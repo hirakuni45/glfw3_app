@@ -183,6 +183,7 @@ namespace gui {
 			widget_label::param wp_(path);
 			wp_.text_param_.placement_.hpt = vtx::holizontal_placement::LEFT;
 			wp_.plate_param_.resizeble_ = true;
+			wp_.plate_param_.frame_width_ = 2;
 			path_ = wd_.add_widget<widget_label>(wp, wp_);
 			path_->set_state(widget::state::POSITION_LOCK);
 		}
