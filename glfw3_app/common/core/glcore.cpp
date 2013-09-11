@@ -6,6 +6,7 @@
 //=====================================================================//
 #include "glcore.hpp"
 #include "utils/file_io.hpp"
+#include "utils/string_utils.hpp"
 #include <unistd.h>                
 #include <time.h>
 
@@ -394,7 +395,10 @@ namespace gl {
 				const char** pp = glfwGetDropfilesString(window_, &n);
 				recv_file_path_.clear();
 				for(int i = 0; i < n; ++i) {
-					recv_file_path_.push_back(pp[i]);
+					std::string src = pp[i];
+					std::string file;
+					utils::code_conv(src, '\\', '/', file);
+					recv_file_path_.push_back(file);
 				}
 			}
 		}
