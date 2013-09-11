@@ -60,7 +60,7 @@ OPTLIBS		=	glfw3 opengl32 glu32 gdi32 imm32 \
 				pthread \
 				openal winmm dsound \
 				fitz \
-				png12 jpeg_x86 openjpeg jbig2dec \
+				png16 jpeg_x86 openjpeg jbig2dec \
 				freetype \
 				id3tag \
 				z \
@@ -70,7 +70,7 @@ OPTLIBS		=	glfw3 opengl32 glu32 gdi32 imm32 \
 INC_SYS		=	/usr/boost_1_54_0 \
 				/usr/local/include
 
-INC_LIB		=	/usr/local/include/libpng12 \
+INC_LIB		=	/usr/local/include/libpng16 \
 				/usr/local/include/libjpeg_x86 \
 				/usr/local/include/freetype2 \
 				/usr/local/include/mupdf
@@ -154,23 +154,25 @@ dllname:
 
 tarball:
 	chmod 644 \
-			../core/*.[hc]pp \
-			../gl_fw/*.[hc]pp \
-			../utils/*.[hc]pp \
-			../img_io/*.[hc]pp \
-			../snd_io/*.[hc]pp \
-			../widgets/*.[hc]pp \
-			../minizip/*.[hc] \
-			../player/*.[hc]pp Makefile
+			../common/core/*.[hc]pp \
+			../common/gl_fw/*.[hc]pp \
+			../common/utils/*.[hc]pp \
+			../common/img_io/*.[hc]pp \
+			../common/snd_io/*.[hc]pp \
+			../common/widgets/*.[hc]pp \
+			../common/minizip/*.[hc] \
+			../player/*.[hc]pp \
+			../player/Makefile \
+			../player/res/*
 	rm -f $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz
 	tar cfvz $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz \
-			../core/*.[hc]pp \
-			../gl_fw/*.[hc]pp \
-			../utils/*.[hc]pp \
-			../img_io/*.[hc]pp \
-			../snd_io/*.[hc]pp \
-			../widgets/*.[hc]pp \
-			../minizip/*.[hc] \
+			../common/core/*.[hc]pp \
+			../common/gl_fw/*.[hc]pp \
+			../common/utils/*.[hc]pp \
+			../common/img_io/*.[hc]pp \
+			../common/snd_io/*.[hc]pp \
+			../common/widgets/*.[hc]pp \
+			../common/minizip/*.[hc] \
 			../player/*.[hc]pp \
 			../player/res/*.png \
 			../player/res/*.ttf
