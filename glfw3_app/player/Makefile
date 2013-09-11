@@ -60,7 +60,7 @@ OPTLIBS		=	glfw3 opengl32 glu32 gdi32 imm32 \
 				pthread \
 				openal winmm dsound \
 				fitz \
-				png16 jpeg_x86 openjpeg jbig2dec \
+				png12 jpeg_x86 openjpeg jbig2dec \
 				freetype \
 				id3tag \
 				z \
@@ -70,7 +70,7 @@ OPTLIBS		=	glfw3 opengl32 glu32 gdi32 imm32 \
 INC_SYS		=	/usr/boost_1_54_0 \
 				/usr/local/include
 
-INC_LIB		=	/usr/local/include/libpng16 \
+INC_LIB		=	/usr/local/include/libpng12 \
 				/usr/local/include/libjpeg_x86 \
 				/usr/local/include/freetype2 \
 				/usr/local/include/mupdf
