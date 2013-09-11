@@ -19,6 +19,19 @@ namespace app {
 	static const char* remain_pos_path_ = { "/player/remain/position" };
 	static const char* remain_file_path_ = { "/player/remain/file" };
 
+
+	void player::sound_play_(const std::string& file)
+	{
+		al::sound& sound = director_.at_core().sound_;
+
+		std::string path;
+		utils::get_file_path(file, path);
+		if(!sound.play_stream(path, utils::get_file_name(file))) {
+			std::string s = "Can't open input file: " + path + '/' + file;
+		}
+	}
+
+
 	static void set_time_(gui::widget_label* w, time_t t)
 	{
 		gui::widget_label::param& pa = w->at_local_param();
@@ -165,6 +178,7 @@ namespace app {
 	void player::update()
 	{
 		gl::IGLcore* igl = gl::get_glcore();
+
 		const vtx::spos& size = igl->get_size();
 
 		gui::widget_director& wd = director_.at_core().widget_director_;
@@ -357,14 +371,25 @@ namespace app {
 		sound.set_gain_stream(volume_->get_local_param().slider_param_.position_);
 
 
+		// ファイラーからのファイル選択識別
 		if(wf.update()) {
 			const std::string& file = wf.get_file();
-			std::string path;
-			utils::get_file_path(file, path);
-			if(!sound.play_stream(path, utils::get_file_name(file))) {
-				std::string s = "Can't open input file: " + path + '/' + file;
-			}
+			sound_play_(file);
 			wf.enable(false);
+		}
+
+		// Drag & Drop されたファイルを再生
+		int id = igl->get_recv_file_id();
+		if(drop_file_id_ != id) {
+			drop_file_id_ = id;
+			const utils::strings& ss = igl->get_recv_file_path();
+			if(!ss.empty()) {
+				std::string file = ss[0];
+				if(ss.size() > 1) {
+					if(file > ss.back()) file = ss.back();
+				}
+				sound_play_(file);
+			}
 		}
 	}
 
