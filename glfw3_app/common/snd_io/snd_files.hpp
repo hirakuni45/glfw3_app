@@ -28,12 +28,13 @@ namespace al {
 		const i_audio*	aif_;
 
 		i_snd_io*		stream_;
-
 		tag				tag_;
 
 		bool			init_;
 
 		void add_sound_fileio_context_(i_snd_io* sio, const std::string& exts);
+
+		static uint32_t	tag_serial_;
 
 	public:
 		//-----------------------------------------------------------------//

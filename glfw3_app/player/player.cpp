@@ -90,6 +90,7 @@ namespace app {
 		// サウンド・デコーダーの拡張子設定
 		gui::widget_filer& wf = director_.at_core().widget_filer_;
 		al::sound& sound = director_.at_core().sound_;
+		tag_serial_ = sound.get_tag_stream().serial_;
 		wf.set_filter(sound.get_file_exts());
 
 		wf.create(vtx::srect(10, 10, 500, 350), igl->get_current_path());
@@ -327,51 +328,51 @@ namespace app {
 			}
 		}
 
-		// 曲の情報表示
-		{
-			const al::tag& t = sound.get_tag_stream();
-			gui::set_widget_text(album_pad_, t.album_);
-			gui::set_widget_text(title_pad_, t.title_);
-			std::string s = t.track_;
+		// 曲の情報を取得して表示
+		const al::tag& tag = sound.get_tag_stream();
+		if(tag_serial_ != tag.serial_) {
+
+			gui::set_widget_text(album_pad_, tag.album_);
+			gui::set_widget_text(title_pad_, tag.title_);
+			std::string s = tag.track_;
 			if(!s.empty()) {
-				if(!t.total_tracks_.empty()) {
-					s += " / " + t.total_tracks_;
+				if(!tag.total_tracks_.empty()) {
+					s += " / " + tag.total_tracks_;
 				}
 			}
-			if(!t.disc_.empty()) {
-				s += " : " + t.disc_;
-				if(!t.total_discs_.empty()) {
-					s += " / " + t.total_discs_;
+			if(!tag.disc_.empty()) {
+				s += " : " + tag.disc_;
+				if(!tag.total_discs_.empty()) {
+					s += " / " + tag.total_discs_;
 				}
 			}
-			if(!t.date_.empty()) {
-				s += " : " + t.date_;
+			if(!tag.date_.empty()) {
+				s += " : " + tag.date_;
 			}
 			gui::set_widget_text(other_pad_, s);
-			s = t.artist_;
-			if(!t.writer_.empty()) {
-				s += " / " + t.writer_;
+			s = tag.artist_;
+			if(!tag.writer_.empty()) {
+				s += " / " + tag.writer_;
 			}
 			gui::set_widget_text(artist_pad_, s);
-			if(tag_serial_ != t.serial_) {
-				mobj_.destroy();
-				mobj_.initialize();
-   				if(t.image_) {
-					jacket_ = mobj_.install(t.image_);					
-				} else {
-					if(wd.at_img_files().load("res/NoImage.png")) {
-						jacket_ = mobj_.install(wd.at_img_files().get_image_if()); 
-					}
+
+			// ジャケット画像の取得とテクスチャーへの登録
+			mobj_.destroy();
+			mobj_.initialize();
+   			if(tag.image_) {
+				jacket_ = mobj_.install(tag.image_);
+			} else {
+				if(wd.at_img_files().load("res/NoImage.png")) {
+					jacket_ = mobj_.install(wd.at_img_files().get_image_if()); 
 				}
 			}
-			tag_serial_ = t.serial_;
+			tag_serial_ = tag.serial_;
 		}
 
 		// ストリームのゲイン(volume)を設定
 		sound.set_gain_stream(volume_->get_local_param().slider_param_.position_);
 
-
-		// ファイラーからのファイル選択識別
+		// ファイラーがファイル選択をした場合
 		if(wf.update()) {
 			const std::string& file = wf.get_file();
 			sound_play_(file);

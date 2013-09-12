@@ -82,7 +82,6 @@ namespace al {
 			}
 
 			sst->tag_ = sdf.get_tag();
-			++sst->tag_cnt_;
 
 			sst->len_ = ainfo.samples;
 			time_t t;
@@ -417,6 +416,8 @@ namespace al {
 
 		stop_stream();
 
+		stream_tag_.clear();
+
 		stream_start_ = true;
 		sstream_t_.audio_ = &audio_;
 		sstream_t_.slot_ = stream_slot_;
@@ -535,9 +536,8 @@ namespace al {
 				stream_fph_ = sstream_t_.fph_;
 				stream_fph_cnt_ = sstream_t_.fph_cnt_;
 			}
-			if(stream_tag_cnt_ != sstream_t_.tag_cnt_) {
+			if(stream_tag_.serial_ != sstream_t_.tag_.serial_) {
 				stream_tag_ = sstream_t_.tag_;
-				stream_tag_cnt_ = sstream_t_.tag_cnt_;
 			}
 			if(sstream_t_.finsh_) {
 				::pthread_detach(pth_);

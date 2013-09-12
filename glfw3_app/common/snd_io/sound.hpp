@@ -57,14 +57,14 @@ namespace al {
 			volatile uint32_t		open_err_;
 			volatile uint32_t		fph_cnt_;
 			std::string				fph_;
-			volatile uint32_t		tag_cnt_;
 			tag						tag_;
+
 			sstream_t() : audio_(0), slot_(0),
 				root_(), file_(),
 				start_(false), finsh_(false), stop_(false),
 				next_(false), replay_(false), prior_(false), pause_(false), seek_(false),
 				pos_(0), len_(0), time_(0), etime_(0), seek_pos_(0),
-				open_err_(0), fph_cnt_(0), fph_(), tag_cnt_(0), tag_()
+				open_err_(0), fph_cnt_(0), fph_(), tag_()
 			{ }
 		};
 
@@ -90,7 +90,6 @@ namespace al {
 		pthread_t		pth_;
 		volatile uint32_t	stream_fph_cnt_;
 		std::string			stream_fph_;
-		volatile uint32_t	stream_tag_cnt_;
 		tag					stream_tag_;
 
 		audio_io::slot_handle	stream_slot_;
@@ -104,7 +103,7 @@ namespace al {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		sound() : slot_max_(0), stream_fph_cnt_(0), stream_tag_cnt_(0),
+		sound() : slot_max_(0), stream_fph_cnt_(0),
 			stream_slot_(0) {
 			se_ts_.push_back(se_t());
 		}

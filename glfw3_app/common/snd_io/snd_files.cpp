@@ -12,7 +12,6 @@
 
 namespace al {
 
-
 	static bool check_file_exts_(const std::string& exts, const std::string& ext)
 	{
 		utils::strings ss;
@@ -25,6 +24,7 @@ namespace al {
 		return false;
 	}
 
+	uint32_t snd_files::tag_serial_ = 0;
 
 	void snd_files::add_sound_fileio_context_(i_snd_io* sio, const std::string& exts)
 	{
@@ -126,6 +126,9 @@ namespace al {
 				if(check_file_exts_(io.ext, ext)) {
 					if(io.sio->info(fin, fo)) {
 						tag_ = io.sio->get_tag();
+						// snd_files のタグ更新シリアルを上書き
+						++tag_serial_;
+						tag_.serial_ = tag_serial_;
 						return true;
 					} else n = i;
 					break;
@@ -137,6 +140,9 @@ namespace al {
 				snd_file& io = sndios_[i];
 				if(io.sio->info(fin, fo)) {
 					tag_ = io.sio->get_tag();
+					// snd_files のタグ更新シリアルを上書き
+					++tag_serial_;
+					tag_.serial_ = tag_serial_;
 					return true;
 				}
 			}
@@ -230,6 +236,9 @@ namespace al {
 				if(check_file_exts_(io.ext, ext)) {
 					if(io.sio->open_stream(fin, size, inf)) {
 						tag_ = io.sio->get_tag();
+						// snd_files のタグ更新シリアルを上書き
+						++tag_serial_;
+						tag_.serial_ = tag_serial_;
 						stream_ = io.sio;
 						return true;
 					}
@@ -244,6 +253,9 @@ namespace al {
 				snd_file& io = sndios_[i];
 				if(io.sio->open_stream(fin, size, inf)) {
 					tag_ = io.sio->get_tag();
+					// snd_files のタグ更新シリアルを上書き
+					++tag_serial_;
+					tag_.serial_ = tag_serial_;
 					stream_ = io.sio;
 					return true;
 				}

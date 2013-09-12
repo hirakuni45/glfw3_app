@@ -454,7 +454,7 @@ namespace al {
 			} else {
 				tag_.image_ = 0;
 			}
-			++tag_.serial_;
+			tag_.update();
 
 			mp3_tag_.close();	// ここでファイルはクローズしてしまう・・
 			fin.close();

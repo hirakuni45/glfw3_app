@@ -735,8 +735,8 @@ namespace al {
 				}
 			}
 		}
+		tag_.update();
 
-		++tag_.serial_;
 		return true;
 	}
 
