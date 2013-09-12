@@ -39,7 +39,8 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_null(widget_director& wd, const widget::param& wp, const param& p) :
-			wd_(wd), widget(wp), param_(p) { }
+			wd_(wd), widget(wp), param_(p) {
+		}
 
 
 		//-----------------------------------------------------------------//

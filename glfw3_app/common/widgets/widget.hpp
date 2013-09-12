@@ -203,7 +203,7 @@ namespace gui {
 
 				RESIZE_H_ENABLE,		///< 水平リサイズ許可
 				RESIZE_V_ENABLE,		///< 垂直リサイズ許可
-				RESIZE_RIGHT_BTN,		///< 右ボタンでのリサイズ
+				SIZE_LOCK,				///< サイズ固定
 
 				/// ワーク用
 				BEFORE_FOCUS,			///< １フレーム前フォーカスの状態
@@ -231,6 +231,7 @@ namespace gui {
 			vtx::spos			rpos_;			///< レンダリング開始
 			vtx::spos			move_org_;		///< 移動基準位置
 			vtx::spos			resize_org_;	///< リサイズ基準位置
+			vtx::spos			resize_ref_;	///< リサイズ基準サイズ
 			vtx::spos			speed_;			///< 速度
 			vtx::spos			in_point_;		///< 内包ポイント
 			uint32_t			hold_frame_;	///< ホールド・フレーム
@@ -241,7 +242,9 @@ namespace gui {
 
 			param(const vtx::srect& r = vtx::srect(0), widget* parents = 0) :
 				rect_(r), clip_(r), msize_(r.size), rpos_(r.org),
-				move_org_(0), resize_org_(0), speed_(0), in_point_(0),
+				move_org_(0),
+				resize_org_(0), resize_ref_(0),
+				speed_(0), in_point_(0),
 				hold_frame_(0), holded_frame_(0),
 				parents_(parents),
 				action_()
@@ -393,6 +396,26 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		bool get_state(state::type t) const { return param_.state_[t]; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	アクションの設定
+			@param[in]	t	制御タイプ
+			@param[in]	f	不許可の場合「false」
+		*/
+		//-----------------------------------------------------------------//
+		void set_action(action::type t, bool f = true) { param_.action_[t] = f; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	アクションの取得
+			@param[in]	t	制御タイプ
+			@return	許可なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool get_action(action::type t) const { return param_.action_[t]; }
 
 
 		//-----------------------------------------------------------------//

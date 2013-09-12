@@ -22,6 +22,7 @@ namespace gui {
 
 		// ボタンは標準的に固定
 		at_param().state_.set(widget::state::POSITION_LOCK);
+		at_param().state_.set(widget::state::SIZE_LOCK);
 		at_param().action_.set(widget::action::SELECT_SCALE);
 
 		using namespace img;

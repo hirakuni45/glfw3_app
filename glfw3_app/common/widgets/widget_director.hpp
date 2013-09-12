@@ -66,7 +66,8 @@ namespace gui {
 		float					scale_;
 		img::rgbaf				color_;
 
-		widget*					top_select_;
+		widget*					top_move_;
+		widget*					top_resize_;
 
 		widget::color_param		def_frame_color_;
 		widget::color_param		def_button_color_;
@@ -95,7 +96,7 @@ namespace gui {
 		widget_director() : img_files_(),
 			mobj_(), common_parts_(mobj_), serial_(0), widgets_(),
 			unselect_length_(7.0f), position_(0.0f), scale_(1.0f),
-			top_select_(0),
+			top_move_(0), top_resize_(0),
 			def_frame_color_( img::rgba8( 55, 157, 235), img::rgba8( 53, 110, 154)),
 			def_button_color_(img::rgba8( 72, 193, 241), img::rgba8( 47,  72,  86)),
 			def_label_color_( img::rgba8( 48, 193, 241), img::rgba8( 31,  72,  86)),
@@ -201,11 +202,11 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	top セレクトを取得
-			@return TOP セレクト
+			@brief	前面移動を取得
+			@return 前面移動ウィジェット
 		*/
 		//-----------------------------------------------------------------//
-		widget* get_top_select() const { return top_select_; }
+		widget* get_top_move() const { return top_move_; }
 
 
 		//-----------------------------------------------------------------//

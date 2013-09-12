@@ -21,6 +21,7 @@ namespace gui {
 	{
 		// ボタンは標準的に固定
 		at_param().state_.set(widget::state::POSITION_LOCK);
+		at_param().state_.set(widget::state::SIZE_LOCK);
 
 		param_.text_param_.placement_.hpt = vtx::holizontal_placement::LEFT;
 

@@ -18,9 +18,12 @@ namespace gui {
 	{
 		param_.color_param_ = wd_.get_default_frame_color();
 
-		param_.plate_param_.resizeble_ = true;
+		// 自由な大きさの変更
+		at_param().state_.set(widget::state::SIZE_LOCK, false);
+		at_param().state_.set(widget::state::RESIZE_H_ENABLE);
+		at_param().state_.set(widget::state::RESIZE_V_ENABLE);
 
-		at_param().action_.set(widget::action::FOCUS_ALPHA25);
+		param_.plate_param_.resizeble_ = true;
 
 		vtx::spos size;
 		if(param_.plate_param_.resizeble_) {
@@ -73,7 +76,6 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_frame::destroy()
 	{
-//		wd_.at_mobj().erase(objh_);
 	}
 
 }

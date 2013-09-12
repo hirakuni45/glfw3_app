@@ -21,6 +21,7 @@ namespace gui {
 
 		// 標準的設定
 		at_param().state_.set(widget::state::POSITION_LOCK);
+		at_param().state_.set(widget::state::SIZE_LOCK);
 
 		vtx::spos size = get_rect().size;
 		img::paint pa;

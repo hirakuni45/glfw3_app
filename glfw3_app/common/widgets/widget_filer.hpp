@@ -14,6 +14,7 @@
 #include "widget_director.hpp"
 #include "widget.hpp"
 #include "widget_null.hpp"
+#include "widget_frame.hpp"
 #include "widget_label.hpp"
 
 namespace gui {
@@ -34,7 +35,7 @@ namespace gui {
 
 		std::string	path_text_;
 
-		widget*			base_;	///< ベース・フレーム
+		widget_frame*	base_;	///< ベース・フレーム
 		widget_label*	path_;	///< パス・フレーム
 		widget*			main_;	///< メイン・フレーム
 		widget*			files_;	///< ファイル・フレーム
@@ -70,6 +71,7 @@ namespace gui {
 
 		void create_files_(widget_files& wfs, short ofs);
 		widget_files_cit scan_select_file_(widget_files& wfs);
+		void resize_files_(widget_files& wfs, short width);
 		void destroy_files_(widget_files& wfs);
 
 	public:

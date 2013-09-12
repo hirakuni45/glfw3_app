@@ -42,6 +42,7 @@ namespace gui {
 				widget_null::param wp_;
 				wf.base = wd_.add_widget<widget_null>(wp, wp_);
 				wf.base->set_state(widget::state::POSITION_LOCK);
+				wf.base->set_state(widget::state::SIZE_LOCK);
 				wf.base->set_state(widget::state::CLIP_PARENTS);
 				wf.base->set_state(widget::state::DRAG_UNSELECT);
 				wf.base->set_state(widget::state::SELECT_PARENTS);
@@ -103,6 +104,21 @@ namespace gui {
 			}
 		}
 		return wfs.end();
+	}
+
+
+	void widget_filer::resize_files_(widget_files& wfs, short width)
+	{
+		for(widget_files_cit cit = wfs.begin(); cit != wfs.end(); ++cit) {
+			const widget_file& wf = *cit;
+			wf.base->at_rect().size.x = width;
+			short name_size = width * 2 / 3;
+			short space = 2;
+			short info_size = width - name_size - space;
+			wf.name->at_rect().size.x = name_size;
+			wf.info->at_rect().org.x  = name_size + space;
+			wf.info->at_rect().size.x = info_size;
+		}
 	}
 
 
@@ -169,7 +185,7 @@ namespace gui {
 			widget::param wp(rect);
 			widget_frame::param wp_;
 			base_ = wd_.add_widget<widget_frame>(wp, wp_);
-			base_->at_param().action_.reset(widget::action::FOCUS_ALPHA25);
+			base_->set_state(widget::state::SIZE_LOCK, false);
 		}
 
 		// path（ハンドル）
@@ -197,6 +213,7 @@ namespace gui {
 			widget_null::param wp_;
 			main_ = wd_.add_widget<widget_null>(wp, wp_);
 			main_->set_state(widget::state::POSITION_LOCK);
+			main_->set_state(widget::state::SIZE_LOCK);
 		}
 
 		// files null frame
@@ -208,6 +225,7 @@ namespace gui {
 			widget_null::param wp_;
 			files_ = wd_.add_widget<widget_null>(wp, wp_);
 			files_->set_state(widget::state::CLIP_PARENTS);
+			files_->set_state(widget::state::SIZE_LOCK);
 		}
 
 		position_ = files_->get_rect().org;
@@ -244,6 +262,17 @@ namespace gui {
 		wd_.top_widget(path_);
 		wd_.top_widget(main_);
 		wd_.top_widget(files_);
+
+		// フレームのサイズを、仮想ウィジェットに反映
+		{
+			short fw = base_->get_local_param().plate_param_.frame_width_;
+			const vtx::spos size = base_->get_rect().size;
+			path_->at_rect().size.x = size.x - fw * 2;
+			main_->at_rect().size.x = size.x - fw * 2;
+			main_->at_rect().size.y = size.y - path_->get_rect().size.y - fw * 2;
+			files_->at_rect().size.x = size.x - fw * 2;
+			resize_files_(center_, size.x - fw * 2);
+		}
 
 		short base_size = main_->get_rect().size.y;
 		short d = base_size - files_->get_rect().size.y;

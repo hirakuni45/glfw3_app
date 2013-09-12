@@ -198,7 +198,7 @@ namespace img {
 				if(round) {
 					if(xx == ox || xx == (ln - 1)) {
 						c.a = al;
-						uint16_t a = static_cast<uint16_t>(dst->r) * (256 - c.a);
+						uint16_t a = static_cast<uint16_t>(dst->a) * (256 - c.a);
 						a += static_cast<uint16_t>(c.a) * (c.a + 1);
 						a >>= 8;
 						uint16_t r = static_cast<uint16_t>(dst->r) * (256 - a);
@@ -207,8 +207,7 @@ namespace img {
 						r += static_cast<uint16_t>(c.r) * (a + 1);
 						g += static_cast<uint16_t>(c.g) * (a + 1);
 						b += static_cast<uint16_t>(c.b) * (a + 1);
-//						c.a = a;
-						c.a = dst->a;
+						c.a = al;
 						c.r = r >> 8;
 						c.g = g >> 8;
 						c.b = b >> 8;

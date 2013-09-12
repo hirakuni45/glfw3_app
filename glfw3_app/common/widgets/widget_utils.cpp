@@ -59,7 +59,7 @@ namespace gui {
 		const widget::color_param& cp, const vtx::spos& size)
 	{
 		pa.create(size, true);
-		pa.fill(img::rgba8(0));
+		pa.fill(img::rgba8(0, 0));
 		pa.set_fore_color(cp.fore_color_);
 		pa.set_back_color(cp.back_color_);
 		if(pp.frame_width_) {
