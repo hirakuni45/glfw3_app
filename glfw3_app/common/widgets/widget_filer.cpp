@@ -115,6 +115,11 @@ namespace gui {
 			short name_size = width * 2 / 3;
 			short space = 2;
 			short info_size = width - name_size - space;
+			short info_limit = 130;
+			if(info_size >= info_limit) {
+				info_size = info_limit;
+				name_size = width - space - info_limit;
+			}
 			wf.name->at_rect().size.x = name_size;
 			wf.info->at_rect().org.x  = name_size + space;
 			wf.info->at_rect().size.x = info_size;
