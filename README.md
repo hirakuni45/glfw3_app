@@ -39,5 +39,7 @@ GLFW3 application (player)
 
 ・コンパイルは cygwin 環境で行っており、i686-w64-mingw32-g++ クロスコンパイラを使っていますので、コンパイルする場合は、インストールして下さい。  
 ・g++ のバージョンは、4.8.1 です。  
-・i686-w64-mingw32 POSIX の pthread ライブラリーが必要です。  
+・i686-w64-mingw32 POSIX の pthread ライブラリーが必要です。 
+・boost_1_54_0 が必要です。  
 ・他に、make、makedepend、などが必要です。  
+・libraries は /usr/local/ 以下に展開します。  
