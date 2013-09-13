@@ -328,30 +328,33 @@ namespace gui {
 			ss.push_back(spos(12-4, 16));
 			pa.fill_polygon(ss);
 			share_img_.up_box_ = mobj_.install(&pa);
-			ss.clear();
 
 			pa = fr;
 			pa.swap_color();
+			ss.clear();
 			ss.push_back(spos(12,   16));
 			ss.push_back(spos(12-4,  8));
 			ss.push_back(spos(12+4,  8));
 			pa.fill_polygon(ss);
 			share_img_.down_box_ = mobj_.install(&pa);
-			ss.clear();
 
 			pa = fr;
 			pa.swap_color();
-
-			pa.fill_polygon(ss);
-			share_img_.left_box_ = mobj_.install(&pa);
 			ss.clear();
-
-			pa = fr;
-			pa.swap_color();
-
+			ss.push_back(spos(16, 12));
+			ss.push_back(spos(8,  12-4));
+			ss.push_back(spos(8,  12+4));
 			pa.fill_polygon(ss);
 			share_img_.right_box_ = mobj_.install(&pa);
+
+			pa = fr;
+			pa.swap_color();
 			ss.clear();
+			ss.push_back(spos(8,  12));
+			ss.push_back(spos(16, 12+4));
+			ss.push_back(spos(16, 12-4));
+			pa.fill_polygon(ss);
+			share_img_.left_box_ = mobj_.install(&pa);
 
 			// ラジオボタン
 			pa.fill(img::rgba8(0, 0));

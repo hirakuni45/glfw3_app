@@ -45,12 +45,28 @@ namespace gui {
 		widget*			main_;	///< メイン・フレーム
 		widget*			files_;	///< ファイル・フレーム
 
+		// 情報の状態
+		struct info_state {
+			enum type {
+				NONE,	///< 情報無し
+				SIZE,	///< サイズ表示
+				TIME,	///< 時間表示
+				MODE,	///< モード表示
+				limit_
+			};
+		};
+		info_state::type	info_state_;
+
 		struct widget_file {
 			widget*			base;
 			widget_label*	name;
 			widget_label*	info;
+			size_t			size;
+			time_t			time;
+			mode_t			mode;
 			bool			dir;
-			widget_file() : base(0), name(0), info(0), dir(false) { }
+			widget_file() : base(0), name(0), info(0),
+				size(0), time(0), mode(0), dir(false) { }
 		};
 		typedef std::vector<widget_file> widget_files;
 		typedef std::vector<widget_file>::iterator widget_files_it;
@@ -77,6 +93,7 @@ namespace gui {
 		void create_files_(widget_files& wfs, short ofs);
 		widget_files_cit scan_select_file_(widget_files& wfs);
 		void resize_files_(widget_files& wfs, short width);
+		void update_files_info_(widget_files& wfs);
 		void destroy_files_(widget_files& wfs);
 
 	public:
@@ -87,7 +104,9 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_filer(widget_director& wd) : wd_(wd), fsc_(),
 			path_height_(32), label_height_(32),
-			base_(0), path_(0), info_(0), main_(0), files_(0)
+			base_(0), path_(0), info_(0), main_(0), files_(0),
+			info_state_(info_state::NONE),
+			speed_(0.0f), position_(0.0f), file_()
 			{ }
 
 

@@ -73,7 +73,10 @@ namespace gui {
 	{
 		if(objh_ == 0) return;
 
-		wd_.at_mobj().resize(objh_, get_param().rect_.size);
+		if(param_.plate_param_.resizeble_) {
+			wd_.at_mobj().resize(objh_, get_param().rect_.size);
+		}
+
 		render_text(wd_, objh_, get_param(), param_.text_param_, param_.plate_param_);
 	}
 

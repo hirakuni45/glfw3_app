@@ -9,6 +9,7 @@
 #include "widget_frame.hpp"
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/format.hpp>
 
 namespace gui {
 
@@ -71,8 +72,7 @@ namespace gui {
 				r.size.set(ats, label_height_);
 				widget::param wp(r, wf.base);
 				wp.action_.set(widget::action::SELECT_HIGHLIGHT);
-				widget_label::param wp_(" " +
-					boost::lexical_cast<std::string>(fi.get_size()));
+				widget_label::param wp_;
 				wp_.text_param_.placement_.hpt = vtx::holizontal_placement::LEFT;
 				wp_.plate_param_.frame_width_ = 0;
 				wp_.plate_param_.round_radius_ = 0;
@@ -82,6 +82,9 @@ namespace gui {
 				wf.info->set_state(widget::state::CLIP_PARENTS);
 				wf.info->set_state(widget::state::DRAG_UNSELECT);
 			}
+			wf.size = fi.get_size();
+			wf.time = fi.get_time();
+			wf.mode = fi.get_mode();
 			wfs.push_back(wf);
 			rect.org.y += label_height_;
 		}
@@ -116,13 +119,55 @@ namespace gui {
 			short space = 2;
 			short info_size = width - name_size - space;
 			short info_limit = 130;
+			if(info_state_ == info_state::TIME) {
+				info_limit = 200;
+			}
 			if(info_size >= info_limit) {
 				info_size = info_limit;
 				name_size = width - space - info_limit;
 			}
+			if(info_state_ == info_state::NONE) {
+				name_size = width;
+				info_size = 0;
+			}
 			wf.name->at_rect().size.x = name_size;
 			wf.info->at_rect().org.x  = name_size + space;
 			wf.info->at_rect().size.x = info_size;
+		}
+	}
+
+
+	void widget_filer::update_files_info_(widget_files& wfs)
+	{
+		for(widget_files_cit cit = wfs.begin(); cit != wfs.end(); ++cit) {
+			const widget_file& wf = *cit;
+			if(info_state_ == info_state::SIZE) {
+				wf.info->at_local_param().text_param_.text_
+					= ' ' + boost::lexical_cast<std::string>(wf.size);
+			} else if(info_state_ == info_state::TIME) {
+				std::string s;
+				struct tm* t = localtime(&wf.time);
+				s += (boost::format("%02d:%02d ") % t->tm_hour % t->tm_min).str();
+				s += (boost::format("%d/%d ")
+					% (t->tm_mon + 1) % t->tm_mday).str();
+				s += (boost::format("%4d") % (t->tm_year + 1900)).str();
+				wf.info->at_local_param().text_param_.text_ = s;
+			} else if(info_state_ == info_state::MODE) {
+				std::string s;
+				s += ' ';
+				uint32_t bit = 1 << 8;
+				static const char chmod[9]
+					= { 'r', 'w', 'x', 'r', 'w', 'x', 'r', 'w', 'x' };
+				for(int i = 0; i < 9; ++i) {
+					if(wf.mode & bit) {
+						s += chmod[i];
+					} else {
+						s += '-';
+					}
+					bit >>= 1;
+				}
+				wf.info->at_local_param().text_param_.text_ = s;
+			}
 		}
 	}
 
@@ -215,9 +260,16 @@ namespace gui {
 
 		// info ボタン
 		{
+			gl::glmobj::handle hnd = wd_.get_share_image().right_box_;
 			vtx::srect r;
-//			r.org.set(
-
+			r.size = wd_.at_mobj().get_size(hnd);
+			short space = 4;
+			r.org.x = base_->get_rect().size.x - r.size.x - frame_width - space;
+			r.org.y = frame_width + (path_height_ - r.size.y) / 2;
+			widget::param wp(r, base_);
+			widget_button::param wp_;
+			wp_.handle_ = hnd;
+			info_ = wd_.add_widget<widget_button>(wp, wp_);
 		}
 
 		// main null frame
@@ -264,6 +316,7 @@ namespace gui {
 		if(fsc_.probe()) {
 			if(center_.empty()) {
 				create_files_(center_, 0);
+				update_files_info_(center_);
 				std::string s;
 				if(utils::previous_path(path_text_, s)) {
 //					fsc_.set_path(s);
@@ -276,17 +329,29 @@ namespace gui {
 		// オブジェクトの優先順位設定
 		wd_.top_widget(base_);
 		wd_.top_widget(path_);
+		wd_.top_widget(info_);
 		wd_.top_widget(main_);
 		wd_.top_widget(files_);
+
+		// 情報ボタンが押された場合の処理
+		if(info_->get_selected()) {
+			info_state_ = static_cast<info_state::type>(info_state_ + 1);
+			if(info_state_ == info_state::limit_) {
+				info_state_ = info_state::NONE;
+			}
+			update_files_info_(center_);
+		}
 
 		// フレームのサイズを、仮想ウィジェットに反映
 		{
 			short fw = base_->get_local_param().plate_param_.frame_width_;
-			const vtx::spos size = base_->get_rect().size;
-			path_->at_rect().size.x = size.x - fw * 2;
+			const vtx::spos& size = base_->get_rect().size;
+			path_->at_rect().size.x = size.x - fw * 2 - path_height_;
 			main_->at_rect().size.x = size.x - fw * 2;
 			main_->at_rect().size.y = size.y - path_->get_rect().size.y - fw * 2;
 			files_->at_rect().size.x = size.x - fw * 2;
+			short space = 4;
+			info_->at_rect().org.x = size.x - info_->get_rect().size.x - fw - space;
 			resize_files_(center_, size.x - fw * 2);
 		}
 
@@ -440,6 +505,7 @@ namespace gui {
 		if(base_) {
 			if(!pre.put_position(key_locate_, vtx::ipos(base_->get_rect().org))) ++err;
 			if(!pre.put_position(key_size_, vtx::ipos(base_->get_rect().size))) ++err;
+///			if(!pre.put_integer(key_info_, info_state_) ++err;
 		}
 		return err == 0;
 	}
@@ -475,6 +541,14 @@ namespace gui {
 		} else {
 			++err;
 		}
+#if 0
+		int i;
+		if(pre.get_integer(key_info_, i)) {
+			info_state_ = static_cast<info_state::type>(i);
+		} else {
+			++err;
+		}
+#endif
 		return err == 0;
 	}
 
