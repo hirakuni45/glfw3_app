@@ -18,8 +18,6 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_label::initialize()
 	{
-		param_.color_param_ = wd_.get_default_label_color();
-
 		// 標準的に固定
 		at_param().state_.set(widget::state::POSITION_LOCK);
 		at_param().state_.set(widget::state::SIZE_LOCK);
@@ -39,6 +37,7 @@ namespace gui {
 		t.size_ = size;
 		t.color_param_ = param_.color_param_;
 		t.plate_param_ = param_.plate_param_;
+
 		objh_ = wd_.share_add(t);
 	}
 

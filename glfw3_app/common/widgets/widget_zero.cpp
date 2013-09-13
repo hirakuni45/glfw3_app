@@ -16,8 +16,6 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_zero::initialize()
 	{
-		param_.color_param_ = director_.get_default_frame_color();
-
 		// 標準的に位置固定
 		at_param().state_.set(widget::state::POSITION_LOCK);
 

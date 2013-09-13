@@ -183,6 +183,11 @@ bin_zip:
 	rm -f $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip
 	zip $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip *.exe *.dll res/*.*
 
+copy_build:
+	$(LK) $(LOF)$(TARGET).exe $(LFLAGS) $(LIBS) -mwindows $(OBJECTS) $(LIBN)
+	cp *.dll build/.
+	cp -r res build/.
+
 lib_arc:
 	tar cfvz mingw_pack.tgz /usr/local/include /usr/local/lib /usr/local/bin
 
@@ -213,7 +218,8 @@ main.o: ../common/utils/files.hpp ../common/utils/drive_info.hpp
 main.o: ../common/utils/file_info.hpp ../common/utils/handle_set.hpp
 main.o: ../common/utils/preference.hpp ../common/widgets/widget_director.hpp
 main.o: ../common/widgets/widget.hpp ../common/widgets/widget_null.hpp
-main.o: ../common/widgets/widget_label.hpp ../common/core/glcore.hpp
+main.o: ../common/widgets/widget_frame.hpp ../common/widgets/widget_label.hpp
+main.o: ../common/widgets/widget_button.hpp ../common/core/glcore.hpp
 main.o: ../common/gl_fw/IGLcore.hpp ../common/core/device.hpp
 main.o: ../common/gl_fw/glfonts.hpp ../common/gl_fw/Ikfimg.hpp
 main.o: ../common/core/device.hpp ../common/utils/director.hpp
@@ -241,7 +247,9 @@ player.o: ../common/utils/drive_info.hpp ../common/utils/file_info.hpp
 player.o: ../common/utils/handle_set.hpp ../common/utils/preference.hpp
 player.o: ../common/widgets/widget_director.hpp ../common/widgets/widget.hpp
 player.o: ../common/widgets/widget_null.hpp
-player.o: ../common/widgets/widget_label.hpp ../common/utils/i_scene.hpp
+player.o: ../common/widgets/widget_frame.hpp
+player.o: ../common/widgets/widget_label.hpp
+player.o: ../common/widgets/widget_button.hpp ../common/utils/i_scene.hpp
 player.o: ../common/utils/director.hpp ../common/utils/i_scene.hpp
 player.o: ../common/widgets/widget_label.hpp
 player.o: ../common/widgets/widget_slider.hpp
@@ -943,9 +951,10 @@ player.o: ../common/widgets/widget_image.hpp
 ../common/widgets/widget_filer.o: ../common/img_io/i_img_io.hpp
 ../common/widgets/widget_filer.o: ../common/widgets/widget.hpp
 ../common/widgets/widget_filer.o: ../common/widgets/widget_null.hpp
+../common/widgets/widget_filer.o: ../common/widgets/widget_frame.hpp
 ../common/widgets/widget_filer.o: ../common/widgets/widget_label.hpp
 ../common/widgets/widget_filer.o: ../common/widgets/widget_director.hpp
-../common/widgets/widget_filer.o: ../common/widgets/widget_frame.hpp
+../common/widgets/widget_filer.o: ../common/widgets/widget_button.hpp
 ../common/widgets/widget_terminal.o: ../common/widgets/widget_terminal.hpp
 ../common/widgets/widget_terminal.o: ../common/widgets/widget_director.hpp
 ../common/widgets/widget_terminal.o: ../common/widgets/widget.hpp

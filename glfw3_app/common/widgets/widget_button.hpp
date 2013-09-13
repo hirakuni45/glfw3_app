@@ -27,12 +27,13 @@ namespace gui {
 			plate_param		plate_param_;
 			color_param		color_param_;	///< 頂点カラーで変調する場合のパラメーター
 			text_param		text_param_;	///< テキスト描画のパラメータ
-			const img::i_img*	image_;		///< ボタンの背景に画像を使う場合
+			const img::i_img*	image_;		///< ボタンに画像を使う場合
+			gl::glmobj::handle	handle_;	///< ボタンにモーションオブジェクトを使う場合
 
 			param(const std::string& text = "") :
-				plate_param_(), color_param_(),
+				plate_param_(), color_param_(widget_director::default_button_color_),
 				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255)),
-				image_(0) { }
+				image_(0), handle_(0) { }
 		};
 
 	private:

@@ -17,8 +17,6 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_slider::initialize()
 	{
-		param_.color_param_ = wd_.get_default_slider_color();
-
 		// 標準的設定
 		at_param().state_.set(widget::state::POSITION_LOCK);
 		at_param().state_.set(widget::state::SIZE_LOCK);

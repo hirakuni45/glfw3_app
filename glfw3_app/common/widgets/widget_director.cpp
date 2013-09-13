@@ -25,6 +25,13 @@ namespace gui {
 
 	using namespace gl;
 
+	widget::color_param widget_director::default_frame_color_;
+	widget::color_param widget_director::default_button_color_;
+	widget::color_param widget_director::default_label_color_;
+	widget::color_param widget_director::default_slider_color_;
+	widget::color_param widget_director::default_check_color_;
+	widget::color_param widget_director::default_list_color_;
+
 	void widget_director::message_widget_(widget* w, const std::string& s)
 	{
 		std::string type;
@@ -252,18 +259,32 @@ namespace gui {
 
 		mobj_.initialize();
 
+		// 「各」標準的な色彩や、形状などの設定
+		default_frame_color_ =
+			widget::color_param(img::rgba8( 55, 157, 235), img::rgba8( 53, 110, 154));
+		default_button_color_ =
+			widget::color_param(img::rgba8( 72, 193, 241), img::rgba8( 47,  72,  86));
+		default_label_color_ =
+			widget::color_param(img::rgba8( 48, 193, 241), img::rgba8( 31,  72,  86));
+		default_slider_color_ =
+			widget::color_param(img::rgba8( 48, 193, 241), img::rgba8( 31,  72,  86));
+		default_check_color_ =
+			widget::color_param(img::rgba8( 72, 193, 241), img::rgba8( 47,  72,  86));
+		default_list_color_ =
+			widget::color_param(img::rgba8( 48, 193, 241), img::rgba8( 31,  72,  86));
+
 		img::paint::intensity_rect ir;
 		ir.left_top    = 200; ir.center_top    = 255; ir.right_top    = 200;
 		ir.left_center = 255; ir.center_center = 255; ir.right_center = 255;
 		ir.left_bottom = 180; ir.center_bottom = 255; ir.right_bottom = 180;
-		def_button_color_.inten_rect_ = ir;
-		def_button_color_.ir_enable_ = true;
+		default_button_color_.inten_rect_ = ir;
+		default_button_color_.ir_enable_ = true;
 
 		ir.left_top    = 255; ir.center_top    = 255; ir.right_top    = 255;
 		ir.left_center = 200; ir.center_center = 200; ir.right_center = 200;
 		ir.left_bottom = 110; ir.center_bottom = 110; ir.right_bottom = 110;
-		def_label_color_.inten_rect_  = ir;
-		def_label_color_.ir_enable_ = true;
+		default_label_color_.inten_rect_  = ir;
+		default_label_color_.ir_enable_ = true;
 
 		IGLcore* igl = get_glcore();
 		if(igl == 0) return;
@@ -281,7 +302,7 @@ namespace gui {
 			widget::plate_param pp;
 			pp.frame_width_ = 4;
 			pp.round_radius_ = 4;
-			create_round_frame(fr, pp, def_check_color_, size);
+			create_round_frame(fr, pp, default_check_color_, size);
 			share_img_.un_check_ = mobj_.install(&fr);
 
 			img::paint pa;
@@ -335,14 +356,14 @@ namespace gui {
 			// ラジオボタン
 			pa.fill(img::rgba8(0, 0));
 			pa.alpha_blend(false);
-			pa.set_fore_color(def_check_color_.fore_color_);
+			pa.set_fore_color(default_check_color_.fore_color_);
 			pa.fill_circle(vtx::spos(12), 11);
 			pa.alpha_blend();
-			pa.set_fore_color(def_check_color_.back_color_);
+			pa.set_fore_color(default_check_color_.back_color_);
 			pa.fill_circle(vtx::spos(12), 8);
 			share_img_.un_radio_ = mobj_.install(&pa);
 
-			pa.set_fore_color(def_check_color_.fore_color_);
+			pa.set_fore_color(default_check_color_.fore_color_);
 			pa.fill_circle(vtx::spos(12), 5);
 			share_img_.to_radio_ = mobj_.install(&pa);
 		}

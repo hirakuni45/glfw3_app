@@ -35,7 +35,8 @@ namespace gui {
 			uint32_t	shift_hold_frame_;	///< シフト表示までのホールドフレーム
 
 			param(const std::string& text = "") :
-				plate_param_(), color_param_(),
+				plate_param_(),
+				color_param_(widget_director::default_label_color_),
 				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255)),
 				shift_enable_(true), shift_every_(false),
 				shift_offset_(0.0f), shift_speed_(0.5f),
@@ -57,7 +58,8 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_label(widget_director& wd, const widget::param& bp, const param& p) :
-			wd_(wd), widget(bp), param_(p), objh_(0) { }
+			wd_(wd), widget(bp), param_(p), objh_(0) {
+		}
 
 
 		//-----------------------------------------------------------------//

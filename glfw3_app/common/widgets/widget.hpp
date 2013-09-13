@@ -46,8 +46,7 @@ namespace gui {
 			img::rgba8		back_color_;			///< 背景色
 			img::paint::intensity_rect	inten_rect_;
 			bool			ir_enable_;
-			color_param(const img::rgba8& fc = img::rgba8(130, 255, 136),
-				const img::rgba8& bc = img::rgba8(100, 200, 120)) :
+			color_param(const img::rgba8& fc = img::rgba8(255), const img::rgba8& bc = img::rgba8(0)) :
 				fore_color_(fc), back_color_(bc), inten_rect_(), ir_enable_(false)
 			{ }
 

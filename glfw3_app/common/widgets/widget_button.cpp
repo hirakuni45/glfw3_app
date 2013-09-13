@@ -18,16 +18,17 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_button::initialize()
 	{
-		param_.color_param_ = wd_.get_default_button_color();
-
-		// ボタンは標準的に固定
+		// ボタンは標準的に固定、サイズ固定、選択時スケーリング
 		at_param().state_.set(widget::state::POSITION_LOCK);
 		at_param().state_.set(widget::state::SIZE_LOCK);
 		at_param().action_.set(widget::action::SELECT_SCALE);
 
 		using namespace img;
 
-		if(param_.image_) {
+		if(param_.handle_) {
+			at_rect().size = wd_.at_mobj().get_size(param_.handle_);
+			objh_ = param_.handle_;
+		} else if(param_.image_) {
 			paint pa;
 			const vtx::spos& size = get_rect().size;
 			create_image_base(param_.image_, size, pa);

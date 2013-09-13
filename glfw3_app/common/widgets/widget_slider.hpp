@@ -34,7 +34,9 @@ namespace gui {
 
 			bool					hand_ctrl_;		///< ハンドル・コントロール
 
-			param() : plate_param_(), color_param_(), slider_param_(),
+			param() : plate_param_(),
+				color_param_(widget_director::default_slider_color_),
+				slider_param_(),
 				base_image_(0), hand_image_(0), hand_ctrl_(true)
 				{ }
 		};

@@ -28,7 +28,9 @@ namespace gui {
 			plate_param		plate_param_;
 			color_param		color_param_;
 
-			param() : plate_param_(), color_param_() { }
+			param() : plate_param_(),
+				color_param_(widget_director::default_frame_color_)
+			{ }
 		};
 
 	private:

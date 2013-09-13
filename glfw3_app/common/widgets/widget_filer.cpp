@@ -52,7 +52,7 @@ namespace gui {
 			{
 				vtx::srect r;
 				r.org.set(0);
-				r.size.set(fns, 32);
+				r.size.set(fns, label_height_);
 				widget::param wp(r, wf.base);
 				wp.action_.set(widget::action::SELECT_HIGHLIGHT);
 				widget_label::param wp_(fn);
@@ -68,7 +68,7 @@ namespace gui {
 			{
 				vtx::srect r;
 				r.org.set(fns + 2, 0);
-				r.size.set(ats, 32);
+				r.size.set(ats, label_height_);
 				widget::param wp(r, wf.base);
 				wp.action_.set(widget::action::SELECT_HIGHLIGHT);
 				widget_label::param wp_(" " +
@@ -83,7 +83,7 @@ namespace gui {
 				wf.info->set_state(widget::state::DRAG_UNSELECT);
 			}
 			wfs.push_back(wf);
-			rect.org.y += 32;
+			rect.org.y += label_height_;
 		}
 		files_->at_rect().size.y = rect.org.y;
 
@@ -193,25 +193,36 @@ namespace gui {
 			base_->set_state(widget::state::SIZE_LOCK, false);
 		}
 
+		short frame_width = base_->get_local_param().plate_param_.frame_width_;
 		// path（ハンドル）
 		{
 			vtx::srect r;
-			r.org.set(4, 4);
-			r.size.x = rect.size.x - 4 * 2;
-			r.size.y = 32;
+			r.org.set(frame_width);
+			r.size.x = rect.size.x - frame_width * 2;
+			r.size.y = path_height_;
 			widget::param wp(r, base_);
 			wp.action_.set(widget::action::SELECT_HIGHLIGHT);
 			widget_label::param wp_(path);
 			wp_.text_param_.placement_.hpt = vtx::holizontal_placement::LEFT;
+			wp_.color_param_.fore_color_.set(236, 181, 63);
+			wp_.color_param_.back_color_.set(131, 104, 45);
 			wp_.plate_param_.resizeble_ = true;
-			wp_.plate_param_.frame_width_ = 2;
+			wp_.plate_param_.frame_width_  = 2;
+			wp_.plate_param_.round_radius_ = 4;
 			path_ = wd_.add_widget<widget_label>(wp, wp_);
 			path_->set_state(widget::state::POSITION_LOCK);
 		}
 
+		// info ボタン
+		{
+			vtx::srect r;
+//			r.org.set(
+
+		}
+
 		// main null frame
 		{
-			vtx::srect r(vtx::spos(4, 32 + 4),
+			vtx::srect r(vtx::spos(frame_width, frame_width + path_height_),
 				vtx::spos(rect.size.x - 8, rect.size.y - 32 - 2 * 4 - 4));
 			widget::param wp(r, base_);
 			wp.state_.reset(widget::state::RENDER_ENABLE);

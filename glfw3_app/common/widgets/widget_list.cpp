@@ -19,8 +19,6 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_list::initialize()
 	{
-		param_.color_param_ = wd_.get_default_list_color();
-
 		// 標準的に固定
 		at_param().state_.set(widget::state::POSITION_LOCK);
 		at_param().state_.set(widget::state::SIZE_LOCK);

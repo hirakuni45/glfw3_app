@@ -34,7 +34,8 @@ namespace gui {
 			bool		open_;
 
 			param(const std::string& text = "") :
-				plate_param_(), color_param_(),
+				plate_param_(),
+				color_param_(widget_director::default_list_color_),
 				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255),
 					vtx::placement(vtx::holizontal_placement::LEFT,
 					vtx::vertical_placement::CENTER)),

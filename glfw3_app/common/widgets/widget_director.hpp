@@ -69,13 +69,6 @@ namespace gui {
 		widget*					top_move_;
 		widget*					top_resize_;
 
-		widget::color_param		def_frame_color_;
-		widget::color_param		def_button_color_;
-		widget::color_param		def_label_color_;
-		widget::color_param		def_slider_color_;
-		widget::color_param		def_check_color_;
-		widget::color_param		def_list_color_;
-
 		float					msp_length_;
 		vtx::spos				msp_speed_;
 		vtx::spos				position_positive_;
@@ -88,6 +81,13 @@ namespace gui {
 		void message_widget_(widget* w, const std::string& s);
 
 	public:
+		static widget::color_param		default_frame_color_;
+		static widget::color_param		default_button_color_;
+		static widget::color_param		default_label_color_;
+		static widget::color_param		default_slider_color_;
+		static widget::color_param		default_check_color_;
+		static widget::color_param		default_list_color_;
+
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	コンストラクター
@@ -97,12 +97,6 @@ namespace gui {
 			mobj_(), common_parts_(mobj_), serial_(0), widgets_(),
 			unselect_length_(7.0f), position_(0.0f), scale_(1.0f),
 			top_move_(0), top_resize_(0),
-			def_frame_color_( img::rgba8( 55, 157, 235), img::rgba8( 53, 110, 154)),
-			def_button_color_(img::rgba8( 72, 193, 241), img::rgba8( 47,  72,  86)),
-			def_label_color_( img::rgba8( 48, 193, 241), img::rgba8( 31,  72,  86)),
-			def_slider_color_(img::rgba8( 48, 193, 241), img::rgba8( 31,  72,  86)),
-			def_check_color_( img::rgba8( 72, 193, 241), img::rgba8( 47,  72,  86)),
-			def_list_color_(  img::rgba8( 48, 193, 241), img::rgba8( 31,  72,  86)),
 			msp_length_(0.0f), msp_speed_(0),
 			position_positive_(0), position_level_(0), position_negative_(0),
 			scroll_(0)
@@ -312,22 +306,5 @@ namespace gui {
 
 
 		const common_parts& get_common_parts() const { return common_parts_; }
-
-		const widget::color_param& get_default_frame_color() const {
-			return def_frame_color_;
-		}
-		const widget::color_param& get_default_button_color() const {
-			return def_button_color_;
-		}
-		const widget::color_param& get_default_label_color() const {
-			return def_label_color_;
-		}
-		const widget::color_param& get_default_slider_color() const {
-			return def_slider_color_;
-		}
-		const widget::color_param& get_default_list_color() const {
-			return def_list_color_;
-		}
 	};
-
 }

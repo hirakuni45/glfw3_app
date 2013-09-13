@@ -16,6 +16,7 @@
 #include "widget_null.hpp"
 #include "widget_frame.hpp"
 #include "widget_label.hpp"
+#include "widget_button.hpp"
 
 namespace gui {
 
@@ -35,8 +36,12 @@ namespace gui {
 
 		std::string	path_text_;
 
+		short			path_height_;
+		short			label_height_;
+
 		widget_frame*	base_;	///< ベース・フレーム
 		widget_label*	path_;	///< パス・フレーム
+		widget_button*	info_;	///< インフォメーション切り替えボタン
 		widget*			main_;	///< メイン・フレーム
 		widget*			files_;	///< ファイル・フレーム
 
@@ -81,7 +86,8 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_filer(widget_director& wd) : wd_(wd), fsc_(),
-			base_(0), path_(0), main_(0), files_(0)
+			path_height_(32), label_height_(32),
+			base_(0), path_(0), info_(0), main_(0), files_(0)
 			{ }
 
 
