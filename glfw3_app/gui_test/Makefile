@@ -1,0 +1,326 @@
+#-----------------------------------------------#
+# GNU-Makefile for "gcc"	 					#
+#-----------------------------------------------#
+TARGET		=	gui_test
+PSOURCES	=	main.cpp \
+				gui_test.cpp \
+				../common/core/glcore.cpp \
+				../common/core/device.cpp \
+				../common/core/kfimg_ft2.cpp \
+				../common/core/jfep_io.cpp \
+				../common/gl_fw/glfonts.cpp \
+				../common/gl_fw/glmobj.cpp \
+				../common/gl_fw/gltexfb.cpp \
+				../common/gl_fw/glterminal.cpp \
+				../common/utils/vtx.cpp \
+				../common/utils/vmath.cpp \
+				../common/utils/string_utils.cpp \
+				../common/utils/file_io.cpp \
+				../common/utils/file_info.cpp \
+				../common/utils/files.cpp \
+				../common/utils/preference.cpp \
+				../common/img_io/paint.cpp \
+				../common/img_io/png_io.cpp \
+				../common/img_io/jpeg_io.cpp \
+				../common/img_io/openjpeg_io.cpp \
+				../common/img_io/bmp_io.cpp \
+				../common/img_io/dds_io.cpp \
+				../common/img_io/pdf_in.cpp \
+				../common/img_io/img_files.cpp \
+				../common/img_io/img_utils.cpp \
+				../common/snd_io/audio_io.cpp \
+				../common/snd_io/pcm.cpp \
+				../common/snd_io/wav_io.cpp \
+				../common/snd_io/mp3_io.cpp \
+				../common/snd_io/mp3_tag.cpp \
+				../common/snd_io/aac_io.cpp \
+				../common/snd_io/snd_files.cpp \
+				../common/snd_io/sound.cpp \
+				../common/widgets/common_parts.cpp \
+				../common/widgets/widget.cpp \
+				../common/widgets/widget_director.cpp \
+				../common/widgets/widget_utils.cpp \
+				../common/widgets/widget_group.cpp \
+				../common/widgets/widget_image.cpp \
+				../common/widgets/widget_frame.cpp \
+				../common/widgets/widget_button.cpp \
+				../common/widgets/widget_label.cpp \
+				../common/widgets/widget_slider.cpp \
+				../common/widgets/widget_list.cpp \
+				../common/widgets/widget_check.cpp \
+				../common/widgets/widget_radio.cpp \
+				../common/widgets/widget_zero.cpp \
+				../common/widgets/widget_filer.cpp \
+				../common/widgets/widget_terminal.cpp
+
+CSOURCES	=	../common/minizip/ioapi.c \
+				../common/minizip/unzip.c
+STDLIBS		=
+OPTLIBS		=	glfw3 opengl32 glu32 gdi32 imm32 \
+				pthread \
+				openal winmm dsound \
+				fitz \
+				png12 jpeg_x86 openjpeg jbig2dec \
+				freetype \
+				id3tag \
+				z \
+				mad \
+				faad mp4ff
+
+INC_SYS		=	/usr/boost_1_54_0 \
+				/usr/local/include
+
+INC_LIB		=	/usr/local/include/libpng12 \
+				/usr/local/include/libjpeg_x86 \
+				/usr/local/include/freetype2 \
+				/usr/local/include/mupdf
+
+PINC_APP	=	./ ../common
+CINC_APP	=	./ ../common
+LIBDIR		=	/usr/local/lib
+
+INC_S	=	$(addprefix -I, $(INC_SYS))
+INC_L	=	$(addprefix -I, $(INC_LIB))
+INC_P	=	$(addprefix -I, $(PINC_APP))
+INC_C	=	$(addprefix -I, $(CINC_APP))
+CINCS	=	$(INC_S) $(INC_L) $(INC_C)
+PINCS	=	$(INC_S) $(INC_L) $(INC_P)
+LIBS	=	$(addprefix -L, $(LIBDIR))
+LIBN	=	$(addprefix -l, $(STDLIBS))
+LIBN	+=	$(addprefix -l, $(OPTLIBS))
+
+#
+# Compiler, Linker Options, Resource_compiler
+#
+CP	=	i686-w64-mingw32-g++
+CC	=	i686-w64-mingw32-gcc
+LK	=	i686-w64-mingw32-g++
+RC	=
+
+POPT	=	-O2 -std=gnu++11
+COPT	=	-O2
+# POPT	=	-g
+# COPT	=	-g
+LOPT	=
+
+COF	=	-o
+LOF	=	-o
+
+PFLAGS	=	-DWIN32 -DHAVE_STDINT_H
+# PFLAGS	=	-DWIN32 -mno-cygwin -DIPAD_EMU -DOPTION_MEMORY_ALOCATE
+# PFLAGS	=	-DWIN32 -mno-cygwin -DIPAD_EMU
+CFLAGS	=	-DWIN32
+LFLAGS	=	-static-libgcc -static-libstdc++
+
+# -Wuninitialized -Wunused -Werror -Wshadow
+CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
+			-Wformat
+CPPWARN	=	-Wall
+
+OBJECTS	=	$(PSOURCES:.cpp=.o) $(CSOURCES:.c=.o)
+
+.SUFFIXES :
+.SUFFIXES : .res .hpp .h .c .cpp .o
+
+$(TARGET).exe: $(OBJECTS) Makefile
+	$(LK) $(LOF)$(TARGET).exe $(LFLAGS) $(LIBS) $(OBJECTS) $(LIBN)
+
+.c.o:
+	$(CC) $(COPT) $(CFLAGS) $(CINCS) $(CCWARN) -c $< $(COF)$@
+
+.cpp.o:
+	$(CP) $(POPT) $(PFLAGS) $(PINCS) $(CPWARN) -c $< $(COF)$@
+
+.rc.c:
+	$(RC) $< $@
+
+all:
+	make clean
+	make depend
+	make $(TARGET)
+
+install:
+	cp ./$(TARGET).exe /usr/local/bin/.
+
+run:
+	./$(TARGET).exe
+
+clean:
+	rm -f $(OBJECTS)
+	rm -f $(TARGET)
+
+dllname:
+	objdump -p $(TARGET).exe | grep "DLL Name"
+
+tarball:
+	chmod 644 \
+			../core/*.[hc]pp \
+			../gl_fw/*.[hc]pp \
+			../utils/*.[hc]pp \
+			../img_io/*.[hc]pp \
+			../snd_io/*.[hc]pp \
+			../widgets/*.[hc]pp \
+			../minizip/*.[hc] \
+			../player/*.[hc]pp Makefile
+	rm -f $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz
+	tar cfvz $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz \
+			../core/*.[hc]pp \
+			../gl_fw/*.[hc]pp \
+			../utils/*.[hc]pp \
+			../img_io/*.[hc]pp \
+			../snd_io/*.[hc]pp \
+			../widgets/*.[hc]pp \
+			../minizip/*.[hc] \
+			../player/*.[hc]pp \
+			../player/res/*.png \
+			../player/res/*.ttf
+	chmod 444 $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz
+
+bin_zip:
+	$(LK) $(LOF)$(TARGET).exe $(LFLAGS) $(LIBS) -mwindows $(OBJECTS) $(LIBN)
+	rm -f $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip
+	zip $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip *.exe *.dll res/*.*
+
+lib_arc:
+	tar cfvz mingw_pack.tgz /usr/local/include /usr/local/lib /usr/local/bin
+
+depend:
+	makedepend -Y -- $(CFLAGS) $(INC_P) -- $(CSOURCES) $(PSOURCES)
+
+# DO NOT DELETE
+
+../common/minizip/ioapi.o: ../common/minizip/ioapi.h
+../common/minizip/unzip.o: ../common/minizip/unzip.h
+../common/minizip/unzip.o: ../common/minizip/ioapi.h
+main.o: main.hpp gui_test.hpp
+gui_test.o: gui_test.hpp main.hpp
+../common/core/glcore.o: ../common/core/glcore.hpp ../common/core/device.hpp
+../common/core/device.o: ../common/core/device.hpp
+../common/core/kfimg_ft2.o: ../common/core/kfimg_ft2.hpp
+../common/gl_fw/glfonts.o: ../common/gl_fw/glfonts.hpp
+../common/gl_fw/glmobj.o: ../common/gl_fw/glmobj.hpp
+../common/gl_fw/glmobj.o: ../common/gl_fw/glutils.hpp
+../common/gl_fw/glterminal.o: ../common/gl_fw/glterminal.hpp
+../common/utils/vtx.o: ../common/utils/vtx.hpp
+../common/utils/vmath.o: ../common/utils/vmath.hpp ../common/utils/vtx.hpp
+../common/utils/string_utils.o: ../common/utils/string_utils.hpp
+../common/utils/files.o: ../common/utils/files.hpp
+../common/img_io/paint.o: ../common/img_io/paint.hpp ../common/img_io/img.hpp
+../common/img_io/paint.o: ../common/img_io/i_img.hpp
+../common/img_io/paint.o: ../common/img_io/img_rgba8.hpp
+../common/img_io/paint.o: ../common/img_io/img_idx8.hpp
+../common/img_io/paint.o: ../common/img_io/img_gray8.hpp
+../common/img_io/png_io.o: ../common/img_io/png_io.hpp
+../common/img_io/png_io.o: ../common/img_io/i_img_io.hpp
+../common/img_io/png_io.o: ../common/img_io/i_img.hpp
+../common/img_io/png_io.o: ../common/img_io/img.hpp
+../common/img_io/png_io.o: ../common/img_io/img_idx8.hpp
+../common/img_io/png_io.o: ../common/img_io/img_rgba8.hpp
+../common/img_io/png_io.o: ../common/img_io/img_gray8.hpp
+../common/img_io/jpeg_io.o: ../common/img_io/jpeg_io.hpp
+../common/img_io/jpeg_io.o: ../common/img_io/i_img_io.hpp
+../common/img_io/jpeg_io.o: ../common/img_io/i_img.hpp
+../common/img_io/jpeg_io.o: ../common/img_io/img.hpp
+../common/img_io/jpeg_io.o: ../common/img_io/img_rgba8.hpp
+../common/img_io/jpeg_io.o: ../common/img_io/img_idx8.hpp
+../common/img_io/jpeg_io.o: ../common/img_io/img_gray8.hpp
+../common/img_io/openjpeg_io.o: ../common/img_io/openjpeg_io.hpp
+../common/img_io/openjpeg_io.o: ../common/img_io/i_img_io.hpp
+../common/img_io/openjpeg_io.o: ../common/img_io/i_img.hpp
+../common/img_io/openjpeg_io.o: ../common/img_io/img.hpp
+../common/img_io/openjpeg_io.o: ../common/img_io/img_rgba8.hpp
+../common/img_io/openjpeg_io.o: ../common/img_io/img_idx8.hpp
+../common/img_io/openjpeg_io.o: ../common/img_io/img_gray8.hpp
+../common/img_io/bmp_io.o: ../common/img_io/bmp_io.hpp
+../common/img_io/bmp_io.o: ../common/img_io/i_img_io.hpp
+../common/img_io/bmp_io.o: ../common/img_io/i_img.hpp
+../common/img_io/bmp_io.o: ../common/img_io/img.hpp
+../common/img_io/bmp_io.o: ../common/img_io/img_idx8.hpp
+../common/img_io/bmp_io.o: ../common/img_io/img_rgba8.hpp
+../common/img_io/bmp_io.o: ../common/img_io/img_gray8.hpp
+../common/img_io/dds_io.o: ../common/img_io/dds_io.hpp
+../common/img_io/dds_io.o: ../common/img_io/i_img_io.hpp
+../common/img_io/dds_io.o: ../common/img_io/i_img.hpp
+../common/img_io/dds_io.o: ../common/img_io/img.hpp
+../common/img_io/dds_io.o: ../common/img_io/img_idx8.hpp
+../common/img_io/dds_io.o: ../common/img_io/img_rgba8.hpp
+../common/img_io/dds_io.o: ../common/img_io/img_gray8.hpp
+../common/img_io/pdf_in.o: ../common/img_io/pdf_in.hpp
+../common/snd_io/audio_io.o: ../common/snd_io/audio_io.hpp
+../common/snd_io/audio_io.o: ../common/snd_io/i_audio.hpp
+../common/snd_io/audio_io.o: ../common/snd_io/audio.hpp
+../common/snd_io/audio_io.o: ../common/snd_io/pcm.hpp
+../common/snd_io/pcm.o: ../common/snd_io/pcm.hpp ../common/snd_io/i_audio.hpp
+../common/snd_io/pcm.o: ../common/snd_io/audio.hpp
+../common/snd_io/wav_io.o: ../common/snd_io/wav_io.hpp
+../common/snd_io/wav_io.o: ../common/snd_io/i_snd_io.hpp
+../common/snd_io/wav_io.o: ../common/snd_io/i_audio.hpp
+../common/snd_io/wav_io.o: ../common/snd_io/audio.hpp
+../common/snd_io/wav_io.o: ../common/snd_io/tag.hpp ../common/snd_io/pcm.hpp
+../common/snd_io/mp3_io.o: ../common/snd_io/mp3_io.hpp
+../common/snd_io/mp3_io.o: ../common/snd_io/i_snd_io.hpp
+../common/snd_io/mp3_io.o: ../common/snd_io/i_audio.hpp
+../common/snd_io/mp3_io.o: ../common/snd_io/audio.hpp
+../common/snd_io/mp3_io.o: ../common/snd_io/tag.hpp
+../common/snd_io/mp3_io.o: ../common/snd_io/mp3_tag.hpp
+../common/snd_io/mp3_io.o: ../common/snd_io/pcm.hpp
+../common/snd_io/mp3_tag.o: ../common/snd_io/mp3_tag.hpp
+../common/snd_io/aac_io.o: ../common/snd_io/aac_io.hpp
+../common/snd_io/aac_io.o: ../common/snd_io/i_snd_io.hpp
+../common/snd_io/aac_io.o: ../common/snd_io/i_audio.hpp
+../common/snd_io/aac_io.o: ../common/snd_io/audio.hpp
+../common/snd_io/aac_io.o: ../common/snd_io/tag.hpp ../common/snd_io/pcm.hpp
+../common/snd_io/snd_files.o: ../common/snd_io/snd_files.hpp
+../common/snd_io/snd_files.o: ../common/snd_io/i_snd_io.hpp
+../common/snd_io/snd_files.o: ../common/snd_io/i_audio.hpp
+../common/snd_io/snd_files.o: ../common/snd_io/audio.hpp
+../common/snd_io/snd_files.o: ../common/snd_io/tag.hpp
+../common/snd_io/snd_files.o: ../common/snd_io/wav_io.hpp
+../common/snd_io/snd_files.o: ../common/snd_io/mp3_io.hpp
+../common/snd_io/snd_files.o: ../common/snd_io/mp3_tag.hpp
+../common/snd_io/snd_files.o: ../common/snd_io/aac_io.hpp
+../common/snd_io/sound.o: ../common/snd_io/sound.hpp
+../common/snd_io/sound.o: ../common/snd_io/audio_io.hpp
+../common/snd_io/sound.o: ../common/snd_io/i_audio.hpp
+../common/snd_io/sound.o: ../common/snd_io/audio.hpp
+../common/snd_io/sound.o: ../common/snd_io/snd_files.hpp
+../common/snd_io/sound.o: ../common/snd_io/i_snd_io.hpp
+../common/snd_io/sound.o: ../common/snd_io/tag.hpp ../common/snd_io/pcm.hpp
+../common/widgets/widget.o: ../common/widgets/widget.hpp
+../common/widgets/widget_director.o: ../common/widgets/widget_director.hpp
+../common/widgets/widget_director.o: ../common/widgets/widget_utils.hpp
+../common/widgets/widget_director.o: ../common/widgets/widget_null.hpp
+../common/widgets/widget_director.o: ../common/widgets/widget_image.hpp
+../common/widgets/widget_director.o: ../common/widgets/widget_frame.hpp
+../common/widgets/widget_director.o: ../common/widgets/widget_button.hpp
+../common/widgets/widget_director.o: ../common/widgets/widget_label.hpp
+../common/widgets/widget_director.o: ../common/widgets/widget_slider.hpp
+../common/widgets/widget_director.o: ../common/widgets/widget_check.hpp
+../common/widgets/widget_director.o: ../common/widgets/widget_radio.hpp
+../common/widgets/widget_director.o: ../common/widgets/widget_list.hpp
+../common/widgets/widget_utils.o: ../common/widgets/widget_utils.hpp
+../common/widgets/widget_utils.o: ../common/widgets/widget_button.hpp
+../common/widgets/widget_utils.o: ../common/widgets/widget_label.hpp
+../common/widgets/widget_image.o: ../common/widgets/widget_image.hpp
+../common/widgets/widget_image.o: ../common/widgets/widget_utils.hpp
+../common/widgets/widget_frame.o: ../common/widgets/widget_frame.hpp
+../common/widgets/widget_frame.o: ../common/widgets/widget_director.hpp
+../common/widgets/widget_frame.o: ../common/widgets/widget_utils.hpp
+../common/widgets/widget_button.o: ../common/widgets/widget_button.hpp
+../common/widgets/widget_button.o: ../common/widgets/widget_utils.hpp
+../common/widgets/widget_label.o: ../common/widgets/widget_label.hpp
+../common/widgets/widget_label.o: ../common/widgets/widget_utils.hpp
+../common/widgets/widget_slider.o: ../common/widgets/widget_slider.hpp
+../common/widgets/widget_slider.o: ../common/widgets/widget_director.hpp
+../common/widgets/widget_slider.o: ../common/widgets/widget_utils.hpp
+../common/widgets/widget_zero.o: ../common/widgets/widget_zero.hpp
+../common/widgets/widget_zero.o: ../common/widgets/widget_director.hpp
+../common/widgets/widget_filer.o: ../common/widgets/widget_filer.hpp
+../common/widgets/widget_filer.o: ../common/widgets/widget_director.hpp
+../common/widgets/widget_filer.o: ../common/widgets/widget.hpp
+../common/widgets/widget_filer.o: ../common/widgets/widget_null.hpp
+../common/widgets/widget_filer.o: ../common/widgets/widget_frame.hpp
+../common/widgets/widget_filer.o: ../common/widgets/widget_label.hpp
+../common/widgets/widget_filer.o: ../common/widgets/widget_button.hpp
+../common/widgets/widget_terminal.o: ../common/widgets/widget_terminal.hpp
+../common/widgets/widget_terminal.o: ../common/widgets/widget_director.hpp
