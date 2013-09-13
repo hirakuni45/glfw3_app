@@ -5,7 +5,8 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include "Widgets/widget_director.hpp"
+#include "widgets/widget_director.hpp"
+#include "widgets/widget_label.hpp"
 
 namespace gui {
 
