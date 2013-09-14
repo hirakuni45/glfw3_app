@@ -146,6 +146,7 @@ namespace gui {
 					= ' ' + boost::lexical_cast<std::string>(wf.size);
 			} else if(info_state_ == info_state::TIME) {
 				std::string s;
+				s += ' ';
 				struct tm* t = localtime(&wf.time);
 				s += (boost::format("%02d:%02d ") % t->tm_hour % t->tm_min).str();
 				s += (boost::format("%d/%d ")
@@ -313,6 +314,7 @@ namespace gui {
 	{
 		if(!get_enable()) return false;
 
+		// ファイル情報の取得と反映（ファイル情報収集はスレッドで動作）
 		if(fsc_.probe()) {
 			if(center_.empty()) {
 				create_files_(center_, 0);

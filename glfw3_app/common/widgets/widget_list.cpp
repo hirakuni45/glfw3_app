@@ -41,16 +41,15 @@ namespace gui {
 		t.plate_param_ = param_.plate_param_;
 		root_h_ = wd_.share_add(t);
 
-		t.size_ -= t.plate_param_.frame_width_ * 2;
-		t.plate_param_.round_radius_ -= t.plate_param_.frame_width_;
-		if(t.plate_param_.round_radius_ < 0) t.plate_param_.round_radius_ = 0;
+		t.size_ = size;
+		t.plate_param_.round_radius_ = 0;
 		t.plate_param_.frame_width_ = 0;
 		list_h_ = wd_.share_add(t);
 
 		vtx::spos frsz;
 		frsz.x = t.size_.x;
 		frsz.y = t.size_.y * param_.text_list_.size();
-		widget::param wp(vtx::srect(vtx::spos(t.plate_param_.frame_width_), frsz), this);
+		widget::param wp(vtx::srect(vtx::spos(0), frsz), this);
 		widget_null::param wp_;
 		frame_ = wd_.add_widget<widget_null>(wp, wp_);
 	}
@@ -100,7 +99,7 @@ namespace gui {
 
 		if(!param_.open_) return;
 
-		vtx::spos pos(param_.plate_param_.frame_width_);
+		vtx::spos pos(0);
 		const vtx::spos& sz = wd_.at_mobj().get_size(list_h_);
 		for(uint32_t i = 0; i < param_.text_list_.size(); ++i) {
 			glPushMatrix();

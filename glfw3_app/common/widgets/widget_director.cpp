@@ -274,17 +274,26 @@ namespace gui {
 			widget::color_param(img::rgba8( 48, 193, 241), img::rgba8( 31,  72,  86));
 
 		img::paint::intensity_rect ir;
+		// ボタンの頂点輝度設定
 		ir.left_top    = 200; ir.center_top    = 255; ir.right_top    = 200;
 		ir.left_center = 255; ir.center_center = 255; ir.right_center = 255;
 		ir.left_bottom = 180; ir.center_bottom = 255; ir.right_bottom = 180;
 		default_button_color_.inten_rect_ = ir;
 		default_button_color_.ir_enable_ = true;
 
+		// ラベルの頂点輝度設定
 		ir.left_top    = 255; ir.center_top    = 255; ir.right_top    = 255;
 		ir.left_center = 200; ir.center_center = 200; ir.right_center = 200;
-		ir.left_bottom = 110; ir.center_bottom = 110; ir.right_bottom = 110;
+		ir.left_bottom = 100; ir.center_bottom = 100; ir.right_bottom = 100;
 		default_label_color_.inten_rect_  = ir;
 		default_label_color_.ir_enable_ = true;
+
+		// リストの頂点輝度設定
+		ir.left_top    = 255; ir.center_top    = 255; ir.right_top    = 255;
+		ir.left_center = 200; ir.center_center = 200; ir.right_center = 200;
+		ir.left_bottom =  80; ir.center_bottom =  80; ir.right_bottom =  80;
+		default_list_color_.inten_rect_  = ir;
+		default_list_color_.ir_enable_ = true;
 
 		IGLcore* igl = get_glcore();
 		if(igl == 0) return;
