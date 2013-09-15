@@ -221,16 +221,15 @@ namespace img {
 								+ static_cast<u32>(b) * 7471) >> 16; }
 
 		void gainY(float gain) {
-			u32 s = static_cast<u32>(gain * 256.0f);
-			u32 rr = (static_cast<u32>(r) * 19595 * s) >> 24;
-			u32 gg = (static_cast<u32>(g) * 38470 * s) >> 24;
-			u32 bb = (static_cast<u32>(b) * 7471  * s) >> 24;
-			if(rr > 255) rr = 255;
-			if(gg > 255) gg = 255;
-			if(bb > 255) bb = 255;
-			r = rr;
-			g = gg;
-			b = bb;
+			float rr = r * (1.0f - 0.299f) + r * 0.299f * gain;
+			float gg = g * (1.0f - 0.587f) + g * 0.587f * gain;
+			float bb = b * (1.0f - 0.114f) + b * 0.114f * gain;
+			if(rr > 255.0f) rr = 255.0f;
+			if(gg > 255.0f) gg = 255.0f;
+			if(bb > 255.0f) bb = 255.0f;
+			r = static_cast<u8>(rr);
+			g = static_cast<u8>(gg);
+			b = static_cast<u8>(bb);
 		}
 
 

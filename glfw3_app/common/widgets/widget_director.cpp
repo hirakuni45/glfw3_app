@@ -263,24 +263,31 @@ namespace gui {
 		mobj_.initialize();
 
 		// 「各」標準的な色彩や、形状などの設定
-		default_frame_color_ =
-			widget::color_param(img::rgba8( 55, 157, 235), img::rgba8( 53, 110, 154));
-		default_button_color_ =
-			widget::color_param(img::rgba8( 72, 193, 241), img::rgba8( 47,  72,  86));
-		default_label_color_ =
-			widget::color_param(img::rgba8( 48, 193, 241), img::rgba8( 31,  72,  86));
-		default_label_color_select_ = default_label_color_;
-		default_label_color_select_.fore_color_.gainY(1.3f);
-		default_label_color_select_.back_color_.gainY(1.3f);
-		default_slider_color_ =
-			widget::color_param(img::rgba8( 48, 193, 241), img::rgba8( 31,  72,  86));
-		default_check_color_ =
-			widget::color_param(img::rgba8( 72, 193, 241), img::rgba8( 47,  72,  86));
-		default_list_color_ =
-			widget::color_param(img::rgba8( 48, 193, 241), img::rgba8( 31,  72,  86));
-		default_list_color_select_ = default_list_color_;
-		default_list_color_select_.fore_color_.gainY(1.3f);
-		default_list_color_select_.back_color_.gainY(1.3f);
+		img::rgba8 fc, bc;
+		fc.set( 55, 157, 235);
+		bc = fc * 0.7f;
+		default_frame_color_ = widget::color_param(fc, bc);
+		fc.set( 72, 193, 241);
+		bc = fc * 0.7f;
+		default_button_color_ = widget::color_param(fc, bc);
+
+		fc.set( 48, 193, 241);
+		bc = fc * 0.7f;
+		default_label_color_ = widget::color_param(fc, bc);
+		default_label_color_select_ = widget::color_param(fc * 1.2f, fc);
+
+		fc.set( 48, 193, 241);
+		bc.set( 31,  72,  86);
+		default_slider_color_ = widget::color_param(fc, bc);
+
+		fc.set( 72, 193, 241);
+		bc.set( 47,  72,  86);
+		default_check_color_ = widget::color_param(fc, bc);
+
+		fc.set( 48, 193, 241);
+		bc = fc * 0.7f;
+		default_list_color_ = widget::color_param(fc, bc);
+		default_list_color_select_ = widget::color_param(bc, fc * 1.2f);
 
 		img::paint::intensity_rect ir;
 		// ボタンの頂点輝度設定

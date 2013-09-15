@@ -61,6 +61,8 @@ namespace app {
 
 		widget::param wp(vtx::srect(vtx::spos(0), size), 0);
 		widget_label::param wp_(text);
+		wp_.color_param_ = widget_director::default_slider_color_;
+		wp_.color_param_select_ = widget_director::default_slider_color_;
 		wp_.text_param_.font_ = font;
 		wp_.text_param_.proportional_ = proportional;
 		wp_.plate_param_.resizeble_ = true;
