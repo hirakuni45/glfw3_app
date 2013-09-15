@@ -36,6 +36,7 @@ namespace img {
 				left_top(i),    center_top(i),    right_top(i),
 				left_center(i), center_center(i), right_center(i),
 				left_bottom(i), center_bottom(i), right_bottom(i) { }
+
 			void set(uint8_t a0, uint8_t b0, uint8_t c0,
 					 uint8_t a1, uint8_t b1, uint8_t c1,
 					 uint8_t a2, uint8_t b2, uint8_t c2) {

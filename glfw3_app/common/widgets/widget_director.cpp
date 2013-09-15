@@ -28,9 +28,11 @@ namespace gui {
 	widget::color_param widget_director::default_frame_color_;
 	widget::color_param widget_director::default_button_color_;
 	widget::color_param widget_director::default_label_color_;
+	widget::color_param widget_director::default_label_color_select_;
 	widget::color_param widget_director::default_slider_color_;
 	widget::color_param widget_director::default_check_color_;
 	widget::color_param widget_director::default_list_color_;
+	widget::color_param widget_director::default_list_color_select_;
 
 	void widget_director::message_widget_(widget* w, const std::string& s)
 	{
@@ -151,15 +153,16 @@ namespace gui {
 	{
 		if(w == 0) return false;
 
-		widgets wtmp;
+		widgets ws;
 		BOOST_FOREACH(widget* ww, widgets_) {
-			if(ww == w) {
-				delete ww;
-			} else {
-				wtmp.push_back(ww);
+			if(ww != w) {
+				ws.push_back(ww);
 			}
 		}
-		widgets_ = wtmp;
+		widgets_ = ws;
+
+		delete w;
+
 		return true;
 	}
 
@@ -266,12 +269,18 @@ namespace gui {
 			widget::color_param(img::rgba8( 72, 193, 241), img::rgba8( 47,  72,  86));
 		default_label_color_ =
 			widget::color_param(img::rgba8( 48, 193, 241), img::rgba8( 31,  72,  86));
+		default_label_color_select_ = default_label_color_;
+		default_label_color_select_.fore_color_.gainY(1.3f);
+		default_label_color_select_.back_color_.gainY(1.3f);
 		default_slider_color_ =
 			widget::color_param(img::rgba8( 48, 193, 241), img::rgba8( 31,  72,  86));
 		default_check_color_ =
 			widget::color_param(img::rgba8( 72, 193, 241), img::rgba8( 47,  72,  86));
 		default_list_color_ =
 			widget::color_param(img::rgba8( 48, 193, 241), img::rgba8( 31,  72,  86));
+		default_list_color_select_ = default_list_color_;
+		default_list_color_select_.fore_color_.gainY(1.3f);
+		default_list_color_select_.back_color_.gainY(1.3f);
 
 		img::paint::intensity_rect ir;
 		// ボタンの頂点輝度設定
@@ -287,6 +296,11 @@ namespace gui {
 		ir.left_bottom = 100; ir.center_bottom = 100; ir.right_bottom = 100;
 		default_label_color_.inten_rect_  = ir;
 		default_label_color_.ir_enable_ = true;
+		ir.left_top    = 150; ir.center_top    = 150; ir.right_top    = 150;
+		ir.left_center = 255; ir.center_center = 255; ir.right_center = 255;
+		ir.left_bottom = 150; ir.center_bottom = 150; ir.right_bottom = 150;
+		default_label_color_select_.inten_rect_  = ir;
+		default_label_color_select_.ir_enable_ = true;
 
 		// リストの頂点輝度設定
 		ir.left_top    = 255; ir.center_top    = 255; ir.right_top    = 255;
@@ -294,6 +308,11 @@ namespace gui {
 		ir.left_bottom =  80; ir.center_bottom =  80; ir.right_bottom =  80;
 		default_list_color_.inten_rect_  = ir;
 		default_list_color_.ir_enable_ = true;
+		ir.left_top    = 150; ir.center_top    = 150; ir.right_top    = 150;
+		ir.left_center = 255; ir.center_center = 255; ir.right_center = 255;
+		ir.left_bottom = 150; ir.center_bottom = 150; ir.right_bottom = 150;
+		default_list_color_select_.inten_rect_  = ir;
+		default_list_color_select_.ir_enable_ = true;
 
 		IGLcore* igl = get_glcore();
 		if(igl == 0) return;
@@ -637,9 +656,21 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_director::destroy()
 	{
+		// ハイブリッドから消去
+		widgets hyws;
+		BOOST_FOREACH(widget* w, widgets_) {
+			if(w->hybrid()) {
+				hyws.push_back(w);
+			}
+		}
+		BOOST_FOREACH(widget* w, hyws) {
+			del_widget(w);
+		}
+
 		BOOST_FOREACH(widget* w, widgets_) {
 			delete w;
 		}
+
 		widgets().swap(widgets_);
 	}
 

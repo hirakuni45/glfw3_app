@@ -75,15 +75,25 @@ namespace gui {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct plate_param {
+			struct round_style {
+				enum type {
+					ALL,		///< 全てラウンド
+					TOP,		///< 上側をラウンド 
+					BOTTOM,		///< 下側をラウンド
+				};
+			};
+			round_style::type	round_style_;	///< ラウンド・スタイル
 			short	round_radius_;		///< ラウンド半径
 			short	frame_width_;		///< フレーム幅
 			vtx::spos	grid_;			///< リサイズ・グリッド
 			bool	resizeble_;			///< リサイズが可能な場合
-			plate_param() : round_radius_(8), frame_width_(4),
+			plate_param() : round_style_(round_style::ALL), round_radius_(8),
+				frame_width_(4),
 				grid_(16), resizeble_(false) { }
 
 			size_t hash() const {
 				size_t h = grid_.hash();
+				boost::hash_combine(h, round_style_);
 				boost::hash_combine(h, round_radius_);
 				boost::hash_combine(h, frame_width_);
 				boost::hash_combine(h, resizeble_);
@@ -91,7 +101,8 @@ namespace gui {
 			}
 
 			bool operator == (const plate_param& pp) const {
-				return pp.round_radius_ == round_radius_ &&
+				return pp.round_style_ == round_style_ &&
+					pp.round_radius_ == round_radius_ &&
 					pp.frame_width_ == frame_width_ &&
 					pp.resizeble_ == resizeble_ &&
 					pp.grid_ == grid_;
@@ -347,6 +358,15 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	ハイブリッド・ウィジェットのサイン
+			@return ハイブリッド・ウィジェットの場合「true」を返す。
+		*/
+		//-----------------------------------------------------------------//
+		virtual bool hybrid() const = 0;
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
@@ -424,7 +444,9 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		bool get_focus_in() const {
-			return !param_.state_[state::BEFORE_FOCUS] && param_.state_[state::IS_FOCUS];
+			if(get_state(state::STALL)) return false;
+			if(!get_state(state::ENABLE)) return false;
+			return !get_state(state::BEFORE_FOCUS) && get_state(state::IS_FOCUS);
 		}
 
 
@@ -434,7 +456,11 @@ namespace gui {
 			@return 状態
 		*/
 		//-----------------------------------------------------------------//
-		bool get_focus() const { return param_.state_[state::IS_FOCUS]; }
+		bool get_focus() const {
+			if(get_state(state::STALL)) return false;
+			if(!get_state(state::ENABLE)) return false;
+			return get_state(state::IS_FOCUS);
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -444,7 +470,9 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		bool get_focus_out() const {
-			return param_.state_[state::BEFORE_FOCUS] && !param_.state_[state::IS_FOCUS];
+			if(get_state(state::STALL)) return false;
+			if(!get_state(state::ENABLE)) return false;
+			return get_state(state::BEFORE_FOCUS) && !get_state(state::IS_FOCUS);
 		}
 
 
@@ -455,7 +483,9 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		bool get_select_in() const {
-			return !param_.state_[state::BEFORE_SELECT] && param_.state_[state::IS_SELECT];
+			if(get_state(state::STALL)) return false;
+			if(!get_state(state::ENABLE)) return false;
+			return !get_state(state::BEFORE_SELECT) && get_state(state::IS_SELECT);
 		}
 
 
@@ -465,7 +495,11 @@ namespace gui {
 			@return 状態
 		*/
 		//-----------------------------------------------------------------//
-		bool get_select() const { return param_.state_[state::IS_SELECT]; }
+		bool get_select() const {
+			if(get_state(state::STALL)) return false;
+			if(!get_state(state::ENABLE)) return false;
+			return get_state(state::IS_SELECT);
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -475,7 +509,9 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		bool get_select_out() const {
-			return param_.state_[state::BEFORE_SELECT] && !param_.state_[state::IS_SELECT];
+			if(get_state(state::STALL)) return false;
+			if(!get_state(state::ENABLE)) return false;
+			return get_state(state::BEFORE_SELECT) && !get_state(state::IS_SELECT);
 		}
 
 

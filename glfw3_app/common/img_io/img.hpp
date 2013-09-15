@@ -220,6 +220,20 @@ namespace img {
 								+ static_cast<u32>(g) * 38470
 								+ static_cast<u32>(b) * 7471) >> 16; }
 
+		void gainY(float gain) {
+			u32 s = static_cast<u32>(gain * 256.0f);
+			u32 rr = (static_cast<u32>(r) * 19595 * s) >> 24;
+			u32 gg = (static_cast<u32>(g) * 38470 * s) >> 24;
+			u32 bb = (static_cast<u32>(b) * 7471  * s) >> 24;
+			if(rr > 255) rr = 255;
+			if(gg > 255) gg = 255;
+			if(bb > 255) bb = 255;
+			r = rr;
+			g = gg;
+			b = bb;
+		}
+
+
 		void alpha_mix(const rgba8& bc, u8 alpha) {
 			u16 ii = 255 - alpha;
 			u16 aa = alpha + 1;

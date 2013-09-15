@@ -37,8 +37,10 @@ namespace gui {
 		t.size_ = size;
 		t.color_param_ = param_.color_param_;
 		t.plate_param_ = param_.plate_param_;
-
 		objh_ = wd_.share_add(t);
+
+		t.color_param_ = param_.color_param_select_;
+		select_objh_ = wd_.share_add(t);
 	}
 
 
@@ -95,11 +97,16 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_label::render()
 	{
-		if(param_.plate_param_.resizeble_) {
-			wd_.at_mobj().resize(objh_, get_param().rect_.size);
+		gl::glmobj::handle h = objh_;
+		if(get_select()) {
+			h = select_objh_;
 		}
 
-		render_text(wd_, objh_, get_param(), param_.text_param_, param_.plate_param_);
+		if(param_.plate_param_.resizeble_) {
+			wd_.at_mobj().resize(h, get_param().rect_.size);
+		}
+
+		render_text(wd_, h, get_param(), param_.text_param_, param_.plate_param_);
 	}
 
 

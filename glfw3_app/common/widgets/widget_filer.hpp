@@ -77,12 +77,14 @@ namespace gui {
 
 		vtx::fpos	speed_;
 		vtx::fpos	position_;
+		uint32_t	select_pos_;
 
 		std::string	file_;
 
 		struct file_t {
 			vtx::spos	position_;
-			file_t() : position_(0) { }
+			uint32_t	select_pos_;
+			file_t() : position_(0), select_pos_(0) { }
 		};
 
 		typedef boost::unordered_map<std::string, file_t>	file_map;
@@ -92,6 +94,7 @@ namespace gui {
 
 		void create_files_(widget_files& wfs, short ofs);
 		widget_files_cit scan_select_file_(widget_files& wfs);
+		widget_files_cit scan_selected_file_(widget_files& wfs);
 		void resize_files_(widget_files& wfs, short width);
 		void update_files_info_(widget_files& wfs);
 		void destroy_files_(widget_files& wfs);
@@ -106,7 +109,8 @@ namespace gui {
 			path_height_(32), label_height_(32),
 			base_(0), path_(0), info_(0), main_(0), files_(0),
 			info_state_(info_state::NONE),
-			speed_(0.0f), position_(0.0f), file_()
+			speed_(0.0f), position_(0.0f), select_pos_(0),
+			file_()
 			{ }
 
 
@@ -201,6 +205,16 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		const utils::files& get_files() const { return fsc_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ファイルを選択
+			@param[in]	path	選択するファイルパス
+			@return 該当するファイルが無い場合「false」
+		*/
+		//-----------------------------------------------------------------//
+		bool select_file(const std::string& path);
 
 
 		//-----------------------------------------------------------------//

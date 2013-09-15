@@ -6,8 +6,6 @@
 //=====================================================================//
 #include "gl_fw/IGLcore.hpp"
 #include "widgets/widget_list.hpp"
-#include "widgets/widget_utils.hpp"
-#include "widgets/widget_null.hpp"
 #include <boost/foreach.hpp>
 
 namespace gui {
@@ -19,39 +17,44 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_list::initialize()
 	{
-		// 標準的に固定
-		at_param().state_.set(widget::state::POSITION_LOCK);
-		at_param().state_.set(widget::state::SIZE_LOCK);
-		at_param().action_.set(widget::action::SELECT_HIGHLIGHT);
+		widget::param wp = get_param();
+		widget_label::param wp_;
+		wp_.plate_param_ = param_.plate_param_;
+		wp_.color_param_ = param_.color_param_;
+		wp_.text_param_ = param_.text_param_;
+		wp_.color_param_select_ = param_.color_param_select_;
+		root_ = wd_.add_widget<widget_label>(wp, wp_);
 
-		vtx::spos size;
-		if(param_.plate_param_.resizeble_) {
-			vtx::spos rsz = param_.plate_param_.grid_ * 3;
-			if(get_param().rect_.size.x >= rsz.x) size.x = rsz.x;
-			else size.x = get_param().rect_.size.x;
-			if(get_param().rect_.size.y >= rsz.y) size.y = rsz.y;
-			else size.y = get_param().rect_.size.y;
-		} else {
-			size = get_param().rect_.size;
+		{
+			wp.rect_.size.y *= param_.text_list_.size();
+			widget_null::param wp_;
+			frame_ = wd_.add_widget<widget_null>(wp, wp_);
+			frame_->set_state(widget::state::POSITION_LOCK);
 		}
 
-		share_t t;
-		t.size_ = size;
-		t.color_param_ = param_.color_param_;
-		t.plate_param_ = param_.plate_param_;
-		root_h_ = wd_.share_add(t);
-
-		t.size_ = size;
-		t.plate_param_.round_radius_ = 0;
-		t.plate_param_.frame_width_ = 0;
-		list_h_ = wd_.share_add(t);
-
-		vtx::spos frsz;
-		frsz.x = t.size_.x;
-		frsz.y = t.size_.y * param_.text_list_.size();
-		widget::param wp(vtx::srect(vtx::spos(0), frsz), this);
-		widget_null::param wp_;
-		frame_ = wd_.add_widget<widget_null>(wp, wp_);
+		wp.parents_ = frame_;
+		wp.rect_.org.set(0);
+		wp.rect_.size.y = root_->get_rect().size.y;
+		wp_.plate_param_.frame_width_ = 0;
+		int n = 0;
+		BOOST_FOREACH(const std::string& s, param_.text_list_) {
+			wp_.text_param_.text_ = s;
+			if(n == 0) {
+				wp_.plate_param_.round_radius_ = param_.plate_param_.round_radius_;
+				wp_.plate_param_.round_style_ = widget::plate_param::round_style::TOP;
+			} else if(n == (param_.text_list_.size() - 1)) {
+				wp_.plate_param_.round_radius_ = param_.plate_param_.round_radius_;
+				wp_.plate_param_.round_style_ = widget::plate_param::round_style::BOTTOM;
+			} else {
+				wp_.plate_param_.round_radius_ = 0;
+				wp_.plate_param_.round_style_ = widget::plate_param::round_style::ALL;
+			}
+			widget_label* w = wd_.add_widget<widget_label>(wp, wp_);
+			w->set_state(widget::state::ENABLE, false);
+			list_.push_back(w);
+			wp.rect_.org.y += root_->get_rect().size.y;
+			++n;
+		}
 	}
 
 
@@ -62,8 +65,25 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_list::update()
 	{
-		if(get_selected()) {
-			param_.open_ = !param_.open_;
+		param_.open_before_ = param_.open_;
+		if(root_->get_selected()) {
+			param_.open_ = true;
+			wd_.enable(root_, false);
+			wd_.enable(frame_, param_.open_, true);
+		} else if(frame_->get_selected()) {
+			param_.open_ = false;
+			wd_.enable(root_);
+			wd_.enable(frame_, param_.open_, true);
+		}
+
+		uint32_t n = 0;
+		BOOST_FOREACH(widget_label* w, list_) {
+			if(w->get_select()) {
+				param_.select_pos_ = n;
+				root_->at_local_param().text_param_.text_
+					= w->get_local_param().text_param_.text_;
+			}
+			++n;
 		}
 	}
 
@@ -78,41 +98,6 @@ namespace gui {
 		using namespace gl;
 
 		IGLcore* igl = get_glcore();
-
-		if(param_.plate_param_.resizeble_) {
-			wd_.at_mobj().resize(root_h_, get_param().rect_.size);
-		}
-
-		render_text(wd_, root_h_,
-			get_param(), param_.text_param_, param_.plate_param_);
-
-		const vtx::spos& size = igl->get_size();
-		wd_.at_mobj().setup_matrix(size.x, size.y);
-		glTranslatef(get_param().rpos_.x, get_param().rpos_.y, 1.0f);
-
-		const vtx::spos& bsz = wd_.at_mobj().get_size(wd_.get_share_image().down_box_);
-		vtx::spos ofs;
-		ofs.x = get_rect().size.x - bsz.x - param_.plate_param_.frame_width_ - 4;
-		ofs.y = (get_rect().size.y - bsz.y) / 2;
-		wd_.at_mobj().draw(wd_.get_share_image().down_box_, gl::glmobj::normal,
-			ofs.x, ofs.y);
-
-		if(!param_.open_) return;
-
-		vtx::spos pos(0);
-		const vtx::spos& sz = wd_.at_mobj().get_size(list_h_);
-		for(uint32_t i = 0; i < param_.text_list_.size(); ++i) {
-			glPushMatrix();
-			wd_.at_mobj().draw(list_h_, gl::glmobj::normal, pos.x, pos.y);
-			glPopMatrix();
-			pos.y += sz.y;
-		}
-
-//		BOOST_FOREACH(
-
-//		render_text(wd_, list_h_,
-//			get_param(), param_.text_param_, param_.plate_param_);
-
 	}
 
 
@@ -123,6 +108,11 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_list::destroy()
 	{
+		BOOST_FOREACH(widget_label* w, list_) {
+			wd_.del_widget(w);
+		}
+		wd_.del_widget(frame_);
+		wd_.del_widget(root_);
 	}
 
 }

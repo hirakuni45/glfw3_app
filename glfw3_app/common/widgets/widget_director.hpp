@@ -84,9 +84,11 @@ namespace gui {
 		static widget::color_param		default_frame_color_;
 		static widget::color_param		default_button_color_;
 		static widget::color_param		default_label_color_;
+		static widget::color_param		default_label_color_select_;
 		static widget::color_param		default_slider_color_;
 		static widget::color_param		default_check_color_;
 		static widget::color_param		default_list_color_;
+		static widget::color_param		default_list_color_select_;
 
 		//-----------------------------------------------------------------//
 		/*!

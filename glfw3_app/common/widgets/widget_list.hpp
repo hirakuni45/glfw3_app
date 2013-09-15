@@ -7,6 +7,7 @@
 //=====================================================================//
 #include "widgets/widget_director.hpp"
 #include "widgets/widget_label.hpp"
+#include "widgets/widget_null.hpp"
 
 namespace gui {
 
@@ -26,12 +27,15 @@ namespace gui {
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
 			plate_param	plate_param_;	///< プレート・パラメーター
-			color_param	color_param_;	///< 頂点カラーで変調する場合のパラ
+			color_param	color_param_;	///< カラー・パラメーター
 			text_param	text_param_;	///< テキスト描画のパラメーター
+			color_param	color_param_select_;	///< 選択時カラー・パラメーター
 
 			utils::strings	text_list_;
 
-			uint32_t	location_;
+			uint32_t	select_pos_;
+
+			bool		open_before_;
 			bool		open_;
 
 			param(const std::string& text = "") :
@@ -40,7 +44,8 @@ namespace gui {
 				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255),
 					vtx::placement(vtx::holizontal_placement::LEFT,
 					vtx::vertical_placement::CENTER)),
-				location_(0), open_(false)
+				color_param_select_(widget_director::default_list_color_select_),
+				select_pos_(0), open_before_(false), open_(false)
 			{ }
 		};
 
@@ -49,10 +54,9 @@ namespace gui {
 
 		param				param_;
 
-		gl::glmobj::handle	root_h_;
-		gl::glmobj::handle	list_h_;
-
-		widget*				frame_;
+		widget_label*		root_;
+		widget_null*		frame_;
+		widget_labels		list_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -62,7 +66,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_list(widget_director& wd, const widget::param& bp, const param& p) :
 			wd_(wd), widget(bp), param_(p),
-			root_h_(0), list_h_(0), frame_(0)
+			root_(0), frame_(0), list_()
 			{ }
 
 
@@ -80,6 +84,15 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		type_id type() const { return get_type_id<value_type>(); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ハイブリッド・ウィジェットのサイン
+			@return ハイブリッド・ウィジェットの場合「true」を返す。
+		*/
+		//-----------------------------------------------------------------//
+		bool hybrid() const { return true; }
 
 
 		//-----------------------------------------------------------------//

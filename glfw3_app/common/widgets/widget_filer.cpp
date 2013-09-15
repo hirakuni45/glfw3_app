@@ -93,12 +93,25 @@ namespace gui {
 		file_map_it it = file_map_.find(path_text_);
 		if(it != file_map_.end()) {
 			position_ = it->second.position_;
+			select_pos_ = it->second.select_pos_;
 			files_->at_rect().org = it->second.position_;
 		}
 	}
 
 
 	widget_filer::widget_files_cit widget_filer::scan_select_file_(widget_files& wfs)
+	{
+		for(widget_files_cit cit = wfs.begin(); cit != wfs.end(); ++cit) {
+			const widget_file& wf = *cit;
+			if(wf.base->get_select()) {
+				return cit;
+			}
+		}
+		return wfs.end();
+	}
+
+
+	widget_filer::widget_files_cit widget_filer::scan_selected_file_(widget_files& wfs)
 	{
 		for(widget_files_cit cit = wfs.begin(); cit != wfs.end(); ++cit) {
 			const widget_file& wf = *cit;
@@ -252,6 +265,10 @@ namespace gui {
 			wp_.text_param_.placement_.hpt = vtx::holizontal_placement::LEFT;
 			wp_.color_param_.fore_color_.set(236, 181, 63);
 			wp_.color_param_.back_color_.set(131, 104, 45);
+			wp_.color_param_select_.fore_color_ = wp_.color_param_.fore_color_;
+			wp_.color_param_select_.back_color_ = wp_.color_param_.back_color_;
+			wp_.color_param_select_.fore_color_.gainY(1.3f);
+			wp_.color_param_select_.back_color_.gainY(1.3f);
 			wp_.plate_param_.resizeble_ = true;
 			wp_.plate_param_.frame_width_  = 2;
 			wp_.plate_param_.round_radius_ = 4;
@@ -328,7 +345,7 @@ namespace gui {
 			}
 		}
 
-		// オブジェクトの優先順位設定
+		// ウィジェットの強制的な優先順位設定
 		wd_.top_widget(base_);
 		wd_.top_widget(path_);
 		wd_.top_widget(info_);
@@ -439,6 +456,7 @@ namespace gui {
 			}
 			file_t& f = it->second;
 			f.position_ = position_;
+			f.select_pos_ = select_pos_;
 		}
 
 		// path 文字列を設定
@@ -453,10 +471,24 @@ namespace gui {
 			}
 		}
 
+		// 選択されたファイルをハイライトする位置の検出
+		if(files_->get_select()) {
+			widget_files_cit cit = scan_select_file_(center_);
+			if(cit != center_.end()) {
+				select_pos_ = cit - center_.begin();
+			}
+		} else if(!center_.empty() && select_pos_ < center_.size()) {
+			widget_file& wf = center_[select_pos_];
+			wf.name->set_action(widget::action::SELECT_HIGHLIGHT);
+			wf.name->set_state(widget::state::IS_SELECT);
+			wf.info->set_action(widget::action::SELECT_HIGHLIGHT);
+			wf.info->set_state(widget::state::IS_SELECT);
+		}
+
 		// 選択の確認と動作
 		bool selected = false;
 		if(files_->get_select_out()) {
-			widget_files_cit cit = scan_select_file_(center_);
+			widget_files_cit cit = scan_selected_file_(center_);
 			if(cit != center_.end()) {
 				const widget_file& wf = *cit;
 				if(wf.name) {
@@ -490,6 +522,25 @@ namespace gui {
 		}
 
 		return selected;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	ファイルを選択
+		@param[in]	path	選択するファイルパス
+		@return 該当するファイルが無い場合「false」
+	*/
+	//-----------------------------------------------------------------//
+	bool widget_filer::select_file(const std::string& path)
+	{
+#if 0
+		file_map_it it = file_map_.find(path);
+		if(it != file_map_.end()) {
+			select_pos_ = it->second.select_pos_;
+		}
+#endif
+		return false;
 	}
 
 

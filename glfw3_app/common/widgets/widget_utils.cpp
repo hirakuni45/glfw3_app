@@ -46,6 +46,42 @@ namespace gui {
 	}
 
 
+	static void mix_round_(img::paint& pa, const widget::color_param& cp, const widget::plate_param& pp)
+	{
+		if(pp.round_style_ == widget::plate_param::round_style::ALL) {
+			return;
+		} else {
+			const vtx::spos& size = pa.get_size();
+			img::paint npa;
+			npa.create(size, pa.test_alpha());
+			npa.fill(img::rgba8(0, 0));
+			npa.set_fore_color(cp.fore_color_);
+			npa.set_back_color(cp.back_color_);
+			if(pp.frame_width_) {
+				npa.set_round(0);
+				npa.fill_rect();
+				npa.set_intensity_rect(cp.inten_rect_);
+				npa.swap_color();
+				short wf = pp.frame_width_;
+				npa.fill_rect(wf, wf, size.x - 2 * wf, size.y - 2 * wf, cp.ir_enable_);
+			} else {
+				npa.set_intensity_rect(cp.inten_rect_);
+				npa.set_round(0);
+				npa.swap_color();
+				npa.fill_rect(cp.ir_enable_);
+			}
+
+			if(pp.round_style_ == widget::plate_param::round_style::TOP) {
+				pa.copy(0, size.y - pp.round_radius_, npa,
+					0, size.y - pp.round_radius_, size.x, pp.round_radius_);
+			} else if(pp.round_style_ == widget::plate_param::round_style::BOTTOM) {
+				pa.copy(0, 0, npa,
+					0, 0, size.x, pp.round_radius_);
+			}
+		}
+	}
+
+
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
 		@brief	ラウンド・フレームの作成
@@ -73,11 +109,13 @@ namespace gui {
 			pa.set_round(rd);
 			pa.swap_color();
 			pa.fill_rect(wf, wf, size.x - 2 * wf, size.y - 2 * wf, cp.ir_enable_);
+			mix_round_(pa, cp, pp);
 		} else {
 			pa.set_intensity_rect(cp.inten_rect_);
 			pa.set_round(pp.round_radius_);
 			pa.swap_color();
 			pa.fill_rect(cp.ir_enable_);
+			mix_round_(pa, cp, pp);
 		}
 	}
 

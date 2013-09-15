@@ -25,8 +25,9 @@ namespace gui {
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
 			plate_param	plate_param_;	///< プレート・パラメーター
-			color_param	color_param_;	///< 頂点カラーで変調する場合のパラ
+			color_param	color_param_;	///< カラーパラメーター
 			text_param	text_param_;	///< テキスト描画のパラメーター
+			color_param	color_param_select_;	///< 選択時のカラーパラメーター
 
 			bool		shift_enable_;	///< シフト表示を有効にする場合
 			bool		shift_every_;	///< 常にシフト動作の場合
@@ -38,6 +39,7 @@ namespace gui {
 				plate_param_(),
 				color_param_(widget_director::default_label_color_),
 				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255)),
+				color_param_select_(widget_director::default_label_color_select_),
 				shift_enable_(true), shift_every_(false),
 				shift_offset_(0.0f), shift_speed_(0.5f),
 				shift_hold_frame_(2 * 60)
@@ -50,6 +52,7 @@ namespace gui {
 		param				param_;
 
 		gl::glmobj::handle	objh_;
+		gl::glmobj::handle	select_objh_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -58,7 +61,7 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_label(widget_director& wd, const widget::param& bp, const param& p) :
-			wd_(wd), widget(bp), param_(p), objh_(0) {
+			wd_(wd), widget(bp), param_(p), objh_(0), select_objh_(0) {
 		}
 
 
@@ -76,6 +79,15 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		type_id type() const { return get_type_id<value_type>(); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ハイブリッド・ウィジェットのサイン
+			@return ハイブリッド・ウィジェットの場合「true」を返す。
+		*/
+		//-----------------------------------------------------------------//
+		bool hybrid() const { return false; }
 
 
 		//-----------------------------------------------------------------//
@@ -129,4 +141,7 @@ namespace gui {
 
 	};
 
+	typedef std::vector<widget_label*>	widget_labels;
+	typedef widget_labels::iterator		widget_labels_it;
+	typedef widget_labels::const_iterator	widget_labels_cit;
 }

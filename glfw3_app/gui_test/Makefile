@@ -611,6 +611,7 @@ gui_test.o: ../common/widgets/widget_image.hpp
 ../common/widgets/widget_director.o: ../common/widgets/widget_radio.hpp
 ../common/widgets/widget_director.o: ../common/widgets/widget_list.hpp
 ../common/widgets/widget_director.o: ../common/widgets/widget_label.hpp
+../common/widgets/widget_director.o: ../common/widgets/widget_null.hpp
 ../common/widgets/widget_utils.o: ../common/gl_fw/IGLcore.hpp
 ../common/widgets/widget_utils.o: ../common/core/device.hpp
 ../common/widgets/widget_utils.o: ../common/utils/vtx.hpp
@@ -831,7 +832,6 @@ gui_test.o: ../common/widgets/widget_image.hpp
 ../common/widgets/widget_list.o: ../common/img_io/img_files.hpp
 ../common/widgets/widget_list.o: ../common/img_io/i_img_io.hpp
 ../common/widgets/widget_list.o: ../common/widgets/widget_label.hpp
-../common/widgets/widget_list.o: ../common/widgets/widget_utils.hpp
 ../common/widgets/widget_list.o: ../common/widgets/widget_null.hpp
 ../common/widgets/widget_list.o: ../common/widgets/widget_director.hpp
 ../common/widgets/widget_check.o: ../common/gl_fw/IGLcore.hpp
