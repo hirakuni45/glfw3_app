@@ -5,8 +5,8 @@
 */
 //=====================================================================//
 #include "gl_fw/IGLcore.hpp"
-#include "widget_label.hpp"
-#include "widget_utils.hpp"
+#include "widgets/widget_label.hpp"
+#include "widgets/widget_utils.hpp"
 #include "img_io/paint.hpp"
 
 namespace gui {

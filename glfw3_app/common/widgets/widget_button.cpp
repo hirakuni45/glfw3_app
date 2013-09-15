@@ -5,9 +5,9 @@
 */
 //=====================================================================//
 #include "gl_fw/IGLcore.hpp"
-#include "widget_button.hpp"
 #include "img_io/paint.hpp"
-#include "widget_utils.hpp"
+#include "widgets/widget_button.hpp"
+#include "widgets/widget_utils.hpp"
 
 namespace gui {
 

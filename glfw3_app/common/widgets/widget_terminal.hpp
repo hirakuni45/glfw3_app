@@ -5,7 +5,8 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include "widget_director.hpp"
+#include "widgets/widget_director.hpp"
+#include "widgets/widget_frame.hpp"
 
 namespace gui {
 
@@ -18,7 +19,7 @@ namespace gui {
 
 		widget_director&	wd_;
 
-		widget*		base_;	///< ベース・フレーム
+		widget_frame*		base_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -29,8 +30,6 @@ namespace gui {
 		widget_terminal(widget_director& wd) : wd_(wd),
 			base_(0)
 		{ }
-
-
 
 
 	};
