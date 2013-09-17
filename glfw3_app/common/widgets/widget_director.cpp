@@ -17,6 +17,7 @@
 #include "widget_check.hpp"
 #include "widget_radio.hpp"
 #include "widget_list.hpp"
+#include "widget_dialog.hpp"
 #include <boost/foreach.hpp>
 
 #include <cstdio>
@@ -33,6 +34,7 @@ namespace gui {
 	widget::color_param widget_director::default_check_color_;
 	widget::color_param widget_director::default_list_color_;
 	widget::color_param widget_director::default_list_color_select_;
+	widget::color_param widget_director::default_dialog_color_;
 
 	void widget_director::message_widget_(widget* w, const std::string& s)
 	{
@@ -84,6 +86,8 @@ namespace gui {
 			}
 		} else if(w->type() == get_type_id<widget_list>()) {
 			type = "list";
+		} else if(w->type() == get_type_id<widget_dialog>()) {
+			type = "dialog";
 		} else {
 			type = "(none)";
 		}
@@ -288,6 +292,10 @@ namespace gui {
 		bc = fc * 0.7f;
 		default_list_color_ = widget::color_param(fc, bc);
 		default_list_color_select_ = widget::color_param(bc, fc * 1.2f);
+
+		fc.set(235, 157,  95);
+		bc = fc * 0.7f;
+		default_dialog_color_ = widget::color_param(fc, bc);
 
 		img::paint::intensity_rect ir;
 		// ボタンの頂点輝度設定
@@ -520,7 +528,7 @@ namespace gui {
 		}
 
 		// リサイズ
-		if(top_resize_) {
+		if(top_resize_ && !top_resize_->get_state(widget::state::SIZE_LOCK)) {
 			if(right.pos) {
 				top_resize_->at_param().resize_org_ = msp;
 				top_resize_->at_param().resize_ref_ = top_resize_->get_rect().size;
@@ -555,6 +563,21 @@ namespace gui {
 			}
 		}
 
+		// ダイアログの優先順位
+		{
+			widgets ws;
+			BOOST_FOREACH(widget* w, widgets_) {
+				if(w->type() == get_type_id<widget_dialog>()) {
+					ws.push_back(w);
+				}
+			}
+			if(ws.size()) {
+				BOOST_FOREACH(widget* w, ws) {
+					top_widget(w);
+				}
+			}
+		}
+
 		// 最後に各部品の update 処理 
 		BOOST_FOREACH(widget* w, widgets_) {
 			if(!w->get_state(widget::state::ENABLE)) continue;
@@ -564,7 +587,7 @@ namespace gui {
 			}
 		}
 
-///		action_monitor();
+//		action_monitor();
 	}
 
 

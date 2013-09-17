@@ -8,6 +8,7 @@
 #include "utils/i_scene.hpp"
 #include "utils/director.hpp"
 #include "widgets/widget.hpp"
+#include "widgets/widget_dialog.hpp"
 
 namespace app {
 
@@ -15,13 +16,18 @@ namespace app {
 
 		utils::director<core>&	director_;
 
+		gui::widget*			dialog_open_;
+		gui::widget_dialog*		dialog_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		gui_test(utils::director<core>& d) : director_(d) { }
+		gui_test(utils::director<core>& d) : director_(d),
+			dialog_open_(0), dialog_(0)
+		{ }
 
 
 		//-----------------------------------------------------------------//

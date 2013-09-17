@@ -119,28 +119,28 @@ namespace gui {
 			std::string		text_;				///< テキスト
 			std::string		font_;				///< フォントセット
 			bool			proportional_;		///< プロポーショナル・フォント
-			bool			shift_;				///< シフト表示の場合「true」
 			img::rgba8		fore_color_;		///< テキスト色
 			img::rgba8		shadow_color_;		///< 影色
-			vtx::placement	placement_;			///< 配置方法
-			vtx::spos		offset_;			///< 描画オフセット（スクロール用）
 			vtx::spos		shadow_offset_;		///< 影の相対位置
+			vtx::placement	placement_;			///< 配置方法
+			bool			shift_;				///< シフト表示の場合（シフト表示用）
+			vtx::spos		offset_;			///< 描画オフセット（シフト表示用）
 			text_param() :
 				proportional_(true),
-				shift_(false),
 				fore_color_(255, 255), shadow_color_(0, 255),
 				placement_(vtx::placement::holizontal::CENTER,
 					vtx::placement::vertical::CENTER),
-				offset_(0), shadow_offset_(2) { }
+				shadow_offset_(2),
+				offset_(0), shift_(false) { }
 			text_param(const std::string& text,
 				const img::rgba8& fc, const img::rgba8& sc,
 				const vtx::placement& pl = vtx::placement(
 				vtx::placement::holizontal::CENTER,
 				vtx::placement::vertical::CENTER)) :
 					text_(text), font_(), proportional_(true),
-					shift_(false),
 					fore_color_(fc), shadow_color_(sc), placement_(pl),
-					offset_(0), shadow_offset_(2) { }
+					shadow_offset_(2),
+					offset_(0), shift_(false) { }
 		};
 
 

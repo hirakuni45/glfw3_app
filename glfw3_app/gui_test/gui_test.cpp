@@ -80,16 +80,23 @@ namespace app {
 			wd.add_widget<widget_frame>(wp, wp_);
 		}
 
-		if(1) { // ボタンのテスト
-			widget::param wp(vtx::srect(30, 200, 100, 40));
-			widget_button::param wp_("Button");
-			wd.add_widget<widget_button>(wp, wp_);
+		if(1) { // ダイアログのテスト
+			widget::param wp(vtx::srect(100, 250, 300, 200));
+			widget_dialog::param wp_;
+			wp_.style_ = widget_dialog::param::style::CANCEL_OK;
+			dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
 		}
 
 		if(1) { // ラベルのテスト
 			widget::param wp(vtx::srect(30, 250, 150, 40));
 			widget_label::param wp_("Label");
 			wd.add_widget<widget_label>(wp, wp_);
+		}
+
+		if(1) { // ボタンのテスト
+			widget::param wp(vtx::srect(30, 200, 100, 40));
+			widget_button::param wp_("Button");
+			dialog_open_ = wd.add_widget<widget_button>(wp, wp_);
 		}
 
 	}
@@ -106,6 +113,15 @@ namespace app {
 		const vtx::spos& size = igl->get_size();
 
 		gui::widget_director& wd = director_.at_core().widget_director_;
+
+		if(dialog_open_) {
+			if(dialog_open_->get_selected()) {
+				if(dialog_) {
+					wd.enable(dialog_, true, true);
+				}
+			}
+		}
+
 		wd.update();
 	}
 
