@@ -27,7 +27,11 @@ namespace app {
 		std::string path;
 		utils::get_file_path(file, path);
 		if(!sound.play_stream(path, utils::get_file_name(file))) {
-			std::string s = "Can't open input file: " + path + '/' + file;
+			std::string s = "Can't open input file:  " + path + '/' + file;
+			if(error_dialog_) {
+				error_dialog_->set_text(s);
+				error_dialog_->enable();
+			}
 		}
 	}
 
@@ -172,6 +176,17 @@ namespace app {
 		}
 		pre.get_real(volume_path_, volume_->at_local_param().slider_param_.position_);
 		wf.load(pre);
+
+		// エラー用ダイアログリソースの生成
+		{
+			const vtx::spos& scs = igl->get_size();
+			short w = 450;
+			short h = 150;
+			widget::param wp(vtx::srect((scs.x - w) / 2, (scs.y - h) / 2, w, h));
+			widget_dialog::param wp_;
+			error_dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
+			error_dialog_->enable(false);
+		}
 	}
 
 

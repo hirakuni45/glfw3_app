@@ -249,11 +249,11 @@ namespace gui {
 			fonts.set_fore_color(tp.shadow_color_);
 			vtx::spos p = pos + tp.shadow_offset_;
 			fonts.set_fore_color(tp.shadow_color_);
-			fonts.draw(p.x, p.y, tp.text_);
+			fonts.draw(p, tp.text_, clip_.size.x);
 		}
 
 		fonts.set_fore_color(tp.fore_color_);
-		fonts.draw(pos.x, pos.y, tp.text_);
+		fonts.draw(pos, tp.text_, clip_.size.x);
 
 		if(!tp.font_.empty()) {
 			fonts.set_font_type(cft);

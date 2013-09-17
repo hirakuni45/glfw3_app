@@ -179,7 +179,8 @@ namespace gl {
 						fw = font_size_.x * 2;
 					}
 				}
-				fonts.draw(xx + kn, (limit_pos_.y - y - 1) * font_size_.y, c.cha);
+				vtx::spos pos(xx + kn, (limit_pos_.y - y - 1) * font_size_.y);
+				fonts.draw(pos, c.cha);
 				xx += fw;
 			}
 		}

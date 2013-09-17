@@ -8,6 +8,7 @@
 #include "widgets/widget_director.hpp"
 #include "widgets/widget_frame.hpp"
 #include "widgets/widget_button.hpp"
+#include "widgets/widget_text.hpp"
 
 namespace gui {
 
@@ -36,9 +37,9 @@ namespace gui {
 
 			plate_param		plate_param_;
 			color_param		color_param_;
-			text_param		text_param_;
 
 			style::type		style_;		///< ダイアログ・スタイル
+			vtx::srect		text_area_;	///< テキスト表示エリア
 
 			bool			return_ok_;
 			bool			return_cancel_;
@@ -46,6 +47,7 @@ namespace gui {
 			param() : plate_param_(),
 				color_param_(widget_director::default_dialog_color_),
 				style_(style::OK),
+				text_area_(vtx::spos(8), vtx::spos(0)),
 				return_ok_(false), return_cancel_(false)
 			{ }
 		};
@@ -56,7 +58,7 @@ namespace gui {
 		param				param_;
 
 		widget_frame*		base_;
-
+		widget_text*		text_;
 		widget_button*		ok_;
 		widget_button*		cancel_;
 
@@ -68,7 +70,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_dialog(widget_director& wd, const widget::param& wp, const param& p) :
 			wd_(wd), widget(wp), param_(p),
-			base_(0), ok_(0), cancel_(0)
+			base_(0), text_(0), ok_(0), cancel_(0)
 		{ }
 
 
@@ -113,6 +115,24 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		param& at_local_param() { return param_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	有効・無効の設定
+			@param[in]	f	無効にする場合「false」
+		*/
+		//-----------------------------------------------------------------//
+		void enable(bool f = true) { wd_.enable(this, f, true); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	文書の設定
+			@param[in]	text	文書
+		*/
+		//-----------------------------------------------------------------//
+		void set_text(const std::string& text);
 
 
 		//-----------------------------------------------------------------//

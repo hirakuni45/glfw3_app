@@ -33,12 +33,12 @@ namespace app {
 		widget_director& wd = director_.at_core().widget_director_;
 
 		if(1) {	// ラジオボタンのテスト
-			widget::param wpr(vtx::srect(20, 20, 100, 200), 0);
+			widget::param wpr(vtx::srect(20, 20, 130, 200), 0);
 			widget_null::param wpr_;
 			widget* root = wd.add_widget<widget_null>(wpr, wpr_);
 			root->set_state(widget::state::POSITION_LOCK);
 
-			widget::param wp(vtx::srect(0, 0, 100, 30), root);
+			widget::param wp(vtx::srect(0, 0, 130, 30), root);
 			widget_radio::param wp_("Enable");
 			wd.add_widget<widget_radio>(wp, wp_);
 			wp.rect_.org.y += 40;
@@ -94,6 +94,7 @@ namespace app {
 			widget_dialog::param wp_;
 			wp_.style_ = widget_dialog::param::style::CANCEL_OK;
 			dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
+			dialog_->set_text("ああああ\nうううう\nいいいい\n漢字\n日本");
 		}
 
 		if(1) { // ラベルのテスト
@@ -104,7 +105,7 @@ namespace app {
 
 		if(1) { // ボタンのテスト
 			widget::param wp(vtx::srect(30, 200, 100, 40));
-			widget_button::param wp_("Button");
+			widget_button::param wp_("Daialog");
 			dialog_open_ = wd.add_widget<widget_button>(wp, wp_);
 		}
 
@@ -126,7 +127,7 @@ namespace app {
 		if(dialog_open_) {
 			if(dialog_open_->get_selected()) {
 				if(dialog_) {
-					wd.enable(dialog_, true, true);
+					dialog_->enable();
 				}
 			}
 		}

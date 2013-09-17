@@ -10,6 +10,20 @@ namespace gui {
 
 	//-----------------------------------------------------------------//
 	/*!
+		@brief	文書の設定
+		@param[in]	text	文書
+	*/
+	//-----------------------------------------------------------------//
+	void widget_dialog::set_text(const std::string& text)
+	{
+		if(text_) {
+			text_->at_local_param().text_param_.text_ = text;
+		}
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
 		@brief	初期化
 	*/
 	//-----------------------------------------------------------------//
@@ -52,6 +66,15 @@ namespace gui {
 				cancel_ = wd_.add_widget<widget_button>(wp, wp_);
 			}
 		}
+
+		{
+			param_.text_area_.size.x = size.x - param_.text_area_.org.x * 2;
+			param_.text_area_.size.y = size.y - param_.text_area_.org.y * 2
+				- space_height - btn_height;
+			widget::param wp(param_.text_area_, base_);
+			widget_text::param wp_;
+			text_ = wd_.add_widget<widget_text>(wp, wp_);
+		}
 	}
 
 
@@ -72,7 +95,7 @@ namespace gui {
 			f = true;
 		}
 
-		if(f) wd_.enable(this, false, true);
+		if(f) enable(false);
 	}
 
 
@@ -95,6 +118,7 @@ namespace gui {
 	{
 		wd_.del_widget(cancel_);
 		wd_.del_widget(ok_);
+		wd_.del_widget(text_);
 		wd_.del_widget(base_);
 	}
 }

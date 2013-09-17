@@ -454,37 +454,36 @@ namespace gl {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	フォントを描画する
-			@param[in]	x	描画位置 X
-			@param[in]	y	描画位置 Y
+			@param[in]	pos	描画位置
 			@param[in]	code	描画するコード
 			@return	フォントの幅を返す。
 		 */
 		//-----------------------------------------------------------------//
-		int draw(int x, int y, wchar_t code);
+		int draw(const vtx::spos& pos, wchar_t code);
 
 
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	フォントを描画する
-			@param[in]	x	描画位置 X
-			@param[in]	y	描画位置 Y
+			@param[in]	pos	描画位置
 			@param[in]	text	描画するワイド文字列
+			@param[in]	limit	改行のリミット幅
 			@return	描画幅を返す（複数行の場合、最大値）
 		 */
 		//-----------------------------------------------------------------//
-		int draw(int x, int y, const utils::wstring& text);
+		int draw(const vtx::spos& pos, const utils::wstring& text, short limit = 0);
 
 
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	フォントを描画する
-			@param[in]	x	描画位置 X
-			@param[in]	y	描画位置 Y
+			@param[in]	pos	描画位置
 			@param[in]	text	描画文字列コンテナ
+			@param[in]	limit	改行のリミット幅
 			@return	描画幅を返す（複数行の場合、最大値）
 		 */
 		//-----------------------------------------------------------------//
-		int draw(int x, int y, const std::string& text);
+		int draw(const vtx::spos& pos, const std::string& text, short limit = 0);
 
 
 		//-----------------------------------------------------------------//
@@ -622,13 +621,10 @@ namespace gl {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	フォントのバックの描画
-			@param[in]	x	描画位置 X
-			@param[in]	y	描画位置 Y
-			@param[in]	w	描画幅
-			@param[in]	h	描画高さ
+			@param[in]	rect	描画位置と大きさ
 		 */
 		//-----------------------------------------------------------------//
-		void draw_back(int x, int y, int w, int h);
+		void draw_back(const vtx::srect& rect);
 
 
 		//-----------------------------------------------------------------//

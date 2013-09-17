@@ -11,6 +11,7 @@
 #include "widgets/widget_label.hpp"
 #include "widgets/widget_slider.hpp"
 #include "widgets/widget_check.hpp"
+#include "widgets/widget_dialog.hpp"
 #include "gl_fw/glmobj.hpp"
 
 namespace app {
@@ -40,6 +41,8 @@ namespace app {
 		gui::widget_label*	artist_pad_;
 		gui::widget_label*	other_pad_;
 
+		gui::widget_dialog*	error_dialog_;
+
 		time_t			total_t_;
 		time_t			remain_t_;
 		uint32_t		frame_count_;
@@ -66,6 +69,7 @@ namespace app {
 		  volume_(0), vol_min_img_(0), vol_max_img_(0),
 		  total_time_(0), remain_time_(0), seek_time_(0), resume_play_(0),
 		  title_pad_(0), album_pad_(0), artist_pad_(0), other_pad_(0),
+		  error_dialog_(0),
 		  total_t_(0), remain_t_(0), frame_count_(0), frame_limit_(60),
 		  tag_serial_(0), jacket_(0), drop_file_id_(0)
 		{ }

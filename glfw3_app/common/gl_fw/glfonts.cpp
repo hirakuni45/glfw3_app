@@ -484,13 +484,12 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	フォントを１文字描画する
-		@param[in]	x	描画位置 X
-		@param[in]	y	描画位置 Y
+		@param[in]	pos	描画位置
 		@param[in]	code	描画するコード
 		@return	描画に成功したらフォントの幅を返す。
 	 */
 	//-----------------------------------------------------------------//
-	int glfonts::draw(int x, int y, wchar_t code)
+	int glfonts::draw(const vtx::spos& pos, wchar_t code)
 	{
 		fcode_map_cit cit = find_font_code(code);
 		if(cit == face_->fcode_map_.end()) {
@@ -499,6 +498,8 @@ namespace gl {
 		}
 		const tex_map& tmap = cit->second;
 
+		short x = pos.x;
+		short y = pos.y;
 		int fw = tmap.w;
 		// スペース以外の半角文字で、等幅表示の場合、中心に描画
 		if(!face_->info_.proportional && code > 0x20 && code <= 0x7f) {
@@ -657,16 +658,18 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	フォントを描画する
-		@param[in]	x	描画位置 X
-		@param[in]	y	描画位置 Y
+		@param[in]	pos	描画位置
 		@param[in]	text	描画する文字列
+		@param[in]	limit	改行のリミット幅
 		@return	描画幅を返す（複数行の場合、最大値）
 	 */
 	//-----------------------------------------------------------------//
-	int glfonts::draw(int x, int y, const utils::wstring& text)
+	int glfonts::draw(const vtx::spos& pos, const utils::wstring& text, short limit)
 	{
-		int xt = x;
-		int xx = x;
+		short x = pos.x;
+		short y = pos.y;
+		short xt = x;
+		short xx = x;
 		const wchar_t* p = text.c_str();
 		while(wchar_t code = *p++) {
 			if(code < 32) {
@@ -675,7 +678,7 @@ namespace gl {
 					y += face_->info_.size;
 				}
 			} else {
-				x += draw(x, y, code);
+				x += draw(vtx::spos(x, y), code);
 				if(x > xx) xx = x;
 			}
 		}
@@ -686,16 +689,17 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	フォントを描画する
-		@param[in]	x	描画位置 X
-		@param[in]	y	描画位置 Y
+		@param[in]	pos		描画位置
 		@param[in]	text	描画する文字列 (UTF-8)
+		@param[in]	limit	改行のリミット幅
 		@return	描画幅を返す（複数行の場合、最大値）
 	 */
 	//-----------------------------------------------------------------//
-	int glfonts::draw(int x, int y, const std::string& text)
+	int glfonts::draw(const vtx::spos& pos, const std::string& text, short limit)
 	{
-		int xt = x;
-		int xx = x;
+		short x = pos.x;
+		short y = pos.y;
+		short xx = x;
 		unsigned char c;
 		int cnt = 0;
 		wchar_t	code = 0;
@@ -714,16 +718,23 @@ namespace gl {
 			if(cnt == 0 && code != 0) {
 				if(code < 32) {
 					if(code == '\n') {
+						x = pos.x;
 						y += face_->info_.size;
-						x = xt;
 					}
 				} else {
-					x += draw(x, y, code);
+					if(limit) {
+						short w = get_width(code);
+						if((x + w) >= limit) {
+							x = pos.x;
+							y += face_->info_.size;
+						}	
+					}
+					x += draw(vtx::spos(x, y), code);
 					if(x > xx) xx = x;
 				}
 			}
 		}
-		return xx - xt;
+		return xx - pos.x;
 	}
 
 
@@ -800,22 +811,19 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	フォントのバックの描画
-		@param[in]	x	描画位置 X
-		@param[in]	y	描画位置 Y
-		@param[in]	w	描画幅
-		@param[in]	h	描画高さ
+		@param[in]	rect	描画位置と大きさ
 	 */
 	//-----------------------------------------------------------------//
-	void glfonts::draw_back(int x, int y, int w, int h)
+	void glfonts::draw_back(const vtx::srect& rect)
 	{
 		::glColor4ub(back_color_.r, back_color_.g, back_color_.b, back_color_.a);
 
 		::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
-		vertex_[0].x = x;     vertex_[0].y = y;
-		vertex_[1].x = x;     vertex_[1].y = y + h;
-		vertex_[3].x = x + w; vertex_[3].y = y + h;
-		vertex_[2].x = x + w; vertex_[2].y = y;
+		vertex_[0].x = rect.org.x;     vertex_[0].y = rect.org.y;
+		vertex_[1].x = rect.org.x;     vertex_[1].y = rect.end_y();
+		vertex_[3].x = rect.end_x();   vertex_[3].y = rect.end_y();
+		vertex_[2].x = rect.end_x();   vertex_[2].y = rect.org.y;
 		::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	}
 

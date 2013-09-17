@@ -220,7 +220,8 @@ main.o: ../common/core/device.hpp ../common/utils/director.hpp
 main.o: ../common/utils/i_scene.hpp gui_test.hpp ../common/utils/i_scene.hpp
 main.o: ../common/widgets/widget_dialog.hpp
 main.o: ../common/widgets/widget_frame.hpp
-main.o: ../common/widgets/widget_button.hpp ../common/gl_fw/glutils.hpp
+main.o: ../common/widgets/widget_button.hpp ../common/widgets/widget_text.hpp
+main.o: ../common/gl_fw/glutils.hpp
 gui_test.o: gui_test.hpp main.hpp ../common/snd_io/sound.hpp
 gui_test.o: ../common/snd_io/audio_io.hpp ../common/utils/file_io.hpp
 gui_test.o: ../common/utils/string_utils.hpp ../common/snd_io/i_audio.hpp
@@ -247,7 +248,8 @@ gui_test.o: ../common/widgets/widget_button.hpp ../common/utils/i_scene.hpp
 gui_test.o: ../common/utils/director.hpp ../common/utils/i_scene.hpp
 gui_test.o: ../common/widgets/widget_dialog.hpp
 gui_test.o: ../common/widgets/widget_frame.hpp
-gui_test.o: ../common/widgets/widget_button.hpp ../common/core/glcore.hpp
+gui_test.o: ../common/widgets/widget_button.hpp
+gui_test.o: ../common/widgets/widget_text.hpp ../common/core/glcore.hpp
 gui_test.o: ../common/gl_fw/IGLcore.hpp ../common/core/device.hpp
 gui_test.o: ../common/gl_fw/glfonts.hpp ../common/gl_fw/Ikfimg.hpp
 gui_test.o: ../common/core/device.hpp ../common/widgets/widget_utils.hpp
@@ -258,7 +260,6 @@ gui_test.o: ../common/widgets/widget_check.hpp
 gui_test.o: ../common/widgets/widget_radio.hpp
 gui_test.o: ../common/widgets/widget_list.hpp
 gui_test.o: ../common/widgets/widget_image.hpp
-gui_test.o: ../common/widgets/widget_text.hpp
 ../common/core/glcore.o: ../common/core/glcore.hpp
 ../common/core/glcore.o: ../common/gl_fw/IGLcore.hpp
 ../common/core/glcore.o: ../common/core/device.hpp ../common/utils/vtx.hpp
@@ -621,6 +622,7 @@ gui_test.o: ../common/widgets/widget_text.hpp
 ../common/widgets/widget_director.o: ../common/widgets/widget_dialog.hpp
 ../common/widgets/widget_director.o: ../common/widgets/widget_frame.hpp
 ../common/widgets/widget_director.o: ../common/widgets/widget_button.hpp
+../common/widgets/widget_director.o: ../common/widgets/widget_text.hpp
 ../common/widgets/widget_utils.o: ../common/gl_fw/IGLcore.hpp
 ../common/widgets/widget_utils.o: ../common/core/device.hpp
 ../common/widgets/widget_utils.o: ../common/utils/vtx.hpp
@@ -953,6 +955,7 @@ gui_test.o: ../common/widgets/widget_text.hpp
 ../common/widgets/widget_dialog.o: ../common/widgets/widget_frame.hpp
 ../common/widgets/widget_dialog.o: ../common/widgets/widget_director.hpp
 ../common/widgets/widget_dialog.o: ../common/widgets/widget_button.hpp
+../common/widgets/widget_dialog.o: ../common/widgets/widget_text.hpp
 ../common/widgets/widget_filer.o: ../common/widgets/widget_filer.hpp
 ../common/widgets/widget_filer.o: ../common/utils/files.hpp
 ../common/widgets/widget_filer.o: ../common/utils/drive_info.hpp
