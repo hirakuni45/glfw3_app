@@ -28,7 +28,7 @@ namespace gui {
 			param(const std::string& text = "") : text_param_(text,
 				img::rgba8(255, 255), img::rgba8(0, 255),
 				vtx::placement(vtx::placement::holizontal::LEFT,
-					vtx::placement::vertical::BOTTOM))
+					vtx::placement::vertical::TOP))
 			{ }
 		};
 

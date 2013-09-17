@@ -241,8 +241,8 @@ namespace gui {
 		if(tp.shift_) {
 			pl.hpt = vtx::placement::holizontal::LEFT;
 		}
-
-		vtx::create_placement(rect_, fonts.get_size(tp.text_), pl, pos);
+		const vtx::spos& fsize = fonts.get_size(tp.text_);
+		vtx::create_placement(rect_, fsize, pl, pos);
 
 		pos += tp.offset_;
 		if(tp.shadow_offset_.x != 0 || tp.shadow_offset_.y != 0) {

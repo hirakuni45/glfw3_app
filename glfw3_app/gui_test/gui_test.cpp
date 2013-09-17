@@ -58,10 +58,10 @@ namespace app {
 		}
 
 		if(1) {	// イメージのテスト
-			widget::param wp(vtx::srect(400, 20, 500, 500), 0);
+			widget::param wp(vtx::srect(400, 20, 500, 250), 0);
 			img::paint pa;
 			pa.set_fore_color(img::rgba8(0, 255, 0));
-			pa.create(vtx::spos(500), true);
+			pa.create(vtx::spos(500, 250), true);
 			pa.fill(img::rgba8(255, 100, 100));
 			pa.alpha_blend();
 			pa.fill_circle(vtx::spos(250), 220);
@@ -76,9 +76,10 @@ namespace app {
 		}
 
 		if(1) {	// テキストのテスト
-			widget::param wp(vtx::srect(400, 20, 200, 100), 0);
+			widget::param wp(vtx::srect(400, 20, 200, 250), 0);
 			widget_text::param wp_;
 			wp_.text_param_.text_ = "AsDfGhJKl\nqwertyuiop\nzxcvbnm";
+			wp_.text_param_.placement_.vpt = vtx::placement::vertical::CENTER;
 			wd.add_widget<widget_text>(wp, wp_);
 		}
 
