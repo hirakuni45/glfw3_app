@@ -23,8 +23,6 @@ namespace gui {
 		at_param().state_.set(widget::state::POSITION_LOCK);
 		at_param().state_.set(widget::state::SIZE_LOCK);
 
-		param_.text_param_.placement_.hpt = vtx::holizontal_placement::LEFT;
-
 		if(param_.type_ == style::CHECKED) {
 			dis_h_ = wd_.get_share_image().un_check_;
 			ena_h_ = wd_.get_share_image().to_check_;

@@ -11,44 +11,44 @@ namespace vtx {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
-		@brief	水平配置型
-	*/
-	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	struct holizontal_placement {
-		enum type {
-			NONE,		///< 無効果
-			LEFT,		///< 左
-			CENTER,		///< 中央
-			RIGHT,		///< 右
-		};
-	};
-
-
-	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	/*!
-		@brief	垂直配置型
-	*/
-	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	struct vertical_placement {
-		enum type {
-			NONE,		///< 無効果
-			TOP,		///< 上
-			CENTER,		///< 中央
-			BOTTOM,		///< 下
-		};
-	};
-
-
-	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	/*!
 		@brief	配置型
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct placement {
-		vtx::holizontal_placement::type	hpt;
-		vtx::vertical_placement::type	vpt;
-		placement(holizontal_placement::type hpt_ = holizontal_placement::NONE,
-				  vertical_placement::type vpt_ = vertical_placement::NONE) : hpt(hpt_), vpt(vpt_) { }
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	水平配置型
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		struct holizontal {
+			enum type {
+				NONE,		///< 無効果
+				LEFT,		///< 左
+				CENTER,		///< 中央
+				RIGHT,		///< 右
+			};
+		};
+
+
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	垂直配置型
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		struct vertical {
+			enum type {
+				NONE,		///< 無効果
+				TOP,		///< 上
+				CENTER,		///< 中央
+				BOTTOM,		///< 下
+			};
+		};
+
+
+		holizontal::type	hpt;
+		vertical::type		vpt;
+		placement(holizontal::type hpt_ = holizontal::NONE,
+				  vertical::type vpt_ = vertical::NONE) : hpt(hpt_), vpt(vpt_) { }
 	};
 
 
@@ -65,19 +65,19 @@ namespace vtx {
 	void create_placement(const rectangle<T>& area, const vertex2<T>& size,
 		const placement& pt, vertex2<T>& dst)
 	{
-		if(pt.hpt == holizontal_placement::LEFT) {
+		if(pt.hpt == placement::holizontal::LEFT) {
 			dst.x = area.org.x;
-		} else if(pt.hpt == holizontal_placement::CENTER) {
+		} else if(pt.hpt == placement::holizontal::CENTER) {
 			dst.x = area.org.x + (area.size.x - size.x) / 2;
-		} else if(pt.hpt == holizontal_placement::RIGHT) {
+		} else if(pt.hpt == placement::holizontal::RIGHT) {
 			dst.x = area.end_x() - size.x;
 		}
 
-		if(pt.vpt == vertical_placement::TOP) {
+		if(pt.vpt == placement::vertical::TOP) {
 			dst.y = area.org.y;
-		} else if(pt.vpt == vertical_placement::CENTER) {
+		} else if(pt.vpt == placement::vertical::CENTER) {
 			dst.y = area.org.y + (area.size.y - size.y) / 2;
-		} else if(pt.vpt == vertical_placement::BOTTOM) {
+		} else if(pt.vpt == placement::vertical::BOTTOM) {
 			dst.y = area.end_y() - size.y;
 		}
 	}

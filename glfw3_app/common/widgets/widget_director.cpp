@@ -529,7 +529,14 @@ namespace gui {
 				vtx::spos d = msp - top_resize_->at_param().resize_org_;
 				if(!top_resize_->get_state(widget::state::RESIZE_H_ENABLE)) d.x = 0;
 				if(!top_resize_->get_state(widget::state::RESIZE_V_ENABLE)) d.y = 0;
-				top_resize_->at_rect().size = top_resize_->get_param().resize_ref_ + d;
+				vtx::spos newsize = top_resize_->get_param().resize_ref_ + d;
+				vtx::spos min = top_resize_->get_param().resize_min_;
+				const vtx::spos& size = top_resize_->get_rect().size;
+				if(size.x < min.x) min.x = size.x;
+				if(size.y < min.y) min.y = size.y;
+   				if(newsize.x < min.x) newsize.x = min.x;
+				if(newsize.y < min.y) newsize.y = min.y;
+				top_resize_->at_rect().size = newsize;
 			}
 			if(right.neg) {
 				top_resize_ = 0;

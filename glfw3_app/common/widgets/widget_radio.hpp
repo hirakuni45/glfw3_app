@@ -29,7 +29,9 @@ namespace gui {
 			bool	disable_gray_text_;	///< 不許可時、文字をグレースケールする場合
 			bool	check_;				///< 許可、不許可の状態
 			param(const std::string& text = "") :
-				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255)),
+				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255),
+					vtx::placement(vtx::placement::holizontal::LEFT,
+					vtx::placement::vertical::CENTER)),
 				gray_text_gain_(0.65f), disable_gray_text_(true),
 				check_(false) { }
 		};

@@ -17,6 +17,10 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_list::initialize()
 	{
+		// 標準的に固定
+		at_param().state_.set(widget::state::POSITION_LOCK);
+		at_param().state_.set(widget::state::SIZE_LOCK);
+
 		widget::param wp = get_param();
 		widget_label::param wp_;
 		wp_.plate_param_ = param_.plate_param_;
@@ -98,6 +102,24 @@ namespace gui {
 		using namespace gl;
 
 		IGLcore* igl = get_glcore();
+		const vtx::spos& sc = igl->get_size();
+
+		if(!param_.open_ && param_.drop_box_) {
+			// チップの描画
+			gl::glmobj::handle h;
+			if((root_->get_rect().org.y + frame_->get_rect().size.y) > sc.y) {
+				h = wd_.get_share_image().up_box_;
+			} else {
+				h = wd_.get_share_image().down_box_;
+			}
+
+			const vtx::spos& bs = wd_.at_mobj().get_size(h);
+			const vtx::spos& size = root_->get_rect().size;
+			short wf = param_.plate_param_.frame_width_;
+			short space = 4;
+			vtx::spos pos(size.x - bs.x - wf - space, (size.y - bs.y) / 2);
+			wd_.at_mobj().draw(h, gl::glmobj::normal, pos.x, pos.y);
+		}
 	}
 
 

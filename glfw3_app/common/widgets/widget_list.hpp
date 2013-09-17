@@ -31,9 +31,11 @@ namespace gui {
 			text_param	text_param_;	///< テキスト描画のパラメーター
 			color_param	color_param_select_;	///< 選択時カラー・パラメーター
 
-			utils::strings	text_list_;
+			utils::strings	text_list_;	///< テキスト・リスト
 
-			uint32_t	select_pos_;
+			uint32_t	select_pos_;	///< テキスト・リストの選択位置
+
+			bool		drop_box_;		///< ドロップ・ボックスの表示
 
 			bool		open_before_;
 			bool		open_;
@@ -42,10 +44,11 @@ namespace gui {
 				plate_param_(),
 				color_param_(widget_director::default_list_color_),
 				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255),
-					vtx::placement(vtx::holizontal_placement::LEFT,
-					vtx::vertical_placement::CENTER)),
+					vtx::placement(vtx::placement::holizontal::LEFT,
+						vtx::placement::vertical::CENTER)),
 				color_param_select_(widget_director::default_list_color_select_),
-				select_pos_(0), open_before_(false), open_(false)
+				select_pos_(0), drop_box_(true),
+				open_before_(false), open_(false)
 			{ }
 		};
 

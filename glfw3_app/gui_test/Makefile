@@ -154,23 +154,23 @@ dllname:
 
 tarball:
 	chmod 644 \
-			../core/*.[hc]pp \
-			../gl_fw/*.[hc]pp \
-			../utils/*.[hc]pp \
-			../img_io/*.[hc]pp \
-			../snd_io/*.[hc]pp \
-			../widgets/*.[hc]pp \
-			../minizip/*.[hc] \
+			../common/core/*.[hc]pp \
+			../common/gl_fw/*.[hc]pp \
+			../common/utils/*.[hc]pp \
+			../common/img_io/*.[hc]pp \
+			../common/snd_io/*.[hc]pp \
+			../common/widgets/*.[hc]pp \
+			../common/minizip/*.[hc] \
 			../player/*.[hc]pp Makefile
 	rm -f $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz
 	tar cfvz $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz \
-			../core/*.[hc]pp \
-			../gl_fw/*.[hc]pp \
-			../utils/*.[hc]pp \
-			../img_io/*.[hc]pp \
-			../snd_io/*.[hc]pp \
-			../widgets/*.[hc]pp \
-			../minizip/*.[hc] \
+			../common/core/*.[hc]pp \
+			../common/gl_fw/*.[hc]pp \
+			../common/utils/*.[hc]pp \
+			../common/img_io/*.[hc]pp \
+			../common/snd_io/*.[hc]pp \
+			../common/widgets/*.[hc]pp \
+			../common/minizip/*.[hc] \
 			../player/*.[hc]pp \
 			../player/res/*.png \
 			../player/res/*.ttf

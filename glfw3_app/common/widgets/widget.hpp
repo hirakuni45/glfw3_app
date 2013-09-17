@@ -119,6 +119,7 @@ namespace gui {
 			std::string		text_;				///< テキスト
 			std::string		font_;				///< フォントセット
 			bool			proportional_;		///< プロポーショナル・フォント
+			bool			shift_;				///< シフト表示の場合「true」
 			img::rgba8		fore_color_;		///< テキスト色
 			img::rgba8		shadow_color_;		///< 影色
 			vtx::placement	placement_;			///< 配置方法
@@ -126,16 +127,18 @@ namespace gui {
 			vtx::spos		shadow_offset_;		///< 影の相対位置
 			text_param() :
 				proportional_(true),
+				shift_(false),
 				fore_color_(255, 255), shadow_color_(0, 255),
-				placement_(vtx::holizontal_placement::CENTER,
-					vtx::vertical_placement::CENTER),
+				placement_(vtx::placement::holizontal::CENTER,
+					vtx::placement::vertical::CENTER),
 				offset_(0), shadow_offset_(2) { }
 			text_param(const std::string& text,
 				const img::rgba8& fc, const img::rgba8& sc,
 				const vtx::placement& pl = vtx::placement(
-				vtx::holizontal_placement::CENTER,
-				vtx::vertical_placement::CENTER)) :
+				vtx::placement::holizontal::CENTER,
+				vtx::placement::vertical::CENTER)) :
 					text_(text), font_(), proportional_(true),
+					shift_(false),
 					fore_color_(fc), shadow_color_(sc), placement_(pl),
 					offset_(0), shadow_offset_(2) { }
 		};
@@ -240,6 +243,7 @@ namespace gui {
 			vtx::spos			msize_;			///< 最小サイズ
 			vtx::spos			rpos_;			///< レンダリング開始
 			vtx::spos			move_org_;		///< 移動基準位置
+			vtx::spos			resize_min_;	///< リサイズ最小サイズ
 			vtx::spos			resize_org_;	///< リサイズ基準位置
 			vtx::spos			resize_ref_;	///< リサイズ基準サイズ
 			vtx::spos			speed_;			///< 速度
@@ -253,7 +257,7 @@ namespace gui {
 			param(const vtx::srect& r = vtx::srect(0), widget* parents = 0) :
 				rect_(r), clip_(r), msize_(r.size), rpos_(r.org),
 				move_org_(0),
-				resize_org_(0), resize_ref_(0),
+				resize_min_(16 * 3), resize_org_(0), resize_ref_(0),
 				speed_(0), in_point_(0),
 				hold_frame_(0), holded_frame_(0),
 				parents_(parents),

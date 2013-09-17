@@ -57,7 +57,7 @@ namespace gui {
 				widget::param wp(r, wf.base);
 				wp.action_.set(widget::action::SELECT_HIGHLIGHT);
 				widget_label::param wp_(fn);
-				wp_.text_param_.placement_.hpt = vtx::holizontal_placement::LEFT;
+				wp_.text_param_.placement_.hpt = vtx::placement::holizontal::LEFT;
 				wp_.plate_param_.frame_width_ = 0;
 				wp_.plate_param_.round_radius_ = 0;
 				wp_.plate_param_.resizeble_ = true;
@@ -73,7 +73,7 @@ namespace gui {
 				widget::param wp(r, wf.base);
 				wp.action_.set(widget::action::SELECT_HIGHLIGHT);
 				widget_label::param wp_;
-				wp_.text_param_.placement_.hpt = vtx::holizontal_placement::LEFT;
+				wp_.text_param_.placement_.hpt = vtx::placement::holizontal::LEFT;
 				wp_.plate_param_.frame_width_ = 0;
 				wp_.plate_param_.round_radius_ = 0;
 				wp_.plate_param_.resizeble_ = true;
@@ -262,7 +262,7 @@ namespace gui {
 			widget::param wp(r, base_);
 			wp.action_.set(widget::action::SELECT_HIGHLIGHT);
 			widget_label::param wp_(path);
-			wp_.text_param_.placement_.hpt = vtx::holizontal_placement::LEFT;
+			wp_.text_param_.placement_.hpt = vtx::placement::holizontal::LEFT;
 			wp_.color_param_.fore_color_.set(236, 181, 63);
 			wp_.color_param_.back_color_.set(131, 104, 45);
 			wp_.color_param_select_.fore_color_ = wp_.color_param_.fore_color_;

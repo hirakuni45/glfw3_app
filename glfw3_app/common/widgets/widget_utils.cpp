@@ -108,6 +108,7 @@ namespace gui {
 			else rd = 0;
 			pa.set_round(rd);
 			pa.swap_color();
+			pa.alpha_blend();
 			pa.fill_rect(wf, wf, size.x - 2 * wf, size.y - 2 * wf, cp.ir_enable_);
 			mix_round_(pa, cp, pp);
 		} else {
@@ -231,7 +232,11 @@ namespace gui {
 		fonts.set_proportional(tp.proportional_);
 		vtx::spos text_size(fonts.get_width(tp.text_), fonts.get_font_size());
 		vtx::spos pos;
-		vtx::create_placement(rect_, text_size, tp.placement_, pos);
+		vtx::placement pl = tp.placement_;
+		if(tp.shift_) {
+			pl.hpt = vtx::placement::holizontal::LEFT;
+		}
+		vtx::create_placement(rect_, text_size, pl, pos);
 
 		pos += tp.offset_;
 		if(tp.shadow_offset_.x != 0 || tp.shadow_offset_.y != 0) {

@@ -65,6 +65,8 @@ namespace app {
 		wp_.color_param_select_ = widget_director::default_slider_color_;
 		wp_.text_param_.font_ = font;
 		wp_.text_param_.proportional_ = proportional;
+		wp_.text_param_.placement_.hpt = vtx::placement::holizontal::CENTER;
+		wp_.text_param_.placement_.vpt = vtx::placement::vertical::CENTER;
 		wp_.plate_param_.resizeble_ = true;
 		wp_.shift_every_ = true;
 		return wd.add_widget<widget_label>(wp, wp_);

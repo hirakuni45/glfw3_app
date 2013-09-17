@@ -31,7 +31,7 @@ namespace app {
 		using namespace gui;
 		widget_director& wd = director_.at_core().widget_director_;
 
-		if(1) {
+		if(1) {	// ラジオボタンのテスト
 			widget::param wpr(vtx::srect(20, 20, 100, 200), 0);
 			widget_null::param wpr_;
 			widget* root = wd.add_widget<widget_null>(wpr, wpr_);
@@ -47,7 +47,7 @@ namespace app {
 			wd.add_widget<widget_radio>(wp, wp_);
 		}
 
-		if(1) {
+		if(1) { // リストのテスト
 			widget::param wp(vtx::srect(30, 300, 150, 40), 0);
 			widget_list::param wp_("List Box");
 			wp_.text_list_.push_back("abc");
@@ -56,7 +56,7 @@ namespace app {
 			wd.add_widget<widget_list>(wp, wp_);
 		}
 
-		if(1) {
+		if(0) {	// イメージのテスト
 			widget::param wp(vtx::srect(200, 20, 500, 500), 0);
 			img::paint pa;
 			pa.set_fore_color(img::rgba8(0, 255, 0));
@@ -72,6 +72,24 @@ namespace app {
 //			pa.fill_polygon(ss);
 			widget_image::param wp_(&pa);
 			wd.add_widget<widget_image>(wp, wp_);
+		}
+
+		if(1) { // フレームのテスト
+			widget::param wp(vtx::srect(200, 20, 100, 80));
+			widget_frame::param wp_;
+			wd.add_widget<widget_frame>(wp, wp_);
+		}
+
+		if(1) { // ボタンのテスト
+			widget::param wp(vtx::srect(30, 200, 100, 40));
+			widget_button::param wp_("Button");
+			wd.add_widget<widget_button>(wp, wp_);
+		}
+
+		if(1) { // ラベルのテスト
+			widget::param wp(vtx::srect(30, 250, 150, 40));
+			widget_label::param wp_("Label");
+			wd.add_widget<widget_label>(wp, wp_);
 		}
 
 	}
