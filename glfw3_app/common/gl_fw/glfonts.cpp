@@ -770,6 +770,35 @@ namespace gl {
 
 	//-----------------------------------------------------------------//
 	/*!
+		@brief	文字列全体の大きさを取得
+		@param[in]	wt	文字列
+		@return	大きさを返す
+	 */
+	//-----------------------------------------------------------------//
+	vtx::spos glfonts::get_size(const utils::wstring& wt)
+	{
+		vtx::spos size(0, 0);
+		vtx::spos tmp(0, face_->info_.size);
+		BOOST_FOREACH(wchar_t wch, wt) {
+			if(wch >= 0x20) {
+				tmp.x += get_width(wch);
+			} else {
+				if(wch == '\n') {
+					tmp.y += face_->info_.size;
+					if(size.x < tmp.x) size.x = tmp.x;
+					tmp.x = 0;
+				}
+			}
+		}
+		if(size.x < tmp.x) size.x = tmp.x;
+		if(tmp.x == 0) tmp.y -= face_->info_.size; 
+		size.y = tmp.y;
+		return size;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
 		@brief	フォントのバックの描画
 		@param[in]	x	描画位置 X
 		@param[in]	y	描画位置 Y

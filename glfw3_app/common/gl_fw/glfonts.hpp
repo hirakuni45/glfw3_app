@@ -585,25 +585,7 @@ namespace gl {
 			@return	大きさを返す
 		 */
 		//-----------------------------------------------------------------//
-		vtx::spos get_size(const utils::wstring& wt) {
-			vtx::spos size(0, 0);
-			vtx::spos tmp(0, 0);
-			BOOST_FOREACH(wchar_t wch, wt) {
-				if(wch >= 0x20) {
-					tmp.x += get_width(wch);
-				} else {
-					if(wch == '\n') {
-						tmp.y += face_->info_.size;
-						if(size.x < tmp.x) size.x = tmp.x;
-						tmp.x = 0;
-					}
-				}
-			}
-			if(size.x < tmp.x) size.x = tmp.x;
-			if(size.x > 0 && size.y == 0) tmp.y = face_->info_.size;
-			size.y = tmp.y;
-			return size;
-		}
+		vtx::spos get_size(const utils::wstring& wt);
 
 
 		//-----------------------------------------------------------------//
