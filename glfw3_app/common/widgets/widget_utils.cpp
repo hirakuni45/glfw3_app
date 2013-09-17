@@ -225,18 +225,24 @@ namespace gui {
 		vtx::srect clip_ = clip;
 		vtx::srect rect_ = rect;
 
+		std::string cft;
+		if(!tp.font_.empty()) {
+			cft = fonts.get_font_type();
+			fonts.set_font_type(tp.font_);
+		}			
+
 		glViewport(clip_.org.x, size.y - clip_.org.y - clip_.size.y,
 			clip_.size.x, clip_.size.y);
 		fonts.setup_matrix(clip_.size.x, clip_.size.y);
 
 		fonts.set_proportional(tp.proportional_);
-		vtx::spos text_size(fonts.get_width(tp.text_), fonts.get_font_size());
 		vtx::spos pos;
 		vtx::placement pl = tp.placement_;
 		if(tp.shift_) {
 			pl.hpt = vtx::placement::holizontal::LEFT;
 		}
-		vtx::create_placement(rect_, text_size, pl, pos);
+
+		vtx::create_placement(rect_, fonts.get_size(tp.text_), pl, pos);
 
 		pos += tp.offset_;
 		if(tp.shadow_offset_.x != 0 || tp.shadow_offset_.y != 0) {
@@ -248,6 +254,10 @@ namespace gui {
 
 		fonts.set_fore_color(tp.fore_color_);
 		fonts.draw(pos.x, pos.y, tp.text_);
+
+		if(!tp.font_.empty()) {
+			fonts.set_font_type(cft);
+		}
 	}
 
 
@@ -285,12 +295,6 @@ namespace gui {
 				rect.size = wp.rect_.size;
 			}
 
-			std::string cft;
-			if(!tp.font_.empty()) {
-				cft = fonts.get_font_type();
-				fonts.set_font_type(tp.font_);
-			}			
-
 			{
 				vtx::srect clip = wp.clip_;
 				rect.size.x -= pp.frame_width_ * 2;
@@ -306,10 +310,6 @@ namespace gui {
 
 			glPopMatrix();
 			glViewport(0, 0, size.x, size.y);
-
-			if(!tp.font_.empty()) {
-				fonts.set_font_type(cft);
-			}
 		}
 	}
 

@@ -10,6 +10,7 @@
 #include "widget_utils.hpp"
 #include "widget_null.hpp"
 #include "widget_image.hpp"
+#include "widget_text.hpp"
 #include "widget_frame.hpp"
 #include "widget_button.hpp"
 #include "widget_label.hpp"
@@ -53,6 +54,8 @@ namespace gui {
 			type = "null";
 		} else if(w->type() == get_type_id<widget_image>()) {
 			type = "image";
+		} else if(w->type() == get_type_id<widget_text>()) {
+			type = "text";
 		} else if(w->type() == get_type_id<widget_frame>()) {
 			type = "frame";
 		} else if(w->type() == get_type_id<widget_button>()) {

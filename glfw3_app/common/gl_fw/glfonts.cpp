@@ -672,7 +672,7 @@ namespace gl {
 			if(code < 32) {
 				if(code == '\n') {
 					x = xt;
-					y -= face_->info_.size;
+					y += face_->info_.size;
 				}
 			} else {
 				x += draw(x, y, code);
@@ -714,7 +714,7 @@ namespace gl {
 			if(cnt == 0 && code != 0) {
 				if(code < 32) {
 					if(code == '\n') {
-						y -= face_->info_.size;
+						y += face_->info_.size;
 						x = xt;
 					}
 				} else {
