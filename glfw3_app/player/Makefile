@@ -40,7 +40,6 @@ PSOURCES	=	main.cpp \
 				../common/widgets/widget.cpp \
 				../common/widgets/widget_director.cpp \
 				../common/widgets/widget_utils.cpp \
-				../common/widgets/widget_group.cpp \
 				../common/widgets/widget_image.cpp \
 				../common/widgets/widget_text.cpp \
 				../common/widgets/widget_frame.cpp \
@@ -51,8 +50,7 @@ PSOURCES	=	main.cpp \
 				../common/widgets/widget_check.cpp \
 				../common/widgets/widget_radio.cpp \
 				../common/widgets/widget_dialog.cpp \
-				../common/widgets/widget_filer.cpp \
-				../common/widgets/widget_terminal.cpp
+				../common/widgets/widget_filer.cpp
 
 CSOURCES	=	../common/minizip/ioapi.c \
 				../common/minizip/unzip.c
@@ -661,29 +659,6 @@ player.o: ../common/widgets/widget_image.hpp
 ../common/widgets/widget_utils.o: ../common/img_io/i_img_io.hpp
 ../common/widgets/widget_utils.o: ../common/widgets/widget_button.hpp
 ../common/widgets/widget_utils.o: ../common/widgets/widget_label.hpp
-../common/widgets/widget_group.o: ../common/widgets/widget_group.hpp
-../common/widgets/widget_group.o: ../common/widgets/widget.hpp
-../common/widgets/widget_group.o: ../common/img_io/img.hpp
-../common/widgets/widget_group.o: ../common/img_io/paint.hpp
-../common/widgets/widget_group.o: ../common/img_io/img.hpp
-../common/widgets/widget_group.o: ../common/img_io/i_img.hpp
-../common/widgets/widget_group.o: ../common/utils/vtx.hpp
-../common/widgets/widget_group.o: ../common/img_io/img_rgba8.hpp
-../common/widgets/widget_group.o: ../common/img_io/img_idx8.hpp
-../common/widgets/widget_group.o: ../common/img_io/i_img.hpp
-../common/widgets/widget_group.o: ../common/img_io/img_clut.hpp
-../common/widgets/widget_group.o: ../common/img_io/img_gray8.hpp
-../common/widgets/widget_group.o: ../common/utils/string_utils.hpp
-../common/widgets/widget_group.o: ../common/utils/vmath.hpp
-../common/widgets/widget_group.o: ../common/utils/vtx.hpp
-../common/widgets/widget_group.o: ../common/widgets/widget_director.hpp
-../common/widgets/widget_group.o: ../common/widgets/common_parts.hpp
-../common/widgets/widget_group.o: ../common/gl_fw/glmobj.hpp
-../common/widgets/widget_group.o: ../common/gl_fw/gl_info.hpp
-../common/widgets/widget_group.o: ../common/img_io/img_rgba8.hpp
-../common/widgets/widget_group.o: ../common/img_io/img_files.hpp
-../common/widgets/widget_group.o: ../common/img_io/i_img_io.hpp
-../common/widgets/widget_group.o: ../common/utils/file_io.hpp
 ../common/widgets/widget_image.o: ../common/gl_fw/IGLcore.hpp
 ../common/widgets/widget_image.o: ../common/core/device.hpp
 ../common/widgets/widget_image.o: ../common/utils/vtx.hpp
@@ -998,28 +973,3 @@ player.o: ../common/widgets/widget_image.hpp
 ../common/widgets/widget_filer.o: ../common/widgets/widget_label.hpp
 ../common/widgets/widget_filer.o: ../common/widgets/widget_director.hpp
 ../common/widgets/widget_filer.o: ../common/widgets/widget_button.hpp
-../common/widgets/widget_terminal.o: ../common/widgets/widget_terminal.hpp
-../common/widgets/widget_terminal.o: ../common/widgets/widget_director.hpp
-../common/widgets/widget_terminal.o: ../common/widgets/widget.hpp
-../common/widgets/widget_terminal.o: ../common/img_io/img.hpp
-../common/widgets/widget_terminal.o: ../common/img_io/paint.hpp
-../common/widgets/widget_terminal.o: ../common/img_io/img.hpp
-../common/widgets/widget_terminal.o: ../common/img_io/i_img.hpp
-../common/widgets/widget_terminal.o: ../common/utils/vtx.hpp
-../common/widgets/widget_terminal.o: ../common/img_io/img_rgba8.hpp
-../common/widgets/widget_terminal.o: ../common/img_io/img_idx8.hpp
-../common/widgets/widget_terminal.o: ../common/img_io/i_img.hpp
-../common/widgets/widget_terminal.o: ../common/img_io/img_clut.hpp
-../common/widgets/widget_terminal.o: ../common/img_io/img_gray8.hpp
-../common/widgets/widget_terminal.o: ../common/utils/string_utils.hpp
-../common/widgets/widget_terminal.o: ../common/utils/vmath.hpp
-../common/widgets/widget_terminal.o: ../common/utils/vtx.hpp
-../common/widgets/widget_terminal.o: ../common/widgets/common_parts.hpp
-../common/widgets/widget_terminal.o: ../common/gl_fw/glmobj.hpp
-../common/widgets/widget_terminal.o: ../common/gl_fw/gl_info.hpp
-../common/widgets/widget_terminal.o: ../common/img_io/img_rgba8.hpp
-../common/widgets/widget_terminal.o: ../common/img_io/img_files.hpp
-../common/widgets/widget_terminal.o: ../common/img_io/i_img_io.hpp
-../common/widgets/widget_terminal.o: ../common/utils/file_io.hpp
-../common/widgets/widget_terminal.o: ../common/widgets/widget_frame.hpp
-../common/widgets/widget_terminal.o: ../common/widgets/widget_director.hpp
