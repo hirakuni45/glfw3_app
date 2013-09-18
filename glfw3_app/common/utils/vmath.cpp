@@ -4,7 +4,7 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include "vmath.hpp"
+#include "utils/vmath.hpp"
 
 namespace vtx {
 

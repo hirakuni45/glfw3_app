@@ -7,10 +7,8 @@
 //=====================================================================//
 #include <vector>
 #include <cmath>
-// #include <float.h>
-
-#include "vtx.hpp"
-#include "mtx.hpp"
+#include "utils/vtx.hpp"
+#include "utils/mtx.hpp"
 
 namespace qtx {
 

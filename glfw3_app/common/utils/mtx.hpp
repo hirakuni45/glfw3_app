@@ -1,5 +1,4 @@
-#ifndef MTX_HPP
-#define MTX_HPP
+#pragma once
 //=====================================================================//
 /*!	@file
 	@brief	各種マトリックスの定義
@@ -9,8 +8,7 @@
 #include <vector>
 #include <cmath>
 #include <float.h>
-
-#include "vtx.hpp"
+#include "utils/vtx.hpp"
 
 namespace mtx {
 
@@ -790,5 +788,3 @@ namespace mtx {
 	typedef matrix4<double>	dmat4;	///< 「double」型マトリックス
 
 }
-
-#endif	// MTX_HPP

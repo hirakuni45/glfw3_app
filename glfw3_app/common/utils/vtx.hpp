@@ -1,5 +1,4 @@
-#ifndef VTX_HPP
-#define VTX_HPP
+#pragma once
 //=====================================================================//
 /*!	@file
 	@brief	各種頂点の定義
@@ -1193,5 +1192,3 @@ namespace vtx {
 	typedef boost::unordered_set<dvtx>::const_iterator	dvtx_set_cit;
 
 }	// namespace vtx
-
-#endif

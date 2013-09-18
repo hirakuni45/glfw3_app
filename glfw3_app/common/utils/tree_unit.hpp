@@ -8,11 +8,11 @@
 #ifndef NDEBUG
 #include <iostream>
 #endif
-#include <map>
-#include <set>
 #include <stack>
+#include <boost/unordered_map.hpp>
+#include <boost/unordered_set.hpp>
 #include <boost/optional.hpp>
-#include "StringUtils.hpp"
+#include "utils/string_utils.hpp"
 
 namespace utils {
 
@@ -34,28 +34,28 @@ namespace utils {
 			std::string		name;	///< ユニット名
 			T				value;	///< ユーザー利用データ
 		private:
-			unsigned int	id_;
+			uint32_t		id_;
 
-			typedef std::set<std::string>	childs;
+			typedef boost::unordered_set<std::string>	childs;
 			typedef childs::iterator		childs_it;
 			childs			childs_;	///< 子ユニットの key
 #ifndef NDEBUG
-			void listAll() const
+			void list_all() const
 			{
 				if(!name.empty()) {
 					std::cout << "(" << name << "), ";
 				} else {
 					std::cout << "(), ";
 				}
-				value.listAll();
+				value.list_all();
 			}
 #endif
 		public:
 			unit_t() : id_(0) { }
-			void set_id(unsigned int id) { id_ = id; }
-			unsigned int get_id() const { return id_; }
+			void set_id(uint32_t id) { id_ = id; }
+			uint32_t get_id() const { return id_; }
 			void install_child(const std::string& key) {
-				childs_.install(key);
+				childs_.insert(key);
 			}
 			bool is_childs_empty() const { return childs_.empty(); }
 		};
@@ -64,15 +64,15 @@ namespace utils {
 		typedef boost::optional<T&>			optional_ref;		//< オプショナル参照型
 
 	private:
-		typedef std::map<std::string, unit_t> 		unit_map;
+		typedef boost::unordered_map<std::string, unit_t> unit_map;
 		typedef typename unit_map::iterator			unit_map_it;
 		typedef typename unit_map::const_iterator	unit_map_cit;
 
 		unit_map	   	unit_map_;
 
-		unsigned int	serial_id_;
-		unsigned int	units_;
-		unsigned int	directory_;
+		uint32_t		serial_id_;
+		uint32_t		units_;
+		uint32_t		directory_;
 
 		std::string		current_path_;
 
@@ -127,32 +127,30 @@ namespace utils {
 			@return 成功したら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool install(const std::string& key, const Unit_t& unit, bool same_name = false)
+		bool install(const std::string& key, const unit_t& unit, bool same_name = false)
 		{
 			std::string fullpath;
 			if(!create_full_path(key, fullpath)) {
 				return false;
 			}
 
-			TreeUnit_t t;
-			t.unit = unit;
 			if(same_name) {
-				t.unit.name = get_file_name(key.c_str());
+				unit.name = get_file_name(key);
 			}
 
-			t.set_id(serial_id_);
-			std::pair<unit_map_it, bool> ret = unit_map_.insert(TreeUnitMap::value_type(fullpath, t));
+			unit.set_id(serial_id_);
+			std::pair<unit_map_it, bool> ret = unit_map_.insert(unit_map::value_type(fullpath, unit));
 			if(ret.second) {
 				++serial_id_;
 				++units_;
 				// ディレクトリー情報にユニット名を追加
 				std::string d;
-				if(get_file_path(fullpath.c_str(), d)) {
+				if(get_file_path(fullpath, d)) {
 					unit_map_it it = unit_map_.find(d);
 					if(it == unit_map_.end()) {
 						return false;
 					} else {
-						Unit_t& t = it->second;
+						unit_t& t = it->second;
 						t.install_child(key);
 					}
 				}
@@ -177,7 +175,7 @@ namespace utils {
 
 			unit_map_it it = unit_map_.find(fullpath);
 			if(it != unit_map_.end()) {
-				const Unit_t& t = it->second;
+				const unit_t& t = it->second;
 				if(t.keys.empty()) {
 					unit_map_.erase(it);
 					--units_;
@@ -286,9 +284,9 @@ namespace utils {
 				return false;
 			}
 
-			TreeUnit_t t;
+			unit_t t;
 			if(same_name) {
-				t.unit.name = get_file_name(name.c_str());
+				t.name = get_file_name(name);
 			}
 			t.serial_id = serial_id_;
 			t.unit.dir = true;
@@ -395,7 +393,7 @@ namespace utils {
 			@brief	デバッグ用、全リスト表示
 		*/
 		//-----------------------------------------------------------------//
-		void listAll() const
+		void list_all() const
 		{
 			// key の最大長さを探す
 			unsigned int ml = 0;
@@ -405,7 +403,7 @@ namespace utils {
 			}
 
 			for(unit_map_cit cit = unit_map_.begin(); cit != unit_map_.end(); ++cit) {
-				const Unit_t& t = cit->second;
+				const unit_t& t = cit->second;
 				if(t.is_childs_empty()) {
 					std::cout << "- ";
 				} else {
@@ -424,6 +422,7 @@ namespace utils {
 				std::cout << std::endl;
 			}
 			int n = unit_map_.size();
+
 			std::cout << "Total " << n << " file";
 			std::cout << ((n > 1) ? "s" : "") << std::endl << std::endl;
 		}
@@ -434,18 +433,9 @@ namespace utils {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
-		@brief	標準的な文字情報を扱える TreeUnit クラスの型設定
+		@brief	標準的な文字情報を扱える tree_unit クラスの型設定
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	struct UnitString_t {
-		std::string		str;	///< ストリング
-#ifndef NDEBUG
-		void listAll() const
-		{
-			std::cout << str;
-		}
-#endif
-	};
-	typedef TreeUnit<UnitString_t>	TreeUnit_string;
+	typedef tree_unit<std::string> tree_unit_string;
 
 }
