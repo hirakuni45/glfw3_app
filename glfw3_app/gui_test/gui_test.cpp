@@ -17,6 +17,7 @@
 #include "widgets/widget_list.hpp"
 #include "widgets/widget_image.hpp"
 #include "widgets/widget_text.hpp"
+#include "widgets/widget_tree.hpp"
 
 namespace app {
 
@@ -109,6 +110,11 @@ namespace app {
 			dialog_open_ = wd.add_widget<widget_button>(wp, wp_);
 		}
 
+		if(1) {	// ツリーのテスト
+			widget::param wp(vtx::srect(200, 400, 100, 100));
+			widget_tree::param wp_;
+			wd.add_widget<widget_tree>(wp, wp_);
+		}
 	}
 
 

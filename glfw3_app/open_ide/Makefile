@@ -40,8 +40,8 @@ PSOURCES	=	main.cpp \
 				../common/widgets/widget.cpp \
 				../common/widgets/widget_director.cpp \
 				../common/widgets/widget_utils.cpp \
-				../common/widgets/widget_group.cpp \
 				../common/widgets/widget_image.cpp \
+				../common/widgets/widget_text.cpp \
 				../common/widgets/widget_frame.cpp \
 				../common/widgets/widget_button.cpp \
 				../common/widgets/widget_label.cpp \
@@ -49,7 +49,8 @@ PSOURCES	=	main.cpp \
 				../common/widgets/widget_list.cpp \
 				../common/widgets/widget_check.cpp \
 				../common/widgets/widget_radio.cpp \
-				../common/widgets/widget_zero.cpp \
+				../common/widgets/widget_dialog.cpp \
+				../common/widgets/widget_tree.cpp \
 				../common/widgets/widget_filer.cpp \
 				../common/widgets/widget_terminal.cpp
 
@@ -154,26 +155,24 @@ dllname:
 
 tarball:
 	chmod 644 \
-			../core/*.[hc]pp \
-			../gl_fw/*.[hc]pp \
-			../utils/*.[hc]pp \
-			../img_io/*.[hc]pp \
-			../snd_io/*.[hc]pp \
-			../widgets/*.[hc]pp \
-			../minizip/*.[hc] \
-			../player/*.[hc]pp Makefile
+			../common/core/*.[hc]pp \
+			../common/gl_fw/*.[hc]pp \
+			../common/utils/*.[hc]pp \
+			../common/img_io/*.[hc]pp \
+			../common/snd_io/*.[hc]pp \
+			../common/widgets/*.[hc]pp \
+			../common/minizip/*.[hc] \
+			../open_ide/*.[hc]pp Makefile
 	rm -f $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz
 	tar cfvz $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz \
-			../core/*.[hc]pp \
-			../gl_fw/*.[hc]pp \
-			../utils/*.[hc]pp \
-			../img_io/*.[hc]pp \
-			../snd_io/*.[hc]pp \
-			../widgets/*.[hc]pp \
-			../minizip/*.[hc] \
-			../player/*.[hc]pp \
-			../player/res/*.png \
-			../player/res/*.ttf
+			../common/core/*.[hc]pp \
+			../common/gl_fw/*.[hc]pp \
+			../common/utils/*.[hc]pp \
+			../common/img_io/*.[hc]pp \
+			../common/snd_io/*.[hc]pp \
+			../common/widgets/*.[hc]pp \
+			../common/minizip/*.[hc] \
+			../open_ide/*.[hc]pp
 	chmod 444 $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz
 
 bin_zip:
@@ -203,15 +202,15 @@ main.o: ../common/img_io/img.hpp ../common/img_io/paint.hpp
 main.o: ../common/img_io/i_img.hpp ../common/img_io/img_rgba8.hpp
 main.o: ../common/img_io/img_idx8.hpp ../common/img_io/img_clut.hpp
 main.o: ../common/img_io/img_gray8.hpp ../common/utils/vmath.hpp
-main.o: ../common/utils/vtx.hpp ../common/widgets/common_parts.hpp
-main.o: ../common/gl_fw/glmobj.hpp ../common/gl_fw/gl_info.hpp
-main.o: ../common/img_io/img_rgba8.hpp ../common/img_io/img_files.hpp
-main.o: ../common/img_io/i_img_io.hpp ../common/widgets/widget_filer.hpp
-main.o: ../common/utils/files.hpp ../common/utils/drive_info.hpp
-main.o: ../common/utils/file_info.hpp ../common/utils/handle_set.hpp
-main.o: ../common/utils/preference.hpp ../common/widgets/widget_director.hpp
-main.o: ../common/widgets/widget.hpp ../common/widgets/widget_null.hpp
-main.o: ../common/widgets/widget_frame.hpp ../common/widgets/widget_label.hpp
+main.o: ../common/widgets/common_parts.hpp ../common/gl_fw/glmobj.hpp
+main.o: ../common/gl_fw/gl_info.hpp ../common/img_io/img_rgba8.hpp
+main.o: ../common/img_io/img_files.hpp ../common/img_io/i_img_io.hpp
+main.o: ../common/widgets/widget_filer.hpp ../common/utils/files.hpp
+main.o: ../common/utils/drive_info.hpp ../common/utils/file_info.hpp
+main.o: ../common/utils/handle_set.hpp ../common/utils/preference.hpp
+main.o: ../common/widgets/widget_director.hpp ../common/widgets/widget.hpp
+main.o: ../common/widgets/widget_null.hpp ../common/widgets/widget_frame.hpp
+main.o: ../common/widgets/widget_label.hpp
 main.o: ../common/widgets/widget_button.hpp ../common/core/glcore.hpp
 main.o: ../common/gl_fw/IGLcore.hpp ../common/core/device.hpp
 main.o: ../common/gl_fw/glfonts.hpp ../common/gl_fw/Ikfimg.hpp
@@ -229,13 +228,13 @@ open_ide.o: ../common/widgets/widget.hpp ../common/img_io/img.hpp
 open_ide.o: ../common/img_io/paint.hpp ../common/img_io/i_img.hpp
 open_ide.o: ../common/img_io/img_rgba8.hpp ../common/img_io/img_idx8.hpp
 open_ide.o: ../common/img_io/img_clut.hpp ../common/img_io/img_gray8.hpp
-open_ide.o: ../common/utils/vmath.hpp ../common/utils/vtx.hpp
-open_ide.o: ../common/widgets/common_parts.hpp ../common/gl_fw/glmobj.hpp
-open_ide.o: ../common/gl_fw/gl_info.hpp ../common/img_io/img_rgba8.hpp
-open_ide.o: ../common/img_io/img_files.hpp ../common/img_io/i_img_io.hpp
-open_ide.o: ../common/widgets/widget_filer.hpp ../common/utils/files.hpp
-open_ide.o: ../common/utils/drive_info.hpp ../common/utils/file_info.hpp
-open_ide.o: ../common/utils/handle_set.hpp ../common/utils/preference.hpp
+open_ide.o: ../common/utils/vmath.hpp ../common/widgets/common_parts.hpp
+open_ide.o: ../common/gl_fw/glmobj.hpp ../common/gl_fw/gl_info.hpp
+open_ide.o: ../common/img_io/img_rgba8.hpp ../common/img_io/img_files.hpp
+open_ide.o: ../common/img_io/i_img_io.hpp ../common/widgets/widget_filer.hpp
+open_ide.o: ../common/utils/files.hpp ../common/utils/drive_info.hpp
+open_ide.o: ../common/utils/file_info.hpp ../common/utils/handle_set.hpp
+open_ide.o: ../common/utils/preference.hpp
 open_ide.o: ../common/widgets/widget_director.hpp
 open_ide.o: ../common/widgets/widget.hpp ../common/widgets/widget_null.hpp
 open_ide.o: ../common/widgets/widget_frame.hpp
@@ -545,7 +544,6 @@ open_ide.o: ../common/gl_fw/Ikfimg.hpp ../common/core/device.hpp
 ../common/widgets/common_parts.o: ../common/img_io/img_rgba8.hpp
 ../common/widgets/common_parts.o: ../common/utils/string_utils.hpp
 ../common/widgets/common_parts.o: ../common/utils/vmath.hpp
-../common/widgets/common_parts.o: ../common/utils/vtx.hpp
 ../common/widgets/common_parts.o: ../common/widgets/widget_utils.hpp
 ../common/widgets/common_parts.o: ../common/widgets/widget_director.hpp
 ../common/widgets/common_parts.o: ../common/img_io/img_files.hpp
@@ -563,7 +561,7 @@ open_ide.o: ../common/gl_fw/Ikfimg.hpp ../common/core/device.hpp
 ../common/widgets/widget.o: ../common/img_io/img_clut.hpp
 ../common/widgets/widget.o: ../common/img_io/img_gray8.hpp
 ../common/widgets/widget.o: ../common/utils/string_utils.hpp
-../common/widgets/widget.o: ../common/utils/vmath.hpp ../common/utils/vtx.hpp
+../common/widgets/widget.o: ../common/utils/vmath.hpp
 ../common/widgets/widget_director.o: ../common/gl_fw/gl_info.hpp
 ../common/widgets/widget_director.o: ../common/gl_fw/IGLcore.hpp
 ../common/widgets/widget_director.o: ../common/core/device.hpp
@@ -584,16 +582,16 @@ open_ide.o: ../common/gl_fw/Ikfimg.hpp ../common/core/device.hpp
 ../common/widgets/widget_director.o: ../common/img_io/img_clut.hpp
 ../common/widgets/widget_director.o: ../common/img_io/img_gray8.hpp
 ../common/widgets/widget_director.o: ../common/utils/vmath.hpp
-../common/widgets/widget_director.o: ../common/utils/vtx.hpp
 ../common/widgets/widget_director.o: ../common/widgets/common_parts.hpp
 ../common/widgets/widget_director.o: ../common/gl_fw/glmobj.hpp
 ../common/widgets/widget_director.o: ../common/img_io/img_rgba8.hpp
 ../common/widgets/widget_director.o: ../common/img_io/img_files.hpp
 ../common/widgets/widget_director.o: ../common/img_io/i_img_io.hpp
 ../common/widgets/widget_director.o: ../common/widgets/widget_utils.hpp
-../common/widgets/widget_director.o: ../common/widgets/widget_director.hpp
 ../common/widgets/widget_director.o: ../common/widgets/widget_null.hpp
+../common/widgets/widget_director.o: ../common/widgets/widget_director.hpp
 ../common/widgets/widget_director.o: ../common/widgets/widget_image.hpp
+../common/widgets/widget_director.o: ../common/widgets/widget_text.hpp
 ../common/widgets/widget_director.o: ../common/widgets/widget_frame.hpp
 ../common/widgets/widget_director.o: ../common/widgets/widget_button.hpp
 ../common/widgets/widget_director.o: ../common/widgets/widget_label.hpp
@@ -601,8 +599,9 @@ open_ide.o: ../common/gl_fw/Ikfimg.hpp ../common/core/device.hpp
 ../common/widgets/widget_director.o: ../common/widgets/widget_check.hpp
 ../common/widgets/widget_director.o: ../common/widgets/widget_radio.hpp
 ../common/widgets/widget_director.o: ../common/widgets/widget_list.hpp
-../common/widgets/widget_director.o: ../common/widgets/widget_label.hpp
-../common/widgets/widget_director.o: ../common/widgets/widget_null.hpp
+../common/widgets/widget_director.o: ../common/widgets/widget_dialog.hpp
+../common/widgets/widget_director.o: ../common/widgets/widget_tree.hpp
+../common/widgets/widget_director.o: ../common/utils/tree_unit.hpp
 ../common/widgets/widget_utils.o: ../common/gl_fw/IGLcore.hpp
 ../common/widgets/widget_utils.o: ../common/core/device.hpp
 ../common/widgets/widget_utils.o: ../common/utils/vtx.hpp
@@ -624,7 +623,6 @@ open_ide.o: ../common/gl_fw/Ikfimg.hpp ../common/core/device.hpp
 ../common/widgets/widget_utils.o: ../common/widgets/widget.hpp
 ../common/widgets/widget_utils.o: ../common/img_io/img.hpp
 ../common/widgets/widget_utils.o: ../common/utils/vmath.hpp
-../common/widgets/widget_utils.o: ../common/utils/vtx.hpp
 ../common/widgets/widget_utils.o: ../common/widgets/widget_director.hpp
 ../common/widgets/widget_utils.o: ../common/widgets/common_parts.hpp
 ../common/widgets/widget_utils.o: ../common/gl_fw/glmobj.hpp
@@ -633,29 +631,6 @@ open_ide.o: ../common/gl_fw/Ikfimg.hpp ../common/core/device.hpp
 ../common/widgets/widget_utils.o: ../common/img_io/i_img_io.hpp
 ../common/widgets/widget_utils.o: ../common/widgets/widget_button.hpp
 ../common/widgets/widget_utils.o: ../common/widgets/widget_label.hpp
-../common/widgets/widget_group.o: ../common/widgets/widget_group.hpp
-../common/widgets/widget_group.o: ../common/widgets/widget.hpp
-../common/widgets/widget_group.o: ../common/img_io/img.hpp
-../common/widgets/widget_group.o: ../common/img_io/paint.hpp
-../common/widgets/widget_group.o: ../common/img_io/img.hpp
-../common/widgets/widget_group.o: ../common/img_io/i_img.hpp
-../common/widgets/widget_group.o: ../common/utils/vtx.hpp
-../common/widgets/widget_group.o: ../common/img_io/img_rgba8.hpp
-../common/widgets/widget_group.o: ../common/img_io/img_idx8.hpp
-../common/widgets/widget_group.o: ../common/img_io/i_img.hpp
-../common/widgets/widget_group.o: ../common/img_io/img_clut.hpp
-../common/widgets/widget_group.o: ../common/img_io/img_gray8.hpp
-../common/widgets/widget_group.o: ../common/utils/string_utils.hpp
-../common/widgets/widget_group.o: ../common/utils/vmath.hpp
-../common/widgets/widget_group.o: ../common/utils/vtx.hpp
-../common/widgets/widget_group.o: ../common/widgets/widget_director.hpp
-../common/widgets/widget_group.o: ../common/widgets/common_parts.hpp
-../common/widgets/widget_group.o: ../common/gl_fw/glmobj.hpp
-../common/widgets/widget_group.o: ../common/gl_fw/gl_info.hpp
-../common/widgets/widget_group.o: ../common/img_io/img_rgba8.hpp
-../common/widgets/widget_group.o: ../common/img_io/img_files.hpp
-../common/widgets/widget_group.o: ../common/img_io/i_img_io.hpp
-../common/widgets/widget_group.o: ../common/utils/file_io.hpp
 ../common/widgets/widget_image.o: ../common/gl_fw/IGLcore.hpp
 ../common/widgets/widget_image.o: ../common/core/device.hpp
 ../common/widgets/widget_image.o: ../common/utils/vtx.hpp
@@ -677,14 +652,40 @@ open_ide.o: ../common/gl_fw/Ikfimg.hpp ../common/core/device.hpp
 ../common/widgets/widget_image.o: ../common/img_io/img_clut.hpp
 ../common/widgets/widget_image.o: ../common/img_io/img_gray8.hpp
 ../common/widgets/widget_image.o: ../common/utils/vmath.hpp
-../common/widgets/widget_image.o: ../common/utils/vtx.hpp
 ../common/widgets/widget_image.o: ../common/widgets/common_parts.hpp
 ../common/widgets/widget_image.o: ../common/gl_fw/glmobj.hpp
 ../common/widgets/widget_image.o: ../common/img_io/img_rgba8.hpp
 ../common/widgets/widget_image.o: ../common/img_io/img_files.hpp
 ../common/widgets/widget_image.o: ../common/img_io/i_img_io.hpp
-../common/widgets/widget_image.o: ../common/img_io/img_utils.hpp
 ../common/widgets/widget_image.o: ../common/widgets/widget_utils.hpp
+../common/widgets/widget_image.o: ../common/img_io/img_utils.hpp
+../common/widgets/widget_text.o: ../common/gl_fw/IGLcore.hpp
+../common/widgets/widget_text.o: ../common/core/device.hpp
+../common/widgets/widget_text.o: ../common/utils/vtx.hpp
+../common/widgets/widget_text.o: ../common/gl_fw/gl_info.hpp
+../common/widgets/widget_text.o: ../common/gl_fw/glfonts.hpp
+../common/widgets/widget_text.o: ../common/gl_fw/Ikfimg.hpp
+../common/widgets/widget_text.o: ../common/img_io/i_img.hpp
+../common/widgets/widget_text.o: ../common/img_io/img.hpp
+../common/widgets/widget_text.o: ../common/utils/string_utils.hpp
+../common/widgets/widget_text.o: ../common/utils/file_io.hpp
+../common/widgets/widget_text.o: ../common/widgets/widget_text.hpp
+../common/widgets/widget_text.o: ../common/widgets/widget_director.hpp
+../common/widgets/widget_text.o: ../common/widgets/widget.hpp
+../common/widgets/widget_text.o: ../common/img_io/img.hpp
+../common/widgets/widget_text.o: ../common/img_io/paint.hpp
+../common/widgets/widget_text.o: ../common/img_io/i_img.hpp
+../common/widgets/widget_text.o: ../common/img_io/img_rgba8.hpp
+../common/widgets/widget_text.o: ../common/img_io/img_idx8.hpp
+../common/widgets/widget_text.o: ../common/img_io/img_clut.hpp
+../common/widgets/widget_text.o: ../common/img_io/img_gray8.hpp
+../common/widgets/widget_text.o: ../common/utils/vmath.hpp
+../common/widgets/widget_text.o: ../common/widgets/common_parts.hpp
+../common/widgets/widget_text.o: ../common/gl_fw/glmobj.hpp
+../common/widgets/widget_text.o: ../common/img_io/img_rgba8.hpp
+../common/widgets/widget_text.o: ../common/img_io/img_files.hpp
+../common/widgets/widget_text.o: ../common/img_io/i_img_io.hpp
+../common/widgets/widget_text.o: ../common/widgets/widget_utils.hpp
 ../common/widgets/widget_frame.o: ../common/widgets/widget_frame.hpp
 ../common/widgets/widget_frame.o: ../common/widgets/widget_director.hpp
 ../common/widgets/widget_frame.o: ../common/widgets/widget.hpp
@@ -700,7 +701,6 @@ open_ide.o: ../common/gl_fw/Ikfimg.hpp ../common/core/device.hpp
 ../common/widgets/widget_frame.o: ../common/img_io/img_gray8.hpp
 ../common/widgets/widget_frame.o: ../common/utils/string_utils.hpp
 ../common/widgets/widget_frame.o: ../common/utils/vmath.hpp
-../common/widgets/widget_frame.o: ../common/utils/vtx.hpp
 ../common/widgets/widget_frame.o: ../common/widgets/common_parts.hpp
 ../common/widgets/widget_frame.o: ../common/gl_fw/glmobj.hpp
 ../common/widgets/widget_frame.o: ../common/gl_fw/gl_info.hpp
@@ -731,41 +731,39 @@ open_ide.o: ../common/gl_fw/Ikfimg.hpp ../common/core/device.hpp
 ../common/widgets/widget_button.o: ../common/widgets/widget.hpp
 ../common/widgets/widget_button.o: ../common/img_io/img.hpp
 ../common/widgets/widget_button.o: ../common/utils/vmath.hpp
-../common/widgets/widget_button.o: ../common/utils/vtx.hpp
 ../common/widgets/widget_button.o: ../common/widgets/common_parts.hpp
 ../common/widgets/widget_button.o: ../common/gl_fw/glmobj.hpp
 ../common/widgets/widget_button.o: ../common/img_io/img_rgba8.hpp
 ../common/widgets/widget_button.o: ../common/img_io/img_files.hpp
 ../common/widgets/widget_button.o: ../common/img_io/i_img_io.hpp
 ../common/widgets/widget_button.o: ../common/widgets/widget_utils.hpp
-../common/widgets/widget_label.o: ../common/gl_fw/IGLcore.hpp
-../common/widgets/widget_label.o: ../common/core/device.hpp
-../common/widgets/widget_label.o: ../common/utils/vtx.hpp
-../common/widgets/widget_label.o: ../common/gl_fw/gl_info.hpp
-../common/widgets/widget_label.o: ../common/gl_fw/glfonts.hpp
-../common/widgets/widget_label.o: ../common/gl_fw/Ikfimg.hpp
-../common/widgets/widget_label.o: ../common/img_io/i_img.hpp
-../common/widgets/widget_label.o: ../common/img_io/img.hpp
-../common/widgets/widget_label.o: ../common/utils/string_utils.hpp
-../common/widgets/widget_label.o: ../common/utils/file_io.hpp
 ../common/widgets/widget_label.o: ../common/widgets/widget_label.hpp
 ../common/widgets/widget_label.o: ../common/widgets/widget_director.hpp
 ../common/widgets/widget_label.o: ../common/widgets/widget.hpp
 ../common/widgets/widget_label.o: ../common/img_io/img.hpp
 ../common/widgets/widget_label.o: ../common/img_io/paint.hpp
+../common/widgets/widget_label.o: ../common/img_io/img.hpp
 ../common/widgets/widget_label.o: ../common/img_io/i_img.hpp
+../common/widgets/widget_label.o: ../common/utils/vtx.hpp
 ../common/widgets/widget_label.o: ../common/img_io/img_rgba8.hpp
 ../common/widgets/widget_label.o: ../common/img_io/img_idx8.hpp
+../common/widgets/widget_label.o: ../common/img_io/i_img.hpp
 ../common/widgets/widget_label.o: ../common/img_io/img_clut.hpp
 ../common/widgets/widget_label.o: ../common/img_io/img_gray8.hpp
+../common/widgets/widget_label.o: ../common/utils/string_utils.hpp
 ../common/widgets/widget_label.o: ../common/utils/vmath.hpp
-../common/widgets/widget_label.o: ../common/utils/vtx.hpp
 ../common/widgets/widget_label.o: ../common/widgets/common_parts.hpp
 ../common/widgets/widget_label.o: ../common/gl_fw/glmobj.hpp
+../common/widgets/widget_label.o: ../common/gl_fw/gl_info.hpp
 ../common/widgets/widget_label.o: ../common/img_io/img_rgba8.hpp
 ../common/widgets/widget_label.o: ../common/img_io/img_files.hpp
 ../common/widgets/widget_label.o: ../common/img_io/i_img_io.hpp
+../common/widgets/widget_label.o: ../common/utils/file_io.hpp
 ../common/widgets/widget_label.o: ../common/widgets/widget_utils.hpp
+../common/widgets/widget_label.o: ../common/gl_fw/IGLcore.hpp
+../common/widgets/widget_label.o: ../common/core/device.hpp
+../common/widgets/widget_label.o: ../common/gl_fw/glfonts.hpp
+../common/widgets/widget_label.o: ../common/gl_fw/Ikfimg.hpp
 ../common/widgets/widget_slider.o: ../common/gl_fw/IGLcore.hpp
 ../common/widgets/widget_slider.o: ../common/core/device.hpp
 ../common/widgets/widget_slider.o: ../common/utils/vtx.hpp
@@ -787,7 +785,6 @@ open_ide.o: ../common/gl_fw/Ikfimg.hpp ../common/core/device.hpp
 ../common/widgets/widget_slider.o: ../common/img_io/img_clut.hpp
 ../common/widgets/widget_slider.o: ../common/img_io/img_gray8.hpp
 ../common/widgets/widget_slider.o: ../common/utils/vmath.hpp
-../common/widgets/widget_slider.o: ../common/utils/vtx.hpp
 ../common/widgets/widget_slider.o: ../common/widgets/common_parts.hpp
 ../common/widgets/widget_slider.o: ../common/gl_fw/glmobj.hpp
 ../common/widgets/widget_slider.o: ../common/img_io/img_rgba8.hpp
@@ -816,7 +813,6 @@ open_ide.o: ../common/gl_fw/Ikfimg.hpp ../common/core/device.hpp
 ../common/widgets/widget_list.o: ../common/img_io/img_clut.hpp
 ../common/widgets/widget_list.o: ../common/img_io/img_gray8.hpp
 ../common/widgets/widget_list.o: ../common/utils/vmath.hpp
-../common/widgets/widget_list.o: ../common/utils/vtx.hpp
 ../common/widgets/widget_list.o: ../common/widgets/common_parts.hpp
 ../common/widgets/widget_list.o: ../common/gl_fw/glmobj.hpp
 ../common/widgets/widget_list.o: ../common/img_io/img_rgba8.hpp
@@ -846,7 +842,6 @@ open_ide.o: ../common/gl_fw/Ikfimg.hpp ../common/core/device.hpp
 ../common/widgets/widget_check.o: ../common/img_io/img_clut.hpp
 ../common/widgets/widget_check.o: ../common/img_io/img_gray8.hpp
 ../common/widgets/widget_check.o: ../common/utils/vmath.hpp
-../common/widgets/widget_check.o: ../common/utils/vtx.hpp
 ../common/widgets/widget_check.o: ../common/widgets/common_parts.hpp
 ../common/widgets/widget_check.o: ../common/gl_fw/glmobj.hpp
 ../common/widgets/widget_check.o: ../common/img_io/img_rgba8.hpp
@@ -874,36 +869,62 @@ open_ide.o: ../common/gl_fw/Ikfimg.hpp ../common/core/device.hpp
 ../common/widgets/widget_radio.o: ../common/img_io/img_clut.hpp
 ../common/widgets/widget_radio.o: ../common/img_io/img_gray8.hpp
 ../common/widgets/widget_radio.o: ../common/utils/vmath.hpp
-../common/widgets/widget_radio.o: ../common/utils/vtx.hpp
 ../common/widgets/widget_radio.o: ../common/widgets/common_parts.hpp
 ../common/widgets/widget_radio.o: ../common/gl_fw/glmobj.hpp
 ../common/widgets/widget_radio.o: ../common/img_io/img_rgba8.hpp
 ../common/widgets/widget_radio.o: ../common/img_io/img_files.hpp
 ../common/widgets/widget_radio.o: ../common/img_io/i_img_io.hpp
 ../common/widgets/widget_radio.o: ../common/widgets/widget_utils.hpp
-../common/widgets/widget_zero.o: ../common/widgets/widget_zero.hpp
-../common/widgets/widget_zero.o: ../common/widgets/widget_director.hpp
-../common/widgets/widget_zero.o: ../common/widgets/widget.hpp
-../common/widgets/widget_zero.o: ../common/img_io/img.hpp
-../common/widgets/widget_zero.o: ../common/img_io/paint.hpp
-../common/widgets/widget_zero.o: ../common/img_io/img.hpp
-../common/widgets/widget_zero.o: ../common/img_io/i_img.hpp
-../common/widgets/widget_zero.o: ../common/utils/vtx.hpp
-../common/widgets/widget_zero.o: ../common/img_io/img_rgba8.hpp
-../common/widgets/widget_zero.o: ../common/img_io/img_idx8.hpp
-../common/widgets/widget_zero.o: ../common/img_io/i_img.hpp
-../common/widgets/widget_zero.o: ../common/img_io/img_clut.hpp
-../common/widgets/widget_zero.o: ../common/img_io/img_gray8.hpp
-../common/widgets/widget_zero.o: ../common/utils/string_utils.hpp
-../common/widgets/widget_zero.o: ../common/utils/vmath.hpp
-../common/widgets/widget_zero.o: ../common/utils/vtx.hpp
-../common/widgets/widget_zero.o: ../common/widgets/common_parts.hpp
-../common/widgets/widget_zero.o: ../common/gl_fw/glmobj.hpp
-../common/widgets/widget_zero.o: ../common/gl_fw/gl_info.hpp
-../common/widgets/widget_zero.o: ../common/img_io/img_rgba8.hpp
-../common/widgets/widget_zero.o: ../common/img_io/img_files.hpp
-../common/widgets/widget_zero.o: ../common/img_io/i_img_io.hpp
-../common/widgets/widget_zero.o: ../common/utils/file_io.hpp
+../common/widgets/widget_dialog.o: ../common/widgets/widget_dialog.hpp
+../common/widgets/widget_dialog.o: ../common/widgets/widget_director.hpp
+../common/widgets/widget_dialog.o: ../common/widgets/widget.hpp
+../common/widgets/widget_dialog.o: ../common/img_io/img.hpp
+../common/widgets/widget_dialog.o: ../common/img_io/paint.hpp
+../common/widgets/widget_dialog.o: ../common/img_io/img.hpp
+../common/widgets/widget_dialog.o: ../common/img_io/i_img.hpp
+../common/widgets/widget_dialog.o: ../common/utils/vtx.hpp
+../common/widgets/widget_dialog.o: ../common/img_io/img_rgba8.hpp
+../common/widgets/widget_dialog.o: ../common/img_io/img_idx8.hpp
+../common/widgets/widget_dialog.o: ../common/img_io/i_img.hpp
+../common/widgets/widget_dialog.o: ../common/img_io/img_clut.hpp
+../common/widgets/widget_dialog.o: ../common/img_io/img_gray8.hpp
+../common/widgets/widget_dialog.o: ../common/utils/string_utils.hpp
+../common/widgets/widget_dialog.o: ../common/utils/vmath.hpp
+../common/widgets/widget_dialog.o: ../common/widgets/common_parts.hpp
+../common/widgets/widget_dialog.o: ../common/gl_fw/glmobj.hpp
+../common/widgets/widget_dialog.o: ../common/gl_fw/gl_info.hpp
+../common/widgets/widget_dialog.o: ../common/img_io/img_rgba8.hpp
+../common/widgets/widget_dialog.o: ../common/img_io/img_files.hpp
+../common/widgets/widget_dialog.o: ../common/img_io/i_img_io.hpp
+../common/widgets/widget_dialog.o: ../common/utils/file_io.hpp
+../common/widgets/widget_dialog.o: ../common/widgets/widget_button.hpp
+../common/widgets/widget_dialog.o: ../common/widgets/widget_text.hpp
+../common/widgets/widget_dialog.o: ../common/widgets/widget_utils.hpp
+../common/widgets/widget_tree.o: ../common/widgets/widget_tree.hpp
+../common/widgets/widget_tree.o: ../common/widgets/widget_director.hpp
+../common/widgets/widget_tree.o: ../common/widgets/widget.hpp
+../common/widgets/widget_tree.o: ../common/img_io/img.hpp
+../common/widgets/widget_tree.o: ../common/img_io/paint.hpp
+../common/widgets/widget_tree.o: ../common/img_io/img.hpp
+../common/widgets/widget_tree.o: ../common/img_io/i_img.hpp
+../common/widgets/widget_tree.o: ../common/utils/vtx.hpp
+../common/widgets/widget_tree.o: ../common/img_io/img_rgba8.hpp
+../common/widgets/widget_tree.o: ../common/img_io/img_idx8.hpp
+../common/widgets/widget_tree.o: ../common/img_io/i_img.hpp
+../common/widgets/widget_tree.o: ../common/img_io/img_clut.hpp
+../common/widgets/widget_tree.o: ../common/img_io/img_gray8.hpp
+../common/widgets/widget_tree.o: ../common/utils/string_utils.hpp
+../common/widgets/widget_tree.o: ../common/utils/vmath.hpp
+../common/widgets/widget_tree.o: ../common/widgets/common_parts.hpp
+../common/widgets/widget_tree.o: ../common/gl_fw/glmobj.hpp
+../common/widgets/widget_tree.o: ../common/gl_fw/gl_info.hpp
+../common/widgets/widget_tree.o: ../common/img_io/img_rgba8.hpp
+../common/widgets/widget_tree.o: ../common/img_io/img_files.hpp
+../common/widgets/widget_tree.o: ../common/img_io/i_img_io.hpp
+../common/widgets/widget_tree.o: ../common/utils/file_io.hpp
+../common/widgets/widget_tree.o: ../common/widgets/widget_label.hpp
+../common/widgets/widget_tree.o: ../common/utils/tree_unit.hpp
+../common/widgets/widget_tree.o: ../common/widgets/widget_utils.hpp
 ../common/widgets/widget_filer.o: ../common/widgets/widget_filer.hpp
 ../common/widgets/widget_filer.o: ../common/utils/files.hpp
 ../common/widgets/widget_filer.o: ../common/utils/drive_info.hpp
@@ -925,7 +946,6 @@ open_ide.o: ../common/gl_fw/Ikfimg.hpp ../common/core/device.hpp
 ../common/widgets/widget_filer.o: ../common/img_io/img_clut.hpp
 ../common/widgets/widget_filer.o: ../common/img_io/img_gray8.hpp
 ../common/widgets/widget_filer.o: ../common/utils/vmath.hpp
-../common/widgets/widget_filer.o: ../common/utils/vtx.hpp
 ../common/widgets/widget_filer.o: ../common/widgets/common_parts.hpp
 ../common/widgets/widget_filer.o: ../common/gl_fw/glmobj.hpp
 ../common/widgets/widget_filer.o: ../common/gl_fw/gl_info.hpp
@@ -953,7 +973,6 @@ open_ide.o: ../common/gl_fw/Ikfimg.hpp ../common/core/device.hpp
 ../common/widgets/widget_terminal.o: ../common/img_io/img_gray8.hpp
 ../common/widgets/widget_terminal.o: ../common/utils/string_utils.hpp
 ../common/widgets/widget_terminal.o: ../common/utils/vmath.hpp
-../common/widgets/widget_terminal.o: ../common/utils/vtx.hpp
 ../common/widgets/widget_terminal.o: ../common/widgets/common_parts.hpp
 ../common/widgets/widget_terminal.o: ../common/gl_fw/glmobj.hpp
 ../common/widgets/widget_terminal.o: ../common/gl_fw/gl_info.hpp
