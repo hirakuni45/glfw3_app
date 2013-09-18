@@ -1,50 +1,61 @@
 #pragma once
 //=====================================================================//
 /*!	@file
-	@brief	GUI widget_radio クラス（ヘッダー）
+	@brief	GUI widget_tree クラス（ヘッダー）
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
 #include "widgets/widget_director.hpp"
+#include "widgets/widget_label.hpp"
+#include "utils/tree_unit.hpp"
 
 namespace gui {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
-		@brief	GUI widget_radio クラス
+		@brief	GUI widget_tree クラス
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	struct widget_radio : public widget {
+	struct widget_tree : public widget {
 
-		typedef widget_radio value_type;
+		typedef widget_tree value_type;
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
-			@brief	widget_check パラメーター
+			@brief	widget_tree パラメーター
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
-			widget::text_param	text_param_;
-			float	gray_text_gain_;	///< 不許可時のグレースケールゲイン
-			bool	disable_gray_text_;	///< 不許可時、文字をグレースケールする場合
-			bool	check_;				///< 許可、不許可の状態
-			param(const std::string& text = "") :
-				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255),
-					vtx::placement(vtx::placement::holizontal::LEFT,
-					vtx::placement::vertical::CENTER)),
-				gray_text_gain_(0.65f), disable_gray_text_(true),
-				check_(false) { }
+			plate_param	plate_param_;	///< プレート・パラメーター
+			color_param	color_param_;	///< カラー・パラメーター
+
+			param() :
+				plate_param_(),
+				color_param_(widget_director::default_tree_color_)
+			{ }
 		};
+
+
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	ツリー・データベースのユニット
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		struct unit_t {
+			std::string		value_;
+			bool			open_;
+			unit_t() : value_(), open_(false) { }
+		};
+		typedef utils::tree_unit<unit_t>	tree_unit;
 
 	private:
 		widget_director&	wd_;
 
 		param				param_;
 
-		bool				obj_state_;
+		tree_unit			tree_unit_;
 
-		gl::glmobj::handle	ena_h_;
-		gl::glmobj::handle	dis_h_;
+		gl::glmobj::handle	objh_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -52,9 +63,10 @@ namespace gui {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		widget_radio(widget_director& wd, const widget::param& bp, const param& p) :
+		widget_tree(widget_director& wd, const widget::param& bp, const param& p) :
 			wd_(wd), widget(bp), param_(p),
-			obj_state_(false), ena_h_(0), dis_h_(0) { }
+			objh_(0)
+			{ }
 
 
 		//-----------------------------------------------------------------//
@@ -62,7 +74,7 @@ namespace gui {
 			@brief	デストラクター
 		*/
 		//-----------------------------------------------------------------//
-		virtual ~widget_radio() { }
+		virtual ~widget_tree() { }
 
 
 		//-----------------------------------------------------------------//
@@ -79,7 +91,7 @@ namespace gui {
 			@return ハイブリッド・ウィジェットの場合「true」を返す。
 		*/
 		//-----------------------------------------------------------------//
-		bool hybrid() const { return false; }
+		bool hybrid() const { return true; }
 
 
 		//-----------------------------------------------------------------//
@@ -98,6 +110,24 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		param& at_local_param() { return param_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	有効・無効の設定
+			@param[in]	f	無効にする場合「false」
+		*/
+		//-----------------------------------------------------------------//
+		void enable(bool f = true) { wd_.enable(this, f, true); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ツリー構造の参照
+			@return ツリー構造
+		*/
+		//-----------------------------------------------------------------//
+		tree_unit& at_tree_unit() { return tree_unit_; }
 
 
 		//-----------------------------------------------------------------//

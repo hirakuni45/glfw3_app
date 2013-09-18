@@ -128,7 +128,7 @@ namespace gui {
 		@brief	廃棄
 	*/
 	//-----------------------------------------------------------------//
-	void widget_list::destroy()
+	void widget_list::destroy_()
 	{
 		BOOST_FOREACH(widget_label* w, list_) {
 			wd_.del_widget(w);

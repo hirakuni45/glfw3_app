@@ -5,6 +5,7 @@
 */
 //=====================================================================//
 #include "widgets/widget_dialog.hpp"
+#include "widgets/widget_utils.hpp"
 
 namespace gui {
 
@@ -29,15 +30,15 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_dialog::initialize()
 	{
+		// 自由な大きさの変更を禁止
+		at_param().state_.set(widget::state::SIZE_LOCK);
+
+		param_.plate_param_.resizeble_ = true;
+		// フレームの生成
+		objh_ = frame_init(wd_, at_param(), param_.plate_param_, param_.color_param_);
+
+		// 構成部品の作成
 		const vtx::spos& size = get_rect().size;
-		{	// ベース・フレームの作成
-			widget::param wp(vtx::srect(vtx::spos(0), get_rect().size), this);
-			widget_frame::param wp_;
-			wp_.plate_param_ = param_.plate_param_;
-			wp_.color_param_ = param_.color_param_;
-			base_ = wd_.add_widget<widget_frame>(wp, wp_);
-			base_->set_state(widget::state::SIZE_LOCK);
-		}
 
 		short fw = param_.plate_param_.frame_width_;
 		short btn_width = 100;
@@ -48,20 +49,20 @@ namespace gui {
 		if(param_.style_ == param::style::OK) {
 			widget::param wp(vtx::srect(vtx::spos(
 				(size.x - fw - btn_width) / 2, y),
-				btn_size), base_);
+				btn_size), this);
 			widget_button::param wp_("OK");
 			ok_ = wd_.add_widget<widget_button>(wp, wp_);
 		} else if(param_.style_ == param::style::CANCEL_OK) {
 			short ofs = (size.x - fw * 2 - btn_width * 2) / 3;
 			{
 				widget::param wp(vtx::srect(vtx::spos(fw + ofs, y),
-				btn_size), base_);
+				btn_size), this);
 				widget_button::param wp_("Cancel");
 				ok_ = wd_.add_widget<widget_button>(wp, wp_);
 			}
 			{
 				widget::param wp(vtx::srect(vtx::spos(fw + ofs + btn_width + ofs, y),
-				btn_size), base_);
+				btn_size), this);
 				widget_button::param wp_("OK");
 				cancel_ = wd_.add_widget<widget_button>(wp, wp_);
 			}
@@ -71,7 +72,7 @@ namespace gui {
 			param_.text_area_.size.x = size.x - param_.text_area_.org.x * 2;
 			param_.text_area_.size.y = size.y - param_.text_area_.org.y * 2
 				- space_height - btn_height;
-			widget::param wp(param_.text_area_, base_);
+			widget::param wp(param_.text_area_, this);
 			widget_text::param wp_;
 			text_ = wd_.add_widget<widget_text>(wp, wp_);
 		}
@@ -106,6 +107,11 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_dialog::render()
 	{
+		if(objh_ == 0) return;
+
+		wd_.at_mobj().resize(objh_, get_param().rect_.size);
+		glEnable(GL_TEXTURE_2D);
+		wd_.at_mobj().draw(objh_, gl::glmobj::normal, 0, 0);
 	}
 
 
@@ -114,11 +120,10 @@ namespace gui {
 		@brief	廃棄
 	*/
 	//-----------------------------------------------------------------//
-	void widget_dialog::destroy()
+	void widget_dialog::destroy_()
 	{
 		wd_.del_widget(cancel_);
 		wd_.del_widget(ok_);
 		wd_.del_widget(text_);
-		wd_.del_widget(base_);
 	}
 }

@@ -4,9 +4,9 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include "gl_fw/IGLcore.hpp"
 #include "widgets/widget_label.hpp"
 #include "widgets/widget_utils.hpp"
+#include "gl_fw/IGLcore.hpp"
 #include "img_io/paint.hpp"
 
 namespace gui {
@@ -111,15 +111,4 @@ namespace gui {
 
 		render_text(wd_, h, get_param(), param_.text_param_, param_.plate_param_);
 	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	廃棄
-	*/
-	//-----------------------------------------------------------------//
-	void widget_label::destroy()
-	{
-	}
-
 }

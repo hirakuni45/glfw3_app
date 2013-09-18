@@ -4,24 +4,24 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
+#include <cstdio>
+#include <boost/foreach.hpp>
 #include "gl_fw/gl_info.hpp"
 #include "gl_fw/IGLcore.hpp"
-#include "widget_director.hpp"
-#include "widget_utils.hpp"
-#include "widget_null.hpp"
-#include "widget_image.hpp"
-#include "widget_text.hpp"
-#include "widget_frame.hpp"
-#include "widget_button.hpp"
-#include "widget_label.hpp"
-#include "widget_slider.hpp"
-#include "widget_check.hpp"
-#include "widget_radio.hpp"
-#include "widget_list.hpp"
-#include "widget_dialog.hpp"
-#include <boost/foreach.hpp>
-
-#include <cstdio>
+#include "widgets/widget_director.hpp"
+#include "widgets/widget_utils.hpp"
+#include "widgets/widget_null.hpp"
+#include "widgets/widget_image.hpp"
+#include "widgets/widget_text.hpp"
+#include "widgets/widget_frame.hpp"
+#include "widgets/widget_button.hpp"
+#include "widgets/widget_label.hpp"
+#include "widgets/widget_slider.hpp"
+#include "widgets/widget_check.hpp"
+#include "widgets/widget_radio.hpp"
+#include "widgets/widget_list.hpp"
+#include "widgets/widget_dialog.hpp"
+#include "widgets/widget_tree.hpp"
 
 namespace gui {
 
@@ -36,6 +36,7 @@ namespace gui {
 	widget::color_param widget_director::default_list_color_;
 	widget::color_param widget_director::default_list_color_select_;
 	widget::color_param widget_director::default_dialog_color_;
+	widget::color_param widget_director::default_tree_color_;
 
 	void widget_director::message_widget_(widget* w, const std::string& s)
 	{
@@ -91,6 +92,8 @@ namespace gui {
 			type = "list";
 		} else if(w->type() == get_type_id<widget_dialog>()) {
 			type = "dialog";
+		} else if(w->type() == get_type_id<widget_tree>()) {
+			type = "tree";
 		} else {
 			type = "(none)";
 		}
@@ -299,6 +302,10 @@ namespace gui {
 		fc.set(235, 157,  95);
 		bc = fc * 0.7f;
 		default_dialog_color_ = widget::color_param(fc, bc);
+
+		fc.set( 55, 157, 235);
+		bc = fc * 0.7f;
+		default_tree_color_ = widget::color_param(fc, bc);
 
 		img::paint::intensity_rect ir;
 		// ボタンの頂点輝度設定
@@ -621,7 +628,6 @@ namespace gui {
 			}
 		}
 
-
 		const vtx::spos& size = Igl->get_size();
 
 		// 各 描画
@@ -633,7 +639,9 @@ namespace gui {
 			const widget::param& pa = w->get_param();
 			if(!pa.state_[widget::state::ENABLE]) continue;
 			if(!pa.state_[widget::state::RENDER_ENABLE]) continue;
-			if(w->get_param().clip_.size.x <= 0 || w->get_param().clip_.size.y <= 0) continue;
+			if(w->get_param().clip_.size.x <= 0 || w->get_param().clip_.size.y <= 0) {
+				continue;
+			}
 
 			mobj_.setup_matrix(size.x, size.y);
 			vtx::spos pos(0);

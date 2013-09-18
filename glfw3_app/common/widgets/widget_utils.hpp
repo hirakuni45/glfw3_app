@@ -137,4 +137,16 @@ namespace gui {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	void render_text(widget_director& wd, gl::glmobj::handle oh, const widget::param& wp, const widget::text_param& tp, const widget::plate_param& pp);
 
+
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief	フレームの初期化
+		@param[in]	wd	widget_director
+		@param[in]	wp	widget::param
+		@param[in]	pp	widget::plate_param
+		@param[in]	cp	widget::color_param
+		@return モーション・オブジェクトのハンドルを返す
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	gl::glmobj::handle frame_init(widget_director& wd, widget::param& wp, const widget::plate_param& pp, const widget::color_param& cp);
 }

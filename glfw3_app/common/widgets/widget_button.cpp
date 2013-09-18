@@ -79,15 +79,4 @@ namespace gui {
 
 		render_text(wd_, objh_, get_param(), param_.text_param_, param_.plate_param_);
 	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	廃棄
-	*/
-	//-----------------------------------------------------------------//
-	void widget_button::destroy()
-	{
-	}
-
 }

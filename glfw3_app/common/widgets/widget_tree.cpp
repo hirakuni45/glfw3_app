@@ -1,10 +1,10 @@
 //=====================================================================//
 /*!	@file
-	@brief	GUI widget_frame クラス
+	@brief	GUI Widget ツリー
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include "widgets/widget_frame.hpp"
+#include "widgets/widget_tree.hpp"
 #include "widgets/widget_utils.hpp"
 
 namespace gui {
@@ -14,7 +14,7 @@ namespace gui {
 		@brief	初期化
 	*/
 	//-----------------------------------------------------------------//
-	void widget_frame::initialize()
+	void widget_tree::initialize()
 	{
 		// 自由な大きさの変更
 		at_param().state_.set(widget::state::SIZE_LOCK, false);
@@ -32,7 +32,7 @@ namespace gui {
 		@brief	アップデート
 	*/
 	//-----------------------------------------------------------------//
-	void widget_frame::update()
+	void widget_tree::update()
 	{
 	}
 
@@ -42,7 +42,7 @@ namespace gui {
 		@brief	レンダリング
 	*/
 	//-----------------------------------------------------------------//
-	void widget_frame::render()
+	void widget_tree::render()
 	{
 		if(objh_ == 0) return;
 

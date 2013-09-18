@@ -6,7 +6,6 @@
 */
 //=====================================================================//
 #include "widgets/widget_director.hpp"
-#include "widgets/widget_frame.hpp"
 #include "widgets/widget_button.hpp"
 #include "widgets/widget_text.hpp"
 
@@ -27,6 +26,8 @@ namespace gui {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
+			plate_param		plate_param_;
+			color_param		color_param_;
 
 			struct style {
 				enum type {
@@ -34,10 +35,6 @@ namespace gui {
 					CANCEL_OK,	///< キャンセル、OKボタン
 				};
 			};
-
-			plate_param		plate_param_;
-			color_param		color_param_;
-
 			style::type		style_;		///< ダイアログ・スタイル
 			vtx::srect		text_area_;	///< テキスト表示エリア
 
@@ -57,11 +54,13 @@ namespace gui {
 
 		param				param_;
 
-		widget_frame*		base_;
+		gl::glmobj::handle	objh_;
+
 		widget_text*		text_;
 		widget_button*		ok_;
 		widget_button*		cancel_;
 
+		void destroy_();
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -69,8 +68,8 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_dialog(widget_director& wd, const widget::param& wp, const param& p) :
-			wd_(wd), widget(wp), param_(p),
-			base_(0), text_(0), ok_(0), cancel_(0)
+			wd_(wd), widget(wp), param_(p), objh_(0),
+			text_(0), ok_(0), cancel_(0)
 		{ }
 
 
@@ -79,7 +78,7 @@ namespace gui {
 			@brief	デストラクター
 		*/
 		//-----------------------------------------------------------------//
-		virtual ~widget_dialog() { destroy(); }
+		virtual ~widget_dialog() { destroy_(); }
 
 
 		//-----------------------------------------------------------------//
@@ -137,6 +136,22 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	文書の取得
+			@return	文書
+		*/
+		//-----------------------------------------------------------------//
+		const std::string& get_text() const {
+			if(text_) {
+				return text_->get_local_param().text_param_.text_;
+			} else {
+				static std::string s;
+				return s;
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
@@ -157,13 +172,5 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		void render();
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	廃棄
-		*/
-		//-----------------------------------------------------------------//
-		void destroy();
 	};
 }

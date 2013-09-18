@@ -313,4 +313,34 @@ namespace gui {
 		}
 	}
 
+
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief	フレームの初期化
+		@param[in]	wd	widget_director
+		@param[in]	wp	widget::param
+		@param[in]	pp	widget::plate_param
+		@param[in]	cp	widget::color_param
+		@return モーション・オブジェクトのハンドルを返す
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	gl::glmobj::handle frame_init(widget_director& wd, widget::param& wp, const widget::plate_param& pp, const widget::color_param& cp)
+	{
+		vtx::spos size;
+		if(pp.resizeble_) {
+			vtx::spos rsz = pp.grid_ * 3;
+			if(wp.rect_.size.x >= rsz.x) size.x = rsz.x;
+			else size.x = wp.rect_.size.x;
+			if(wp.rect_.size.y >= rsz.y) size.y = rsz.y;
+			else size.y = wp.rect_.size.y;
+		} else {
+			size = wp.rect_.size;
+		}
+
+		share_t t;
+		t.size_ = size;
+		t.color_param_ = cp;
+		t.plate_param_ = pp;
+		return wd.share_add(t);
+	}
 }
