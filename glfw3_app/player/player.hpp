@@ -8,6 +8,7 @@
 #include "main.hpp"
 #include "utils/i_scene.hpp"
 #include "utils/director.hpp"
+#include "widgets/widget_filer.hpp"
 #include "widgets/widget_label.hpp"
 #include "widgets/widget_slider.hpp"
 #include "widgets/widget_check.hpp"
@@ -19,6 +20,8 @@ namespace app {
 	class player : public utils::i_scene {
 
 		utils::director<core>&	director_;
+
+		gui::widget_filer*	filer_;
 
 		gui::widget*	file_btn_;
 		gui::widget*	play_btn_;
@@ -65,6 +68,7 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		player(utils::director<core>& d) : director_(d),
+		  filer_(0),
 		  file_btn_(0), play_btn_(0), pause_btn_(0), rew_btn_(0), ff_btn_(0),
 		  volume_(0), vol_min_img_(0), vol_max_img_(0),
 		  total_time_(0), remain_time_(0), seek_time_(0), resume_play_(0),

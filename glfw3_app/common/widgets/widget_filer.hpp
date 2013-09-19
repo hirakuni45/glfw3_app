@@ -11,12 +11,10 @@
 #include "utils/files.hpp"
 #include "utils/drive_info.hpp"
 #include "utils/preference.hpp"
-#include "widget_director.hpp"
-#include "widget.hpp"
-#include "widget_null.hpp"
-#include "widget_frame.hpp"
-#include "widget_label.hpp"
-#include "widget_button.hpp"
+#include "widgets/widget_director.hpp"
+#include "widgets/widget_null.hpp"
+#include "widgets/widget_label.hpp"
+#include "widgets/widget_button.hpp"
 
 namespace gui {
 
@@ -25,21 +23,42 @@ namespace gui {
 		@brief	GUI filer クラス（ファイル選択）
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	class widget_filer {
+	struct widget_filer : public widget {
 
+		typedef widget_filer value_type;
+
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	widget_filer パラメーター
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		struct param {
+			plate_param		plate_param_;
+			color_param		color_param_;
+
+			std::string		path_;		///< 初期ファイル・パス
+			std::string		filter_;	///< 初期ファイル・フィルター
+
+			param(const std::string& path = "", const std::string& filter = "") :
+				plate_param_(),
+				color_param_(widget_director::default_frame_color_),
+				path_(path), filter_(filter)
+			{ }
+		};
+
+	private:
 		widget_director&	wd_;
+
+		param				param_;
+
+		gl::glmobj::handle	objh_;
 
 		utils::files		fsc_;
 		utils::drive_info	drv_;
 
-		std::string	ext_filter_;
-
-		std::string	path_text_;
-
 		short			path_height_;
 		short			label_height_;
 
-		widget_frame*	base_;	///< ベース・フレーム
 		widget_label*	path_;	///< パス・フレーム
 		widget_button*	info_;	///< インフォメーション切り替えボタン
 		widget*			main_;	///< メイン・フレーム
@@ -98,16 +117,18 @@ namespace gui {
 		void resize_files_(widget_files& wfs, short width);
 		void update_files_info_(widget_files& wfs);
 		void destroy_files_(widget_files& wfs);
-
+		void destroy_();
 	public:
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		widget_filer(widget_director& wd) : wd_(wd), fsc_(),
+		widget_filer(widget_director& wd, const widget::param& bp, const param& p) :
+			wd_(wd), widget(bp), param_(p), objh_(0),
+			fsc_(),
 			path_height_(32), label_height_(32),
-			base_(0), path_(0), info_(0), main_(0), files_(0),
+			path_(0), info_(0), main_(0), files_(0),
 			info_state_(info_state::NONE),
 			speed_(0.0f), position_(0.0f), select_pos_(0),
 			file_()
@@ -119,22 +140,42 @@ namespace gui {
 			@brief	デストラクター
 		*/
 		//-----------------------------------------------------------------//
-		~widget_filer() { destroy(); }
+		virtual ~widget_filer() { destroy_(); }
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	許可状態の取得
-			@return 許可状態
+			@brief	型を取得
 		*/
 		//-----------------------------------------------------------------//
-		bool get_enable() const {
-			if(base_) {
-				return base_->get_state(widget::state::ENABLE);
-			} else {
-				return false;
-			}
-		}
+		type_id type() const { return get_type_id<value_type>(); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ハイブリッド・ウィジェットのサイン
+			@return ハイブリッド・ウィジェットの場合「true」を返す。
+		*/
+		//-----------------------------------------------------------------//
+		bool hybrid() const { return true; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	個別パラメーターへの取得(ro)
+			@return 個別パラメーター
+		*/
+		//-----------------------------------------------------------------//
+		const param& get_local_param() const { return param_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	個別パラメーターへの取得
+			@return 個別パラメーター
+		*/
+		//-----------------------------------------------------------------//
+		param& at_local_param() { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -144,38 +185,40 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		void enable(bool f = true) {
-			wd_.enable(base_, f, true);
+			wd_.enable(this, f, true);
 		}
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	拡張子フィルターの設定
-			@param[in]	ext	拡張子
+			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void set_filter(const std::string& ext) {
-			ext_filter_ = ext;
-		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	リソースを作成
-			@param[in]	rect	位置と大きさ
-			@param[in]	path	ファイル・パス
-		*/
-		//-----------------------------------------------------------------//
-		widget* create(const vtx::srect& rect, const std::string& path);
+		void initialize();
 
 
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	アップデート
-			@return ファイルが選択されたら「true」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool update();
+		void update();
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	レンダリング
+		*/
+		//-----------------------------------------------------------------//
+		void render();
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	サービス
+		*/
+		//-----------------------------------------------------------------//
+		void service();
 
 
 		//-----------------------------------------------------------------//
@@ -235,15 +278,5 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		bool load(sys::preference& pre);
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	リソースの廃棄
-		*/
-		//-----------------------------------------------------------------//
-		void destroy();
-
 	};
-
 }

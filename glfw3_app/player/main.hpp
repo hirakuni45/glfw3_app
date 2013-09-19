@@ -17,10 +17,9 @@ namespace app {
 		al::sound	sound_;
 
 		gui::widget_director	widget_director_;
-		gui::widget_filer		widget_filer_;
 
 		sys::preference		preference_;
 
-		core() : widget_filer_(widget_director_) { }
+		core() { }
 	};
 }

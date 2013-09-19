@@ -96,7 +96,9 @@ namespace gui {
 			f = true;
 		}
 
-		if(f) enable(false);
+		if(f) {
+			enable(false);
+		}
 	}
 
 

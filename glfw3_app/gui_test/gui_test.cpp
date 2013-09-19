@@ -9,6 +9,7 @@
 #include "core/glcore.hpp"
 #include "widgets/widget_utils.hpp"
 #include "widgets/widget_null.hpp"
+#include "widgets/widget_frame.hpp"
 #include "widgets/widget_button.hpp"
 #include "widgets/widget_label.hpp"
 #include "widgets/widget_slider.hpp"
@@ -18,6 +19,7 @@
 #include "widgets/widget_image.hpp"
 #include "widgets/widget_text.hpp"
 #include "widgets/widget_tree.hpp"
+#include "widgets/widget_filer.hpp"
 
 namespace app {
 
@@ -116,6 +118,12 @@ namespace app {
 			filer_open_ = wd.add_widget<widget_button>(wp, wp_);
 		}
 
+		if(1) {	// ファイラーのテスト
+			widget::param wp(vtx::srect(10, 30, 300, 200));
+			widget_filer::param wp_(igl->get_current_path());
+			filer_ = wd.add_widget<widget_filer>(wp, wp_);
+		}
+
 		if(1) {	// ツリーのテスト
 			widget::param wp(vtx::srect(200, 400, 100, 100));
 			widget_tree::param wp_;
@@ -161,6 +169,9 @@ namespace app {
 
 		if(filer_open_) {
 			if(filer_open_->get_selected()) {
+				if(filer_) {
+					filer_->enable();
+				}
 			}
 		}
 

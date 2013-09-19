@@ -4,9 +4,8 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include "widget_filer.hpp"
-#include "widget_null.hpp"
-#include "widget_frame.hpp"
+#include "widgets/widget_utils.hpp"
+#include "widgets/widget_filer.hpp"
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
@@ -90,12 +89,19 @@ namespace gui {
 		}
 		files_->at_rect().size.y = rect.org.y;
 
-		file_map_it it = file_map_.find(path_text_);
+		file_map_it it = file_map_.find(param_.path_);
 		if(it != file_map_.end()) {
 			position_ = it->second.position_;
 			select_pos_ = it->second.select_pos_;
 			files_->at_rect().org = it->second.position_;
 		}
+
+		// ウィジェットの強制的な優先順位設定
+		wd_.top_widget(this);
+		wd_.top_widget(path_);
+		wd_.top_widget(info_);
+		wd_.top_widget(main_);
+		wd_.top_widget(files_);
 	}
 
 
@@ -188,15 +194,24 @@ namespace gui {
 
 	void widget_filer::destroy_files_(widget_files& wfs)
 	{
-		// ラベルを破棄
+		// ラベル郡を破棄
 		BOOST_FOREACH(const widget_file& wf, wfs) {
-			wd_.del_widget(wf.name);
 			wd_.del_widget(wf.info);
+			wd_.del_widget(wf.name);
 			wd_.del_widget(wf.base);
 		}
 		wfs.clear();
 		speed_.set(0);
 		position_.set(0);
+	}
+
+
+	void widget_filer::destroy_()
+	{
+		destroy_files_(center_);
+		wd_.del_widget(files_);
+		wd_.del_widget(main_);
+		wd_.del_widget(path_);
 	}
 
 
@@ -216,7 +231,7 @@ namespace gui {
 			std::string fn;
 			if(fi.get_name() == ".") continue;
 			else if(fi.get_name() == "..") continue;
-			utils::append_path(path_text_, fi.get_name(), fn);
+			utils::append_path(param_.path_, fi.get_name(), fn);
 			if(fn == file_) ret = n;
 			if(dir && fi.is_directory()) {
 				fn += "/";
@@ -233,35 +248,32 @@ namespace gui {
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	リソースを作成
-		@param[in]	rect	位置と大きさ
-		@param[in]	path	ファイル・パス
+		@brief	初期化
 	*/
 	//-----------------------------------------------------------------//
-	widget* widget_filer::create(const vtx::srect& rect, const std::string& path)
+	void widget_filer::initialize()
 	{
-		path_text_ = path;
+		// 自由な大きさの変更
+		at_param().state_.set(widget::state::SIZE_LOCK, false);
+		at_param().state_.set(widget::state::RESIZE_H_ENABLE);
+		at_param().state_.set(widget::state::RESIZE_V_ENABLE);
 
-		fsc_.set_path(path, ext_filter_);
+		param_.plate_param_.resizeble_ = true;
+		// フレームの生成
+		objh_ = frame_init(wd_, at_param(), param_.plate_param_, param_.color_param_);
 
-		// base frame
-		{
-			widget::param wp(rect);
-			widget_frame::param wp_;
-			base_ = wd_.add_widget<widget_frame>(wp, wp_);
-			base_->set_state(widget::state::SIZE_LOCK, false);
-		}
+		fsc_.set_path(param_.path_, param_.filter_);
 
-		short frame_width = base_->get_local_param().plate_param_.frame_width_;
+		short frame_width = param_.plate_param_.frame_width_;
 		// path（ハンドル）
 		{
 			vtx::srect r;
 			r.org.set(frame_width);
-			r.size.x = rect.size.x - frame_width * 2;
+			r.size.x = get_rect().size.x - frame_width * 2;
 			r.size.y = path_height_;
-			widget::param wp(r, base_);
+			widget::param wp(r, this);
 			wp.action_.set(widget::action::SELECT_HIGHLIGHT);
-			widget_label::param wp_(path);
+			widget_label::param wp_(param_.path_);
 			wp_.text_param_.placement_.hpt = vtx::placement::holizontal::LEFT;
 			wp_.color_param_.fore_color_.set(236, 181, 63);
 			wp_.color_param_.back_color_.set(131, 104, 45);
@@ -282,9 +294,9 @@ namespace gui {
 			vtx::srect r;
 			r.size = wd_.at_mobj().get_size(hnd);
 			short space = 4;
-			r.org.x = base_->get_rect().size.x - r.size.x - frame_width - space;
+			r.org.x = get_rect().size.x - r.size.x - frame_width - space;
 			r.org.y = frame_width + (path_height_ - r.size.y) / 2;
-			widget::param wp(r, base_);
+			widget::param wp(r, this);
 			widget_button::param wp_;
 			wp_.handle_ = hnd;
 			info_ = wd_.add_widget<widget_button>(wp, wp_);
@@ -293,8 +305,8 @@ namespace gui {
 		// main null frame
 		{
 			vtx::srect r(vtx::spos(frame_width, frame_width + path_height_),
-				vtx::spos(rect.size.x - 8, rect.size.y - 32 - 2 * 4 - 4));
-			widget::param wp(r, base_);
+				vtx::spos(get_rect().size.x - 8, get_rect().size.y - 32 - 2 * 4 - 4));
+			widget::param wp(r, this);
 			wp.state_.reset(widget::state::RENDER_ENABLE);
 			widget_null::param wp_;
 			main_ = wd_.add_widget<widget_null>(wp, wp_);
@@ -304,8 +316,7 @@ namespace gui {
 
 		// files null frame
 		{
-			vtx::srect r(vtx::spos(0, 0),
-				vtx::spos(rect.size.x, rect.size.y));
+			vtx::srect r(vtx::spos(0), get_rect().size);
 			widget::param wp(r, main_);
 			wp.state_.reset(widget::state::RENDER_ENABLE);
 			widget_null::param wp_;
@@ -316,42 +327,16 @@ namespace gui {
 
 		position_ = files_->get_rect().org;
 		speed_.set(0.0f, 0.0f);
-
-		return 0;
 	}
 
 
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	アップデート
-		@return ファイルが選択されたら「true」を返す
 	*/
 	//-----------------------------------------------------------------//
-	bool widget_filer::update()
+	void widget_filer::update()
 	{
-		if(!get_enable()) return false;
-
-		// ファイル情報の取得と反映（ファイル情報収集はスレッドで動作）
-		if(fsc_.probe()) {
-			if(center_.empty()) {
-				create_files_(center_, 0);
-				update_files_info_(center_);
-				std::string s;
-				if(utils::previous_path(path_text_, s)) {
-//					fsc_.set_path(s);
-				}
-			} else if(left_.empty()) {
-//				create_files_(left_, -files_->get_rect().size.x);
-			}
-		}
-
-		// ウィジェットの強制的な優先順位設定
-		wd_.top_widget(base_);
-		wd_.top_widget(path_);
-		wd_.top_widget(info_);
-		wd_.top_widget(main_);
-		wd_.top_widget(files_);
-
 		// 情報ボタンが押された場合の処理
 		if(info_->get_selected()) {
 			info_state_ = static_cast<info_state::type>(info_state_ + 1);
@@ -363,8 +348,8 @@ namespace gui {
 
 		// フレームのサイズを、仮想ウィジェットに反映
 		{
-			short fw = base_->get_local_param().plate_param_.frame_width_;
-			const vtx::spos& size = base_->get_rect().size;
+			short fw = param_.plate_param_.frame_width_;
+			const vtx::spos& size = get_rect().size;
 			path_->at_rect().size.x = size.x - fw * 2 - path_height_;
 			main_->at_rect().size.x = size.x - fw * 2;
 			main_->at_rect().size.y = size.y - path_->get_rect().size.y - fw * 2;
@@ -382,7 +367,8 @@ namespace gui {
 		float speed_gain = 0.95f;
 
 		// スプリング効果
-		if(files_->get_select()) {
+//		if(files_->get_select()) {
+		if(get_select()) {
 			position_ = files_->get_rect().org;
 			if(d < 0) {
 				if(position_.y < d) {
@@ -396,7 +382,8 @@ namespace gui {
 				position_.y *= slip_gain;
 			}
 		} else {
-			if(files_->get_select_out()) {
+///			if(files_->get_select_out()) {
+			if(get_select_out()) {
 				speed_ = files_->get_param().speed_;
 			}
 			position_ += speed_;
@@ -449,10 +436,10 @@ namespace gui {
 
 		// パスに紐づいた位置の記録
 		{
-			file_map_it it = file_map_.find(path_text_);
+			file_map_it it = file_map_.find(param_.path_);
 			if(it == file_map_.end()) {
 				file_t t;
-				it = file_map_.insert(file_map_pair(path_text_, t)).first;
+				it = file_map_.insert(file_map_pair(param_.path_, t)).first;
 			}
 			file_t& f = it->second;
 			f.position_ = position_;
@@ -461,13 +448,13 @@ namespace gui {
 
 		// path 文字列を設定
 		{
-			if(files_->get_rect().org.x > (base_->get_rect().size.x / 2)) {
+			if(files_->get_rect().org.x > (get_rect().size.x / 2)) {
 				std::string np;
-				if(utils::previous_path(path_text_, np)) {
+				if(utils::previous_path(param_.path_, np)) {
 					path_->at_local_param().text_param_.text_ = np;
 				}
 			} else {
-				path_->at_local_param().text_param_.text_ = path_text_;
+				path_->at_local_param().text_param_.text_ = param_.path_;
 			}
 		}
 
@@ -484,10 +471,52 @@ namespace gui {
 			wf.info->set_action(widget::action::SELECT_HIGHLIGHT);
 			wf.info->set_state(widget::state::IS_SELECT);
 		}
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	レンダリング
+	*/
+	//-----------------------------------------------------------------//
+	void widget_filer::render()
+	{
+		if(objh_ == 0) return;
+
+		wd_.at_mobj().resize(objh_, get_param().rect_.size);
+		glEnable(GL_TEXTURE_2D);
+		wd_.at_mobj().draw(objh_, gl::glmobj::normal, 0, 0);
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	サービス
+	*/
+	//-----------------------------------------------------------------//
+	void widget_filer::service()
+	{
+		if(!get_state(widget::state::ENABLE)) return;
+
+		// ファイル情報の取得と反映（ファイル情報収集はスレッドで動作）
+		if(fsc_.probe()) {
+			if(center_.empty()) {
+				create_files_(center_, 0);
+				update_files_info_(center_);
+
+				std::string s;
+				if(utils::previous_path(param_.path_, s)) {
+//					fsc_.set_path(s);
+				}
+			} else if(left_.empty()) {
+//				create_files_(left_, -files_->get_rect().size.x);
+			}
+		}
 
 		// 選択の確認と動作
 		bool selected = false;
-		if(files_->get_select_out()) {
+///		if(files_->get_select_out()) {
+		if(files_->get_selected()) {
 			widget_files_cit cit = scan_selected_file_(center_);
 			if(cit != center_.end()) {
 				const widget_file& wf = *cit;
@@ -495,33 +524,34 @@ namespace gui {
 					const std::string& n = wf.name->get_local_param().text_param_.text_;
 					if(n == "..") {
 						std::string np;
-						utils::previous_path(path_text_, np);
-						path_text_ = np;
-						fsc_.set_path(path_text_, ext_filter_);
+						utils::previous_path(param_.path_, np);
+						param_.path_ = np;
+						fsc_.set_path(param_.path_, param_.filter_);
 						destroy_files_(center_);
 					} else if(wf.dir) {
 						std::string np;
-						utils::append_path(path_text_, n, np);
-						utils::strip_last_of_delimita_path(np, path_text_);
-						fsc_.set_path(path_text_, ext_filter_);
+						utils::append_path(param_.path_, n, np);
+						utils::strip_last_of_delimita_path(np, param_.path_);
+						fsc_.set_path(param_.path_, param_.filter_);
 						destroy_files_(center_);
 					} else {
-						utils::append_path(path_text_, n, file_);
+						utils::append_path(param_.path_, n, file_);
 						selected = true;
 					}
 				}
 			} else {
-				if(files_->get_rect().org.x > (base_->get_rect().size.x / 2)) {
+				if(files_->get_rect().org.x > (get_rect().size.x / 2)) {
 					std::string np;
-					utils::previous_path(path_text_, np);
-					path_text_ = np;
-					fsc_.set_path(path_text_);
+					utils::previous_path(param_.path_, np);
+					param_.path_ = np;
+					fsc_.set_path(param_.path_);
 					destroy_files_(center_);
 				}
 			}
 		}
-
-		return selected;
+		if(selected) {
+			enable(false);
+		}
 	}
 
 
@@ -554,12 +584,10 @@ namespace gui {
 	bool widget_filer::save(sys::preference& pre)
 	{
 		int err = 0;
-		if(!pre.put_text(key_path_, path_text_)) ++err;
-		if(base_) {
-			if(!pre.put_position(key_locate_, vtx::ipos(base_->get_rect().org))) ++err;
-			if(!pre.put_position(key_size_, vtx::ipos(base_->get_rect().size))) ++err;
-///			if(!pre.put_integer(key_info_, info_state_) ++err;
-		}
+		if(!pre.put_text(key_path_, param_.path_)) ++err;
+		if(!pre.put_position(key_locate_, vtx::ipos(get_rect().org))) ++err;
+		if(!pre.put_position(key_size_, vtx::ipos(get_rect().size))) ++err;
+///		if(!pre.put_integer(key_info_, info_state_) ++err;
 		return err == 0;
 	}
 
@@ -576,8 +604,8 @@ namespace gui {
 		int err = 0;
 		std::string path;
 		if(pre.get_text(key_path_, path)) {
-			path_text_ = path;
-			fsc_.set_path(path, ext_filter_);
+			param_.path_ = path;
+			fsc_.set_path(param_.path_, param_.filter_);
 			destroy_files_(center_);
 		} else {
 			++err;
@@ -585,12 +613,12 @@ namespace gui {
 
 		vtx::ipos p;
 		if(pre.get_position(key_locate_, p)) {
-			base_->at_rect().org = p;
+			at_rect().org = p;
 		} else {
 			++err;
 		}
 		if(pre.get_position(key_size_, p)) {
-			base_->at_rect().size = p;
+			at_rect().size = p;
 		} else {
 			++err;
 		}
@@ -604,20 +632,4 @@ namespace gui {
 #endif
 		return err == 0;
 	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	リソースの廃棄
-	*/
-	//-----------------------------------------------------------------//
-	void widget_filer::destroy()
-	{
-		destroy_files_(center_);
-		wd_.del_widget(files_);
-		wd_.del_widget(main_);
-		wd_.del_widget(path_);
-		wd_.del_widget(base_);
-	}
-
 }

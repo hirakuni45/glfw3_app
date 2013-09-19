@@ -215,19 +215,17 @@ main.o: ../common/img_io/img_files.hpp ../common/img_io/i_img_io.hpp
 main.o: ../common/widgets/widget_filer.hpp ../common/utils/files.hpp
 main.o: ../common/utils/drive_info.hpp ../common/utils/file_info.hpp
 main.o: ../common/utils/handle_set.hpp ../common/utils/preference.hpp
-main.o: ../common/widgets/widget_director.hpp ../common/widgets/widget.hpp
-main.o: ../common/widgets/widget_null.hpp ../common/widgets/widget_frame.hpp
+main.o: ../common/widgets/widget_null.hpp
+main.o: ../common/widgets/widget_director.hpp
 main.o: ../common/widgets/widget_label.hpp
 main.o: ../common/widgets/widget_button.hpp ../common/core/glcore.hpp
 main.o: ../common/gl_fw/IGLcore.hpp ../common/core/device.hpp
 main.o: ../common/gl_fw/glfonts.hpp ../common/gl_fw/Ikfimg.hpp
 main.o: ../common/core/device.hpp ../common/utils/director.hpp
 main.o: ../common/utils/i_scene.hpp player.hpp ../common/utils/i_scene.hpp
-main.o: ../common/widgets/widget_label.hpp
 main.o: ../common/widgets/widget_slider.hpp
 main.o: ../common/widgets/widget_check.hpp
-main.o: ../common/widgets/widget_dialog.hpp
-main.o: ../common/widgets/widget_button.hpp ../common/widgets/widget_text.hpp
+main.o: ../common/widgets/widget_dialog.hpp ../common/widgets/widget_text.hpp
 main.o: ../common/gl_fw/glutils.hpp
 player.o: player.hpp main.hpp ../common/snd_io/sound.hpp
 player.o: ../common/snd_io/audio_io.hpp ../common/utils/file_io.hpp
@@ -246,23 +244,18 @@ player.o: ../common/img_io/img_rgba8.hpp ../common/img_io/img_files.hpp
 player.o: ../common/img_io/i_img_io.hpp ../common/widgets/widget_filer.hpp
 player.o: ../common/utils/files.hpp ../common/utils/drive_info.hpp
 player.o: ../common/utils/file_info.hpp ../common/utils/handle_set.hpp
-player.o: ../common/utils/preference.hpp
-player.o: ../common/widgets/widget_director.hpp ../common/widgets/widget.hpp
-player.o: ../common/widgets/widget_null.hpp
-player.o: ../common/widgets/widget_frame.hpp
+player.o: ../common/utils/preference.hpp ../common/widgets/widget_null.hpp
+player.o: ../common/widgets/widget_director.hpp
 player.o: ../common/widgets/widget_label.hpp
 player.o: ../common/widgets/widget_button.hpp ../common/utils/i_scene.hpp
 player.o: ../common/utils/director.hpp ../common/utils/i_scene.hpp
-player.o: ../common/widgets/widget_label.hpp
 player.o: ../common/widgets/widget_slider.hpp
 player.o: ../common/widgets/widget_check.hpp
 player.o: ../common/widgets/widget_dialog.hpp
-player.o: ../common/widgets/widget_button.hpp
 player.o: ../common/widgets/widget_text.hpp ../common/core/glcore.hpp
 player.o: ../common/gl_fw/IGLcore.hpp ../common/core/device.hpp
 player.o: ../common/gl_fw/glfonts.hpp ../common/gl_fw/Ikfimg.hpp
 player.o: ../common/core/device.hpp ../common/widgets/widget_utils.hpp
-player.o: ../common/widgets/widget_null.hpp
 player.o: ../common/widgets/widget_image.hpp
 ../common/core/glcore.o: ../common/core/glcore.hpp
 ../common/core/glcore.o: ../common/gl_fw/IGLcore.hpp
@@ -622,6 +615,12 @@ player.o: ../common/widgets/widget_image.hpp
 ../common/widgets/widget_director.o: ../common/widgets/widget_dialog.hpp
 ../common/widgets/widget_director.o: ../common/widgets/widget_tree.hpp
 ../common/widgets/widget_director.o: ../common/utils/tree_unit.hpp
+../common/widgets/widget_director.o: ../common/widgets/widget_filer.hpp
+../common/widgets/widget_director.o: ../common/utils/files.hpp
+../common/widgets/widget_director.o: ../common/utils/drive_info.hpp
+../common/widgets/widget_director.o: ../common/utils/file_info.hpp
+../common/widgets/widget_director.o: ../common/utils/handle_set.hpp
+../common/widgets/widget_director.o: ../common/utils/preference.hpp
 ../common/widgets/widget_utils.o: ../common/gl_fw/IGLcore.hpp
 ../common/widgets/widget_utils.o: ../common/core/device.hpp
 ../common/widgets/widget_utils.o: ../common/utils/vtx.hpp
@@ -729,7 +728,6 @@ player.o: ../common/widgets/widget_image.hpp
 ../common/widgets/widget_frame.o: ../common/img_io/i_img_io.hpp
 ../common/widgets/widget_frame.o: ../common/utils/file_io.hpp
 ../common/widgets/widget_frame.o: ../common/widgets/widget_utils.hpp
-../common/widgets/widget_frame.o: ../common/widgets/widget_director.hpp
 ../common/widgets/widget_button.o: ../common/gl_fw/IGLcore.hpp
 ../common/widgets/widget_button.o: ../common/core/device.hpp
 ../common/widgets/widget_button.o: ../common/utils/vtx.hpp
@@ -920,36 +918,35 @@ player.o: ../common/widgets/widget_image.hpp
 ../common/widgets/widget_dialog.o: ../common/widgets/widget_button.hpp
 ../common/widgets/widget_dialog.o: ../common/widgets/widget_text.hpp
 ../common/widgets/widget_dialog.o: ../common/widgets/widget_utils.hpp
-../common/widgets/widget_filer.o: ../common/widgets/widget_filer.hpp
-../common/widgets/widget_filer.o: ../common/utils/files.hpp
-../common/widgets/widget_filer.o: ../common/utils/drive_info.hpp
-../common/widgets/widget_filer.o: ../common/utils/file_info.hpp
-../common/widgets/widget_filer.o: ../common/utils/file_io.hpp
-../common/widgets/widget_filer.o: ../common/utils/string_utils.hpp
-../common/widgets/widget_filer.o: ../common/utils/handle_set.hpp
-../common/widgets/widget_filer.o: ../common/utils/preference.hpp
-../common/widgets/widget_filer.o: ../common/utils/vtx.hpp
-../common/widgets/widget_filer.o: ../common/widgets/widget_director.hpp
+../common/widgets/widget_filer.o: ../common/widgets/widget_utils.hpp
 ../common/widgets/widget_filer.o: ../common/widgets/widget.hpp
 ../common/widgets/widget_filer.o: ../common/img_io/img.hpp
 ../common/widgets/widget_filer.o: ../common/img_io/paint.hpp
 ../common/widgets/widget_filer.o: ../common/img_io/img.hpp
 ../common/widgets/widget_filer.o: ../common/img_io/i_img.hpp
+../common/widgets/widget_filer.o: ../common/utils/vtx.hpp
 ../common/widgets/widget_filer.o: ../common/img_io/img_rgba8.hpp
 ../common/widgets/widget_filer.o: ../common/img_io/img_idx8.hpp
 ../common/widgets/widget_filer.o: ../common/img_io/i_img.hpp
 ../common/widgets/widget_filer.o: ../common/img_io/img_clut.hpp
 ../common/widgets/widget_filer.o: ../common/img_io/img_gray8.hpp
+../common/widgets/widget_filer.o: ../common/utils/string_utils.hpp
 ../common/widgets/widget_filer.o: ../common/utils/vmath.hpp
+../common/widgets/widget_filer.o: ../common/widgets/widget_director.hpp
 ../common/widgets/widget_filer.o: ../common/widgets/common_parts.hpp
 ../common/widgets/widget_filer.o: ../common/gl_fw/glmobj.hpp
 ../common/widgets/widget_filer.o: ../common/gl_fw/gl_info.hpp
 ../common/widgets/widget_filer.o: ../common/img_io/img_rgba8.hpp
 ../common/widgets/widget_filer.o: ../common/img_io/img_files.hpp
 ../common/widgets/widget_filer.o: ../common/img_io/i_img_io.hpp
-../common/widgets/widget_filer.o: ../common/widgets/widget.hpp
+../common/widgets/widget_filer.o: ../common/utils/file_io.hpp
+../common/widgets/widget_filer.o: ../common/widgets/widget_filer.hpp
+../common/widgets/widget_filer.o: ../common/utils/files.hpp
+../common/widgets/widget_filer.o: ../common/utils/drive_info.hpp
+../common/widgets/widget_filer.o: ../common/utils/file_info.hpp
+../common/widgets/widget_filer.o: ../common/utils/handle_set.hpp
+../common/widgets/widget_filer.o: ../common/utils/preference.hpp
 ../common/widgets/widget_filer.o: ../common/widgets/widget_null.hpp
-../common/widgets/widget_filer.o: ../common/widgets/widget_frame.hpp
-../common/widgets/widget_filer.o: ../common/widgets/widget_label.hpp
 ../common/widgets/widget_filer.o: ../common/widgets/widget_director.hpp
+../common/widgets/widget_filer.o: ../common/widgets/widget_label.hpp
 ../common/widgets/widget_filer.o: ../common/widgets/widget_button.hpp

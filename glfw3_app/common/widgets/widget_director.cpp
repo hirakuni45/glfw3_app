@@ -22,6 +22,7 @@
 #include "widgets/widget_list.hpp"
 #include "widgets/widget_dialog.hpp"
 #include "widgets/widget_tree.hpp"
+#include "widgets/widget_filer.hpp"
 
 namespace gui {
 
@@ -94,6 +95,8 @@ namespace gui {
 			type = "dialog";
 		} else if(w->type() == get_type_id<widget_tree>()) {
 			type = "tree";
+		} else if(w->type() == get_type_id<widget_filer>()) {
+			type = "filer";
 		} else {
 			type = "(none)";
 		}
@@ -145,9 +148,9 @@ namespace gui {
 			return;
 		}
 
-		widgets tmp;
-		parents_widget(root, tmp);
-		BOOST_FOREACH(widget* w, tmp) {
+		widgets ws;
+		parents_widget(root, ws);
+		BOOST_FOREACH(widget* w, ws) {
 			w->at_param().state_[widget::state::ENABLE] = flag;
 		}
 	}
@@ -581,23 +584,24 @@ namespace gui {
 					ws.push_back(w);
 				}
 			}
-			if(ws.size()) {
-				BOOST_FOREACH(widget* w, ws) {
-					top_widget(w);
-				}
+			BOOST_FOREACH(widget* w, ws) {
+				top_widget(w);
 			}
 		}
 
 		// 最後に各部品の update 処理 
-		BOOST_FOREACH(widget* w, widgets_) {
-			if(!w->get_state(widget::state::ENABLE)) continue;
-			if(w->get_state(widget::state::STALL)) continue;
-			if(w->get_state(widget::state::UPDATE_ENABLE)) {
-				w->update();
+		{
+			widgets ws = widgets_;
+			BOOST_FOREACH(widget* w, ws) {
+				if(!w->get_state(widget::state::ENABLE)) continue;
+				if(w->get_state(widget::state::STALL)) continue;
+				if(w->get_state(widget::state::UPDATE_ENABLE)) {
+					w->update();
+				}
 			}
 		}
 
-//		action_monitor();
+		action_monitor();
 	}
 
 
@@ -693,6 +697,21 @@ namespace gui {
 			set_TSC();
 
 			w->render();
+		}
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	サービス
+	*/
+	//-----------------------------------------------------------------//
+	void widget_director::service()
+	{
+		BOOST_FOREACH(widget* w, widgets_) {
+			if(w->get_param().parents_ == 0) {
+				w->service();
+			}
 		}
 	}
 

@@ -96,16 +96,18 @@ namespace app {
 		fonts.set_font_type(cf);
 
 		// サウンド・デコーダーの拡張子設定
-		gui::widget_filer& wf = director_.at_core().widget_filer_;
 		al::sound& sound = director_.at_core().sound_;
 		tag_serial_ = sound.get_tag_stream().serial_;
-		wf.set_filter(sound.get_file_exts());
-
-		wf.create(vtx::srect(10, 10, 500, 350), igl->get_current_path());
-		wf.enable(false);
 
 		using namespace gui;
 		widget_director& wd = director_.at_core().widget_director_;
+
+		{	// ファイラーリソースの生成
+			widget::param wp(vtx::srect(10, 10, 500, 350));
+			widget_filer::param wp_(igl->get_current_path(), sound.get_file_exts());
+			filer_ = wd.add_widget<widget_filer>(wp, wp_);
+			filer_->enable(false);
+		}
 
 		file_btn_  = gui::create_image<widget_button>(wd, "res/select.png");
 		play_btn_  = gui::create_image<widget_button>(wd, "res/play.png");
@@ -175,7 +177,9 @@ namespace app {
 			}
 		}
 		pre.get_real(volume_path_, volume_->at_local_param().slider_param_.position_);
-		wf.load(pre);
+		if(filer_) {
+			filer_->load(pre);
+		}
 
 		// エラー用ダイアログリソースの生成
 		{
@@ -293,12 +297,9 @@ namespace app {
 			play_btn_->set_state(gui::widget::state::STALL);
 		}
 
-		// ファイラーの状態など
-		gui::widget_filer& wf = director_.at_core().widget_filer_;
-
-		if(file_btn_->get_selected()) {
-			bool f = wf.get_enable();
-			wf.enable(!f);
+		if(filer_ && file_btn_->get_selected()) {
+			bool f = filer_->get_state(gui::widget::state::ENABLE);
+			filer_->enable(!f);
 		}
 
 		if(ff_btn_->get_selected()) {
@@ -392,11 +393,11 @@ namespace app {
 		sound.set_gain_stream(volume_->get_local_param().slider_param_.position_);
 
 		// ファイラーがファイル選択をした場合
-		if(wf.update()) {
-			const std::string& file = wf.get_file();
-			sound_play_(file);
-			wf.enable(false);
-		}
+///		if(wf.update()) {
+///			const std::string& file = wf.get_file();
+///			sound_play_(file);
+///			wf.enable(false);
+///		}
 
 		// Drag & Drop されたファイルを再生
 		int id = igl->get_recv_file_id();
@@ -437,6 +438,8 @@ namespace app {
 		}
 
 		director_.at_core().widget_director_.render();
+
+		director_.at_core().widget_director_.service();
 	}
 
 
@@ -466,8 +469,9 @@ namespace app {
 		// volume slider
 		pre.put_real(volume_path_, volume_->get_local_param().slider_param_.position_);
 
-		gui::widget_filer& wf = director_.at_core().widget_filer_;
-		wf.save(pre);
+		if(filer_) {
+			filer_->save(pre);
+		}
 	}
 
 }
