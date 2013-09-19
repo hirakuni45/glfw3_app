@@ -438,6 +438,7 @@ namespace al {
 
 		uint32_t pos = fin.tell();
 		uint32_t ofs = 0;
+		tag_.clear();
 		if(mp3_tag_.open(fin)) {
 			mp3_tag_.decode();
 			ofs = mp3_tag_.get_skip_head();

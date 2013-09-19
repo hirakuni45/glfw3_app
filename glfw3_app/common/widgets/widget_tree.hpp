@@ -9,6 +9,8 @@
 #include "widgets/widget_label.hpp"
 #include "utils/tree_unit.hpp"
 
+#include <cstdio>
+
 namespace gui {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -41,12 +43,18 @@ namespace gui {
 			@brief	ツリー・データベースのユニット
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		struct unit_t {
-			std::string		value_;
+		struct value {
+			std::string		data_;
 			bool			open_;
-			unit_t() : value_(), open_(false) { }
+
+			value() :
+				data_(), open_(false)
+			{ }
+			void list_all() const {
+				printf("(%d): '%s'", open_, data_.c_str());
+			}
 		};
-		typedef utils::tree_unit<unit_t>	tree_unit;
+		typedef utils::tree_unit<value>	tree_unit;
 
 	private:
 		widget_director&	wd_;

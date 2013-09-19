@@ -91,7 +91,7 @@ namespace app {
 		}
 
 		if(1) { // ダイアログのテスト
-			widget::param wp(vtx::srect(100, 250, 300, 200));
+			widget::param wp(vtx::srect(300, 300, 300, 200));
 			widget_dialog::param wp_;
 			wp_.style_ = widget_dialog::param::style::CANCEL_OK;
 			dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
@@ -104,16 +104,37 @@ namespace app {
 			wd.add_widget<widget_label>(wp, wp_);
 		}
 
-		if(1) { // ボタンのテスト
+		if(1) { // ボタンのテスト（ダイアログ開始ボタン）
 			widget::param wp(vtx::srect(30, 200, 100, 40));
 			widget_button::param wp_("Daialog");
 			dialog_open_ = wd.add_widget<widget_button>(wp, wp_);
 		}
 
+		if(1) { // ボタンのテスト（ファイラー開始ボタン）
+			widget::param wp(vtx::srect(30, 150, 100, 40));
+			widget_button::param wp_("Filer");
+			filer_open_ = wd.add_widget<widget_button>(wp, wp_);
+		}
+
 		if(1) {	// ツリーのテスト
 			widget::param wp(vtx::srect(200, 400, 100, 100));
 			widget_tree::param wp_;
-			wd.add_widget<widget_tree>(wp, wp_);
+			tree_ = wd.add_widget<widget_tree>(wp, wp_);
+
+			widget_tree::tree_unit& tu = tree_->at_tree_unit();
+			tu.make_directory("/root");
+			tu.set_current_path("root");
+			{
+				widget_tree::value v;
+				v.data_ = "AAA";
+				tu.install("sub0", v);
+			}
+			{
+				widget_tree::value v;
+				v.data_ = "BBB";
+				tu.install("sub1", v);
+			}
+			/// tu.list_all();
 		}
 	}
 
@@ -135,6 +156,11 @@ namespace app {
 				if(dialog_) {
 					dialog_->enable();
 				}
+			}
+		}
+
+		if(filer_open_) {
+			if(filer_open_->get_selected()) {
 			}
 		}
 

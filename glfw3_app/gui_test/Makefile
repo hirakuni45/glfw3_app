@@ -216,8 +216,8 @@ main.o: ../common/gl_fw/IGLcore.hpp ../common/core/device.hpp
 main.o: ../common/gl_fw/glfonts.hpp ../common/gl_fw/Ikfimg.hpp
 main.o: ../common/core/device.hpp ../common/utils/director.hpp
 main.o: ../common/utils/i_scene.hpp gui_test.hpp ../common/utils/i_scene.hpp
-main.o: ../common/widgets/widget_dialog.hpp
-main.o: ../common/widgets/widget_button.hpp ../common/widgets/widget_text.hpp
+main.o: ../common/widgets/widget_button.hpp
+main.o: ../common/widgets/widget_dialog.hpp ../common/widgets/widget_text.hpp
 main.o: ../common/gl_fw/glutils.hpp
 gui_test.o: gui_test.hpp main.hpp ../common/snd_io/sound.hpp
 gui_test.o: ../common/snd_io/audio_io.hpp ../common/utils/file_io.hpp
@@ -243,8 +243,8 @@ gui_test.o: ../common/widgets/widget_frame.hpp
 gui_test.o: ../common/widgets/widget_label.hpp
 gui_test.o: ../common/widgets/widget_button.hpp ../common/utils/i_scene.hpp
 gui_test.o: ../common/utils/director.hpp ../common/utils/i_scene.hpp
-gui_test.o: ../common/widgets/widget_dialog.hpp
 gui_test.o: ../common/widgets/widget_button.hpp
+gui_test.o: ../common/widgets/widget_dialog.hpp
 gui_test.o: ../common/widgets/widget_text.hpp ../common/core/glcore.hpp
 gui_test.o: ../common/gl_fw/IGLcore.hpp ../common/core/device.hpp
 gui_test.o: ../common/gl_fw/glfonts.hpp ../common/gl_fw/Ikfimg.hpp

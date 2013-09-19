@@ -76,6 +76,10 @@ printf("%x ", c);
 
 		value_ = 0;
 
+		for(int i = 0; i < id3_t::limit_; ++i) {
+			text_[i].clear();
+		}
+
 		return true;
 	}
 

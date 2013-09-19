@@ -39,6 +39,8 @@ namespace utils {
 			typedef boost::unordered_set<std::string>	childs;
 			typedef childs::iterator		childs_it;
 			childs			childs_;	///< 子ユニットの key
+
+		public:
 #ifndef NDEBUG
 			void list_all() const
 			{
@@ -50,7 +52,6 @@ namespace utils {
 				value.list_all();
 			}
 #endif
-		public:
 			unit_t() : id_(0) { }
 			void set_id(uint32_t id) { id_ = id; }
 			uint32_t get_id() const { return id_; }
@@ -64,6 +65,7 @@ namespace utils {
 		typedef boost::optional<T&>			optional_ref;		//< オプショナル参照型
 
 	private:
+		typedef std::pair<std::string, unit_t>	unit_pair;
 		typedef boost::unordered_map<std::string, unit_t> unit_map;
 		typedef typename unit_map::iterator			unit_map_it;
 		typedef typename unit_map::const_iterator	unit_map_cit;
@@ -122,24 +124,26 @@ namespace utils {
 		/*!
 			@brief	ユニットを登録
 			@param[in]	key		ユニットを識別するキー
-			@param[in]	unit	ユニット
+			@param[in]	value	値
 			@param[in]	same_name	キーと名前を同一にする場合「true」
 			@return 成功したら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool install(const std::string& key, const unit_t& unit, bool same_name = false)
+		bool install(const std::string& key, const T& value, bool same_name = false)
 		{
 			std::string fullpath;
 			if(!create_full_path(key, fullpath)) {
 				return false;
 			}
 
+			unit_t u;
+			u.value = value;
 			if(same_name) {
-				unit.name = get_file_name(key);
+				u.name = get_file_name(key);
 			}
+			u.set_id(serial_id_);
 
-			unit.set_id(serial_id_);
-			std::pair<unit_map_it, bool> ret = unit_map_.insert(unit_map::value_type(fullpath, unit));
+			std::pair<unit_map_it, bool> ret = unit_map_.insert(unit_pair(fullpath, u));
 			if(ret.second) {
 				++serial_id_;
 				++units_;
@@ -288,9 +292,9 @@ namespace utils {
 			if(same_name) {
 				t.name = get_file_name(name);
 			}
-			t.serial_id = serial_id_;
-			t.unit.dir = true;
-			std::pair<unit_map_it, bool> ret = unit_map_.insert(unit_map::value_type(fullpath, t));
+			t.set_id(serial_id_);
+
+			std::pair<unit_map_it, bool> ret = unit_map_.insert(unit_pair(fullpath, t));
 			if(ret.second) {
 				++serial_id_;
 				++directory_;
@@ -412,13 +416,11 @@ namespace utils {
 
 				const std::string& key = cit->first;
 				std::cout << key;
-				if(!t.unit.dir) {
-					for(uint32_t i = key.size(); i < ml; ++i) {
-						std::cout << " ";
-					}
+				for(uint32_t i = key.size(); i < ml; ++i) {
 					std::cout << " ";
-					t.unit.listAll();
 				}
+				std::cout << " ";
+				t.list_all();
 				std::cout << std::endl;
 			}
 			int n = unit_map_.size();
@@ -428,6 +430,35 @@ namespace utils {
 		}
 #endif
 
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	swap
+		*/
+		//-----------------------------------------------------------------//
+		void swap(tree_unit& src) {
+			unit_map_.swap(src.unit_map_);
+			std::swap(serial_id_, src.serial_id_);
+			std::swap(units_, src.units_);
+			std::swap(directory_, src.directory_);
+			current_path_.swap(src.current_path_);
+			stack_path_.swap(src.stack_path_);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	＝オペレーター
+		*/
+		//-----------------------------------------------------------------//
+		tree_unit& operator = (const tree_unit& src) {
+			unit_map_ = src.unit_map_;
+			serial_id_ = src.serial_id_;
+			units_ = src.units_;
+			directory_ = src.directory_;
+			current_path_ = src.current_path_;
+			stack_path_ = src.stack_path_;
+			return *this;
+		} 
 	};
 
 

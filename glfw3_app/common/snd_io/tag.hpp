@@ -33,7 +33,6 @@ namespace al {
 		tag() : serial_(0), image_(0) { }
 
 		void clear() {
-			serial_ = 0;
 			title_.clear();
 			artist_.clear();
 			writer_.clear();
@@ -43,6 +42,10 @@ namespace al {
 			disc_.clear();
 			total_discs_.clear();
 			date_.clear();
+		}
+		void reset() {
+			serial_ = 0;
+			clear();
 		}
 		void update() { ++serial_; }
 	};
