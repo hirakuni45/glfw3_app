@@ -215,13 +215,15 @@ namespace gui {
 				SELECT_PARENTS,			///< ペアレント全てが選択
 
 				MOVE_ROOT,				///< 移動の選択権をルートに与える
+				RESIZE_ROOT,			///< リサイズの選択権をルートに与える
 
 				RESIZE_H_ENABLE,		///< 水平リサイズ許可
 				RESIZE_V_ENABLE,		///< 垂直リサイズ許可
 				SIZE_LOCK,				///< サイズ固定
 
 				/// ワーク用
-				SYSTEM_STALL,			///< ストール
+				SYSTEM_STALL,			///< システム用ストール
+				SYSTEM_SELECT,			///< システム用セレクト
 
 				BEFORE_FOCUS,			///< １フレーム前フォーカスの状態
 				IS_FOCUS,				///< フォーカスの状態

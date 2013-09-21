@@ -118,7 +118,7 @@ namespace app {
 			filer_open_ = wd.add_widget<widget_button>(wp, wp_);
 		}
 
-		if(0) {	// ファイラーのテスト
+		if(1) {	// ファイラーのテスト
 			widget::param wp(vtx::srect(10, 30, 300, 200));
 			widget_filer::param wp_(igl->get_current_path());
 			filer_ = wd.add_widget<widget_filer>(wp, wp_);

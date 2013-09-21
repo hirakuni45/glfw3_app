@@ -38,7 +38,6 @@ namespace gui {
 			}
 			{
 				widget::param wp(rect, files_);
-				wp.state_.reset(widget::state::RENDER_ENABLE);
 				widget_null::param wp_;
 				wf.base = wd_.add_widget<widget_null>(wp, wp_);
 				wf.base->set_state(widget::state::POSITION_LOCK);
@@ -64,6 +63,7 @@ namespace gui {
 				wf.name->set_state(widget::state::POSITION_LOCK);
 				wf.name->set_state(widget::state::CLIP_PARENTS);
 				wf.name->set_state(widget::state::DRAG_UNSELECT);
+				wf.name->set_state(widget::state::RESIZE_ROOT);
 			}
 			{
 				vtx::srect r;
@@ -80,6 +80,7 @@ namespace gui {
 				wf.info->set_state(widget::state::POSITION_LOCK);
 				wf.info->set_state(widget::state::CLIP_PARENTS);
 				wf.info->set_state(widget::state::DRAG_UNSELECT);
+				wf.info->set_state(widget::state::RESIZE_ROOT);
 			}
 			wf.size = fi.get_size();
 			wf.time = fi.get_time();
@@ -105,11 +106,11 @@ namespace gui {
 	}
 
 
-	widget_filer::widget_files_cit widget_filer::scan_select_file_(widget_files& wfs)
+	widget_filer::widget_files_cit widget_filer::scan_select_file_(widget_files& wfs) const
 	{
 		for(widget_files_cit cit = wfs.begin(); cit != wfs.end(); ++cit) {
 			const widget_file& wf = *cit;
-			if(wf.base->get_select()) {
+			if(wf.name->get_select() || wf.info->get_select()) {
 				return cit;
 			}
 		}
@@ -117,11 +118,11 @@ namespace gui {
 	}
 
 
-	widget_filer::widget_files_cit widget_filer::scan_selected_file_(widget_files& wfs)
+	widget_filer::widget_files_cit widget_filer::scan_selected_file_(widget_files& wfs) const
 	{
 		for(widget_files_cit cit = wfs.begin(); cit != wfs.end(); ++cit) {
 			const widget_file& wf = *cit;
-			if(wf.base->get_selected()) {
+			if(wf.name->get_selected() || wf.info->get_selected()) {
 				return cit;
 			}
 		}
@@ -286,6 +287,8 @@ namespace gui {
 			wp_.plate_param_.round_radius_ = 4;
 			path_ = wd_.add_widget<widget_label>(wp, wp_);
 			path_->set_state(widget::state::POSITION_LOCK);
+			path_->set_state(widget::state::MOVE_ROOT);
+			path_->set_state(widget::state::RESIZE_ROOT);
 		}
 
 		// info ボタン
@@ -337,28 +340,6 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_filer::update()
 	{
-		// 情報ボタンが押された場合の処理
-		if(info_->get_selected()) {
-			info_state_ = static_cast<info_state::type>(info_state_ + 1);
-			if(info_state_ == info_state::limit_) {
-				info_state_ = info_state::NONE;
-			}
-			update_files_info_(center_);
-		}
-
-		// フレームのサイズを、仮想ウィジェットに反映
-		{
-			short fw = param_.plate_param_.frame_width_;
-			const vtx::spos& size = get_rect().size;
-			path_->at_rect().size.x = size.x - fw * 2 - path_height_;
-			main_->at_rect().size.x = size.x - fw * 2;
-			main_->at_rect().size.y = size.y - path_->get_rect().size.y - fw * 2;
-			files_->at_rect().size.x = size.x - fw * 2;
-			short space = 4;
-			info_->at_rect().org.x = size.x - info_->get_rect().size.x - fw - space;
-			resize_files_(center_, size.x - fw * 2);
-		}
-
 		short base_size = main_->get_rect().size.y;
 		short d = base_size - files_->get_rect().size.y;
 		short scroll_gain = 12;
@@ -367,8 +348,8 @@ namespace gui {
 		float speed_gain = 0.95f;
 
 		// スプリング効果
-//		if(files_->get_select()) {
-		if(get_select()) {
+		widget_files_cit cit = scan_select_file_(center_);
+		if(cit != center_.end()) {
 			position_ = files_->get_rect().org;
 			if(d < 0) {
 				if(position_.y < d) {
@@ -382,8 +363,7 @@ namespace gui {
 				position_.y *= slip_gain;
 			}
 		} else {
-///			if(files_->get_select_out()) {
-			if(get_select_out()) {
+			if(files_->get_select_out()) {
 				speed_ = files_->get_param().speed_;
 			}
 			position_ += speed_;
@@ -459,17 +439,25 @@ namespace gui {
 		}
 
 		// 選択されたファイルをハイライトする位置の検出
-		if(files_->get_select()) {
-			widget_files_cit cit = scan_select_file_(center_);
-			if(cit != center_.end()) {
-				select_pos_ = cit - center_.begin();
+		if(cit != center_.end()) {
+			select_pos_ = cit - center_.begin();
+			BOOST_FOREACH(widget_file& wf, center_) {
+///				wf.name->set_state(widget::state::SYSTEM_SELECT, false);
+///				wf.info->set_state(widget::state::SYSTEM_SELECT, false);
 			}
-		} else if(!center_.empty() && select_pos_ < center_.size()) {
-			widget_file& wf = center_[select_pos_];
-			wf.name->set_action(widget::action::SELECT_HIGHLIGHT);
-			wf.name->set_state(widget::state::IS_SELECT);
-			wf.info->set_action(widget::action::SELECT_HIGHLIGHT);
-			wf.info->set_state(widget::state::IS_SELECT);
+		} else {
+			uint32_t n = 0;
+			BOOST_FOREACH(widget_file& wf, center_) {
+				bool f = false;
+				if(n == select_pos_) {
+					f = true;
+				}
+				wf.name->set_action(widget::action::SELECT_HIGHLIGHT);
+///				wf.name->set_state(widget::state::SYSTEM_SELECT, f);
+				wf.info->set_action(widget::action::SELECT_HIGHLIGHT);
+///				wf.info->set_state(widget::state::SYSTEM_SELECT, f);
+				++n;
+			}
 		}
 	}
 
@@ -496,7 +484,18 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_filer::service()
 	{
-		if(!get_state(widget::state::ENABLE)) return;
+		if(!get_state(widget::state::ENABLE)) {
+			return;
+		}
+
+		// 情報ボタンが押された場合の処理
+		if(info_->get_selected()) {
+			info_state_ = static_cast<info_state::type>(info_state_ + 1);
+			if(info_state_ == info_state::limit_) {
+				info_state_ = info_state::NONE;
+			}
+			update_files_info_(center_);
+		}
 
 		// ファイル情報の取得と反映（ファイル情報収集はスレッドで動作）
 		if(fsc_.probe()) {
@@ -511,6 +510,19 @@ namespace gui {
 			} else if(left_.empty()) {
 //				create_files_(left_, -files_->get_rect().size.x);
 			}
+		}
+
+		// フレームのサイズを、仮想ウィジェットに反映
+		{
+			short fw = param_.plate_param_.frame_width_;
+			const vtx::spos& size = get_rect().size;
+			path_->at_rect().size.x = size.x - fw * 2 - path_height_;
+			main_->at_rect().size.x = size.x - fw * 2;
+			main_->at_rect().size.y = size.y - path_->get_rect().size.y - fw * 2;
+			files_->at_rect().size.x = size.x - fw * 2;
+			short space = 4;
+			info_->at_rect().org.x = size.x - info_->get_rect().size.x - fw - space;
+			resize_files_(center_, size.x - fw * 2);
 		}
 
 		// 選択の確認と動作

@@ -112,8 +112,8 @@ namespace gui {
 		file_map	file_map_;
 
 		void create_files_(widget_files& wfs, short ofs);
-		widget_files_cit scan_select_file_(widget_files& wfs);
-		widget_files_cit scan_selected_file_(widget_files& wfs);
+		widget_files_cit scan_select_file_(widget_files& wfs) const;
+		widget_files_cit scan_selected_file_(widget_files& wfs) const;
 		void resize_files_(widget_files& wfs, short width);
 		void update_files_info_(widget_files& wfs);
 		void destroy_files_(widget_files& wfs);

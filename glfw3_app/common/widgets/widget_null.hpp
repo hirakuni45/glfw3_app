@@ -73,7 +73,9 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() { }
+		void initialize() {
+			set_state(widget::state::RENDER_ENABLE, false);
+		}
 
 
 		//-----------------------------------------------------------------//

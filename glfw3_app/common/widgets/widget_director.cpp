@@ -538,6 +538,10 @@ namespace gui {
 			// 選択している widget 候補
 			if(left.lvl && focus) {
 				select = w;
+				if(w->get_state(widget::state::DRAG_UNSELECT)
+				  && msp_length_ > unselect_length_) {
+					select = 0;
+				}
 			}
 			// 移動を行う widget 候補
 			if(left.pos && focus) {
@@ -554,13 +558,18 @@ namespace gui {
 			if(select != w) {
 				w->set_state(widget::state::SELECT, false);
 			} else {
-				if(select) w->set_state(widget::state::SELECT);
+				w->set_state(widget::state::SELECT);
 			}
 		}
 
 		if(top_move_) {
 			if(top_move_->get_state(widget::state::MOVE_ROOT)) {
 				top_move_ = root_widget(top_move_);
+			}
+		}
+		if(top_resize_) {
+			if(top_resize_->get_state(widget::state::RESIZE_ROOT)) {
+				top_resize_ = root_widget(top_resize_);
 			}
 		}
 
@@ -634,7 +643,7 @@ namespace gui {
 			}
 		}
 
-		action_monitor();
+//		action_monitor();
 	}
 
 
@@ -705,7 +714,7 @@ namespace gui {
 					y -= static_cast<float>(pa.rect_.size.y) * ss;
 				}
 			}
-			if(w->get_select()) {
+			if(w->get_select() || w->get_state(widget::state::SYSTEM_SELECT)) {
 				if(pa.action_[widget::action::SELECT_HIGHLIGHT]) {
 					i = 1.0f;
 				}

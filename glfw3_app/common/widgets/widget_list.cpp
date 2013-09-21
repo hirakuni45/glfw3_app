@@ -136,6 +136,10 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_list::service()
 	{
+		if(!get_state(widget::state::ENABLE)) {
+			return;
+		}
+
 		param_.open_before_ = param_.open_;
 		if(get_selected()) {
 			param_.open_ = true;
@@ -143,7 +147,7 @@ namespace gui {
 			wd_.top_widget(frame_);
 		}
 
-		if(param_.open_) {
+		if(param_.open_ && list_.size() > 0) {
 			uint32_t n = 0;
 			bool selected = false;
 			BOOST_FOREACH(widget_label* w, list_) {
@@ -160,6 +164,29 @@ namespace gui {
 				param_.open_ = false;
 				wd_.enable(frame_, param_.open_, true);
 				wd_.top_widget(this);
+			} else {
+				const vtx::spos& scr = wd_.get_scroll();
+				if(frame_->get_focus() && scr.y != 0) {
+					int pos = param_.select_pos_;
+					pos += scr.y;
+					if(pos < 0) {
+						pos = 0;
+					} else if(pos >= static_cast<int>(list_.size())) {
+						pos = list_.size() - 1;
+					}
+					param_.select_pos_ = pos;
+				}
+				int n = 0;
+				BOOST_FOREACH(widget_label* w, list_) {
+					if(n == param_.select_pos_) {
+						w->set_action(widget::action::SELECT_HIGHLIGHT);
+						w->set_state(widget::state::SYSTEM_SELECT);
+					} else {
+						w->set_action(widget::action::SELECT_HIGHLIGHT, false);
+						w->set_state(widget::state::SYSTEM_SELECT, false);
+					}
+					++n;
+				}
 			}
 		}
 	}
