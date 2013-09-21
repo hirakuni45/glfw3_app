@@ -57,7 +57,8 @@ namespace gui {
 
 		param				param_;
 
-		widget_label*		root_;
+		gl::glmobj::handle	objh_;
+
 		widget_null*		frame_;
 		widget_labels		list_;
 
@@ -70,7 +71,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_list(widget_director& wd, const widget::param& bp, const param& p) :
 			wd_(wd), widget(bp), param_(p),
-			root_(0), frame_(0), list_()
+			objh_(0), frame_(0), list_()
 			{ }
 
 
@@ -146,7 +147,7 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() { }
+		void service();
 	};
 
 }

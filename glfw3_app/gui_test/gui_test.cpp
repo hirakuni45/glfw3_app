@@ -118,7 +118,7 @@ namespace app {
 			filer_open_ = wd.add_widget<widget_button>(wp, wp_);
 		}
 
-		if(1) {	// ファイラーのテスト
+		if(0) {	// ファイラーのテスト
 			widget::param wp(vtx::srect(10, 30, 300, 200));
 			widget_filer::param wp_(igl->get_current_path());
 			filer_ = wd.add_widget<widget_filer>(wp, wp_);
@@ -187,6 +187,8 @@ namespace app {
 	void gui_test::render()
 	{
 		director_.at_core().widget_director_.render();
+
+		director_.at_core().widget_director_.service();
 	}
 
 

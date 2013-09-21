@@ -79,7 +79,7 @@ namespace gui {
 		share_img				share_img_;
 
 		void message_widget_(widget* w, const std::string& s);
-
+		void parents_widget_mark_(widget* root);
 	public:
 		static widget::color_param		default_frame_color_;
 		static widget::color_param		default_button_color_;
@@ -182,12 +182,12 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	最も手前のウィジェットを返す
+			@brief	ルート・ウィジェットを返す
 			@param[in]	w	基準ウィジェット
-			@return 手前のウィジェット
+			@return ルート・ウィジェット
 		*/
 		//-----------------------------------------------------------------//
-		widget* get_top_widget(widget* w) const;
+		widget* root_widget(widget* w) const;
 
 
 		//-----------------------------------------------------------------//

@@ -131,6 +131,17 @@ namespace gui {
 	}
 
 
+	void widget_director::parents_widget_mark_(widget* root)
+	{
+		root->set_mark();
+		widgets ws;
+		parents_widget(root, ws);
+		BOOST_FOREACH(widget* w, ws) {
+			w->set_mark();
+		}
+	}
+
+
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	ウィジェットの許可、不許可
@@ -200,12 +211,12 @@ namespace gui {
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	最も手前のウィジェットを返す
+		@brief	ルート・ウィジェットを返す
 		@param[in]	w	基準ウィジェット
-		@return 手前のウィジェット
+		@return ルート・ウィジェット
 	*/
 	//-----------------------------------------------------------------//
-	widget* widget_director::get_top_widget(widget* w) const
+	widget* widget_director::root_widget(widget* w) const
 	{
 		if(w == 0) return 0;
 
@@ -439,6 +450,33 @@ namespace gui {
 		IGLcore* Igl = get_glcore();
 		if(Igl == 0) return;
 
+		// ダイアログがある場合の優先順位とストール処理
+		{
+			reset_mark();
+			widgets ws;
+			BOOST_FOREACH(widget* w, widgets_) {
+				if(!w->get_state(widget::state::ENABLE)) continue;
+				if(w->type() == get_type_id<widget_dialog>()) {
+					parents_widget_mark_(w);
+					ws.push_back(w);
+				}
+			}
+			if(ws.empty()) {
+				BOOST_FOREACH(widget* w, widgets_) {
+					w->set_state(widget::state::SYSTEM_STALL, false);
+				}
+			} else {
+				BOOST_FOREACH(widget* w, widgets_) {
+					if(!w->get_mark()) {
+						w->set_state(widget::state::SYSTEM_STALL); 
+					}
+				}
+			}
+			BOOST_FOREACH(widget* w, ws) {
+				top_widget(w);
+			}
+		}
+
 		const device& dev = Igl->get_device();
 
 		scroll_ = dev.get_scroll();
@@ -459,6 +497,13 @@ namespace gui {
 		right.pos = dev.get_positive(device::key::MOUSE_RIGHT);
 		right.neg = dev.get_negative(device::key::MOUSE_RIGHT);
 
+		if(!left.lvl) {
+			top_move_ = 0;
+		}
+		if(!right.lvl) {
+			top_resize_ = 0;
+		}
+
 		vtx::spos msp_speed = msp - msp_speed_;
 		msp_speed_ = msp;
 
@@ -476,51 +521,51 @@ namespace gui {
 		}
 
 		// フォーカス、選択、を設定
-		widgets gs;
+		widget* select = 0;
 		BOOST_FOREACH(widget* w, widgets_) {
-			if(w->get_state(widget::state::STALL)) continue;
+			if(!w->get_state(widget::state::ENABLE) ||
+			  w->get_state(widget::state::STALL) ||
+			  w->get_state(widget::state::SYSTEM_STALL)) {
+				w->set_state(widget::state::FOCUS, false);
+				w->set_state(widget::state::SELECT, false);
+				continue;
+			}
 
 			bool focus = w->get_param().clip_.is_focus(msp);
 			if(w->get_state(widget::state::FOCUS_ENABLE)) {
 				w->set_state(widget::state::FOCUS, focus);
 			}
-			bool select = false;
-			if(focus) {
-				select = left.lvl;
+			// 選択している widget 候補
+			if(left.lvl && focus) {
+				select = w;
 			}
-			if(w->get_state(widget::state::SELECT_ENABLE)) {
-				if(w->get_state(widget::state::DRAG_UNSELECT)
-				  && msp_length_ > unselect_length_) {
-					select = false;
-				}
-				w->set_state(widget::state::SELECT, select);
-				if(w->get_state(widget::state::SELECT_PARENTS) && select) {
-					gs.push_back(w);
-				}
-			}
-			w->at_param().speed_ = msp_speed;
-
-			// 移動を行う widget 候補を選択
-			if(left.pos && focus && !w->get_state(widget::state::POSITION_LOCK)) {
+			// 移動を行う widget 候補
+			if(left.pos && focus) {
 				top_move_ = w;
 			}
-			// リサイズを行う widget 候補を選択
-			if(right.pos && focus && !w->get_state(widget::state::SIZE_LOCK)) {
+			// リサイズを行う widget 候補
+			if(right.pos && focus) {
 				top_resize_ = w;
 			}
 		}
 
-		// フォーカスとセレクトの状態を作る。
-		BOOST_FOREACH(widget* w, gs) {
-			if(w->get_state(widget::state::STALL)) continue;
-			BOOST_FOREACH(widget* tw, widgets_) {
-				if(w == tw->get_param().parents_) {
-					tw->set_state(widget::state::SELECT, true);
-				}
+		// 一番手前だけ選択される
+		BOOST_FOREACH(widget* w, widgets_) {
+			if(select != w) {
+				w->set_state(widget::state::SELECT, false);
+			} else {
+				if(select) w->set_state(widget::state::SELECT);
 			}
 		}
+
+		if(top_move_) {
+			if(top_move_->get_state(widget::state::MOVE_ROOT)) {
+				top_move_ = root_widget(top_move_);
+			}
+		}
+
+		// フォーカス、セレクトの動的な状態は常に作成
 		BOOST_FOREACH(widget* w, widgets_) {
-			if(w->get_state(widget::state::STALL)) continue;
 			bool f;
 			f = w->get_state(widget::state::IS_FOCUS);
 			w->set_state(widget::state::BEFORE_FOCUS, f);
@@ -565,7 +610,8 @@ namespace gui {
 		}
 
 		// 移動
-		if(top_move_) {
+		if(top_move_ && !top_move_->get_state(widget::state::POSITION_LOCK)) {
+			top_widget(top_move_);
 			if(left.pos) {
 				top_move_->at_param().move_org_ = top_move_->get_rect().org;
 			}
@@ -573,19 +619,6 @@ namespace gui {
 			top_move_->at_rect().org = top_move_->at_param().move_org_ + d;
 			if(!left.lvl) {
 				top_move_ = 0;
-			}
-		}
-
-		// ダイアログの優先順位
-		{
-			widgets ws;
-			BOOST_FOREACH(widget* w, widgets_) {
-				if(w->type() == get_type_id<widget_dialog>()) {
-					ws.push_back(w);
-				}
-			}
-			BOOST_FOREACH(widget* w, ws) {
-				top_widget(w);
 			}
 		}
 
@@ -686,8 +719,10 @@ namespace gui {
 					y -= static_cast<float>(pa.rect_.size.y) * ss;
 				}
 			}
-			if(w->get_state(widget::state::STALL)) {
+			if(w->get_state(widget::state::STALL) ||
+				w->get_state(widget::state::SYSTEM_STALL)) {
 				i = 0.25f;
+				a = 0.85f;
 			}
 
 			position_.set(x, y);
@@ -709,7 +744,7 @@ namespace gui {
 	void widget_director::service()
 	{
 		BOOST_FOREACH(widget* w, widgets_) {
-			if(w->get_param().parents_ == 0) {
+			if(w->hybrid()) {
 				w->service();
 			}
 		}
@@ -750,13 +785,31 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_director::action_monitor()
 	{
+		static int id = 0;
+		bool f = false;
 		BOOST_FOREACH(widget* w, widgets_) {
 			if(!w->get_state(widget::state::ENABLE)) continue;
 
-			if(w->get_focus_in()) message_widget_(w, "Focus In");
-			if(w->get_focus_out()) message_widget_(w, "Focus Out");
-			if(w->get_select_in()) message_widget_(w, "Select In");
-			if(w->get_select_out()) message_widget_(w, "Select Out");
+			if(w->get_focus_in()) {
+				message_widget_(w, "Focus In");
+				f = true;
+			}
+			if(w->get_focus_out()) {
+				message_widget_(w, "Focus Out");
+				f = true;
+			}
+			if(w->get_select_in()) {
+				message_widget_(w, "Select In");
+				f = true;
+			}
+			if(w->get_select_out()) {
+				message_widget_(w, "Select Out");
+				f = true;
+			}
+		}
+		if(f) {
+			printf("(%d)\n", id);
+			++id;
 		}
 		fflush(stdout);
 	}

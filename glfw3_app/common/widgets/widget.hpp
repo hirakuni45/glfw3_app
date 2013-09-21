@@ -214,14 +214,19 @@ namespace gui {
 				DRAG_UNSELECT,			///< ドラッグされたらセレクトを外す
 				SELECT_PARENTS,			///< ペアレント全てが選択
 
+				MOVE_ROOT,				///< 移動の選択権をルートに与える
+
 				RESIZE_H_ENABLE,		///< 水平リサイズ許可
 				RESIZE_V_ENABLE,		///< 垂直リサイズ許可
 				SIZE_LOCK,				///< サイズ固定
 
 				/// ワーク用
+				SYSTEM_STALL,			///< ストール
+
 				BEFORE_FOCUS,			///< １フレーム前フォーカスの状態
 				IS_FOCUS,				///< フォーカスの状態
 				FOCUS,					///< フォーカス（テンポラリー）
+
 				BEFORE_SELECT,			///< １フレーム前選択状態
 				IS_SELECT,				///< 選択状態
 				SELECT,					///< セレクト（テンポラリー）
@@ -449,8 +454,6 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		bool get_focus_in() const {
-			if(get_state(state::STALL)) return false;
-			if(!get_state(state::ENABLE)) return false;
 			return !get_state(state::BEFORE_FOCUS) && get_state(state::IS_FOCUS);
 		}
 
@@ -462,8 +465,6 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		bool get_focus() const {
-			if(get_state(state::STALL)) return false;
-			if(!get_state(state::ENABLE)) return false;
 			return get_state(state::IS_FOCUS);
 		}
 
@@ -475,8 +476,6 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		bool get_focus_out() const {
-			if(get_state(state::STALL)) return false;
-			if(!get_state(state::ENABLE)) return false;
 			return get_state(state::BEFORE_FOCUS) && !get_state(state::IS_FOCUS);
 		}
 
@@ -488,8 +487,6 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		bool get_select_in() const {
-			if(get_state(state::STALL)) return false;
-			if(!get_state(state::ENABLE)) return false;
 			return !get_state(state::BEFORE_SELECT) && get_state(state::IS_SELECT);
 		}
 
@@ -501,8 +498,6 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		bool get_select() const {
-			if(get_state(state::STALL)) return false;
-			if(!get_state(state::ENABLE)) return false;
 			return get_state(state::IS_SELECT);
 		}
 
@@ -514,8 +509,6 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		bool get_select_out() const {
-			if(get_state(state::STALL)) return false;
-			if(!get_state(state::ENABLE)) return false;
 			return get_state(state::BEFORE_SELECT) && !get_state(state::IS_SELECT);
 		}
 
