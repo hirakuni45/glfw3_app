@@ -605,10 +605,8 @@ namespace gui {
 				if(!top_resize_->get_state(widget::state::RESIZE_H_ENABLE)) d.x = 0;
 				if(!top_resize_->get_state(widget::state::RESIZE_V_ENABLE)) d.y = 0;
 				vtx::spos newsize = top_resize_->get_param().resize_ref_ + d;
-				vtx::spos min = top_resize_->get_param().resize_min_;
+				const vtx::spos& min = top_resize_->get_param().resize_min_;
 				const vtx::spos& size = top_resize_->get_rect().size;
-				if(size.x < min.x) min.x = size.x;
-				if(size.y < min.y) min.y = size.y;
    				if(newsize.x < min.x) newsize.x = min.x;
 				if(newsize.y < min.y) newsize.y = min.y;
 				top_resize_->at_rect().size = newsize;

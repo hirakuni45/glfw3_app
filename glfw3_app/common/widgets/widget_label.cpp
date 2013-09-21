@@ -74,19 +74,16 @@ namespace gui {
 			}
 			const vtx::spos& size = bp.rect_.size;
 			if(size.x < fw) {
-				param_.text_param_.shift_ = true;
 				param_.shift_offset_ -= param_.shift_speed_;
 				if((static_cast<short>(param_.shift_offset_) + fw) <= 0) {
 					param_.shift_offset_ = size.x;
 				}
 				param_.text_param_.offset_.x = param_.shift_offset_;
 			} else {
-				param_.text_param_.shift_ = false;
 				param_.text_param_.offset_.x = 0;
 				param_.shift_offset_ = 0.0f;
 			}
 		} else {
-			param_.text_param_.shift_ = false;
 			param_.text_param_.offset_.x = 0;
 			param_.shift_offset_ = 0.0f;
 		}

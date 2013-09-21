@@ -260,6 +260,10 @@ namespace gui {
 		at_param().state_.set(widget::state::RESIZE_V_ENABLE);
 
 		param_.plate_param_.resizeble_ = true;
+		at_param().resize_min_ = param_.plate_param_.grid_ * 3;
+		at_param().resize_min_.x += 32;
+		at_param().resize_min_.x += 32;
+
 		// フレームの生成
 		objh_ = frame_init(wd_, at_param(), param_.plate_param_, param_.color_param_);
 

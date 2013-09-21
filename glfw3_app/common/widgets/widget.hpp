@@ -123,7 +123,6 @@ namespace gui {
 			img::rgba8		shadow_color_;		///< 影色
 			vtx::spos		shadow_offset_;		///< 影の相対位置
 			vtx::placement	placement_;			///< 配置方法
-			bool			shift_;				///< シフト表示の場合（シフト表示用）
 			vtx::spos		offset_;			///< 描画オフセット（シフト表示用）
 			text_param() :
 				proportional_(true),
@@ -131,7 +130,7 @@ namespace gui {
 				placement_(vtx::placement::holizontal::CENTER,
 					vtx::placement::vertical::CENTER),
 				shadow_offset_(2),
-				offset_(0), shift_(false) { }
+				offset_(0) { }
 			text_param(const std::string& text,
 				const img::rgba8& fc, const img::rgba8& sc,
 				const vtx::placement& pl = vtx::placement(
@@ -140,7 +139,7 @@ namespace gui {
 					text_(text), font_(), proportional_(true),
 					fore_color_(fc), shadow_color_(sc), placement_(pl),
 					shadow_offset_(2),
-					offset_(0), shift_(false) { }
+					offset_(0) { }
 		};
 
 
@@ -247,7 +246,6 @@ namespace gui {
 		struct param {
 			vtx::srect			rect_;			///< 領域
 			vtx::srect			clip_;			///< クリップ領域
-			vtx::spos			msize_;			///< 最小サイズ
 			vtx::spos			rpos_;			///< レンダリング開始
 			vtx::spos			move_org_;		///< 移動基準位置
 			vtx::spos			resize_min_;	///< リサイズ最小サイズ
@@ -262,7 +260,7 @@ namespace gui {
 			state_types			state_;			///< 状態制御
 
 			param(const vtx::srect& r = vtx::srect(0), widget* parents = 0) :
-				rect_(r), clip_(r), msize_(r.size), rpos_(r.org),
+				rect_(r), clip_(r), rpos_(r.org),
 				move_org_(0),
 				resize_min_(16 * 3), resize_org_(0), resize_ref_(0),
 				speed_(0), in_point_(0),

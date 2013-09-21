@@ -237,23 +237,28 @@ namespace gui {
 
 		fonts.set_proportional(tp.proportional_);
 		vtx::spos pos;
-		vtx::placement pl = tp.placement_;
-		if(tp.shift_) {
-			pl.hpt = vtx::placement::holizontal::LEFT;
-		}
 		const vtx::spos& fsize = fonts.get_size(tp.text_);
-		vtx::create_placement(rect_, fsize, pl, pos);
+		vtx::placement tpl = tp.placement_;
+		if(fsize.x > clip_.size.x) {
+			tpl.hpt = vtx::placement::holizontal::LEFT;
+		}
+		vtx::create_placement(rect_, fsize, tpl, pos);
+
+		short clx = 0;
+		if(utils::string_strchr(tp.text_, '\n')) {
+			clx = clip_.size.x;
+		}
 
 		pos += tp.offset_;
 		if(tp.shadow_offset_.x != 0 || tp.shadow_offset_.y != 0) {
 			fonts.set_fore_color(tp.shadow_color_);
 			vtx::spos p = pos + tp.shadow_offset_;
 			fonts.set_fore_color(tp.shadow_color_);
-			fonts.draw(p, tp.text_, clip_.size.x);
+			fonts.draw(p, tp.text_, clx);
 		}
 
 		fonts.set_fore_color(tp.fore_color_);
-		fonts.draw(pos, tp.text_, clip_.size.x);
+		fonts.draw(pos, tp.text_, clx);
 
 		if(!tp.font_.empty()) {
 			fonts.set_font_type(cft);
