@@ -111,12 +111,16 @@ namespace gui {
 		typedef std::pair<std::string, file_t> file_map_pair;
 		file_map	file_map_;
 
+		uint32_t	select_file_id_;
+
 		void create_files_(widget_files& wfs, short ofs);
+		widget_files_cit scan_select_in_file_(widget_files& wfs) const;
 		widget_files_cit scan_select_file_(widget_files& wfs) const;
 		widget_files_cit scan_selected_file_(widget_files& wfs) const;
 		void resize_files_(widget_files& wfs, short width);
 		void update_files_info_(widget_files& wfs);
 		void destroy_files_(widget_files& wfs);
+		void regist_state_();
 		void destroy_();
 	public:
 		//-----------------------------------------------------------------//
@@ -131,7 +135,8 @@ namespace gui {
 			path_(0), info_(0), main_(0), files_(0),
 			info_state_(info_state::NONE),
 			speed_(0.0f), position_(0.0f), select_pos_(0),
-			file_()
+			file_(),
+			select_file_id_(0)
 			{ }
 
 
@@ -219,6 +224,15 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		void service();
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ファイル選択シグナルを取得
+			@return ファイル選択シグナル
+		*/
+		//-----------------------------------------------------------------//
+		uint32_t get_select_file_id() const { return select_file_id_; }
 
 
 		//-----------------------------------------------------------------//

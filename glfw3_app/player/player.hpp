@@ -56,6 +56,7 @@ namespace app {
 		gl::glmobj::handle	jacket_;
 
 		int				drop_file_id_;
+		uint32_t		select_file_id_;
 
 		void sound_play_(const std::string& file);
 		gui::widget* create_image_button_(const std::string& file, const vtx::spos& pos);
@@ -75,7 +76,7 @@ namespace app {
 		  title_pad_(0), album_pad_(0), artist_pad_(0), other_pad_(0),
 		  error_dialog_(0),
 		  total_t_(0), remain_t_(0), frame_count_(0), frame_limit_(60),
-		  tag_serial_(0), jacket_(0), drop_file_id_(0)
+		  tag_serial_(0), jacket_(0), drop_file_id_(0), select_file_id_(0)
 		{ }
 
 

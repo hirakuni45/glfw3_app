@@ -186,9 +186,8 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void gui_test::render()
 	{
-		director_.at_core().widget_director_.render();
-
 		director_.at_core().widget_director_.service();
+		director_.at_core().widget_director_.render();
 	}
 
 

@@ -90,6 +90,7 @@ namespace gui {
 		}
 		files_->at_rect().size.y = rect.org.y;
 
+		select_pos_ = 0;
 		file_map_it it = file_map_.find(param_.path_);
 		if(it != file_map_.end()) {
 			position_ = it->second.position_;
@@ -103,6 +104,18 @@ namespace gui {
 		wd_.top_widget(info_);
 		wd_.top_widget(main_);
 		wd_.top_widget(files_);
+	}
+
+
+	widget_filer::widget_files_cit widget_filer::scan_select_in_file_(widget_files& wfs) const
+	{
+		for(widget_files_cit cit = wfs.begin(); cit != wfs.end(); ++cit) {
+			const widget_file& wf = *cit;
+			if(wf.name->get_select_in() || wf.info->get_select_in()) {
+				return cit;
+			}
+		}
+		return wfs.end();
 	}
 
 
@@ -204,6 +217,20 @@ namespace gui {
 		wfs.clear();
 		speed_.set(0);
 		position_.set(0);
+	}
+
+
+	void widget_filer::regist_state_()
+	{
+		// パスに紐づいた位置の記録
+		file_map_it it = file_map_.find(param_.path_);
+		if(it == file_map_.end()) {
+			file_t t;
+			it = file_map_.insert(file_map_pair(param_.path_, t)).first;
+		}
+		file_t& f = it->second;
+		f.position_ = position_;
+		f.select_pos_ = select_pos_;
 	}
 
 
@@ -344,6 +371,35 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_filer::update()
 	{
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	レンダリング
+	*/
+	//-----------------------------------------------------------------//
+	void widget_filer::render()
+	{
+		if(objh_ == 0) return;
+
+		wd_.at_mobj().resize(objh_, get_param().rect_.size);
+		glEnable(GL_TEXTURE_2D);
+		wd_.at_mobj().draw(objh_, gl::glmobj::normal, 0, 0);
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	サービス
+	*/
+	//-----------------------------------------------------------------//
+	void widget_filer::service()
+	{
+		if(!get_state(widget::state::ENABLE)) {
+			return;
+		}
+
 		short base_size = main_->get_rect().size.y;
 		short d = base_size - files_->get_rect().size.y;
 		short scroll_gain = 12;
@@ -352,9 +408,8 @@ namespace gui {
 		float speed_gain = 0.95f;
 
 		// スプリング効果
-		widget_files_cit cit = scan_select_file_(center_);
-		if(cit != center_.end()) {
-			position_ = files_->get_rect().org;
+		if(files_->get_state(widget::state::DRAG)) {
+			position_ = files_->get_param().move_pos_;
 			if(d < 0) {
 				if(position_.y < d) {
 					position_.y -= d;
@@ -418,18 +473,6 @@ namespace gui {
 		}
 		files_->at_rect().org = position_;
 
-		// パスに紐づいた位置の記録
-		{
-			file_map_it it = file_map_.find(param_.path_);
-			if(it == file_map_.end()) {
-				file_t t;
-				it = file_map_.insert(file_map_pair(param_.path_, t)).first;
-			}
-			file_t& f = it->second;
-			f.position_ = position_;
-			f.select_pos_ = select_pos_;
-		}
-
 		// path 文字列を設定
 		{
 			if(files_->get_rect().org.x > (get_rect().size.x / 2)) {
@@ -443,53 +486,22 @@ namespace gui {
 		}
 
 		// 選択されたファイルをハイライトする位置の検出
+		widget_files_cit cit = scan_select_in_file_(center_);
 		if(cit != center_.end()) {
+			BOOST_FOREACH(const widget_file& wf, center_) {
+				wf.name->set_state(widget::state::SYSTEM_SELECT, false);
+				wf.info->set_state(widget::state::SYSTEM_SELECT, false);
+			}
 			select_pos_ = cit - center_.begin();
-			BOOST_FOREACH(widget_file& wf, center_) {
-///				wf.name->set_state(widget::state::SYSTEM_SELECT, false);
-///				wf.info->set_state(widget::state::SYSTEM_SELECT, false);
+			regist_state_();
+		} else if(scan_select_file_(center_) != center_.end()) {
+			// 何もしない
+		} else if(!files_->get_state(widget::state::DRAG)){
+			if(select_pos_ < center_.size()) {
+				widget_file& wf = center_[select_pos_];
+				wf.name->set_state(widget::state::SYSTEM_SELECT);
+				wf.info->set_state(widget::state::SYSTEM_SELECT);
 			}
-		} else {
-			uint32_t n = 0;
-			BOOST_FOREACH(widget_file& wf, center_) {
-				bool f = false;
-				if(n == select_pos_) {
-					f = true;
-				}
-				wf.name->set_action(widget::action::SELECT_HIGHLIGHT);
-///				wf.name->set_state(widget::state::SYSTEM_SELECT, f);
-				wf.info->set_action(widget::action::SELECT_HIGHLIGHT);
-///				wf.info->set_state(widget::state::SYSTEM_SELECT, f);
-				++n;
-			}
-		}
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	レンダリング
-	*/
-	//-----------------------------------------------------------------//
-	void widget_filer::render()
-	{
-		if(objh_ == 0) return;
-
-		wd_.at_mobj().resize(objh_, get_param().rect_.size);
-		glEnable(GL_TEXTURE_2D);
-		wd_.at_mobj().draw(objh_, gl::glmobj::normal, 0, 0);
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	サービス
-	*/
-	//-----------------------------------------------------------------//
-	void widget_filer::service()
-	{
-		if(!get_state(widget::state::ENABLE)) {
-			return;
 		}
 
 		// 情報ボタンが押された場合の処理
@@ -530,9 +542,7 @@ namespace gui {
 		}
 
 		// 選択の確認と動作
-		bool selected = false;
-///		if(files_->get_select_out()) {
-		if(files_->get_selected()) {
+		{
 			widget_files_cit cit = scan_selected_file_(center_);
 			if(cit != center_.end()) {
 				const widget_file& wf = *cit;
@@ -552,10 +562,11 @@ namespace gui {
 						destroy_files_(center_);
 					} else {
 						utils::append_path(param_.path_, n, file_);
-						selected = true;
+						++select_file_id_;
+						enable(false);
 					}
 				}
-			} else {
+			} else if(!files_->get_state(widget::state::DRAG)){
 				if(files_->get_rect().org.x > (get_rect().size.x / 2)) {
 					std::string np;
 					utils::previous_path(param_.path_, np);
@@ -564,9 +575,6 @@ namespace gui {
 					destroy_files_(center_);
 				}
 			}
-		}
-		if(selected) {
-			enable(false);
 		}
 	}
 

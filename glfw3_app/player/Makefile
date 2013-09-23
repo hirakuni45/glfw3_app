@@ -839,6 +839,7 @@ player.o: ../common/widgets/widget_image.hpp
 ../common/widgets/widget_list.o: ../common/widgets/widget_label.hpp
 ../common/widgets/widget_list.o: ../common/widgets/widget_null.hpp
 ../common/widgets/widget_list.o: ../common/widgets/widget_director.hpp
+../common/widgets/widget_list.o: ../common/widgets/widget_utils.hpp
 ../common/widgets/widget_check.o: ../common/gl_fw/IGLcore.hpp
 ../common/widgets/widget_check.o: ../common/core/device.hpp
 ../common/widgets/widget_check.o: ../common/utils/vtx.hpp

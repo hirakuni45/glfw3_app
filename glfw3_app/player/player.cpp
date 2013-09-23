@@ -393,11 +393,11 @@ namespace app {
 		sound.set_gain_stream(volume_->get_local_param().slider_param_.position_);
 
 		// ファイラーがファイル選択をした場合
-///		if(wf.update()) {
-///			const std::string& file = wf.get_file();
-///			sound_play_(file);
-///			wf.enable(false);
-///		}
+		if(filer_->get_select_file_id() != select_file_id_) {
+			select_file_id_ = filer_->get_select_file_id();
+			const std::string& file = filer_->get_file();
+			sound_play_(file);
+		}
 
 		// Drag & Drop されたファイルを再生
 		int id = igl->get_recv_file_id();

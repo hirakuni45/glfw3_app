@@ -523,6 +523,8 @@ namespace gui {
 		// フォーカス、選択、を設定
 		widget* select = 0;
 		BOOST_FOREACH(widget* w, widgets_) {
+			w->set_state(widget::state::DRAG, false);
+			w->set_state(widget::state::RESIZE, false);
 			if(!w->get_state(widget::state::ENABLE) ||
 			  w->get_state(widget::state::STALL) ||
 			  w->get_state(widget::state::SYSTEM_STALL)) {
@@ -535,30 +537,43 @@ namespace gui {
 			if(w->get_state(widget::state::FOCUS_ENABLE)) {
 				w->set_state(widget::state::FOCUS, focus);
 			}
+			if(left.pos && focus) {
+				w->at_param().move_org_ = w->get_rect().org;
+				top_move_ = w;	// 移動を行う widget 候補
+			}
+			if(right.pos && focus) {
+				w->at_param().resize_org_ = msp;
+				w->at_param().resize_ref_ = w->get_rect().size;
+				top_resize_ = w;	// リサイズを行う widget 候補
+			}
 			// 選択している widget 候補
 			if(left.lvl && focus) {
+				w->set_state(widget::state::DRAG);
 				select = w;
 				if(w->get_state(widget::state::DRAG_UNSELECT)
 				  && msp_length_ > unselect_length_) {
+					w->set_state(widget::state::SELECT, false);
+					w->set_state(widget::state::IS_SELECT, false);
 					select = 0;
 				}
 			}
-			// 移動を行う widget 候補
-			if(left.pos && focus) {
-				top_move_ = w;
+			// 移動時
+			if(left.lvl) {
+				vtx::spos d = msp - position_positive_;
+				w->at_param().move_pos_ = w->get_param().move_org_ + d;
 			}
-			// リサイズを行う widget 候補
-			if(right.pos && focus) {
-				top_resize_ = w;
+			// リサイズ時
+			if(right.lvl && focus) {
+				w->set_state(widget::state::RESIZE);
 			}
 		}
 
 		// 一番手前だけ選択される
 		BOOST_FOREACH(widget* w, widgets_) {
-			if(select != w) {
-				w->set_state(widget::state::SELECT, false);
-			} else {
+			if(select == w) {
 				w->set_state(widget::state::SELECT);
+			} else {
+				w->set_state(widget::state::SELECT, false);
 			}
 		}
 
@@ -596,37 +611,32 @@ namespace gui {
 
 		// リサイズ
 		if(top_resize_ && !top_resize_->get_state(widget::state::SIZE_LOCK)) {
-			if(right.pos) {
-				top_resize_->at_param().resize_org_ = msp;
-				top_resize_->at_param().resize_ref_ = top_resize_->get_rect().size;
-			}
 			if(right.lvl) {
 				vtx::spos d = msp - top_resize_->at_param().resize_org_;
 				if(!top_resize_->get_state(widget::state::RESIZE_H_ENABLE)) d.x = 0;
 				if(!top_resize_->get_state(widget::state::RESIZE_V_ENABLE)) d.y = 0;
-				vtx::spos newsize = top_resize_->get_param().resize_ref_ + d;
 				const vtx::spos& min = top_resize_->get_param().resize_min_;
 				const vtx::spos& size = top_resize_->get_rect().size;
-   				if(newsize.x < min.x) newsize.x = min.x;
-				if(newsize.y < min.y) newsize.y = min.y;
+				vtx::spos newsize = top_resize_->at_param().resize_ref_ + d;
+				const vtx::spos& ref = top_resize_->at_param().resize_ref_;
+				if(ref.x >= min.x) {
+					if(newsize.x < min.x) newsize.x = min.x;
+				} else {
+					newsize.x = ref.x;
+				}
+				if(ref.y >= min.y) {
+					if(newsize.y < min.y) newsize.y = min.y;
+				} else {
+					newsize.x = ref.x;
+				}
 				top_resize_->at_rect().size = newsize;
-			}
-			if(right.neg) {
-				top_resize_ = 0;
 			}
 		}
 
 		// 移動
 		if(top_move_ && !top_move_->get_state(widget::state::POSITION_LOCK)) {
 			top_widget(top_move_);
-			if(left.pos) {
-				top_move_->at_param().move_org_ = top_move_->get_rect().org;
-			}
-			vtx::spos d = msp - position_positive_;
-			top_move_->at_rect().org = top_move_->at_param().move_org_ + d;
-			if(!left.lvl) {
-				top_move_ = 0;
-			}
+			top_move_->at_rect().org = top_move_->get_param().move_pos_;
 		}
 
 		// 最後に各部品の update 処理 
@@ -750,10 +760,14 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_director::service()
 	{
+		widgets ws;
 		BOOST_FOREACH(widget* w, widgets_) {
 			if(w->hybrid()) {
-				w->service();
+				ws.push_back(w);
 			}
+		}
+		BOOST_FOREACH(widget* w, ws) {
+			w->service();
 		}
 	}
 
