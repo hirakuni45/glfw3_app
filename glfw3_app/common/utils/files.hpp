@@ -47,6 +47,8 @@ namespace utils {
 				exts_ = exts;
 				return true;
 			}
+			const std::string& get_path() const { return path_; }
+			const std::string& get_exts() const { return exts_; }
 			files_io() : exit_(false) { }
 		};
 
@@ -94,6 +96,24 @@ namespace utils {
 				file_infos_.clear();
 			}
 		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ルートパスを取得
+			@return ルートパス
+		*/
+		//-----------------------------------------------------------------//
+		const std::string& get_path() const { return files_io_.get_path(); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	拡張子を取得
+			@return 拡張子
+		*/
+		//-----------------------------------------------------------------//
+		const std::string& get_exts() const { return files_io_.get_exts(); }
 
 
 		//-----------------------------------------------------------------//
