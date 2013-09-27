@@ -12,9 +12,29 @@
 
 namespace gui {
 
-	static const char* key_path_   = { "widget/filer/current_path" };
-	static const char* key_locate_ = { "widget/filer/locate" };
-	static const char* key_size_   = { "widget/filer/size" };
+	const char* widget_filer::key_path_   = { "widget/filer/current_path" };
+	const char* widget_filer::key_locate_ = { "widget/filer/locate" };
+	const char* widget_filer::key_size_   = { "widget/filer/size" };
+
+	void widget_filer::update_priority_()
+	{
+		// 選択位置の回復
+		select_pos_ = 0;
+		file_map_it it = file_map_.find(param_.path_);
+		if(it != file_map_.end()) {
+			position_ = it->second.position_;
+			select_pos_ = it->second.select_pos_;
+			files_->at_rect().org = it->second.position_;
+		}
+
+		// ウィジェットの強制的な優先順位設定
+		wd_.top_widget(this);
+		wd_.top_widget(path_);
+		wd_.top_widget(info_);
+		wd_.top_widget(main_);
+		wd_.top_widget(files_);
+	}
+
 
 	void widget_filer::create_files_(widget_files& wfs, short ofs)
 	{
@@ -22,10 +42,9 @@ namespace gui {
 		vtx::srect rect;
 		rect.org.set(ofs, 0);
 		rect.size.x = path_->get_rect().size.x;
-		rect.size.y = 32;
+		rect.size.y = param_.label_height_;
 
 		const utils::file_infos& fos = fsc_.get();
-
 		BOOST_FOREACH(const utils::file_info& fi, fos) {
 			std::string fn = fi.get_name();
 			if(fn == ".") continue;
@@ -51,7 +70,7 @@ namespace gui {
 			{
 				vtx::srect r;
 				r.org.set(0);
-				r.size.set(fns, label_height_);
+				r.size.set(fns, param_.label_height_);
 				widget::param wp(r, wf.base);
 				wp.action_.set(widget::action::SELECT_HIGHLIGHT);
 				widget_label::param wp_(fn);
@@ -68,7 +87,7 @@ namespace gui {
 			{
 				vtx::srect r;
 				r.org.set(fns + 2, 0);
-				r.size.set(ats, label_height_);
+				r.size.set(ats, param_.label_height_);
 				widget::param wp(r, wf.base);
 				wp.action_.set(widget::action::SELECT_HIGHLIGHT);
 				widget_label::param wp_;
@@ -86,24 +105,11 @@ namespace gui {
 			wf.time = fi.get_time();
 			wf.mode = fi.get_mode();
 			wfs.push_back(wf);
-			rect.org.y += label_height_;
+			rect.org.y += param_.label_height_;
 		}
-		files_->at_rect().size.y = rect.org.y;
-
-		select_pos_ = 0;
-		file_map_it it = file_map_.find(param_.path_);
-		if(it != file_map_.end()) {
-			position_ = it->second.position_;
-			select_pos_ = it->second.select_pos_;
-			files_->at_rect().org = it->second.position_;
+		if(files_->get_rect().size.y < rect.org.y) {
+			files_->at_rect().size.y = rect.org.y;
 		}
-
-		// ウィジェットの強制的な優先順位設定
-		wd_.top_widget(this);
-		wd_.top_widget(path_);
-		wd_.top_widget(info_);
-		wd_.top_widget(main_);
-		wd_.top_widget(files_);
 	}
 
 
@@ -302,7 +308,7 @@ namespace gui {
 			vtx::srect r;
 			r.org.set(frame_width);
 			r.size.x = get_rect().size.x - frame_width * 2;
-			r.size.y = path_height_;
+			r.size.y = param_.path_height_;
 			widget::param wp(r, this);
 			wp.action_.set(widget::action::SELECT_HIGHLIGHT);
 			widget_label::param wp_(param_.path_);
@@ -329,7 +335,7 @@ namespace gui {
 			r.size = wd_.at_mobj().get_size(hnd);
 			short space = 4;
 			r.org.x = get_rect().size.x - r.size.x - frame_width - space;
-			r.org.y = frame_width + (path_height_ - r.size.y) / 2;
+			r.org.y = frame_width + (param_.path_height_ - r.size.y) / 2;
 			widget::param wp(r, this);
 			widget_button::param wp_;
 			wp_.handle_ = hnd;
@@ -338,8 +344,10 @@ namespace gui {
 
 		// main null frame
 		{
-			vtx::srect r(vtx::spos(frame_width, frame_width + path_height_),
-				vtx::spos(get_rect().size.x - 8, get_rect().size.y - 32 - 2 * 4 - 4));
+			short fw = 4;
+			vtx::srect r(vtx::spos(frame_width, frame_width + param_.path_height_),
+				vtx::spos(get_rect().size.x - 8,
+					get_rect().size.y - param_.path_height_ - fw * 2 - fw));
 			widget::param wp(r, this);
 			wp.state_.reset(widget::state::RENDER_ENABLE);
 			widget_null::param wp_;
@@ -398,6 +406,21 @@ namespace gui {
 	{
 		if(!get_state(widget::state::ENABLE)) {
 			return;
+		}
+
+		// ファイル情報の取得と反映（ファイル情報収集はスレッドで動作）
+		if(fsc_.probe()) {
+			if(center_.empty()) {
+				create_files_(center_, 0);
+				update_priority_();
+				update_files_info_(center_);
+				std::string s;
+				if(utils::previous_path(param_.path_, s)) {
+					fsc_.set_path(s);
+				}
+			} else if(left_.empty()) {
+				create_files_(left_, -main_->get_rect().size.x);
+			}
 		}
 
 		short base_size = main_->get_rect().size.y;
@@ -513,26 +536,11 @@ namespace gui {
 			update_files_info_(center_);
 		}
 
-		// ファイル情報の取得と反映（ファイル情報収集はスレッドで動作）
-		if(fsc_.probe()) {
-			if(center_.empty()) {
-				create_files_(center_, 0);
-				update_files_info_(center_);
-
-				std::string s;
-				if(utils::previous_path(param_.path_, s)) {
-//					fsc_.set_path(s);
-				}
-			} else if(left_.empty()) {
-//				create_files_(left_, -files_->get_rect().size.x);
-			}
-		}
-
 		// フレームのサイズを、仮想ウィジェットに反映
 		{
 			short fw = param_.plate_param_.frame_width_;
 			const vtx::spos& size = get_rect().size;
-			path_->at_rect().size.x = size.x - fw * 2 - path_height_;
+			path_->at_rect().size.x = size.x - fw * 2 - param_.path_height_;
 			main_->at_rect().size.x = size.x - fw * 2;
 			main_->at_rect().size.y = size.y - path_->get_rect().size.y - fw * 2;
 			files_->at_rect().size.x = size.x - fw * 2;

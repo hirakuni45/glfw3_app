@@ -5,7 +5,6 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-
 namespace utils {
 
 	template <class T>

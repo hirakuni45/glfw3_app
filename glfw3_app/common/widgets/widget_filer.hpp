@@ -39,10 +39,14 @@ namespace gui {
 			std::string		path_;		///< 初期ファイル・パス
 			std::string		filter_;	///< 初期ファイル・フィルター
 
+			short			path_height_;
+			short			label_height_;
+
 			param(const std::string& path = "", const std::string& filter = "") :
 				plate_param_(),
 				color_param_(widget_director::default_frame_color_),
-				path_(path), filter_(filter)
+				path_(path), filter_(filter),
+				path_height_(32), label_height_(32)
 			{ }
 		};
 
@@ -55,9 +59,6 @@ namespace gui {
 
 		utils::files		fsc_;
 		utils::drive_info	drv_;
-
-		short			path_height_;
-		short			label_height_;
 
 		widget_label*	path_;	///< パス・フレーム
 		widget_button*	info_;	///< インフォメーション切り替えボタン
@@ -113,6 +114,11 @@ namespace gui {
 
 		uint32_t	select_file_id_;
 
+		static const char* key_path_;
+		static const char* key_locate_;
+		static const char* key_size_;
+
+		void update_priority_();
 		void create_files_(widget_files& wfs, short ofs);
 		widget_files_cit scan_select_in_file_(widget_files& wfs) const;
 		widget_files_cit scan_select_file_(widget_files& wfs) const;
@@ -131,7 +137,6 @@ namespace gui {
 		widget_filer(widget_director& wd, const widget::param& bp, const param& p) :
 			wd_(wd), widget(bp), param_(p), objh_(0),
 			fsc_(),
-			path_height_(32), label_height_(32),
 			path_(0), info_(0), main_(0), files_(0),
 			info_state_(info_state::NONE),
 			speed_(0.0f), position_(0.0f), select_pos_(0),

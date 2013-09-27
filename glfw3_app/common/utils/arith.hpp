@@ -1,5 +1,4 @@
-#ifndef ARITH_HPP
-#define ARITH_HPP
+#pragma once
 //=====================================================================//
 /*!	@file
 	@brief	Arithmetic クラス（ヘッダー）@n
@@ -12,184 +11,184 @@
 #include <bitset>
 #include <boost/unordered_map.hpp>
 
-namespace fio {
+namespace utils {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
 		@brief	Arithmetic クラス
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	class arith {
-
-	public:
+	struct arith {
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	エラー・タイプ
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		enum error {
-			none,				///< エラー無
+		struct error {
+			enum type {
+				none,				///< エラー無
 
-			fatal,				///< エラー
-			number_fatal,		///< 数字の変換に関するエラー
-			zero_divide,		///< ０除算エラー
-			binary_fatal,		///< ２進データの変換に関するエラー
-			octal_fatal,		///< ８進データの変換に関するエラー
-			hexdecimal_fatal,	///< １６進データの変換に関するエラー
-			integer_fatal,		///< 整数データの変換に関するエラー
-			float_fatal,		///< 浮動小数点データの変換に関するエラー
-			double_fatal,		///< 倍精度浮動小数点データの変換に関するエラー
-			symbol_fatal,		///< シンボルデータの変換に関するエラー
+				fatal,				///< エラー
+				number_fatal,		///< 数字の変換に関するエラー
+				zero_divide,		///< ０除算エラー
+				binary_fatal,		///< ２進データの変換に関するエラー
+				octal_fatal,		///< ８進データの変換に関するエラー
+				hexdecimal_fatal,	///< １６進データの変換に関するエラー
+				integer_fatal,		///< 整数データの変換に関するエラー
+				float_fatal,		///< 浮動小数点データの変換に関するエラー
+				double_fatal,		///< 倍精度浮動小数点データの変換に関するエラー
+				symbol_fatal,		///< シンボルデータの変換に関するエラー
 
-			err_limit			///< ※管理用
+				err_limit_			///< ※管理用
+			};
 		};
 
 	private:
-		const char*		m_tx;
-		char			m_ch;
+		const char*		tx_;
+		char			ch_;
 
 		class value {
 		public:
-			std::bitset<err_limit>	m_error;
+			std::bitset<err_limit_>	error_;
 
-			bool	m_hex_value;
-			long	m_integer;
+			bool	hex_value_;
+			long	integer_;
 
-			bool	m_point;
+			bool	point_;
 
-			float	m_float;
-			float	m_f_scale;
+			float	float_;
+			float	f_scale_;
 
-			bool	m_dbe;
-			double	m_double;
-			double	m_d_scale;
+			bool	dbe_;
+			double	double_;
+			double	d_scale_;
 
-			value() : m_hex_value(false), m_integer(0), m_point(false),
-					  m_float(0.0f), m_f_scale(1.0f),
-					  m_dbe(false), m_double(0.0), m_d_scale(1.0) { }
+			value() : hex_value_(false), integer_(0), point_(false),
+					  float_(0.0f), f_scale_(1.0f),
+					  dbe_(false), double_(0.0), d_scale_(1.0) { }
 
 			void sum(char c);
 			void neg();
 			void inv();
 
 			value& operator += (const value& v) {
-				m_integer += v.m_integer;
-				m_float += v.m_float;
-				if(m_dbe) m_double += v.m_double;
-				if(v.m_point) m_point = v.m_point;
-				m_error |= v.m_error;
+				integer_ += v.integer_;
+				float_ += v.float_;
+				if(dbe_) double_ += v.double_;
+				if(v.point_) point_ = v.point_;
+				error_ |= v.error_;
 				return *this;
 			}
 
 			value& operator -= (const value& v) {
-				m_integer -= v.m_integer;
-				m_float -= v.m_float;
-				if(m_dbe) m_double -= v.m_double;
-				if(v.m_point) m_point = v.m_point;
-				m_error |= v.m_error;
+				integer_ -= v.integer_;
+				float_ -= v.float_;
+				if(dbe_) double_ -= v.double_;
+				if(v.point_) point_ = v.point_;
+				error_ |= v.error_;
 				return *this;
 			}
 
 			value& operator &= (const value& v) {
-				m_integer &= v.m_integer;
-				m_error.set(float_fatal);
-				if(m_dbe) m_error.set(double_fatal);
-				if(v.m_point) m_point = v.m_point;
-				m_error |= v.m_error;
+				integer_ &= v.integer_;
+				error_.set(error::float_fatal);
+				if(dbe_) error_.set(error::double_fatal);
+				if(v.point_) point_ = v.point_;
+				error_ |= v.error_;
 				return *this;
 			}
 
 			value& operator ^= (const value& v) {
-				m_integer ^= v.m_integer;
-				m_error.set(float_fatal);
-				if(m_dbe) m_error.set(double_fatal);
-				if(v.m_point) m_point = v.m_point;
-				m_error |= v.m_error;
+				integer_ ^= v.integer_;
+				error_.set(error::float_fatal);
+				if(dbe_) error_.set(error::double_fatal);
+				if(v.point_) point_ = v.point_;
+				error_ |= v.error_;
 				return *this;
 			}
 
 			value& operator |= (const value& v) {
-				m_integer |= v.m_integer;
-				m_error.set(float_fatal);
-				if(m_dbe) m_error.set(double_fatal);
-				if(v.m_point) m_point = v.m_point;
-				m_error |= v.m_error;
+				integer_ |= v.integer_;
+				error_.set(error::float_fatal);
+				if(dbe_) error_.set(error::double_fatal);
+				if(v.point_) point_ = v.point_;
+				error_ |= v.error_;
 				return *this;
 			}
 
 			value& operator *= (const value& v) {
-				m_integer *= v.m_integer;
-				m_float *= v.m_float;
-				if(m_dbe) m_double *= v.m_double;
-				if(v.m_point) m_point = v.m_point;
-				m_error |= v.m_error;
+				integer_ *= v.integer_;
+				float_ *= v.float_;
+				if(dbe_) double_ *= v.double_;
+				if(v.point_) point_ = v.point_;
+				error_ |= v.error_;
 				return *this;
 			}
 
 			value& operator /= (const value& v) {
-				if(v.m_integer == 0 || v.m_float == 0.0f || v.m_double == 0.0) {
-					m_error.set(zero_divide);
+				if(v.integer_ == 0 || v.float_ == 0.0f || v.double_ == 0.0) {
+					error_.set(error::zero_divide);
 				} else {
-					m_integer /= v.m_integer;
-					m_float /= v.m_float;
-					if(m_dbe) m_double /= v.m_double;
+					integer_ /= v.integer_;
+					float_ /= v.float_;
+					if(dbe_) double_ /= v.double_;
 				}
-				if(v.m_point) m_point = v.m_point;
-				m_error |= v.m_error;
+				if(v.point_) point_ = v.point_;
+				error_ |= v.error_;
 				return *this;
 			}
 
 			value& operator %= (const value& v) {
-				if(v.m_integer == 0 || v.m_float == 0.0f || v.m_double == 0.0) {
-					m_error.set(zero_divide);
+				if(v.integer_ == 0 || v.float_ == 0.0f || v.double_ == 0.0) {
+					error_.set(error::zero_divide);
 				} else {
-					m_integer %= v.m_integer;
-					m_error.set(float_fatal);
-					if(m_dbe) m_error.set(double_fatal);
+					integer_ %= v.integer_;
+					error.set(error::float_fatal);
+					if(dbe_) error_.set(error::double_fatal);
 				}
-				if(v.m_point) m_point = v.m_point;
-				m_error |= v.m_error;
+				if(v.point_) point_ = v.point_;
+				error_ |= v.error_;
 				return *this;
 			}
 
 			value& operator <<= (const value& v) {
-				m_integer <<= v.m_integer;
-				m_error.set(float_fatal);
-				if(m_dbe) m_error.set(double_fatal);
-				if(v.m_point) m_point = v.m_point;
-				m_error |= v.m_error;
+				integer_ <<= v.integer_;
+				error_.set(error::float_fatal);
+				if(dbe_) error_.set(error::double_fatal);
+				if(v.point_) point_ = v.point_;
+				error_ |= v.error_;
 				return *this;
 			}
 
 			value& operator >>= (const value& v) {
-				m_integer >>= v.m_integer;
-				m_error.set(float_fatal);
-				if(m_dbe) m_error.set(double_fatal);
-				if(v.m_point) m_point = v.m_point;
-				m_error |= v.m_error;
+				integer__ >>= v.integer_;
+				error_.set(error::float_fatal);
+				if(dbe_) error_.set(error::double_fatal);
+				if(v.point_) point_ = v.point_;
+				error_ |= v.error_;
 				return *this;
 			}
 		};
 
-		value		m_value;
+		value		value_;
 
 		typedef boost::unordered_map<std::string, value>					symbol_map;
 		typedef boost::unordered_map<std::string, value>::iterator			symbol_map_it;
 		typedef boost::unordered_map<std::string, value>::const_iterator	symbol_map_cit;
-		symbol_map	m_symbol;
+		symbol_map	symbol_;
 
-		value number();
-		value factor();
-		value term();
-		value expression();
+		value number_();
+		value factor_();
+		value term_();
+		value expression_();
 	public:
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		arith() : m_tx(0), m_ch(0) { }
+		arith() : tx_(0), ch_(0) { }
 
 
 		//-----------------------------------------------------------------//
@@ -247,7 +246,7 @@ namespace fio {
 			@return エラーがある場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool get_error(error type) const { return m_value.m_error[type]; }
+		bool get_error(error::type t) const { return value_.error_[t]; }
 
 
 		//-----------------------------------------------------------------//
@@ -256,7 +255,7 @@ namespace fio {
 			@return 小数点表記なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool is_point() const { return m_value.m_point; }
+		bool is_point() const { return value_.point_; }
 
 
 		//-----------------------------------------------------------------//
@@ -265,7 +264,7 @@ namespace fio {
 			@return 解析結果（整数）を受け取る
 		*/
 		//-----------------------------------------------------------------//
-		int get_integer() const { return m_value.m_integer; }
+		int get_integer() const { return value_.integer_; }
 
 
 		//-----------------------------------------------------------------//
@@ -274,7 +273,7 @@ namespace fio {
 			@return 解析結果（32 ビット浮動小数点）を受け取る
 		*/
 		//-----------------------------------------------------------------//
-		float get_float() const { return m_value.m_float; }
+		float get_float() const { return value_.float_; }
 
 
 		//-----------------------------------------------------------------//
@@ -283,9 +282,8 @@ namespace fio {
 			@return 解析結果（64 ビット浮動小数点）を受け取る
 		*/
 		//-----------------------------------------------------------------//
-		double get_double() const { return m_value.m_double; }
+		double get_double() const { return value_.double_; }
 
 	};
 
 }
-#endif

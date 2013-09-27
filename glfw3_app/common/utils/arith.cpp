@@ -7,66 +7,66 @@
 //=====================================================================//
 #include "arith.hpp"
 
-namespace fio {
+namespace utils {
 
-	void arith::value::sum(char c)
+	void arith::value::sum_(char c)
 	{
 		if(c == '_') ;	// 数字列にある '_'（アンダースコアー）は無視
-		else if(m_hex_value == false && m_integer == 0 && m_point == false && (c =='x' || c == 'X' || c == '$')) {
-			m_hex_value = true;
+		else if(hex_value_ == false && integer_ == 0 && point_ == false && (c =='x' || c == 'X' || c == '$')) {
+			hex_value_ = true;
 		} else if(c == '.') {
-			if(m_point == false) {
-				m_point = true;
+			if(point_ == false) {
+				point_ = true;
 			} else {	// 少数点が２つ以上ある場合
-				m_error.set(fatal);
+				error_.set(error::fatal);
 			}
 		} else if(c >= '0' && c <= '9') {
 			c -= '0';
-			if(m_point == false) {
-				if(m_hex_value) {
-					m_integer <<= 4;
-					m_integer |= c;
+			if(point_ == false) {
+				if(hex_value_) {
+					integer_ <<= 4;
+					integer_ |= c;
 				} else {
-					m_integer *= 10;
-					m_integer += c;
-					m_float *= 10.0f;
-					m_float += static_cast<float>(c);
-					m_double *= 10.0;
-					m_double += static_cast<double>(c);
+					integer_ *= 10;
+					integer_ += c;
+					float_ *= 10.0f;
+					float_ += static_cast<float>(c);
+					double_ *= 10.0;
+					double_ += static_cast<double>(c);
 				}
 			} else {
-				m_f_scale *= 0.1f;
-				m_float += static_cast<float>(c) * m_f_scale;
-				m_d_scale *= 0.1;
-				m_double += static_cast<double>(c) * m_d_scale;
+				f_scale_ *= 0.1f;
+				float_ += static_cast<float>(c) * f_scale_;
+				d_scale_ *= 0.1;
+				double_ += static_cast<double>(c) * d_scale_;
 			}
-		} else if(m_hex_value == true && (c >= 'a' && c <= 'f')) {
+		} else if(hex_value_ == true && (c >= 'a' && c <= 'f')) {
 			c -= 'a';
 			c += 10;
-			m_integer <<= 4;
-			m_integer |= c;
-		} else if(m_hex_value == true && (c >= 'A' && c <= 'F')) {
+			integer_ <<= 4;
+			integer_ |= c;
+		} else if(hex_value_ == true && (c >= 'A' && c <= 'F')) {
 			c -= 'A';
 			c += 10;
-			m_integer <<= 4;
-			m_integer |= c;
+			integer_ <<= 4;
+			integer_ |= c;
 		} else {
-			m_error.set(number_fatal);
+			error_.set(error::number_fatal);
 		}
 	}
 
 
-	void arith::value::neg()
+	void arith::value::neg_()
 	{
-		m_integer = -m_integer;
-		m_float   = -m_float;
-		m_double  = -m_double;
+		integer_ = -integer_;
+		float_   = -float_;
+		double_  = -double_;
 	}
 
 
-	void arith::value::inv()
+	void arith::value::inv_()
 	{
-		m_integer = m_integer ^ -1;
+		integer_ = integer_ ^ -1;
 	}
 
 
@@ -79,18 +79,18 @@ namespace fio {
 	//-----------------------------------------------------------------//
 	void arith::set_symbol_i(const char* name, long val)
 	{
-		symbol_map_it it = m_symbol.find(name);
-		if(it == m_symbol.end()) {
+		symbol_map_it it = symbol_.find(name);
+		if(it == symbol_.end()) {
 			value v;
-			m_symbol[name] = v;
-			symbol_map_it it = m_symbol.find(name);
+			symbol_[name] = v;
+			symbol_map_it it = symbol_.find(name);
 		}
 		value& vp = (*it).second;
-		vp.m_integer = val;
-		vp.m_float = static_cast<float>(val);
-		vp.m_double = static_cast<double>(val);
-		vp.m_point = false;
-		vp.m_dbe = false;
+		vp.integer_ = val;
+		vp.float_ = static_cast<float>(val);
+		vp.double_ = static_cast<double>(val);
+		vp.point_ = false;
+		vp.dbe_ = false;
 	}
 
 
@@ -103,18 +103,18 @@ namespace fio {
 	//-----------------------------------------------------------------//
 	void arith::set_symbol_f(const char* name, float val)
 	{
-		symbol_map_it it = m_symbol.find(name);
-		if(it == m_symbol.end()) {
+		symbol_map_it it = symbol_.find(name);
+		if(it == symbol_.end()) {
 			value v;
-			m_symbol[name] = v;
-			symbol_map_it it = m_symbol.find(name);
+			symbol_[name] = v;
+			symbol_map_it it = symbol_.find(name);
 		}
 		value& vp = (*it).second;
-		vp.m_integer = static_cast<long>(val);
-		vp.m_float = val;
-		vp.m_double = static_cast<double>(val);
-		vp.m_point = true;
-		vp.m_dbe = false;
+		vp.integer_ = static_cast<long>(val);
+		vp.float_ = val;
+		vp.double_ = static_cast<double>(val);
+		vp.point_ = true;
+		vp.dbe_ = false;
 	}
 
 
@@ -128,17 +128,17 @@ namespace fio {
 	void arith::set_symbol_d(const char* name, double val)
 	{
 		symbol_map_it it = m_symbol.find(name);
-		if(it == m_symbol.end()) {
+		if(it == symbol_.end()) {
 			value v;
-			m_symbol[name] = v;
-			symbol_map_it it = m_symbol.find(name);
+			symbol_[name] = v;
+			symbol_map_it it = symbol_.find(name);
 		}
 		value& vp = (*it).second;
-		vp.m_integer = static_cast<long>(val);
-		vp.m_float = static_cast<float>(val);
-		vp.m_double = val;
-		vp.m_point = true;
-		vp.m_dbe = true;
+		vp.integer_ = static_cast<long>(val);
+		vp.float_ = static_cast<float>(val);
+		vp.double_ = val;
+		vp.point_ = true;
+		vp.dbe_ = true;
 	}
 
 
@@ -150,23 +150,23 @@ namespace fio {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	arith::value arith::number()
 	{
-		bool	inv = false;
-		bool	neg = false;
+		bool inv = false;
+		bool neg = false;
 
 		// 符号、反転の判定
-		if(m_ch == '-') {
+		if(ch_ == '-') {
 			inv = true;
-			m_ch = *m_tx++;
-		} else if(m_ch == '+') {
-			m_ch = *m_tx++;
-		} else if(m_ch == '!' || m_ch == '~') {
+			ch_ = *tx_++;
+		} else if(ch_ == '+') {
+			ch_ = *tx_++;
+		} else if(ch_ == '!' || ch_ == '~') {
 			neg = true;
-			m_ch = *m_tx++;
+			ch_ = *tx_++;
 		}
 
 		value v;
-		if(m_ch == '(') {
-			v = factor();
+		if(ch_ == '(') {
+			v = factor_();
 		} else {
 //			long val_bin = 0;
 //			long val_oct = 0;
@@ -179,27 +179,27 @@ namespace fio {
 			bool symbol = false;
 			std::string sym;
 
-			if(m_ch >= 'A' && m_ch <= 'Z') symbol = true;
-			else if(m_ch >= 'a' && m_ch <= 'z') symbol = true;
-			else if(m_ch == '_' || m_ch == '?') symbol = true;
+			if(ch_ >= 'A' && ch_ <= 'Z') symbol = true;
+			else if(ch_ >= 'a' && ch_ <= 'z') symbol = true;
+			else if(ch_ == '_' || ch_ == '?') symbol = true;
 
-			while(m_ch != 0) {
-				if(m_ch == '+') break;
-				else if(m_ch == '-') break;
-				else if(m_ch == '*') break;
-				else if(m_ch == '/') break;
-				else if(m_ch == '&') break;
-				else if(m_ch == '^') break;
-				else if(m_ch == '|') break;
-				else if(m_ch == '%') break;
-				else if(m_ch == ')') break;
-				else if(m_ch == '<') break;
-				else if(m_ch == '>') break;
-				else if(m_ch == '!') break;
-				else if(m_ch == '~') break;
+			while(ch_ != 0) {
+				if(ch_ == '+') break;
+				else if(ch_ == '-') break;
+				else if(ch_ == '*') break;
+				else if(ch_ == '/') break;
+				else if(ch_ == '&') break;
+				else if(ch_ == '^') break;
+				else if(ch_ == '|') break;
+				else if(ch_ == '%') break;
+				else if(ch_ == ')') break;
+				else if(ch_ == '<') break;
+				else if(ch_ == '>') break;
+				else if(ch_ == '!') break;
+				else if(ch_ == '~') break;
 
 				if(symbol) {
-					sym += m_ch;
+					sym += ch_;
 				} else {
 #if 0
 					if(m_ch == 'b' || m_ch == 'B') {
@@ -218,20 +218,20 @@ namespace fio {
 						}
 					}
 #endif
-					v.sum(m_ch);
+					v.sum(ch_);
 
-					if(v.m_error[binary_fatal] == true || v.m_error[octal_fatal] == true) ;
-					else if(v.m_error.any()) break;
+					if(v.error_[error::binary_fatal] == true || v.error_[error::octal_fatal] == true) ;
+					else if(v.error_.any()) break;
 				}
-				m_ch = *m_tx++;
+				ch_ = *tx_++;
 			}
 
 			if(symbol) {
-				symbol_map_cit cit = m_symbol.find(sym);
-				if(cit != m_symbol.end()) {
+				symbol_map_cit cit = symbol_.find(sym);
+				if(cit != symbol_.end()) {
 					v = (*cit).second;
 				} else {
-					v.m_error.set(symbol_fatal);
+					v.error_.set(error::symbol_fatal);
 				}
 			}
 		}
@@ -240,8 +240,8 @@ namespace fio {
 //						v.m_error.reset(double_fatal);
 		if(inv) v.inv();
 		if(neg) v.neg();
-		v.m_error.reset(binary_fatal);
-		v.m_error.reset(octal_fatal);
+		v.error_.reset(error::binary_fatal);
+		v.error_.reset(error::octal_fatal);
 
 		return v;
 	}
@@ -250,56 +250,56 @@ namespace fio {
 	arith::value arith::factor()
 	{
 		value v;
-		if(m_ch != '(') {
-			v = number();
+		if(ch_ != '(') {
+			v = number_();
 		} else {
-			m_ch = *m_tx++;
-			v = expression();
-			if(m_ch != ')') {
-				v.m_error.set(fatal);
+			ch_ = *tx_++;
+			v = expression_();
+			if(ch_ != ')') {
+				v.error_.set(error::fatal);
 			} else {
-				m_ch = *m_tx++;
+				ch_ = *tx_++;
 			}
 		}
 		return v;
 	}
 
 
-	arith::value arith::term()
+	arith::value arith::term_()
 	{
-		value v = factor();
-		while(v.m_error.any() != true) {
+		value v = factor_();
+		while(v.error_.any() != true) {
 			bool fin = false;
-			switch(m_ch) {
+			switch(ch_) {
 			case '*':
-				m_ch = *m_tx++;
-				v *= factor();
+				ch_ = *tx_++;
+				v *= factor_();
 				break;
 			case '/':
-				m_ch = *m_tx++;
-				if(m_ch == '/') {
-					m_ch = *m_tx++;
-					v %= factor();
+				ch_ = *tx_++;
+				if(ch_ == '/') {
+					ch_ = *tx_++;
+					v %= factor_();
 				} else {
 					v /= factor();
 				}
 				break;
 			case '<':
-				m_ch = *m_tx++;
-				if(m_ch == '<') {
-					m_ch = *m_tx++;
-					v <<= factor();
+				ch_ = *tx_++;
+				if(ch_ == '<') {
+					ch_ = *tx_++;
+					v <<= factor_();
 				} else {
-					v.m_error.set(fatal);
+					v.error_.set(error::fatal);
 				}
 				break;
 			case '>':
-				m_ch = *m_tx++;
-				if(m_ch == '>') {
-					m_ch = *m_tx++;
-					v <<= factor();
+				ch_ = *tx_++;
+				if(ch_ == '>') {
+					ch_ = *tx_++;
+					v <<= factor_();
 				} else {
-					v.m_error.set(fatal);
+					v.error_.set(error::fatal);
 				}
 				break;
 			default:
@@ -312,31 +312,31 @@ namespace fio {
 	}
 
 
-	arith::value arith::expression()
+	arith::value arith::expression_()
 	{
-		value v = term();
-		while(v.m_error.any() != true) {
+		value v = term_();
+		while(v.error_.any() != true) {
 			bool fin = false;
-			switch(m_ch) {
+			switch(ch_) {
 			case '+':
-				m_ch = *m_tx++;
-				v += term();
+				ch_ = *tx_++;
+				v += term_();
 				break;
 			case '-':
-				m_ch = *m_tx++;
-				v -= term();
+				ch_ = *tx_++;
+				v -= term_();
 				break;
 			case '&':
-				m_ch = *m_tx++;
-				v &= term();
+				ch_ = *tx_++;
+				v &= term_();
 				break;
 			case '^':
-				m_ch = *m_tx++;
-				v ^= term();
+				ch_ = *tx_++;
+				v ^= term_();
 				break;
 			case '|':
-				m_ch = *m_tx++;
-				v |= term();
+				ch_ = *tx_++;
+				v |= term_();
 				break;
 			default:
 				fin = true;
@@ -364,25 +364,25 @@ namespace fio {
 		while((c = *text++) != 0) {
 			if(c == ' ' || c == '\t') ;
 			else if(c < ' ') {
-				m_value.m_error.set(fatal);
+				value_.error_.set(fatal);
 				return false;
 			} else {
 				s += c;
 			}
 		}
 
-		m_tx = s.c_str();
-		m_ch = *m_tx++;
+		tx_ = s.c_str();
+		ch_ = *tx_++;
 		if(m_ch != 0) {
-			m_value = expression();
+			value_ = expression_();
 		} else {
-			m_value.m_error.set(fatal);
+			value_.error_.set(error::fatal);
 		}
 
-		if(m_value.m_error.any() == true) {
+		if(value_.error_.any() == true) {
 			return false;
-		} else if(m_ch != 0) {
-			m_value.m_error.set(fatal);
+		} else if(ch_ != 0) {
+			value_.error_.set(error::fatal);
 			return false;
 		}
 		return true;
