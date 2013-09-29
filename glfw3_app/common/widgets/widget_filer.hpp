@@ -78,7 +78,7 @@ namespace gui {
 		info_state::type	info_state_;
 
 		struct widget_file {
-			widget*			base;
+			widget_null*	base;
 			widget_label*	name;
 			widget_label*	info;
 			size_t			size;
@@ -123,7 +123,7 @@ namespace gui {
 		widget_files_cit scan_select_in_file_(widget_files& wfs) const;
 		widget_files_cit scan_select_file_(widget_files& wfs) const;
 		widget_files_cit scan_selected_file_(widget_files& wfs) const;
-		void resize_files_(widget_files& wfs, short width);
+		void resize_files_(widget_files& wfs, short ofs, short width);
 		void update_files_info_(widget_files& wfs);
 		void destroy_files_(widget_files& wfs);
 		void regist_state_();

@@ -24,7 +24,7 @@ namespace gui {
 		if(it != file_map_.end()) {
 			position_ = it->second.position_;
 			select_pos_ = it->second.select_pos_;
-			files_->at_rect().org = it->second.position_;
+///			files_->at_rect().org = it->second.position_;
 		}
 
 		// ウィジェットの強制的な優先順位設定
@@ -107,9 +107,6 @@ namespace gui {
 			wfs.push_back(wf);
 			rect.org.y += param_.label_height_;
 		}
-		if(files_->get_rect().size.y < rect.org.y) {
-			files_->at_rect().size.y = rect.org.y;
-		}
 	}
 
 
@@ -149,10 +146,11 @@ namespace gui {
 	}
 
 
-	void widget_filer::resize_files_(widget_files& wfs, short width)
+	void widget_filer::resize_files_(widget_files& wfs, short ofs, short width)
 	{
 		for(widget_files_cit cit = wfs.begin(); cit != wfs.end(); ++cit) {
 			const widget_file& wf = *cit;
+			wf.base->at_rect().org.x = ofs;
 			wf.base->at_rect().size.x = width;
 			short name_size = width * 2 / 3;
 			short space = 2;
@@ -242,7 +240,9 @@ namespace gui {
 
 	void widget_filer::destroy_()
 	{
+		destroy_files_(left_);
 		destroy_files_(center_);
+		destroy_files_(right_);
 		wd_.del_widget(files_);
 		wd_.del_widget(main_);
 		wd_.del_widget(path_);
@@ -367,7 +367,7 @@ namespace gui {
 			files_->set_state(widget::state::SIZE_LOCK);
 		}
 
-		position_ = files_->get_rect().org;
+		position_.set(0.0f);
 		speed_.set(0.0f, 0.0f);
 	}
 
@@ -411,6 +411,7 @@ namespace gui {
 		// ファイル情報の取得と反映（ファイル情報収集はスレッドで動作）
 		if(fsc_.probe()) {
 			if(center_.empty()) {
+				destroy_files_(left_);
 				create_files_(center_, 0);
 				update_priority_();
 				update_files_info_(center_);
@@ -419,8 +420,32 @@ namespace gui {
 					fsc_.set_path(s);
 				}
 			} else if(left_.empty()) {
-				create_files_(left_, -main_->get_rect().size.x);
+				create_files_(left_, 0);
+				update_files_info_(left_);
 			}
+		}
+
+		// フレームのサイズを、仮想ウィジェットに反映
+		{
+			short fw = param_.plate_param_.frame_width_;
+			const vtx::spos& size = get_rect().size;
+			short bw = size.x - fw * 2;
+			path_->at_rect().size.x = bw - param_.path_height_;
+			main_->at_rect().size.x = bw;
+			main_->at_rect().size.y = size.y - path_->get_rect().size.y - fw * 2;
+			short space = 4;
+			info_->at_rect().org.x = size.x - info_->get_rect().size.x - fw - space;
+			short bh = center_.size();
+			if(left_.size() > 0) {
+				resize_files_(left_,    0, bw);
+				resize_files_(center_, bw, bw);
+				bw += bw;
+				if(left_.size() > bh) bh = left_.size();
+			} else {
+				resize_files_(center_, 0, bw);
+			}
+			files_->at_rect().size.x = bw;
+			files_->at_rect().size.y = bh * param_.label_height_;
 		}
 
 		short base_size = main_->get_rect().size.y;
@@ -433,6 +458,9 @@ namespace gui {
 		// スプリング効果
 		if(files_->get_state(widget::state::DRAG)) {
 			position_ = files_->get_param().move_pos_;
+			if(left_.size() > 0) {
+				position_.x += main_->get_rect().size.x;
+			}
 			if(d < 0) {
 				if(position_.y < d) {
 					position_.y -= d;
@@ -495,10 +523,15 @@ namespace gui {
 			}
 		}
 		files_->at_rect().org = position_;
+		if(left_.size() > 0) {
+			files_->at_rect().org.x -= main_->get_rect().size.x;
+		}
 
 		// path 文字列を設定
 		{
-			if(files_->get_rect().org.x > (get_rect().size.x / 2)) {
+			short ref = files_->get_rect().org.x;
+			if(left_.size() > 0) ref += main_->get_rect().size.x;
+			if(ref > (get_rect().size.x / 2)) {
 				std::string np;
 				if(utils::previous_path(param_.path_, np)) {
 					path_->at_local_param().text_param_.text_ = np;
@@ -533,20 +566,8 @@ namespace gui {
 			if(info_state_ == info_state::limit_) {
 				info_state_ = info_state::NONE;
 			}
+			update_files_info_(left_);
 			update_files_info_(center_);
-		}
-
-		// フレームのサイズを、仮想ウィジェットに反映
-		{
-			short fw = param_.plate_param_.frame_width_;
-			const vtx::spos& size = get_rect().size;
-			path_->at_rect().size.x = size.x - fw * 2 - param_.path_height_;
-			main_->at_rect().size.x = size.x - fw * 2;
-			main_->at_rect().size.y = size.y - path_->get_rect().size.y - fw * 2;
-			files_->at_rect().size.x = size.x - fw * 2;
-			short space = 4;
-			info_->at_rect().org.x = size.x - info_->get_rect().size.x - fw - space;
-			resize_files_(center_, size.x - fw * 2);
 		}
 
 		// 選択の確認と動作
@@ -556,7 +577,7 @@ namespace gui {
 				const widget_file& wf = *cit;
 				if(wf.name) {
 					const std::string& n = wf.name->get_local_param().text_param_.text_;
-					if(n == "..") {
+					if(n == "..") {  // 一つ前に戻る
 						std::string np;
 						utils::previous_path(param_.path_, np);
 						param_.path_ = np;
