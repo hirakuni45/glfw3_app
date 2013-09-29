@@ -24,7 +24,6 @@ namespace gui {
 		if(it != file_map_.end()) {
 			position_ = it->second.position_;
 			select_pos_ = it->second.select_pos_;
-///			files_->at_rect().org = it->second.position_;
 		}
 
 		// ウィジェットの強制的な優先順位設定
@@ -455,8 +454,19 @@ namespace gui {
 		float slip_gain = 0.5f;
 		float speed_gain = 0.95f;
 
-		// スプリング効果
-		if(files_->get_state(widget::state::DRAG)) {
+		// スプリング効果など
+		if(move_speed_ > 0.5f || move_speed_ < -0.5f) {
+			position_.x += move_speed_;
+			if(position_.x >= main_->get_rect().size.x) {
+				move_speed_ = 0.0f;
+				position_.x = 0.0f;
+///						std::string np;
+///						utils::previous_path(param_.path_, np);
+///						param_.path_ = np;
+///						fsc_.set_path(param_.path_, param_.filter_);
+///						destroy_files_(center_);
+			}
+		} else if(files_->get_state(widget::state::DRAG)) {
 			position_ = files_->get_param().move_pos_;
 			if(left_.size() > 0) {
 				position_.x += main_->get_rect().size.x;
@@ -522,9 +532,11 @@ namespace gui {
 				}
 			}
 		}
-		files_->at_rect().org = position_;
-		if(left_.size() > 0) {
-			files_->at_rect().org.x -= main_->get_rect().size.x;
+		{
+			files_->at_rect().org = position_;
+			if(left_.size() > 0) {
+				files_->at_rect().org.x -= main_->get_rect().size.x;
+			}
 		}
 
 		// path 文字列を設定
@@ -578,11 +590,7 @@ namespace gui {
 				if(wf.name) {
 					const std::string& n = wf.name->get_local_param().text_param_.text_;
 					if(n == "..") {  // 一つ前に戻る
-						std::string np;
-						utils::previous_path(param_.path_, np);
-						param_.path_ = np;
-						fsc_.set_path(param_.path_, param_.filter_);
-						destroy_files_(center_);
+						move_speed_ = 16.0f;
 					} else if(wf.dir) {
 						std::string np;
 						utils::append_path(param_.path_, n, np);
@@ -596,12 +604,14 @@ namespace gui {
 					}
 				}
 			} else if(!files_->get_state(widget::state::DRAG)){
-				if(files_->get_rect().org.x > (get_rect().size.x / 2)) {
-					std::string np;
-					utils::previous_path(param_.path_, np);
-					param_.path_ = np;
-					fsc_.set_path(param_.path_);
-					destroy_files_(center_);
+				short ref = files_->get_rect().org.x;
+				if(left_.size() > 0) ref += main_->get_rect().size.x;
+				if(ref > (get_rect().size.x / 2)) {
+//					std::string np;
+//					utils::previous_path(param_.path_, np);
+//					param_.path_ = np;
+//					fsc_.set_path(param_.path_);
+//					destroy_files_(center_);
 				}
 			}
 		}

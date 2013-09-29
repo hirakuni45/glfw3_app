@@ -97,6 +97,7 @@ namespace gui {
 
 		vtx::fpos	speed_;
 		vtx::fpos	position_;
+		float		move_speed_;
 		uint32_t	select_pos_;
 
 		std::string	file_;
@@ -139,7 +140,7 @@ namespace gui {
 			fsc_(),
 			path_(0), info_(0), main_(0), files_(0),
 			info_state_(info_state::NONE),
-			speed_(0.0f), position_(0.0f), select_pos_(0),
+			speed_(0.0f), position_(0.0f), move_speed_(0.0f), select_pos_(0),
 			file_(),
 			select_file_id_(0)
 			{ }
