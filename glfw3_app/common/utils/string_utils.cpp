@@ -193,7 +193,6 @@ namespace utils {
 		// ルートの場合
 		if(dst.find('/') == std::string::npos) {
 			dst += '/';
-			return false;
 		}
 		return true;
 	}
