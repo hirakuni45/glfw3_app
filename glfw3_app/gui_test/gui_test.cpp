@@ -4,6 +4,7 @@
 	@author 平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
+#include <iostream>
 #include <boost/lexical_cast.hpp>
 #include "gui_test.hpp"
 #include "core/glcore.hpp"
@@ -172,6 +173,12 @@ namespace app {
 				if(filer_) {
 					filer_->enable();
 				}
+			}
+		}
+		if(filer_) {
+			if(filer_id_ != filer_->get_select_file_id()) {
+				filer_id_ = filer_->get_select_file_id();
+				std::cout << "Filer: '" << filer_->get_file() << "'" << std::endl;
 			}
 		}
 

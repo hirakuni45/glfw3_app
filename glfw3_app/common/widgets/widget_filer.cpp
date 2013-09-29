@@ -410,17 +410,28 @@ namespace gui {
 		// ファイル情報の取得と反映（ファイル情報収集はスレッドで動作）
 		if(fsc_.probe()) {
 			if(center_.empty()) {
-				destroy_files_(left_);
 				create_files_(center_, 0);
 				update_priority_();
 				update_files_info_(center_);
-				std::string s;
-				if(utils::previous_path(param_.path_, s)) {
-					fsc_.set_path(s);
+				if(left_.empty()) {
+					std::string pp;
+					if(utils::previous_path(param_.path_, pp)) {
+						fsc_.set_path(pp);
+						request_right_ = false;
+					}
 				}
-			} else if(left_.empty()) {
-				create_files_(left_, 0);
-				update_files_info_(left_);
+			} else {
+				if(request_right_) {
+					if(right_.empty()) {
+						create_files_(right_, 0);
+						update_files_info_(right_);
+					}
+				} else {
+					if(left_.empty()) {
+						create_files_(left_, 0);
+						update_files_info_(left_);
+					}
+				}
 			}
 		}
 
@@ -435,15 +446,21 @@ namespace gui {
 			short space = 4;
 			info_->at_rect().org.x = size.x - info_->get_rect().size.x - fw - space;
 			short bh = center_.size();
+			short sc = 1;
 			if(left_.size() > 0) {
 				resize_files_(left_,    0, bw);
 				resize_files_(center_, bw, bw);
-				bw += bw;
+				++sc;
 				if(left_.size() > bh) bh = left_.size();
 			} else {
 				resize_files_(center_, 0, bw);
 			}
-			files_->at_rect().size.x = bw;
+			if(right_.size() > 0) {
+				if(right_.size() > bh) bh = right_.size();
+				resize_files_(right_, bw * 2, bw);
+				++sc;
+			}
+			files_->at_rect().size.x = bw * sc;
 			files_->at_rect().size.y = bh * param_.label_height_;
 		}
 
@@ -453,19 +470,38 @@ namespace gui {
 		float gain = 0.85f;
 		float slip_gain = 0.5f;
 		float speed_gain = 0.95f;
+		float speed_move = 38.0f;	/// 横スクロールの初期速度
 
 		// スプリング効果など
-		if(move_speed_ > 0.5f || move_speed_ < -0.5f) {
+		if(move_speed_ != 0.0f) {
 			position_.x += move_speed_;
-			if(position_.x >= main_->get_rect().size.x) {
+			float spd = move_speed_;
+			move_speed_ *= 0.985f;
+			if(-6.0f < move_speed_ && move_speed_ < 6.0f) {
+				move_speed_ = spd;
+			}
+			if(move_speed_ > 0.0f && position_.x >= main_->get_rect().size.x) {
 				move_speed_ = 0.0f;
 				position_.x = 0.0f;
-///						std::string np;
-///						utils::previous_path(param_.path_, np);
-///						param_.path_ = np;
-///						fsc_.set_path(param_.path_, param_.filter_);
-///						destroy_files_(center_);
+				std::string pp;
+				if(utils::previous_path(param_.path_, pp)) {
+					param_.path_ = pp;
+					destroy_files_(center_);
+					center_.swap(left_);
+					if(utils::previous_path(param_.path_, pp)) {
+						fsc_.set_path(pp, param_.filter_);
+					}
+				} else {
+					destroy_files_(left_);
+				}
+			} else if(move_speed_ < 0.0f && position_.x <= -main_->get_rect().size.x) {
+				move_speed_ = 0.0f;
+				position_.x = 0.0f;
+				destroy_files_(left_);
+				center_.swap(left_);
+				center_.swap(right_);
 			}
+
 		} else if(files_->get_state(widget::state::DRAG)) {
 			position_ = files_->get_param().move_pos_;
 			if(left_.size() > 0) {
@@ -554,6 +590,14 @@ namespace gui {
 		}
 
 		// 選択されたファイルをハイライトする位置の検出
+		BOOST_FOREACH(const widget_file& wf, left_) {
+			wf.name->set_state(widget::state::SYSTEM_SELECT, false);
+			wf.info->set_state(widget::state::SYSTEM_SELECT, false);
+		}
+		BOOST_FOREACH(const widget_file& wf, right_) {
+			wf.name->set_state(widget::state::SYSTEM_SELECT, false);
+			wf.info->set_state(widget::state::SYSTEM_SELECT, false);
+		}
 		widget_files_cit cit = scan_select_in_file_(center_);
 		if(cit != center_.end()) {
 			BOOST_FOREACH(const widget_file& wf, center_) {
@@ -580,6 +624,7 @@ namespace gui {
 			}
 			update_files_info_(left_);
 			update_files_info_(center_);
+			update_files_info_(right_);
 		}
 
 		// 選択の確認と動作
@@ -590,29 +635,30 @@ namespace gui {
 				if(wf.name) {
 					const std::string& n = wf.name->get_local_param().text_param_.text_;
 					if(n == "..") {  // 一つ前に戻る
-						move_speed_ = 16.0f;
+						request_right_ = false;
+						move_speed_ =  speed_move;
 					} else if(wf.dir) {
-						std::string np;
-						utils::append_path(param_.path_, n, np);
-						utils::strip_last_of_delimita_path(np, param_.path_);
-						fsc_.set_path(param_.path_, param_.filter_);
-						destroy_files_(center_);
+						request_right_ = true;
+						move_speed_ = -speed_move;
+						std::string ap;
+						utils::append_path(param_.path_, n, ap);
+						utils::strip_last_of_delimita_path(ap, param_.path_);
+						fsc_.set_path(param_.path_, param_.filter_);						
+						destroy_files_(right_);
 					} else {
 						utils::append_path(param_.path_, n, file_);
 						++select_file_id_;
 						enable(false);
 					}
 				}
+#if 0
 			} else if(!files_->get_state(widget::state::DRAG)){
 				short ref = files_->get_rect().org.x;
 				if(left_.size() > 0) ref += main_->get_rect().size.x;
 				if(ref > (get_rect().size.x / 2)) {
-//					std::string np;
-//					utils::previous_path(param_.path_, np);
-//					param_.path_ = np;
-//					fsc_.set_path(param_.path_);
-//					destroy_files_(center_);
+					move_speed_ = 30.0f;
 				}
+#endif
 			}
 		}
 	}

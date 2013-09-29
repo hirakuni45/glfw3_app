@@ -25,6 +25,8 @@ namespace app {
 		gui::widget_tree*		tree_;
 		gui::widget_filer*		filer_;
 
+		uint32_t	filer_id_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -32,7 +34,8 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		gui_test(utils::director<core>& d) : director_(d),
-			dialog_open_(0), filer_open_(0), dialog_(0), tree_(0), filer_(0)
+			dialog_open_(0), filer_open_(0), dialog_(0), tree_(0), filer_(0),
+			filer_id_(0)
 		{ }
 
 

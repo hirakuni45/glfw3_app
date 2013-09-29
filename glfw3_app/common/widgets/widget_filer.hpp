@@ -94,6 +94,7 @@ namespace gui {
 		widget_files	left_;
 		widget_files	center_;
 		widget_files	right_;
+		bool			request_right_;
 
 		vtx::fpos	speed_;
 		vtx::fpos	position_;
@@ -140,6 +141,7 @@ namespace gui {
 			fsc_(),
 			path_(0), info_(0), main_(0), files_(0),
 			info_state_(info_state::NONE),
+			request_right_(false),
 			speed_(0.0f), position_(0.0f), move_speed_(0.0f), select_pos_(0),
 			file_(),
 			select_file_id_(0)
