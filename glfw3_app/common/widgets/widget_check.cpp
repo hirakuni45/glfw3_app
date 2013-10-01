@@ -91,7 +91,13 @@ namespace gui {
 			if(param_.disable_gray_text_ && !obj_state_) {
 				param_.text_param_.fore_color_ *= param_.gray_text_gain_;
 			}
-			draw_text(param_.text_param_, rect, wp.clip_);
+			widget::text_param tmp = param_.text_param_;
+			const img::rgbaf& cf = wd_.get_color();
+			tmp.fore_color_ *= cf.r;
+			tmp.fore_color_.alpha_scale(cf.a);
+			tmp.shadow_color_ *= cf.r;
+			tmp.shadow_color_.alpha_scale(cf.a);
+			draw_text(tmp, rect, wp.clip_);
 
 			igl->at_fonts().restore_matrix();
 

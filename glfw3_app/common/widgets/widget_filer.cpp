@@ -465,7 +465,7 @@ namespace gui {
 		}
 
 		short base_size = main_->get_rect().size.y;
-		short d = base_size - files_->get_rect().size.y;
+		short d = base_size - center_.size() * param_.label_height_;
 		short scroll_gain = 12;
 		float gain = 0.85f;
 		float slip_gain = 0.5f;

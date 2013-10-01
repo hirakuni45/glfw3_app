@@ -301,6 +301,13 @@ namespace gui {
 			}
 
 			{
+				widget::text_param tmp = tp;
+				const img::rgbaf& cf = wd.get_color();
+				tmp.fore_color_ *= cf.r;
+				tmp.fore_color_.alpha_scale(cf.a);
+				tmp.shadow_color_ *= cf.r;
+				tmp.shadow_color_.alpha_scale(cf.a);
+
 				vtx::srect clip = wp.clip_;
 				rect.size.x -= pp.frame_width_ * 2;
 				rect.size.y -= pp.frame_width_ * 2;
@@ -308,7 +315,7 @@ namespace gui {
 				clip.org.y += pp.frame_width_;
 				clip.size.x -= pp.frame_width_ * 2;
 				clip.size.y -= pp.frame_width_ * 2;
-				draw_text(tp, rect, clip);
+				draw_text(tmp, rect, clip);
 			}
 
 			fonts.restore_matrix();
