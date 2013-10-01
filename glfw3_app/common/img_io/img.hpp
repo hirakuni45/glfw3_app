@@ -242,6 +242,14 @@ namespace img {
 			a = 255;
 		}
 
+
+		void alpha_scale(float scale) {
+			float fa = static_cast<float>(a) * scale;
+			if(fa < 0.0f) fa = 0.0f;
+			else if(fa > 255.0f) fa = 255.0f; 
+			a = static_cast<u8>(fa);
+		}
+
 	};
 
 	inline size_t hash_value(const rgba8& v) { return v.hash(); }
