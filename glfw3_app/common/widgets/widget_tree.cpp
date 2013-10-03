@@ -20,6 +20,7 @@ namespace gui {
 		at_param().state_.set(widget::state::SIZE_LOCK, false);
 		at_param().state_.set(widget::state::RESIZE_H_ENABLE);
 		at_param().state_.set(widget::state::RESIZE_V_ENABLE);
+		at_param().state_.set(widget::state::SERVICE);
 
 		param_.plate_param_.resizeble_ = true;
 		// フレームの生成

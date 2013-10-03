@@ -32,6 +32,7 @@ namespace gui {
 	{
 		// 自由な大きさの変更を禁止
 		at_param().state_.set(widget::state::SIZE_LOCK);
+		at_param().state_.set(widget::state::SERVICE);
 
 		param_.plate_param_.resizeble_ = true;
 		// フレームの生成

@@ -223,6 +223,8 @@ namespace gui {
 				DRAG,					///< ドラッグ時有効
 				RESIZE,					///< リサイズ時有効
 
+				SERVICE,				///< サービスを呼び出す
+
 				/// ワーク用
 				SYSTEM_STALL,			///< システム用ストール
 				SYSTEM_SELECT,			///< システム用セレクト

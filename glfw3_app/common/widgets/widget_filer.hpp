@@ -120,7 +120,8 @@ namespace gui {
 		static const char* key_locate_;
 		static const char* key_size_;
 
-		void update_priority_();
+		void create_file_(widget_file& wf, const vtx::srect& rect, short ofs,
+			const std::string& fn);
 		void create_files_(widget_files& wfs, short ofs);
 		widget_files_cit scan_select_in_file_(widget_files& wfs) const;
 		widget_files_cit scan_select_file_(widget_files& wfs) const;
@@ -128,7 +129,8 @@ namespace gui {
 		void resize_files_(widget_files& wfs, short ofs, short width);
 		void update_files_info_(widget_files& wfs);
 		void destroy_files_(widget_files& wfs);
-		void regist_state_();
+		void get_regist_state_();
+		void set_regist_state_();
 		void destroy_();
 	public:
 		//-----------------------------------------------------------------//

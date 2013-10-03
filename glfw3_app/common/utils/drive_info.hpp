@@ -46,38 +46,25 @@ namespace utils {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct info_t {
-			int			drive_;		///< ドライブ番号（A:0 to Z:25)
+			uint32_t	drive_;		///< ドライブ番号（A:0 to Z:25)
 			drive::type	type_;		///< ドライブの種類
+			info_t() : drive_(26), type_(drive::none) { }
 		};
 
 	private:
-		unsigned long		drives_;
+		uint32_t		drives_;
 		std::vector<info_t>	infos_;
 
-	public:
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		/*!
-		  @brief	コンストラクター
-		*/
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		drive_info() : drives_(0) { }
-
-
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		/*!
-		  @brief	初期化
-		*/
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		void initialize() {
+		void initialize_() {
 			infos_.clear();
 #ifdef WIN32
 			drives_ = GetLogicalDrives();
 #else
 			drives_ = 0;
 #endif
-			unsigned long drvbits = drives_;
+			uint32_t drvbits = drives_;
 #ifdef WIN32
-			unsigned long bits = 1;
+			uint32_t bits = 1;
 			int idx = 0;
 			while(drvbits) {
 				drive::type t = drive::none;
@@ -127,6 +114,14 @@ namespace utils {
 #endif
 		}
 
+	public:
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+		  @brief	コンストラクター
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		drive_info() : drives_(0) { initialize_(); }
+
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
@@ -134,7 +129,7 @@ namespace utils {
 		  @return ドライブ数
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		int get_drive_num() const { return static_cast<int>(infos_.size()); }
+		uint32_t get_num() const { return infos_.size(); }
 
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -144,7 +139,14 @@ namespace utils {
 		  @return ドライブのタイプ
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		const info_t& get_info(int drive) const { return infos_[drive]; }
+		const info_t& get_info(uint32_t drive) const {
+			if(drive < infos_.size()) {
+				return infos_[drive];
+			} else {
+				static info_t info;
+				return info;
+			}
+		}
 
 		void dump() {
 			BOOST_FOREACH(const info_t& inf, infos_) {

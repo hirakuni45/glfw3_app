@@ -21,6 +21,7 @@ namespace gui {
 		// 標準的に固定
 		at_param().state_.set(widget::state::POSITION_LOCK);
 		at_param().state_.set(widget::state::SIZE_LOCK);
+		at_param().state_.set(widget::state::SERVICE);
 
 		vtx::spos size;
 		if(param_.plate_param_.resizeble_) {

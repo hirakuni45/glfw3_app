@@ -23,6 +23,7 @@
 #include "widgets/widget_dialog.hpp"
 #include "widgets/widget_tree.hpp"
 #include "widgets/widget_filer.hpp"
+#include "widgets/widget_terminal.hpp"
 
 namespace gui {
 
@@ -37,7 +38,9 @@ namespace gui {
 	widget::color_param widget_director::default_list_color_;
 	widget::color_param widget_director::default_list_color_select_;
 	widget::color_param widget_director::default_dialog_color_;
+	widget::color_param widget_director::default_filer_color_;
 	widget::color_param widget_director::default_tree_color_;
+	widget::color_param widget_director::default_terminal_color_;
 
 	void widget_director::message_widget_(widget* w, const std::string& s)
 	{
@@ -97,6 +100,8 @@ namespace gui {
 			type = "tree";
 		} else if(w->type() == get_type_id<widget_filer>()) {
 			type = "filer";
+		} else if(w->type() == get_type_id<widget_terminal>()) {
+			type = "terminal";
 		} else {
 			type = "(none)";
 		}
@@ -291,6 +296,7 @@ namespace gui {
 		fc.set( 55, 157, 235);
 		bc = fc * 0.7f;
 		default_frame_color_ = widget::color_param(fc, bc);
+
 		fc.set( 72, 193, 241);
 		bc = fc * 0.7f;
 		default_button_color_ = widget::color_param(fc, bc);
@@ -317,9 +323,17 @@ namespace gui {
 		bc = fc * 0.7f;
 		default_dialog_color_ = widget::color_param(fc, bc);
 
+		fc.set(235, 157,  95);
+		bc = fc * 0.7f;
+		default_filer_color_ = widget::color_param(fc, bc);
+
 		fc.set( 55, 157, 235);
 		bc = fc * 0.7f;
 		default_tree_color_ = widget::color_param(fc, bc);
+
+		fc.set( 55, 157, 235);
+		bc = fc * 0.7f;
+		default_terminal_color_ = widget::color_param(fc, bc);
 
 		img::paint::intensity_rect ir;
 		// ボタンの頂点輝度設定
@@ -762,7 +776,7 @@ namespace gui {
 	{
 		widgets ws;
 		BOOST_FOREACH(widget* w, widgets_) {
-			if(w->hybrid()) {
+			if(w->get_state(widget::state::SERVICE)) {
 				ws.push_back(w);
 			}
 		}

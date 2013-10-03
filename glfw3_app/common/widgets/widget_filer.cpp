@@ -16,22 +16,55 @@ namespace gui {
 	const char* widget_filer::key_locate_ = { "widget/filer/locate" };
 	const char* widget_filer::key_size_   = { "widget/filer/size" };
 
-	void widget_filer::update_priority_()
-	{
-		// 選択位置の回復
-		select_pos_ = 0;
-		file_map_it it = file_map_.find(param_.path_);
-		if(it != file_map_.end()) {
-			position_ = it->second.position_;
-			select_pos_ = it->second.select_pos_;
-		}
 
-		// ウィジェットの強制的な優先順位設定
-		wd_.top_widget(this);
-		wd_.top_widget(path_);
-		wd_.top_widget(info_);
-		wd_.top_widget(main_);
-		wd_.top_widget(files_);
+	void widget_filer::create_file_(widget_file& wf, const vtx::srect& rect, short ofs, const std::string& fn)
+	{
+		{
+			widget::param wp(rect, files_);
+			widget_null::param wp_;
+			wf.base = wd_.add_widget<widget_null>(wp, wp_);
+			wf.base->set_state(widget::state::POSITION_LOCK);
+			wf.base->set_state(widget::state::SIZE_LOCK);
+			wf.base->set_state(widget::state::CLIP_PARENTS);
+			wf.base->set_state(widget::state::DRAG_UNSELECT);
+			wf.base->set_state(widget::state::SELECT_PARENTS);
+		}
+		short fns = rect.size.x * 2 / 3;
+		short ats = rect.size.x - fns - 2;
+		{
+			vtx::srect r;
+			r.org.set(0);
+			r.size.set(fns, param_.label_height_);
+			widget::param wp(r, wf.base);
+			wp.action_.set(widget::action::SELECT_HIGHLIGHT);
+			widget_label::param wp_(fn);
+			wp_.text_param_.placement_.hpt = vtx::placement::holizontal::LEFT;
+			wp_.plate_param_.frame_width_ = 0;
+			wp_.plate_param_.round_radius_ = 0;
+			wp_.plate_param_.resizeble_ = true;
+			wf.name = wd_.add_widget<widget_label>(wp, wp_);
+			wf.name->set_state(widget::state::POSITION_LOCK);
+			wf.name->set_state(widget::state::CLIP_PARENTS);
+			wf.name->set_state(widget::state::DRAG_UNSELECT);
+			wf.name->set_state(widget::state::RESIZE_ROOT);
+		}
+		{
+			vtx::srect r;
+			r.org.set(fns + 2, 0);
+			r.size.set(ats, param_.label_height_);
+			widget::param wp(r, wf.base);
+			wp.action_.set(widget::action::SELECT_HIGHLIGHT);
+			widget_label::param wp_;
+			wp_.text_param_.placement_.hpt = vtx::placement::holizontal::LEFT;
+			wp_.plate_param_.frame_width_ = 0;
+			wp_.plate_param_.round_radius_ = 0;
+			wp_.plate_param_.resizeble_ = true;
+			wf.info = wd_.add_widget<widget_label>(wp, wp_);
+			wf.info->set_state(widget::state::POSITION_LOCK);
+			wf.info->set_state(widget::state::CLIP_PARENTS);
+			wf.info->set_state(widget::state::DRAG_UNSELECT);
+			wf.info->set_state(widget::state::RESIZE_ROOT);
+		}
 	}
 
 
@@ -42,6 +75,21 @@ namespace gui {
 		rect.org.set(ofs, 0);
 		rect.size.x = path_->get_rect().size.x;
 		rect.size.y = param_.label_height_;
+
+		// ルートパスならドライブレターを加える
+		std::string pp;
+		if(!utils::previous_path(fsc_.get_path(), pp)) {
+			for(uint32_t i = 0; i < drv_.get_num(); ++i) {
+				widget_file wf;
+				std::string fn;
+				fn += 'A' + drv_.get_info(i).drive_;
+				fn += ":/";
+				wf.dir = true;
+				create_file_(wf, rect, ofs, fn);
+				wfs.push_back(wf);
+				rect.org.y += param_.label_height_;
+			}
+		}
 
 		const utils::file_infos& fos = fsc_.get();
 		BOOST_FOREACH(const utils::file_info& fi, fos) {
@@ -54,55 +102,13 @@ namespace gui {
 				fn += '/';
 				wf.dir = true;
 			}
-			{
-				widget::param wp(rect, files_);
-				widget_null::param wp_;
-				wf.base = wd_.add_widget<widget_null>(wp, wp_);
-				wf.base->set_state(widget::state::POSITION_LOCK);
-				wf.base->set_state(widget::state::SIZE_LOCK);
-				wf.base->set_state(widget::state::CLIP_PARENTS);
-				wf.base->set_state(widget::state::DRAG_UNSELECT);
-				wf.base->set_state(widget::state::SELECT_PARENTS);
-			}
-			short fns = rect.size.x * 2 / 3;
-			short ats = rect.size.x - fns - 2;
-			{
-				vtx::srect r;
-				r.org.set(0);
-				r.size.set(fns, param_.label_height_);
-				widget::param wp(r, wf.base);
-				wp.action_.set(widget::action::SELECT_HIGHLIGHT);
-				widget_label::param wp_(fn);
-				wp_.text_param_.placement_.hpt = vtx::placement::holizontal::LEFT;
-				wp_.plate_param_.frame_width_ = 0;
-				wp_.plate_param_.round_radius_ = 0;
-				wp_.plate_param_.resizeble_ = true;
-				wf.name = wd_.add_widget<widget_label>(wp, wp_);
-				wf.name->set_state(widget::state::POSITION_LOCK);
-				wf.name->set_state(widget::state::CLIP_PARENTS);
-				wf.name->set_state(widget::state::DRAG_UNSELECT);
-				wf.name->set_state(widget::state::RESIZE_ROOT);
-			}
-			{
-				vtx::srect r;
-				r.org.set(fns + 2, 0);
-				r.size.set(ats, param_.label_height_);
-				widget::param wp(r, wf.base);
-				wp.action_.set(widget::action::SELECT_HIGHLIGHT);
-				widget_label::param wp_;
-				wp_.text_param_.placement_.hpt = vtx::placement::holizontal::LEFT;
-				wp_.plate_param_.frame_width_ = 0;
-				wp_.plate_param_.round_radius_ = 0;
-				wp_.plate_param_.resizeble_ = true;
-				wf.info = wd_.add_widget<widget_label>(wp, wp_);
-				wf.info->set_state(widget::state::POSITION_LOCK);
-				wf.info->set_state(widget::state::CLIP_PARENTS);
-				wf.info->set_state(widget::state::DRAG_UNSELECT);
-				wf.info->set_state(widget::state::RESIZE_ROOT);
-			}
+
+			create_file_(wf, rect, ofs, fn);
+
 			wf.size = fi.get_size();
 			wf.time = fi.get_time();
 			wf.mode = fi.get_mode();
+
 			wfs.push_back(wf);
 			rect.org.y += param_.label_height_;
 		}
@@ -223,7 +229,19 @@ namespace gui {
 	}
 
 
-	void widget_filer::regist_state_()
+	void widget_filer::get_regist_state_()
+	{
+		// 選択位置の回復
+		select_pos_ = 0;
+		file_map_it it = file_map_.find(param_.path_);
+		if(it != file_map_.end()) {
+			position_ = it->second.position_;
+			select_pos_ = it->second.select_pos_;
+		}
+	}
+
+
+	void widget_filer::set_regist_state_()
 	{
 		// パスに紐づいた位置の記録
 		file_map_it it = file_map_.find(param_.path_);
@@ -290,6 +308,7 @@ namespace gui {
 		at_param().state_.set(widget::state::SIZE_LOCK, false);
 		at_param().state_.set(widget::state::RESIZE_H_ENABLE);
 		at_param().state_.set(widget::state::RESIZE_V_ENABLE);
+		at_param().state_.set(widget::state::SERVICE);
 
 		param_.plate_param_.resizeble_ = true;
 		at_param().resize_min_ = param_.plate_param_.grid_ * 3;
@@ -410,8 +429,9 @@ namespace gui {
 		// ファイル情報の取得と反映（ファイル情報収集はスレッドで動作）
 		if(fsc_.probe()) {
 			if(center_.empty()) {
+				wd_.top_widget(path_);
+				wd_.top_widget(info_);
 				create_files_(center_, 0);
-				update_priority_();
 				update_files_info_(center_);
 				if(left_.empty()) {
 					std::string pp;
@@ -494,6 +514,7 @@ namespace gui {
 				} else {
 					destroy_files_(left_);
 				}
+				get_regist_state_();
 			} else if(move_speed_ < 0.0f && position_.x <= -main_->get_rect().size.x) {
 				move_speed_ = 0.0f;
 				position_.x = 0.0f;
@@ -605,7 +626,7 @@ namespace gui {
 				wf.info->set_state(widget::state::SYSTEM_SELECT, false);
 			}
 			select_pos_ = cit - center_.begin();
-			regist_state_();
+			set_regist_state_();
 		} else if(scan_select_file_(center_) != center_.end()) {
 			// 何もしない
 		} else if(!files_->get_state(widget::state::DRAG)){
@@ -641,9 +662,13 @@ namespace gui {
 						request_right_ = true;
 						move_speed_ = -speed_move;
 						std::string ap;
-						utils::append_path(param_.path_, n, ap);
-						utils::strip_last_of_delimita_path(ap, param_.path_);
-						fsc_.set_path(param_.path_, param_.filter_);						
+						if(n.size() > 2 && 'A' <= n[0] && n[0] <= 'Z' && n[1] == ':') {
+							param_.path_ = n;
+						} else {
+							utils::append_path(param_.path_, n, ap);
+							utils::strip_last_of_delimita_path(ap, param_.path_);
+						}
+						fsc_.set_path(param_.path_, param_.filter_);
 						destroy_files_(right_);
 					} else {
 						utils::append_path(param_.path_, n, file_);
