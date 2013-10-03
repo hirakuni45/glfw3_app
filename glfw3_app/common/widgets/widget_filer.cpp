@@ -740,7 +740,9 @@ namespace gui {
 		if(pre.get_text(key_path_, path)) {
 			param_.path_ = path;
 			fsc_.set_path(param_.path_, param_.filter_);
+			destroy_files_(left_);
 			destroy_files_(center_);
+			destroy_files_(right_);
 		} else {
 			++err;
 		}

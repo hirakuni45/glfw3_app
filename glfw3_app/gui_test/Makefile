@@ -217,6 +217,7 @@ main.o: ../common/gl_fw/IGLcore.hpp ../common/core/device.hpp
 main.o: ../common/gl_fw/glfonts.hpp ../common/gl_fw/Ikfimg.hpp
 main.o: ../common/core/device.hpp ../common/utils/director.hpp
 main.o: ../common/utils/i_scene.hpp gui_test.hpp ../common/utils/i_scene.hpp
+main.o: ../common/widgets/widget_slider.hpp
 main.o: ../common/widgets/widget_dialog.hpp ../common/widgets/widget_text.hpp
 main.o: ../common/widgets/widget_tree.hpp ../common/utils/tree_unit.hpp
 main.o: ../common/gl_fw/glutils.hpp
@@ -242,6 +243,7 @@ gui_test.o: ../common/widgets/widget_director.hpp
 gui_test.o: ../common/widgets/widget_label.hpp
 gui_test.o: ../common/widgets/widget_button.hpp ../common/utils/i_scene.hpp
 gui_test.o: ../common/utils/director.hpp ../common/utils/i_scene.hpp
+gui_test.o: ../common/widgets/widget_slider.hpp
 gui_test.o: ../common/widgets/widget_dialog.hpp
 gui_test.o: ../common/widgets/widget_text.hpp
 gui_test.o: ../common/widgets/widget_tree.hpp ../common/utils/tree_unit.hpp
@@ -250,7 +252,6 @@ gui_test.o: ../common/core/device.hpp ../common/gl_fw/glfonts.hpp
 gui_test.o: ../common/gl_fw/Ikfimg.hpp ../common/core/device.hpp
 gui_test.o: ../common/widgets/widget_utils.hpp
 gui_test.o: ../common/widgets/widget_frame.hpp
-gui_test.o: ../common/widgets/widget_slider.hpp
 gui_test.o: ../common/widgets/widget_check.hpp
 gui_test.o: ../common/widgets/widget_radio.hpp
 gui_test.o: ../common/widgets/widget_list.hpp

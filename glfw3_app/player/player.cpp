@@ -176,7 +176,7 @@ namespace app {
 				sound.seek_stream(static_cast<size_t>(pos));
 			}
 		}
-		pre.get_real(volume_path_, volume_->at_local_param().slider_param_.position_);
+		pre.get_real(volume_path_, volume_->at_slider_param().position_);
 		if(filer_) {
 			filer_->load(pre);
 		}
@@ -336,7 +336,7 @@ namespace app {
 		set_time_(total_time_, total_t_);
 		set_time_(remain_time_, remain_t_);
 		{
-			gui::widget::slider_param& sp = seek_time_->at_local_param().slider_param_;
+			gui::widget::slider_param& sp = seek_time_->at_slider_param();
 			if(total_t_) {
 				float limit = static_cast<float>(frame_limit_);
 				float t = static_cast<float>(remain_t_) * limit;
@@ -390,7 +390,7 @@ namespace app {
 		}
 
 		// ストリームのゲイン(volume)を設定
-		sound.set_gain_stream(volume_->get_local_param().slider_param_.position_);
+		sound.set_gain_stream(volume_->get_slider_param().position_);
 
 		// ファイラーがファイル選択をした場合
 		if(filer_->get_select_file_id() != select_file_id_) {

@@ -87,7 +87,7 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		void set_path(const std::string& path, const std::string& ext = "") {
-			if(!start_) {
+			if(!start_) { // スレッドの起動
 				sem_wait(&files_io_.start_);
 				start_ = true;
 			}

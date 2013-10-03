@@ -119,10 +119,17 @@ namespace app {
 			filer_open_ = wd.add_widget<widget_button>(wp, wp_);
 		}
 
+		if(1) { // スライダーのテスト
+			widget::param wp(vtx::srect(30, 400, 180, 20));
+			widget_slider::param wp_;
+			slider_ = wd.add_widget<widget_slider>(wp, wp_);
+		}
+
 		if(1) {	// ファイラーのテスト
 			widget::param wp(vtx::srect(10, 30, 300, 200));
 			widget_filer::param wp_(igl->get_current_path());
 			filer_ = wd.add_widget<widget_filer>(wp, wp_);
+			filer_->enable(false);
 		}
 
 		if(1) {	// ツリーのテスト
@@ -144,6 +151,12 @@ namespace app {
 				tu.install("sub1", v);
 			}
 			/// tu.list_all();
+		}
+
+		// プリファレンスの取得
+		sys::preference& pre = director_.at_core().preference_;
+		if(filer_) {
+			filer_->load(pre);
 		}
 	}
 
@@ -205,6 +218,9 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void gui_test::destroy()
 	{
+		sys::preference& pre = director_.at_core().preference_;
+		if(filer_) {
+			filer_->save(pre);
+		}
 	}
-
 }

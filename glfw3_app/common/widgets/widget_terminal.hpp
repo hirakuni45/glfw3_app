@@ -39,6 +39,17 @@ namespace gui {
 
 		gl::glmobj::handle	objh_;
 
+		struct cha {
+			wchar_t		ch;
+			img::rgba8	col;
+		};
+		typedef std::vector<cha> chas;
+		typedef std::vector<cha>::iterator chas_it;
+		typedef std::vector<cha>::const_iterator chas_cit;
+
+		vtx::spos	scs_;
+		chas		chas_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
