@@ -370,7 +370,7 @@ namespace gui {
 		IGLcore* igl = get_glcore();
 		if(igl == 0) return;
 
-		glfonts& fonts = igl->at_fonts();
+		fonts& fonts = igl->at_fonts();
 		fonts.set_clip_size(igl->get_size());
 		fonts.set_font_size(24);
 

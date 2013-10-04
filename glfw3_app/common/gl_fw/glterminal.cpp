@@ -40,7 +40,7 @@ namespace gl {
 		}
 
 		// 半角文字中で一番広い場合の幅検出
-		glfonts& fonts = Igl->at_fonts();
+		fonts& fonts = Igl->at_fonts();
 		int max = 0;
 		for(int i = 0x20; i < 128; ++i) {
 			int ww = fonts.get_width(i);
@@ -153,7 +153,7 @@ namespace gl {
 	{
 		IGLcore* Igl = get_glcore();
 		if(Igl == 0) return;
-		glfonts& fonts = Igl->at_fonts();
+		fonts& fonts = Igl->at_fonts();
 
 		fonts.set_fore_color(fore_color_);
 		fonts.set_back_color(back_color_);

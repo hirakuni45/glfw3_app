@@ -7,6 +7,7 @@
 //=====================================================================//
 #include "widgets/widget_director.hpp"
 #include "widgets/widget_frame.hpp"
+#include "gl_fw/glterminal.hpp"
 
 namespace gui {
 
@@ -39,16 +40,7 @@ namespace gui {
 
 		gl::glmobj::handle	objh_;
 
-		struct cha {
-			wchar_t		ch;
-			img::rgba8	col;
-		};
-		typedef std::vector<cha> chas;
-		typedef std::vector<cha>::iterator chas_it;
-		typedef std::vector<cha>::const_iterator chas_cit;
-
-		vtx::spos	scs_;
-		chas		chas_;
+		gl::terminal		term_;
 
 	public:
 		//-----------------------------------------------------------------//

@@ -23,7 +23,7 @@ namespace gl {
 		@brief	glfonts クラス
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	class glfonts {
+	class fonts {
 
 		static const int texture_page_width  = 256;	///< テクスチャーページの幅
 		static const int texture_page_height = 256;	///< テクスチャーページの高さ
@@ -138,17 +138,18 @@ namespace gl {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		glfonts() : kfm_(0),
-					face_(0),
-					fore_color_(255, 255, 255, 255),
-					back_color_(0, 0, 0, 255),
-					setup_(false),
-					render_back_(true),
-					h_flip_(false),
-					v_flip_(false),
-					ccw_(false),
-					swap_color_(false),
-					clip_(0, 0, 0, 0) { }
+		fonts() : kfm_(0),
+				  face_(0),
+				  fore_color_(255, 255, 255, 255),
+				  back_color_(0, 0, 0, 255),
+				  setup_(false),
+				  render_back_(true),
+				  h_flip_(false),
+				  v_flip_(false),
+				  ccw_(false),
+				  swap_color_(false),
+				  clip_(0, 0, 0, 0)
+			{ }
 
 
 		//-----------------------------------------------------------------//
@@ -156,7 +157,7 @@ namespace gl {
 			@brief	デストラクター
 		*/
 		//-----------------------------------------------------------------//
-		~glfonts() { destroy(); }
+		~fonts() { destroy(); }
 
 
 		//-----------------------------------------------------------------//

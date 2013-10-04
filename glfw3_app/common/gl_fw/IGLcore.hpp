@@ -234,7 +234,7 @@ namespace gl {
 			@return フォント・クラス
 		*/
 		//-----------------------------------------------------------------//
-		virtual glfonts& at_fonts() = 0;
+		virtual fonts& at_fonts() = 0;
 
 	};
 

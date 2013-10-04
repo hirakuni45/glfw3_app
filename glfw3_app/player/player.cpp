@@ -88,7 +88,7 @@ namespace app {
 
 		mobj_.initialize();
 
-		gl::glfonts& fonts = igl->at_fonts();
+		gl::fonts& fonts = igl->at_fonts();
 		std::string cf = fonts.get_font_type();
 		if(!fonts.install_font_type("./res/seg12.ttf", "led")) {
 			std::cerr << "Can't install system TTF font..." << std::endl;

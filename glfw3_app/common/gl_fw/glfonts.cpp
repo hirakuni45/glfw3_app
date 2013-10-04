@@ -26,7 +26,7 @@ namespace gl {
 		@brief	初期化
 	*/
 	//-----------------------------------------------------------------//
-	void glfonts::initialize()
+	void fonts::initialize()
 	{
 		if(kfm_ != 0) return;
 
@@ -50,7 +50,7 @@ namespace gl {
 		@return 正常なら「true」を返す
 	*/
 	//-----------------------------------------------------------------//
-	bool glfonts::install_font_type(const std::string& ttfname, const std::string& alias)
+	bool fonts::install_font_type(const std::string& ttfname, const std::string& alias)
 	{
 		if(kfm_ == 0) return false;
 
@@ -82,7 +82,7 @@ namespace gl {
 		@return 正常なら「true」を返す
 	*/
 	//-----------------------------------------------------------------//
-	bool glfonts::set_font_type(const std::string& alias)
+	bool fonts::set_font_type(const std::string& alias)
 	{
 		if(kfm_ == 0) return false;
 
@@ -106,7 +106,7 @@ namespace gl {
 		@return フォントタイプの別名
 	*/
 	//-----------------------------------------------------------------//
-	const std::string& glfonts::get_font_type() const
+	const std::string& fonts::get_font_type() const
 	{
 		return kfm_->get_font();
 	}
@@ -118,7 +118,7 @@ namespace gl {
 		@param[in]	s	インストールするフォントの高さ
 	*/
 	//-----------------------------------------------------------------//
-	void glfonts::set_font_size(int s)
+	void fonts::set_font_size(int s)
 	{
 		face_->info_.size = s;
 
@@ -147,7 +147,7 @@ namespace gl {
 		@brief	標準的な描画前設定
 	*/
 	//-----------------------------------------------------------------//
-	void glfonts::setup_matrix()
+	void fonts::setup_matrix()
 	{
 		if(setup_ == false) {
 			::glMatrixMode(GL_TEXTURE);
@@ -170,7 +170,7 @@ namespace gl {
 		@param[in]	sch	スクリーンの高さ（ピクセル単位）
 	*/
 	//-----------------------------------------------------------------//
-	void glfonts::setup_matrix(int scx, int scy, int scw, int sch)
+	void fonts::setup_matrix(int scx, int scy, int scw, int sch)
 	{
 		if(setup_ == false) {
 			::glMatrixMode(GL_TEXTURE);
@@ -195,7 +195,7 @@ namespace gl {
 		@param[in]	rect	開始位置、大きさ
 	*/
 	//-----------------------------------------------------------------//
-	void glfonts::setup_matrix_with_clip(const vtx::srect& rect)
+	void fonts::setup_matrix_with_clip(const vtx::srect& rect)
 	{
 		int w = rect.size.x;
 		int h = rect.size.y;
@@ -210,7 +210,7 @@ namespace gl {
 		@brief	描画後設定
 	*/
 	//-----------------------------------------------------------------//
-	void glfonts::restore_matrix()
+	void fonts::restore_matrix()
 	{
 		if(setup_) {
 			::glMatrixMode(GL_TEXTURE);
@@ -232,7 +232,7 @@ namespace gl {
 		@return	確保できれば「true」を返す。
 	*/
 	//-----------------------------------------------------------------//
-	bool glfonts::allocate_font_texture(int width, int height, tex_map& tmap)
+	bool fonts::allocate_font_texture(int width, int height, tex_map& tmap)
 	{
 		int w;
 		if(width > height) w = width; else w = height;
@@ -285,7 +285,7 @@ namespace gl {
 		@return 登録できたら iterator を返す。
 	*/
 	//-----------------------------------------------------------------//
-	glfonts::fcode_map_it glfonts::install_image(wchar_t code)
+	fonts::fcode_map_it fonts::install_image(wchar_t code)
 	{
 		const img::i_img* image = kfm_->get_img();
 		const vtx::spos& isz = image->get_size();
@@ -390,7 +390,7 @@ namespace gl {
 		@return 登録できたら、「true」を返す。
 	*/
 	//-----------------------------------------------------------------//
-	bool glfonts::install_font(const wchar_t* list)
+	bool fonts::install_font(const wchar_t* list)
 	{
 		bool f = false;
 		wchar_t wc;
@@ -408,7 +408,7 @@ namespace gl {
 		@return 登録できたら、「true」を返す。
 	*/
 	//-----------------------------------------------------------------//
-	bool glfonts::install_font(const char* list)
+	bool fonts::install_font(const char* list)
 	{
 		wstring ws;
 		char_to_ucs(list, ws);
@@ -421,7 +421,7 @@ namespace gl {
 		@brief	リソースを廃棄する。
 	*/
 	//-----------------------------------------------------------------//
-	void glfonts::destroy()
+	void fonts::destroy()
 	{
 		if(!pages_.empty()) {
 			::glDeleteTextures(pages_.size(), &pages_[0]);
@@ -438,7 +438,7 @@ namespace gl {
 		@param[in]	page	描画するテクスチャーページ
 	*/
 	//-----------------------------------------------------------------//
-	void glfonts::draw_page(int page)
+	void fonts::draw_page(int page)
 	{
 		::glEnable(GL_TEXTURE_2D);
 
@@ -461,7 +461,7 @@ namespace gl {
 	}
 
 
-	int glfonts::font_width(wchar_t code, int fw, int fh) const
+	int fonts::font_width(wchar_t code, int fw, int fh) const
 	{
 		int fow = 0;
 		// プロポーショナルでは無い英数字の場合
@@ -489,7 +489,7 @@ namespace gl {
 		@return	描画に成功したらフォントの幅を返す。
 	 */
 	//-----------------------------------------------------------------//
-	int glfonts::draw(const vtx::spos& pos, wchar_t code)
+	int fonts::draw(const vtx::spos& pos, wchar_t code)
 	{
 		fcode_map_cit cit = find_font_code(code);
 		if(cit == face_->fcode_map_.end()) {
@@ -642,7 +642,7 @@ namespace gl {
 		@return	フォントの幅を返す
 	 */
 	//-----------------------------------------------------------------//
-	int glfonts::get_width(wchar_t code)
+	int fonts::get_width(wchar_t code)
 	{
 		fcode_map_cit cit = find_font_code(code);
 		if(cit == face_->fcode_map_.end()) {
@@ -664,7 +664,7 @@ namespace gl {
 		@return	描画幅を返す（複数行の場合、最大値）
 	 */
 	//-----------------------------------------------------------------//
-	int glfonts::draw(const vtx::spos& pos, const utils::wstring& text, short limit)
+	int fonts::draw(const vtx::spos& pos, const utils::wstring& text, short limit)
 	{
 		short x = pos.x;
 		short y = pos.y;
@@ -695,7 +695,7 @@ namespace gl {
 		@return	描画幅を返す（複数行の場合、最大値）
 	 */
 	//-----------------------------------------------------------------//
-	int glfonts::draw(const vtx::spos& pos, const std::string& text, short limit)
+	int fonts::draw(const vtx::spos& pos, const std::string& text, short limit)
 	{
 		short x = pos.x;
 		short y = pos.y;
@@ -745,7 +745,7 @@ namespace gl {
 		@return	フォントの幅を返す
 	 */
 	//-----------------------------------------------------------------//
-	int glfonts::get_width(const std::string& text)
+	int fonts::get_width(const std::string& text)
 	{
 		int xm = 0;
 		int x = 0;
@@ -786,7 +786,7 @@ namespace gl {
 		@return	大きさを返す
 	 */
 	//-----------------------------------------------------------------//
-	vtx::spos glfonts::get_size(const utils::wstring& wt)
+	vtx::spos fonts::get_size(const utils::wstring& wt)
 	{
 		vtx::spos size(0, 0);
 		vtx::spos tmp(0, face_->info_.size);
@@ -814,7 +814,7 @@ namespace gl {
 		@param[in]	rect	描画位置と大きさ
 	 */
 	//-----------------------------------------------------------------//
-	void glfonts::draw_back(const vtx::srect& rect)
+	void fonts::draw_back(const vtx::srect& rect)
 	{
 		::glColor4ub(back_color_.r, back_color_.g, back_color_.b, back_color_.a);
 

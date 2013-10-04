@@ -30,7 +30,7 @@ namespace gl {
 
 		device			device_;
 
-		glfonts			fonts_;
+		fonts			fonts_;
 
 		GLFWwindow*		window_;
 
@@ -282,7 +282,7 @@ namespace gl {
 			@return デバイス・クラス
 		*/
 		//-----------------------------------------------------------------//
-		glfonts& at_fonts() { return fonts_; }
+		fonts& at_fonts() { return fonts_; }
 	};
 }
 

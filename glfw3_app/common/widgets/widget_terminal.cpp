@@ -27,6 +27,15 @@ namespace gui {
 
 		// フレームの生成
 		objh_ = frame_init(wd_, at_param(), param_.plate_param_, param_.color_param_);
+
+		// ターミナル用フォントの登録
+#if 0
+		gl::IGLcore* igl = gl::get_glcore();
+		gl::glfonts& fonts = igl->at_fonts();
+		std::string cf = fonts.get_font_type();
+
+		fonts.set_font_type(cf);
+#endif
 	}
 
 
@@ -52,6 +61,12 @@ namespace gui {
 		wd_.at_mobj().resize(objh_, get_param().rect_.size);
 		glEnable(GL_TEXTURE_2D);
 		wd_.at_mobj().draw(objh_, gl::glmobj::normal, 0, 0);
+
+		gl::IGLcore* igl = gl::get_glcore();
+		gl::fonts& fonts = igl->at_fonts();
+
+
+
 	}
 
 

@@ -214,13 +214,12 @@ namespace gui {
 	{
 		if(tp.text_.empty()) return;
 
-		using namespace gl;
-		IGLcore* igl = get_glcore();
+		gl::IGLcore* igl = gl::get_glcore();
 		if(igl == 0) return;
 
 		const vtx::spos& size = igl->get_size();
 
-		glfonts& fonts = igl->at_fonts();
+		gl::fonts& fonts = igl->at_fonts();
 
 		vtx::srect clip_ = clip;
 		vtx::srect rect_ = rect;
@@ -278,13 +277,11 @@ namespace gui {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	void render_text(widget_director& wd, gl::glmobj::handle oh, const widget::param& wp, const widget::text_param& tp, const widget::plate_param& pp)
 	{
-		using namespace gl;
-		IGLcore* igl = get_glcore();
-		if(igl == 0) return;
+		gl::IGLcore* igl = gl::get_glcore();
 
 		const vtx::spos& size = igl->get_size();
 
-		glfonts& fonts = igl->at_fonts();
+		gl::fonts& fonts = igl->at_fonts();
 		fonts.enable_back_color(false);
 
 		if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) { 

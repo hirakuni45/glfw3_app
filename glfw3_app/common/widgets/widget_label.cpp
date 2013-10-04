@@ -51,13 +51,11 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_label::update()
 	{
-		using namespace gl;
-		IGLcore* Igl = get_glcore();
-		if(Igl == 0) return;
+		gl::IGLcore* Igl = gl::get_glcore();
 
 		const vtx::spos& size = Igl->get_size();
 
-		glfonts& fonts = Igl->at_fonts();
+		gl::fonts& fonts = Igl->at_fonts();
 
 		const widget::param& bp = get_param();
 		if(param_.shift_every_ ||

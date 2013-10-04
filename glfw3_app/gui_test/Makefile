@@ -621,6 +621,7 @@ gui_test.o: ../common/widgets/widget_image.hpp
 ../common/widgets/widget_director.o: ../common/utils/handle_set.hpp
 ../common/widgets/widget_director.o: ../common/utils/preference.hpp
 ../common/widgets/widget_director.o: ../common/widgets/widget_terminal.hpp
+../common/widgets/widget_director.o: ../common/gl_fw/glterminal.hpp
 ../common/widgets/widget_utils.o: ../common/gl_fw/IGLcore.hpp
 ../common/widgets/widget_utils.o: ../common/core/device.hpp
 ../common/widgets/widget_utils.o: ../common/utils/vtx.hpp
@@ -999,4 +1000,9 @@ gui_test.o: ../common/widgets/widget_image.hpp
 ../common/widgets/widget_terminal.o: ../common/img_io/i_img_io.hpp
 ../common/widgets/widget_terminal.o: ../common/utils/file_io.hpp
 ../common/widgets/widget_terminal.o: ../common/widgets/widget_frame.hpp
+../common/widgets/widget_terminal.o: ../common/gl_fw/glterminal.hpp
+../common/widgets/widget_terminal.o: ../common/gl_fw/IGLcore.hpp
+../common/widgets/widget_terminal.o: ../common/core/device.hpp
+../common/widgets/widget_terminal.o: ../common/gl_fw/glfonts.hpp
+../common/widgets/widget_terminal.o: ../common/gl_fw/Ikfimg.hpp
 ../common/widgets/widget_terminal.o: ../common/widgets/widget_utils.hpp
