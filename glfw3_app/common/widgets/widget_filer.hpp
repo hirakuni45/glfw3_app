@@ -55,7 +55,7 @@ namespace gui {
 
 		param				param_;
 
-		gl::glmobj::handle	objh_;
+		gl::mobj::handle	objh_;
 
 		utils::files		fsc_;
 		utils::drive_info	drv_;

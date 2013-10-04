@@ -54,7 +54,7 @@ namespace gui {
 
 		param				param_;
 
-		gl::glmobj::handle	objh_;
+		gl::mobj::handle	objh_;
 
 		widget_text*		text_;
 		widget_button*		ok_;

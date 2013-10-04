@@ -19,9 +19,9 @@ namespace gui {
 	struct common_parts {
 
 	private:
-		gl::glmobj&		mobj_;
+		gl::mobj&		mobj_;
 
-		typedef gl::glmobj::handle handle;
+		typedef gl::mobj::handle handle;
 		typedef boost::unordered_map<share_t, handle>	share_map;
 		typedef share_map::iterator			share_map_it;
 		typedef share_map::const_iterator	share_map_cit;
@@ -33,7 +33,7 @@ namespace gui {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		common_parts(gl::glmobj& mo) : mobj_(mo) { }
+		common_parts(gl::mobj& mo) : mobj_(mo) { }
 
 
 		//-----------------------------------------------------------------//
@@ -43,7 +43,7 @@ namespace gui {
 			@return	描画ハンドル
 		*/
 		//-----------------------------------------------------------------//
-		gl::glmobj::handle add(const share_t& k);
+		gl::mobj::handle add(const share_t& k);
 
 
 		//-----------------------------------------------------------------//
@@ -53,8 +53,8 @@ namespace gui {
 			@return	共有ハンドル
 		*/
 		//-----------------------------------------------------------------//
-		gl::glmobj::handle get(const share_t& k) const {
-			gl::glmobj::handle h = 0;
+		gl::mobj::handle get(const share_t& k) const {
+			gl::mobj::handle h = 0;
 			share_map_cit cit = share_map_.find(k);
 			if(cit != share_map_.end()) {
 				h = cit->second;

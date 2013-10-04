@@ -63,7 +63,7 @@ namespace gui {
 
 		tree_unit			tree_unit_;
 
-		gl::glmobj::handle	objh_;
+		gl::mobj::handle	objh_;
 
 	public:
 		//-----------------------------------------------------------------//

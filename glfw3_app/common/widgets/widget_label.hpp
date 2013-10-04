@@ -53,8 +53,8 @@ namespace gui {
 
 		param				param_;
 
-		gl::glmobj::handle	objh_;
-		gl::glmobj::handle	select_objh_;
+		gl::mobj::handle	objh_;
+		gl::mobj::handle	select_objh_;
 
 	public:
 		//-----------------------------------------------------------------//

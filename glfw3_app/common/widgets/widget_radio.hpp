@@ -43,8 +43,8 @@ namespace gui {
 
 		bool				obj_state_;
 
-		gl::glmobj::handle	ena_h_;
-		gl::glmobj::handle	dis_h_;
+		gl::mobj::handle	ena_h_;
+		gl::mobj::handle	dis_h_;
 
 	public:
 		//-----------------------------------------------------------------//

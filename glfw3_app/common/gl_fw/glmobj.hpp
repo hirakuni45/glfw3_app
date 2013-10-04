@@ -135,7 +135,7 @@ namespace gl {
 				の機能を提供するクラス。
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	struct glmobj {
+	struct mobj {
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
@@ -155,7 +155,7 @@ namespace gl {
 			@brief	モーション・オブジェクト構造体
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		struct mobj {
+		struct obj {
 			GLuint	id;		///< texture ID
 
 			short	tx;		///< texture coordinate U location
@@ -178,8 +178,8 @@ namespace gl {
 			bool	mp;		///< mipmap
 			bool	ex;		///< EX format
 
-			mobj*	link;	///< リンクオブジェクト
-			mobj() : link(0) { }
+			obj*	link;	///< リンクオブジェクト
+			obj() : link(0) { }
 		};
 
 		typedef unsigned int			handle;			///< 管理ハンドル
@@ -193,11 +193,11 @@ namespace gl {
 		int			tex_page_w_;
 		int			tex_page_h_;
 
-		typedef std::vector<mobj*>::iterator		mobjs_it;
-		typedef std::vector<mobj*>::const_iterator	mobjs_cit;
-		typedef std::vector<mobj*>					mobjs;
+		typedef std::vector<obj*>::iterator			objs_it;
+		typedef std::vector<obj*>::const_iterator	objs_cit;
+		typedef std::vector<obj*>					objs;
 
-		mobjs		mobjs_;
+		objs		objs_;
 
 		typedef std::vector<texture_mem>		texture_mems;
 		typedef texture_mems::iterator			tex_mem_it;
@@ -210,8 +210,8 @@ namespace gl {
 		typedef std::vector<GLuint>				texture_pages;
 		texture_pages							texture_pages_;
 
-		bool allocate_texture(texture_mems& mems, mobj* mo);
-		void add_texture_page(texture_mems& mems, mobj* mo, const img::img_rgba8& im);
+		bool allocate_texture(texture_mems& mems, obj* o);
+		void add_texture_page(texture_mems& mems, obj* o, const img::img_rgba8& im);
 		void destroy_texture_page(texture_mems& mems);
 
 	public:
@@ -220,7 +220,7 @@ namespace gl {
 			@brief	コンストラクター
 		 */
 		//-----------------------------------------------------------------//
-		glmobj() : tex_page_w_(256), tex_page_h_(256),
+		mobj() : tex_page_w_(256), tex_page_h_(256),
 			space_(0), internal_format_(GL_RGBA) { }
 
 
@@ -229,7 +229,7 @@ namespace gl {
 			@brief	デストラクター
 		 */
 		//-----------------------------------------------------------------//
-		~glmobj() {
+		~mobj() {
 			destroy();
 			destroy_texture_page(texture_mems_);
 		}
@@ -247,13 +247,13 @@ namespace gl {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	モーションオブジェクトを得る。
+			@brief	オブジェクトを得る。
 			@param[in]	h	ハンドル
 			@return モーションオブジェクト構造体のポインター
 		 */
 		//-----------------------------------------------------------------//
-		const mobj* get_mobj(handle h) const {
-			if(h > 0 && h < mobjs_.size()) return mobjs_[h]; else return 0;
+		const obj* get_obj(handle h) const {
+			if(h > 0 && h < objs_.size()) return objs_[h]; else return 0;
 		}
 
 
@@ -330,7 +330,7 @@ namespace gl {
 			@return	ハンドルを返す
 		 */
 		//-----------------------------------------------------------------//
-		handle install_direct(const mobj& root);
+		handle install_direct(const obj& root);
 
 
 		//-----------------------------------------------------------------//
@@ -499,7 +499,7 @@ namespace gl {
 		//-----------------------------------------------------------------//
 		void destroy();
 
-	};	// glmobj
+	};	// mobj
 
 };	// gui
 

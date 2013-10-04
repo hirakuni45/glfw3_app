@@ -32,19 +32,19 @@ namespace gui {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct share_img {
-			gl::glmobj::handle	un_check_;	///< チェックボタン解除
-			gl::glmobj::handle	to_check_;	///< チェックボタン選択
+			gl::mobj::handle	un_check_;	///< チェックボタン解除
+			gl::mobj::handle	to_check_;	///< チェックボタン選択
 
-			gl::glmobj::handle	un_radio_;	///< ラジオボタン解除
-			gl::glmobj::handle	to_radio_;	///< ラジオボタン選択
+			gl::mobj::handle	un_radio_;	///< ラジオボタン解除
+			gl::mobj::handle	to_radio_;	///< ラジオボタン選択
 
-			gl::glmobj::handle	minus_box_;	///< マイナス
-			gl::glmobj::handle	plus_box_;	///< プラス
+			gl::mobj::handle	minus_box_;	///< マイナス
+			gl::mobj::handle	plus_box_;	///< プラス
 
-			gl::glmobj::handle	up_box_;	///< up arrow
-			gl::glmobj::handle	down_box_;	///< down arrow
-			gl::glmobj::handle	left_box_;	///< left arrow
-			gl::glmobj::handle	right_box_;	///< right arrow
+			gl::mobj::handle	up_box_;	///< up arrow
+			gl::mobj::handle	down_box_;	///< down arrow
+			gl::mobj::handle	left_box_;	///< left arrow
+			gl::mobj::handle	right_box_;	///< right arrow
 
 			share_img() : un_check_(0), to_check_(0),
 				un_radio_(0), to_radio_(0),
@@ -56,7 +56,7 @@ namespace gui {
 	private:
 		img::img_files			img_files_;
 
-		gl::glmobj				mobj_;
+		gl::mobj				mobj_;
 		common_parts			common_parts_;
 		uint32_t				serial_;
 		widgets					widgets_;
@@ -295,7 +295,7 @@ namespace gui {
 			@return モーション・オブジェクト
 		*/
 		//-----------------------------------------------------------------//
-		gl::glmobj& at_mobj() { return mobj_; }
+		gl::mobj& at_mobj() { return mobj_; }
 
 
 		//-----------------------------------------------------------------//
@@ -304,7 +304,7 @@ namespace gui {
 			@return ハンドル
 		*/
 		//-----------------------------------------------------------------//
-		gl::glmobj::handle share_add(const share_t& key) {
+		gl::mobj::handle share_add(const share_t& key) {
 			return common_parts_.add(key);
 		}
 
@@ -315,7 +315,7 @@ namespace gui {
 			@return ハンドル
 		*/
 		//-----------------------------------------------------------------//
-		gl::glmobj::handle share_get(const share_t& key) {
+		gl::mobj::handle share_get(const share_t& key) {
 			return common_parts_.get(key);
 		}
 

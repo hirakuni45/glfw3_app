@@ -113,7 +113,7 @@ namespace gui {
 			wd_.at_mobj().setup_matrix(sc.x, sc.y);
 			wd_.set_TSC();
 			// チップの描画
-			gl::glmobj::handle h;
+			gl::mobj::handle h;
 			if((get_rect().org.y + frame_->get_rect().size.y) > sc.y) {
 				h = wd_.get_share_image().up_box_;
 			} else {
@@ -125,7 +125,7 @@ namespace gui {
 			short wf = param_.plate_param_.frame_width_;
 			short space = 4;
 			vtx::spos pos(size.x - bs.x - wf - space, (size.y - bs.y) / 2);
-			wd_.at_mobj().draw(h, gl::glmobj::normal, pos.x, pos.y);
+			wd_.at_mobj().draw(h, gl::mobj::normal, pos.x, pos.y);
 		}
 	}
 

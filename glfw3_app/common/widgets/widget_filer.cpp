@@ -348,7 +348,7 @@ namespace gui {
 
 		// info ボタン
 		{
-			gl::glmobj::handle hnd = wd_.get_share_image().right_box_;
+			gl::mobj::handle hnd = wd_.get_share_image().right_box_;
 			vtx::srect r;
 			r.size = wd_.at_mobj().get_size(hnd);
 			short space = 4;
@@ -411,7 +411,7 @@ namespace gui {
 
 		wd_.at_mobj().resize(objh_, get_param().rect_.size);
 		glEnable(GL_TEXTURE_2D);
-		wd_.at_mobj().draw(objh_, gl::glmobj::normal, 0, 0);
+		wd_.at_mobj().draw(objh_, gl::mobj::normal, 0, 0);
 	}
 
 

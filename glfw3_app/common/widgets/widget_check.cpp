@@ -67,7 +67,7 @@ namespace gui {
 		const widget::param& wp = get_param();
 
 		if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) { 
-			gl::glmobj::handle h;
+			gl::mobj::handle h;
 			if(obj_state_) h = ena_h_;
 			else h = dis_h_;
 
@@ -81,7 +81,7 @@ namespace gui {
 				rect.org  = wp.rpos_;
 				rect.size = wp.rect_.size;
 			} else {
-				wd_.at_mobj().draw(h, gl::glmobj::normal, ofs.x, ofs.y);
+				wd_.at_mobj().draw(h, gl::mobj::normal, ofs.x, ofs.y);
 				rect.org.set(0);
 				rect.size = wp.rect_.size;
 			}

@@ -17,9 +17,9 @@ namespace gui {
 		@return	描画ハンドル
 	*/
 	//-----------------------------------------------------------------//
-	gl::glmobj::handle common_parts::add(const share_t& k)
+	gl::mobj::handle common_parts::add(const share_t& k)
 	{
-		gl::glmobj::handle h = get(k);
+		gl::mobj::handle h = get(k);
 		if(h == 0) {
 			img::paint pa;
 			create_round_frame(pa, k.plate_param_, k.color_param_, k.size_);

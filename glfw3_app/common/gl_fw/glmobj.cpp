@@ -143,7 +143,7 @@ namespace gl {
 		@return	管理領域があれば「true」
 	 */
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	bool glmobj::allocate_texture(texture_mems& mems, mobj* mo)
+	bool mobj::allocate_texture(texture_mems& mems, obj* mo)
 	{
 		for(unsigned int i = 0; i < mems.size(); ++i) {
 			if(mems[i].allocate(mo->tx, mo->ty, mo->tw, mo->th)) {
@@ -163,7 +163,7 @@ namespace gl {
 		@param[in]	im		初期化画像
 	 */
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	void glmobj::add_texture_page(texture_mems& mems, mobj* mo, const img_rgba8& im)
+	void mobj::add_texture_page(texture_mems& mems, obj* mo, const img_rgba8& im)
 	{
 		texture_mem mem;
 		mem.initialize(tex_page_w_, tex_page_h_, internal_format_, mo->mp, im);
@@ -179,7 +179,7 @@ namespace gl {
 		@param[in]	mems	テクスチャー管理（vector）
 	 */
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	void glmobj::destroy_texture_page(texture_mems& mems)
+	void mobj::destroy_texture_page(texture_mems& mems)
 	{
 		unsigned int idsize = mems.size();
 		GLuint* idtbl = new GLuint[idsize];
@@ -200,11 +200,11 @@ namespace gl {
 		@param[in]	pgh	テクスチャーページの最大高さサイズ
 	 */
 	//-----------------------------------------------------------------//
-	void glmobj::initialize(int pgw, int pgh)
+	void mobj::initialize(int pgw, int pgh)
 	{
 		// 0 番ハンドルは使わないので無効とする。
-		mobjs_.clear();
-		mobjs_.push_back(0);
+		objs_.clear();
+		objs_.push_back(0);
 		texture_pages_.clear();
 		tex_page_w_ = pgw;
 		tex_page_h_ = pgh;
@@ -218,10 +218,10 @@ namespace gl {
 		@return サイズ
 	 */
 	//-----------------------------------------------------------------//
-	const vtx::spos& glmobj::get_size(handle h) const
+	const vtx::spos& mobj::get_size(handle h) const
 	{
-		if(h > 0 && h < mobjs_.size()) {
-			return mobjs_[h]->size;
+		if(h > 0 && h < objs_.size()) {
+			return objs_[h]->size;
 		} else {
 			static vtx::spos zero_(0);
 			return zero_;
@@ -237,12 +237,12 @@ namespace gl {
 		@return	ハンドルを返す
 	 */
 	//-----------------------------------------------------------------//
-	glmobj::handle glmobj::install(const img::i_img* imf, bool mipmap)
+	mobj::handle mobj::install(const img::i_img* imf, bool mipmap)
 	{
 		mipmap = false;
 
-		mobj* root = 0;
-		mobj* lk = 0;
+		obj* root = 0;
+		obj* lk = 0;
 		int sox = 0;
 		int soy = 0;
 		const vtx::spos& isz = imf->get_size();
@@ -254,7 +254,7 @@ namespace gl {
 			short ox = 0;
 			int ww = isz.x;
 			while(ww > 0) {
-				mobj* mo = new mobj;
+				obj* mo = new obj;
 				mo->nx = 0;
 				mo->ny = 0;
 				if(lk) lk->link = mo;
@@ -327,8 +327,8 @@ namespace gl {
 			oy += lk->th;
 		}
 
-		handle h = mobjs_.size();
-		mobjs_.push_back(root);
+		handle h = objs_.size();
+		objs_.push_back(root);
 		return h;
 	}
 
@@ -342,7 +342,7 @@ namespace gl {
 		@return	ハンドルを返す
 	 */
 	//-----------------------------------------------------------------//
-	glmobj::handle glmobj::install(const img::i_img* imf, const vtx::spos& size, const vtx::spos& grid)
+	mobj::handle mobj::install(const img::i_img* imf, const vtx::spos& size, const vtx::spos& grid)
 	{
 		const vtx::spos& isz = imf->get_size();
 		// 基本テクスチャーサイズを超える場合はエラーとする。
@@ -365,13 +365,13 @@ namespace gl {
 			return 0;
 		}
 
-		mobj* root = 0;
-		mobj* lk = 0;
+		obj* root = 0;
+		obj* lk = 0;
 		short oy = 0;
 		for(int j = 0; j < jn; ++j) {
 			short ox = 0;
 			for(int i = 0; i < in; ++i) {
-				mobj* mo = new mobj;
+				obj* mo = new obj;
 				mo->nx = in;
 				mo->ny = jn;
 				if(lk) lk->link = mo;
@@ -434,8 +434,8 @@ namespace gl {
 			}
 			oy += lk->dh;
 		}
-		handle h = mobjs_.size();
-		mobjs_.push_back(root);
+		handle h = objs_.size();
+		objs_.push_back(root);
 		return h;
 	}
 
@@ -447,7 +447,7 @@ namespace gl {
 		@return	テクスチャー・ハンドルを返す
 	 */
 	//-----------------------------------------------------------------//
-	GLuint glmobj::install_texture(const img::i_img* imf)
+	GLuint mobj::install_texture(const img::i_img* imf)
 	{
 		if(imf == 0) return 0;
 
@@ -487,7 +487,7 @@ namespace gl {
 		@return テクスチャー・ハンドルを返す
 	 */
 	//-----------------------------------------------------------------//
-	GLuint glmobj::install_compressed_texture(const void* ptr, size_t size, int type, int w, int h)
+	GLuint mobj::install_compressed_texture(const void* ptr, size_t size, int type, int w, int h)
 	{
 		int level = 0;
 		GLuint id;
@@ -509,19 +509,19 @@ namespace gl {
 		@return ハンドルを返す
 	 */
 	//-----------------------------------------------------------------//
-	glmobj::handle glmobj::install_direct(const mobj& root)
+	mobj::handle mobj::install_direct(const obj& root)
 	{
-		mobj* top = new mobj;
+		obj* top = new obj;
 		*top = root;
-		mobj* p = top;
+		obj* p = top;
 		while(p->link) {
-			mobj* tmp = new mobj;
+			obj* tmp = new obj;
 			tmp = p->link;
 			p->link = tmp;
 			p = tmp;
 		}
-		handle h = mobjs_.size();
-		mobjs_.push_back(top);
+		handle h = objs_.size();
+		objs_.push_back(top);
 		return h;
 	}
 
@@ -531,7 +531,7 @@ namespace gl {
 		@brief	モーション・オブジェクト描画前設定（テクスチャースケールのみ）
 	 */
 	//-----------------------------------------------------------------//
-	void glmobj::setup_matrix()
+	void mobj::setup_matrix()
 	{
 		::glMatrixMode(GL_TEXTURE);
 		::glLoadIdentity();
@@ -555,7 +555,7 @@ namespace gl {
 		@param[in]	zf	Z (奥)
 	 */
 	//-----------------------------------------------------------------//
-	void glmobj::setup_matrix(int x, int y, int w, int h, float zn, float zf)
+	void mobj::setup_matrix(int x, int y, int w, int h, float zn, float zf)
 	{
 		setup_matrix();
 
@@ -582,7 +582,7 @@ namespace gl {
 		@param[in]	dst_y	ディスとネーションの Y オフセット
 	 */
 	//-----------------------------------------------------------------//
-	void glmobj::copy_image(handle h, const img::i_img* src, int dst_x, int dst_y)
+	void mobj::copy_image(handle h, const img::i_img* src, int dst_x, int dst_y)
 	{
 		const i_img* imif = src;
 		// RGBA8 以外の画像タイプなら、一旦 RGBA8 形式で画像を作成。
@@ -593,7 +593,7 @@ namespace gl {
 			imif = &tmp;
 		}
 
-		const mobj* m = mobjs_[h];
+		const obj* m = objs_[h];
 		while(m != 0) {
 			::glBindTexture(GL_TEXTURE_2D, m->id);
 			int level = 0;
@@ -631,9 +631,9 @@ namespace gl {
 		@param[in]	linear	「true」ならリニアフィルター
 	 */
 	//-----------------------------------------------------------------//
-	void glmobj::draw(handle h, attribute atr, short xx, short yy, bool linear)
+	void mobj::draw(handle h, attribute atr, short xx, short yy, bool linear)
 	{
-		if(h == 0 || h >= mobjs_.size()) return;
+		if(h == 0 || h >= objs_.size()) return;
 
 		bool hf = false;
 		bool vf = false;
@@ -643,7 +643,7 @@ namespace gl {
 			else if(atr == hv_flip) hf = vf = true;
 		}
 
-		const mobj* m = mobjs_[h];
+		const obj* m = objs_[h];
 		do {
 			short xp;
 			if(hf) {
@@ -737,11 +737,11 @@ namespace gl {
 		@param[in]	linear	「true」ならリニアフィルター
 	 */
 	//-----------------------------------------------------------------//
-	void glmobj::draw_sub(handle h, attribute atr, short xx, short yy, short ox, short oy, short ww, short hh, bool linear)
+	void mobj::draw_sub(handle h, attribute atr, short xx, short yy, short ox, short oy, short ww, short hh, bool linear)
 	{
-		if(h == 0 || h >= mobjs_.size()) return;
+		if(h == 0 || h >= objs_.size()) return;
 
-		const mobj* m = mobjs_[h];
+		const obj* m = objs_[h];
 		do {
 			short xp = m->oxp;
 			short yp = m->oyp;
@@ -855,7 +855,7 @@ namespace gl {
 		@param[in]	linear	「true」ならリニア
 	 */
 	//-----------------------------------------------------------------//
-	void glmobj::draws(const handle* hs, attribute atr, short xx, short yy, bool linear)
+	void mobj::draws(const handle* hs, attribute atr, short xx, short yy, bool linear)
 	{
 		handle h;
 		while((h = *hs++) != 0) {
@@ -874,13 +874,13 @@ namespace gl {
 		@return エラーなら「false」
 	 */
 	//-----------------------------------------------------------------//
-	bool glmobj::resize(handle h, const vtx::spos& size)
+	bool mobj::resize(handle h, const vtx::spos& size)
 	{
-		if(h == 0 && h >= mobjs_.size()) {
+		if(h == 0 && h >= objs_.size()) {
 			return false;
 		}
 
-		mobj* m = mobjs_[h];
+		obj* m = objs_[h];
 		if(!m->ex) return false;
 		if(m->nx == 0 || m->ny == 0) return false;
 //		if(m->ww == size.x && m->hh == size.y) return true; 
@@ -935,17 +935,17 @@ namespace gl {
 		@brief	廃棄
 	 */
 	//-----------------------------------------------------------------//
-	void glmobj::destroy()
+	void mobj::destroy()
 	{
-		for(mobjs_it it = mobjs_.begin(); it != mobjs_.end(); ++it) {
-			mobj* mo = *it;
-			while(mo != 0) {
-				mobj* m = mo;
-				mo = m->link;
-				delete m;
+		for(objs_it it = objs_.begin(); it != objs_.end(); ++it) {
+			obj* o = *it;
+			while(o != 0) {
+				obj* tmp = o;
+				o = tmp->link;
+				delete tmp;
 			}
 		}
-		mobjs().swap(mobjs_);
+		objs().swap(objs_);
 
 		destroy_texture_page(texture_mems_);
 		texture_mems().swap(texture_mems_);

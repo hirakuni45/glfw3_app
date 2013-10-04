@@ -51,8 +51,8 @@ namespace gui {
 
 		vtx::spos			handle_offset_;
 
-		gl::glmobj::handle	base_h_;	///< ベース
-		gl::glmobj::handle	hand_h_;	///< ハンドル
+		gl::mobj::handle	base_h_;	///< ベース
+		gl::mobj::handle	hand_h_;	///< ハンドル
 
 	public:
 		//-----------------------------------------------------------------//

@@ -433,7 +433,7 @@ namespace app {
 			float sci = 1.0f / scale;
 			float ofsx = (size.x * 0.5f) / 2 * sci;
 			float ofsy = 10.0f * sci;
-			mobj_.draw(jacket_, gl::glmobj::normal, ofsx, ofsy);
+			mobj_.draw(jacket_, gl::mobj::normal, ofsx, ofsy);
 			mobj_.restore_matrix();
 		}
 

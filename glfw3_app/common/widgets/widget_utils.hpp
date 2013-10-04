@@ -111,7 +111,7 @@ namespace gui {
 		@param[in]	ofs		描画オフセット
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	void draw_mobj(widget_director& wd, gl::glmobj::handle h, const vtx::srect& clip, const vtx::spos& ofs = vtx::spos(0));
+	void draw_mobj(widget_director& wd, gl::mobj::handle h, const vtx::srect& clip, const vtx::spos& ofs = vtx::spos(0));
 
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -135,7 +135,7 @@ namespace gui {
 		@param[in]	pp	プレート・パラメーター
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	void render_text(widget_director& wd, gl::glmobj::handle oh, const widget::param& wp, const widget::text_param& tp, const widget::plate_param& pp);
+	void render_text(widget_director& wd, gl::mobj::handle oh, const widget::param& wp, const widget::text_param& tp, const widget::plate_param& pp);
 
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -148,5 +148,5 @@ namespace gui {
 		@return モーション・オブジェクトのハンドルを返す
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	gl::glmobj::handle frame_init(widget_director& wd, widget::param& wp, const widget::plate_param& pp, const widget::color_param& cp);
+	gl::mobj::handle frame_init(widget_director& wd, widget::param& wp, const widget::plate_param& pp, const widget::color_param& cp);
 }

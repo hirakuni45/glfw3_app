@@ -52,8 +52,8 @@ namespace app {
 		uint32_t		frame_limit_;
 
 		uint32_t			tag_serial_;
-		gl::glmobj			mobj_;
-		gl::glmobj::handle	jacket_;
+		gl::mobj			mobj_;
+		gl::mobj::handle	jacket_;
 
 		int				drop_file_id_;
 		uint32_t		select_file_id_;

@@ -187,7 +187,7 @@ namespace gui {
 		@param[in]	ofs		描画オフセット
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	void draw_mobj(widget_director& wd, gl::glmobj::handle h, const vtx::srect& clip, const vtx::spos& ofs)
+	void draw_mobj(widget_director& wd, gl::mobj::handle h, const vtx::srect& clip, const vtx::spos& ofs)
 	{
 		using namespace gl;
 		IGLcore* igl = get_glcore();
@@ -198,7 +198,7 @@ namespace gui {
 		glViewport(clip.org.x, size.y - clip.org.y - clip.size.y, clip.size.x, clip.size.y);
 		wd.at_mobj().setup_matrix(clip.size.x, clip.size.y);
 
-		wd.at_mobj().draw(h, gl::glmobj::normal, ofs.x, ofs.y);
+		wd.at_mobj().draw(h, gl::mobj::normal, ofs.x, ofs.y);
 	}
 
 
@@ -275,7 +275,7 @@ namespace gui {
 		@param[in]	pp	プレート・パラメーター
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	void render_text(widget_director& wd, gl::glmobj::handle oh, const widget::param& wp, const widget::text_param& tp, const widget::plate_param& pp)
+	void render_text(widget_director& wd, gl::mobj::handle oh, const widget::param& wp, const widget::text_param& tp, const widget::plate_param& pp)
 	{
 		gl::IGLcore* igl = gl::get_glcore();
 
@@ -292,7 +292,7 @@ namespace gui {
 				rect.org  = wp.rpos_;
 				rect.size = wp.rect_.size;
 			} else {
-				wd.at_mobj().draw(oh, gl::glmobj::normal, 0, 0);
+				wd.at_mobj().draw(oh, gl::mobj::normal, 0, 0);
 				rect.org.set(0);
 				rect.size = wp.rect_.size;
 			}
@@ -333,7 +333,7 @@ namespace gui {
 		@return モーション・オブジェクトのハンドルを返す
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	gl::glmobj::handle frame_init(widget_director& wd, widget::param& wp, const widget::plate_param& pp, const widget::color_param& cp)
+	gl::mobj::handle frame_init(widget_director& wd, widget::param& wp, const widget::plate_param& pp, const widget::color_param& cp)
 	{
 		vtx::spos size;
 		if(pp.resizeble_) {

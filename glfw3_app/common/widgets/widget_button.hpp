@@ -28,7 +28,7 @@ namespace gui {
 			color_param		color_param_;	///< 頂点カラーで変調する場合のパラメーター
 			text_param		text_param_;	///< テキスト描画のパラメータ
 			const img::i_img*	image_;		///< ボタンに画像を使う場合
-			gl::glmobj::handle	handle_;	///< ボタンにモーションオブジェクトを使う場合
+			gl::mobj::handle	handle_;	///< ボタンにモーションオブジェクトを使う場合
 
 			param(const std::string& text = "") :
 				plate_param_(), color_param_(widget_director::default_button_color_),
@@ -41,7 +41,7 @@ namespace gui {
 
 		param				param_;
 
-		gl::glmobj::handle	objh_;
+		gl::mobj::handle	objh_;
 
 	public:
 		//-----------------------------------------------------------------//
