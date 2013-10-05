@@ -25,6 +25,10 @@ namespace gui {
 		param_.plate_param_.resizeble_ = true;
 		// フレームの生成
 		objh_ = frame_init(wd_, at_param(), param_.plate_param_, param_.color_param_);
+
+		// 共有テクスチャー
+		mins_h_ = wd_.get_share_image().minus_box_;
+		plus_h_ = wd_.get_share_image().plus_box_;
 	}
 
 

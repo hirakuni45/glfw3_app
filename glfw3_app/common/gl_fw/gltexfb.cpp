@@ -13,6 +13,13 @@ namespace gl {
 	using namespace std;
 	using namespace vtx;
 
+
+	void texfb::destroy_()
+	{
+		glDeleteTextures(2, tex_id_.ids_);
+	}
+
+
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	テクスチャー・フレーム・バッファの設定
@@ -23,7 +30,7 @@ namespace gl {
 						それ以外の場合はエラー
 	*/
 	//-----------------------------------------------------------------//
-	int gltexfb::initialize(int width, int height, int depth)
+	texfb::error::type texfb::initialize(int width, int height, int depth)
 	{
 		int tw, th;
 
@@ -34,7 +41,7 @@ namespace gl {
 		else if(width <= 256) tw = 256;
 		else if(width <= 512) tw = 512;
 		else {
-			return ERROR_WIDTH_OVER;
+			return error::ERROR_WIDTH_OVER;
 		}
 
 		if(height <= 64) th = 64;
@@ -42,7 +49,7 @@ namespace gl {
 		else if(height <= 256) th = 256;
 		else if(height <= 512) th = 512;
 		else {
-			return ERROR_HEIGHT_OVER;
+			return error::ERROR_HEIGHT_OVER;
 		}
 		
 		if(depth == 4) {
@@ -63,7 +70,7 @@ namespace gl {
 			tex_type_ = GL_RGBA;
 			tex_depth_ = 32;
 		} else {
-			return ERROR_DEPTH;
+			return error::ERROR_DEPTH;
 		}
 
 	// フレーム・バッファの要求サイズ
@@ -103,9 +110,7 @@ namespace gl {
 		}
 		delete[] img;
 
-		init_ = true;
-
-		return ERROR_NONE;
+		return error::ERROR_NONE;
 	}
 
 
@@ -120,7 +125,7 @@ namespace gl {
 		@param[in]	zf	Z (奥)
 	 */
 	//-----------------------------------------------------------------//
-	void gltexfb::setup_matrix(int x, int y, int w, int h, float zn, float zf)
+	void texfb::setup_matrix(int x, int y, int w, int h, float zn, float zf)
 	{
 		::glMatrixMode(GL_PROJECTION);
 		::glLoadIdentity();
@@ -134,7 +139,7 @@ namespace gl {
 	/*----------------------------------------------------------/
 	/	QUAD ポリゴンの描画										/
 	/----------------------------------------------------------*/
-	void gltexfb::draw_quad(GLuint tex_id)
+	void texfb::draw_quad_(GLuint tex_id)
 	{
 		::glEnable(GL_TEXTURE_2D);
 
@@ -186,15 +191,13 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	/*!
 		@brief		テクスチャー・フレーム・バッファ・レンダリング
-		@param[in]	type	ソース・イメージのタイプ（RGB、RGBA、BGR）
+		@param[in]	srct	ソース・イメージのタイプ（RGB、RGBA、BGR）
 		@param[in]	img		ソース・イメージの先頭ポインター
 		@param[in]	alpha	24 -> 32 ビットフォーマット変換時のアルファ値
 	*/
 	//-----------------------------------------------------------------//
-	void gltexfb::rendering(imgtype type, const char* img, int alpha)
+	void texfb::rendering(image::type srct, const char* img, int alpha)
 	{
-		if(init_ == false) return;
-
 		if(img == 0) return;
 
 		// GL_RGB 又は、GL_RGBA への変換（必要な場合）
@@ -203,7 +206,7 @@ namespace gl {
 		} else if(tex_depth_ == 8) {
 		} else if(tex_depth_ == 16) {		// RGBA4
 		} else if(tex_depth_ == 24) {		// RGB8
-			if(type == GRAY) {
+			if(srct == image::GRAY) {
 				dst = new char[disp_size_.x * disp_size_.y * 3];
 				for(int y = 0; y < disp_size_.y; ++y) {
 					char* p = &dst[y * disp_size_.x * 3];
@@ -214,9 +217,9 @@ namespace gl {
 						*p++ = g;
 					}
 				}
-			} else if(type == RGB) {
+			} else if(srct == image::RGB) {
 				// 変換の必要無し
-			} else if(type == RGBA) {
+			} else if(srct == image::RGBA) {
 				dst = new char[disp_size_.x * disp_size_.y * 3];
 				for(int y = 0; y < disp_size_.y; ++y) {
 					char* p = &dst[y * disp_size_.x * 3];
@@ -227,7 +230,7 @@ namespace gl {
 						img++;
 					}
 				}
-			} else if(type == BGR) {
+			} else if(srct == image::BGR) {
 				dst = new char[disp_size_.x * disp_size_.y * 3];
 				for(int y = 0; y < disp_size_.y; ++y) {
 					char* p = &dst[y * disp_size_.x * 3];
@@ -240,7 +243,7 @@ namespace gl {
 				}
 			}
 		} else if(tex_depth_ == 32) {		// RGBA8
-			if(type == GRAY) {
+			if(srct == image::GRAY) {
 				dst = new char[disp_size_.x * disp_size_.y * 4];
 				for(int y = 0; y < disp_size_.y; ++y) {
 					char* p = &dst[y * disp_size_.x * 4];
@@ -252,7 +255,7 @@ namespace gl {
 						*p++ = alpha;
 					}
 				}
-			} else if(type == RGB) {
+			} else if(srct == image::RGB) {
 				dst = new char[disp_size_.x * disp_size_.y * 4];
 				for(int y = 0; y < disp_size_.y; ++y) {
 					char* p = &dst[y * disp_size_.x * 4];
@@ -263,9 +266,9 @@ namespace gl {
 						*p++ = alpha;
 					}
 				}
-			} else if(type == RGBA) {
+			} else if(srct == image::RGBA) {
 				// 変換不要
-			} else if(type == BGR) {
+			} else if(srct == image::BGR) {
 				dst = new char[disp_size_.x * disp_size_.y * 4];
 				for(int y = 0; y < disp_size_.y; ++y) {
 					char* p = &dst[y * disp_size_.x * 4];
@@ -334,12 +337,10 @@ namespace gl {
 					※OpenGL 描画ループの中で、毎フレーム呼ぶ事
 	*/
 	//-----------------------------------------------------------------//
-	void gltexfb::draw()
+	void texfb::draw()
 	{
-		if(!init_) return;
-
-		draw_quad(tex_id_.ids_[disp_page_]);
-		frame_count_++;
+		draw_quad_(tex_id_.ids_[disp_page_]);
+		++frame_count_;
 	}
 
 
@@ -350,23 +351,9 @@ namespace gl {
 		@param[in]	scale	描画するテクスチャーポリゴンの表示スケール
 	*/
 	//-----------------------------------------------------------------//
-	void gltexfb::flip()
+	void texfb::flip()
 	{
 		disp_page_ ^= 1;
 	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief		廃棄
-	*/
-	//-----------------------------------------------------------------//
-	void gltexfb::destroy()
-	{
-		if(init_) {
-			::glDeleteTextures(2, tex_id_.ids_);
-			init_ = false;
-		}
-	}
 }
-/* ----- End Of File "gltexfb.cpp" ----- */
+

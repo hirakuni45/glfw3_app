@@ -9,8 +9,6 @@
 #include "widgets/widget_label.hpp"
 #include "utils/tree_unit.hpp"
 
-#include <cstdio>
-
 namespace gui {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -51,7 +49,7 @@ namespace gui {
 				data_(), open_(false)
 			{ }
 			void list_all() const {
-				printf("(%d): '%s'", open_, data_.c_str());
+				std::cout << "(" << open_ << "): '" << data_ << "'";
 			}
 		};
 		typedef utils::tree_unit<value>	tree_unit;
@@ -65,6 +63,9 @@ namespace gui {
 
 		gl::mobj::handle	objh_;
 
+		gl::mobj::handle	mins_h_;
+		gl::mobj::handle	plus_h_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -73,7 +74,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_tree(widget_director& wd, const widget::param& bp, const param& p) :
 			wd_(wd), widget(bp), param_(p),
-			objh_(0)
+			objh_(0), mins_h_(0), plus_h_(0)
 			{ }
 
 
