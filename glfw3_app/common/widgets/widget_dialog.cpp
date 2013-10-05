@@ -75,6 +75,8 @@ namespace gui {
 				- space_height - btn_height;
 			widget::param wp(param_.text_area_, this);
 			widget_text::param wp_;
+			wp_.text_param_.placement_.hpt = vtx::placement::holizontal::CENTER;
+			wp_.text_param_.placement_.vpt = vtx::placement::vertical::CENTER;
 			text_ = wd_.add_widget<widget_text>(wp, wp_);
 		}
 	}
