@@ -160,8 +160,7 @@ tarball:
 			../common/snd_io/*.[hc]pp \
 			../common/widgets/*.[hc]pp \
 			../common/minizip/*.[hc] \
-			../player/*.[hc]pp \
-			../player/Makefile \
+			../player/*.[hc]pp Makefile \
 			../player/res/*
 	rm -f $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz
 	tar cfvz $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz \
@@ -172,7 +171,7 @@ tarball:
 			../common/snd_io/*.[hc]pp \
 			../common/widgets/*.[hc]pp \
 			../common/minizip/*.[hc] \
-			../player/*.[hc]pp \
+			../player/*.[hc]pp Makefile \
 			../player/res/*.png \
 			../player/res/*.ttf
 	chmod 444 $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz
