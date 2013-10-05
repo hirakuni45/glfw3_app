@@ -167,7 +167,9 @@ tarball:
 			../common/snd_io/*.[hc]pp \
 			../common/widgets/*.[hc]pp \
 			../common/minizip/*.[hc] \
-			../open_ide/*.[hc]pp Makefile
+			../spinv/side/*.h \
+			../spinv/side/*.cpp \
+			../spinv/*.[hc]pp Makefile
 	rm -f $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz
 	tar cfvz $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz \
 			../common/core/*.[hc]pp \
@@ -177,7 +179,9 @@ tarball:
 			../common/snd_io/*.[hc]pp \
 			../common/widgets/*.[hc]pp \
 			../common/minizip/*.[hc] \
-			../open_ide/*.[hc]pp
+			../spinv/side/*.h \
+			../spinv/side/*.cpp \
+			../spinv/*.[hc]pp Makefile
 	chmod 444 $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz
 
 bin_zip:
