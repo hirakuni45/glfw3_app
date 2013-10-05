@@ -150,7 +150,7 @@ namespace app {
 				v.data_ = "BBB";
 				tu.install("sub1", v);
 			}
-			/// tu.list_all();
+			tu.list_all();
 		}
 
 		// プリファレンスの取得
