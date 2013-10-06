@@ -8,11 +8,10 @@
 #include <iostream>
 #include <vector>
 #include "utils/director.hpp"
-#include "gl_fw/glinfo.hpp"
+#include "gl_fw/gl_info.hpp"
 #include "gl_fw/glcamera.hpp"
 #include "gl_fw/gllight.hpp"
 #include "gl_fw/glutils.hpp"
-#include "gl_fw/glfiler.hpp"
 #include "collada/dae_io.hpp"
 #include "img_io/img_files.hpp"
 #include "physics.hpp"
@@ -28,7 +27,6 @@ namespace core {
 		utils::director&	director_;
 
 		gl::intensity 		inten_;
-		gl::glfiler			filer_;
 
 		collada::dae_io		dae_;
 

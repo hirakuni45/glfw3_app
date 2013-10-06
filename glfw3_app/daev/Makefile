@@ -12,6 +12,8 @@ PSOURCES	=	main.cpp \
 				../common/gl_fw/glmobj.cpp \
 				../common/gl_fw/gltexfb.cpp \
 				../common/gl_fw/glterminal.cpp \
+				../common/gl_fw/gllight.cpp \
+				../common/gl_fw/glcamera.cpp \
 				../common/utils/vtx.cpp \
 				../common/utils/vmath.cpp \
 				../common/utils/string_utils.cpp \
@@ -162,7 +164,7 @@ tarball:
 			../common/snd_io/*.[hc]pp \
 			../common/widgets/*.[hc]pp \
 			../common/minizip/*.[hc] \
-			../gui_test/*.[hc]pp Makefile
+			../daev/*.[hc]pp Makefile
 	rm -f $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz
 	tar cfvz $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz \
 			../common/core/*.[hc]pp \
@@ -172,14 +174,13 @@ tarball:
 			../common/snd_io/*.[hc]pp \
 			../common/widgets/*.[hc]pp \
 			../common/minizip/*.[hc] \
-			../gui_test/*.[hc]pp \
-			../gui_test/Makefile
+			../daev/*.[hc]pp Makefile
 	chmod 444 $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz
 
 bin_zip:
 	$(LK) $(LOF)$(TARGET).exe $(LFLAGS) $(LIBS) -mwindows $(OBJECTS) $(LIBN)
 	rm -f $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip
-	zip $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip *.exe *.dll res/*.*
+	zip $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip *.exe *.dll
 
 lib_arc:
 	tar cfvz mingw_pack.tgz /usr/local/include /usr/local/lib /usr/local/bin
@@ -217,7 +218,9 @@ main.o: ../common/gl_fw/IGLcore.hpp ../common/core/device.hpp
 main.o: ../common/gl_fw/glfonts.hpp ../common/gl_fw/Ikfimg.hpp
 main.o: ../common/core/device.hpp ../common/utils/director.hpp
 main.o: ../common/utils/i_scene.hpp ../common/gl_fw/glutils.hpp
-main.o: dae_render.hpp ../common/collada/dae_io.hpp
+main.o: dae_render.hpp ../common/gl_fw/glcamera.hpp ../common/utils/quat.hpp
+main.o: ../common/utils/mtx.hpp ../common/gl_fw/glmatrix.hpp
+main.o: ../common/gl_fw/gllight.hpp ../common/collada/dae_io.hpp
 main.o: ../common/utils/verbose.hpp ../common/collada/dae_asset.hpp
 main.o: ../common/collada/dae_lights.hpp ../common/collada/dae_images.hpp
 main.o: ../common/collada/dae_materials.hpp ../common/collada/dae_effects.hpp
@@ -226,7 +229,10 @@ main.o: ../common/collada/dae_visual_scenes.hpp
 main.o: ../common/collada/dae_scene.hpp physics.hpp gl_shape_drawer.hpp
 dae_render.o: dae_render.hpp ../common/utils/director.hpp
 dae_render.o: ../common/utils/i_scene.hpp ../common/gl_fw/gl_info.hpp
-dae_render.o: ../common/gl_fw/glutils.hpp ../common/utils/vtx.hpp
+dae_render.o: ../common/gl_fw/glcamera.hpp ../common/utils/quat.hpp
+dae_render.o: ../common/utils/vtx.hpp ../common/utils/mtx.hpp
+dae_render.o: ../common/gl_fw/glmatrix.hpp ../common/gl_fw/gllight.hpp
+dae_render.o: ../common/img_io/img.hpp ../common/gl_fw/glutils.hpp
 dae_render.o: ../common/img_io/i_img.hpp ../common/img_io/img.hpp
 dae_render.o: ../common/img_io/img_rgba8.hpp ../common/img_io/i_img.hpp
 dae_render.o: ../common/img_io/img_idx8.hpp ../common/img_io/img_clut.hpp
@@ -245,10 +251,10 @@ dae_render.o: ../common/img_io/i_img_io.hpp ../common/utils/file_io.hpp
 dae_render.o: physics.hpp gl_shape_drawer.hpp ../common/utils/preference.hpp
 dae_render.o: ../common/widgets/widget_frame.hpp
 dae_render.o: ../common/widgets/widget_director.hpp
-dae_render.o: ../common/widgets/widget.hpp ../common/img_io/img.hpp
-dae_render.o: ../common/img_io/paint.hpp ../common/img_io/img_rgba8.hpp
-dae_render.o: ../common/utils/vmath.hpp ../common/widgets/common_parts.hpp
-dae_render.o: ../common/gl_fw/glmobj.hpp ../common/widgets/widget_button.hpp
+dae_render.o: ../common/widgets/widget.hpp ../common/img_io/paint.hpp
+dae_render.o: ../common/img_io/img_rgba8.hpp ../common/utils/vmath.hpp
+dae_render.o: ../common/widgets/common_parts.hpp ../common/gl_fw/glmobj.hpp
+dae_render.o: ../common/widgets/widget_button.hpp
 dae_render.o: ../common/widgets/widget_check.hpp
 ../common/core/glcore.o: ../common/core/glcore.hpp
 ../common/core/glcore.o: ../common/gl_fw/IGLcore.hpp
@@ -307,6 +313,21 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/gl_fw/glterminal.o: ../common/utils/string_utils.hpp
 ../common/gl_fw/glterminal.o: ../common/utils/file_io.hpp
 ../common/gl_fw/glterminal.o: ../common/img_io/img.hpp
+../common/gl_fw/gllight.o: ../common/gl_fw/gllight.hpp
+../common/gl_fw/gllight.o: ../common/gl_fw/gl_info.hpp
+../common/gl_fw/gllight.o: ../common/utils/vtx.hpp ../common/img_io/img.hpp
+../common/gl_fw/glcamera.o: ../common/gl_fw/IGLcore.hpp
+../common/gl_fw/glcamera.o: ../common/core/device.hpp ../common/utils/vtx.hpp
+../common/gl_fw/glcamera.o: ../common/gl_fw/gl_info.hpp
+../common/gl_fw/glcamera.o: ../common/gl_fw/glfonts.hpp
+../common/gl_fw/glcamera.o: ../common/gl_fw/Ikfimg.hpp
+../common/gl_fw/glcamera.o: ../common/img_io/i_img.hpp
+../common/gl_fw/glcamera.o: ../common/img_io/img.hpp
+../common/gl_fw/glcamera.o: ../common/utils/string_utils.hpp
+../common/gl_fw/glcamera.o: ../common/utils/file_io.hpp
+../common/gl_fw/glcamera.o: ../common/gl_fw/glcamera.hpp
+../common/gl_fw/glcamera.o: ../common/utils/quat.hpp ../common/utils/mtx.hpp
+../common/gl_fw/glcamera.o: ../common/gl_fw/glmatrix.hpp
 ../common/utils/vtx.o: ../common/utils/vtx.hpp
 ../common/utils/vmath.o: ../common/utils/vmath.hpp ../common/utils/vtx.hpp
 ../common/utils/string_utils.o: ../common/utils/string_utils.hpp

@@ -11,8 +11,8 @@
 
 #include "utils/verbose.hpp"
 
-#include "gl_fw/mtx.hpp"
-#include "gl_fw/gl_matrix.hpp"
+#include "utils/mtx.hpp"
+#include "gl_fw/glmatrix.hpp"
 
 namespace collada {
 
@@ -108,7 +108,7 @@ namespace collada {
 
 		void parse_visual_scene_(utils::verbose& v, const boost::property_tree::ptree::value_type& element);
 
-		void joint_vertex_(const node& nd, gl::glmatf& glmat, skeleton& sk) const;
+		void joint_vertex_(const node& nd, gl::matrixf& glmat, skeleton& sk) const;
 
 	public:
 

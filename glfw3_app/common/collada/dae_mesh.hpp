@@ -14,8 +14,8 @@
 #include <boost/optional.hpp>
 
 #include "utils/verbose.hpp"
-#include "gl_fw/vtx.hpp"
-#include "gl_fw/mtx.hpp"
+#include "utils/vtx.hpp"
+#include "utils/mtx.hpp"
 
 namespace collada {
 

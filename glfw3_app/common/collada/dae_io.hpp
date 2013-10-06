@@ -24,8 +24,8 @@
 #include "dae_visual_scenes.hpp"
 #include "dae_scene.hpp"
 
-#include "gl_fw/vtx.hpp"
-#include "gl_fw/mtx.hpp"
+#include "utils/vtx.hpp"
+#include "utils/mtx.hpp"
 
 namespace collada {
 
