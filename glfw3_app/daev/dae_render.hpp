@@ -7,6 +7,7 @@
 //=====================================================================//
 #include <iostream>
 #include <vector>
+#include "main.hpp"
 #include "utils/director.hpp"
 #include "gl_fw/gl_info.hpp"
 #include "gl_fw/glcamera.hpp"
@@ -16,7 +17,7 @@
 #include "img_io/img_files.hpp"
 #include "physics.hpp"
 
-namespace core {
+namespace app {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
@@ -24,9 +25,7 @@ namespace core {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class dae_render : public utils::i_scene {
-		utils::director&	director_;
-
-		gl::intensity 		inten_;
+		utils::director<core>&	director_;
 
 		collada::dae_io		dae_;
 
@@ -74,7 +73,7 @@ namespace core {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		dae_render(utils::director& d) : director_(d),
+		dae_render(utils::director<core>& d) : director_(d),
 			model_scale_(10.0f),
 			physics_(), physics_time_(0.0f),
 			tools_palette_(0), filer_button_(0), physics_button_(0),

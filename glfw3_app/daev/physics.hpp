@@ -9,7 +9,7 @@
 #include "btBulletDynamicsCommon.h"
 #include <vector>
 #include "gl_shape_drawer.hpp"
-#include "gl_fw/gl_camera.hpp"
+#include "gl_fw/glcamera.hpp"
 
 namespace bt {
 

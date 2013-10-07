@@ -76,7 +76,8 @@ INC_SYS		=	/usr/boost_1_54_0 \
 INC_LIB		=	/usr/local/include/libpng12 \
 				/usr/local/include/libjpeg_x86 \
 				/usr/local/include/freetype2 \
-				/usr/local/include/mupdf
+				/usr/local/include/mupdf \
+				/usr/local/include/bullet
 
 PINC_APP	=	./ ../common
 CINC_APP	=	./ ../common
@@ -227,18 +228,36 @@ main.o: ../common/collada/dae_materials.hpp ../common/collada/dae_effects.hpp
 main.o: ../common/collada/dae_mesh.hpp ../common/collada/dae_controllers.hpp
 main.o: ../common/collada/dae_visual_scenes.hpp
 main.o: ../common/collada/dae_scene.hpp physics.hpp gl_shape_drawer.hpp
-dae_render.o: dae_render.hpp ../common/utils/director.hpp
-dae_render.o: ../common/utils/i_scene.hpp ../common/gl_fw/gl_info.hpp
-dae_render.o: ../common/gl_fw/glcamera.hpp ../common/utils/quat.hpp
-dae_render.o: ../common/utils/vtx.hpp ../common/utils/mtx.hpp
-dae_render.o: ../common/gl_fw/glmatrix.hpp ../common/gl_fw/gllight.hpp
-dae_render.o: ../common/img_io/img.hpp ../common/gl_fw/glutils.hpp
+dae_render.o: ../common/gl_fw/IGLcore.hpp ../common/core/device.hpp
+dae_render.o: ../common/utils/vtx.hpp ../common/gl_fw/gl_info.hpp
+dae_render.o: ../common/gl_fw/glfonts.hpp ../common/gl_fw/Ikfimg.hpp
 dae_render.o: ../common/img_io/i_img.hpp ../common/img_io/img.hpp
-dae_render.o: ../common/img_io/img_rgba8.hpp ../common/img_io/i_img.hpp
-dae_render.o: ../common/img_io/img_idx8.hpp ../common/img_io/img_clut.hpp
-dae_render.o: ../common/img_io/img_gray8.hpp ../common/collada/dae_io.hpp
-dae_render.o: ../common/utils/verbose.hpp ../common/collada/dae_asset.hpp
-dae_render.o: ../common/utils/string_utils.hpp
+dae_render.o: ../common/utils/string_utils.hpp ../common/utils/file_io.hpp
+dae_render.o: dae_render.hpp main.hpp ../common/snd_io/sound.hpp
+dae_render.o: ../common/snd_io/audio_io.hpp ../common/snd_io/i_audio.hpp
+dae_render.o: ../common/snd_io/audio.hpp ../common/snd_io/snd_files.hpp
+dae_render.o: ../common/snd_io/i_snd_io.hpp ../common/snd_io/tag.hpp
+dae_render.o: ../common/widgets/widget_director.hpp
+dae_render.o: ../common/widgets/widget.hpp ../common/img_io/img.hpp
+dae_render.o: ../common/img_io/paint.hpp ../common/img_io/i_img.hpp
+dae_render.o: ../common/img_io/img_rgba8.hpp ../common/img_io/img_idx8.hpp
+dae_render.o: ../common/img_io/img_clut.hpp ../common/img_io/img_gray8.hpp
+dae_render.o: ../common/utils/vmath.hpp ../common/widgets/common_parts.hpp
+dae_render.o: ../common/gl_fw/glmobj.hpp ../common/img_io/img_rgba8.hpp
+dae_render.o: ../common/img_io/img_files.hpp ../common/img_io/i_img_io.hpp
+dae_render.o: ../common/widgets/widget_filer.hpp ../common/utils/files.hpp
+dae_render.o: ../common/utils/drive_info.hpp ../common/utils/file_info.hpp
+dae_render.o: ../common/utils/handle_set.hpp ../common/utils/preference.hpp
+dae_render.o: ../common/widgets/widget_null.hpp
+dae_render.o: ../common/widgets/widget_director.hpp
+dae_render.o: ../common/widgets/widget_label.hpp
+dae_render.o: ../common/widgets/widget_button.hpp
+dae_render.o: ../common/utils/director.hpp ../common/utils/i_scene.hpp
+dae_render.o: ../common/gl_fw/glcamera.hpp ../common/utils/quat.hpp
+dae_render.o: ../common/utils/mtx.hpp ../common/gl_fw/glmatrix.hpp
+dae_render.o: ../common/gl_fw/gllight.hpp ../common/gl_fw/glutils.hpp
+dae_render.o: ../common/collada/dae_io.hpp ../common/utils/verbose.hpp
+dae_render.o: ../common/collada/dae_asset.hpp
 dae_render.o: ../common/collada/dae_lights.hpp
 dae_render.o: ../common/collada/dae_images.hpp
 dae_render.o: ../common/collada/dae_materials.hpp
@@ -246,15 +265,8 @@ dae_render.o: ../common/collada/dae_effects.hpp
 dae_render.o: ../common/collada/dae_mesh.hpp
 dae_render.o: ../common/collada/dae_controllers.hpp
 dae_render.o: ../common/collada/dae_visual_scenes.hpp
-dae_render.o: ../common/collada/dae_scene.hpp ../common/img_io/img_files.hpp
-dae_render.o: ../common/img_io/i_img_io.hpp ../common/utils/file_io.hpp
-dae_render.o: physics.hpp gl_shape_drawer.hpp ../common/utils/preference.hpp
+dae_render.o: ../common/collada/dae_scene.hpp physics.hpp gl_shape_drawer.hpp
 dae_render.o: ../common/widgets/widget_frame.hpp
-dae_render.o: ../common/widgets/widget_director.hpp
-dae_render.o: ../common/widgets/widget.hpp ../common/img_io/paint.hpp
-dae_render.o: ../common/img_io/img_rgba8.hpp ../common/utils/vmath.hpp
-dae_render.o: ../common/widgets/common_parts.hpp ../common/gl_fw/glmobj.hpp
-dae_render.o: ../common/widgets/widget_button.hpp
 dae_render.o: ../common/widgets/widget_check.hpp
 ../common/core/glcore.o: ../common/core/glcore.hpp
 ../common/core/glcore.o: ../common/gl_fw/IGLcore.hpp

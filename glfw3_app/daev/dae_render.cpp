@@ -5,16 +5,14 @@
 */
 //=====================================================================//
 #include <iostream>
+#include "gl_fw/IGLcore.hpp"
 #include "dae_render.hpp"
 #include "utils/preference.hpp"
 #include "widgets/widget_frame.hpp"
 #include "widgets/widget_button.hpp"
 #include "widgets/widget_check.hpp"
-#include "widgets/widget_zero.hpp"
 
-namespace core {
-
-	using namespace gl;
+namespace app {
 
 	static collada::dae_io::triangle_meshes tms_;
 	static vtx::fvtxs		bone_vertex_list_;
@@ -139,7 +137,7 @@ namespace core {
 
 		::glPushMatrix();
 		glTranslatef(j.x, j.y, j.z);
-		glutSolidSphere(0.015f, 12, 12);
+////		glutSolidSphere(0.015f, 12, 12);
 		::glPopMatrix();
 		BOOST_FOREACH(const collada::dae_visual_scenes::skeleton& sk_, sk.skeletons_) {
 			render_skeleton_(j, sk_);
@@ -245,19 +243,15 @@ namespace core {
 	//-----------------------------------------------------------------//
 	void dae_render::initialize()
 	{
-		IGLcore* igl = get_glcore();
+		gl::IGLcore* igl = gl::get_glcore();
 		igl->set_title("DAE Render");
 
-		igl->set_cursor(arrow);
-
+////		igl->set_cursor(arrow);
+#if 0
 		sys::preference& pre = sys::preference::get_instance();
 		pre.set_current_path("/dae_render");
 		std::string s;
 		pre.get_text("file_path", s);
-
-		inten_.initialize(60.0f);
-		filer_.initialize();
-		filer_.set_root_path(s);
 
 		// 詳細表示の設定
 		dae_.at_verbose().set_level(utils::verbose::level::max);
@@ -330,8 +324,7 @@ namespace core {
 			wd.add_widget<gui::widget_zero>(param, sub_param);
 		}
 
-
-
+#endif
 	}
 
 
@@ -342,29 +335,30 @@ namespace core {
 	//-----------------------------------------------------------------//
 	void dae_render::update()
 	{
+		using namespace gl;
+
 		IGLcore* igl = get_glcore();
 		if(igl == 0) return;
 
-		const gldev& dev = igl->get_device();
+		const device& dev = igl->get_device();
 
-		int scw = igl->get_width();
-		int sch = igl->get_height();
+		const vtx::spos& size = igl->get_size();
 
 		camera_.update();
 
-		if(dev.get_key_positive(KEY_NORMAL + 'w') || dev.get_key_positive(KEY_NORMAL + 'W')) {
+		if(dev.get_positive(device::key::W)) {
 			wire_frame_ = !wire_frame_;
 		}
-		if(dev.get_key_positive(KEY_NORMAL + 'g') || dev.get_key_positive(KEY_NORMAL + 'G')) {
+		if(dev.get_positive(device::key::G)) {
 			grid_enable_ = !grid_enable_;
 		}
-		if(dev.get_key_positive(KEY_NORMAL + 'j') || dev.get_key_positive(KEY_NORMAL + 'J')) {
+		if(dev.get_positive(device::key::J)) {
 			joint_enable_ = !joint_enable_;
 		}
-		if(dev.get_key_positive(KEY_NORMAL + 'm') || dev.get_key_positive(KEY_NORMAL + 'M')) {
+		if(dev.get_positive(device::key::M)) {
 			model_enable_ = !model_enable_;
 		}
-		if(dev.get_key_positive(KEY_NORMAL + 'l') || dev.get_key_positive(KEY_NORMAL + 'L')) {
+		if(dev.get_positive(device::key::L)) {
 			light_enable_ = !light_enable_;
 		}
 
@@ -376,15 +370,15 @@ namespace core {
 		bool filer = false;
 
 		// CTRL-F
-		if(dev.get_key_positive(KEY_NORMAL + 'F' - 0x40)) {
-			filer = true;
-		}
+///		if(dev.get_key_positive(KEY_NORMAL + 'F' - 0x40)) {
+///			filer = true;
+///		}
 
 		if(physics_enable_) {
 			physics_.update(camera_);
 			physics_time_ += 1.0f / 60.0f;
 		}
-
+#if 0
 		unsigned int cnt_f = filer_button_->get_count();
 		unsigned int cnt_p = physics_button_->get_count();
 		gui::widget_director& wd = director_.at_widget_director();
@@ -407,6 +401,7 @@ namespace core {
 
 		tools_palette_->at_position().set(0);
 		tools_palette_->at_size().x = scw;
+#endif
 	}
 
 
@@ -417,16 +412,12 @@ namespace core {
 	//-----------------------------------------------------------------//
 	void dae_render::render()
 	{
-		IGLcore* igl = get_glcore();
-		if(igl == 0) return;
+		gl::IGLcore* igl = gl::get_glcore();
 
-		int scw = igl->get_width();
-		int sch = igl->get_height();
-
+		const vtx::ipos& size = igl->get_size();
+#if 0
 //		resource* res = get_resource();
 //		if(res == 0) return;
-
-		inten_.service();
 
 		::glEnable(GL_DEPTH_TEST);
 
@@ -503,7 +494,7 @@ namespace core {
 			::glDisable(GL_DEPTH_TEST);
 			::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-			glfonts& fo = igl->at_fonts();
+			gl::fonts& fo = igl->at_fonts();
 			fo.setup_matrix(0, 0, scw, sch);
 			fo.set_clip_org(vtx::spos(0, 0));
 			fo.set_clip_size(vtx::spos(scw, sch));
@@ -523,16 +514,15 @@ namespace core {
 		{
 
 			::glEnable(GL_TEXTURE_2D);
-			glfonts& fo = igl->at_fonts();
+			gl::fonts& fo = igl->at_fonts();
 			fo.setup_matrix(0, 0, scw, sch);
 //			vtx::spos s = fo.get_size();
-			filer_.set_size(scw, sch);
-			bool file_select = filer_.service(inten_);
-			if(file_select) {
-				open_dae_(filer_.get_selected_filename());
-			}
+///			if(file_select) {
+///				open_dae_(filer_.get_selected_filename());
+///			}
 			fo.restore_matrix();
 		}
+#endif
 	}
 
 
@@ -544,9 +534,9 @@ namespace core {
 	void dae_render::destroy()
 	{
 		// ファイラー、カレントパスの記録
-		sys::preference& pre = sys::preference::get_instance();
+		sys::preference& pre = director_.at_core().preference_;
 		pre.set_current_path("/dae_render");
-		pre.put_text("file_path", filer_.get_root_path());
+///		pre.put_text("file_path", filer_.get_root_path());
 
 		std::cout << "DAE Render - destroy" << std::endl;
 	}
