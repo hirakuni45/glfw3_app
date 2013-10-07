@@ -18,9 +18,9 @@ namespace gl {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class camera {
 
-		int			translate_key_;
-		int			rotate_key_;
-		int			zoom_key_;
+		device::key::type	translate_key_;
+		device::key::type	rotate_key_;
+		device::key::type	zoom_key_;
 
 		vtx::spos	mouse_left_first_pos_;
 		vtx::fvtx	eye_first_;
@@ -46,7 +46,9 @@ namespace gl {
 
 	public:
 		camera() :
-			translate_key_(KEY_CTRL), rotate_key_(KEY_SHIFT), zoom_key_(KEY_ALT),
+			translate_key_(device::key::CONTROL),
+			rotate_key_(device::key::SHIFT),
+			zoom_key_(device::key::ALT),
 			mouse_left_first_pos_(0),
 			quat_handle_(0.0f), quat_handle_first_(0.0f), quat_(), glmat_(),
 			size_(0.0f), aspect_(0.0f), fov_(45.0f), z_near_(5.0f), z_far_(5000.0f),

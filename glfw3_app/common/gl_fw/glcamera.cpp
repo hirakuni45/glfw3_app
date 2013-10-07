@@ -10,13 +10,12 @@
 
 namespace gl {
 
-
 	void camera::update()
 	{
 		using namespace vtx;
 
 		IGLcore* glc = get_glcore();
-		const gldev& dev = glc->get_device();
+		const device& dev = glc->get_device();
 
 		const spos& mspos = dev.get_mouse_position();
 		const spos& msdiff = dev.get_mouse_diff();
@@ -28,7 +27,7 @@ namespace gl {
 		bool zoom = dev.get_key_level(zoom_key_);
 
 		if(trans || rotate || zoom) {
-			if(dev.get_mouse_positive() & MOUSE_LEFT) {
+			if(dev.get_positive() & MOUSE_LEFT) {
 				mouse_left_first_pos_ = mspos;
 				eye_first_ = eye_;
 				target_first_ = target_;
