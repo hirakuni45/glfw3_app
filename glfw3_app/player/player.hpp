@@ -6,7 +6,6 @@
 //=====================================================================//
 #include <time.h>
 #include "main.hpp"
-#include "utils/i_scene.hpp"
 #include "utils/director.hpp"
 #include "widgets/widget_filer.hpp"
 #include "widgets/widget_label.hpp"
