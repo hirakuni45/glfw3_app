@@ -170,6 +170,15 @@ namespace gl {
     	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         	glfwSetWindowShouldClose(window, GL_TRUE);
 		}
+
+		if(mods & GLFW_MOD_SHIFT) glcore::bitsets_[device::key::SHIFT] = true;
+		else glcore::bitsets_[device::key::SHIFT] = false;
+		if(mods & GLFW_MOD_CONTROL) glcore::bitsets_[device::key::CONTROL] = true;
+		else glcore::bitsets_[device::key::CONTROL] = false;
+		if(mods & GLFW_MOD_ALT) glcore::bitsets_[device::key::ALT] = true;
+		else glcore::bitsets_[device::key::ALT] = false;
+		if(mods & GLFW_MOD_SUPER) glcore::bitsets_[device::key::SUPER] = true;
+		else glcore::bitsets_[device::key::SUPER] = false;
 	}
 
 
