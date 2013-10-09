@@ -8,6 +8,7 @@
 #include "gl_fw/gl_info.hpp"
 #include "utils/quat.hpp"
 #include "gl_fw/glmatrix.hpp"
+#include "core/device.hpp"
 
 namespace gl {
 
