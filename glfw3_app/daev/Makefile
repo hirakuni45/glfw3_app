@@ -243,6 +243,7 @@ main.o: ../common/collada/dae_effects.hpp ../common/collada/dae_mesh.hpp
 main.o: ../common/collada/dae_controllers.hpp
 main.o: ../common/collada/dae_visual_scenes.hpp
 main.o: ../common/collada/dae_scene.hpp physics.hpp gl_shape_drawer.hpp
+main.o: ../common/widgets/widget_frame.hpp
 dae_render.o: ../common/gl_fw/IGLcore.hpp ../common/core/device.hpp
 dae_render.o: ../common/utils/vtx.hpp ../common/gl_fw/gl_info.hpp
 dae_render.o: ../common/gl_fw/glfonts.hpp ../common/gl_fw/Ikfimg.hpp
