@@ -61,7 +61,7 @@ namespace utils {
 		return true;
 	}
 
-#if 0
+
 	bool string_to_matrix4x4(const std::string& src, mtx::fmat4& dst)
 	{
 		float_vector vv;
@@ -78,7 +78,7 @@ namespace utils {
 			return false;
 		}
 	}
-#endif
+
 
 	//-----------------------------------------------------------------//
 	/*!

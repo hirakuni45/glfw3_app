@@ -13,6 +13,7 @@
 #include <boost/unordered_map.hpp>
 #include <boost/optional.hpp>
 #include <boost/format.hpp>
+#include "utils/mtx.hpp"
 
 namespace utils {
 
@@ -51,7 +52,7 @@ namespace utils {
 
 	bool string_to_int(const std::string& src, int_vector& dst);
 	bool string_to_float(const std::string& src, float_vector& dst);
-//	bool string_to_matrix4x4(const std::string& src, mtx::fmat4& dst);
+	bool string_to_matrix4x4(const std::string& src, mtx::fmat4& dst);
 
 	//-----------------------------------------------------------------//
 	/*!
