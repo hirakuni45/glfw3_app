@@ -17,17 +17,18 @@ namespace gl {
 		IGLcore* glc = get_glcore();
 		const device& dev = glc->get_device();
 
-		const spos& mspos = dev.get_mouse_position();
-		const spos& msdiff = dev.get_mouse_diff();
+		const spos& mspos = dev.get_cursor();
+		const spos msdiff = mspos - mouse_pos_;
+		mouse_pos_ = mspos;
 
 		bool touch = false;
 
-		bool trans = dev.get_key_level(translate_key_);
-		bool rotate = dev.get_key_level(rotate_key_);
-		bool zoom = dev.get_key_level(zoom_key_);
+		bool trans = dev.get_level(translate_key_);
+		bool rotate = dev.get_level(rotate_key_);
+		bool zoom = dev.get_level(zoom_key_);
 
 		if(trans || rotate || zoom) {
-			if(dev.get_positive() & MOUSE_LEFT) {
+			if(dev.get_positive(device::key::MOUSE_LEFT)) {
 				mouse_left_first_pos_ = mspos;
 				eye_first_ = eye_;
 				target_first_ = target_;
@@ -36,7 +37,7 @@ namespace gl {
 			}
 		}
 
-		if(dev.get_mouse_level() & MOUSE_LEFT) {
+		if(dev.get_level(device::key::MOUSE_LEFT)) {
 			// 並行移動
 			spos diff_pos = mspos - mouse_left_first_pos_;
 			if(trans) {
@@ -60,9 +61,9 @@ namespace gl {
 				if(q.rot_xz(qh.x, qh.y, 1.0f)) {
 					q.create_rotate_matrix(glmat_.at_current_matrix());
 					vtx::fvtx4 fv;
-					glmatf::vertex_world(glmat_.get_current_matrix(), up_first_, fv);
+					matrixf::vertex_world(glmat_.get_current_matrix(), up_first_, fv);
 					up_.set(fv.x,  fv.y,  fv.z);
-					glmatf::vertex_world(glmat_.get_current_matrix(), eye_first_ - target_first_, fv);
+					matrixf::vertex_world(glmat_.get_current_matrix(), eye_first_ - target_first_, fv);
 					eye_ = target_first_ + vtx::fvtx(fv.x, fv.y, fv.z);
 					touch = true;
 				}
@@ -84,13 +85,12 @@ namespace gl {
 
 	void camera::service()
 	{
-		IGLcore* glc = get_glcore();
-		const gldev& dev = glc->get_device();
+		IGLcore* igl = get_glcore();
+		const device& dev = igl->get_device();
 
 		::glMatrixMode(GL_PROJECTION);
 		::glLoadIdentity();
-		size_.x = static_cast<float>(glc->get_width());
-		size_.y = static_cast<float>(glc->get_height());
+		size_ = igl->get_size();
 		aspect_ = size_.x / size_.y;
 		::gluPerspective(fov_, aspect_, z_near_, z_far_);
 		::gluLookAt(eye_.x, eye_.y, eye_.z,

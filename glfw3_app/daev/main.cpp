@@ -51,7 +51,7 @@ int main(int argc, char** argv)
 
 		director.at_core().widget_director_.initialize();
 
-//		director.install_scene<app::player>();
+		director.install_scene<app::dae_render>();
 
 		while(!igl->get_exit_signal()) {
 			igl->service();

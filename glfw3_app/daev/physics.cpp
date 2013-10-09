@@ -8,7 +8,19 @@
 #include <boost/foreach.hpp>
 #include "gl_fw/IGLcore.hpp"
 #include <boost/foreach.hpp>
-#include "gl_fw/quat.hpp"
+#include "utils/quat.hpp"
+
+#if 0
+void* btAlignedAllocInternal(size_t size, int alignment)
+{
+	return malloc(size);
+}
+
+void btAlignedFreeInternal(void* ptr)
+{
+	free(ptr);
+}
+#endif
 
 namespace bt {
 
@@ -77,6 +89,7 @@ namespace bt {
 		btCollisionWorld::ClosestRayResultCallback ray_callback(ray_from, ray_to);
 		world_->rayTest(ray_from, ray_to, ray_callback);
 		if(ray_callback.hasHit()) {
+#if 0
 			btRigidBody* body = btRigidBody::upcast(ray_callback.m_collisionObject);
 			if(body) {
 				//other exclusions?
@@ -124,6 +137,7 @@ namespace bt {
 					last_picking_dist_ = (pick_pos - ray_from).length();
 				}
 			}
+#endif
 		}
 	}
 
@@ -599,15 +613,15 @@ namespace bt {
 			using namespace gl;
 			IGLcore* igl = get_glcore();
 			if(igl == 0) return;
-			const gldev& dev = igl->get_device();
+			const device& dev = igl->get_device();
 
-			const vtx::spos& mspos = dev.get_mouse_position();
+			const vtx::spos& mspos = dev.get_cursor();
 			btVector3 ray_to = get_ray_to_(cam, mspos.x, mspos.y);
 
-			if(dev.get_mouse_positive() & MOUSE_LEFT) {
+			if(dev.get_positive(device::key::MOUSE_LEFT)) {
 				picking_body_(cam, ray_to);
 			}
-			if(dev.get_mouse_level() & MOUSE_LEFT) {
+			if(dev.get_level(device::key::MOUSE_LEFT)) {
 				moveing_body_(cam, ray_to);
 			} else {
 				remove_picking_constraint_();

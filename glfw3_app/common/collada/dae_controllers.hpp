@@ -8,8 +8,8 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include "utils/string_utils.hpp"
-
 #include "utils/verbose.hpp"
+#include "utils/mtx.hpp"
 
 namespace collada {
 

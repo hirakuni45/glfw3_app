@@ -4,6 +4,8 @@
 TARGET		=	daev
 PSOURCES	=	main.cpp \
 				dae_render.cpp \
+				gl_shape_drawer.cpp \
+				physics.cpp \
 				../common/core/glcore.cpp \
 				../common/core/device.cpp \
 				../common/core/kfimg_ft2.cpp \
@@ -54,7 +56,17 @@ PSOURCES	=	main.cpp \
 				../common/widgets/widget_dialog.cpp \
 				../common/widgets/widget_tree.cpp \
 				../common/widgets/widget_filer.cpp \
-				../common/widgets/widget_terminal.cpp
+				../common/widgets/widget_terminal.cpp \
+				../common/collada/dae_asset.cpp \
+				../common/collada/dae_controllers.cpp \
+				../common/collada/dae_effects.cpp \
+				../common/collada/dae_images.cpp \
+				../common/collada/dae_io.cpp \
+				../common/collada/dae_lights.cpp \
+				../common/collada/dae_materials.cpp \
+				../common/collada/dae_mesh.cpp \
+				../common/collada/dae_scene.cpp \
+				../common/collada/dae_visual_scenes.cpp
 
 CSOURCES	=	../common/minizip/ioapi.c \
 				../common/minizip/unzip.c
@@ -68,7 +80,8 @@ OPTLIBS		=	glfw3 opengl32 glu32 gdi32 imm32 \
 				id3tag \
 				z \
 				mad \
-				faad mp4ff
+				faad mp4ff \
+				BulletSoftBody BulletDynamics BulletCollision LinearMath
 
 INC_SYS		=	/usr/boost_1_54_0 \
 				/usr/local/include
@@ -164,6 +177,7 @@ tarball:
 			../common/img_io/*.[hc]pp \
 			../common/snd_io/*.[hc]pp \
 			../common/widgets/*.[hc]pp \
+			../common/collada/*.[hc]pp \
 			../common/minizip/*.[hc] \
 			../daev/*.[hc]pp Makefile
 	rm -f $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz
@@ -174,6 +188,7 @@ tarball:
 			../common/img_io/*.[hc]pp \
 			../common/snd_io/*.[hc]pp \
 			../common/widgets/*.[hc]pp \
+			../common/collada/*.[hc]pp \
 			../common/minizip/*.[hc] \
 			../daev/*.[hc]pp Makefile
 	chmod 444 $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz
@@ -196,22 +211,22 @@ depend:
 ../common/minizip/unzip.o: ../common/minizip/ioapi.h
 main.o: main.hpp ../common/snd_io/sound.hpp ../common/snd_io/audio_io.hpp
 main.o: ../common/utils/file_io.hpp ../common/utils/string_utils.hpp
+main.o: ../common/utils/mtx.hpp ../common/utils/vtx.hpp
 main.o: ../common/snd_io/i_audio.hpp ../common/snd_io/audio.hpp
 main.o: ../common/snd_io/snd_files.hpp ../common/snd_io/i_snd_io.hpp
 main.o: ../common/snd_io/tag.hpp ../common/img_io/i_img.hpp
-main.o: ../common/img_io/img.hpp ../common/utils/vtx.hpp
-main.o: ../common/widgets/widget_director.hpp ../common/widgets/widget.hpp
-main.o: ../common/img_io/img.hpp ../common/img_io/paint.hpp
-main.o: ../common/img_io/i_img.hpp ../common/img_io/img_rgba8.hpp
-main.o: ../common/img_io/img_idx8.hpp ../common/img_io/img_clut.hpp
-main.o: ../common/img_io/img_gray8.hpp ../common/utils/vmath.hpp
-main.o: ../common/widgets/common_parts.hpp ../common/gl_fw/glmobj.hpp
-main.o: ../common/gl_fw/gl_info.hpp ../common/img_io/img_rgba8.hpp
-main.o: ../common/img_io/img_files.hpp ../common/img_io/i_img_io.hpp
-main.o: ../common/widgets/widget_filer.hpp ../common/utils/files.hpp
-main.o: ../common/utils/drive_info.hpp ../common/utils/file_info.hpp
-main.o: ../common/utils/handle_set.hpp ../common/utils/preference.hpp
-main.o: ../common/widgets/widget_null.hpp
+main.o: ../common/img_io/img.hpp ../common/widgets/widget_director.hpp
+main.o: ../common/widgets/widget.hpp ../common/img_io/img.hpp
+main.o: ../common/img_io/paint.hpp ../common/img_io/i_img.hpp
+main.o: ../common/img_io/img_rgba8.hpp ../common/img_io/img_idx8.hpp
+main.o: ../common/img_io/img_clut.hpp ../common/img_io/img_gray8.hpp
+main.o: ../common/utils/vmath.hpp ../common/widgets/common_parts.hpp
+main.o: ../common/gl_fw/glmobj.hpp ../common/gl_fw/gl_info.hpp
+main.o: ../common/img_io/img_rgba8.hpp ../common/img_io/img_files.hpp
+main.o: ../common/img_io/i_img_io.hpp ../common/widgets/widget_filer.hpp
+main.o: ../common/utils/files.hpp ../common/utils/drive_info.hpp
+main.o: ../common/utils/file_info.hpp ../common/utils/handle_set.hpp
+main.o: ../common/utils/preference.hpp ../common/widgets/widget_null.hpp
 main.o: ../common/widgets/widget_director.hpp
 main.o: ../common/widgets/widget_label.hpp
 main.o: ../common/widgets/widget_button.hpp ../common/core/glcore.hpp
@@ -220,24 +235,25 @@ main.o: ../common/gl_fw/glfonts.hpp ../common/gl_fw/Ikfimg.hpp
 main.o: ../common/core/device.hpp ../common/utils/director.hpp
 main.o: ../common/utils/i_scene.hpp ../common/gl_fw/glutils.hpp
 main.o: dae_render.hpp ../common/gl_fw/glcamera.hpp ../common/utils/quat.hpp
-main.o: ../common/utils/mtx.hpp ../common/gl_fw/glmatrix.hpp
-main.o: ../common/gl_fw/gllight.hpp ../common/collada/dae_io.hpp
-main.o: ../common/utils/verbose.hpp ../common/collada/dae_asset.hpp
-main.o: ../common/collada/dae_lights.hpp ../common/collada/dae_images.hpp
-main.o: ../common/collada/dae_materials.hpp ../common/collada/dae_effects.hpp
-main.o: ../common/collada/dae_mesh.hpp ../common/collada/dae_controllers.hpp
+main.o: ../common/gl_fw/glmatrix.hpp ../common/gl_fw/gllight.hpp
+main.o: ../common/collada/dae_io.hpp ../common/utils/verbose.hpp
+main.o: ../common/collada/dae_asset.hpp ../common/collada/dae_lights.hpp
+main.o: ../common/collada/dae_images.hpp ../common/collada/dae_materials.hpp
+main.o: ../common/collada/dae_effects.hpp ../common/collada/dae_mesh.hpp
+main.o: ../common/collada/dae_controllers.hpp
 main.o: ../common/collada/dae_visual_scenes.hpp
 main.o: ../common/collada/dae_scene.hpp physics.hpp gl_shape_drawer.hpp
+main.o: ../common/widgets/widget_frame.hpp
 dae_render.o: ../common/gl_fw/IGLcore.hpp ../common/core/device.hpp
 dae_render.o: ../common/utils/vtx.hpp ../common/gl_fw/gl_info.hpp
 dae_render.o: ../common/gl_fw/glfonts.hpp ../common/gl_fw/Ikfimg.hpp
 dae_render.o: ../common/img_io/i_img.hpp ../common/img_io/img.hpp
-dae_render.o: ../common/utils/string_utils.hpp ../common/utils/file_io.hpp
-dae_render.o: dae_render.hpp main.hpp ../common/snd_io/sound.hpp
-dae_render.o: ../common/snd_io/audio_io.hpp ../common/snd_io/i_audio.hpp
-dae_render.o: ../common/snd_io/audio.hpp ../common/snd_io/snd_files.hpp
-dae_render.o: ../common/snd_io/i_snd_io.hpp ../common/snd_io/tag.hpp
-dae_render.o: ../common/widgets/widget_director.hpp
+dae_render.o: ../common/utils/string_utils.hpp ../common/utils/mtx.hpp
+dae_render.o: ../common/utils/file_io.hpp dae_render.hpp main.hpp
+dae_render.o: ../common/snd_io/sound.hpp ../common/snd_io/audio_io.hpp
+dae_render.o: ../common/snd_io/i_audio.hpp ../common/snd_io/audio.hpp
+dae_render.o: ../common/snd_io/snd_files.hpp ../common/snd_io/i_snd_io.hpp
+dae_render.o: ../common/snd_io/tag.hpp ../common/widgets/widget_director.hpp
 dae_render.o: ../common/widgets/widget.hpp ../common/img_io/img.hpp
 dae_render.o: ../common/img_io/paint.hpp ../common/img_io/i_img.hpp
 dae_render.o: ../common/img_io/img_rgba8.hpp ../common/img_io/img_idx8.hpp
@@ -254,10 +270,9 @@ dae_render.o: ../common/widgets/widget_label.hpp
 dae_render.o: ../common/widgets/widget_button.hpp
 dae_render.o: ../common/utils/director.hpp ../common/utils/i_scene.hpp
 dae_render.o: ../common/gl_fw/glcamera.hpp ../common/utils/quat.hpp
-dae_render.o: ../common/utils/mtx.hpp ../common/gl_fw/glmatrix.hpp
-dae_render.o: ../common/gl_fw/gllight.hpp ../common/gl_fw/glutils.hpp
-dae_render.o: ../common/collada/dae_io.hpp ../common/utils/verbose.hpp
-dae_render.o: ../common/collada/dae_asset.hpp
+dae_render.o: ../common/gl_fw/glmatrix.hpp ../common/gl_fw/gllight.hpp
+dae_render.o: ../common/gl_fw/glutils.hpp ../common/collada/dae_io.hpp
+dae_render.o: ../common/utils/verbose.hpp ../common/collada/dae_asset.hpp
 dae_render.o: ../common/collada/dae_lights.hpp
 dae_render.o: ../common/collada/dae_images.hpp
 dae_render.o: ../common/collada/dae_materials.hpp
@@ -268,6 +283,15 @@ dae_render.o: ../common/collada/dae_visual_scenes.hpp
 dae_render.o: ../common/collada/dae_scene.hpp physics.hpp gl_shape_drawer.hpp
 dae_render.o: ../common/widgets/widget_frame.hpp
 dae_render.o: ../common/widgets/widget_check.hpp
+gl_shape_drawer.o: ../common/gl_fw/gl_info.hpp gl_shape_drawer.hpp
+physics.o: physics.hpp gl_shape_drawer.hpp ../common/gl_fw/gl_info.hpp
+physics.o: ../common/gl_fw/glcamera.hpp ../common/utils/quat.hpp
+physics.o: ../common/utils/vtx.hpp ../common/utils/mtx.hpp
+physics.o: ../common/gl_fw/glmatrix.hpp ../common/core/device.hpp
+physics.o: ../common/gl_fw/IGLcore.hpp ../common/gl_fw/glfonts.hpp
+physics.o: ../common/gl_fw/Ikfimg.hpp ../common/img_io/i_img.hpp
+physics.o: ../common/img_io/img.hpp ../common/utils/string_utils.hpp
+physics.o: ../common/utils/file_io.hpp
 ../common/core/glcore.o: ../common/core/glcore.hpp
 ../common/core/glcore.o: ../common/gl_fw/IGLcore.hpp
 ../common/core/glcore.o: ../common/core/device.hpp ../common/utils/vtx.hpp
@@ -276,7 +300,7 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/core/glcore.o: ../common/gl_fw/Ikfimg.hpp
 ../common/core/glcore.o: ../common/img_io/i_img.hpp ../common/img_io/img.hpp
 ../common/core/glcore.o: ../common/utils/string_utils.hpp
-../common/core/glcore.o: ../common/utils/file_io.hpp
+../common/core/glcore.o: ../common/utils/mtx.hpp ../common/utils/file_io.hpp
 ../common/core/glcore.o: ../common/core/device.hpp
 ../common/core/device.o: ../common/core/device.hpp ../common/utils/vtx.hpp
 ../common/core/kfimg_ft2.o: ../common/core/kfimg_ft2.hpp
@@ -285,6 +309,7 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/core/kfimg_ft2.o: ../common/img_io/img.hpp ../common/utils/vtx.hpp
 ../common/core/kfimg_ft2.o: ../common/img_io/img_gray8.hpp
 ../common/core/kfimg_ft2.o: ../common/utils/string_utils.hpp
+../common/core/kfimg_ft2.o: ../common/utils/mtx.hpp
 ../common/core/jfep_io.o: ../common/core/jfep_io.hpp
 ../common/gl_fw/glfonts.o: ../common/gl_fw/glfonts.hpp
 ../common/gl_fw/glfonts.o: ../common/gl_fw/gl_info.hpp
@@ -292,6 +317,7 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/gl_fw/glfonts.o: ../common/img_io/i_img.hpp
 ../common/gl_fw/glfonts.o: ../common/img_io/img.hpp ../common/utils/vtx.hpp
 ../common/gl_fw/glfonts.o: ../common/utils/string_utils.hpp
+../common/gl_fw/glfonts.o: ../common/utils/mtx.hpp
 ../common/gl_fw/glfonts.o: ../common/img_io/img_utils.hpp
 ../common/gl_fw/glfonts.o: ../common/img_io/i_img.hpp
 ../common/gl_fw/glfonts.o: ../common/img_io/img_idx8.hpp
@@ -323,6 +349,7 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/gl_fw/glterminal.o: ../common/img_io/i_img.hpp
 ../common/gl_fw/glterminal.o: ../common/img_io/img.hpp
 ../common/gl_fw/glterminal.o: ../common/utils/string_utils.hpp
+../common/gl_fw/glterminal.o: ../common/utils/mtx.hpp
 ../common/gl_fw/glterminal.o: ../common/utils/file_io.hpp
 ../common/gl_fw/glterminal.o: ../common/img_io/img.hpp
 ../common/gl_fw/gllight.o: ../common/gl_fw/gllight.hpp
@@ -336,28 +363,35 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/gl_fw/glcamera.o: ../common/img_io/i_img.hpp
 ../common/gl_fw/glcamera.o: ../common/img_io/img.hpp
 ../common/gl_fw/glcamera.o: ../common/utils/string_utils.hpp
+../common/gl_fw/glcamera.o: ../common/utils/mtx.hpp
 ../common/gl_fw/glcamera.o: ../common/utils/file_io.hpp
 ../common/gl_fw/glcamera.o: ../common/gl_fw/glcamera.hpp
-../common/gl_fw/glcamera.o: ../common/utils/quat.hpp ../common/utils/mtx.hpp
+../common/gl_fw/glcamera.o: ../common/utils/quat.hpp
 ../common/gl_fw/glcamera.o: ../common/gl_fw/glmatrix.hpp
 ../common/utils/vtx.o: ../common/utils/vtx.hpp
 ../common/utils/vmath.o: ../common/utils/vmath.hpp ../common/utils/vtx.hpp
 ../common/utils/string_utils.o: ../common/utils/string_utils.hpp
+../common/utils/string_utils.o: ../common/utils/mtx.hpp
+../common/utils/string_utils.o: ../common/utils/vtx.hpp
 ../common/utils/file_io.o: ../common/utils/file_io.hpp
 ../common/utils/file_io.o: ../common/utils/string_utils.hpp
+../common/utils/file_io.o: ../common/utils/mtx.hpp ../common/utils/vtx.hpp
 ../common/utils/file_info.o: ../common/utils/file_info.hpp
 ../common/utils/file_info.o: ../common/utils/file_io.hpp
 ../common/utils/file_info.o: ../common/utils/string_utils.hpp
+../common/utils/file_info.o: ../common/utils/mtx.hpp ../common/utils/vtx.hpp
 ../common/utils/files.o: ../common/utils/files.hpp
 ../common/utils/files.o: ../common/utils/drive_info.hpp
 ../common/utils/files.o: ../common/utils/file_info.hpp
 ../common/utils/files.o: ../common/utils/file_io.hpp
 ../common/utils/files.o: ../common/utils/string_utils.hpp
+../common/utils/files.o: ../common/utils/mtx.hpp ../common/utils/vtx.hpp
 ../common/utils/files.o: ../common/utils/handle_set.hpp
 ../common/utils/preference.o: ../common/Utils/preference.hpp
 ../common/utils/preference.o: ../common/utils/vtx.hpp
 ../common/utils/preference.o: ../common/utils/file_io.hpp
 ../common/utils/preference.o: ../common/utils/string_utils.hpp
+../common/utils/preference.o: ../common/utils/mtx.hpp
 ../common/img_io/paint.o: ../common/img_io/paint.hpp ../common/img_io/img.hpp
 ../common/img_io/paint.o: ../common/img_io/i_img.hpp ../common/utils/vtx.hpp
 ../common/img_io/paint.o: ../common/img_io/img_rgba8.hpp
@@ -366,13 +400,14 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/img_io/paint.o: ../common/img_io/img_clut.hpp
 ../common/img_io/paint.o: ../common/img_io/img_gray8.hpp
 ../common/img_io/paint.o: ../common/utils/string_utils.hpp
-../common/img_io/paint.o: ../common/gl_fw/Ikfimg.hpp
+../common/img_io/paint.o: ../common/utils/mtx.hpp ../common/gl_fw/Ikfimg.hpp
 ../common/img_io/png_io.o: ../common/img_io/png_io.hpp
 ../common/img_io/png_io.o: ../common/img_io/i_img_io.hpp
 ../common/img_io/png_io.o: ../common/utils/file_io.hpp
 ../common/img_io/png_io.o: ../common/utils/string_utils.hpp
+../common/img_io/png_io.o: ../common/utils/mtx.hpp ../common/utils/vtx.hpp
 ../common/img_io/png_io.o: ../common/img_io/i_img.hpp
-../common/img_io/png_io.o: ../common/img_io/img.hpp ../common/utils/vtx.hpp
+../common/img_io/png_io.o: ../common/img_io/img.hpp
 ../common/img_io/png_io.o: ../common/img_io/img_idx8.hpp
 ../common/img_io/png_io.o: ../common/img_io/i_img.hpp
 ../common/img_io/png_io.o: ../common/img_io/img_clut.hpp
@@ -380,10 +415,11 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/img_io/png_io.o: ../common/img_io/img_gray8.hpp
 ../common/img_io/jpeg_io.o: ../common/utils/file_io.hpp
 ../common/img_io/jpeg_io.o: ../common/utils/string_utils.hpp
+../common/img_io/jpeg_io.o: ../common/utils/mtx.hpp ../common/utils/vtx.hpp
 ../common/img_io/jpeg_io.o: ../common/img_io/jpeg_io.hpp
 ../common/img_io/jpeg_io.o: ../common/img_io/i_img_io.hpp
 ../common/img_io/jpeg_io.o: ../common/img_io/i_img.hpp
-../common/img_io/jpeg_io.o: ../common/img_io/img.hpp ../common/utils/vtx.hpp
+../common/img_io/jpeg_io.o: ../common/img_io/img.hpp
 ../common/img_io/jpeg_io.o: ../common/img_io/img_rgba8.hpp
 ../common/img_io/jpeg_io.o: ../common/img_io/img_idx8.hpp
 ../common/img_io/jpeg_io.o: ../common/img_io/i_img.hpp
@@ -391,11 +427,12 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/img_io/jpeg_io.o: ../common/img_io/img_gray8.hpp
 ../common/img_io/openjpeg_io.o: ../common/utils/file_io.hpp
 ../common/img_io/openjpeg_io.o: ../common/utils/string_utils.hpp
+../common/img_io/openjpeg_io.o: ../common/utils/mtx.hpp
+../common/img_io/openjpeg_io.o: ../common/utils/vtx.hpp
 ../common/img_io/openjpeg_io.o: ../common/img_io/openjpeg_io.hpp
 ../common/img_io/openjpeg_io.o: ../common/img_io/i_img_io.hpp
 ../common/img_io/openjpeg_io.o: ../common/img_io/i_img.hpp
 ../common/img_io/openjpeg_io.o: ../common/img_io/img.hpp
-../common/img_io/openjpeg_io.o: ../common/utils/vtx.hpp
 ../common/img_io/openjpeg_io.o: ../common/img_io/img_rgba8.hpp
 ../common/img_io/openjpeg_io.o: ../common/img_io/img_idx8.hpp
 ../common/img_io/openjpeg_io.o: ../common/img_io/i_img.hpp
@@ -405,8 +442,9 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/img_io/bmp_io.o: ../common/img_io/i_img_io.hpp
 ../common/img_io/bmp_io.o: ../common/utils/file_io.hpp
 ../common/img_io/bmp_io.o: ../common/utils/string_utils.hpp
+../common/img_io/bmp_io.o: ../common/utils/mtx.hpp ../common/utils/vtx.hpp
 ../common/img_io/bmp_io.o: ../common/img_io/i_img.hpp
-../common/img_io/bmp_io.o: ../common/img_io/img.hpp ../common/utils/vtx.hpp
+../common/img_io/bmp_io.o: ../common/img_io/img.hpp
 ../common/img_io/bmp_io.o: ../common/img_io/img_idx8.hpp
 ../common/img_io/bmp_io.o: ../common/img_io/i_img.hpp
 ../common/img_io/bmp_io.o: ../common/img_io/img_clut.hpp
@@ -416,8 +454,9 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/img_io/dds_io.o: ../common/img_io/i_img_io.hpp
 ../common/img_io/dds_io.o: ../common/utils/file_io.hpp
 ../common/img_io/dds_io.o: ../common/utils/string_utils.hpp
+../common/img_io/dds_io.o: ../common/utils/mtx.hpp ../common/utils/vtx.hpp
 ../common/img_io/dds_io.o: ../common/img_io/i_img.hpp
-../common/img_io/dds_io.o: ../common/img_io/img.hpp ../common/utils/vtx.hpp
+../common/img_io/dds_io.o: ../common/img_io/img.hpp
 ../common/img_io/dds_io.o: ../common/img_io/img_idx8.hpp
 ../common/img_io/dds_io.o: ../common/img_io/i_img.hpp
 ../common/img_io/dds_io.o: ../common/img_io/img_clut.hpp
@@ -427,8 +466,9 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/img_io/pdf_in.o: ../common/img_io/i_img_io.hpp
 ../common/img_io/pdf_in.o: ../common/utils/file_io.hpp
 ../common/img_io/pdf_in.o: ../common/utils/string_utils.hpp
+../common/img_io/pdf_in.o: ../common/utils/mtx.hpp ../common/utils/vtx.hpp
 ../common/img_io/pdf_in.o: ../common/img_io/i_img.hpp
-../common/img_io/pdf_in.o: ../common/img_io/img.hpp ../common/utils/vtx.hpp
+../common/img_io/pdf_in.o: ../common/img_io/img.hpp
 ../common/img_io/pdf_in.o: ../common/img_io/img_rgba8.hpp
 ../common/img_io/pdf_in.o: ../common/img_io/img_idx8.hpp
 ../common/img_io/pdf_in.o: ../common/img_io/i_img.hpp
@@ -438,9 +478,9 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/img_io/img_files.o: ../common/img_io/i_img_io.hpp
 ../common/img_io/img_files.o: ../common/utils/file_io.hpp
 ../common/img_io/img_files.o: ../common/utils/string_utils.hpp
+../common/img_io/img_files.o: ../common/utils/mtx.hpp ../common/utils/vtx.hpp
 ../common/img_io/img_files.o: ../common/img_io/i_img.hpp
 ../common/img_io/img_files.o: ../common/img_io/img.hpp
-../common/img_io/img_files.o: ../common/utils/vtx.hpp
 ../common/img_io/img_files.o: ../common/img_io/jpeg_io.hpp
 ../common/img_io/img_files.o: ../common/img_io/i_img_io.hpp
 ../common/img_io/img_files.o: ../common/img_io/img_rgba8.hpp
@@ -464,32 +504,35 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/snd_io/audio_io.o: ../common/snd_io/audio_io.hpp
 ../common/snd_io/audio_io.o: ../common/utils/file_io.hpp
 ../common/snd_io/audio_io.o: ../common/utils/string_utils.hpp
+../common/snd_io/audio_io.o: ../common/utils/mtx.hpp ../common/utils/vtx.hpp
 ../common/snd_io/audio_io.o: ../common/snd_io/i_audio.hpp
 ../common/snd_io/audio_io.o: ../common/snd_io/audio.hpp
 ../common/snd_io/audio_io.o: ../common/snd_io/pcm.hpp
 ../common/snd_io/pcm.o: ../common/snd_io/pcm.hpp ../common/snd_io/i_audio.hpp
 ../common/snd_io/pcm.o: ../common/utils/file_io.hpp
 ../common/snd_io/pcm.o: ../common/utils/string_utils.hpp
+../common/snd_io/pcm.o: ../common/utils/mtx.hpp ../common/utils/vtx.hpp
 ../common/snd_io/pcm.o: ../common/snd_io/audio.hpp
 ../common/snd_io/wav_io.o: ../common/snd_io/wav_io.hpp
 ../common/snd_io/wav_io.o: ../common/snd_io/i_snd_io.hpp
 ../common/snd_io/wav_io.o: ../common/utils/file_io.hpp
 ../common/snd_io/wav_io.o: ../common/utils/string_utils.hpp
+../common/snd_io/wav_io.o: ../common/utils/mtx.hpp ../common/utils/vtx.hpp
 ../common/snd_io/wav_io.o: ../common/snd_io/i_audio.hpp
 ../common/snd_io/wav_io.o: ../common/snd_io/audio.hpp
 ../common/snd_io/wav_io.o: ../common/snd_io/tag.hpp
 ../common/snd_io/wav_io.o: ../common/img_io/i_img.hpp
-../common/snd_io/wav_io.o: ../common/img_io/img.hpp ../common/utils/vtx.hpp
-../common/snd_io/wav_io.o: ../common/snd_io/pcm.hpp
+../common/snd_io/wav_io.o: ../common/img_io/img.hpp ../common/snd_io/pcm.hpp
 ../common/snd_io/mp3_io.o: ../common/snd_io/mp3_io.hpp
 ../common/snd_io/mp3_io.o: ../common/snd_io/i_snd_io.hpp
 ../common/snd_io/mp3_io.o: ../common/utils/file_io.hpp
 ../common/snd_io/mp3_io.o: ../common/utils/string_utils.hpp
+../common/snd_io/mp3_io.o: ../common/utils/mtx.hpp ../common/utils/vtx.hpp
 ../common/snd_io/mp3_io.o: ../common/snd_io/i_audio.hpp
 ../common/snd_io/mp3_io.o: ../common/snd_io/audio.hpp
 ../common/snd_io/mp3_io.o: ../common/snd_io/tag.hpp
 ../common/snd_io/mp3_io.o: ../common/img_io/i_img.hpp
-../common/snd_io/mp3_io.o: ../common/img_io/img.hpp ../common/utils/vtx.hpp
+../common/snd_io/mp3_io.o: ../common/img_io/img.hpp
 ../common/snd_io/mp3_io.o: ../common/snd_io/mp3_tag.hpp
 ../common/snd_io/mp3_io.o: ../common/img_io/jpeg_io.hpp
 ../common/snd_io/mp3_io.o: ../common/img_io/i_img_io.hpp
@@ -504,8 +547,9 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/snd_io/mp3_tag.o: ../common/snd_io/mp3_tag.hpp
 ../common/snd_io/mp3_tag.o: ../common/utils/file_io.hpp
 ../common/snd_io/mp3_tag.o: ../common/utils/string_utils.hpp
+../common/snd_io/mp3_tag.o: ../common/utils/mtx.hpp ../common/utils/vtx.hpp
 ../common/snd_io/mp3_tag.o: ../common/img_io/i_img.hpp
-../common/snd_io/mp3_tag.o: ../common/img_io/img.hpp ../common/utils/vtx.hpp
+../common/snd_io/mp3_tag.o: ../common/img_io/img.hpp
 ../common/snd_io/mp3_tag.o: ../common/img_io/jpeg_io.hpp
 ../common/snd_io/mp3_tag.o: ../common/img_io/i_img_io.hpp
 ../common/snd_io/mp3_tag.o: ../common/img_io/i_img.hpp
@@ -518,12 +562,12 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/snd_io/aac_io.o: ../common/snd_io/i_snd_io.hpp
 ../common/snd_io/aac_io.o: ../common/utils/file_io.hpp
 ../common/snd_io/aac_io.o: ../common/utils/string_utils.hpp
+../common/snd_io/aac_io.o: ../common/utils/mtx.hpp ../common/utils/vtx.hpp
 ../common/snd_io/aac_io.o: ../common/snd_io/i_audio.hpp
 ../common/snd_io/aac_io.o: ../common/snd_io/audio.hpp
 ../common/snd_io/aac_io.o: ../common/snd_io/tag.hpp
 ../common/snd_io/aac_io.o: ../common/img_io/i_img.hpp
-../common/snd_io/aac_io.o: ../common/img_io/img.hpp ../common/utils/vtx.hpp
-../common/snd_io/aac_io.o: ../common/snd_io/pcm.hpp
+../common/snd_io/aac_io.o: ../common/img_io/img.hpp ../common/snd_io/pcm.hpp
 ../common/snd_io/aac_io.o: ../common/img_io/img_files.hpp
 ../common/snd_io/aac_io.o: ../common/img_io/i_img_io.hpp
 ../common/snd_io/aac_io.o: ../common/img_io/i_img.hpp
@@ -536,12 +580,12 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/snd_io/snd_files.o: ../common/snd_io/i_snd_io.hpp
 ../common/snd_io/snd_files.o: ../common/utils/file_io.hpp
 ../common/snd_io/snd_files.o: ../common/utils/string_utils.hpp
+../common/snd_io/snd_files.o: ../common/utils/mtx.hpp ../common/utils/vtx.hpp
 ../common/snd_io/snd_files.o: ../common/snd_io/i_audio.hpp
 ../common/snd_io/snd_files.o: ../common/snd_io/audio.hpp
 ../common/snd_io/snd_files.o: ../common/snd_io/tag.hpp
 ../common/snd_io/snd_files.o: ../common/img_io/i_img.hpp
 ../common/snd_io/snd_files.o: ../common/img_io/img.hpp
-../common/snd_io/snd_files.o: ../common/utils/vtx.hpp
 ../common/snd_io/snd_files.o: ../common/snd_io/wav_io.hpp
 ../common/snd_io/snd_files.o: ../common/snd_io/mp3_io.hpp
 ../common/snd_io/snd_files.o: ../common/snd_io/mp3_tag.hpp
@@ -558,13 +602,13 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/snd_io/sound.o: ../common/snd_io/audio_io.hpp
 ../common/snd_io/sound.o: ../common/utils/file_io.hpp
 ../common/snd_io/sound.o: ../common/utils/string_utils.hpp
+../common/snd_io/sound.o: ../common/utils/mtx.hpp ../common/utils/vtx.hpp
 ../common/snd_io/sound.o: ../common/snd_io/i_audio.hpp
 ../common/snd_io/sound.o: ../common/snd_io/audio.hpp
 ../common/snd_io/sound.o: ../common/snd_io/snd_files.hpp
 ../common/snd_io/sound.o: ../common/snd_io/i_snd_io.hpp
 ../common/snd_io/sound.o: ../common/snd_io/tag.hpp ../common/img_io/i_img.hpp
-../common/snd_io/sound.o: ../common/img_io/img.hpp ../common/utils/vtx.hpp
-../common/snd_io/sound.o: ../common/snd_io/pcm.hpp
+../common/snd_io/sound.o: ../common/img_io/img.hpp ../common/snd_io/pcm.hpp
 ../common/snd_io/sound.o: ../common/utils/file_info.hpp
 ../common/widgets/common_parts.o: ../common/widgets/common_parts.hpp
 ../common/widgets/common_parts.o: ../common/gl_fw/glmobj.hpp
@@ -582,6 +626,7 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/widgets/common_parts.o: ../common/img_io/paint.hpp
 ../common/widgets/common_parts.o: ../common/img_io/img_rgba8.hpp
 ../common/widgets/common_parts.o: ../common/utils/string_utils.hpp
+../common/widgets/common_parts.o: ../common/utils/mtx.hpp
 ../common/widgets/common_parts.o: ../common/utils/vmath.hpp
 ../common/widgets/common_parts.o: ../common/widgets/widget_utils.hpp
 ../common/widgets/common_parts.o: ../common/widgets/widget_director.hpp
@@ -600,7 +645,7 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/widgets/widget.o: ../common/img_io/img_clut.hpp
 ../common/widgets/widget.o: ../common/img_io/img_gray8.hpp
 ../common/widgets/widget.o: ../common/utils/string_utils.hpp
-../common/widgets/widget.o: ../common/utils/vmath.hpp
+../common/widgets/widget.o: ../common/utils/mtx.hpp ../common/utils/vmath.hpp
 ../common/widgets/widget_director.o: ../common/gl_fw/gl_info.hpp
 ../common/widgets/widget_director.o: ../common/gl_fw/IGLcore.hpp
 ../common/widgets/widget_director.o: ../common/core/device.hpp
@@ -610,6 +655,7 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/widgets/widget_director.o: ../common/img_io/i_img.hpp
 ../common/widgets/widget_director.o: ../common/img_io/img.hpp
 ../common/widgets/widget_director.o: ../common/utils/string_utils.hpp
+../common/widgets/widget_director.o: ../common/utils/mtx.hpp
 ../common/widgets/widget_director.o: ../common/utils/file_io.hpp
 ../common/widgets/widget_director.o: ../common/widgets/widget_director.hpp
 ../common/widgets/widget_director.o: ../common/widgets/widget.hpp
@@ -658,6 +704,7 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/widgets/widget_utils.o: ../common/img_io/i_img.hpp
 ../common/widgets/widget_utils.o: ../common/img_io/img.hpp
 ../common/widgets/widget_utils.o: ../common/utils/string_utils.hpp
+../common/widgets/widget_utils.o: ../common/utils/mtx.hpp
 ../common/widgets/widget_utils.o: ../common/utils/file_io.hpp
 ../common/widgets/widget_utils.o: ../common/img_io/paint.hpp
 ../common/widgets/widget_utils.o: ../common/img_io/i_img.hpp
@@ -687,6 +734,7 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/widgets/widget_image.o: ../common/img_io/i_img.hpp
 ../common/widgets/widget_image.o: ../common/img_io/img.hpp
 ../common/widgets/widget_image.o: ../common/utils/string_utils.hpp
+../common/widgets/widget_image.o: ../common/utils/mtx.hpp
 ../common/widgets/widget_image.o: ../common/utils/file_io.hpp
 ../common/widgets/widget_image.o: ../common/widgets/widget_image.hpp
 ../common/widgets/widget_image.o: ../common/widgets/widget_director.hpp
@@ -715,6 +763,7 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/widgets/widget_text.o: ../common/img_io/i_img.hpp
 ../common/widgets/widget_text.o: ../common/img_io/img.hpp
 ../common/widgets/widget_text.o: ../common/utils/string_utils.hpp
+../common/widgets/widget_text.o: ../common/utils/mtx.hpp
 ../common/widgets/widget_text.o: ../common/utils/file_io.hpp
 ../common/widgets/widget_text.o: ../common/widgets/widget_text.hpp
 ../common/widgets/widget_text.o: ../common/widgets/widget_director.hpp
@@ -747,6 +796,7 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/widgets/widget_frame.o: ../common/img_io/img_clut.hpp
 ../common/widgets/widget_frame.o: ../common/img_io/img_gray8.hpp
 ../common/widgets/widget_frame.o: ../common/utils/string_utils.hpp
+../common/widgets/widget_frame.o: ../common/utils/mtx.hpp
 ../common/widgets/widget_frame.o: ../common/utils/vmath.hpp
 ../common/widgets/widget_frame.o: ../common/widgets/common_parts.hpp
 ../common/widgets/widget_frame.o: ../common/gl_fw/glmobj.hpp
@@ -765,6 +815,7 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/widgets/widget_button.o: ../common/img_io/i_img.hpp
 ../common/widgets/widget_button.o: ../common/img_io/img.hpp
 ../common/widgets/widget_button.o: ../common/utils/string_utils.hpp
+../common/widgets/widget_button.o: ../common/utils/mtx.hpp
 ../common/widgets/widget_button.o: ../common/utils/file_io.hpp
 ../common/widgets/widget_button.o: ../common/img_io/paint.hpp
 ../common/widgets/widget_button.o: ../common/img_io/i_img.hpp
@@ -797,6 +848,7 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/widgets/widget_label.o: ../common/img_io/img_clut.hpp
 ../common/widgets/widget_label.o: ../common/img_io/img_gray8.hpp
 ../common/widgets/widget_label.o: ../common/utils/string_utils.hpp
+../common/widgets/widget_label.o: ../common/utils/mtx.hpp
 ../common/widgets/widget_label.o: ../common/utils/vmath.hpp
 ../common/widgets/widget_label.o: ../common/widgets/common_parts.hpp
 ../common/widgets/widget_label.o: ../common/gl_fw/glmobj.hpp
@@ -819,6 +871,7 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/widgets/widget_slider.o: ../common/img_io/i_img.hpp
 ../common/widgets/widget_slider.o: ../common/img_io/img.hpp
 ../common/widgets/widget_slider.o: ../common/utils/string_utils.hpp
+../common/widgets/widget_slider.o: ../common/utils/mtx.hpp
 ../common/widgets/widget_slider.o: ../common/utils/file_io.hpp
 ../common/widgets/widget_slider.o: ../common/widgets/widget_slider.hpp
 ../common/widgets/widget_slider.o: ../common/widgets/widget_director.hpp
@@ -847,6 +900,7 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/widgets/widget_list.o: ../common/img_io/i_img.hpp
 ../common/widgets/widget_list.o: ../common/img_io/img.hpp
 ../common/widgets/widget_list.o: ../common/utils/string_utils.hpp
+../common/widgets/widget_list.o: ../common/utils/mtx.hpp
 ../common/widgets/widget_list.o: ../common/utils/file_io.hpp
 ../common/widgets/widget_list.o: ../common/widgets/widget_list.hpp
 ../common/widgets/widget_list.o: ../common/widgets/widget_director.hpp
@@ -877,6 +931,7 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/widgets/widget_check.o: ../common/img_io/i_img.hpp
 ../common/widgets/widget_check.o: ../common/img_io/img.hpp
 ../common/widgets/widget_check.o: ../common/utils/string_utils.hpp
+../common/widgets/widget_check.o: ../common/utils/mtx.hpp
 ../common/widgets/widget_check.o: ../common/utils/file_io.hpp
 ../common/widgets/widget_check.o: ../common/widgets/widget_check.hpp
 ../common/widgets/widget_check.o: ../common/widgets/widget_director.hpp
@@ -904,6 +959,7 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/widgets/widget_radio.o: ../common/img_io/i_img.hpp
 ../common/widgets/widget_radio.o: ../common/img_io/img.hpp
 ../common/widgets/widget_radio.o: ../common/utils/string_utils.hpp
+../common/widgets/widget_radio.o: ../common/utils/mtx.hpp
 ../common/widgets/widget_radio.o: ../common/utils/file_io.hpp
 ../common/widgets/widget_radio.o: ../common/widgets/widget_radio.hpp
 ../common/widgets/widget_radio.o: ../common/widgets/widget_director.hpp
@@ -936,6 +992,7 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/widgets/widget_dialog.o: ../common/img_io/img_clut.hpp
 ../common/widgets/widget_dialog.o: ../common/img_io/img_gray8.hpp
 ../common/widgets/widget_dialog.o: ../common/utils/string_utils.hpp
+../common/widgets/widget_dialog.o: ../common/utils/mtx.hpp
 ../common/widgets/widget_dialog.o: ../common/utils/vmath.hpp
 ../common/widgets/widget_dialog.o: ../common/widgets/common_parts.hpp
 ../common/widgets/widget_dialog.o: ../common/gl_fw/glmobj.hpp
@@ -961,6 +1018,7 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/widgets/widget_tree.o: ../common/img_io/img_clut.hpp
 ../common/widgets/widget_tree.o: ../common/img_io/img_gray8.hpp
 ../common/widgets/widget_tree.o: ../common/utils/string_utils.hpp
+../common/widgets/widget_tree.o: ../common/utils/mtx.hpp
 ../common/widgets/widget_tree.o: ../common/utils/vmath.hpp
 ../common/widgets/widget_tree.o: ../common/widgets/common_parts.hpp
 ../common/widgets/widget_tree.o: ../common/gl_fw/glmobj.hpp
@@ -985,6 +1043,7 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/widgets/widget_filer.o: ../common/img_io/img_clut.hpp
 ../common/widgets/widget_filer.o: ../common/img_io/img_gray8.hpp
 ../common/widgets/widget_filer.o: ../common/utils/string_utils.hpp
+../common/widgets/widget_filer.o: ../common/utils/mtx.hpp
 ../common/widgets/widget_filer.o: ../common/utils/vmath.hpp
 ../common/widgets/widget_filer.o: ../common/widgets/widget_director.hpp
 ../common/widgets/widget_filer.o: ../common/widgets/common_parts.hpp
@@ -1018,6 +1077,7 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/widgets/widget_terminal.o: ../common/img_io/img_clut.hpp
 ../common/widgets/widget_terminal.o: ../common/img_io/img_gray8.hpp
 ../common/widgets/widget_terminal.o: ../common/utils/string_utils.hpp
+../common/widgets/widget_terminal.o: ../common/utils/mtx.hpp
 ../common/widgets/widget_terminal.o: ../common/utils/vmath.hpp
 ../common/widgets/widget_terminal.o: ../common/widgets/common_parts.hpp
 ../common/widgets/widget_terminal.o: ../common/gl_fw/glmobj.hpp
@@ -1033,3 +1093,59 @@ dae_render.o: ../common/widgets/widget_check.hpp
 ../common/widgets/widget_terminal.o: ../common/gl_fw/glfonts.hpp
 ../common/widgets/widget_terminal.o: ../common/gl_fw/Ikfimg.hpp
 ../common/widgets/widget_terminal.o: ../common/widgets/widget_utils.hpp
+../common/collada/dae_asset.o: ../common/collada/dae_asset.hpp
+../common/collada/dae_asset.o: ../common/utils/string_utils.hpp
+../common/collada/dae_asset.o: ../common/utils/mtx.hpp
+../common/collada/dae_asset.o: ../common/utils/vtx.hpp
+../common/collada/dae_asset.o: ../common/utils/verbose.hpp
+../common/collada/dae_controllers.o: ../common/collada/dae_controllers.hpp
+../common/collada/dae_controllers.o: ../common/utils/string_utils.hpp
+../common/collada/dae_controllers.o: ../common/utils/mtx.hpp
+../common/collada/dae_controllers.o: ../common/utils/vtx.hpp
+../common/collada/dae_controllers.o: ../common/utils/verbose.hpp
+../common/collada/dae_effects.o: ../common/collada/dae_effects.hpp
+../common/collada/dae_effects.o: ../common/utils/verbose.hpp
+../common/collada/dae_images.o: ../common/collada/dae_images.hpp
+../common/collada/dae_images.o: ../common/utils/string_utils.hpp
+../common/collada/dae_images.o: ../common/utils/mtx.hpp
+../common/collada/dae_images.o: ../common/utils/vtx.hpp
+../common/collada/dae_images.o: ../common/utils/verbose.hpp
+../common/collada/dae_io.o: ../common/collada/dae_io.hpp
+../common/collada/dae_io.o: ../common/utils/verbose.hpp
+../common/collada/dae_io.o: ../common/collada/dae_asset.hpp
+../common/collada/dae_io.o: ../common/utils/string_utils.hpp
+../common/collada/dae_io.o: ../common/utils/mtx.hpp ../common/utils/vtx.hpp
+../common/collada/dae_io.o: ../common/collada/dae_lights.hpp
+../common/collada/dae_io.o: ../common/collada/dae_images.hpp
+../common/collada/dae_io.o: ../common/collada/dae_materials.hpp
+../common/collada/dae_io.o: ../common/collada/dae_effects.hpp
+../common/collada/dae_io.o: ../common/collada/dae_mesh.hpp
+../common/collada/dae_io.o: ../common/collada/dae_controllers.hpp
+../common/collada/dae_io.o: ../common/collada/dae_visual_scenes.hpp
+../common/collada/dae_io.o: ../common/gl_fw/glmatrix.hpp
+../common/collada/dae_io.o: ../common/collada/dae_scene.hpp
+../common/collada/dae_lights.o: ../common/collada/dae_lights.hpp
+../common/collada/dae_lights.o: ../common/utils/string_utils.hpp
+../common/collada/dae_lights.o: ../common/utils/mtx.hpp
+../common/collada/dae_lights.o: ../common/utils/vtx.hpp
+../common/collada/dae_lights.o: ../common/utils/verbose.hpp
+../common/collada/dae_materials.o: ../common/collada/dae_materials.hpp
+../common/collada/dae_materials.o: ../common/utils/string_utils.hpp
+../common/collada/dae_materials.o: ../common/utils/mtx.hpp
+../common/collada/dae_materials.o: ../common/utils/vtx.hpp
+../common/collada/dae_materials.o: ../common/utils/verbose.hpp
+../common/collada/dae_mesh.o: ../common/collada/dae_mesh.hpp
+../common/collada/dae_mesh.o: ../common/utils/verbose.hpp
+../common/collada/dae_mesh.o: ../common/utils/vtx.hpp ../common/utils/mtx.hpp
+../common/collada/dae_mesh.o: ../common/utils/string_utils.hpp
+../common/collada/dae_scene.o: ../common/collada/dae_scene.hpp
+../common/collada/dae_scene.o: ../common/utils/string_utils.hpp
+../common/collada/dae_scene.o: ../common/utils/mtx.hpp
+../common/collada/dae_scene.o: ../common/utils/vtx.hpp
+../common/collada/dae_scene.o: ../common/utils/verbose.hpp
+../common/collada/dae_visual_scenes.o: ../common/collada/dae_visual_scenes.hpp
+../common/collada/dae_visual_scenes.o: ../common/utils/string_utils.hpp
+../common/collada/dae_visual_scenes.o: ../common/utils/mtx.hpp
+../common/collada/dae_visual_scenes.o: ../common/utils/vtx.hpp
+../common/collada/dae_visual_scenes.o: ../common/utils/verbose.hpp
+../common/collada/dae_visual_scenes.o: ../common/gl_fw/glmatrix.hpp

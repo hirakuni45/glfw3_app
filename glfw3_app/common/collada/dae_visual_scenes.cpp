@@ -252,11 +252,11 @@ namespace collada {
 	}
 
 
-	void dae_visual_scenes::joint_vertex_(const node& nd, gl::glmatf& glmat, skeleton& sk) const
+	void dae_visual_scenes::joint_vertex_(const node& nd, gl::matrixf& glmat, skeleton& sk) const
 	{
 		glmat.mult(nd.matrix_);
 		vtx::fvtx4 v;
-		gl::glmatf::vertex_world(glmat.get_current_matrix(), vtx::fvtx(0.0f), v);
+		gl::matrixf::vertex_world(glmat.get_current_matrix(), vtx::fvtx(0.0f), v);
 		sk.joint_.set(v.x, v.y, v.z);
 // std::cout << "joint: " << boost::format("%g, %g, %g") % v.x % v.y % v.z << std::endl;
 		BOOST_FOREACH(const node& nd, nd.nodes_) {
@@ -274,7 +274,7 @@ namespace collada {
 		BOOST_FOREACH(const visual_scene& vc, visual_scenes_) {
 			BOOST_FOREACH(const node& nd, vc.nodes_) {
 				if(nd.id_ == id) {
-					gl::glmatf glmat;
+					gl::matrixf glmat;
 					glmat.initialize();
 					skeleton sk;
 					joint_vertex_(nd, glmat, sk);

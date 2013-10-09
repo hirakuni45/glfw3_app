@@ -16,6 +16,9 @@
 #include "collada/dae_io.hpp"
 #include "img_io/img_files.hpp"
 #include "physics.hpp"
+#include "widgets/widget_filer.hpp"
+#include "widgets/widget_frame.hpp"
+#include "widgets/widget_button.hpp"
 
 namespace app {
 
@@ -49,8 +52,10 @@ namespace app {
 		typedef std::vector<capsule_body>	capsules;
 		capsules	capsules_;
 
-		gui::widget*		tools_palette_;
-		gui::widget*		filer_button_;
+		gui::widget_filer*	filer_;
+		uint32_t			file_id_;
+		gui::widget_frame*	tools_palette_;
+		gui::widget_button*	filer_button_;
 		gui::widget*		physics_button_;
 
 		bool	wire_frame_;
@@ -76,6 +81,7 @@ namespace app {
 		dae_render(utils::director<core>& d) : director_(d),
 			model_scale_(10.0f),
 			physics_(), physics_time_(0.0f),
+			filer_(0), file_id_(0),
 			tools_palette_(0), filer_button_(0), physics_button_(0),
 			wire_frame_(false), light_enable_(true),
 			grid_enable_(true), model_enable_(true), joint_enable_(false),
@@ -87,7 +93,7 @@ namespace app {
 			@brief	デストラクター
 		*/
 		//-----------------------------------------------------------------//
-		virtual ~dae_render() { destroy(); }
+		virtual ~dae_render() { }
 
 
 		//-----------------------------------------------------------------//

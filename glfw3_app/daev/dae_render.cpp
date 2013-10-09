@@ -1,6 +1,6 @@
 //=====================================================================//
 /*!	@file
-	@brief	メニュー・クラス
+	@brief	DAE レンダー・メニュー・クラス
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
@@ -8,8 +8,6 @@
 #include "gl_fw/IGLcore.hpp"
 #include "dae_render.hpp"
 #include "utils/preference.hpp"
-#include "widgets/widget_frame.hpp"
-#include "widgets/widget_button.hpp"
 #include "widgets/widget_check.hpp"
 
 namespace app {
@@ -287,20 +285,28 @@ namespace app {
 			light_.set_diffuse_color(h, img::rgbaf(0.6f, 0.6f, 0.8f));
 			light_.set_specular_color(h, img::rgbaf(1.0f, 1.0f, 1.0f));
 		}
+#endif
 
 		// gui の設定
-		gui::widget_director& wd = director_.at_widget_director();
+		gui::widget_director& wd = director_.at_core().widget_director_;
 		{
-			gui::widget::param param(vtx::spos(0, 0), vtx::spos(500, 50));
-			gui::widget_frame::param sub_param;
-			tools_palette_ = wd.add_widget<gui::widget_frame>(param, sub_param);
+			gui::widget::param wp(vtx::srect(50, 50, 500, 300));
+			gui::widget_filer::param wp_(igl->get_current_path(), "dae");
+			filer_ = wd.add_widget<gui::widget_filer>(wp, wp_);
+			filer_->enable(false);
 		}
 		{
-			gui::widget::param param(vtx::spos(5, 5), vtx::spos(100, 40), tools_palette_);
-			gui::widget_button::param sub_param;
-			sub_param.text_ = "ファイル";
-			filer_button_ = wd.add_widget<gui::widget_button>(param, sub_param);
+			gui::widget::param wp(vtx::srect(0, 0, 500, 50));
+			gui::widget_frame::param wp_;
+			tools_palette_ = wd.add_widget<gui::widget_frame>(wp, wp_);
 		}
+
+		{
+			gui::widget::param wp(vtx::srect(5, 5, 100, 40), tools_palette_);
+			gui::widget_button::param wp_("ファイル");
+			filer_button_ = wd.add_widget<gui::widget_button>(wp, wp_);
+		}
+#if 0
 		{
 			gui::widget::param param(vtx::spos(110, 5), vtx::spos(100, 40), tools_palette_);
 			gui::widget_button::param sub_param;
@@ -323,7 +329,6 @@ namespace app {
 			gui::widget_zero::param sub_param;
 			wd.add_widget<gui::widget_zero>(param, sub_param);
 		}
-
 #endif
 	}
 
@@ -338,7 +343,6 @@ namespace app {
 		using namespace gl;
 
 		IGLcore* igl = get_glcore();
-		if(igl == 0) return;
 
 		const device& dev = igl->get_device();
 
@@ -378,27 +382,24 @@ namespace app {
 			physics_.update(camera_);
 			physics_time_ += 1.0f / 60.0f;
 		}
-#if 0
-		unsigned int cnt_f = filer_button_->get_count();
-		unsigned int cnt_p = physics_button_->get_count();
-		gui::widget_director& wd = director_.at_widget_director();
+
+		gui::widget_director& wd = director_.at_core().widget_director_;
 		wd.update();
-		if(filer_button_->get_count() != cnt_f) {
-			filer = true;
+		if(filer_button_->get_selected()) {
+			filer_->enable();
 		}
+
+		if(filer_->get_select_file_id() != file_id_) {
+			file_id_ = filer_->get_select_file_id();
+			open_dae_(filer_->get_file());
+		}
+
+
+#if 0
 		if(physics_button_->get_count() != cnt_p) {
 			physics_enable_ = !physics_enable_;
 			if(physics_enable_) physics_time_ = 0.0f;
 		}
-
-		if(filer) {
-			filer_.set_ctrl(glfiler::enable);
-			filer_.set_ctrl(glfiler::visible);
-			filer_.set_ctrl(glfiler::filepath);
-			filer_.set_ctrl(glfiler::mouse_select);
-			filer_.set_ctrl(glfiler::drive_letter);
-		}
-
 		tools_palette_->at_position().set(0);
 		tools_palette_->at_size().x = scw;
 #endif
@@ -504,25 +505,13 @@ namespace app {
 			fo.draw(0, 0, s);
 			fo.restore_matrix();
 		}
-
+#endif
 		{
 			::glDisable(GL_LIGHTING);
-			gui::widget_director& wd = director_.at_widget_director();
+			gui::widget_director& wd = director_.at_core().widget_director_;
+			wd.service();
 			wd.render();
 		}
-
-		{
-
-			::glEnable(GL_TEXTURE_2D);
-			gl::fonts& fo = igl->at_fonts();
-			fo.setup_matrix(0, 0, scw, sch);
-//			vtx::spos s = fo.get_size();
-///			if(file_select) {
-///				open_dae_(filer_.get_selected_filename());
-///			}
-			fo.restore_matrix();
-		}
-#endif
 	}
 
 
