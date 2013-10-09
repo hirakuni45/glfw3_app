@@ -22,6 +22,7 @@ namespace gl {
 		device::key::type	rotate_key_;
 		device::key::type	zoom_key_;
 
+		vtx::spos	mouse_pos_;
 		vtx::spos	mouse_left_first_pos_;
 		vtx::fvtx	eye_first_;
 		vtx::fvtx	target_first_;
@@ -49,7 +50,7 @@ namespace gl {
 			translate_key_(device::key::CONTROL),
 			rotate_key_(device::key::SHIFT),
 			zoom_key_(device::key::ALT),
-			mouse_left_first_pos_(0),
+			mouse_pos_(0), mouse_left_first_pos_(0),
 			quat_handle_(0.0f), quat_handle_first_(0.0f), quat_(), glmat_(),
 			size_(0.0f), aspect_(0.0f), fov_(45.0f), z_near_(5.0f), z_far_(5000.0f),
 			eye_(0.0f, -15.0f, 6.0f),
