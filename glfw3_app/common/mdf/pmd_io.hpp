@@ -55,6 +55,17 @@ namespace mdf {
 
 		std::vector<uint16_t>	face_index_;
 
+		struct pmd_material {
+			float	diffuse_color[3]
+			float	alpha;
+			float	specularity;
+			float   specular_color[3];
+			float	mirror_color[3];
+			uint8_t	toon_index;
+			uint8_t	edge_flag;
+			uint32_t	face_vert_count;
+			char	texture_file_name[20];
+		};
 
 
 
