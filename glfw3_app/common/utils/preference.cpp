@@ -225,11 +225,11 @@ namespace sys {
 		}
 
 		for(item_cit cit = map_.begin(); cit != map_.end(); ++cit) {
-			out.put_text(cit->first);
+			out.put(cit->first);
 			out.put_char(' ');
 			out.put_char(0x30 + static_cast<int>(cit->second.type_));
 			out.put_char(' ');
-			out.put_text(cit->second.value_);
+			out.put(cit->second.value_);
 			out.put_char('\n');
 		}
 		out.close();

@@ -499,6 +499,58 @@ namespace utils {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	文字列の読み込み
+			@param[out]	pad	読み込み先
+			@param[in]	size	サイズ（０なら終端文字まで読み込む）
+			@param[in]	term	終端文字
+			@return	読み込んだ数
+		*/
+		//-----------------------------------------------------------------//
+		size_t get(std::string& pad, size_t size = 0, char term = 0) {
+			if(size == 0) {
+				size_t n = 0;
+				while(1) {
+					char ch;
+					if(!get_char(ch)) {
+						return n;
+					}
+					if(ch == term) {
+						return n;
+					}
+					pad += ch;
+					++n;
+				}
+			} else {
+				for(size_t i = 0; i < size; ++i) {
+					char ch;
+					if(!get_char(ch)) {
+						return i;
+					}
+					pad += ch;
+				}
+				return size;
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	T の読み込み
+			@param[out]	pad	読み込み先
+			@return	正常なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		template <typename T>
+		bool get(T& pad) {
+			if(read(&pad, sizeof(T)) != sizeof(T)) {
+				return false;
+			}
+			return true;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	１バイト書き出し
 			@param[in]	c	書き出しデータ
 			@return	エラーなら「false」
@@ -514,12 +566,16 @@ namespace utils {
 			@return	書き出した数
 		*/
 		//-----------------------------------------------------------------//
-		int put_text(const std::string& text) {
+		size_t put(const std::string& text) {
 			if(text.empty()) return 0;
-			BOOST_FOREACH(char c, text) {
-				put_char(c);
+			size_t n = 0;
+			BOOST_FOREACH(char ch, text) {
+				if(!put_char(ch)) {
+					return n;
+				}
+				++n;
 			}
-			return text.size();
+			return n;
 		}
 
 

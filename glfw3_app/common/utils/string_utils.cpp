@@ -94,7 +94,7 @@ namespace utils {
 
 		size_t sz = src.size() + 1;
 		wchar_t* tmp = new wchar_t[sz];
-		int len = mbstowcs(&tmp[0], src.c_str(), sz);
+		int len = mbstowcs(tmp, src.c_str(), sz);
 		tmp[len] = 0;
 		utf16_to_utf8(tmp, dst);
 		delete[] tmp;
@@ -116,7 +116,7 @@ namespace utils {
 
 		size_t sz = src.size() + 1;
 		wchar_t* tmp = new wchar_t[sz];
-		int len = mbstowcs(&tmp[0], src.c_str(), sz);
+		int len = mbstowcs(tmp, src.c_str(), sz);
 		tmp[len] = 0;
 		dst += tmp;
 		delete[] tmp;
@@ -140,7 +140,7 @@ namespace utils {
 		utf8_to_utf16(src.c_str(), stmp);
 		size_t sz = stmp.size() * 4 + 1;	// 一応４倍分のバイト数確保
 		char* dtmp = new char[sz];
-		int len = wcstombs(&dtmp[0], stmp.c_str(), sz);
+		int len = wcstombs(dtmp, stmp.c_str(), sz);
 		dtmp[len] = 0;
 		dst += dtmp;
 		delete[] dtmp;
@@ -162,7 +162,7 @@ namespace utils {
 
 		size_t sz = src.size() * 4 + 1;	// 一応４倍分のバイト数確保
 		char* dtmp = new char[sz];
-		int len = wcstombs(&dtmp[0], src.c_str(), sz);
+		int len = wcstombs(dtmp, src.c_str(), sz);
 		dtmp[len] = 0;
 		dst += dtmp;
 		delete[] dtmp;
