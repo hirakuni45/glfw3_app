@@ -162,8 +162,9 @@ tarball:
 			../common/img_io/*.[hc]pp \
 			../common/snd_io/*.[hc]pp \
 			../common/widgets/*.[hc]pp \
+			../common/mdf/*.[hc]pp \
 			../common/minizip/*.[hc] \
-			../gui_test/*.[hc]pp Makefile
+			../pmdv/*.[hc]pp Makefile
 	rm -f $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz
 	tar cfvz $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz \
 			../common/core/*.[hc]pp \
@@ -172,9 +173,10 @@ tarball:
 			../common/img_io/*.[hc]pp \
 			../common/snd_io/*.[hc]pp \
 			../common/widgets/*.[hc]pp \
+			../common/mdf/*.[hc]pp \
 			../common/minizip/*.[hc] \
-			../gui_test/*.[hc]pp \
-			../gui_test/Makefile
+			../pmdv/*.[hc]pp \
+			../pmdv/Makefile
 	chmod 444 $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz
 
 bin_zip:
