@@ -102,9 +102,9 @@ namespace gl {
 		@brief	２次元単純構造体
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	template <typename _T>
+	template <typename T>
 	struct v2_t {
-		_T	x, y;
+		T	x, y;
 	};
 
 
@@ -113,9 +113,9 @@ namespace gl {
 		@brief	３次元単純構造体
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	template <typename _T>
+	template <typename T>
 	struct v3_t {
-		_T	x, y, z;
+		T	x, y, z;
 	};
 
 
@@ -124,9 +124,9 @@ namespace gl {
 		@brief	４次元単純構造体
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	template <typename _T>
+	template <typename T>
 	struct v4_t {
-		_T	x, y, z, w;
+		T	x, y, z, w;
 	};
 
 
@@ -138,8 +138,8 @@ namespace gl {
 		@param[in]	dst	pos 出力列
 	*/
 	//-----------------------------------------------------------------//
-	template <class _T>
-	void init_fposs(const v2_t<_T>* src, int n, vtx::fposs& dst) {
+	template <class T>
+	void init_fposs(const v2_t<T>* src, int n, vtx::fposs& dst) {
 		for(int i = 0; i < n; ++i) {
 			dst.push_back(vtx::fpos(static_cast<float>(src->x), static_cast<float>(src->y)));
 			src++;
@@ -155,8 +155,8 @@ namespace gl {
 		@param[in]	dst	pos 出力列
 	*/
 	//-----------------------------------------------------------------//
-	template <class _T>
-	void init_fvtxs(const v3_t<_T>* src, int n, vtx::fvtxs& dst) {
+	template <class T>
+	void init_fvtxs(const v3_t<T>* src, int n, vtx::fvtxs& dst) {
 		for(int i = 0; i < n; ++i) {
 			dst.push_back(vtx::fvtx(static_cast<float>(src->x), static_cast<float>(src->y), static_cast<float>(src->z)));
 			src++;
@@ -172,8 +172,8 @@ namespace gl {
 		@param[in]	dst	出力列（STL vector）
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	template <class _T>
-	unsigned int polygon2triangleStrip(const _T& src, _T& dst) {
+	template <class T>
+	unsigned int polygon2triangleStrip(const T& src, T& dst) {
 		dst.clear();
 
 		unsigned int num = src.size();
