@@ -9,8 +9,7 @@
 #include "utils/file_io.hpp"
 #include "utils/string_utils.hpp"
 #include <boost/format.hpp>
-
-#include <cstdio>
+#include "core/glcore.hpp"
 
 namespace mdf {
 
@@ -36,20 +35,16 @@ namespace mdf {
 ///		std::cout << "Vertex :" << n << std::endl;
 		vertex_.reserve(n);
 		vertex_.clear();
-		vtx::fvtx min;
-		vtx::fvtx max;
 		for(uint32_t i = 0; i < n; ++i) {
 			pmd_vertex v;
 			if(!v.get(fio)) {
 				return false;
 			}
-			if(i == 0) min = max = v.pos;
-			vtx::set_min(v.pos, min);
-			vtx::set_max(v.pos, max);
+			if(i == 0) vertex_min_ = vertex_max_ = v.pos;
+			vtx::set_min(v.pos, vertex_min_);
+			vtx::set_max(v.pos, vertex_max_);
 			vertex_.push_back(v);
 		}
-		model_min_ = min;
-		model_max_ = max;
 ///		std::cout << (boost::format("Min: %1.3f, %1.3f, %1.3f\n") % min.x % min.y % min.z);
 ///		std::cout << (boost::format("Max: %1.3f, %1.3f, %1.3f\n") % max.x % max.y % max.z);
 		return true;
@@ -257,6 +252,9 @@ namespace mdf {
 			return false;
 		}
 
+		destroy_();
+///		std::cout << fn << std::endl;
+
 		{
 			std::string s;
 			if(fio.get(s, 3) != 3) {
@@ -339,9 +337,31 @@ namespace mdf {
 #endif
 		fio.close();
 
-///		std::cout << fn << std::endl;
-
 		return true;
+	}
+
+
+	void pmd_io::destroy_()
+	{
+		glDeleteBuffers(1, &vertex_id_);
+		vertex_id_ = 0;
+		glDeleteBuffers(1, &index_id_);
+		index_id_ = 0;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	レンダリング・セットアップ
+	*/
+	//-----------------------------------------------------------------//
+	void pmd_io::render_setup()
+	{
+		glGenBuffers(1, &vertex_id_);
+		glGenBuffers(1, &index_id_);
+
+
+
 	}
 
 

@@ -5,7 +5,6 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include <GLFW/glfw3.h>
 #include <string>
 #include <stdint.h>
 #include "gl_fw/IGLcore.hpp"

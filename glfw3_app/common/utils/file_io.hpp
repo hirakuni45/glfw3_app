@@ -581,6 +581,22 @@ namespace utils {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	T の書き込み
+			@param[in]	pad	書き込み元
+			@return	正常なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		template <typename T>
+		bool put(const T& pad) {
+			if(write(&pad, sizeof(T)) != sizeof(T)) {
+				return false;
+			}
+			return true;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	複数バイト書き出し
 			@param[in]	ptr	書き出し元
 			@param[in]	size	オブジェクトのサイズ

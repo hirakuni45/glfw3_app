@@ -1,5 +1,4 @@
-#ifndef GL_INFO_HPP
-#define GL_INFO_HPP
+#pragma once
 //=====================================================================//
 /*!	@file
 	@brief	OpenGL/ES 依存を吸収する為のヘッダー
@@ -7,13 +6,19 @@
 */
 //=====================================================================//
 #ifdef WIN32
+#if 0
 #include <windows.h>
 #include <GL/glu.h>
+#include <GL/glext.h>
+#else
+#define GLEW_STATIC
+#include <GL/glew.h>
+#include <GL/wglew.h>
+#endif
 #endif
 
 #define GLFW_INCLUDE_GLU
 #include <GLFW/glfw3.h>
-#include <GL/glext.h>
 
 namespace gl {
 
@@ -48,7 +53,6 @@ namespace gl {
 	}
 #endif
 
-#if 0
 #ifdef OPENGL_ES
 	inline void glOrtho(double l, double r, double b, double t, double aa, double bb) {
 		glOrthof(static_cast<float>(l), static_cast<float>(r),
@@ -80,7 +84,6 @@ namespace gl {
 					 static_cast<unsigned char>(a * 255.0f));
 	}
 #endif
-#endif
 
 	inline void glTranslatei(int x, int y) {
 		glTranslatef(static_cast<float>(x), static_cast<float>(y), 0.0f);
@@ -91,5 +94,3 @@ namespace gl {
 	}
 
 }
-
-#endif	// GL_INFO_HPP

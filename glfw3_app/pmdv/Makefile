@@ -60,7 +60,7 @@ PSOURCES	=	main.cpp \
 CSOURCES	=	../common/minizip/ioapi.c \
 				../common/minizip/unzip.c
 STDLIBS		=
-OPTLIBS		=	glfw3 opengl32 glu32 gdi32 imm32 \
+OPTLIBS		=	glfw3 glew32 opengl32 glu32 gdi32 imm32 \
 				pthread \
 				openal winmm dsound \
 				fitz \
@@ -1070,15 +1070,20 @@ pmdv_main.o: ../common/gl_fw/glmatrix.hpp
 ../common/widgets/widget_terminal.o: ../common/gl_fw/glfonts.hpp
 ../common/widgets/widget_terminal.o: ../common/gl_fw/Ikfimg.hpp
 ../common/widgets/widget_terminal.o: ../common/widgets/widget_utils.hpp
-../common/mdf/pmd_io.o: ../common/mdf/pmd_io.hpp ../common/img_io/bmp_io.hpp
-../common/mdf/pmd_io.o: ../common/img_io/i_img_io.hpp
-../common/mdf/pmd_io.o: ../common/utils/file_io.hpp
+../common/mdf/pmd_io.o: ../common/mdf/pmd_io.hpp ../common/gl_fw/IGLcore.hpp
+../common/mdf/pmd_io.o: ../common/core/device.hpp ../common/utils/vtx.hpp
+../common/mdf/pmd_io.o: ../common/gl_fw/gl_info.hpp
+../common/mdf/pmd_io.o: ../common/gl_fw/glfonts.hpp
+../common/mdf/pmd_io.o: ../common/gl_fw/Ikfimg.hpp ../common/img_io/i_img.hpp
+../common/mdf/pmd_io.o: ../common/img_io/img.hpp
 ../common/mdf/pmd_io.o: ../common/utils/string_utils.hpp
-../common/mdf/pmd_io.o: ../common/utils/mtx.hpp ../common/utils/vtx.hpp
-../common/mdf/pmd_io.o: ../common/img_io/i_img.hpp ../common/img_io/img.hpp
-../common/mdf/pmd_io.o: ../common/img_io/img_idx8.hpp
+../common/mdf/pmd_io.o: ../common/utils/mtx.hpp ../common/utils/file_io.hpp
+../common/mdf/pmd_io.o: ../common/img_io/bmp_io.hpp
+../common/mdf/pmd_io.o: ../common/img_io/i_img_io.hpp
 ../common/mdf/pmd_io.o: ../common/img_io/i_img.hpp
+../common/mdf/pmd_io.o: ../common/img_io/img_idx8.hpp
 ../common/mdf/pmd_io.o: ../common/img_io/img_clut.hpp
 ../common/mdf/pmd_io.o: ../common/img_io/img_rgba8.hpp
 ../common/mdf/pmd_io.o: ../common/img_io/img_gray8.hpp
-../common/mdf/pmd_io.o: ../common/utils/quat.hpp
+../common/mdf/pmd_io.o: ../common/utils/quat.hpp ../common/core/glcore.hpp
+../common/mdf/pmd_io.o: ../common/core/device.hpp

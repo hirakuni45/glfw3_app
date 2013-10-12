@@ -7,6 +7,7 @@
 //=====================================================================//
 #include <string>
 #include <vector>
+#include "gl_fw/IGLcore.hpp"
 #include "img_io/bmp_io.hpp"
 #include "utils/vtx.hpp"
 #include "utils/mtx.hpp"
@@ -48,10 +49,26 @@ namespace mdf {
 				if(!fio.get(edge_flag)) return false;
 				return true;
 			}
+
+			bool put(utils::file_io& fio) {
+				if(!fio.put(pos.x)) return false;
+				if(!fio.put(pos.y)) return false;
+				if(!fio.put(pos.z)) return false;
+				if(!fio.put(normal.x)) return false;
+				if(!fio.put(normal.y)) return false;
+				if(!fio.put(normal.z)) return false;
+				if(!fio.put(uv.x)) return false;
+				if(!fio.put(uv.y)) return false;
+				if(!fio.put(bone_num[0])) return false;
+				if(!fio.put(bone_num[1])) return false;
+				if(!fio.put(bone_weight)) return false;
+				if(!fio.put(edge_flag)) return false;
+				return true;
+			}
 		};
 		std::vector<pmd_vertex>	vertex_;
-		vtx::fvtx		model_min_;
-		vtx::fvtx		model_max_;
+		vtx::fvtx		vertex_min_;
+		vtx::fvtx		vertex_max_;
 
 		std::vector<uint16_t>	face_index_;
 
@@ -205,6 +222,10 @@ namespace mdf {
 		bool parse_skin_index_(utils::file_io& fio);
 		bool parse_bone_disp_list_(utils::file_io& fio);
 		bool parse_bone_disp_(utils::file_io& fio);
+		void destroy_();
+
+		GLuint		vertex_id_;
+		GLuint		index_id_;
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -212,7 +233,9 @@ namespace mdf {
 		*/
 		//-----------------------------------------------------------------//
 		pmd_io() : version_(0.0f),
-			model_min_(0.0f), model_max_(0.0f) { }
+			vertex_min_(0.0f), vertex_max_(0.0f),
+			vertex_id_(0), index_id_(0)
+		{ }
 
 
 		//-----------------------------------------------------------------//
@@ -220,7 +243,7 @@ namespace mdf {
 			@brief	デストラクター
 		*/
 		//-----------------------------------------------------------------//
-		~pmd_io() { }
+		~pmd_io() { destroy_(); }
 
 
 		//-----------------------------------------------------------------//
@@ -231,6 +254,14 @@ namespace mdf {
 		*/
 		//-----------------------------------------------------------------//
 		bool open(const std::string& fn);
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	レンダリング・セットアップ
+		*/
+		//-----------------------------------------------------------------//
+		void render_setup();
 
 
 		//-----------------------------------------------------------------//
