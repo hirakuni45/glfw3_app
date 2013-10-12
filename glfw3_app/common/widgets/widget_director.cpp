@@ -457,12 +457,12 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	挙動制御
+		@return 操作があった場合「true」
 	*/
 	//-----------------------------------------------------------------//
-	void widget_director::update()
+	bool widget_director::update()
 	{
 		IGLcore* Igl = get_glcore();
-		if(Igl == 0) return;
 
 		// ダイアログがある場合の優先順位とストール処理
 		{
@@ -493,9 +493,9 @@ namespace gui {
 
 		const device& dev = Igl->get_device();
 
-		scroll_ = dev.get_scroll();
+		scroll_ = dev.get_locator().scroll_;
 
-		const vtx::spos& msp = dev.get_cursor();
+		const vtx::spos& msp = dev.get_locator().cursor_;
 
 		struct trg_t {
 			bool	lvl;
@@ -582,10 +582,12 @@ namespace gui {
 			}
 		}
 
+		bool touch = false;
 		// 一番手前だけ選択される
 		BOOST_FOREACH(widget* w, widgets_) {
 			if(select == w) {
 				w->set_state(widget::state::SELECT);
+				touch = true;
 			} else {
 				w->set_state(widget::state::SELECT, false);
 			}
@@ -643,12 +645,14 @@ namespace gui {
 				} else {
 					newsize.x = ref.x;
 				}
+				touch = true;
 				top_resize_->at_rect().size = newsize;
 			}
 		}
 
 		// 移動
 		if(top_move_ && !top_move_->get_state(widget::state::POSITION_LOCK)) {
+			touch = true;
 			top_widget(top_move_);
 			top_move_->at_rect().org = top_move_->get_param().move_pos_;
 		}
@@ -666,6 +670,7 @@ namespace gui {
 		}
 
 //		action_monitor();
+		return touch;
 	}
 
 

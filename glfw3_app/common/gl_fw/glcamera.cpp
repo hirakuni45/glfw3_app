@@ -10,6 +10,11 @@
 
 namespace gl {
 
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	update
+	 */
+	//-----------------------------------------------------------------//
 	void camera::update()
 	{
 		using namespace vtx;
@@ -17,11 +22,9 @@ namespace gl {
 		IGLcore* glc = get_glcore();
 		const device& dev = glc->get_device();
 
-		const spos& mspos = dev.get_cursor();
+		const spos& mspos = dev.get_locator().cursor_;
 		const spos msdiff = mspos - mouse_pos_;
 		mouse_pos_ = mspos;
-
-		bool touch = false;
 
 		bool trans = dev.get_level(translate_key_);
 		bool rotate = dev.get_level(rotate_key_);
@@ -34,55 +37,61 @@ namespace gl {
 				target_first_ = target_;
 				up_first_ = up_;
 				quat_handle_first_ = quat_handle_;
+				touch_ = true;
 			}
 		}
 
-		if(dev.get_level(device::key::MOUSE_LEFT)) {
-			// 並行移動
-			spos diff_pos = mspos - mouse_left_first_pos_;
-			if(trans) {
-				fvtx d;
-				d.x = static_cast<float>(-diff_pos.x);
-				d.y = 0.0f;
-				d.z = static_cast<float>(diff_pos.y);
-				d *= 0.01f;
-				eye_ = eye_first_ + d;
-				target_ = target_first_ + d;
-				touch = true;
-			}
-
-			// 回転
-			if(rotate) {
-				fpos d;
-				d.x = static_cast<float>(diff_pos.x);
-				d.y = static_cast<float>(diff_pos.y);
-				vtx::fpos qh = d * -0.005f;
-				qtx::fquat q;
-				if(q.rot_xz(qh.x, qh.y, 1.0f)) {
-					q.create_rotate_matrix(glmat_.at_current_matrix());
-					vtx::fvtx4 fv;
-					matrixf::vertex_world(glmat_.get_current_matrix(), up_first_, fv);
-					up_.set(fv.x,  fv.y,  fv.z);
-					matrixf::vertex_world(glmat_.get_current_matrix(), eye_first_ - target_first_, fv);
-					eye_ = target_first_ + vtx::fvtx(fv.x, fv.y, fv.z);
-					touch = true;
+		if(touch_) {
+			if(dev.get_level(device::key::MOUSE_LEFT)) {
+				// 並行移動
+				spos diff_pos = mspos - mouse_left_first_pos_;
+				if(trans) {
+					fvtx d;
+					d.x = static_cast<float>(-diff_pos.x);
+					d.y = 0.0f;
+					d.z = static_cast<float>(diff_pos.y);
+					d *= 0.01f;
+					eye_ = eye_first_ + d;
+					target_ = target_first_ + d;
 				}
-			}
+
+				// 回転
+				if(rotate) {
+					fpos d;
+					d.x = static_cast<float>(diff_pos.x);
+					d.y = static_cast<float>(diff_pos.y);
+					vtx::fpos qh = d * -0.005f;
+					qtx::fquat q;
+					if(q.rot_xz(qh.x, qh.y, 1.0f)) {
+						q.create_rotate_matrix(glmat_.at_current_matrix());
+						vtx::fvtx4 fv;
+						matrixf::vertex_world(glmat_.get_current_matrix(), up_first_, fv);
+						up_.set(fv.x,  fv.y,  fv.z);
+						matrixf::vertex_world(glmat_.get_current_matrix(), eye_first_ - target_first_, fv);
+						eye_ = target_first_ + vtx::fvtx(fv.x, fv.y, fv.z);
+					}
+				}
 
 			// ズーム
-			if(zoom) {
-				vtx::fpos d(static_cast<float>(diff_pos.x), static_cast<float>(diff_pos.y));
-				vtx::fvtx n;
-				if(vtx::normalize(target_ - eye_, n)) {
-					eye_ = eye_first_ + n * d.y * 0.01f;
-					touch = true;
+				if(zoom) {
+					vtx::fpos d(static_cast<float>(diff_pos.x), static_cast<float>(diff_pos.y));
+					vtx::fvtx n;
+					if(vtx::normalize(target_ - eye_, n)) {
+						eye_ = eye_first_ + n * d.y * 0.01f;
+					}
 				}
 			}
+		} else {
+			touch_ = false;
 		}
-		touch_ = touch;
 	}
 
 
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	サービス
+	 */
+	//-----------------------------------------------------------------//
 	void camera::service()
 	{
 		IGLcore* igl = get_glcore();

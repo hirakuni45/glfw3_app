@@ -474,43 +474,46 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	グリッドを描画
-		@param[in]	xs	X スタート
-		@param[in]	ys	Y スタート
-		@param[in]	xe	X エンド
-		@param[in]	ye	Y エンド
-		@param[in]	dx	X 変化量
-		@param[in]	dy	Y 変化量
+		@param[in]	start	スタート
+		@param[in]	end		エンド
+		@param[in]	d	変化量
 	*/
 	//-----------------------------------------------------------------//
-	void draw_grid(float xs, float ys, float xe, float ye, float dx, float dy)
+	void draw_grid(const vtx::fpos& start, const vtx::fpos& end, const vtx::fpos& d)
 	{
 		::glLineWidth(1.0f);
 
-		fposs v;
-		float i = ys;
-		int yy = static_cast<int>((ye - ys) / dy);
-		for(int y = 0; y <= yy; ++y) {
-			v.push_back(fpos(xs, i));
-			v.push_back(fpos(xe, i));
-			i += dy;
+		fposs vs;
+		{
+			float step = start.y;
+			int yy = static_cast<int>((end.y - start.y) / d.y);
+			for(int y = 0; y <= yy; ++y) {
+				vs.push_back(fpos(start.x, step));
+				vs.push_back(fpos(end.x, step));
+				step += d.y;
+			}
 		}
-		float j = xs;
-		int xx = static_cast<int>((xe - xs) / dx);
-		for(int x = 0; x <= xx; ++x) {
-			v.push_back(fpos(j, ys));
-			v.push_back(fpos(j, ye));
-			j += dx;
+		{
+			float step = start.x;
+			int xx = static_cast<int>((end.x - start.x) / d.x);
+			for(int x = 0; x <= xx; ++x) {
+				vs.push_back(fpos(step, start.y));
+				vs.push_back(fpos(step, end.y));
+				step += d.x;
+			}
 		}
-		draw_lines(v);
+		draw_lines(vs);
 
-		::glLineWidth(2.0f);
-		v.clear();
-		i = (xs + xe) * 0.5f;
-		j = (ys + ye) * 0.5f;
-		v.push_back(fpos(i, j));
-		v.push_back(fpos(i + dx, j));
-		v.push_back(fpos(i, j));
-		v.push_back(fpos(i, j + dy));
+		if(0) {
+			::glLineWidth(2.0f);
+			vs.clear();
+			float i = (start.x + end.x) * 0.5f;
+			float j = (start.y + end.y) * 0.5f;
+			vs.push_back(fpos(i, j));
+			vs.push_back(fpos(i + d.x, j));
+			vs.push_back(fpos(i, j));
+			vs.push_back(fpos(i, j + d.y));
+		}
 	}
 
 
@@ -1714,9 +1717,9 @@ namespace gl {
 	img::img_rgba8* get_frame_buffer(int x, int y, int w, int h)
 	{
 		IGLcore* glif = get_glcore();
-		int fbh = glif->get_height();
+		int fbh = glif->get_size().y;
 		img::img_rgba8* im = new img::img_rgba8;
-		im->create(w, h, true);
+		im->create(vtx::spos(w, h), true);
 		::glReadBuffer(GL_BACK);
 		::glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		img::rgba8* p = im->at_image();
@@ -1742,7 +1745,7 @@ namespace gl {
 	void get_frame_bufferRGB(unsigned char* dst, int x, int y, int w, int h)
 	{
 		IGLcore* glif = get_glcore();
-		int fbh = glif->get_height();
+		int fbh = glif->get_size().y;
 		::glReadBuffer(GL_BACK);
 		::glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		::glReadPixels(x, y, w, h, GL_RGB, GL_UNSIGNED_BYTE, dst);
@@ -1763,7 +1766,7 @@ namespace gl {
 	void get_frame_bufferRGBA(unsigned char* dst, int x, int y, int w, int h)
 	{
 		IGLcore* glif = get_glcore();
-		int fbh = glif->get_height();
+		int fbh = glif->get_size().y;
 		::glReadBuffer(GL_BACK);
 		::glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		::glReadPixels(x, y, w, h, GL_RGBA, GL_UNSIGNED_BYTE, dst);

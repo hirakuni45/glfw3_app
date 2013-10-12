@@ -130,14 +130,14 @@ namespace gl {
 	};
 
 
-	//-----------------------------------------------------------------//
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
 		@brief	v2_t テーブルから、fposs へ初期化
 		@param[in]	src	v2_t 型ソース
 		@param[in]	n	数
 		@param[in]	dst	pos 出力列
 	*/
-	//-----------------------------------------------------------------//
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	template <class T>
 	void init_fposs(const v2_t<T>* src, int n, vtx::fposs& dst) {
 		for(int i = 0; i < n; ++i) {
@@ -147,14 +147,14 @@ namespace gl {
 	};
 
 
-	//-----------------------------------------------------------------//
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
 		@brief	v3_t テーブルから、fvtxs へ初期化
 		@param[in]	src	v3_t 型ソース
 		@param[in]	n	数
 		@param[in]	dst	pos 出力列
 	*/
-	//-----------------------------------------------------------------//
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	template <class T>
 	void init_fvtxs(const v3_t<T>* src, int n, vtx::fvtxs& dst) {
 		for(int i = 0; i < n; ++i) {
@@ -173,17 +173,17 @@ namespace gl {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	template <class T>
-	unsigned int polygon2triangleStrip(const T& src, T& dst) {
+	uint32_t polygon2triangleStrip(const T& src, T& dst) {
 		dst.clear();
 
-		unsigned int num = src.size();
-		for(unsigned int i = 0; i < num; ++i) {
+		uint32_t num = src.size();
+		for(uint32_t i = 0; i < num; ++i) {
 			if(i == 0) {
 				dst.push_back(src[1]);
 			} else if(i == 1) {
 				dst.push_back(src[0]);
 			} else {
-				int n = ((i - 2) & 65535) >> 1;
+				uint32_t n = ((i - 2) & 65535) >> 1;
 				if(i & 1) {
 					dst.push_back(src[num - 1 - n]);
 				} else {
@@ -202,7 +202,7 @@ namespace gl {
 		@param[out]	dst	出力列
 	*/
 	//-----------------------------------------------------------------//
-	inline unsigned int polygon_to_triangle_strip(const vtx::sposs& src, vtx::sposs& dst) {
+	inline uint32_t polygon_to_triangle_strip(const vtx::sposs& src, vtx::sposs& dst) {
 		return polygon2triangleStrip<vtx::sposs>(src, dst);
 	}
 
@@ -214,7 +214,7 @@ namespace gl {
 		@param[out]	dst	出力列
 	*/
 	//-----------------------------------------------------------------//
-	inline unsigned int polygon_to_triangle_strip(const vtx::fposs& src, vtx::fposs& dst) {
+	inline uint32_t polygon_to_triangle_strip(const vtx::fposs& src, vtx::fposs& dst) {
 		return polygon2triangleStrip<vtx::fposs>(src, dst);
 	}
 
@@ -226,7 +226,7 @@ namespace gl {
 		@param[out]	dst	出力列
 	*/
 	//-----------------------------------------------------------------//
-	inline unsigned int polygon_to_triangle_strip(const vtx::fvtxs& src, vtx::fvtxs& dst) {
+	inline uint32_t polygon_to_triangle_strip(const vtx::fvtxs& src, vtx::fvtxs& dst) {
 		return polygon2triangleStrip<vtx::fvtxs>(src, dst);
 	}
 
@@ -638,20 +638,15 @@ namespace gl {
 	void draw_square(float s);
 
 
-
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	グリッドを描画
-		@param[in]	xs	X スタート
-		@param[in]	ys	Y スタート
-		@param[in]	xe	X エンド
-		@param[in]	ye	Y エンド
-		@param[in]	dx	X 変化量
-		@param[in]	dy	Y 変化量
+		@param[in]	start	スタート
+		@param[in]	end		エンド
+		@param[in]	d	変化量
 	*/
 	//-----------------------------------------------------------------//
-    void draw_grid(float xs, float ys, float xe, float ye, float dx, float dy);
-
+	void draw_grid(const vtx::fpos& start, const vtx::fpos& end, const vtx::fpos& d);
 
 
 	void subdivision_line(const vtx::fvtxs& src, float factor, vtx::fvtxs& dst);
