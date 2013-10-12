@@ -87,6 +87,7 @@ namespace app {
 			filer_id_ = filer_->get_select_file_id();
 ///			std::cout << "Filer: '" << filer_->get_file() << "'" << std::endl;
 			pmd_io_.open(filer_->get_file());
+			pmd_io_.render_setup();
 		}
 
 		if(!wd.update()) {
@@ -113,7 +114,7 @@ namespace app {
 		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 		gl::draw_grid(vtx::fpos(-5.0f), vtx::fpos(5.0f), vtx::fpos(1.0f));
 
-
+		pmd_io_.render();
 
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		glEnable(GL_TEXTURE_2D);

@@ -5,35 +5,13 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#ifdef WIN32
-#if 0
-#include <windows.h>
-#include <GL/glu.h>
-#include <GL/glext.h>
-#else
 #define GLEW_STATIC
 #include <GL/glew.h>
-#include <GL/wglew.h>
-#endif
-#endif
 
 #define GLFW_INCLUDE_GLU
 #include <GLFW/glfw3.h>
 
 namespace gl {
-
-#if 0
-#ifdef WIN32
-	enum cursor {
-		arrow = GLUT_CURSOR_LEFT_ARROW,
-		arrow_left = GLUT_CURSOR_LEFT_ARROW,
-		arrow_right = GLUT_CURSOR_RIGHT_ARROW,
-		wait = GLUT_CURSOR_WAIT,
-		info = GLUT_CURSOR_INFO,
-		help = GLUT_CURSOR_HELP
-	};
-#endif
-#endif
 
 #ifndef OPENGL_ES
 	inline void glOrthof(float l, float r, float b, float t, float aa, float bb) {
@@ -51,9 +29,7 @@ namespace gl {
 	inline void gluLookAtf(float eye_x, float eye_y, float eye_z, float tgt_x, float tgt_y, float tgt_z, float up_x, float up_y, float up_z) {
 		gluLookAt(eye_x, eye_y, eye_z, tgt_x, tgt_y, tgt_z, up_x, up_y, up_z);
 	}
-#endif
 
-#ifdef OPENGL_ES
 	inline void glOrtho(double l, double r, double b, double t, double aa, double bb) {
 		glOrthof(static_cast<float>(l), static_cast<float>(r),
 				   static_cast<float>(b), static_cast<float>(t),

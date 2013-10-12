@@ -4,6 +4,8 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
+#include <windows.h>
+#include <iostream>
 #include "glcore.hpp"
 #include "utils/file_io.hpp"
 #include "utils/string_utils.hpp"
@@ -303,6 +305,12 @@ namespace gl {
 //		glfwSetFramebufferSizeCallback(window_, resize_framebuffer_);
 
 		glfwMakeContextCurrent(window_);
+
+		int err = glewInit();
+		if(err != GLEW_OK) {
+			std::cout << "GLEW initalization error: " << err << std::endl;
+			return -1;
+		}
 
 		fonts_.initialize();
 		fonts_.set_font_size(24);

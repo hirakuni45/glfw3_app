@@ -343,10 +343,14 @@ namespace mdf {
 
 	void pmd_io::destroy_()
 	{
-		glDeleteBuffers(1, &vertex_id_);
-		vertex_id_ = 0;
-		glDeleteBuffers(1, &index_id_);
-		index_id_ = 0;
+		if(vertex_id_) {
+			glDeleteBuffers(1, &vertex_id_);
+			vertex_id_ = 0;
+		}
+		if(index_id_) {
+			glDeleteBuffers(1, &index_id_);
+			index_id_ = 0;
+		}
 	}
 
 
@@ -359,6 +363,7 @@ namespace mdf {
 	{
 		glGenBuffers(1, &vertex_id_);
 		glGenBuffers(1, &index_id_);
+
 
 
 
