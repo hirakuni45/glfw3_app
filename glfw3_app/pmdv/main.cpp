@@ -1,13 +1,12 @@
 //=====================================================================//
 /*! @file
-	@brief  player サンプル
+	@brief  共通メイン
 	@author 平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
 #include "main.hpp"
 #include "core/glcore.hpp"
 #include "utils/director.hpp"
-#include "gl_fw/glutils.hpp"
 #include "pmdv_main.hpp"
 
 int main(int argc, char** argv);
@@ -55,15 +54,6 @@ int main(int argc, char** argv)
 
 		while(!igl->get_exit_signal()) {
 			igl->service();
-
-			glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-			gl::glColor(img::rgbaf(1.0f));
-
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-			glEnable(GL_TEXTURE_2D);
-			glEnable(GL_BLEND);
-			glDisable(GL_DEPTH_TEST);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 			director.render();
 

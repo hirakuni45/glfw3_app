@@ -12,6 +12,8 @@ PSOURCES	=	main.cpp \
 				../common/gl_fw/glmobj.cpp \
 				../common/gl_fw/gltexfb.cpp \
 				../common/gl_fw/glterminal.cpp \
+				../common/gl_fw/glcamera.cpp \
+				../common/gl_fw/glutils.cpp \
 				../common/utils/vtx.cpp \
 				../common/utils/vmath.cpp \
 				../common/utils/string_utils.cpp \
@@ -209,48 +211,51 @@ main.o: ../common/img_io/img_clut.hpp ../common/img_io/img_gray8.hpp
 main.o: ../common/utils/vmath.hpp ../common/widgets/common_parts.hpp
 main.o: ../common/gl_fw/glmobj.hpp ../common/gl_fw/gl_info.hpp
 main.o: ../common/img_io/img_rgba8.hpp ../common/img_io/img_files.hpp
-main.o: ../common/img_io/i_img_io.hpp ../common/widgets/widget_filer.hpp
-main.o: ../common/utils/files.hpp ../common/utils/drive_info.hpp
-main.o: ../common/utils/file_info.hpp ../common/utils/handle_set.hpp
-main.o: ../common/utils/preference.hpp ../common/widgets/widget_null.hpp
+main.o: ../common/img_io/i_img_io.hpp ../common/utils/preference.hpp
+main.o: ../common/core/glcore.hpp ../common/gl_fw/IGLcore.hpp
+main.o: ../common/core/device.hpp ../common/gl_fw/glfonts.hpp
+main.o: ../common/gl_fw/Ikfimg.hpp ../common/core/device.hpp
+main.o: ../common/utils/director.hpp ../common/utils/i_scene.hpp
+main.o: pmdv_main.hpp ../common/utils/i_scene.hpp
+main.o: ../common/widgets/widget_filer.hpp ../common/utils/files.hpp
+main.o: ../common/utils/drive_info.hpp ../common/utils/file_info.hpp
+main.o: ../common/utils/handle_set.hpp ../common/widgets/widget_null.hpp
 main.o: ../common/widgets/widget_director.hpp
 main.o: ../common/widgets/widget_label.hpp
-main.o: ../common/widgets/widget_button.hpp ../common/core/glcore.hpp
-main.o: ../common/gl_fw/IGLcore.hpp ../common/core/device.hpp
-main.o: ../common/gl_fw/glfonts.hpp ../common/gl_fw/Ikfimg.hpp
-main.o: ../common/core/device.hpp ../common/utils/director.hpp
-main.o: ../common/utils/i_scene.hpp ../common/gl_fw/glutils.hpp pmdv_main.hpp
-main.o: ../common/utils/i_scene.hpp ../common/mdf/pmd_io.hpp
+main.o: ../common/widgets/widget_button.hpp ../common/mdf/pmd_io.hpp
 main.o: ../common/img_io/bmp_io.hpp ../common/img_io/i_img_io.hpp
-main.o: ../common/utils/quat.hpp
+main.o: ../common/utils/quat.hpp ../common/gl_fw/glcamera.hpp
+main.o: ../common/gl_fw/glmatrix.hpp
 pmdv_main.o: ../common/core/glcore.hpp ../common/gl_fw/IGLcore.hpp
 pmdv_main.o: ../common/core/device.hpp ../common/utils/vtx.hpp
 pmdv_main.o: ../common/gl_fw/gl_info.hpp ../common/gl_fw/glfonts.hpp
 pmdv_main.o: ../common/gl_fw/Ikfimg.hpp ../common/img_io/i_img.hpp
 pmdv_main.o: ../common/img_io/img.hpp ../common/utils/string_utils.hpp
 pmdv_main.o: ../common/utils/mtx.hpp ../common/utils/file_io.hpp
-pmdv_main.o: ../common/core/device.hpp pmdv_main.hpp main.hpp
+pmdv_main.o: ../common/core/device.hpp ../common/gl_fw/glutils.hpp
+pmdv_main.o: ../common/img_io/img_rgba8.hpp ../common/img_io/i_img.hpp
+pmdv_main.o: ../common/img_io/img_idx8.hpp ../common/img_io/img_clut.hpp
+pmdv_main.o: ../common/img_io/img_gray8.hpp pmdv_main.hpp main.hpp
 pmdv_main.o: ../common/snd_io/sound.hpp ../common/snd_io/audio_io.hpp
 pmdv_main.o: ../common/snd_io/i_audio.hpp ../common/snd_io/audio.hpp
 pmdv_main.o: ../common/snd_io/snd_files.hpp ../common/snd_io/i_snd_io.hpp
 pmdv_main.o: ../common/snd_io/tag.hpp ../common/widgets/widget_director.hpp
 pmdv_main.o: ../common/widgets/widget.hpp ../common/img_io/img.hpp
-pmdv_main.o: ../common/img_io/paint.hpp ../common/img_io/i_img.hpp
-pmdv_main.o: ../common/img_io/img_rgba8.hpp ../common/img_io/img_idx8.hpp
-pmdv_main.o: ../common/img_io/img_clut.hpp ../common/img_io/img_gray8.hpp
+pmdv_main.o: ../common/img_io/paint.hpp ../common/img_io/img_rgba8.hpp
 pmdv_main.o: ../common/utils/vmath.hpp ../common/widgets/common_parts.hpp
-pmdv_main.o: ../common/gl_fw/glmobj.hpp ../common/img_io/img_rgba8.hpp
-pmdv_main.o: ../common/img_io/img_files.hpp ../common/img_io/i_img_io.hpp
-pmdv_main.o: ../common/widgets/widget_filer.hpp ../common/utils/files.hpp
-pmdv_main.o: ../common/utils/drive_info.hpp ../common/utils/file_info.hpp
-pmdv_main.o: ../common/utils/handle_set.hpp ../common/utils/preference.hpp
+pmdv_main.o: ../common/gl_fw/glmobj.hpp ../common/img_io/img_files.hpp
+pmdv_main.o: ../common/img_io/i_img_io.hpp ../common/utils/preference.hpp
+pmdv_main.o: ../common/utils/i_scene.hpp ../common/utils/director.hpp
+pmdv_main.o: ../common/utils/i_scene.hpp ../common/widgets/widget_filer.hpp
+pmdv_main.o: ../common/utils/files.hpp ../common/utils/drive_info.hpp
+pmdv_main.o: ../common/utils/file_info.hpp ../common/utils/handle_set.hpp
 pmdv_main.o: ../common/widgets/widget_null.hpp
 pmdv_main.o: ../common/widgets/widget_director.hpp
 pmdv_main.o: ../common/widgets/widget_label.hpp
-pmdv_main.o: ../common/widgets/widget_button.hpp ../common/utils/i_scene.hpp
-pmdv_main.o: ../common/utils/director.hpp ../common/utils/i_scene.hpp
-pmdv_main.o: ../common/mdf/pmd_io.hpp ../common/img_io/bmp_io.hpp
-pmdv_main.o: ../common/img_io/i_img_io.hpp ../common/utils/quat.hpp
+pmdv_main.o: ../common/widgets/widget_button.hpp ../common/mdf/pmd_io.hpp
+pmdv_main.o: ../common/img_io/bmp_io.hpp ../common/img_io/i_img_io.hpp
+pmdv_main.o: ../common/utils/quat.hpp ../common/gl_fw/glcamera.hpp
+pmdv_main.o: ../common/gl_fw/glmatrix.hpp
 ../common/core/glcore.o: ../common/core/glcore.hpp
 ../common/core/glcore.o: ../common/gl_fw/IGLcore.hpp
 ../common/core/glcore.o: ../common/core/device.hpp ../common/utils/vtx.hpp
@@ -311,6 +316,35 @@ pmdv_main.o: ../common/img_io/i_img_io.hpp ../common/utils/quat.hpp
 ../common/gl_fw/glterminal.o: ../common/utils/mtx.hpp
 ../common/gl_fw/glterminal.o: ../common/utils/file_io.hpp
 ../common/gl_fw/glterminal.o: ../common/img_io/img.hpp
+../common/gl_fw/glcamera.o: ../common/gl_fw/IGLcore.hpp
+../common/gl_fw/glcamera.o: ../common/core/device.hpp ../common/utils/vtx.hpp
+../common/gl_fw/glcamera.o: ../common/gl_fw/gl_info.hpp
+../common/gl_fw/glcamera.o: ../common/gl_fw/glfonts.hpp
+../common/gl_fw/glcamera.o: ../common/gl_fw/Ikfimg.hpp
+../common/gl_fw/glcamera.o: ../common/img_io/i_img.hpp
+../common/gl_fw/glcamera.o: ../common/img_io/img.hpp
+../common/gl_fw/glcamera.o: ../common/utils/string_utils.hpp
+../common/gl_fw/glcamera.o: ../common/utils/mtx.hpp
+../common/gl_fw/glcamera.o: ../common/utils/file_io.hpp
+../common/gl_fw/glcamera.o: ../common/gl_fw/glcamera.hpp
+../common/gl_fw/glcamera.o: ../common/utils/quat.hpp
+../common/gl_fw/glcamera.o: ../common/gl_fw/glmatrix.hpp
+../common/gl_fw/glutils.o: ../common/gl_fw/glutils.hpp
+../common/gl_fw/glutils.o: ../common/gl_fw/gl_info.hpp
+../common/gl_fw/glutils.o: ../common/utils/vtx.hpp ../common/img_io/i_img.hpp
+../common/gl_fw/glutils.o: ../common/img_io/img.hpp
+../common/gl_fw/glutils.o: ../common/img_io/img_rgba8.hpp
+../common/gl_fw/glutils.o: ../common/img_io/i_img.hpp
+../common/gl_fw/glutils.o: ../common/img_io/img_idx8.hpp
+../common/gl_fw/glutils.o: ../common/img_io/img_clut.hpp
+../common/gl_fw/glutils.o: ../common/img_io/img_gray8.hpp
+../common/gl_fw/glutils.o: ../common/gl_fw/IGLcore.hpp
+../common/gl_fw/glutils.o: ../common/core/device.hpp
+../common/gl_fw/glutils.o: ../common/gl_fw/glfonts.hpp
+../common/gl_fw/glutils.o: ../common/gl_fw/Ikfimg.hpp
+../common/gl_fw/glutils.o: ../common/utils/string_utils.hpp
+../common/gl_fw/glutils.o: ../common/utils/mtx.hpp
+../common/gl_fw/glutils.o: ../common/utils/file_io.hpp
 ../common/utils/vtx.o: ../common/utils/vtx.hpp
 ../common/utils/vmath.o: ../common/utils/vmath.hpp ../common/utils/vtx.hpp
 ../common/utils/string_utils.o: ../common/utils/string_utils.hpp

@@ -7,6 +7,7 @@
 #include <iostream>
 #include <boost/lexical_cast.hpp>
 #include "core/glcore.hpp"
+#include "gl_fw/glutils.hpp"
 #include "pmdv_main.hpp"
 
 namespace app {
@@ -88,7 +89,9 @@ namespace app {
 			pmd_io_.open(filer_->get_file());
 		}
 
-		wd.update();
+		if(!wd.update()) {
+			camera_.update();
+		}
 	}
 
 
@@ -99,6 +102,25 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void pmdv_main::render()
 	{
+		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+		gl::glColor(img::rgbaf(1.0f));
+
+		camera_.service();
+		glDisable(GL_TEXTURE_2D);
+		glEnable(GL_BLEND);
+		glDisable(GL_DEPTH_TEST);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+		gl::draw_grid(vtx::fpos(-5.0f), vtx::fpos(5.0f), vtx::fpos(1.0f));
+
+
+
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		glEnable(GL_TEXTURE_2D);
+		glEnable(GL_BLEND);
+		glDisable(GL_DEPTH_TEST);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 		director_.at_core().widget_director_.service();
 		director_.at_core().widget_director_.render();
 	}

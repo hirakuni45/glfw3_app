@@ -10,6 +10,7 @@
 #include "widgets/widget_filer.hpp"
 #include "widgets/widget_button.hpp"
 #include "mdf/pmd_io.hpp"
+#include "gl_fw/glcamera.hpp"
 
 namespace app {
 
@@ -23,6 +24,8 @@ namespace app {
 		gui::widget_button*		fopen_;
 
 		mdf::pmd_io		pmd_io_;
+
+		gl::camera		camera_;
 
 	public:
 		//-----------------------------------------------------------------//
