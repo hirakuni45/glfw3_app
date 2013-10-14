@@ -112,7 +112,6 @@ namespace mdf {
 ///			std::cout << "Bone: " << s << std::endl;
 		}
 
-
 		return true;
 	}
 
@@ -342,9 +341,15 @@ namespace mdf {
 			glDeleteBuffers(1, &vtx_id_);
 			vtx_id_ = 0;
 		}
+
 		if(!idx_id_.empty()) {
 			glDeleteBuffers(idx_id_.size(), &idx_id_[0]);
 			idx_id_.clear();
+		}
+
+		if(sphere_) {
+			gluDeleteQuadric(sphere_);
+			sphere_ = 0;
 		}
 	}
 
@@ -356,23 +361,41 @@ namespace mdf {
 	//-----------------------------------------------------------------//
 	void pmd_io::render_setup()
 	{
+		if(sphere_ == 0) {
+			sphere_ = gluNewQuadric();
+			gluQuadricDrawStyle(sphere_, GLU_FILL);
+		}
+
 		if(vertex_.empty()) return;
 		if(face_index_.empty()) return;
 
-		vbos_.reserve(vertex_.size());
-		vbos_.clear();
-		BOOST_FOREACH(pmd_vertex& v, vertex_) {
-			vbo_t vbo;
-			vbo.uv = v.uv;
-			vbo.n = v.normal;			
-			vbo.v.set(v.pos.x, v.pos.y, v.pos.z);
-			vbos_.push_back(vbo);
+		{
+			std::vector<vbo_t> vbos;
+			vbos.reserve(vertex_.size());
+			vbos.clear();
+			BOOST_FOREACH(pmd_vertex& v, vertex_) {
+				vbo_t vbo;
+				vbo.uv = v.uv;
+				vbo.n = v.normal;			
+				vbo.v.set(v.pos.x, v.pos.y, v.pos.z);
+				vbos.push_back(vbo);
+			}
+
+			glGenBuffers(1, &vtx_id_);
+			glBindBuffer(GL_ARRAY_BUFFER, vtx_id_);
+			glBufferData(GL_ARRAY_BUFFER, vbos.size() * sizeof(vbo_t), &vbos[0],
+				GL_STATIC_DRAW);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}
 
-		glGenBuffers(1, &vtx_id_);
-		glBindBuffer(GL_ARRAY_BUFFER, vtx_id_);
-		glBufferData(GL_ARRAY_BUFFER, vbos_.size() * sizeof(vbo_t), &vbos_[0], GL_STATIC_DRAW);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		std::vector<uint16_t> idxes;
+		idxes.reserve(face_index_.size());
+		idxes.clear();
+		for(uint32_t i = 0; i < (face_index_.size() / 3); ++i) {
+			idxes.push_back(face_index_[i * 3 + 0]);
+			idxes.push_back(face_index_[i * 3 + 2]);
+			idxes.push_back(face_index_[i * 3 + 1]);
+		}
 
 		idx_id_.resize(material_.size());
 		glGenBuffers(material_.size(), &idx_id_[0]);
@@ -385,7 +408,7 @@ namespace mdf {
 		BOOST_FOREACH(pmd_material& m, material_) {
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idx_id_[n]);
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, m.face_vert_count * sizeof(uint16_t),
-				&face_index_[in], GL_STATIC_DRAW);
+				&idxes[in], GL_STATIC_DRAW);
 			in += m.face_vert_count;
 			++n;
 
@@ -424,17 +447,25 @@ namespace mdf {
 		@brief	レンダリング
 	*/
 	//-----------------------------------------------------------------//
-	void pmd_io::render()
+	void pmd_io::render_surface()
 	{
 		if(vertex_.empty()) return;
 		if(face_index_.empty()) return;
 
+		glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+		glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
+		glScalef(-1.0f, 1.0f, 1.0f);
+
+		glPushMatrix();
+
 		glEnable(GL_CULL_FACE);
-		glCullFace(GL_FRONT);
+		glCullFace(GL_BACK);
 
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		glEnable(GL_DEPTH_TEST);
+///		glDisable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
+///		glEnable(GL_POLYGON_SMOOTH);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		// 頂点情報をバインド
@@ -469,6 +500,33 @@ namespace mdf {
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
+///		glDisable(GL_POLYGON_SMOOTH);
+
 		glDisable(GL_CULL_FACE);
+
+		glPopMatrix();
 	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	ボーンのレンダリング
+	*/
+	//-----------------------------------------------------------------//
+	void pmd_io::render_bone()
+	{
+		if(bone_.empty()) return;
+
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_BLEND);
+
+		glColor3f(1.0f, 1.0f, 1.0f);
+		BOOST_FOREACH(const pmd_bone& bone, bone_) {
+			glPushMatrix();
+			glTranslatef(bone.head_pos.x, bone.head_pos.y, bone.head_pos.z);
+			gluSphere(sphere_, 0.1f, 10.0f, 10.0f);
+			glPopMatrix();
+		}
+	}
+
 }

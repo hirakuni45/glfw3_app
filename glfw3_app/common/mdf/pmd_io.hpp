@@ -127,12 +127,22 @@ namespace mdf {
 		std::vector<pmd_material>	material_;
 
 		struct pmd_bone {
-			char		name[20];
-			uint16_t	parent_index;
-			uint16_t	tail_pos_index;
-			uint8_t		type;
-			uint16_t	ik_parent_index;
-			vtx::fvtx	head_pos;
+			enum bone_type {
+				ROTATE,			///< 回転
+				ROTATE_MOVE,	///< 回転と移動
+				IK,				///< IK
+				none_,			///< 不明
+				IK_,			///< IK 影響下
+				ROTATE_,		///< 回転影響下
+				IK_LINK,		///< IK 接続先
+				NO_DISP			///< 非表示
+			};
+			char		name[20];			///< ボーン名
+			uint16_t	parent_index;		///< 親ボーン番号（無い場合は 0xffff）
+			uint16_t	tail_pos_index;		///< tail 位置のボーン番号（末端の場合０）
+			uint8_t		type;				///< ボーン種
+			uint16_t	ik_parent_index;	///< IK ボーン番号（無い場合０）
+			vtx::fvtx	head_pos;			///< 基準位置
 
 			bool get(utils::file_io& fio) {
 				if(fio.read(name, 20) != 20) return false;
@@ -253,10 +263,11 @@ namespace mdf {
 			vtx::fvtx	n;
 			vtx::fvtx	v;
 		};
-		std::vector<vbo_t>	vbos_;
 
 		GLuint	vtx_id_;
 		std::vector<GLuint>	idx_id_;
+
+		GLUquadricObj*	sphere_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -265,7 +276,8 @@ namespace mdf {
 		*/
 		//-----------------------------------------------------------------//
 		pmd_io() : version_(0.0f),
-			vertex_min_(0.0f), vertex_max_(0.0f), vtx_id_(0), idx_id_(0)
+			vertex_min_(0.0f), vertex_max_(0.0f), vtx_id_(0),
+			sphere_(0)
 		{ }
 
 
@@ -324,10 +336,18 @@ namespace mdf {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	レンダリング
+			@brief	サーフェースのレンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render();
+		void render_surface();
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ボーンのレンダリング
+		*/
+		//-----------------------------------------------------------------//
+		void render_bone();
 
 	};
 }
