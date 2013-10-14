@@ -5,11 +5,13 @@
 */
 //=====================================================================//
 #include <iostream>
+#include <boost/format.hpp>
+#include <boost/foreach.hpp>
 #include "mdf/pmd_io.hpp"
 #include "utils/file_io.hpp"
 #include "utils/string_utils.hpp"
-#include <boost/format.hpp>
-#include "core/glcore.hpp"
+#include "gl_fw/gl_info.hpp"
+#include "img_io/img_files.hpp"
 
 namespace mdf {
 
@@ -32,7 +34,7 @@ namespace mdf {
 		if(!fio.get(n)) {
 			return false;
 		}
-///		std::cout << "Vertex :" << n << std::endl;
+
 		vertex_.reserve(n);
 		vertex_.clear();
 		for(uint32_t i = 0; i < n; ++i) {
@@ -45,8 +47,6 @@ namespace mdf {
 			vtx::set_max(v.pos, vertex_max_);
 			vertex_.push_back(v);
 		}
-///		std::cout << (boost::format("Min: %1.3f, %1.3f, %1.3f\n") % min.x % min.y % min.z);
-///		std::cout << (boost::format("Max: %1.3f, %1.3f, %1.3f\n") % max.x % max.y % max.z);
 		return true;
 	}
 
@@ -56,7 +56,7 @@ namespace mdf {
 		if(!fio.get(n)) {
 			return false;
 		}
-///		std::cout << "Face Vertex: " << n << std::endl;
+
 		face_index_.reserve(n);
 		face_index_.clear();
 		for(uint32_t i = 0; i < n; ++i) {
@@ -76,7 +76,6 @@ namespace mdf {
 		if(!fio.get(n)) {
 			return false;
 		}
-///		std::cout << "Material num: " << n << std::endl;
 
 		material_.reserve(n);
 		material_.clear();
@@ -86,10 +85,6 @@ namespace mdf {
 				return false;
 			}
 			material_.push_back(m);
-
-///			std::string s;
-///			get_text_(m.texture_file_name, 20, s);
-///			std::cout << "Material: " << s << std::endl;
 		}
 		return true;
 	}
@@ -252,8 +247,10 @@ namespace mdf {
 			return false;
 		}
 
+		current_path_.clear();
+		utils::get_file_path(fn, current_path_);
+
 		destroy_();
-///		std::cout << fn << std::endl;
 
 		{
 			std::string s;
@@ -267,14 +264,13 @@ namespace mdf {
 		if(!fio.get(version_)) {
 			return false;
 		}
-///		std::cout << "Version: " << (boost::format("%1.2f") % version_) << std::endl;
+
 		{
 			std::string s;
 			if(fio.get(s, 20) != 20) {
 				return false;
 			}
 			utils::sjis_to_utf8(s, model_name_);
-///			std::cout << "Model name: '" << model_name_ << "'" << std::endl; 
 		}
 		{
 			std::string s;
@@ -282,7 +278,6 @@ namespace mdf {
 				return false;
 			}
 			utils::sjis_to_utf8(s, comment_);
-///			std::cout << "Comment: '" << comment_ << "'" << std::endl; 
 		}
 
 		// 頂点リスト取得
@@ -343,14 +338,6 @@ namespace mdf {
 
 	void pmd_io::destroy_()
 	{
-		if(vertex_id_) {
-			glDeleteBuffers(1, &vertex_id_);
-			vertex_id_ = 0;
-		}
-		if(index_id_) {
-			glDeleteBuffers(1, &index_id_);
-			index_id_ = 0;
-		}
 	}
 
 
@@ -361,12 +348,39 @@ namespace mdf {
 	//-----------------------------------------------------------------//
 	void pmd_io::render_setup()
 	{
-		glGenBuffers(1, &vertex_id_);
-		glGenBuffers(1, &index_id_);
+		if(vertex_.empty()) return;
+		if(face_index_.empty()) return;
 
+		img::img_files imf;
+		imf.initialize();
 
-
-
+		BOOST_FOREACH(pmd_material& m, material_) {
+			m.tex_id_ = 0;
+			std::string mats;
+			get_text_(m.texture_file_name, 20, mats);
+// std::cout << mats << ", " << static_cast<int>(m.edge_flag) << std::endl;
+			if(!mats.empty()) {
+				std::string tfn;
+	   			size_t pos = mats.find_first_of('*');
+				if(std::string::npos != pos) {
+					tfn = mats.substr(0, pos);
+				} else {
+					tfn = mats;
+				}
+				if(imf.load(current_path_ + '/' + tfn)) {
+					const img::i_img* img = imf.get_image_if();
+					if(img == 0) continue;
+					glGenTextures(1, &m.tex_id_);
+					glBindTexture(GL_TEXTURE_2D, m.tex_id_);
+					int level = 0;
+					int border = 0;
+					glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA,
+						img->get_size().x, img->get_size().y, border,
+						GL_RGBA, GL_UNSIGNED_BYTE, img->get_image());
+// std::cout << m.tex_id_ << ", " << img->get_size().x << ", " << img->get_size().y << std::endl;
+				}
+			}
+		}
 	}
 
 
@@ -378,10 +392,54 @@ namespace mdf {
 	void pmd_io::render()
 	{
 		if(vertex_.empty()) return;
+		if(face_index_.empty()) return;
 
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
 
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		glEnable(GL_DEPTH_TEST);
+		glDisable(GL_BLEND);
+///		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+		glEnableClientState(GL_NORMAL_ARRAY);
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		glEnableClientState(GL_VERTEX_ARRAY);
 
+		glVertexPointer(3, GL_FLOAT, sizeof(pmd_vertex), &vertex_[0].pos);
+		glNormalPointer(GL_FLOAT, sizeof(pmd_vertex), &vertex_[0].normal);
+		glTexCoordPointer(2, GL_FLOAT, sizeof(pmd_vertex), &vertex_[0].uv);
+
+		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+		uint32_t n = 0;
+		BOOST_FOREACH(const pmd_material& m, material_) {
+			if(m.tex_id_) {
+				glEnable(GL_TEXTURE_2D);
+				glBindTexture(GL_TEXTURE_2D, m.tex_id_);
+				GLenum edge;
+				if(m.edge_flag) {
+					edge = GL_CLAMP_TO_EDGE;
+				} else {
+					edge = GL_REPEAT;
+				}
+       			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, edge);
+       			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, edge);
+       			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+       			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			} else {
+				glDisable(GL_TEXTURE_2D);
+			}
+			glDrawElements(GL_TRIANGLES, m.face_vert_count,
+				GL_UNSIGNED_SHORT, &face_index_[n]);
+			n += m.face_vert_count;
+		}
+
+		glDisable(GL_TEXTURE_2D);
+
+		glDisableClientState(GL_VERTEX_ARRAY);
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		glDisableClientState(GL_NORMAL_ARRAY);
+
+		glDisable(GL_CULL_FACE);
 	}
-
 }

@@ -58,7 +58,7 @@ namespace gl {
 			zoom_key_(device::key::ALT),
 			mouse_pos_(0), mouse_left_first_pos_(0),
 			quat_handle_(0.0f), quat_handle_first_(0.0f), quat_(), glmat_(),
-			size_(0.0f), aspect_(1.0f), fov_(45.0f), z_near_(5.0f), z_far_(5000.0f),
+			size_(0.0f), aspect_(1.0f), fov_(30.0f), z_near_(5.0f), z_far_(50000.0f),
 			eye_(0.0f, -15.0f, 6.0f),
 			target_(0.0f, 0.0f, 0.0f),
 			up_(0.0f, 1.0f, 0.0f), touch_(false) { glmat_.initialize(); }

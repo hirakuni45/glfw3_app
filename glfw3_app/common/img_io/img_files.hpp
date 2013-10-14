@@ -75,11 +75,12 @@ namespace img {
 			@return 拡張子（小文字）
 		*/
 		//-----------------------------------------------------------------//
-		const char* get_file_ext(size_t n) const {
+		const std::string& get_file_ext(size_t n) const {
 			if(n < imgios_.size()) {
-				return imgios_[n].ext.c_str();
+				return imgios_[n].ext;
 			} else {
-				return 0;
+				static std::string empty;
+				return empty;
 			}
 		}
 

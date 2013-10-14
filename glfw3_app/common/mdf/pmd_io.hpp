@@ -8,7 +8,6 @@
 #include <string>
 #include <vector>
 #include "gl_fw/IGLcore.hpp"
-#include "img_io/bmp_io.hpp"
 #include "utils/vtx.hpp"
 #include "utils/mtx.hpp"
 #include "utils/quat.hpp"
@@ -101,6 +100,29 @@ namespace mdf {
 				if(fio.read(texture_file_name, 20) != 20) return false;
 				return true;
 			}
+
+			bool put(utils::file_io& fio) {
+				if(!fio.put(diffuse_color[0])) return false;
+				if(!fio.put(diffuse_color[1])) return false;
+				if(!fio.put(diffuse_color[2])) return false;
+				if(!fio.put(alpha)) return false;
+				if(!fio.put(specularity)) return false;
+				if(!fio.put(specular_color[0])) return false;
+				if(!fio.put(specular_color[1])) return false;
+				if(!fio.put(specular_color[2])) return false;
+				if(!fio.put(mirror_color[0])) return false;
+				if(!fio.put(mirror_color[1])) return false;
+				if(!fio.put(mirror_color[2])) return false;
+				if(!fio.put(toon_index)) return false;
+				if(!fio.put(edge_flag)) return false;
+				if(!fio.put(face_vert_count)) return false;
+				if(fio.write(texture_file_name, 20) != 20) return false;
+				return true;
+			}
+
+			GLuint	tex_id_;
+
+			pmd_material() : tex_id_(0) { }
 		};
 		std::vector<pmd_material>	material_;
 
@@ -224,8 +246,8 @@ namespace mdf {
 		bool parse_bone_disp_(utils::file_io& fio);
 		void destroy_();
 
-		GLuint		vertex_id_;
-		GLuint		index_id_;
+		std::string	current_path_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -233,8 +255,7 @@ namespace mdf {
 		*/
 		//-----------------------------------------------------------------//
 		pmd_io() : version_(0.0f),
-			vertex_min_(0.0f), vertex_max_(0.0f),
-			vertex_id_(0), index_id_(0)
+			vertex_min_(0.0f), vertex_max_(0.0f)
 		{ }
 
 
@@ -244,6 +265,33 @@ namespace mdf {
 		*/
 		//-----------------------------------------------------------------//
 		~pmd_io() { destroy_(); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	バージョンを取得
+			@return バージョン
+		*/
+		//-----------------------------------------------------------------//
+		float get_version() const { return version_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	モデル名を取得
+			@return モデル名
+		*/
+		//-----------------------------------------------------------------//
+		const std::string& get_model_name() const { return model_name_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	コメントを取得
+			@return コメント
+		*/
+		//-----------------------------------------------------------------//
+		const std::string& get_comment() const { return comment_; }
 
 
 		//-----------------------------------------------------------------//

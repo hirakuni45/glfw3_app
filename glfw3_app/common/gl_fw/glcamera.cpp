@@ -100,7 +100,7 @@ namespace gl {
 		::glMatrixMode(GL_PROJECTION);
 		::glLoadIdentity();
 		size_ = igl->get_size();
-		aspect_ = size_.x / size_.y;
+		aspect_ = static_cast<float>(size_.x) / static_cast<float>(size_.y);
 		::gluPerspective(fov_, aspect_, z_near_, z_far_);
 		::gluLookAt(eye_.x, eye_.y, eye_.z,
 			target_.x, target_.y, target_.z,
