@@ -8,7 +8,9 @@
 #include "utils/i_scene.hpp"
 #include "utils/director.hpp"
 #include "widgets/widget_filer.hpp"
+#include "widgets/widget_frame.hpp"
 #include "widgets/widget_button.hpp"
+#include "widgets/widget_check.hpp"
 #include "mdf/pmd_io.hpp"
 #include "gl_fw/glcamera.hpp"
 
@@ -21,7 +23,9 @@ namespace app {
 		gui::widget_filer*		filer_;
 		uint32_t	filer_id_;
 
+		gui::widget_frame*		tools_;
 		gui::widget_button*		fopen_;
+		gui::widget_check*		bone_;
 
 		mdf::pmd_io		pmd_io_;
 
@@ -35,7 +39,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		pmdv_main(utils::director<core>& d) : director_(d),
 			filer_(0), filer_id_(0),
-			fopen_(0)
+			tools_(0), fopen_(0), bone_(0)
 		{ }
 
 

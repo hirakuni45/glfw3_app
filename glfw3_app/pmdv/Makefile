@@ -222,9 +222,10 @@ main.o: ../common/utils/drive_info.hpp ../common/utils/file_info.hpp
 main.o: ../common/utils/handle_set.hpp ../common/widgets/widget_null.hpp
 main.o: ../common/widgets/widget_director.hpp
 main.o: ../common/widgets/widget_label.hpp
-main.o: ../common/widgets/widget_button.hpp ../common/mdf/pmd_io.hpp
-main.o: ../common/utils/quat.hpp ../common/gl_fw/glcamera.hpp
-main.o: ../common/gl_fw/glmatrix.hpp
+main.o: ../common/widgets/widget_button.hpp
+main.o: ../common/widgets/widget_frame.hpp ../common/widgets/widget_check.hpp
+main.o: ../common/mdf/pmd_io.hpp ../common/utils/quat.hpp
+main.o: ../common/gl_fw/glcamera.hpp ../common/gl_fw/glmatrix.hpp
 pmdv_main.o: ../common/core/glcore.hpp ../common/gl_fw/IGLcore.hpp
 pmdv_main.o: ../common/core/device.hpp ../common/utils/vtx.hpp
 pmdv_main.o: ../common/gl_fw/gl_info.hpp ../common/gl_fw/glfonts.hpp
@@ -251,7 +252,9 @@ pmdv_main.o: ../common/utils/file_info.hpp ../common/utils/handle_set.hpp
 pmdv_main.o: ../common/widgets/widget_null.hpp
 pmdv_main.o: ../common/widgets/widget_director.hpp
 pmdv_main.o: ../common/widgets/widget_label.hpp
-pmdv_main.o: ../common/widgets/widget_button.hpp ../common/mdf/pmd_io.hpp
+pmdv_main.o: ../common/widgets/widget_button.hpp
+pmdv_main.o: ../common/widgets/widget_frame.hpp
+pmdv_main.o: ../common/widgets/widget_check.hpp ../common/mdf/pmd_io.hpp
 pmdv_main.o: ../common/utils/quat.hpp ../common/gl_fw/glcamera.hpp
 pmdv_main.o: ../common/gl_fw/glmatrix.hpp
 ../common/core/glcore.o: ../common/core/glcore.hpp

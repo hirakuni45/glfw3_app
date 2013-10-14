@@ -24,20 +24,30 @@ namespace app {
 		using namespace gui;
 		widget_director& wd = director_.at_core().widget_director_;
 
-		{	// ファイラーのテスト
+		{	// ファイラー・リソース
 			widget::param wp(vtx::srect(30, 30, 300, 200));
 			widget_filer::param wp_(igl->get_current_path());
 			filer_ = wd.add_widget<widget_filer>(wp, wp_);
 			filer_->enable(false);
 		}
-
-		{
-			widget::param wp(vtx::srect(20, 20, 100, 40));
+		{	// ツールパレット
+			widget::param wp(vtx::srect(20, 20, 150, 350));
+			widget_frame::param wp_;
+			tools_ = wd.add_widget<widget_frame>(wp, wp_);
+			tools_->set_state(gui::widget::state::SIZE_LOCK);
+		}
+		{	// ファイラー起動ボタン
+			widget::param wp(vtx::srect(10, 10, 100, 40), tools_);
 			widget_button::param wp_("開く");
 			fopen_ = wd.add_widget<widget_button>(wp, wp_);
 		}
+		{
+			widget::param wp(vtx::srect(10, 60, 150, 40), tools_);
+			widget_check::param wp_("ボーン");
+			bone_ = wd.add_widget<widget_check>(wp, wp_);
+		}
 #if 0
-		if(1) {	// ツリーのテスト
+		if(1) {	// ツリー
 			widget::param wp(vtx::srect(200, 400, 100, 100));
 			widget_tree::param wp_;
 			tree_ = wd.add_widget<widget_tree>(wp, wp_);
@@ -80,7 +90,7 @@ namespace app {
 		gui::widget_director& wd = director_.at_core().widget_director_;
 
 		if(fopen_->get_selected()) {
-			filer_->enable();
+			filer_->enable(fopen_->get_counts() & 1);
 		}
 
 		if(filer_id_ != filer_->get_select_file_id()) {
@@ -109,15 +119,20 @@ namespace app {
 
 		camera_.service();
 		glDisable(GL_TEXTURE_2D);
+		glEnable(GL_LINE_SMOOTH);
+		glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
 		glEnable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 		gl::draw_grid(vtx::fpos(-10.0f), vtx::fpos(10.0f), vtx::fpos(1.0f));
+		glDisable(GL_LINE_SMOOTH);
+		glDisable(GL_BLEND);
 
-		glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-		glScalef(-1.0f, 1.0f, 1.0f);
-		pmd_io_.render();
+		pmd_io_.render_surface();
+		if(bone_->get_check()) {
+			pmd_io_.render_bone();
+		}
 
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		glEnable(GL_TEXTURE_2D);
