@@ -223,7 +223,6 @@ main.o: ../common/utils/handle_set.hpp ../common/widgets/widget_null.hpp
 main.o: ../common/widgets/widget_director.hpp
 main.o: ../common/widgets/widget_label.hpp
 main.o: ../common/widgets/widget_button.hpp ../common/mdf/pmd_io.hpp
-main.o: ../common/img_io/bmp_io.hpp ../common/img_io/i_img_io.hpp
 main.o: ../common/utils/quat.hpp ../common/gl_fw/glcamera.hpp
 main.o: ../common/gl_fw/glmatrix.hpp
 pmdv_main.o: ../common/core/glcore.hpp ../common/gl_fw/IGLcore.hpp
@@ -253,7 +252,6 @@ pmdv_main.o: ../common/widgets/widget_null.hpp
 pmdv_main.o: ../common/widgets/widget_director.hpp
 pmdv_main.o: ../common/widgets/widget_label.hpp
 pmdv_main.o: ../common/widgets/widget_button.hpp ../common/mdf/pmd_io.hpp
-pmdv_main.o: ../common/img_io/bmp_io.hpp ../common/img_io/i_img_io.hpp
 pmdv_main.o: ../common/utils/quat.hpp ../common/gl_fw/glcamera.hpp
 pmdv_main.o: ../common/gl_fw/glmatrix.hpp
 ../common/core/glcore.o: ../common/core/glcore.hpp
@@ -1078,12 +1076,7 @@ pmdv_main.o: ../common/gl_fw/glmatrix.hpp
 ../common/mdf/pmd_io.o: ../common/img_io/img.hpp
 ../common/mdf/pmd_io.o: ../common/utils/string_utils.hpp
 ../common/mdf/pmd_io.o: ../common/utils/mtx.hpp ../common/utils/file_io.hpp
-../common/mdf/pmd_io.o: ../common/img_io/bmp_io.hpp
+../common/mdf/pmd_io.o: ../common/utils/quat.hpp
+../common/mdf/pmd_io.o: ../common/img_io/img_files.hpp
 ../common/mdf/pmd_io.o: ../common/img_io/i_img_io.hpp
 ../common/mdf/pmd_io.o: ../common/img_io/i_img.hpp
-../common/mdf/pmd_io.o: ../common/img_io/img_idx8.hpp
-../common/mdf/pmd_io.o: ../common/img_io/img_clut.hpp
-../common/mdf/pmd_io.o: ../common/img_io/img_rgba8.hpp
-../common/mdf/pmd_io.o: ../common/img_io/img_gray8.hpp
-../common/mdf/pmd_io.o: ../common/utils/quat.hpp ../common/core/glcore.hpp
-../common/mdf/pmd_io.o: ../common/core/device.hpp

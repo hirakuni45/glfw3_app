@@ -85,7 +85,6 @@ namespace app {
 
 		if(filer_id_ != filer_->get_select_file_id()) {
 			filer_id_ = filer_->get_select_file_id();
-///			std::cout << "Filer: '" << filer_->get_file() << "'" << std::endl;
 			pmd_io_.open(filer_->get_file());
 			pmd_io_.render_setup();
 		}
@@ -106,6 +105,8 @@ namespace app {
 		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 		gl::glColor(img::rgbaf(1.0f));
 
+		director_.at_core().widget_director_.service();
+
 		camera_.service();
 		glDisable(GL_TEXTURE_2D);
 		glEnable(GL_BLEND);
@@ -114,6 +115,7 @@ namespace app {
 		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 		gl::draw_grid(vtx::fpos(-5.0f), vtx::fpos(5.0f), vtx::fpos(1.0f));
 
+		glScalef(0.25f, 0.35f, 0.25f);
 		pmd_io_.render();
 
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
@@ -122,7 +124,6 @@ namespace app {
 		glDisable(GL_DEPTH_TEST);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		director_.at_core().widget_director_.service();
 		director_.at_core().widget_director_.render();
 	}
 
