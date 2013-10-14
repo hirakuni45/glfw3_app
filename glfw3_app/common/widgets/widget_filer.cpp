@@ -429,8 +429,7 @@ namespace gui {
 		// ファイル情報の取得と反映（ファイル情報収集はスレッドで動作）
 		if(fsc_.probe()) {
 			if(center_.empty()) {
-				wd_.top_widget(path_);
-				wd_.top_widget(info_);
+				wd_.top_widget(this);
 				create_files_(center_, 0);
 				update_files_info_(center_);
 				if(left_.empty()) {

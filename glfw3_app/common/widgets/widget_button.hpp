@@ -29,11 +29,12 @@ namespace gui {
 			text_param		text_param_;	///< テキスト描画のパラメータ
 			const img::i_img*	image_;		///< ボタンに画像を使う場合
 			gl::mobj::handle	handle_;	///< ボタンにモーションオブジェクトを使う場合
+			uint32_t		counts_;		///< ボタンを押した回数
 
 			param(const std::string& text = "") :
 				plate_param_(), color_param_(widget_director::default_button_color_),
 				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255)),
-				image_(0), handle_(0) { }
+				image_(0), handle_(0), counts_(0) { }
 		};
 
 	private:
@@ -94,6 +95,15 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		param& at_local_param() { return param_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	押した回数の取得
+			@return 押した回数
+		*/
+		//-----------------------------------------------------------------//
+		uint32_t get_counts() const { return param_.counts_; }
 
 
 		//-----------------------------------------------------------------//

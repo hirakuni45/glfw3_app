@@ -61,6 +61,9 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_button::update()
 	{
+		if(get_selected()) {
+			++param_.counts_;
+		}
 	}
 
 
