@@ -110,12 +110,13 @@ namespace app {
 		camera_.service();
 		glDisable(GL_TEXTURE_2D);
 		glEnable(GL_BLEND);
-		glDisable(GL_DEPTH_TEST);
+		glEnable(GL_DEPTH_TEST);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-		gl::draw_grid(vtx::fpos(-5.0f), vtx::fpos(5.0f), vtx::fpos(1.0f));
+		gl::draw_grid(vtx::fpos(-10.0f), vtx::fpos(10.0f), vtx::fpos(1.0f));
 
-		glScalef(0.25f, 0.35f, 0.25f);
+		glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+		glScalef(-1.0f, 1.0f, 1.0f);
 		pmd_io_.render();
 
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);

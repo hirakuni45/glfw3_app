@@ -97,19 +97,17 @@ namespace gl {
 		IGLcore* igl = get_glcore();
 		const device& dev = igl->get_device();
 
-		::glMatrixMode(GL_PROJECTION);
-		::glLoadIdentity();
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
 		size_ = igl->get_size();
 		aspect_ = static_cast<float>(size_.x) / static_cast<float>(size_.y);
-		::gluPerspective(fov_, aspect_, z_near_, z_far_);
-		::gluLookAt(eye_.x, eye_.y, eye_.z,
+		gluPerspective(fov_, aspect_, z_near_, z_far_);
+		gluLookAt(eye_.x, eye_.y, eye_.z,
 			target_.x, target_.y, target_.z,
 			up_.x, up_.y, up_.z);
-//		const mtx::fmat4& m = glmat_.get_current_matrix();
-//		glMultMatrixf(m());
 
-		::glMatrixMode(GL_MODELVIEW);
-		::glLoadIdentity();
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
 	}
 
 }

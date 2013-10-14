@@ -248,6 +248,16 @@ namespace mdf {
 
 		std::string	current_path_;
 
+		struct vbo_t {
+			vtx::fpos	uv;
+			vtx::fvtx	n;
+			vtx::fvtx	v;
+		};
+		std::vector<vbo_t>	vbos_;
+
+		GLuint	vtx_id_;
+		std::vector<GLuint>	idx_id_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -255,7 +265,7 @@ namespace mdf {
 		*/
 		//-----------------------------------------------------------------//
 		pmd_io() : version_(0.0f),
-			vertex_min_(0.0f), vertex_max_(0.0f)
+			vertex_min_(0.0f), vertex_max_(0.0f), vtx_id_(0), idx_id_(0)
 		{ }
 
 

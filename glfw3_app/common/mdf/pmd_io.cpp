@@ -338,6 +338,14 @@ namespace mdf {
 
 	void pmd_io::destroy_()
 	{
+		if(vtx_id_) {
+			glDeleteBuffers(1, &vtx_id_);
+			vtx_id_ = 0;
+		}
+		if(!idx_id_.empty()) {
+			glDeleteBuffers(idx_id_.size(), &idx_id_[0]);
+			idx_id_.clear();
+		}
 	}
 
 
@@ -351,10 +359,36 @@ namespace mdf {
 		if(vertex_.empty()) return;
 		if(face_index_.empty()) return;
 
+		vbos_.reserve(vertex_.size());
+		vbos_.clear();
+		BOOST_FOREACH(pmd_vertex& v, vertex_) {
+			vbo_t vbo;
+			vbo.uv = v.uv;
+			vbo.n = v.normal;			
+			vbo.v.set(v.pos.x, v.pos.y, v.pos.z);
+			vbos_.push_back(vbo);
+		}
+
+		glGenBuffers(1, &vtx_id_);
+		glBindBuffer(GL_ARRAY_BUFFER, vtx_id_);
+		glBufferData(GL_ARRAY_BUFFER, vbos_.size() * sizeof(vbo_t), &vbos_[0], GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+		idx_id_.resize(material_.size());
+		glGenBuffers(material_.size(), &idx_id_[0]);
+
 		img::img_files imf;
 		imf.initialize();
 
+		uint32_t n = 0;
+		uint32_t in = 0;
 		BOOST_FOREACH(pmd_material& m, material_) {
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idx_id_[n]);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, m.face_vert_count * sizeof(uint16_t),
+				&face_index_[in], GL_STATIC_DRAW);
+			in += m.face_vert_count;
+			++n;
+
 			m.tex_id_ = 0;
 			std::string mats;
 			get_text_(m.texture_file_name, 20, mats);
@@ -381,6 +415,7 @@ namespace mdf {
 				}
 			}
 		}
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 
 
@@ -395,24 +430,20 @@ namespace mdf {
 		if(face_index_.empty()) return;
 
 		glEnable(GL_CULL_FACE);
-		glCullFace(GL_BACK);
+		glCullFace(GL_FRONT);
 
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		glEnable(GL_DEPTH_TEST);
-		glDisable(GL_BLEND);
-///		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		glEnableClientState(GL_NORMAL_ARRAY);
-		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		glEnableClientState(GL_VERTEX_ARRAY);
+		// 頂点情報をバインド
+		glBindBuffer(GL_ARRAY_BUFFER, vtx_id_);
+		glInterleavedArrays(GL_T2F_N3F_V3F, 0, 0);
 
-		glVertexPointer(3, GL_FLOAT, sizeof(pmd_vertex), &vertex_[0].pos);
-		glNormalPointer(GL_FLOAT, sizeof(pmd_vertex), &vertex_[0].normal);
-		glTexCoordPointer(2, GL_FLOAT, sizeof(pmd_vertex), &vertex_[0].uv);
-
-		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 		uint32_t n = 0;
 		BOOST_FOREACH(const pmd_material& m, material_) {
+			glColor4f(m.diffuse_color[0], m.diffuse_color[1], m.diffuse_color[2], m.alpha);
 			if(m.tex_id_) {
 				glEnable(GL_TEXTURE_2D);
 				glBindTexture(GL_TEXTURE_2D, m.tex_id_);
@@ -429,16 +460,14 @@ namespace mdf {
 			} else {
 				glDisable(GL_TEXTURE_2D);
 			}
-			glDrawElements(GL_TRIANGLES, m.face_vert_count,
-				GL_UNSIGNED_SHORT, &face_index_[n]);
-			n += m.face_vert_count;
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idx_id_[n]);
+			glDrawElements(GL_TRIANGLES, m.face_vert_count, GL_UNSIGNED_SHORT, 0);
+			++n;
 		}
-
 		glDisable(GL_TEXTURE_2D);
 
-		glDisableClientState(GL_VERTEX_ARRAY);
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-		glDisableClientState(GL_NORMAL_ARRAY);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 		glDisable(GL_CULL_FACE);
 	}
