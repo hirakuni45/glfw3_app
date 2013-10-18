@@ -8,10 +8,10 @@
 #include <boost/format.hpp>
 #include <boost/foreach.hpp>
 #include "mdf/pmd_io.hpp"
-#include "utils/file_io.hpp"
 #include "utils/string_utils.hpp"
-#include "gl_fw/gl_info.hpp"
 #include "img_io/img_files.hpp"
+#include "gl_fw/gl_info.hpp"
+#include "gl_fw/glutils.hpp"
 
 namespace mdf {
 
@@ -107,9 +107,10 @@ namespace mdf {
 			}
 			bone_.push_back(b);
 
-///			std::string s;
-///			get_text_(b.name, 20, s);
-///			std::cout << "Bone: " << s << std::endl;
+//			std::string s;
+//			get_text_(b.name, 20, s);
+//			std::cout << "Bone: '" << s << "', type: " << static_cast<int>(b.type)
+//				<< std::endl;
 		}
 
 		return true;
@@ -231,23 +232,102 @@ namespace mdf {
 	}
 
 
+//	static void draw_joint_(const vtx::fvyx& t, const vtx::fvtx& e, float w, float ratio)
+	static void draw_joint_(float w, float up, float down)
+	{
+//		vtx::fvtx n = vtx::normalize(e - t);
+
+		vtx::fvtxs vs;
+
+		vs.push_back(vtx::fvtx(0.0f, 0.0f, 0.0f));
+		vs.push_back(vtx::fvtx(   w,    w, down));
+		vs.push_back(vtx::fvtx(   w,   -w, down));
+		vs.push_back(vtx::fvtx(0.0f, 0.0f, 0.0f));
+		vs.push_back(vtx::fvtx(   w,   -w, down));
+		vs.push_back(vtx::fvtx(  -w,   -w, down));
+		vs.push_back(vtx::fvtx(0.0f, 0.0f, 0.0f));
+		vs.push_back(vtx::fvtx(  -w,   -w, down));
+		vs.push_back(vtx::fvtx(  -w,    w, down));
+		vs.push_back(vtx::fvtx(0.0f, 0.0f, 0.0f));
+		vs.push_back(vtx::fvtx(  -w,    w, down));
+		vs.push_back(vtx::fvtx(   w,    w, down));
+
+		vs.push_back(vtx::fvtx(   w,   -w, down));
+		vs.push_back(vtx::fvtx(   w,    w, down));
+		vs.push_back(vtx::fvtx(0.0f, 0.0f, up));
+		vs.push_back(vtx::fvtx(  -w,   -w, down));
+		vs.push_back(vtx::fvtx(   w,   -w, down));
+		vs.push_back(vtx::fvtx(0.0f, 0.0f, up));
+		vs.push_back(vtx::fvtx(  -w,    w, down));
+		vs.push_back(vtx::fvtx(  -w,   -w, down));
+		vs.push_back(vtx::fvtx(0.0f, 0.0f, up));
+		vs.push_back(vtx::fvtx(   w,    w, down));
+		vs.push_back(vtx::fvtx(  -w,    w, down));
+		vs.push_back(vtx::fvtx(0.0f, 0.0f, up));
+
+		vtx::fvtxs ns;
+		for(uint32_t i = 0; i < 8; ++i) {
+			vtx::fvtx n;
+			vtx::fvtx::cross(vs[i * 3 + 0], vs[i * 3 + 2], n);
+			vtx::fvtx out;
+			vtx::normalize(n, out);
+			ns.push_back(out);
+			ns.push_back(out);
+			ns.push_back(out);
+		}
+
+		glEnableClientState(GL_NORMAL_ARRAY);
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glNormalPointer(GL_FLOAT, 0, &ns[0]);
+		glVertexPointer(3, GL_FLOAT, 0, &vs[0]);
+		glDrawArrays(GL_TRIANGLES, 0, vs.size());
+		glDisableClientState(GL_NORMAL_ARRAY);
+		glDisableClientState(GL_VERTEX_ARRAY);
+	}
+
+
+	void pmd_io::initialize_()
+	{
+		if(init_) return;
+		init_ = true;
+
+		// Joint オブジェクトの生成
+		joint_list_id_ = glGenLists(1);
+		glNewList(joint_list_id_, GL_COMPILE);		
+		draw_joint_(0.1f, 1.0f, 0.3f);
+		glEndList();
+	}
+
+
+	void pmd_io::destroy_()
+	{
+		if(vtx_id_) {
+			glDeleteBuffers(1, &vtx_id_);
+			vtx_id_ = 0;
+		}
+
+		if(!idx_id_.empty()) {
+			glDeleteBuffers(idx_id_.size(), &idx_id_[0]);
+			idx_id_.clear();
+		}
+
+		glDeleteLists(bone_list_id_, 1);
+	}
+
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	ファイル・オープン
+		@brief	ロード
 		@param[in]	fn	ファイル名
 		@return 成功なら「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool pmd_io::open(const std::string& fn)
+	bool pmd_io::load(utils::file_io fio)
 	{
-		utils::file_io fio;
-		if(!fio.open(fn, "rb")) {
-			return false;
-		}
+		initialize_();
 
 		current_path_.clear();
-		utils::get_file_path(fn, current_path_);
+		utils::get_file_path(fio.get_path(), current_path_);
 
 		destroy_();
 
@@ -329,28 +409,22 @@ namespace mdf {
 		uint32_t l = fio.get_file_size();
 		std::cout << (l - len) << std::endl;
 #endif
-		fio.close();
-
 		return true;
 	}
 
 
-	void pmd_io::destroy_()
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	セーブ
+		@param[in]	fio	ファイル入出力クラス
+		@return 成功なら「true」
+	*/
+	//-----------------------------------------------------------------//
+	bool pmd_io::save(utils::file_io fio)
 	{
-		if(vtx_id_) {
-			glDeleteBuffers(1, &vtx_id_);
-			vtx_id_ = 0;
-		}
 
-		if(!idx_id_.empty()) {
-			glDeleteBuffers(idx_id_.size(), &idx_id_[0]);
-			idx_id_.clear();
-		}
 
-		if(sphere_) {
-			gluDeleteQuadric(sphere_);
-			sphere_ = 0;
-		}
+		return false;
 	}
 
 
@@ -361,15 +435,10 @@ namespace mdf {
 	//-----------------------------------------------------------------//
 	void pmd_io::render_setup()
 	{
-		if(sphere_ == 0) {
-			sphere_ = gluNewQuadric();
-			gluQuadricDrawStyle(sphere_, GLU_FILL);
-		}
-
 		if(vertex_.empty()) return;
 		if(face_index_.empty()) return;
 
-		{
+		{	// 頂点バッファの作成
 			std::vector<vbo_t> vbos;
 			vbos.reserve(vertex_.size());
 			vbos.clear();
@@ -388,34 +457,38 @@ namespace mdf {
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}
 
-		std::vector<uint16_t> idxes;
-		idxes.reserve(face_index_.size());
-		idxes.clear();
-		for(uint32_t i = 0; i < (face_index_.size() / 3); ++i) {
-			idxes.push_back(face_index_[i * 3 + 0]);
-			idxes.push_back(face_index_[i * 3 + 2]);
-			idxes.push_back(face_index_[i * 3 + 1]);
+		{ // インデックス・バッファの作成（マテリアル別に作成）
+			std::vector<uint16_t> idxes;
+			idxes.reserve(face_index_.size());
+			idxes.clear();
+			for(uint32_t i = 0; i < (face_index_.size() / 3); ++i) {
+				idxes.push_back(face_index_[i * 3 + 0]);
+				idxes.push_back(face_index_[i * 3 + 2]);
+				idxes.push_back(face_index_[i * 3 + 1]);
+			}
+
+			idx_id_.resize(material_.size());
+			glGenBuffers(material_.size(), &idx_id_[0]);
+
+			uint32_t n = 0;
+			uint32_t in = 0;
+			BOOST_FOREACH(const pmd_material& m, material_) {
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idx_id_[n]);
+				glBufferData(GL_ELEMENT_ARRAY_BUFFER, m.face_vert_count * sizeof(uint16_t),
+					&idxes[in], GL_STATIC_DRAW);
+				in += m.face_vert_count;
+				++n;
+			}
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 		}
 
-		idx_id_.resize(material_.size());
-		glGenBuffers(material_.size(), &idx_id_[0]);
-
+		// マテリアル（テクスチャー）の作成と登録
 		img::img_files imf;
 		imf.initialize();
-
-		uint32_t n = 0;
-		uint32_t in = 0;
 		BOOST_FOREACH(pmd_material& m, material_) {
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idx_id_[n]);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, m.face_vert_count * sizeof(uint16_t),
-				&idxes[in], GL_STATIC_DRAW);
-			in += m.face_vert_count;
-			++n;
-
 			m.tex_id_ = 0;
 			std::string mats;
 			get_text_(m.texture_file_name, 20, mats);
-// std::cout << mats << ", " << static_cast<int>(m.edge_flag) << std::endl;
 			if(!mats.empty()) {
 				std::string tfn;
 	   			size_t pos = mats.find_first_of('*');
@@ -427,18 +500,29 @@ namespace mdf {
 				if(imf.load(current_path_ + '/' + tfn)) {
 					const img::i_img* img = imf.get_image_if();
 					if(img == 0) continue;
+
 					glGenTextures(1, &m.tex_id_);
 					glBindTexture(GL_TEXTURE_2D, m.tex_id_);
 					int level = 0;
 					int border = 0;
-					glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA,
-						img->get_size().x, img->get_size().y, border,
+					int w = img->get_size().x;
+					int h = img->get_size().y;
+					glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA, w, h, border,
 						GL_RGBA, GL_UNSIGNED_BYTE, img->get_image());
-// std::cout << m.tex_id_ << ", " << img->get_size().x << ", " << img->get_size().y << std::endl;
 				}
 			}
 		}
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+		// Bone ジョイントの作成
+		// bone joint size
+		bone_joint_size_ = (vertex_max_ - vertex_min_).len() / 200.0f;
+		GLUquadricObj* sphere = gluNewQuadric();
+		gluQuadricDrawStyle(sphere, GLU_FILL);
+		bone_list_id_ = glGenLists(1);
+		glNewList(bone_list_id_, GL_COMPILE);		
+		gluSphere(sphere, bone_joint_size_, 10.0f, 10.0f);
+		glEndList();
+		gluDeleteQuadric(sphere);
 	}
 
 
@@ -463,9 +547,7 @@ namespace mdf {
 
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		glEnable(GL_DEPTH_TEST);
-///		glDisable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
-///		glEnable(GL_POLYGON_SMOOTH);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		// 頂点情報をバインド
@@ -500,8 +582,6 @@ namespace mdf {
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-///		glDisable(GL_POLYGON_SMOOTH);
-
 		glDisable(GL_CULL_FACE);
 
 		glPopMatrix();
@@ -511,22 +591,43 @@ namespace mdf {
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	ボーンのレンダリング
+		@param[in]	lig	ライトのコンテキスト
 	*/
 	//-----------------------------------------------------------------//
-	void pmd_io::render_bone()
+	void pmd_io::render_bone(gl::light& lig)
 	{
 		if(bone_.empty()) return;
 
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_BLEND);
+		glDisable(GL_TEXTURE_2D);
 
-		glColor3f(1.0f, 1.0f, 1.0f);
 		BOOST_FOREACH(const pmd_bone& bone, bone_) {
+			if(bone.type == pmd_bone::NO_DISP) {
+				lig.set_material(gl::light::material::turquoise);
+			} else {
+				lig.set_material(gl::light::material::pearl);
+			}
 			glPushMatrix();
-			glTranslatef(bone.head_pos.x, bone.head_pos.y, bone.head_pos.z);
-			gluSphere(sphere_, 0.1f, 10.0f, 10.0f);
+			gl::glTranslate(bone.head_pos);
+			glCallList(bone_list_id_);
+			lig.set_material(gl::light::material::pearl);
 			glPopMatrix();
-		}
-	}
 
+			uint16_t idx = bone.parent_index;
+			if(idx < bone_.size()) {
+				glPushMatrix();
+				gl::glTranslate(bone.head_pos);
+				vtx::fvtx sc((bone.head_pos - bone_[idx].head_pos).len());
+				gl::glScale(sc);
+				glCallList(joint_list_id_);
+//				gl::draw_line(bone.head_pos, bone_[idx].head_pos);
+				glPopMatrix();
+			}
+		}
+
+		glDisable(GL_CULL_FACE);
+	}
 }

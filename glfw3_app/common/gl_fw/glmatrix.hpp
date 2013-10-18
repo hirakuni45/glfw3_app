@@ -500,10 +500,10 @@ namespace gl {
 			for(int i = 0; i < 4; ++i) {
 				std::cout << boost::format("(%d) %-1.5f, %-1.5f, %-1.5f, %-1.5f\n")
 					% i
-					% m_acc[m_mode].m[0 * 4 + i]
-					% m_acc[m_mode].m[1 * 4 + i]
-					% m_acc[m_mode].m[2 * 4 + i]
-					% m_acc[m_mode].m[3 * 4 + i];
+					% acc_[mode_].m[0 * 4 + i]
+					% acc_[mode_].m[1 * 4 + i]
+					% acc_[mode_].m[2 * 4 + i]
+					% acc_[mode_].m[3 * 4 + i];
 			}
 		}
 #endif

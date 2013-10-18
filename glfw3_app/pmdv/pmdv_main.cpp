@@ -41,8 +41,15 @@ namespace app {
 			widget_button::param wp_("開く");
 			fopen_ = wd.add_widget<widget_button>(wp, wp_);
 		}
-		{
-			widget::param wp(vtx::srect(10, 60, 150, 40), tools_);
+		short h = 60;
+		{	// Grid、On/Off
+			widget::param wp(vtx::srect(10, h, 150, 30), tools_);
+			widget_check::param wp_("Grid", true);
+			grid_ = wd.add_widget<widget_check>(wp, wp_);
+			h += 40;
+		}
+		{	// ボーン、On/Off
+			widget::param wp(vtx::srect(10, h, 150, 30), tools_);
 			widget_check::param wp_("ボーン");
 			bone_ = wd.add_widget<widget_check>(wp, wp_);
 		}
@@ -68,6 +75,10 @@ namespace app {
 			tu.list_all();
 		}
 #endif
+
+		// ボーン表示用ライトの設定
+		bone_light_ = light_.create();
+		light_.set_position(bone_light_, vtx::fvtx(5.0f, 5.0f, 5.0f));
 
 		// プリファレンスの取得
 		sys::preference& pre = director_.at_core().preference_;
@@ -95,7 +106,7 @@ namespace app {
 
 		if(filer_id_ != filer_->get_select_file_id()) {
 			filer_id_ = filer_->get_select_file_id();
-			pmd_io_.open(filer_->get_file());
+			pmd_io_.load(filer_->get_file());
 			pmd_io_.render_setup();
 		}
 
@@ -118,21 +129,28 @@ namespace app {
 		director_.at_core().widget_director_.service();
 
 		camera_.service();
-		glDisable(GL_TEXTURE_2D);
-		glEnable(GL_LINE_SMOOTH);
-		glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
-		glEnable(GL_BLEND);
-		glEnable(GL_DEPTH_TEST);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-		gl::draw_grid(vtx::fpos(-10.0f), vtx::fpos(10.0f), vtx::fpos(1.0f));
-		glDisable(GL_LINE_SMOOTH);
-		glDisable(GL_BLEND);
+
+		if(grid_->get_check()) {
+			glDisable(GL_TEXTURE_2D);
+			glEnable(GL_LINE_SMOOTH);
+			glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
+			glEnable(GL_BLEND);
+			glEnable(GL_DEPTH_TEST);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+			gl::draw_grid(vtx::fpos(-10.0f), vtx::fpos(10.0f), vtx::fpos(1.0f));
+			glDisable(GL_LINE_SMOOTH);
+			glDisable(GL_BLEND);
+		}
 
 		pmd_io_.render_surface();
 		if(bone_->get_check()) {
-			pmd_io_.render_bone();
+			light_.enable();
+			light_.enable(bone_light_);
+			light_.service();
+			pmd_io_.render_bone(light_);
 		}
+		light_.enable(false);
 
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		glEnable(GL_TEXTURE_2D);

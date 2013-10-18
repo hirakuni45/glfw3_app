@@ -18,21 +18,53 @@ namespace gl {
 		@brief	ライト・クラス
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	class light {
-
-	public:
+	struct light {
 		typedef size_t	handle;
+
+		struct material {
+			enum type {
+				emerald,	///< エメラルド
+				jade,		///< 翡翠
+				obsidian,	///< 黒曜石
+				pearl,		///< 真珠
+				ruby,		///< ルビー
+				turquoise,	///< トルコ石
+				brass,		///< 真鍮
+				bronze,		///< 青銅
+				chrome,		///< クローム
+				copper,		///< 銅
+				gold,		///< 金
+				silver,		///< 銀
+				black_plastic,	///< プラスチック(黒)
+				cyan_plastic,	///< プラスチック(シアン)
+				green_plastic,	///< プラスチック(緑)
+				red_plastic,	///< プラスチック(赤)
+				white_plastic,	///< プラスチック(白)
+				yellow_plastic,	///< プラスチック(黄)
+				black_rubber,	///< ゴム(黒)
+				cyan_rubber,	///< ゴム(シアン)
+				green_rubber,	///< ゴム(緑)
+				red_rubber,		///< ゴム(赤)
+				white_rubber,	///< ゴム(白)
+				yellow_rubber,	///< ゴム(黄)
+				none_,			///< 無効
+			};
+		};
 
 	private:
 		bool	enable_;
 
 		struct light_env {
 			bool		enable_;
-			vtx::fvtx4	light_pos_;
-			img::rgbaf	light_ambient_;
-			img::rgbaf	light_diffuse_;
-			img::rgbaf	light_specular_;
-			light_env() : enable_(true) { }
+			vtx::fvtx4	pos_;
+			img::rgbaf	ambient_;
+			img::rgbaf	diffuse_;
+			img::rgbaf	specular_;
+			light_env() : enable_(true), pos_(0.0f),
+				ambient_(0.0f, 0.0f, 0.0f, 1.0f),
+				diffuse_(1.0f, 1.0f, 1.0f, 1.0f),
+				specular_(1.0f, 1.0f, 1.0f, 1.0f)
+			{ }
 		};
 
 		typedef std::vector<light_env>						light_envs;
@@ -41,13 +73,15 @@ namespace gl {
 
 		light_envs		light_envs_;
 
+		uint32_t	light_num_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		light() : enable_(false) { }
+		light() : enable_(false), light_num_(0) { }
 
 
 		//-----------------------------------------------------------------//
@@ -55,15 +89,7 @@ namespace gl {
 			@brief	デストラクター
 		*/
 		//-----------------------------------------------------------------//
-		~light() { destroy(); }
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	初期化
-		*/
-		//-----------------------------------------------------------------//
-		void initialize();
+		~light() { }
 
 
 		//-----------------------------------------------------------------//
@@ -72,7 +98,14 @@ namespace gl {
 			@param[in]	f	フラグ
 		*/
 		//-----------------------------------------------------------------//
-		void enable(bool f = true) { enable_ = f; }
+		void enable(bool f = true) {
+			enable_ = f;
+			if(light_num_ != 0 && enable_) {
+				glEnable(GL_LIGHTING);
+			} else {
+				glDisable(GL_LIGHTING);
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -107,7 +140,7 @@ namespace gl {
 		*/
 		//-----------------------------------------------------------------//
 		void set_position(handle h, const vtx::fvtx& pos) {
-			light_envs_[h].light_pos_.set(pos.x, pos.y, pos.z);
+			light_envs_[h].pos_.set(pos.x, pos.y, pos.z);
 		}
 
 
@@ -119,7 +152,7 @@ namespace gl {
 		*/
 		//-----------------------------------------------------------------//
 		void set_ambient_color(handle h, const img::rgbaf& col) {
-			light_envs_[h].light_ambient_ = col;
+			light_envs_[h].ambient_ = col;
 		}
 
 
@@ -131,7 +164,7 @@ namespace gl {
 		*/
 		//-----------------------------------------------------------------//
 		void set_diffuse_color(handle h, const img::rgbaf& col) {
-			light_envs_[h].light_diffuse_ = col;
+			light_envs_[h].diffuse_ = col;
 		}
 
 
@@ -143,7 +176,7 @@ namespace gl {
 		*/
 		//-----------------------------------------------------------------//
 		void set_specular_color(handle h, const img::rgbaf& col) {
-			light_envs_[h].light_specular_ = col;
+			light_envs_[h].specular_ = col;
 		}
 
 
@@ -153,7 +186,7 @@ namespace gl {
 			@param[in]	id	マテルアル ID
 		*/
 		//-----------------------------------------------------------------//
-		void set_material(int id) const;
+		void set_material(material::type id) const;
 
 
 		//-----------------------------------------------------------------//
@@ -163,7 +196,7 @@ namespace gl {
 			@return	マテリアル ID
 		*/
 		//-----------------------------------------------------------------//
-		int lookup_material(const std::string& name) const;
+		material::type lookup_material(const std::string& name) const;
 
 
 		//-----------------------------------------------------------------//
@@ -173,8 +206,8 @@ namespace gl {
 		*/
 		//-----------------------------------------------------------------//
 		bool set_material(const std::string& name) const {
-			int id = lookup_material(name);
-			if(id >= 0) {
+			material::type id = lookup_material(name);
+			if(id != material::type::none_) {
 				set_material(id);
 				return true;
 			} else {
@@ -186,18 +219,9 @@ namespace gl {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	サービス
-			@return 有効なライトがあれば「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool service() const;
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	廃棄
-		*/
-		//-----------------------------------------------------------------//
-		void destroy();
+		void service();
 
 
 		//-----------------------------------------------------------------//

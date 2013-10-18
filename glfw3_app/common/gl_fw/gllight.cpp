@@ -91,7 +91,7 @@ namespace gl {
 			25.6f
 		},
 
-		// (クローム) 	
+		// (クローム) 
 		{
 			"chrome",
 			{ 0.25f,      0.25f,     0.25f,     1.0f },
@@ -239,35 +239,25 @@ namespace gl {
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	初期化
-	*/
-	//-----------------------------------------------------------------//
-	void light::initialize()
-	{
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
 		@brief	マテリアルの設定
 		@param[in]	id	マテルアル ID
 	*/
 	//-----------------------------------------------------------------//
-	void light::set_material(int id) const
+	void light::set_material(material::type id) const
 	{
 		const light_material_& mte = light_material_tables_[id];
 #ifdef WIN32
-		::glMaterialfv(GL_FRONT, GL_AMBIENT,   mte.ambient_);
-		::glMaterialfv(GL_FRONT, GL_DIFFUSE,   mte.diffuse_);
-		::glMaterialfv(GL_FRONT, GL_SPECULAR,  mte.specular_);
-		::glMaterialfv(GL_FRONT, GL_SHININESS, &mte.shininess_);
+		glMaterialfv(GL_FRONT, GL_AMBIENT,   mte.ambient_);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE,   mte.diffuse_);
+		glMaterialfv(GL_FRONT, GL_SPECULAR,  mte.specular_);
+		glMaterialfv(GL_FRONT, GL_SHININESS, &mte.shininess_);
 #endif
 
 #ifdef __PPU__
-		::glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,   mte.ambient_);
-		::glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,   mte.diffuse_);
-		::glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  mte.specular_);
-		::glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, &mte.shininess_);
+		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,   mte.ambient_);
+		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,   mte.diffuse_);
+		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  mte.specular_);
+		glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, &mte.shininess_);
 #endif
 	}
 
@@ -279,15 +269,15 @@ namespace gl {
 		@return	マテリアル ID
 	*/
 	//-----------------------------------------------------------------//
-	int light::lookup_material(const std::string& name) const
+	light::material::type light::lookup_material(const std::string& name) const
 	{
 		for(size_t i = 0; i < (sizeof(light_material_tables_) / sizeof(light_material_)); ++i) {
 			const light_material_& mte = light_material_tables_[i];
 			if(name == mte.name_) {
-				return i;
+				return static_cast<material::type>(i);
 			}
 		}
-		return -1;
+		return material::none_;
 	}
 
 
@@ -296,7 +286,7 @@ namespace gl {
 		@brief	サービス
 	*/
 	//-----------------------------------------------------------------//
-	bool light::service() const
+	void light::service()
 	{
 		static const GLenum light_idx[] = {
 			GL_LIGHT0, GL_LIGHT1, GL_LIGHT2, GL_LIGHT3,
@@ -307,31 +297,15 @@ namespace gl {
 		for(light_envs_cit cit = light_envs_.begin(); cit != light_envs_.end(); ++cit) {
 			const light_env& env = *cit;
 			if(env.enable_ == true && i < 8) {
-				::glLightfv(light_idx[i], GL_POSITION, env.light_pos_.getXYZW());
-				::glLightfv(light_idx[i], GL_AMBIENT,  env.light_ambient_.rgba);
-				::glLightfv(light_idx[i], GL_DIFFUSE,  env.light_diffuse_.rgba);
-				::glLightfv(light_idx[i], GL_SPECULAR, env.light_specular_.rgba);
-				::glEnable(light_idx[i]);
+				glLightfv(light_idx[i], GL_POSITION, env.pos_.getXYZW());
+				glLightfv(light_idx[i], GL_AMBIENT,  env.ambient_.rgba);
+				glLightfv(light_idx[i], GL_DIFFUSE,  env.diffuse_.rgba);
+				glLightfv(light_idx[i], GL_SPECULAR, env.specular_.rgba);
+				glEnable(light_idx[i]);
 				i++;
 			}
 		}
-		if(i != 0 && enable_ == true) {
-			::glEnable(GL_LIGHTING);
-			return true;
-		} else {
-			::glDisable(GL_LIGHTING);
-			return false;
-		}
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	廃棄
-	*/
-	//-----------------------------------------------------------------//
-	void light::destroy()
-	{
+		light_num_ = i;
 	}
 
 

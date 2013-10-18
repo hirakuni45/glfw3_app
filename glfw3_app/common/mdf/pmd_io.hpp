@@ -8,9 +8,11 @@
 #include <string>
 #include <vector>
 #include "gl_fw/IGLcore.hpp"
+#include "gl_fw/gllight.hpp"
 #include "utils/vtx.hpp"
 #include "utils/mtx.hpp"
 #include "utils/quat.hpp"
+#include "utils/file_io.hpp"
 
 namespace mdf {
 
@@ -128,14 +130,14 @@ namespace mdf {
 
 		struct pmd_bone {
 			enum bone_type {
-				ROTATE,			///< 回転
-				ROTATE_MOVE,	///< 回転と移動
-				IK,				///< IK
-				none_,			///< 不明
-				IK_,			///< IK 影響下
-				ROTATE_,		///< 回転影響下
-				IK_LINK,		///< IK 接続先
-				NO_DISP			///< 非表示
+				ROTATE,			///< (0) 回転
+				ROTATE_MOVE,	///< (1) 回転と移動
+				IK,				///< (2) IK
+				none_,			///< (3) 不明
+				IK_,			///< (4) IK 影響下
+				ROTATE_,		///< (5) 回転影響下
+				IK_LINK,		///< (6) IK 接続先
+				NO_DISP			///< (7) 非表示
 			};
 			char		name[20];			///< ボーン名
 			uint16_t	parent_index;		///< 親ボーン番号（無い場合は 0xffff）
@@ -153,6 +155,18 @@ namespace mdf {
 				if(!fio.get(head_pos.x)) return false;
 				if(!fio.get(head_pos.y)) return false;
 				if(!fio.get(head_pos.z)) return false;
+				return true;
+			}
+
+			bool put(utils::file_io& fio) {
+				if(fio.write(name, 20) != 20) return false;
+				if(!fio.put(parent_index)) return false;
+				if(!fio.put(tail_pos_index)) return false;
+				if(!fio.put(type)) return false;
+				if(!fio.put(ik_parent_index)) return false;
+				if(!fio.put(head_pos.x)) return false;
+				if(!fio.put(head_pos.y)) return false;
+				if(!fio.put(head_pos.z)) return false;
 				return true;
 			}
 		};
@@ -254,6 +268,7 @@ namespace mdf {
 		bool parse_skin_index_(utils::file_io& fio);
 		bool parse_bone_disp_list_(utils::file_io& fio);
 		bool parse_bone_disp_(utils::file_io& fio);
+		void initialize_();
 		void destroy_();
 
 		std::string	current_path_;
@@ -267,7 +282,11 @@ namespace mdf {
 		GLuint	vtx_id_;
 		std::vector<GLuint>	idx_id_;
 
-		GLUquadricObj*	sphere_;
+		float	bone_joint_size_;
+		GLuint	bone_list_id_;
+		GLuint	joint_list_id_;
+
+		bool	init_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -275,10 +294,11 @@ namespace mdf {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		pmd_io() : version_(0.0f),
+		pmd_io() : version_(1.0f),
 			vertex_min_(0.0f), vertex_max_(0.0f), vtx_id_(0),
-			sphere_(0)
-		{ }
+			bone_joint_size_(0.0f), bone_list_id_(0), joint_list_id_(0),
+			init_(false)
+		{ initialize_(); }
 
 
 		//-----------------------------------------------------------------//
@@ -286,7 +306,10 @@ namespace mdf {
 			@brief	デストラクター
 		*/
 		//-----------------------------------------------------------------//
-		~pmd_io() { destroy_(); }
+		~pmd_io() {
+			destroy_();
+			glDeleteLists(joint_list_id_, 1);
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -318,12 +341,58 @@ namespace mdf {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	ファイル・オープン
+			@brief	ロード
+			@param[in]	fio	ファイル入出力クラス
+			@return 成功なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool load(utils::file_io fio);
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ロード
 			@param[in]	fn	ファイル名
 			@return 成功なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool open(const std::string& fn);
+		bool load(const std::string& fn) {
+			utils::file_io fio;
+			if(!fio.open(fn, "rb")) {
+				return false;
+			}
+			bool f = load(fio);
+			fio.close();
+			return f;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	セーブ
+			@param[in]	fio	ファイル入出力クラス
+			@return 成功なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool save(utils::file_io fio);
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	セーブ
+			@param[in]	fn	ファイル名
+			@return 成功なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool save(const std::string& fn) {
+			utils::file_io fio;
+			if(!fio.open(fn, "wb")) {
+				return false;
+			}
+			bool f = save(fio);
+			fio.close();
+			return f;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -345,9 +414,10 @@ namespace mdf {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	ボーンのレンダリング
+			@param[in]	lig	ライトのコンテキスト
 		*/
 		//-----------------------------------------------------------------//
-		void render_bone();
+		void render_bone(gl::light& lig);
 
 	};
 }

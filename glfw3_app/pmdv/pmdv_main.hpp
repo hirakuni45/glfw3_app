@@ -13,6 +13,7 @@
 #include "widgets/widget_check.hpp"
 #include "mdf/pmd_io.hpp"
 #include "gl_fw/glcamera.hpp"
+#include "gl_fw/gllight.hpp"
 
 namespace app {
 
@@ -25,11 +26,14 @@ namespace app {
 
 		gui::widget_frame*		tools_;
 		gui::widget_button*		fopen_;
+		gui::widget_check*		grid_;
 		gui::widget_check*		bone_;
 
 		mdf::pmd_io		pmd_io_;
 
 		gl::camera		camera_;
+		gl::light		light_;
+		gl::light::handle	bone_light_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -39,7 +43,8 @@ namespace app {
 		//-----------------------------------------------------------------//
 		pmdv_main(utils::director<core>& d) : director_(d),
 			filer_(0), filer_id_(0),
-			tools_(0), fopen_(0), bone_(0)
+			tools_(0), fopen_(0), grid_(0), bone_(0),
+			bone_light_(0)
 		{ }
 
 
