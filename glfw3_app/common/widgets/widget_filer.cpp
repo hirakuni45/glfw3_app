@@ -732,7 +732,7 @@ namespace gui {
 		@return エラーが無い場合「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool widget_filer::load(sys::preference& pre)
+	bool widget_filer::load(const sys::preference& pre)
 	{
 		int err = 0;
 		std::string path;

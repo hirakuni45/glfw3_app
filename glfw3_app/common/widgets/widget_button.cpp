@@ -82,4 +82,30 @@ namespace gui {
 
 		render_text(wd_, objh_, get_param(), param_.text_param_, param_.plate_param_);
 	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	状態のセーブ
+		@param[in]	pre	プリファレンス参照
+		@return エラーが無い場合「true」
+	*/
+	//-----------------------------------------------------------------//
+	bool widget_button::save(sys::preference& pre)
+	{
+		return true;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	状態のロード
+		@param[in]	pre	プリファレンス参照
+		@return エラーが無い場合「true」
+	*/
+	//-----------------------------------------------------------------//
+	bool widget_button::load(const sys::preference& pre)
+	{
+		return true;
+	}
 }

@@ -10,7 +10,6 @@
 #include <boost/unordered_map.hpp>
 #include "utils/files.hpp"
 #include "utils/drive_info.hpp"
-#include "utils/preference.hpp"
 #include "widgets/widget_director.hpp"
 #include "widgets/widget_null.hpp"
 #include "widgets/widget_label.hpp"
@@ -301,6 +300,6 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(sys::preference& pre);
+		bool load(const sys::preference& pre);
 	};
 }

@@ -52,4 +52,30 @@ namespace gui {
 		glEnable(GL_TEXTURE_2D);
 		wd_.at_mobj().draw(objh_, gl::mobj::normal, 0, 0);
 	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	状態のセーブ
+		@param[in]	pre	プリファレンス参照
+		@return エラーが無い場合「true」
+	*/
+	//-----------------------------------------------------------------//
+	bool widget_frame::save(sys::preference& pre)
+	{
+		return true;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	状態のロード
+		@param[in]	pre	プリファレンス参照
+		@return エラーが無い場合「true」
+	*/
+	//-----------------------------------------------------------------//
+	bool widget_frame::load(const sys::preference& pre)
+	{
+		return true;
+	}
 }
