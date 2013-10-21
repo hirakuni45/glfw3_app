@@ -255,6 +255,17 @@ namespace gui {
 	}
 
 
+	void widget_filer::set_select_pos_(uint32_t pos)
+	{
+		BOOST_FOREACH(const widget_file& wf, center_) {
+			wf.name->set_state(widget::state::SYSTEM_SELECT, false);
+			wf.info->set_state(widget::state::SYSTEM_SELECT, false);
+		}
+		select_pos_ = pos;
+		set_regist_state_();
+	}
+
+
 	void widget_filer::destroy_()
 	{
 		destroy_files_(left_);
@@ -620,12 +631,7 @@ namespace gui {
 		}
 		widget_files_cit cit = scan_select_in_file_(center_);
 		if(cit != center_.end()) {
-			BOOST_FOREACH(const widget_file& wf, center_) {
-				wf.name->set_state(widget::state::SYSTEM_SELECT, false);
-				wf.info->set_state(widget::state::SYSTEM_SELECT, false);
-			}
-			select_pos_ = cit - center_.begin();
-			set_regist_state_();
+			set_select_pos_(cit - center_.begin());
 		} else if(scan_select_file_(center_) != center_.end()) {
 			// 何もしない
 		} else if(!files_->get_state(widget::state::DRAG)){
@@ -697,23 +703,26 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	bool widget_filer::focus_file(const std::string& path)
 	{
+// std::cout << path << std::endl;
 		std::string fn;
-		if(path[0] == '/') {
+		if(utils::probe_full_path(path)) {
 			std::string root;
 			if(utils::get_file_path(path, root)) {
 				if(param_.path_ != root) return false;
 			}
-			if(!utils::get_file_path(path, fn)) {
+			const char* p = utils::get_file_name(path);
+			if(p == 0) {
 				return false;
 			}
+			fn = p;
 		} else {
 			fn = path;
 		}
-
+// std::cout << fn << std::endl;
 		uint32_t n = 0;
-		BOOST_FOREACH(const widget_file& wf, left_) {
+		BOOST_FOREACH(const widget_file& wf, center_) {
 			if(wf.name->at_local_param().text_param_.text_ == fn) {
-				select_pos_ = n;
+				set_select_pos_(n);
 				return true;
 			}
 			++n;

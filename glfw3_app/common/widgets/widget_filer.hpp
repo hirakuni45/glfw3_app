@@ -130,6 +130,7 @@ namespace gui {
 		void destroy_files_(widget_files& wfs);
 		void get_regist_state_();
 		void set_regist_state_();
+		void set_select_pos_(uint32_t pos);
 		void destroy_();
 	public:
 		//-----------------------------------------------------------------//
