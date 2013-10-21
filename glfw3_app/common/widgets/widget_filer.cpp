@@ -690,19 +690,34 @@ namespace gui {
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	ファイルを選択
+		@brief	ファイルをフォーカスする
 		@param[in]	path	選択するファイルパス
 		@return 該当するファイルが無い場合「false」
 	*/
 	//-----------------------------------------------------------------//
-	bool widget_filer::select_file(const std::string& path)
+	bool widget_filer::focus_file(const std::string& path)
 	{
-#if 0
-		file_map_it it = file_map_.find(path);
-		if(it != file_map_.end()) {
-			select_pos_ = it->second.select_pos_;
+		std::string fn;
+		if(path[0] == '/') {
+			std::string root;
+			if(utils::get_file_path(path, root)) {
+				if(param_.path_ != root) return false;
+			}
+			if(!utils::get_file_path(path, fn)) {
+				return false;
+			}
+		} else {
+			fn = path;
 		}
-#endif
+
+		uint32_t n = 0;
+		BOOST_FOREACH(const widget_file& wf, left_) {
+			if(wf.name->at_local_param().text_param_.text_ == fn) {
+				select_pos_ = n;
+				return true;
+			}
+			++n;
+		}
 		return false;
 	}
 

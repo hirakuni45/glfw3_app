@@ -386,6 +386,10 @@ namespace app {
 					jacket_ = mobj_.install(wd.at_img_files().get_image_if()); 
 				}
 			}
+
+			// 演奏ファイル名を取得して、ファイラーのフォーカスを設定
+			
+
 			tag_serial_ = tag.serial_;
 		}
 

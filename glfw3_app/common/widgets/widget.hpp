@@ -225,6 +225,8 @@ namespace gui {
 				RESIZE,					///< リサイズ時有効
 
 				SERVICE,				///< サービスを呼び出す
+				PREFERENCE_LOAD,		///< プリファレンスのロード
+				PREFERENCE_SAVE,		///< プリファレンスのセーブ
 
 				/// ワーク用
 				SYSTEM_STALL,			///< システム用ストール
