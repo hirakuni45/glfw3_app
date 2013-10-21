@@ -126,7 +126,7 @@ CPPWARN	=	-Wall
 OBJECTS	=	$(PSOURCES:.cpp=.o) $(CSOURCES:.c=.o)
 
 .SUFFIXES :
-.SUFFIXES : .res .hpp .h .c .cpp .o
+.SUFFIXES : .rc .hpp .h .c .cpp .o
 
 $(TARGET).exe: $(OBJECTS) Makefile
 	$(LK) $(LOF)$(TARGET).exe $(LFLAGS) $(LIBS) $(OBJECTS) $(LIBN)
@@ -138,7 +138,7 @@ $(TARGET).exe: $(OBJECTS) Makefile
 	$(CP) $(POPT) $(PFLAGS) $(PINCS) $(CPWARN) -c $< $(COF)$@
 
 .rc.c:
-	$(RC) $< $@
+	$(RC) -i $< -o $@
 
 all:
 	make clean
