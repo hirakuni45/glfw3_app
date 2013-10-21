@@ -298,9 +298,12 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	コンストラクター
+			@param[in]	para	パラメーター
+			@param[in]	sym		シンボル
 		*/
 		//-----------------------------------------------------------------//
-		widget(const param& p) : param_(p), symbol_(), serial_(0), mark_(false)
+		widget(const param& para, const std::string& sym = "") : param_(para), symbol_(sym),
+			serial_(0), mark_(false)
 			{ }
 
 

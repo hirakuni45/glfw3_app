@@ -130,12 +130,12 @@ namespace gui {
 		/*!
 			@brief	部品の追加
 			@param[in]	bp	ベース型パラメーター
-			@param[in]	p	T 型パラメーター
+			@param[in]	tp	T 型パラメーター
 		*/
 		//-----------------------------------------------------------------//
 		template <class T>
-		T* add_widget(const widget::param& bp, const typename T::param& p) {
-			T* w = new T(*this, bp, p);
+		T* add_widget(const widget::param& bp, const typename T::param& tp) {
+			T* w = new T(*this, bp, tp);
 			w->initialize();
 			w->set_serial(serial_);
 			++serial_;
