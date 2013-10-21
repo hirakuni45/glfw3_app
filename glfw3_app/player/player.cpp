@@ -282,7 +282,7 @@ namespace app {
 				sound.pause_stream();
 			}
 
-			igl->set_title(sound.get_file_path_stream());
+			igl->set_title(sound.get_file_stream());
 
 		} else if(sound.get_state_stream() == al::sound::stream_state::PAUSE) {
 			wd.enable(play_btn_);
@@ -307,7 +307,7 @@ namespace app {
 		}
 		if(rew_btn_->get_selected()) {
 			// 開始５秒以降なら、曲の先頭に～
-			if(sound.get_time_stream() < 5) {
+			if(sound.get_time_stream() < seek_change_time_) {
 				sound.prior_stream();
 			} else {
 				sound.replay_stream();
@@ -388,8 +388,9 @@ namespace app {
 			}
 
 			// 演奏ファイル名を取得して、ファイラーのフォーカスを設定
-			
-
+			{ 
+				filer_->focus_file(sound.get_file_stream());
+			}
 			tag_serial_ = tag.serial_;
 		}
 
@@ -463,7 +464,7 @@ namespace app {
 		if(sound.get_state_stream() == al::sound::stream_state::PLAY ||
 			sound.get_state_stream() == al::sound::stream_state::PAUSE) {
 			po = static_cast<int>(sound.get_position_stream());
-			fn = sound.get_file_path_stream();
+			fn = sound.get_file_stream();
 		}
 		pre.put_integer(remain_pos_path_, po);
 		pre.put_text(remain_file_path_, fn);

@@ -55,7 +55,7 @@ PSOURCES	=	main.cpp \
 CSOURCES	=	../common/minizip/ioapi.c \
 				../common/minizip/unzip.c
 STDLIBS		=
-OPTLIBS		=	glfw3 opengl32 glu32 gdi32 imm32 \
+OPTLIBS		=	glfw3 glew32 opengl32 glu32 gdi32 imm32 \
 				pthread \
 				openal winmm dsound \
 				fitz \

@@ -16,7 +16,15 @@
 
 namespace app {
 
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief  プレイヤー・メイン・シーン
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class player : public utils::i_scene {
+
+		/// 「REW」ボタンが押された場合の挙動切り替え時間
+		static const int seek_change_time_ = 5;
 
 		utils::director<core>&	director_;
 
