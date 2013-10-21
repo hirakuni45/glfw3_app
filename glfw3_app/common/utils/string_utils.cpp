@@ -172,6 +172,34 @@ namespace utils {
 
 	//-----------------------------------------------------------------//
 	/*!
+		@brief	フルパスか、相対パスか検査する
+		@param[in]	path	ファイルパス
+		@return フル・パスなら「true」
+	*/
+	//-----------------------------------------------------------------//
+	bool probe_full_path(const std::string& path)
+	{
+		if(path.empty()) return false;
+
+		char ch = path[0];
+#ifdef WIN32
+		// WIN32 ではドライブレターの検査
+		if(path.size() >= 3 && path[1] == ':' &&
+			(path[0] >= 'A' && path[0] <= 'Z') || (path[0] >= 'a' && path[0] <= 'z')) {
+			ch = path[2];
+		} else {
+			ch = 0;
+		}
+#endif
+		if(ch != 0 && ch == '/') {
+			return true;
+		}
+		return false;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
 		@brief	階層を一つ戻ったパスを得る
 		@param[in]	src	ソースパス
 		@param[out]	dst	出力パス
