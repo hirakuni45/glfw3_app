@@ -224,19 +224,19 @@ namespace gui {
 			wd_.del_widget(wf.base);
 		}
 		wfs.clear();
-		speed_.set(0);
-		position_.set(0);
 	}
 
 
 	void widget_filer::get_regist_state_()
 	{
 		// 選択位置の回復
-		select_pos_ = 0;
 		file_map_it it = file_map_.find(param_.path_);
 		if(it != file_map_.end()) {
 			position_ = it->second.position_;
 			select_pos_ = it->second.select_pos_;
+		} else {
+			select_pos_ = 0;
+			position_.set(0.0f);
 		}
 	}
 
@@ -496,13 +496,12 @@ namespace gui {
 
 		short base_size = main_->get_rect().size.y;
 		short d = base_size - center_.size() * param_.label_height_;
-		short scroll_gain = 12;
 		float gain = 0.85f;
 		float slip_gain = 0.5f;
 		float speed_gain = 0.95f;
 		float speed_move = 38.0f;	/// 横スクロールの初期速度
 
-		// スプリング効果など
+		// 左右スクロールと、スプリング効果など
 		if(move_speed_ != 0.0f) {
 			position_.x += move_speed_;
 			float spd = move_speed_;
@@ -515,9 +514,11 @@ namespace gui {
 				position_.x = 0.0f;
 				std::string pp;
 				if(utils::previous_path(param_.path_, pp)) {
+					std::string tmp = param_.path_;
 					param_.path_ = pp;
 					destroy_files_(center_);
 					center_.swap(left_);
+					focus_file(tmp);
 					if(utils::previous_path(param_.path_, pp)) {
 						fsc_.set_path(pp, param_.filter_);
 					}
@@ -531,8 +532,8 @@ namespace gui {
 				destroy_files_(left_);
 				center_.swap(left_);
 				center_.swap(right_);
+				get_regist_state_();
 			}
-
 		} else if(files_->get_state(widget::state::DRAG)) {
 			position_ = files_->get_param().move_pos_;
 			if(left_.size() > 0) {
@@ -582,7 +583,7 @@ namespace gui {
 					} else {
 						const vtx::spos& scr = wd_.get_scroll();
 						if(files_->get_focus() && scr.y != 0) {
-							position_.y += scr.y * scroll_gain;
+							position_.y += scr.y * param_.label_height_;
 							if(position_.y < d) {
 								position_.y = d;
 							} else if(position_.y > 0.0f) {
@@ -718,10 +719,17 @@ namespace gui {
 		} else {
 			fn = path;
 		}
-// std::cout << fn << std::endl;
+
 		uint32_t n = 0;
 		BOOST_FOREACH(const widget_file& wf, center_) {
-			if(wf.name->at_local_param().text_param_.text_ == fn) {
+			std::string t;
+			utils::strip_last_of_delimita_path(wf.name->at_local_param().text_param_.text_, t);
+			if(t == fn) {
+				short ofs = static_cast<short>(n) -
+				(main_->get_rect().size.y / param_.label_height_) / 2;
+				if(ofs >= 0) { 
+					position_.y = static_cast<float>(ofs * -param_.label_height_);
+				}
 				set_select_pos_(n);
 				return true;
 			}
