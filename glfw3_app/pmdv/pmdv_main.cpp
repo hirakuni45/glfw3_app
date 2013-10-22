@@ -106,8 +106,11 @@ namespace app {
 
 		if(filer_id_ != filer_->get_select_file_id()) {
 			filer_id_ = filer_->get_select_file_id();
-			pmd_io_.load(filer_->get_file());
-			pmd_io_.render_setup();
+			if(pmd_io_.load(filer_->get_file())) {
+				pmd_io_.render_setup();
+			} else if(pmx_io_.load(filer_->get_file())) {
+
+			}
 		}
 
 		if(!wd.update()) {

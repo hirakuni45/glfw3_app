@@ -12,6 +12,7 @@
 #include "widgets/widget_button.hpp"
 #include "widgets/widget_check.hpp"
 #include "mdf/pmd_io.hpp"
+#include "mdf/pmx_io.hpp"
 #include "gl_fw/glcamera.hpp"
 #include "gl_fw/gllight.hpp"
 
@@ -30,6 +31,7 @@ namespace app {
 		gui::widget_check*		bone_;
 
 		mdf::pmd_io		pmd_io_;
+		mdf::pmx_io		pmx_io_;
 
 		gl::camera		camera_;
 		gl::light		light_;

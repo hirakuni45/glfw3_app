@@ -56,7 +56,8 @@ PSOURCES	=	main.cpp \
 				../common/widgets/widget_tree.cpp \
 				../common/widgets/widget_filer.cpp \
 				../common/widgets/widget_terminal.cpp \
-				../common/mdf/pmd_io.cpp
+				../common/mdf/pmd_io.cpp \
+				../common/mdf/pmx_io.cpp
 #				../common/mdf/surface.cpp
 
 CSOURCES	=	../common/minizip/ioapi.c \
@@ -227,8 +228,8 @@ main.o: ../common/widgets/widget_label.hpp
 main.o: ../common/widgets/widget_button.hpp
 main.o: ../common/widgets/widget_frame.hpp ../common/widgets/widget_check.hpp
 main.o: ../common/mdf/pmd_io.hpp ../common/gl_fw/gllight.hpp
-main.o: ../common/utils/quat.hpp ../common/gl_fw/glcamera.hpp
-main.o: ../common/gl_fw/glmatrix.hpp
+main.o: ../common/utils/quat.hpp ../common/mdf/pmx_io.hpp
+main.o: ../common/gl_fw/glcamera.hpp ../common/gl_fw/glmatrix.hpp
 pmdv_main.o: ../common/core/glcore.hpp ../common/gl_fw/IGLcore.hpp
 pmdv_main.o: ../common/core/device.hpp ../common/utils/vtx.hpp
 pmdv_main.o: ../common/gl_fw/gl_info.hpp ../common/gl_fw/glfonts.hpp
@@ -259,7 +260,8 @@ pmdv_main.o: ../common/widgets/widget_button.hpp
 pmdv_main.o: ../common/widgets/widget_frame.hpp
 pmdv_main.o: ../common/widgets/widget_check.hpp ../common/mdf/pmd_io.hpp
 pmdv_main.o: ../common/gl_fw/gllight.hpp ../common/utils/quat.hpp
-pmdv_main.o: ../common/gl_fw/glcamera.hpp ../common/gl_fw/glmatrix.hpp
+pmdv_main.o: ../common/mdf/pmx_io.hpp ../common/gl_fw/glcamera.hpp
+pmdv_main.o: ../common/gl_fw/glmatrix.hpp
 ../common/core/glcore.o: ../common/core/glcore.hpp
 ../common/core/glcore.o: ../common/gl_fw/IGLcore.hpp
 ../common/core/glcore.o: ../common/core/device.hpp ../common/utils/vtx.hpp
@@ -1111,3 +1113,13 @@ pmdv_main.o: ../common/gl_fw/glcamera.hpp ../common/gl_fw/glmatrix.hpp
 ../common/mdf/pmd_io.o: ../common/img_io/img_idx8.hpp
 ../common/mdf/pmd_io.o: ../common/img_io/img_clut.hpp
 ../common/mdf/pmd_io.o: ../common/img_io/img_gray8.hpp
+../common/mdf/pmx_io.o: ../common/mdf/pmx_io.hpp ../common/gl_fw/IGLcore.hpp
+../common/mdf/pmx_io.o: ../common/core/device.hpp ../common/utils/vtx.hpp
+../common/mdf/pmx_io.o: ../common/gl_fw/gl_info.hpp
+../common/mdf/pmx_io.o: ../common/gl_fw/glfonts.hpp
+../common/mdf/pmx_io.o: ../common/gl_fw/Ikfimg.hpp ../common/img_io/i_img.hpp
+../common/mdf/pmx_io.o: ../common/img_io/img.hpp
+../common/mdf/pmx_io.o: ../common/utils/string_utils.hpp
+../common/mdf/pmx_io.o: ../common/utils/mtx.hpp ../common/utils/file_io.hpp
+../common/mdf/pmx_io.o: ../common/gl_fw/gllight.hpp ../common/img_io/img.hpp
+../common/mdf/pmx_io.o: ../common/utils/quat.hpp
