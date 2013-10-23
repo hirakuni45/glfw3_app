@@ -65,6 +65,9 @@ namespace app {
 		int				drop_file_id_;
 		uint32_t		select_file_id_;
 
+		vtx::spos		mouse_pos_;
+		uint32_t		filer_count_;
+
 		void sound_play_(const std::string& file);
 		gui::widget* create_image_button_(const std::string& file, const vtx::spos& pos);
 		gui::widget_label* create_text_pad_(const vtx::spos& size, const std::string& text,
@@ -83,7 +86,8 @@ namespace app {
 		  title_pad_(0), album_pad_(0), artist_pad_(0), other_pad_(0),
 		  error_dialog_(0),
 		  total_t_(0), remain_t_(0), frame_count_(0), frame_limit_(60),
-		  tag_serial_(0), jacket_(0), drop_file_id_(0), select_file_id_(0)
+		  tag_serial_(0), jacket_(0), drop_file_id_(0), select_file_id_(0),
+		  mouse_pos_(0), filer_count_(0)
 		{ }
 
 

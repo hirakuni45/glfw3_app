@@ -205,6 +205,7 @@ namespace app {
 
 		const vtx::spos& size = igl->get_size();
 
+		// ウィジェットのコア、更新
 		gui::widget_director& wd = director_.at_core().widget_director_;
 		wd.update();
 
@@ -297,14 +298,17 @@ namespace app {
 			play_btn_->set_state(gui::widget::state::STALL);
 		}
 
+		// ファイラーボタンの確認
 		if(filer_ && file_btn_->get_selected()) {
 			bool f = filer_->get_state(gui::widget::state::ENABLE);
 			filer_->enable(!f);
 		}
 
+		// 「送り」ボタン
 		if(ff_btn_->get_selected()) {
 			sound.next_stream();
 		}
+		// 「戻り」ボタン
 		if(rew_btn_->get_selected()) {
 			// 開始５秒以降なら、曲の先頭に～
 			if(sound.get_time_stream() < seek_change_time_) {
@@ -402,6 +406,20 @@ namespace app {
 			select_file_id_ = filer_->get_select_file_id();
 			const std::string& file = filer_->get_file();
 			sound_play_(file);
+		}
+
+		// ファイラーが有効で、マウス操作が無い状態が５秒続いたら、演奏ファイルへフォーカス
+   		if(filer_->get_state(gui::widget::state::ENABLE)) {
+			const vtx::spos& msp = igl->get_device().get_locator().cursor_;
+			if(msp == mouse_pos_) {
+				++filer_count_;
+				if(filer_count_ >= (60 * 5)) {
+					filer_->focus_file(sound.get_file_stream());
+				}
+			} else {
+				filer_count_ = 0;
+				mouse_pos_ = msp;
+			}
 		}
 
 		// Drag & Drop されたファイルを再生
