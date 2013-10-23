@@ -704,7 +704,6 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	bool widget_filer::focus_file(const std::string& path)
 	{
-// std::cout << path << std::endl;
 		std::string fn;
 		if(utils::probe_full_path(path)) {
 			std::string root;
@@ -725,9 +724,12 @@ namespace gui {
 			std::string t;
 			utils::strip_last_of_delimita_path(wf.name->at_local_param().text_param_.text_, t);
 			if(t == fn) {
+				if(wf.name->get_state(widget::state::SYSTEM_SELECT)) {
+					return true;
+				}
 				short ofs = static_cast<short>(n) -
 				(main_->get_rect().size.y / param_.label_height_) / 2;
-				if(ofs >= 0) { 
+				if(ofs >= 0) {
 					position_.y = static_cast<float>(ofs * -param_.label_height_);
 				}
 				set_select_pos_(n);
