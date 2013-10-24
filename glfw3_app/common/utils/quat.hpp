@@ -190,7 +190,7 @@ namespace qtx {
 			n = static_cast<T>(1) / std::sqrt(n);
 
 			T si, co;
-			mtx::deg_sin_cos(deg / static_cast<T>(2), si, co);
+			mtx::deg_sin_cos_(deg / static_cast<T>(2), si, co);
 			t = co;
 			si *= n;
 			x = si * AxisX;

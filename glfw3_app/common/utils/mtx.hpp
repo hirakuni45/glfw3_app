@@ -12,12 +12,12 @@
 
 namespace mtx {
 
-	static inline void deg_sin_cos(float deg, float& si, float& co) {
+	static inline void deg_sin_cos_(float deg, float& si, float& co) {
 		si = sinf(deg * vtx::g_deg2rad_f);
 		co = cosf(deg * vtx::g_deg2rad_f);
 	}
 
-	static inline void deg_sin_cos(double deg, double& si, double& co) {
+	static inline void deg_sin_cos_(double deg, double& si, double& co) {
 		si = sin(deg * vtx::g_deg2rad_d);
 		co = cos(deg * vtx::g_deg2rad_d);
 	}
@@ -35,10 +35,10 @@ namespace mtx {
 	}
 
 	template <class T>
-	void swap_rows(T* a, T* b) {
-		T* tmp_ = a;
-		a = b;
-		b = tmp_;
+	void swap_rows_(T* a, T* b) {
+		T tmp = *a;
+		*a = *b;
+		*b = tmp;
 	}
  
 
@@ -221,7 +221,7 @@ namespace mtx {
 	template <class T>
 	bool mult_perspective(T* out, T fovy, T aspect, T nearv, T farv) {
 		T si, co;
-		deg_sin_cos(fovy * 0.5f, si, co);
+		deg_sin_cos_(fovy * 0.5f, si, co);
 		T delta = farv - nearv;
 		if((delta == 0.0f) || (si == 0.0f) || (aspect == 0.0f)) {
 			return false;
@@ -445,9 +445,9 @@ namespace mtx {
 		r3[7] = 1.0f, r3[4] = r3[5] = r3[6] = 0.0f;
 
 		/// choose pivot - or die
-		if(abs_(r3[0]) > abs_(r2[0])) swap_rows(r3, r2);
-		if(abs_(r2[0]) > abs_(r1[0])) swap_rows(r2, r1);
-		if(abs_(r1[0]) > abs_(r0[0])) swap_rows(r1, r0);
+		if(std::abs(r3[0]) > std::abs(r2[0])) swap_rows_(r3, r2);
+		if(std::abs(r2[0]) > std::abs(r1[0])) swap_rows_(r2, r1);
+		if(std::abs(r1[0]) > std::abs(r0[0])) swap_rows_(r1, r0);
 		if(0.0f == r0[0])  return false;
 
 		/// eliminate first variable
@@ -468,8 +468,8 @@ namespace mtx {
 		if(s != 0.0f) { r1[7] -= m1 * s; r2[7] -= m2 * s; r3[7] -= m3 * s; }
 
 		/// choose pivot - or die
-		if(FABSF(r3[1]) > FABSF(r2[1])) swap_rows(r3, r2);
-		if(FABSF(r2[1]) > FABSF(r1[1])) swap_rows(r2, r1);
+		if(std::abs(r3[1]) > std::abs(r2[1])) swap_rows_(r3, r2);
+		if(std::abs(r2[1]) > std::abs(r1[1])) swap_rows_(r2, r1);
 		if(0.0f == r1[1])  return false;
 
 		/// eliminate second variable
@@ -483,7 +483,7 @@ namespace mtx {
 		s = r1[7]; if (0.0f != s) { r2[7] -= m2 * s; r3[7] -= m3 * s; }
 
 		/// choose pivot - or die
-		if(FABSF(r3[2]) > FABSF(r2[2])) SWAP_ROWS(r3, r2);
+		if(std::abs(r3[2]) > std::abs(r2[2])) swap_rows_(r3, r2);
 		if(0.0f == r2[2])  return false;
 
 		/// eliminate third variable
@@ -598,6 +598,19 @@ namespace mtx {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	逆行列を求める
+			@return エラーなら「false」
+		 */
+		//-----------------------------------------------------------------//
+		bool inverse() {
+			T tmp[16];
+			for(int i = 0; i < 16; ++i) tmp[i] = m[i];
+			return inv_matrix<T>(tmp, m);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	OpenGL スケーリング
 			@param[in]	v	スケールファクター
 		 */
@@ -624,7 +637,7 @@ namespace mtx {
 		//-----------------------------------------------------------------//
 		void rotate(T angle, const vtx::vertex3<T>& v) {
 			T si, co;
-			deg_sin_cos(angle, si, co);
+			deg_sin_cos_(angle, si, co);
 			mult_rotate<T>(m, si, co, v.x, v.y, v.z);
 		}
 
@@ -726,7 +739,7 @@ namespace mtx {
 		//-----------------------------------------------------------------//
 		matrix4 operator = (const T* srcm) {
 			for(int i = 0; i < 16; ++i) {
-				m[i] = static_cast<T>( *srcm++ );
+				m[i] = static_cast<T>(srcm[i]);
 			}
 			return *this;
 		}
