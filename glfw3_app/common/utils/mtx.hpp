@@ -24,17 +24,17 @@ namespace mtx {
 
 	typedef unsigned int	uint;
 
-	template <class T>
+	template <typename T>
 	const T& grc_(const T* p, uint row, uint col) {
 		return p[(col << 2) + row];
 	}
 
-	template <class T>
+	template <typename T>
 	T& prc_(T* p, uint row, uint col) {
 		return p[(col << 2) + row];
 	}
 
-	template <class T>
+	template <typename T>
 	void swap_rows_(T* a, T* b) {
 		T tmp = *a;
 		*a = *b;
@@ -62,10 +62,14 @@ namespace mtx {
 	//-----------------------------------------------------------------//
 	template <class T>
 	void create_identity(T* m) {
-		m[ 0] = 1.0f; m[ 1] = 0.0f; m[ 2] = 0.0f; m[ 3] = 0.0f;
-		m[ 4] = 0.0f; m[ 5] = 1.0f; m[ 6] = 0.0f; m[ 7] = 0.0f;
-		m[ 8] = 0.0f; m[ 9] = 0.0f; m[10] = 1.0f; m[11] = 0.0f;
-		m[12] = 0.0f; m[13] = 0.0f; m[14] = 0.0f; m[15] = 1.0f;
+		m[ 0] = static_cast<T>(1); m[ 1] = static_cast<T>(0);
+		m[ 2] = static_cast<T>(0); m[ 3] = static_cast<T>(0);
+		m[ 4] = static_cast<T>(0); m[ 5] = static_cast<T>(1);
+		m[ 6] = static_cast<T>(0); m[ 7] = static_cast<T>(0);
+		m[ 8] = static_cast<T>(0); m[ 9] = static_cast<T>(0);
+		m[10] = static_cast<T>(1); m[11] = static_cast<T>(0);
+		m[12] = static_cast<T>(0); m[13] = static_cast<T>(0);
+		m[14] = static_cast<T>(0); m[15] = static_cast<T>(1);
 	}
 
 
@@ -154,18 +158,30 @@ namespace mtx {
 	//-----------------------------------------------------------------//
 	template <class T>
 	void mult_frustum(T* out, T left, T right, T bottom, T top, T nearval, T farval) {
-		T x = (2.0f * nearval) / (right - left);
-		T y = (2.0f * nearval) / (top - bottom);
+		T x = (static_cast<T>(2) * nearval) / (right - left);
+		T y = (static_cast<T>(2) * nearval) / (top - bottom);
 		T a = (right + left)   / (right - left);
 		T b = (top + bottom)   / (top - bottom);
 		T c = -(farval + nearval) / ( farval - nearval);
-		T d = -(2.0f * farval * nearval) / (farval - nearval);  /* error? */
+		T d = -(static_cast<T>(2) * farval * nearval) / (farval - nearval);  /* error? */
 
 		T m[16];
-		prc_(m,0,0) = x;    prc_(m,0,1) = 0.0F; prc_(m,0,2) = a;     prc_(m,0,3) = 0.0F;
-		prc_(m,1,0) = 0.0F; prc_(m,1,1) = y;    prc_(m,1,2) = b;     prc_(m,1,3) = 0.0F;
-		prc_(m,2,0) = 0.0F; prc_(m,2,1) = 0.0F; prc_(m,2,2) = c;     prc_(m,2,3) = d;
-		prc_(m,3,0) = 0.0F; prc_(m,3,1) = 0.0F; prc_(m,3,2) = -1.0F; prc_(m,3,3) = 0.0F;
+		prc_(m,0,0) = x;
+		prc_(m,0,1) = static_cast<T>(0);
+		prc_(m,0,2) = a;
+		prc_(m,0,3) = static_cast<T>(0);
+		prc_(m,1,0) = static_cast<T>(0);
+		prc_(m,1,1) = y;
+		prc_(m,1,2) = b;
+		prc_(m,1,3) = static_cast<T>(0);
+		prc_(m,2,0) = static_cast<T>(0);
+		prc_(m,2,1) = static_cast<T>(0);
+		prc_(m,2,2) = c;
+		prc_(m,2,3) = d;
+		prc_(m,3,0) = static_cast<T>(0);
+		prc_(m,3,1) = static_cast<T>(0);
+		prc_(m,3,2) = static_cast<T>(-1);
+		prc_(m,3,3) = static_cast<T>(0);
 		matmul4<T>(out, out, m);
 	}
 
@@ -185,25 +201,25 @@ namespace mtx {
 	template <class T>
 	void mult_ortho(T* out, T left, T right, T bottom, T top, T nearval, T farval) {
 		T m[16];
-		prc_(m,0,0) = 2.0f / (right - left);
-		prc_(m,0,1) = 0.0f;
-		prc_(m,0,2) = 0.0f;
+		prc_(m,0,0) = static_cast<T>(2) / (right - left);
+		prc_(m,0,1) = static_cast<T>(0);
+		prc_(m,0,2) = static_cast<T>(0);
 		prc_(m,0,3) = -(right + left) / (right - left);
 
-		prc_(m,1,0) = 0.0f;
-		prc_(m,1,1) = 2.0f / (top - bottom);
-		prc_(m,1,2) = 0.0f;
+		prc_(m,1,0) = static_cast<T>(0);
+		prc_(m,1,1) = static_cast<T>(2) / (top - bottom);
+		prc_(m,1,2) = static_cast<T>(0);
 		prc_(m,1,3) = -(top + bottom) / (top - bottom);
 
-		prc_(m,2,0) = 0.0f;
-		prc_(m,2,1) = 0.0f;
-		prc_(m,2,2) = -2.0f / (farval - nearval);
+		prc_(m,2,0) = static_cast<T>(0);
+		prc_(m,2,1) = static_cast<T>(0);
+		prc_(m,2,2) = static_cast<T>(-2) / (farval - nearval);
 		prc_(m,2,3) = -(farval + nearval) / (farval - nearval);
 
-		prc_(m,3,0) = 0.0f;
-		prc_(m,3,1) = 0.0f;
-		prc_(m,3,2) = 0.0f;
-		prc_(m,3,3) = 1.0f;
+		prc_(m,3,0) = static_cast<T>(0);
+		prc_(m,3,1) = static_cast<T>(0);
+		prc_(m,3,2) = static_cast<T>(0);
+		prc_(m,3,3) = static_cast<T>(1);
 		matmul4<T>(out, out, m);
 	}
 
@@ -223,31 +239,32 @@ namespace mtx {
 		T si, co;
 		deg_sin_cos_(fovy * 0.5f, si, co);
 		T delta = farv - nearv;
-		if((delta == 0.0f) || (si == 0.0f) || (aspect == 0.0f)) {
+		if((delta == static_cast<T>(0)) ||
+			(si == static_cast<T>(0)) || (aspect == static_cast<T>(0))) {
 			return false;
 		}
 
 		T cotan = co / si;
 		T m[4][4];
 		m[0][0] = cotan / aspect;
-		m[0][1] = 0.0f;
-		m[0][2] = 0.0f;
-		m[0][3] = 0.0f;
+		m[0][1] = static_cast<T>(0);
+		m[0][2] = static_cast<T>(0);
+		m[0][3] = static_cast<T>(0);
 
-		m[1][0] = 0.0f;
+		m[1][0] = static_cast<T>(0);
 		m[1][1] = cotan;
-		m[1][2] = 0.0f;
-		m[1][3] = 0.0f;
+		m[1][2] = static_cast<T>(0);
+		m[1][3] = static_cast<T>(0);
 
-		m[2][0] = 0.0f;
-		m[2][1] = 0.0f;
+		m[2][0] = static_cast<T>(0);
+		m[2][1] = static_cast<T>(0);
 		m[2][2] = -(farv + nearv) / delta;
-		m[2][3] = -1.0f;
+		m[2][3] = static_cast<T>(-1);
 
-		m[3][0] = 0.0f;
-		m[3][1] = 0.0f;
-		m[3][2] = -2.0f * nearv * farv / delta;
-		m[3][3] = 0.0f;
+		m[3][0] = static_cast<T>(0);
+		m[3][1] = static_cast<T>(0);
+		m[3][2] = static_cast<T>(-2) * nearv * farv / delta;
+		m[3][3] = static_cast<T>(0);
 
 		matmul4<T>(out, out, &m[0][0]);
 		return true;
@@ -278,22 +295,22 @@ namespace mtx {
 		m[0][0] = side.x;
 		m[1][0] = side.y;
 		m[2][0] = side.z;
-		m[3][0] = 0.0f;
+		m[3][0] = static_cast<T>(0);
 
 		m[0][1] = t.x;
 		m[1][1] = t.y;
 		m[2][1] = t.z;
-		m[3][1] = 0.0f;
+		m[3][1] = static_cast<T>(0);
 
 		m[0][2] = -forward.x;
 		m[1][2] = -forward.y;
 		m[2][2] = -forward.z;
-		m[3][2] = 0.0f;
+		m[3][2] = static_cast<T>(0);
 
-		m[0][3] = 0.0f;
-		m[1][3] = 0.0f;
-		m[2][3] = 0.0f;
-		m[3][3] = 1.0f;
+		m[0][3] = static_cast<T>(0);
+		m[1][3] = static_cast<T>(0);
+		m[2][3] = static_cast<T>(0);
+		m[3][3] = static_cast<T>(1);
 		matmul4<T>(out, out, &m[0][0]);
 		mult_translate<T>(out, -eye.x, -eye.y, -eye.z);
 	}
@@ -315,9 +332,9 @@ namespace mtx {
 		create_identity(m);
 		bool optimized = false;
 
-		if(x == 0.0f) {
-			if(y == 0.0f) {
-				if(z != 0.0f) {
+		if(x == static_cast<T>(0)) {
+			if(y == static_cast<T>(0)) {
+				if(z != static_cast<T>(0)) {
 					optimized = true;
 					// rotate only around z-axis
 					prc_(m,0,0) = co;
@@ -330,7 +347,7 @@ namespace mtx {
 						prc_(m,1,0) =  si;
 					}
 				}
-			} else if(z == 0.0f) {
+			} else if(z == static_cast<T>(0)) {
 				optimized = true;
 				// rotate only around y-axis
 				prc_(m,0,0) = co;
@@ -343,7 +360,7 @@ namespace mtx {
 					prc_(m,2,0) = -si;
 				}
 			}
-		} else if(y == 0.0f) {
+		} else if(y == static_cast<T>(0)) {
 			if(z == 0.0f) {
 				optimized = true;
 				// rotate only around x-axis
@@ -381,28 +398,28 @@ namespace mtx {
 			T xs = x * si;
 			T ys = y * si;
 			T zs = z * si;
-			T one_c = 1.0f - co;
+			T one_c = static_cast<T>(1) - co;
 
 			// We already hold the identity-matrix so we can skip some statements
 			prc_(m,0,0) = (one_c * xx) + co;
 			prc_(m,0,1) = (one_c * xy) - zs;
 			prc_(m,0,2) = (one_c * zx) + ys;
-			// M(0,3) = 0.0f;
+			prc_(m,0,3) = static_cast<T>(0);
 
 			prc_(m,1,0) = (one_c * xy) + zs;
 			prc_(m,1,1) = (one_c * yy) + co;
 			prc_(m,1,2) = (one_c * yz) - xs;
-			// M(1,3) = 0.0f;
+			prc_(m,1,3) = static_cast<T>(0);
 
 			prc_(m,2,0) = (one_c * zx) - ys;
 			prc_(m,2,1) = (one_c * yz) + xs;
 			prc_(m,2,2) = (one_c * zz) + co;
-			// M(2,3) = 0.0f;
+			prc_(m,2,3) = static_cast<T>(0);
 
-			// M(3,0) = 0.0f;
-			// M(3,1) = 0.0f;
-			// M(3,2) = 0.0f;
-			// M(3,3) = 1.0f;
+			prc_(m,3,0) = static_cast<T>(0);
+			prc_(m,3,1) = static_cast<T>(0);
+			prc_(m,3,2) = static_cast<T>(0);
+			prc_(m,3,3) = static_cast<T>(1);
 		}
 		matmul4<T>(out, out, m);
 	}
@@ -421,34 +438,44 @@ namespace mtx {
 	{
 		const T* m = src;
 		T wtmp[4][8];
-		T* r0;
-		T* r1;
-		T* r2;
-		T* r3;
+		T* r0 = wtmp[0];
+		T* r1 = wtmp[1];
+		T* r2 = wtmp[2];
+		T* r3 = wtmp[3];
 
-		r0 = wtmp[0], r1 = wtmp[1], r2 = wtmp[2], r3 = wtmp[3];
+		r0[0] = grc_(m,0,0);
+		r0[1] = grc_(m,0,1);
+		r0[2] = grc_(m,0,2);
+		r0[3] = grc_(m,0,3);
+		r0[4] = static_cast<T>(1);
+		r0[5] = r0[6] = r0[7] = static_cast<T>(0);
 
-		r0[0] = grc_(m,0,0), r0[1] = grc_(m,0,1),
-		r0[2] = grc_(m,0,2), r0[3] = grc_(m,0,3),
-		r0[4] = 1.0f, r0[5] = r0[6] = r0[7] = 0.0f,
+		r1[0] = grc_(m,1,0);
+		r1[1] = grc_(m,1,1);
+		r1[2] = grc_(m,1,2);
+		r1[3] = grc_(m,1,3);
+		r1[5] = static_cast<T>(1);
+		r1[4] = r1[6] = r1[7] = static_cast<T>(0);
 
-		r1[0] = grc_(m,1,0), r1[1] = grc_(m,1,1),
-		r1[2] = grc_(m,1,2), r1[3] = grc_(m,1,3),
-		r1[5] = 1.0f, r1[4] = r1[6] = r1[7] = 0.0f,
+		r2[0] = grc_(m,2,0);
+		r2[1] = grc_(m,2,1);
+		r2[2] = grc_(m,2,2);
+		r2[3] = grc_(m,2,3);
+		r2[6] = static_cast<T>(1);
+		r2[4] = r2[5] = r2[7] = static_cast<T>(0);
 
-		r2[0] = grc_(m,2,0), r2[1] = grc_(m,2,1),
-		r2[2] = grc_(m,2,2), r2[3] = grc_(m,2,3),
-		r2[6] = 1.0f, r2[4] = r2[5] = r2[7] = 0.0f,
-
-		r3[0] = grc_(m,3,0), r3[1] = grc_(m,3,1),
-		r3[2] = grc_(m,3,2), r3[3] = grc_(m,3,3),
-		r3[7] = 1.0f, r3[4] = r3[5] = r3[6] = 0.0f;
+		r3[0] = grc_(m,3,0);
+		r3[1] = grc_(m,3,1);
+		r3[2] = grc_(m,3,2);
+		r3[3] = grc_(m,3,3);
+		r3[7] = static_cast<T>(1);
+		r3[4] = r3[5] = r3[6] = static_cast<T>(0);
 
 		/// choose pivot - or die
 		if(std::abs(r3[0]) > std::abs(r2[0])) swap_rows_(r3, r2);
 		if(std::abs(r2[0]) > std::abs(r1[0])) swap_rows_(r2, r1);
 		if(std::abs(r1[0]) > std::abs(r0[0])) swap_rows_(r1, r0);
-		if(0.0f == r0[0])  return false;
+		if(static_cast<T>(0) == r0[0])  return false;
 
 		/// eliminate first variable
 		T m1 = r1[0] / r0[0];
@@ -459,13 +486,13 @@ namespace mtx {
 		s = r0[2]; r1[2] -= m1 * s; r2[2] -= m2 * s; r3[2] -= m3 * s;
 		s = r0[3]; r1[3] -= m1 * s; r2[3] -= m2 * s; r3[3] -= m3 * s;
 		s = r0[4];
-		if (s != 0.0f) { r1[4] -= m1 * s; r2[4] -= m2 * s; r3[4] -= m3 * s; }
+		if(s != static_cast<T>(0)) { r1[4] -= m1 * s; r2[4] -= m2 * s; r3[4] -= m3 * s; }
 		s = r0[5];
-		if (s != 0.0f) { r1[5] -= m1 * s; r2[5] -= m2 * s; r3[5] -= m3 * s; }
+		if(s != static_cast<T>(0)) { r1[5] -= m1 * s; r2[5] -= m2 * s; r3[5] -= m3 * s; }
 		s = r0[6];
-		if (s != 0.0f) { r1[6] -= m1 * s; r2[6] -= m2 * s; r3[6] -= m3 * s; }
+		if(s != static_cast<T>(0)) { r1[6] -= m1 * s; r2[6] -= m2 * s; r3[6] -= m3 * s; }
 		s = r0[7];
-		if(s != 0.0f) { r1[7] -= m1 * s; r2[7] -= m2 * s; r3[7] -= m3 * s; }
+		if(s != static_cast<T>(0)) { r1[7] -= m1 * s; r2[7] -= m2 * s; r3[7] -= m3 * s; }
 
 		/// choose pivot - or die
 		if(std::abs(r3[1]) > std::abs(r2[1])) swap_rows_(r3, r2);
@@ -477,10 +504,10 @@ namespace mtx {
 		m3 = r3[1] / r1[1];
 		r2[2] -= m2 * r1[2]; r3[2] -= m3 * r1[2];
 		r2[3] -= m2 * r1[3]; r3[3] -= m3 * r1[3];
-		s = r1[4]; if (0.0f != s) { r2[4] -= m2 * s; r3[4] -= m3 * s; }
-		s = r1[5]; if (0.0f != s) { r2[5] -= m2 * s; r3[5] -= m3 * s; }
-		s = r1[6]; if (0.0f != s) { r2[6] -= m2 * s; r3[6] -= m3 * s; }
-		s = r1[7]; if (0.0f != s) { r2[7] -= m2 * s; r3[7] -= m3 * s; }
+		s = r1[4]; if(static_cast<T>(0) != s) { r2[4] -= m2 * s; r3[4] -= m3 * s; }
+		s = r1[5]; if(static_cast<T>(0) != s) { r2[5] -= m2 * s; r3[5] -= m3 * s; }
+		s = r1[6]; if(static_cast<T>(0) != s) { r2[6] -= m2 * s; r3[6] -= m3 * s; }
+		s = r1[7]; if(static_cast<T>(0) != s) { r2[7] -= m2 * s; r3[7] -= m3 * s; }
 
 		/// choose pivot - or die
 		if(std::abs(r3[2]) > std::abs(r2[2])) swap_rows_(r3, r2);
@@ -495,7 +522,7 @@ namespace mtx {
 		/// last check
 		if(0.0f == r3[3]) return false;
 
-		s = 1.0f / r3[3];		///< now back substitute row 3
+		s = static_cast<T>(1) / r3[3];		///< now back substitute row 3
 		r3[4] *= s; r3[5] *= s; r3[6] *= s; r3[7] *= s;
 
 		m2 = r2[3];				///< now back substitute row 2
@@ -584,7 +611,7 @@ namespace mtx {
 			@brief	単位ユニットの設定
 		 */
 		//-----------------------------------------------------------------//
-		void identity() { create_identity<T>(m); }
+		void identity() { create_identity(m); }
 
 
 		//-----------------------------------------------------------------//
@@ -593,7 +620,7 @@ namespace mtx {
 			@param[in]	srcm	ソース・マトリックス配列
 		 */
 		//-----------------------------------------------------------------//
-		void load(const T srcm[16]) { for(int i = 0; i < 16; ++i) m[i] = srcm[i]; }
+		void load(const T srcm[16]) { matrix_copy(srcm, m); }
 
 
 		//-----------------------------------------------------------------//
@@ -604,7 +631,7 @@ namespace mtx {
 		//-----------------------------------------------------------------//
 		bool inverse() {
 			T tmp[16];
-			for(int i = 0; i < 16; ++i) tmp[i] = m[i];
+			matrix_copy(m, tmp);
 			return inv_matrix<T>(tmp, m);
 		}
 
