@@ -304,7 +304,9 @@ namespace gui {
 		fc.set( 48, 193, 241);
 		bc = fc * 0.7f;
 		default_label_color_ = widget::color_param(fc, bc);
-		default_label_color_select_ = widget::color_param(fc * 1.2f, fc);
+		fc.set(118, 223, 231);
+		bc = fc * 0.7f;
+		default_label_color_select_ = widget::color_param(fc, bc);
 
 		fc.set( 48, 193, 241);
 		bc.set( 31,  72,  86);
@@ -317,7 +319,9 @@ namespace gui {
 		fc.set( 48, 193, 241);
 		bc = fc * 0.7f;
 		default_list_color_ = widget::color_param(fc, bc);
-		default_list_color_select_ = widget::color_param(bc, fc * 1.2f);
+		fc.set(118, 223, 231);
+		bc = fc * 0.7f;
+		default_list_color_select_ = widget::color_param(fc, bc);
 
 		fc.set(235, 157,  95);
 		bc = fc * 0.7f;
