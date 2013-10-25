@@ -374,11 +374,11 @@ namespace utils {
 		@return	ファイルのサイズ
 	*/
 	//-----------------------------------------------------------------//
-	long file_io::get_file_size()
+	size_t file_io::get_file_size()
 	{
-		long pos = tell();
+		size_t pos = tell();
 		seek(0, seek::end);
-		long size = tell();
+		size_t size = tell();
 		seek(pos, seek::set);
 		return size;
 	}

@@ -405,11 +405,11 @@ namespace utils {
 			@return	ファイル位置
 		*/
 		//-----------------------------------------------------------------//
-		long tell() const {
+		size_t tell() const {
 			if(fp_) {
 				return ftell(fp_);
 			} else {
-				return static_cast<long>(fpos_);
+				return fpos_;
 			}
 		}
 
@@ -422,13 +422,12 @@ namespace utils {
 			@return	正常なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool seek(long offset, seek::type stp) {
+		bool seek(size_t offset, seek::type stp) {
 			if(fp_) {
 				if(fseek(fp_, offset, stp) == 0) return true;
 				else return false;
 			} else {
-				long pos = static_cast<long>(fpos_);
-				long limit = static_cast<long>(size_);
+				size_t pos = fpos_;
 				switch(stp) {
 				case seek::set:
 					pos = offset;
@@ -437,16 +436,18 @@ namespace utils {
 					pos += offset;
 					break;
 				case seek::end:
-					pos = limit + offset;
+					pos = size_ + offset;
 					break;
 				default:
 					return false;
 					break;
 				}
-				if(pos <= limit) {
-					fpos_ = static_cast<size_t>(pos);
+				if(pos <= size_) {
+					fpos_ = pos;
 					return true;
-				} else return false;
+				} else {
+					return false;
+				}
 			}
 		}
 
@@ -671,7 +672,7 @@ namespace utils {
 			@return	ファイルのサイズ
 		*/
 		//-----------------------------------------------------------------//
-		long get_file_size();
+		size_t get_file_size();
 
 
 		//-----------------------------------------------------------------//
