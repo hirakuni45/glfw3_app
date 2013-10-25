@@ -22,25 +22,16 @@ namespace mtx {
 		co = cos(deg * vtx::g_deg2rad_d);
 	}
 
-	typedef unsigned int	uint;
-
 	template <typename T>
-	const T& grc_(const T* p, uint row, uint col) {
+	const T& grc_(const T* p, uint32_t row, uint32_t col) {
 		return p[(col << 2) + row];
 	}
 
 	template <typename T>
-	T& prc_(T* p, uint row, uint col) {
+	T& prc_(T* p, uint32_t row, uint32_t col) {
 		return p[(col << 2) + row];
 	}
 
-	template <typename T>
-	void swap_rows_(T* a, T* b) {
-		T tmp = *a;
-		*a = *b;
-		*b = tmp;
-	}
- 
 
 	//-----------------------------------------------------------------//
 	/*!
@@ -51,7 +42,7 @@ namespace mtx {
 	//-----------------------------------------------------------------//
 	template <class T>
 	void matrix_copy(const T* src, T* dst) {
-		for(int i = 0; i < 16; ++i) { dst[i] = src[i]; }
+		for(uint32_t i = 0; i < 16; ++i) { dst[i] = src[i]; }
 	}
 
 	//-----------------------------------------------------------------//
@@ -83,7 +74,7 @@ namespace mtx {
 	//-----------------------------------------------------------------//
 	template <class T>
 	void matmul4(T* out, const T* a, const T* b) {
-		for(int i = 0; i < 4; ++i) {
+		for(uint32_t i = 0; i < 4; ++i) {
 			T ai0 = grc_(a,i,0);
 			T ai1 = grc_(a,i,1);
 			T ai2 = grc_(a,i,2);
@@ -327,7 +318,7 @@ namespace mtx {
 	 */
 	//-----------------------------------------------------------------//
 	template <class T>
-	void mult_rotate(T* out, T si, T co, T x, T y, T z) {
+	bool mult_rotate(T* out, T si, T co, T x, T y, T z) {
 		T m[16];
 		create_identity(m);
 		bool optimized = false;
@@ -382,7 +373,7 @@ namespace mtx {
 			vtx::min_level(min);
 			if(mag <= min) {
 				// 算術エラー（０除算と同一）
-				return;
+				return false;
 			}
 
 			x /= mag;
@@ -422,6 +413,7 @@ namespace mtx {
 			prc_(m,3,3) = static_cast<T>(1);
 		}
 		matmul4<T>(out, out, m);
+		return true;
 	}
 
 
@@ -434,7 +426,7 @@ namespace mtx {
 	 */
 	//-----------------------------------------------------------------//
 	template <class T>
-	bool inv_matrix(const T* src, T* dst)
+	bool invert_matrix(const T* src, T* dst)
 	{
 		const T* m = src;
 		T wtmp[4][8];
@@ -472,9 +464,9 @@ namespace mtx {
 		r3[4] = r3[5] = r3[6] = static_cast<T>(0);
 
 		/// choose pivot - or die
-		if(std::abs(r3[0]) > std::abs(r2[0])) swap_rows_(r3, r2);
-		if(std::abs(r2[0]) > std::abs(r1[0])) swap_rows_(r2, r1);
-		if(std::abs(r1[0]) > std::abs(r0[0])) swap_rows_(r1, r0);
+		if(std::abs(r3[0]) > std::abs(r2[0])) std::swap(r3, r2);
+		if(std::abs(r2[0]) > std::abs(r1[0])) std::swap(r2, r1);
+		if(std::abs(r1[0]) > std::abs(r0[0])) std::swap(r1, r0);
 		if(static_cast<T>(0) == r0[0])  return false;
 
 		/// eliminate first variable
@@ -495,9 +487,9 @@ namespace mtx {
 		if(s != static_cast<T>(0)) { r1[7] -= m1 * s; r2[7] -= m2 * s; r3[7] -= m3 * s; }
 
 		/// choose pivot - or die
-		if(std::abs(r3[1]) > std::abs(r2[1])) swap_rows_(r3, r2);
-		if(std::abs(r2[1]) > std::abs(r1[1])) swap_rows_(r2, r1);
-		if(0.0f == r1[1])  return false;
+		if(std::abs(r3[1]) > std::abs(r2[1])) std::swap(r3, r2);
+		if(std::abs(r2[1]) > std::abs(r1[1])) std::swap(r2, r1);
+		if(static_cast<T>(0) == r1[1])  return false;
 
 		/// eliminate second variable
 		m2 = r2[1] / r1[1];
@@ -510,8 +502,8 @@ namespace mtx {
 		s = r1[7]; if(static_cast<T>(0) != s) { r2[7] -= m2 * s; r3[7] -= m3 * s; }
 
 		/// choose pivot - or die
-		if(std::abs(r3[2]) > std::abs(r2[2])) swap_rows_(r3, r2);
-		if(0.0f == r2[2])  return false;
+		if(std::abs(r3[2]) > std::abs(r2[2])) std::swap(r3, r2);
+		if(static_cast<T>(0) == r2[2])  return false;
 
 		/// eliminate third variable
 		m3 = r3[2] / r2[2];
@@ -520,7 +512,7 @@ namespace mtx {
 		r3[7] -= m3 * r2[7];
 
 		/// last check
-		if(0.0f == r3[3]) return false;
+		if(static_cast<T>(0) == r3[3]) return false;
 
 		s = static_cast<T>(1) / r3[3];		///< now back substitute row 3
 		r3[4] *= s; r3[5] *= s; r3[6] *= s; r3[7] *= s;
@@ -559,6 +551,75 @@ namespace mtx {
 	}
 
 
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	逆行列を求める（一般解の手法）
+		@param[in]	src	ソースのマトリックス
+		@param[in]	dst 計算された逆行列
+		@return	演算が途中でストールした場合（解が求められない）「false」が返る。
+	 */
+	//-----------------------------------------------------------------//
+	template <class T>
+	bool invert_matrix_3d(const T* src, T* dst)
+	{
+		const T* in = src->m;
+		/* Calculate the determinant of upper left 3x3 submatrix and
+		* determine if the matrix is singular.
+		*/
+		T pos = static_cast<T>(0);
+		T neg = static_cast<T>(0);
+		T t;
+		t = grc_(in,0,0) * grc_(in,1,1) * grc_(in,2,2);
+		if(t >= static_cast<T>(0)) pos += t; else neg += t;
+
+		t = grc_(in,1,0) * grc_(in,2,1) * grc_(in,0,2);
+		if(t >= static_cast<T>(0)) pos += t; else neg += t;
+
+		t = grc_(in,2,0) * grc_(in,0,1) * grc_(in,1,2);
+		if(t >= static_cast<T>(0)) pos += t; else neg += t;
+
+		t = -grc_(in,2,0) * grc_(in,1,1) * grc_(in,0,2);
+		if(t >= static_cast<T>(0)) pos += t; else neg += t;
+
+		t = -grc_(in,1,0) * grc_(in,0,1) * grc_(in,2,2);
+		if(t >= static_cast<T>(0)) pos += t; else neg += t;
+
+		t = -grc_(in,0,0) * grc_(in,2,1) * grc_(in,1,2);
+		if(t >= static_cast<T>(0)) pos += t; else neg += t;
+
+		T det = pos + neg;
+
+		T min;
+		vtx::min_level(min);
+		if((det * det) < min) {
+			return false;
+		}
+
+		det = static_cast<T>(1) / det;
+		prc_(dst,0,0) =  (grc_(in,1,1) * grc_(in,2,2) - grc_(in,2,1) * grc_(in,1,2)) * det;
+		prc_(dst,0,1) = -(grc_(in,0,1) * grc_(in,2,2) - grc_(in,2,1) * grc_(in,0,2)) * det;
+		prc_(dst,0,2) =  (grc_(in,0,1) * grc_(in,1,2) - grc_(in,1,1) * grc_(in,0,2)) * det;
+		prc_(dst,1,0) = -(grc_(in,1,0) * grc_(in,2,2) - grc_(in,2,0) * grc_(in,1,2)) * det;
+		prc_(dst,1,1) =  (grc_(in,0,0) * grc_(in,2,2) - grc_(in,2,0) * grc_(in,0,2)) * det;
+		prc_(dst,1,2) = -(grc_(in,0,0) * grc_(in,1,2) - grc_(in,1,0) * grc_(in,0,2)) * det;
+		prc_(dst,2,0) =  (grc_(in,1,0) * grc_(in,2,1) - grc_(in,2,0) * grc_(in,1,1)) * det;
+		prc_(dst,2,1) = -(grc_(in,0,0) * grc_(in,2,1) - grc_(in,2,0) * grc_(in,0,1)) * det;
+		prc_(dst,2,2) =  (grc_(in,0,0) * grc_(in,1,1) - grc_(in,1,0) * grc_(in,0,1)) * det;
+
+		/* Do the translation part */
+		prc_(dst,0,3) = -(grc_(in,0,3) * grc_(dst,0,0) +
+			grc_(in,1,3) * grc_(dst,0,1) +
+			grc_(in,2,3) * grc_(dst,0,2));
+		prc_(dst,1,3) = -(grc_(in,0,3) * grc_(dst,1,0) +
+			grc_(in,1,3) * grc_(dst,1,1) +
+			grc_(in,2,3) * grc_(dst,1,2));
+		prc_(dst,2,3) = -(grc_(in,0,3) * grc_(dst,2,0) +
+			grc_(in,1,3) * grc_(dst,2,1) +
+			grc_(in,2,3) * grc_(dst,2,2) );
+		return true;
+	}
+
+
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
 		@brief	４×４マトリックス・テンプレート
@@ -583,7 +644,7 @@ namespace mtx {
 			@param[in]	mm	ソースマトリックス配列
 		 */
 		//-----------------------------------------------------------------//
-		matrix4(const T mm[16]) { mtx::matrix_copy(mm, m); }
+		matrix4(const T* srcm) { matrix_copy(srcm, m); }
 
 
 		//-----------------------------------------------------------------//
@@ -600,7 +661,7 @@ namespace mtx {
 		 */
 		//-----------------------------------------------------------------//
 		void zero() {
-			for(int i = 0; i < 16; ++i) {
+			for(uint32_t i = 0; i < 16; ++i) {
 				m[i] = static_cast<T>(0);
 			}
 		}
@@ -620,7 +681,7 @@ namespace mtx {
 			@param[in]	srcm	ソース・マトリックス配列
 		 */
 		//-----------------------------------------------------------------//
-		void load(const T srcm[16]) { matrix_copy(srcm, m); }
+		void load(const T* srcm) { matrix_copy(srcm, m); }
 
 
 		//-----------------------------------------------------------------//
@@ -632,7 +693,20 @@ namespace mtx {
 		bool inverse() {
 			T tmp[16];
 			matrix_copy(m, tmp);
-			return inv_matrix<T>(tmp, m);
+			return invert_matrix<T>(tmp, m);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	逆行列(3D)を求める
+			@return エラーなら「false」
+		 */
+		//-----------------------------------------------------------------//
+		bool inverse_3d() {
+			T tmp[16];
+			matrix_copy(m, tmp);
+			return invert_matrix_3d<T>(tmp, m);
 		}
 
 
@@ -765,7 +839,7 @@ namespace mtx {
 		 */
 		//-----------------------------------------------------------------//
 		matrix4 operator = (const T* srcm) {
-			for(int i = 0; i < 16; ++i) {
+			for(uint32_t i = 0; i < 16; ++i) {
 				m[i] = static_cast<T>(srcm[i]);
 			}
 			return *this;
