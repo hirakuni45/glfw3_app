@@ -369,9 +369,7 @@ namespace mtx {
 
 		if(!optimized) {
 			const T mag = std::sqrt(x * x + y * y + z * z);
-			T min;
-			vtx::min_level(min);
-			if(mag <= min) {
+			if(mag <= vtx::min_value<T>()) {
 				// 算術エラー（０除算と同一）
 				return false;
 			}
@@ -589,9 +587,7 @@ namespace mtx {
 
 		T det = pos + neg;
 
-		T min;
-		vtx::min_level(min);
-		if((det * det) < min) {
+		if((det * det) < vtx::min_value<T>()) {
 			return false;
 		}
 
@@ -687,27 +683,21 @@ namespace mtx {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	逆行列を求める
+			@param[in]	srcm	ソース・マトリックス配列
 			@return エラーなら「false」
 		 */
 		//-----------------------------------------------------------------//
-		bool inverse() {
-			T tmp[16];
-			matrix_copy(m, tmp);
-			return invert_matrix<T>(tmp, m);
-		}
+		bool inverse(const T* srcm) { return invert_matrix<T>(srcm, m); }
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	逆行列(3D)を求める
+			@brief	逆行列を求める(3D)
+			@param[in]	srcm	ソース・マトリックス配列
 			@return エラーなら「false」
 		 */
 		//-----------------------------------------------------------------//
-		bool inverse_3d() {
-			T tmp[16];
-			matrix_copy(m, tmp);
-			return invert_matrix_3d<T>(tmp, m);
-		}
+		bool inverse_3d(const T* srcm) { return invert_matrix_3d<T>(srcm, m); }
 
 
 		//-----------------------------------------------------------------//

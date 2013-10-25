@@ -30,6 +30,20 @@ namespace vtx {
 	inline void max_level(float& max) { max = FLT_MAX; }
 	inline void max_level(double& max) { max = DBL_MAX; }
 
+	template <typename T>
+	T min_value() {
+		T min;
+		min_level(min);
+		return min;
+	}
+
+	template <typename T>
+	T max_value() {
+		T max;
+		max_level(max);
+		return max;
+	}
+
 	template <typename T> class vertex2;
 	template <typename T> class vertex3;
 	template <typename T> class vertex4;
