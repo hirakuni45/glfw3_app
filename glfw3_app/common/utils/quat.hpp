@@ -130,7 +130,7 @@ namespace qtx {
 		inline bool rot_xy(T dx, T dy, T scale) {
 			T a = std::sqrt(dx * dx + dy * dy);
 		// 回転のクォータニオン dq を求める
-			if(a > min_value<T>()) {
+			if(a > vtx::min_value<T>()) {
 				T ar = a * scale * 0.5f;
 				T as = std::sin(ar) / a;
 				t = std::cos(ar);
