@@ -315,6 +315,34 @@ namespace mdf {
 	}
 
 
+	static bool probe_(utils::file_io& fio)
+	{
+		std::string s;
+		if(fio.get(s, 3) != 3) {
+			return false;
+		}
+		if(s != "Pmd") {
+			return false;
+		}
+		return true;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	ファイルが有効か検査
+		@return 有効なら「true」
+	*/
+	//-----------------------------------------------------------------//
+	bool pmd_io::probe(utils::file_io& fio)
+	{
+		size_t pos = fio.tell();
+		bool f = probe_(fio);
+		fio.seek(pos, utils::file_io::seek::set);
+		return f;
+	}
+
+
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	ロード
@@ -322,7 +350,7 @@ namespace mdf {
 		@return 成功なら「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool pmd_io::load(utils::file_io fio)
+	bool pmd_io::load(utils::file_io& fio)
 	{
 		initialize_();
 
@@ -331,15 +359,10 @@ namespace mdf {
 
 		destroy_();
 
-		{
-			std::string s;
-			if(fio.get(s, 3) != 3) {
-				return false;
-			}
-			if(s != "Pmd") {
-				return false;
-			}
+		if(!probe_(fio)) {
+			return false;
 		}
+
 		if(!fio.get(version_)) {
 			return false;
 		}

@@ -25,6 +25,148 @@ namespace mdf {
 
 		float	version_;
 
+		struct reading_info {
+			uint8_t		text_encode_type;
+			uint8_t		appendix_uv;
+			uint8_t		vertex_index_size;
+			uint8_t		texture_index_size;
+			uint8_t		material_index_size;
+			uint8_t		bone_index_size;
+			uint8_t		morph_index_size;
+			uint8_t		rigid_body_index_size;
+
+			bool get(utils::file_io& fio) {
+				uint8_t len;
+				if(!fio.get(len)) return false;
+				if(!fio.get(text_encode_type)) return false;
+				if(!fio.get(appendix_uv)) return false;
+				if(!fio.get(vertex_index_size)) return false;
+				if(!fio.get(texture_index_size)) return false;
+				if(!fio.get(material_index_size)) return false;
+				if(!fio.get(bone_index_size)) return false;
+				if(!fio.get(morph_index_size)) return false;
+				if(!fio.get(rigid_body_index_size)) return false;
+				if(len > 8) {
+					return false;
+				}
+				return true;
+			}
+		};
+		reading_info	reading_info_;
+
+		static bool get_text_(utils::file_io& fio, std::string& t, bool utf16) {
+			uint32_t len;
+			if(!fio.get(len)) return false;
+			t.clear();
+			if(utf16) {
+				utils::wstring tmp;
+				if(!fio.get(tmp, len / 2)) {
+					return false;
+				}
+				utils::utf16_to_utf8(tmp, t);
+			} else {
+				if(!fio.get(t, len)) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		struct model_info {
+			std::string		name;
+			std::string		name_en;
+			std::string		comment;
+			std::string		comment_en;
+
+			bool get(utils::file_io& fio, bool utf16 = false) {
+				if(!get_text_(fio, name, utf16)) return false;
+				if(!get_text_(fio, name_en, utf16)) return false;
+				if(!get_text_(fio, comment, utf16)) return false;
+				if(!get_text_(fio, comment_en, utf16)) return false;
+				return true;
+			}
+		};
+		model_info		model_info_;
+
+		struct pmx_vertex {
+			vtx::fvtx	position_;
+			vtx::fvtx	normal_;
+			vtx::fpos	uv_;
+			std::vector<vtx::fvtx4>	append_uves_;
+
+			struct weight {
+				enum type {
+					BDEF1,
+					BDEF2,
+					BDEF4,
+					SDEF
+				};
+			};
+			weight::type	weight_type_;
+			union bone_weight {
+				struct BDEF1 {
+					uint32_t	index;
+				};
+				struct BDEF2 {
+					uint32_t	index[2];
+					float		weight[2];
+				};
+				struct BDEF4 {
+					uint32_t	index[4];
+					float		weight[4];
+				};
+				struct SDEF {
+					uint32_t	index[2];
+					float		weight;
+					vtx::fvtx	c;
+					vtx::fvtx	r0;
+					vtx::fvtx	r1;
+				};
+			};
+			bone_weight		bone_weight_;
+
+			float			edge_scale_;
+
+			bool get(utils::file_io& fio, const reading_info& info) {
+
+				if(!fio.get(position_)) return false;
+				if(!fio.get(normal_)) return false;
+				if(!fio.get(uv_)) return false;
+				if(info.appendix_uv) {
+					append_uves_.reserve(info.appendix_uv);
+					append_uves_.clear();
+					for(uint8_t i = 0; i < info.appendix_uv; ++i) {
+						vtx::fvtx4 auv;
+						if(!fio.get(auv)) return false;
+						append_uves_.push_back(auv);
+					}
+				}
+				{
+					uint8_t type;
+					if(!fio.get(type)) return false;
+					weight_type_ = static_cast<weight::type>(type);
+				}
+				switch(weight_type_) {
+				case weight::BDEF1:
+										
+					break;
+				case weight::BDEF2:
+
+					break;
+				case weight::BDEF4:
+
+					break;
+				case weight::SDEF:
+
+					break;
+				default:
+					return false;
+				}
+				return true;
+			}
+		};
+		std::vector<pmx_vertex>	pmx_vertexes_;
+
 
 	public:
 		//-----------------------------------------------------------------//
@@ -54,12 +196,21 @@ namespace mdf {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	ファイルが有効か検査
+			@return 有効なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool probe(utils::file_io& fio);
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	ロード
 			@param[in]	fio	ファイル入出力クラス
 			@return 成功なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(utils::file_io fio);
+		bool load(utils::file_io& fio);
 
 
 		//-----------------------------------------------------------------//
