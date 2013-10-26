@@ -101,14 +101,18 @@ namespace app {
 		gui::widget_director& wd = director_.at_core().widget_director_;
 
 		if(fopen_->get_selected()) {
-			filer_->enable(fopen_->get_counts() & 1);
+			bool f = filer_->get_state(gui::widget::state::ENABLE);
+			filer_->enable(!f);
 		}
 
 		if(filer_id_ != filer_->get_select_file_id()) {
 			filer_id_ = filer_->get_select_file_id();
+
 			if(pmd_io_.load(filer_->get_file())) {
 				pmd_io_.render_setup();
 			} else if(pmx_io_.load(filer_->get_file())) {
+
+			} else {
 
 			}
 		}
