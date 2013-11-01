@@ -8,6 +8,7 @@
 
 namespace mdf {
 
+#if 0
 	void surface::destroy_vertex_()
 	{
 		if(vertex_id_) {
@@ -95,5 +96,5 @@ namespace mdf {
 
 		}
 	}
-
+#endif
 }

@@ -14,6 +14,7 @@ PSOURCES	=	main.cpp \
 				../common/gl_fw/glterminal.cpp \
 				../common/gl_fw/glcamera.cpp \
 				../common/gl_fw/gllight.cpp \
+				../common/gl_fw/glsurface.cpp \
 				../common/gl_fw/glutils.cpp \
 				../common/utils/vtx.cpp \
 				../common/utils/vmath.cpp \
@@ -338,6 +339,10 @@ pmdv_main.o: ../common/gl_fw/glmatrix.hpp
 ../common/gl_fw/gllight.o: ../common/gl_fw/gllight.hpp
 ../common/gl_fw/gllight.o: ../common/gl_fw/gl_info.hpp
 ../common/gl_fw/gllight.o: ../common/utils/vtx.hpp ../common/img_io/img.hpp
+../common/gl_fw/glsurface.o: ../common/gl_fw/glsurface.hpp
+../common/gl_fw/glsurface.o: ../common/gl_fw/gl_info.hpp
+../common/gl_fw/glsurface.o: ../common/utils/quat.hpp ../common/utils/vtx.hpp
+../common/gl_fw/glsurface.o: ../common/utils/mtx.hpp
 ../common/gl_fw/glutils.o: ../common/gl_fw/glutils.hpp
 ../common/gl_fw/glutils.o: ../common/gl_fw/gl_info.hpp
 ../common/gl_fw/glutils.o: ../common/utils/vtx.hpp ../common/img_io/i_img.hpp

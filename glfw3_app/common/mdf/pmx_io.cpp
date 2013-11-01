@@ -71,7 +71,7 @@ namespace mdf {
 		{
 			uint32_t num;
 			if(!fio.get(num)) return false;
-			std::cout << num << std::endl;
+			std::cout << "Vertex: " << num << std::endl;
 
 			pmx_vertexes_.reserve(num);
 			pmx_vertexes_.clear();
