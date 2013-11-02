@@ -1,7 +1,7 @@
 #pragma once
 //=====================================================================//
 /*!	@file
-	@breif	ビット単位で入出力（ヘッダー）
+	@breif	ビット・アレイ関係
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
@@ -11,7 +11,12 @@
 
 namespace utils {
 
-	class bitstream {
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief	bit_array クラス
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	class bit_array {
 
 		uint32_t	bit_pos_;		///> カレントのビット位置
 		uint32_t	bit_limit_;		///> ビットの最大数
@@ -24,7 +29,7 @@ namespace utils {
 			@breif	bitio クラス・コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		bitstream() : m_bit_pos(0), m_bit_limit(0), m_bit_val(0) { };
+		bit_array() : bit_pos_(0), bit_limit_(0), bit_val_(0) { };
 
 
 		//-----------------------------------------------------------------//
@@ -32,14 +37,13 @@ namespace utils {
 			@breif	bitio クラス・デストラクター
 		*/
 		//-----------------------------------------------------------------//
-		~bitstream() { };
+		~bit_array() { };
 
 
 		//-----------------------------------------------------------------//
 		/*!
 			@breif	ビット情報を設定して、カレントのビット位置を進める。
 			@param[in]	val ビット情報
-						true の場合は「１」、false の場合は「０」が設定
 		*/
 		//-----------------------------------------------------------------//
 		void put_bit(bool val) {
@@ -136,18 +140,36 @@ namespace utils {
 		uint32_t get_limit() const { return bit_limit_; };
 
 
+		//-----------------------------------------------------------------//
+		/*!
+			@breif	クリア
+		*/
+		//-----------------------------------------------------------------//
 		void clear() { bit_limit_ = bit_pos_ = 0; bit_list_.clear(); }
-
-
-		size_t size() const { return bit_list_.size(); }
-
-
-		const uint8_t* get_array() const { return &bit_list_[0]; }
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@breif		全てのビット情報をファイルにセーブする。
+			@breif		セーブ
+			@param[in]	fout	ファイル I/O
+			@return		セーブしたバイト数
+		*/
+		//-----------------------------------------------------------------//
+		uint32_t save_file(file_io& fout) {
+			// テンポラリーの余剰分を処理（「０」で埋める）
+			while((bit_limit_ % 8) != 0) {
+				put_bit(false);
+			}
+			BOOST_FOREACH(uint8_t ch, bit_list_) {
+				fout.put_char(ch);
+			}
+			return bit_list_.size();
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@breif		セーブ
 			@param[in]	fname ファイル名
 			@return		セーブしたバイト数
 		*/
@@ -157,51 +179,34 @@ namespace utils {
 				return 0;
 			}
 
-			file_io::fout;
+			file_io fout;
 			if(!fout.open(fname, "wb")) {
 				return 0;
 			}
 
-			// テンポラリーの余剰分を処理（「０」で埋める）
-			while((bit_limit_ % 8) != 0) {
-				put_bit(false);
-			}
-			BOOST_FOREACH(uint8_t ch, bit_list_) {
-				fout.putc(ch);
-			}
-
+			uint32_t sz = save_file(fout);
 			fout.close();
 
-			return bit_list_.size();
+			return sz;
 		}
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@breif		全てのビット情報をファイルにセーブする。
-			@param[in]	fname ファイル名
-			@return		セーブしたバイト数
+			@breif		ロード
+			@param[in]	fin	ファイル　I/O
+			@return		ロードしたバイト数
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t save_append_file(const std::string& fname) {
-			if(fname.empty() || bit_list_.size() == 0) {
-				return 0;
+		uint32_t load_file(file_io& fin) {
+			bit_list_.reserve(fin.get_file_size());
+			bit_list_.clear();
+			char ch;
+			while(fin.get_char(ch)) {
+				bit_list_.push_back(ch);
 			}
-
-			// テンポラリーの余剰分を処理（「０」で埋める）
-			while((bit_limit_ % 8) != 0) {
-				put_bit(false);
-			}
-
-			file_io::fout;
-			fout.open(fname, "ab");
-
-			for(std::vector<uint8_t>::iterator i = bit_list_.begin(); i != bit_list_.end(); ++i) {
-				uint8_t c = *i;
-				fputc(c, fp);
-			}
-			fclose(fp);
-			return bit_list_.size();
+			bit_limit_ = fin.get_file_size() * 8;
+			return fin.get_file_size();
 		}
 
 
@@ -217,17 +222,15 @@ namespace utils {
 
 			bit_list_.clear();
 
-			file_io::fin;
+			file_io fin;
 			if(!fin.open(fname, "rb")) {
 				return 0;
 			}
-			int ch;
-			while(fin.get_char(ch)) {
-				bit_list_.push_back(ch);
-			}
+
+			uint32_t sz = load_file(fin);
+
 			fin.close();
-			bit_limit_ = num * 8;
-			return num;
+			return sz;
 		}
 	};
 }
