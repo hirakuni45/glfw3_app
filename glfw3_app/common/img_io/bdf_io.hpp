@@ -5,46 +5,50 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include <cstdio>
+#include <cstdint>
+#include <string>
 #include <vector>
+#include "utils/bit_array.hpp"
 
-#include "bitio.hpp"
+namespace img {
 
-class bdfio {
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief	BDF クラス
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	class bdf_io {
 
-	std::vector<char>	m_codemap;
-	std::vector<unsigned char>	m_bitmaps;
+		std::vector<char>	codemap_;
+		std::vector<uint8_t>	bitmaps_;
 
-	unsigned short	m_jis_code;
-	bool	m_bitmap;
+		unsigned short	jis_code_;
+		bool	bitmap_;
 
-	int		m_map_max;
+		int		map_max_;
 
-	int		m_bbx_width;
-	int		m_bbx_height;
+		int		bbx_width_;
+		int		bbx_height_;
 
-	bitio	m_bitio;
+		utils::bit_array	bit_array_;
 
-	bool	m_alignment_bits;
+		bool	alignment_bits_;
 
-public:
-	bdfio() : m_jis_code(0), m_bitmap(false), m_map_max(0),
-			  m_bbx_width(0), m_bbx_height(0), m_alignment_bits(8) { }
+	public:
+		bdf_io() : jis_code_(0), bitmap_(false), map_max_(0),
+			bbx_width_(0), bbx_height_(0), alignment_bits_(8) { }
 
-	~bdfio() { }
+		~bdf_io() { }
 
-	void initialize();
+		void initialize();
 
-	size_t size() const { return m_bitmaps.size(); }
+		size_t size() const { return bitmaps_.size(); }
 
-	const unsigned char* get_array() const { return &m_bitmaps[0]; }
+		const unsigned char* get_array() const { return &bitmaps_[0]; }
 
-	bool load(const char* filename);
+		bool load(const std::string& filename);
 
-	bool save(const char* filename);
+		bool save(const std::string& filename);
 
-};
-
-
-
-
+	};
+}
