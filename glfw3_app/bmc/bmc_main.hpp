@@ -1,3 +1,4 @@
+#pragma once
 //=====================================================================//
 /*! @file
 	@brief  BMC メイン関係
@@ -7,13 +8,13 @@
 #include "main.hpp"
 #include "utils/i_scene.hpp"
 #include "utils/director.hpp"
-#include "utils/bit_array.hpp"
 #include "widgets/widget.hpp"
 #include "widgets/widget_button.hpp"
 #include "widgets/widget_slider.hpp"
 #include "widgets/widget_dialog.hpp"
 #include "widgets/widget_filer.hpp"
 #include "widgets/widget_tree.hpp"
+#include "img_io/bdf_io.hpp"
 
 namespace app {
 
@@ -35,7 +36,7 @@ namespace app {
 
 		uint32_t	filer_id_;
 
-		utils::bit_array	bit_array_;
+		img::bdf_io	bdf_io_;
 
 	public:
 		//-----------------------------------------------------------------//
