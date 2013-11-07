@@ -17,6 +17,7 @@ namespace app {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class bmc_core {
 	public:
+
 		struct option {
 			enum type {
 				preview,
