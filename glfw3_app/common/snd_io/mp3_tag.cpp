@@ -42,9 +42,6 @@ printf("%x ", c);
 		open_ = false;
 		id3_file_ = 0;
 		id3_tag_ = 0;
-
-		jpegio_.initialize();
-		pngio_.initialize();
 	}
 
 

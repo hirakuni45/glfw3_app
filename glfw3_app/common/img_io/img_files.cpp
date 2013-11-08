@@ -30,7 +30,6 @@ namespace img {
 	void img_files::add_image_file_io_context_(i_img_io* imi, const std::string& exts)
 	{
 		if(imi) {
-			imi->initialize();
 			utils::strings ss;
 			utils::split_text(exts, ",", ss);
 			BOOST_FOREACH(std::string& s, ss) {
