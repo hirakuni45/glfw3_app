@@ -6,8 +6,32 @@
 //=====================================================================//
 #include "bmc_core.hpp"
 #include <boost/foreach.hpp>
+#include <boost/format.hpp>
 
 namespace app {
+
+// タイトルの表示と簡単な説明
+	void bmc_core::help() const
+	{
+		using namespace std;
+
+		cout << "Bitmap image creator" << endl;
+		cout << "Copyright (C) 2007, Hiramatsu Kunihito" << endl;
+		cout << "Version " << boost::format("%1.2f") % version_ << endl;
+		cout << "usage:" << endl;
+		std::string cmd = argv_[0];
+		cout << "	" << cmd << " [options] in-file [out-file]" << endl;
+		cout << "	-preview -pre      preview image (OpenGL)" << endl;
+		cout << "	-bdf               BDF file input" << endl;
+		cout << "	-dither            Ditherring(50%)" << endl;
+		cout << "	-no-header         No-Header(Width/Height) output" << endl;
+		cout << "	-clip-x start len  Clipping X-line" << endl;
+		cout << "	-clip-y	start len  Clipping Y-line" << endl;
+		cout << "	-append            Append output file" << endl;
+		cout << "	-verbose           verbose" << endl;
+		cout << endl;
+	}
+
 
 	//-----------------------------------------------------------------//
 	/*!
@@ -288,47 +312,6 @@ void preview_main(void)
 {
 	glutMainLoop();
 }
-
-
-// タイトルの表示と簡単な説明
-static void title(const char *cmd)
-{
-	char	*p, buff[256];
-
-	p = strrchr(cmd, '\\');
-	if(p != NULL) {
-		strcpy(buff, p+1);
-	} else {
-		p = strrchr(cmd, '/');
-		if(p != NULL) {
-			strcpy(buff, p+1);
-		} else {
-			strcpy(buff, cmd);
-		}
-	}
-
-	p = strrchr(buff, '.');
-	if(p != NULL) *p = 0;
-
-	printf("Bitmap image creator\n");
-	printf("Copyright (C) 2007, Hiramatsu Kunihito\n");
-	printf("Version %1.2f\n", VERSION_NO);
-	printf("usage:\n");
-	printf("	%s [options] in-file [out-file]\n", buff);
-	printf("	-preview -pre      preview image (OpenGL)\n");
-	printf("	-true-color24      RGBA color preview\n");
-	printf("	-inverse           Inverse image\n");
-	printf("	-png               PNG file input\n");
-	printf("	-bdf               BDF file input\n");
-	printf("	-dither            Ditherring(50%)\n");
-	printf("	-no-header         No-Header(Width/Height) output\n");
-	printf("	-clip-x start len  Clipping X-line\n");
-	printf("	-clip-y	start len  Clipping Y-line\n");
-	printf("	-append            Append output file\n");
-	printf("	-verbose           verbose\n");
-	printf("\n");
-}
-
 
 static void set_bitmap12x12(const unsigned char* bitmap12, int x, int y, img& image)
 {
