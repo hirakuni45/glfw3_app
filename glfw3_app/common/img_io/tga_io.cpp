@@ -5,8 +5,21 @@
 */
 //=====================================================================//
 #include "img_io/tga_io.hpp"
+#include <tga.h>
 
 namespace img {
+
+	static int getc_(void* context)
+	{
+		char ch;
+		if(static_cast<utils::file_io*>(context)->get(ch)) {
+			return ch;
+		} else {
+			return -1;
+		}
+	}
+
+
 
 	//-----------------------------------------------------------------//
 	/*!
@@ -17,6 +30,13 @@ namespace img {
 	//-----------------------------------------------------------------//
 	bool tga_io::probe(utils::file_io& fin)
 	{
+		TGA* tga = TGAInit();
+
+		tga->file.getc = getc_;
+
+
+//		TGAFree(tga);
+
 		return true;
 	}
 
