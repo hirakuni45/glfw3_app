@@ -86,10 +86,10 @@ enum {  TGA_OK = 0, 		/* success */
 	TGA_SEEK_FAIL,
 	TGA_READ_FAIL,
 	TGA_WRITE_FAIL,
-	TGA_UNKNOWN_SUB_FORMAT  /* invalid bit depth */
-};
+	TGA_UNKNOWN_SUB_FORMAT,  /* invalid bit depth */
 
-#define TGA_ERRORS 8  /* total number of error codes */
+	TGA_ERRORS	/* total number of error codes */
+};
 
 /* text strings corresponding to the error codes */
 static const char*
