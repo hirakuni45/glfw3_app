@@ -142,11 +142,13 @@ namespace gl {
 			@brief	アトリビュート（描画オプション）
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		enum attribute {
-			normal,		///< 通常描画
-			h_flip,		///< 水平方向反転
-			v_flip,		///< 垂直方向反転
-			hv_flip,	///< 水平、垂直方向反転
+		struct attribute {
+			enum type {
+				normal,		///< 通常描画
+				h_flip,		///< 水平方向反転
+				v_flip,		///< 垂直方向反転
+				hv_flip,	///< 水平、垂直方向反転
+			};
 		};
 
 
@@ -400,7 +402,7 @@ namespace gl {
 			@param[in]	linear	「true」ならリニアフィルター
 		 */
 		//-----------------------------------------------------------------//
-		void draw(handle h, attribute atr, short xx, short yy, bool linear = true);
+		void draw(handle h, attribute::type atr, short xx, short yy, bool linear = true);
 
 
 		//-----------------------------------------------------------------//
@@ -411,7 +413,7 @@ namespace gl {
 			@param[in]	linear	「true」ならリニア
 		 */
 		//-----------------------------------------------------------------//
-		void draw_center(handle h, attribute atr, bool linear = true) {
+		void draw_center(handle h, attribute::type atr, bool linear = true) {
 			const vtx::spos& size = get_size(h);
 			draw(h, atr, size.x / -2, size.y / -2, linear);
 		}
@@ -431,7 +433,7 @@ namespace gl {
 			@param[in]	linear	「true」ならリニアフィルター
 		 */
 		//-----------------------------------------------------------------//
-		void draw_sub(handle h, attribute atr, short xx, short yy, short ox, short oy, short ww, short hh, bool liner = true);
+		void draw_sub(handle h, attribute::type atr, short xx, short yy, short ox, short oy, short ww, short hh, bool liner = true);
 
 
 		//-----------------------------------------------------------------//
@@ -444,7 +446,7 @@ namespace gl {
 			@param[in]	linear	「true」ならリニア
 		 */
 		//-----------------------------------------------------------------//
-		void draws(const handle* hs, attribute atr, short xx, short yy, bool linear = true);
+		void draws(const handle* hs, attribute::type atr, short xx, short yy, bool linear = true);
 
 
 		//-----------------------------------------------------------------//

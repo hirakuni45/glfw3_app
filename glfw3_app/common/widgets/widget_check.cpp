@@ -81,7 +81,7 @@ namespace gui {
 				rect.org  = wp.rpos_;
 				rect.size = wp.rect_.size;
 			} else {
-				wd_.at_mobj().draw(h, gl::mobj::normal, ofs.x, ofs.y);
+				wd_.at_mobj().draw(h, gl::mobj::attribute::normal, ofs.x, ofs.y);
 				rect.org.set(0);
 				rect.size = wp.rect_.size;
 			}

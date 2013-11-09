@@ -53,7 +53,7 @@ namespace gui {
 
 		wd_.at_mobj().resize(objh_, get_param().rect_.size);
 		glEnable(GL_TEXTURE_2D);
-		wd_.at_mobj().draw(objh_, gl::mobj::normal, 0, 0);
+		wd_.at_mobj().draw(objh_, gl::mobj::attribute::normal, 0, 0);
 	}
 
 

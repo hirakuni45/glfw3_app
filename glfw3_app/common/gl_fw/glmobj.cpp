@@ -631,16 +631,16 @@ namespace gl {
 		@param[in]	linear	「true」ならリニアフィルター
 	 */
 	//-----------------------------------------------------------------//
-	void mobj::draw(handle h, attribute atr, short xx, short yy, bool linear)
+	void mobj::draw(handle h, attribute::type atr, short xx, short yy, bool linear)
 	{
 		if(h == 0 || h >= objs_.size()) return;
 
 		bool hf = false;
 		bool vf = false;
-		if(atr != normal) {
-			if(atr == h_flip) hf = true;
-			else if(atr == v_flip) vf = true;
-			else if(atr == hv_flip) hf = vf = true;
+		if(atr != attribute::normal) {
+			if(atr == attribute::h_flip) hf = true;
+			else if(atr == attribute::v_flip) vf = true;
+			else if(atr == attribute::hv_flip) hf = vf = true;
 		}
 
 		const obj* m = objs_[h];
@@ -665,7 +665,7 @@ namespace gl {
 			spos tlist[4];
 			switch(atr) {
 
-			case h_flip:
+			case attribute::h_flip:
 				tlist[0].set(m->tx + m->tw, m->ty);
 				vlist[0].set(   xp,            yp);
 				tlist[1].set(m->tx + m->tw, m->ty + m->th);
@@ -676,7 +676,7 @@ namespace gl {
 				vlist[2].set(   xp + m->dw,    yp);
 				break;
 
-			case v_flip:
+			case attribute::v_flip:
 				tlist[0].set(m->tx,         m->ty + m->th);
 				vlist[0].set(   xp,            yp);
 				tlist[1].set(m->tx,         m->ty);
@@ -687,7 +687,7 @@ namespace gl {
 				vlist[2].set(   xp + m->dw,    yp);
 				break;
 
-			case hv_flip:
+			case attribute::hv_flip:
 				tlist[0].set(m->tx + m->tw, m->ty + m->th);
 				vlist[0].set(   xp,            yp);
 				tlist[1].set(m->tx + m->tw, m->ty);
@@ -698,7 +698,7 @@ namespace gl {
 				vlist[2].set(   xp + m->dw,    yp);
 				break;
 
-			case normal:
+			case attribute::normal:
 			default:
 				tlist[0].set(m->tx,         m->ty);
 				vlist[0].set(xp,               yp);
@@ -737,7 +737,7 @@ namespace gl {
 		@param[in]	linear	「true」ならリニアフィルター
 	 */
 	//-----------------------------------------------------------------//
-	void mobj::draw_sub(handle h, attribute atr, short xx, short yy, short ox, short oy, short ww, short hh, bool linear)
+	void mobj::draw_sub(handle h, attribute::type atr, short xx, short yy, short ox, short oy, short ww, short hh, bool linear)
 	{
 		if(h == 0 || h >= objs_.size()) return;
 
@@ -787,7 +787,7 @@ namespace gl {
 				spos vlist[4];
 				spos tlist[4];
 				switch(atr) {
-				case h_flip:
+				case attribute::h_flip:
 					tlist[0].set(tx + w, ty);
 					vlist[0].set(xp, yp);
 					tlist[1].set(tx + w, ty + h);
@@ -798,7 +798,7 @@ namespace gl {
 					vlist[2].set(xp + w, yp);
 					break;
 
-				case v_flip:
+				case attribute::v_flip:
 					tlist[0].set(tx, ty + h);
 					vlist[0].set(xp, yp);
 					tlist[1].set(tx, ty);
@@ -809,7 +809,7 @@ namespace gl {
 					vlist[2].set(xp + w, yp);
 					break;
 
-				case hv_flip:
+				case attribute::hv_flip:
 					tlist[0].set(tx + w, ty + h);
 					vlist[0].set(xp, yp);
 					tlist[1].set(tx + w, ty);
@@ -820,7 +820,7 @@ namespace gl {
 					vlist[2].set(xp + w, yp);
 					break;
 
-				case normal:
+				case attribute::normal:
 				default:
 					tlist[0].set(tx, ty);
 					vlist[0].set(xp, yp);
@@ -855,7 +855,7 @@ namespace gl {
 		@param[in]	linear	「true」ならリニア
 	 */
 	//-----------------------------------------------------------------//
-	void mobj::draws(const handle* hs, attribute atr, short xx, short yy, bool linear)
+	void mobj::draws(const handle* hs, attribute::type atr, short xx, short yy, bool linear)
 	{
 		handle h;
 		while((h = *hs++) != 0) {
