@@ -122,7 +122,7 @@ namespace img {
 			@return 領域なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool put_pixel(int x, int y, const gray8 c) {
+		bool put_pixel(int x, int y, const gray8& c) {
 			if(x >= 0 && x < size_.x && y >= 0 && y < size_.y) {
 				img_[size_.x * y + x] = c;
 				return true;
@@ -139,7 +139,7 @@ namespace img {
 			@param[in]	c	描画するカラー
 		*/
 		//-----------------------------------------------------------------//
-		bool put_pixel(int x, int y, const rgba8 c) { return false; }
+		bool put_pixel(int x, int y, const rgba8& c) { return false; }
 
 
 		//-----------------------------------------------------------------//

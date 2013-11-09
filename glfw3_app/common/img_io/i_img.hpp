@@ -89,7 +89,7 @@ namespace img {
 			@return 領域なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		virtual bool put_pixel(int x, int y, const gray8 c) = 0;
+		virtual bool put_pixel(int x, int y, const gray8& c) = 0;
 
 
 		//-----------------------------------------------------------------//
@@ -113,7 +113,7 @@ namespace img {
 			@return 領域なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		virtual bool put_pixel(int x, int y, const rgba8 c) = 0;
+		virtual bool put_pixel(int x, int y, const rgba8& c) = 0;
 
 
 		//-----------------------------------------------------------------//
@@ -178,7 +178,7 @@ namespace img {
 			@return	利用している色数
 		*/
 		//-----------------------------------------------------------------//
-		virtual unsigned int count_color() const = 0;
+		virtual uint32_t count_color() const = 0;
 
 
 		//-----------------------------------------------------------------//

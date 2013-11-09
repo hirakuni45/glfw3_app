@@ -152,7 +152,7 @@ namespace img {
 			@return 領域なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool put_pixel(int x, int y, const gray8 c) {
+		bool put_pixel(int x, int y, const gray8& c) {
 			return false;
 		}
 
@@ -180,7 +180,7 @@ namespace img {
 			@return 領域なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool put_pixel(int x, int y, const rgba8 c) {
+		bool put_pixel(int x, int y, const rgba8& c) {
 			return false;
 		}
 
