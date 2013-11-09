@@ -92,7 +92,7 @@ enum {  TGA_OK = 0, 		/* success */
 #define TGA_ERRORS 8  /* total number of error codes */
 
 /* text strings corresponding to the error codes */
-static char*
+static const char*
 tga_error_strings[] = {
 	"Success",
 	"Error",
@@ -119,6 +119,7 @@ typedef tuint8  tbyte;
 typedef tuint16	tshort;
 typedef tuint32	tlong;
 
+typedef struct _TGAFile TGAFile;
 typedef struct _TGAHeader TGAHeader;
 typedef struct _TGAData	  TGAData;
 typedef struct _TGA	  TGA;
@@ -153,9 +154,20 @@ struct _TGAData {
 	tuint32  flags;
 };
 
+/* TGA file handle */
+struct _TGAFile {
+	int (*getc)(void *context);
+	size_t (*read)(void *ptr, size_t size, void *context);
+	int (*putc)(char ch, void *context);
+	size_t (*write)(const void *ptr, size_t size, void *context);
+	int (*seek)(size_t offset, int mode, void *context);
+	size_t (*tell)(void *context);
+};
+
 /* TGA image handle */
 struct _TGA {
-	FILE*		fd;		/* file stream */
+	void*	fd;
+	TGAFile	file;	/* TGA File context */
 	tlong		off;		/* current offset in file*/
 	int		last;		/* last error code */
 	TGAHeader	hdr;		/* image header */
@@ -169,6 +181,8 @@ __BEGIN_DECLS
 TGA* TGAOpen __P((char *name, char *mode));
 
 TGA* TGAOpenFd __P((FILE *fd));
+
+TGA* TGAInit __P((void));
 
 
 int TGAReadHeader __P((TGA *tga));
@@ -195,12 +209,13 @@ size_t TGAWriteScanlines __P((TGA *tga, tbyte *buf, size_t sln, size_t n,
 int TGAWriteImage __P((TGA *tga, TGAData *data));
 
 
-char* TGAStrError __P((tuint8 code));
+const char* TGAStrError __P((tuint8 code));
 
 tlong __TGASeek __P((TGA *tga, tlong off, int whence));
 
 void __TGAbgr2rgb __P((tbyte *data, size_t size, size_t bytes));
 
+void TGAFree __P((TGA *tga));
 
 void TGAClose __P((TGA *tga));
 
