@@ -277,6 +277,30 @@ namespace gui {
 	}
 
 
+	bool widget_filer::focus_(const std::string& fn)
+	{
+		uint32_t n = 0;
+		BOOST_FOREACH(const widget_file& wf, center_) {
+			std::string t;
+			utils::strip_last_of_delimita_path(wf.name->at_local_param().text_param_.text_, t);
+			if(t == fn) {
+				if(wf.name->get_state(widget::state::SYSTEM_SELECT)) {
+					return true;
+				}
+				short ofs = static_cast<short>(n) -
+				(main_->get_rect().size.y / param_.label_height_) / 2;
+				if(ofs >= 0) {
+					position_.y = static_cast<float>(ofs * -param_.label_height_);
+				}
+				set_select_pos_(n);
+				return true;
+			}
+			++n;
+		}
+		return false;
+	}
+
+
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	ファイル・リストを取得
@@ -439,6 +463,7 @@ namespace gui {
 
 		// ファイル情報の取得と反映（ファイル情報収集はスレッドで動作）
 		if(fsc_.probe()) {
+
 			if(center_.empty()) {
 				wd_.top_widget(this);
 				create_files_(center_, 0);
@@ -463,6 +488,7 @@ namespace gui {
 					}
 				}
 			}
+			focus_(focus_path_);
 		}
 
 		// フレームのサイズを、仮想ウィジェットに反映
@@ -704,7 +730,6 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	bool widget_filer::focus_file(const std::string& path)
 	{
-		std::string fn;
 		if(utils::probe_full_path(path)) {
 			std::string root;
 			if(utils::get_file_path(path, root)) {
@@ -714,30 +739,12 @@ namespace gui {
 			if(p == 0) {
 				return false;
 			}
-			fn = p;
+			focus_path_ = p;
 		} else {
-			fn = path;
+			focus_path_ = path;
 		}
 
-		uint32_t n = 0;
-		BOOST_FOREACH(const widget_file& wf, center_) {
-			std::string t;
-			utils::strip_last_of_delimita_path(wf.name->at_local_param().text_param_.text_, t);
-			if(t == fn) {
-				if(wf.name->get_state(widget::state::SYSTEM_SELECT)) {
-					return true;
-				}
-				short ofs = static_cast<short>(n) -
-				(main_->get_rect().size.y / param_.label_height_) / 2;
-				if(ofs >= 0) {
-					position_.y = static_cast<float>(ofs * -param_.label_height_);
-				}
-				set_select_pos_(n);
-				return true;
-			}
-			++n;
-		}
-		return false;
+		return focus_(focus_path_);
 	}
 
 

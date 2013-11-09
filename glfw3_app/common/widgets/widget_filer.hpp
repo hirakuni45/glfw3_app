@@ -115,6 +115,8 @@ namespace gui {
 
 		uint32_t	select_file_id_;
 
+		std::string	focus_path_;
+
 		static const char* key_path_;
 		static const char* key_locate_;
 		static const char* key_size_;
@@ -132,6 +134,7 @@ namespace gui {
 		void set_regist_state_();
 		void set_select_pos_(uint32_t pos);
 		void destroy_();
+		bool focus_(const std::string& fn);
 	public:
 		//-----------------------------------------------------------------//
 		/*!
