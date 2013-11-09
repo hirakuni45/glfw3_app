@@ -22,6 +22,10 @@
 #include "widgets/widget_tree.hpp"
 #include "widgets/widget_filer.hpp"
 
+#include "img_io/img_base.hpp"
+
+img::img_base<img::rgba8> img_;
+
 namespace app {
 
 	//-----------------------------------------------------------------//

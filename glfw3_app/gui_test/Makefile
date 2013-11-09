@@ -24,6 +24,7 @@ PSOURCES	=	main.cpp \
 				../common/img_io/jpeg_io.cpp \
 				../common/img_io/openjpeg_io.cpp \
 				../common/img_io/bmp_io.cpp \
+				../common/img_io/tga_io.cpp \
 				../common/img_io/dds_io.cpp \
 				../common/img_io/pdf_in.cpp \
 				../common/img_io/img_files.cpp \
@@ -61,7 +62,7 @@ OPTLIBS		=	glfw3 glew32 opengl32 glu32 gdi32 imm32 \
 				pthread \
 				openal winmm dsound \
 				fitz \
-				png12 jpeg_x86 openjpeg jbig2dec \
+				png12 jpeg_x86 openjpeg jbig2dec tga \
 				freetype \
 				id3tag \
 				z \
@@ -256,7 +257,7 @@ gui_test.o: ../common/widgets/widget_frame.hpp
 gui_test.o: ../common/widgets/widget_check.hpp
 gui_test.o: ../common/widgets/widget_radio.hpp
 gui_test.o: ../common/widgets/widget_list.hpp
-gui_test.o: ../common/widgets/widget_image.hpp
+gui_test.o: ../common/widgets/widget_image.hpp ../common/img_io/img_base.hpp
 ../common/core/glcore.o: ../common/core/glcore.hpp
 ../common/core/glcore.o: ../common/gl_fw/IGLcore.hpp
 ../common/core/glcore.o: ../common/core/device.hpp ../common/utils/vtx.hpp
@@ -399,6 +400,18 @@ gui_test.o: ../common/widgets/widget_image.hpp
 ../common/img_io/bmp_io.o: ../common/img_io/img_clut.hpp
 ../common/img_io/bmp_io.o: ../common/img_io/img_rgba8.hpp
 ../common/img_io/bmp_io.o: ../common/img_io/img_gray8.hpp
+../common/img_io/tga_io.o: ../common/img_io/tga_io.hpp
+../common/img_io/tga_io.o: ../common/img_io/i_img_io.hpp
+../common/img_io/tga_io.o: ../common/utils/file_io.hpp
+../common/img_io/tga_io.o: ../common/utils/string_utils.hpp
+../common/img_io/tga_io.o: ../common/utils/mtx.hpp ../common/utils/vtx.hpp
+../common/img_io/tga_io.o: ../common/img_io/i_img.hpp
+../common/img_io/tga_io.o: ../common/img_io/img.hpp
+../common/img_io/tga_io.o: ../common/img_io/img_idx8.hpp
+../common/img_io/tga_io.o: ../common/img_io/i_img.hpp
+../common/img_io/tga_io.o: ../common/img_io/img_clut.hpp
+../common/img_io/tga_io.o: ../common/img_io/img_rgba8.hpp
+../common/img_io/tga_io.o: ../common/img_io/img_gray8.hpp
 ../common/img_io/dds_io.o: ../common/img_io/dds_io.hpp
 ../common/img_io/dds_io.o: ../common/img_io/i_img_io.hpp
 ../common/img_io/dds_io.o: ../common/utils/file_io.hpp
@@ -439,6 +452,7 @@ gui_test.o: ../common/widgets/widget_image.hpp
 ../common/img_io/img_files.o: ../common/img_io/img_gray8.hpp
 ../common/img_io/img_files.o: ../common/img_io/png_io.hpp
 ../common/img_io/img_files.o: ../common/img_io/bmp_io.hpp
+../common/img_io/img_files.o: ../common/img_io/tga_io.hpp
 ../common/img_io/img_files.o: ../common/img_io/dds_io.hpp
 ../common/img_io/img_files.o: ../common/img_io/openjpeg_io.hpp
 ../common/img_io/img_utils.o: ../common/img_io/img_utils.hpp
