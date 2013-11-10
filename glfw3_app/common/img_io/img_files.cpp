@@ -189,6 +189,8 @@ namespace img {
 					io.igf->set_image_if(imf_);
 					if(io.igf->save(fout, opt)) {
 						return true;
+					} else {
+						return false;
 					}
 				}
 			}

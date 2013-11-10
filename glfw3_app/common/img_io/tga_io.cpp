@@ -13,7 +13,7 @@ namespace img {
 	{
 		char ch;
 		if(static_cast<utils::file_io*>(context)->get(ch)) {
-			return ch;
+			return static_cast<uint8_t>(ch);
 		} else {
 			return -1;
 		}
@@ -78,6 +78,8 @@ namespace img {
 		tga->file.seek = seek_;
 		tga->file.tell = tell_;
 
+		tga->error = 0;
+
 		return tga;
 	}
 
@@ -92,6 +94,9 @@ namespace img {
 // std::cout << "Map type: " << static_cast<int>(tga->hdr.map_t) << std::endl;
 // std::cout << "Img type: " << static_cast<int>(tga->hdr.img_t) << std::endl;
 // std::cout << "Map depth: " << static_cast<int>(tga->hdr.map_entry) << std::endl;
+// std::cout << "ID: " << static_cast<int>(tga->hdr.id_len) << std::endl;
+// std::cout << "X: " << static_cast<int>(tga->hdr.x) << std::endl;
+// std::cout << "Y: " << static_cast<int>(tga->hdr.y) << std::endl;
 
 		// Indexed color
 		if(tga->hdr.map_t == 1 || tga->hdr.map_t == 9) {
@@ -227,10 +232,11 @@ namespace img {
 
 		bool f = true;
 
+		tuint32 flags = 0;
+
 		if(fo.clut_num) {
 			tbyte* cmap = 0;
-			int n = TGAReadColorMap(tga, &cmap, TGA_RGB);
-// std::cout << "Map: " << n << std::endl;
+			int n = TGAReadColorMap(tga, &cmap, flags);
 			if(n != 0) {
 				img_.destroy();
 				idx_.create(vtx::spos(fo.width, fo.height), alpha);
@@ -238,73 +244,70 @@ namespace img {
 				for(int i = 0; i < fo.clut_num; ++i) {
 					img::rgba8 c;
 					if(fo.r_depth == 8 && fo.a_depth == 0) {
-						c.r = cmap[i * 3 + 0];
+						c.b = cmap[i * 3 + 0];
 						c.g = cmap[i * 3 + 1];
-						c.b = cmap[i * 3 + 2];
+						c.r = cmap[i * 3 + 2];
 						c.a = 255;
 					} else if(fo.r_depth == 8 && fo.a_depth == 8) {
-						c.r = cmap[i * 4 + 0];
+						c.b = cmap[i * 4 + 0];
 						c.g = cmap[i * 4 + 1];
-						c.b = cmap[i * 4 + 2];
+						c.r = cmap[i * 4 + 2];
 						c.a = cmap[i * 4 + 3];
 					}
 					idx_.put_clut(i, c);
 				}
 				free(cmap);
 
-				tbyte* tmp = new tbyte[fo.width * fo.height];
-				if(TGAReadScanlines(tga, tmp, 0, fo.height, 0) != 0) {
-					const uint8_t* p = static_cast<const uint8_t*>(tmp);
-					for(int y = 0; y < fo.height; ++y) {
-						int ofs;
-						if(tga->hdr.vert) ofs = y;
-						else ofs = fo.height - y - 1;
-						for(int x = 0; x < fo.width; ++x) {
-							idx8 i(p[x]);
-							idx_.put_pixel(x, ofs, i);
-						}
-						p += fo.width;
+				tbyte* pix = new tbyte[fo.width];
+				for(int y = 0; y < fo.height; ++y) {
+					if(TGAReadScanlines(tga, pix, 0, 1, flags) == 0) {
+						f = false;
+						break;
 					}
-				} else {
-					f = false;
+					int ofs;
+					if(tga->hdr.vert) ofs = y;
+					else ofs = fo.height - y - 1;
+					for(int x = 0; x < fo.width; ++x) {
+						idx8 i(pix[x]);
+						idx_.put_pixel(x, ofs, i);
+					}
 				}
-				delete[] tmp;
+				delete[] pix;
 			} else {
 				f = false;
 			}
 		} else {
 			idx_.destroy();
 			img_.create(vtx::spos(fo.width, fo.height), alpha);
-			tbyte* tmp = new tbyte[fo.width * fo.height * 4];
-			if(TGAReadScanlines(tga, tmp, 0, fo.height, TGA_BGR) != 0) {
-				const uint8_t* p = static_cast<const uint8_t*>(tmp);
-				uint32_t n = 3;
-				if(alpha) ++n;
-				n *= fo.width;
-				for(int y = 0; y < fo.height; ++y) {
-					int ofs;
-					if(tga->hdr.vert) ofs = y;
-					else ofs = fo.height - y - 1;
-					for(int x = 0; x < fo.width; ++x) {
-						rgba8 c;
-						if(alpha) {
-							c.b = p[x * 4 + 0];
-							c.g = p[x * 4 + 1];
-							c.r = p[x * 4 + 2];
-							c.a = p[x * 4 + 3];
-						} else {
-							c.b = p[x * 3 + 0];
-							c.g = p[x * 3 + 1];
-							c.r = p[x * 3 + 2];
-						} 
-						img_.put_pixel(x, ofs, c);
-					}
-					p += n;
+
+			tbyte* pix = new tbyte[fo.width * 4];
+			uint32_t n = 3;
+			if(alpha) ++n;
+			n *= fo.width;
+			for(int y = 0; y < fo.height; ++y) {
+				if(TGAReadScanlines(tga, pix, 0, 1, flags) == 0) {
+					f = false;
+					break;
 				}
-			} else {
-				f = false;
+				int ofs;
+				if(tga->hdr.vert) ofs = y;
+				else ofs = fo.height - y - 1;
+				for(int x = 0; x < fo.width; ++x) {
+					rgba8 c;
+					if(alpha) {
+						c.b = pix[x * 4 + 0];
+						c.g = pix[x * 4 + 1];
+						c.r = pix[x * 4 + 2];
+						c.a = pix[x * 4 + 3];
+					} else {
+						c.b = pix[x * 3 + 0];
+						c.g = pix[x * 3 + 1];
+						c.r = pix[x * 3 + 2];
+					} 
+					img_.put_pixel(x, ofs, c);
+				}
 			}
-			delete[] tmp;
+			delete[] pix;
 		}
 
 		TGAFree(tga);
@@ -330,16 +333,21 @@ namespace img {
 		TGA* tga = create_(&fout);
 		TGAHeader& h = tga->hdr;
         h.id_len = 0;
+		bool indexed = false;
+		bool rle = false;
+		if(opt == "rle") rle = true;
+
 		if(imf_->get_type() == IMG::INDEXED8) {
 			h.map_t = 1;
-			h.img_t = (opt == "rle") ? 1 : 9;
+			h.img_t = rle ? 9 : 1;
 			h.map_first = 0;
 			h.map_len = imf_->get_clut_max();
 			h.map_entry = imf_->test_alpha() ? 32 : 24;
 			h.depth = 8;
+			indexed = true;
 		} else if(imf_->get_type() == IMG::FULL8) {
 			h.map_t = 0;
-			h.img_t = (opt == "rle") ? 10 : 2;
+			h.img_t = rle ? 10 : 2;
 			h.map_first = 0;
 			h.map_len = 0;
 			h.map_entry = 0;
@@ -352,7 +360,9 @@ namespace img {
 		h.y = 0;
 		h.width  = imf_->get_size().x;
 		h.height = imf_->get_size().y;
-		h.alpha = (imf_->test_alpha() == true) ? 8 : 0;
+		h.alpha  = imf_->test_alpha() ? 8 : 0;
+// std::cout << "Depth: " << static_cast<int>(h.depth) << std::endl;
+// std::cout << "Alpha: " << static_cast<int>(h.alpha) << std::endl;
 		h.horz = 0;
     	h.vert = 0;
 
@@ -362,7 +372,10 @@ namespace img {
 			return false;
 		}
 
-		if(imf_->get_clut_max()) {
+		tuint32 flags = 0;
+		if(rle) flags |= TGA_RLE_ENCODE;
+
+		if(indexed) {
 			// カラールックアップテーブル出力
 			{
 				int n = imf_->test_alpha() ? 4 : 3;
@@ -370,48 +383,45 @@ namespace img {
 				for(int i = 0; i < imf_->get_clut_max(); ++i) {
 					rgba8 c;
 					imf_->get_clut(i, c);
-					clut[i * n + 0] = c.r;
+					clut[i * n + 0] = c.b;
 					clut[i * n + 1] = c.g;
-					clut[i * n + 2] = c.b;
+					clut[i * n + 2] = c.r;
 					if(imf_->test_alpha()) clut[i * n + 3] = c.a;
 				}
-				TGAWriteColorMap(tga, clut, TGA_RGB);
+				TGAWriteColorMap(tga, clut, 0);
 				delete[] clut;
 			}
 
 			// インデックス出力
 			{
-				tbyte* pix = new tbyte[imf_->get_size().x * imf_->get_size().y];
-				tbyte* p = pix;
+				tbyte* pix = new tbyte[imf_->get_size().x];
 				for(int y = 0; y < imf_->get_size().y; ++y) {
 					int ofs = imf_->get_size().y - y - 1;
 					for(int x = 0; x < imf_->get_size().x; ++x) {
 						idx8 i;
 						imf_->get_pixel(x, ofs, i);
-						p[x] = i.i;
+						pix[x] = i.i;
 					}
-					p += imf_->get_size().x;
+					TGAWriteScanlines(tga, pix, 0, 1, flags);
 				} 
-				TGAWriteScanlines(tga, pix, 0, imf_->get_size().y, 0);
 				delete[] pix;
 			}
 		} else {
+			// フルカラー出力
 			int n = imf_->test_alpha() ? 4 : 3;
-			tbyte* pix = new tbyte[imf_->get_size().x * imf_->get_size().y * n];
-			tbyte* p = pix;
+			tbyte* pix = new tbyte[imf_->get_size().x * n];
 			for(int y = 0; y < imf_->get_size().y; ++y) {
 				int ofs = imf_->get_size().y - y - 1;
 				for(int x = 0; x < imf_->get_size().x; ++x) {
 					rgba8 c;
 					imf_->get_pixel(x, ofs, c);
-					p[x * n + 0] = c.b;
-					p[x * n + 1] = c.g;
-					p[x * n + 2] = c.r;
-					if(imf_->test_alpha()) p[x * n + 3] = c.a;
+					pix[x * n + 0] = c.b;
+					pix[x * n + 1] = c.g;
+					pix[x * n + 2] = c.r;
+					if(imf_->test_alpha()) pix[x * n + 3] = c.a;
 				}
-				p += imf_->get_size().x * n;
-			} 
-			TGAWriteScanlines(tga, pix, 0, imf_->get_size().y, TGA_BGR);
+				TGAWriteScanlines(tga, pix, 0, 1, flags);
+			}
 			delete[] pix;
 		}
 
