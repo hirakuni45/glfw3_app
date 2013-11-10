@@ -10,11 +10,10 @@
 #include "utils/director.hpp"
 #include "widgets/widget.hpp"
 #include "widgets/widget_button.hpp"
-#include "widgets/widget_slider.hpp"
 #include "widgets/widget_dialog.hpp"
 #include "widgets/widget_filer.hpp"
-#include "widgets/widget_tree.hpp"
 #include "img_io/bdf_io.hpp"
+#include "gl_fw/glmobj.hpp"
 
 namespace app {
 
@@ -27,16 +26,13 @@ namespace app {
 
 		utils::director<core>&	director_;
 
-		gui::widget_button*		dialog_open_;
-		gui::widget_button*		filer_open_;
-		gui::widget_slider*		slider_;
-		gui::widget_dialog*		dialog_;
-		gui::widget_tree*		tree_;
+		gui::widget_button*		open_;
 		gui::widget_filer*		filer_;
 
-		uint32_t	filer_id_;
+		gl::mobj			mobj_;
+		gl::mobj::handle	img_handle_;
 
-		img::bdf_io	bdf_io_;
+		uint32_t	filer_id_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -45,9 +41,7 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		bmc_main(utils::director<core>& d) : director_(d),
-			dialog_open_(0), filer_open_(0), slider_(0),
-			dialog_(0), tree_(0), filer_(0),
-			filer_id_(0)
+			open_(0), filer_(0), img_handle_(0), filer_id_(0)
 		{ }
 
 

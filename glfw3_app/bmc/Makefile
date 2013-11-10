@@ -25,6 +25,7 @@ PSOURCES	=	main.cpp \
 				../common/img_io/jpeg_io.cpp \
 				../common/img_io/openjpeg_io.cpp \
 				../common/img_io/bmp_io.cpp \
+				../common/img_io/tga_io.cpp \
 				../common/img_io/dds_io.cpp \
 				../common/img_io/bdf_io.cpp \
 				../common/img_io/pdf_in.cpp \
@@ -63,7 +64,7 @@ OPTLIBS		=	glfw3 glew32 opengl32 glu32 gdi32 imm32 \
 				pthread \
 				openal winmm dsound \
 				fitz \
-				png12 jpeg_x86 openjpeg jbig2dec \
+				png12 jpeg_x86 openjpeg tga jbig2dec \
 				freetype \
 				id3tag \
 				z \
@@ -219,11 +220,11 @@ main.o: ../common/gl_fw/IGLcore.hpp ../common/core/device.hpp
 main.o: ../common/gl_fw/glfonts.hpp ../common/gl_fw/Ikfimg.hpp
 main.o: ../common/core/device.hpp ../common/utils/director.hpp
 main.o: ../common/utils/i_scene.hpp ../common/gl_fw/glutils.hpp bmc_main.hpp
-main.o: ../common/utils/i_scene.hpp ../common/widgets/widget_slider.hpp
-main.o: ../common/widgets/widget_dialog.hpp ../common/widgets/widget_text.hpp
-main.o: ../common/widgets/widget_tree.hpp ../common/utils/tree_unit.hpp
-main.o: ../common/img_io/bdf_io.hpp ../common/utils/bit_array.hpp
-bmc_core.o: bmc_core.hpp
+main.o: ../common/utils/i_scene.hpp ../common/widgets/widget_dialog.hpp
+main.o: ../common/widgets/widget_text.hpp ../common/img_io/bdf_io.hpp
+main.o: ../common/utils/bit_array.hpp
+bmc_core.o: bmc_core.hpp ../common/utils/string_utils.hpp
+bmc_core.o: ../common/utils/mtx.hpp ../common/utils/vtx.hpp
 bmc_main.o: bmc_main.hpp main.hpp ../common/snd_io/sound.hpp
 bmc_main.o: ../common/snd_io/audio_io.hpp ../common/utils/file_io.hpp
 bmc_main.o: ../common/utils/string_utils.hpp ../common/utils/mtx.hpp
@@ -247,20 +248,13 @@ bmc_main.o: ../common/widgets/widget_director.hpp
 bmc_main.o: ../common/widgets/widget_label.hpp
 bmc_main.o: ../common/widgets/widget_button.hpp ../common/utils/i_scene.hpp
 bmc_main.o: ../common/utils/director.hpp ../common/utils/i_scene.hpp
-bmc_main.o: ../common/widgets/widget_slider.hpp
 bmc_main.o: ../common/widgets/widget_dialog.hpp
-bmc_main.o: ../common/widgets/widget_text.hpp
-bmc_main.o: ../common/widgets/widget_tree.hpp ../common/utils/tree_unit.hpp
-bmc_main.o: ../common/img_io/bdf_io.hpp ../common/utils/bit_array.hpp
-bmc_main.o: ../common/core/glcore.hpp ../common/gl_fw/IGLcore.hpp
-bmc_main.o: ../common/core/device.hpp ../common/gl_fw/glfonts.hpp
-bmc_main.o: ../common/gl_fw/Ikfimg.hpp ../common/core/device.hpp
-bmc_main.o: ../common/widgets/widget_utils.hpp
+bmc_main.o: ../common/widgets/widget_text.hpp ../common/img_io/bdf_io.hpp
+bmc_main.o: ../common/utils/bit_array.hpp ../common/core/glcore.hpp
+bmc_main.o: ../common/gl_fw/IGLcore.hpp ../common/core/device.hpp
+bmc_main.o: ../common/gl_fw/glfonts.hpp ../common/gl_fw/Ikfimg.hpp
+bmc_main.o: ../common/core/device.hpp ../common/widgets/widget_utils.hpp
 bmc_main.o: ../common/widgets/widget_frame.hpp
-bmc_main.o: ../common/widgets/widget_check.hpp
-bmc_main.o: ../common/widgets/widget_radio.hpp
-bmc_main.o: ../common/widgets/widget_list.hpp
-bmc_main.o: ../common/widgets/widget_image.hpp
 ../common/core/glcore.o: ../common/core/glcore.hpp
 ../common/core/glcore.o: ../common/gl_fw/IGLcore.hpp
 ../common/core/glcore.o: ../common/core/device.hpp ../common/utils/vtx.hpp
@@ -403,6 +397,18 @@ bmc_main.o: ../common/widgets/widget_image.hpp
 ../common/img_io/bmp_io.o: ../common/img_io/img_clut.hpp
 ../common/img_io/bmp_io.o: ../common/img_io/img_rgba8.hpp
 ../common/img_io/bmp_io.o: ../common/img_io/img_gray8.hpp
+../common/img_io/tga_io.o: ../common/img_io/tga_io.hpp
+../common/img_io/tga_io.o: ../common/img_io/i_img_io.hpp
+../common/img_io/tga_io.o: ../common/utils/file_io.hpp
+../common/img_io/tga_io.o: ../common/utils/string_utils.hpp
+../common/img_io/tga_io.o: ../common/utils/mtx.hpp ../common/utils/vtx.hpp
+../common/img_io/tga_io.o: ../common/img_io/i_img.hpp
+../common/img_io/tga_io.o: ../common/img_io/img.hpp
+../common/img_io/tga_io.o: ../common/img_io/img_idx8.hpp
+../common/img_io/tga_io.o: ../common/img_io/i_img.hpp
+../common/img_io/tga_io.o: ../common/img_io/img_clut.hpp
+../common/img_io/tga_io.o: ../common/img_io/img_rgba8.hpp
+../common/img_io/tga_io.o: ../common/img_io/img_gray8.hpp
 ../common/img_io/dds_io.o: ../common/img_io/dds_io.hpp
 ../common/img_io/dds_io.o: ../common/img_io/i_img_io.hpp
 ../common/img_io/dds_io.o: ../common/utils/file_io.hpp
@@ -448,6 +454,7 @@ bmc_main.o: ../common/widgets/widget_image.hpp
 ../common/img_io/img_files.o: ../common/img_io/img_gray8.hpp
 ../common/img_io/img_files.o: ../common/img_io/png_io.hpp
 ../common/img_io/img_files.o: ../common/img_io/bmp_io.hpp
+../common/img_io/img_files.o: ../common/img_io/tga_io.hpp
 ../common/img_io/img_files.o: ../common/img_io/dds_io.hpp
 ../common/img_io/img_files.o: ../common/img_io/openjpeg_io.hpp
 ../common/img_io/img_utils.o: ../common/img_io/img_utils.hpp

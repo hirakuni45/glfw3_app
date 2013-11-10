@@ -302,6 +302,7 @@ namespace app {
 		if(filer_ && file_btn_->get_selected()) {
 			bool f = filer_->get_state(gui::widget::state::ENABLE);
 			filer_->enable(!f);
+			if(!f) filer_->focus_file(sound.get_file_stream());
 		}
 
 		// 「送り」ボタン
