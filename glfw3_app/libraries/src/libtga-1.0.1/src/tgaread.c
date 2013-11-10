@@ -303,8 +303,7 @@ TGAReadScanlines(TGA 	*tga,
 	}
 	
 	if (TGA_CAN_SWAP(tga->hdr.depth) && (flags & TGA_RGB)) {
-		__TGAbgr2rgb(buf + (sln_size * sln), sln_size * n, 
-			   tga->hdr.depth / 8);
+		__TGAbgr2rgb(buf, sln_size * n, tga->hdr.depth / 8);
 	}
 	
 	if (tga->hdr.depth == 15 || tga->hdr.depth == 16) {
