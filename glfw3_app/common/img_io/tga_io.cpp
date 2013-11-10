@@ -209,11 +209,11 @@ namespace img {
 	/*!
 		@brief	BMP ファイル、ロード(utils::file_io)
 		@param[in]	fin	ファイル I/O クラス
-		@param[in]	ext	フォーマット固有の設定文字列
+		@param[in]	opt	フォーマット固有の設定文字列
 		@return エラーなら「false」を返す
 	*/
 	//-----------------------------------------------------------------//
-	bool tga_io::load(utils::file_io& fin, const std::string& ext)
+	bool tga_io::load(utils::file_io& fin, const std::string& opt)
 	{
 		img::img_info fo;
 		TGA* tga = info_(&fin, fo);
@@ -317,11 +317,11 @@ namespace img {
 	/*!
 		@brief	BMP ファイルをセーブする
 		@param[in]	fout	ファイル I/O クラス
-		@param[in]	ext		フォーマット固有の設定文字列
+		@param[in]	opt		フォーマット固有の設定文字列
 		@return エラーがあれば「false」
 	*/
 	//-----------------------------------------------------------------//
-	bool tga_io::save(utils::file_io& fout, const std::string& ext)
+	bool tga_io::save(utils::file_io& fout, const std::string& opt)
 	{
 		if(imf_ == 0) {
 			return false;
@@ -332,14 +332,14 @@ namespace img {
         h.id_len = 0;
 		if(imf_->get_type() == IMG::INDEXED8) {
 			h.map_t = 1;
-			h.img_t = (ext == "rle") ? 1 : 9;
+			h.img_t = (opt == "rle") ? 1 : 9;
 			h.map_first = 0;
 			h.map_len = imf_->get_clut_max();
 			h.map_entry = imf_->test_alpha() ? 32 : 24;
 			h.depth = 8;
 		} else if(imf_->get_type() == IMG::FULL8) {
 			h.map_t = 0;
-			h.img_t = (ext == "rle") ? 10 : 2;
+			h.img_t = (opt == "rle") ? 10 : 2;
 			h.map_first = 0;
 			h.map_len = 0;
 			h.map_entry = 0;

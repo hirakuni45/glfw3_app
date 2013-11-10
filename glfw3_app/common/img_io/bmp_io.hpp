@@ -77,22 +77,22 @@ namespace img {
 		/*!
 			@brief	BMP ファイル、ロード(utils::file_io)
 			@param[in]	fin	ファイル I/O クラス
-			@param[in]	ext	フォーマット固有の設定文字列
+			@param[in]	opt	フォーマット固有の設定文字列
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool load(utils::file_io& fin, const std::string& ext = "");
+		bool load(utils::file_io& fin, const std::string& opt = "");
 
 
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	BMP ファイルをセーブする
 			@param[in]	fout	ファイル I/O クラス
-			@param[in]	ext		フォーマット固有の設定文字列
+			@param[in]	opt		フォーマット固有の設定文字列
 			@return エラーがあれば「false」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(utils::file_io& fout, const std::string& ext = "");
+		bool save(utils::file_io& fout, const std::string& opt = "");
 
 
 		//-----------------------------------------------------------------//

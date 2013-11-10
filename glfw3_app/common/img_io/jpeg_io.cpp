@@ -332,11 +332,11 @@ namespace img {
 	/*!
 		@brief	JPEG ファイル、ロード
 		@param[in]	fin	file_io クラス
-		@param[in]	ext	フォーマット固有の設定文字列
+		@param[in]	opt	フォーマット固有の設定文字列
 		@return エラーなら「false」を返す
 	*/
 	//-----------------------------------------------------------------//
-	bool jpeg_io::load(utils::file_io& fin, const std::string& ext)
+	bool jpeg_io::load(utils::file_io& fin, const std::string& opt)
 	{
 		// とりあえず、ヘッダーの検査
 		if(probe(fin) == false) {
@@ -432,18 +432,18 @@ namespace img {
 	/*!
 		@brief	JPEG ファイルをセーブする
 		@param[in]	fout	file_io クラス
-		@param[in]	ext	フォーマット固有の設定文字列
+		@param[in]	opt	フォーマット固有の設定文字列
 		@return エラーがあれば「false」
 	*/
 	//-----------------------------------------------------------------//
-	bool jpeg_io::save(utils::file_io& fout, const std::string& ext)
+	bool jpeg_io::save(utils::file_io& fout, const std::string& opt)
 	{
 		if(imf_ == 0 && rgb_ptr_ == 0) return false;
 
 		int quality = quality_;
-		if(!ext.empty()) {
+		if(!opt.empty()) {
 			int n;
-			if(sscanf(ext.c_str(), "%d", &n) == 1) {
+			if(sscanf(opt.c_str(), "%d", &n) == 1) {
 				quality = n;
 			}
 		}

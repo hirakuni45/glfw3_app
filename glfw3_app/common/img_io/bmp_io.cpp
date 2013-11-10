@@ -648,12 +648,12 @@ namespace img {
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	BMP ファイルをロードする
-		@param[in]	fin		ファイル I/O クラス
-		@param[in]	ext	フォーマット固有の設定文字列
+		@param[in]	fin	ファイル I/O クラス
+		@param[in]	opt	フォーマット固有の設定文字列
 		@return エラーがあれば「false」
 	*/
 	//-----------------------------------------------------------------//
-	bool bmp_io::load(utils::file_io& fin, const std::string& ext)
+	bool bmp_io::load(utils::file_io& fin, const std::string& opt)
 	{
 		long pos = fin.tell();
 		bmp_info bmp;
@@ -750,11 +750,11 @@ namespace img {
 	/*!
 		@brief	BMP ファイルをセーブする
 		@param[in]	fout	ファイル I/O クラス
-		@param[in]	ext	フォーマット固有の設定文字列
+		@param[in]	opt	フォーマット固有の設定文字列
 		@return エラーがあれば「false」
 	*/
 	//-----------------------------------------------------------------//
-	bool bmp_io::save(utils::file_io& fout, const std::string& ext)
+	bool bmp_io::save(utils::file_io& fout, const std::string& opt)
 	{
 		int w = imf_->get_size().x;
 		int h = imf_->get_size().y;

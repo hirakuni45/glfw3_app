@@ -79,11 +79,11 @@ namespace img {
 		/*!
 			@brief	JPEG ファイル、ロード(wchar_t)
 			@param[in]	fin	file_io クラス
-			@param[in]	ext	フォーマット固有の設定文字列
+			@param[in]	opt	フォーマット固有の設定文字列
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool load(utils::file_io& fin, const std::string& ext = "");
+		bool load(utils::file_io& fin, const std::string& opt = "");
 
 
 		//-----------------------------------------------------------------//
@@ -109,11 +109,11 @@ namespace img {
 		/*!
 			@brief	JPEG ファイルをセーブする
 			@param[in]	fout	file_io クラス
-			@param[in]	ext	フォーマット固有の設定文字列
+			@param[in]	opt	フォーマット固有の設定文字列
 			@return エラーがあれば「false」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(utils::file_io& fout, const std::string& ext = "");
+		bool save(utils::file_io& fout, const std::string& opt = "");
 
 
 		//-----------------------------------------------------------------//
