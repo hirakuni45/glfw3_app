@@ -289,17 +289,17 @@ TGAReadScanlines(TGA 	*tga,
 	}
 
 	if(TGA_IS_ENCODED(tga)) {
-		for(read = 0; read <= n; ++read) {
+		for(read = 0; read < n; ++read) {
 			if(TGAReadRLE(tga, buf + ((sln + read) * sln_size)) !=
 				TGA_OK) break;
 		}
-		tga->hdr.img_t -= 8;
+		read *= sln_size;
 	} else {
 		read = TGARead(tga, buf, sln_size * n);
 	}
 	if(read != (sln_size * n)) {
 		TGA_ERROR(tga, TGA_READ_FAIL);
-		return read;
+		return 0;
 	}
 	
 	if (TGA_CAN_SWAP(tga->hdr.depth) && (flags & TGA_RGB)) {

@@ -277,10 +277,10 @@ TGAWriteScanlines(TGA 	  *tga,
 	
 	if (flags & TGA_RLE_ENCODE) {
 		for(wrote = 0; wrote < n; ++wrote) {
-			if(TGAWriteRLE(tga, buf + ((sln + wrote)*sln_size)) !=
+			if(TGAWriteRLE(tga, buf + ((sln + wrote) * sln_size)) !=
 				TGA_OK) break;
 		}
-		tga->hdr.img_t += 8;
+		wrote *= sln_size;
 	} else {
 		wrote = TGAWrite(tga, buf, sln_size * n);
 	}
