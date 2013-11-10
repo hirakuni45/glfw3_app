@@ -87,6 +87,9 @@ namespace app {
 
 				} else {
 					img_handle_ = mobj_.install(imf.get_image_if());
+					
+///					imf.set_image_if(imf.get_image_if());
+///					imf.save("test.tga", "rle");
 				}
 			}
 		}
