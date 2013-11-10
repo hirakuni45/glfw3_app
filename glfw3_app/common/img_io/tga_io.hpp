@@ -88,11 +88,12 @@ namespace img {
 		/*!
 			@brief	BMP ファイルをセーブする
 			@param[in]	fout	ファイル I/O クラス
-			@param[in]	ext		フォーマット固有の設定文字列
+			@param[in]	ext		フォーマット固有の設定文字列 @n
+								「rle」を指定すると圧縮タイプで出力する
 			@return エラーがあれば「false」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(utils::file_io& fout, const std::string& ext = "");
+		bool save(utils::file_io& fout, const std::string& ext = "rle");
 
 
 		//-----------------------------------------------------------------//
