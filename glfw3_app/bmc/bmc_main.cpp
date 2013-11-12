@@ -28,15 +28,15 @@ namespace app {
 			widget_frame::param wp_;
 			frame_ = wd.add_widget<widget_frame>(wp, wp_);
 		}
-		if(0) { // 画像イメージ（子）
-			widget::param wp(vtx::srect(0, 0, 256, 256), frame_);
-			widget_image::param wp_;
-			image_ = wd.add_widget<widget_image>(wp, wp_);
-		}
 
+		{ // 機能ツールパレット
+			widget::param wp(vtx::srect(10, 10, 120, 300));
+			widget_frame::param wp_;
+			tools_ = wd.add_widget<widget_frame>(wp, wp_);
+		}
 		{ // ファイラー起動ボタン
-			widget::param wp(vtx::srect(10, 10, 150, 40));
-			widget_button::param wp_("画像ファイル");
+			widget::param wp(vtx::srect(5, 5, 100, 40), tools_);
+			widget_button::param wp_("file");
 			open_ = wd.add_widget<widget_button>(wp, wp_);
 		}
 
@@ -54,6 +54,7 @@ namespace app {
 		if(filer_) {
 			filer_->load(pre);
 			frame_->load(pre);
+			tools_->load(pre);
 		}
 	}
 
@@ -113,8 +114,10 @@ namespace app {
 
 		if(img_handle_) {
 			const vtx::spos& size = igl->get_size();
-			mobj_.setup_matrix(size.x, size.y);
-			mobj_.draw(img_handle_, gl::mobj::attribute::normal, 0, 0);
+			vtx::spos ofs(frame_->get_local_param().plate_param_.frame_width_);
+			vtx::srect clip = frame_->get_param().clip_;
+			clip.size -= ofs;
+			gui::render_clipped_mobj(mobj_, img_handle_, clip, ofs);
 		}
 	}
 
@@ -130,6 +133,7 @@ namespace app {
 		if(filer_) {
 			filer_->save(pre);
 			frame_->save(pre);
+			tools_->save(pre);
 		}
 	}
 }
