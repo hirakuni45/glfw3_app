@@ -221,7 +221,8 @@ main.o: ../common/gl_fw/glfonts.hpp ../common/gl_fw/Ikfimg.hpp
 main.o: ../common/core/device.hpp ../common/utils/director.hpp
 main.o: ../common/utils/i_scene.hpp ../common/gl_fw/glutils.hpp bmc_main.hpp
 main.o: ../common/utils/i_scene.hpp ../common/widgets/widget_dialog.hpp
-main.o: ../common/widgets/widget_text.hpp ../common/img_io/bdf_io.hpp
+main.o: ../common/widgets/widget_text.hpp ../common/widgets/widget_frame.hpp
+main.o: ../common/widgets/widget_image.hpp ../common/img_io/bdf_io.hpp
 main.o: ../common/utils/bit_array.hpp
 bmc_core.o: bmc_core.hpp ../common/utils/string_utils.hpp
 bmc_core.o: ../common/utils/mtx.hpp ../common/utils/vtx.hpp
@@ -249,12 +250,13 @@ bmc_main.o: ../common/widgets/widget_label.hpp
 bmc_main.o: ../common/widgets/widget_button.hpp ../common/utils/i_scene.hpp
 bmc_main.o: ../common/utils/director.hpp ../common/utils/i_scene.hpp
 bmc_main.o: ../common/widgets/widget_dialog.hpp
-bmc_main.o: ../common/widgets/widget_text.hpp ../common/img_io/bdf_io.hpp
+bmc_main.o: ../common/widgets/widget_text.hpp
+bmc_main.o: ../common/widgets/widget_frame.hpp
+bmc_main.o: ../common/widgets/widget_image.hpp ../common/img_io/bdf_io.hpp
 bmc_main.o: ../common/utils/bit_array.hpp ../common/core/glcore.hpp
 bmc_main.o: ../common/gl_fw/IGLcore.hpp ../common/core/device.hpp
 bmc_main.o: ../common/gl_fw/glfonts.hpp ../common/gl_fw/Ikfimg.hpp
 bmc_main.o: ../common/core/device.hpp ../common/widgets/widget_utils.hpp
-bmc_main.o: ../common/widgets/widget_frame.hpp
 ../common/core/glcore.o: ../common/core/glcore.hpp
 ../common/core/glcore.o: ../common/gl_fw/IGLcore.hpp
 ../common/core/glcore.o: ../common/core/device.hpp ../common/utils/vtx.hpp

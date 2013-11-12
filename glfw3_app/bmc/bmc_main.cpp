@@ -5,14 +5,9 @@
 */
 //=====================================================================//
 #include <iostream>
-#include <boost/lexical_cast.hpp>
 #include "bmc_main.hpp"
 #include "core/glcore.hpp"
 #include "widgets/widget_utils.hpp"
-#include "widgets/widget_null.hpp"
-#include "widgets/widget_frame.hpp"
-#include "widgets/widget_button.hpp"
-#include "widgets/widget_filer.hpp"
 
 namespace app {
 
@@ -28,19 +23,24 @@ namespace app {
 		using namespace gui;
 		widget_director& wd = director_.at_core().widget_director_;
 
-//		if(1) { // フレームのテスト
-//			widget::param wp(vtx::srect(200, 20, 100, 80));
-//			widget_frame::param wp_;
-//			wd.add_widget<widget_frame>(wp, wp_);
-//		}
+		{ // 画像ファイル表示用フレーム
+			widget::param wp(vtx::srect(30, 30, 256, 256));
+			widget_frame::param wp_;
+			frame_ = wd.add_widget<widget_frame>(wp, wp_);
+		}
+		if(0) { // 画像イメージ（子）
+			widget::param wp(vtx::srect(0, 0, 256, 256), frame_);
+			widget_image::param wp_;
+			image_ = wd.add_widget<widget_image>(wp, wp_);
+		}
 
-		{
+		{ // ファイラー起動ボタン
 			widget::param wp(vtx::srect(10, 10, 150, 40));
 			widget_button::param wp_("画像ファイル");
 			open_ = wd.add_widget<widget_button>(wp, wp_);
 		}
 
-		{
+		{ // ファイラー本体
 			widget::param wp(vtx::srect(10, 30, 300, 200));
 			widget_filer::param wp_(igl->get_current_path());
 			filer_ = wd.add_widget<widget_filer>(wp, wp_);
@@ -53,6 +53,7 @@ namespace app {
 		sys::preference& pre = director_.at_core().preference_;
 		if(filer_) {
 			filer_->load(pre);
+			frame_->load(pre);
 		}
 	}
 
@@ -128,6 +129,7 @@ namespace app {
 		sys::preference& pre = director_.at_core().preference_;
 		if(filer_) {
 			filer_->save(pre);
+			frame_->save(pre);
 		}
 	}
 }

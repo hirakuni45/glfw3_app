@@ -12,6 +12,8 @@
 #include "widgets/widget_button.hpp"
 #include "widgets/widget_dialog.hpp"
 #include "widgets/widget_filer.hpp"
+#include "widgets/widget_frame.hpp"
+#include "widgets/widget_image.hpp"
 #include "img_io/bdf_io.hpp"
 #include "gl_fw/glmobj.hpp"
 
@@ -28,6 +30,8 @@ namespace app {
 
 		gui::widget_button*		open_;
 		gui::widget_filer*		filer_;
+		gui::widget_frame*		frame_;
+		gui::widget_image*		image_;
 
 		gl::mobj			mobj_;
 		gl::mobj::handle	img_handle_;
@@ -41,7 +45,8 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		bmc_main(utils::director<core>& d) : director_(d),
-			open_(0), filer_(0), img_handle_(0), filer_id_(0)
+			open_(0), filer_(0), frame_(0), image_(0),
+			img_handle_(0), filer_id_(0)
 		{ }
 
 
