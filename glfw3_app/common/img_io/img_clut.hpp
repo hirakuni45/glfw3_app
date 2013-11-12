@@ -14,11 +14,12 @@ namespace img {
 		@brief	カラー・ルック・アップ・テーブル・クラス
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	template <class COLOR = rgba8, uint32_t NUM = 256>
 	class img_clut {
 
-		uint32_t		clut_max_;
 		uint32_t		clut_pos_;
-		rgba8			clut_[256];
+		COLOR			clut_[NUM];
+		bool			alpha_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -26,7 +27,7 @@ namespace img {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		img_clut() : clut_max_(256), clut_pos_(0) { }
+		img_clut() : clut_pos_(0), alpha_(true) { }
 
 
 		//-----------------------------------------------------------------//
@@ -39,19 +40,28 @@ namespace img {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	全てのカラーテーブルを廃棄する。
+			@brief	容量を返す
+			@return 容量
 		*/
 		//-----------------------------------------------------------------//
-		void destroy() { clut_max_ = 256; clut_pos_ = 0; }
+		uint32_t capacity() const { return NUM; }
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	現在のカラー数を得る。
-			@return カラー数を返す。
+			@brief	要素数を返す
+			@return 要素数
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t get_color_num() const { return clut_pos_; }
+		uint32_t size() const { return clut_pos_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	カラーテーブルのクリア
+		*/
+		//-----------------------------------------------------------------//
+		void clear() { clut_pos_ = 0; }
 
 
 		//-----------------------------------------------------------------//
@@ -62,11 +72,7 @@ namespace img {
 			@return	カラー情報を返した場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool get_color(int pos, rgba8& c) const {
-			if(pos < 0 || pos >= clut_pos_) return false;
-			c = clut_[pos];
-			return true;
-		}
+		const COLOR& get_color(uint32_t pos) const { return clut_[pos]; }
 
 
 		//-----------------------------------------------------------------//
@@ -77,10 +83,12 @@ namespace img {
 			@return	カラー情報を変更した場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool set_color(int pos, const rgba8& c) {
-			if(pos < 0 || pos >= clut_pos_) return false;
-			clut_[pos] = c;
-			return true;
+		bool set_color(uint32_t pos, const COLOR& c) {
+			if(pos < clut_pos_) {
+				clut_[pos] = c;
+				return true;
+			}
+			return false;
 		}
 
 
@@ -92,8 +100,8 @@ namespace img {
 			@return	適合するカラーがあった場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool lookup_color(const rgba8& c, int& pos) {
-			for(int i = 0; i < clut_max_; ++i) {
+		bool lookup_color(const COLOR& c, int& pos) {
+			for(uint32_t i = 0; i < clut_pos_; ++i) {
 				if(clut_[i] == c) {
 					pos = i;
 					return true;
@@ -111,13 +119,12 @@ namespace img {
 		*/
 		//-----------------------------------------------------------------//
 		bool add_color(const rgba8& c) {
-			if(clut_pos_ < clut_max_) {
+			if(clut_pos_ < NUM) {
 				clut_[clut_pos_] = c;
 				clut_pos_++;
+				return true;
 			}
 			return false;
 		}
-
 	};
-
 }
