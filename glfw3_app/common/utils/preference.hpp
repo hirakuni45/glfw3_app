@@ -11,7 +11,6 @@
 #include <stack>
 #include <map>
 #include <boost/format.hpp>
-#include <boost/unordered_map.hpp>
 #include "utils/vtx.hpp"
 #include "utils/file_io.hpp"
 
@@ -22,15 +21,18 @@ namespace sys {
 		@brief	プリファレンス・クラス
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	class preference {
-
-	public:
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	struct preference {
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
-			@brief	プリファレンス・「値」形
+			@brief	プリファレンス値型
 		*/
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct value {
+			//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+			/*!
+				@brief	タイプ
+			*/
+			//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 			enum type {
 				invalid = -1,
 				int32 = 0,
@@ -39,7 +41,6 @@ namespace sys {
 				position_int32,
 				position_float32,
 				boolean,
-//				binary,
 			};
 		};
 
@@ -52,10 +53,10 @@ namespace sys {
 		};
 
 		typedef std::pair<std::string, value_t>					item_pair;
-		typedef boost::unordered_map<std::string, value_t>::iterator		item_it;
-		typedef boost::unordered_map<std::string, value_t>::const_iterator	item_cit;
+		typedef std::map<std::string, value_t>::iterator		item_it;
+		typedef std::map<std::string, value_t>::const_iterator	item_cit;
 		typedef std::pair<item_it, bool>						item_ret;
-		boost::unordered_map<std::string, value_t>	map_;
+		std::map<std::string, value_t>	map_;
 
 		std::string						path_;
 		std::stack<std::string>			stack_path_;
