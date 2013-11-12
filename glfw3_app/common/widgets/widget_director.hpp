@@ -25,7 +25,6 @@ namespace gui {
 		typedef widgets::iterator			widgets_it;
 		typedef widgets::const_iterator		widgets_cit;
 
-
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	共通画像構造体
@@ -337,5 +336,15 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		const common_parts& get_common_parts() const { return common_parts_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	widget 固有の文字列を生成
+			@param[in]	w	生成する widget
+			@return widget 固有の文字列
+		*/
+		//-----------------------------------------------------------------//
+		const std::string create_widget_name(const widget* w) const;
 	};
 }

@@ -12,11 +12,6 @@
 
 namespace gui {
 
-	const char* widget_filer::key_path_   = { "widget/filer/current_path" };
-	const char* widget_filer::key_locate_ = { "widget/filer/locate" };
-	const char* widget_filer::key_size_   = { "widget/filer/size" };
-
-
 	void widget_filer::create_file_(widget_file& wf, const vtx::srect& rect, short ofs, const std::string& fn)
 	{
 		{
@@ -97,8 +92,9 @@ namespace gui {
 			if(fn == ".") continue;
 
 			widget_file wf;
-			if(fn == "..") ;
-			else if(fi.is_directory()) {
+			if(fn == "..") {
+				wf.dir = true;
+			} else if(fi.is_directory()) {
 				fn += '/';
 				wf.dir = true;
 			}
@@ -184,8 +180,12 @@ namespace gui {
 		for(widget_files_cit cit = wfs.begin(); cit != wfs.end(); ++cit) {
 			const widget_file& wf = *cit;
 			if(info_state_ == info_state::SIZE) {
-				wf.info->at_local_param().text_param_.text_
-					= ' ' + boost::lexical_cast<std::string>(wf.size);
+				std::string& s = wf.info->at_local_param().text_param_.text_;
+				if(wf.dir) {
+					s = " -";
+				} else {
+					s = ' ' + boost::lexical_cast<std::string>(wf.size);
+				}
 			} else if(info_state_ == info_state::TIME) {
 				std::string s;
 				s += ' ';
@@ -757,10 +757,13 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	bool widget_filer::save(sys::preference& pre)
 	{
+		std::string path;
+		path += '/';
+		path += wd_.create_widget_name(this);
 		int err = 0;
-		if(!pre.put_text(key_path_, param_.path_)) ++err;
-		if(!pre.put_position(key_locate_, vtx::ipos(get_rect().org))) ++err;
-		if(!pre.put_position(key_size_, vtx::ipos(get_rect().size))) ++err;
+		if(!pre.put_text(path + "/current_path", param_.path_)) ++err;
+		if(!pre.put_position(path + "/locate", vtx::ipos(get_rect().org))) ++err;
+		if(!pre.put_position(path + "/size", vtx::ipos(get_rect().size))) ++err;
 ///		if(!pre.put_integer(key_info_, info_state_) ++err;
 		return err == 0;
 	}
@@ -775,10 +778,14 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	bool widget_filer::load(const sys::preference& pre)
 	{
-		int err = 0;
 		std::string path;
-		if(pre.get_text(key_path_, path)) {
-			param_.path_ = path;
+		path += '/';
+		path += wd_.create_widget_name(this);
+
+		int err = 0;
+		std::string s;
+		if(pre.get_text(path + "/current_path", s)) {
+			param_.path_ = s;
 			fsc_.set_path(param_.path_, param_.filter_);
 			destroy_files_(left_);
 			destroy_files_(center_);
@@ -788,12 +795,12 @@ namespace gui {
 		}
 
 		vtx::ipos p;
-		if(pre.get_position(key_locate_, p)) {
+		if(pre.get_position(path + "/locate", p)) {
 			at_rect().org = p;
 		} else {
 			++err;
 		}
-		if(pre.get_position(key_size_, p)) {
+		if(pre.get_position(path + "/size", p)) {
 			at_rect().size = p;
 		} else {
 			++err;

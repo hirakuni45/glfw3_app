@@ -63,7 +63,15 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	bool widget_frame::save(sys::preference& pre)
 	{
-		return true;
+		std::string path;
+		path += '/';
+		path += wd_.create_widget_name(this);
+
+		int err = 0;
+		if(!pre.put_position(path + "/locate",  vtx::ipos(get_rect().org))) ++err;
+		if(!pre.put_position(path + "/size", vtx::ipos(get_rect().size))) ++err;
+
+		return err == 0;
 	}
 
 
@@ -76,6 +84,23 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	bool widget_frame::load(const sys::preference& pre)
 	{
-		return true;
+		std::string path;
+		path += '/';
+		path += wd_.create_widget_name(this);
+
+		int err = 0;
+		vtx::ipos p;
+		if(pre.get_position(path + "/locate", p)) {
+			at_rect().org = p;
+		} else {
+			++err;
+		}
+		if(pre.get_position(path + "/size", p)) {
+			at_rect().size = p;
+		} else {
+			++err;
+		}
+
+		return err == 0;
 	}
 }

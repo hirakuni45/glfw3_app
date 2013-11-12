@@ -5,7 +5,9 @@
 */
 //=====================================================================//
 #include <cstdio>
+#include <map>
 #include <boost/foreach.hpp>
+#include <boost/format.hpp>
 #include "gl_fw/gl_info.hpp"
 #include "gl_fw/IGLcore.hpp"
 #include "widgets/widget_director.hpp"
@@ -46,8 +48,8 @@ namespace gui {
 	{
 		std::string type;
 
+		type = w->type_name();
 		if(w->type() == get_type_id<widget_label>()) {
-			type = "label";
 			widget_label* wl = dynamic_cast<widget_label*>(w);
 			if(wl) {
 				type += ": ";
@@ -55,16 +57,7 @@ namespace gui {
 				type += wl->get_local_param().text_param_.text_;
 				type += "'";
 			}
-		} else if(w->type() == get_type_id<widget_null>()) {
-			type = "null";
-		} else if(w->type() == get_type_id<widget_image>()) {
-			type = "image";
-		} else if(w->type() == get_type_id<widget_text>()) {
-			type = "text";
-		} else if(w->type() == get_type_id<widget_frame>()) {
-			type = "frame";
 		} else if(w->type() == get_type_id<widget_button>()) {
-			type = "button";
 			widget_button* wl = dynamic_cast<widget_button*>(w);
 			if(wl) {
 				type += ": ";
@@ -72,10 +65,7 @@ namespace gui {
 				type += wl->get_local_param().text_param_.text_;
 				type += "'";
 			}
-		} else if(w->type() == get_type_id<widget_slider>()) {
-			type = "slider";
 		} else if(w->type() == get_type_id<widget_check>()) {
-			type = "check";
 			widget_check* wl = dynamic_cast<widget_check*>(w);
 			if(wl) {
 				type += ": ";
@@ -84,7 +74,6 @@ namespace gui {
 				type += "'";
 			}
 		} else if(w->type() == get_type_id<widget_radio>()) {
-			type = "radio";
 			widget_radio* wl = dynamic_cast<widget_radio*>(w);
 			if(wl) {
 				type += ": ";
@@ -92,18 +81,6 @@ namespace gui {
 				type += wl->get_local_param().text_param_.text_;
 				type += "'";
 			}
-		} else if(w->type() == get_type_id<widget_list>()) {
-			type = "list";
-		} else if(w->type() == get_type_id<widget_dialog>()) {
-			type = "dialog";
-		} else if(w->type() == get_type_id<widget_tree>()) {
-			type = "tree";
-		} else if(w->type() == get_type_id<widget_filer>()) {
-			type = "filer";
-		} else if(w->type() == get_type_id<widget_terminal>()) {
-			type = "terminal";
-		} else {
-			type = "(none)";
 		}
 
 		printf("(%d:%s)%s: '%s'\n", w->get_serial(), w->get_symbol().c_str(),
@@ -856,5 +833,35 @@ namespace gui {
 			++id;
 		}
 		fflush(stdout);
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	widget 固有の文字列を生成
+		@param[in]	w	生成する widget
+		@return widget 固有の文字列
+	*/
+	//-----------------------------------------------------------------//
+	const std::string widget_director::create_widget_name(const widget* w) const
+	{
+		std::map<uint32_t, widget*> tbl;
+		typedef std::pair<uint32_t, widget*> tbl_p;
+		BOOST_FOREACH(widget* ww, widgets_) {
+			if(w->type() == ww->type()) {
+				tbl.insert(tbl_p(w->get_serial(), ww));
+			}
+		}
+
+		int n = 0;
+		BOOST_FOREACH(const tbl_p& t, tbl) {
+			if(t.second == w) break;
+			++n;
+		}
+
+		std::string s = w->type_name();
+		s += '/';
+		s += (boost::format("%05d") % n).str();
+		return s;
 	}
 }
