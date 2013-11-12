@@ -37,10 +37,10 @@ int main(int argc, char** argv)
 		director.at_core().preference_.load(pref);
 
 		vtx::ipos locate(10, 10);
-		director.at_core().preference_.get_position("player/window/locate", locate);
+		director.at_core().preference_.get_position("application/window/locate", locate);
 		vtx::ipos size(800, 600);
 		vtx::spos lsz = size;
-		director.at_core().preference_.get_position("player/window/size", size);
+		director.at_core().preference_.get_position("application/window/size", size);
 
 		if(!igl->setup(vtx::srect(locate, size), "player", false)) {
 			return -1;
@@ -80,9 +80,9 @@ int main(int argc, char** argv)
 		director.render();
 
 		vtx::ipos p = igl->get_size();
-		director.at_core().preference_.put_position("player/window/size", p);
+		director.at_core().preference_.put_position("application/window/size", p);
 		p = igl->get_locate();
-		director.at_core().preference_.put_position("player/window/locate", p);
+		director.at_core().preference_.put_position("application/window/locate", p);
 
 		director.at_core().preference_.save(pref);
 	}
