@@ -156,8 +156,10 @@ namespace gui {
 		@brief	クリッピングされたモーションオブジェクトのレンダリング
 		@param[in]	mo	モーションオブジェクト
 		@param[in]	moh	モーションオブジェクトハンドル
-		@param[in]	wp	widget パラメーター
+		@param[in]	clip	clip パラメーター
+		@param[in]	ofs	描画オフセット
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	void render_clipped_mobj(gl::mobj& mo, gl::mobj::handle moh, const vtx::srect& clip);
+	void render_clipped_mobj(gl::mobj& mo, gl::mobj::handle moh, const vtx::srect& clip,
+		const vtx::spos& ofs);
 }
