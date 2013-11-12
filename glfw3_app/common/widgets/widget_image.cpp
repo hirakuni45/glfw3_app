@@ -89,12 +89,8 @@ namespace gui {
 			vtx::srect rect;
 			if(wp.state_[widget::state::CLIP_PARENTS]) {
 				draw_mobj(wd_, objh_, wp.clip_);
-				rect.org  = wp.rpos_;
-				rect.size = wp.rect_.size;
 			} else {
 				wd_.at_mobj().draw(objh_, gl::mobj::attribute::normal, 0, 0);
-				rect.org.set(0);
-				rect.size = wp.rect_.size;
 			}
 			glPopMatrix();
 			glViewport(0, 0, size.x, size.y);

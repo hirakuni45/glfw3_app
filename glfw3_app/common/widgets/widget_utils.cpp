@@ -352,4 +352,31 @@ namespace gui {
 		t.plate_param_ = pp;
 		return wd.share_add(t);
 	}
+
+
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief	クリッピングされたモーションオブジェクトのレンダリング
+		@param[in]	mo	モーションオブジェクト
+		@param[in]	moh	モーションオブジェクトハンドル
+		@param[in]	wp	widget パラメーター
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	void render_clipped_mobj(gl::mobj& mo, gl::mobj::handle moh, const vtx::srect& clip)
+	{
+		using namespace gl;
+		IGLcore* igl = get_glcore();
+
+		const vtx::spos& size = igl->get_size();
+
+		if(clip.size.x > 0 && clip.size.y > 0) {
+			glPushMatrix();
+			glViewport(clip.org.x, size.y - clip.org.y - clip.size.y,
+				clip.size.x, clip.size.y);
+			mo.setup_matrix(clip.size.x, clip.size.y);
+			mo.draw(moh, gl::mobj::attribute::normal, 0, 0);
+			glPopMatrix();
+			glViewport(0, 0, size.x, size.y);
+		}
+	}
 }

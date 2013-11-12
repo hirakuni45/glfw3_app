@@ -849,7 +849,7 @@ namespace gui {
 		typedef std::pair<uint32_t, widget*> tbl_p;
 		BOOST_FOREACH(widget* ww, widgets_) {
 			if(w->type() == ww->type()) {
-				tbl.insert(tbl_p(w->get_serial(), ww));
+				tbl.insert(tbl_p(ww->get_serial(), ww));
 			}
 		}
 

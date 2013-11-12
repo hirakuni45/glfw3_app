@@ -149,4 +149,15 @@ namespace gui {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	gl::mobj::handle frame_init(widget_director& wd, widget::param& wp, const widget::plate_param& pp, const widget::color_param& cp);
+
+
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief	クリッピングされたモーションオブジェクトのレンダリング
+		@param[in]	mo	モーションオブジェクト
+		@param[in]	moh	モーションオブジェクトハンドル
+		@param[in]	wp	widget パラメーター
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	void render_clipped_mobj(gl::mobj& mo, gl::mobj::handle moh, const vtx::srect& clip);
 }
