@@ -293,7 +293,7 @@ namespace utils {
 		strings exts;
 		split_text(ext, ",", exts);
 		BOOST_FOREACH(const std::string& s, src) {
-			const char* src_ext = get_file_ext(s);
+			std::string src_ext = get_file_ext(s);
 			BOOST_FOREACH(const std::string& ex, exts) {
 				if(cap) {
 					if(no_capital_strcmp(src_ext, ex) == 0) {

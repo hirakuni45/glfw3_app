@@ -158,6 +158,7 @@ namespace img {
 				}
 			}
 		}
+
 		for(size_t i = 0; i < imgios_.size(); ++i) {
 			if(n != i) {
 				img_file& io = imgios_[i];

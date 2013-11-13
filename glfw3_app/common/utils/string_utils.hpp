@@ -503,23 +503,28 @@ namespace utils {
 	*/
 	//-----------------------------------------------------------------//
 	template <class T>
-	inline const typename T::value_type* get_file_extT(const T& src) {
-		if(src.empty()) return 0;
+	inline T get_file_extT(const T& src) {
+		static T empty;
+		if(src.empty()) return empty;
 		const typename T::value_type* p = string_strrchr(src, '.');
 		if(p) {
 			++p;
 			if((p - &src[0]) <= 0) {
-				return 0;
+				return empty;
 			}
 			if(string_strchr(p, '/')) {
-				return 0;
+				return empty;
 			}
 			return p;
 		}
-		return 0;
+		return empty;
 	}
-	inline const char* get_file_ext(const std::string& src) { return get_file_extT(src); }
-	inline const wchar_t* get_file_ext(const wstring& src) { return get_file_extT(src); }
+	inline std::string get_file_ext(const std::string& src) {
+		return get_file_extT<std::string>(src);
+	}
+	inline wstring get_file_ext(const wstring& src) {
+		return get_file_extT<wstring>(src);
+	}
 
 
 	//-----------------------------------------------------------------//
