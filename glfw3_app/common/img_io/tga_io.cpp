@@ -256,13 +256,21 @@ namespace img {
 		}
 
 		inline void set_pixel_(const uint8_t* p, rgba8& pix) {
-			pix.b = p[0];
-			pix.g = p[1];
-			pix.r = p[2];
-			if(info_.alpha) {
-				pix.a = p[3];
-			} else {
+			if(info_.depth == 15 || info_.depth == 16) { // 555
+				uint16_t c = p[0] | (p[1] << 8);
+				pix.b = c & 0x1f; pix.b |= (pix.b << 3) & 0xe0;
+				pix.g = (c >> 5) & 0x1f; pix.g |= (pix.g << 3) & 0xe0;
+				pix.r = (c >> 10) & 0x1f; pix.r |= (pix.r << 3) & 0xe0;
 				pix.a = 255;
+			} else {
+				pix.b = p[0];
+				pix.g = p[1];
+				pix.r = p[2];
+				if(info_.alpha) {
+					pix.a = p[3];
+				} else {
+					pix.a = 255;
+				}
 			}
 		}
 
@@ -271,21 +279,13 @@ namespace img {
 		}
 
 		inline bool read_pixel_(rgba8& pix) {
-			if(info_.depth == 15) { // 1555
+			if(info_.depth == 15 || info_.depth == 16) { // 555
 				uint8_t tmp[2];
 				if(fio_.read(tmp, 2) != 2) return false;
 				uint16_t c = tmp[0] | (tmp[1] << 8);
 				pix.b = c & 0x1f; pix.b |= (pix.b << 3) & 0xe0;
 				pix.g = (c >> 5) & 0x1f; pix.g |= (pix.g << 3) & 0xe0;
 				pix.r = (c >> 10) & 0x1f; pix.r |= (pix.r << 3) & 0xe0;
-				pix.a = 255;
-			} else if(info_.depth == 16) { // 565
-				uint8_t tmp[2];
-				if(fio_.read(tmp, 2) != 2) return false;
-				uint16_t c = tmp[0] | (tmp[1] << 8);
-				pix.b = c & 0x1f; pix.b |= (pix.b << 3) & 0xe0;
-				pix.g = (c >> 5) & 0x3f; pix.g |= (pix.g << 2) & 0xc0;
-				pix.r = (c >> 11) & 0x1f; pix.r |= (pix.r << 3) & 0xe0;
 				pix.a = 255;
 			} else {
 				if(!fio_.get(pix.b)) return false;
@@ -348,8 +348,8 @@ namespace img {
 
 		   uint8_t* buf = 0;
 			uint32_t bits = info_.depth;
+			if(bits == 15) ++bits;
 			if(rle_) {
-				if(bits == 15) ++bits;
 				buf = new uint8_t[bits / 8 * info_.w];
 			}
 			for(uint16_t y = 0; y < info_.h; ++y) {
