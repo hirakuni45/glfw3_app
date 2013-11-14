@@ -96,6 +96,8 @@ namespace img {
 
 		const tga_info& get_info() const { return info_; }
 
+		void enable_rle(bool f = true) { rle_ = f; }
+
 		bool read_info(img::img_info& fo)
 		{
 			if(!fio_.seek(offset_, utils::file_io::seek::set)) {
@@ -409,7 +411,8 @@ namespace img {
 				} else {
 					if(direct) {
 						if(!fio_.put<uint8_t>(direct - 1)) return false;
-						if(fio_.write(from, bytes * direct) != bytes * direct) return false;
+						uint32_t n = bytes * direct;
+						if(fio_.write(from, n) != n) return false;
 						from = buf;
 						direct = 0;
 						repeat = 1;
@@ -435,10 +438,10 @@ namespace img {
 			}
 
 			if(repeat > 0) {
-				if(!fio_.put(128 + repeat))  return false;
+				if(!fio_.put<uint8_t>(128 + repeat))  return false;
 				if(fio_.write(from, bytes) != bytes) return false;
 			} else {
-				if(!fio_.put(direct))  return false;
+				if(!fio_.put<uint8_t>(direct))  return false;
 				uint32_t n = bytes * (direct + 1);
 				if(fio_.write(from, n) != n) return false;
 			}
@@ -446,42 +449,49 @@ namespace img {
 			return true;
 		}
 
-		bool encode(const i_img* imf, bool rle)
+		bool encode(const i_img* imf)
 		{
+// std::cout << static_cast<int>(rle) << std::endl;
+			uint8_t* buf = 0;
+			if(rle_) {
+				uint32_t n = imf->get_size().x * info_.depth / 8;
+				buf = new uint8_t[n];
+			}
 			for(int y = 0; y < imf->get_size().y; ++y) {
-				if(rle) {
-					uint32_t n = imf->get_size().x * info_.depth / 8;
-					uint8_t* buf = new uint8_t[n];
+				int yy = imf->get_size().y - y - 1;
+				if(rle_) {
 					uint8_t* p = buf;
 					if(imf->get_type() == IMG::INDEXED8) {
 						for(int x = 0; x < imf->get_size().x; ++x) {
 							idx8 i;
-							imf->get_pixel(x, y, i);
+							imf->get_pixel(x, yy, i);
 							*p++ = i.i;
 						}
 					} else {
 						for(int x = 0; x < imf->get_size().x; ++x) {
 							rgba8 c;
-							imf->get_pixel(x, y, c);
+							imf->get_pixel(x, yy, c);
 							*p++ = c.b;
 							*p++ = c.g;
 							*p++ = c.r;
 							if(info_.alpha) *p++ = c.a;
 						}
 					}
-					if(!encode_rle_(buf)) return false;
-					delete[] buf;
+					if(!encode_rle_(&buf[0])) {
+						delete[] buf;
+						return false;
+					}
 				} else {
 					if(imf->get_type() == IMG::INDEXED8) {
 						for(int x = 0; x < imf->get_size().x; ++x) {
 							idx8 i;
-							imf->get_pixel(x, y, i);
+							imf->get_pixel(x, yy, i);
 							if(!fio_.put(i.i)) return false;
 						}
 					} else {
 						for(int x = 0; x < imf->get_size().x; ++x) {
 							rgba8 c;
-							imf->get_pixel(x, y, c);
+							imf->get_pixel(x, yy, c);
 							if(!fio_.put(c.b)) return false;
 							if(!fio_.put(c.g)) return false;
 							if(!fio_.put(c.r)) return false;
@@ -492,6 +502,7 @@ namespace img {
 					}
 				}
 			}
+			delete[] buf;
 			return true;
 		}
 	};
@@ -605,6 +616,8 @@ namespace img {
 
 		tga tga_(fout);
 
+		if(opt == "rle") tga_.enable_rle(); else tga_.enable_rle(false);
+
 		if(!tga_.write_info(imf_)) {
 			return false;
 		}
@@ -625,8 +638,6 @@ namespace img {
 		}
 
 		// ピクセルの書き込み
-		bool rle;
-		if(opt == "rle") rle = true; rle = false;
-		return tga_.encode(imf_, rle);
+		return tga_.encode(imf_);
 	}
 }
