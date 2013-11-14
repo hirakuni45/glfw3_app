@@ -55,7 +55,7 @@ namespace img {
 								アクセス可能なフォーマットを制御出来る。
 		*/
 		//-----------------------------------------------------------------//
-		void initialize(const std::string& exts = "bmp,png,tga,jpg,jpeg,j2k,jp2");
+		void initialize(const std::string& exts = "bmp,png,jpg,jpeg,j2k,jp2,tga");
 
 
 		//-----------------------------------------------------------------//

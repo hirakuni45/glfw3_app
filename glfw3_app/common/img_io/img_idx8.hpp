@@ -20,7 +20,9 @@ namespace img {
 		※RGBA8 形式のカラー・ルック・アップ・テーブル付き
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	class img_idx8 : public i_img {
+	struct img_idx8 : public i_img {
+
+		typedef idx8	pixel_type;
 
 	private:
 		vtx::spos	size_;

@@ -19,7 +19,9 @@ namespace img {
 		@brief	RGBA8 形式の画像を扱うクラス
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	class img_rgba8 : public i_img {
+	struct img_rgba8 : public i_img {
+
+		typedef rgba8	pixel_type;
 
 	private:
 		vtx::spos	size_;
