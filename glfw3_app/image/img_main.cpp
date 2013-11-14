@@ -39,12 +39,17 @@ namespace app {
 			widget_button::param wp_("file");
 			open_ = wd.add_widget<widget_button>(wp, wp_);
 		}
-
 		{ // ファイラー本体
 			widget::param wp(vtx::srect(10, 30, 300, 200));
 			widget_filer::param wp_(igl->get_current_path());
 			filer_ = wd.add_widget<widget_filer>(wp, wp_);
 			filer_->enable(false);
+		}
+		{ // ダイアログ
+			widget::param wp(vtx::srect(10, 30, 450, 200));
+			widget_dialog::param wp_;
+			dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
+			dialog_->enable(false);
 		}
 
 		mobj_.initialize();
@@ -82,16 +87,16 @@ namespace app {
 		if(filer_) {
 			if(filer_id_ != filer_->get_select_file_id()) {
 				filer_id_ = filer_->get_select_file_id();
-///				std::cout << "Filer: '" << filer_->get_file() << "'" << std::endl;
 
 				img::img_files& imf = wd.at_img_files();
 				if(!imf.load(filer_->get_file())) {
-
+					dialog_->set_text("Can't decode image file:\n '"
+						+ filer_->get_file() + "'");
+					dialog_->enable();
 				} else {
+					mobj_.destroy();
+					mobj_.initialize();
 					img_handle_ = mobj_.install(imf.get_image_if());
-					
-///					imf.set_image_if(imf.get_image_if());
-///					imf.save("test.tga", "rle");
 				}
 			}
 		}
