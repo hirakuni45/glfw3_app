@@ -21,12 +21,18 @@ namespace app {
 		gl::IGLcore* igl = gl::get_glcore();
 
 		using namespace gui;
-		widget_director& wd = director_.at_core().widget_director_;
+		widget_director& wd = director_.at().widget_director_;
 
 		{ // 画像ファイル表示用フレーム
 			widget::param wp(vtx::srect(30, 30, 256, 256));
 			widget_frame::param wp_;
 			frame_ = wd.add_widget<widget_frame>(wp, wp_);
+		}
+		{ // 画像ファイル表示イメージ
+			widget::param wp(vtx::srect(0, 0, 256, 256), frame_);
+			widget_image::param wp_;
+			image_ = wd.add_widget<widget_image>(wp, wp_);
+			image_->set_state(widget::state::CLIP_PARENTS);
 		}
 
 		{ // 機能ツールパレット
@@ -55,7 +61,7 @@ namespace app {
 		mobj_.initialize();
 
 		// プリファレンスの取得
-		sys::preference& pre = director_.at_core().preference_;
+		sys::preference& pre = director_.at().preference_;
 		if(filer_) {
 			filer_->load(pre);
 			frame_->load(pre);
@@ -74,7 +80,7 @@ namespace app {
 		gl::IGLcore* igl = gl::get_glcore();
 		const vtx::spos& size = igl->get_size();
 
-		gui::widget_director& wd = director_.at_core().widget_director_;
+		gui::widget_director& wd = director_.at().widget_director_;
 
 		if(open_) {
 			if(open_->get_selected()) {
@@ -84,6 +90,7 @@ namespace app {
 				}
 			}
 		}
+
 		if(filer_) {
 			if(filer_id_ != filer_->get_select_file_id()) {
 				filer_id_ = filer_->get_select_file_id();
@@ -97,8 +104,19 @@ namespace app {
 					mobj_.destroy();
 					mobj_.initialize();
 					img_handle_ = mobj_.install(imf.get_image_if());
+					image_->at_local_param().mobj_ = mobj_;
+					image_->at_local_param().mobj_handle_ = img_handle_;
+// imf.set_image_if(imf.get_image_if());
+// imf.save("test.tga", "rle");
 				}
 			}
+		}
+
+		// frame 内 image のサイズを設定
+		if(frame_ && image_) {
+			vtx::spos ofs(frame_->get_local_param().plate_param_.frame_width_);
+			image_->at_rect().org = ofs;
+			image_->at_rect().size = frame_->get_rect().size - ofs * 2;
 		}
 
 		wd.update();
@@ -112,18 +130,8 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void img_main::render()
 	{
-		director_.at_core().widget_director_.service();
-		director_.at_core().widget_director_.render();
-
-		gl::IGLcore* igl = gl::get_glcore();
-
-		if(img_handle_) {
-			const vtx::spos& size = igl->get_size();
-			vtx::spos ofs(frame_->get_local_param().plate_param_.frame_width_);
-			vtx::srect clip = frame_->get_param().clip_;
-			clip.size -= ofs;
-			gui::render_clipped_mobj(mobj_, img_handle_, clip, ofs);
-		}
+		director_.at().widget_director_.service();
+		director_.at().widget_director_.render();
 	}
 
 
@@ -134,7 +142,7 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void img_main::destroy()
 	{
-		sys::preference& pre = director_.at_core().preference_;
+		sys::preference& pre = director_.at().preference_;
 		if(filer_) {
 			filer_->save(pre);
 			frame_->save(pre);

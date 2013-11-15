@@ -30,6 +30,7 @@ namespace app {
 
 		gui::widget_filer*		filer_;
 		gui::widget_frame*		frame_;
+		gui::widget_image*		image_;
 		gui::widget_frame*		tools_;
 		gui::widget_button*		open_;
 		gui::widget_dialog*		dialog_;
@@ -46,7 +47,7 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		img_main(utils::director<core>& d) : director_(d),
-			filer_(0), frame_(0), tools_(0), open_(0), dialog_(0),
+			filer_(0), frame_(0), image_(0), tools_(0), open_(0), dialog_(0),
 			img_handle_(0), filer_id_(0)
 		{ }
 

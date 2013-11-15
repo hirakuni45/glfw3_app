@@ -1,29 +1,18 @@
 //=====================================================================//
 /*! @file
-	@brief  image application
+	@brief  image サンプル
 	@author 平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
 #include "main.hpp"
-#include "core/glcore.hpp"
-#include "gl_fw/glutils.hpp"
 #include "img_main.hpp"
-#include "utils/string_utils.hpp"
 
-#if 0
-void dropfiles(main_core& core)
-{
-	gl::IGLcore* igl = gl::get_glcore();
+typedef app::img_main	start_app;
 
-	int id = igl->get_recv_file_id();
-	if(core.id_ != id) {
-		core.id_ = id;
-		const utils::strings& ss = igl->get_recv_file_path();
-		if(!ss.empty()) {
-		}
-	}
-}
-#endif
+static const char* window_key_ = { "application/window" };
+static const char* app_title_ = { "Image" };
+static const vtx::spos start_size_(1024, 768);
+static const vtx::spos limit_size_(800, 600);
 
 int main(int argc, char** argv);
 
@@ -46,61 +35,56 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
-	{
-		utils::director<app::core> director;
+	utils::director<app::core> director;
 
-		director.at_core().preference_.load(pref);
+	director.at().preference_.load(pref);
 
-		vtx::ipos locate(10, 40);
-		director.at_core().preference_.get_position("application/window/locate", locate);
-		vtx::ipos size(800, 600);
-		vtx::spos lsz = size;
-		director.at_core().preference_.get_position("application/window/size", size);
+	vtx::srect rect(vtx::spos(10, 40), start_size_);
+	if(!director.at().preference_.load_rect(window_key_, rect)) {
+//		std::cout << "Load rect error..." << std::endl; 
+	}
 
-		if(!igl->setup(vtx::srect(100, 100, 1024, 768), "Image", false)) {
-			return -1;
-		}
-		igl->set_limit_size(vtx::spos(1024, 768));
+	if(!igl->setup(rect, app_title_, false)) {
+		return -1;
+	}
+	igl->set_limit_size(limit_size_);
 
-		director.at_core().sound_.initialize(16);
+	director.at().sound_.initialize(16);
 
-		director.at_core().widget_director_.initialize();
+	director.at().widget_director_.initialize();
 
-		director.install_scene<app::img_main>();
+	director.install_scene<start_app>();
 
-		while(!igl->get_exit_signal()) {
-			igl->service();
+	while(!igl->get_exit_signal()) {
+		igl->service();
 
-			glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-			gl::glColor(img::rgbaf(1.0f));
+		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+		gl::glColor(img::rgbaf(1.0f));
 
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-			glEnable(GL_TEXTURE_2D);
-			glEnable(GL_BLEND);
-			glDisable(GL_DEPTH_TEST);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		glEnable(GL_TEXTURE_2D);
+		glEnable(GL_BLEND);
+		glDisable(GL_DEPTH_TEST);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-			director.render();
-
-			igl->flip_frame();
-
-			director.at_core().sound_.service();
-		}
-		// プログラム終了の廃棄
-		director.erase_scene();
 		director.render();
 
-		vtx::ipos p = igl->get_size();
-		director.at_core().preference_.put_position("application/window/size", p);
-		p = igl->get_locate();
-		director.at_core().preference_.put_position("application/window/locate", p);
+		igl->flip_frame();
 
-		director.at_core().preference_.save(pref);
+		director.at().sound_.service();
 	}
+	// プログラム終了の廃棄
+	director.erase_scene();
+	director.render();
+
+	{
+		vtx::srect rect(igl->get_locate(), igl->get_size());
+		director.at().preference_.save_rect(window_key_, rect);
+	}
+
+	director.at().preference_.save(pref);
 
 	igl->destroy();
 
 	gl::destroy_glcore();
-
-	return 0;
 }

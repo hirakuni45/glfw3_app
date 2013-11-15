@@ -212,8 +212,8 @@ main.o: ../common/img_io/img_files.hpp ../common/img_io/i_img_io.hpp
 main.o: ../common/core/glcore.hpp ../common/gl_fw/IGLcore.hpp
 main.o: ../common/core/device.hpp ../common/gl_fw/glfonts.hpp
 main.o: ../common/gl_fw/Ikfimg.hpp ../common/core/device.hpp
-main.o: ../common/gl_fw/glutils.hpp img_main.hpp ../common/utils/i_scene.hpp
 main.o: ../common/utils/director.hpp ../common/utils/i_scene.hpp
+main.o: ../common/gl_fw/glutils.hpp img_main.hpp ../common/utils/i_scene.hpp
 main.o: ../common/widgets/widget_button.hpp
 main.o: ../common/widgets/widget_dialog.hpp ../common/widgets/widget_text.hpp
 main.o: ../common/widgets/widget_filer.hpp ../common/utils/files.hpp
@@ -239,8 +239,12 @@ img_main.o: ../common/utils/vmath.hpp ../common/utils/preference.hpp
 img_main.o: ../common/widgets/common_parts.hpp ../common/gl_fw/glmobj.hpp
 img_main.o: ../common/gl_fw/gl_info.hpp ../common/img_io/img_rgba8.hpp
 img_main.o: ../common/img_io/img_files.hpp ../common/img_io/i_img_io.hpp
-img_main.o: ../common/utils/i_scene.hpp ../common/utils/director.hpp
-img_main.o: ../common/utils/i_scene.hpp ../common/widgets/widget_button.hpp
+img_main.o: ../common/core/glcore.hpp ../common/gl_fw/IGLcore.hpp
+img_main.o: ../common/core/device.hpp ../common/gl_fw/glfonts.hpp
+img_main.o: ../common/gl_fw/Ikfimg.hpp ../common/core/device.hpp
+img_main.o: ../common/utils/director.hpp ../common/utils/i_scene.hpp
+img_main.o: ../common/gl_fw/glutils.hpp ../common/utils/i_scene.hpp
+img_main.o: ../common/widgets/widget_button.hpp
 img_main.o: ../common/widgets/widget_dialog.hpp
 img_main.o: ../common/widgets/widget_text.hpp
 img_main.o: ../common/widgets/widget_filer.hpp ../common/utils/files.hpp
@@ -250,10 +254,7 @@ img_main.o: ../common/widgets/widget_director.hpp
 img_main.o: ../common/widgets/widget_label.hpp
 img_main.o: ../common/widgets/widget_frame.hpp
 img_main.o: ../common/widgets/widget_image.hpp ../common/img_io/bdf_io.hpp
-img_main.o: ../common/utils/bit_array.hpp ../common/core/glcore.hpp
-img_main.o: ../common/gl_fw/IGLcore.hpp ../common/core/device.hpp
-img_main.o: ../common/gl_fw/glfonts.hpp ../common/gl_fw/Ikfimg.hpp
-img_main.o: ../common/core/device.hpp ../common/widgets/widget_utils.hpp
+img_main.o: ../common/utils/bit_array.hpp ../common/widgets/widget_utils.hpp
 ../common/core/glcore.o: ../common/core/glcore.hpp
 ../common/core/glcore.o: ../common/gl_fw/IGLcore.hpp
 ../common/core/glcore.o: ../common/core/device.hpp ../common/utils/vtx.hpp
