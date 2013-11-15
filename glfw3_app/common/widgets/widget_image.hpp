@@ -6,6 +6,7 @@
 */
 //=====================================================================//
 #include "widgets/widget_director.hpp"
+#include <boost/optional.hpp>
 
 namespace gui {
 
@@ -25,7 +26,10 @@ namespace gui {
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
 			const img::i_img*		image_;		///< 画像を使う場合
-			param(const img::i_img* image = 0) : image_(image) { }
+			gl::mobj::handle	mobj_handle_;	///< モーション・オブジェクトのハンドル
+			boost::optional<gl::mobj&>	mobj_;	///< モーションオブジェクトの参照
+			param(const img::i_img* image = 0) : image_(image),
+				mobj_handle_(0) { }
 		};
 
 	private:
