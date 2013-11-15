@@ -19,7 +19,7 @@ namespace utils {
 	template <class CORE>
 	struct director {
 
-		typedef CORE	value_type;
+		typedef CORE	value_type;		///< コアの型
 
 		typedef std::vector<i_scene*>   	scenes;
 		typedef scenes::iterator			scenes_it;
@@ -168,7 +168,16 @@ namespace utils {
 			@return コア
 		*/
 		//-----------------------------------------------------------------//
-		CORE& at_core() { return core_; }
+		CORE& at() { return core_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	コアへの参照（RO）
+			@return コア
+		*/
+		//-----------------------------------------------------------------//
+		const CORE& get() const { return core_; }
 
 	};
 

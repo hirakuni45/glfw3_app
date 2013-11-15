@@ -176,6 +176,60 @@ namespace sys {
 
 	//-----------------------------------------------------------------//
 	/*!
+		@brief	標準的な rect 構造の取得
+		@param[in]	key	ベースとなるキーワード
+		@return エラーが無ければ「true」
+	*/
+	//-----------------------------------------------------------------//
+	bool preference::load_rect(const std::string& key, vtx::srect& rect)
+	{
+		vtx::ipos org(-1);
+		if(!get_position(key + "/locate", org)) {
+			return false;
+		}
+		if(org.x < 0 || org.y < 0) {
+			return false;
+		}
+
+		vtx::ipos size(0);
+		if(!get_position(key + "/size", size)) {
+			return false;
+		}
+		if(size.x <= 0 || size.y <= 0) {
+			return false;
+		}
+
+		rect.org = org;
+		rect.size = size;
+		return true;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	標準的な rect 構造の取得
+		@param[in]	key	ベースとなるキーワード
+		@return エラーが無ければ「true」
+	*/
+	//-----------------------------------------------------------------//
+	bool preference::save_rect(const std::string& key, const vtx::srect& rect)
+	{
+		if(rect.org.x < 0 || rect.org.y < 0) {
+			return false;
+		}
+		vtx::ipos org = rect.org;
+		if(rect.size.x <= 0 || rect.size.y <= 0) {
+			return false;
+		}
+		vtx::ipos size = rect.size;
+		put_position(key + "/locate", org);
+		put_position(key + "/size", size);
+		return true;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
 		@brief	設定をロード
 		@param[in]	filename	ファイル名
 		@return エラーが無ければ「true」
