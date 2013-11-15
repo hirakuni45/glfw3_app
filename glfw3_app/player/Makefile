@@ -61,7 +61,7 @@ OPTLIBS		=	glfw3 glew32 opengl32 glu32 gdi32 imm32 \
 				pthread \
 				openal winmm dsound \
 				fitz \
-				png12 jpeg_x86 openjpeg tga jbig2dec \
+				png12 jpeg_x86 openjpeg jbig2dec \
 				freetype \
 				id3tag \
 				z \
@@ -214,20 +214,20 @@ main.o: ../common/utils/vmath.hpp ../common/utils/preference.hpp
 main.o: ../common/widgets/common_parts.hpp ../common/gl_fw/glmobj.hpp
 main.o: ../common/gl_fw/gl_info.hpp ../common/img_io/img_rgba8.hpp
 main.o: ../common/img_io/img_files.hpp ../common/img_io/i_img_io.hpp
+main.o: ../common/core/glcore.hpp ../common/gl_fw/IGLcore.hpp
+main.o: ../common/core/device.hpp ../common/gl_fw/glfonts.hpp
+main.o: ../common/gl_fw/Ikfimg.hpp ../common/core/device.hpp
+main.o: ../common/utils/director.hpp ../common/utils/i_scene.hpp
+main.o: ../common/gl_fw/glutils.hpp player.hpp
 main.o: ../common/widgets/widget_filer.hpp ../common/utils/files.hpp
 main.o: ../common/utils/drive_info.hpp ../common/utils/file_info.hpp
 main.o: ../common/utils/handle_set.hpp ../common/widgets/widget_null.hpp
 main.o: ../common/widgets/widget_director.hpp
 main.o: ../common/widgets/widget_label.hpp
-main.o: ../common/widgets/widget_button.hpp ../common/core/glcore.hpp
-main.o: ../common/gl_fw/IGLcore.hpp ../common/core/device.hpp
-main.o: ../common/gl_fw/glfonts.hpp ../common/gl_fw/Ikfimg.hpp
-main.o: ../common/core/device.hpp ../common/utils/director.hpp
-main.o: ../common/utils/i_scene.hpp player.hpp
+main.o: ../common/widgets/widget_button.hpp
 main.o: ../common/widgets/widget_slider.hpp
 main.o: ../common/widgets/widget_check.hpp
 main.o: ../common/widgets/widget_dialog.hpp ../common/widgets/widget_text.hpp
-main.o: ../common/gl_fw/glutils.hpp
 player.o: player.hpp main.hpp ../common/snd_io/sound.hpp
 player.o: ../common/snd_io/audio_io.hpp ../common/utils/file_io.hpp
 player.o: ../common/utils/string_utils.hpp ../common/utils/mtx.hpp
@@ -243,20 +243,22 @@ player.o: ../common/img_io/img_gray8.hpp ../common/utils/vmath.hpp
 player.o: ../common/utils/preference.hpp ../common/widgets/common_parts.hpp
 player.o: ../common/gl_fw/glmobj.hpp ../common/gl_fw/gl_info.hpp
 player.o: ../common/img_io/img_rgba8.hpp ../common/img_io/img_files.hpp
-player.o: ../common/img_io/i_img_io.hpp ../common/widgets/widget_filer.hpp
-player.o: ../common/utils/files.hpp ../common/utils/drive_info.hpp
-player.o: ../common/utils/file_info.hpp ../common/utils/handle_set.hpp
-player.o: ../common/widgets/widget_null.hpp
-player.o: ../common/widgets/widget_director.hpp
-player.o: ../common/widgets/widget_label.hpp
-player.o: ../common/widgets/widget_button.hpp ../common/utils/director.hpp
-player.o: ../common/utils/i_scene.hpp ../common/widgets/widget_slider.hpp
-player.o: ../common/widgets/widget_check.hpp
-player.o: ../common/widgets/widget_dialog.hpp
-player.o: ../common/widgets/widget_text.hpp ../common/core/glcore.hpp
+player.o: ../common/img_io/i_img_io.hpp ../common/core/glcore.hpp
 player.o: ../common/gl_fw/IGLcore.hpp ../common/core/device.hpp
 player.o: ../common/gl_fw/glfonts.hpp ../common/gl_fw/Ikfimg.hpp
-player.o: ../common/core/device.hpp ../common/widgets/widget_utils.hpp
+player.o: ../common/core/device.hpp ../common/utils/director.hpp
+player.o: ../common/utils/i_scene.hpp ../common/gl_fw/glutils.hpp
+player.o: ../common/widgets/widget_filer.hpp ../common/utils/files.hpp
+player.o: ../common/utils/drive_info.hpp ../common/utils/file_info.hpp
+player.o: ../common/utils/handle_set.hpp ../common/widgets/widget_null.hpp
+player.o: ../common/widgets/widget_director.hpp
+player.o: ../common/widgets/widget_label.hpp
+player.o: ../common/widgets/widget_button.hpp
+player.o: ../common/widgets/widget_slider.hpp
+player.o: ../common/widgets/widget_check.hpp
+player.o: ../common/widgets/widget_dialog.hpp
+player.o: ../common/widgets/widget_text.hpp
+player.o: ../common/widgets/widget_utils.hpp
 player.o: ../common/widgets/widget_image.hpp
 ../common/core/glcore.o: ../common/core/glcore.hpp
 ../common/core/glcore.o: ../common/gl_fw/IGLcore.hpp

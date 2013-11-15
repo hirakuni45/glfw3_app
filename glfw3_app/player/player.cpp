@@ -22,7 +22,7 @@ namespace app {
 
 	void player::sound_play_(const std::string& file)
 	{
-		al::sound& sound = director_.at_core().sound_;
+		al::sound& sound = director_.at().sound_;
 
 		std::string path;
 		utils::get_file_path(file, path);
@@ -61,7 +61,7 @@ namespace app {
 		const std::string& text, const std::string& font, bool proportional)
 	{
 		using namespace gui;
-		widget_director& wd = director_.at_core().widget_director_;
+		widget_director& wd = director_.at().widget_director_;
 
 		widget::param wp(vtx::srect(vtx::spos(0), size), 0);
 		widget_label::param wp_(text);
@@ -96,11 +96,11 @@ namespace app {
 		fonts.set_font_type(cf);
 
 		// サウンド・デコーダーの拡張子設定
-		al::sound& sound = director_.at_core().sound_;
+		al::sound& sound = director_.at().sound_;
 		tag_serial_ = sound.get_tag_stream().serial_;
 
 		using namespace gui;
-		widget_director& wd = director_.at_core().widget_director_;
+		widget_director& wd = director_.at().widget_director_;
 
 		{	// ファイラーリソースの生成
 			widget::param wp(vtx::srect(10, 10, 500, 350));
@@ -162,7 +162,7 @@ namespace app {
 		}
 
 		// プリファレンスの取得
-		sys::preference& pre = director_.at_core().preference_;
+		sys::preference& pre = director_.at().preference_;
 		pre.get_boolean(resume_path_, resume_play_->at_local_param().check_);
 		if(resume_play_->at_local_param().check_) {
 			int pos = 0;
@@ -206,7 +206,7 @@ namespace app {
 		const vtx::spos& size = igl->get_size();
 
 		// ウィジェットのコア、更新
-		gui::widget_director& wd = director_.at_core().widget_director_;
+		gui::widget_director& wd = director_.at().widget_director_;
 		wd.update();
 
 		// 画面のサイズに合わせた動的な位置補正
@@ -268,7 +268,7 @@ namespace app {
 		// ボタンの状態を設定
 		wd.enable(play_btn_, false);
 		wd.enable(pause_btn_, false);
-		al::sound& sound = director_.at_core().sound_;
+		al::sound& sound = director_.at().sound_;
 		if(sound.get_state_stream() == al::sound::stream_state::STALL) {
 			wd.enable(play_btn_);
 			play_btn_->set_state(gui::widget::state::STALL);
@@ -461,9 +461,9 @@ namespace app {
 			mobj_.restore_matrix();
 		}
 
-		director_.at_core().widget_director_.render();
+		director_.at().widget_director_.render();
 
-		director_.at_core().widget_director_.service();
+		director_.at().widget_director_.service();
 	}
 
 
@@ -474,10 +474,10 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void player::destroy()
 	{
-		sys::preference& pre = director_.at_core().preference_;
+		sys::preference& pre = director_.at().preference_;
 
 		// remain time
-		al::sound& sound = director_.at_core().sound_;
+		al::sound& sound = director_.at().sound_;
 		int po = 0;
 		std::string fn;
 		if(sound.get_state_stream() == al::sound::stream_state::PLAY ||
