@@ -22,7 +22,7 @@ namespace app {
 		gl::IGLcore* igl = gl::get_glcore();
 
 		using namespace gui;
-		widget_director& wd = director_.at_core().widget_director_;
+		widget_director& wd = director_.at().widget_director_;
 
 		{	// ファイラー・リソース
 			widget::param wp(vtx::srect(30, 30, 300, 200));
@@ -81,7 +81,7 @@ namespace app {
 		light_.set_position(bone_light_, vtx::fvtx(5.0f, 5.0f, 5.0f));
 
 		// プリファレンスの取得
-		sys::preference& pre = director_.at_core().preference_;
+		sys::preference& pre = director_.at().preference_;
 		if(filer_) {
 			filer_->load(pre);
 		}
@@ -98,7 +98,7 @@ namespace app {
 		gl::IGLcore* igl = gl::get_glcore();
 		const vtx::spos& size = igl->get_size();
 
-		gui::widget_director& wd = director_.at_core().widget_director_;
+		gui::widget_director& wd = director_.at().widget_director_;
 
 		if(fopen_->get_selected()) {
 			bool f = filer_->get_state(gui::widget::state::ENABLE);
@@ -133,7 +133,7 @@ namespace app {
 		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 		gl::glColor(img::rgbaf(1.0f));
 
-		director_.at_core().widget_director_.service();
+		director_.at().widget_director_.service();
 
 		camera_.service();
 
@@ -165,7 +165,7 @@ namespace app {
 		glDisable(GL_DEPTH_TEST);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		director_.at_core().widget_director_.render();
+		director_.at().widget_director_.render();
 	}
 
 
@@ -176,7 +176,7 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void pmdv_main::destroy()
 	{
-		sys::preference& pre = director_.at_core().preference_;
+		sys::preference& pre = director_.at().preference_;
 		if(filer_) {
 			filer_->save(pre);
 		}

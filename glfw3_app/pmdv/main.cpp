@@ -1,13 +1,18 @@
 //=====================================================================//
 /*! @file
-	@brief  共通メイン
+	@brief  PMD, PMX Viewer
 	@author 平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
 #include "main.hpp"
-#include "core/glcore.hpp"
-#include "utils/director.hpp"
 #include "pmdv_main.hpp"
+
+typedef app::pmdv_main start_app;
+
+static const char* window_key_ = { "application/window" };
+static const char* app_title_ = { "PMD-PMX Viewer" };
+static const vtx::spos start_size_(800, 600);
+static const vtx::spos limit_size_(800, 600);
 
 int main(int argc, char** argv);
 
@@ -30,48 +35,54 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
-	{
-		utils::director<app::core> director;
+	utils::director<app::core> director;
 
-		director.at_core().preference_.load(pref);
+	director.at().preference_.load(pref);
 
-		vtx::ipos locate(10, 10);
-		director.at_core().preference_.get_position("/window/locate", locate);
-		vtx::ipos size(800, 600);
-		vtx::spos lsz = size;
-		director.at_core().preference_.get_position("/window/size", size);
+	vtx::srect rect(vtx::spos(10, 40), start_size_);
+	if(!director.at().preference_.load_rect(window_key_, rect)) {
+//		std::cout << "Load rect error..." << std::endl; 
+	}
 
-		if(!igl->setup(vtx::srect(locate, size), "PMD Viewer", false)) {
-			return -1;
-		}
-		igl->set_limit_size(lsz);
+	if(!igl->setup(rect, app_title_, false)) {
+		return -1;
+	}
+	igl->set_limit_size(limit_size_);
 
-		director.at_core().sound_.initialize(16);
+	director.at().sound_.initialize(16);
 
-		director.at_core().widget_director_.initialize();
+	director.at().widget_director_.initialize();
 
-		director.install_scene<app::pmdv_main>();
+	director.install_scene<start_app>();
 
-		while(!igl->get_exit_signal()) {
-			igl->service();
+	while(!igl->get_exit_signal()) {
+		igl->service();
 
-			director.render();
+		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+		gl::glColor(img::rgbaf(1.0f));
 
-			igl->flip_frame();
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		glEnable(GL_TEXTURE_2D);
+		glEnable(GL_BLEND);
+		glDisable(GL_DEPTH_TEST);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-			director.at_core().sound_.service();
-		}
-		// プログラム終了の廃棄
-		director.erase_scene();
 		director.render();
 
-		vtx::ipos p = igl->get_size();
-		director.at_core().preference_.put_position("/window/size", p);
-		p = igl->get_locate();
-		director.at_core().preference_.put_position("/window/locate", p);
+		igl->flip_frame();
 
-		director.at_core().preference_.save(pref);
+		director.at().sound_.service();
 	}
+	// プログラム終了の廃棄
+	director.erase_scene();
+	director.render();
+
+	{
+		vtx::srect rect(igl->get_locate(), igl->get_size());
+		director.at().preference_.save_rect(window_key_, rect);
+	}
+
+	director.at().preference_.save(pref);
 
 	igl->destroy();
 

@@ -64,7 +64,7 @@ OPTLIBS		=	glfw3 glew32 opengl32 glu32 gdi32 imm32 \
 				pthread \
 				openal winmm dsound \
 				fitz \
-				png12 jpeg_x86 openjpeg tga jbig2dec \
+				png12 jpeg_x86 openjpeg jbig2dec \
 				freetype \
 				id3tag \
 				z \
@@ -210,22 +210,25 @@ main.o: ../common/utils/vmath.hpp ../common/utils/preference.hpp
 main.o: ../common/widgets/common_parts.hpp ../common/gl_fw/glmobj.hpp
 main.o: ../common/gl_fw/gl_info.hpp ../common/img_io/img_rgba8.hpp
 main.o: ../common/img_io/img_files.hpp ../common/img_io/i_img_io.hpp
+main.o: ../common/core/glcore.hpp ../common/gl_fw/IGLcore.hpp
+main.o: ../common/core/device.hpp ../common/gl_fw/glfonts.hpp
+main.o: ../common/gl_fw/Ikfimg.hpp ../common/core/device.hpp
+main.o: ../common/utils/director.hpp ../common/utils/i_scene.hpp
+main.o: ../common/gl_fw/glutils.hpp bmc_main.hpp ../common/utils/i_scene.hpp
+main.o: ../common/widgets/widget_button.hpp
+main.o: ../common/widgets/widget_dialog.hpp ../common/widgets/widget_text.hpp
 main.o: ../common/widgets/widget_filer.hpp ../common/utils/files.hpp
 main.o: ../common/utils/drive_info.hpp ../common/utils/file_info.hpp
 main.o: ../common/utils/handle_set.hpp ../common/widgets/widget_null.hpp
 main.o: ../common/widgets/widget_director.hpp
-main.o: ../common/widgets/widget_label.hpp
-main.o: ../common/widgets/widget_button.hpp ../common/core/glcore.hpp
-main.o: ../common/gl_fw/IGLcore.hpp ../common/core/device.hpp
-main.o: ../common/gl_fw/glfonts.hpp ../common/gl_fw/Ikfimg.hpp
-main.o: ../common/core/device.hpp ../common/utils/director.hpp
-main.o: ../common/utils/i_scene.hpp ../common/gl_fw/glutils.hpp bmc_main.hpp
-main.o: ../common/utils/i_scene.hpp ../common/widgets/widget_dialog.hpp
-main.o: ../common/widgets/widget_text.hpp ../common/widgets/widget_frame.hpp
+main.o: ../common/widgets/widget_label.hpp ../common/widgets/widget_frame.hpp
 main.o: ../common/widgets/widget_image.hpp ../common/img_io/bdf_io.hpp
-main.o: ../common/utils/bit_array.hpp
+main.o: ../common/utils/bit_array.hpp bmc_core.hpp
 bmc_core.o: bmc_core.hpp ../common/utils/string_utils.hpp
 bmc_core.o: ../common/utils/mtx.hpp ../common/utils/vtx.hpp
+bmc_core.o: ../common/img_io/img_files.hpp ../common/img_io/i_img_io.hpp
+bmc_core.o: ../common/utils/file_io.hpp ../common/img_io/i_img.hpp
+bmc_core.o: ../common/img_io/img.hpp
 bmc_main.o: bmc_main.hpp main.hpp ../common/snd_io/sound.hpp
 bmc_main.o: ../common/snd_io/audio_io.hpp ../common/utils/file_io.hpp
 bmc_main.o: ../common/utils/string_utils.hpp ../common/utils/mtx.hpp
@@ -242,21 +245,22 @@ bmc_main.o: ../common/utils/vmath.hpp ../common/utils/preference.hpp
 bmc_main.o: ../common/widgets/common_parts.hpp ../common/gl_fw/glmobj.hpp
 bmc_main.o: ../common/gl_fw/gl_info.hpp ../common/img_io/img_rgba8.hpp
 bmc_main.o: ../common/img_io/img_files.hpp ../common/img_io/i_img_io.hpp
+bmc_main.o: ../common/core/glcore.hpp ../common/gl_fw/IGLcore.hpp
+bmc_main.o: ../common/core/device.hpp ../common/gl_fw/glfonts.hpp
+bmc_main.o: ../common/gl_fw/Ikfimg.hpp ../common/core/device.hpp
+bmc_main.o: ../common/utils/director.hpp ../common/utils/i_scene.hpp
+bmc_main.o: ../common/gl_fw/glutils.hpp ../common/utils/i_scene.hpp
+bmc_main.o: ../common/widgets/widget_button.hpp
+bmc_main.o: ../common/widgets/widget_dialog.hpp
+bmc_main.o: ../common/widgets/widget_text.hpp
 bmc_main.o: ../common/widgets/widget_filer.hpp ../common/utils/files.hpp
 bmc_main.o: ../common/utils/drive_info.hpp ../common/utils/file_info.hpp
 bmc_main.o: ../common/utils/handle_set.hpp ../common/widgets/widget_null.hpp
 bmc_main.o: ../common/widgets/widget_director.hpp
 bmc_main.o: ../common/widgets/widget_label.hpp
-bmc_main.o: ../common/widgets/widget_button.hpp ../common/utils/i_scene.hpp
-bmc_main.o: ../common/utils/director.hpp ../common/utils/i_scene.hpp
-bmc_main.o: ../common/widgets/widget_dialog.hpp
-bmc_main.o: ../common/widgets/widget_text.hpp
 bmc_main.o: ../common/widgets/widget_frame.hpp
 bmc_main.o: ../common/widgets/widget_image.hpp ../common/img_io/bdf_io.hpp
-bmc_main.o: ../common/utils/bit_array.hpp ../common/core/glcore.hpp
-bmc_main.o: ../common/gl_fw/IGLcore.hpp ../common/core/device.hpp
-bmc_main.o: ../common/gl_fw/glfonts.hpp ../common/gl_fw/Ikfimg.hpp
-bmc_main.o: ../common/core/device.hpp ../common/widgets/widget_utils.hpp
+bmc_main.o: ../common/utils/bit_array.hpp ../common/widgets/widget_utils.hpp
 ../common/core/glcore.o: ../common/core/glcore.hpp
 ../common/core/glcore.o: ../common/gl_fw/IGLcore.hpp
 ../common/core/glcore.o: ../common/core/device.hpp ../common/utils/vtx.hpp

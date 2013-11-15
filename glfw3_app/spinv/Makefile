@@ -67,7 +67,7 @@ OPTLIBS		=	glfw3 glew32 opengl32 glu32 gdi32 imm32 \
 				pthread \
 				openal winmm dsound \
 				fitz \
-				png12 jpeg_x86 openjpeg tga jbig2dec \
+				png12 jpeg_x86 openjpeg jbig2dec \
 				freetype \
 				id3tag \
 				z \

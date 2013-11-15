@@ -28,6 +28,7 @@ PSOURCES	=	main.cpp \
 				../common/img_io/jpeg_io.cpp \
 				../common/img_io/openjpeg_io.cpp \
 				../common/img_io/bmp_io.cpp \
+				../common/img_io/tga_io.cpp \
 				../common/img_io/dds_io.cpp \
 				../common/img_io/pdf_in.cpp \
 				../common/img_io/img_files.cpp \
@@ -220,7 +221,7 @@ main.o: ../common/core/glcore.hpp ../common/gl_fw/IGLcore.hpp
 main.o: ../common/core/device.hpp ../common/gl_fw/glfonts.hpp
 main.o: ../common/gl_fw/Ikfimg.hpp ../common/core/device.hpp
 main.o: ../common/utils/director.hpp ../common/utils/i_scene.hpp
-main.o: pmdv_main.hpp ../common/utils/i_scene.hpp
+main.o: ../common/gl_fw/glutils.hpp pmdv_main.hpp ../common/utils/i_scene.hpp
 main.o: ../common/widgets/widget_filer.hpp ../common/utils/files.hpp
 main.o: ../common/utils/drive_info.hpp ../common/utils/file_info.hpp
 main.o: ../common/utils/handle_set.hpp ../common/widgets/widget_null.hpp
@@ -250,7 +251,7 @@ pmdv_main.o: ../common/img_io/paint.hpp ../common/img_io/img_rgba8.hpp
 pmdv_main.o: ../common/utils/vmath.hpp ../common/utils/preference.hpp
 pmdv_main.o: ../common/widgets/common_parts.hpp ../common/gl_fw/glmobj.hpp
 pmdv_main.o: ../common/img_io/img_files.hpp ../common/img_io/i_img_io.hpp
-pmdv_main.o: ../common/utils/i_scene.hpp ../common/utils/director.hpp
+pmdv_main.o: ../common/utils/director.hpp ../common/utils/i_scene.hpp
 pmdv_main.o: ../common/utils/i_scene.hpp ../common/widgets/widget_filer.hpp
 pmdv_main.o: ../common/utils/files.hpp ../common/utils/drive_info.hpp
 pmdv_main.o: ../common/utils/file_info.hpp ../common/utils/handle_set.hpp
@@ -441,6 +442,18 @@ pmdv_main.o: ../common/gl_fw/glmatrix.hpp
 ../common/img_io/bmp_io.o: ../common/img_io/img_clut.hpp
 ../common/img_io/bmp_io.o: ../common/img_io/img_rgba8.hpp
 ../common/img_io/bmp_io.o: ../common/img_io/img_gray8.hpp
+../common/img_io/tga_io.o: ../common/img_io/tga_io.hpp
+../common/img_io/tga_io.o: ../common/img_io/i_img_io.hpp
+../common/img_io/tga_io.o: ../common/utils/file_io.hpp
+../common/img_io/tga_io.o: ../common/utils/string_utils.hpp
+../common/img_io/tga_io.o: ../common/utils/mtx.hpp ../common/utils/vtx.hpp
+../common/img_io/tga_io.o: ../common/img_io/i_img.hpp
+../common/img_io/tga_io.o: ../common/img_io/img.hpp
+../common/img_io/tga_io.o: ../common/img_io/img_idx8.hpp
+../common/img_io/tga_io.o: ../common/img_io/i_img.hpp
+../common/img_io/tga_io.o: ../common/img_io/img_clut.hpp
+../common/img_io/tga_io.o: ../common/img_io/img_rgba8.hpp
+../common/img_io/tga_io.o: ../common/img_io/img_gray8.hpp
 ../common/img_io/dds_io.o: ../common/img_io/dds_io.hpp
 ../common/img_io/dds_io.o: ../common/img_io/i_img_io.hpp
 ../common/img_io/dds_io.o: ../common/utils/file_io.hpp
@@ -481,6 +494,7 @@ pmdv_main.o: ../common/gl_fw/glmatrix.hpp
 ../common/img_io/img_files.o: ../common/img_io/img_gray8.hpp
 ../common/img_io/img_files.o: ../common/img_io/png_io.hpp
 ../common/img_io/img_files.o: ../common/img_io/bmp_io.hpp
+../common/img_io/img_files.o: ../common/img_io/tga_io.hpp
 ../common/img_io/img_files.o: ../common/img_io/dds_io.hpp
 ../common/img_io/img_files.o: ../common/img_io/openjpeg_io.hpp
 ../common/img_io/img_utils.o: ../common/img_io/img_utils.hpp

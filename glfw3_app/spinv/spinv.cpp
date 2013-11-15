@@ -23,12 +23,12 @@ namespace app {
 		texfb_.initialize(InvadersMachine::ScreenWidth, InvadersMachine::ScreenHeight, 32);
 
         using namespace gui;
-        widget_director& wd = director_.at_core().widget_director_;
+        widget_director& wd = director_.at().widget_director_;
 
 		std::string errstr;
 		// sounds.zip 展開
 		{
-			al::sound& sound = director_.at_core().sound_;
+			al::sound& sound = director_.at().sound_;
 
 			static const char* sounds[] = {
     			"Ufo", "Walk1", "Walk2", "Walk3",
@@ -122,7 +122,7 @@ namespace app {
 		gl::IGLcore* igl = gl::get_glcore();
 		const gl::device& dev = igl->get_device();
 
-        gui::widget_director& wd = director_.at_core().widget_director_;
+        gui::widget_director& wd = director_.at().widget_director_;
 
 		// 1P
 		if(dev.get_positive(gl::device::key::_1)) {
@@ -185,7 +185,7 @@ namespace app {
 			spinv_.fireEvent( InvadersMachine::KeyFireUp);
 		}
 
-		al::sound& sound = director_.at_core().sound_;
+		al::sound& sound = director_.at().sound_;
 		if(dev.get_positive(gl::device::key::A)) {
 			sound.request_se(0, se_id_[8]);
 		}
@@ -273,8 +273,8 @@ namespace app {
 		gl::glScale(scale);
 		texfb_.draw();
 
-        director_.at_core().widget_director_.service();
-        director_.at_core().widget_director_.render();
+        director_.at().widget_director_.service();
+        director_.at().widget_director_.render();
 	}
 
 

@@ -49,22 +49,22 @@ int main(int argc, char** argv)
 	{
 		utils::director<app::core> director;
 
-		director.at_core().preference_.load(pref);
+		director.at().preference_.load(pref);
 
 		vtx::ipos locate(10, 50);
-		director.at_core().preference_.get_position("/window/locate", locate);
+		director.at().preference_.get_position("/window/locate", locate);
 //		vtx::ipos size(800, 600);
 //		vtx::spos lsz = size;
-//		director.at_core().preference_.get_position("player/window/size", size);
+//		director.at().preference_.get_position("player/window/size", size);
 
 		if(!igl->setup(vtx::srect(locate, vtx::spos(512)), "Space Invader", false)) {
 			return -1;
 		}
 		igl->set_limit_size(vtx::spos(512, 512));
 
-		director.at_core().sound_.initialize(16);
+		director.at().sound_.initialize(16);
 
-		director.at_core().widget_director_.initialize();
+		director.at().widget_director_.initialize();
 
 		director.install_scene<app::spinv>();
 
@@ -88,18 +88,18 @@ int main(int argc, char** argv)
 
 			igl->flip_frame();
 
-			director.at_core().sound_.service();
+			director.at().sound_.service();
 		}
 		// プログラム終了の廃棄
 		director.erase_scene();
 		director.render();
 
 //		vtx::ipos p = igl->get_size();
-//		director.at_core().preference_.put_position("player/window/size", p);
+//		director.at().preference_.put_position("player/window/size", p);
 		const vtx::ipos& p = igl->get_locate();
-		director.at_core().preference_.put_position("/window/locate", p);
+		director.at().preference_.put_position("/window/locate", p);
 
-		director.at_core().preference_.save(pref);
+		director.at().preference_.save(pref);
 	}
 
 	igl->destroy();
