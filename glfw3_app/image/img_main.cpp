@@ -33,6 +33,7 @@ namespace app {
 			widget_image::param wp_;
 			image_ = wd.add_widget<widget_image>(wp, wp_);
 			image_->set_state(widget::state::CLIP_PARENTS);
+			image_->set_state(widget::state::RESIZE_ROOT);
 		}
 
 		{ // 機能ツールパレット
