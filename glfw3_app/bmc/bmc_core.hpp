@@ -7,7 +7,8 @@
 //=====================================================================//
 #include <bitset>
 #include "utils/string_utils.hpp"
-#include "img_io/img_files.hpp"
+#include "utils/bit_array.hpp"
+#include "img_io/img_rgba8.hpp"
 
 namespace app {
 
@@ -21,13 +22,15 @@ namespace app {
 
 		struct option {
 			enum type {
-				preview,
-				verbose,
+				preview,	///< プレビューを有効
+				verbose,	///< 詳細なメッセージ出力
+				no_header,	///< サイズヘッダーを出力しない
+				c_style,	///< C スタイルのテキスト出力
+
 				true_color,
 				inverse,
 				bdf_type,
 				dither,
-				header,
 				append,
 				opterr,
 
@@ -45,8 +48,13 @@ namespace app {
 
 		float	version_;
 
-		img::img_files	img_files_;
+		img::img_rgba8	src_img_;
+		img::img_rgba8	dst_img_;
 
+		utils::bit_array	bits_;
+
+		void bitmap_convert_();
+		uint32_t save_file_();
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -62,14 +70,6 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		void help() const;
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief  verbose 表示
-		*/
-		//-----------------------------------------------------------------//
-		void verbose() const;
 
 
 		//-----------------------------------------------------------------//
@@ -116,5 +116,23 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		const std::string& get_out_file() const { return out_fname_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  ソース画像の参照を取得
+			@return ソース画像の参照
+		*/
+		//-----------------------------------------------------------------//
+		const img::img_rgba8& get_src_image() const { return src_img_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  ソース画像の参照を取得
+			@return ソース画像の参照
+		*/
+		//-----------------------------------------------------------------//
+		const img::img_rgba8& get_dst_image() const { return dst_img_; }
 	};
 }

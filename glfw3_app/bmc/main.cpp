@@ -8,6 +8,7 @@
 #include "bmc_main.hpp"
 
 #include "bmc_core.hpp"
+#include "img_io/img_files.hpp"
 
 typedef app::bmc_main	start_app;
 
@@ -22,11 +23,12 @@ int main(int argc, char** argv)
 {
 	app::bmc_core bmc(argc, argv);
 
-	if(!bmc.analize()) {
+	if(!bmc.analize() || bmc.get_inp_file().empty()) {
 		bmc.help();
 	} else {
-//		if(bmc.get_inp_file().empty()) {
-
+		if(!bmc.execute()) {
+			return 0;
+		}
 	}
 
 	// プレビューする場合
@@ -52,6 +54,9 @@ int main(int argc, char** argv)
 	}
 
 	utils::director<app::core> director;
+
+	// bmc_core を設定
+	director.at().bmc_ = bmc;
 
 	director.at().preference_.load(pref);
 

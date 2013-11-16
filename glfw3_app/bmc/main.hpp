@@ -11,6 +11,8 @@
 #include "core/glcore.hpp"
 #include "utils/director.hpp"
 #include "gl_fw/glutils.hpp"
+#include "bmc_core.hpp"
+#include <boost/optional.hpp>
 
 namespace app {
 
@@ -26,6 +28,8 @@ namespace app {
 		gui::widget_director	widget_director_;
 
 		sys::preference		preference_;
+
+		boost::optional<app::bmc_core&>	bmc_;
 
 		core() { }
 	};

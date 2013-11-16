@@ -7,11 +7,50 @@
 #include "bmc_core.hpp"
 #include <boost/foreach.hpp>
 #include <boost/format.hpp>
-#include <cstring>
+#include "img_io/img_files.hpp"
 
 namespace app {
 
-// タイトルの表示と簡単な説明
+	uint32_t bmc_core::save_file_()
+	{
+		if(out_fname_.empty()) {
+			return 0;
+		}
+
+		uint32_t n = 0;
+		if(!option_[option::c_style]) {
+
+		} else {
+			n = bits_.save_file(out_fname_);
+		}
+		return n;
+	}
+
+	void bmc_core::bitmap_convert_()
+	{
+		if(src_img_.empty()) return;
+
+		if(!option_[option::no_header]) {
+			bits_.put_bits(src_img_.get_size().x, 8);
+			bits_.put_bits(src_img_.get_size().y, 8);
+		}
+
+		dst_img_.create(src_img_.get_size(), true);
+
+		for(int y = 0; y < src_img_.get_size().y; ++y) {
+			for(int x = 0; x < src_img_.get_size().x; ++x) {
+				img::rgba8 c;
+				src_img_.get_pixel(x, y, c);
+				bool f = (c.getY() >= 128);
+				bits_.put_bit(f);
+				if(f) c.set(255, 255, 255, 255);
+				else c.set(0, 0, 0, 255);
+				dst_img_.put_pixel(x, y, c);
+			}
+		}
+	}
+
+	// タイトルの表示と簡単な説明
 	void bmc_core::help() const
 	{
 		using namespace std;
@@ -25,32 +64,17 @@ namespace app {
 		if(p) { cmd = p + 1; }
 		cout << "	" << cmd << " [options] in-file [out-file]" << endl;
 		cout << "	-preview -pre      preview image (OpenGL)" << endl;
-		cout << "	-inverse           inverse mono color" << endl;
+		cout << "	-no-header         no output size header" << endl;
+		cout << "	-c-style           C style text output" << endl;
+
+//		cout << "	-inverse           inverse mono color" << endl;
 //		cout << "	-bdf               BDF file input" << endl;
 //		cout << "	-dither            Ditherring(50%)" << endl;
-//		cout << "	-no-header         No-Header(Width/Height) output" << endl;
 //		cout << "	-clip-x start len  Clipping X-line" << endl;
 //		cout << "	-clip-y	start len  Clipping Y-line" << endl;
 //		cout << "	-append            Append output file" << endl;
 		cout << "	-verbose           verbose" << endl;
 		cout << endl;
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief  verbose 表示
-	*/
-	//-----------------------------------------------------------------//
-	void bmc_core::verbose() const
-	{
-		using namespace std;
-
-		cout << "Input File:  '" << inp_fname_ << "'" << endl;
-		cout << "Output File: '" << out_fname_ << "'" << endl;
-
-		for(uint32_t i = 0; i < option::limit_; ++i) {
-		}
 	}
 
 
@@ -71,12 +95,13 @@ namespace app {
 				if(s == "-preview") option_.set(option::preview);
 				else if(s == "-pre") option_.set(option::preview);
 				else if(s == "-verbose") option_.set(option::verbose);
-				else if(s == "-inverse") option_.set(option::inverse);
+				else if(s == "-no-header") option_.set(option::no_header);
+				else if(s == "-c_style") option_.set(option::c_style);
 #if 0
+				else if(s == "-inverse") option_.set(option::inverse);
 				else if(strcmp(p, "-true-color")==0) true_color = true;
 				else if(strcmp(p, "-bdf")==0) { bdf_type = true; png_type = false; }
 				else if(strcmp(p, "-dither")==0) dither = true;
-				else if(strcmp(p, "-no-header")==0) header = false;
 				else if(strcmp(p, "-clip-x")==0) { clipx = true;  clipy = false; }
 				else if(strcmp(p, "-clip-y")==0) { clipy = false; clipy = true; }
 				else if(strcmp(p, "-append")==0) { append = true; }
@@ -126,6 +151,41 @@ namespace app {
 	//-----------------------------------------------------------------//
 	bool bmc_core::execute()
 	{
+		using namespace std;
+
+		if(option_[option::verbose]) {
+			cout << "Input File:  '" << inp_fname_ << "'" << endl;
+			cout << "Output File: '" << out_fname_ << "'" << endl;
+		}
+
+		if(inp_fname_.empty()) {
+			cerr << "Input file empty..." << endl;
+			return false;
+		}
+		img::img_files	imfs;
+		imfs.initialize();
+
+		if(!imfs.load(inp_fname_)) {
+			cerr << "Can't load source image: " << inp_fname_ << "'" << endl;
+			return false;
+		}
+
+		// ソース画像をコピー
+		src_img_ = imfs.get_image_if();
+
+		if(option_[option::verbose]) {
+			cout << "Source image size: " << src_img_.get_size().x << ", "
+				<< src_img_.get_size().y << endl;
+		}
+
+		// モノクロ変換
+		bitmap_convert_();
+
+		// ファイル出力
+		uint32_t n = save_file_();
+		if(!option_[option::verbose]) {
+			cout << "Output size: " << n << " bytes" << endl;		
+		}
 
 		return true;
 	}

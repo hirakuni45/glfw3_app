@@ -26,14 +26,29 @@ namespace app {
 		{ // 画像ファイル表示用フレーム
 			widget::param wp(vtx::srect(30, 30, 256, 256));
 			widget_frame::param wp_;
-			frame_ = wd.add_widget<widget_frame>(wp, wp_);
+			src_frame_ = wd.add_widget<widget_frame>(wp, wp_);
 		}
 		{ // 画像ファイル表示イメージ
-			widget::param wp(vtx::srect(0, 0, 256, 256), frame_);
+			widget::param wp(vtx::srect(0, 0, 256, 256), src_frame_);
 			widget_image::param wp_;
-			image_ = wd.add_widget<widget_image>(wp, wp_);
-			image_->set_state(widget::state::CLIP_PARENTS);
+			src_image_ = wd.add_widget<widget_image>(wp, wp_);
+			src_image_->set_state(widget::state::CLIP_PARENTS);
+			src_image_->set_state(widget::state::RESIZE_ROOT);
 		}
+
+		{ // 画像ファイル表示用フレーム
+			widget::param wp(vtx::srect(60, 60, 256, 256));
+			widget_frame::param wp_;
+			dst_frame_ = wd.add_widget<widget_frame>(wp, wp_);
+		}
+		{ // 画像ファイル表示イメージ
+			widget::param wp(vtx::srect(0, 0, 256, 256), dst_frame_);
+			widget_image::param wp_;
+			dst_image_ = wd.add_widget<widget_image>(wp, wp_);
+			dst_image_->set_state(widget::state::CLIP_PARENTS);
+			dst_image_->set_state(widget::state::RESIZE_ROOT);
+		}
+
 
 		{ // 機能ツールパレット
 			widget::param wp(vtx::srect(10, 10, 120, 300));
@@ -65,8 +80,24 @@ namespace app {
 		sys::preference& pre = director_.at().preference_;
 		if(filer_) {
 			filer_->load(pre);
-			frame_->load(pre);
+			src_frame_->load(pre);
+			dst_frame_->load(pre);
 			tools_->load(pre);
+		}
+
+		// コアの画像を表示
+		if(director_.at().bmc_) {
+			bmc_core& bmc = *director_.at().bmc_;
+			if(!bmc.get_src_image().empty()) {
+				src_handle_ = mobj_.install(&bmc.get_src_image());
+				src_image_->at_local_param().mobj_ = mobj_;
+				src_image_->at_local_param().mobj_handle_ = src_handle_;
+			}
+			if(!bmc.get_dst_image().empty()) {
+				dst_handle_ = mobj_.install(&bmc.get_dst_image());
+				dst_image_->at_local_param().mobj_ = mobj_;
+				dst_image_->at_local_param().mobj_handle_ = dst_handle_;
+			}
 		}
 	}
 
@@ -102,11 +133,11 @@ namespace app {
 						+ filer_->get_file() + "'");
 					dialog_->enable();
 				} else {
-					mobj_.destroy();
-					mobj_.initialize();
-					img_handle_ = mobj_.install(imf.get_image_if());
-					image_->at_local_param().mobj_ = mobj_;
-					image_->at_local_param().mobj_handle_ = img_handle_;
+//					mobj_.destroy();
+//					mobj_.initialize();
+//					img_handle_ = mobj_.install(imf.get_image_if());
+//					image_->at_local_param().mobj_ = mobj_;
+//					image_->at_local_param().mobj_handle_ = img_handle_;
 ///					imf.set_image_if(imf.get_image_if());
 ///					imf.save("test.tga", "rle");
 				}
@@ -114,10 +145,15 @@ namespace app {
 		}
 
 		// frame 内 image のサイズを設定
-		if(frame_ && image_) {
-			vtx::spos ofs(frame_->get_local_param().plate_param_.frame_width_);
-			image_->at_rect().org = ofs;
-			image_->at_rect().size = frame_->get_rect().size - ofs * 2;
+		if(src_frame_ && src_image_) {
+			vtx::spos ofs(src_frame_->get_local_param().plate_param_.frame_width_);
+			src_image_->at_rect().org = ofs;
+			src_image_->at_rect().size = src_frame_->get_rect().size - ofs * 2;
+		}
+		if(dst_frame_ && dst_image_) {
+			vtx::spos ofs(dst_frame_->get_local_param().plate_param_.frame_width_);
+			dst_image_->at_rect().org = ofs;
+			dst_image_->at_rect().size = dst_frame_->get_rect().size - ofs * 2;
 		}
 
 		wd.update();
@@ -148,7 +184,8 @@ namespace app {
 		sys::preference& pre = director_.at().preference_;
 		if(filer_) {
 			filer_->save(pre);
-			frame_->save(pre);
+			src_frame_->save(pre);
+			dst_frame_->save(pre);
 			tools_->save(pre);
 		}
 	}
