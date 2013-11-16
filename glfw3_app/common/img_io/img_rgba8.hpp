@@ -408,6 +408,25 @@ namespace img {
 			alpha_ = false;
 			std::vector<rgba8>().swap(img_);
 		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	イメージインターフェースからのコピー
+		*/
+		//-----------------------------------------------------------------//
+		img_rgba8& operator = (const i_img* img) {
+			if(img == 0) return *this;
+			create(img->get_size(), img->test_alpha());
+			for(int y = 0; y < size_.y; ++y) {
+				for(int x = 0; x < size_.x; ++x) {
+					rgba8 c;
+					img->get_pixel(x, y, c);
+					put_pixel(x, y, c);
+				}
+			}
+			return *this;
+		} 
 	};
 }
 

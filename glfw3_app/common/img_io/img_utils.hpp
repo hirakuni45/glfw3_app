@@ -107,7 +107,7 @@ namespace img {
 		@param[in]	dst_y	コピー先位置 Y
 	*/
 	//-----------------------------------------------------------------//
-	inline void copy_to_rgba8(const i_img* src, img_rgba8& dst, int dst_x, int dst_y) {
+	inline void copy_to_rgba8(const i_img* src, img_rgba8& dst, int dst_x = 0, int dst_y = 0) {
 		if(src == 0) return;
 		copy_to_rgba8(src, 0, 0, src->get_size().x, src->get_size().y, dst, dst_x, dst_y);
 	}
@@ -123,7 +123,7 @@ namespace img {
 		@return コピーに成功したら「true」を返す。
 	*/
 	//-----------------------------------------------------------------//
-	inline bool copy_to_idx8(const i_img* src, img_idx8& dst, int dst_x, int dst_y) {
+	inline bool copy_to_idx8(const i_img* src, img_idx8& dst, int dst_x = 0, int dst_y = 0) {
 		return copy_to_idx8(src, 0, 0, src->get_size().x, src->get_size().y, dst, dst_x, dst_y);
 	}
 
