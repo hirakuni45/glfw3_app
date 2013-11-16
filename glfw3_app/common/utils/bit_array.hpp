@@ -18,10 +18,9 @@ namespace utils {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class bit_array {
 
-		uint32_t	bit_pos_;		///> カレントのビット位置
-		uint32_t	bit_limit_;		///> ビットの最大数
-		uint8_t		bit_val_;		///> カレントのビット情報（バイト単位）
-		std::vector<uint8_t>	bit_list_;
+		uint32_t	put_pos_;		///> put ビット位置
+		uint32_t	get_pos_;		///> get ビット位置
+		std::vector<uint8_t>	array_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -29,7 +28,7 @@ namespace utils {
 			@brief	bitio クラス・コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		bit_array() : bit_pos_(0), bit_limit_(0), bit_val_(0) { };
+		bit_array() : put_pos_(0), get_pos_(0) { };
 
 
 		//-----------------------------------------------------------------//
@@ -47,13 +46,11 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		void put_bit(bool val) {
-			if(val == true) {
-				bit_val_ |= 1 << (bit_limit_ % 8);
+			if((put_pos_ & 7) == 0) {
+				array_.push_back(0);
 			}
-			++bit_limit_;
-			if((bit_limit_ % 8) == 0) {
-				bit_list_.push_back(bit_val_);
-				bit_val_ = 0;
+			if(val) {
+				array_[put_pos_ >> 3] |= 1 << (put_pos_ & 7);
 			}
 		}
 
@@ -82,13 +79,12 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		bool get_bit() {
-			if(bit_pos_ >= bit_limit_) {
+			if(get_pos_ >= (array_.size() << 3)) {
 				return false;
 			}
-			uint32_t bpos = bit_pos_ % 8;
-			uint8_t	c = bit_list_[bit_pos_ >> 3];
-			++bit_pos_;
-			if(c & (1 << bpos)) return true; else return false;
+			bool bit = array_[get_pos_ >> 3] & (1 << (get_pos_ & 7));
+			++get_pos_;
+			return bit;
 		}
 
 
@@ -101,43 +97,21 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		uint32_t get_bits(int num) {
-			uint32_t val = 0;
+			uint32_t bits = 0;
 
 			for(int i = 0; i < num; ++i) {
-				if(get_bit() == true) val |= 1 << i;
+				if(get_bit() == true) bits |= 1 << i;
 			}
-			return val;
+			return bits;
 		}
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	カレントのビット位置を変更する。
-			@param[in]	pos	ビット位置
+			@brief	サイズを取得
 		*/
 		//-----------------------------------------------------------------//
-		void set_pos(unsigned int pos) {
-			if(bit_limit_ < pos) pos = bit_limit_ - 1;
-			bit_pos_ = pos;
-		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	カレントのビット位置を得る。
-			@return	カレントのビット位置
-		*/
-		//-----------------------------------------------------------------//
-		uint32_t get_pos() const { return bit_pos_; }
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	最大ビット位置を得る。
-			@return	最大ビット位置
-		*/
-		//-----------------------------------------------------------------//
-		uint32_t get_limit() const { return bit_limit_; };
+		uint32_t size() const { return put_pos_; }
 
 
 		//-----------------------------------------------------------------//
@@ -145,7 +119,7 @@ namespace utils {
 			@brief	クリア
 		*/
 		//-----------------------------------------------------------------//
-		void clear() { bit_limit_ = bit_pos_ = 0; bit_list_.clear(); }
+		void clear() { put_pos_ = get_pos_ = 0; array_.clear(); }
 
 
 		//-----------------------------------------------------------------//
@@ -156,14 +130,10 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		uint32_t save_file(file_io& fout) {
-			// テンポラリーの余剰分を処理（「０」で埋める）
-			while((bit_limit_ % 8) != 0) {
-				put_bit(false);
-			}
-			BOOST_FOREACH(uint8_t ch, bit_list_) {
+			BOOST_FOREACH(uint8_t ch, array_) {
 				fout.put_char(ch);
 			}
-			return bit_list_.size();
+			return array_.size();
 		}
 
 
@@ -175,7 +145,7 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		uint32_t save_file(const std::string& fname) {
-			if(fname.empty() || bit_list_.size() == 0) {
+			if(fname.empty() || array_.size() == 0) {
 				return 0;
 			}
 
@@ -199,13 +169,12 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		uint32_t load_file(file_io& fin) {
-			bit_list_.reserve(fin.get_file_size());
-			bit_list_.clear();
+			array_.reserve(fin.get_file_size());
+			array_.clear();
 			char ch;
 			while(fin.get_char(ch)) {
-				bit_list_.push_back(ch);
+				array_.push_back(ch);
 			}
-			bit_limit_ = fin.get_file_size() * 8;
 			return fin.get_file_size();
 		}
 
@@ -220,8 +189,6 @@ namespace utils {
 		uint32_t load_file(const std::string& fname) {
 			if(fname.empty()) return 0;
 
-			bit_list_.clear();
-
 			file_io fin;
 			if(!fin.open(fname, "rb")) {
 				return 0;
@@ -232,5 +199,18 @@ namespace utils {
 			fin.close();
 			return sz;
 		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief		バイトアクセス
+			@param[in]	idx	バイト位置
+			@return		値
+		*/
+		//-----------------------------------------------------------------//
+		uint8_t get_byte(uint32_t idx) const {
+			return array_[idx];
+		}
+
 	};
 }
