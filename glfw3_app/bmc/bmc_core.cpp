@@ -24,7 +24,14 @@ namespace app {
 		if(option_[option::c_style]) {
 			utils::file_io fio;
 			if(fio.open(out_fname_, "wb")) {
-				std::string label = "static const uint8_t " + symbol_ + "[] = {\n";
+				utils::strings ss;
+				utils::split_text(symbol_, ",", ss);
+				std::string label;
+				if(ss.size() == 1) {
+					label = "static const uint8_t " + ss[0] + "[] = {\n";
+				} else if(ss.size() == 2) {
+					label = "static const uint8_t " + ss[0] + "[] " + ss[1] + " = {\n";
+				}
 				fio.put(label);
 				for(uint32_t i = 0; i < bits_.byte_size(); ++i) {
 					if(i) {
