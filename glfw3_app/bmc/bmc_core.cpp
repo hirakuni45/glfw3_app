@@ -18,8 +18,26 @@ namespace app {
 		}
 
 		uint32_t n = 0;
-		if(!option_[option::c_style]) {
-
+		if(option_[option::c_style]) {
+			utils::file_io fio;
+			if(fio.open(out_fname_, "wb")) {
+				std::string label = "static const uint8_t " + symbol_ + " = {\n";
+				fio.put(label);
+				for(uint32_t i = 0; i < bits_.byte_size(); ++i) {
+					if(i) {
+						fio.put(",");
+						if((i % 16) == 0) {
+							fio.put("\n");
+						}
+					}
+					fio.put((boost::format("0x%02x") % static_cast<uint32_t>(bits_.get_byte(i))).str());
+				}
+				fio.put(" };\n");
+				n = fio.tell();
+				fio.close();
+			} else {
+				std::cerr << "Can't write open file: '" << out_fname_ << "'" << std::endl;
+			}
 		} else {
 			n = bits_.save_file(out_fname_);
 		}
@@ -65,13 +83,12 @@ namespace app {
 		cout << "	" << cmd << " [options] in-file [out-file]" << endl;
 		cout << "	-preview -pre      preview image (OpenGL)" << endl;
 		cout << "	-no-header         no output size header" << endl;
-		cout << "	-c-style           C style text output" << endl;
-
+		cout << "	-c-style symbol    C style table output" << endl;
+		cout << "	-clip-x top len    Clipping X location" << endl;
+		cout << "	-clip-y	top len    Clipping Y location" << endl;
 //		cout << "	-inverse           inverse mono color" << endl;
 //		cout << "	-bdf               BDF file input" << endl;
 //		cout << "	-dither            Ditherring(50%)" << endl;
-//		cout << "	-clip-x start len  Clipping X-line" << endl;
-//		cout << "	-clip-y	start len  Clipping Y-line" << endl;
 //		cout << "	-append            Append output file" << endl;
 		cout << "	-verbose           verbose" << endl;
 		cout << endl;
@@ -89,6 +106,9 @@ namespace app {
 		using namespace std;
 
 		bool no_err = true;
+		bool symbol = false;
+		bool clip_x = false;
+		bool clip_y = false;
 		for(int i = 1; i < argc_; ++i) {
 			string s = argv_[i];
 			if(s[0] == '-') {
@@ -96,14 +116,14 @@ namespace app {
 				else if(s == "-pre") option_.set(option::preview);
 				else if(s == "-verbose") option_.set(option::verbose);
 				else if(s == "-no-header") option_.set(option::no_header);
-				else if(s == "-c_style") option_.set(option::c_style);
+				else if(s == "-c_style") { option_.set(option::c_style); symbol = true; }
+				else if(s == "-clip-x") { option_.set(option::clip_x); clip_x = true; }
+				else if(s == "-clip-y") { option_.set(option::clip_y); clip_y = true; }
 #if 0
 				else if(s == "-inverse") option_.set(option::inverse);
 				else if(strcmp(p, "-true-color")==0) true_color = true;
 				else if(strcmp(p, "-bdf")==0) { bdf_type = true; png_type = false; }
 				else if(strcmp(p, "-dither")==0) dither = true;
-				else if(strcmp(p, "-clip-x")==0) { clipx = true;  clipy = false; }
-				else if(strcmp(p, "-clip-y")==0) { clipy = false; clipy = true; }
 				else if(strcmp(p, "-append")==0) { append = true; }
 #endif
 				else {
@@ -111,23 +131,25 @@ namespace app {
 					cerr << "Option error: '" << s << "'" << endl;
 				}
 			} else {
-#if 0
-				if(clipx == true) {
-					area.x = area.w;
-					if(Arith((const char *)p, &area.w) != 0) {
-						clipx = false;
-					}
-					if(area.x >= 0 && area.w > 0) clipx = false;
-				} else if(clipy == true) {
-					area.y = area.h;
-					if(Arith((const char *)p, &area.h) != 0) {
-						clipy = false;
-					}
-					if(area.y >= 0 && area.h > 0) clipy = false;
+				if(clip_x) {
+//					area.x = area.w;
+//					if(Arith((const char *)p, &area.w) != 0) {
+//
+//					}
+					clip_x = false;
+				} else if(clip_y) {
+//					area.y = area.h;
+//					if(Arith((const char *)p, &area.h) != 0) {
+//						clipy = false;
+//					}
+					clip_y = false;
+				} else if(symbol) {
+					symbol_ = s;
+					symbol = false;
 				} else {
-#endif
-				inp_fname_ = out_fname_;
-				out_fname_ = s;
+					inp_fname_ = out_fname_;
+					out_fname_ = s;
+				}
 			}
 		}
 
@@ -183,7 +205,10 @@ namespace app {
 
 		// ファイル出力
 		uint32_t n = save_file_();
-		if(!option_[option::verbose]) {
+		if(option_[option::verbose]) {
+			if(option_[option::c_style]) {
+				cout << "C-Style output symbol: '" << symbol_ << "'" << endl; 
+			}
 			cout << "Output size: " << n << " bytes" << endl;		
 		}
 

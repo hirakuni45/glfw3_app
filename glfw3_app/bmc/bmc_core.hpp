@@ -26,13 +26,14 @@ namespace app {
 				verbose,	///< 詳細なメッセージ出力
 				no_header,	///< サイズヘッダーを出力しない
 				c_style,	///< C スタイルのテキスト出力
+				clip_x,		///< X 軸のクリッピング
+				clip_y,		///< Y 軸のクリッピング
 
 				true_color,
 				inverse,
 				bdf_type,
 				dither,
 				append,
-				opterr,
 
 				limit_
 			};
@@ -42,6 +43,8 @@ namespace app {
 		std::bitset<option::limit_>	option_;
 		std::string	inp_fname_;
 		std::string out_fname_;
+		std::string	symbol_;
+		vtx::srect	clip_;
 
 		int		argc_;
 		char**	argv_;
@@ -61,7 +64,8 @@ namespace app {
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		bmc_core(int argc, char** argv) : argc_(argc), argv_(argv), version_(0.1f) { }
+		bmc_core(int argc, char** argv) : argc_(argc), argv_(argv), clip_(0),
+			version_(0.1f) { }
 
 
 		//-----------------------------------------------------------------//
