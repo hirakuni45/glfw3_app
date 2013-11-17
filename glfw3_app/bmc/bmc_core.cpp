@@ -8,6 +8,9 @@
 #include <boost/foreach.hpp>
 #include <boost/format.hpp>
 #include "img_io/img_files.hpp"
+#include "img_io/img_utils.hpp"
+#include "utils/arith.hpp"
+#include "utils/string_utils.hpp"
 
 namespace app {
 
@@ -21,7 +24,7 @@ namespace app {
 		if(option_[option::c_style]) {
 			utils::file_io fio;
 			if(fio.open(out_fname_, "wb")) {
-				std::string label = "static const uint8_t " + symbol_ + " = {\n";
+				std::string label = "static const uint8_t " + symbol_ + "[] = {\n";
 				fio.put(label);
 				for(uint32_t i = 0; i < bits_.byte_size(); ++i) {
 					if(i) {
@@ -29,6 +32,9 @@ namespace app {
 						if((i % 16) == 0) {
 							fio.put("\n");
 						}
+					}
+					if((i % 16) == 0) {
+						fio.put("    ");
 					}
 					fio.put((boost::format("0x%02x") % static_cast<uint32_t>(bits_.get_byte(i))).str());
 				}
@@ -68,6 +74,29 @@ namespace app {
 		}
 	}
 
+
+	static bool scan_pos_(const std::string& str, vtx::spos& pos)
+	{
+		utils::strings ss;
+		utils::split_text(str, ",", ss);
+		if(ss.size() == 2) {
+			for(int i = 0; i < 2; ++i) {
+				utils::arith a;
+ 				if(!a.analize(ss[i])) {
+					std::cerr << "Number error: '" << str << "'" << std::endl;
+					return false;
+				}
+				if(i == 0) pos.x = a.get_integer();
+				else pos.y = a.get_integer();
+			}
+		} else {
+			std::cerr << "Number error: '" << str << "'" << std::endl;
+			return false;
+		}
+		return true;
+	}
+
+
 	// タイトルの表示と簡単な説明
 	void bmc_core::help() const
 	{
@@ -84,12 +113,11 @@ namespace app {
 		cout << "	-preview -pre      preview image (OpenGL)" << endl;
 		cout << "	-no-header         no output size header" << endl;
 		cout << "	-c-style symbol    C style table output" << endl;
-		cout << "	-clip-x top len    Clipping X location" << endl;
-		cout << "	-clip-y	top len    Clipping Y location" << endl;
+		cout << "	-offset x,y        Offset location" << endl;
+		cout << "	-clip	x,y        Clipping length" << endl;
 //		cout << "	-inverse           inverse mono color" << endl;
 //		cout << "	-bdf               BDF file input" << endl;
 //		cout << "	-dither            Ditherring(50%)" << endl;
-//		cout << "	-append            Append output file" << endl;
 		cout << "	-verbose           verbose" << endl;
 		cout << endl;
 	}
@@ -107,8 +135,8 @@ namespace app {
 
 		bool no_err = true;
 		bool symbol = false;
-		bool clip_x = false;
-		bool clip_y = false;
+		bool offset = false;
+		bool size = false;
 		for(int i = 1; i < argc_; ++i) {
 			string s = argv_[i];
 			if(s[0] == '-') {
@@ -117,32 +145,26 @@ namespace app {
 				else if(s == "-verbose") option_.set(option::verbose);
 				else if(s == "-no-header") option_.set(option::no_header);
 				else if(s == "-c_style") { option_.set(option::c_style); symbol = true; }
-				else if(s == "-clip-x") { option_.set(option::clip_x); clip_x = true; }
-				else if(s == "-clip-y") { option_.set(option::clip_y); clip_y = true; }
-#if 0
-				else if(s == "-inverse") option_.set(option::inverse);
-				else if(strcmp(p, "-true-color")==0) true_color = true;
-				else if(strcmp(p, "-bdf")==0) { bdf_type = true; png_type = false; }
-				else if(strcmp(p, "-dither")==0) dither = true;
-				else if(strcmp(p, "-append")==0) { append = true; }
-#endif
+				else if(s == "-offset") { option_.set(option::offset); offset = true; }
+				else if(s == "-size") { option_.set(option::size); size = true; }
+//				else if(s == "-inverse") option_.set(option::inverse);
+//				else if(s == "-bdf") option_.set(option::bdf_type);
+//				else if(s == "-dither") option_.set(option::dither);
 				else {
 					no_err = false;
 					cerr << "Option error: '" << s << "'" << endl;
 				}
 			} else {
-				if(clip_x) {
-//					area.x = area.w;
-//					if(Arith((const char *)p, &area.w) != 0) {
-//
-//					}
-					clip_x = false;
-				} else if(clip_y) {
-//					area.y = area.h;
-//					if(Arith((const char *)p, &area.h) != 0) {
-//						clipy = false;
-//					}
-					clip_y = false;
+				if(offset) {
+					if(!scan_pos_(s, clip_.org)) {
+						cerr << "Option offset error: '" << s << "'" << endl;
+					}
+					offset = false;
+				} else if(size) {
+					if(!scan_pos_(s, clip_.size)) {
+						cerr << "Option size error: '" << s << "'" << endl;
+					}
+					size = false;
 				} else if(symbol) {
 					symbol_ = s;
 					symbol = false;
@@ -193,12 +215,16 @@ namespace app {
 		}
 
 		// ソース画像をコピー
-		src_img_ = imfs.get_image_if();
-
-		if(option_[option::verbose]) {
-			cout << "Source image size: " << src_img_.get_size().x << ", "
-				<< src_img_.get_size().y << endl;
+		vtx::srect sr(vtx::spos(0), imfs.get_image_if()->get_size());
+		if(option_[option::offset]) {
+			sr.org = clip_.org;
 		}
+		if(option_[option::size]) {
+			sr.size = clip_.size;
+		}
+		src_img_.create(sr.size, true);
+		img::copy_to_rgba8(imfs.get_image_if(), sr.org.x, sr.org.y, sr.size.x, sr.size.y,
+			src_img_, 0, 0); 
 
 		// モノクロ変換
 		bitmap_convert_();
@@ -206,8 +232,18 @@ namespace app {
 		// ファイル出力
 		uint32_t n = save_file_();
 		if(option_[option::verbose]) {
+			cout << "Source image size: " << src_img_.get_size().x << ", "
+				<< src_img_.get_size().y << endl;
 			if(option_[option::c_style]) {
 				cout << "C-Style output symbol: '" << symbol_ << "'" << endl; 
+			}
+			if(option_[option::offset]) {
+				cout << "Offset: " << static_cast<int>(clip_.org.x) << " ,"
+					<< static_cast<int>(clip_.org.y) << endl;
+			}
+			if(option_[option::size]) {
+				cout << "Size: " << static_cast<int>(clip_.size.x) << " ,"
+					<< static_cast<int>(clip_.size.y) << endl;
 			}
 			cout << "Output size: " << n << " bytes" << endl;		
 		}

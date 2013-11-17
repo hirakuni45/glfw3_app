@@ -56,9 +56,9 @@ namespace app {
 			tools_ = wd.add_widget<widget_frame>(wp, wp_);
 		}
 		{ // ファイラー起動ボタン
-			widget::param wp(vtx::srect(5, 5, 100, 40), tools_);
-			widget_button::param wp_("file");
-			open_ = wd.add_widget<widget_button>(wp, wp_);
+//			widget::param wp(vtx::srect(5, 5, 100, 40), tools_);
+//			widget_button::param wp_("file");
+//			open_ = wd.add_widget<widget_button>(wp, wp_);
 		}
 
 		{ // ファイラー本体
@@ -113,7 +113,7 @@ namespace app {
 		const vtx::spos& size = igl->get_size();
 
 		gui::widget_director& wd = director_.at().widget_director_;
-
+#if 0
 		if(open_) {
 			if(open_->get_selected()) {
 				if(filer_) {
@@ -122,6 +122,7 @@ namespace app {
 				}
 			}
 		}
+
 		if(filer_) {
 			if(filer_id_ != filer_->get_select_file_id()) {
 				filer_id_ = filer_->get_select_file_id();
@@ -143,7 +144,7 @@ namespace app {
 				}
 			}
 		}
-
+#endif
 		// frame 内 image のサイズを設定
 		if(src_frame_ && src_image_) {
 			vtx::spos ofs(src_frame_->get_local_param().plate_param_.frame_width_);

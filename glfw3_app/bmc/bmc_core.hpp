@@ -26,14 +26,12 @@ namespace app {
 				verbose,	///< 詳細なメッセージ出力
 				no_header,	///< サイズヘッダーを出力しない
 				c_style,	///< C スタイルのテキスト出力
-				clip_x,		///< X 軸のクリッピング
-				clip_y,		///< Y 軸のクリッピング
+				offset,		///< オフセット
+				size,		///< サイズ
 
-				true_color,
 				inverse,
-				bdf_type,
+				bdf,
 				dither,
-				append,
 
 				limit_
 			};

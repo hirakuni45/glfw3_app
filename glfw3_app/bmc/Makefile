@@ -13,6 +13,7 @@ PSOURCES	=	main.cpp \
 				../common/gl_fw/glmobj.cpp \
 				../common/gl_fw/gltexfb.cpp \
 				../common/gl_fw/glterminal.cpp \
+				../common/utils/arith.cpp \
 				../common/utils/vtx.cpp \
 				../common/utils/vmath.cpp \
 				../common/utils/string_utils.cpp \
@@ -231,7 +232,8 @@ bmc_core.o: ../common/img_io/img_rgba8.hpp ../common/img_io/i_img.hpp
 bmc_core.o: ../common/img_io/img.hpp ../common/img_io/img_idx8.hpp
 bmc_core.o: ../common/img_io/i_img.hpp ../common/img_io/img_clut.hpp
 bmc_core.o: ../common/img_io/img_gray8.hpp ../common/img_io/img_files.hpp
-bmc_core.o: ../common/img_io/i_img_io.hpp
+bmc_core.o: ../common/img_io/i_img_io.hpp ../common/img_io/img_utils.hpp
+bmc_core.o: ../common/img_io/img_rgba8.hpp ../common/utils/arith.hpp
 bmc_main.o: bmc_main.hpp main.hpp ../common/snd_io/sound.hpp
 bmc_main.o: ../common/snd_io/audio_io.hpp ../common/utils/file_io.hpp
 bmc_main.o: ../common/utils/string_utils.hpp ../common/utils/mtx.hpp
@@ -325,6 +327,7 @@ bmc_main.o: ../common/widgets/widget_utils.hpp
 ../common/gl_fw/glterminal.o: ../common/utils/mtx.hpp
 ../common/gl_fw/glterminal.o: ../common/utils/file_io.hpp
 ../common/gl_fw/glterminal.o: ../common/img_io/img.hpp
+../common/utils/arith.o: ../common/utils/arith.hpp
 ../common/utils/vtx.o: ../common/utils/vtx.hpp
 ../common/utils/vmath.o: ../common/utils/vmath.hpp ../common/utils/vtx.hpp
 ../common/utils/string_utils.o: ../common/utils/string_utils.hpp
