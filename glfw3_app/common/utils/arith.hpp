@@ -40,7 +40,7 @@ namespace utils {
 				double_fatal,		///< 倍精度浮動小数点データの変換に関するエラー
 				symbol_fatal,		///< シンボルデータの変換に関するエラー
 
-				err_limit_			///< ※管理用
+				limit_
 			};
 		};
 
@@ -50,7 +50,7 @@ namespace utils {
 
 		class value {
 		public:
-			std::bitset<err_limit_>	error_;
+			std::bitset<error::limit_>	error_;
 
 			bool	hex_value_;
 			long	integer_;
@@ -144,7 +144,7 @@ namespace utils {
 					error_.set(error::zero_divide);
 				} else {
 					integer_ %= v.integer_;
-					error.set(error::float_fatal);
+					error_.set(error::float_fatal);
 					if(dbe_) error_.set(error::double_fatal);
 				}
 				if(v.point_) point_ = v.point_;
@@ -162,7 +162,7 @@ namespace utils {
 			}
 
 			value& operator >>= (const value& v) {
-				integer__ >>= v.integer_;
+				integer_ >>= v.integer_;
 				error_.set(error::float_fatal);
 				if(dbe_) error_.set(error::double_fatal);
 				if(v.point_) point_ = v.point_;
@@ -206,7 +206,7 @@ namespace utils {
 			@param[in]	val		整数値
 		*/
 		//-----------------------------------------------------------------//
-		void set_symbol_i(const char* name, long val);
+		void set_symbol(const std::string& name, long val);
 
 
 		//-----------------------------------------------------------------//
@@ -216,7 +216,7 @@ namespace utils {
 			@param[in]	val		浮動小数点
 		*/
 		//-----------------------------------------------------------------//
-		void set_symbol_f(const char* name, float val);
+		void set_symbol(const std::string& name, float val);
 
 
 		//-----------------------------------------------------------------//
@@ -226,7 +226,7 @@ namespace utils {
 			@param[in]	val		倍精度浮動小数点
 		*/
 		//-----------------------------------------------------------------//
-		void set_symbol_d(const char* name, double val);
+		void set_symbol(const std::string& name, double val);
 
 
 		//-----------------------------------------------------------------//
@@ -236,7 +236,7 @@ namespace utils {
 			@return	文法にエラーがあった場合、「false」
 		*/
 		//-----------------------------------------------------------------//
-		bool analize(const char* text);
+		bool analize(const std::string& text);
 
 
 		//-----------------------------------------------------------------//

@@ -6,10 +6,11 @@
 */
 //=====================================================================//
 #include "arith.hpp"
+#include <boost/foreach.hpp>
 
 namespace utils {
 
-	void arith::value::sum_(char c)
+	void arith::value::sum(char c)
 	{
 		if(c == '_') ;	// 数字列にある '_'（アンダースコアー）は無視
 		else if(hex_value_ == false && integer_ == 0 && point_ == false && (c =='x' || c == 'X' || c == '$')) {
@@ -56,7 +57,7 @@ namespace utils {
 	}
 
 
-	void arith::value::neg_()
+	void arith::value::neg()
 	{
 		integer_ = -integer_;
 		float_   = -float_;
@@ -64,7 +65,7 @@ namespace utils {
 	}
 
 
-	void arith::value::inv_()
+	void arith::value::inv()
 	{
 		integer_ = integer_ ^ -1;
 	}
@@ -77,7 +78,7 @@ namespace utils {
 		@param[in]	val		整数値
 	*/
 	//-----------------------------------------------------------------//
-	void arith::set_symbol_i(const char* name, long val)
+	void arith::set_symbol(const std::string& name, long val)
 	{
 		symbol_map_it it = symbol_.find(name);
 		if(it == symbol_.end()) {
@@ -101,7 +102,7 @@ namespace utils {
 		@param[in]	val		浮動小数点
 	*/
 	//-----------------------------------------------------------------//
-	void arith::set_symbol_f(const char* name, float val)
+	void arith::set_symbol(const std::string& name, float val)
 	{
 		symbol_map_it it = symbol_.find(name);
 		if(it == symbol_.end()) {
@@ -125,9 +126,9 @@ namespace utils {
 		@param[in]	val		倍精度浮動小数点
 	*/
 	//-----------------------------------------------------------------//
-	void arith::set_symbol_d(const char* name, double val)
+	void arith::set_symbol(const std::string& name, double val)
 	{
-		symbol_map_it it = m_symbol.find(name);
+		symbol_map_it it = symbol_.find(name);
 		if(it == symbol_.end()) {
 			value v;
 			symbol_[name] = v;
@@ -148,7 +149,7 @@ namespace utils {
 		@return 数値を返す
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	arith::value arith::number()
+	arith::value arith::number_()
 	{
 		bool inv = false;
 		bool neg = false;
@@ -247,7 +248,7 @@ namespace utils {
 	}
 
 
-	arith::value arith::factor()
+	arith::value arith::factor_()
 	{
 		value v;
 		if(ch_ != '(') {
@@ -281,7 +282,7 @@ namespace utils {
 					ch_ = *tx_++;
 					v %= factor_();
 				} else {
-					v /= factor();
+					v /= factor_();
 				}
 				break;
 			case '<':
@@ -355,16 +356,15 @@ namespace utils {
 		@return	文法にエラーがあった場合、「false」
 	*/
 	//-----------------------------------------------------------------//
-	bool arith::analize(const char *text)
+	bool arith::analize(const std::string& text)
 	{
 		std::string s;
 
 		// スペースと TAB を除外
-		char c;
-		while((c = *text++) != 0) {
+		BOOST_FOREACH(char c, text) {
 			if(c == ' ' || c == '\t') ;
 			else if(c < ' ') {
-				value_.error_.set(fatal);
+				value_.error_.set(error::fatal);
 				return false;
 			} else {
 				s += c;
@@ -373,7 +373,7 @@ namespace utils {
 
 		tx_ = s.c_str();
 		ch_ = *tx_++;
-		if(m_ch != 0) {
+		if(ch_ != 0) {
 			value_ = expression_();
 		} else {
 			value_.error_.set(error::fatal);
