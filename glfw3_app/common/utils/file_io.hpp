@@ -599,7 +599,7 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	文字列の書き出し
-			@param[in]	text	書き出し文字列
+			@param[in]	text	書き出し文字コンテナ
 			@return	書き出した数
 		*/
 		//-----------------------------------------------------------------//
@@ -607,6 +607,29 @@ namespace utils {
 			if(text.empty()) return 0;
 			size_t n = 0;
 			BOOST_FOREACH(char ch, text) {
+				if(!put_char(ch)) {
+					return n;
+				}
+				++n;
+			}
+			return n;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	文字列の書き出し
+			@param[in]	text	書き出し文字列
+			@return	書き出した数
+		*/
+		//-----------------------------------------------------------------//
+		size_t put(const char* text) {
+			if(text == 0) {
+				return 0;
+			}
+			char ch;
+			size_t n = 0;
+			while(ch = *text++) {
 				if(!put_char(ch)) {
 					return n;
 				}
