@@ -28,9 +28,9 @@ namespace app {
 				c_style,	///< C スタイルのテキスト出力
 				offset,		///< オフセット
 				size,		///< サイズ
+				bdf,		///< BDF ファイル入力
 
 				inverse,
-				bdf,
 				dither,
 
 				limit_
@@ -63,7 +63,7 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		bmc_core(int argc, char** argv) : argc_(argc), argv_(argv), clip_(0),
-			version_(0.1f) { }
+			version_(0.25f) { }
 
 
 		//-----------------------------------------------------------------//

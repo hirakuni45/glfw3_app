@@ -9,6 +9,7 @@
 #include <boost/format.hpp>
 #include "img_io/img_files.hpp"
 #include "img_io/img_utils.hpp"
+#include "img_io/bdf_io.hpp"
 #include "utils/arith.hpp"
 #include "utils/string_utils.hpp"
 
@@ -121,9 +122,9 @@ namespace app {
 		cout << "	-no-header         no output size header" << endl;
 		cout << "	-c-style symbol    C style table output" << endl;
 		cout << "	-offset x,y        Offset location" << endl;
-		cout << "	-clip	x,y        Clipping length" << endl;
+		cout << "	-clip	x,y        Clipping area" << endl;
+		cout << "	-bdf               BDF file input" << endl;
 //		cout << "	-inverse           inverse mono color" << endl;
-//		cout << "	-bdf               BDF file input" << endl;
 //		cout << "	-dither            Ditherring(50%)" << endl;
 		cout << "	-verbose           verbose" << endl;
 		cout << endl;
@@ -154,8 +155,8 @@ namespace app {
 				else if(s == "-c_style") { option_.set(option::c_style); symbol = true; }
 				else if(s == "-offset") { option_.set(option::offset); offset = true; }
 				else if(s == "-size") { option_.set(option::size); size = true; }
+				else if(s == "-bdf") option_.set(option::bdf);
 //				else if(s == "-inverse") option_.set(option::inverse);
-//				else if(s == "-bdf") option_.set(option::bdf_type);
 //				else if(s == "-dither") option_.set(option::dither);
 				else {
 					no_err = false;
@@ -213,31 +214,46 @@ namespace app {
 			cerr << "Input file empty..." << endl;
 			return false;
 		}
-		img::img_files	imfs;
-		imfs.initialize();
 
-		if(!imfs.load(inp_fname_)) {
-			cerr << "Can't load source image: " << inp_fname_ << "'" << endl;
-			return false;
-		}
+		if(option_[option::bdf]) { // BDF ファイルの場合
+			img::bdf_io bdf;
 
-		// ソース画像をコピー
-		vtx::srect sr(vtx::spos(0), imfs.get_image_if()->get_size());
-		if(option_[option::offset]) {
-			sr.org = clip_.org;
-		}
-		if(option_[option::size]) {
-			sr.size = clip_.size;
-		}
-		src_img_.create(sr.size, true);
-		img::copy_to_rgba8(imfs.get_image_if(), sr.org.x, sr.org.y, sr.size.x, sr.size.y,
-			src_img_, 0, 0); 
+			bdf.initialize();
 
-		// モノクロ変換
-		bitmap_convert_();
+			if(!bdf.load(inp_fname_)) {
+				cerr << "Can't decode BDF file: '" << inp_fname_ << "'" << endl;
+				return false;
+			}
+
+
+		} else {
+			img::img_files	imfs;
+			imfs.initialize();
+
+			if(!imfs.load(inp_fname_)) {
+				cerr << "Can't load source image: " << inp_fname_ << "'" << endl;
+				return false;
+			}
+
+			// ソース画像をコピー
+			vtx::srect sr(vtx::spos(0), imfs.get_image_if()->get_size());
+			if(option_[option::offset]) {
+				sr.org = clip_.org;
+			}
+			if(option_[option::size]) {
+				sr.size = clip_.size;
+			}
+			src_img_.create(sr.size, true);
+			img::copy_to_rgba8(imfs.get_image_if(), sr.org.x, sr.org.y, sr.size.x, sr.size.y,
+				src_img_, 0, 0); 
+
+			// モノクロ変換
+			bitmap_convert_();
+		}
 
 		// ファイル出力
 		uint32_t n = save_file_();
+
 		if(option_[option::verbose]) {
 			cout << "Source image size: " << src_img_.get_size().x << ", "
 				<< src_img_.get_size().y << endl;
@@ -251,6 +267,9 @@ namespace app {
 			if(option_[option::size]) {
 				cout << "Size: " << static_cast<int>(clip_.size.x) << " ,"
 					<< static_cast<int>(clip_.size.y) << endl;
+			}
+			if(option_[option::bdf]) {
+				cout << "BDF file input" << endl;
 			}
 			cout << "Output size: " << n << " bytes" << endl;		
 		}

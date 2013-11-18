@@ -51,15 +51,21 @@ namespace app {
 
 
 		{ // 機能ツールパレット
-			widget::param wp(vtx::srect(10, 10, 120, 300));
+			widget::param wp(vtx::srect(10, 10, 150, 300));
 			widget_frame::param wp_;
 			tools_ = wd.add_widget<widget_frame>(wp, wp_);
+		}
+		{ // スケール
+			widget::param wp(vtx::srect(10, 10, 130, 40), tools_);
+			widget_check::param wp_("scale");
+			scale_ = wd.add_widget<widget_check>(wp, wp_);
 		}
 		{ // ファイラー起動ボタン
 //			widget::param wp(vtx::srect(5, 5, 100, 40), tools_);
 //			widget_button::param wp_("file");
 //			open_ = wd.add_widget<widget_button>(wp, wp_);
 		}
+
 
 		{ // ファイラー本体
 			widget::param wp(vtx::srect(10, 30, 300, 200));
