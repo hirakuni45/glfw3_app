@@ -5,6 +5,7 @@
 */
 //=====================================================================//
 #include "gl_fw/IGLcore.hpp"
+#include "gl_fw/glutils.hpp"
 #include "widgets/widget_image.hpp"
 #include "widgets/widget_utils.hpp"
 #include "img_io/paint.hpp"
@@ -79,33 +80,31 @@ namespace gui {
 		const vtx::spos& size = igl->get_size();
 		const widget::param& wp = get_param();
 
+		glPushMatrix();
 		if(objh_) {
 			if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) { 
-				glPushMatrix();
 				vtx::srect rect;
 				if(wp.state_[widget::state::CLIP_PARENTS]) {
 					draw_mobj(wd_, objh_, wp.clip_);
 				} else {
 					wd_.at_mobj().draw(objh_, gl::mobj::attribute::normal, 0, 0);
 				}
-				glPopMatrix();
-				glViewport(0, 0, size.x, size.y);
 			}
 		} else if(param_.mobj_ && param_.mobj_handle_) {
 			mobj& mo = *param_.mobj_;
 			if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) { 
-				glPushMatrix();
 				vtx::srect rect;
 				if(wp.state_[widget::state::CLIP_PARENTS]) {
-					vtx::spos ofs(0);
-					render_clipped_mobj(mo, param_.mobj_handle_, wp.clip_, ofs);
-				} else {
-					mo.draw(param_.mobj_handle_, gl::mobj::attribute::normal, 0, 0);
+					glViewport(wp.clip_.org.x, size.y - wp.clip_.org.y - wp.clip_.size.y,
+						wp.clip_.size.x, wp.clip_.size.y);
+						mo.setup_matrix(wp.clip_.size.x, wp.clip_.size.y);
 				}
-				glPopMatrix();
-				glViewport(0, 0, size.x, size.y);
+				glScale(param_.scale_);
+				mo.draw(param_.mobj_handle_, gl::mobj::attribute::normal, 0, 0);
 			}
 		}
+		glPopMatrix();
+		glViewport(0, 0, size.x, size.y);
 	}
 
 
