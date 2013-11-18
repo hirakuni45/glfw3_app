@@ -97,6 +97,7 @@ namespace gui {
 			tmp.fore_color_.alpha_scale(cf.a);
 			tmp.shadow_color_ *= cf.r;
 			tmp.shadow_color_.alpha_scale(cf.a);
+
 			draw_text(tmp, rect, wp.clip_);
 
 			igl->at_fonts().restore_matrix();

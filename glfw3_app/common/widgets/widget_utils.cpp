@@ -250,7 +250,6 @@ namespace gui {
 
 		pos += tp.offset_;
 		if(tp.shadow_offset_.x != 0 || tp.shadow_offset_.y != 0) {
-			fonts.set_fore_color(tp.shadow_color_);
 			vtx::spos p = pos + tp.shadow_offset_;
 			fonts.set_fore_color(tp.shadow_color_);
 			fonts.draw(p, tp.text_, clx);
@@ -282,7 +281,6 @@ namespace gui {
 		const vtx::spos& size = igl->get_size();
 
 		gl::fonts& fonts = igl->at_fonts();
-		fonts.enable_back_color(false);
 
 		if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) { 
 			glPushMatrix();

@@ -443,7 +443,7 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	bool widget_director::update()
 	{
-		IGLcore* Igl = get_glcore();
+		IGLcore* igl = get_glcore();
 
 		// ダイアログがある場合の優先順位とストール処理
 		{
@@ -472,7 +472,7 @@ namespace gui {
 			}
 		}
 
-		const device& dev = Igl->get_device();
+		const device& dev = igl->get_device();
 
 		scroll_ = dev.get_locator().scroll_;
 
@@ -662,8 +662,7 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_director::render()
 	{
-		IGLcore* Igl = get_glcore();
-		if(Igl == 0) return;
+		IGLcore* igl = get_glcore();
 
 		// クリップ領域を全てアップデート
 		reset_mark();
@@ -682,12 +681,15 @@ namespace gui {
 			}
 		}
 
-		const vtx::spos& size = Igl->get_size();
+		const vtx::spos& size = igl->get_size();
 
 		// 各 描画
 		glDisable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		// フォントは基本、バックカラーを描画しない
+		igl->at_fonts().enable_back_color(false);
 
 		BOOST_FOREACH(widget* w, widgets_) {
 			const widget::param& pa = w->get_param();

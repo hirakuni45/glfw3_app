@@ -93,14 +93,15 @@ namespace gui {
 		} else if(param_.mobj_ && param_.mobj_handle_) {
 			mobj& mo = *param_.mobj_;
 			if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) { 
-				vtx::srect rect;
+//				vtx::srect rect;
 				if(wp.state_[widget::state::CLIP_PARENTS]) {
 					glViewport(wp.clip_.org.x, size.y - wp.clip_.org.y - wp.clip_.size.y,
 						wp.clip_.size.x, wp.clip_.size.y);
 						mo.setup_matrix(wp.clip_.size.x, wp.clip_.size.y);
 				}
 				glScale(param_.scale_);
-				mo.draw(param_.mobj_handle_, gl::mobj::attribute::normal, 0, 0);
+				mo.draw(param_.mobj_handle_, gl::mobj::attribute::normal,
+					param_.offset_.x, param_.offset_.y);
 			}
 		}
 		glPopMatrix();

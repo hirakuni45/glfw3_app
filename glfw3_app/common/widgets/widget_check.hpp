@@ -47,7 +47,7 @@ namespace gui {
 				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255),
 					vtx::placement(vtx::placement::holizontal::LEFT,
 					vtx::placement::vertical::CENTER)),
-				gray_text_gain_(0.65f), disable_gray_text_(true), check_(check)
+					gray_text_gain_(0.65f), disable_gray_text_(true), check_(check)
 				{ }
 		};
 
