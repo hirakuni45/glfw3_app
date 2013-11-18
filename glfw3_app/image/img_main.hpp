@@ -10,6 +10,7 @@
 #include "utils/director.hpp"
 #include "widgets/widget.hpp"
 #include "widgets/widget_button.hpp"
+#include "widgets/widget_check.hpp"
 #include "widgets/widget_dialog.hpp"
 #include "widgets/widget_filer.hpp"
 #include "widgets/widget_frame.hpp"
@@ -33,6 +34,7 @@ namespace app {
 		gui::widget_image*		image_;
 		gui::widget_frame*		tools_;
 		gui::widget_button*		open_;
+		gui::widget_check*		scale_;
 		gui::widget_dialog*		dialog_;
 
 		gl::mobj			mobj_;
@@ -47,7 +49,9 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		img_main(utils::director<core>& d) : director_(d),
-			filer_(0), frame_(0), image_(0), tools_(0), open_(0), dialog_(0),
+			filer_(0), frame_(0), image_(0),
+			tools_(0), open_(0), scale_(0),
+			dialog_(0),
 			img_handle_(0), filer_id_(0)
 		{ }
 

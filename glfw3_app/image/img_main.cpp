@@ -37,15 +37,21 @@ namespace app {
 		}
 
 		{ // 機能ツールパレット
-			widget::param wp(vtx::srect(10, 10, 120, 300));
+			widget::param wp(vtx::srect(10, 10, 150, 300));
 			widget_frame::param wp_;
 			tools_ = wd.add_widget<widget_frame>(wp, wp_);
 		}
 		{ // ファイラー起動ボタン
-			widget::param wp(vtx::srect(5, 5, 100, 40), tools_);
+			widget::param wp(vtx::srect(10, 10, 100, 40), tools_);
 			widget_button::param wp_("file");
 			open_ = wd.add_widget<widget_button>(wp, wp_);
 		}
+		{ // スケールチェックボックス
+			widget::param wp(vtx::srect(10, 60, 100, 40), tools_);
+			widget_check::param wp_("scale");
+			scale_ = wd.add_widget<widget_check>(wp, wp_);	
+		}
+
 		{ // ファイラー本体
 			widget::param wp(vtx::srect(10, 30, 300, 200));
 			widget_filer::param wp_(igl->get_current_path());
@@ -67,6 +73,7 @@ namespace app {
 			filer_->load(pre);
 			frame_->load(pre);
 			tools_->load(pre);
+			scale_->load(pre);
 		}
 	}
 
@@ -118,6 +125,15 @@ namespace app {
 			vtx::spos ofs(frame_->get_local_param().plate_param_.frame_width_);
 			image_->at_rect().org = ofs;
 			image_->at_rect().size = frame_->get_rect().size - ofs * 2;
+
+			float s = 1.0f;
+			if(scale_->get_check()) {
+				vtx::fpos is = mobj_.get_size(img_handle_);
+				vtx::fpos ss = image_->at_rect().size;
+				vtx::fpos sc = ss / is;
+				if(sc.x < sc.y) s = sc.x; else s = sc.y;
+			}
+			image_->at_local_param().scale_ = s;
 		}
 
 		wd.update();
@@ -148,6 +164,7 @@ namespace app {
 			filer_->save(pre);
 			frame_->save(pre);
 			tools_->save(pre);
+			scale_->save(pre);
 		}
 	}
 }
