@@ -30,11 +30,11 @@ namespace img {
 	// sjis コードをリニア表に変換する。
 	// 上位バイト： 0x81 to 0x9f, 0xe0 to 0xef
 	// 下位バイト： 0x40 to 0x7e, 0x80 to 0xfc
-	static unsigned short sjis_to_liner_(unsigned short sjis)
+	static uint16_t sjis_to_liner_(uint16_t sjis)
 	{
-		unsigned short code;
-		unsigned char up = sjis >> 8;
-		unsigned char lo = sjis & 0xff;
+		uint16_t code;
+		uint8_t up = sjis >> 8;
+		uint8_t lo = sjis & 0xff;
 		if(0x81 <= up && up <= 0x9f) {
 			code = up - 0x81;
 		} else if(0xe0 <= up && up <= 0xef) {
@@ -74,9 +74,10 @@ namespace img {
 
 	void bdf_io::initialize()
 	{
-		size_t loa = (0x7e + 1 - 0x40) + (0xfc + 1 - 0x80);
+		uint32_t loa = (0x7e + 1 - 0x40) + (0xfc + 1 - 0x80);
 		loa *= (0x9f + 1 - 0x81) + (0xef + 1 - 0xe0);
-		codemap_.reserve(loa);
+
+		lin_code_max_ = loa;
 		codemap_.clear();
 
 		jis_code_ = 0;
@@ -108,28 +109,25 @@ namespace img {
 			} else if(ss.size() == 1) {
 				if(bitmap_) {
 					if(ss[0] == "ENDCHAR") {
-						unsigned short sjis = jis_to_sjis_(jis_code_);
-						unsigned short lin = sjis_to_liner_(sjis);
+						uint16_t sjis = jis_to_sjis_(jis_code_);
+						uint16_t lin = sjis_to_liner_(sjis);
 						if(lin == 0xffff) {
 							std::cerr << "Error JIS code map: " << jis_code_
 								<< std::endl; 
 							retcode = false;
 						} else {
-							if(codemap_.size() > lin) {
+							if(lin_code_max_ > lin) {
 								if(map_max_ < lin) map_max_ = lin;
-								codemap_[lin] = 1;
+								codemap_.push_back(sjis);
 								int len = bbx_width_ * bbx_height_;
 								if(len & 7) {
 									// バイト単位になるように埋める
 									for(int i = len; i <= (len | 7); ++i) {
 										bit_array_.put_bit(0);
 									}
-									len |= 7;
-									++len;
 								}
-								// memcpy(&m_bitmaps[lin * len], m_bitio.get_array(), len);
 							} else {
-								std::cerr << "Linear code area over (Shift-JIS: "
+								std::cerr << "Out of code area (Shift-JIS: "
 									<< sjis << "): " << lin << std::endl;
 								retcode = false;
 							}
@@ -175,14 +173,6 @@ namespace img {
 		}
 		fin.close();
 
-		//	unsigned short cd = jis_to_sjis(0x5e21);
-		//	printf("SJIS: %04X\n", cd);
-		int use = 0;
-		for(uint32_t i = 0; i < codemap_.size(); ++i) {
-			if(codemap_[i]) ++use;
-		}
-		std::cout << "Used bitmap: " << use << " / " << codemap_.size() << std::endl;
-		std::cout << "Linear code max: " << map_max_ << std::endl;
 		return retcode;
 	}
 
@@ -195,7 +185,7 @@ namespace img {
 			return false;
 		}
 
-		fout.write(&bitmaps_[0], bitmaps_.size());
+///		fout.write(&bitmaps_[0], bitmaps_.size());
 
 		fout.close();
 

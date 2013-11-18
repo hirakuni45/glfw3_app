@@ -19,11 +19,11 @@ namespace img {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class bdf_io {
 
-		std::vector<char>	codemap_;
-		std::vector<uint8_t>	bitmaps_;
+		uint32_t				lin_code_max_;
+		std::vector<uint16_t>	codemap_;
 
-		unsigned short	jis_code_;
-		bool	bitmap_;
+		uint16_t	jis_code_;
+		bool		bitmap_;
 
 		int		map_max_;
 
@@ -35,16 +35,12 @@ namespace img {
 		bool	alignment_bits_;
 
 	public:
-		bdf_io() : jis_code_(0), bitmap_(false), map_max_(0),
+		bdf_io() : lin_code_max_(0), jis_code_(0), bitmap_(false), map_max_(0),
 			bbx_width_(0), bbx_height_(0), alignment_bits_(8) { }
 
 		~bdf_io() { }
 
 		void initialize();
-
-		size_t size() const { return bitmaps_.size(); }
-
-		const unsigned char* get_array() const { return &bitmaps_[0]; }
 
 		bool load(const std::string& filename);
 
