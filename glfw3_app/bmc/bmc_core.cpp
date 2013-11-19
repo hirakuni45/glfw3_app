@@ -21,40 +21,48 @@ namespace app {
 			return 0;
 		}
 
+		std::string mode;
+		if(option_[option::append]) mode = "ab";
+		else mode = "wb";
+
+		utils::file_io fio;
+		if(!fio.open(out_fname_, mode)) {
+			std::cerr << "Can't write open file: '" << out_fname_ << "'" << std::endl;
+			return 0;
+		}
+
 		uint32_t n = 0;
-		if(option_[option::c_style]) {
-			utils::file_io fio;
-			if(fio.open(out_fname_, "wb")) {
-				utils::strings ss;
-				utils::split_text(symbol_, ",", ss);
-				std::string label;
+		if(option_[option::text]) {
+			utils::strings ss;
+			utils::split_text(symbol_, ",", ss);
+			std::string label;
+			if(option_[option::c_style]) {
 				if(ss.size() == 1) {
 					label = "static const uint8_t " + ss[0] + "[] = {\n";
 				} else if(ss.size() == 2) {
 					label = "static const uint8_t " + ss[0] + "[] " + ss[1] + " = {\n";
 				}
 				fio.put(label);
-				for(uint32_t i = 0; i < bits_.byte_size(); ++i) {
-					if(i) {
-						fio.put(",");
-						if((i % 16) == 0) {
-							fio.put("\n");
-						}
-					}
-					if((i % 16) == 0) {
-						fio.put("    ");
-					}
-					fio.put((boost::format("0x%02x") % static_cast<uint32_t>(bits_.get_byte(i))).str());
-				}
-				fio.put(" };\n");
-				n = fio.tell();
-				fio.close();
-			} else {
-				std::cerr << "Can't write open file: '" << out_fname_ << "'" << std::endl;
 			}
+			for(uint32_t i = 0; i < bits_.byte_size(); ++i) {
+				if((i % 16) == 0) {
+					fio.put("    ");
+				}
+				fio.put((boost::format("0x%02x") % static_cast<uint32_t>(bits_.get_byte(i))).str());
+				fio.put(",");
+				if((i % 16) == 15) {
+					fio.put("\n");
+				}
+			}
+			if(option_[option::c_style]) {
+				fio.put(" };");
+			}
+			fio.put("\n");
+			n = fio.tell();
 		} else {
-			n = bits_.save_file(out_fname_);
+			n = bits_.save_file(fio);
 		}
+		fio.close();
 		return n;
 	}
 
@@ -120,10 +128,12 @@ namespace app {
 		cout << "	" << cmd << " [options] in-file [out-file]" << endl;
 		cout << "	-preview -pre      preview image (OpenGL)" << endl;
 		cout << "	-no-header         no output size header" << endl;
+		cout << "	-text              text base output" << endl;
 		cout << "	-c-style symbol    C style table output" << endl;
-		cout << "	-offset x,y        Offset location" << endl;
-		cout << "	-clip	x,y        Clipping area" << endl;
+		cout << "	-offset x,y        offset location" << endl;
+		cout << "	-clip	x,y        clipping area" << endl;
 		cout << "	-bdf               BDF file input" << endl;
+		cout << "	-append            append file" << endl;
 //		cout << "	-inverse           inverse mono color" << endl;
 //		cout << "	-dither            Ditherring(50%)" << endl;
 		cout << "	-verbose           verbose" << endl;
@@ -152,10 +162,12 @@ namespace app {
 				else if(s == "-pre") option_.set(option::preview);
 				else if(s == "-verbose") option_.set(option::verbose);
 				else if(s == "-no-header") option_.set(option::no_header);
+				else if(s == "-text") option_.set(option::text);
 				else if(s == "-c_style") { option_.set(option::c_style); symbol = true; }
 				else if(s == "-offset") { option_.set(option::offset); offset = true; }
 				else if(s == "-size") { option_.set(option::size); size = true; }
 				else if(s == "-bdf") option_.set(option::bdf);
+				else if(s == "-append") option_.set(option::append);
 //				else if(s == "-inverse") option_.set(option::inverse);
 //				else if(s == "-dither") option_.set(option::dither);
 				else {
@@ -257,6 +269,9 @@ namespace app {
 		if(option_[option::verbose]) {
 			cout << "Source image size: " << src_img_.get_size().x << ", "
 				<< src_img_.get_size().y << endl;
+			if(option_[option::text]) {
+				cout << "Text base output" << endl;
+			}
 			if(option_[option::c_style]) {
 				cout << "C-Style output symbol: '" << symbol_ << "'" << endl; 
 			}
@@ -271,114 +286,13 @@ namespace app {
 			if(option_[option::bdf]) {
 				cout << "BDF file input" << endl;
 			}
+			if(option_[option::append]) {
+				cout << "Append file" << endl;
+			}
 			cout << "Output size: " << n << " bytes" << endl;		
 		}
 
 		return true;
 	}
-
-
-#if 0
-static void set_bitmap12x12(const unsigned char* bitmap12, int x, int y, img& image)
-{
-	int pos = 0;
-	unsigned char bits = *bitmap12++;
-	for(int j = 0; j < 12; ++j) {
-		for(int i = 0; i < 12; ++i) {
-			img::rgba c;
-			if(bits & 1) c.set(255, 255, 255);
-			else c.set(0, 0, 0);
-			image.put_pixel(x + i, y + j, c);
-			bits >>= 1;
-			++pos;
-			pos &= 7;
-			if(pos == 0) bits = *bitmap12++;
-		}
-	}
-}
-
-
-//-----------------------------------------------------------------//
-/*!
-	@breif	main 関数
-	@param[in]	argc	コマンド入力パラメーターの数	
-	@param[in]	argv	コマンド入力パラメーターのリスト
-	@return	常に０
-*/
-//-----------------------------------------------------------------//
-int main(int argc, char *argv[])
-{
-// Verbose
-	if(verbose == true) {
-		printf("Input image file:  '%s'\n", in_fname);
-		printf("Output image file: '%s'\n", out_fname);
-		printf("Clipping X location(start, length): %d, %d\n", area.x, area.w);
-		printf("Clipping Y location(start, length): %d, %d\n", area.y, area.h);
-	}
-
-	bool file_read = true;
-	img	image;
-	bdfio bdf;
-
-	if(bdf_type) {
-		if(file_read == true && out_fname != NULL) {
-			bdf.save(out_fname);
-		}
-
-		if(file_read == true && preview == true) {
-			image.create(256, 256);
-
-			const unsigned char* p = bdf.get_array();
-			p += 18 * 300;
-			for(int y = 0; y < 256; y += 16) {
-				for(int x = 0; x < 256; x += 16) {
-					set_bitmap12x12(p, x, y, image);
-					p += 18;
-				}
-			}
-			bitio	bitfo;
-			int		num;
-			if(dither == true) num = 3;
-			else num = 2;
-			render_mono_img(image, num, inverse, bitfo, area);
-		}
-
-	} else if(true_color == true) {
-		render_true_img(image);
-	} else {
-		bitio	bitfo;
-		int		num;
-		if(dither == true) num = 3;
-		else num = 2;
-
-		if(header == true) {
-			int	w = image.get_width();
-			int	h = image.get_height();
-			if(area.w > 0) w = area.w;
-			if(area.h > 0) h = area.h;
-			bitfo.put_bits(w, 8);
-			bitfo.put_bits(h, 8);
-		}
-		render_mono_img(image, num, inverse, bitfo, area);
-
-// バイナリーファイル出力
-		if(out_fname != NULL) {
-			if(append == true) {
-				bitfo.save_append_file((const char *)out_fname);
-			} else {
-				bitfo.save_file((const char *)out_fname);
-			}
-		}
-	}
-
-	if(file_read == true && preview == true) {
-		preview_init(&argc, argv);
-		preview_main();
-	}
-
-	return 0;
-}
-#endif
-
 }
 

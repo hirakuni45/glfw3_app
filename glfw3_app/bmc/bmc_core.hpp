@@ -25,10 +25,12 @@ namespace app {
 				preview,	///< プレビューを有効
 				verbose,	///< 詳細なメッセージ出力
 				no_header,	///< サイズヘッダーを出力しない
+				text,		///< テキストベース出力
 				c_style,	///< C スタイルのテキスト出力
 				offset,		///< オフセット
 				size,		///< サイズ
 				bdf,		///< BDF ファイル入力
+				append,		///< 追加出力
 
 				inverse,
 				dither,

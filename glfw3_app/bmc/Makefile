@@ -146,6 +146,7 @@ all:
 
 install:
 	cp ./$(TARGET).exe /usr/local/bin/.
+	cp ./*.dll /usr/local/bin/.
 
 run:
 	./$(TARGET).exe
