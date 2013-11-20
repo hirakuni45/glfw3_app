@@ -31,6 +31,7 @@ namespace app {
 		{ // 画像ファイル表示イメージ
 			widget::param wp(vtx::srect(0, 0, 256, 256), src_frame_);
 			widget_image::param wp_;
+			wp_.linear_ = false;
 			src_image_ = wd.add_widget<widget_image>(wp, wp_);
 			src_image_->set_state(widget::state::CLIP_PARENTS);
 			src_image_->set_state(widget::state::RESIZE_ROOT);
@@ -44,6 +45,7 @@ namespace app {
 		{ // 画像ファイル表示イメージ
 			widget::param wp(vtx::srect(0, 0, 256, 256), dst_frame_);
 			widget_image::param wp_;
+			wp_.linear_ = false;
 			dst_image_ = wd.add_widget<widget_image>(wp, wp_);
 			dst_image_->set_state(widget::state::CLIP_PARENTS);
 			dst_image_->set_state(widget::state::RESIZE_ROOT);
