@@ -78,7 +78,8 @@ namespace img {
 		loa *= (0x9f + 1 - 0x81) + (0xef + 1 - 0xe0);
 
 		lin_code_max_ = loa;
-		codemap_.clear();
+
+		sjis_pad_.clear();
 
 		jis_code_ = 0;
 		bitmap_ = false;
@@ -105,6 +106,9 @@ namespace img {
 				if(ss[0] == "FONTBOUNDINGBOX") {
 					bbx_width_  = boost::lexical_cast<int>(ss[1]);
 					bbx_height_ = boost::lexical_cast<int>(ss[2]);
+					if(sjis_pad_.empty()) {
+						sjis_pad_.resize(lin_code_max_ * byte_size());
+					}
 				}
 			} else if(ss.size() == 1) {
 				if(bitmap_) {
@@ -118,13 +122,17 @@ namespace img {
 						} else {
 							if(lin_code_max_ > lin) {
 								if(map_max_ < lin) map_max_ = lin;
-								codemap_.push_back(sjis);
 								int len = bbx_width_ * bbx_height_;
 								if(len & 7) {
 									// バイト単位になるように埋める
 									for(int i = len; i <= (len | 7); ++i) {
 										bit_array_.put_bit(0);
 									}
+								}
+								// SJIS 並びのバッファにコピー
+								for(uint32_t i = 0; i < byte_size(); ++i) {
+									uint32_t ofs_dst = lin * byte_size();
+									sjis_pad_[ofs_dst + i] = bit_array_.get_byte(i);
 								}
 							} else {
 								std::cerr << "Out of code area (Shift-JIS: "
@@ -185,7 +193,7 @@ namespace img {
 			return false;
 		}
 
-///		fout.write(&bitmaps_[0], bitmaps_.size());
+		fout.write(&sjis_pad_[0], sjis_pad_.size());
 
 		fout.close();
 
