@@ -101,7 +101,7 @@ namespace gui {
 				}
 				glScale(param_.scale_);
 				mo.draw(param_.mobj_handle_, gl::mobj::attribute::normal,
-					param_.offset_.x, param_.offset_.y);
+					param_.offset_.x, param_.offset_.y, param_.linear_);
 			}
 		}
 		glPopMatrix();

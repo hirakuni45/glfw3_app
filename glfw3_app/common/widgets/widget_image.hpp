@@ -30,8 +30,9 @@ namespace gui {
 			boost::optional<gl::mobj&>	mobj_;	///< モーションオブジェクトの参照
 			vtx::fpos	offset_;				///< 描画オフセット
 			vtx::fpos	scale_;					///< 描画スケール
+			bool	linear_;					///< リニアフィルター
 			param(const img::i_img* image = 0) : image_(image),
-				mobj_handle_(0), offset_(0.0f), scale_(1.0f) { }
+				mobj_handle_(0), offset_(0.0f), scale_(1.0f), linear_(true) { }
 		};
 
 	private:
