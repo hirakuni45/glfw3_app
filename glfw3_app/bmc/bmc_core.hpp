@@ -9,6 +9,7 @@
 #include "utils/string_utils.hpp"
 #include "utils/bit_array.hpp"
 #include "img_io/img_rgba8.hpp"
+#include "img_io/bdf_io.hpp"
 
 namespace app {
 
@@ -31,9 +32,9 @@ namespace app {
 				size,		///< サイズ
 				bdf,		///< BDF ファイル入力
 				append,		///< 追加出力
+				inverse,	///< 画像反転
 
-				inverse,
-				dither,
+///				dither,
 
 				limit_
 			};
@@ -57,6 +58,7 @@ namespace app {
 		utils::bit_array	bits_;
 
 		void bitmap_convert_();
+		void bitmap_convert_(img::bdf_io& bdf);
 		uint32_t save_file_();
 	public:
 		//-----------------------------------------------------------------//

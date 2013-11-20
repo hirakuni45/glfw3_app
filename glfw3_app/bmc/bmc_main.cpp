@@ -156,11 +156,29 @@ namespace app {
 			vtx::spos ofs(src_frame_->get_local_param().plate_param_.frame_width_);
 			src_image_->at_rect().org = ofs;
 			src_image_->at_rect().size = src_frame_->get_rect().size - ofs * 2;
+
+			float s = 1.0f;
+			if(scale_->get_check()) {
+				vtx::fpos is = mobj_.get_size(src_handle_);
+				vtx::fpos ss = src_image_->at_rect().size;
+				vtx::fpos sc = ss / is;
+				if(sc.x < sc.y) s = sc.x; else s = sc.y;
+			}
+			src_image_->at_local_param().scale_ = s;
 		}
 		if(dst_frame_ && dst_image_) {
 			vtx::spos ofs(dst_frame_->get_local_param().plate_param_.frame_width_);
 			dst_image_->at_rect().org = ofs;
 			dst_image_->at_rect().size = dst_frame_->get_rect().size - ofs * 2;
+
+			float s = 1.0f;
+			if(scale_->get_check()) {
+				vtx::fpos is = mobj_.get_size(dst_handle_);
+				vtx::fpos ss = dst_image_->at_rect().size;
+				vtx::fpos sc = ss / is;
+				if(sc.x < sc.y) s = sc.x; else s = sc.y;
+			}
+			dst_image_->at_local_param().scale_ = s;
 		}
 
 		wd.update();

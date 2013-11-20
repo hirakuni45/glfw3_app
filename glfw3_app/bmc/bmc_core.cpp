@@ -9,7 +9,6 @@
 #include <boost/format.hpp>
 #include "img_io/img_files.hpp"
 #include "img_io/img_utils.hpp"
-#include "img_io/bdf_io.hpp"
 #include "utils/arith.hpp"
 #include "utils/string_utils.hpp"
 
@@ -66,6 +65,7 @@ namespace app {
 		return n;
 	}
 
+
 	void bmc_core::bitmap_convert_()
 	{
 		if(src_img_.empty()) return;
@@ -82,10 +82,43 @@ namespace app {
 				img::rgba8 c;
 				src_img_.get_pixel(x, y, c);
 				bool f = (c.getY() >= 128);
+				if(option_[option::inverse]) f = !f;
 				bits_.put_bit(f);
 				if(f) c.set(255, 255, 255, 255);
 				else c.set(0, 0, 0, 255);
 				dst_img_.put_pixel(x, y, c);
+			}
+		}
+	}
+
+
+	void bmc_core::bitmap_convert_(img::bdf_io& bdf)
+	{
+		if(!option_[option::no_header]) {
+			bits_.put_bits(bdf.get_width(), 8);
+			bits_.put_bits(bdf.get_height(), 8);
+		}
+
+		// sjis に並んだものをそのまま出力
+		for(uint32_t i = 0; i < bdf.size(); ++i) {
+			bits_.put_bits(bdf.get_byte(i), 8);
+		}
+
+		// とりあえずプレビュー用に512ｘ512で画像を作成
+		uint32_t n = bdf.size() / bdf.byte_size();
+		dst_img_.create(vtx::spos(512), true);
+		bits_.set_pos(16);
+		for(uint32_t y = 0; y < 512; y += bdf.get_height()) {
+			for(uint32_t x = 0; x < 512; x += bdf.get_width()) {
+				for(uint32_t j = 0; j < bdf.get_height(); ++j) {
+					for(uint32_t i = 0; i < bdf.get_width(); ++i) {
+						bool f = bits_.get_bit();
+						img::rgba8 c;
+						if(f) c.set(255, 255, 255, 255);
+						else c.set(0, 0, 0, 255);
+						dst_img_.put_pixel(x + i, y + j, c);
+					}
+				}
 			}
 		}
 	}
@@ -134,8 +167,8 @@ namespace app {
 		cout << "	-clip	x,y        clipping area" << endl;
 		cout << "	-bdf               BDF file input" << endl;
 		cout << "	-append            append file" << endl;
-//		cout << "	-inverse           inverse mono color" << endl;
-//		cout << "	-dither            Ditherring(50%)" << endl;
+		cout << "	-inverse           inverse mono color" << endl;
+//		cout << "	-dither            ditherring" << endl;
 		cout << "	-verbose           verbose" << endl;
 		cout << endl;
 	}
@@ -168,7 +201,7 @@ namespace app {
 				else if(s == "-size") { option_.set(option::size); size = true; }
 				else if(s == "-bdf") option_.set(option::bdf);
 				else if(s == "-append") option_.set(option::append);
-//				else if(s == "-inverse") option_.set(option::inverse);
+				else if(s == "-inverse") option_.set(option::inverse);
 //				else if(s == "-dither") option_.set(option::dither);
 				else {
 					no_err = false;
@@ -237,8 +270,9 @@ namespace app {
 				return false;
 			}
 
+			bitmap_convert_(bdf);
 
-		} else {
+		} else { // 通常の画像ファイル
 			img::img_files	imfs;
 			imfs.initialize();
 
