@@ -25,7 +25,7 @@ namespace app {
 			enum type {
 				preview,	///< プレビューを有効
 				verbose,	///< 詳細なメッセージ出力
-				no_header,	///< サイズヘッダーを出力しない
+				header,		///< サイズヘッダー出力
 				text,		///< テキストベース出力
 				c_style,	///< C スタイルのテキスト出力
 				offset,		///< オフセット
@@ -33,8 +33,7 @@ namespace app {
 				bdf,		///< BDF ファイル入力
 				append,		///< 追加出力
 				inverse,	///< 画像反転
-
-///				dither,
+				dither,		///< ディザリング
 
 				limit_
 			};
@@ -44,6 +43,7 @@ namespace app {
 		std::bitset<option::limit_>	option_;
 		std::string	inp_fname_;
 		std::string out_fname_;
+		uint32_t	header_size_;
 		std::string	symbol_;
 		vtx::srect	clip_;
 
@@ -66,8 +66,9 @@ namespace app {
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		bmc_core(int argc, char** argv) : argc_(argc), argv_(argv), clip_(0),
-			version_(0.25f) { }
+		bmc_core(int argc, char** argv) : argc_(argc), argv_(argv),
+			header_size_(0), clip_(0),
+			version_(0.5f) { }
 
 
 		//-----------------------------------------------------------------//
