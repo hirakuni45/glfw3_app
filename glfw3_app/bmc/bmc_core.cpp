@@ -222,7 +222,7 @@ namespace app {
 		cout << "    -text             text base output" << endl;
 		cout << "    -c-style symbol   C style table output" << endl;
 		cout << "    -offset x,y       offset location" << endl;
-		cout << "    -clip	x,y        clipping area" << endl;
+		cout << "    -clip x,y         clipping area" << endl;
 		cout << "    -bdf              BDF file input" << endl;
 		cout << "    -append           append file" << endl;
 		cout << "    -inverse          inverse mono color" << endl;
