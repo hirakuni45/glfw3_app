@@ -164,14 +164,18 @@ namespace app {
 			bits_.put_bits(bdf.get_byte(i), 8);
 		}
 
-		// とりあえずプレビュー用に512ｘ512で画像を作成
+		// ヘッダーの分を seek
+		if(option_[option::header]) {
+			bits_.set_pos(header_size_ * 2);
+		}
+
 		uint32_t n = bdf.size() / bdf.byte_size();
-		dst_img_.create(vtx::spos(512), true);
-		bits_.set_pos(16);
-		for(uint32_t y = 0; y < 512; y += bdf.get_height()) {
-			for(uint32_t x = 0; x < 512; x += bdf.get_width()) {
-				for(uint32_t j = 0; j < bdf.get_height(); ++j) {
-					for(uint32_t i = 0; i < bdf.get_width(); ++i) {
+		vtx::spos ssz(bdf.get_width(), bdf.get_height());
+		dst_img_.create(ssz * 16, true);
+		for(uint32_t y = 0; y < (ssz.y * 16); y += ssz.y) {
+			for(uint32_t x = 0; x < (ssz.x * 16); x += ssz.x) {
+				for(uint32_t j = 0; j < ssz.y; ++j) {
+					for(uint32_t i = 0; i < ssz.x; ++i) {
 						bool f = bits_.get_bit();
 						img::rgba8 c;
 						if(f) c.set(255, 255, 255, 255);
