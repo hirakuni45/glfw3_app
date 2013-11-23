@@ -113,6 +113,7 @@ namespace img {
 			} else if(ss.size() == 1) {
 				if(bitmap_) {
 					if(ss[0] == "ENDCHAR") {
+						++jis_count_;
 						uint16_t sjis = jis_to_sjis_(jis_code_);
 						uint16_t lin = sjis_to_liner_(sjis);
 						if(lin == 0xffff) {
@@ -180,7 +181,7 @@ namespace img {
 			line.clear();
 		}
 		fin.close();
-
+// std::cout << "JIS count: " << jis_count_ << std::endl;
 		return retcode;
 	}
 

@@ -27,6 +27,8 @@ namespace img {
 
 		int		map_max_;
 
+		uint32_t	jis_count_;
+
 		uint32_t	bbx_width_;
 		uint32_t	bbx_height_;
 
@@ -36,6 +38,7 @@ namespace img {
 
 	public:
 		bdf_io() : lin_code_max_(0), jis_code_(0), bitmap_(false), map_max_(0),
+			jis_count_(0),
 			bbx_width_(0), bbx_height_(0), alignment_bits_(8) { }
 
 		~bdf_io() { }
