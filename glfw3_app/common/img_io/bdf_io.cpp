@@ -72,6 +72,11 @@ namespace img {
 	}
 
 
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	初期化
+	*/
+	//-----------------------------------------------------------------//
 	void bdf_io::initialize()
 	{
 		uint32_t loa = (0x7e + 1 - 0x40) + (0xfc + 1 - 0x80);
@@ -89,6 +94,13 @@ namespace img {
 	}
 
 
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	ファイルの読み込み
+		@param[in]	filename	ファイル名
+		@return エラーが無ければ「true」
+	*/
+	//-----------------------------------------------------------------//
 	bool bdf_io::load(const std::string& filename)
 	{
 		utils::file_io fin;
@@ -121,6 +133,7 @@ namespace img {
 								<< std::endl; 
 							retcode = false;
 						} else {
+							if(lin_limit_ < lin) lin_limit_ = lin;
 							if(lin_code_max_ > lin) {
 								if(map_max_ < lin) map_max_ = lin;
 								int len = bbx_width_ * bbx_height_;
@@ -181,11 +194,18 @@ namespace img {
 			line.clear();
 		}
 		fin.close();
-// std::cout << "JIS count: " << jis_count_ << std::endl;
+// std::cout << "Linear limit: " << lin_limit_ << std::endl;
 		return retcode;
 	}
 
 
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	SJIS 順番によるバイナリー出力
+		@param[in]	filename	ファイル名
+		@return エラーが無ければ「true」
+	*/
+	//-----------------------------------------------------------------//
 	bool bdf_io::save(const std::string& filename)
 	{
 		utils::file_io fout;
