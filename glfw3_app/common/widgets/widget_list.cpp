@@ -150,7 +150,7 @@ namespace gui {
 		}
 
 		param_.open_before_ = param_.open_;
-		if(get_selected()) {
+		if(get_selected() && list_.size() > 0) {
 			param_.open_ = true;
 			wd_.enable(frame_, param_.open_, true);
 			wd_.top_widget(frame_);
