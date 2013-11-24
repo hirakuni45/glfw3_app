@@ -40,6 +40,9 @@ namespace app {
 		};
 
 	private:
+		static const uint32_t bdf_prev_x_ = 32;
+		static const uint32_t bdf_prev_y_ = 32;
+
 		std::bitset<option::limit_>	option_;
 		std::string	inp_fname_;
 		std::string out_fname_;
@@ -57,6 +60,10 @@ namespace app {
 
 		utils::bit_array	bits_;
 
+		uint32_t		bdf_num_;
+		uint32_t		bdf_pages_;
+		vtx::spos		bdf_fsize_;
+
 		void bitmap_convert_();
 		void bitmap_convert_(img::bdf_io& bdf);
 		uint32_t save_file_();
@@ -68,7 +75,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		bmc_core(int argc, char** argv) : argc_(argc), argv_(argv),
 			header_size_(0), clip_(0),
-			version_(0.5f) { }
+			version_(0.5f), bdf_num_(0), bdf_pages_(0), bdf_fsize_(0) { }
 
 
 		//-----------------------------------------------------------------//
@@ -141,5 +148,23 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		const img::img_rgba8& get_dst_image() const { return dst_img_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  BDF の画像のページ数を取得
+			@return 最大ページ数
+		*/
+		//-----------------------------------------------------------------//
+		uint32_t get_bdf_pages() const { return bdf_pages_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  BDF の画像を生成
+			@param[in]	page	ページ
+		*/
+		//-----------------------------------------------------------------//
+		void create_bdf_image(uint32_t page);
 	};
 }

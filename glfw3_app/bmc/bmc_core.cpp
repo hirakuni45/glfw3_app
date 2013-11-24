@@ -164,27 +164,14 @@ namespace app {
 			bits_.put_bits(bdf.get_byte(i), 8);
 		}
 
-		// ヘッダーの分を seek
-		if(option_[option::header]) {
-			bits_.set_pos(header_size_ * 2);
-		}
+		// 最大ページ数を求めておく
+		bdf_num_ = bdf.size() / bdf.byte_size();	// 全フォント数
+		bdf_pages_ = bdf_num_ / (bdf_prev_x_ * bdf_prev_y_);
+		if(bdf_num_ % (bdf_prev_x_ * bdf_prev_y_)) ++bdf_pages_;
 
-		uint32_t n = bdf.size() / bdf.byte_size();
-		vtx::spos ssz(bdf.get_width(), bdf.get_height());
-		dst_img_.create(ssz * 16, true);
-		for(uint32_t y = 0; y < (ssz.y * 16); y += ssz.y) {
-			for(uint32_t x = 0; x < (ssz.x * 16); x += ssz.x) {
-				for(uint32_t j = 0; j < ssz.y; ++j) {
-					for(uint32_t i = 0; i < ssz.x; ++i) {
-						bool f = bits_.get_bit();
-						img::rgba8 c;
-						if(f) c.set(255, 255, 255, 255);
-						else c.set(0, 0, 0, 255);
-						dst_img_.put_pixel(x + i, y + j, c);
-					}
-				}
-			}
-		}
+		bdf_fsize_.set(bdf.get_width(), bdf.get_height());
+
+		create_bdf_image(0);
 	}
 
 
@@ -393,6 +380,9 @@ namespace app {
 			}
 			if(option_[option::bdf]) {
 				cout << "BDF file input" << endl;
+				cout << "BDF font size: " << static_cast<int>(bdf_fsize_.x)
+					<< ", " << static_cast<int>(bdf_fsize_.y) << endl;
+				cout << "BDF font num: " << bdf_num_ << endl;
 			}
 			if(option_[option::append]) {
 				cout << "Append file" << endl;
@@ -404,6 +394,46 @@ namespace app {
 		}
 
 		return true;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief  BDF の画像を生成
+		@param[in]	page	ページ
+	*/
+	//-----------------------------------------------------------------//
+	void bmc_core::create_bdf_image(uint32_t page)
+	{
+		if(page >= bdf_pages_) {
+			return;
+		}
+
+		uint32_t ofs = 0;
+		// ヘッダーの分を seek
+		if(option_[option::header]) {
+			ofs = header_size_ * 2;
+		}
+
+		uint32_t fb = (((bdf_fsize_.x * bdf_fsize_.y) + 7) >> 3) << 3;
+		ofs += bdf_prev_x_ * bdf_prev_y_ * page * fb;
+		bits_.set_pos(ofs); // seek
+
+		vtx::spos ssz(bdf_fsize_.x * bdf_prev_x_, bdf_fsize_.y * bdf_prev_y_);
+		dst_img_.create(ssz, true);
+		for(uint32_t y = 0; y < ssz.y; y += bdf_fsize_.y) {
+			for(uint32_t x = 0; x < ssz.x; x += bdf_fsize_.x) {
+				for(uint32_t j = 0; j < bdf_fsize_.y; ++j) {
+					for(uint32_t i = 0; i < bdf_fsize_.x; ++i) {
+						bool f = bits_.get_bit();
+						img::rgba8 c;
+						if(f) c.set(255, 255, 255, 255);
+						else c.set(0, 0, 0, 255);
+						dst_img_.put_pixel(x + i, y + j, c);
+					}
+				}
+			}
+		}
 	}
 }
 

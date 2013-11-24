@@ -15,6 +15,7 @@
 #include "widgets/widget_filer.hpp"
 #include "widgets/widget_frame.hpp"
 #include "widgets/widget_image.hpp"
+#include "widgets/widget_list.hpp"
 #include "img_io/bdf_io.hpp"
 #include "gl_fw/glmobj.hpp"
 
@@ -40,12 +41,14 @@ namespace app {
 		gui::widget_button*		open_;
 		gui::widget_check*		scale_;
 		gui::widget_dialog*		dialog_;
+		gui::widget_list*		bdf_page_;
 
 		gl::mobj			mobj_;
 		gl::mobj::handle	src_handle_;
 		gl::mobj::handle	dst_handle_;
 
 		uint32_t	filer_id_;
+		uint32_t	bdf_page_no_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -56,8 +59,8 @@ namespace app {
 		bmc_main(utils::director<core>& d) : director_(d),
 			filer_(0), src_frame_(0), src_image_(0), dst_frame_(0), dst_image_(0),
 			tools_(0), open_(0), scale_(0),
-			dialog_(0),
-			src_handle_(0), dst_handle_(0), filer_id_(0)
+			dialog_(0), bdf_page_(0),
+			src_handle_(0), dst_handle_(0), filer_id_(0), bdf_page_no_(0)
 		{ }
 
 

@@ -8,6 +8,7 @@
 #include "bmc_main.hpp"
 #include "core/glcore.hpp"
 #include "widgets/widget_utils.hpp"
+#include <boost/lexical_cast.hpp>
 
 namespace app {
 
@@ -61,6 +62,17 @@ namespace app {
 			widget::param wp(vtx::srect(10, 10, 130, 40), tools_);
 			widget_check::param wp_("scale");
 			scale_ = wd.add_widget<widget_check>(wp, wp_);
+		}
+		{ // BDF page list
+			widget::param wp(vtx::srect(10, 60, 100, 40), tools_);
+			widget_list::param wp_("0");
+			const bmc_core& bmc = *director_.at().bmc_;
+			for(uint32_t i = 0; i < bmc.get_bdf_pages(); ++i) {
+				std::string s = boost::lexical_cast<std::string>(i);
+				wp_.text_list_.push_back(s);
+			}
+			bdf_page_no_ = 0;
+			bdf_page_ = wd.add_widget<widget_list>(wp, wp_);
 		}
 		{ // ファイラー起動ボタン
 //			widget::param wp(vtx::srect(5, 5, 100, 40), tools_);
@@ -168,6 +180,21 @@ namespace app {
 			}
 			src_image_->at_local_param().scale_ = s;
 		}
+
+		// BDF ファイルの複数ページ対応
+		bmc_core& bmc = *director_.at().bmc_;
+		if(bmc.get_bdf_pages()) {
+			if(bdf_page_->get_local_param().select_pos_ != bdf_page_no_) {
+				bdf_page_no_ = bdf_page_->get_local_param().select_pos_;
+				bmc.create_bdf_image(bdf_page_no_);
+				mobj_.destroy();
+				mobj_.initialize();
+				dst_handle_ = mobj_.install(&bmc.get_dst_image());
+				dst_image_->at_local_param().mobj_ = mobj_;
+				dst_image_->at_local_param().mobj_handle_ = dst_handle_;
+			}
+		}
+
 		if(dst_frame_ && dst_image_) {
 			vtx::spos ofs(dst_frame_->get_local_param().plate_param_.frame_width_);
 			dst_image_->at_rect().org = ofs;

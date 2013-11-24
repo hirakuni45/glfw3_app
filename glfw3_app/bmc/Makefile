@@ -227,7 +227,7 @@ main.o: ../common/utils/drive_info.hpp ../common/utils/file_info.hpp
 main.o: ../common/utils/handle_set.hpp ../common/widgets/widget_null.hpp
 main.o: ../common/widgets/widget_director.hpp
 main.o: ../common/widgets/widget_label.hpp ../common/widgets/widget_frame.hpp
-main.o: ../common/widgets/widget_image.hpp
+main.o: ../common/widgets/widget_image.hpp ../common/widgets/widget_list.hpp
 bmc_core.o: bmc_core.hpp ../common/utils/string_utils.hpp
 bmc_core.o: ../common/utils/mtx.hpp ../common/utils/vtx.hpp
 bmc_core.o: ../common/utils/bit_array.hpp ../common/utils/file_io.hpp
@@ -271,6 +271,7 @@ bmc_main.o: ../common/widgets/widget_director.hpp
 bmc_main.o: ../common/widgets/widget_label.hpp
 bmc_main.o: ../common/widgets/widget_frame.hpp
 bmc_main.o: ../common/widgets/widget_image.hpp
+bmc_main.o: ../common/widgets/widget_list.hpp
 bmc_main.o: ../common/widgets/widget_utils.hpp
 ../common/core/glcore.o: ../common/core/glcore.hpp
 ../common/core/glcore.o: ../common/gl_fw/IGLcore.hpp
