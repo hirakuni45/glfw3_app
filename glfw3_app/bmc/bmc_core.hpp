@@ -75,7 +75,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		bmc_core(int argc, char** argv) : argc_(argc), argv_(argv),
 			header_size_(0), clip_(0),
-			version_(0.5f), bdf_num_(0), bdf_pages_(0), bdf_fsize_(0) { }
+			version_(0.6f), bdf_num_(0), bdf_pages_(0), bdf_fsize_(0) { }
 
 
 		//-----------------------------------------------------------------//
