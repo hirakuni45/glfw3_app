@@ -62,7 +62,7 @@ OPTLIBS		=	glfw3 glew32 opengl32 glu32 gdi32 imm32 \
 				pthread \
 				openal winmm dsound \
 				fitz \
-				png12 jpeg_x86 openjpeg jbig2dec tga \
+				png12 jpeg_x86 openjpeg jbig2dec \
 				freetype \
 				id3tag \
 				z \
@@ -703,21 +703,22 @@ gui_test.o: ../common/widgets/widget_image.hpp ../common/img_io/img_base.hpp
 ../common/widgets/widget_image.o: ../common/utils/string_utils.hpp
 ../common/widgets/widget_image.o: ../common/utils/mtx.hpp
 ../common/widgets/widget_image.o: ../common/utils/file_io.hpp
+../common/widgets/widget_image.o: ../common/gl_fw/glutils.hpp
+../common/widgets/widget_image.o: ../common/img_io/img_rgba8.hpp
+../common/widgets/widget_image.o: ../common/img_io/i_img.hpp
+../common/widgets/widget_image.o: ../common/img_io/img_idx8.hpp
+../common/widgets/widget_image.o: ../common/img_io/img_clut.hpp
+../common/widgets/widget_image.o: ../common/img_io/img_gray8.hpp
 ../common/widgets/widget_image.o: ../common/widgets/widget_image.hpp
 ../common/widgets/widget_image.o: ../common/widgets/widget_director.hpp
 ../common/widgets/widget_image.o: ../common/widgets/widget.hpp
 ../common/widgets/widget_image.o: ../common/img_io/img.hpp
 ../common/widgets/widget_image.o: ../common/img_io/paint.hpp
-../common/widgets/widget_image.o: ../common/img_io/i_img.hpp
 ../common/widgets/widget_image.o: ../common/img_io/img_rgba8.hpp
-../common/widgets/widget_image.o: ../common/img_io/img_idx8.hpp
-../common/widgets/widget_image.o: ../common/img_io/img_clut.hpp
-../common/widgets/widget_image.o: ../common/img_io/img_gray8.hpp
 ../common/widgets/widget_image.o: ../common/utils/vmath.hpp
 ../common/widgets/widget_image.o: ../common/utils/preference.hpp
 ../common/widgets/widget_image.o: ../common/widgets/common_parts.hpp
 ../common/widgets/widget_image.o: ../common/gl_fw/glmobj.hpp
-../common/widgets/widget_image.o: ../common/img_io/img_rgba8.hpp
 ../common/widgets/widget_image.o: ../common/img_io/img_files.hpp
 ../common/widgets/widget_image.o: ../common/img_io/i_img_io.hpp
 ../common/widgets/widget_image.o: ../common/widgets/widget_utils.hpp

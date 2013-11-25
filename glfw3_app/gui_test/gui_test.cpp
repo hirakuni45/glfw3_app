@@ -38,7 +38,7 @@ namespace app {
 		gl::IGLcore* igl = gl::get_glcore();
 
 		using namespace gui;
-		widget_director& wd = director_.at_core().widget_director_;
+		widget_director& wd = director_.at().widget_director_;
 
 		if(1) {	// ラジオボタンのテスト
 			widget::param wpr(vtx::srect(20, 20, 130, 200), 0);
@@ -158,7 +158,7 @@ namespace app {
 		}
 
 		// プリファレンスの取得
-		sys::preference& pre = director_.at_core().preference_;
+		sys::preference& pre = director_.at().preference_;
 		if(filer_) {
 			filer_->load(pre);
 		}
@@ -175,7 +175,7 @@ namespace app {
 		gl::IGLcore* igl = gl::get_glcore();
 		const vtx::spos& size = igl->get_size();
 
-		gui::widget_director& wd = director_.at_core().widget_director_;
+		gui::widget_director& wd = director_.at().widget_director_;
 
 		if(dialog_open_) {
 			if(dialog_open_->get_selected()) {
@@ -210,8 +210,8 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void gui_test::render()
 	{
-		director_.at_core().widget_director_.service();
-		director_.at_core().widget_director_.render();
+		director_.at().widget_director_.service();
+		director_.at().widget_director_.render();
 	}
 
 
@@ -222,7 +222,7 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void gui_test::destroy()
 	{
-		sys::preference& pre = director_.at_core().preference_;
+		sys::preference& pre = director_.at().preference_;
 		if(filer_) {
 			filer_->save(pre);
 		}

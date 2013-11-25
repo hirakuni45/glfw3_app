@@ -1,17 +1,24 @@
 #pragma once
 //=====================================================================//
 /*! @file
-	@brief  player サンプル
+	@brief  共有ヘッダー
 	@author 平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
 #include "snd_io/sound.hpp"
 #include "widgets/widget_director.hpp"
-#include "widgets/widget_filer.hpp"
 #include "utils/preference.hpp"
+#include "core/glcore.hpp"
+#include "utils/director.hpp"
+#include "gl_fw/glutils.hpp"
 
 namespace app {
 
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief  アプリケーション・共有リソース
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct core {
 
 		al::sound	sound_;
