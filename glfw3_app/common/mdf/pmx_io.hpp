@@ -13,6 +13,7 @@
 #include "utils/mtx.hpp"
 #include "utils/quat.hpp"
 #include "utils/file_io.hpp"
+#include "utils/dim.hpp"
 
 namespace mdf {
 
@@ -88,11 +89,34 @@ namespace mdf {
 		};
 		model_info		model_info_;
 
+		struct BDEF2 {
+			uint32_t	index[2];
+			float		weight[2];
+		};
+		struct BDEF4 {
+			uint32_t	index[4];
+			float		weight[4];
+		};
+		struct SDEF {
+			uint32_t	index[2];
+			float		weight;
+			vtx::fvtx	c;
+			vtx::fvtx	r0;
+			vtx::fvtx	r1;
+		};
+		struct share_t {
+			std::vector<vtx::fvtx4> uv;
+			std::vector<BDEF2> bdef2;
+			std::vector<BDEF4> bdef4;
+			std::vector<SDEF>  sdef;
+		};
+		static share_t share_;
+
 		struct pmx_vertex {
 			vtx::fvtx	position_;
 			vtx::fvtx	normal_;
 			vtx::fpos	uv_;
-			std::vector<vtx::fvtx4>	append_uves_;
+			uint32_t	append_uv_;
 
 			struct weight {
 				enum type {
@@ -102,53 +126,29 @@ namespace mdf {
 					SDEF
 				};
 			};
-			weight::type	weight_type_;
-			union bone_weight {
-				struct BDEF1 {
-					uint32_t	index;
-				};
-				struct BDEF2 {
-					uint32_t	index[2];
-					float		weight[2];
-				};
-				struct BDEF4 {
-					uint32_t	index[4];
-					float		weight[4];
-				};
-				struct SDEF {
-					uint32_t	index[2];
-					float		weight;
-					vtx::fvtx	c;
-					vtx::fvtx	r0;
-					vtx::fvtx	r1;
-				};
-			};
-			bone_weight		bone_weight_;
-
-			float			edge_scale_;
+			weight::type	weight_;
+			uint32_t		weight_index_;
 
 			bool get(utils::file_io& fio, const reading_info& info) {
-
 				if(!fio.get(position_)) return false;
 				if(!fio.get(normal_)) return false;
 				if(!fio.get(uv_)) return false;
 				if(info.appendix_uv) {
-					append_uves_.reserve(info.appendix_uv);
-					append_uves_.clear();
+					append_uv_ = share_.uv.size();
 					for(uint8_t i = 0; i < info.appendix_uv; ++i) {
-						vtx::fvtx4 auv;
-						if(!fio.get(auv)) return false;
-						append_uves_.push_back(auv);
+						vtx::fvtx4 v; 
+						if(!fio.get(v)) return false;
+						share_.uv.push_back(v);
 					}
 				}
 				{
 					uint8_t type;
 					if(!fio.get(type)) return false;
-					weight_type_ = static_cast<weight::type>(type);
+					weight_ = static_cast<weight::type>(type);
 				}
-				switch(weight_type_) {
+				switch(weight_) {
 				case weight::BDEF1:
-										
+//					bone_index_size;
 					break;
 				case weight::BDEF2:
 

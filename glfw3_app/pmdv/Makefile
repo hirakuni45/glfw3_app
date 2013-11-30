@@ -14,7 +14,6 @@ PSOURCES	=	main.cpp \
 				../common/gl_fw/glterminal.cpp \
 				../common/gl_fw/glcamera.cpp \
 				../common/gl_fw/gllight.cpp \
-				../common/gl_fw/glsurface.cpp \
 				../common/gl_fw/glutils.cpp \
 				../common/utils/vtx.cpp \
 				../common/utils/vmath.cpp \
@@ -231,7 +230,8 @@ main.o: ../common/widgets/widget_button.hpp
 main.o: ../common/widgets/widget_frame.hpp ../common/widgets/widget_check.hpp
 main.o: ../common/mdf/pmd_io.hpp ../common/gl_fw/gllight.hpp
 main.o: ../common/utils/quat.hpp ../common/mdf/pmx_io.hpp
-main.o: ../common/gl_fw/glcamera.hpp ../common/gl_fw/glmatrix.hpp
+main.o: ../common/utils/dim.hpp ../common/gl_fw/glcamera.hpp
+main.o: ../common/gl_fw/glmatrix.hpp
 pmdv_main.o: ../common/core/glcore.hpp ../common/gl_fw/IGLcore.hpp
 pmdv_main.o: ../common/core/device.hpp ../common/utils/vtx.hpp
 pmdv_main.o: ../common/gl_fw/gl_info.hpp ../common/gl_fw/glfonts.hpp
@@ -262,8 +262,8 @@ pmdv_main.o: ../common/widgets/widget_button.hpp
 pmdv_main.o: ../common/widgets/widget_frame.hpp
 pmdv_main.o: ../common/widgets/widget_check.hpp ../common/mdf/pmd_io.hpp
 pmdv_main.o: ../common/gl_fw/gllight.hpp ../common/utils/quat.hpp
-pmdv_main.o: ../common/mdf/pmx_io.hpp ../common/gl_fw/glcamera.hpp
-pmdv_main.o: ../common/gl_fw/glmatrix.hpp
+pmdv_main.o: ../common/mdf/pmx_io.hpp ../common/utils/dim.hpp
+pmdv_main.o: ../common/gl_fw/glcamera.hpp ../common/gl_fw/glmatrix.hpp
 ../common/core/glcore.o: ../common/core/glcore.hpp
 ../common/core/glcore.o: ../common/gl_fw/IGLcore.hpp
 ../common/core/glcore.o: ../common/core/device.hpp ../common/utils/vtx.hpp
@@ -340,10 +340,6 @@ pmdv_main.o: ../common/gl_fw/glmatrix.hpp
 ../common/gl_fw/gllight.o: ../common/gl_fw/gllight.hpp
 ../common/gl_fw/gllight.o: ../common/gl_fw/gl_info.hpp
 ../common/gl_fw/gllight.o: ../common/utils/vtx.hpp ../common/img_io/img.hpp
-../common/gl_fw/glsurface.o: ../common/gl_fw/glsurface.hpp
-../common/gl_fw/glsurface.o: ../common/gl_fw/gl_info.hpp
-../common/gl_fw/glsurface.o: ../common/utils/quat.hpp ../common/utils/vtx.hpp
-../common/gl_fw/glsurface.o: ../common/utils/mtx.hpp
 ../common/gl_fw/glutils.o: ../common/gl_fw/glutils.hpp
 ../common/gl_fw/glutils.o: ../common/gl_fw/gl_info.hpp
 ../common/gl_fw/glutils.o: ../common/utils/vtx.hpp ../common/img_io/i_img.hpp
@@ -745,21 +741,22 @@ pmdv_main.o: ../common/gl_fw/glmatrix.hpp
 ../common/widgets/widget_image.o: ../common/utils/string_utils.hpp
 ../common/widgets/widget_image.o: ../common/utils/mtx.hpp
 ../common/widgets/widget_image.o: ../common/utils/file_io.hpp
+../common/widgets/widget_image.o: ../common/gl_fw/glutils.hpp
+../common/widgets/widget_image.o: ../common/img_io/img_rgba8.hpp
+../common/widgets/widget_image.o: ../common/img_io/i_img.hpp
+../common/widgets/widget_image.o: ../common/img_io/img_idx8.hpp
+../common/widgets/widget_image.o: ../common/img_io/img_clut.hpp
+../common/widgets/widget_image.o: ../common/img_io/img_gray8.hpp
 ../common/widgets/widget_image.o: ../common/widgets/widget_image.hpp
 ../common/widgets/widget_image.o: ../common/widgets/widget_director.hpp
 ../common/widgets/widget_image.o: ../common/widgets/widget.hpp
 ../common/widgets/widget_image.o: ../common/img_io/img.hpp
 ../common/widgets/widget_image.o: ../common/img_io/paint.hpp
-../common/widgets/widget_image.o: ../common/img_io/i_img.hpp
 ../common/widgets/widget_image.o: ../common/img_io/img_rgba8.hpp
-../common/widgets/widget_image.o: ../common/img_io/img_idx8.hpp
-../common/widgets/widget_image.o: ../common/img_io/img_clut.hpp
-../common/widgets/widget_image.o: ../common/img_io/img_gray8.hpp
 ../common/widgets/widget_image.o: ../common/utils/vmath.hpp
 ../common/widgets/widget_image.o: ../common/utils/preference.hpp
 ../common/widgets/widget_image.o: ../common/widgets/common_parts.hpp
 ../common/widgets/widget_image.o: ../common/gl_fw/glmobj.hpp
-../common/widgets/widget_image.o: ../common/img_io/img_rgba8.hpp
 ../common/widgets/widget_image.o: ../common/img_io/img_files.hpp
 ../common/widgets/widget_image.o: ../common/img_io/i_img_io.hpp
 ../common/widgets/widget_image.o: ../common/widgets/widget_utils.hpp
@@ -1141,4 +1138,4 @@ pmdv_main.o: ../common/gl_fw/glmatrix.hpp
 ../common/mdf/pmx_io.o: ../common/utils/string_utils.hpp
 ../common/mdf/pmx_io.o: ../common/utils/mtx.hpp ../common/utils/file_io.hpp
 ../common/mdf/pmx_io.o: ../common/gl_fw/gllight.hpp ../common/img_io/img.hpp
-../common/mdf/pmx_io.o: ../common/utils/quat.hpp
+../common/mdf/pmx_io.o: ../common/utils/quat.hpp ../common/utils/dim.hpp

@@ -8,6 +8,8 @@
 
 namespace mdf {
 
+	pmx_io::share_t pmx_io::share_;
+
 	static bool probe_(utils::file_io& fio)
 	{
 		std::string s;
