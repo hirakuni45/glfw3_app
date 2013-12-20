@@ -1,6 +1,6 @@
 //=====================================================================//
 /*! @file
-	@brief  Open IDE
+	@brief  main
 	@author 平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
@@ -13,8 +13,6 @@ static const char* window_key_ = { "application/window" };
 static const char* app_title_ = { "Open IDE" };
 static const vtx::spos start_size_(800, 600);
 static const vtx::spos limit_size_(800, 600);
-
-int main(int argc, char** argv);
 
 int main(int argc, char** argv)
 {

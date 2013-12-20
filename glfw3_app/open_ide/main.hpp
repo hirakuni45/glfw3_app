@@ -1,7 +1,7 @@
 #pragma once
 //=====================================================================//
 /*! @file
-	@brief  player サンプル
+	@brief  main ヘッダー
 	@author 平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
@@ -11,6 +11,8 @@
 #include "core/glcore.hpp"
 #include "utils/director.hpp"
 #include "gl_fw/glutils.hpp"
+
+int main(int argc, char** argv);
 
 namespace app {
 

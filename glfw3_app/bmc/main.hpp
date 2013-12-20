@@ -1,7 +1,7 @@
 #pragma once
 //=====================================================================//
 /*! @file
-	@brief  Bit Map Converter
+	@brief  main ヘッダー
 	@author 平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
@@ -13,6 +13,8 @@
 #include "gl_fw/glutils.hpp"
 #include "bmc_core.hpp"
 #include <boost/optional.hpp>
+
+int main(int argc, char** argv);
 
 namespace app {
 
