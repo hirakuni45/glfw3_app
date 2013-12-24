@@ -750,7 +750,9 @@ namespace gui {
 
 			set_TSC();
 
+//			w->run_signal(widget::render_before);
 			w->render();
+			w->run_signal(widget::signal_group::render_later);
 		}
 	}
 

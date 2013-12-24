@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 #include <bitset>
+#include <boost/signals2.hpp>
 #include "img_io/img.hpp"
 #include "img_io/paint.hpp"
 #include "utils/vtx.hpp"
@@ -36,6 +37,27 @@ namespace gui {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct widget {
+
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	シグナル・タイプ
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		typedef boost::signals2::signal<void (widget*)> signal_type;
+
+
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	シグナル・グループ
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		enum class signal_group {
+			update_before,		///< アップデート前
+			update_later,		///< アップデート後
+			render_before,		///< レンダリング前
+			render_later		///< レンダリング後
+		};
+
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
@@ -289,6 +311,8 @@ namespace gui {
 		std::string	symbol_;
 
 		uint32_t	serial_;
+
+		signal_type	sig_;
 
 		bool		mark_;
 
@@ -599,6 +623,22 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		uint32_t get_serial() const { return serial_; }
 
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	シグナルを追加
+			@param[in]	group	シグナルグループ
+			@param[in]	signal	シグナル
+		*/
+		//-----------------------------------------------------------------//
+		void set_signal(signal_group group, void (*signal)(widget*)) {
+			sig_.connect(signal);
+		}
+
+
+		void run_signal(signal_group group) {
+			sig_(this);
+		}
 	};
 
 	typedef std::vector<widget*> widgets;
