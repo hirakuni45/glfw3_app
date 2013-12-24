@@ -12,6 +12,8 @@
 #include "utils/director.hpp"
 #include "gl_fw/glutils.hpp"
 
+int main(int argc, char** argv);
+
 namespace app {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
