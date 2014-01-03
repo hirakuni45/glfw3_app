@@ -1,6 +1,6 @@
 //=====================================================================//
 /*! @file
-	@brief  PMD, PMX Viewer
+	@brief  メイン
 	@author 平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
@@ -10,11 +10,9 @@
 typedef app::pmdv_main start_app;
 
 static const char* window_key_ = { "application/window" };
-static const char* app_title_ = { "PMD-PMX Viewer" };
+static const char* app_title_ = { "PMD/PMX Viewer" };
 static const vtx::spos start_size_(800, 600);
 static const vtx::spos limit_size_(800, 600);
-
-int main(int argc, char** argv);
 
 int main(int argc, char** argv)
 {
