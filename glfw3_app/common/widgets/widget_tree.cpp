@@ -39,6 +39,7 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_tree::update()
 	{
+		tree_unit_.create_list("", tree_unit_cits_);
 	}
 
 
@@ -55,10 +56,11 @@ namespace gui {
 		glEnable(GL_TEXTURE_2D);
 		wd_.at_mobj().draw(objh_, gl::mobj::attribute::normal, 0, 0);
 
+		BOOST_FOREACH(tree_unit::unit_map_cit cit, tree_unit_cits_) {
+
+		}
 
 		wd_.at_mobj().draw(plus_h_, gl::mobj::attribute::normal, 0, 0);
-		
-
 	}
 
 

@@ -60,6 +60,7 @@ namespace gui {
 		param				param_;
 
 		tree_unit			tree_unit_;
+		tree_unit::unit_map_cits	tree_unit_cits_;
 
 		gl::mobj::handle	objh_;
 
