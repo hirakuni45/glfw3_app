@@ -73,18 +73,6 @@ namespace utils {
 		typedef std::vector<unit_map_cit>					unit_map_cits;
 
 	private:
-		struct cmp_id_ {
-			bool operator() (unit_map_cit left, unit_map_cit right) {
-				return left->second.get_id() < right->second.get_id();
-			}
-		};
-
-		struct cmp_key_ {
-			bool operator() (unit_map_cit left, unit_map_cit right) {
-				return left->first < right->first;
-			}
-		};
-
 		unit_map	   	unit_map_;
 
 		uint32_t		serial_id_;
@@ -445,11 +433,35 @@ namespace utils {
 			}
 
 			if(id_sort) {
-				std::sort(list.begin(), list.end(), cmp_id_());
+				std::sort(list.begin(), list.end(), [] (unit_map_cit l, unit_map_cit r) {
+					return l->second.get_id() < r->second.get_id(); }
+				);
 			} else {
-				std::sort(list.begin(), list.end(), cmp_key_());
+				std::sort(list.begin(), list.end(), [] (unit_map_cit l, unit_map_cit r) {
+					return l->first < r->first; }
+				);
 			}
 		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	key の取得
+			@param[in]	cit	イテレーター
+			@return key の参照
+		*/
+		//-----------------------------------------------------------------//
+		const std::string& get_key(unit_map_cit cit) const { return cit->first; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	unit の取得
+			@param[in]	cit	イテレーター
+			@return unit の参照
+		*/
+		//-----------------------------------------------------------------//
+		const unit_t& get_unit(unit_map_cit cit) const { return cit->second; }
 
 
 #ifndef NDEBUG
@@ -488,7 +500,7 @@ namespace utils {
 				std::cout << std::endl;
 			}
 
-			int n = unit_map_.size();
+			int n = cits.size();
 
 			std::cout << "Total " << n << " file";
 			std::cout << ((n > 1) ? "s" : "") << std::endl << std::endl;
