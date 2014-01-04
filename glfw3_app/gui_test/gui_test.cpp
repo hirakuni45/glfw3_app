@@ -5,6 +5,7 @@
 */
 //=====================================================================//
 #include <iostream>
+#include <algorithm>
 #include <boost/lexical_cast.hpp>
 #include "gui_test.hpp"
 #include "core/glcore.hpp"
@@ -154,7 +155,7 @@ namespace app {
 				v.data_ = "BBB";
 				tu.install("sub1", v);
 			}
-			tu.list_all();
+			tu.list("root");
 		}
 
 		// プリファレンスの取得

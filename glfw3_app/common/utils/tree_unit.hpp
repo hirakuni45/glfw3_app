@@ -8,9 +8,12 @@
 #ifndef NDEBUG
 #include <iostream>
 #endif
+#include <algorithm>
 #include <stack>
+#include <vector>
 #include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
+#include <boost/foreach.hpp>
 #include <boost/optional.hpp>
 #include "utils/string_utils.hpp"
 
@@ -31,24 +34,20 @@ namespace utils {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct unit_t {
-			std::string		name;	///< ユニット名
 			T				value;	///< ユーザー利用データ
-		private:
-			uint32_t		id_;
 
 			typedef boost::unordered_set<std::string>	childs;
 			typedef childs::iterator		childs_it;
-			childs			childs_;	///< 子ユニットの key
+			typedef childs::const_iterator	childs_cit;
+
+		private:
+			uint32_t		id_;
+
+			childs			childs_;
 
 		public:
 #ifndef NDEBUG
-			void list_all() const
-			{
-				if(!name.empty()) {
-					std::cout << "(" << name << "), ";
-				} else {
-					std::cout << "(), ";
-				}
+			void list_all() const {
 				value.list_all();
 			}
 #endif
@@ -59,16 +58,32 @@ namespace utils {
 				childs_.insert(key);
 			}
 			bool is_childs_empty() const { return childs_.empty(); }
+			const childs& get_childs() const { return childs_; }
 		};
 
 		typedef boost::optional<const T&>	optional_const_ref;	//< オプショナル参照型(const)
 		typedef boost::optional<T&>			optional_ref;		//< オプショナル参照型
 
-	private:
 		typedef std::pair<std::string, unit_t>	unit_pair;
-		typedef boost::unordered_map<std::string, unit_t> unit_map;
-		typedef typename unit_map::iterator			unit_map_it;
-		typedef typename unit_map::const_iterator	unit_map_cit;
+
+		typedef boost::unordered_map<std::string, unit_t>	unit_map;
+		typedef typename unit_map::const_iterator			unit_map_cit;
+		typedef typename unit_map::iterator					unit_map_it;
+
+		typedef std::vector<unit_map_cit>					unit_map_cits;
+
+	private:
+		struct cmp_id_ {
+			bool operator() (unit_map_cit left, unit_map_cit right) {
+				return left->second.get_id() < right->second.get_id();
+			}
+		};
+
+		struct cmp_key_ {
+			bool operator() (unit_map_cit left, unit_map_cit right) {
+				return left->first < right->first;
+			}
+		};
 
 		unit_map	   	unit_map_;
 
@@ -95,7 +110,23 @@ namespace utils {
 			@brief	デストラクター
 		*/
 		//-----------------------------------------------------------------//
-		~tree_unit() { }
+		~tree_unit() { clear(); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	クリア
+		*/
+		//-----------------------------------------------------------------//
+		void clear() {
+			unit_map_.clear();
+
+			serial_id_ = 0;
+			units_ = 0;
+			directory_ = 0;
+
+			current_path_.clear();
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -125,11 +156,10 @@ namespace utils {
 			@brief	ユニットを登録
 			@param[in]	key		ユニットを識別するキー
 			@param[in]	value	値
-			@param[in]	same_name	キーと名前を同一にする場合「true」
 			@return 成功したら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool install(const std::string& key, const T& value, bool same_name = false)
+		bool install(const std::string& key, const T& value)
 		{
 			std::string fullpath;
 			if(!create_full_path(key, fullpath)) {
@@ -138,9 +168,6 @@ namespace utils {
 
 			unit_t u;
 			u.value = value;
-			if(same_name) {
-				u.name = get_file_name(key);
-			}
 			u.set_id(serial_id_);
 
 			std::pair<unit_map_it, bool> ret = unit_map_.insert(unit_pair(fullpath, u));
@@ -277,11 +304,10 @@ namespace utils {
 		/*!
 			@brief	ディレクトリーを作成
 			@param[in]	name	ディレクトリー名
-			@param[in]	same_name	名前にコピーする場合「true」
 			@return 正常なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool make_directory(const std::string& name, bool same_name = false)
+		bool make_directory(const std::string& name)
 		{
 			std::string fullpath;
 			if(!create_full_path(name, fullpath)) {
@@ -289,9 +315,6 @@ namespace utils {
 			}
 
 			unit_t t;
-			if(same_name) {
-				t.name = get_file_name(name);
-			}
 			t.set_id(serial_id_);
 
 			std::pair<unit_map_it, bool> ret = unit_map_.insert(unit_pair(fullpath, t));
@@ -308,6 +331,28 @@ namespace utils {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	ユニットを探す
+			@param[in]	key	ユニット・キー
+			@return ユニットがあれば「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool find(const std::string& key) const {
+			std::string fullpath;
+			if(!create_full_path(key, fullpath)) {
+				return false;
+			}
+
+			unit_map_it it = unit_map_.find(fullpath);
+			if(it == unit_map_.end()) {
+				return false;
+			} else {
+				return true;
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	ユニットを取得
 			@param[in]	key	ユニット・キー
 			@return ユニット・オプショナル型を返す
@@ -317,7 +362,7 @@ namespace utils {
 		{
 			std::string fullpath;
 			if(!create_full_path(key, fullpath)) {
-				return boost::none;
+				return false;
 			}
 
 			unit_map_it it = unit_map_.find(fullpath);
@@ -354,49 +399,56 @@ namespace utils {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	キーリストを作成する
-			@param[in]	root	起点となるルート
-			@param[out]	ss		キーリストを受け取るコンテナ
+			@brief	リストを作成する
+			@param[in]	root	起点となるルートパス
+			@param[out]	list	リスト
+			@param[in]	id_sort	ID 順（登録順）でソートする場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		void create_key_list(const std::string& root, strings& ss)
+		void create_list(const std::string& root, unit_map_cits& list, bool id_sort = false) const
 		{
-			ss.resize(unit_map_.size());
-			ss.clear();
-			for(unit_map_cit cit = unit_map_.begin(); cit != unit_map_.end(); ++cit) {
-				const std::string& key = cit->first;
-				if(root.empty()) {
-					ss.push_back(key);
-				} else if(strncmp(root.c_str(), key.c_str(), root.size()) == 0) {
-					ss.push_back(key);
+			if(unit_map_.empty()) {
+				list.clear();
+				return;
+			}
+
+			if(root.empty()) {
+				list.resize(unit_map_.size());
+				list.clear();
+				for(unit_map_cit cit = unit_map_.begin(); cit != unit_map_.end(); ++cit) {
+					list.push_back(cit);
 				}
-			}			
-		}
+			} else {
+				std::string fullpath;
+				if(!create_full_path(root, fullpath)) {
+					list.clear();
+					return;
+				}
 
+				unit_map_cit cit = unit_map_.find(fullpath);
+				if(cit != unit_map_.end()) {
+					const typename unit_t::childs& ch = cit->second.get_childs();
+					list.resize(ch.size());
+					list.clear();
+					BOOST_FOREACH(const std::string& s, ch) {
+						std::string path;
+						if(create_full_path(s, path)) {
+							cit = unit_map_.find(path);
+							if(cit != unit_map_.end()) {
+								list.push_back(cit);
+							}
+						}
+					}
+				} else {
+					list.clear();
+				}
+			}
 
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	廃棄
-		*/
-		//-----------------------------------------------------------------//
-		void destroy()
-		{
-			unit_map_.clear();
-
-			serial_id_ = 0;
-			units_ = 0;
-			directory_ = 0;
-
-			current_path_.clear();
-		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	リスト作成（アイテムがインストールされた順番）
-		*/
-		//-----------------------------------------------------------------//
-		void make_list() const {
+			if(id_sort) {
+				std::sort(list.begin(), list.end(), cmp_id_());
+			} else {
+				std::sort(list.begin(), list.end(), cmp_key_());
+			}
 		}
 
 
@@ -406,16 +458,19 @@ namespace utils {
 			@brief	デバッグ用、全リスト表示
 		*/
 		//-----------------------------------------------------------------//
-		void list_all() const
+		void list(const std::string& root = "") const
 		{
+			unit_map_cits cits;
+			create_list(root, cits);
+
 			// key の最大長さを探す
-			unsigned int ml = 0;
-			for(unit_map_cit cit = unit_map_.begin(); cit != unit_map_.end(); ++cit) {
+			uint32_t ml = 0;
+			BOOST_FOREACH(unit_map_cit cit, cits) {
 				const std::string& key = cit->first;
-				if(key.size() > ml) ml = key.size();
+				if(key.size() > ml) ml = key.size();				
 			}
 
-			for(unit_map_cit cit = unit_map_.begin(); cit != unit_map_.end(); ++cit) {
+			BOOST_FOREACH(unit_map_cit cit, cits) {
 				const unit_t& t = cit->second;
 				if(t.is_childs_empty()) {
 					std::cout << "- ";
@@ -432,6 +487,7 @@ namespace utils {
 				t.list_all();
 				std::cout << std::endl;
 			}
+
 			int n = unit_map_.size();
 
 			std::cout << "Total " << n << " file";
