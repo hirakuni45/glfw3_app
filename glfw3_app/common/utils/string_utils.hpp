@@ -5,14 +5,9 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include <cstring>
 #include <string>
-#include <map>
-#include <vector>
 #include <boost/foreach.hpp>
-#include <boost/unordered_map.hpp>
-#include <boost/optional.hpp>
-#include <boost/format.hpp>
+#include <vector>
 #include "utils/mtx.hpp"
 
 namespace utils {
@@ -36,22 +31,8 @@ namespace utils {
 	typedef std::vector<strings>::iterator	   			strings_array_it;
 	typedef std::vector<strings>::const_iterator	   	strings_array_cit;
 
-	typedef std::pair<std::string, std::string>		str_str_pair;
-	typedef std::map<std::string, std::string>		str_str_map;
-	typedef str_str_map::iterator					str_str_map_it;
-	typedef str_str_map::const_iterator				str_str_map_cit;
-	typedef boost::unordered_map<std::string, std::string>	str_str_undmap;
-	typedef str_str_undmap::iterator						str_str_undmap_it;
-	typedef str_str_undmap::const_iterator					str_str_undmap_cit;
-
-	typedef boost::optional<const std::string&>	optional_str_ref;
-
-	typedef std::vector<int>	int_vector;
-	typedef std::vector<float>	float_vector;
-
-
-	bool string_to_int(const std::string& src, int_vector& dst);
-	bool string_to_float(const std::string& src, float_vector& dst);
+	bool string_to_int(const std::string& src, std::vector<int>& dst);
+	bool string_to_float(const std::string& src, std::vector<float>& dst);
 	bool string_to_matrix4x4(const std::string& src, mtx::fmat4& dst);
 
 	//-----------------------------------------------------------------//

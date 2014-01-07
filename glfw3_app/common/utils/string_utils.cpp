@@ -14,7 +14,7 @@ namespace utils {
 
 	using namespace std;
 
-	bool string_to_int(const std::string& src, int_vector& dst)
+	bool string_to_int(const std::string& src, std::vector<int>& dst)
 	{
 		try {
 			string s;
@@ -38,7 +38,7 @@ namespace utils {
 	}
 
 
-	bool string_to_float(const std::string& src, float_vector& dst)
+	bool string_to_float(const std::string& src, std::vector<float>& dst)
 	{
 		try {
 			string s;
@@ -64,7 +64,7 @@ namespace utils {
 
 	bool string_to_matrix4x4(const std::string& src, mtx::fmat4& dst)
 	{
-		float_vector vv;
+		std::vector<float> vv;
 		if(!string_to_float(src, vv)) {
 			return false;
 		}
