@@ -39,7 +39,12 @@ namespace utils {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		handle_set() : array_(), erase_set_() { }
+		handle_set(uint32_t n = 0) : array_(), erase_set_() {
+			if(n) {
+				array_.reserve(n);
+				array_.clear();
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -89,9 +94,8 @@ namespace utils {
 					erase_set_.insert(h);
 					return true;
 				}
-			} else {
-				return false;
 			}
+			return false;
 		}
 
 
