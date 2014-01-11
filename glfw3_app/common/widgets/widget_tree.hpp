@@ -26,10 +26,14 @@ namespace gui {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
+			text_param	text_param_;	///< テキスト・パラメーター
 			plate_param	plate_param_;	///< プレート・パラメーター
 			color_param	color_param_;	///< カラー・パラメーター
 
 			param() :
+				text_param_("", img::rgba8(255, 255), img::rgba8(0, 255),
+					vtx::placement(vtx::placement::holizontal::LEFT,
+					vtx::placement::vertical::CENTER)),
 				plate_param_(),
 				color_param_(widget_director::default_tree_color_)
 			{ }
@@ -66,6 +70,8 @@ namespace gui {
 
 		gl::mobj::handle	mins_h_;
 		gl::mobj::handle	plus_h_;
+
+		void render_(gl::mobj::handle h, const vtx::spos& pos);
 
 	public:
 		//-----------------------------------------------------------------//

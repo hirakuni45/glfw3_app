@@ -137,8 +137,14 @@ namespace app {
 			filer_->enable(false);
 		}
 
+		if(1) {	// チェックボックスのテスト
+			widget::param wp(vtx::srect(20, 350, 130, 30));
+			widget_check::param wp_("Disable");
+			wd.add_widget<widget_check>(wp, wp_);
+		}
+
 		if(1) {	// ツリーのテスト
-			widget::param wp(vtx::srect(200, 400, 100, 100));
+			widget::param wp(vtx::srect(400, 500, 100, 100));
 			widget_tree::param wp_;
 			tree_ = wd.add_widget<widget_tree>(wp, wp_);
 

@@ -208,20 +208,20 @@ main.o: ../common/utils/vmath.hpp ../common/utils/preference.hpp
 main.o: ../common/widgets/common_parts.hpp ../common/gl_fw/glmobj.hpp
 main.o: ../common/gl_fw/gl_info.hpp ../common/img_io/img_rgba8.hpp
 main.o: ../common/img_io/img_files.hpp ../common/img_io/i_img_io.hpp
+main.o: ../common/core/glcore.hpp ../common/gl_fw/IGLcore.hpp
+main.o: ../common/core/device.hpp ../common/gl_fw/glfonts.hpp
+main.o: ../common/gl_fw/Ikfimg.hpp ../common/core/device.hpp
+main.o: ../common/utils/director.hpp ../common/utils/i_scene.hpp
+main.o: ../common/gl_fw/glutils.hpp gui_test.hpp ../common/utils/i_scene.hpp
+main.o: ../common/widgets/widget_button.hpp
+main.o: ../common/widgets/widget_slider.hpp
+main.o: ../common/widgets/widget_director.hpp
+main.o: ../common/widgets/widget_dialog.hpp ../common/widgets/widget_text.hpp
 main.o: ../common/widgets/widget_filer.hpp ../common/utils/files.hpp
 main.o: ../common/utils/drive_info.hpp ../common/utils/file_info.hpp
 main.o: ../common/utils/handle_set.hpp ../common/widgets/widget_null.hpp
-main.o: ../common/widgets/widget_director.hpp
-main.o: ../common/widgets/widget_label.hpp
-main.o: ../common/widgets/widget_button.hpp ../common/core/glcore.hpp
-main.o: ../common/gl_fw/IGLcore.hpp ../common/core/device.hpp
-main.o: ../common/gl_fw/glfonts.hpp ../common/gl_fw/Ikfimg.hpp
-main.o: ../common/core/device.hpp ../common/utils/director.hpp
-main.o: ../common/utils/i_scene.hpp gui_test.hpp ../common/utils/i_scene.hpp
-main.o: ../common/widgets/widget_slider.hpp
-main.o: ../common/widgets/widget_dialog.hpp ../common/widgets/widget_text.hpp
-main.o: ../common/widgets/widget_tree.hpp ../common/utils/tree_unit.hpp
-main.o: ../common/gl_fw/glutils.hpp
+main.o: ../common/widgets/widget_label.hpp ../common/widgets/widget_tree.hpp
+main.o: ../common/utils/tree_unit.hpp
 gui_test.o: gui_test.hpp main.hpp ../common/snd_io/sound.hpp
 gui_test.o: ../common/snd_io/audio_io.hpp ../common/utils/file_io.hpp
 gui_test.o: ../common/utils/string_utils.hpp ../common/utils/mtx.hpp
@@ -238,20 +238,21 @@ gui_test.o: ../common/utils/vmath.hpp ../common/utils/preference.hpp
 gui_test.o: ../common/widgets/common_parts.hpp ../common/gl_fw/glmobj.hpp
 gui_test.o: ../common/gl_fw/gl_info.hpp ../common/img_io/img_rgba8.hpp
 gui_test.o: ../common/img_io/img_files.hpp ../common/img_io/i_img_io.hpp
-gui_test.o: ../common/widgets/widget_filer.hpp ../common/utils/files.hpp
-gui_test.o: ../common/utils/drive_info.hpp ../common/utils/file_info.hpp
-gui_test.o: ../common/utils/handle_set.hpp ../common/widgets/widget_null.hpp
-gui_test.o: ../common/widgets/widget_director.hpp
-gui_test.o: ../common/widgets/widget_label.hpp
-gui_test.o: ../common/widgets/widget_button.hpp ../common/utils/i_scene.hpp
-gui_test.o: ../common/utils/director.hpp ../common/utils/i_scene.hpp
-gui_test.o: ../common/widgets/widget_slider.hpp
-gui_test.o: ../common/widgets/widget_dialog.hpp
-gui_test.o: ../common/widgets/widget_text.hpp
-gui_test.o: ../common/widgets/widget_tree.hpp ../common/utils/tree_unit.hpp
 gui_test.o: ../common/core/glcore.hpp ../common/gl_fw/IGLcore.hpp
 gui_test.o: ../common/core/device.hpp ../common/gl_fw/glfonts.hpp
 gui_test.o: ../common/gl_fw/Ikfimg.hpp ../common/core/device.hpp
+gui_test.o: ../common/utils/director.hpp ../common/utils/i_scene.hpp
+gui_test.o: ../common/gl_fw/glutils.hpp ../common/utils/i_scene.hpp
+gui_test.o: ../common/widgets/widget_button.hpp
+gui_test.o: ../common/widgets/widget_slider.hpp
+gui_test.o: ../common/widgets/widget_director.hpp
+gui_test.o: ../common/widgets/widget_dialog.hpp
+gui_test.o: ../common/widgets/widget_text.hpp
+gui_test.o: ../common/widgets/widget_filer.hpp ../common/utils/files.hpp
+gui_test.o: ../common/utils/drive_info.hpp ../common/utils/file_info.hpp
+gui_test.o: ../common/utils/handle_set.hpp ../common/widgets/widget_null.hpp
+gui_test.o: ../common/widgets/widget_label.hpp
+gui_test.o: ../common/widgets/widget_tree.hpp ../common/utils/tree_unit.hpp
 gui_test.o: ../common/widgets/widget_utils.hpp
 gui_test.o: ../common/widgets/widget_frame.hpp
 gui_test.o: ../common/widgets/widget_check.hpp
@@ -982,27 +983,31 @@ gui_test.o: ../common/widgets/widget_image.hpp ../common/img_io/img_base.hpp
 ../common/widgets/widget_dialog.o: ../common/widgets/widget_button.hpp
 ../common/widgets/widget_dialog.o: ../common/widgets/widget_text.hpp
 ../common/widgets/widget_dialog.o: ../common/widgets/widget_utils.hpp
+../common/widgets/widget_tree.o: ../common/gl_fw/IGLcore.hpp
+../common/widgets/widget_tree.o: ../common/core/device.hpp
+../common/widgets/widget_tree.o: ../common/utils/vtx.hpp
+../common/widgets/widget_tree.o: ../common/gl_fw/gl_info.hpp
+../common/widgets/widget_tree.o: ../common/gl_fw/glfonts.hpp
+../common/widgets/widget_tree.o: ../common/gl_fw/Ikfimg.hpp
+../common/widgets/widget_tree.o: ../common/img_io/i_img.hpp
+../common/widgets/widget_tree.o: ../common/img_io/img.hpp
+../common/widgets/widget_tree.o: ../common/utils/string_utils.hpp
+../common/widgets/widget_tree.o: ../common/utils/mtx.hpp
+../common/widgets/widget_tree.o: ../common/utils/file_io.hpp
 ../common/widgets/widget_tree.o: ../common/widgets/widget_tree.hpp
 ../common/widgets/widget_tree.o: ../common/widgets/widget_director.hpp
 ../common/widgets/widget_tree.o: ../common/widgets/widget.hpp
 ../common/widgets/widget_tree.o: ../common/img_io/img.hpp
 ../common/widgets/widget_tree.o: ../common/img_io/paint.hpp
-../common/widgets/widget_tree.o: ../common/img_io/img.hpp
 ../common/widgets/widget_tree.o: ../common/img_io/i_img.hpp
-../common/widgets/widget_tree.o: ../common/utils/vtx.hpp
 ../common/widgets/widget_tree.o: ../common/img_io/img_rgba8.hpp
 ../common/widgets/widget_tree.o: ../common/img_io/img_idx8.hpp
-../common/widgets/widget_tree.o: ../common/img_io/i_img.hpp
 ../common/widgets/widget_tree.o: ../common/img_io/img_clut.hpp
 ../common/widgets/widget_tree.o: ../common/img_io/img_gray8.hpp
-../common/widgets/widget_tree.o: ../common/utils/string_utils.hpp
-../common/widgets/widget_tree.o: ../common/utils/mtx.hpp
 ../common/widgets/widget_tree.o: ../common/utils/vmath.hpp
 ../common/widgets/widget_tree.o: ../common/utils/preference.hpp
-../common/widgets/widget_tree.o: ../common/utils/file_io.hpp
 ../common/widgets/widget_tree.o: ../common/widgets/common_parts.hpp
 ../common/widgets/widget_tree.o: ../common/gl_fw/glmobj.hpp
-../common/widgets/widget_tree.o: ../common/gl_fw/gl_info.hpp
 ../common/widgets/widget_tree.o: ../common/img_io/img_rgba8.hpp
 ../common/widgets/widget_tree.o: ../common/img_io/img_files.hpp
 ../common/widgets/widget_tree.o: ../common/img_io/i_img_io.hpp
