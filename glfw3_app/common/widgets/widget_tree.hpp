@@ -6,7 +6,7 @@
 */
 //=====================================================================//
 #include "widgets/widget_director.hpp"
-#include "widgets/widget_label.hpp"
+#include "widgets/widget_check.hpp"
 #include "utils/tree_unit.hpp"
 
 namespace gui {
@@ -26,16 +26,15 @@ namespace gui {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
-			text_param	text_param_;	///< テキスト・パラメーター
 			plate_param	plate_param_;	///< プレート・パラメーター
 			color_param	color_param_;	///< カラー・パラメーター
 
+			int			height_;		///< ユニットの高さ
+
 			param() :
-				text_param_("", img::rgba8(255, 255), img::rgba8(0, 255),
-					vtx::placement(vtx::placement::holizontal::LEFT,
-					vtx::placement::vertical::CENTER)),
 				plate_param_(),
-				color_param_(widget_director::default_tree_color_)
+				color_param_(widget_director::default_tree_color_),
+				height_(28)
 			{ }
 		};
 
@@ -68,10 +67,10 @@ namespace gui {
 
 		gl::mobj::handle	objh_;
 
-		gl::mobj::handle	mins_h_;
-		gl::mobj::handle	plus_h_;
+		std::vector<widget_check*>	units_;
 
-		void render_(gl::mobj::handle h, const vtx::spos& pos);
+		void create_();
+		void destroy_();
 
 	public:
 		//-----------------------------------------------------------------//
@@ -81,7 +80,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_tree(widget_director& wd, const widget::param& bp, const param& p) :
 			wd_(wd), widget(bp), param_(p),
-			objh_(0), mins_h_(0), plus_h_(0)
+			objh_(0)
 			{ }
 
 
@@ -90,7 +89,7 @@ namespace gui {
 			@brief	デストラクター
 		*/
 		//-----------------------------------------------------------------//
-		virtual ~widget_tree() { }
+		virtual ~widget_tree() { destroy_(); }
 
 
 		//-----------------------------------------------------------------//

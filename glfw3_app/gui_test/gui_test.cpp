@@ -144,7 +144,7 @@ namespace app {
 		}
 
 		if(1) {	// ツリーのテスト
-			widget::param wp(vtx::srect(400, 500, 100, 100));
+			widget::param wp(vtx::srect(400, 500, 200, 100));
 			widget_tree::param wp_;
 			tree_ = wd.add_widget<widget_tree>(wp, wp_);
 
@@ -162,10 +162,10 @@ namespace app {
 				tu.install("sub1", v);
 			}
 //			tu.list("/root");
-			tu.list();
+//			tu.list();
 		}
 
-		if(1) {	// ターミナルのテスト
+		if(0) {	// ターミナルのテスト
 			widget::param wp(vtx::srect(400, 700, 100, 100));
 			widget_terminal::param wp_;
 			terminal_ = wd.add_widget<widget_terminal>(wp, wp_);
@@ -175,6 +175,9 @@ namespace app {
 		sys::preference& pre = director_.at().preference_;
 		if(filer_) {
 			filer_->load(pre);
+		}
+		if(tree_) {
+			tree_->load(pre);
 		}
 	}
 
@@ -239,6 +242,9 @@ namespace app {
 		sys::preference& pre = director_.at().preference_;
 		if(filer_) {
 			filer_->save(pre);
+		}
+		if(tree_) {
+			tree_->save(pre);
 		}
 	}
 }

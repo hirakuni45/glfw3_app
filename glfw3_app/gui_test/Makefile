@@ -221,7 +221,8 @@ main.o: ../common/widgets/widget_filer.hpp ../common/utils/files.hpp
 main.o: ../common/utils/drive_info.hpp ../common/utils/file_info.hpp
 main.o: ../common/utils/handle_set.hpp ../common/widgets/widget_null.hpp
 main.o: ../common/widgets/widget_label.hpp ../common/widgets/widget_tree.hpp
-main.o: ../common/utils/tree_unit.hpp ../common/widgets/widget_terminal.hpp
+main.o: ../common/widgets/widget_check.hpp ../common/utils/tree_unit.hpp
+main.o: ../common/widgets/widget_terminal.hpp
 gui_test.o: gui_test.hpp main.hpp ../common/snd_io/sound.hpp
 gui_test.o: ../common/snd_io/audio_io.hpp ../common/utils/file_io.hpp
 gui_test.o: ../common/utils/string_utils.hpp ../common/utils/mtx.hpp
@@ -252,11 +253,11 @@ gui_test.o: ../common/widgets/widget_filer.hpp ../common/utils/files.hpp
 gui_test.o: ../common/utils/drive_info.hpp ../common/utils/file_info.hpp
 gui_test.o: ../common/utils/handle_set.hpp ../common/widgets/widget_null.hpp
 gui_test.o: ../common/widgets/widget_label.hpp
-gui_test.o: ../common/widgets/widget_tree.hpp ../common/utils/tree_unit.hpp
+gui_test.o: ../common/widgets/widget_tree.hpp
+gui_test.o: ../common/widgets/widget_check.hpp ../common/utils/tree_unit.hpp
 gui_test.o: ../common/widgets/widget_terminal.hpp
 gui_test.o: ../common/widgets/widget_utils.hpp
 gui_test.o: ../common/widgets/widget_frame.hpp
-gui_test.o: ../common/widgets/widget_check.hpp
 gui_test.o: ../common/widgets/widget_radio.hpp
 gui_test.o: ../common/widgets/widget_list.hpp
 gui_test.o: ../common/widgets/widget_image.hpp ../common/img_io/img_base.hpp
@@ -1011,7 +1012,7 @@ gui_test.o: ../common/widgets/widget_image.hpp ../common/img_io/img_base.hpp
 ../common/widgets/widget_tree.o: ../common/img_io/img_rgba8.hpp
 ../common/widgets/widget_tree.o: ../common/img_io/img_files.hpp
 ../common/widgets/widget_tree.o: ../common/img_io/i_img_io.hpp
-../common/widgets/widget_tree.o: ../common/widgets/widget_label.hpp
+../common/widgets/widget_tree.o: ../common/widgets/widget_check.hpp
 ../common/widgets/widget_tree.o: ../common/utils/tree_unit.hpp
 ../common/widgets/widget_tree.o: ../common/widgets/widget_utils.hpp
 ../common/widgets/widget_filer.o: ../common/widgets/widget_utils.hpp
