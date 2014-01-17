@@ -76,6 +76,7 @@ namespace gui {
 		}
 	}
 
+
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	状態のセーブ
@@ -85,7 +86,14 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	bool widget_text::save(sys::preference& pre)
 	{
-		return true;
+		std::string path;
+		path += '/';
+		path += wd_.create_widget_name(this);
+		int err = 0;
+		if(!pre.put_text(path + "/text", param_.text_param_.text_)) ++err;
+//		if(!pre.put_position(path + "/locate", vtx::ipos(get_rect().org))) ++err;
+//		if(!pre.put_position(path + "/size", vtx::ipos(get_rect().size))) ++err;
+		return err == 0;
 	}
 
 
@@ -98,6 +106,14 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	bool widget_text::load(const sys::preference& pre)
 	{
-		return true;
+		std::string path;
+		path += '/';
+		path += wd_.create_widget_name(this);
+
+		int err = 0;
+		if(!pre.get_text(path + "/text", param_.text_param_.text_)) {
+			++err;
+		}
+		return err == 0;
 	}
 }

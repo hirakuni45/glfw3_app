@@ -165,6 +165,12 @@ namespace app {
 			tu.list();
 		}
 
+		if(1) {	// ターミナルのテスト
+			widget::param wp(vtx::srect(400, 700, 100, 100));
+			widget_terminal::param wp_;
+			terminal_ = wd.add_widget<widget_terminal>(wp, wp_);
+		}
+
 		// プリファレンスの取得
 		sys::preference& pre = director_.at().preference_;
 		if(filer_) {

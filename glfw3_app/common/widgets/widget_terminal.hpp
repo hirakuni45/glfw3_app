@@ -6,8 +6,7 @@
 */
 //=====================================================================//
 #include "widgets/widget_director.hpp"
-#include "widgets/widget_frame.hpp"
-#include "gl_fw/glterminal.hpp"
+#include "widgets/widget_text.hpp"
 
 namespace gui {
 
@@ -40,7 +39,7 @@ namespace gui {
 
 		gl::mobj::handle	objh_;
 
-		gl::terminal		term_;
+		std::vector<widget_text*>	texts_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -83,7 +82,7 @@ namespace gui {
 			@return ハイブリッド・ウィジェットの場合「true」を返す。
 		*/
 		//-----------------------------------------------------------------//
-		bool hybrid() const { return false; }
+		bool hybrid() const { return true; }
 
 
 		//-----------------------------------------------------------------//
@@ -134,6 +133,26 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		void service();
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	状態のセーブ
+			@param[in]	pre	プリファレンス参照
+			@return エラーが無い場合「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool save(sys::preference& pre);
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	状態のロード
+			@param[in]	pre	プリファレンス参照
+			@return エラーが無い場合「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool load(const sys::preference& pre);
 	};
 }
 
