@@ -71,6 +71,7 @@ namespace utils {
 		typedef typename unit_map::iterator					unit_map_it;
 
 		typedef std::vector<unit_map_cit>					unit_map_cits;
+		typedef std::vector<unit_map_it>					unit_map_its;
 
 	private:
 		unit_map	   	unit_map_;
@@ -99,6 +100,24 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		~tree_unit() { clear(); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	シリアルIDを取得
+			@return シリアルID
+		*/
+		//-----------------------------------------------------------------//
+		uint32_t get_serial_id() const { return serial_id_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ユニット数を取得
+			@return ユニット数
+		*/
+		//-----------------------------------------------------------------//
+		uint32_t get_unit_num() const { return units_; }
 
 
 		//-----------------------------------------------------------------//
@@ -393,7 +412,7 @@ namespace utils {
 			@param[in]	id_sort	ID 順（登録順）でソートする場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		void create_list(const std::string& root, unit_map_cits& list, bool id_sort = false) const
+		void create_list(const std::string& root, unit_map_its& list, bool id_sort = false)
 		{
 			if(unit_map_.empty()) {
 				list.clear();
@@ -401,10 +420,9 @@ namespace utils {
 			}
 
 			if(root.empty()) {
-				list.resize(unit_map_.size());
-				list.clear();
-				for(unit_map_cit cit = unit_map_.begin(); cit != unit_map_.end(); ++cit) {
-					list.push_back(cit);
+				list.reserve(unit_map_.size());
+				for(unit_map_it it = unit_map_.begin(); it != unit_map_.end(); ++it) {
+					list.push_back(it);
 				}
 			} else {
 				std::string fullpath;
@@ -413,17 +431,17 @@ namespace utils {
 					return;
 				}
 
-				unit_map_cit cit = unit_map_.find(fullpath);
-				if(cit != unit_map_.end()) {
-					const typename unit_t::childs& ch = cit->second.get_childs();
+				unit_map_it it = unit_map_.find(fullpath);
+				if(it != unit_map_.end()) {
+					const typename unit_t::childs& ch = it->second.get_childs();
 					list.resize(ch.size());
 					list.clear();
 					BOOST_FOREACH(const std::string& s, ch) {
 						std::string path;
 						if(create_full_path(s, path)) {
-							cit = unit_map_.find(path);
-							if(cit != unit_map_.end()) {
-								list.push_back(cit);
+							it = unit_map_.find(path);
+							if(it != unit_map_.end()) {
+								list.push_back(it);
 							}
 						}
 					}
@@ -433,11 +451,11 @@ namespace utils {
 			}
 
 			if(id_sort) {
-				std::sort(list.begin(), list.end(), [] (unit_map_cit l, unit_map_cit r) {
+				std::sort(list.begin(), list.end(), [] (unit_map_it l, unit_map_it r) {
 					return l->second.get_id() < r->second.get_id(); }
 				);
 			} else {
-				std::sort(list.begin(), list.end(), [] (unit_map_cit l, unit_map_cit r) {
+				std::sort(list.begin(), list.end(), [] (unit_map_it l, unit_map_it r) {
 					return l->first < r->first; }
 				);
 			}
@@ -462,6 +480,23 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		const unit_t& get_unit(unit_map_cit cit) const { return cit->second; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ディレクトリーかどうか？
+			@param[in]	cit	イテレーター
+			@return ディレクトリーなら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool is_directory(unit_map_cit cit) const
+		{
+			if(cit != unit_map_.end()) {
+				return !(cit->second.is_childs_empty());
+			} else {
+				return false;
+			}
+		}
 
 
 #ifndef NDEBUG

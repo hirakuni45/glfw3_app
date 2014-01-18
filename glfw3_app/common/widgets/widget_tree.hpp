@@ -45,11 +45,11 @@ namespace gui {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct value {
+			widget_check*	path_;
 			std::string		data_;
 			bool			open_;
 
-			value() :
-				data_(), open_(false)
+			value() : path_(0), data_(), open_(false)
 			{ }
 			void list_all() const {
 				std::cout << "(" << open_ << "): '" << data_ << "'";
@@ -63,11 +63,10 @@ namespace gui {
 		param				param_;
 
 		tree_unit			tree_unit_;
-		tree_unit::unit_map_cits	tree_unit_cits_;
+		uint32_t			serial_id_;
+		uint32_t			unit_num_;
 
 		gl::mobj::handle	objh_;
-
-		std::vector<widget_check*>	units_;
 
 		void create_();
 		void destroy_();
@@ -80,6 +79,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_tree(widget_director& wd, const widget::param& bp, const param& p) :
 			wd_(wd), widget(bp), param_(p),
+			tree_unit_(), serial_id_(0), unit_num_(0),
 			objh_(0)
 			{ }
 

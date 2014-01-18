@@ -12,31 +12,40 @@ namespace gui {
 
 	void widget_tree::create_()
 	{
-		units_.reserve(tree_unit_cits_.size());
 		vtx::srect r;
 		r.org.set(param_.plate_param_.frame_width_);
 		r.size.x = get_rect().size.x;
 		r.size.y = param_.height_;
-		BOOST_FOREACH(tree_unit::unit_map_cit cit, tree_unit_cits_) {
-			widget::param wp(r, this);
-			widget_check::param wp_(cit->first);
-			wp_.type_ = widget_check::style::MINUS_PLUS;
-			widget_check* w = wd_.add_widget<widget_check>(wp, wp_);
-			w->set_state(widget::state::POSITION_LOCK);
-			w->set_state(widget::state::MOVE_ROOT);
-			w->set_state(widget::state::RESIZE_ROOT);
-			w->set_state(widget::state::DRAG_UNSELECT);
-			units_.push_back(w);
-			r.org.y += param_.height_;
+		tree_unit::unit_map_its its;
+		tree_unit_.create_list("", its);
+		BOOST_FOREACH(tree_unit::unit_map_it it, its) {
+			if(!it->second.value.path_) {
+				widget::param wp(r, this);
+				widget_check::param wp_(it->first);
+				wp_.type_ = widget_check::style::MINUS_PLUS;
+				widget_check* w = wd_.add_widget<widget_check>(wp, wp_);
+				w->set_state(widget::state::POSITION_LOCK);
+				w->set_state(widget::state::MOVE_ROOT);
+				w->set_state(widget::state::RESIZE_ROOT);
+				w->set_state(widget::state::DRAG_UNSELECT);
+				if(tree_unit_.is_directory(it)) {
+					r.org.y += param_.height_;
+				} else {
+					wd_.enable(w, false);
+				}
+				it->second.value.path_ = w;
+			}
 		}
 	}
 
+
 	void widget_tree::destroy_()
 	{
-		BOOST_FOREACH(widget_check* w, units_) {
-			wd_.del_widget(w);
+		tree_unit::unit_map_its its;
+		tree_unit_.create_list("", its);
+		BOOST_FOREACH(tree_unit::unit_map_it it, its) {
+			wd_.del_widget(it->second.value.path_);
 		}
-		units_.clear();
 	}
 
 
@@ -66,12 +75,6 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_tree::update()
 	{
-		uint32_t n = tree_unit_cits_.size();
-		tree_unit_.create_list("", tree_unit_cits_);
-
-		if(n != tree_unit_cits_.size()) {
-			create_();
-		}
 	}
 
 
@@ -87,13 +90,6 @@ namespace gui {
 		wd_.at_mobj().resize(objh_, get_param().rect_.size);
 		glEnable(GL_TEXTURE_2D);
 		wd_.at_mobj().draw(objh_, gl::mobj::attribute::normal, 0, 0);
-
-		vtx::spos pos(0);
-		BOOST_FOREACH(tree_unit::unit_map_cit cit, tree_unit_cits_) {
-//			param_.text_param_.text_ = cit->first;
-
-			pos.y += 32;
-		}
 	}
 
 
@@ -104,6 +100,35 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_tree::service()
 	{
+		if(tree_unit_.get_serial_id() != serial_id_ ||
+		   tree_unit_.get_unit_num() != unit_num_) {
+			create_();
+			serial_id_ = tree_unit_.get_serial_id();
+			unit_num_ = tree_unit_.get_unit_num();
+		}
+
+		tree_unit::unit_map_its its;
+		tree_unit_.create_list("", its);
+		vtx::spos pos(param_.plate_param_.frame_width_);
+		BOOST_FOREACH(tree_unit::unit_map_it it, its) {
+			widget_check* w = it->second.value.path_;
+			if(w == 0) continue;
+
+			w->at_rect().org = pos;
+			if(w->get_check() != it->second.value.open_) {
+				it->second.value.open_ = w->get_check();
+			}
+			if(tree_unit_.is_directory(it)) {
+				pos.y += param_.height_;
+			} else {
+				if(it->second.value.open_) {
+					wd_.enable(w);
+					pos.y += param_.height_;
+				} else {
+					wd_.enable(w, false);
+				}
+			}
+		}
 	}
 
 

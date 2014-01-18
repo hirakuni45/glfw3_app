@@ -149,8 +149,9 @@ namespace app {
 			tree_ = wd.add_widget<widget_tree>(wp, wp_);
 
 			widget_tree::tree_unit& tu = tree_->at_tree_unit();
-			tu.make_directory("/root");
-			tu.set_current_path("root");
+			tu.make_directory("/root0");
+			tu.make_directory("/root1");
+			tu.set_current_path("/root0");
 			{
 				widget_tree::value v;
 				v.data_ = "AAA";
@@ -161,6 +162,18 @@ namespace app {
 				v.data_ = "BBB";
 				tu.install("sub1", v);
 			}
+			tu.set_current_path("/root1");
+			{
+				widget_tree::value v;
+				v.data_ = "ASDFG";
+				tu.install("sub_A", v);
+			}
+			{
+				widget_tree::value v;
+				v.data_ = "ZXCVB";
+				tu.install("sub_B", v);
+			}
+
 //			tu.list("/root");
 //			tu.list();
 		}
