@@ -404,7 +404,7 @@ namespace gl {
 			locate_.y = y;
 		}
 
-
+#if 0
 		{
 			int id = glfwGetDropfilesId(window_);
 			if(recv_file_id_ != id) {
@@ -420,7 +420,7 @@ namespace gl {
 				}
 			}
 		}
-
+#endif
 		glViewport(0, 0, size_.x, size_.y);
 
 	 	if(glfwWindowShouldClose(window_)) {
