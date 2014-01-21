@@ -4,11 +4,7 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#if defined(IPHONE) || defined(IPAD) || defined(IPHONE_IPAD)
-#include "png.h"
-#else
 #include <png.h>
-#endif
 #include "png_io.hpp"
 #include "img_idx8.hpp"
 #include "img_rgba8.hpp"
@@ -33,7 +29,7 @@ namespace img {
 		if(s != size) {
 			char text[128];
 			sprintf(text, "png_io_read_func: error (read size: %d, request: %d)", (int)s, (int)size);
-			::png_error(png_ptr, text);
+			png_error(png_ptr, text);
 		}
 	}
 
@@ -54,7 +50,7 @@ namespace img {
 		if(s != size) {
 			char text[128];
 			sprintf(text, "png_io_write_func: error (%d/%d)", (int)s, (int)size);
-			::png_error(png_ptr, text);
+			png_error(png_ptr, text);
 		}
 	}
 
@@ -69,6 +65,11 @@ namespace img {
 	{
 		utils::file_io* fout = (utils::file_io*)png_get_io_ptr(png_ptr);
 		fout->flush();
+	}
+
+
+	static void err_func_(png_structp png_ptr, const char* msg)
+	{
 	}
 
 
@@ -88,7 +89,7 @@ namespace img {
 		size_t l = fin.read(sig, 1, PNG_BYTES_TO_CHECK);
 		fin.seek(pos, utils::file_io::seek::set);
 		if(l == PNG_BYTES_TO_CHECK) {
-			if(::png_check_sig(sig, PNG_BYTES_TO_CHECK)) {
+			if(png_check_sig(sig, PNG_BYTES_TO_CHECK)) {
 				return true;
 			}
 		}
@@ -111,25 +112,25 @@ namespace img {
 		}
 
 		//	png_ptr 構造体を確保・初期化します
-		::png_structp png_ptr = ::png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+		png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, err_func_);
 		if(png_ptr == NULL) {
 			return false;
 		}
 		//  info_ptr 構造体を確保・初期化します
-		::png_infop info_ptr = ::png_create_info_struct(png_ptr);
+		png_infop info_ptr = png_create_info_struct(png_ptr);
 		if(info_ptr == NULL) {
 			return false;
 		}
 
 		long pos = fin.tell();
 
-		::png_set_read_fn(png_ptr, (png_voidp)&fin, png_io_read_func);
-		::png_read_info(png_ptr, info_ptr);
+		png_set_read_fn(png_ptr, (png_voidp)&fin, png_io_read_func);
+		png_read_info(png_ptr, info_ptr);
 
 //  IHDRチャンク情報を取得します
-		::png_uint_32	width, height;
+		png_uint_32	width, height;
 		int bit_depth, color_type, interlace_type;
-		::png_get_IHDR(png_ptr, info_ptr, &width, &height, &bit_depth, &color_type, &interlace_type, NULL, NULL);
+		png_get_IHDR(png_ptr, info_ptr, &width, &height, &bit_depth, &color_type, &interlace_type, NULL, NULL);
 		fo.width  = width;
 		fo.height = height;
 		fo.mipmap_level = 0;
@@ -142,7 +143,11 @@ namespace img {
 		fo.a_depth = 0;
 		if(color_type & PNG_COLOR_MASK_PALETTE) {
 			fo.i_depth = bit_depth;
-			if(info_ptr->num_trans) fo.a_depth = bit_depth;
+			png_bytep ta;
+			int nt;
+			png_color_16p tc;
+			png_get_tRNS(png_ptr, info_ptr, &ta, &nt, &tc);
+			if(nt) fo.a_depth = bit_depth;
 		} else {
 			fo.i_depth = 0;
 			if(color_type & PNG_COLOR_MASK_ALPHA) {
@@ -150,7 +155,7 @@ namespace img {
 			}
 		}
 
-		::png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
+		png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
 
 		fin.seek(pos, utils::file_io::seek::set);
 
@@ -173,25 +178,25 @@ namespace img {
 		}
 
 		//	png_ptr 構造体を確保・初期化します
-		::png_structp png_ptr = ::png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+		png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, err_func_);
 		if(png_ptr == NULL) {
 			return false;
 		}
 		//  info_ptr 構造体を確保・初期化します
-		::png_infop info_ptr = ::png_create_info_struct(png_ptr);
+		png_infop info_ptr = png_create_info_struct(png_ptr);
 		if(info_ptr == NULL) {
 			return false;
 		}
 
 		destroy();
 
-		::png_set_read_fn(png_ptr, (png_voidp)&fin, png_io_read_func);
-		::png_read_info(png_ptr, info_ptr);
+		png_set_read_fn(png_ptr, (png_voidp)&fin, png_io_read_func);
+		png_read_info(png_ptr, info_ptr);
 
 //  IHDRチャンク情報を取得します
-		::png_uint_32	width, height;
+		png_uint_32	width, height;
 		int bit_depth, color_type, interlace_type;
-		::png_get_IHDR(png_ptr, info_ptr, &width, &height, &bit_depth, &color_type, &interlace_type, NULL, NULL);
+		png_get_IHDR(png_ptr, info_ptr, &width, &height, &bit_depth, &color_type, &interlace_type, NULL, NULL);
 		int ch;
 		bool alpha;
 		bool gray = false;
@@ -209,7 +214,11 @@ namespace img {
 //			printf("PNG gray scale with alpha\n");
 		} else if(color_type & PNG_COLOR_MASK_PALETTE) {
 			ch = 1;
-			if(info_ptr->num_trans) alpha = true; else alpha = false;
+			png_bytep ta;
+			int nt;
+			png_color_16p tc;
+			png_get_tRNS(png_ptr, info_ptr, &ta, &nt, &tc);
+			if(nt) alpha = true; else alpha = false;
 			imf = dynamic_cast<i_img*>(&idx_);
 		} else if(color_type & PNG_COLOR_MASK_ALPHA) {
 			ch = 4;
@@ -230,14 +239,19 @@ namespace img {
 		imf->create(vtx::spos(width, height), alpha);
 
 		if(color_type & PNG_COLOR_MASK_PALETTE) {
-			for(int i = 0; i < info_ptr->num_palette; ++i) {
-				unsigned char a;
-				if(info_ptr->num_trans) {
-					a = info_ptr->trans[i];
-				} else {
-					a = 255;
+			png_bytep ta;
+			int nt;
+			png_color_16p tc;
+			png_get_tRNS(png_ptr, info_ptr, &ta, &nt, &tc);
+			png_colorp pal;
+			int num;
+			png_get_PLTE(png_ptr, info_ptr, &pal, &num);
+			for(int i = 0; i < num; ++i) {
+				unsigned char a = 255;
+				if(nt) { // アルファチャネル
+					a = ta[i];
 				}
-				::png_color* clut = &info_ptr->palette[i];
+				const png_color* clut = &pal[i];
 				rgba8 c(clut->red, clut->green, clut->blue, a);
 				imf->put_clut(i, c);
 			}
@@ -246,11 +260,11 @@ namespace img {
 		png_byte* im = new png_byte[width * height * ch];
 
 // ポインターの作成 [png_bytep]
-		png_bytep*	pp = new ::png_bytep[height];
+		png_bytep*	pp = new png_bytep[height];
 		for(int i = 0; i < (int)height; ++i) {
 			pp[i] = &im[i * width * ch];
 		}
-		::png_read_image(png_ptr, pp);
+		png_read_image(png_ptr, pp);
 
 		for(int y = 0; y < (int)height; ++y) {
 			png_byte*	p = pp[y];
@@ -274,10 +288,13 @@ namespace img {
 						else c.a = 255;
 					}
 					if(color_key_enable_) {
-						const png_color_16& tc = info_ptr->trans_values;
-						if(static_cast<unsigned short>(c.r) == tc.red
-						   && static_cast<unsigned short>(c.g) == tc.green
-						   && static_cast<unsigned short>(c.b) == tc.blue) {
+						png_bytep ta;
+						int nt;
+						png_color_16p tc;
+						png_get_tRNS(png_ptr, info_ptr, &ta, &nt, &tc);
+						if(static_cast<unsigned short>(c.r) == tc->red
+						   && static_cast<unsigned short>(c.g) == tc->green
+						   && static_cast<unsigned short>(c.b) == tc->blue) {
 							c.a = 0;
 						}
 					}
@@ -289,7 +306,7 @@ namespace img {
 		delete[] pp;
 		delete[] im;
 
-		::png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
+		png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
 
 		return true;
 	}
@@ -314,16 +331,16 @@ namespace img {
 		}
 
 		//	png_ptr 構造体を確保・初期化します
-		::png_structp png_ptr = ::png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+		png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 		if(png_ptr == NULL) {
 			return false;
 		}
 		//  info_ptr 構造体を確保・初期化します
-		::png_infop info_ptr = ::png_create_info_struct(png_ptr);
+		png_infop info_ptr = png_create_info_struct(png_ptr);
 		if(info_ptr == NULL) {
 			return false;
 		}
-		::png_set_write_fn(png_ptr, (png_voidp)&fout, png_io_write_func, png_io_flush_func);
+		png_set_write_fn(png_ptr, (png_voidp)&fout, png_io_write_func, png_io_flush_func);
 
 		int	type;
 		int ch;
@@ -341,7 +358,7 @@ namespace img {
 		}
 
 		int depth = 8;
-		::png_set_IHDR(png_ptr, info_ptr, w, h, depth, type,
+		png_set_IHDR(png_ptr, info_ptr, w, h, depth, type,
 			PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
 
 		unsigned char* clut_trans = 0;
@@ -358,13 +375,13 @@ namespace img {
 				clut[i].blue  = c.b;
 				if(imf_->test_alpha()) clut_trans[i] = c.a;
 			}
-			::png_set_PLTE(png_ptr, info_ptr, clut, color);
-			if(imf_->test_alpha()) ::png_set_tRNS(png_ptr, info_ptr, clut_trans, color, NULL);
+			png_set_PLTE(png_ptr, info_ptr, clut, color);
+			if(imf_->test_alpha()) png_set_tRNS(png_ptr, info_ptr, clut_trans, color, NULL);
 		}
 
-		::png_write_info(png_ptr, info_ptr);
+		png_write_info(png_ptr, info_ptr);
 
-		png_bytep*	pp = new ::png_bytep[h];
+		png_bytep*	pp = new png_bytep[h];
 		for(int y = 0; y < h; ++y) {
 			pp[y] = new png_byte[w * ch];
 			png_byte*	p;
@@ -386,7 +403,7 @@ namespace img {
 				}
 			}
 		}
-		::png_write_image(png_ptr, pp);
+		png_write_image(png_ptr, pp);
 
 		delete clut_trans;
 		delete clut;
@@ -395,8 +412,8 @@ namespace img {
 		}
 		delete[] pp;
 
-		::png_write_end(png_ptr, info_ptr);
-		::png_destroy_write_struct(&png_ptr, &info_ptr);
+		png_write_end(png_ptr, info_ptr);
+		png_destroy_write_struct(&png_ptr, &info_ptr);
 
 		return true;
 	}
