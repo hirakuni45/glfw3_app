@@ -214,6 +214,10 @@ namespace img {
 		array_uc ary;
 		if(read_array(fin, ary)) {
 			opj_cio_t* cio = opj_cio_open((opj_common_ptr)dinfo, &ary[0], ary.size());
+			if(!cio) {
+				opj_destroy_decompress(dinfo);
+				return false;				
+			}
 			opj_image_t* image = opj_decode(dinfo, cio);
 			if(!image) {
 				opj_cio_close(cio);
