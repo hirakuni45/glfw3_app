@@ -126,7 +126,7 @@ namespace img {
 			// fz_device_rgb ---> RGBA
 			img_.create(vtx::spos(w, h), true);
 
-			fz_pixmap* pix = fz_new_pixmap_with_data(context_, fz_device_rgb,
+			fz_pixmap* pix = fz_new_pixmap_with_data(context_, fz_device_rgb(context_),
 				w, h, (unsigned char*)img_.at_image());
 			fz_clear_pixmap_with_value(context_, pix, 0xff);
 
