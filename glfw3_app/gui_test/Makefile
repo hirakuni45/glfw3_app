@@ -62,7 +62,7 @@ OPTLIBS		=	glfw3 glew32 opengl32 glu32 gdi32 imm32 \
 				pthread \
 				openal winmm dsound \
 				mupdf mupdf-js-none \
-				png jpeg_x86 openjpeg jbig2dec \
+				png jpeg_x86 openjp2 jbig2dec \
 				freetype \
 				id3tag \
 				z \
@@ -73,6 +73,7 @@ INC_SYS		=	/usr/local/boost_1_54_0
 
 INC_LIB		=	/usr/local/include \
 				/usr/local/include/libjpeg_x86 \
+				/usr/local/include/openjpeg-2.0 \
 				/usr/local/include/freetype2 \
 				/usr/local/include/mupdf
 
