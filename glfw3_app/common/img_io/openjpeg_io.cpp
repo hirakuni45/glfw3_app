@@ -17,15 +17,15 @@ namespace img {
 
 	static void error_callback_(const char* msg, void* client_data)
 	{
-		FILE* stream = (FILE*)client_data;
-		fprintf(stream, "[ERROR] %s", msg);
+//		FILE* stream = (FILE*)client_data;
+		fprintf(stderr, "[ERROR] %s", msg);
 	}
 
 
 	static void warning_callback_(const char* msg, void* client_data)
 	{
-		FILE* stream = (FILE*)client_data;
-		fprintf(stream, "[WARNING] %s", msg);
+//		FILE* stream = (FILE*)client_data;
+		fprintf(stderr, "[WARNING] %s", msg);
 	}
 
 
