@@ -4,8 +4,8 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #define OPJ_STATIC
 #include <openjpeg.h>
 #include "utils/file_io.hpp"
@@ -15,27 +15,73 @@ namespace img {
 
 	using namespace utils;
 
-	static void g_error_callback(const char* msg, void* client_data)
+	static void error_callback_(const char* msg, void* client_data)
 	{
 		FILE* stream = (FILE*)client_data;
 		fprintf(stream, "[ERROR] %s", msg);
 	}
 
 
-	static void g_warning_callback(const char* msg, void* client_data)
+	static void warning_callback_(const char* msg, void* client_data)
 	{
 		FILE* stream = (FILE*)client_data;
 		fprintf(stream, "[WARNING] %s", msg);
 	}
 
-#if 0
-	static void g_info_callback(const char* msg, void* client_data)
+
+	static void info_callback_(const char* msg, void* client_data)
 	{
 		(void)client_data;
-		fprintf(stdout, "[INFO] %s", msg);
-		fflush(stdout);
+//		fprintf(stdout, "[INFO] %s", msg);
+//		fflush(stdout);
 	}
-#endif
+
+
+	struct stream_block {
+		unsigned char *data;
+		int size;
+		int pos;
+	};
+
+
+	OPJ_SIZE_T stream_read_(void * p_buffer, OPJ_SIZE_T p_nb_bytes, void * p_user_data)
+	{
+		stream_block *sb = (stream_block *)p_user_data;
+		int len;
+
+		len = sb->size - sb->pos;
+		if (len < 0)
+			len = 0;
+		if (len == 0)
+			return (OPJ_SIZE_T)-1;  /* End of file! */
+		if ((OPJ_SIZE_T)len > p_nb_bytes)
+			len = p_nb_bytes;
+		memcpy(p_buffer, sb->data + sb->pos, len);
+		sb->pos += len;
+		return len;
+	}
+
+	OPJ_OFF_T stream_skip_(OPJ_OFF_T skip, void * p_user_data)
+	{
+		stream_block *sb = (stream_block *)p_user_data;
+
+		if (skip > sb->size - sb->pos)
+			skip = sb->size - sb->pos;
+		sb->pos += skip;
+		return sb->pos;
+	}
+
+
+	OPJ_BOOL stream_seek_(OPJ_OFF_T seek_pos, void * p_user_data)
+	{
+		stream_block *sb = (stream_block *)p_user_data;
+
+		if (seek_pos > sb->size)
+			return OPJ_FALSE;
+		sb->pos = seek_pos;
+		return OPJ_TRUE;
+	}
+
 
 	static int int_floorlog2(int a)
 	{
@@ -120,125 +166,131 @@ namespace img {
 		}
 	}
 
+	struct sub_t {
+		opj_codec_t*	codec;
+		opj_stream_t*	stream;
+		opj_image_t*	image;
+	};
 
-	static bool decode_header(utils::file_io& fin, CODEC_FORMAT form, img::img_info& fo)
+	bool decode_sub_(utils::file_io& fin, CODEC_FORMAT form, sub_t& t, bool all = true)
 	{
-		opj_event_mgr_t event_mgr;
-		memset(&event_mgr, 0, sizeof(opj_event_mgr_t));
-		event_mgr.error_handler = g_error_callback;
-		event_mgr.warning_handler = g_warning_callback;
-//		event_mgr.info_handler = g_info_callback;
+		array_uc array;
+		if(all) {
+			if(!read_array(fin, array)) {
+				return false;
+			}
+		} else { // header のみ
+			if(!read_array(fin, array, 1024)) {
+				return false;
+			}
+		}
+
 		opj_dparameters_t parameters;
 		opj_set_default_decoder_parameters(&parameters);
 
-		// ヘッダーのみのデコード
-		parameters.cp_limit_decoding = LIMIT_TO_MAIN_HEADER;
+		t.codec = opj_create_decompress(form);
+		opj_set_info_handler(t.codec, info_callback_, 0);
+		opj_set_warning_handler(t.codec, warning_callback_, 0);
+		opj_set_error_handler(t.codec, error_callback_, 0);
 
-		opj_dinfo_t* dinfo = opj_create_decompress(form);
-		opj_set_event_mgr((opj_common_ptr)dinfo, &event_mgr, stderr);
-		opj_setup_decoder(dinfo, &parameters);
+		if(!opj_setup_decoder(t.codec, &parameters)) {
+			return false;
+		}
 
-		long pos = fin.tell();
-		array_uc ary;
+		stream_block sb;
+		t.stream = opj_stream_default_create(OPJ_TRUE);
+		sb.data = &array[0];
+		sb.pos = 0;
+		sb.size = array.size();
+		opj_stream_set_read_function(t.stream, stream_read_);
+		opj_stream_set_skip_function(t.stream, stream_skip_);
+		opj_stream_set_seek_function(t.stream, stream_seek_);
+		opj_stream_set_user_data(t.stream, &sb);
+		// Set the length to avoid an assert
+		opj_stream_set_user_data_length(t.stream, array.size());
 
-		// ※ヘッダーとして読み込むサイズは適当なので、問題が起こる可能性あり・・
-		// +256 でサンプルは読めたが、念のため +1024 バイト分
-		bool f = read_array(fin, ary, 64 + 1024);
-		fin.seek(pos, utils::file_io::seek::set);
+		opj_image_t *jpx;
+		if(!opj_read_header(t.stream, t.codec, &t.image)) {
+			opj_stream_destroy(t.stream);
+			opj_destroy_codec(t.codec);
+			return false;
+		}
+	}
 
-		if(f) {
-			opj_cio_t* cio = opj_cio_open((opj_common_ptr)dinfo, &ary[0], ary.size());
-			opj_image_t* image = opj_decode(dinfo, cio);
-			if(!image) {
-				opj_cio_close(cio);
-				opj_destroy_decompress(dinfo);
-				return false;
-			}
 
-			fo.width  = image->x1 - image->x0;
-			fo.height = image->y1 - image->y0;
-			fo.mipmap_level = 0;
-			fo.multi_level = 0;
-			fo.i_depth = 0;
-			if(image->color_space == CLRSPC_SRGB) fo.grayscale = false;
-			else if(image->color_space == CLRSPC_GRAY) fo.grayscale = true;
+	static bool decode_header(utils::file_io& fin, CODEC_FORMAT form, img::img_info& fo)
+	{
+		sub_t t;
+		if(!decode_sub_(fin, form, t, false)) {
+			return false;
+		}
 
-///			printf("Header components: %d\n", image->numcomps);
+		fo.width  = t.image->x1 - t.image->x0;
+		fo.height = t.image->y1 - t.image->y0;
+		fo.mipmap_level = 0;
+		fo.multi_level = 0;
+		fo.i_depth = 0;
+		if(t.image->color_space == OPJ_CLRSPC_SRGB) fo.grayscale = false;
+		else if(t.image->color_space == OPJ_CLRSPC_GRAY) fo.grayscale = true;
 
-			if(image->numcomps == 1) {
-				fo.r_depth = 8;
-				fo.g_depth = 8;
-				fo.b_depth = 8;
-				fo.a_depth = 0;
-			} else if(image->numcomps == 2) {
-				fo.r_depth = 8;
-				fo.g_depth = 8;
-				fo.b_depth = 8;
-				fo.a_depth = 8;
-			} else if(image->numcomps == 3) {
-				fo.r_depth = 8;
-				fo.g_depth = 8;
-				fo.b_depth = 8;
-				fo.a_depth = 0;
-			} else if(image->numcomps == 4) {
-				fo.r_depth = 8;
-				fo.g_depth = 8;
-				fo.b_depth = 8;
-				fo.a_depth = 8;
-			}
-			opj_image_destroy(image);
-			opj_cio_close(cio);
-			opj_destroy_decompress(dinfo);
-			return true;
+///		printf("Header components: %d\n", image->numcomps);
+
+		if(t.image->numcomps == 1) {
+			fo.r_depth = 8;
+			fo.g_depth = 8;
+			fo.b_depth = 8;
+			fo.a_depth = 0;
+		} else if(t.image->numcomps == 2) {
+			fo.r_depth = 8;
+			fo.g_depth = 8;
+			fo.b_depth = 8;
+			fo.a_depth = 8;
+		} else if(t.image->numcomps == 3) {
+			fo.r_depth = 8;
+			fo.g_depth = 8;
+			fo.b_depth = 8;
+			fo.a_depth = 0;
+		} else if(t.image->numcomps == 4) {
+			fo.r_depth = 8;
+			fo.g_depth = 8;
+			fo.b_depth = 8;
+			fo.a_depth = 8;
 		} else {
 			return false;
 		}
+		opj_image_destroy(t.image);
+		opj_stream_destroy(t.stream);
+		opj_destroy_codec(t.codec);
+
+		return true;
 	}
 
 
 	static bool decode(utils::file_io& fin, CODEC_FORMAT form, img_rgba8& img)
 	{
-		opj_event_mgr_t event_mgr;
-		memset(&event_mgr, 0, sizeof(opj_event_mgr_t));
-		event_mgr.error_handler = g_error_callback;
-		event_mgr.warning_handler = g_warning_callback;
-//		event_mgr.info_handler = g_info_callback;
-
-		opj_dparameters_t parameters;
-		opj_set_default_decoder_parameters(&parameters);
-
-		opj_dinfo_t* dinfo = opj_create_decompress(form);
-		opj_set_event_mgr((opj_common_ptr)dinfo, &event_mgr, stderr);
-		opj_setup_decoder(dinfo, &parameters);
-
-		array_uc ary;
-		if(read_array(fin, ary)) {
-			opj_cio_t* cio = opj_cio_open((opj_common_ptr)dinfo, &ary[0], ary.size());
-			if(!cio) {
-				opj_destroy_decompress(dinfo);
-				return false;				
-			}
-			opj_image_t* image = opj_decode(dinfo, cio);
-			if(!image) {
-				opj_cio_close(cio);
-				opj_destroy_decompress(dinfo);
-				return false;
-			}
-			opj_image_to_rgba8(image, img);
-			opj_image_destroy(image);
-			opj_cio_close(cio);
-			opj_destroy_decompress(dinfo);
-			return true;
-		} else {
-			opj_destroy_decompress(dinfo);
+		sub_t t;
+		if(!decode_sub_(fin, form, t)) {
 			return false;
 		}
+
+		if(!opj_decode(t.codec, t.stream, t.image)) {
+			opj_image_destroy(t.image);
+			opj_stream_destroy(t.stream);
+			opj_destroy_codec(t.codec);
+			return false;
+		}
+
+		opj_image_to_rgba8(t.image, img);
+		opj_image_destroy(t.image);
+		opj_stream_destroy(t.stream);
+		opj_destroy_codec(t.codec);
+
+		return true;
 	}
 
 
 	static bool encode(utils::file_io& fout, CODEC_FORMAT form, const img_rgba8& img)
 	{
-
 
 		return false;
 	}
@@ -257,14 +309,13 @@ namespace img {
 		long pos = fin.tell();
 		size_t l = fin.read(sig, 1, 4);
 		fin.seek(pos, utils::file_io::seek::set);
+
 		if(l == 4) {
-//			printf("OpenJPEG probe: J2K\n");
-//			fflush(stdout);
-			// J2K: ff, 4f, ff, 51
 			if(sig[0] == 0xff && sig[1] == 0x4f && sig[2] == 0xff && sig[3] == 0x51) {
 				return true;
+			} else if(sig[0] == 0x00 && sig[1] == 0x00 && sig[2] == 0x00 && sig[3] == 0x0c) {
+				return true;
 			}
-			// JP2: 00 00 00 0c
 		}
 		return false;
 	}
@@ -285,18 +336,18 @@ namespace img {
 		size_t l = fin.read(sig, 1, 4);
 		fin.seek(pos, utils::file_io::seek::set);
 
-		CODEC_FORMAT form = CODEC_UNKNOWN;
+		CODEC_FORMAT form = OPJ_CODEC_UNKNOWN;
 		if(l == 4) {
 			if(sig[0] == 0xff && sig[1] == 0x4f && sig[2] == 0xff && sig[3] == 0x51) {
-				form = CODEC_J2K;
+				form = OPJ_CODEC_J2K;
 			} else if(sig[0] == 0x00 && sig[1] == 0x00 && sig[2] == 0x00 && sig[3] == 0x0c) {
-				form = CODEC_JP2;
+				form = OPJ_CODEC_JP2;
 			}
 		} else {
 			return false;
 		}
 
-		if(form != CODEC_UNKNOWN) {
+		if(form != OPJ_CODEC_UNKNOWN) {
 			if(decode_header(fin, form, fo)) {
 				return true;
 			}
@@ -315,24 +366,17 @@ namespace img {
 	//-----------------------------------------------------------------//
 	bool openjpeg_io::load(utils::file_io& fin, const std::string& ext)
 	{
-#if 0
-		img_info fo;
-		if(info(fin, fo)) {
-			printf("Info OK!: %d, %d\n", fo.width, fo.height);
-			fflush(stdout);
-		}
-#endif
 		unsigned char sig[4];
 		long pos = fin.tell();
 		size_t l = fin.read(sig, 1, 4);
 		fin.seek(pos, utils::file_io::seek::set);
 
-		CODEC_FORMAT form = CODEC_UNKNOWN;
+		CODEC_FORMAT form = OPJ_CODEC_UNKNOWN;
 		if(l == 4) {
 			if(sig[0] == 0xff && sig[1] == 0x4f && sig[2] == 0xff && sig[3] == 0x51) {
-				form = CODEC_J2K;
+				form = OPJ_CODEC_J2K;
 			} else if(sig[0] == 0x00 && sig[1] == 0x00 && sig[2] == 0x00 && sig[3] == 0x0c) {
-				form = CODEC_JP2;
+				form = OPJ_CODEC_JP2;
 			}
 		} else {
 			return false;
