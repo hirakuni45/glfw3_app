@@ -102,11 +102,31 @@ namespace img {
 		/*!
 			@brief	OpenJPEG ファイルをセーブする
 			@param[in]	fout	file_io クラス
-			@param[in]	ext	フォーマット固有の設定文字列
+			@param[in]	opt	フォーマット固有の拡張文字列
 			@return エラーがあれば「false」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(utils::file_io& fout, const std::string& ext = "");
+		bool save(utils::file_io& fout, const std::string& opt = "");
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ファイルをセーブする
+			@param[in]	fn	ファイル名
+			@param[in]	opt	フォーマット固有の拡張文字列
+			@return エラーがあれば「false」
+		*/
+		//-----------------------------------------------------------------//
+		bool save(const std::string& fn, const std::string& opt = "") {
+			utils::file_io out;
+			if(out.open(fn, "wb")) {
+				bool f = save(out, opt);
+				out.close();
+				return f;
+			} else {
+				return false;
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
