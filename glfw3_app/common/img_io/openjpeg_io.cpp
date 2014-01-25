@@ -8,8 +8,9 @@
 #include <cstdlib>
 #define OPJ_STATIC
 #include <openjpeg.h>
-#include "utils/file_io.hpp"
-#include "openjpeg_io.hpp"
+#include "../img_io/openjpeg_io.hpp"
+#include "../utils/string_utils.hpp"
+#include <boost/lexical_cast.hpp>
 
 namespace img {
 
@@ -393,11 +394,11 @@ namespace img {
 	/*!
 		@brief	ファイルをセーブする
 		@param[in]	fout	file_io クラス
-		@param[in]	ext	フォーマット固有の設定文字列
+		@param[in]	opt	フォーマット固有の設定文字列
 		@return エラーがあれば「false」
 	*/
 	//-----------------------------------------------------------------//
-	bool openjpeg_io::save(utils::file_io& fout, const std::string& ext)
+	bool openjpeg_io::save(utils::file_io& fout, const std::string& opt)
 	{
 		CODEC_FORMAT form;
 		const std::string& fp = fout.get_path();
@@ -417,12 +418,22 @@ namespace img {
 		int nc = 3;
 		if(imf_->test_alpha()) ++nc; 
 
+		// 品質パラメーター
+		float q = 0.0f;
+		if(!opt.empty()) {
+			try {
+				q = boost::lexical_cast<float>(opt);
+			} catch (boost::bad_lexical_cast&) {
+				q = 0.0f;
+			}
+		}
+
 		opj_cparameters_t parameters;
 		opj_set_default_encoder_parameters(&parameters);
 
 		// 各レイヤーの圧縮率
 		if(parameters.tcp_numlayers == 0) {
-			parameters.tcp_rates[0] = 0;	/* MOD antonin : losslessbug */
+			parameters.tcp_rates[0] = q;	/* MOD antonin : losslessbug */
 			parameters.tcp_numlayers++;
 			parameters.cp_disto_alloc = 1;
 		}

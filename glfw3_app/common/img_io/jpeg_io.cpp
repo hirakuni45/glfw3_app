@@ -13,6 +13,8 @@ extern "C" {
 #include "utils/file_io.hpp"
 #include "jpeg_io.hpp"
 
+#include <boost/lexical_cast.hpp>
+
 namespace img {
 
 	static const size_t INPUT_BUF_SIZE = 4096;
@@ -445,11 +447,12 @@ namespace img {
 	{
 		if(imf_ == 0) return false;
 
-		int quality = quality_;
+		int q = 0;
 		if(!opt.empty()) {
-			int n;
-			if(sscanf(opt.c_str(), "%d", &n) == 1) {
-				quality = n;
+			try {
+				q = boost::lexical_cast<int>(opt);
+			} catch (boost::bad_lexical_cast&) {
+				q = 0;
 			}
 		}
 
@@ -476,7 +479,7 @@ namespace img {
 		cinfo.in_color_space = JCS_RGB;
 
 		jpeg_set_defaults(&cinfo);
-		jpeg_set_quality(&cinfo, quality, TRUE);
+		jpeg_set_quality(&cinfo, q, TRUE);
 
 		jpeg_start_compress(&cinfo, TRUE);
 
