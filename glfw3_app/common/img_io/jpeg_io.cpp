@@ -379,7 +379,12 @@ namespace img {
 		int row_stride = cinfo.output_width * cinfo.output_components;
 
 		img_.destroy();
-		img_.create(vtx::spos(cinfo.image_width, cinfo.image_height), true);
+		if(cinfo.output_components == 3) {
+			img_.create(vtx::spos(cinfo.image_width, cinfo.image_height), false);
+		} else {
+			img_.create(vtx::spos(cinfo.image_width, cinfo.image_height), true);
+		}
+
 //		printf("%d, %d (%d)\n", cinfo.image_width, cinfo.image_height, cinfo.output_components);
 		unsigned char* line = new unsigned char[row_stride];
 		unsigned char* lines[1];
@@ -438,7 +443,7 @@ namespace img {
 	//-----------------------------------------------------------------//
 	bool jpeg_io::save(utils::file_io& fout, const std::string& opt)
 	{
-		if(imf_ == 0 && rgb_ptr_ == 0) return false;
+		if(imf_ == 0) return false;
 
 		int quality = quality_;
 		if(!opt.empty()) {
@@ -462,18 +467,12 @@ namespace img {
 		fio_jpeg_file_io_dst(&cinfo, &fout);
 		fio_dst_ptr dst = (fio_dst_ptr)cinfo.dest;
 
-		int w, h;
-		if(rgb_ptr_) {
-			w = rgb_w_;
-			h = rgb_h_;
-		} else {
-			w = imf_->get_size().x;
-			h = imf_->get_size().y;
-		}
-
+		int w = imf_->get_size().x;
+		int h = imf_->get_size().y;
 		cinfo.image_width  = w;
 		cinfo.image_height = h;
 		cinfo.input_components = 3;
+		if(imf_->test_alpha()) ++cinfo.input_components;
 		cinfo.in_color_space = JCS_RGB;
 
 		jpeg_set_defaults(&cinfo);
@@ -481,35 +480,25 @@ namespace img {
 
 		jpeg_start_compress(&cinfo, TRUE);
 
-		if(rgb_ptr_) {
-			JSAMPROW* rp = new JSAMPROW[h];
-			if(rgb_vf_) {
-				for(int y = 0; y < h; ++y) rp[y] = (JSAMPLE *) &rgb_ptr_[w * (h - y - 1) * 3];
-			} else {
-				for(int y = 0; y < h; ++y) rp[y] = (JSAMPLE *) &rgb_ptr_[w * y * 3];
+		int y = 0;
+		JSAMPROW row_pointer[1];
+		unsigned char* tmp = new unsigned char[w * cinfo.input_components];
+		row_pointer[0] = (JSAMPLE *)tmp;
+		while(cinfo.next_scanline < h) {
+			unsigned char* p = tmp;
+			for(int x = 0; x < w; ++x) {
+				rgba8 c;
+				imf_->get_pixel(x, y, c);
+				*p++ = c.r;
+				*p++ = c.g;
+				*p++ = c.b;
+				if(imf_->test_alpha()) *p++ = c.a;
 			}
-			jpeg_write_scanlines(&cinfo, rp, h);
-			delete[] rp;
-		} else {
-			int y = 0;
-			JSAMPROW row_pointer[1];
-			unsigned char* tmp = new unsigned char[w * 3];
-			row_pointer[0] = (JSAMPLE *)tmp;
-			while(cinfo.next_scanline < h) {
-				unsigned char* p = tmp;
-				for(int x = 0; x < w; ++x) {
-					rgba8 c;
-					imf_->get_pixel(x, y, c);
-					*p++ = c.r;
-					*p++ = c.g;
-					*p++ = c.b;
-				}
-				jpeg_write_scanlines(&cinfo, row_pointer, 1);
-				if(dst->error) break;
-				++y;
-			}
-			delete[] tmp;
+			jpeg_write_scanlines(&cinfo, row_pointer, 1);
+			if(dst->error) break;
+			++y;
 		}
+		delete[] tmp;
 
 		// 圧縮後のサイズ
 //		int ret = row_stride * height - cinfo.dest->free_in_buffer;
