@@ -115,7 +115,7 @@ namespace app {
 					image_->at_local_param().mobj_ = mobj_;
 					image_->at_local_param().mobj_handle_ = img_handle_;
 // imf.set_image_if(imf.get_image_if());
-// imf.save("test.tga", "rle");
+// imf.save("test.jp2");
 				}
 			}
 		}
