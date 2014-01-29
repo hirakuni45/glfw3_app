@@ -190,7 +190,7 @@ tarball:
 bin_zip:
 	$(LK) $(LOF)$(TARGET).exe $(LFLAGS) $(LIBS) -mwindows $(OBJECTS) $(LIBN)
 	rm -f $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip
-	zip $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip *.exe *.dll res/*.*
+	zip $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip *.exe *.dll
 
 mylib_arc:
 	tar cfvz mingw_pack.tgz /usr/local/include /usr/local/lib /usr/local/bin
