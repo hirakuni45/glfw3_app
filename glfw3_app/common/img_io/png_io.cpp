@@ -9,6 +9,8 @@
 #include "img_idx8.hpp"
 #include "img_rgba8.hpp"
 
+#include <iostream>
+
 using namespace std;
 
 namespace img {
@@ -195,8 +197,16 @@ namespace img {
 
 //  IHDRチャンク情報を取得します
 		png_uint_32	width, height;
-		int bit_depth, color_type, interlace_type;
-		png_get_IHDR(png_ptr, info_ptr, &width, &height, &bit_depth, &color_type, &interlace_type, NULL, NULL);
+		int bit_depth, color_type, interlace_type, comp_type, filter_type;
+		png_get_IHDR(png_ptr, info_ptr, &width, &height, &bit_depth, &color_type, &interlace_type,
+			&comp_type, &filter_type);
+
+// フィルタータイプの取得
+//	   png_read_update_info(png_ptr, info_ptr);
+//		png_byte ft = png_get_filter_type(png_ptr, info_ptr);
+///		std::cout << "Compression: " << comp_type << std::endl;
+///		std::cout << "Filter: " << filter_type << std::endl;
+
 		int ch;
 		bool alpha;
 		bool gray = false;
