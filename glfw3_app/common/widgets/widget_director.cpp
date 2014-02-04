@@ -606,9 +606,10 @@ namespace gui {
 			}
 		}
 
-		// リサイズ
+		// リサイズ処理
 		if(top_resize_ && !top_resize_->get_state(widget::state::SIZE_LOCK)) {
 			if(right.lvl) {
+//				vtx::spos neworg = top_resize_->get_rect().org;
 				vtx::spos d = msp - top_resize_->at_param().resize_org_;
 				if(!top_resize_->get_state(widget::state::RESIZE_H_ENABLE)) d.x = 0;
 				if(!top_resize_->get_state(widget::state::RESIZE_V_ENABLE)) d.y = 0;
@@ -626,7 +627,11 @@ namespace gui {
 				} else {
 					newsize.x = ref.x;
 				}
+//				{
+//					vtx::spos d = newsize - top_resize_->get_rect().size;
+//				}
 				touch = true;
+//				top_resize_->at_rect().org = neworg;
 				top_resize_->at_rect().size = newsize;
 			}
 		}
