@@ -183,7 +183,7 @@ tarball:
 	chmod 444 $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz
 
 bin_zip:
-	$(LK) $(LOF)$(TARGET).exe $(LFLAGS) $(LIBS) -mwindows $(OBJECTS) $(LIBN)
+	$(LK) $(LOF)$(TARGET).exe $(LFLAGS) $(LIBS) -mwindows $(OBJECTS) icon.o $(LIBN)
 	rm -f $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip
 	zip $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip *.exe *.dll res/*.*
 
