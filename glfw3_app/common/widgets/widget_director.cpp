@@ -537,7 +537,12 @@ namespace gui {
 				top_move_ = w;	// 移動を行う widget 候補
 			}
 			if(right.pos && focus) {
-				w->at_param().resize_org_ = msp;
+				vtx::spos sign(1);
+				if(msp.x < (w->get_rect().org.x + w->get_rect().size.x / 2)) sign.x = -1;
+				if(msp.y < (w->get_rect().org.y + w->get_rect().size.y / 2)) sign.y = -1;
+				w->at_param().resize_sign_ = sign;
+				w->at_param().resize_pos_ = msp;
+				w->at_param().resize_org_ = w->get_rect().org;
 				w->at_param().resize_ref_ = w->get_rect().size;
 				top_resize_ = w;	// リサイズを行う widget 候補
 			}
@@ -609,14 +614,15 @@ namespace gui {
 		// リサイズ処理
 		if(top_resize_ && !top_resize_->get_state(widget::state::SIZE_LOCK)) {
 			if(right.lvl) {
-//				vtx::spos neworg = top_resize_->get_rect().org;
-				vtx::spos d = msp - top_resize_->at_param().resize_org_;
+				const widget::param& param = top_resize_->get_param();
+				vtx::spos d = msp - param.resize_pos_;
+				if(param.resize_sign_.x < 0) d.x = -d.x;
+				if(param.resize_sign_.y < 0) d.y = -d.y;
 				if(!top_resize_->get_state(widget::state::RESIZE_H_ENABLE)) d.x = 0;
 				if(!top_resize_->get_state(widget::state::RESIZE_V_ENABLE)) d.y = 0;
-				const vtx::spos& min = top_resize_->get_param().resize_min_;
-				const vtx::spos& size = top_resize_->get_rect().size;
-				vtx::spos newsize = top_resize_->at_param().resize_ref_ + d;
-				const vtx::spos& ref = top_resize_->at_param().resize_ref_;
+				const vtx::spos& min = param.resize_min_;
+				vtx::spos newsize = param.resize_ref_ + d;
+				const vtx::spos& ref = param.resize_ref_;
 				if(ref.x >= min.x) {
 					if(newsize.x < min.x) newsize.x = min.x;
 				} else {
@@ -627,11 +633,11 @@ namespace gui {
 				} else {
 					newsize.x = ref.x;
 				}
-//				{
-//					vtx::spos d = newsize - top_resize_->get_rect().size;
-//				}
 				touch = true;
-//				top_resize_->at_rect().org = neworg;
+				vtx::spos ofs(0);
+				if(param.resize_sign_.x < 0) ofs.x = param.resize_ref_.x - newsize.x;
+				if(param.resize_sign_.y < 0) ofs.y = param.resize_ref_.y - newsize.y;
+				top_resize_->at_rect().org  = param.resize_org_ + ofs;
 				top_resize_->at_rect().size = newsize;
 			}
 		}

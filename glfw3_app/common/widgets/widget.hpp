@@ -277,8 +277,10 @@ namespace gui {
 			vtx::spos			rpos_;			///< レンダリング開始
 			vtx::spos			move_org_;		///< 移動基準位置
 			vtx::spos			move_pos_;		///< 移動位置
+			vtx::spos			resize_sign_;	///< リサイズ符号
 			vtx::spos			resize_min_;	///< リサイズ最小サイズ
 			vtx::spos			resize_org_;	///< リサイズ基準位置
+			vtx::spos			resize_pos_;	///< リサイズ位置
 			vtx::spos			resize_ref_;	///< リサイズ基準サイズ
 			vtx::spos			speed_;			///< 速度
 			vtx::spos			in_point_;		///< 内包ポイント
@@ -291,7 +293,7 @@ namespace gui {
 			param(const vtx::srect& r = vtx::srect(0), widget* parents = 0) :
 				rect_(r), clip_(r), rpos_(r.org),
 				move_org_(0), move_pos_(0),
-				resize_min_(16 * 3), resize_org_(0), resize_ref_(0),
+				resize_sign_(0), resize_min_(16 * 3), resize_org_(0), resize_pos_(0), resize_ref_(0),
 				speed_(0), in_point_(0),
 				hold_frame_(0), holded_frame_(0),
 				parents_(parents),
