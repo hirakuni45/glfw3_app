@@ -149,9 +149,6 @@ all:
 	make depend
 	make $(TARGET)
 
-install:
-	cp ./$(TARGET).exe /usr/local/bin/.
-
 run:
 	./$(TARGET).exe
 
