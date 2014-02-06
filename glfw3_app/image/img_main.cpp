@@ -100,6 +100,8 @@ namespace app {
 		}
 
 		if(filer_) {
+			wd.top_widget(filer_);
+
 			if(filer_id_ != filer_->get_select_file_id()) {
 				filer_id_ = filer_->get_select_file_id();
 
