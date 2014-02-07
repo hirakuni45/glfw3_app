@@ -207,7 +207,6 @@ namespace app {
 
 		// ウィジェットのコア、更新
 		gui::widget_director& wd = director_.at().widget_director_;
-		wd.update();
 
 		// 画面のサイズに合わせた動的な位置補正
 		short btw = 64;
@@ -436,6 +435,8 @@ namespace app {
 				sound_play_(file);
 			}
 		}
+
+		wd.update();
 	}
 
 
