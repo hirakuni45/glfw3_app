@@ -39,9 +39,10 @@ namespace app {
 		}
 
 		{ // 機能ツールパレット
-			widget::param wp(vtx::srect(10, 10, 150, 300));
+			widget::param wp(vtx::srect(10, 10, 130, 300));
 			widget_frame::param wp_;
 			tools_ = wd.add_widget<widget_frame>(wp, wp_);
+			tools_->set_state(widget::state::SIZE_LOCK);
 		}
 		{ // ファイラー起動ボタン
 			widget::param wp(vtx::srect(10, 10, 100, 40), tools_);
