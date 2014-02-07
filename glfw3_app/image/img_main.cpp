@@ -50,7 +50,7 @@ namespace app {
 		}
 		{ // スケールチェックボックス
 			widget::param wp(vtx::srect(10, 60, 100, 40), tools_);
-			widget_check::param wp_("scale");
+			widget_check::param wp_("fit");
 			scale_ = wd.add_widget<widget_check>(wp, wp_);	
 		}
 
@@ -113,6 +113,8 @@ namespace app {
 						+ filer_->get_file() + "'");
 					dialog_->enable();
 				} else {
+					image_offset_.set(0.0f);
+					frame_->at_local_param().text_param_.text_ = filer_->get_file();
 					mobj_.destroy();
 					mobj_.initialize();
 					img_handle_ = mobj_.install(imf.get_image_if());
@@ -147,7 +149,6 @@ namespace app {
 					vtx::spos d = image_->get_param().move_pos_ - image_->get_param().move_org_;
 					image_->at_local_param().offset_ = image_offset_ + d;
 				}
-
 			}
 			image_->at_local_param().scale_ = s;
 		}
