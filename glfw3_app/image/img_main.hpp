@@ -42,6 +42,8 @@ namespace app {
 
 		uint32_t	filer_id_;
 
+		vtx::fpos	image_offset_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -52,7 +54,8 @@ namespace app {
 			filer_(0), frame_(0), image_(0),
 			tools_(0), open_(0), scale_(0),
 			dialog_(0),
-			img_handle_(0), filer_id_(0)
+			img_handle_(0), filer_id_(0),
+			image_offset_(0.0f)
 		{ }
 
 

@@ -26,6 +26,7 @@ namespace app {
 		{ // 画像ファイル表示用フレーム
 			widget::param wp(vtx::srect(30, 30, 256, 256));
 			widget_frame::param wp_;
+			wp_.plate_param_.set_caption(24);
 			frame_ = wd.add_widget<widget_frame>(wp, wp_);
 		}
 		{ // 画像ファイル表示イメージ
@@ -34,6 +35,7 @@ namespace app {
 			image_ = wd.add_widget<widget_image>(wp, wp_);
 			image_->set_state(widget::state::CLIP_PARENTS);
 			image_->set_state(widget::state::RESIZE_ROOT);
+			image_->set_state(widget::state::MOVE_ROOT, false);
 		}
 
 		{ // 機能ツールパレット
@@ -126,7 +128,9 @@ namespace app {
 		if(frame_ && image_) {
 			vtx::spos ofs(frame_->get_local_param().plate_param_.frame_width_);
 			image_->at_rect().org = ofs;
+			image_->at_rect().org.y += frame_->get_local_param().plate_param_.caption_width_;
 			image_->at_rect().size = frame_->get_rect().size - ofs * 2;
+			image_->at_rect().size.y -= frame_->get_local_param().plate_param_.caption_width_;
 
 			float s = 1.0f;
 			if(scale_->get_check()) {
@@ -134,6 +138,16 @@ namespace app {
 				vtx::fpos ss = image_->at_rect().size;
 				vtx::fpos sc = ss / is;
 				if(sc.x < sc.y) s = sc.x; else s = sc.y;
+				image_->at_local_param().offset_ = 0.0f;
+			} else {
+				if(image_->get_select_in()) {
+					image_offset_ = image_->get_local_param().offset_;
+				}
+				if(image_->get_select()) {
+					vtx::spos d = image_->get_param().move_pos_ - image_->get_param().move_org_;
+					image_->at_local_param().offset_ = image_offset_ + d;
+				}
+
 			}
 			image_->at_local_param().scale_ = s;
 		}
