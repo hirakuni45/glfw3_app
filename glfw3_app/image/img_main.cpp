@@ -93,11 +93,14 @@ namespace app {
 
 		// プリファレンスの取得
 		sys::preference& pre = director_.at().preference_;
-		if(filer_) {
-			filer_->load(pre);
-			frame_->load(pre);
-			tools_->load(pre);
-		}
+		if(filer_) filer_->load(pre);
+		if(frame_) frame_->load(pre);
+		if(tools_) tools_->load(pre);
+		if(scale_fit_) scale_fit_->load(pre);
+		if(scale_1x_) scale_1x_->load(pre);
+		if(scale_2x_) scale_2x_->load(pre);
+		if(scale_3x_) scale_3x_->load(pre);
+		if(scale_4x_) scale_4x_->load(pre);
 	}
 
 
@@ -203,10 +206,13 @@ namespace app {
 	void img_main::destroy()
 	{
 		sys::preference& pre = director_.at().preference_;
-		if(filer_) {
-			filer_->save(pre);
-			frame_->save(pre);
-			tools_->save(pre);
-		}
+		if(filer_) filer_->save(pre);
+		if(frame_) frame_->save(pre);
+		if(tools_) tools_->save(pre);
+		if(scale_fit_) scale_fit_->save(pre);
+		if(scale_1x_) scale_1x_->save(pre);
+		if(scale_2x_) scale_2x_->save(pre);
+		if(scale_3x_) scale_3x_->save(pre);
+		if(scale_4x_) scale_4x_->save(pre);
 	}
 }
