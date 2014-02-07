@@ -49,10 +49,31 @@ namespace app {
 			widget_button::param wp_("file");
 			open_ = wd.add_widget<widget_button>(wp, wp_);
 		}
-		{ // スケールチェックボックス
-			widget::param wp(vtx::srect(10, 60, 100, 40), tools_);
-			widget_check::param wp_("fit");
-			scale_ = wd.add_widget<widget_check>(wp, wp_);	
+		{ // スケール FIT
+			widget::param wp(vtx::srect(10, 60+30*0, 90, 30), tools_);
+			widget_radio::param wp_("fit");
+			wp_.check_ = true;
+			scale_fit_ = wd.add_widget<widget_radio>(wp, wp_);	
+		}
+		{ // スケール 1X
+			widget::param wp(vtx::srect(10, 60+30*1, 90, 30), tools_);
+			widget_radio::param wp_("1x");
+			scale_1x_ = wd.add_widget<widget_radio>(wp, wp_);	
+		}
+		{ // スケール 2X
+			widget::param wp(vtx::srect(10, 60+30*2, 90, 30), tools_);
+			widget_radio::param wp_("2x");
+			scale_2x_ = wd.add_widget<widget_radio>(wp, wp_);	
+		}
+		{ // スケール 3X
+			widget::param wp(vtx::srect(10, 60+30*3, 90, 30), tools_);
+			widget_radio::param wp_("3x");
+			scale_3x_ = wd.add_widget<widget_radio>(wp, wp_);	
+		}
+		{ // スケール 4X
+			widget::param wp(vtx::srect(10, 60+30*4, 90, 30), tools_);
+			widget_radio::param wp_("4x");
+			scale_4x_ = wd.add_widget<widget_radio>(wp, wp_);	
 		}
 
 		{ // ファイラー本体
@@ -76,7 +97,6 @@ namespace app {
 			filer_->load(pre);
 			frame_->load(pre);
 			tools_->load(pre);
-			scale_->load(pre);
 		}
 	}
 
@@ -136,19 +156,24 @@ namespace app {
 			image_->at_rect().size.y -= frame_->get_local_param().plate_param_.caption_width_;
 
 			float s = 1.0f;
-			if(scale_->get_check()) {
+			if(scale_fit_->get_check()) {
 				vtx::fpos is = mobj_.get_size(img_handle_);
 				vtx::fpos ss = image_->at_rect().size;
 				vtx::fpos sc = ss / is;
 				if(sc.x < sc.y) s = sc.x; else s = sc.y;
 				image_->at_local_param().offset_ = 0.0f;
 			} else {
+				if(scale_1x_->get_check()) s = 1.0f;
+ 				else if(scale_2x_->get_check()) s = 2.0f;
+ 				else if(scale_3x_->get_check()) s = 3.0f;
+ 				else if(scale_4x_->get_check()) s = 4.0f;
+
 				if(image_->get_select_in()) {
 					image_offset_ = image_->get_local_param().offset_;
 				}
 				if(image_->get_select()) {
 					vtx::spos d = image_->get_param().move_pos_ - image_->get_param().move_org_;
-					image_->at_local_param().offset_ = image_offset_ + d;
+					image_->at_local_param().offset_ = image_offset_ + d / s;
 				}
 			}
 			image_->at_local_param().scale_ = s;
@@ -182,7 +207,6 @@ namespace app {
 			filer_->save(pre);
 			frame_->save(pre);
 			tools_->save(pre);
-			scale_->save(pre);
 		}
 	}
 }
