@@ -145,10 +145,14 @@ $(TARGET).exe: $(OBJECTS) Makefile
 	$(RC) -i $< -o $@
 
 %.d: %.c
-	$(CC) -MM $(COPT) $(CFLAGS) $(INC_L) $(INC_C) $(CCWARN) $< > $@
+	echo '$*.o: \' > $@
+	$(CC) -MM $(COPT) $(CFLAGS) $(INC_C) $(CCWARN) $< | \
+	sed 's/.*://' >> $@
 
 %.d: %.cpp
-	$(CP) -MM $(POPT) $(PFLAGS) $(INC_L) $(INC_P) $(CPWARN) $< > $@
+	echo '$*.o: \' > $@
+	$(CP) -MM $(POPT) $(PFLAGS) $(INC_P) $(CPWARN) $< | \
+	sed 's/.*://' >> $@
 
 all:
 	make clean
