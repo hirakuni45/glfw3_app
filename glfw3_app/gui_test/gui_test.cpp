@@ -87,7 +87,7 @@ namespace app {
 		if(1) {	// テキストのテスト
 			widget::param wp(vtx::srect(400, 20, 200, 250), 0);
 			widget_text::param wp_;
-			wp_.text_param_.text_ = "AsDfGhJKl\nqwertyuiop\nzxcvbnm";
+			wp_.text_param_.text_ = "日本の美しい漢字\nqwertyuiop\nzxcvbnm";
 			wp_.text_param_.placement_.vpt = vtx::placement::vertical::CENTER;
 			wd.add_widget<widget_text>(wp, wp_);
 		}
@@ -95,7 +95,7 @@ namespace app {
 		if(1) { // フレームのテスト
 			widget::param wp(vtx::srect(200, 20, 100, 80));
 			widget_frame::param wp_;
-			wd.add_widget<widget_frame>(wp, wp_);
+			frame_ = wd.add_widget<widget_frame>(wp, wp_);
 		}
 
 		if(1) { // ダイアログのテスト
@@ -192,6 +192,9 @@ namespace app {
 		if(tree_) {
 			tree_->load(pre);
 		}
+		if(frame_) {
+			frame_->load(pre);
+		}
 	}
 
 
@@ -258,6 +261,9 @@ namespace app {
 		}
 		if(tree_) {
 			tree_->save(pre);
+		}
+		if(frame_) {
+			frame_->save(pre);
 		}
 	}
 }

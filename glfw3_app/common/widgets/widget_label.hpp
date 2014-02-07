@@ -29,6 +29,8 @@ namespace gui {
 			text_param	text_param_;	///< テキスト描画のパラメーター
 			color_param	color_param_select_;	///< 選択時のカラーパラメーター
 
+			bool		read_only_;		///< 読み出し専用の場合
+
 			bool		shift_enable_;	///< シフト表示を有効にする場合
 			bool		shift_every_;	///< 常にシフト動作の場合
 			float		shift_offset_;	///< シフト表示のオフセット
@@ -42,6 +44,7 @@ namespace gui {
 					vtx::placement(vtx::placement::holizontal::LEFT,
 						vtx::placement::vertical::CENTER)),
 				color_param_select_(widget_director::default_label_color_select_),
+				read_only_(true),
 				shift_enable_(true), shift_every_(false),
 				shift_offset_(0.0f), shift_speed_(0.5f),
 				shift_hold_frame_(2 * 60)
