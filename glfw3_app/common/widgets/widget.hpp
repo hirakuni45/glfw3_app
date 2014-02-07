@@ -108,17 +108,24 @@ namespace gui {
 			round_style::type	round_style_;	///< ラウンド・スタイル
 			short	round_radius_;		///< ラウンド半径
 			short	frame_width_;		///< フレーム幅
+			short	caption_width_;		///< キャプション幅
 			vtx::spos	grid_;			///< リサイズ・グリッド
 			bool	resizeble_;			///< リサイズが可能な場合
-			plate_param() : round_style_(round_style::ALL), round_radius_(8),
-				frame_width_(4),
+			plate_param() : round_style_(round_style::ALL),
+				round_radius_(8), frame_width_(4), caption_width_(0),
 				grid_(16), resizeble_(false) { }
+
+			void set_caption(short width) {
+				caption_width_ = width;
+				grid_.set(width * 3);
+			}
 
 			size_t hash() const {
 				size_t h = grid_.hash();
 				boost::hash_combine(h, round_style_);
 				boost::hash_combine(h, round_radius_);
 				boost::hash_combine(h, frame_width_);
+				boost::hash_combine(h, caption_width_);
 				boost::hash_combine(h, resizeble_);
 				return h;
 			}
@@ -127,6 +134,7 @@ namespace gui {
 				return pp.round_style_ == round_style_ &&
 					pp.round_radius_ == round_radius_ &&
 					pp.frame_width_ == frame_width_ &&
+					pp.caption_width_ == caption_width_ &&
 					pp.resizeble_ == resizeble_ &&
 					pp.grid_ == grid_;
 			}
