@@ -108,17 +108,24 @@ namespace gui {
 			round_style::type	round_style_;	///< ラウンド・スタイル
 			short	round_radius_;		///< ラウンド半径
 			short	frame_width_;		///< フレーム幅
+			short	caption_width_;		///< キャプション幅
 			vtx::spos	grid_;			///< リサイズ・グリッド
 			bool	resizeble_;			///< リサイズが可能な場合
-			plate_param() : round_style_(round_style::ALL), round_radius_(8),
-				frame_width_(4),
+			plate_param() : round_style_(round_style::ALL),
+				round_radius_(8), frame_width_(4), caption_width_(0),
 				grid_(16), resizeble_(false) { }
+
+			void set_caption(short width) {
+				caption_width_ = width;
+				grid_.set(width * 3);
+			}
 
 			size_t hash() const {
 				size_t h = grid_.hash();
 				boost::hash_combine(h, round_style_);
 				boost::hash_combine(h, round_radius_);
 				boost::hash_combine(h, frame_width_);
+				boost::hash_combine(h, caption_width_);
 				boost::hash_combine(h, resizeble_);
 				return h;
 			}
@@ -127,6 +134,7 @@ namespace gui {
 				return pp.round_style_ == round_style_ &&
 					pp.round_radius_ == round_radius_ &&
 					pp.frame_width_ == frame_width_ &&
+					pp.caption_width_ == caption_width_ &&
 					pp.resizeble_ == resizeble_ &&
 					pp.grid_ == grid_;
 			}
@@ -277,8 +285,10 @@ namespace gui {
 			vtx::spos			rpos_;			///< レンダリング開始
 			vtx::spos			move_org_;		///< 移動基準位置
 			vtx::spos			move_pos_;		///< 移動位置
+			vtx::spos			resize_sign_;	///< リサイズ符号
 			vtx::spos			resize_min_;	///< リサイズ最小サイズ
 			vtx::spos			resize_org_;	///< リサイズ基準位置
+			vtx::spos			resize_pos_;	///< リサイズ位置
 			vtx::spos			resize_ref_;	///< リサイズ基準サイズ
 			vtx::spos			speed_;			///< 速度
 			vtx::spos			in_point_;		///< 内包ポイント
@@ -291,7 +301,7 @@ namespace gui {
 			param(const vtx::srect& r = vtx::srect(0), widget* parents = 0) :
 				rect_(r), clip_(r), rpos_(r.org),
 				move_org_(0), move_pos_(0),
-				resize_min_(16 * 3), resize_org_(0), resize_ref_(0),
+				resize_sign_(0), resize_min_(16 * 3), resize_org_(0), resize_pos_(0), resize_ref_(0),
 				speed_(0), in_point_(0),
 				hold_frame_(0), holded_frame_(0),
 				parents_(parents),

@@ -134,17 +134,18 @@ icon.o: icon.rc ./res/player.ico
 	$(RC) -i $< -o $@
 
 %.d: %.c
-	$(CC) -MM $(COPT) $(CFLAGS) $(INC_L) $(INC_C) $(CCWARN) $< > $@
+	echo '$*.o: \' > $@
+	$(CC) -MM $(COPT) $(CFLAGS) $(INC_C) $(CCWARN) $< | \
+	sed 's/.*://' >> $@
 
 %.d: %.cpp
-	$(CP) -MM $(POPT) $(PFLAGS) $(INC_L) $(INC_P) $(CPWARN) $< > $@
+	echo '$*.o: \' > $@
+	$(CP) -MM $(POPT) $(PFLAGS) $(INC_P) $(CPWARN) $< | \
+	sed 's/.*://' >> $@
 
 all:
 	make clean
 	make $(TARGET)
-
-install:
-	cp ./$(TARGET).exe /usr/local/bin/.
 
 run:
 	./$(TARGET).exe
@@ -183,7 +184,7 @@ tarball:
 	chmod 444 $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz
 
 bin_zip:
-	$(LK) $(LOF)$(TARGET).exe $(LFLAGS) $(LIBS) -mwindows $(OBJECTS) $(LIBN)
+	$(LK) $(LOF)$(TARGET).exe $(LFLAGS) $(LIBS) -mwindows $(OBJECTS) icon.o $(LIBN)
 	rm -f $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip
 	zip $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip *.exe *.dll res/*.*
 

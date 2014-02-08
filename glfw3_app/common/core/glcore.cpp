@@ -317,15 +317,15 @@ namespace gl {
 
         // 垂直同期を有効にする。
 		if(glfwExtensionSupported("WGL_EXT_swap_control") == GL_TRUE) {
-///			printf("`WGL_EXT_swap_control` OK\n");
-			void (*p)() = glfwGetProcAddress("wglSwapIntervalEXT");
+//			std::cout << "`WGL_EXT_swap_control` OK" << std::endl;
+			bool (*p)(int) = (bool (*)(int)) glfwGetProcAddress("wglSwapIntervalEXT");
 			if(p) {
-///				printf("Swap Interval: OK\n");
+				(*p)(1);
+//				std::cout << "Swap Interval: OK" << std::endl;
 			}
 	    } else {
-///			printf("`WGL_EXT_swap_control` NO\n");
+//			std::cout << "`WGL_EXT_swap_control` NO" << std::endl;
 		}
-///		fflush(stdout);
 
 		glfwSwapInterval(1);
 
@@ -435,8 +435,6 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	void glcore::flip_frame()
 	{
-        glfwSwapBuffers(window_);
-
 #ifdef WIN32
 		if(cpu_ghz_ > 0.0) {
 			double ref = machine_cycle_;
@@ -476,6 +474,7 @@ namespace gl {
             }
         }
 #endif
+        glfwSwapBuffers(window_);
 	}
 
 

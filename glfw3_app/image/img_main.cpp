@@ -26,6 +26,7 @@ namespace app {
 		{ // 画像ファイル表示用フレーム
 			widget::param wp(vtx::srect(30, 30, 256, 256));
 			widget_frame::param wp_;
+			wp_.plate_param_.set_caption(24);
 			frame_ = wd.add_widget<widget_frame>(wp, wp_);
 		}
 		{ // 画像ファイル表示イメージ
@@ -34,22 +35,45 @@ namespace app {
 			image_ = wd.add_widget<widget_image>(wp, wp_);
 			image_->set_state(widget::state::CLIP_PARENTS);
 			image_->set_state(widget::state::RESIZE_ROOT);
+			image_->set_state(widget::state::MOVE_ROOT, false);
 		}
 
 		{ // 機能ツールパレット
-			widget::param wp(vtx::srect(10, 10, 150, 300));
+			widget::param wp(vtx::srect(10, 10, 130, 300));
 			widget_frame::param wp_;
 			tools_ = wd.add_widget<widget_frame>(wp, wp_);
+			tools_->set_state(widget::state::SIZE_LOCK);
 		}
 		{ // ファイラー起動ボタン
 			widget::param wp(vtx::srect(10, 10, 100, 40), tools_);
 			widget_button::param wp_("file");
 			open_ = wd.add_widget<widget_button>(wp, wp_);
 		}
-		{ // スケールチェックボックス
-			widget::param wp(vtx::srect(10, 60, 100, 40), tools_);
-			widget_check::param wp_("scale");
-			scale_ = wd.add_widget<widget_check>(wp, wp_);	
+		{ // スケール FIT
+			widget::param wp(vtx::srect(10, 60+30*0, 90, 30), tools_);
+			widget_radio::param wp_("fit");
+			wp_.check_ = true;
+			scale_fit_ = wd.add_widget<widget_radio>(wp, wp_);	
+		}
+		{ // スケール 1X
+			widget::param wp(vtx::srect(10, 60+30*1, 90, 30), tools_);
+			widget_radio::param wp_("1x");
+			scale_1x_ = wd.add_widget<widget_radio>(wp, wp_);	
+		}
+		{ // スケール 2X
+			widget::param wp(vtx::srect(10, 60+30*2, 90, 30), tools_);
+			widget_radio::param wp_("2x");
+			scale_2x_ = wd.add_widget<widget_radio>(wp, wp_);	
+		}
+		{ // スケール 3X
+			widget::param wp(vtx::srect(10, 60+30*3, 90, 30), tools_);
+			widget_radio::param wp_("3x");
+			scale_3x_ = wd.add_widget<widget_radio>(wp, wp_);	
+		}
+		{ // スケール 4X
+			widget::param wp(vtx::srect(10, 60+30*4, 90, 30), tools_);
+			widget_radio::param wp_("4x");
+			scale_4x_ = wd.add_widget<widget_radio>(wp, wp_);	
 		}
 
 		{ // ファイラー本体
@@ -69,12 +93,14 @@ namespace app {
 
 		// プリファレンスの取得
 		sys::preference& pre = director_.at().preference_;
-		if(filer_) {
-			filer_->load(pre);
-			frame_->load(pre);
-			tools_->load(pre);
-			scale_->load(pre);
-		}
+		if(filer_) filer_->load(pre);
+		if(frame_) frame_->load(pre);
+		if(tools_) tools_->load(pre);
+		if(scale_fit_) scale_fit_->load(pre);
+		if(scale_1x_) scale_1x_->load(pre);
+		if(scale_2x_) scale_2x_->load(pre);
+		if(scale_3x_) scale_3x_->load(pre);
+		if(scale_4x_) scale_4x_->load(pre);
 	}
 
 
@@ -100,6 +126,8 @@ namespace app {
 		}
 
 		if(filer_) {
+			wd.top_widget(filer_);
+
 			if(filer_id_ != filer_->get_select_file_id()) {
 				filer_id_ = filer_->get_select_file_id();
 
@@ -109,6 +137,8 @@ namespace app {
 						+ filer_->get_file() + "'");
 					dialog_->enable();
 				} else {
+					image_offset_.set(0.0f);
+					frame_->at_local_param().text_param_.text_ = filer_->get_file();
 					mobj_.destroy();
 					mobj_.initialize();
 					img_handle_ = mobj_.install(imf.get_image_if());
@@ -124,14 +154,30 @@ namespace app {
 		if(frame_ && image_) {
 			vtx::spos ofs(frame_->get_local_param().plate_param_.frame_width_);
 			image_->at_rect().org = ofs;
+			image_->at_rect().org.y += frame_->get_local_param().plate_param_.caption_width_;
 			image_->at_rect().size = frame_->get_rect().size - ofs * 2;
+			image_->at_rect().size.y -= frame_->get_local_param().plate_param_.caption_width_;
 
 			float s = 1.0f;
-			if(scale_->get_check()) {
+			if(scale_fit_->get_check()) {
 				vtx::fpos is = mobj_.get_size(img_handle_);
 				vtx::fpos ss = image_->at_rect().size;
 				vtx::fpos sc = ss / is;
 				if(sc.x < sc.y) s = sc.x; else s = sc.y;
+				image_->at_local_param().offset_ = 0.0f;
+			} else {
+				if(scale_1x_->get_check()) s = 1.0f;
+ 				else if(scale_2x_->get_check()) s = 2.0f;
+ 				else if(scale_3x_->get_check()) s = 3.0f;
+ 				else if(scale_4x_->get_check()) s = 4.0f;
+
+				if(image_->get_select_in()) {
+					image_offset_ = image_->get_local_param().offset_;
+				}
+				if(image_->get_select()) {
+					vtx::spos d = image_->get_param().move_pos_ - image_->get_param().move_org_;
+					image_->at_local_param().offset_ = image_offset_ + d / s;
+				}
 			}
 			image_->at_local_param().scale_ = s;
 		}
@@ -160,11 +206,13 @@ namespace app {
 	void img_main::destroy()
 	{
 		sys::preference& pre = director_.at().preference_;
-		if(filer_) {
-			filer_->save(pre);
-			frame_->save(pre);
-			tools_->save(pre);
-			scale_->save(pre);
-		}
+		if(filer_) filer_->save(pre);
+		if(frame_) frame_->save(pre);
+		if(tools_) tools_->save(pre);
+		if(scale_fit_) scale_fit_->save(pre);
+		if(scale_1x_) scale_1x_->save(pre);
+		if(scale_2x_) scale_2x_->save(pre);
+		if(scale_3x_) scale_3x_->save(pre);
+		if(scale_4x_) scale_4x_->save(pre);
 	}
 }

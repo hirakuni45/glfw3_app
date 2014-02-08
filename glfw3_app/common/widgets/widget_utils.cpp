@@ -109,7 +109,7 @@ namespace gui {
 			pa.set_round(rd);
 			pa.swap_color();
 			pa.alpha_blend();
-			pa.fill_rect(wf, wf, size.x - 2 * wf, size.y - 2 * wf, cp.ir_enable_);
+			pa.fill_rect(wf, wf + pp.caption_width_, size.x - 2 * wf, size.y - 2 * wf - pp.caption_width_, cp.ir_enable_);
 			mix_round_(pa, cp, pp);
 		} else {
 			pa.set_intensity_rect(cp.inten_rect_);

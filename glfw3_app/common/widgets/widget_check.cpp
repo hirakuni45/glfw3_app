@@ -77,11 +77,11 @@ namespace gui {
 			const vtx::spos& mosz = wd_.at_mobj().get_size(h);
 			vtx::spos ofs(0, (wp.rect_.size.y - mosz.y) / 2);
 			if(wp.state_[widget::state::CLIP_PARENTS]) {
-				draw_mobj(wd_, h, wp.clip_, ofs);
+				if(param_.draw_box_) draw_mobj(wd_, h, wp.clip_, ofs);
 				rect.org  = wp.rpos_;
 				rect.size = wp.rect_.size;
 			} else {
-				wd_.at_mobj().draw(h, gl::mobj::attribute::normal, ofs.x, ofs.y);
+				if(param_.draw_box_) wd_.at_mobj().draw(h, gl::mobj::attribute::normal, ofs.x, ofs.y);
 				rect.org.set(0);
 				rect.size = wp.rect_.size;
 			}

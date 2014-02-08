@@ -407,6 +407,7 @@ namespace gui {
 			main_ = wd_.add_widget<widget_null>(wp, wp_);
 			main_->set_state(widget::state::POSITION_LOCK);
 			main_->set_state(widget::state::SIZE_LOCK);
+			main_->set_state(widget::state::RESIZE_ROOT);
 		}
 
 		// files null frame
@@ -418,6 +419,7 @@ namespace gui {
 			files_ = wd_.add_widget<widget_null>(wp, wp_);
 			files_->set_state(widget::state::CLIP_PARENTS);
 			files_->set_state(widget::state::SIZE_LOCK);
+			files_->set_state(widget::state::RESIZE_ROOT);
 		}
 
 		position_.set(0.0f);

@@ -7,6 +7,7 @@
 #include "gl_fw/IGLcore.hpp"
 #include "widgets/widget_tree.hpp"
 #include "widgets/widget_utils.hpp"
+#include <stack>
 
 namespace gui {
 
@@ -21,7 +22,7 @@ namespace gui {
 		BOOST_FOREACH(tree_unit::unit_map_it it, its) {
 			if(!it->second.value.path_) {
 				widget::param wp(r, this);
-				widget_check::param wp_(it->first);
+				widget_check::param wp_(utils::get_file_name(it->first));
 				wp_.type_ = widget_check::style::MINUS_PLUS;
 				widget_check* w = wd_.add_widget<widget_check>(wp, wp_);
 				w->set_state(widget::state::POSITION_LOCK);
@@ -110,24 +111,36 @@ namespace gui {
 		tree_unit::unit_map_its its;
 		tree_unit_.create_list("", its);
 		vtx::spos pos(param_.plate_param_.frame_width_);
+		std::stack<bool> open_stack;
+		bool open = true;
+		uint32_t nest = 1;
 		BOOST_FOREACH(tree_unit::unit_map_it it, its) {
 			widget_check* w = it->second.value.path_;
 			if(w == 0) continue;
-
-			w->at_rect().org = pos;
-			if(w->get_check() != it->second.value.open_) {
-				it->second.value.open_ = w->get_check();
+			uint32_t n = utils::count_char(it->first, '/');
+			bool draw = open;
+			if(n <= 1) {
+				draw = true;
+				open = w->get_check();
+			}
+			wd_.enable(w, draw);
+			if(draw) {
+				w->at_local_param().draw_box_ = tree_unit_.is_directory(it);
+				pos.x = (n - 1) * param_.height_;
+				w->at_rect().org = pos;
+				pos.y += param_.height_;
 			}
 			if(tree_unit_.is_directory(it)) {
-				pos.y += param_.height_;
-			} else {
-				if(it->second.value.open_) {
-					wd_.enable(w);
-					pos.y += param_.height_;
-				} else {
-					wd_.enable(w, false);
+				open_stack.push(open);
+				if(open) {
+					open = w->get_check();
 				}
 			}
+			if(nest > n) {
+				open = open_stack.top();
+				open_stack.pop();
+			}
+			nest = n;
 		}
 	}
 

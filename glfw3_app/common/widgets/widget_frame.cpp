@@ -4,6 +4,7 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
+#include "gl_fw/IGLcore.hpp"
 #include "widgets/widget_frame.hpp"
 #include "widgets/widget_utils.hpp"
 
@@ -16,7 +17,7 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_frame::initialize()
 	{
-		// 自由な大きさの変更
+		// 標準的設定（自由な大きさの変更）
 		at_param().state_.set(widget::state::SIZE_LOCK, false);
 		at_param().state_.set(widget::state::RESIZE_H_ENABLE);
 		at_param().state_.set(widget::state::RESIZE_V_ENABLE);
@@ -51,6 +52,33 @@ namespace gui {
 		wd_.at_mobj().resize(objh_, get_param().rect_.size);
 		glEnable(GL_TEXTURE_2D);
 		wd_.at_mobj().draw(objh_, gl::mobj::attribute::normal, 0, 0);
+
+		if(param_.plate_param_.caption_width_ <= 0) return;
+		if(param_.text_param_.text_.empty()) return;
+ 
+		using namespace gl;
+		IGLcore* igl = get_glcore();
+		const vtx::spos& size = igl->get_size();
+		const widget::param& wp = get_param();
+
+		glPushMatrix();
+
+		vtx::srect rect;
+		rect.org.set(0);
+		rect.size.set(get_rect().size.x, param_.plate_param_.caption_width_);
+
+		widget::text_param tmp = param_.text_param_;
+		const img::rgbaf& cf = wd_.get_color();
+		tmp.fore_color_ *= cf.r;
+		tmp.fore_color_.alpha_scale(cf.a);
+		tmp.shadow_color_ *= cf.r;
+		tmp.shadow_color_.alpha_scale(cf.a);
+		draw_text(tmp, rect, wp.clip_);
+
+		igl->at_fonts().restore_matrix();
+
+		glPopMatrix();
+		glViewport(0, 0, size.x, size.y);
 	}
 
 

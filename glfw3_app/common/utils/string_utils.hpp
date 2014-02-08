@@ -593,4 +593,20 @@ namespace utils {
 	//-----------------------------------------------------------------//
 	void ext_filter_path(const strings& src, const std::string& ext, strings& dst, bool cap = true);
 
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	キャラクターをカウントする
+		@param[in]	s	文字列
+		@param[in]	ch	カウントする文字
+		@return 数
+	*/
+	//-----------------------------------------------------------------//
+	inline uint32_t count_char(const std::string& s, char ch) {
+		uint32_t cnt = 0;
+		BOOST_FOREACH(char c, s) {
+			if(c == ch) ++cnt;
+		}
+		return cnt;
+	}
 }
