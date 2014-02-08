@@ -162,6 +162,13 @@ namespace app {
 				v.data_ = "BBB";
 				tu.install("sub1", v);
 			}
+			tu.make_directory("sub2");
+			tu.set_current_path("sub2");
+			{
+				widget_tree::value v;
+				v.data_ = "CCC";
+				tu.install("sub-sub", v);
+			}
 			tu.set_current_path("/root1");
 			{
 				widget_tree::value v;
