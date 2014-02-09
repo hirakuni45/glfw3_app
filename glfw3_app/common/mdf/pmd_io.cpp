@@ -192,7 +192,7 @@ namespace mdf {
 		if(!fio.get(n)) {
 			return false;
 		}
-///		std::cout << "Bone disp list num: " << static_cast<int>(n) << std::endl;
+		std::cout << "Bone disp list num: " << static_cast<int>(n) << std::endl;
 
 		bone_disp_list_.reserve(n);
 		bone_disp_list_.clear();
@@ -203,9 +203,9 @@ namespace mdf {
 			}
 			bone_disp_list_.push_back(bdl);
 
-///			std::string s;
-///			get_text_(bdl.name, 50, s);
-///			std::cout << "Bone disp list: " << s << std::endl;
+			std::string s;
+			get_text_(bdl.name, 50, s);
+			std::cout << "Bone disp list: " << s << std::endl;
 		}
 		return true;
 	}

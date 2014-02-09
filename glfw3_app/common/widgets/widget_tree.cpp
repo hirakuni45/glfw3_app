@@ -29,6 +29,7 @@ namespace gui {
 				w->set_state(widget::state::MOVE_ROOT);
 				w->set_state(widget::state::RESIZE_ROOT);
 				w->set_state(widget::state::DRAG_UNSELECT);
+				w->set_state(widget::state::CLIP_PARENTS);
 				if(tree_unit_.is_directory(it)) {
 					r.org.y += param_.height_;
 				} else {

@@ -137,6 +137,8 @@ namespace app {
 
 		camera_.service();
 
+// glActiveTexture(0);
+
 		if(grid_->get_check()) {
 			glDisable(GL_TEXTURE_2D);
 			glEnable(GL_LINE_SMOOTH);
