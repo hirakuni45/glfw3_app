@@ -31,10 +31,13 @@ namespace gui {
 
 			int			height_;		///< ユニットの高さ
 
+			bool		single_;		///< シングル選択の場合「true」
+
 			param() :
 				plate_param_(),
 				color_param_(widget_director::default_tree_color_),
-				height_(28)
+				height_(28),
+				single_(true)
 			{ }
 		};
 

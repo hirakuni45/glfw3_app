@@ -77,6 +77,18 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_tree::update()
 	{
+		if(param_.single_) {
+			tree_unit::unit_map_its its;
+			tree_unit_.create_list("", its);
+			BOOST_FOREACH(tree_unit::unit_map_it it, its) {
+				widget_check* w = it->second.value.path_;
+				if(w == 0) continue;
+				if(tree_unit_.is_directory(it)) continue;
+				if(w->get_select_in()) {
+
+				}
+			}
+		}
 	}
 
 
