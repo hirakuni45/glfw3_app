@@ -53,9 +53,9 @@ namespace app {
 			widget_check::param wp_("ボーン");
 			bone_ = wd.add_widget<widget_check>(wp, wp_);
 		}
-#if 0
-		if(1) {	// ツリー
-			widget::param wp(vtx::srect(200, 400, 100, 100));
+
+		{	// ツリー
+			widget::param wp(vtx::srect(20, 400, 100, 100));
 			widget_tree::param wp_;
 			tree_ = wd.add_widget<widget_tree>(wp, wp_);
 
@@ -72,9 +72,7 @@ namespace app {
 				v.data_ = "BBB";
 				tu.install("sub1", v);
 			}
-			tu.list_all();
 		}
-#endif
 
 		// ボーン表示用ライトの設定
 		bone_light_ = light_.create();
