@@ -271,6 +271,8 @@ namespace mdf {
 		void initialize_();
 		void destroy_();
 
+		static void get_text_(const char* src, uint32_t n, std::string& dst);
+
 		std::string	current_path_;
 
 		struct vbo_t {
@@ -427,6 +429,56 @@ namespace mdf {
 		*/
 		//-----------------------------------------------------------------//
 		void render_bone(gl::light& lig);
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	「bone」数の取得
+			@return 数
+		*/
+		//-----------------------------------------------------------------//
+		uint32_t get_bone_num() const { return bone_.size(); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	「bone」名の取得
+			@param[in]	n	インデックス
+			@param[out]	s	名前を受け取る参照
+		*/
+		//-----------------------------------------------------------------//
+		void get_bone_name(uint32_t n, std::string& s) const {
+			const pmd_bone& t = bone_[n];
+			get_text_(t.name, sizeof(t.name), s);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	「bone_disp_list」数の取得
+			@return 数
+		*/
+		//-----------------------------------------------------------------//
+		uint32_t get_bone_disp_list_num() const { return bone_disp_list_.size(); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	「bone_disp_list」名の取得
+			@param[in]	n	インデックス
+			@param[out]	s	名前を受け取る参照
+		*/
+		//-----------------------------------------------------------------//
+		void get_bone_disp_list_name(uint32_t n, std::string& s) const {
+			const pmd_bone_disp_list& t = bone_disp_list_[n];
+			get_text_(t.name, sizeof(t.name), s);
+		}
+
+
+
+
+
+
 
 	};
 }
