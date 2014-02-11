@@ -8,6 +8,7 @@
 #include "pcm.hpp"
 #include <boost/foreach.hpp>
 #include "img_io/img_utils.hpp"
+#include <iostream>
 
 namespace al {
 
@@ -441,6 +442,7 @@ namespace al {
 		tag_.clear();
 		if(mp3_tag_.open(fin)) {
 			mp3_tag_.decode();
+
 			ofs = mp3_tag_.get_skip_head();
 			tag_.title_  = mp3_tag_.get_text(mp3::mp3_tag::id3_t::title);
 			tag_.artist_ = mp3_tag_.get_text(mp3::mp3_tag::id3_t::artist);
@@ -449,6 +451,12 @@ namespace al {
 			tag_.disc_   = mp3_tag_.get_text(mp3::mp3_tag::id3_t::disc);
 			tag_.track_  = mp3_tag_.get_text(mp3::mp3_tag::id3_t::track);
 			tag_.date_   = mp3_tag_.get_text(mp3::mp3_tag::id3_t::release_year);
+
+			if(tag_.title_.empty()) {
+				// tag 情報が無い場合、ファイル名を曲名としておく
+				utils::get_file_base(utils::get_file_name(fin.get_path()), tag_.title_);
+			}	
+
 			delete tag_.image_;
 			if(mp3_tag_.get_image_if()) {
 				tag_.image_  = img::copy_image(mp3_tag_.get_image_if());
@@ -460,7 +468,8 @@ namespace al {
 			mp3_tag_.close();	// ここでファイルはクローズしてしまう・・
 			fin.close();
 			fin.re_open();
-		}		
+		}
+
 		if(!fin.is_open()) {
 			return false;
 		}
