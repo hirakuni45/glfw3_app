@@ -152,11 +152,7 @@ namespace app {
 
 		// frame 内 image のサイズを設定
 		if(frame_ && image_) {
-			vtx::spos ofs(frame_->get_local_param().plate_param_.frame_width_);
-			image_->at_rect().org = ofs;
-			image_->at_rect().org.y += frame_->get_local_param().plate_param_.caption_width_;
-			image_->at_rect().size = frame_->get_rect().size - ofs * 2;
-			image_->at_rect().size.y -= frame_->get_local_param().plate_param_.caption_width_;
+			image_->at_rect() = frame_->get_draw_area();
 
 			float s = 1.0f;
 			if(scale_fit_->get_check()) {
