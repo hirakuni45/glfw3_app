@@ -26,7 +26,6 @@ namespace gui {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
-			plate_param	plate_param_;	///< プレート・パラメーター
 			color_param	color_param_;	///< カラー・パラメーター
 
 			int			height_;		///< ユニットの高さ
@@ -34,7 +33,6 @@ namespace gui {
 			bool		single_;		///< シングル選択の場合「true」
 
 			param() :
-				plate_param_(),
 				color_param_(widget_director::default_tree_color_),
 				height_(28),
 				single_(true)
@@ -69,8 +67,6 @@ namespace gui {
 		uint32_t			serial_id_;
 		uint32_t			unit_num_;
 
-		gl::mobj::handle	objh_;
-
 		void create_();
 		void destroy_();
 
@@ -82,8 +78,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_tree(widget_director& wd, const widget::param& bp, const param& p) :
 			wd_(wd), widget(bp), param_(p),
-			tree_unit_(), serial_id_(0), unit_num_(0),
-			objh_(0)
+			tree_unit_(), serial_id_(0), unit_num_(0)
 			{ }
 
 

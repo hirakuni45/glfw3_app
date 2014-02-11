@@ -96,11 +96,27 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	個別パラメーターへの取得
+			@brief	個別パラメーターへの取得(rw)
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
 		param& at_local_param() { return param_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	描画領域の取得
+			@return 描画領域
+		*/
+		//-----------------------------------------------------------------//
+		const vtx::srect& get_draw_area() const {
+			static vtx::srect area;
+			short ofs = param_.plate_param_.frame_width_;
+			area.org.set(ofs, ofs + param_.plate_param_.caption_width_);
+			area.size.x = get_rect().size.x - ofs * 2;
+			area.size.y = get_rect().size.y - ofs * 2 - param_.plate_param_.caption_width_;
+			return area;
+		}
 
 
 		//-----------------------------------------------------------------//

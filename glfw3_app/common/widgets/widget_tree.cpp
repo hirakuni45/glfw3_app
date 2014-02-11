@@ -14,7 +14,7 @@ namespace gui {
 	void widget_tree::create_()
 	{
 		vtx::srect r;
-		r.org.set(param_.plate_param_.frame_width_);
+		r.org.set(0);
 		r.size.x = get_rect().size.x;
 		r.size.y = param_.height_;
 		tree_unit::unit_map_its its;
@@ -63,10 +63,6 @@ namespace gui {
 		at_param().state_.set(widget::state::RESIZE_H_ENABLE);
 		at_param().state_.set(widget::state::RESIZE_V_ENABLE);
 		at_param().state_.set(widget::state::SERVICE);
-
-		param_.plate_param_.resizeble_ = true;
-		// フレームの生成
-		objh_ = frame_init(wd_, at_param(), param_.plate_param_, param_.color_param_);
 	}
 
 
@@ -99,11 +95,6 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_tree::render()
 	{
-		if(objh_ == 0) return;
-
-		wd_.at_mobj().resize(objh_, get_param().rect_.size);
-		glEnable(GL_TEXTURE_2D);
-		wd_.at_mobj().draw(objh_, gl::mobj::attribute::normal, 0, 0);
 	}
 
 
@@ -123,7 +114,7 @@ namespace gui {
 
 		tree_unit::unit_map_its its;
 		tree_unit_.create_list("", its);
-		vtx::spos pos(param_.plate_param_.frame_width_);
+		vtx::spos pos(0);
 		std::stack<bool> open_stack;
 		bool open = true;
 		uint32_t nest = 1;
@@ -167,6 +158,7 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	bool widget_tree::save(sys::preference& pre)
 	{
+#if 0
 		std::string path;
 		path += '/';
 		path += wd_.create_widget_name(this);
@@ -176,6 +168,8 @@ namespace gui {
 		if(!pre.put_position(path + "/size", vtx::ipos(get_rect().size))) ++err;
 
 		return err == 0;
+#endif
+		return false;
 	}
 
 
@@ -188,6 +182,7 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	bool widget_tree::load(const sys::preference& pre)
 	{
+#if 0
 		std::string path;
 		path += '/';
 		path += wd_.create_widget_name(this);
@@ -206,5 +201,7 @@ namespace gui {
 		}
 
 		return err == 0;
+#endif
+		return false;
 	}
 }
