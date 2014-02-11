@@ -27,6 +27,8 @@ namespace app {
 		{ // 画像ファイル表示用フレーム
 			widget::param wp(vtx::srect(30, 30, 256, 256));
 			widget_frame::param wp_;
+			wp_.plate_param_.caption_width_ = 24;
+			wp_.text_param_.text_ = "元画像";
 			src_frame_ = wd.add_widget<widget_frame>(wp, wp_);
 		}
 		{ // 画像ファイル表示イメージ
@@ -36,11 +38,14 @@ namespace app {
 			src_image_ = wd.add_widget<widget_image>(wp, wp_);
 			src_image_->set_state(widget::state::CLIP_PARENTS);
 			src_image_->set_state(widget::state::RESIZE_ROOT);
+			src_image_->set_state(widget::state::MOVE_ROOT, false);
 		}
 
 		{ // 画像ファイル表示用フレーム
 			widget::param wp(vtx::srect(60, 60, 256, 256));
 			widget_frame::param wp_;
+			wp_.plate_param_.caption_width_ = 24;
+			wp_.text_param_.text_ = "変換後";
 			dst_frame_ = wd.add_widget<widget_frame>(wp, wp_);
 		}
 		{ // 画像ファイル表示イメージ
@@ -50,6 +55,7 @@ namespace app {
 			dst_image_ = wd.add_widget<widget_image>(wp, wp_);
 			dst_image_->set_state(widget::state::CLIP_PARENTS);
 			dst_image_->set_state(widget::state::RESIZE_ROOT);
+			dst_image_->set_state(widget::state::MOVE_ROOT, false);
 		}
 
 
@@ -167,9 +173,7 @@ namespace app {
 #endif
 		// frame 内 image のサイズを設定
 		if(src_frame_ && src_image_) {
-			vtx::spos ofs(src_frame_->get_local_param().plate_param_.frame_width_);
-			src_image_->at_rect().org = ofs;
-			src_image_->at_rect().size = src_frame_->get_rect().size - ofs * 2;
+			src_image_->at_rect() = src_frame_->get_draw_area();
 
 			float s = 1.0f;
 			if(scale_->get_check()) {
@@ -179,6 +183,15 @@ namespace app {
 				if(sc.x < sc.y) s = sc.x; else s = sc.y;
 			}
 			src_image_->at_local_param().scale_ = s;
+
+			if(src_image_->get_select_in()) {
+				wd.top_widget(src_frame_);
+				src_image_offset_ = src_image_->get_local_param().offset_;
+			}
+			if(src_image_->get_select()) {
+				vtx::spos d = src_image_->get_param().move_pos_ - src_image_->get_param().move_org_;
+				src_image_->at_local_param().offset_ = src_image_offset_ + d / s;
+			}
 		}
 
 		// BDF ファイルの複数ページ対応
@@ -196,9 +209,7 @@ namespace app {
 		}
 
 		if(dst_frame_ && dst_image_) {
-			vtx::spos ofs(dst_frame_->get_local_param().plate_param_.frame_width_);
-			dst_image_->at_rect().org = ofs;
-			dst_image_->at_rect().size = dst_frame_->get_rect().size - ofs * 2;
+			dst_image_->at_rect() = dst_frame_->get_draw_area();
 
 			float s = 1.0f;
 			if(scale_->get_check()) {
@@ -208,6 +219,15 @@ namespace app {
 				if(sc.x < sc.y) s = sc.x; else s = sc.y;
 			}
 			dst_image_->at_local_param().scale_ = s;
+
+			if(dst_image_->get_select_in()) {
+				wd.top_widget(dst_frame_);
+				dst_image_offset_ = dst_image_->get_local_param().offset_;
+			}
+			if(dst_image_->get_select()) {
+				vtx::spos d = dst_image_->get_param().move_pos_ - dst_image_->get_param().move_org_;
+				dst_image_->at_local_param().offset_ = dst_image_offset_ + d / s;
+			}
 		}
 
 		wd.update();

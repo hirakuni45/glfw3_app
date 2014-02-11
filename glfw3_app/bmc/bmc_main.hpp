@@ -50,6 +50,9 @@ namespace app {
 		uint32_t	filer_id_;
 		uint32_t	bdf_page_no_;
 
+		vtx::fpos	src_image_offset_;
+		vtx::fpos	dst_image_offset_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -60,7 +63,8 @@ namespace app {
 			filer_(0), src_frame_(0), src_image_(0), dst_frame_(0), dst_image_(0),
 			tools_(0), open_(0), scale_(0),
 			dialog_(0), bdf_page_(0),
-			src_handle_(0), dst_handle_(0), filer_id_(0), bdf_page_no_(0)
+			src_handle_(0), dst_handle_(0), filer_id_(0), bdf_page_no_(0),
+			src_image_offset_(0.0f), dst_image_offset_(0.0f)
 		{ }
 
 
