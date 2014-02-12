@@ -117,7 +117,9 @@ namespace gui {
 
 			void set_caption(short width) {
 				caption_width_ = width;
-				grid_.set(width * 3);
+				short g = width + frame_width_;
+				if(g & 15) { g |= 15; ++g; }
+				grid_.set(g);
 			}
 
 			size_t hash() const {

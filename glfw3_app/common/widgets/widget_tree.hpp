@@ -67,6 +67,8 @@ namespace gui {
 		uint32_t			serial_id_;
 		uint32_t			unit_num_;
 
+		vtx::fpos			position_;
+
 		void create_();
 		void destroy_();
 
@@ -78,7 +80,8 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_tree(widget_director& wd, const widget::param& bp, const param& p) :
 			wd_(wd), widget(bp), param_(p),
-			tree_unit_(), serial_id_(0), unit_num_(0)
+			tree_unit_(), serial_id_(0), unit_num_(0),
+			position_(0.0f)
 			{ }
 
 

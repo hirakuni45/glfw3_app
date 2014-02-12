@@ -26,7 +26,7 @@ namespace gui {
 				wp_.type_ = widget_check::style::MINUS_PLUS;
 				widget_check* w = wd_.add_widget<widget_check>(wp, wp_);
 				w->set_state(widget::state::POSITION_LOCK);
-				w->set_state(widget::state::MOVE_ROOT);
+				w->set_state(widget::state::MOVE_ROOT, false);
 				w->set_state(widget::state::RESIZE_ROOT);
 				w->set_state(widget::state::DRAG_UNSELECT);
 				w->set_state(widget::state::CLIP_PARENTS);
@@ -39,7 +39,6 @@ namespace gui {
 			}
 		}
 	}
-
 
 	void widget_tree::destroy_()
 	{
@@ -59,10 +58,14 @@ namespace gui {
 	void widget_tree::initialize()
 	{
 		// 自由な大きさの変更
-		at_param().state_.set(widget::state::SIZE_LOCK, false);
-		at_param().state_.set(widget::state::RESIZE_H_ENABLE);
-		at_param().state_.set(widget::state::RESIZE_V_ENABLE);
+		at_param().state_.set(widget::state::POSITION_LOCK);
+		at_param().state_.set(widget::state::SIZE_LOCK);
+		at_param().state_.set(widget::state::RESIZE_H_ENABLE, false);
+		at_param().state_.set(widget::state::RESIZE_V_ENABLE, false);
 		at_param().state_.set(widget::state::SERVICE);
+		at_param().state_.set(widget::state::MOVE_ROOT, false);
+		at_param().state_.set(widget::state::RESIZE_ROOT);
+		at_param().state_.set(widget::state::CLIP_PARENTS);
 	}
 
 
@@ -73,6 +76,9 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_tree::update()
 	{
+
+
+
 		if(param_.single_) {
 			tree_unit::unit_map_its its;
 			tree_unit_.create_list("", its);
@@ -85,16 +91,6 @@ namespace gui {
 				}
 			}
 		}
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	レンダリング
-	*/
-	//-----------------------------------------------------------------//
-	void widget_tree::render()
-	{
 	}
 
 
@@ -114,7 +110,8 @@ namespace gui {
 
 		tree_unit::unit_map_its its;
 		tree_unit_.create_list("", its);
-		vtx::spos pos(0);
+		vtx::spos pos;
+		pos = position_;
 		std::stack<bool> open_stack;
 		bool open = true;
 		uint32_t nest = 1;
@@ -151,6 +148,16 @@ namespace gui {
 
 	//-----------------------------------------------------------------//
 	/*!
+		@brief	レンダリング
+	*/
+	//-----------------------------------------------------------------//
+	void widget_tree::render()
+	{
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
 		@brief	状態のセーブ
 		@param[in]	pre	プリファレンス参照
 		@return エラーが無い場合「true」
@@ -158,18 +165,20 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	bool widget_tree::save(sys::preference& pre)
 	{
-#if 0
 		std::string path;
 		path += '/';
 		path += wd_.create_widget_name(this);
 
 		int err = 0;
-		if(!pre.put_position(path + "/locate",  vtx::ipos(get_rect().org))) ++err;
-		if(!pre.put_position(path + "/size", vtx::ipos(get_rect().size))) ++err;
+		tree_unit::unit_map_its its;
+		tree_unit_.create_list("", its);
+		BOOST_FOREACH(tree_unit::unit_map_it it, its) {
+			widget_check* w = it->second.value.path_;
+			if(w == 0) continue;
+			
+		}
 
 		return err == 0;
-#endif
-		return false;
 	}
 
 
@@ -182,26 +191,19 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	bool widget_tree::load(const sys::preference& pre)
 	{
-#if 0
 		std::string path;
 		path += '/';
 		path += wd_.create_widget_name(this);
 
 		int err = 0;
-		vtx::ipos p;
-		if(pre.get_position(path + "/locate", p)) {
-			at_rect().org = p;
-		} else {
-			++err;
-		}
-		if(pre.get_position(path + "/size", p)) {
-			at_rect().size = p;
-		} else {
-			++err;
+		tree_unit::unit_map_its its;
+		tree_unit_.create_list("", its);
+		BOOST_FOREACH(tree_unit::unit_map_it it, its) {
+			widget_check* w = it->second.value.path_;
+			if(w == 0) continue;
+			
 		}
 
 		return err == 0;
-#endif
-		return false;
 	}
 }

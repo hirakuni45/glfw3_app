@@ -106,16 +106,14 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	描画領域の取得
-			@return 描画領域
+			@param[out]	area	描画領域の参照
 		*/
 		//-----------------------------------------------------------------//
-		const vtx::srect& get_draw_area() const {
-			static vtx::srect area;
+		void create_draw_area(vtx::srect& area) const {
 			short ofs = param_.plate_param_.frame_width_;
 			area.org.set(ofs, ofs + param_.plate_param_.caption_width_);
 			area.size.x = get_rect().size.x - ofs * 2;
 			area.size.y = get_rect().size.y - ofs * 2 - param_.plate_param_.caption_width_;
-			return area;
 		}
 
 
