@@ -12,6 +12,42 @@
 
 namespace app {
 
+	void pmdv_main::info_pmd_()
+	{
+		using namespace gui;
+		using namespace mdf;
+		{	// 廃棄
+			widget_tree::tree_unit t;
+			t.swap(tree_->at_tree_unit());
+		}
+
+		widget_tree::tree_unit& tu = tree_->at_tree_unit();
+
+		tu.make_directory("/bone");
+		tu.set_current_path("/bone");
+		for(uint32_t i = 0; i < pmd_io_.get_bone_num(); ++i) {
+			const pmd_io::pmd_bone& bone = pmd_io_.get_bone(i);
+			widget_tree::value v;
+			v.data_ = "0";
+			std::string s;
+			pmd_io::get_text_(bone.name, sizeof(bone.name), s);
+			tu.install(s, v);
+		}
+
+		tu.make_directory("/bone_disp");
+		tu.set_current_path("/bone");
+		for(uint32_t i = 0; i < pmd_io_.get_bone_num(); ++i) {
+			const pmd_io::pmd_bone& bone = pmd_io_.get_bone(i);
+			widget_tree::value v;
+			v.data_ = "0";
+			std::string s;
+			pmd_io::get_text_(bone.name, sizeof(bone.name), s);
+			tu.install(s, v);
+		}
+
+	}
+
+
 	//-----------------------------------------------------------------//
 	/*!
 		@brief  初期化
@@ -58,7 +94,7 @@ namespace app {
 			widget::param wp(vtx::srect(20, 400, 100, 100));
 			widget_tree::param wp_;
 			tree_ = wd.add_widget<widget_tree>(wp, wp_);
-
+#if 0
 			widget_tree::tree_unit& tu = tree_->at_tree_unit();
 			tu.make_directory("/root");
 			tu.set_current_path("root");
@@ -72,6 +108,7 @@ namespace app {
 				v.data_ = "BBB";
 				tu.install("sub1", v);
 			}
+#endif
 		}
 
 		// ボーン表示用ライトの設定
@@ -107,6 +144,7 @@ namespace app {
 			filer_id_ = filer_->get_select_file_id();
 
 			if(pmd_io_.load(filer_->get_file())) {
+				info_pmd_();
 				pmd_io_.render_setup();
 			} else if(pmx_io_.load(filer_->get_file())) {
 

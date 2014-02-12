@@ -144,11 +144,21 @@ namespace app {
 		}
 
 		if(1) {	// ツリーのテスト
-			widget::param wp(vtx::srect(400, 500, 200, 100));
-			widget_tree::param wp_;
-			tree_ = wd.add_widget<widget_tree>(wp, wp_);
+			{
+				widget::param wp(vtx::srect(400, 500, 200, 100));
+				widget_frame::param wp_;
+				wp_.plate_param_.set_caption(24);
+				tree_frame_ = wd.add_widget<widget_frame>(wp, wp_);
+			}
 
-			widget_tree::tree_unit& tu = tree_->at_tree_unit();
+			widget::param wp(vtx::srect(0), tree_frame_);
+			widget_tree::param wp_;
+			tree_core_ = wd.add_widget<widget_tree>(wp, wp_);
+			tree_core_->set_state(widget::state::CLIP_PARENTS);
+			tree_core_->set_state(widget::state::RESIZE_ROOT);
+			tree_core_->set_state(widget::state::MOVE_ROOT, false);
+
+			widget_tree::tree_unit& tu = tree_core_->at_tree_unit();
 			tu.make_directory("/root0");
 			tu.make_directory("/root1");
 			tu.set_current_path("/root0");
@@ -196,8 +206,8 @@ namespace app {
 		if(filer_) {
 			filer_->load(pre);
 		}
-		if(tree_) {
-			tree_->load(pre);
+		if(tree_frame_) {
+			tree_frame_->load(pre);
 		}
 		if(frame_) {
 			frame_->load(pre);
@@ -239,6 +249,10 @@ namespace app {
 			}
 		}
 
+		if(tree_core_) {
+			tree_frame_->create_draw_area(tree_core_->at_rect());
+		}
+
 		wd.update();
 	}
 
@@ -266,8 +280,8 @@ namespace app {
 		if(filer_) {
 			filer_->save(pre);
 		}
-		if(tree_) {
-			tree_->save(pre);
+		if(tree_frame_) {
+			tree_frame_->save(pre);
 		}
 		if(frame_) {
 			frame_->save(pre);

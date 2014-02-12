@@ -152,7 +152,7 @@ namespace app {
 
 		// frame 内 image のサイズを設定
 		if(frame_ && image_) {
-			image_->at_rect() = frame_->get_draw_area();
+			frame_->create_draw_area(image_->at_rect());
 
 			float s = 1.0f;
 			if(scale_fit_->get_check()) {

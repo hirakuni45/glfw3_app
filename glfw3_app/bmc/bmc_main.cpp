@@ -27,7 +27,7 @@ namespace app {
 		{ // 画像ファイル表示用フレーム
 			widget::param wp(vtx::srect(30, 30, 256, 256));
 			widget_frame::param wp_;
-			wp_.plate_param_.caption_width_ = 24;
+			wp_.plate_param_.set_caption(24);
 			wp_.text_param_.text_ = "元画像";
 			src_frame_ = wd.add_widget<widget_frame>(wp, wp_);
 		}
@@ -44,7 +44,7 @@ namespace app {
 		{ // 画像ファイル表示用フレーム
 			widget::param wp(vtx::srect(60, 60, 256, 256));
 			widget_frame::param wp_;
-			wp_.plate_param_.caption_width_ = 24;
+			wp_.plate_param_.set_caption(24);
 			wp_.text_param_.text_ = "変換後";
 			dst_frame_ = wd.add_widget<widget_frame>(wp, wp_);
 		}
@@ -173,7 +173,7 @@ namespace app {
 #endif
 		// frame 内 image のサイズを設定
 		if(src_frame_ && src_image_) {
-			src_image_->at_rect() = src_frame_->get_draw_area();
+			src_frame_->create_draw_area(src_image_->at_rect());
 
 			float s = 1.0f;
 			if(scale_->get_check()) {
@@ -209,7 +209,7 @@ namespace app {
 		}
 
 		if(dst_frame_ && dst_image_) {
-			dst_image_->at_rect() = dst_frame_->get_draw_area();
+			dst_frame_->create_draw_area(dst_image_->at_rect());
 
 			float s = 1.0f;
 			if(scale_->get_check()) {
