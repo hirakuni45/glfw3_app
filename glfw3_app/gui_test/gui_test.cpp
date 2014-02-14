@@ -145,9 +145,9 @@ namespace app {
 
 		if(1) {	// ツリーのテスト
 			{
-				widget::param wp(vtx::srect(400, 500, 200, 100));
+				widget::param wp(vtx::srect(400, 500, 200, 200));
 				widget_frame::param wp_;
-				wp_.plate_param_.set_caption(24);
+				wp_.plate_param_.set_caption(30);
 				tree_frame_ = wd.add_widget<widget_frame>(wp, wp_);
 			}
 

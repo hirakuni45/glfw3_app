@@ -26,7 +26,7 @@ namespace app {
 		{ // 画像ファイル表示用フレーム
 			widget::param wp(vtx::srect(30, 30, 256, 256));
 			widget_frame::param wp_;
-			wp_.plate_param_.set_caption(24);
+			wp_.plate_param_.set_caption(30);
 			frame_ = wd.add_widget<widget_frame>(wp, wp_);
 		}
 		{ // 画像ファイル表示イメージ
@@ -125,28 +125,41 @@ namespace app {
 			}
 		}
 
+		std::string imfn;
+		int id = igl->get_recv_file_id();
+		if(dd_id_ != id) {
+			dd_id_ = id;
+			const utils::strings& ss = igl->get_recv_file_path();
+			if(!ss.empty()) {
+				imfn = ss.back();
+			}
+		}
+
 		if(filer_) {
 			wd.top_widget(filer_);
 
 			if(filer_id_ != filer_->get_select_file_id()) {
 				filer_id_ = filer_->get_select_file_id();
+				imfn = filer_->get_file();
+			}
+		}
 
-				img::img_files& imf = wd.at_img_files();
-				if(!imf.load(filer_->get_file())) {
-					dialog_->set_text("Can't decode image file:\n '"
-						+ filer_->get_file() + "'");
-					dialog_->enable();
-				} else {
-					image_offset_.set(0.0f);
-					frame_->at_local_param().text_param_.text_ = filer_->get_file();
-					mobj_.destroy();
-					mobj_.initialize();
-					img_handle_ = mobj_.install(imf.get_image_if());
-					image_->at_local_param().mobj_ = mobj_;
-					image_->at_local_param().mobj_handle_ = img_handle_;
+		if(!imfn.empty()) {
+			img::img_files& imf = wd.at_img_files();
+			if(!imf.load(imfn)) {
+				dialog_->set_text("Can't decode image file:\n '"
+					+ filer_->get_file() + "'");
+				dialog_->enable();
+			} else {
+				image_offset_.set(0.0f);
+				frame_->at_local_param().text_param_.text_ = imfn;
+				mobj_.destroy();
+				mobj_.initialize();
+				img_handle_ = mobj_.install(imf.get_image_if());
+				image_->at_local_param().mobj_ = mobj_;
+				image_->at_local_param().mobj_handle_ = img_handle_;
 // imf.set_image_if(imf.get_image_if());
 // imf.save("test.jp2");
-				}
 			}
 		}
 

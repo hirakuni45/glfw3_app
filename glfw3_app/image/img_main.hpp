@@ -45,6 +45,7 @@ namespace app {
 		gl::mobj			mobj_;
 		gl::mobj::handle	img_handle_;
 
+		int			dd_id_;
 		uint32_t	filer_id_;
 
 		vtx::fpos	image_offset_;
@@ -60,7 +61,7 @@ namespace app {
 			tools_(0), open_(0),
 			scale_fit_(0), scale_1x_(0), scale_2x_(0), scale_3x_(0), scale_4x_(0),
 			dialog_(0),
-			img_handle_(0), filer_id_(0),
+			img_handle_(0), dd_id_(0), filer_id_(0),
 			image_offset_(0.0f)
 		{ }
 

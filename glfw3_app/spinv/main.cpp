@@ -10,21 +10,6 @@
 #include "utils/director.hpp"
 #include "gl_fw/glutils.hpp"
 
-#if 0
-void dropfiles(main_core& core)
-{
-	gl::IGLcore* igl = gl::get_glcore();
-
-	int id = igl->get_recv_file_id();
-	if(core.id_ != id) {
-		core.id_ = id;
-		const utils::strings& ss = igl->get_recv_file_path();
-		if(!ss.empty()) {
-		}
-	}
-}
-#endif
-
 int main(int argc, char** argv);
 
 int main(int argc, char** argv)

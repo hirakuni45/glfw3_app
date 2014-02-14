@@ -27,7 +27,7 @@ namespace app {
 		{ // 画像ファイル表示用フレーム
 			widget::param wp(vtx::srect(30, 30, 256, 256));
 			widget_frame::param wp_;
-			wp_.plate_param_.set_caption(24);
+			wp_.plate_param_.set_caption(30);
 			wp_.text_param_.text_ = "元画像";
 			src_frame_ = wd.add_widget<widget_frame>(wp, wp_);
 		}
@@ -44,7 +44,7 @@ namespace app {
 		{ // 画像ファイル表示用フレーム
 			widget::param wp(vtx::srect(60, 60, 256, 256));
 			widget_frame::param wp_;
-			wp_.plate_param_.set_caption(24);
+			wp_.plate_param_.set_caption(30);
 			wp_.text_param_.text_ = "変換後";
 			dst_frame_ = wd.add_widget<widget_frame>(wp, wp_);
 		}
@@ -139,6 +139,9 @@ namespace app {
 		const vtx::spos& size = igl->get_size();
 
 		gui::widget_director& wd = director_.at().widget_director_;
+
+		wd.update();
+
 #if 0
 		if(open_) {
 			if(open_->get_selected()) {
@@ -171,6 +174,7 @@ namespace app {
 			}
 		}
 #endif
+
 		// frame 内 image のサイズを設定
 		if(src_frame_ && src_image_) {
 			src_frame_->create_draw_area(src_image_->at_rect());
@@ -184,13 +188,15 @@ namespace app {
 			}
 			src_image_->at_local_param().scale_ = s;
 
-			if(src_image_->get_select_in()) {
-				wd.top_widget(src_frame_);
-				src_image_offset_ = src_image_->get_local_param().offset_;
-			}
-			if(src_image_->get_select()) {
-				vtx::spos d = src_image_->get_param().move_pos_ - src_image_->get_param().move_org_;
-				src_image_->at_local_param().offset_ = src_image_offset_ + d / s;
+			if(src_image_->get_focus()) {
+				if(src_image_->get_select_in()) {
+					wd.top_widget(src_frame_);
+					src_image_offset_ = src_image_->get_local_param().offset_;
+				}
+				if(src_image_->get_select()) {
+					vtx::spos d = src_image_->get_param().move_pos_ - src_image_->get_param().move_org_;
+					src_image_->at_local_param().offset_ = src_image_offset_ + d / s;
+				}
 			}
 		}
 
@@ -220,17 +226,18 @@ namespace app {
 			}
 			dst_image_->at_local_param().scale_ = s;
 
-			if(dst_image_->get_select_in()) {
-				wd.top_widget(dst_frame_);
-				dst_image_offset_ = dst_image_->get_local_param().offset_;
-			}
-			if(dst_image_->get_select()) {
-				vtx::spos d = dst_image_->get_param().move_pos_ - dst_image_->get_param().move_org_;
-				dst_image_->at_local_param().offset_ = dst_image_offset_ + d / s;
+			if(dst_image_->get_focus()) {
+				if(dst_image_->get_select_in()) {
+					wd.top_widget(dst_frame_);
+					dst_image_offset_ = dst_image_->get_local_param().offset_;
+				}
+				if(dst_image_->get_select()) {
+					vtx::spos d = dst_image_->get_param().move_pos_ - dst_image_->get_param().move_org_;
+					dst_image_->at_local_param().offset_ = dst_image_offset_ + d / s;
+				}
 			}
 		}
 
-		wd.update();
 	}
 
 
