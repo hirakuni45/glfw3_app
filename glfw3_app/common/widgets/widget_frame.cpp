@@ -23,6 +23,8 @@ namespace gui {
 		at_param().state_.set(widget::state::RESIZE_V_ENABLE);
 
 		param_.plate_param_.resizeble_ = true;
+		param_.text_param_.shadow_offset_.set(0);	// 通常「影」は付けない。
+		param_.text_param_.fore_color_.set(250, 250, 250);
 		at_param().resize_min_ = param_.plate_param_.grid_ * 3;
 
 		// フレームの生成
@@ -64,7 +66,7 @@ namespace gui {
 		glPushMatrix();
 
 		vtx::srect rect;
-		rect.org.set(0);
+		rect.org.set(param_.plate_param_.frame_width_);
 		rect.size.set(get_rect().size.x, param_.plate_param_.caption_width_);
 
 		widget::text_param tmp = param_.text_param_;

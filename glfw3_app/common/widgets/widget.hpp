@@ -117,7 +117,8 @@ namespace gui {
 
 			void set_caption(short width) {
 				caption_width_ = width;
-				short g = width + frame_width_;
+				// アンチエリアスを解消する為の隙間を取る
+				short g = width + frame_width_ + 2;
 				if(g & 15) { g |= 15; ++g; }
 				grid_.set(g);
 			}
