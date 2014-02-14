@@ -33,6 +33,7 @@ namespace gui {
 			std::pair<share_t, handle> t(k, h);
 			share_map_.insert(t);
 		}
+// std::cout << static_cast<int>(h) << std::endl;
 		return h;
 	}
 }

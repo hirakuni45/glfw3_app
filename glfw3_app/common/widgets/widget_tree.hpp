@@ -69,6 +69,9 @@ namespace gui {
 
 		vtx::fpos			position_;
 
+		uint32_t			select_id_;
+		tree_unit::unit_map_it	select_it_;
+
 		void create_();
 		void destroy_();
 
@@ -81,7 +84,7 @@ namespace gui {
 		widget_tree(widget_director& wd, const widget::param& bp, const param& p) :
 			wd_(wd), widget(bp), param_(p),
 			tree_unit_(), serial_id_(0), unit_num_(0),
-			position_(0.0f)
+			position_(0.0f), select_id_(0), select_it_()
 			{ }
 
 
@@ -153,6 +156,24 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		tree_unit& at_tree_unit() { return tree_unit_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	選択 ID を取得（メニューが選択されたら、ID が進む）
+			@return 選択 ID
+		*/
+		//-----------------------------------------------------------------//
+		uint32_t get_select_id() const { return select_id_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	選択メニューを取得
+			@return 選択メニュー
+		*/
+		//-----------------------------------------------------------------//
+		tree_unit::unit_map_it get_select_it() const { return select_it_; }
 
 
 		//-----------------------------------------------------------------//

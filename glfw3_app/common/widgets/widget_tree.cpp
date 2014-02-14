@@ -76,18 +76,29 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_tree::update()
 	{
-
-
-
 		if(param_.single_) {
 			tree_unit::unit_map_its its;
 			tree_unit_.create_list("", its);
+			widget_check* sel = 0;
 			BOOST_FOREACH(tree_unit::unit_map_it it, its) {
 				widget_check* w = it->second.value.path_;
 				if(w == 0) continue;
 				if(tree_unit_.is_directory(it)) continue;
-				if(w->get_select_in()) {
-
+				if(w->get_select_out()) {
+					sel = w;
+					break;
+				}
+			}
+			if(sel) {
+				BOOST_FOREACH(tree_unit::unit_map_it it, its) {
+					widget_check* w = it->second.value.path_;
+					if(w == 0) continue;
+					if(tree_unit_.is_directory(it)) continue;
+					if(w != sel) {
+						w->set_check(false);
+					} else {
+						select_it_ = it;
+					}
 				}
 			}
 		}

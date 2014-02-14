@@ -335,11 +335,12 @@ namespace gui {
 	{
 		vtx::spos size;
 		if(pp.resizeble_) {
-			vtx::spos rsz = pp.grid_ * 3;
-			if(wp.rect_.size.x >= rsz.x) size.x = rsz.x;
-			else size.x = wp.rect_.size.x;
-			if(wp.rect_.size.y >= rsz.y) size.y = rsz.y;
-			else size.y = wp.rect_.size.y;
+//			vtx::spos rsz = pp.grid_ * 3;
+//			if(wp.rect_.size.x >= rsz.x) size.x = rsz.x;
+//			else size.x = wp.rect_.size.x;
+//			if(wp.rect_.size.y >= rsz.y) size.y = rsz.y;
+//			else size.y = wp.rect_.size.y;
+			size = pp.grid_ * 3;
 		} else {
 			size = wp.rect_.size;
 		}
