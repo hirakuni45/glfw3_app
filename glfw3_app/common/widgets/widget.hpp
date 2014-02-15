@@ -116,9 +116,10 @@ namespace gui {
 				grid_(16), resizeble_(false) { }
 
 			void set_caption(short width) {
+				if(width <= 0) return;
 				caption_width_ = width;
 				// アンチエリアスを解消する為の隙間を取る
-				short g = width + frame_width_;
+				short g = width + frame_width_ + round_radius_ - frame_width_;
 				if(g & 15) { g |= 15; ++g; }
 				grid_.y = g;
 			}
@@ -249,6 +250,7 @@ namespace gui {
 
 				MOVE_ROOT,				///< 移動の選択権をルートに与える
 				RESIZE_ROOT,			///< リサイズの選択権をルートに与える
+				AREA_ROOT,				///< ルートの描画領域を継承
 
 				RESIZE_H_ENABLE,		///< 水平リサイズ許可
 				RESIZE_V_ENABLE,		///< 垂直リサイズ許可

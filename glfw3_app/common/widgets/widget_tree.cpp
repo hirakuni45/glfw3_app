@@ -6,6 +6,7 @@
 //=====================================================================//
 #include "gl_fw/IGLcore.hpp"
 #include "widgets/widget_tree.hpp"
+#include "widgets/widget_frame.hpp"
 #include "widgets/widget_utils.hpp"
 #include <stack>
 
@@ -21,6 +22,9 @@ namespace gui {
 		tree_unit_.create_list("", its);
 		BOOST_FOREACH(tree_unit::unit_map_it it, its) {
 			if(!it->second.value.path_) {
+				gl::IGLcore* igl = gl::get_glcore();
+				gl::fonts& fonts = igl->at_fonts();
+				r.size.x = fonts.get_width(utils::get_file_name(it->first)) + r.size.y + 8;
 				widget::param wp(r, this);
 				widget_check::param wp_(utils::get_file_name(it->first));
 				wp_.type_ = widget_check::style::MINUS_PLUS;
@@ -40,6 +44,7 @@ namespace gui {
 		}
 	}
 
+
 	void widget_tree::destroy_()
 	{
 		tree_unit::unit_map_its its;
@@ -57,7 +62,6 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_tree::initialize()
 	{
-		// 自由な大きさの変更
 		at_param().state_.set(widget::state::POSITION_LOCK);
 		at_param().state_.set(widget::state::SIZE_LOCK);
 		at_param().state_.set(widget::state::RESIZE_H_ENABLE, false);
@@ -66,6 +70,7 @@ namespace gui {
 		at_param().state_.set(widget::state::MOVE_ROOT, false);
 		at_param().state_.set(widget::state::RESIZE_ROOT);
 		at_param().state_.set(widget::state::CLIP_PARENTS);
+		at_param().state_.set(widget::state::AREA_ROOT);
 	}
 
 
@@ -76,6 +81,13 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_tree::update()
 	{
+		if(get_param().parents_ && get_state(widget::state::AREA_ROOT)) {
+			if(get_param().parents_->type() == get_type_id<widget_frame>()) {
+				widget_frame* w = static_cast<widget_frame*>(at_param().parents_);
+				w->create_draw_area(at_rect());
+			}
+		}
+
 		if(param_.single_) {
 			tree_unit::unit_map_its its;
 			tree_unit_.create_list("", its);

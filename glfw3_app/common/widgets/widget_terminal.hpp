@@ -25,21 +25,29 @@ namespace gui {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
-			plate_param		plate_param_;
 			color_param		color_param_;
+			text_param		text_param_;
 
-			param() : plate_param_(),
-				color_param_(widget_director::default_terminal_color_)
-			{ }
+			uint32_t		height_;
+			uint32_t		lines_;
+
+			param() : color_param_(widget_director::default_terminal_color_),
+				text_param_(),
+				height_(28), lines_(24)
+			{
+				text_param_.proportional_ = false;
+				text_param_.shadow_offset_.set(0);
+				text_param_.placement_.hpt = vtx::placement::holizontal::LEFT;
+			}
 		};
 
 		widget_director&	wd_;
 
 		param				param_;
 
-		gl::mobj::handle	objh_;
-
 		std::vector<widget_text*>	texts_;
+
+		void create_text_();
 
 	public:
 		//-----------------------------------------------------------------//
@@ -48,7 +56,7 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_terminal(widget_director& wd, const widget::param& bp, const param& p) :
-			wd_(wd), widget(bp), param_(p), objh_(0) { }
+			wd_(wd), widget(bp), param_(p) { }
 
 
 		//-----------------------------------------------------------------//

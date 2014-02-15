@@ -7,6 +7,7 @@
 #include "gl_fw/IGLcore.hpp"
 #include "gl_fw/glutils.hpp"
 #include "widgets/widget_image.hpp"
+#include "widgets/widget_frame.hpp"
 #include "widgets/widget_utils.hpp"
 #include "img_io/paint.hpp"
 #include "img_io/img_utils.hpp"
@@ -24,6 +25,7 @@ namespace gui {
 		at_param().state_.set(widget::state::POSITION_LOCK);
 		at_param().state_.set(widget::state::SIZE_LOCK);
 		at_param().state_.set(widget::state::MOVE_ROOT);
+		at_param().state_.set(widget::state::AREA_ROOT);
 
 		using namespace img;
 
@@ -65,6 +67,12 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_image::update()
 	{
+		if(get_param().parents_ && get_state(widget::state::AREA_ROOT)) {
+			if(get_param().parents_->type() == get_type_id<widget_frame>()) {
+				widget_frame* w = static_cast<widget_frame*>(at_param().parents_);
+				w->create_draw_area(at_rect());
+			}
+		}
 	}
 
 

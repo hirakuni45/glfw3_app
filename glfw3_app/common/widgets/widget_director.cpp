@@ -651,6 +651,7 @@ namespace gui {
 
 		// 最後に各部品の update 処理 
 		{
+			widget* top = 0;
 			widgets ws = widgets_;
 			BOOST_FOREACH(widget* w, ws) {
 				if(!w->get_state(widget::state::ENABLE)) continue;
@@ -658,7 +659,9 @@ namespace gui {
 				if(w->get_state(widget::state::UPDATE_ENABLE)) {
 					w->update();
 				}
+				top = w;
 			}
+			top_widget_ = root_widget(top);
 		}
 
 //		action_monitor();
