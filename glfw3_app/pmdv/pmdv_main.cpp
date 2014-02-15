@@ -91,24 +91,15 @@ namespace app {
 		}
 
 		{	// ツリー
-			widget::param wp(vtx::srect(20, 400, 100, 100));
+			widget::param wp(vtx::srect(20, 400, 200, 200));
+			widget_frame::param wp_;
+			wp_.plate_param_.set_caption(12);
+			tree_frame_ = wd.add_widget<widget_frame>(wp, wp_);
+		}
+		{
+			widget::param wp(vtx::srect(0), tree_frame_);
 			widget_tree::param wp_;
 			tree_ = wd.add_widget<widget_tree>(wp, wp_);
-#if 0
-			widget_tree::tree_unit& tu = tree_->at_tree_unit();
-			tu.make_directory("/root");
-			tu.set_current_path("root");
-			{
-				widget_tree::value v;
-				v.data_ = "AAA";
-				tu.install("sub0", v);
-			}
-			{
-				widget_tree::value v;
-				v.data_ = "BBB";
-				tu.install("sub1", v);
-			}
-#endif
 		}
 
 		// ボーン表示用ライトの設定
@@ -152,6 +143,8 @@ namespace app {
 
 			}
 		}
+
+
 
 		if(!wd.update()) {
 			camera_.update();

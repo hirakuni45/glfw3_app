@@ -177,8 +177,6 @@ namespace app {
 
 		// frame 内 image のサイズを設定
 		if(src_frame_ && src_image_) {
-			src_frame_->create_draw_area(src_image_->at_rect());
-
 			float s = 1.0f;
 			if(scale_->get_check()) {
 				vtx::fpos is = mobj_.get_size(src_handle_);
@@ -188,7 +186,7 @@ namespace app {
 			}
 			src_image_->at_local_param().scale_ = s;
 
-			if(src_image_->get_focus()) {
+			if(src_frame_ == wd.get_top_widget()) {
 				if(src_image_->get_select_in()) {
 					wd.top_widget(src_frame_);
 					src_image_offset_ = src_image_->get_local_param().offset_;
@@ -215,8 +213,6 @@ namespace app {
 		}
 
 		if(dst_frame_ && dst_image_) {
-			dst_frame_->create_draw_area(dst_image_->at_rect());
-
 			float s = 1.0f;
 			if(scale_->get_check()) {
 				vtx::fpos is = mobj_.get_size(dst_handle_);
@@ -226,7 +222,7 @@ namespace app {
 			}
 			dst_image_->at_local_param().scale_ = s;
 
-			if(dst_image_->get_focus()) {
+			if(dst_frame_ == wd.get_top_widget()) {
 				if(dst_image_->get_select_in()) {
 					wd.top_widget(dst_frame_);
 					dst_image_offset_ = dst_image_->get_local_param().offset_;

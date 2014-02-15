@@ -26,11 +26,12 @@ namespace app {
 		gui::widget_button*		filer_open_;
 		gui::widget_slider*		slider_;
 		gui::widget_dialog*		dialog_;
+		gui::widget_frame*		frame_;
 		gui::widget_frame*		tree_frame_;
 		gui::widget_tree*		tree_core_;
 		gui::widget_filer*		filer_;
-		gui::widget_frame*		frame_;
-		gui::widget_terminal*	terminal_;
+		gui::widget_frame*		terminal_frame_;
+		gui::widget_terminal*	terminal_core_;
 
 		uint32_t	filer_id_;
 
@@ -42,8 +43,9 @@ namespace app {
 		//-----------------------------------------------------------------//
 		gui_test(utils::director<core>& d) : director_(d),
 			dialog_open_(0), filer_open_(0), slider_(0),
-			dialog_(0), tree_frame_(0), tree_core_(0), filer_(0), frame_(0),
-			terminal_(0),
+			dialog_(0), frame_(0), tree_frame_(0), tree_core_(0),
+			filer_(0),
+			terminal_frame_(0), terminal_core_(0),
 			filer_id_(0)
 		{ }
 

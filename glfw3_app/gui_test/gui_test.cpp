@@ -195,10 +195,18 @@ namespace app {
 //			tu.list();
 		}
 
-		if(0) {	// ターミナルのテスト
-			widget::param wp(vtx::srect(400, 700, 100, 100));
-			widget_terminal::param wp_;
-			terminal_ = wd.add_widget<widget_terminal>(wp, wp_);
+		if(1) {	// ターミナルのテスト
+			{
+				widget::param wp(vtx::srect(700, 500, 200, 200));
+				widget_frame::param wp_;
+				wp_.plate_param_.set_caption(30);
+				terminal_frame_ = wd.add_widget<widget_frame>(wp, wp_);
+			}
+			{
+				widget::param wp(vtx::srect(0), terminal_frame_);
+				widget_terminal::param wp_;
+				terminal_core_ = wd.add_widget<widget_terminal>(wp, wp_);
+			}
 		}
 
 		// プリファレンスの取得
@@ -206,11 +214,14 @@ namespace app {
 		if(filer_) {
 			filer_->load(pre);
 		}
+		if(frame_) {
+			frame_->load(pre);
+		}
 		if(tree_frame_) {
 			tree_frame_->load(pre);
 		}
-		if(frame_) {
-			frame_->load(pre);
+		if(terminal_frame_) {
+			terminal_frame_->load(pre);
 		}
 	}
 
@@ -249,10 +260,6 @@ namespace app {
 			}
 		}
 
-		if(tree_core_) {
-			tree_frame_->create_draw_area(tree_core_->at_rect());
-		}
-
 		wd.update();
 	}
 
@@ -279,6 +286,9 @@ namespace app {
 		sys::preference& pre = director_.at().preference_;
 		if(filer_) {
 			filer_->save(pre);
+		}
+		if(terminal_frame_) {
+			terminal_frame_->save(pre);
 		}
 		if(tree_frame_) {
 			tree_frame_->save(pre);

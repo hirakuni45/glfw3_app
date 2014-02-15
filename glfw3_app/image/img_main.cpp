@@ -165,8 +165,6 @@ namespace app {
 
 		// frame 内 image のサイズを設定
 		if(frame_ && image_) {
-			frame_->create_draw_area(image_->at_rect());
-
 			float s = 1.0f;
 			if(scale_fit_->get_check()) {
 				vtx::fpos is = mobj_.get_size(img_handle_);
