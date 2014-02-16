@@ -61,13 +61,13 @@ namespace gui {
 				rect.size = wp.rect_.size;
 			}
 
-			widget::text_param tmp = param_.text_param_;
+			widget::text_param tpr = param_.text_param_;
 			const img::rgbaf& cf = wd_.get_color();
-			tmp.fore_color_ *= cf.r;
-			tmp.fore_color_.alpha_scale(cf.a);
-			tmp.shadow_color_ *= cf.r;
-			tmp.shadow_color_.alpha_scale(cf.a);
-			draw_text(tmp, rect, wp.clip_);
+			tpr.fore_color_ *= cf.r;
+			tpr.fore_color_.alpha_scale(cf.a);
+			tpr.shadow_color_ *= cf.r;
+			tpr.shadow_color_.alpha_scale(cf.a);
+			draw_text(tpr, rect, wp.clip_);
 
 			igl->at_fonts().restore_matrix();
 

@@ -7,19 +7,86 @@
 #include "widgets/widget_terminal.hpp"
 #include "widgets/widget_frame.hpp"
 #include "widgets/widget_utils.hpp"
+#include <boost/foreach.hpp>
 
 namespace gui {
 
-	void widget_terminal::create_text_()
+	void widget_terminal::rebuild_texts_()
 	{
-		vtx::srect sr(0, 0, get_rect().size.x, param_.height_);
-		for(uint32_t i = 0; i < param_.lines_; ++i) {
+		uint32_t n = get_rect().size.y / param_.height_;
+		if(texts_.size() == n) return;
+
+		short ofs = 0;
+		if(texts_.size() > n) {
+			for(uint32_t i = texts_.size(); i < n; ++i) {
+				wd_.del_widget(texts_[i]);
+			}
+			texts_.resize(n);
+			return;
+		} else if(texts_.size() < n) {
+			n -= texts_.size();
+			ofs = texts_.size() * param_.height_;
+		}
+
+		vtx::srect sr(0, ofs, get_rect().size.x, param_.height_);
+		for(uint32_t i = 0; i < n; ++i) {
 			widget::param wp(sr, this);
 			widget_text::param wp_;
 			wp_.text_param_ = param_.text_param_;
-			wp_.text_param_.text_ = "Abcdef";
-			texts_.push_back(wd_.add_widget<widget_text>(wp, wp_));
-			sr.org.y += param_.height_;
+			wp_.text_param_.text_ = "AbcdefiWw 漢字";
+			widget_text* w = wd_.add_widget<widget_text>(wp, wp_);
+			if(w) {
+				w->set_state(widget::state::CLIP_PARENTS);
+				w->set_state(widget::state::RESIZE_ROOT);
+				w->set_state(widget::state::MOVE_ROOT, false);
+				w->set_state(widget::state::POSITION_LOCK);
+				w->set_state(widget::state::SIZE_LOCK);
+				texts_.push_back(w);
+				sr.org.y += param_.height_;
+			}
+		}
+	}
+
+
+	void widget_terminal::scroll_()
+	{
+		uint32_t n = get_rect().size.y / param_.height_;
+		for(uint32_t i = 1; i < n; ++i) {
+			texts_[i - 1]->at_local_param().text_param_.text_ = texts_[i]->get_local_param().text_param_.text_;
+		}
+		texts_[n - 1]->at_local_param().text_param_.text_.clear();
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	１文字出力
+		@param[in]	wch	文字
+	*/
+	//-----------------------------------------------------------------//
+	void widget_terminal::output(wchar_t wch)
+	{
+		// param_.cursor_pos_.x;
+
+		// scroll_();
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	テキストの出力
+		@param[in]	text	テキスト
+	*/
+	//-----------------------------------------------------------------//
+	void widget_terminal::output(const std::string& text)
+	{
+		if(text.empty()) return;
+
+		utils::wstring ws;
+		utils::utf8_to_utf16(text, ws);
+
+		BOOST_FOREACH(wchar_t wch, ws) {
+			output(wch);
 		}
 	}
 
@@ -40,11 +107,6 @@ namespace gui {
 		at_param().state_.set(widget::state::RESIZE_ROOT);
 		at_param().state_.set(widget::state::CLIP_PARENTS);
 		at_param().state_.set(widget::state::AREA_ROOT);
-
-		uint32_t n = get_rect().size.y / param_.height_;
-		if(n > param_.lines_) param_.lines_ = n;
-
-		create_text_();
 	}
 
 
@@ -87,6 +149,7 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_terminal::service()
 	{
+		rebuild_texts_();
 	}
 
 

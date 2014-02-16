@@ -225,10 +225,13 @@ namespace gui {
 		vtx::srect rect_ = rect;
 
 		std::string cft;
+		short cfs = 0;
 		if(!tp.font_.empty()) {
 			cft = fonts.get_font_type();
 			fonts.set_font_type(tp.font_);
-		}			
+			cfs = fonts.get_font_size();
+			fonts.set_font_size(tp.font_size_);
+		}
 
 		glViewport(clip_.org.x, size.y - clip_.org.y - clip_.size.y,
 			clip_.size.x, clip_.size.y);
@@ -260,6 +263,7 @@ namespace gui {
 
 		if(!tp.font_.empty()) {
 			fonts.set_font_type(cft);
+			fonts.set_font_size(cfs);
 		}
 	}
 

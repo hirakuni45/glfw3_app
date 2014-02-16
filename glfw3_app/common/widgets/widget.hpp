@@ -153,14 +153,16 @@ namespace gui {
 		struct text_param {
 			std::string		text_;				///< テキスト
 			std::string		font_;				///< フォントセット
-			bool			proportional_;		///< プロポーショナル・フォント
+			bool			proportional_;		///< プロポーショナル・フォントの場合「true」
+			short			font_size_;			///< フォントサイズ
 			img::rgba8		fore_color_;		///< テキスト色
 			img::rgba8		shadow_color_;		///< 影色
 			vtx::spos		shadow_offset_;		///< 影の相対位置
 			vtx::placement	placement_;			///< 配置方法
 			vtx::spos		offset_;			///< 描画オフセット（シフト表示用）
 			text_param() :
-				proportional_(true),
+				text_(), font_(),
+				proportional_(true), font_size_(24),
 				fore_color_(255, 255), shadow_color_(0, 255),
 				placement_(vtx::placement::holizontal::CENTER,
 					vtx::placement::vertical::CENTER),

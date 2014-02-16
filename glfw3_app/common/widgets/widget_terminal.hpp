@@ -28,13 +28,16 @@ namespace gui {
 			color_param		color_param_;
 			text_param		text_param_;
 
-			uint32_t		height_;
-			uint32_t		lines_;
+			uint32_t		height_;		///< 行の高さ
+
+			vtx::spos		cursor_pos_;	///< カーソル位置
 
 			param() : color_param_(widget_director::default_terminal_color_),
 				text_param_(),
-				height_(28), lines_(24)
+				height_(16), cursor_pos_(0)
 			{
+				text_param_.font_ = "Inconsolata";	// 標準的フォント
+				text_param_.font_size_ = 14;		// 標準的サイズ
 				text_param_.proportional_ = false;
 				text_param_.shadow_offset_.set(0);
 				text_param_.placement_.hpt = vtx::placement::holizontal::LEFT;
@@ -45,9 +48,11 @@ namespace gui {
 
 		param				param_;
 
-		std::vector<widget_text*>	texts_;
+		typedef std::vector<widget_text*> texts;
+		texts	texts_;
 
-		void create_text_();
+		void rebuild_texts_();
+		void scroll_();
 
 	public:
 		//-----------------------------------------------------------------//
@@ -56,7 +61,7 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_terminal(widget_director& wd, const widget::param& bp, const param& p) :
-			wd_(wd), widget(bp), param_(p) { }
+			wd_(wd), widget(bp), param_(p), texts_() { }
 
 
 		//-----------------------------------------------------------------//
@@ -109,6 +114,24 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		param& at_local_param() { return param_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	１文字出力
+			@param[in]	wch	文字
+		*/
+		//-----------------------------------------------------------------//
+		void output(wchar_t wch);
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	テキストの出力
+			@param[in]	text	テキスト
+		*/
+		//-----------------------------------------------------------------//
+		void output(const std::string& text);
 
 
 		//-----------------------------------------------------------------//
