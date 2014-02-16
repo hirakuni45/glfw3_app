@@ -130,7 +130,8 @@ namespace gl {
 		//-----------------------------------------------------------------//
 		bool allocate_font_texture(int width, int height, tex_map& tmap);
 
-		int font_width(wchar_t code, int fw, int fh) const;
+
+		int font_width_(wchar_t code, int fw, int fh);
 
 	public:
 		//-----------------------------------------------------------------//

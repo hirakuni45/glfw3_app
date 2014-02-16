@@ -122,22 +122,21 @@ namespace gl {
 	{
 		face_->info_.size = s;
 
-		// 半角文字はとりあえず全部インストールしとく
-		bool tmp = face_->info_.proportional;	
-		face_->info_.proportional = true;
-		int fixw = 0;
-		for(wchar_t i = 0x20; i <= 0x7f; ++i) {
-			install_font(i);
-			int w = get_width(i);
-			if(fixw < w) fixw = w;
-		}
-		face_->info_.proportional = tmp;
-
 		face_t::fix_width_it it = face_->fix_width_.find(s);
 		if(it == face_->fix_width_.end()) {
+			// 半角文字はとりあえず全部インストールしとく
+			bool tmp = face_->info_.proportional;	
+			face_->info_.proportional = true;
+			int fixw = 0;
+			for(wchar_t i = 0x20; i < 0x7f; ++i) {
+				install_font(i);
+				int w = get_width(i);
+				if(fixw < w) fixw = w;
+/// std::cout << "Code: " << static_cast<int>(i) << ", W: " << w << std::endl;
+			}
 			face_->fix_width_.insert(face_t::fix_width_pair(s, fixw));
-		} else {
-			it->second = fixw;
+			face_->info_.proportional = tmp;
+/// std::cout << "Size: " << s << ", Fixw: " << fixw << std::endl;
 		}
 	}
 
@@ -461,23 +460,26 @@ namespace gl {
 	}
 
 
-	int fonts::font_width(wchar_t code, int fw, int fh) const
+	int fonts::font_width_(wchar_t code, int fw, int fh)
 	{
 		int fow = 0;
-		// プロポーショナルでは無い英数字の場合
-		if(!face_->info_.proportional && code >= 0 && code <= 0x7f) {
+		// 等幅フォントで英数字の場合
+		if(!face_->info_.proportional && code >= 0x20 && code < 0x7f) {
 			face_t::fix_width_it it = face_->fix_width_.find(fh);
 			if(it != face_->fix_width_.end()) {
 				fow = it->second;
 			} else {
-				fow = fh / 2;
+				set_font_size(fh);
+				face_t::fix_width_it it = face_->fix_width_.find(fh);
+				fow = it->second;
 			}
 		} else {
 			// プロポーショナル・フォントの場合にスペースコードは特殊処理
 			if(code == 0x20) fow = fh / 4;
 			else fow = fw;
+			if(face_->info_.proportional) fow += face_->info_.spaceing;
 		}
-		return fow + face_->info_.spaceing;
+		return fow;
 	}
 
 
@@ -502,7 +504,7 @@ namespace gl {
 		short y = pos.y;
 		int fw = tmap.w;
 		// スペース以外の半角文字で、等幅表示の場合、中心に描画
-		if(!face_->info_.proportional && code > 0x20 && code <= 0x7f) {
+		if(!face_->info_.proportional && code > 0x20 && code < 0x7f) {
 			if(fw < face_->info_.size) {
 				x += (face_->info_.size - fw) / 2;
 			}
@@ -518,14 +520,14 @@ namespace gl {
 		short	xt = x;
 		short	xe = x + fw;
 		short	clip_xe = clip.org.x + clip.size.x;
-		if(xe < clip.org.x) return font_width(code, fw, tmap.h);	// clip out!
-		else if(clip_xe <= xt) return font_width(code, fw, tmap.h);	// clip out!
+		if(xe < clip.org.x) return font_width_(code, fw, tmap.h);	// clip out!
+		else if(clip_xe <= xt) return font_width_(code, fw, tmap.h);	// clip out!
 
 		short	yt = y;
 		short	ye = y + face_->info_.size;
 		short	clip_ye = clip.org.y + clip.size.y;
-		if(ye < clip.org.y) return font_width(code, fw, tmap.h);	// clip out!
-		else if(clip_ye <= yt) return font_width(code, fw, tmap.h);	// clip out!
+		if(ye < clip.org.y) return font_width_(code, fw, tmap.h);	// clip out!
+		else if(clip_ye <= yt) return font_width_(code, fw, tmap.h);	// clip out!
 
 		short	ut = 0;
 		short	ue = fw;
@@ -587,8 +589,8 @@ namespace gl {
 			bc = back_color_;
 		}
 
-		::glEnableClientState(GL_VERTEX_ARRAY);
-		::glVertexPointer(2, GL_SHORT, 0, vertex_);
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glVertexPointer(2, GL_SHORT, 0, vertex_);
 		if(render_back_) {
 			int i = face_->info_.spaceing;
 			if(ccw_) {
@@ -602,10 +604,10 @@ namespace gl {
 				vertex_[3].x = ox + xe + i; vertex_[3].y = oy + yt;
 				vertex_[2].x = ox + xe + i; vertex_[2].y = oy + ye;
 			}
-			::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-			::glDisable(GL_TEXTURE_2D);
-			::glColor4ub(bc.r, bc.g, bc.b, bc.a);
-			::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+			glDisable(GL_TEXTURE_2D);
+			glColor4ub(bc.r, bc.g, bc.b, bc.a);
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		}
 
 		if(ccw_) {
@@ -620,18 +622,18 @@ namespace gl {
 			vertex_[2].x = ox + xe; vertex_[2].y = oy + ye;
 		}
 
-		::glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		::glTexCoordPointer(2, GL_SHORT, 0, coord_);
-		::glEnable(GL_TEXTURE_2D);
-		::glBindTexture(GL_TEXTURE_2D, tmap.id);
-		::glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		::glColor4ub(fc.r, fc.g, fc.b, fc.a);
-		::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		glTexCoordPointer(2, GL_SHORT, 0, coord_);
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, tmap.id);
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		glColor4ub(fc.r, fc.g, fc.b, fc.a);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-		::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-		::glDisableClientState(GL_VERTEX_ARRAY);
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		glDisableClientState(GL_VERTEX_ARRAY);
 
-		return font_width(code, fw, tmap.h);
+		return font_width_(code, fw, tmap.h);
 	}
 
 
@@ -651,7 +653,7 @@ namespace gl {
 		}
 		const tex_map& tmap = cit->second;
 
-		return font_width(code, tmap.w, tmap.h);
+		return font_width_(code, tmap.w, tmap.h);
 	}
 
 
