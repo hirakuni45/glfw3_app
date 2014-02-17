@@ -5,57 +5,11 @@
 */
 //=====================================================================//
 #include "widgets/widget_terminal.hpp"
+#include "gl_fw/IGLcore.hpp"
 #include "widgets/widget_frame.hpp"
-#include "widgets/widget_utils.hpp"
 #include <boost/foreach.hpp>
 
 namespace gui {
-
-	void widget_terminal::rebuild_texts_()
-	{
-		uint32_t n = get_rect().size.y / param_.height_;
-		if(texts_.size() == n) return;
-
-		short ofs = 0;
-		if(texts_.size() > n) {
-			for(uint32_t i = texts_.size(); i < n; ++i) {
-				wd_.del_widget(texts_[i]);
-			}
-			texts_.resize(n);
-			return;
-		} else if(texts_.size() < n) {
-			n -= texts_.size();
-			ofs = texts_.size() * param_.height_;
-		}
-
-		vtx::srect sr(0, ofs, get_rect().size.x, param_.height_);
-		for(uint32_t i = 0; i < n; ++i) {
-			widget::param wp(sr, this);
-			widget_text::param wp_;
-			wp_.text_param_ = param_.text_param_;
-			wp_.text_param_.text_ = "AbcdefiWw 漢字";
-			widget_text* w = wd_.add_widget<widget_text>(wp, wp_);
-			if(w) {
-				w->set_state(widget::state::CLIP_PARENTS);
-				w->set_state(widget::state::RESIZE_ROOT);
-				w->set_state(widget::state::MOVE_ROOT, false);
-				w->set_state(widget::state::POSITION_LOCK);
-				w->set_state(widget::state::SIZE_LOCK);
-				texts_.push_back(w);
-				sr.org.y += param_.height_;
-			}
-		}
-	}
-
-
-	void widget_terminal::scroll_()
-	{
-		uint32_t n = get_rect().size.y / param_.height_;
-		for(uint32_t i = 1; i < n; ++i) {
-			texts_[i - 1]->at_local_param().text_param_.text_ = texts_[i]->get_local_param().text_param_.text_;
-		}
-		texts_[n - 1]->at_local_param().text_param_.text_.clear();
-	}
 
 
 	//-----------------------------------------------------------------//
@@ -66,9 +20,7 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_terminal::output(wchar_t wch)
 	{
-		// param_.cursor_pos_.x;
-
-		// scroll_();
+		param_.terminal_.output(wch);
 	}
 
 
@@ -125,10 +77,13 @@ namespace gui {
 				w->create_draw_area(sr);
 				if(sr.size != get_rect().size) resize = true;
 				at_rect() = sr;
+				if(resize) {
+					param_.terminal_.resize(
+						vtx::spos(sr.size.x / param_.font_size_ * 2, sr.size.y / param_.height_)
+					);
+				}
 			}
 		}
-
-
 	}
 
 
@@ -139,6 +94,63 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_terminal::render()
 	{
+		using namespace gl;
+		IGLcore* igl = get_glcore();
+
+		const vtx::spos& size = igl->get_size();
+
+		gl::fonts& fonts = igl->at_fonts();
+
+		const widget::param& wp = get_param();
+
+		if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) { 
+
+			glPushMatrix();
+
+			vtx::srect rect;
+			if(wp.state_[widget::state::CLIP_PARENTS]) {
+				rect.org  = wp.rpos_;
+				rect.size = wp.rect_.size;
+			} else {
+				rect.org.set(0);
+				rect.size = wp.rect_.size;
+			}
+
+			std::string cft = fonts.get_font_type();
+			short cfs = fonts.get_font_size(); 
+			fonts.set_font_type(param_.font_);
+			fonts.set_font_size(param_.font_size_);
+
+			vtx::srect clip_ = wp.clip_;
+
+			glViewport(clip_.org.x, size.y - clip_.org.y - clip_.size.y,
+				clip_.size.x, clip_.size.y);
+			fonts.setup_matrix(clip_.size.x, clip_.size.y);
+
+			fonts.set_proportional(false);
+			fonts.enable_back_color();
+
+			vtx::spos pos;
+			vtx::spos chs(rect.org);
+			for(pos.y = 0; pos.y < param_.terminal_.size().y; ++pos.y) {
+				for(pos.x = 0; pos.x < param_.terminal_.size().x; ++pos.x) {
+					const utils::terminal::cha_t& t = param_.terminal_.get_char(pos);
+					fonts.set_fore_color(t.fc);
+					fonts.set_back_color(t.bc);
+					chs.x += fonts.draw(chs, t.cha);
+				}
+				chs.y += param_.height_;
+				chs.x = rect.org.x;
+			}
+
+			fonts.set_font_type(cft);
+			fonts.set_font_size(cfs);
+			fonts.enable_back_color(false);
+
+			fonts.restore_matrix();
+			glPopMatrix();
+			glViewport(0, 0, size.x, size.y);
+		}
 	}
 
 
@@ -149,7 +161,6 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_terminal::service()
 	{
-		rebuild_texts_();
 	}
 
 

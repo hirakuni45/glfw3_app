@@ -6,7 +6,6 @@
 */
 //=====================================================================//
 #include "widgets/widget_director.hpp"
-#include "widgets/widget_text.hpp"
 #include "utils/terminal.hpp"
 
 namespace gui {
@@ -26,36 +25,19 @@ namespace gui {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
-			color_param		color_param_;
-			text_param		text_param_;
-
+			std::string		font_;			///< ターミナル描画フォント
+			uint32_t		font_size_;		///< フォントサイズ
 			uint32_t		height_;		///< 行の高さ
 
-			vtx::spos		cursor_pos_;	///< カーソル位置
+			utils::terminal		terminal_;
 
-			param() : color_param_(widget_director::default_terminal_color_),
-				text_param_(),
-				height_(18), cursor_pos_(0)
-			{
-				text_param_.font_ = "Inconsolata";	// 標準的フォント
-				text_param_.font_size_ = 16;		// 標準的サイズ
-				text_param_.proportional_ = false;
-				text_param_.shadow_offset_.set(0);
-				text_param_.placement_.hpt = vtx::placement::holizontal::LEFT;
-			}
+			param() : font_("Inconsolata"), font_size_(16), height_(18), terminal_()
+			{ }
 		};
 
 		widget_director&	wd_;
 
 		param				param_;
-
-		typedef std::vector<widget_text*> texts;
-		texts	texts_;
-
-		utils::terminal		terminal_;
-
-		void rebuild_texts_();
-		void scroll_();
 
 	public:
 		//-----------------------------------------------------------------//
@@ -64,7 +46,7 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_terminal(widget_director& wd, const widget::param& bp, const param& p) :
-			wd_(wd), widget(bp), param_(p), texts_(), terminal_() { }
+			wd_(wd), widget(bp), param_(p) { }
 
 
 		//-----------------------------------------------------------------//
