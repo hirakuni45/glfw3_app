@@ -34,10 +34,10 @@ namespace gui {
 
 			param() : color_param_(widget_director::default_terminal_color_),
 				text_param_(),
-				height_(16), cursor_pos_(0)
+				height_(18), cursor_pos_(0)
 			{
 				text_param_.font_ = "Inconsolata";	// 標準的フォント
-				text_param_.font_size_ = 14;		// 標準的サイズ
+				text_param_.font_size_ = 16;		// 標準的サイズ
 				text_param_.proportional_ = false;
 				text_param_.shadow_offset_.set(0);
 				text_param_.placement_.hpt = vtx::placement::holizontal::LEFT;
