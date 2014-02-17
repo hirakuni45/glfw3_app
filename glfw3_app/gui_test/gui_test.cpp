@@ -260,6 +260,13 @@ namespace app {
 			}
 		}
 
+		if(terminal_core_) {
+			static wchar_t ch = ' ';
+			terminal_core_->output(ch);
+			++ch;
+			if(ch >= 0x7f) ch = ' ';
+		}		
+
 		wd.update();
 	}
 
