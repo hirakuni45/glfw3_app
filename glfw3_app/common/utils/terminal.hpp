@@ -96,6 +96,8 @@ namespace utils {
 				}
 			}
 			size_ = size;
+			if(cursor_.x >= size_.x) cursor_.x = size_.x - 1;
+			if(cursor_.y >= size_.y) cursor_.y = size_.y - 1;
 		}
 
 
@@ -166,6 +168,7 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		void output(wchar_t cha) {
+			if(chaers_.empty()) return;
 			cha_.cha = cha;
 			chaers_[cursor_.y * size_.x + cursor_.x] = cha_;
 			++cursor_.x;
