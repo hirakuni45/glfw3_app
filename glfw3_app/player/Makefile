@@ -133,12 +133,12 @@ $(TARGET).exe: $(OBJECTS) Makefile icon.o
 icon.o: icon.rc ./res/player.ico
 	$(RC) -i $< -o $@
 
-%.d: %.c
+%.d: %.c %.h
 	echo '$*.o: \' > $@
 	$(CC) -MM $(COPT) $(CFLAGS) $(INC_C) $(CCWARN) $< | \
 	sed 's/.*://' >> $@
 
-%.d: %.cpp
+%.d: %.cpp %.hpp
 	echo '$*.o: \' > $@
 	$(CP) -MM $(POPT) $(PFLAGS) $(INC_P) $(CPWARN) $< | \
 	sed 's/.*://' >> $@
