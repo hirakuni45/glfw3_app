@@ -7,6 +7,7 @@
 //=====================================================================//
 #include "widgets/widget_director.hpp"
 #include "widgets/widget_text.hpp"
+#include "utils/terminal.hpp"
 
 namespace gui {
 
@@ -51,6 +52,8 @@ namespace gui {
 		typedef std::vector<widget_text*> texts;
 		texts	texts_;
 
+		utils::terminal		terminal_;
+
 		void rebuild_texts_();
 		void scroll_();
 
@@ -61,7 +64,7 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_terminal(widget_director& wd, const widget::param& bp, const param& p) :
-			wd_(wd), widget(bp), param_(p), texts_() { }
+			wd_(wd), widget(bp), param_(p), texts_(), terminal_() { }
 
 
 		//-----------------------------------------------------------------//
