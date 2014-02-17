@@ -117,8 +117,7 @@ void get_metrics(wchar_t code)
 			return false;
 		}
 
-///		printf("kfimg install: (%s) 0x%08x\n", name.c_str(), (int)face_);
-///		fflush(stdout);
+///		std::cout << "kfimg install: " << name << ", " << static_cast<int>(face_) << std::endl;
 
 		alias_ = name;
 		install_face_(name, face_);
