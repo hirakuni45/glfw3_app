@@ -26,12 +26,13 @@ namespace gui {
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
 			std::string		font_;			///< ターミナル描画フォント
-			uint32_t		font_size_;		///< フォントサイズ
+			uint32_t		font_width_;	///< フォント幅（初期化で設定される）
+			uint32_t		font_height_;	///< フォント高
 			uint32_t		height_;		///< 行の高さ
 
 			utils::terminal		terminal_;
 
-			param() : font_("Inconsolata"), font_size_(16), height_(18), terminal_()
+			param() : font_("Inconsolata"), font_width_(0), font_height_(16), height_(18), terminal_()
 			{ }
 		};
 

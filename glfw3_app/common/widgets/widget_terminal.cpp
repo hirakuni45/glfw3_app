@@ -59,6 +59,20 @@ namespace gui {
 		at_param().state_.set(widget::state::RESIZE_ROOT);
 		at_param().state_.set(widget::state::CLIP_PARENTS);
 		at_param().state_.set(widget::state::AREA_ROOT);
+
+		using namespace gl;
+		IGLcore* igl = get_glcore();
+		gl::fonts& fonts = igl->at_fonts();
+
+		std::string cft = fonts.get_font_type();
+		short cfs = fonts.get_font_size(); 
+		fonts.set_font_type(param_.font_);
+		fonts.set_font_size(param_.font_height_);
+		fonts.set_proportional(false);
+		param_.font_width_ = fonts.get_width(' ');
+		fonts.set_proportional();
+		fonts.set_font_type(cft);
+		fonts.set_font_size(cfs);
 	}
 
 
@@ -79,7 +93,7 @@ namespace gui {
 				at_rect() = sr;
 				if(resize) {
 					param_.terminal_.resize(
-						vtx::spos(sr.size.x / param_.font_size_ * 2, sr.size.y / param_.height_)
+						vtx::spos(sr.size.x / param_.font_width_, sr.size.y / param_.height_)
 					);
 				}
 			}
@@ -119,7 +133,7 @@ namespace gui {
 			std::string cft = fonts.get_font_type();
 			short cfs = fonts.get_font_size(); 
 			fonts.set_font_type(param_.font_);
-			fonts.set_font_size(param_.font_size_);
+			fonts.set_font_size(param_.font_height_);
 
 			vtx::srect clip_ = wp.clip_;
 
