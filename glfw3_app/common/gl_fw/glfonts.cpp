@@ -825,13 +825,19 @@ namespace gl {
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(2, GL_SHORT, 0, vertex_);
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-		vertex_[0].x = rect.org.x;     vertex_[0].y = rect.org.y;
-		vertex_[1].x = rect.org.x;     vertex_[1].y = rect.end_y();
-		vertex_[3].x = rect.end_x();   vertex_[3].y = rect.end_y();
-		vertex_[2].x = rect.end_x();   vertex_[2].y = rect.org.y;
+		if(ccw_) {
+			vertex_[0].x = rect.org.x;     vertex_[0].y = rect.org.y;
+			vertex_[1].x = rect.org.x;     vertex_[1].y = rect.end_y();
+			vertex_[3].x = rect.end_x();   vertex_[3].y = rect.end_y();
+			vertex_[2].x = rect.end_x();   vertex_[2].y = rect.org.y;
+		} else {
+			vertex_[0].x = rect.org.x;     vertex_[0].y = rect.end_y();
+			vertex_[1].x = rect.org.x;     vertex_[1].y = rect.org.y;
+			vertex_[3].x = rect.end_x();   vertex_[3].y = rect.org.y;
+			vertex_[2].x = rect.end_x();   vertex_[2].y = rect.end_y();
+		}
 		glDisable(GL_TEXTURE_2D);
 		glColor4ub(back_color_.r, back_color_.g, back_color_.b, back_color_.a);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	}
-
 };
