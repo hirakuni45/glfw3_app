@@ -329,6 +329,20 @@ namespace gl {
 
 		glfwSwapInterval(1);
 
+		{  // Lock キーの初期状態を反映する
+#ifdef WIN32
+			if(GetKeyState(VK_CAPITAL)) {
+				bitsets_.set(device::key::CAPS_LOCK);
+			}
+			if(GetKeyState(VK_SCROLL)) {
+				bitsets_.set(device::key::SCROLL_LOCK);
+			}
+			if(GetKeyState(VK_NUMLOCK)) {
+				bitsets_.set(device::key::NUM_LOCK);
+			}
+#endif
+		}
+
 		return true;
 	}
 

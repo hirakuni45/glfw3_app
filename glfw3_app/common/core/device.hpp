@@ -11,7 +11,9 @@
 namespace gl {
 
 	// windows で define されてるので無効にする
+#ifdef WIN32
 	#undef DELETE
+#endif
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
@@ -185,11 +187,16 @@ namespace gl {
 				ALT,
 				SUPER,
 				MENU,
+
+				STATE_CAPS_LOCK,	///< CAPS LOCK の状態
+				STATE_SCROLL_LOCK,	///< SCROLL LOCK の状態
+				STATE_NUM_LOCK,		///< NUM LOCK の状態
+
+				count_
 			};
 		};
 
-		static const int device_bit_num_ = 350; 
-		typedef std::bitset<device_bit_num_>	bitsets;
+		typedef std::bitset<key::count_>	bitsets;
 
 	private:
 		bitsets	level_;

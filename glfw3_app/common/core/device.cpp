@@ -40,13 +40,27 @@ namespace gl {
 			}
 		}
 
+		b[key::STATE_CAPS_LOCK] = level_.test(key::STATE_CAPS_LOCK);
+		b[key::STATE_SCROLL_LOCK] = level_.test(key::STATE_SCROLL_LOCK);
+		b[key::STATE_NUM_LOCK] = level_.test(key::STATE_NUM_LOCK);
+
 		positive_ =  b & ~level_;
 		negative_ = ~b &  level_;
+
+		if(positive_.test(key::CAPS_LOCK)) {
+			b.flip(key::STATE_CAPS_LOCK);
+		}
+		if(positive_.test(key::SCROLL_LOCK)) {
+			b.flip(key::STATE_SCROLL_LOCK);
+		}
+		if(positive_.test(key::NUM_LOCK)) {
+			b.flip(key::STATE_NUM_LOCK);
+		}
+
 		level_ = b;
 
+
 		locator_.cursor_ = poss.cursor_;
-		locator_.scroll_ = poss.scroll_;		
+		locator_.scroll_ = poss.scroll_;
 	}
-
-
 }
