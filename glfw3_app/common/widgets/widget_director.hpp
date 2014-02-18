@@ -11,6 +11,7 @@
 #include "gl_fw/glmobj.hpp"
 #include "img_io/paint.hpp"
 #include "img_io/img_files.hpp"
+#include "utils/keyboard.hpp"
 
 namespace gui {
 
@@ -78,6 +79,8 @@ namespace gui {
 		vtx::spos				scroll_;
 
 		share_img				share_img_;
+
+		sys::keyboard			keyboard_;
 
 		void message_widget_(widget* w, const std::string& s);
 		void parents_widget_mark_(widget* root);
@@ -357,5 +360,23 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		const std::string create_widget_name(const widget* w) const;
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	キーボードの取得
+			@return キーボード
+		*/
+		//-----------------------------------------------------------------//
+		const sys::keyboard& get_keyboard() const { return keyboard_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	キーボードの参照
+			@return キーボード
+		*/
+		//-----------------------------------------------------------------//
+		sys::keyboard& at_keyboard() { return keyboard_; }
 	};
 }

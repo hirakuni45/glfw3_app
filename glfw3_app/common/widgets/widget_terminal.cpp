@@ -20,7 +20,7 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_terminal::output(wchar_t wch)
 	{
-		param_.terminal_.output(wch);
+		terminal_.output(wch);
 	}
 
 
@@ -91,11 +91,14 @@ namespace gui {
 				if(sr.size != get_rect().size) resize = true;
 				at_rect() = sr;
 				if(resize) {
-					param_.terminal_.resize(
+					terminal_.resize(
 						vtx::spos(sr.size.x / param_.font_width_, sr.size.y / param_.height_)
 					);
 				}
 			}
+		}
+		if(get_select_in()) {
+			wd_.top_widget(wd_.root_widget(this));
 		}
 	}
 
@@ -143,20 +146,38 @@ namespace gui {
 			fonts.enable_center(false);
 			fonts.enable_proportional(false);
 
+
+//			tpr.shadow_color_ *= cf.r;
+//			tpr.shadow_color_.alpha_scale(cf.a);
+
+			const img::rgbaf& cf = wd_.get_color();
 			vtx::spos pos;
 			vtx::spos chs(rect.org);
-			for(pos.y = 0; pos.y < param_.terminal_.size().y; ++pos.y) {
-				for(pos.x = 0; pos.x < param_.terminal_.size().x; ++pos.x) {
-					const utils::terminal::cha_t& t = param_.terminal_.get_char(pos);
-					fonts.set_fore_color(t.fc);
-					fonts.set_back_color(t.bc);
+			for(pos.y = 0; pos.y < terminal_.size().y; ++pos.y) {
+				for(pos.x = 0; pos.x < terminal_.size().x; ++pos.x) {
+					const utils::terminal::cha_t& t = terminal_.get_char(pos);
+					img::rgba8 fc  = t.fc;
+					fc *= cf.r;
+					fc.alpha_scale(cf.a);
+					fonts.set_fore_color(fc);
+					img::rgba8 bc = t.bc;
+					bc *= cf.r;
+					bc.alpha_scale(cf.a);
+					fonts.set_back_color(bc);
+					if(pos == terminal_.cursor()) {
+						if((interval_ % 60) < 30) {
+							fonts.swap_color();
+						}
+					}
 					vtx::srect br(chs, vtx::spos(param_.font_width_, param_.height_));
 					fonts.draw_back(br);
 					chs.x += fonts.draw(chs, t.cha);
+					fonts.swap_color(false);
 				}
 				chs.y += param_.height_;
 				chs.x = rect.org.x;
 			}
+			++interval_;
 
 			fonts.set_font_type(cft);
 			fonts.set_font_size(cfs);
@@ -175,6 +196,10 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_terminal::service()
 	{
+		if(wd_.get_top_widget() == wd_.root_widget(this)) {
+			wd_.at_keyboard().service();
+			terminal_.service();
+		}
 	}
 
 
