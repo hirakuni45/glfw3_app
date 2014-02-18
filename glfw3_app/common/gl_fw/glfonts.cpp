@@ -66,9 +66,9 @@ namespace gl {
 		face_ = &it->second;
 
 		// 標準でアンチアリアスとする。
-		set_antialias();
+		enable_antialias();
 		// 標準でプロポーショナル
-		set_proportional();
+		enable_proportional();
 		// 標準で２４ピクセル
 		set_font_size(24);
 
@@ -500,11 +500,11 @@ namespace gl {
 		}
 		const tex_map& tmap = cit->second;
 
-		short x = pos.x;
-		short y = pos.y;
-		int fw = tmap.w;
-		// スペース以外の半角文字で、等幅表示の場合、中心に描画
-		if(!face_->info_.proportional && code > 0x20 && code < 0x7f) {
+		short x  = pos.x;
+		short y  = pos.y;
+		short fw = tmap.w;
+		// 半角文字で、等幅表示の場合、中心に描画
+		if(face_->info_.center && !face_->info_.proportional && code >= 0x20 && code < 0x7f) {
 			if(fw < face_->info_.size) {
 				x += (face_->info_.size - fw) / 2;
 			}
@@ -580,19 +580,16 @@ namespace gl {
 			coord_[2].v = ve;
 		}
 
-		img::rgba8 fc, bc;
-		if(swap_color_) {
-			fc = back_color_;
-			bc = fore_color_;
-		} else {
-			fc = fore_color_;
-			bc = back_color_;
-		}
-
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(2, GL_SHORT, 0, vertex_);
 		if(render_back_) {
-			int i = face_->info_.spaceing;
+			img::rgba8 bc;
+			if(swap_color_) {
+				bc = fore_color_;
+			} else {
+				bc = back_color_;
+			}
+			short i = face_->info_.spaceing;
 			if(ccw_) {
 				vertex_[0].x = ox + xt;     vertex_[0].y = oy + yt;
 				vertex_[1].x = ox + xt;     vertex_[1].y = oy + ye;
@@ -620,6 +617,13 @@ namespace gl {
 			vertex_[1].x = ox + xt; vertex_[1].y = oy + yt;
 			vertex_[3].x = ox + xe; vertex_[3].y = oy + yt;
 			vertex_[2].x = ox + xe; vertex_[2].y = oy + ye;
+		}
+
+		img::rgba8 fc;
+		if(swap_color_) {
+			fc = back_color_;
+		} else {
+			fc = fore_color_;
 		}
 
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -818,15 +822,16 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	void fonts::draw_back(const vtx::srect& rect)
 	{
-		::glColor4ub(back_color_.r, back_color_.g, back_color_.b, back_color_.a);
-
-		::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glVertexPointer(2, GL_SHORT, 0, vertex_);
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 		vertex_[0].x = rect.org.x;     vertex_[0].y = rect.org.y;
 		vertex_[1].x = rect.org.x;     vertex_[1].y = rect.end_y();
 		vertex_[3].x = rect.end_x();   vertex_[3].y = rect.end_y();
 		vertex_[2].x = rect.end_x();   vertex_[2].y = rect.org.y;
-		::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glDisable(GL_TEXTURE_2D);
+		glColor4ub(back_color_.r, back_color_.g, back_color_.b, back_color_.a);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	}
 
 };

@@ -29,7 +29,6 @@ namespace gl {
 		static const int texture_page_height = 256;	///< テクスチャーページの高さ
 
 		img::Ikfimg*	kfm_;
-
 		struct tex_map {
 			GLuint	id;		///< テクスチャー ID
 			int		lcx;	///< ロケーションX
@@ -47,11 +46,12 @@ namespace gl {
 
 		// フォント基本環境
 		struct finfo_t {
-			int			size;
-			int			spaceing;
-			bool		antialias;
-			bool		proportional;
-			finfo_t() : size(24), spaceing(2), antialias(true), proportional(true) { }
+			short	size;			///< フォント基本サイズ
+			short	spaceing;		///< スペーシング
+			bool	antialias;		///< アンチエリアス・シェイプ
+			bool	proportional;	///< プロポーショナルフォント
+			bool	center;			///< センター描画
+			finfo_t() : size(24), spaceing(2), antialias(true), proportional(true), center(true) { }
 		};
 
 		// コード・マップ構造体
@@ -139,17 +139,11 @@ namespace gl {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		fonts() : kfm_(0),
-				  face_(0),
-				  fore_color_(255, 255, 255, 255),
-				  back_color_(0, 0, 0, 255),
-				  setup_(false),
-				  render_back_(true),
-				  h_flip_(false),
-				  v_flip_(false),
-				  ccw_(false),
-				  swap_color_(false),
-				  clip_(0, 0, 0, 0)
+		fonts() : kfm_(0), face_(0),
+			fore_color_(255, 255, 255, 255), back_color_(0, 0, 0, 255),
+			setup_(false),
+			render_back_(true), h_flip_(false), v_flip_(false), ccw_(false),
+			swap_color_(false), clip_(0, 0, 0, 0)
 			{ }
 
 
@@ -237,22 +231,32 @@ namespace gl {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	プロポーショナル・フォントを設定
-			@param[in]	flag	「true」の場合有効
+			@param[in]	f	「false」の場合無効
 		 */
 		//-----------------------------------------------------------------//
-		void set_proportional(bool flag = true) { face_->info_.proportional = flag; }
+		void enable_proportional(bool f = true) { face_->info_.proportional = f; }
 
 
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	アンチエリアスの設定
-			@param[in]	flag	「true」の場合有効
+			@param[in]	f	「false」の場合無効
 		 */
 		//-----------------------------------------------------------------//
-		void set_antialias(bool flag = true) {
-			face_->info_.antialias = flag;
-			kfm_->set_antialias(flag);
+		void enable_antialias(bool f = true) {
+			face_->info_.antialias = f;
+			kfm_->set_antialias(f);
 		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	センターに描画する場合
+			@param[in]	flag	「false」の場合無効
+		 */
+   		//-----------------------------------------------------------------//
+		void enable_center(bool f = true) { face_->info_.center = f; }
+
 
 		//-----------------------------------------------------------------//
 		/*!
