@@ -237,7 +237,7 @@ namespace gui {
 			clip_.size.x, clip_.size.y);
 		fonts.setup_matrix(clip_.size.x, clip_.size.y);
 
-		fonts.set_proportional(tp.proportional_);
+		fonts.enable_proportional(tp.proportional_);
 		vtx::spos pos;
 		const vtx::spos& fsize = fonts.get_size(tp.text_);
 		vtx::placement tpl = tp.placement_;

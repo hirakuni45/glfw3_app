@@ -65,7 +65,7 @@ namespace gui {
 				cft = fonts.get_font_type();
 				fonts.set_font_type(param_.text_param_.font_);
 			}
-			fonts.set_proportional(param_.text_param_.proportional_);
+			fonts.enable_proportional(param_.text_param_.proportional_);
 			short fw = fonts.get_width(param_.text_param_.text_);
 			if(!cft.empty()) {
 				fonts.set_font_type(cft);

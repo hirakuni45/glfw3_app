@@ -68,9 +68,8 @@ namespace gui {
 		short cfs = fonts.get_font_size(); 
 		fonts.set_font_type(param_.font_);
 		fonts.set_font_size(param_.font_height_);
-		fonts.set_proportional(false);
+		fonts.enable_proportional(false);
 		param_.font_width_ = fonts.get_width(' ');
-		fonts.set_proportional();
 		fonts.set_font_type(cft);
 		fonts.set_font_size(cfs);
 	}
@@ -141,8 +140,8 @@ namespace gui {
 				clip_.size.x, clip_.size.y);
 			fonts.setup_matrix(clip_.size.x, clip_.size.y);
 
-			fonts.set_proportional(false);
-			fonts.enable_back_color();
+			fonts.enable_center(false);
+			fonts.enable_proportional(false);
 
 			vtx::spos pos;
 			vtx::spos chs(rect.org);
@@ -151,6 +150,8 @@ namespace gui {
 					const utils::terminal::cha_t& t = param_.terminal_.get_char(pos);
 					fonts.set_fore_color(t.fc);
 					fonts.set_back_color(t.bc);
+					vtx::srect br(chs, vtx::spos(param_.font_width_, param_.height_));
+					fonts.draw_back(br);
 					chs.x += fonts.draw(chs, t.cha);
 				}
 				chs.y += param_.height_;
@@ -159,7 +160,6 @@ namespace gui {
 
 			fonts.set_font_type(cft);
 			fonts.set_font_size(cfs);
-			fonts.enable_back_color(false);
 
 			fonts.restore_matrix();
 			glPopMatrix();
