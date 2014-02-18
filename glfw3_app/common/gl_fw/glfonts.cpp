@@ -837,7 +837,13 @@ namespace gl {
 			vertex_[2].x = rect.end_x();   vertex_[2].y = rect.end_y();
 		}
 		glDisable(GL_TEXTURE_2D);
-		glColor4ub(back_color_.r, back_color_.g, back_color_.b, back_color_.a);
+		img::rgba8 fc;
+		if(swap_color_) {
+			fc = fore_color_;
+		} else {
+			fc = back_color_;
+		}
+		glColor4ub(fc.r, fc.g, fc.b, fc.a);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	}
 };
