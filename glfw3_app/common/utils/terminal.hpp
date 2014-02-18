@@ -9,6 +9,7 @@
 #include <vector>
 #include "img_io/img.hpp"
 #include "utils/vtx.hpp"
+#include "utils/keyboard.hpp"
 
 namespace utils {
 
@@ -34,6 +35,8 @@ namespace utils {
 		};
 
 	private:
+		sys::keyboard&	keyboard_;
+
 		cha_t		cha_;
 
 		typedef std::vector<cha_t>	chaers;
@@ -48,7 +51,8 @@ namespace utils {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		terminal() : cha_(' ', img::rgba8(255, 255, 255, 255), img::rgba8(0, 0, 0, 255)),
+		terminal(sys::keyboard& kbd) : keyboard_(kbd),
+			cha_(' ', img::rgba8(255, 255, 255, 255), img::rgba8(0, 0, 0, 255)),
 			chaers_(),
 			size_(0), cursor_(0) { }
 
@@ -163,22 +167,40 @@ namespace utils {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	ライン・フィード
+		*/
+		//-----------------------------------------------------------------//
+		void line_feed() {
+			++cursor_.y;
+			if(cursor_.y >= size_.y) {
+				cursor_.y = size_.y - 1;
+				scroll();
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	文字出力
 			@param[in]	cha	文字
 		*/
 		//-----------------------------------------------------------------//
 		void output(wchar_t cha) {
 			if(chaers_.empty()) return;
+			if(cha < ' ') {
+				if(cha == 0x0d) {
+					clear_line(cursor_);
+					cursor_.x = 0;
+					line_feed();
+				}
+				return;
+			}
 			cha_.cha = cha;
 			chaers_[cursor_.y * size_.x + cursor_.x] = cha_;
 			++cursor_.x;
 			if(cursor_.x >= size_.x) {
 				cursor_.x = 0;
-				++cursor_.y;
-				if(cursor_.y >= size_.y) {
-					cursor_.y = size_.y - 1;
-					scroll();
-				}
+				line_feed();
 			}
 		}
 
@@ -218,5 +240,22 @@ namespace utils {
 			}
 			return chaers_[pos.y * size_.x + pos.x];
 		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	サービス
+			@param[in]	echo	エコーバックをする場合「true」
+		*/
+		//-----------------------------------------------------------------//
+		void service(bool echo = true) {
+			if(!echo) return;
+
+			const std::string& inps = keyboard_.input();
+			BOOST_FOREACH(char ch, inps) {
+				output(ch);
+			}
+		}
+
 	};
 }
