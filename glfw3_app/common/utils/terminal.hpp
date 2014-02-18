@@ -192,6 +192,18 @@ namespace utils {
 					clear_line(cursor_);
 					cursor_.x = 0;
 					line_feed();
+				} else if(cha == 0x08) {
+					--cursor_.x;
+					if(cursor_.x < 0) {
+						cursor_.x = size_.x - 1;
+						--cursor_.y;
+						if(cursor_.y < 0) {
+							cursor_.x = 0;
+							cursor_.y = 0;
+						}
+					}
+				} else if(cha == 0x3f) {
+
 				}
 				return;
 			}
