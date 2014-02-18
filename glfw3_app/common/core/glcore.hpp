@@ -53,6 +53,8 @@ namespace gl {
 		bool		exit_signal_;
 		bool		full_screen_;
 
+		bool		keyboard_jp_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -65,7 +67,7 @@ namespace gl {
 				   frame_count_(0), frame_ref_(0.0), frame_time_(0.0),
 				   machine_cycle_(0.0), cpu_ghz_(0.5),
 				   cpu_spd_enable_(false), swap_ctrl_(false),
-				   exit_signal_(false), full_screen_(false) { }
+				   exit_signal_(false), full_screen_(false), keyboard_jp_(false) { }
 
 
 		//-----------------------------------------------------------------//
@@ -282,6 +284,16 @@ namespace gl {
 		*/
 		//-----------------------------------------------------------------//
 		fonts& at_fonts() { return fonts_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	日本語キーボードか検査
+			@return 日本語キーボードの場合「true」が返る
+		*/
+		//-----------------------------------------------------------------//
+		bool keyboard_japan() const { return keyboard_jp_; }
+
 	};
 }
 

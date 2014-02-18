@@ -331,6 +331,8 @@ namespace gl {
 
 		{  // Lock キーの初期状態を反映する
 #ifdef WIN32
+			int n = GetKeyboardType(0);
+			if(n == 7) keyboard_jp_ = true;
 			if(GetKeyState(VK_CAPITAL)) {
 				bitsets_.set(device::key::CAPS_LOCK);
 			}
