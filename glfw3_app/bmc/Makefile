@@ -21,6 +21,7 @@ PSOURCES	=	main.cpp \
 				../common/utils/file_info.cpp \
 				../common/utils/files.cpp \
 				../common/utils/preference.cpp \
+				../common/utils/keyboard.cpp \
 				../common/img_io/paint.cpp \
 				../common/img_io/png_io.cpp \
 				../common/img_io/jpeg_io.cpp \
