@@ -108,6 +108,10 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	const std::string& fonts::get_font_type() const
 	{
+		if(kfm_ == 0) {
+			static std::string empty;
+			return empty;
+		}
 		return kfm_->get_font();
 	}
 
