@@ -69,6 +69,7 @@ namespace gui {
 		fonts.set_font_type(param_.font_);
 		fonts.set_font_size(param_.font_height_);
 		fonts.enable_proportional(false);
+		fonts.set_spaceing(0);
 		param_.font_width_ = fonts.get_width(' ');
 		fonts.set_font_type(cft);
 		fonts.set_font_size(cfs);
@@ -197,7 +198,6 @@ namespace gui {
 	void widget_terminal::service()
 	{
 		if(wd_.get_top_widget() == wd_.root_widget(this)) {
-			wd_.at_keyboard().service();
 			terminal_.service();
 		}
 	}

@@ -784,6 +784,10 @@ namespace gui {
 				ws.push_back(w);
 			}
 		}
+
+		// キーボードのサービス
+		keyboard_.service();
+
 		BOOST_FOREACH(widget* w, ws) {
 			w->service();
 		}
