@@ -191,22 +191,52 @@ namespace sys {
 			tbl = us_key_type_tbls_;
 			n = sizeof(us_key_type_tbls_) / sizeof(key_t);
 		}
+		bool repeat = false;
 		for(int i = 0; i < n; ++i) {
 			const key_t& t = tbl[i];
 			if(dev.get_positive(t.key_type)) {
 				char nc = t.normal_code;
-				bool f = dev.get_level(device::key::SHIFT);
-				if(nc >= 'A' && nc <= 'Z') {
-					if(caps) f = !f;
-					if(f) input_ += nc;
-					else input_ += t.shift_code;
+				if(dev.get_level(device::key::CONTROL)) {
+					if(nc >= 0x40) last_char_ = nc - 0x40;
+					else last_char_ = nc;
 				} else {
-					if(!f) input_ += nc;
-					else input_ += t.shift_code;
+					bool f = dev.get_level(device::key::SHIFT);
+					if(nc >= 'A' && nc <= 'Z') {
+						if(caps) f = !f;
+						if(f) last_char_ = nc;
+						else last_char_ = t.shift_code;
+					} else {
+						if(!f) last_char_ = nc;
+						else last_char_ = t.shift_code;
+					}
+				}
+				input_ += last_char_;
+				last_key_idx_ = i;
+			}
+			if(dev.get_level(t.key_type)) {
+				if(repeat_enable_) {
+					if(last_key_idx_ == i) {
+						++repeat_delay_cnt_;
+						repeat = true;
+					}
 				}
 			}
 		}
-
+		if(repeat) {
+			if(repeat_delay_cnt_ >= repeat_delay_) {
+				++repeat_cycle_cnt_;
+				if(repeat_cycle_cnt_ >= repeat_cycle_) {
+					repeat_cycle_cnt_ = 0;
+					if(last_char_) {
+						input_ += last_char_;
+					}
+				}
+			}
+		} else {
+			repeat_delay_cnt_ = 0;
+			repeat_cycle_cnt_ = 0;
+			last_char_ = 0;
+		}
 	}
 
 }
