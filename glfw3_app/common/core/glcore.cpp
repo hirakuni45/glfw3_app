@@ -168,9 +168,9 @@ namespace gl {
 			glcore::bitsets_[ofs] = kv;
 		}
 
-    	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-        	glfwSetWindowShouldClose(window, GL_TRUE);
-		}
+//		if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+//			glfwSetWindowShouldClose(window, GL_TRUE);
+//		}
 
 		if(mods & GLFW_MOD_SHIFT) glcore::bitsets_[device::key::SHIFT] = true;
 		else glcore::bitsets_[device::key::SHIFT] = false;
