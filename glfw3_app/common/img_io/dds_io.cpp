@@ -4,8 +4,10 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
+#include <iostream>
 #include <boost/foreach.hpp>
-#include "dds_io.hpp"
+#include <boost/format.hpp>
+#include "img_io/dds_io.hpp"
 
 namespace img {
 
@@ -302,8 +304,6 @@ static void fancybasecolorsearch( GLubyte *blkaddr, GLubyte srccolors[4][4][4], 
    GLubyte cv[4][4];
    GLubyte testcolor[2][3];
 
-/*   fprintf(stderr, "color begin 0 r/g/b %d/%d/%d, 1 r/g/b %d/%d/%d\n",
-      bestcolor[0][0], bestcolor[0][1], bestcolor[0][2], bestcolor[1][0], bestcolor[1][1], bestcolor[1][2]);*/
    if (((bestcolor[0][0] & 0xf8) << 8 | (bestcolor[0][1] & 0xfc) << 3 | bestcolor[0][2] >> 3) <
       ((bestcolor[1][0] & 0xf8) << 8 | (bestcolor[1][1] & 0xfc) << 3 | bestcolor[1][2] >> 3)) {
       testcolor[0][0] = bestcolor[0][0];
@@ -470,9 +470,6 @@ static void fancybasecolorsearch( GLubyte *blkaddr, GLubyte srccolors[4][4][4], 
          bestcolor[1][i] = testcolor[0][i];
       }
    }
-
-/*     fprintf(stderr, "color end 0 r/g/b %d/%d/%d, 1 r/g/b %d/%d/%d\n",
-     bestcolor[0][0], bestcolor[0][1], bestcolor[0][2], bestcolor[1][0], bestcolor[1][1], bestcolor[1][2]);*/
 }
 
 
@@ -706,7 +703,6 @@ static void encodedxt5alpha(GLubyte *blkaddr, GLubyte srccolors[4][4][4],
       *blkaddr++ = 0;
       *blkaddr++ = 0;
       *blkaddr++ = 0;
-/*      fprintf(stderr, "enc0 used\n");*/
       return;
    }
 
@@ -764,21 +760,6 @@ static void encodedxt5alpha(GLubyte *blkaddr, GLubyte srccolors[4][4][4],
          alphablockerror1 += alphadist * alphadist;
       }
    }
-/*      for (i = 0; i < 16; i++) {
-         fprintf(stderr, "%d ", alphaenc1[i]);
-      }
-      fprintf(stderr, "cutVals ");
-      for (i = 0; i < 8; i++) {
-         fprintf(stderr, "%d ", acutValues[i]);
-      }
-      fprintf(stderr, "srcVals ");
-      for (j = 0; j < numypixels; j++)
-         for (i = 0; i < numxpixels; i++) {
-            fprintf(stderr, "%d ", srccolors[j][i][3]);
-         }
-
-      fprintf(stderr, "\n");
-   }*/
    /* it's not very likely this encoding is better if both alphaabsmin and alphaabsmax
       are false but try it anyway */
    if (alphablockerror1 >= 32) {
@@ -853,7 +834,6 @@ static void encodedxt5alpha(GLubyte *blkaddr, GLubyte srccolors[4][4][4],
           if (alphatest[1] <= alphatest[0]) {
              alphatest[0] = 1;
              alphatest[1] = 254;
-/*             fprintf(stderr, "only 1 or 0 colors for encoding!\n");*/
          }
          for (aindex = 0; aindex < 5; aindex++) {
          /* don't forget here is always rounded down */
@@ -911,17 +891,17 @@ static void encodedxt5alpha(GLubyte *blkaddr, GLubyte srccolors[4][4][4],
          if (nralphainrangelow == 0) nralphainrangelow = 1;
          if (nralphainrangehigh == 0) nralphainrangehigh = 1;
          alphatest[0] = alphatest[0] + (blockerrlin1 / nralphainrangelow);
-/*         fprintf(stderr, "block err lin low %d, nr %d\n", blockerrlin1, nralphainrangelow);
-         fprintf(stderr, "block err lin high %d, nr %d\n", blockerrlin2, nralphainrangehigh);*/
+//         std::cerr << boost::format("block err lin low %d, nr %d\n") % blockerrlin1 % nralphainrangelow;
+//         std::cerr << boost::format("block err lin high %d, nr %d\n") % blockerrlin2 % nralphainrangehigh;
          /* again shouldn't really happen often... */
          if (alphatest[0] < 0) {
             alphatest[0] = 0;
-/*            fprintf(stderr, "adj alpha base val to 0\n");*/
+//            std::cerr << "adj alpha base val to 0\n";
          }
          alphatest[1] = alphatest[1] + (blockerrlin2 / nralphainrangehigh);
          if (alphatest[1] > 255) {
             alphatest[1] = 255;
-/*            fprintf(stderr, "adj alpha base val to 255\n");*/
+//            std::cerr << "adj alpha base val to 255\n";
          }
 
          alphablockerror3 = 0;
@@ -972,15 +952,18 @@ static void encodedxt5alpha(GLubyte *blkaddr, GLubyte srccolors[4][4][4],
    }
   /* write the alpha values and encoding back. */
    if ((alphablockerror1 <= alphablockerror2) && (alphablockerror1 <= alphablockerror3)) {
-/*      if (alphablockerror1 > 96) fprintf(stderr, "enc1 used, error %d\n", alphablockerror1);*/
+//      if (alphablockerror1 > 96) {
+//			std::cerr << "enc1 used, error " << static_cast<int>(alphablockerror1) << std::endl;
+//		}
       writedxt5encodedalphablock( blkaddr, alphause[1], alphause[0], alphaenc1 );
    }
    else if (alphablockerror2 <= alphablockerror3) {
-/*      if (alphablockerror2 > 96) fprintf(stderr, "enc2 used, error %d\n", alphablockerror2);*/
+//      if (alphablockerror2 > 96) {
+//			std::cerr << "enc2 used, error " << static_cast<int>(alphablockerror2) << std::endl;
+//		}
       writedxt5encodedalphablock( blkaddr, alphabase[0], alphabase[1], alphaenc2 );
-   }
-   else {
-/*      fprintf(stderr, "enc3 used, error %d\n", alphablockerror3);*/
+   } else {
+      std::cerr << "enc3 used, error " << static_cast<int>(alphablockerror3) << std::endl;
       writedxt5encodedalphablock( blkaddr, (GLubyte)alphatest[0], (GLubyte)alphatest[1], alphaenc3 );
    }
 }
@@ -1016,8 +999,6 @@ void tx_compress_dxtn(GLint srccomps, GLint width, GLint height, const GLubyte *
    case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
       /* hmm we used to get called without dstRowStride... */
       dstRowDiff = dstRowStride >= (width * 2) ? dstRowStride - (((width + 3) & ~3) * 2) : 0;
-/*      fprintf(stderr, "dxt1 tex width %d tex height %d dstRowStride %d\n",
-              width, height, dstRowStride); */
       for (j = 0; j < height; j += 4) {
          if (height > j + 3) numypixels = 4;
          else numypixels = height - j;
@@ -1035,8 +1016,6 @@ void tx_compress_dxtn(GLint srccomps, GLint width, GLint height, const GLubyte *
       break;
    case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
       dstRowDiff = dstRowStride >= (width * 4) ? dstRowStride - (((width + 3) & ~3) * 4) : 0;
-/*      fprintf(stderr, "dxt3 tex width %d tex height %d dstRowStride %d\n",
-              width, height, dstRowStride); */
       for (j = 0; j < height; j += 4) {
          if (height > j + 3) numypixels = 4;
          else numypixels = height - j;
@@ -1062,8 +1041,6 @@ void tx_compress_dxtn(GLint srccomps, GLint width, GLint height, const GLubyte *
       break;
    case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
       dstRowDiff = dstRowStride >= (width * 4) ? dstRowStride - (((width + 3) & ~3) * 4) : 0;
-/*      fprintf(stderr, "dxt5 tex width %d tex height %d dstRowStride %d\n",
-              width, height, dstRowStride); */
       for (j = 0; j < height; j += 4) {
          if (height > j + 3) numypixels = 4;
          else numypixels = height - j;
@@ -1081,7 +1058,6 @@ void tx_compress_dxtn(GLint srccomps, GLint width, GLint height, const GLubyte *
       }
       break;
    default:
-      fprintf(stderr, "libdxtn: Bad dstFormat %d in tx_compress_dxtn\n", destFormat);
       return;
    }
 }
@@ -1207,20 +1183,19 @@ void tx_compress_dxtn(GLint srccomps, GLint width, GLint height, const GLubyte *
 		img::img_info fo;
 		make_info(ddsd, fo);
 #if 0
-		printf("load Mipmap: %d\n", fo.mipmap_level);
-		printf("load Multi:  %d\n", fo.multi_level);
-		fflush(stdout);
+		boost::format("load Mipmap: %d\n") % fo.mipmap_level;
+		boost::format("load Multi:  %d\n") % fo.multi_level;
 
-		printf("sizeof: %d\n", sizeof(DDSurfaceDesc));
-		printf("Size: %d\n", ddsd.size);
-		printf("Flags: %d\n", ddsd.flags);
-		printf("W/H: %d, %d\n", ddsd.width, ddsd.height);
-		printf("Mipmap level: %d\n", ddsd.mipMapLevels);
-		printf("Pitch: %d\n", ddsd.pitch);
-		printf("Depth: %d\n", ddsd.depth);
-		printf("Surfcae: %d\n", ddsd.surface);
+		boost::format("sizeof: %d\n") % sizeof(DDSurfaceDesc);
+		boost::format("Size: %d\n") % ddsd.size);
+		boost::format("Flags: %d\n") % ddsd.flags;
+		boost::format("W/H: %d, %d\n") % ddsd.width % ddsd.height;
+		boost::format("Mipmap level: %d\n") % ddsd.mipMapLevels;
+		boost::format("Pitch: %d\n") % ddsd.pitch;
+		boost::format("Depth: %d\n") % ddsd.depth;
+		boost::format("Surfcae: %d\n") % ddsd.surface;
 
-		printf("Tex-Stage: %d\n", ddsd.textureStage);
+		boost::format("Tex-Stage: %d\n") % ddsd.textureStage;
 
 		char fo[5];
 		const char* p = (const char *)&ddsd.format.fourCC;
@@ -1229,15 +1204,14 @@ void tx_compress_dxtn(GLint srccomps, GLint width, GLint height, const GLubyte *
 		fo[2] = p[2];
 		fo[3] = p[3];
 		fo[4] = 0;
-		printf("format: '%s'\n", fo);
-		printf("Caps: %08X\n", ddsd.caps.caps2);
+		boost::format("format: '%s'\n") % fo;
+		boost::format("Caps: %08X\n") % ddsd.caps.caps2;
 
-		printf("BPP:   %d\n", ddsd.format.bpp);
-		printf("MaskR: %08X\n", ddsd.format.redMask);
-		printf("MaskG: %08X\n", ddsd.format.greenMask);
-		printf("MaskB: %08X\n", ddsd.format.blueMask);
-		printf("MaskA: %08X\n", ddsd.format.alphaMask);
-		fflush(stdout);
+		boost::format("BPP:   %d\n") % ddsd.format.bpp;
+		boost::format("MaskR: %08X\n") % ddsd.format.redMask;
+		boost::format("MaskG: %08X\n") % ddsd.format.greenMask;
+		boost::format("MaskB: %08X\n") % ddsd.format.blueMask;
+		boost::format("MaskA: %08X\n") % ddsd.format.alphaMask;
 #endif
 
 		enum {
@@ -1312,8 +1286,7 @@ void tx_compress_dxtn(GLint srccomps, GLint width, GLint height, const GLubyte *
 			}
 		}
 
-		printf("%d, %d\n", width, height);
-		fflush(stdout);
+//		boost::format("%d, %d\n") % width % height;
 
 		switch(form) {
 		case form_RGBA:
@@ -1383,8 +1356,7 @@ void tx_compress_dxtn(GLint srccomps, GLint width, GLint height, const GLubyte *
 			}
 			break;
 		default:
-			printf("Can't decode DDS format...\n");
-			fflush(stdout);
+			std::cout << "Can't decode DDS format..." << std::endl;
 			break;
 		}
 

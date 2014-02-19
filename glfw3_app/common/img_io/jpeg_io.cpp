@@ -202,11 +202,11 @@ namespace img {
 		dst->error = false;
 	}
 
-	static volatile int g_error_code;
+	static volatile int error_code_;
 
 	METHODDEF(void) error_exit_task(jpeg_common_struct *st)
 	{
-		g_error_code = 1;
+		error_code_ = 1;
 	}
 
 
@@ -221,7 +221,7 @@ namespace img {
 #ifdef __PPU__
 		int ret = cellSysmoduleLoadModule(CELL_SYSMODULE_JPGDEC);
 		if(ret != CELL_OK){
-			printf("Can't load jpeg module....\n");
+			std::cout << "Can't load jpeg module...." << std::endl;
 			return;
 		}
 #endif
@@ -277,12 +277,12 @@ namespace img {
 		fio_jpeg_file_io_src(&cinfo, &fin);
 
 		// ファイルの情報ヘッダの読込み
-		g_error_code = 0;
+		error_code_ = 0;
 		jpeg_read_header(&cinfo, TRUE);
 		fin.seek(pos, utils::file_io::seek::set);
 
-		if(g_error_code) {
-///			printf("JPEG decode error: 'header'(%d)\n", g_error_code);
+		if(error_code_) {
+///			std::endl << "JPEG decode error: 'header'(" << static_cast<int>(error_code_) << ")" << std::endl; 
 			jpeg_destroy_decompress(&cinfo);
 			return false;
 		}
@@ -359,19 +359,19 @@ namespace img {
 		fio_jpeg_file_io_src(&cinfo, &fin);
 
 		// ファイルの情報ヘッダの読込み
-		g_error_code = 0;
+		error_code_ = 0;
 		jpeg_read_header(&cinfo, TRUE);
-		if(g_error_code) {
-			printf("JPEG decode error: 'header'(%d)\n", g_error_code);
+		if(error_code_) {
+			std::cout << "JPEG decode error: 'header'(" << error_code_ << ")" << std::endl; 
 			jpeg_destroy_decompress(&cinfo);
 			return false;
 		}
 
 		// 解凍の開始
-		g_error_code = 0;
+		error_code_ = 0;
 		jpeg_start_decompress(&cinfo);
-		if(g_error_code) {
-			printf("JPEG decode error: 'decompress'(%d)\n", g_error_code);
+		if(error_code_) {
+			std::cout << "JPEG decode error: 'decompress'(" << error_code_ << ")" << std::endl;
 			jpeg_finish_decompress(&cinfo);
 			jpeg_destroy_decompress(&cinfo);
 			return false;
@@ -387,7 +387,6 @@ namespace img {
 			img_.create(vtx::spos(cinfo.image_width, cinfo.image_height), true);
 		}
 
-//		printf("%d, %d (%d)\n", cinfo.image_width, cinfo.image_height, cinfo.output_components);
 		unsigned char* line = new unsigned char[row_stride];
 		unsigned char* lines[1];
 		lines[0] = line;

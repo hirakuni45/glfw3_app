@@ -4,7 +4,7 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include "kfimg_ft2.hpp"
+#include "core/kfimg_ft2.hpp"
 #include "utils/string_utils.hpp"
 
 using namespace std;
@@ -36,7 +36,7 @@ namespace img {
 	{
 		Ikfimg* p = dynamic_cast<Ikfimg*>(g_kanji_font_image);
 		if(p == 0) {
-//			printf("Can't create kanji-font-image\n");
+///			std::cout << "Can't create kanji-font-image" << std::endl;
 		}
 		return p;
 	}
@@ -172,7 +172,6 @@ void get_metrics(wchar_t code)
 
 		int ox = static_cast<int>(metrics_.hori_x);
 		int oy = offset_y_[size.y] - static_cast<int>(metrics_.hori_y);
-//	printf("%04X - bitmap num: %d\n", code, bitmap->pixel_mode);
 	// グレイスケールでレンダリング出来なかった場合は、モノカラーとなる。
 		if(bitmap->pixel_mode != FT_PIXEL_MODE_MONO) {		// gray-scale 0 to 255
 			for(int j = 0; j < bitmap->rows; j++) {

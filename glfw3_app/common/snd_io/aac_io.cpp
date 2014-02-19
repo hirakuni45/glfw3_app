@@ -10,6 +10,7 @@
 #include <cstdio>
 #include "img_io/img_files.hpp"
 #include "img_io/img_utils.hpp"
+#include <boost/format.hpp>
 
 namespace al {
 
@@ -214,7 +215,7 @@ namespace al {
 		fileread = b.fin.get_file_size();
 
 		if (!(b.buffer = (unsigned char*)malloc(FAAD_MIN_STREAMSIZE * MAX_CHANNELS))) {
-			/// fprintf(stderr, "Memory allocation error\n");
+			/// std::cerr << "Memory allocation error\n";
 			return 0;
 		}
 		memset(b.buffer, 0, FAAD_MIN_STREAMSIZE * MAX_CHANNELS);
@@ -289,7 +290,7 @@ namespace al {
 		if ((bread = NeAACDecInit(hDecoder, b.buffer,
 			b.bytes_into_buffer, &samplerate, &channels)) < 0) {
 			/* If some error initializing occured, skip the file */
-			fprintf(stderr, "Error initializing decoder library.\n");
+			std::cerr << "Error initializing decoder library.\n";
             free(b.buffer);
 			NeAACDecClose(hDecoder);
 			return 0;
@@ -299,18 +300,18 @@ namespace al {
 
 #if 0
 		/* print AAC file info */
-		fprintf(stderr, "%s file info:\n", aacfile);
+		std::cerr << aacfile << " file info:\n"; 
 		switch (header_type) {
 		case 0:
-			fprintf(stderr, "RAW\n\n");
+			std::cerr << "RAW\n\n";
 		break;
 		case 1:
-			fprintf(stderr, "ADTS, %.3f sec, %d kbps, %d Hz\n\n",
-				length, bitrate, samplerate);
+			std::cerr << boost::format("ADTS, %.3f sec, %d kbps, %d Hz\n\n")
+				% length % bitrate % samplerate;
 		break;
 		case 2:
-			fprintf(stderr, "ADIF, %.3f sec, %d kbps, %d Hz\n\n",
-				length, bitrate, samplerate);
+			std::cerr << boost::format("ADIF, %.3f sec, %d kbps, %d Hz\n\n")
+				% length % bitrate % samplerate;
 		break;
 		}
 #endif
@@ -323,15 +324,14 @@ namespace al {
 			advance_buffer_(b, frameInfo.bytesconsumed);
 
 			if (frameInfo.error > 0) {
-				fprintf(stderr, "Error: %s\n",
-					NeAACDecGetErrorMessage(frameInfo.error));
+				std::cerr << "Error: " << NeAACDecGetErrorMessage(frameInfo.error) << std::endl;
 			}
 
-			percent = std::min((int)(b.file_offset*100)/fileread, 100);
+			percent = std::min(static_cast<int>((b.file_offset * 100) / fileread), 100);
 			if (percent > old_percent) {
 				old_percent = percent;
-				/// sprintf(percents, "%d%% decoding %s.", percent, aacfile);
-				fprintf(stderr, "%s\r", percents);
+				/// std::cerr << boost::format("%d%% decoding %s.") % percent % aacfile;
+				std::cerr << boost::format("%s\r") % percents;
 			}
 
 			if ((frameInfo.error == 0) && (frameInfo.samples > 0)) {
@@ -409,9 +409,9 @@ namespace al {
 		}
 		seconds = (float)samples * (float)(f - 1.0f) / (float)mp4ASC.samplingFrequency;
 
-		printf("%s\t%.3f secs, %d ch, %d Hz\n\n",
-			ot[(mp4ASC.objectTypeIndex > 5)?0:mp4ASC.objectTypeIndex],
-			seconds, mp4ASC.channelsConfiguration, mp4ASC.samplingFrequency);
+		std::cout << boost::format("%s\t%.3f secs, %d ch, %d Hz\n\n")
+			% (ot[(mp4ASC.objectTypeIndex > 5) ? 0 : mp4ASC.objectTypeIndex])
+			% seconds % mp4ASC.channelsConfiguration % mp4ASC.samplingFrequency;
 
 #define PRINT_MP4_METADATA
 #ifdef PRINT_MP4_METADATA
@@ -423,16 +423,15 @@ namespace al {
 				if (const char* tag = mp4ff_meta_get_value(infile, k)) {
 					if(std::string(item) == "cover") {
 						size_t size = mp4ff_meta_get_size(infile, k);
-						printf("%s: (%d)\n", item, size);
+						std::cout << boost::format("%s: (%d)\n") % item % size;
 					} else {
-						printf("%s: %s\n", item, tag);
+						std::cout << boost::format("%s: %s\n") % item % tag;
 					}
 				}
 			}
 		}
-		if (j > 0) fprintf(stderr, "\n");
+		if (j > 0) std::cout << std::endl;
 #endif
-		fflush(stdout);
 	}
 
 
@@ -470,7 +469,7 @@ namespace al {
 
 				if(!dt.useAacLength && !dt.initial && (idx < dt.samples / 2)
 				  && (dt.count != dt.frame_info.samples)) {
-					printf("MP4 seems to have incorrect frame duration, using values from AAC data.\n");
+					std::cout << "MP4 seems to have incorrect frame duration, using values from AAC data.\n";
 					dt.useAacLength = 1;
 					dt.count = dt.frame_info.samples;
 				}
@@ -512,14 +511,13 @@ namespace al {
 
 		dt.track = get_aac_track_(dt.infile);
 		if(dt.track < 0) {
-///			printf("Unable to find correct AAC sound track in the MP4 file.\n");
+///			std::cout << "Unable to find correct AAC sound track in the MP4 file.\n";
 			mp4ff_close(dt.infile);
 			NeAACDecClose(dt.h_decoder);
 			return false;
 		}
 
-/// printf("Decode track: %d\n", dt.track);
-/// fflush(stdout);
+/// std::cout << boost::format("Decode track: %d\n") % dt.track;
 
 		return true;
 	}
@@ -534,8 +532,7 @@ namespace al {
 		unsigned long samplerate;
 		unsigned char channels;
 		if(NeAACDecInit2(dt.h_decoder, buffer, buffer_size, &samplerate, &channels) < 0) {
-///	printf("Error initializing decoder library.\n");
-///	fflush(stdout);
+///	std::cout << "Error initializing decoder library.\n";
 			NeAACDecClose(dt.h_decoder);
 			mp4ff_close(dt.infile);
 			return false;
@@ -584,7 +581,7 @@ namespace al {
 		} else if(dt.channels == 2) {
 			aif = dynamic_cast<i_audio*>(new audio_sto16);
 		} else {
-			printf("Can't decode chanel: %d\n", dt.channels);
+			std::cout << boost::format("Can't decode chanel: %d\n") % dt.channels;
 			fflush(stdout);
 			NeAACDecClose(dt.h_decoder);
 			mp4ff_close(dt.infile);
@@ -592,10 +589,9 @@ namespace al {
 		}
 		aif->create(dt.samplerate, out_size);
 
-/// printf("Chanels: %d\n", channels);
-/// printf("Sample rate: %d [Hz]\n", samplerate);
-/// printf("Samples: %d\n", out_size);
-/// fflush(stdout);
+/// std::cout << boost::format("Chanels: %d\n") % channels);
+/// std::cout << boost::format("Sample rate: %d [Hz]\n") % samplerate);
+/// std::cout << boost::format("Samples: %d\n") % out_size);
 
 		dt.count = 0;
 		uint32_t pos = 0;
@@ -603,14 +599,14 @@ namespace al {
 			dt.delay = 0;
 			bool f = decode_audio_mp4_(dt, idx);
 			if(!f) {
-				printf("Reading from MP4 file failed. (%d)\n", dt.count);
+				std::cout << boost::format("Reading from MP4 file failed. (%d)\n") % dt.count;
 				destroy_mp4_(dt);
 				delete aif;
 				return 0;
 			}
 
 			if(dt.delay) {
-/// printf("Delay: %d\n", dt.delay);
+/// std::cout << boost::format("Delay: %d\n") % dt.delay;
 			}
 
 			for(uint32_t i = 0; i < dt.count / dt.channels; ++i) {

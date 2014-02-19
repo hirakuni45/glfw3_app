@@ -23,7 +23,7 @@ namespace mp3 {
 				dst += c;
 			} else {
 #ifdef MSG_
-printf("%x ", c);
+std::cout << boost::format("%x ") % c;
 #endif
 			}
 		}
@@ -67,10 +67,6 @@ printf("%x ", c);
 		}
 		open_ = true;
 
-//		unsigned int v = id3_tag_version(id3_tag_);
-//		printf("ID3-tag: %d\n", v);
-//		fflush(stdout);
-
 		value_ = 0;
 
 		for(int i = 0; i < id3_t::limit_; ++i) {
@@ -92,9 +88,10 @@ printf("%x ", c);
 		if(open_ == false) return false;
 		if(id3_tag_ == 0) return false;
 
-//		printf("Tag frame num: %d\n", id3_tag_->nframes);
-//		printf("Tag version: %d\n", id3_tag_->version);
-//		printf("Tag size: %d (%X)\n", (int)id3_tag_->paddedsize, (int)id3_tag_->paddedsize);
+//		std::cout << boost::format("Tag frame num: %d\n") % id3_tag_->nframes;
+//		std::cout << boost::format("Tag version: %d\n") % id3_tag_->version;
+//		std::cout << boost::format("Tag size: %d (%X)\n") % static_cast<int>(id3_tag_->paddedsize)
+//			% static_cast<int>(id3_tag_->paddedsize);
 
 		int skip = id3_tag_->paddedsize;
 ///		if(skip & 3) { skip |= 3; ++skip; }
@@ -114,12 +111,9 @@ printf("%x ", c);
 			else if(strcmp(fm->id, "TPOS") == 0) frame_t_ = id3_t::disc;
 			else if(strcmp(fm->id, "TDRC") == 0) frame_t_ = id3_t::release_year;
 			else {
-//				printf("(%d)Frame ID: '%s'", i, fm->id);
-//				printf(" by (%d) Fields\n", fm->nfields);
-//				fflush(stdout);
 			}
 #ifdef MSG_
-			printf("%s ", fm->id);
+			std::cout << fm->id << " ";
 #endif
 			for(int j = 0; j < fm->nfields; ++j) {
 				id3_field* fd = &fm->fields[j];
@@ -129,25 +123,22 @@ printf("%x ", c);
 					text_code_ = id3_field_gettextencoding(fd);
 #ifdef MSG_
 					if(text_code_ == ID3_FIELD_TEXTENCODING_ISO_8859_1) {
-						printf("ISO_8859\n");
+						std::cout << "ISO_8859" << std::endl;
 					} else if(text_code_ == ID3_FIELD_TEXTENCODING_UTF_16) {
-						printf("UTF_16  \n");
+						std::cout << "UTF_16  " << std::endl;
 					} else if(text_code_ == ID3_FIELD_TEXTENCODING_UTF_16BE) {
-						printf("UTF_16BE\n");
+						std::cout << "UTF_16BE" << std::endl;
 					} else if(text_code_ == ID3_FIELD_TEXTENCODING_UTF_8) {
-						printf("UTF_8  \n");
+						std::cout << "UTF_8   " << std::endl; 
 					}
 #endif
 					break;
 				case ID3_FIELD_TYPE_LATIN1:
 				{
 					const id3_latin1_t* t = id3_field_getlatin1(fd);
-//					printf("LATIN1: %d\n", *t);
 				}
 					break;
 				case ID3_FIELD_TYPE_LATIN1FULL:
-//					printf("LATIN1FULL:\n");
-//					fflush(stdout);
 					break;
 // ID3_FIELD_TYPE_LATIN1LIST,
 				case ID3_FIELD_TYPE_STRING:
@@ -184,15 +175,13 @@ printf("%x ", c);
 						if(cnv) {
 							text_[frame_t_] = dst;
 #ifdef MSG_
-							printf("STRING: '%s'\n", dst.c_str());
+							std::cout << "STRING: '" << dst << "'";
 #endif
 						}
 					}
 				}
 					break;
 				case ID3_FIELD_TYPE_STRINGFULL:
-//					printf("STRINGFULL:\n");
-//					fflush(stdout);
 					break;
 				case ID3_FIELD_TYPE_STRINGLIST:
 					{
@@ -219,7 +208,7 @@ printf("%x ", c);
 							if(cnv) {
 								text_[frame_t_] = dst;
 #ifdef MSG_
-								printf("STRINGS(%d): '%s'\n", n, dst.c_str());
+								std::cout << boost::format("STRINGS(%d): '%s'\n") % n % dst;
 #endif
 							}
 						}
@@ -230,19 +219,14 @@ printf("%x ", c);
 					{
 						const char* id = id3_field_getframeid(fd);
 						if(id) {
-//							printf("FRAMEID: '%s'\n", id);
-//							fflush(stdout);
 						}
 					}
 					break;
 				case ID3_FIELD_TYPE_DATE:
-//					printf("DATE:\n");
-//					fflush(stdout);
 					break;
 				case ID3_FIELD_TYPE_INT8:
 				{
 					value_ = id3_field_getint(fd);
-//					printf("INT8: %d\n", (int)value_);
 				}
 					break;
 // ID3_FIELD_TYPE_INT16,
@@ -253,12 +237,9 @@ printf("%x ", c);
 					{
 						id3_length_t len;
 						const id3_byte_t* p = id3_field_getbinarydata(fd, &len);
-//						printf("BINARYDATA: %d\n", (int)len);
-//						fflush(stdout);
 						if(picture == true && len > 0) {
 							id3_byte_t* tmp = 0;
 							if(apic_string_len_ == (len + 5)) {
-//								printf("APIC bugfix decode: %d\n", (int)m_apic_string_len);
 								tmp = new id3_byte_t[len + 5];
 								tmp[0] = apic_string_[0];
 								tmp[1] = apic_string_[1];
@@ -280,11 +261,11 @@ printf("%x ", c);
 							} else if(pngio_.probe(mem)) {
 								pngio_.load(mem);
 							} else {
-//								printf("APIC can't decode picture format: ");
+//								std::cout << "APIC can't decode picture format: ";
 //								for(int i = 0; i < 4; ++i) {
-//									printf("%02X,", p[i]);
+//									std::cout << boost::format("%02X,") % p[i];
 //								}
-//								printf("\n");
+//								std::cout << std::endl;
 							}
 							mem.close();
 							delete[] tmp;
@@ -292,13 +273,8 @@ printf("%x ", c);
 					}
 					break;
 				default:
-//					printf("FIELD-TYPE: %d\n", fd->type);
-//					fflush(stdout);
 					break;
 				}
-#ifdef MSG_
-				fflush(stdout);
-#endif
 			}
 		}
 		return true;

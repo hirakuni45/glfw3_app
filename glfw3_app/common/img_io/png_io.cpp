@@ -8,8 +8,7 @@
 #include "png_io.hpp"
 #include "img_idx8.hpp"
 #include "img_rgba8.hpp"
-
-#include <iostream>
+#include <boost/format.hpp>
 
 using namespace std;
 
@@ -29,9 +28,8 @@ namespace img {
 
 		size_t s = fin->read(buf, 1, size);
 		if(s != size) {
-			char text[128];
-			sprintf(text, "png_io_read_func: error (read size: %d, request: %d)", (int)s, (int)size);
-			png_error(png_ptr, text);
+			png_error(png_ptr, boost::io::str(boost::format("png_io_read_func: error (read size: %d, request: %d)")
+				% static_cast<int>(s) % static_cast<int>(size)).c_str());
 		}
 	}
 
@@ -50,8 +48,8 @@ namespace img {
 
 		size_t s = fout->write(buf, 1, size);
 		if(s != size) {
-			char text[128];
-			sprintf(text, "png_io_write_func: error (%d/%d)", (int)s, (int)size);
+			const char* text = boost::io::str(boost::format("png_io_write_func: error (%d/%d)")
+				% static_cast<int>(s) % static_cast<int>(size)).c_str();
 			png_error(png_ptr, text);
 		}
 	}
@@ -221,7 +219,7 @@ namespace img {
 			gray = true;
 			alpha = true;
 			imf = dynamic_cast<i_img*>(&img_);
-//			printf("PNG gray scale with alpha\n");
+//			std::cout << "PNG gray scale with alpha\n";
 		} else if(color_type & PNG_COLOR_MASK_PALETTE) {
 			ch = 1;
 			png_bytep ta;
@@ -234,12 +232,12 @@ namespace img {
 			ch = 4;
 			alpha = true;
 			imf = dynamic_cast<i_img*>(&img_);
-//			printf("PNG RGBA\n");
+//			std::cout << "PNG RGBA\n";
 		} else {
 			ch = 3;
 			alpha = false;
 			imf = dynamic_cast<i_img*>(&img_);
-///			printf("PNG RGB\n");
+///			std::cout << "PNG RGB\n";
 		}
 
 		if(bit_depth > 8) {

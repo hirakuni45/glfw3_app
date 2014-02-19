@@ -253,22 +253,20 @@ namespace al {
 		bool f = parse_header_(fin);
 		if(f == false) {
 #ifdef LOAD_INFO_
-			printf("parse error!\n");
-			fflush(stdout);
+			std::cout << "parse error!" << std::endl;
 #endif
 		} else {
 #ifdef LOAD_INFO_
 			if(type_ == wf_ex) {
-				printf("Form: ex\n");
+				std::cout << "Form: ex" << std::endl;
 			} else {
-				printf("Form: ext\n");
+				std::cout << "Form: ext" << std::endl;
 			}
-			printf("Chanel:        %d\n", ext_.m_format.nChannels);
-			printf("Sample / Sec:  %d\n", ext_.m_format.nSamplesPerSec);
-			printf("Bytes / Sec:   %d\n", ext_.m_format.nAvgBytesPerSec);
-			printf("Bits / Sample: %d\n", ext_.m_format.wBitsPerSample);
-			printf("Block Align:   %d\n", ext_.m_format.nBlockAlign);
-			fflush(stdout);
+			std::cout << "Chanel:        " << static_cast<int>(ext_.m_format.nChannels) << std::endl;
+			std::cout << "Sample / Sec:  " << static_cast<int>(ext_.m_format.nSamplesPerSec) << std::endl;
+			std::cout << "Bytes / Sec:   " << static_cast<int>(ext_.m_format.nAvgBytesPerSec) << std::endl;
+			std::cout << "Bits / Sample: " << static_cast<int>(ext_.m_format.wBitsPerSample) << std::endl;
+			std::cout << "Block Align:   " << static_cast<int>(ext_.m_format.nBlockAlign) << std::endl;
 #endif
 			i_audio* aif = 0;
 			if(ext_.format.channels == 1) {		// mono

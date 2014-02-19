@@ -97,8 +97,6 @@ namespace al {
 			if(n != i) {
 				const snd_file& io = sndios_[i];
 				if(io.sio->probe(fin)) {
-// printf("Probe: '%s'\n", io.ext.c_str());
-// fflush(stdout);
 					return true;
 				}
 			}

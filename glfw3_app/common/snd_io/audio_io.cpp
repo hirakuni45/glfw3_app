@@ -6,11 +6,12 @@
 //=====================================================================//
 #include <unistd.h>
 #include <ctime>
-#include "audio_io.hpp"
-#include "pcm.hpp"
+#include "snd_io/audio_io.hpp"
+#include "snd_io/pcm.hpp"
 #ifdef WIN32
 #include <windows.h>
 #endif
+#include <boost/format.hpp>
 
 namespace al {
 
@@ -38,13 +39,15 @@ namespace al {
 			ALCdevice* device = alcGetContextsDevice(alcGetCurrentContext());
 			ALCenum error = alcGetError(device);
 			if(error != ALC_NO_ERROR) {
-				printf("ALC error: '%s'\n", (const char*)alcGetString(device, error));
+				std::cout << boost::format("ALC error: '%s'\n")
+					% static_cast<const char*>(alcGetString(device, error));
 			}
 		}
 		{
 			ALenum error = alGetError();
 			if(error != AL_NO_ERROR) {
-				printf("AL error: '%s'\n", (const char*)alGetString(error));
+				std::cout << boost::format("AL error: '%s'\n")
+					% static_cast<const char*>(alGetString(error));
 			}
 		}
 	}
@@ -55,9 +58,9 @@ namespace al {
 		const char *s = alcGetString(NULL, which);
 		checkForErrors();
 
-		printf("Available %sdevices:\n", kind);
+		std::cout << boost::format("Available %sdevices:\n") % kind;
 		while(*s != '\0') {
-			printf("    %s\n", s);
+			std::cout << boost::format("    %s\n") % s;
 			while(*s++ != '\0') ;
 		}
 	}
@@ -65,7 +68,7 @@ namespace al {
 
 	static void printExtensions(const char* header, char separator, const char* extensions)
 	{
-		printf("%s:\n", header);
+		std::cout << boost::format("%s:\n") % header;
 		if(extensions == NULL || extensions[0] == '\0') return;
 
 		int width = 0, start = 0, end = 0;
@@ -115,7 +118,6 @@ namespace al {
 			num *= 2;
 			break;
 		default:
-///			utils::string_printf(error_message_, "Can't decode file format.\n");
 			return false;
 			break;
 		}
@@ -163,9 +165,9 @@ namespace al {
 	//-----------------------------------------------------------------//
 	void audio_io::context_info() const
 	{
-		printf("OpenAL vendor string: %s\n", alGetString(AL_VENDOR));
-		printf("OpenAL renderer string: %s\n", alGetString(AL_RENDERER));
-		printf("OpenAL version string: %s\n", alGetString(AL_VERSION));
+		std::cout << boost::format("OpenAL vendor string: %s\n") % alGetString(AL_VENDOR);
+		std::cout << boost::format("OpenAL renderer string: %s\n") % alGetString(AL_RENDERER);
+		std::cout << boost::format("OpenAL version string: %s\n") % alGetString(AL_VERSION);
 	}
 
 
@@ -184,23 +186,23 @@ namespace al {
 				printDevices(ALC_CAPTURE_DEVICE_SPECIFIER, "capture ");
 			}
 		} else {
-			printf("No device enumeration available\n");
+			std::cout << boost::format("No device enumeration available\n");
 		}
 
 		ALCdevice* device = alcGetContextsDevice(alcGetCurrentContext());
 		checkForErrors();
 
-		printf("Default device: %s\n",
-			alcGetString(device, ALC_DEFAULT_DEVICE_SPECIFIER));
+		std::cout << boost::format("Default device: %s\n")
+			% alcGetString(device, ALC_DEFAULT_DEVICE_SPECIFIER);
 
-		printf("Default capture device: %s\n",
-			alcGetString(device, ALC_CAPTURE_DEFAULT_DEVICE_SPECIFIER));
+		std::cout << boost::format("Default capture device: %s\n")
+			% alcGetString(device, ALC_CAPTURE_DEFAULT_DEVICE_SPECIFIER);
 
 		ALCint major, minor;
 		alcGetIntegerv(device, ALC_MAJOR_VERSION, 1, &major);
 		alcGetIntegerv(device, ALC_MINOR_VERSION, 1, &minor);
 		checkForErrors();
-		printf("ALC version: %d.%d\n", (int)major, (int)minor);
+		std::cout << boost::format("ALC version: %d.%d\n") % static_cast<int>(major) % static_cast<int>(minor);
 
 		printExtensions("ALC extensions", ' ',
 			alcGetString(device, ALC_EXTENSIONS));
@@ -226,7 +228,6 @@ namespace al {
 
 		if(wh == AL_NONE) {
 			ALenum alerror = alGetError();
-///			utils::string_printf(m_error_message, "Load file error: '%s'\n", alGetString(alerror));
 			return 0;
 		}
 
@@ -311,7 +312,7 @@ namespace al {
 	{
 		if(sh != 0 && wh != 0) {
 			alSourcei(sh, AL_BUFFER, wh);
-//			printf("set_wave: slot: %d, wave: %d\n", sh, wh);
+//			std::cout << boost::format("set_wave: slot: %d, wave: %d\n") % sh % wh;
 			return true;
 		}
 		return false;
@@ -409,12 +410,10 @@ namespace al {
 		if(ssh == 0) return;
 
 		if(ena) {
-//			printf("Stream: Pause enable\n");
-//			fflush(stdout);
+//			std::cout << "Stream: Pause enable\n";
 			alSourcePause(ssh);
 		} else {
-//			printf("Stream: Pause disable\n");
-//			fflush(stdout);
+//			std::cout << "Stream: Pause disable\n";
 			alSourcePlay(ssh);
 		}
 	}
@@ -479,7 +478,7 @@ namespace al {
 		wav.close_stream();
 		fin.close();
 
-		printf("buffer: %d\n", cnt);
+		std::cout << boost::format("buffer: %d\n") % cnt;
 	}
 #endif
 
@@ -546,7 +545,6 @@ namespace al {
 			break;
 		}
 
-		printf("%u: '%s', ", (unsigned int)sh, stt.c_str());
-		printf("\n");
+		std::cout << boost::format("%u: '%s', ") % static_cast<unsigned int>(sh) % stt;
 	}
 }

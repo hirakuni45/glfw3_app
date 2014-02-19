@@ -7,6 +7,7 @@
 #include "mp3_io.hpp"
 #include "pcm.hpp"
 #include <boost/foreach.hpp>
+#include <boost/format.hpp>
 #include "img_io/img_utils.hpp"
 #include <iostream>
 
@@ -205,8 +206,6 @@ namespace al {
 			}
 		}
 
-//		printf("Decode frame: %d\n", frame_count);
-
 		mad_synth_finish(&mad_synth_);
 		mad_frame_finish(&mad_frame_);
 		mad_stream_finish(&mad_stream_);
@@ -269,16 +268,15 @@ namespace al {
 			 */
 			if(mad_frame_decode(&Frame, &Stream)) {
 				if(MAD_RECOVERABLE(Stream.error)) {
-//					fprintf(stderr,"Recoverable frame level error (%s)\n",
-//							MadErrorString(&Stream));
-//					fflush(stderr);
+//					std::cout << boost::format("Recoverable frame level error (%s)\n")
+//						% MadErrorString(&Stream);
 					continue;
 				} else {
 					if(Stream.error == MAD_ERROR_BUFLEN) {
 						continue;
 					} else {
-//						fprintf(stderr,"Unrecoverable frame level error (%s).\n",
-//								MadErrorString(&Stream));
+//						std::cout << boost::format("Unrecoverable frame level error (%s).\n")
+//							% MadErrorString(&Stream);
 						status = 1;
 						break;
 					}
@@ -349,8 +347,8 @@ namespace al {
 				// Flush the output buffer if it is full.
 				if(OutputPtr == OutputBufferEnd) {
 					if(fwrite(OutputBuffer, 1, OUTPUT_BUFFER_SIZE, OutputFp) != OUTPUT_BUFFER_SIZE) {
-						fprintf(stderr,"PCM write error (%s).\n",
-								strerror(errno));
+						std::cout << boost::format("PCM write error (%s).\n")
+							% strerror(errno);
 						status = 2;
 						break;
 					}
@@ -365,8 +363,8 @@ namespace al {
 			size_t BufferSize = OutputPtr - OutputBuffer;
 
 			if(fwrite(OutputBuffer, 1, BufferSize, OutputFp) != BufferSize) {
-				fprintf(stderr,"PCM write error (%s).\n",
-						strerror(errno));
+				std::cout << boost::format("PCM write error (%s).\n")
+					% strerror(errno);
 				status = 2;
 			}
 		}
@@ -399,8 +397,8 @@ namespace al {
 		 */
 			mad_timer_string(Timer,Buffer,"%lu:%02lu.%03u",
 						 MAD_UNITS_MINUTES,MAD_UNITS_MILLISECONDS,0);
-			fprintf(stderr,"%lu frames decoded (%s).\n",
-					frame_count, Buffer);
+			std::cout << boost::format("%lu frames decoded (%s).\n")
+				% frame_count % Buffer;
 		}
 
 		/* That's the end of the world (in the H. G. Wells way). */
@@ -474,8 +472,7 @@ namespace al {
 			return false;
 		}
 
-// printf("Ofs: %d\n", ofs);
-// fflush(stdout);
+// std::cout << boost::format("Ofs: %d\n") % ofs;
 		// id3v1 タグがあるか確認
 		{
 			fin.seek(fin.get_file_size() - 128, file_io::seek::set);
@@ -483,8 +480,7 @@ namespace al {
 			fin.read(tag, 1, 3);
 			if(tag[0] == 'T' && tag[1] == 'A' && tag[2] == 'G') {
 				id3v1_ = true;
-// printf("ID3 V1 !\n");
-// fflush(stdout);
+// std::cout << boost::format("ID3 V1 !\n");
 			} else {
 				id3v1_ = false;
 			}
@@ -603,10 +599,9 @@ namespace al {
 			++frame_cnt;
 		}
 
-// printf("Frame: %d\n", count);
-// printf("Recoverable frame level error: %d\n", mp3info.recover_frame_error);
-// printf("Unrecoverable frame level error: %d\n", mp3info.unrecover_frame_error);
-// fflush(stdout);
+// std::cout << boost::format("Frame: %d\n") % count;
+// std::cout << boost::format("Recoverable frame level error: %d\n") % mp3info.recover_frame_error;
+// std::cout << boost::format("Unrecoverable frame level error: %d\n") % mp3info.unrecover_frame_error;
 
 		if(error == 0 && frame_cnt > limit_frame && mp3info.unrecover_frame_error == 0) {
 			if(ch == 1) {
@@ -626,9 +621,8 @@ namespace al {
 
 		fin.seek(pos, file_io::seek::set);
 
-// printf("error: %d\n", error);
-// printf("frame: %d\n", frame_cnt);
-// fflush(stdout);
+// std::cout << boost::format("error: %d\n") % error;
+// std::cout << boost::format("frame: %d\n") % frame_cnt;
 
 		if(error == 0 && frame_cnt > limit_frame && mp3info.unrecover_frame_error == 0) {
 			mp3info.frame_count = frame_cnt;
@@ -676,8 +670,8 @@ namespace al {
 				aif = dynamic_cast<i_audio*>(new audio_sto16);
 			}
 			if(aif) {
-//				printf("Sampling: %d [Hz]\n", info.frequency);
-//				printf("Samples:  %d\n", info.samples);
+//				std::cout << boost::format("Sampling: %d [Hz]\n") % info.frequency;
+//				std::cout << boost::format("Samples:  %d\n") % info.samples;
 				aif->create(info.frequency, info.samples);
 
 				if(decode_(fin, aif)) {
@@ -760,8 +754,8 @@ namespace al {
 				output_all_ = static_cast<int>(inf.samples);
 				output_buffer_->create(inf.frequency, output_max_);
 				output_buffer_->zero();
-//				printf("Stream Sampling: %d [Hz]\n", inf.frequency);
-//				printf("Stream Samples:  %d\n", inf.samples);
+//				std::cout << boost::format("Stream Sampling: %d [Hz]\n") % inf.frequency;
+//				std::cout << boost::format("Stream Samples:  %d\n") % inf.samples;
 				return true;
 			}
 		}
@@ -787,8 +781,8 @@ namespace al {
 		size_t end_pos = offset + samples;
 
 		if(offset != 0 && (offset_ + samples) != offset) {	// seek を検出
-//			printf("Seek: %d -> %d\n", (int)offset_, (int)offset);
-//			fflush(stdout);
+//			std::cout << boost::format("Seek: %d -> %d\n") % static_cast<int>(offset_)
+//				% static_cast<int>(offset);
 //			output_pos_ = offset;
 //			fin.seek((long)output_pos_ + start_pos_, utils::file_io::set);
 		}

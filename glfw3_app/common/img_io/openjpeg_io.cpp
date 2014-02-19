@@ -18,20 +18,19 @@ namespace img {
 
 	static void error_callback_(const char* msg, void* context)
 	{
-		fprintf(stderr, "[ERROR] %s", msg);
+		std::cerr << "[ERROR] " << msg;
 	}
 
 
 	static void warning_callback_(const char* msg, void* context)
 	{
-		fprintf(stderr, "[WARNING] %s", msg);
+		std::cerr << "[WARNING] " << msg;
 	}
 
 
 	static void info_callback_(const char* msg, void* context)
 	{
-//		fprintf(stdout, "[INFO] %s", msg);
-//		fflush(stdout);
+//		std::cerr << "[INFO] " << msg;
 	}
 
 
@@ -262,7 +261,7 @@ namespace img {
 		if(t.image->color_space == OPJ_CLRSPC_SRGB) fo.grayscale = false;
 		else if(t.image->color_space == OPJ_CLRSPC_GRAY) fo.grayscale = true;
 
-///		printf("Header components: %d\n", image->numcomps);
+///		std::cout << "Header components: " << static_cast<int>(image->numcomps) << std::endl;
 
 		if(t.image->numcomps == 1) {
 			fo.r_depth = 8;

@@ -267,14 +267,13 @@ namespace img {
 			rgba8 c = fore_color_;
 /// c.r = c.g = c.b = 255;
 			c.a = distance_(twovdu * invD);
-///printf("%d, ", c.a);
+/// std::cout << static_cast<int>(c.a) << ", ";
 			plot(adr, c);
 			c.a = distance_(invD2du - twovdu * invD);
-///printf("%d, ", c.a);
+/// std::cout << static_cast<int>(c.a) << ", ";
 			plot(adr + vincr, c);
 			c.a = distance_(invD2du + twovdu * invD);
-///printf("%d\n", c.a);
-///fflush(stdout);
+/// std::cout << static_cast<int>(c.a) << std::endl;
 			plot(adr - vincr, c);
 			if (d < 0) {
 				twovdu = d + du;

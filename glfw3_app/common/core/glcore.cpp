@@ -60,8 +60,7 @@ namespace gl {
         glcore::glcore_ = new glcore;
 
         if(glcore::glcore_ == 0) {
-            printf("Can't create glcore...\n");
-            fflush(stdout);
+            std::cout << "Can't create glcore..." << std::endl;
             exit(0);
         }
     }
@@ -231,15 +230,11 @@ namespace gl {
 #if 0
 	static void resize_framebuffer_(GLFWwindow* window, int w, int h)
 	{
-//		printf("fb: %d, %d\n", w, h);
-//		fflush(stdout);
 	}
 
 
 	static void resize_window_(GLFWwindow* window, int w, int h)
 	{
-//		printf("win: %d, %d\n", w, h);
-//		fflush(stdout);
 	}
 #endif
 
@@ -481,8 +476,7 @@ namespace gl {
         if((frame_count_ % 60) == 0) {
 #if 0
 			int rate = static_cast<int>((1.0 / frame_time_) + 0.5);
-			printf("%1.3f GHz, FrameRate: %d\n", cpu_ghz_, rate);
-			fflush(stdout);
+			std::cout << cpu_ghz_ << " GHz, FrameRate: " << rate << std::endl;
 #endif
             double spd = get_cpu_clock_() / 1e6;
             if(std::abs(spd - cpu_ghz_) > 0.05) {

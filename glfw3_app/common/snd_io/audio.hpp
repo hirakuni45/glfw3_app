@@ -5,7 +5,7 @@
 	@author	平松邦仁 (hira@rvf-rc45.net))
 */
 //=====================================================================//
-#include <cstdio>
+#include <iostream>
 #include <vector>
 #include <ctime>
 
@@ -76,15 +76,14 @@ namespace al {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	サンプル情報を出力
-			@param[in]	fp	ファイル
 		*/
 		//-----------------------------------------------------------------//
-		void infomation(::FILE* fp = stdout) {
-			fprintf(fp, "Audio infomations:\n");
-			fprintf(fp, "    Samples:     %d\n", (int)samples);
-			fprintf(fp, "    Chanels:     %d\n", chanels);
-			fprintf(fp, "    Bits/Chanel: %d\n", bits);
-			fprintf(fp, "    Sample Rate: %d [Hz]\n", frequency);
+		void infomation() const {
+			std::cout << "Audio infomations:" << std::endl;
+			std::cout << "    Samples:     " << static_cast<int>(samples) << std::endl;
+			std::cout << "    Chanels:     " << static_cast<int>(chanels) << std::endl;
+			std::cout << "    Bits/Chanel: " << static_cast<int>(bits) << std::endl;
+			std::cout << "    Sample Rate: " << static_cast<int>(frequency) << " [Hz]" << std::endl; 
 		}
 	};
 

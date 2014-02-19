@@ -52,15 +52,11 @@ namespace al {
 			if(fi.is_directory()) {
 				utils::file_infos tmp;				
 				create_file_list(fn, tmp);
-// printf("stream dir: '%s' (%d)\n", fn.c_str(), tmp.size());
-// fflush(stdout);
 				play_task_(sst, sdf, fn, tmp, "");
 				++i;
 				continue;
 			}
 
-// printf("(%d)stream play: '%s'\n", i, fn.c_str());
-// fflush(stdout);
 			sst->fph_ = fn;
 			++sst->fph_cnt_;
 

@@ -12,8 +12,10 @@
 #include "gl_fw/Ikfimg.hpp"
 #include "img_io/i_img.hpp"
 #include "img_io/img_gray8.hpp"
+#ifndef DEPEND_ESCAPE
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#endif
 
 namespace img {
 
@@ -122,8 +124,6 @@ namespace img {
 				FT_Vector pen;
 				pen.x = pen.y = 0;
 				FT_Set_Transform(face_, &matrix_, &pen);
-//				printf("kfimg: set font '%s'\n", alias);
-//				fflush(stdout);
 				return true;
 			} else {
 				return false;

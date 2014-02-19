@@ -83,8 +83,7 @@ namespace gui {
 			}
 		}
 
-		printf("(%d:%s)%s: '%s'\n", w->get_serial(), w->get_symbol().c_str(),
-			s.c_str(), type.c_str());
+		std::cout << boost::format("(%d:%s)%s: '%s'") % w->get_serial() % w->get_symbol() % s % type << std::endl;
 	}
 
 
@@ -851,10 +850,9 @@ namespace gui {
 			}
 		}
 		if(f) {
-			printf("(%d)\n", id);
+			std::cout << boost::format("(%d)\n") % id;
 			++id;
 		}
-		fflush(stdout);
 	}
 
 

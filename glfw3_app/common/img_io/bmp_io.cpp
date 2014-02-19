@@ -390,10 +390,10 @@ namespace img {
 			shift_cnt.a = shift_count(bmp.color_mask.a);
 			bits_cnt.a  = bits_count(bmp.color_mask.a);
 
-//			printf("mask: %x, %x, %x, %x\n", bmp.color_mask.r, bmp.color_mask.g, bmp.color_mask.b, bmp.color_mask.a);
-//			printf("Shift: %d, %d, %d, %d\n", shift_cnt.r, shift_cnt.g, shift_cnt.b, shift_cnt.a);
-//			printf("Bits: %d, %d, %d, %d\n", bits_cnt.r, bits_cnt.g, bits_cnt.b, bits_cnt.a);
-//			fflush(stdout);
+//			boost::format("mask: %x, %x, %x, %x\n")
+//				% bmp.color_mask.r % bmp.color_mask.g % bmp.color_mask.b % bmp.color_mask.a;
+//			boost::format("Shift: %d, %d, %d, %d\n") % shift_cnt.r % shift_cnt.g % shift_cnt.b % shift_cnt.a;
+//			boost::format("Bits: %d, %d, %d, %d\n") % bits_cnt.r % bits_cnt.g % bits_cnt.b % bits_cnt.a;
 		}
 
 		size_t stride = (bmp.width * (bmp.depth / 8) + 3) & (~3);
@@ -737,10 +737,6 @@ namespace img {
 			img_.destroy();
 			fin.seek(pos, utils::file_io::seek::set);
 		}
-
-//		printf("Width/Height/Depth: %d, %d (%d), '%s'\n", bmp.width, bmp.height, bmp.depth, (f ? "OK" : "NG"));
-//		printf("Compression: %d\n", bmp.compression);
-//		fflush(stdout);
 
 		return f;
 	}

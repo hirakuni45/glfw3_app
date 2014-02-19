@@ -6,7 +6,7 @@
 //=====================================================================//
 #include "sqlite.hpp"
 #include <boost/foreach.hpp>
-#include <stdio.h>
+#include <iostream>
 
 namespace sys {
 
@@ -79,7 +79,7 @@ namespace sys {
 		sqlite3_stmt* stp = NULL;
 		sqlite3_prepare(m_db, command, -1, &stp, NULL);
 		if(stp == NULL) {
-			printf("sqlite error: '%s'\n", error_message());
+			std::cout << "sqlite error: '" << error_message() << "'" << std::endl;
 			return false;
 		}
 

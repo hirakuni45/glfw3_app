@@ -56,8 +56,7 @@ namespace img {
 		if(outline_) {
 			doctitle_ = outline_->title;
 		}
-// printf("PDF Pages: %d\n", page_count_);
-// fflush(stdout);
+// std::cout << boost::format("PDF Pages: %d\n") % page_count_;
 
 		return true;
 	}
@@ -105,8 +104,7 @@ namespace img {
 		float zoom = 1.0f;
 		float zoomx = static_cast<float>(size.x) / xx;
 		float zoomy = static_cast<float>(size.y) / yy;
-// printf("Scale: %f, %f\n", zoomx, zoomy);
-// fflush(stdout);
+// std::cout << boost::format("Scale: %f, %f\n") % zoomx % zoomy;
 		if((zoomx * xx) > static_cast<float>(size.x)) {
 			zoom = zoomx;
 		} else {
@@ -121,8 +119,7 @@ namespace img {
 		{
 			int w = bbox.x1 - bbox.x0;
 			int h = bbox.y1 - bbox.y0;
-// printf("size: %d, %d\n", w, h);
-// fflush(stdout);
+// std::cout << boost::format("size: %d, %d\n") % w % h;
 			// fz_device_rgb ---> RGBA
 			img_.create(vtx::spos(w, h), true);
 

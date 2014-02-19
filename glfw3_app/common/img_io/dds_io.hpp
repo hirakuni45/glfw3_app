@@ -5,9 +5,9 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include "i_img_io.hpp"
-#include "img_idx8.hpp"
-#include "img_rgba8.hpp"
+#include "img_io/i_img_io.hpp"
+#include "img_io/img_idx8.hpp"
+#include "img_io/img_rgba8.hpp"
 
 namespace img {
 
