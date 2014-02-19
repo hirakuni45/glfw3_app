@@ -797,9 +797,8 @@ void gl_shape_drawer::drawOpenGL(btScalar* m, const btCollisionShape* shape, con
 				{
 					btVector3 vtx;
 					polyshape->getVertex(i,vtx);
-					char buf[12];
-					sprintf(buf," %d",i);
-					//btDrawString(BMF_GetFont(BMF_kHelvetica10),buf);
+//					const char* p = boost::io::str(boost::format(" %d") % i).c_str();
+					//btDrawString(BMF_GetFont(BMF_kHelvetica10), p);
 				}
 
 				for (i=0;i<polyshape->getNumPlanes();i++)
@@ -808,11 +807,8 @@ void gl_shape_drawer::drawOpenGL(btScalar* m, const btCollisionShape* shape, con
 					btVector3 vtx;
 					polyshape->getPlane(normal,vtx,i);
 					//btScalar d = vtx.dot(normal);
-
-					//char buf[12];
-					//sprintf(buf," plane %d",i);
-					//btDrawString(BMF_GetFont(BMF_kHelvetica10),buf);
-
+					//const char* p = boost::io::str(boost::format(" plane %d") % i).c_str();
+					//btDrawString(BMF_GetFont(BMF_kHelvetica10), p);
 				}
 			}
 

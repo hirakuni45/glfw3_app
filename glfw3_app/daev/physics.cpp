@@ -97,7 +97,9 @@ namespace bt {
 					picked_body_ = body;
 					body->setActivationState(DISABLE_DEACTIVATION);
 					const btVector3& pick_pos = ray_callback.m_hitPointWorld;
-					// printf("pickPos=%f,%f,%f\n",pickPos.getX(),pickPos.getY(),pickPos.getZ());
+					// std::cout
+					//     << boost::format("pickPos=%f,%f,%f\n")
+							% pickPos.getX() % pickPos.getY() % pickPos.getZ();
 					const btVector3& local_pivot = body->getCenterOfMassTransform().inverse() * pick_pos;
 					if(use_6dof_) {
 						btTransform tr;
@@ -252,8 +254,10 @@ namespace bt {
 			aabbMin -= btVector3(BT_LARGE_FLOAT, BT_LARGE_FLOAT, BT_LARGE_FLOAT);
 			aabbMax += btVector3(BT_LARGE_FLOAT, BT_LARGE_FLOAT, BT_LARGE_FLOAT);
 
-///			printf("aabbMin=(%f,%f,%f)\n",aabbMin.getX(),aabbMin.getY(),aabbMin.getZ());
-///			printf("aabbMax=(%f,%f,%f)\n",aabbMax.getX(),aabbMax.getY(),aabbMax.getZ());
+///			std::cout << boost::format("aabbMin=(%f,%f,%f)\n")
+///				% aabbMin.getX() % aabbMin.getY() % aabbMin.getZ();
+///			std::cout << boost::format("aabbMax=(%f,%f,%f)\n")
+///				% aabbMax.getX() % aabbMax.getY() % aabbMax.getZ();
 ///			world_->getDebugDrawer()->drawAabb(aabbMin,aabbMax,btVector3(1,1,1));
 
 			if (!(debug_mode_ & btIDebugDraw::DBG_DrawWireframe)) {
