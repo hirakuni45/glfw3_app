@@ -4,8 +4,8 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include "glmobj.hpp"
-#include "glutils.hpp"
+#include "gl_fw/glmobj.hpp"
+#include "gl_fw/glutils.hpp"
 #include "img_io/img_utils.hpp"
 #include <boost/format.hpp>
 

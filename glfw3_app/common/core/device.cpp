@@ -5,7 +5,7 @@
 */
 //=====================================================================//
 #include <GLFW/glfw3.h>
-#include "device.hpp"
+#include "core/device.hpp"
 
 namespace gl {
 

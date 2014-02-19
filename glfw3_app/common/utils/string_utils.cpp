@@ -4,7 +4,7 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include "string_utils.hpp"
+#include "utils/string_utils.hpp"
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 

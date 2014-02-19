@@ -6,7 +6,7 @@
 //=====================================================================//
 #include <windows.h>
 #include <iostream>
-#include "glcore.hpp"
+#include "core/glcore.hpp"
 #include "utils/file_io.hpp"
 #include "utils/string_utils.hpp"
 #include <unistd.h>                

@@ -5,8 +5,8 @@
 */
 //=====================================================================//
 #include <cmath>
-#include "glutils.hpp"
-#include "IGLcore.hpp"
+#include "gl_fw/glutils.hpp"
+#include "gl_fw/IGLcore.hpp"
 
 using namespace vtx;
 

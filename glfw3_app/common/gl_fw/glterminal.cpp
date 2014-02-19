@@ -6,7 +6,7 @@
 //=====================================================================//
 #include <cstring>
 #include <boost/foreach.hpp>
-#include "glterminal.hpp"
+#include "gl_fw/glterminal.hpp"
 
 using namespace std;
 using namespace img;

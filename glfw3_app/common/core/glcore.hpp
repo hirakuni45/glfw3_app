@@ -8,7 +8,7 @@
 #include <string>
 #include <stdint.h>
 #include "gl_fw/IGLcore.hpp"
-#include "device.hpp"
+#include "core/device.hpp"
 
 namespace gl {
 

@@ -4,7 +4,7 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include "devrec.hpp"
+#include "gl_fw/devrec.hpp"
 
 namespace gl {
 

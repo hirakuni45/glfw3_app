@@ -6,7 +6,7 @@
 //=====================================================================//
 #include <iostream>
 #include <boost/format.hpp>
-#include "gllight.hpp"
+#include "gl_fw/gllight.hpp"
 
 namespace gl {
 

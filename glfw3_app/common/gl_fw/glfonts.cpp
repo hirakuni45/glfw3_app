@@ -4,7 +4,7 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include "glfonts.hpp"
+#include "gl_fw/glfonts.hpp"
 #include "img_io/img_utils.hpp"
 
 using namespace std;

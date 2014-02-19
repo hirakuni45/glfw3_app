@@ -6,7 +6,7 @@
 */
 //=====================================================================//
 #include <vector>
-#include "i_scene.hpp"
+#include "utils/i_scene.hpp"
 #include <boost/foreach.hpp>
 
 namespace utils {

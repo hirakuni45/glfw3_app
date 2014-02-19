@@ -5,7 +5,7 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include "arith.hpp"
+#include "utils/arith.hpp"
 #include <boost/foreach.hpp>
 
 namespace utils {
