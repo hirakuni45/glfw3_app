@@ -224,12 +224,9 @@ namespace gui {
 		vtx::srect clip_ = clip;
 		vtx::srect rect_ = rect;
 
-		std::string cft;
-		short cfs = 0;
 		if(!tp.font_.empty()) {
-			cft = fonts.get_font_type();
+			fonts.push_font_info();
 			fonts.set_font_type(tp.font_);
-			cfs = fonts.get_font_size();
 			fonts.set_font_size(tp.font_size_);
 		}
 
@@ -262,8 +259,7 @@ namespace gui {
 		fonts.draw(pos, tp.text_, clx);
 
 		if(!tp.font_.empty()) {
-			fonts.set_font_type(cft);
-			fonts.set_font_size(cfs);
+			fonts.pop_font_info();
 		}
 	}
 

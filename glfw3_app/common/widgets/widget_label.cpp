@@ -60,15 +60,14 @@ namespace gui {
 		const widget::param& bp = get_param();
 		if(param_.shift_every_ ||
 		  (param_.shift_enable_ && bp.hold_frame_ >= param_.shift_hold_frame_)) {
-			std::string cft;
 			if(!param_.text_param_.font_.empty()) {
-				cft = fonts.get_font_type();
+				fonts.push_font_info();
 				fonts.set_font_type(param_.text_param_.font_);
 			}
 			fonts.enable_proportional(param_.text_param_.proportional_);
 			short fw = fonts.get_width(param_.text_param_.text_);
-			if(!cft.empty()) {
-				fonts.set_font_type(cft);
+			if(!param_.text_param_.font_.empty()) {
+				fonts.pop_font_info();
 			}
 			const vtx::spos& size = bp.rect_.size;
 			if(size.x < fw) {

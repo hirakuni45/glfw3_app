@@ -64,15 +64,13 @@ namespace gui {
 		IGLcore* igl = get_glcore();
 		gl::fonts& fonts = igl->at_fonts();
 
-		std::string cft = fonts.get_font_type();
-		short cfs = fonts.get_font_size(); 
+		fonts.push_font_info();
 		fonts.set_font_type(param_.font_);
 		fonts.set_font_size(param_.font_height_);
 		fonts.enable_proportional(false);
 		fonts.set_spaceing(0);
 		param_.font_width_ = fonts.get_width(' ');
-		fonts.set_font_type(cft);
-		fonts.set_font_size(cfs);
+		fonts.pop_font_info();
 	}
 
 
@@ -133,8 +131,7 @@ namespace gui {
 				rect.size = wp.rect_.size;
 			}
 
-			std::string cft = fonts.get_font_type();
-			short cfs = fonts.get_font_size(); 
+			fonts.push_font_info();
 			fonts.set_font_type(param_.font_);
 			fonts.set_font_size(param_.font_height_);
 
@@ -180,8 +177,7 @@ namespace gui {
 			}
 			++interval_;
 
-			fonts.set_font_type(cft);
-			fonts.set_font_size(cfs);
+			fonts.pop_font_info();
 
 			fonts.restore_matrix();
 			glPopMatrix();
