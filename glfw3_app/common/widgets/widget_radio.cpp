@@ -88,7 +88,7 @@ namespace gui {
 			const vtx::spos& mosz = wd_.at_mobj().get_size(h);
 			vtx::spos ofs(0, (wp.rect_.size.y - mosz.y) / 2);
 			if(wp.state_[widget::state::CLIP_PARENTS]) {
-				draw_mobj(wd_, h, wp.clip_, ofs);
+				draw_mobj(wd_, h, wp.clip_, ofs + wp.rpos_);
 				rect.org  = wp.rpos_;
 				rect.size = wp.rect_.size;
 			} else {
