@@ -592,7 +592,6 @@ namespace gui {
 
 			// y 軸クリップ
 			{
-				short pos = files_->get_rect().size.y;
 				if(d < 0) {
 					if(position_.y < d) {
 						position_.y -= d;

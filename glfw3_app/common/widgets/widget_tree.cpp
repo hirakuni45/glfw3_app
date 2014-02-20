@@ -30,6 +30,7 @@ namespace gui {
 				wp_.type_ = widget_check::style::MINUS_PLUS;
 				widget_check* w = wd_.add_widget<widget_check>(wp, wp_);
 				w->set_state(widget::state::POSITION_LOCK);
+				w->set_state(widget::state::SIZE_LOCK);
 				w->set_state(widget::state::MOVE_ROOT, false);
 				w->set_state(widget::state::RESIZE_ROOT);
 				w->set_state(widget::state::DRAG_UNSELECT);
@@ -84,7 +85,9 @@ namespace gui {
 		if(get_param().parents_ && get_state(widget::state::AREA_ROOT)) {
 			if(get_param().parents_->type() == get_type_id<widget_frame>()) {
 				widget_frame* w = static_cast<widget_frame*>(at_param().parents_);
-				w->create_draw_area(at_rect());
+				vtx::srect r;
+				w->create_draw_area(r);
+				at_rect() = r;
 			}
 		}
 
@@ -124,8 +127,14 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_tree::service()
 	{
+		if(!get_state(widget::state::ENABLE)) {
+			return;
+		}
+
+		// ツリーが更新されたら、アイテムを作り直す
 		if(tree_unit_.get_serial_id() != serial_id_ ||
 		   tree_unit_.get_unit_num() != unit_num_) {
+			destroy_();
 			create_();
 			serial_id_ = tree_unit_.get_serial_id();
 			unit_num_ = tree_unit_.get_unit_num();
@@ -133,8 +142,7 @@ namespace gui {
 
 		tree_unit::unit_map_its its;
 		tree_unit_.create_list("", its);
-		vtx::spos pos;
-		pos = position_;
+		vtx::spos pos(0);
 		std::stack<bool> open_stack;
 		bool open = true;
 		uint32_t nest = 1;
@@ -166,6 +174,72 @@ namespace gui {
 			}
 			nest = n;
 		}
+
+		if(get_select_in()) {
+			speed_.set(0.0f);
+			offset_ = position_;
+		}
+		float damping = 0.85f;
+		float slip_gain = 0.5f;
+		short d = get_rect().size.y - pos.y;
+		if(get_select()) {
+			position_ = offset_ + get_param().move_pos_ - get_param().move_org_;
+			if(d < 0) {
+				if(position_.y < d) {
+					position_.y -= d;
+					position_.y *= slip_gain;
+					position_.y += d;
+				} else if(position_.y > 0) {
+					position_.y *= slip_gain;
+				}
+			} else {
+				position_.y *= slip_gain;
+			}
+		} else {
+			if(d < 0) {
+				if(position_.y < d) {
+					position_.y -= d;
+					position_.y *= damping;
+					position_.y += d;
+					speed_.y = 0.0f;
+					if(position_.y > (d - 0.5f)) {
+						position_.y = d;
+					}
+				} else if(position_.y > 0.0f) {
+					position_.y *= damping;
+					speed_.y = 0.0f;
+					if(position_.y < 0.5f) {
+						position_.y = 0.0f;
+					}
+				} else {
+					const vtx::spos& scr = wd_.get_scroll();
+					if(get_focus() && scr.y != 0) {
+						position_.y += scr.y * param_.height_;
+						if(position_.y < d) {
+							position_.y = d;
+						} else if(position_.y > 0.0f) {
+							position_.y = 0.0f;
+						}
+					}
+				}
+			} else {
+				position_.y *= damping;
+				if(-0.5f < position_.y && position_.y < 0.5f) {
+					position_.y = 0.0f;
+					speed_.y = 0.0f;
+				}
+			}
+		}
+//		if(get_select_out()) {
+//		}
+
+		short ofsy = position_.y;
+		BOOST_FOREACH(tree_unit::unit_map_it it, its) {
+			widget_check* w = it->second.value.path_;
+			if(w == 0) continue;
+			w->at_rect().org.y += ofsy;
+		}
+
 	}
 
 

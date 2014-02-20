@@ -28,7 +28,7 @@ namespace gui {
 		struct param {
 			color_param	color_param_;	///< カラー・パラメーター
 
-			int			height_;		///< ユニットの高さ
+			short		height_;		///< ユニットの高さ
 
 			bool		single_;		///< シングル選択の場合「true」
 
@@ -67,6 +67,8 @@ namespace gui {
 		uint32_t			serial_id_;
 		uint32_t			unit_num_;
 
+		vtx::fpos			speed_;
+		vtx::fpos			offset_;
 		vtx::fpos			position_;
 
 		uint32_t			select_id_;
@@ -84,7 +86,7 @@ namespace gui {
 		widget_tree(widget_director& wd, const widget::param& bp, const param& p) :
 			wd_(wd), widget(bp), param_(p),
 			tree_unit_(), serial_id_(0), unit_num_(0),
-			position_(0.0f), select_id_(0), select_it_()
+			speed_(0.0f), offset_(0.0f), position_(0.0f), select_id_(0), select_it_()
 			{ }
 
 
@@ -151,8 +153,8 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	ツリー構造の参照
-			@return ツリー構造
+			@brief	ツリーの参照
+			@return ツリー
 		*/
 		//-----------------------------------------------------------------//
 		tree_unit& at_tree_unit() { return tree_unit_; }
@@ -160,7 +162,7 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	選択 ID を取得（メニューが選択されたら、ID が進む）
+			@brief	選択 ID を取得（メニューが選択される毎に ID が進む）
 			@return 選択 ID
 		*/
 		//-----------------------------------------------------------------//
