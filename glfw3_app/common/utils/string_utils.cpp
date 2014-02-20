@@ -14,6 +14,17 @@ namespace utils {
 
 	using namespace std;
 
+	bool string_to_int(const std::string& src, int& dst)
+	{
+		try {
+			dst = boost::lexical_cast<int>(src);
+		} catch(boost::bad_lexical_cast& bad) {
+			return false;
+		}
+		return true;
+	}
+
+
 	bool string_to_int(const std::string& src, std::vector<int>& dst)
 	{
 		try {
@@ -31,6 +42,17 @@ namespace utils {
 				int v = boost::lexical_cast<int>(s);
 				dst.push_back(v);
 			}
+		} catch(boost::bad_lexical_cast& bad) {
+			return false;
+		}
+		return true;
+	}
+
+
+	bool string_to_float(const std::string& src, float& dst)
+	{
+		try {
+			dst = boost::lexical_cast<float>(src);
 		} catch(boost::bad_lexical_cast& bad) {
 			return false;
 		}
