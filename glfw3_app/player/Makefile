@@ -136,12 +136,12 @@ icon.o: icon.rc ./res/player.ico
 
 %.d: %.c %.h
 	echo '$*.o: \' > $@
-	$(CC) -MM $(COPT) $(CFLAGS) $(INC_C) $(CCWARN) $< | \
+	$(CC) -MM -DDEPEND_ESCAPE $(COPT) $(CFLAGS) $(INC_C) $(CCWARN) $< | \
 	sed 's/.*://' >> $@
 
 %.d: %.cpp %.hpp
 	echo '$*.o: \' > $@
-	$(CP) -MM $(POPT) $(PFLAGS) $(INC_P) $(CPWARN) $< | \
+	$(CP) -MM -DDEPEND_ESCAPE $(POPT) $(PFLAGS) $(INC_P) $(CPWARN) $< | \
 	sed 's/.*://' >> $@
 
 all:
