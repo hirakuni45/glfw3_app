@@ -7,7 +7,6 @@
 #include <iostream>
 #include "img_io/bdf_io.hpp"
 #include "utils/string_utils.hpp"
-#include <boost/lexical_cast.hpp>
 
 namespace img {
 
@@ -116,8 +115,20 @@ namespace img {
 			utils::split_text(line, " ", ss);
 			if(ss.size() == 5) {
 				if(ss[0] == "FONTBOUNDINGBOX") {
-					bbx_width_  = boost::lexical_cast<int>(ss[1]);
-					bbx_height_ = boost::lexical_cast<int>(ss[2]);
+					int ww;
+					if(!utils::string_to_int(ss[1], ww)) {
+						std::cerr << "Error 'FONTBOUNDINGBOX'(width): " << ss[1] << std::endl;
+						retcode = false;
+					} else {
+						bbx_width_ = ww;
+					}
+					int hh;
+					if(!utils::string_to_int(ss[2], hh)) {
+						std::cerr << "Error 'FONTBOUNDINGBOX'(height): " << ss[2] << std::endl;
+						retcode = false;
+					} else {
+						bbx_height_ = hh;
+					}
 					if(sjis_pad_.empty()) {
 						sjis_pad_.resize(lin_code_max_ * byte_size());
 					}
@@ -188,7 +199,13 @@ namespace img {
 				}
 			} else if(ss.size() == 2) {
 				if(ss[0] == "ENCODING") {
-					jis_code_ = boost::lexical_cast<int>(ss[1]);
+					int code;
+					if(!utils::string_to_int(ss[1], code)) {
+						std::cerr << "Error 'ENCODING'(code): " << ss[1] << std::endl;
+						retcode = false;
+					} else {
+						jis_code_ = code;
+					}
 				}
 			}
 			line.clear();
