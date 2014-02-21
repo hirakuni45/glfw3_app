@@ -109,6 +109,7 @@ namespace app {
 		if(1) { // ラベルのテスト
 			widget::param wp(vtx::srect(30, 250, 150, 40));
 			widget_label::param wp_("Label");
+			wp_.read_only_ = false;
 			wd.add_widget<widget_label>(wp, wp_);
 		}
 
@@ -260,12 +261,12 @@ namespace app {
 			}
 		}
 
-		if(terminal_core_) {
+///		if(terminal_core_) {
 ///			static wchar_t ch = ' ';
 ///			terminal_core_->output(ch);
 ///			++ch;
 ///			if(ch >= 0x7f) ch = ' ';
-		}		
+///		}		
 
 		wd.update();
 	}
