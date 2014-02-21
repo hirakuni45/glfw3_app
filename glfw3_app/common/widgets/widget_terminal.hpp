@@ -40,6 +40,8 @@ namespace gui {
 		utils::terminal		terminal_;
 		uint32_t			interval_;
 
+		bool				focus_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -47,7 +49,8 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_terminal(widget_director& wd, const widget::param& bp, const param& p) :
-			wd_(wd), widget(bp), param_(p), terminal_(wd.at_keyboard()), interval_(0) { }
+			wd_(wd), widget(bp), param_(p), terminal_(wd.at_keyboard()), interval_(0),
+			focus_(false) { }
 
 
 		//-----------------------------------------------------------------//

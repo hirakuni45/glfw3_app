@@ -42,6 +42,9 @@ namespace gui {
 	{
 		bool f = param_.check_;
 		if(get_select()) {
+			if(get_select_in()) {
+				wd_.top_widget(this);
+			}
 			obj_state_ = !param_.check_;
 		} else if(get_selected()) {
 			param_.check_ = !param_.check_;

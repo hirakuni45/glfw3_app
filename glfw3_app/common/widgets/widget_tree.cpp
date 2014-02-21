@@ -117,6 +117,9 @@ namespace gui {
 				}
 			}
 		}
+		if(get_select_in()) {
+			wd_.top_widget(wd_.root_widget(this));
+		}
 	}
 
 

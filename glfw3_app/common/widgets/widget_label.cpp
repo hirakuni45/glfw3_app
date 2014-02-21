@@ -21,6 +21,7 @@ namespace gui {
 		// 標準的に固定
 		at_param().state_.set(widget::state::POSITION_LOCK);
 		at_param().state_.set(widget::state::SIZE_LOCK);
+		at_param().state_.set(widget::state::SERVICE);
 
 		vtx::spos size;
 		if(param_.plate_param_.resizeble_) {
@@ -31,6 +32,10 @@ namespace gui {
 			else size.y = get_param().rect_.size.y;
 		} else {
 			size = get_param().rect_.size;
+		}
+
+		if(!param_.read_only_) {
+			param_.text_in_pos_ = param_.text_param_.text_.size();
 		}
 
 		share_t t;
@@ -52,9 +57,7 @@ namespace gui {
 	void widget_label::update()
 	{
 		gl::IGLcore* Igl = gl::get_glcore();
-
-		const vtx::spos& size = Igl->get_size();
-
+		const vtx::spos& size = Igl->get_size();		
 		gl::fonts& fonts = Igl->at_fonts();
 
 		const widget::param& bp = get_param();
@@ -83,6 +86,36 @@ namespace gui {
 		} else {
 			param_.text_param_.offset_.x = 0;
 			param_.shift_offset_ = 0.0f;
+		}
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	サービス
+	*/
+	//-----------------------------------------------------------------//
+	void widget_label::service()
+	{
+		if(get_select_in()) {
+			wd_.top_widget(this);
+			if(!param_.read_only_) {
+				param_.text_in_ = true;
+			}
+		}
+		if(wd_.get_top_widget() != this) {
+			param_.text_in_ = false;
+		} else {
+			if(!param_.read_only_ && param_.text_in_) {
+				const std::string& ins = wd_.get_keyboard().input();
+				BOOST_FOREACH(char ch, ins) {
+					if(ch < 0x20) {
+
+					} else {
+						param_.text_param_.text_ += ch;
+					}
+				}
+			}
 		}
 	}
 

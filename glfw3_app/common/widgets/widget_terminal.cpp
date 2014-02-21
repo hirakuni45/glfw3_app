@@ -118,6 +118,8 @@ namespace gui {
 
 		const widget::param& wp = get_param();
 
+		focus_ = wd_.get_top_widget() == wd_.root_widget(this);
+
 		if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) { 
 
 			glPushMatrix();
@@ -144,7 +146,6 @@ namespace gui {
 			fonts.enable_center(false);
 			fonts.enable_proportional(false);
 
-
 //			tpr.shadow_color_ *= cf.r;
 //			tpr.shadow_color_.alpha_scale(cf.a);
 
@@ -162,8 +163,8 @@ namespace gui {
 					bc *= cf.r;
 					bc.alpha_scale(cf.a);
 					fonts.set_back_color(bc);
-					if(pos == terminal_.cursor()) {
-						if((interval_ % 60) < 30) {
+					if(focus_ && pos == terminal_.cursor()) {
+						if((interval_ % 40) < 20) {
 							fonts.swap_color();
 						}
 					}
@@ -193,7 +194,7 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_terminal::service()
 	{
-		if(wd_.get_top_widget() == wd_.root_widget(this)) {
+		if(focus_) {
 			terminal_.service();
 		}
 	}
