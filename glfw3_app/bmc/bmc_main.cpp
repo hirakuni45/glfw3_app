@@ -186,9 +186,8 @@ namespace app {
 			}
 			src_image_->at_local_param().scale_ = s;
 
-			if(src_frame_ == wd.get_top_widget()) {
+			if(wd.get_top_widget() == src_frame_ || wd.get_top_widget() == src_image_) {
 				if(src_image_->get_select_in()) {
-					wd.top_widget(src_frame_);
 					src_image_offset_ = src_image_->get_local_param().offset_;
 				}
 				if(src_image_->get_select()) {
@@ -222,9 +221,8 @@ namespace app {
 			}
 			dst_image_->at_local_param().scale_ = s;
 
-			if(dst_frame_ == wd.get_top_widget()) {
+			if(wd.get_top_widget() == dst_frame_ || wd.get_top_widget() == dst_image_) {
 				if(dst_image_->get_select_in()) {
-					wd.top_widget(dst_frame_);
 					dst_image_offset_ = dst_image_->get_local_param().offset_;
 				}
 				if(dst_image_->get_select()) {
