@@ -118,11 +118,11 @@ namespace gui {
 								--param_.text_in_pos_;
 								param_.text_param_.text_.erase(param_.text_in_pos_, 1);
 							}
-						} else if(ch == ('Q'-0x40)) {
+						} else if(ch == sys::keyboard::ctrl::RIGHT) {
 							if(param_.text_in_pos_ < param_.text_param_.text_.size()) {
 								++param_.text_in_pos_;
 							}
-						} else if(ch == ('R'-0x40)) {
+						} else if(ch == sys::keyboard::ctrl::LEFT) {
 							if(param_.text_in_pos_) {
 								--param_.text_in_pos_;
 							}
