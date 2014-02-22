@@ -91,7 +91,6 @@ namespace gui {
 		if(get_focus() && param_.hand_ctrl_) {
 			if(get_select()) {
 				if(get_select_in()) {
-					wd_.top_widget(this);
 					ref_position_ = sp.position_;
 					ref_point_ = get_param().in_point_;
 				}

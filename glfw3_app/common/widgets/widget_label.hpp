@@ -58,6 +58,8 @@ namespace gui {
 
 		param				param_;
 
+		uint32_t			interval_;
+
 		gl::mobj::handle	objh_;
 		gl::mobj::handle	select_objh_;
 
@@ -68,7 +70,7 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_label(widget_director& wd, const widget::param& bp, const param& p) :
-			wd_(wd), widget(bp), param_(p), objh_(0), select_objh_(0) {
+			wd_(wd), widget(bp), param_(p), interval_(0), objh_(0), select_objh_(0) {
 		}
 
 

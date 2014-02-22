@@ -96,8 +96,18 @@ namespace gui {
 				}
 			}
 		}
-		if(get_select_in()) {
-			wd_.top_widget(wd_.root_widget(this));
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	サービス
+	*/
+	//-----------------------------------------------------------------//
+	void widget_terminal::service()
+	{
+		if(focus_) {
+			terminal_.service();
 		}
 	}
 
@@ -118,7 +128,11 @@ namespace gui {
 
 		const widget::param& wp = get_param();
 
-		focus_ = wd_.get_top_widget() == wd_.root_widget(this);
+		if(wd_.get_top_widget() == this || wd_.get_top_widget() == wd_.root_widget(this)) {
+			focus_ = true;
+		} else {
+			focus_ = false;
+		}
 
 		if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) { 
 
@@ -183,19 +197,6 @@ namespace gui {
 			fonts.restore_matrix();
 			glPopMatrix();
 			glViewport(0, 0, size.x, size.y);
-		}
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	サービス
-	*/
-	//-----------------------------------------------------------------//
-	void widget_terminal::service()
-	{
-		if(focus_) {
-			terminal_.service();
 		}
 	}
 

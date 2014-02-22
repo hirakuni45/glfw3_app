@@ -172,7 +172,6 @@ namespace gui {
 			if(selected) {
 				param_.open_ = false;
 				wd_.enable(frame_, param_.open_, true);
-				wd_.top_widget(this);
 			} else {
 				const vtx::spos& scr = wd_.get_scroll();
 				if(frame_->get_focus() && scr.y != 0) {

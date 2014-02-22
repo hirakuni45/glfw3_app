@@ -98,7 +98,6 @@ namespace gui {
 	void widget_label::service()
 	{
 		if(get_select_in()) {
-			wd_.top_widget(this);
 			if(!param_.read_only_) {
 				param_.text_in_ = true;
 			}
@@ -109,10 +108,32 @@ namespace gui {
 			if(!param_.read_only_ && param_.text_in_) {
 				const std::string& ins = wd_.get_keyboard().input();
 				BOOST_FOREACH(char ch, ins) {
-					if(ch < 0x20) {
-
+					if(ch == 0x3f) {
+						if(param_.text_in_pos_ < param_.text_param_.text_.size()) {
+							param_.text_param_.text_.erase(param_.text_in_pos_, 1);
+						}
+					} else if(ch < 0x20) {
+						if(ch == 0x08) {
+							if(param_.text_in_pos_) {
+								--param_.text_in_pos_;
+								param_.text_param_.text_.erase(param_.text_in_pos_, 1);
+							}
+						} else if(ch == ('Q'-0x40)) {
+							if(param_.text_in_pos_ < param_.text_param_.text_.size()) {
+								++param_.text_in_pos_;
+							}
+						} else if(ch == ('R'-0x40)) {
+							if(param_.text_in_pos_) {
+								--param_.text_in_pos_;
+							}
+						}
 					} else {
-						param_.text_param_.text_ += ch;
+						if(param_.text_param_.text_.size() <= param_.text_in_pos_) {
+							param_.text_param_.text_ += ch;
+						} else {
+							param_.text_param_.text_[param_.text_in_pos_] = ch;
+						}
+						++param_.text_in_pos_;
 					}
 				}
 			}
@@ -136,7 +157,18 @@ namespace gui {
 			wd_.at_mobj().resize(h, get_param().rect_.size);
 		}
 
-		render_text(wd_, h, get_param(), param_.text_param_, param_.plate_param_);
+		text_param tp = param_.text_param_;
+		if(wd_.get_top_widget() == this) {
+			if((interval_ % 40) < 20) {
+				if(tp.text_.size() <= param_.text_in_pos_) {
+					tp.text_ += '_';
+				} else {
+					tp.text_[param_.text_in_pos_] = '_';
+				}
+			}
+		}
+		render_text(wd_, h, get_param(), tp, param_.plate_param_);
+		++interval_;
 	}
 
 
