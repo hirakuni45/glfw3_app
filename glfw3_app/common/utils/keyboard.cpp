@@ -71,7 +71,12 @@ namespace sys {
 		{ gl::device::key::COMMA,         ',', '<' },
 		{ gl::device::key::PERIOD,        '.', '>' },
 		{ gl::device::key::SLASH,         '/', '?' },
-		{ gl::device::key::SPACE,         ' ', ' ' }
+		{ gl::device::key::SPACE,         ' ', ' ' },
+
+		{ gl::device::key::RIGHT,         'Q'-0x40, 'Q'-0x40 },
+		{ gl::device::key::LEFT,          'R'-0x40, 'R'-0x40 },
+		{ gl::device::key::DOWN,          'S'-0x40, 'S'-0x40 },
+		{ gl::device::key::UP,            'T'-0x40, 'T'-0x40 },
 	};
 
 	static const key_t jp_key_type_tbls_[] = {
@@ -132,15 +137,16 @@ namespace sys {
 		{ gl::device::key::PERIOD,        '.', '>' },
 		{ gl::device::key::SLASH,         '/', '?' },
 		{ gl::device::key::WORLD_2,       '\\', '_' },
-		{ gl::device::key::SPACE,         ' ', ' ' }
+		{ gl::device::key::SPACE,         ' ', ' ' },
+
+		{ gl::device::key::RIGHT,         'Q'-0x40, 'Q'-0x40 },
+		{ gl::device::key::LEFT,          'R'-0x40, 'R'-0x40 },
+		{ gl::device::key::DOWN,          'S'-0x40, 'S'-0x40 },
+		{ gl::device::key::UP,            'T'-0x40, 'T'-0x40 },
 	};
 
 #if 0
 				INSERT    = 260,
-				RIGHT     = 262,
-				LEFT      = 263,
-				DOWN      = 264,
-				UP        = 265,
 				PAGE_UP   = 266,
 				PAGE_DOWN = 267,
 				HOME      = 268,
