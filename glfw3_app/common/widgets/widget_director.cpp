@@ -644,13 +644,13 @@ namespace gui {
 		// 移動
 		if(top_move_ && !top_move_->get_state(widget::state::POSITION_LOCK)) {
 			touch = true;
-			top_widget(top_move_);
 			top_move_->at_rect().org = top_move_->get_param().move_pos_;
 		}
 
 		// 選択（top_widget）、トップ・フォーカス
 		if(select) {
 			top_widget_ = select;
+			top_widget(root_widget(top_widget_));
 			top_widget(top_widget_);
 		}
 
