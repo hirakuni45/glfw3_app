@@ -97,8 +97,10 @@ void get_metrics(wchar_t code)
 	{
 		string name;
 
+		if(fontfile.empty()) return false;
+
 		if(alias.empty()) {
-			name = utils::get_file_name(fontfile);
+			utils::get_file_base(utils::get_file_name(fontfile), name);
 		} else {
 			name = alias;
 		}
@@ -112,7 +114,6 @@ void get_metrics(wchar_t code)
 
 		FT_Error error = FT_New_Face(library_, fontfile.c_str(), 0, &face_);
 		if(error) {
-			face_ = 0;
 			alias_.clear();
 			return false;
 		}
@@ -146,9 +147,16 @@ void get_metrics(wchar_t code)
 
 		// 基準点へのオフセットの計算
 		if(offset_y_.find(size.y) == offset_y_.end()) {
-			error = FT_Load_Char(face_, '~', FT_LOAD_RENDER);
-			FT_GlyphSlot slot = face_->glyph;
-			std::pair<int, int> v(size.y, (int)(slot->metrics.horiBearingY / 64.0f));
+			int max = 0;
+			for(int ch = 0x21; ch <= 0x7f; ++ch) {
+				if(ch == 0x3f) continue;
+				FT_Load_Char(face_, ch, FT_LOAD_RENDER);
+				FT_GlyphSlot slot = face_->glyph;
+				int l = static_cast<int>(slot->metrics.horiBearingY / 64.0f);
+				if(max < l) max = l;
+			}
+			std::pair<int, int> v(size.y, max);
+// std::cout << max << std::endl;
 			offset_y_.insert(v);
 		}
 
@@ -171,7 +179,7 @@ void get_metrics(wchar_t code)
 		metrics_.vert_y   = (float)slot->metrics.vertBearingY / 64.0f;
 
 		int ox = static_cast<int>(metrics_.hori_x);
-		int oy = offset_y_[size.y] - static_cast<int>(metrics_.hori_y);
+		int oy = offset_y_[size.y] - static_cast<int>(metrics_.hori_y) - 1;
 	// グレイスケールでレンダリング出来なかった場合は、モノカラーとなる。
 		if(bitmap->pixel_mode != FT_PIXEL_MODE_MONO) {		// gray-scale 0 to 255
 			for(int j = 0; j < bitmap->rows; j++) {

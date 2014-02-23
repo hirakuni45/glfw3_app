@@ -292,7 +292,7 @@ namespace gl {
 	{
 		const img::i_img* image = kfm_->get_img();
 		const vtx::spos& isz = image->get_size();
-
+// std::cout << static_cast<int>(code) << ": " << static_cast<int>(isz.x) << ", " << static_cast<int>(isz.y) << std::endl;
 		tex_map tmap;
 		tmap.met = kfm_->get_metrics();
 		float font_width = tmap.met.width + tmap.met.hori_x + 0.5f;
