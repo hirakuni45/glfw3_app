@@ -9,7 +9,6 @@
 #include <vector>
 #include "img_io/img.hpp"
 #include "utils/vtx.hpp"
-#include "utils/keyboard.hpp"
 
 namespace utils {
 
@@ -35,8 +34,6 @@ namespace utils {
 		};
 
 	private:
-		sys::keyboard&	keyboard_;
-
 		cha_t		cha_;
 
 		typedef std::vector<cha_t>	chaers;
@@ -51,7 +48,7 @@ namespace utils {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		terminal(sys::keyboard& kbd) : keyboard_(kbd),
+		terminal() :
 			cha_(' ', img::rgba8(255, 255, 255, 255), img::rgba8(0, 0, 0, 255)),
 			chaers_(),
 			size_(0), cursor_(0) { }
@@ -219,6 +216,19 @@ namespace utils {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	文字出力
+			@param[in]	str	文字列
+		*/
+		//-----------------------------------------------------------------//
+		void output(const std::string& str) {
+			BOOST_FOREACH(char ch, str) {
+				output(ch);
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	カーソル位置を取得
 			@return カーソル位置
 		*/
@@ -252,22 +262,5 @@ namespace utils {
 			}
 			return chaers_[pos.y * size_.x + pos.x];
 		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	サービス
-			@param[in]	echo	エコーバックをする場合「true」
-		*/
-		//-----------------------------------------------------------------//
-		void service(bool echo = true) {
-			if(!echo) return;
-
-			const std::string& inps = keyboard_.input();
-			BOOST_FOREACH(char ch, inps) {
-				output(ch);
-			}
-		}
-
 	};
 }

@@ -107,7 +107,9 @@ namespace gui {
 	void widget_terminal::service()
 	{
 		if(focus_) {
-			terminal_.service();
+			if(param_.echo_) {
+				terminal_.output(wd_.at_keyboard().input());
+			}
 		}
 	}
 

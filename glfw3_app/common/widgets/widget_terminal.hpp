@@ -30,7 +30,9 @@ namespace gui {
 			uint32_t		font_height_;	///< フォント高
 			uint32_t		height_;		///< 行の高さ
 
-			param() : font_("Inconsolata"), font_width_(0), font_height_(18), height_(18) { }
+			bool			echo_;			///< キー入力とエコー
+
+			param() : font_("Inconsolata"), font_width_(0), font_height_(18), height_(18), echo_(true) { }
 		};
 
 		widget_director&	wd_;
@@ -49,7 +51,7 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_terminal(widget_director& wd, const widget::param& bp, const param& p) :
-			wd_(wd), widget(bp), param_(p), terminal_(wd.at_keyboard()), interval_(0),
+			wd_(wd), widget(bp), param_(p), terminal_(), interval_(0),
 			focus_(false) { }
 
 
