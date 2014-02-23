@@ -15,6 +15,7 @@
 #include "widgets/widget_filer.hpp"
 #include "widgets/widget_frame.hpp"
 #include "widgets/widget_image.hpp"
+#include "widgets/widget_terminal.hpp"
 #include "img_io/bdf_io.hpp"
 #include "gl_fw/glmobj.hpp"
 
@@ -40,6 +41,9 @@ namespace app {
 		gui::widget_radio*		scale_3x_;
 		gui::widget_radio*		scale_4x_;
 
+		gui::widget_frame*		info_;
+		gui::widget_terminal*	term_;
+
 		gui::widget_dialog*		dialog_;
 
 		gl::mobj			mobj_;
@@ -60,7 +64,7 @@ namespace app {
 			filer_(0), frame_(0), image_(0),
 			tools_(0), open_(0),
 			scale_fit_(0), scale_1x_(0), scale_2x_(0), scale_3x_(0), scale_4x_(0),
-			dialog_(0),
+			info_(0), term_(0), dialog_(0),
 			img_handle_(0), dd_id_(0), filer_id_(0),
 			image_offset_(0.0f)
 		{ }

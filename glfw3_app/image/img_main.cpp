@@ -8,6 +8,7 @@
 #include "img_main.hpp"
 #include "core/glcore.hpp"
 #include "widgets/widget_utils.hpp"
+#include <boost/lexical_cast.hpp>
 
 namespace app {
 
@@ -75,6 +76,20 @@ namespace app {
 			widget_radio::param wp_("4x");
 			scale_4x_ = wd.add_widget<widget_radio>(wp, wp_);	
 		}
+		{ // ターミナル
+			{
+				widget::param wp(vtx::srect(10, 320, 9*14-8, 18*16+28));
+				widget_frame::param wp_;
+				wp_.plate_param_.set_caption(20);
+				info_ = wd.add_widget<widget_frame>(wp, wp_);
+			}
+			{
+				widget::param wp(vtx::srect(0), info_);
+				widget_terminal::param wp_;
+				wp_.echo_ = false;
+				term_ = wd.add_widget<widget_terminal>(wp, wp_);
+			}
+		}
 
 		{ // ファイラー本体
 			widget::param wp(vtx::srect(10, 30, 300, 200));
@@ -101,6 +116,7 @@ namespace app {
 		if(scale_2x_) scale_2x_->load(pre);
 		if(scale_3x_) scale_3x_->load(pre);
 		if(scale_4x_) scale_4x_->load(pre);
+		if(info_) info_->load(pre);
 	}
 
 
@@ -151,6 +167,25 @@ namespace app {
 					+ filer_->get_file() + "'");
 				dialog_->enable();
 			} else {
+				if(term_) {
+					std::string s;
+					s = "W: " + boost::lexical_cast<std::string>(imf.get_image_if()->get_size().x) + '\r';
+					term_->output(s);
+					s = "H: " + boost::lexical_cast<std::string>(imf.get_image_if()->get_size().y) + '\r';
+					term_->output(s);
+					img::IMG::type t = imf.get_image_if()->get_type();
+					if(t == img::IMG::INDEXED8) {
+						term_->output("INDEXED8\r");
+					} else if(t == img::IMG::FULL8) {
+						term_->output("FULL8\r");
+					}
+					if(imf.get_image_if()->test_alpha()) {
+						term_->output("Alpha\r");
+					}
+					s = "C: " + boost::lexical_cast<std::string>(imf.get_image_if()->count_color()) + '\r';
+					term_->output(s);
+					term_->output('\r');
+				}
 				image_offset_.set(0.0f);
 				frame_->at_local_param().text_param_.text_ = imfn;
 				mobj_.destroy();
@@ -221,5 +256,6 @@ namespace app {
 		if(scale_2x_) scale_2x_->save(pre);
 		if(scale_3x_) scale_3x_->save(pre);
 		if(scale_4x_) scale_4x_->save(pre);
+		if(info_) info_->save(pre);
 	}
 }
