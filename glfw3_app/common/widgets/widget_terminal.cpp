@@ -64,13 +64,13 @@ namespace gui {
 		IGLcore* igl = get_glcore();
 		gl::fonts& fonts = igl->at_fonts();
 
-		fonts.push_font_info();
+		fonts.push_font_face();
 		fonts.set_font_type(param_.font_);
 		fonts.set_font_size(param_.font_height_);
 		fonts.enable_proportional(false);
 		fonts.set_spaceing(0);
 		param_.font_width_ = fonts.get_width(' ');
-		fonts.pop_font_info();
+		fonts.pop_font_face();
 	}
 
 
@@ -147,7 +147,7 @@ namespace gui {
 				rect.size = wp.rect_.size;
 			}
 
-			fonts.push_font_info();
+			fonts.push_font_face();
 			fonts.set_font_type(param_.font_);
 			fonts.set_font_size(param_.font_height_);
 
@@ -192,7 +192,7 @@ namespace gui {
 			}
 			++interval_;
 
-			fonts.pop_font_info();
+			fonts.pop_font_face();
 
 			fonts.restore_matrix();
 			glPopMatrix();
