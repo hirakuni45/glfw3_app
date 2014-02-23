@@ -8,7 +8,7 @@ GLFW3 application (player)
 ・glfw3 ライブラリーを使って動作する GUI フレームワークとユーティリティー類をまとめたものです。  
 ・img_io は画像ファイルの入出力や、画像の操作を網羅するモジュールです。  
 ・snd_io は音楽ファイルの入出力や、OpenAL を使った音の再生を行うモジュールです。  
-・glfonts は freetype2 を使ったフォントの描画は、フォント毎にテクスチャーを割り当て管理して表示します。  
+・glfonts は freetype2 を使ったフォントの描画を行い、フォント毎にテクスチャーを割り当て管理して表示します。  
 ・glmobj は、大きさに依存しない画像管理を行います。  
 ・各種ユーティリティーは、文字列の変換、二次元、三次元、四次元ベクトル、行列を扱う数学クラスなどがあります。    
 
@@ -42,14 +42,13 @@ GLFW3 application (player)
 
 ・他に、zlib、libpng、freetype2、mupdf、OpenAL、jpeglib、openjpeg（jpeg2000）、mad（mp3 decode）、faad2、などのライブラリーを使用しています。  
 ・jpeglib は、[x86 CPU 用にアセンブラで最適化したバージョン](http://cetus.sakura.ne.jp/softlab/jpeg-x86simd/jpegsimd.html)をライブラリーに含めています。  
-・libpng は 1.2 を使っています、最新版(1.6)は API の仕様が異なり、ラッパークラスを修正しないとコンパイルできません。  
+
 
 
 ###開発環境
 
-・コンパイルは cygwin 環境で行っており、i686-w64-mingw32-g++ クロスコンパイラを使っていますので、コンパイルする場合は、インストールして下さい。  
-・g++ のバージョンは、4.8.1 です。  
-・i686-w64-mingw32 POSIX の pthread ライブラリーが必要です。  
+・コンパイルは MinGW 環境で行っていますコンパイルする場合は、インストールして下さい。  
+・g++ のバージョンは、4.8.1 です。
+・pthread ライブラリーが必要です。  
 ・boost_1_54_0 が必要です。  
-・他に、make、makedepend、などが必要です。  
 ・libraries/ 以下は /usr/local/ 配下に展開します。  
