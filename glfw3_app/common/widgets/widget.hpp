@@ -173,7 +173,8 @@ namespace gui {
 				const vtx::placement& pl = vtx::placement(
 				vtx::placement::holizontal::CENTER,
 				vtx::placement::vertical::CENTER)) :
-					text_(text), font_(), proportional_(true),
+					text_(text), font_(),
+					proportional_(true), font_size_(24),
 					fore_color_(fc), shadow_color_(sc), placement_(pl),
 					shadow_offset_(2),
 					offset_(0) { }

@@ -225,7 +225,7 @@ namespace gui {
 		vtx::srect rect_ = rect;
 
 		if(!tp.font_.empty()) {
-			fonts.push_font_info();
+			fonts.push_font_face();
 			fonts.set_font_type(tp.font_);
 			fonts.set_font_size(tp.font_size_);
 		}
@@ -259,7 +259,7 @@ namespace gui {
 		fonts.draw(pos, tp.text_, clx);
 
 		if(!tp.font_.empty()) {
-			fonts.pop_font_info();
+			fonts.pop_font_face();
 		}
 	}
 

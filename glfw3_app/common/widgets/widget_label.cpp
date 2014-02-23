@@ -66,13 +66,13 @@ namespace gui {
 		if(param_.shift_every_ ||
 		  (param_.shift_enable_ && bp.hold_frame_ >= param_.shift_hold_frame_)) {
 			if(!param_.text_param_.font_.empty()) {
-				fonts.push_font_info();
+				fonts.push_font_face();
 				fonts.set_font_type(param_.text_param_.font_);
 			}
 			fonts.enable_proportional(param_.text_param_.proportional_);
 			short fw = fonts.get_width(param_.text_param_.text_);
 			if(!param_.text_param_.font_.empty()) {
-				fonts.pop_font_info();
+				fonts.pop_font_face();
 			}
 			short w = get_rect().size.x - param_.plate_param_.frame_width_ * 2;
 			if(w < fw) {
@@ -159,7 +159,7 @@ namespace gui {
 				gl::fonts& fonts = Igl->at_fonts();
 
 				if(!param_.text_param_.font_.empty()) {
-					fonts.push_font_info();
+					fonts.push_font_face();
 					fonts.set_font_type(param_.text_param_.font_);
 				}
 				fonts.enable_proportional(param_.text_param_.proportional_);
@@ -170,7 +170,7 @@ namespace gui {
 				s += '_';
 				short fw = fonts.get_width(s);
 				if(!param_.text_param_.font_.empty()) {
-					fonts.pop_font_info();
+					fonts.pop_font_face();
 				}
 				short w = get_rect().size.x - param_.plate_param_.frame_width_ * 2;
 				if(fw >= w) {
