@@ -30,7 +30,7 @@ namespace gui {
 			uint32_t		font_height_;	///< フォント高
 			uint32_t		height_;		///< 行の高さ
 
-			param() : font_("Inconsolata"), font_width_(0), font_height_(16), height_(18) { }
+			param() : font_("Inconsolata"), font_width_(0), font_height_(18), height_(18) { }
 		};
 
 		widget_director&	wd_;

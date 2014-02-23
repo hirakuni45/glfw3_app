@@ -166,7 +166,7 @@ namespace gui {
 				fore_color_(255, 255), shadow_color_(0, 255),
 				placement_(vtx::placement::holizontal::CENTER,
 					vtx::placement::vertical::CENTER),
-				shadow_offset_(2),
+				shadow_offset_(1),
 				offset_(0) { }
 			text_param(const std::string& text,
 				const img::rgba8& fc, const img::rgba8& sc,

@@ -358,8 +358,14 @@ namespace gui {
 		if(igl == 0) return;
 
 		fonts& fonts = igl->at_fonts();
+
+		// ターミナル用フォントのインストール
+		fonts.push_font_face();
+		fonts.install_font_type("c:/WINDOWS/Fonts/Inconsolata.otf", "Inconsolata");
+		fonts.pop_font_face();
+		fonts.install_font_type("c:/WINDOWS/Fonts/meiryo.ttc", "meiryo");
+		fonts.set_font_size(20);
 		fonts.set_clip_size(igl->get_size());
-		fonts.set_font_size(24);
 
 		// 共通部品の作成
 		{
