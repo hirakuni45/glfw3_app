@@ -167,7 +167,7 @@ namespace gui {
 				if(param_.text_in_pos_ < s.size()) {
 					s.erase(param_.text_in_pos_);
 				}
-				s += '_';
+				s += '|';
 				short fw = fonts.get_width(s);
 				if(!param_.text_param_.font_.empty()) {
 					fonts.pop_font_face();
@@ -203,9 +203,9 @@ namespace gui {
 		if(wd_.get_top_widget() == this && param_.text_in_) {
 			if((interval_ % 40) < 20) {
 				if(tp.text_.size() <= param_.text_in_pos_) {
-					tp.text_ += '_';
+					tp.text_ += '|';
 				} else {
-					tp.text_[param_.text_in_pos_] = '_';
+					tp.text_[param_.text_in_pos_] = '|';
 				}
 			}
 		}
