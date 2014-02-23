@@ -192,9 +192,8 @@ namespace gui {
 			}
 			++interval_;
 
-			fonts.pop_font_face();
-
 			fonts.restore_matrix();
+			fonts.pop_font_face();
 			glPopMatrix();
 			glViewport(0, 0, size.x, size.y);
 		}
