@@ -110,7 +110,7 @@ namespace app {
 			widget::param wp(vtx::srect(30, 250, 150, 40));
 			widget_label::param wp_("Label");
 			wp_.read_only_ = false;
-			wd.add_widget<widget_label>(wp, wp_);
+			label_ = wd.add_widget<widget_label>(wp, wp_);
 		}
 
 		if(1) { // ボタンのテスト（ダイアログ開始ボタン）
@@ -215,6 +215,9 @@ namespace app {
 		if(filer_) {
 			filer_->load(pre);
 		}
+		if(label_) {
+			label_->load(pre);
+		}
 		if(frame_) {
 			frame_->load(pre);
 		}
@@ -300,6 +303,9 @@ namespace app {
 		}
 		if(tree_frame_) {
 			tree_frame_->save(pre);
+		}
+		if(label_) {
+			label_->save(pre);
 		}
 		if(frame_) {
 			frame_->save(pre);
