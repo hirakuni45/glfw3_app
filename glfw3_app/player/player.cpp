@@ -67,7 +67,9 @@ namespace app {
 		widget_label::param wp_(text);
 		wp_.color_param_ = widget_director::default_slider_color_;
 		wp_.color_param_select_ = widget_director::default_slider_color_;
-		wp_.text_param_.font_ = font;
+		if(!font.empty()) {
+			wp_.text_param_.font_ = font;
+		}
 		wp_.text_param_.proportional_ = proportional;
 		wp_.text_param_.placement_.hpt = vtx::placement::holizontal::CENTER;
 		wp_.text_param_.placement_.vpt = vtx::placement::vertical::CENTER;
