@@ -65,7 +65,7 @@ namespace gl {
 			finfo_t		info_;
 		};
 
-		std::stack<finfo_t>	stack_finfo_;
+		std::stack<std::string>	stack_face_;
 
 		// フォント・フェース・マップ
 		typedef std::pair<std::string, face_t>					face_pair;
@@ -263,7 +263,7 @@ namespace gl {
 			@brief	フォント環境を退避
 		*/
 		//-----------------------------------------------------------------//
-		void push_font_info() { stack_finfo_.push(face_->info_); }
+		void push_font_face() { stack_face_.push(get_font_type()); }
 
 
 		//-----------------------------------------------------------------//
@@ -271,7 +271,12 @@ namespace gl {
 			@brief	フォント環境を復帰
 		*/
 		//-----------------------------------------------------------------//
-		void pop_font_info() { face_->info_ = stack_finfo_.top(); stack_finfo_.pop(); }
+		void pop_font_face() {
+			if(!stack_face_.empty()) {
+				set_font_type(stack_face_.top());
+				stack_face_.pop();
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
