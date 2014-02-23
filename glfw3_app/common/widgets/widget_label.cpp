@@ -60,6 +60,8 @@ namespace gui {
 		const vtx::spos& size = Igl->get_size();		
 		gl::fonts& fonts = Igl->at_fonts();
 
+		if(param_.text_in_) return;
+
 		const widget::param& bp = get_param();
 		if(param_.shift_every_ ||
 		  (param_.shift_enable_ && bp.hold_frame_ >= param_.shift_hold_frame_)) {
@@ -72,11 +74,11 @@ namespace gui {
 			if(!param_.text_param_.font_.empty()) {
 				fonts.pop_font_info();
 			}
-			const vtx::spos& size = bp.rect_.size;
-			if(size.x < fw) {
+			short w = get_rect().size.x - param_.plate_param_.frame_width_ * 2;
+			if(w < fw) {
 				param_.shift_offset_ -= param_.shift_speed_;
 				if((static_cast<short>(param_.shift_offset_) + fw) <= 0) {
-					param_.shift_offset_ = size.x;
+					param_.shift_offset_ = w;
 				}
 				param_.text_param_.offset_.x = param_.shift_offset_;
 			} else {
@@ -108,16 +110,26 @@ namespace gui {
 			if(!param_.read_only_ && param_.text_in_) {
 				const std::string& ins = wd_.get_keyboard().input();
 				BOOST_FOREACH(char ch, ins) {
-					if(ch == 0x3f) {
+					if(param_.text_in_limit_ > 0 && param_.text_in_limit_ <= param_.text_in_pos_) {
+						param_.text_in_ = false;
+						continue;
+					}
+					if(ch == sys::keyboard::ctrl::DELETE) {
 						if(param_.text_in_pos_ < param_.text_param_.text_.size()) {
 							param_.text_param_.text_.erase(param_.text_in_pos_, 1);
 						}
 					} else if(ch < 0x20) {
-						if(ch == 0x08) {
+						if(ch == sys::keyboard::ctrl::BS) {
 							if(param_.text_in_pos_) {
 								--param_.text_in_pos_;
 								param_.text_param_.text_.erase(param_.text_in_pos_, 1);
 							}
+						} else if(ch == sys::keyboard::ctrl::CR) {
+							if(param_.text_in_pos_ < param_.text_param_.text_.size()) {
+								param_.text_param_.text_.erase(param_.text_in_pos_);
+							}
+							param_.text_param_.offset_.x = 0;
+							param_.text_in_ = false;
 						} else if(ch == sys::keyboard::ctrl::RIGHT) {
 							if(param_.text_in_pos_ < param_.text_param_.text_.size()) {
 								++param_.text_in_pos_;
@@ -135,6 +147,33 @@ namespace gui {
 						}
 						++param_.text_in_pos_;
 					}
+				}
+			}
+
+			// テキスト幅が、収容範囲を超える場合
+			if(param_.text_in_) {
+				gl::IGLcore* Igl = gl::get_glcore();
+				gl::fonts& fonts = Igl->at_fonts();
+
+				if(!param_.text_param_.font_.empty()) {
+					fonts.push_font_info();
+					fonts.set_font_type(param_.text_param_.font_);
+				}
+				fonts.enable_proportional(param_.text_param_.proportional_);
+				std::string s = param_.text_param_.text_;
+				if(param_.text_in_pos_ < s.size()) {
+					s.erase(param_.text_in_pos_);
+				}
+				s += '_';
+				short fw = fonts.get_width(s);
+				if(!param_.text_param_.font_.empty()) {
+					fonts.pop_font_info();
+				}
+				short w = get_rect().size.x - param_.plate_param_.frame_width_ * 2;
+				if(fw >= w) {
+					param_.text_param_.offset_.x = -(fw - w);
+				} else {
+					param_.text_param_.offset_.x = 0;
 				}
 			}
 		}
@@ -158,7 +197,7 @@ namespace gui {
 		}
 
 		text_param tp = param_.text_param_;
-		if(wd_.get_top_widget() == this) {
+		if(wd_.get_top_widget() == this && param_.text_in_) {
 			if((interval_ % 40) < 20) {
 				if(tp.text_.size() <= param_.text_in_pos_) {
 					tp.text_ += '_';
