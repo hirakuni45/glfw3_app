@@ -32,6 +32,7 @@ namespace sys {
 				LEFT  = 'R' - 0x40,
 				DOWN  = 'S' - 0x40,
 				UP    = 'T' - 0x40,
+				ESC   = 0x1b,
 				DELETE = 0x3f,
 			};
 		};
