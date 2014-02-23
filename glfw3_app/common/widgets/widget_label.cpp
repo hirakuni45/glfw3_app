@@ -130,6 +130,9 @@ namespace gui {
 							}
 							param_.text_param_.offset_.x = 0;
 							param_.text_in_ = false;
+						} else if(ch == sys::keyboard::ctrl::ESC) {
+							param_.text_param_.offset_.x = 0;
+							param_.text_in_ = false;
 						} else if(ch == sys::keyboard::ctrl::RIGHT) {
 							if(param_.text_in_pos_ < param_.text_param_.text_.size()) {
 								++param_.text_in_pos_;
@@ -220,7 +223,13 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	bool widget_label::save(sys::preference& pre)
 	{
-		return true;
+		std::string path;
+		path += '/';
+		path += wd_.create_widget_name(this);
+
+		int err = 0;
+		if(!pre.put_text(path + "/text", param_.text_param_.text_)) ++err;
+		return err == 0;
 	}
 
 
@@ -233,6 +242,14 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	bool widget_label::load(const sys::preference& pre)
 	{
-		return true;
+		std::string path;
+		path += '/';
+		path += wd_.create_widget_name(this);
+
+		bool f = pre.get_text(path + "/text", param_.text_param_.text_);
+		if(f) {
+			param_.text_in_pos_ = param_.text_param_.text_.size();
+		}
+		return f;
 	}
 }

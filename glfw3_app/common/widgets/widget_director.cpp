@@ -166,7 +166,14 @@ namespace gui {
 		}
 		widgets_ = ws;
 
+		if(top_move_ == w) top_move_ = 0;
+		if(top_scroll_ == w) top_scroll_ = 0;
+		if(top_resize_ == w) top_resize_ = 0;
+		if(top_widget_ == w) top_widget_ = 0;
+
 		delete w;
+
+		++del_widgets_;
 
 		return true;
 	}
@@ -780,19 +787,27 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_director::service()
 	{
-		widgets ws;
-		BOOST_FOREACH(widget* w, widgets_) {
-			if(w->get_state(widget::state::SERVICE)) {
-				ws.push_back(w);
-			}
-		}
-
 		// キーボードのサービス
 		keyboard_.service();
 
-		BOOST_FOREACH(widget* w, ws) {
-			w->service();
+		BOOST_FOREACH(widget* w, widgets_) {
+			if(w->get_state(widget::state::SERVICE)) {
+				w->set_state(widget::state::SYSTEM_SERVICE_F, false);
+			}
 		}
+
+		uint32_t n;
+		do {
+			n = del_widgets_;
+			widgets ws = widgets_;
+			BOOST_FOREACH(widget* w, ws) {
+				if(w->get_state(widget::state::SERVICE) && !w->get_state(widget::state::SYSTEM_SERVICE_F)) {
+					w->service();
+					w->set_state(widget::state::SYSTEM_SERVICE_F);
+					if(n != del_widgets_) break;
+				}
+			}
+		} while(n != del_widgets_) ;
 	}
 
 

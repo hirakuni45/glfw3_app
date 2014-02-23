@@ -82,6 +82,8 @@ namespace gui {
 
 		sys::keyboard			keyboard_;
 
+		uint32_t				del_widgets_;
+
 		void message_widget_(widget* w, const std::string& s);
 		void parents_widget_mark_(widget* root);
 	public:
@@ -109,7 +111,7 @@ namespace gui {
 			top_move_(0), top_scroll_(0), top_resize_(0), top_widget_(0),
 			msp_length_(0.0f), msp_speed_(0),
 			position_positive_(0), position_level_(0), position_negative_(0),
-			scroll_(0)
+			scroll_(0), share_img_(), keyboard_(), del_widgets_(0)
 			{ }
 
 
