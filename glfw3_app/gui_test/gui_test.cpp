@@ -57,15 +57,6 @@ namespace app {
 			wd.add_widget<widget_radio>(wp, wp_);
 		}
 
-		if(1) { // リストのテスト
-			widget::param wp(vtx::srect(30, 300, 150, 40), 0);
-			widget_list::param wp_("List Box");
-			wp_.text_list_.push_back("abc");
-			wp_.text_list_.push_back("1234");
-			wp_.text_list_.push_back("qwert");
-			wd.add_widget<widget_list>(wp, wp_);
-		}
-
 		if(1) {	// イメージのテスト
 			widget::param wp(vtx::srect(400, 20, 500, 250), 0);
 			img::paint pa;
@@ -106,28 +97,60 @@ namespace app {
 			dialog_->set_text("ああああ\nうううう\nいいいい\n漢字\n日本");
 		}
 
-		if(1) { // ラベルのテスト
-			widget::param wp(vtx::srect(30, 250, 150, 40));
-			widget_label::param wp_("Label", false);
-			label_ = wd.add_widget<widget_label>(wp, wp_);
-		}
-
-		if(1) { // ボタンのテスト（ダイアログ開始ボタン）
-			widget::param wp(vtx::srect(30, 200, 100, 40));
-			widget_button::param wp_("Daialog");
-			dialog_open_ = wd.add_widget<widget_button>(wp, wp_);
-		}
-
 		if(1) { // ボタンのテスト（ファイラー開始ボタン）
 			widget::param wp(vtx::srect(30, 150, 100, 40));
 			widget_button::param wp_("Filer");
 			filer_open_ = wd.add_widget<widget_button>(wp, wp_);
 		}
 
+		if(1) { // ボタンのテスト（メニュー開始ボタン）
+			widget::param wp(vtx::srect(30, 200, 100, 40));
+			widget_button::param wp_("Menu");
+			menu_open_ = wd.add_widget<widget_button>(wp, wp_);
+		}
+
+		if(1) { // ボタンのテスト（ダイアログ開始ボタン）
+			widget::param wp(vtx::srect(30, 250, 100, 40));
+			widget_button::param wp_("Daialog");
+			dialog_open_ = wd.add_widget<widget_button>(wp, wp_);
+		}
+
+		if(1) { // ラベルのテスト
+			widget::param wp(vtx::srect(30, 300, 150, 40));
+			widget_label::param wp_("ピLabel", false);
+			label_ = wd.add_widget<widget_label>(wp, wp_);
+		}
+
+		if(1) {	// チェックボックスのテスト
+			widget::param wp(vtx::srect(20, 350, 130, 30));
+			widget_check::param wp_("Disable");
+			wd.add_widget<widget_check>(wp, wp_);
+		}
+
+		if(1) { // リストのテスト
+			widget::param wp(vtx::srect(30, 400, 150, 40), 0);
+			widget_list::param wp_("List Box");
+			wp_.text_list_.push_back("abc");
+			wp_.text_list_.push_back("1234");
+			wp_.text_list_.push_back("qwert");
+			wd.add_widget<widget_list>(wp, wp_);
+		}
+
 		if(1) { // スライダーのテスト
-			widget::param wp(vtx::srect(30, 400, 180, 20));
+			widget::param wp(vtx::srect(30, 450, 180, 20));
 			widget_slider::param wp_;
 			slider_ = wd.add_widget<widget_slider>(wp, wp_);
+		}
+
+		if(1) { // メニューのテスト
+			widget::param wp(vtx::srect(10, 10, 180, 30));
+			widget_menu::param wp_;
+//			wp_.round_ = false;
+			wp_.text_list_.push_back("First");
+			wp_.text_list_.push_back("Second");
+			wp_.text_list_.push_back("Third");
+			wp_.text_list_.push_back("Force");
+			menu_ = wd.add_widget<widget_menu>(wp, wp_);
 		}
 
 		if(1) {	// ファイラーのテスト
@@ -135,12 +158,6 @@ namespace app {
 			widget_filer::param wp_(igl->get_current_path());
 			filer_ = wd.add_widget<widget_filer>(wp, wp_);
 			filer_->enable(false);
-		}
-
-		if(1) {	// チェックボックスのテスト
-			widget::param wp(vtx::srect(20, 350, 130, 30));
-			widget_check::param wp_("Disable");
-			wd.add_widget<widget_check>(wp, wp_);
 		}
 
 		if(1) {	// ツリーのテスト
@@ -252,7 +269,7 @@ namespace app {
 		if(filer_open_) {
 			if(filer_open_->get_selected()) {
 				if(filer_) {
-					filer_->enable();
+					filer_->enable(!filer_->get_state(gui::widget::state::ENABLE));
 				}
 			}
 		}
@@ -260,6 +277,26 @@ namespace app {
 			if(filer_id_ != filer_->get_select_file_id()) {
 				filer_id_ = filer_->get_select_file_id();
 				std::cout << "Filer: '" << filer_->get_file() << "'" << std::endl;
+			}
+		}
+
+		if(menu_open_) {
+			if(menu_open_->get_selected()) {
+				if(menu_) {
+					menu_->enable(!menu_->get_state(gui::widget::state::ENABLE));
+					if(menu_->get_state(gui::widget::state::ENABLE)) {
+//						menu_->at_rect().org = 
+					}
+
+				}
+			}
+		}
+		// メニューが選択された！
+		if(menu_) {
+			uint32_t n = menu_->get_select_id();
+			if(menu_id_ != n) {
+				menu_id_ = n;
+				std::cout << "Menu: " << menu_->get_select_text() << std::endl;
 			}
 		}
 
