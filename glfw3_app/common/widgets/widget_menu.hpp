@@ -1,30 +1,46 @@
 #pragma once
 //=====================================================================//
 /*!	@file
-	@brief	GUI widget_null クラス（ヘッダー）
+	@brief	GUI widget_menu クラス（ヘッダー）
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
 #include "widgets/widget_director.hpp"
+#include "widgets/widget_label.hpp"
 
 namespace gui {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
-		@brief	GUI widget_null クラス
+		@brief	GUI widget_menu クラス
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	struct widget_null : public widget {
+	struct widget_menu : public widget {
 
-		typedef widget_null value_type;
+		typedef widget_menu value_type;
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
-			@brief	widget_null パラメーター
+			@brief	widget_menu パラメーター
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
-			param() { }
+			plate_param	plate_param_;	///< プレート・パラメーター
+			color_param	color_param_;	///< カラー・パラメーター
+			text_param	text_param_;	///< テキスト描画のパラメーター
+			color_param	color_param_select_;	///< 選択時カラー・パラメーター
+
+			utils::strings	text_list_;	///< テキスト・リスト
+
+			param(const std::string& text = "") :
+				plate_param_(),
+				color_param_(widget_director::default_list_color_),
+				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255),
+					vtx::placement(vtx::placement::holizontal::LEFT,
+						vtx::placement::vertical::CENTER)),
+				color_param_select_(widget_director::default_list_color_select_),
+				text_list_()
+			{ }
 		};
 
 	private:
@@ -32,15 +48,19 @@ namespace gui {
 
 		param				param_;
 
+		widget_labels		list_;
+
+		void destroy_();
 	public:
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		widget_null(widget_director& wd, const widget::param& wp, const param& p) :
-			wd_(wd), widget(wp), param_(p) {
-		}
+		widget_menu(widget_director& wd, const widget::param& wp, const param& p) :
+			wd_(wd), widget(wp), param_(p),
+			list_()
+		{ }
 
 
 		//-----------------------------------------------------------------//
@@ -48,7 +68,7 @@ namespace gui {
 			@brief	デストラクター
 		*/
 		//-----------------------------------------------------------------//
-		virtual ~widget_null() { }
+		virtual ~widget_menu() { destroy_(); }
 
 
 		//-----------------------------------------------------------------//
@@ -65,7 +85,7 @@ namespace gui {
 			@return widget 型の基本名称
 		*/
 		//-----------------------------------------------------------------//
-		const char* type_name() const { return "null"; }
+		const char* type_name() const { return "menu"; }
 
 
 		//-----------------------------------------------------------------//
@@ -74,7 +94,7 @@ namespace gui {
 			@return ハイブリッド・ウィジェットの場合「true」を返す。
 		*/
 		//-----------------------------------------------------------------//
-		bool hybrid() const { return false; }
+		bool hybrid() const { return true; }
 
 
 		//-----------------------------------------------------------------//
@@ -82,9 +102,7 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() {
-			set_state(widget::state::RENDER_ENABLE, false);
-		}
+		void initialize();
 
 
 		//-----------------------------------------------------------------//
@@ -92,7 +110,7 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() { }
+		void update();
 
 
 		//-----------------------------------------------------------------//
@@ -100,7 +118,7 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() { }
+		void service();
 
 
 		//-----------------------------------------------------------------//
@@ -108,7 +126,7 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render() { }
+		void render();
 
 
 		//-----------------------------------------------------------------//
@@ -118,7 +136,7 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(sys::preference& pre) { return true; }
+		bool save(sys::preference& pre);
 
 
 		//-----------------------------------------------------------------//
@@ -128,6 +146,6 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre) { return true; }
+		bool load(const sys::preference& pre);
 	};
 }

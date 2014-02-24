@@ -47,6 +47,7 @@ namespace gui {
 					vtx::placement(vtx::placement::holizontal::LEFT,
 						vtx::placement::vertical::CENTER)),
 				color_param_select_(widget_director::default_list_color_select_),
+				text_list_(),
 				select_pos_(0), drop_box_(true),
 				open_before_(false), open_(false)
 			{ }

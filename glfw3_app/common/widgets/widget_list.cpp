@@ -18,7 +18,7 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_list::initialize()
 	{
-		// 標準的に固定
+		// 標準的に固定、リサイズ不可
 		at_param().state_.set(widget::state::POSITION_LOCK);
 		at_param().state_.set(widget::state::SIZE_LOCK);
 		at_param().state_.set(widget::state::SERVICE);
@@ -96,50 +96,6 @@ namespace gui {
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	レンダリング
-	*/
-	//-----------------------------------------------------------------//
-	void widget_list::render()
-	{
-		using namespace gl;
-
-		IGLcore* igl = get_glcore();
-		const vtx::spos& sc = igl->get_size();
-
-		gl::mobj::handle h = objh_;
-		if(get_select() || get_state(widget::state::SYSTEM_SELECT)) {
-			h = select_objh_;
-		}
-
-		if(param_.plate_param_.resizeble_) {
-			wd_.at_mobj().resize(objh_, get_param().rect_.size);
-		}
-
-		render_text(wd_, h, get_param(), param_.text_param_, param_.plate_param_);
-
-		if(!param_.open_ && param_.drop_box_) {
-			wd_.at_mobj().setup_matrix(sc.x, sc.y);
-			wd_.set_TSC();
-			// チップの描画
-			gl::mobj::handle h;
-			if((get_rect().org.y + frame_->get_rect().size.y) > sc.y) {
-				h = wd_.get_share_image().up_box_;
-			} else {
-				h = wd_.get_share_image().down_box_;
-			}
-
-			const vtx::spos& bs = wd_.at_mobj().get_size(h);
-			const vtx::spos& size = get_rect().size;
-			short wf = param_.plate_param_.frame_width_;
-			short space = 4;
-			vtx::spos pos(size.x - bs.x - wf - space, (size.y - bs.y) / 2);
-			wd_.at_mobj().draw(h, gl::mobj::attribute::normal, pos.x, pos.y);
-		}
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
 		@brief	サービス
 	*/
 	//-----------------------------------------------------------------//
@@ -196,6 +152,50 @@ namespace gui {
 					++n;
 				}
 			}
+		}
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	レンダリング
+	*/
+	//-----------------------------------------------------------------//
+	void widget_list::render()
+	{
+		using namespace gl;
+
+		IGLcore* igl = get_glcore();
+		const vtx::spos& sc = igl->get_size();
+
+		gl::mobj::handle h = objh_;
+		if(get_select() || get_state(widget::state::SYSTEM_SELECT)) {
+			h = select_objh_;
+		}
+
+		if(param_.plate_param_.resizeble_) {
+			wd_.at_mobj().resize(objh_, get_param().rect_.size);
+		}
+
+		render_text(wd_, h, get_param(), param_.text_param_, param_.plate_param_);
+
+		if(!param_.open_ && param_.drop_box_) {
+			wd_.at_mobj().setup_matrix(sc.x, sc.y);
+			wd_.set_TSC();
+			// チップの描画
+			gl::mobj::handle h;
+			if((get_rect().org.y + frame_->get_rect().size.y) > sc.y) {
+				h = wd_.get_share_image().up_box_;
+			} else {
+				h = wd_.get_share_image().down_box_;
+			}
+
+			const vtx::spos& bs = wd_.at_mobj().get_size(h);
+			const vtx::spos& size = get_rect().size;
+			short wf = param_.plate_param_.frame_width_;
+			short space = 4;
+			vtx::spos pos(size.x - bs.x - wf - space, (size.y - bs.y) / 2);
+			wd_.at_mobj().draw(h, gl::mobj::attribute::normal, pos.x, pos.y);
 		}
 	}
 

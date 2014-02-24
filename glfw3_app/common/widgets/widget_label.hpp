@@ -40,17 +40,27 @@ namespace gui {
 			float		shift_speed_;	///< シフト表示の速度
 			uint32_t	shift_hold_frame_;	///< シフト表示までのホールドフレーム
 
-			param(const std::string& text = "") :
+			bool		menu_enable_;	///< メニュー許可
+
+			//-------------------------------------------------------------//
+			/*!
+				@brief	param コンストラクター
+				@param[in]	text	ラベル・テキスト
+				@param[in]	ro		テキスト変更の場合「false」
+			*/
+			//-------------------------------------------------------------//
+			param(const std::string& text = "", bool ro = true) :
 				plate_param_(),
 				color_param_(widget_director::default_label_color_),
 				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255),
 					vtx::placement(vtx::placement::holizontal::LEFT,
 						vtx::placement::vertical::CENTER)),
 				color_param_select_(widget_director::default_label_color_select_),
-				read_only_(true), text_in_(false), text_in_pos_(0), text_in_limit_(0),
+				read_only_(ro), text_in_(false), text_in_pos_(0), text_in_limit_(0),
 				shift_enable_(true), shift_every_(false),
 				shift_offset_(0.0f), shift_speed_(0.5f),
-				shift_hold_frame_(2 * 60)
+				shift_hold_frame_(2 * 60),
+				menu_enable_(false)
 				{ }
 		};
 

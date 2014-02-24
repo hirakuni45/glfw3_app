@@ -439,21 +439,6 @@ namespace gui {
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	レンダリング
-	*/
-	//-----------------------------------------------------------------//
-	void widget_filer::render()
-	{
-		if(objh_ == 0) return;
-
-		wd_.at_mobj().resize(objh_, get_param().rect_.size);
-		glEnable(GL_TEXTURE_2D);
-		wd_.at_mobj().draw(objh_, gl::mobj::attribute::normal, 0, 0);
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
 		@brief	サービス
 	*/
 	//-----------------------------------------------------------------//
@@ -719,6 +704,21 @@ namespace gui {
 #endif
 			}
 		}
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	レンダリング
+	*/
+	//-----------------------------------------------------------------//
+	void widget_filer::render()
+	{
+		if(objh_ == 0) return;
+
+		wd_.at_mobj().resize(objh_, get_param().rect_.size);
+		glEnable(GL_TEXTURE_2D);
+		wd_.at_mobj().draw(objh_, gl::mobj::attribute::normal, 0, 0);
 	}
 
 
