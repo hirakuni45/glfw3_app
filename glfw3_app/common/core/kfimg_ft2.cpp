@@ -155,6 +155,14 @@ void get_metrics(wchar_t code)
 				int l = static_cast<int>(slot->metrics.horiBearingY / 64.0f);
 				if(max < l) max = l;
 			}
+			if(0) {
+				FT_Load_Char(face_, L'ピ', FT_LOAD_RENDER);
+				FT_GlyphSlot slot = face_->glyph;
+				int l = static_cast<int>(slot->metrics.horiBearingY / 64.0f);
+				float h = (float)slot->metrics.height / 64.0f;
+std::cout << static_cast<int>(l) << ", H: " << h << std::endl;
+				if(max < l) max = l;
+			}
 			std::pair<int, int> v(size.y, max);
 // std::cout << max << std::endl;
 			offset_y_.insert(v);
@@ -169,14 +177,14 @@ void get_metrics(wchar_t code)
 		FT_GlyphSlot slot = face_->glyph;
 		FT_Bitmap* bitmap = &slot->bitmap;
 
-		metrics_.bitmap_w = (float)bitmap->width;
-		metrics_.bitmap_h = (float)bitmap->rows;
-		metrics_.width    = (float)slot->metrics.width  / 64.0f;
-		metrics_.height   = (float)slot->metrics.height / 64.0f;
-		metrics_.hori_x   = (float)slot->metrics.horiBearingX / 64.0f;
-		metrics_.hori_y   = (float)slot->metrics.horiBearingY / 64.0f;
-		metrics_.vert_x   = (float)slot->metrics.vertBearingX / 64.0f;
-		metrics_.vert_y   = (float)slot->metrics.vertBearingY / 64.0f;
+		metrics_.bitmap_w = static_cast<float>(bitmap->width);
+		metrics_.bitmap_h = static_cast<float>(bitmap->rows);
+		metrics_.width    = static_cast<float>(slot->metrics.width)  / 64.0f;
+		metrics_.height   = static_cast<float>(slot->metrics.height) / 64.0f;
+		metrics_.hori_x   = static_cast<float>(slot->metrics.horiBearingX) / 64.0f;
+		metrics_.hori_y   = static_cast<float>(slot->metrics.horiBearingY) / 64.0f;
+		metrics_.vert_x   = static_cast<float>(slot->metrics.vertBearingX) / 64.0f;
+		metrics_.vert_y   = static_cast<float>(slot->metrics.vertBearingY) / 64.0f;
 
 		int ox = static_cast<int>(metrics_.hori_x);
 		int oy = offset_y_[size.y] - static_cast<int>(metrics_.hori_y) - 1;
