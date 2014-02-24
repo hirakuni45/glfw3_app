@@ -32,6 +32,11 @@ namespace gui {
 
 			utils::strings	text_list_;	///< テキスト・リスト
 
+			bool		round_;			///< 角をラウンドしない場合「false」
+
+			std::string	select_text_;	///< 選択位置のテキスト
+			uint32_t	select_pos_;	///< テキスト・リストの選択位置
+
 			param(const std::string& text = "") :
 				plate_param_(),
 				color_param_(widget_director::default_list_color_),
@@ -39,7 +44,7 @@ namespace gui {
 					vtx::placement(vtx::placement::holizontal::LEFT,
 						vtx::placement::vertical::CENTER)),
 				color_param_select_(widget_director::default_list_color_select_),
-				text_list_()
+				text_list_(), round_(true), select_text_(), select_pos_(0)
 			{ }
 		};
 
@@ -50,6 +55,8 @@ namespace gui {
 
 		widget_labels		list_;
 
+		uint32_t			select_id_;
+
 		void destroy_();
 	public:
 		//-----------------------------------------------------------------//
@@ -59,7 +66,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_menu(widget_director& wd, const widget::param& wp, const param& p) :
 			wd_(wd), widget(wp), param_(p),
-			list_()
+			list_(), select_id_(0)
 		{ }
 
 
@@ -95,6 +102,49 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		bool hybrid() const { return true; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	個別パラメーターへの取得(ro)
+			@return 個別パラメーター
+		*/
+		//-----------------------------------------------------------------//
+		const param& get_local_param() const { return param_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	個別パラメーターへの取得
+			@return 個別パラメーター
+		*/
+		//-----------------------------------------------------------------//
+		param& at_local_param() { return param_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	有効・無効の設定
+			@param[in]	f	無効にする場合「false」
+		*/
+		//-----------------------------------------------------------------//
+		void enable(bool f = true) { wd_.enable(this, f, true); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	選択 ID の取得
+		*/
+		//-----------------------------------------------------------------//
+		uint32_t get_select_id() const { return select_id_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	選択テキストの取得
+		*/
+		//-----------------------------------------------------------------//
+		const std::string& get_select_text() const { return param_.select_text_; }
 
 
 		//-----------------------------------------------------------------//
