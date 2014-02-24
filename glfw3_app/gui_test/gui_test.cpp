@@ -108,8 +108,7 @@ namespace app {
 
 		if(1) { // ラベルのテスト
 			widget::param wp(vtx::srect(30, 250, 150, 40));
-			widget_label::param wp_("Label");
-			wp_.read_only_ = false;
+			widget_label::param wp_("Label", false);
 			label_ = wd.add_widget<widget_label>(wp, wp_);
 		}
 

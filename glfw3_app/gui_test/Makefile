@@ -51,6 +51,7 @@ PSOURCES	=	main.cpp \
 				../common/widgets/widget_list.cpp \
 				../common/widgets/widget_check.cpp \
 				../common/widgets/widget_radio.cpp \
+				../common/widgets/widget_menu.cpp \
 				../common/widgets/widget_dialog.cpp \
 				../common/widgets/widget_tree.cpp \
 				../common/widgets/widget_filer.cpp \
