@@ -39,6 +39,8 @@ namespace gui {
 	widget::color_param widget_director::default_check_color_;
 	widget::color_param widget_director::default_list_color_;
 	widget::color_param widget_director::default_list_color_select_;
+	widget::color_param widget_director::default_menu_color_;
+	widget::color_param widget_director::default_menu_color_select_;
 	widget::color_param widget_director::default_dialog_color_;
 	widget::color_param widget_director::default_filer_color_;
 	widget::color_param widget_director::default_tree_color_;
@@ -171,9 +173,9 @@ namespace gui {
 		if(top_resize_ == w) top_resize_ = 0;
 		if(top_widget_ == w) top_widget_ = 0;
 
-		delete w;
+		del_mark_.insert(w);
 
-		++del_widgets_;
+		delete w;
 
 		return true;
 	}
@@ -299,12 +301,19 @@ namespace gui {
 		bc.set( 47,  72,  86);
 		default_check_color_ = widget::color_param(fc, bc);
 
-		fc.set( 48, 193, 241);
+		fc.set( 48, 193, 251);
 		bc = fc * 0.7f;
 		default_list_color_ = widget::color_param(fc, bc);
-		fc.set(118, 223, 231);
+		fc.set(118, 223, 251);
 		bc = fc * 0.7f;
 		default_list_color_select_ = widget::color_param(fc, bc);
+
+		fc.set( 38, 123, 180);
+		bc = fc * 0.7f;
+		default_menu_color_ = widget::color_param(fc, bc);
+		fc.set(118, 223, 251);
+		bc = fc * 0.7f;
+		default_menu_color_select_ = widget::color_param(fc, bc);
 
 		fc.set(235, 157,  95);
 		bc = fc * 0.7f;
@@ -669,8 +678,10 @@ namespace gui {
 
 		// 最後に各部品の update 処理 
 		{
+			del_mark_.clear();
 			widgets ws = widgets_;
 			BOOST_FOREACH(widget* w, ws) {
+				if(del_mark_.find(w) != del_mark_.end()) continue;
 				if(!w->get_state(widget::state::ENABLE)) continue;
 				if(w->get_state(widget::state::STALL)) continue;
 				if(w->get_state(widget::state::UPDATE_ENABLE)) {
@@ -681,6 +692,27 @@ namespace gui {
 
 //		action_monitor();
 		return touch;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	サービス
+	*/
+	//-----------------------------------------------------------------//
+	void widget_director::service()
+	{
+		// キーボードのサービス
+		keyboard_.service();
+
+		del_mark_.clear();
+		widgets ws = widgets_;
+		BOOST_FOREACH(widget* w, ws) {
+			if(del_mark_.find(w) != del_mark_.end()) continue;
+			if(w->get_state(widget::state::SERVICE)) {
+				w->service();
+			}
+		}
 	}
 
 
@@ -783,37 +815,6 @@ namespace gui {
 			w->render();
 			w->run_signal(widget::signal_group::render_later);
 		}
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	サービス
-	*/
-	//-----------------------------------------------------------------//
-	void widget_director::service()
-	{
-		// キーボードのサービス
-		keyboard_.service();
-
-		BOOST_FOREACH(widget* w, widgets_) {
-			if(w->get_state(widget::state::SERVICE)) {
-				w->set_state(widget::state::SYSTEM_SERVICE_F, false);
-			}
-		}
-
-		uint32_t n;
-		do {
-			n = del_widgets_;
-			widgets ws = widgets_;
-			BOOST_FOREACH(widget* w, ws) {
-				if(w->get_state(widget::state::SERVICE) && !w->get_state(widget::state::SYSTEM_SERVICE_F)) {
-					w->service();
-					w->set_state(widget::state::SYSTEM_SERVICE_F);
-					if(n != del_widgets_) break;
-				}
-			}
-		} while(n != del_widgets_) ;
 	}
 
 

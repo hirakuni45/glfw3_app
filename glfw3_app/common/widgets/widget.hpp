@@ -267,7 +267,6 @@ namespace gui {
 				/// 以下ワーク用
 				SYSTEM_STALL,			///< システム用ストール
 				SYSTEM_SELECT,			///< システム用セレクト
-				SYSTEM_SERVICE_F,		///< システム用サービス旗
 
 				BEFORE_FOCUS,			///< １フレーム前フォーカスの状態
 				IS_FOCUS,				///< フォーカスの状態

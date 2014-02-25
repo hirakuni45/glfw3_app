@@ -344,6 +344,7 @@ namespace gui {
 		at_param().state_.set(widget::state::RESIZE_H_ENABLE);
 		at_param().state_.set(widget::state::RESIZE_V_ENABLE);
 		at_param().state_.set(widget::state::SERVICE);
+		at_param().state_.set(widget::state::ENABLE, false);
 
 		param_.plate_param_.resizeble_ = true;
 		at_param().resize_min_ = param_.plate_param_.grid_ * 3;
@@ -448,11 +449,12 @@ namespace gui {
 			return;
 		}
 
+		wd_.top_widget(this);
+
 		// ファイル情報の取得と反映（ファイル情報収集はスレッドで動作）
 		if(fsc_.probe()) {
 
 			if(center_.empty()) {
-				wd_.top_widget(this);
 				create_files_(center_, 0);
 				update_files_info_(center_);
 				if(left_.empty()) {
