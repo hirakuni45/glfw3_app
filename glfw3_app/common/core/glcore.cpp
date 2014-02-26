@@ -312,17 +312,19 @@ namespace gl {
 
         // 垂直同期を有効にする。
 		if(glfwExtensionSupported("WGL_EXT_swap_control") == GL_TRUE) {
-//			std::cout << "`WGL_EXT_swap_control` OK" << std::endl;
+//			std::cout << "WGL_EXT_swap_control: OK" << std::endl;
 			bool (*p)(int) = (bool (*)(int)) glfwGetProcAddress("wglSwapIntervalEXT");
 			if(p) {
 				(*p)(1);
-//				std::cout << "Swap Interval: OK" << std::endl;
+//				std::cout << "wglSwapIntervalEXT: OK" << std::endl;
+			} else {
+//				std::cout << "wglSwapIntervalEXT: NO" << std::endl;
 			}
 	    } else {
-//			std::cout << "`WGL_EXT_swap_control` NO" << std::endl;
+//			std::cout << "WGL_EXT_swap_control: NO" << std::endl;
 		}
-
 		glfwSwapInterval(1);
+
 
 		{  // Lock キーの初期状態を反映する
 #ifdef WIN32
@@ -447,6 +449,7 @@ namespace gl {
 	void glcore::flip_frame()
 	{
 #ifdef WIN32
+		// ソフト同期
 		if(cpu_ghz_ > 0.0) {
 			double ref = machine_cycle_;
 			machine_cycle_ = rdtsc_();
@@ -455,6 +458,7 @@ namespace gl {
 			double ft = 1.0 / 60.0;
 			if(ft > w) {
 				useconds_t usec = static_cast<useconds_t>((ft - w) * 1e6);
+		        SetThreadAffinityMask(GetCurrentThread(), 1);
 				usleep(usec);
 			}
 			{
@@ -464,27 +468,16 @@ namespace gl {
 			}
 		}
 
-        frame_count_++;
-        if(frame_count_ > 4) {
-            if(!cpu_spd_enable_) {
-                // ある程度「負荷」がかからないと正確な値が出ない・・
-                cpu_ghz_ = get_cpu_clock_() / 1e6;
-                cpu_spd_enable_ = true;
-            }
-        }
-        // 定期的にCPU速度を評価して、boostした場合や、スローダウンに対応する。
-        if((frame_count_ % 60) == 0) {
-#if 0
-			int rate = static_cast<int>((1.0 / frame_time_) + 0.5);
-			std::cout << cpu_ghz_ << " GHz, FrameRate: " << rate << std::endl;
+		frame_count_++;
+
+		double cpuz = get_cpu_clock_() / 1e6;
+		if(cpu_ghz_ < cpuz) cpu_ghz_ = cpuz;
+//		if((frame_count_ % 60) == 0) {
+//			int rate = static_cast<int>((1.0 / frame_time_) + 0.5);
+//			std::cout << cpu_ghz_ << " GHz, Perfrmance Frame Rate: " << rate << std::endl;
+//		}
 #endif
-            double spd = get_cpu_clock_() / 1e6;
-            if(std::abs(spd - cpu_ghz_) > 0.05) {
-                cpu_ghz_ = spd;
-            }
-        }
-#endif
-        glfwSwapBuffers(window_);
+		glfwSwapBuffers(window_);
 	}
 
 
