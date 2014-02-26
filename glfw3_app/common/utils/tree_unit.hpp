@@ -85,6 +85,48 @@ namespace utils {
 		typedef std::stack<std::string>		string_stack;
 		string_stack	stack_path_;
 
+		bool install_(const std::string& key, const T& value, bool dir)
+		{
+			std::string fpath;
+			if(!create_full_path(key, fpath)) {
+				return false;
+			}
+
+			bool f = false;
+			utils::strings ss;
+			split_text(fpath, "/", ss);
+			std::string p;
+			for(uint32_t i = 0; i < ss.size(); ++i) {
+				p += '/';
+				p += ss[i];
+
+				unit_t u;
+				u.value = value;
+				u.set_id(serial_id_);
+				std::pair<unit_map_it, bool> ret = unit_map_.insert(unit_pair(p, u));
+				if(ret.second) {
+					++serial_id_;
+					if(i == (ss.size() - 1) && !dir) {
+						++units_;
+					} else {
+						++directory_;
+					}
+					std::string d;
+					if(get_file_path(p, d)) {
+						unit_map_it it = unit_map_.find(d);
+						if(it != unit_map_.end()) {
+							unit_t& t = it->second;
+							t.install_child(utils::get_file_name(p));
+						}
+					}
+					f = true;
+				} else {
+					f = false;
+				}
+			}
+			return f;
+		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -168,32 +210,7 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		bool install(const std::string& key, const T& value)
 		{
-			std::string fullpath;
-			if(!create_full_path(key, fullpath)) {
-				return false;
-			}
-
-			unit_t u;
-			u.value = value;
-			u.set_id(serial_id_);
-
-			std::pair<unit_map_it, bool> ret = unit_map_.insert(unit_pair(fullpath, u));
-			if(ret.second) {
-				++serial_id_;
-				++units_;
-				// ディレクトリー情報にユニット名を追加
-				std::string d;
-				if(get_file_path(fullpath, d)) {
-					unit_map_it it = unit_map_.find(d);
-					if(it == unit_map_.end()) {
-						return false;
-					} else {
-						unit_t& t = it->second;
-						t.install_child(key);
-					}
-				}
-			}
-			return ret.second;
+			return install_(key, value, false);
 		}
 
 
@@ -258,8 +275,10 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		void pop_current_path()
 		{
-			current_path_ = stack_path_.top();
-			stack_path_.pop();
+			if(!stack_path_.empty()) {
+				current_path_ = stack_path_.top();
+				stack_path_.pop();
+			}
 		}
 
 
@@ -316,24 +335,8 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		bool make_directory(const std::string& name)
 		{
-			std::string fullpath;
-			if(!create_full_path(name, fullpath)) {
-				return false;
-			}
-
-			unit_t t;
-			t.set_id(serial_id_);
-
-			std::pair<unit_map_it, bool> ret = unit_map_.insert(unit_pair(fullpath, t));
-			if(ret.second) {
-				ret.first->second.install_child(utils::get_file_name(name));
-				++serial_id_;
-				++directory_;
-				return true;
-			} else {
-				// 既に同じディレクトリーが存在した。
-				return false;
-			}
+			T value;
+			bool f =  install_(name, value, true);
 		}
 
 

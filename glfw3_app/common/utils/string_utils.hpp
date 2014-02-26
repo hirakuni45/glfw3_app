@@ -390,14 +390,14 @@ namespace utils {
 					tab = true;
 				}
 			}
-			if(tab_back == true && tab == false && word.empty() == false) {
+			if(tab_back && !tab && !word.empty()) {
 				dst.push_back(word);
 				word.clear();
 			}
-			if(tab == false) word += c;
+			if(!tab) word += c;
 			tab_back = tab;
 		}
-		if(word.empty() == false) {
+		if(!word.empty()) {
 			dst.push_back(word);
 		}
 	}
