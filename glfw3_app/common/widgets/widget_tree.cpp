@@ -144,9 +144,11 @@ namespace gui {
 		std::stack<bool> open_stack;
 		bool open = true;
 		uint32_t nest = 1;
+		bool bdir = false;
 		BOOST_FOREACH(tree_unit::unit_map_it it, its) {
 			widget_check* w = it->second.value.path_;
 			if(w == 0) continue;
+			bool dir = tree_unit_.is_directory(it);
 			uint32_t n = utils::count_char(it->first, '/');
 			bool draw = open;
 			if(n <= 1) {
@@ -155,22 +157,25 @@ namespace gui {
 			}
 			wd_.enable(w, draw);
 			if(draw) {
-				w->at_local_param().draw_box_ = tree_unit_.is_directory(it);
+				w->at_local_param().draw_box_ = dir;
 				pos.x = (n - 1) * param_.height_;
 				w->at_rect().org = pos;
 				pos.y += param_.height_;
 			}
-			if(tree_unit_.is_directory(it)) {
+			if(dir) {
 				open_stack.push(open);
 				if(open) {
 					open = w->get_check();
 				}
 			}
-			if(nest > n) {
-				open = open_stack.top();
-				open_stack.pop();
+			if(nest > n || (bdir && dir)) {
+				if(!open_stack.empty()) {
+					open = open_stack.top();
+					open_stack.pop();
+				}
 			}
 			nest = n;
+			bdir = dir;
 		}
 
 		if(get_select_in()) {
