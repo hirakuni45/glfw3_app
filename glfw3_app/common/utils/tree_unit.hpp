@@ -326,6 +326,7 @@ namespace utils {
 
 			std::pair<unit_map_it, bool> ret = unit_map_.insert(unit_pair(fullpath, t));
 			if(ret.second) {
+				ret.first->second.install_child(utils::get_file_name(name));
 				++serial_id_;
 				++directory_;
 				return true;
