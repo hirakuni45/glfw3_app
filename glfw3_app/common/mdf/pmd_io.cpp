@@ -1,6 +1,6 @@
 //=====================================================================//
 /*!	@file
-	@brief	PMD ファイルを扱うクラス（ヘッダー）
+	@brief	PMD ファイルを扱うクラス
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
@@ -35,8 +35,8 @@ namespace mdf {
 			return false;
 		}
 
-		vertex_.reserve(n);
-		vertex_.clear();
+		vertexes_.reserve(n);
+		vertexes_.clear();
 		for(uint32_t i = 0; i < n; ++i) {
 			pmd_vertex v;
 			if(!v.get(fio)) {
@@ -45,7 +45,7 @@ namespace mdf {
 			if(i == 0) vertex_min_ = vertex_max_ = v.pos;
 			vtx::set_min(v.pos, vertex_min_);
 			vtx::set_max(v.pos, vertex_max_);
-			vertex_.push_back(v);
+			vertexes_.push_back(v);
 		}
 		return true;
 	}
@@ -57,14 +57,14 @@ namespace mdf {
 			return false;
 		}
 
-		face_index_.reserve(n);
-		face_index_.clear();
+		face_indexes_.reserve(n);
+		face_indexes_.clear();
 		for(uint32_t i = 0; i < n; ++i) {
 			uint16_t v;
 			if(!fio.get(v)) {
 				return false;
 			}
-			face_index_.push_back(v);
+			face_indexes_.push_back(v);
 		}
 		return true;
 	}
@@ -77,14 +77,14 @@ namespace mdf {
 			return false;
 		}
 
-		material_.reserve(n);
-		material_.clear();
+		materials_.reserve(n);
+		materials_.clear();
 		for(uint32_t i = 0; i < n; ++i) {
 			pmd_material m;
 			if(!m.get(fio)) {
 				return false;
 			}
-			material_.push_back(m);
+			materials_.push_back(m);
 		}
 		return true;
 	}
@@ -96,16 +96,16 @@ namespace mdf {
 		if(!fio.get(n)) {
 			return false;
 		}
-///		std::cout << "Bone num: " << n << std::endl;
+//		std::cout << "Bone num: " << n << std::endl;
 
-		bone_.reserve(n);
-		bone_.clear();
+		bones_.reserve(n);
+		bones_.clear();
 		for(uint32_t i = 0; i < static_cast<uint32_t>(n); ++i) {
 			pmd_bone b;
 			if(!b.get(fio)) {
 				return false;
 			}
-			bone_.push_back(b);
+			bones_.push_back(b);
 
 //			std::string s;
 //			get_text_(b.name, 20, s);
@@ -125,14 +125,14 @@ namespace mdf {
 		}
 ///		std::cout << "IK num: " << n << std::endl;
 
-		ik_.reserve(n);
-		ik_.clear();
+		iks_.reserve(n);
+		iks_.clear();
 		for(uint32_t i = 0; i < static_cast<uint32_t>(n); ++i) {
 			pmd_ik ik;
 			if(!ik.get(fio)) {
 				return false;
 			}
-			ik_.push_back(ik);
+			iks_.push_back(ik);
 		}
 		return true;
 	}
@@ -146,14 +146,14 @@ namespace mdf {
 		}
 ///		std::cout << "Skin num: " << n << std::endl;
 
-		skin_.reserve(n);
-		skin_.clear();
+		skins_.reserve(n);
+		skins_.clear();
 		for(uint32_t i = 0; i < static_cast<uint32_t>(n); ++i) {
 			pmd_skin ps;
 			if(!ps.get(fio)) {
 				return false;
 			}
-			skin_.push_back(ps);
+			skins_.push_back(ps);
 
 ///			std::string s;
 ///			get_text_(ps.name, 20, s);
@@ -172,21 +172,21 @@ namespace mdf {
 		}
 ///		std::cout << "Skin index num: " << static_cast<int>(n) << std::endl;
 
-		skin_index_.reserve(n);
-		skin_index_.clear();
+		skin_indexes_.reserve(n);
+		skin_indexes_.clear();
 		for(uint32_t i = 0; i < n; ++i) {
 			uint16_t v;
 			if(!fio.get(v)) {
 				return false;
 			}
-			skin_index_.push_back(v);
+			skin_indexes_.push_back(v);
 		}
 
 		return true;
 	}
 
 
-	bool pmd_io::parse_bone_disp_list_(utils::file_io& fio)
+	bool pmd_io::parse_bone_disp_name_(utils::file_io& fio)
 	{
 		uint8_t n;
 		if(!fio.get(n)) {
@@ -194,14 +194,14 @@ namespace mdf {
 		}
 //		std::cout << "Bone disp list num: " << static_cast<int>(n) << std::endl;
 
-		bone_disp_list_.reserve(n);
-		bone_disp_list_.clear();
+		bone_disp_names_.reserve(n);
+		bone_disp_names_.clear();
 		for(uint32_t i = 0; i < n; ++i) {
-			pmd_bone_disp_list bdl;
+			pmd_bone_disp_name bdl;
 			if(!bdl.get(fio)) {
 				return false;
 			}
-			bone_disp_list_.push_back(bdl);
+			bone_disp_names_.push_back(bdl);
 
 //			std::string s;
 //			get_text_(bdl.name, 50, s);
@@ -219,14 +219,14 @@ namespace mdf {
 		}
 ///		std::cout << "Bone disp num: " << n << std::endl;
 
-		bone_disp_.reserve(n);
-		bone_disp_.clear();
+		bone_disps_.reserve(n);
+		bone_disps_.clear();
 		for(uint32_t i = 0; i < n; ++i) {
 			pmd_bone_disp bd;
 			if(!bd.get(fio)) {
 				return false;
 			}
-			bone_disp_.push_back(bd);
+			bone_disps_.push_back(bd);
 		}
 		return true;
 	}
@@ -418,7 +418,7 @@ namespace mdf {
 		}
 
 		// ボーン・ディスプレイ・リスト 取得
-		if(!parse_bone_disp_list_(fio)) {
+		if(!parse_bone_disp_name_(fio)) {
 			return false;
 		}
 
@@ -458,14 +458,14 @@ namespace mdf {
 	//-----------------------------------------------------------------//
 	void pmd_io::render_setup()
 	{
-		if(vertex_.empty()) return;
-		if(face_index_.empty()) return;
+		if(vertexes_.empty()) return;
+		if(face_indexes_.empty()) return;
 
 		{	// 頂点バッファの作成
 			std::vector<vbo_t> vbos;
-			vbos.reserve(vertex_.size());
+			vbos.reserve(vertexes_.size());
 			vbos.clear();
-			BOOST_FOREACH(pmd_vertex& v, vertex_) {
+			BOOST_FOREACH(pmd_vertex& v, vertexes_) {
 				vbo_t vbo;
 				vbo.uv = v.uv;
 				vbo.n = v.normal;			
@@ -482,20 +482,20 @@ namespace mdf {
 
 		{ // インデックス・バッファの作成（マテリアル別に作成）
 			std::vector<uint16_t> idxes;
-			idxes.reserve(face_index_.size());
+			idxes.reserve(face_indexes_.size());
 			idxes.clear();
-			for(uint32_t i = 0; i < (face_index_.size() / 3); ++i) {
-				idxes.push_back(face_index_[i * 3 + 0]);
-				idxes.push_back(face_index_[i * 3 + 2]);
-				idxes.push_back(face_index_[i * 3 + 1]);
+			for(uint32_t i = 0; i < (face_indexes_.size() / 3); ++i) {
+				idxes.push_back(face_indexes_[i * 3 + 0]);
+				idxes.push_back(face_indexes_[i * 3 + 2]);
+				idxes.push_back(face_indexes_[i * 3 + 1]);
 			}
 
-			idx_id_.resize(material_.size());
-			glGenBuffers(material_.size(), &idx_id_[0]);
+			idx_id_.resize(materials_.size());
+			glGenBuffers(materials_.size(), &idx_id_[0]);
 
 			uint32_t n = 0;
 			uint32_t in = 0;
-			BOOST_FOREACH(const pmd_material& m, material_) {
+			BOOST_FOREACH(const pmd_material& m, materials_) {
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idx_id_[n]);
 				glBufferData(GL_ELEMENT_ARRAY_BUFFER, m.face_vert_count * sizeof(uint16_t),
 					&idxes[in], GL_STATIC_DRAW);
@@ -508,7 +508,7 @@ namespace mdf {
 		// マテリアル（テクスチャー）の作成と登録
 		img::img_files imf;
 		imf.initialize();
-		BOOST_FOREACH(pmd_material& m, material_) {
+		BOOST_FOREACH(pmd_material& m, materials_) {
 			m.tex_id_ = 0;
 			std::string mats;
 			get_text_(m.texture_file_name, 20, mats);
@@ -556,8 +556,8 @@ namespace mdf {
 	//-----------------------------------------------------------------//
 	void pmd_io::render_surface()
 	{
-		if(vertex_.empty()) return;
-		if(face_index_.empty()) return;
+		if(vertexes_.empty()) return;
+		if(face_indexes_.empty()) return;
 
 		glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
 		glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
@@ -578,7 +578,7 @@ namespace mdf {
 		glInterleavedArrays(GL_T2F_N3F_V3F, 0, 0);
 
 		uint32_t n = 0;
-		BOOST_FOREACH(const pmd_material& m, material_) {
+		BOOST_FOREACH(const pmd_material& m, materials_) {
 			glColor4f(m.diffuse_color[0], m.diffuse_color[1], m.diffuse_color[2], m.alpha);
 			if(m.tex_id_) {
 				glEnable(GL_TEXTURE_2D);
@@ -619,7 +619,7 @@ namespace mdf {
 	//-----------------------------------------------------------------//
 	void pmd_io::render_bone(gl::light& lig)
 	{
-		if(bone_.empty()) return;
+		if(bones_.empty()) return;
 
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
@@ -627,7 +627,7 @@ namespace mdf {
 		glDisable(GL_BLEND);
 		glDisable(GL_TEXTURE_2D);
 
-		BOOST_FOREACH(const pmd_bone& bone, bone_) {
+		BOOST_FOREACH(const pmd_bone& bone, bones_) {
 			if(bone.type == pmd_bone::NO_DISP) {
 				lig.set_material(gl::light::material::turquoise);
 			} else {
@@ -640,10 +640,10 @@ namespace mdf {
 			glPopMatrix();
 
 			uint16_t idx = bone.parent_index;
-			if(idx < bone_.size()) {
+			if(idx < bones_.size()) {
 				glPushMatrix();
 				gl::glTranslate(bone.head_pos);
-				vtx::fvtx sc((bone.head_pos - bone_[idx].head_pos).len());
+				vtx::fvtx sc((bone.head_pos - bones_[idx].head_pos).len());
 				gl::glScale(sc);
 				glCallList(joint_list_id_);
 //				gl::draw_line(bone.head_pos, bone_[idx].head_pos);

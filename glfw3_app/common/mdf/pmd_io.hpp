@@ -28,6 +28,8 @@ namespace mdf {
 		std::string	comment_;
 
 	public:
+		typedef std::vector<uint16_t>	pmd_indexes;
+
 		struct pmd_vertex {
 			vtx::fvtx	pos;
 			vtx::fvtx	normal;
@@ -68,6 +70,7 @@ namespace mdf {
 				return true;
 			}
 		};
+		typedef std::vector<pmd_vertex>	pmd_vertexes;
 
 		struct pmd_material {
 			float	diffuse_color[3];
@@ -122,6 +125,8 @@ namespace mdf {
 
 			pmd_material() : tex_id_(0) { }
 		};
+		typedef std::vector<pmd_material>	pmd_materials;
+
 
 		struct pmd_bone {
 			enum bone_type {
@@ -165,6 +170,8 @@ namespace mdf {
 				return true;
 			}
 		};
+		typedef std::vector<pmd_bone>	pmd_bones;
+
 
 		struct pmd_ik {
 			uint16_t	index;
@@ -190,6 +197,7 @@ namespace mdf {
 				return true;
 			}			
 		};
+		typedef std::vector<pmd_ik>	pmd_iks;
 
 		struct pmd_skin_vert {
 			uint32_t	index;
@@ -226,8 +234,9 @@ namespace mdf {
 				return true;
 			}
 		};
+		typedef std::vector<pmd_skin>	pmd_skins;
 
-		struct pmd_bone_disp_list {
+		struct pmd_bone_disp_name {
 			char	name[50];
 
 			bool get(utils::file_io& fio) {
@@ -235,6 +244,7 @@ namespace mdf {
 				return true;
 			}			
 		};
+		typedef std::vector<pmd_bone_disp_name>	pmd_bone_disp_names;
 
 		struct pmd_bone_disp {
 			uint16_t	index;
@@ -246,29 +256,25 @@ namespace mdf {
 				return true;
 			}
 		};
+		typedef std::vector<pmd_bone_disp>	pmd_bone_disps;
 
 		static void get_text_(const char* src, uint32_t n, std::string& dst);
 
 	private:
-		std::vector<pmd_vertex>	vertex_;
-		vtx::fvtx				vertex_min_;
-		vtx::fvtx				vertex_max_;
+		pmd_vertexes		vertexes_;
+		vtx::fvtx			vertex_min_;
+		vtx::fvtx			vertex_max_;
 
-		std::vector<uint16_t>	face_index_;
+		pmd_indexes			face_indexes_;
 
-		std::vector<pmd_material>	material_;
+		pmd_materials		materials_;
+		pmd_bones			bones_;
+		pmd_iks				iks_;
+		pmd_skins			skins_;
+		pmd_indexes			skin_indexes_;
 
-		std::vector<pmd_bone>	bone_;
-
-		std::vector<pmd_ik>		ik_;
-
-		std::vector<pmd_skin>	skin_;
-
-		std::vector<uint16_t>	skin_index_;
-
-		std::vector<pmd_bone_disp_list>	bone_disp_list_;
-
-		std::vector<pmd_bone_disp>	bone_disp_;
+		pmd_bone_disp_names	bone_disp_names_;
+		pmd_bone_disps		bone_disps_;
 
 		bool parse_vertex_(utils::file_io& fio);
 		bool parse_face_vertex_(utils::file_io& fio);
@@ -277,7 +283,7 @@ namespace mdf {
 		bool parse_ik_(utils::file_io& fio);
 		bool parse_skin_(utils::file_io& fio);
 		bool parse_skin_index_(utils::file_io& fio);
-		bool parse_bone_disp_list_(utils::file_io& fio);
+		bool parse_bone_disp_name_(utils::file_io& fio);
 		bool parse_bone_disp_(utils::file_io& fio);
 		void initialize_();
 		void destroy_();
@@ -442,78 +448,38 @@ namespace mdf {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	マテリアル数の取得
-			@return マテリアル数
-		*/
-		//-----------------------------------------------------------------//
-		uint32_t get_material_num() const { return material_.size(); }
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	マテリアルの取得
-			@param[in]	n	インデックス
+			@brief	マテリアルの参照
 			@return マテリアル
 		*/
 		//-----------------------------------------------------------------//
-		const pmd_material& get_material(uint32_t n) const { return material_[n]; }
+		const pmd_materials& get_materials() const { return materials_; }
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	スキン数の取得
-			@return スキン数
-		*/
-		//-----------------------------------------------------------------//
-		uint32_t get_skin_num() const { return skin_.size(); }
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	スキンの取得
-			@param[in]	n	インデックス
+			@brief	スキンの参照
 			@return スキン
 		*/
 		//-----------------------------------------------------------------//
-		const pmd_skin& get_skin(uint32_t n) const { return skin_[n]; }
+		const pmd_skins& get_skins() const { return skins_; }
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	ボーン数の取得
-			@return ボーン数
-		*/
-		//-----------------------------------------------------------------//
-		uint32_t get_bone_num() const { return bone_.size(); }
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	ボーンの取得
-			@param[in]	n	インデックス
+			@brief	ボーンの参照
 			@return ボーン
 		*/
 		//-----------------------------------------------------------------//
-		const pmd_bone& get_bone(uint32_t n) const { return bone_[n]; }
+		const pmd_bones& get_bones() const { return bones_; }
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	ボーン表示リスト数の取得
-			@return ボーン表示リスト数
+			@brief	ボーン表示名の参照
+			@return ボーン表示名
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t get_bone_disp_list_num() const { return bone_disp_list_.size(); }
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	ボーン表示リストの取得
-			@param[in]	n	インデックス
-			@return ボーン表示リスト
-		*/
-		//-----------------------------------------------------------------//
-		const pmd_bone_disp_list& get_bone_disp_list(uint32_t n) const { return bone_disp_list_[n]; }
+		const pmd_bone_disp_names& get_bone_disp_names() const { return bone_disp_names_; }
 
 	};
 }
