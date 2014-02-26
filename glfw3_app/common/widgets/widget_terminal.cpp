@@ -86,7 +86,12 @@ namespace gui {
 			if(get_param().parents_->type() == get_type_id<widget_frame>()) {
 				widget_frame* w = static_cast<widget_frame*>(at_param().parents_);
 				vtx::srect sr;
-				w->create_draw_area(sr);
+				w->get_draw_area(sr);
+				if(param_.auto_fit_) {
+					vtx::spos ss(sr.size.x / param_.font_width_, sr.size.y / param_.height_);
+					w->set_draw_area(vtx::spos(ss.x * param_.font_width_, ss.y * param_.height_));
+					w->get_draw_area(sr);
+				}
 				if(sr.size != get_rect().size) resize = true;
 				at_rect() = sr;
 				if(resize) {

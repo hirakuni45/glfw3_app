@@ -31,8 +31,10 @@ namespace gui {
 			uint32_t		height_;		///< 行の高さ
 
 			bool			echo_;			///< キー入力とエコー
+			bool			auto_fit_;	   	///< 等幅フォントに対するフレームの最適化
 
-			param() : font_("Inconsolata"), font_width_(0), font_height_(18), height_(18), echo_(true) { }
+			param() : font_("Inconsolata"), font_width_(0), font_height_(18), height_(18),
+				echo_(true), auto_fit_(true) { }
 		};
 
 		widget_director&	wd_;

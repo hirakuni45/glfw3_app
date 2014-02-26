@@ -85,9 +85,7 @@ namespace gui {
 		if(get_param().parents_ && get_state(widget::state::AREA_ROOT)) {
 			if(get_param().parents_->type() == get_type_id<widget_frame>()) {
 				widget_frame* w = static_cast<widget_frame*>(at_param().parents_);
-				vtx::srect r;
-				w->create_draw_area(r);
-				at_rect() = r;
+				w->get_draw_area(at_rect());
 			}
 		}
 
