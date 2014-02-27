@@ -46,15 +46,11 @@ namespace gui {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct value {
-			widget_check*	path_;
+			widget_check*	w_;
 			std::string		data_;
-			bool			open_;
 
-			value() : path_(0), data_(), open_(false)
+			value() : w_(0), data_()
 			{ }
-			void list_all() const {
-				std::cout << "(" << open_ << "): '" << data_ << "'";
-			}
 		};
 		typedef utils::tree_unit<value>	tree_unit;
 
@@ -65,7 +61,7 @@ namespace gui {
 
 		tree_unit			tree_unit_;
 		uint32_t			serial_id_;
-		uint32_t			unit_num_;
+		tree_unit::unit_map_its	tree_unit_its_;
 
 		vtx::fpos			speed_;
 		vtx::fpos			offset_;
@@ -85,7 +81,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_tree(widget_director& wd, const widget::param& bp, const param& p) :
 			wd_(wd), widget(bp), param_(p),
-			tree_unit_(), serial_id_(0), unit_num_(0),
+			tree_unit_(), serial_id_(0),
 			speed_(0.0f), offset_(0.0f), position_(0.0f), select_id_(0), select_it_()
 			{ }
 

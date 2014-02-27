@@ -21,7 +21,7 @@ namespace gui {
 		tree_unit::unit_map_its its;
 		tree_unit_.create_list("", its);
 		BOOST_FOREACH(tree_unit::unit_map_it it, its) {
-			if(!it->second.value.path_) {
+			if(!it->second.value.w_) {
 				gl::IGLcore* igl = gl::get_glcore();
 				gl::fonts& fonts = igl->at_fonts();
 				r.size.x = fonts.get_width(utils::get_file_name(it->first)) + r.size.y + 8;
@@ -40,7 +40,7 @@ namespace gui {
 				} else {
 					wd_.enable(w, false);
 				}
-				it->second.value.path_ = w;
+				it->second.value.w_ = w;
 			}
 		}
 	}
@@ -51,7 +51,7 @@ namespace gui {
 		tree_unit::unit_map_its its;
 		tree_unit_.create_list("", its);
 		BOOST_FOREACH(tree_unit::unit_map_it it, its) {
-			wd_.del_widget(it->second.value.path_);
+			wd_.del_widget(it->second.value.w_);
 		}
 	}
 
@@ -90,11 +90,9 @@ namespace gui {
 		}
 
 		if(param_.single_) {
-			tree_unit::unit_map_its its;
-			tree_unit_.create_list("", its);
 			widget_check* sel = 0;
-			BOOST_FOREACH(tree_unit::unit_map_it it, its) {
-				widget_check* w = it->second.value.path_;
+			BOOST_FOREACH(tree_unit::unit_map_it it, tree_unit_its_) {
+				widget_check* w = it->second.value.w_;
 				if(w == 0) continue;
 				if(tree_unit_.is_directory(it)) continue;
 				if(w->get_select_out()) {
@@ -103,8 +101,8 @@ namespace gui {
 				}
 			}
 			if(sel) {
-				BOOST_FOREACH(tree_unit::unit_map_it it, its) {
-					widget_check* w = it->second.value.path_;
+				BOOST_FOREACH(tree_unit::unit_map_it it, tree_unit_its_) {
+					widget_check* w = it->second.value.w_;
 					if(w == 0) continue;
 					if(tree_unit_.is_directory(it)) continue;
 					if(w != sel) {
@@ -130,52 +128,44 @@ namespace gui {
 		}
 
 		// ツリーが更新されたら、アイテムを作り直す
-		if(tree_unit_.get_serial_id() != serial_id_ ||
-		   tree_unit_.get_unit_num() != unit_num_) {
+		if(tree_unit_.get_serial_id() != serial_id_) {
 			destroy_();
 			create_();
+			tree_unit_.create_list("", tree_unit_its_);
 			serial_id_ = tree_unit_.get_serial_id();
-			unit_num_ = tree_unit_.get_unit_num();
 		}
 
-		tree_unit::unit_map_its its;
-		tree_unit_.create_list("", its);
 		vtx::spos pos(0);
-		std::stack<bool> open_stack;
-		bool open = true;
-		uint32_t nest = 1;
-		bool bdir = false;
-		BOOST_FOREACH(tree_unit::unit_map_it it, its) {
-			widget_check* w = it->second.value.path_;
+		BOOST_FOREACH(tree_unit::unit_map_it it, tree_unit_its_) {
+			widget_check* w = it->second.value.w_;
 			if(w == 0) continue;
-			bool dir = tree_unit_.is_directory(it);
+			bool draw = true;
 			uint32_t n = utils::count_char(it->first, '/');
-			bool draw = open;
-			if(n <= 1) {
-				draw = true;
-				open = w->get_check();
+			if(n > 1) {
+				std::string path = it->first;
+				for(uint32_t i = 1; i < n; ++i) {
+					std::string p;
+					utils::get_file_path(path, p);
+					tree_unit::optional_const_ref opt = tree_unit_.get(p);
+					if(opt) {
+						widget_check* w = (*opt).w_;
+						if(w) {
+							if(!w->get_check()) {
+								draw = false;
+								break;
+							}
+						}
+					}
+					path = p;
+				}
 			}
 			wd_.enable(w, draw);
 			if(draw) {
-				w->at_local_param().draw_box_ = dir;
+				w->at_local_param().draw_box_ = tree_unit_.is_directory(it);
 				pos.x = (n - 1) * param_.height_;
 				w->at_rect().org = pos;
 				pos.y += param_.height_;
 			}
-			if(dir) {
-				open_stack.push(open);
-				if(open) {
-					open = w->get_check();
-				}
-			}
-			if(nest > n || (bdir && dir)) {
-				if(!open_stack.empty()) {
-					open = open_stack.top();
-					open_stack.pop();
-				}
-			}
-			nest = n;
-			bdir = dir;
 		}
 
 		if(get_select_in()) {
@@ -233,12 +223,10 @@ namespace gui {
 				}
 			}
 		}
-//		if(get_select_out()) {
-//		}
 
 		short ofsy = position_.y;
-		BOOST_FOREACH(tree_unit::unit_map_it it, its) {
-			widget_check* w = it->second.value.path_;
+		BOOST_FOREACH(tree_unit::unit_map_it it, tree_unit_its_) {
+			widget_check* w = it->second.value.w_;
 			if(w == 0) continue;
 			w->at_rect().org.y += ofsy;
 		}
@@ -273,7 +261,7 @@ namespace gui {
 		tree_unit::unit_map_its its;
 		tree_unit_.create_list("", its);
 		BOOST_FOREACH(tree_unit::unit_map_it it, its) {
-			widget_check* w = it->second.value.path_;
+			widget_check* w = it->second.value.w_;
 			if(w == 0) continue;
 			
 		}
@@ -299,7 +287,7 @@ namespace gui {
 		tree_unit::unit_map_its its;
 		tree_unit_.create_list("", its);
 		BOOST_FOREACH(tree_unit::unit_map_it it, its) {
-			widget_check* w = it->second.value.path_;
+			widget_check* w = it->second.value.w_;
 			if(w == 0) continue;
 			
 		}
