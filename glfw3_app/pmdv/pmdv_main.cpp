@@ -6,11 +6,33 @@
 //=====================================================================//
 #include <iostream>
 #include <boost/lexical_cast.hpp>
+#include <boost/foreach.hpp>
 #include "core/glcore.hpp"
 #include "gl_fw/glutils.hpp"
 #include "pmdv_main.hpp"
 
 namespace app {
+
+	static void create_bone_path_(const mdf::pmd_io::pmd_bones& bones, uint16_t index, std::string& path) 
+	{
+		using namespace mdf;
+		std::vector<uint16_t> ids;
+		do {
+			const pmd_io::pmd_bone& bone = bones[index];
+			ids.push_back(index);
+			index = bone.parent_index;
+		} while(index != 0xffff) ;
+
+		BOOST_REVERSE_FOREACH(uint16_t idx, ids) {
+			const pmd_io::pmd_bone& bone = bones[idx];
+			std::string s;
+			pmd_io::get_text_(bone.name, sizeof(bone.name), s);
+			if(!s.empty()) {
+				path += '/';
+				path += s;
+			}
+		}
+	}
 
 	void pmdv_main::info_pmd_()
 	{
@@ -25,26 +47,19 @@ namespace app {
 
 		tu.make_directory("/bone");
 		tu.set_current_path("/bone");
-		for(uint32_t i = 0; i < pmd_io_.get_bone_num(); ++i) {
-			const pmd_io::pmd_bone& bone = pmd_io_.get_bone(i);
+		uint16_t idx = 0;
+		BOOST_FOREACH(const pmd_io::pmd_bone& bone, pmd_io_.get_bones()) {
+			std::string path;
+			create_bone_path_(pmd_io_.get_bones(), idx, path);
+// std::cout << path << std::endl;
 			widget_tree::value v;
-			v.data_ = "0";
-			std::string s;
-			pmd_io::get_text_(bone.name, sizeof(bone.name), s);
-			tu.install(s, v);
+			v.data_ = "0";			
+			tu.install(&path[1], v);
+			++idx;
 		}
 
-		tu.make_directory("/bone_disp");
-		tu.set_current_path("/bone");
-		for(uint32_t i = 0; i < pmd_io_.get_bone_num(); ++i) {
-			const pmd_io::pmd_bone& bone = pmd_io_.get_bone(i);
-			widget_tree::value v;
-			v.data_ = "0";
-			std::string s;
-			pmd_io::get_text_(bone.name, sizeof(bone.name), s);
-			tu.install(s, v);
-		}
 
+//		tu.make_directory("/bone_disp");
 	}
 
 
@@ -111,6 +126,9 @@ namespace app {
 		if(filer_) {
 			filer_->load(pre);
 		}
+		if(tree_frame_) {
+			tree_frame_->load(pre);
+		}
 	}
 
 
@@ -143,7 +161,6 @@ namespace app {
 
 			}
 		}
-
 
 
 		if(!wd.update()) {
@@ -208,6 +225,9 @@ namespace app {
 	void pmdv_main::destroy()
 	{
 		sys::preference& pre = director_.at().preference_;
+		if(tree_frame_) {
+			tree_frame_->save(pre);
+		}
 		if(filer_) {
 			filer_->save(pre);
 		}
