@@ -12,9 +12,14 @@
 #include <unistd.h>                
 #include <time.h>
 
+extern "C" {
+	DWORD NvOptimusEnablement = 0x00000001;
+};
+
 namespace gl {
 
 #ifdef WIN32
+
 	//=================================================================//
 	/*!
 		@brief	CPU のマシンサイクルをカウントする（WIN32-API）
