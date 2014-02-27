@@ -77,15 +77,13 @@ namespace utils {
 		unit_map	   	unit_map_;
 
 		uint32_t		serial_id_;
-		uint32_t		units_;
-		uint32_t		directory_;
 
 		std::string		current_path_;
 
 		typedef std::stack<std::string>		string_stack;
 		string_stack	stack_path_;
 
-		bool install_(const std::string& key, const T& value, bool dir)
+		bool install_(const std::string& key, const T& value)
 		{
 			std::string fpath;
 			if(!create_full_path(key, fpath)) {
@@ -99,21 +97,15 @@ namespace utils {
 			for(uint32_t i = 0; i < ss.size(); ++i) {
 				p += '/';
 				p += ss[i];
-
 				unit_t u;
 				u.value = value;
 				u.set_id(serial_id_);
 				std::pair<unit_map_it, bool> ret = unit_map_.insert(unit_pair(p, u));
 				if(ret.second) {
 					++serial_id_;
-					if(i == (ss.size() - 1) && !dir) {
-						++units_;
-					} else {
-						++directory_;
-					}
-					std::string d;
-					if(get_file_path(p, d)) {
-						unit_map_it it = unit_map_.find(d);
+					std::string prev;
+					if(utils::get_file_path(p, prev)) {
+						unit_map_it it = unit_map_.find(prev);
 						if(it != unit_map_.end()) {
 							unit_t& t = it->second;
 							t.install_child(utils::get_file_name(p));
@@ -133,7 +125,7 @@ namespace utils {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		tree_unit() : serial_id_(0), units_(0), directory_(0) { }
+		tree_unit() : serial_id_(0) { }
 
 
 		//-----------------------------------------------------------------//
@@ -155,15 +147,6 @@ namespace utils {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	ユニット数を取得
-			@return ユニット数
-		*/
-		//-----------------------------------------------------------------//
-		uint32_t get_unit_num() const { return units_; }
-
-
-		//-----------------------------------------------------------------//
-		/*!
 			@brief	クリア
 		*/
 		//-----------------------------------------------------------------//
@@ -171,8 +154,6 @@ namespace utils {
 			unit_map_.clear();
 
 			serial_id_ = 0;
-			units_ = 0;
-			directory_ = 0;
 
 			current_path_.clear();
 		}
@@ -210,7 +191,7 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		bool install(const std::string& key, const T& value)
 		{
-			return install_(key, value, false);
+			return install_(key, value);
 		}
 
 
@@ -223,32 +204,30 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		bool erase(const std::string& key)
 		{
-			std::string fullpath;
-			if(!create_full_path(key, fullpath)) {
+			std::string fpath;
+			if(!create_full_path(key, fpath)) {
 				return false;
 			}
 
-			unit_map_it it = unit_map_.find(fullpath);
+			unit_map_it it = unit_map_.find(fpath);
 			if(it != unit_map_.end()) {
 				const unit_t& t = it->second;
 				if(t.keys.empty()) {
 					unit_map_.erase(it);
-					--units_;
 				} else {
 					unit_map_.erase(it);
 					push_current_path();
-					current_path_ = fullpath;
+					current_path_ = fpath;
 					for(strings_cit cit = t.keys.begin(); cit != t.keys.end(); ++cit) {
 						const std::string& key = *cit;
-						std::string fullpath;
-						if(!create_full_path(key, fullpath)) {
+						std::string fpath;
+						if(!create_full_path(key, fpath)) {
 							pop_current_path();
 							return false;
 						}
-						erase(fullpath);
+						erase(fpath);
 					}
 					pop_current_path();
-					--directory_;
 				}
 				return true;
 			} else {
@@ -336,7 +315,7 @@ namespace utils {
 		bool make_directory(const std::string& name)
 		{
 			T value;
-			bool f =  install_(name, value, true);
+			bool f =  install_(name, value);
 		}
 
 
@@ -369,18 +348,18 @@ namespace utils {
 			@return ユニット・オプショナル型を返す
 		*/
 		//-----------------------------------------------------------------//
-		optional_const_ref get(const std::string& key)
+		optional_const_ref get(const std::string& key) const
 		{
-			std::string fullpath;
-			if(!create_full_path(key, fullpath)) {
-				return false;
+			std::string fpath;
+			if(!create_full_path(key, fpath)) {
+				return boost::none;
 			}
 
-			unit_map_it it = unit_map_.find(fullpath);
-			if(it == unit_map_.end()) {
+			unit_map_cit cit = unit_map_.find(fpath);
+			if(cit == unit_map_.end()) {
 				return boost::none;
 			} else {
-				return optional_const_ref(it->second);
+				return optional_const_ref(cit->second.value);
 			}
 		}
 
@@ -394,12 +373,12 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		bool is_directory(const std::string& key) const
 		{
-			std::string fullpath;
-			if(!create_full_path(key, fullpath)) {
+			std::string fpath;
+			if(!create_full_path(key, fpath)) {
 				return false;
 			}
 
-			unit_map_it it = unit_map_.find(fullpath);
+			unit_map_it it = unit_map_.find(fpath);
 			if(it != unit_map_.end()) {
 				return !(it->second.is_childs_empty());
 			} else {
@@ -554,8 +533,6 @@ namespace utils {
 		void swap(tree_unit& src) {
 			unit_map_.swap(src.unit_map_);
 			std::swap(serial_id_, src.serial_id_);
-			std::swap(units_, src.units_);
-			std::swap(directory_, src.directory_);
 			current_path_.swap(src.current_path_);
 			stack_path_.swap(src.stack_path_);
 		}
@@ -569,8 +546,6 @@ namespace utils {
 		tree_unit& operator = (const tree_unit& src) {
 			unit_map_ = src.unit_map_;
 			serial_id_ = src.serial_id_;
-			units_ = src.units_;
-			directory_ = src.directory_;
 			current_path_ = src.current_path_;
 			stack_path_ = src.stack_path_;
 			return *this;
