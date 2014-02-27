@@ -330,7 +330,6 @@ namespace gl {
 		}
 		glfwSwapInterval(1);
 
-
 		{  // Lock キーの初期状態を反映する
 #ifdef WIN32
 			int n = GetKeyboardType(0);
@@ -455,32 +454,27 @@ namespace gl {
 	{
 #ifdef WIN32
 		// ソフト同期
+		double cpuz = get_cpu_clock_() / 1e6;
+		if(cpu_ghz_ < cpuz) cpu_ghz_ = cpuz;
 		if(cpu_ghz_ > 0.0) {
 			double ref = machine_cycle_;
 			machine_cycle_ = rdtsc_();
-			double dt = machine_cycle_ - ref;
-			double w = dt / (cpu_ghz_ * 1e6);
+			double wa = (machine_cycle_ - ref) / (cpu_ghz_ * 1e6);
 			double ft = 1.0 / 60.0;
-			if(ft > w) {
-				useconds_t usec = static_cast<useconds_t>((ft - w) * 1e6);
-		        SetThreadAffinityMask(GetCurrentThread(), 1);
+			if(ft > wa) {
+				useconds_t usec = static_cast<useconds_t>((ft - wa) * 1e6);
 				usleep(usec);
 			}
-			{
-				double ref = frame_ref_;
-				frame_ref_ = machine_cycle_;
-				frame_time_ = (frame_ref_ - ref) / (cpu_ghz_ * 1e6);
-			}
+
+			frame_time_ = wa;
 		}
-
 		frame_count_++;
-
-		double cpuz = get_cpu_clock_() / 1e6;
-		if(cpu_ghz_ < cpuz) cpu_ghz_ = cpuz;
-//		if((frame_count_ % 60) == 0) {
-//			int rate = static_cast<int>((1.0 / frame_time_) + 0.5);
-//			std::cout << cpu_ghz_ << " GHz, Perfrmance Frame Rate: " << rate << std::endl;
-//		}
+#if 0
+		if((frame_count_ % 60) == 0) {
+			int rate = static_cast<int>((1.0 / frame_time_) + 0.5);
+			std::cout << cpu_ghz_ << " GHz, Perfrmance Frame Rate: " << rate << std::endl;
+		}
+#endif
 #endif
 		glfwSwapBuffers(window_);
 	}

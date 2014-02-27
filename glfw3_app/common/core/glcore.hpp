@@ -42,9 +42,7 @@ namespace gl {
 		utils::strings	recv_file_path_;
 
 		uint32_t	frame_count_;
-		double		frame_ref_;
 		double		frame_time_;
-
 		double		machine_cycle_;
 		double		cpu_ghz_;
 		bool		cpu_spd_enable_;
@@ -64,8 +62,8 @@ namespace gl {
 		glcore() : window_(0),
 				   best_size_(0), limit_size_(0), size_(0), locate_(0),
 				   recv_file_id_(0),
-				   frame_count_(0), frame_ref_(0.0), frame_time_(0.0),
-				   machine_cycle_(0.0), cpu_ghz_(0.5),
+				   frame_count_(0), frame_time_(0.0),
+				   machine_cycle_(0.0), cpu_ghz_(0.0),
 				   cpu_spd_enable_(false), swap_ctrl_(false),
 				   exit_signal_(false), full_screen_(false), keyboard_jp_(false) { }
 
