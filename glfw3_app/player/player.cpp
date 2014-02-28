@@ -72,7 +72,8 @@ namespace app {
 		}
 		wp_.text_param_.proportional_ = proportional;
 		wp_.text_param_.placement_.hpt = vtx::placement::holizontal::CENTER;
-		wp_.text_param_.placement_.vpt = vtx::placement::vertical::CENTER;
+		if(font.empty()) wp_.text_param_.placement_.vpt = vtx::placement::vertical::CENTER;
+		else wp_.text_param_.placement_.vpt = vtx::placement::vertical::BOTTOM;
 		wp_.plate_param_.resizeble_ = true;
 		wp_.shift_every_ = true;
 		return wd.add_widget<widget_label>(wp, wp_);
@@ -95,6 +96,7 @@ namespace app {
 		if(!fonts.install_font_type("./res/seg12.ttf", "led")) {
 			std::cerr << "Can't install system TTF font..." << std::endl;
 		}
+		fonts.set_spaceing(6);
 		fonts.set_font_type(cf);
 
 		// サウンド・デコーダーの拡張子設定
