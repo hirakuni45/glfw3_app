@@ -6,12 +6,13 @@
 //=====================================================================//
 #include "core/kfimg_ft2.hpp"
 #include "utils/string_utils.hpp"
+#include <boost/foreach.hpp>
 
 using namespace std;
 
 namespace img {
 
-	static kfimg_ft2* g_kanji_font_image = 0;
+	static kfimg_ft2* kanji_font_image_ = 0;
 
 	//-----------------------------------------------------------------//
 	/*!
@@ -20,8 +21,8 @@ namespace img {
 	//-----------------------------------------------------------------//
 	void create_kfimg()
 	{
-		if(g_kanji_font_image == 0) {
-			g_kanji_font_image = new kfimg_ft2;
+		if(kanji_font_image_ == 0) {
+			kanji_font_image_ = new kfimg_ft2;
 		}
 	}
 
@@ -34,7 +35,7 @@ namespace img {
 	//-----------------------------------------------------------------//
 	Ikfimg* get_kfimg()
 	{
-		Ikfimg* p = dynamic_cast<Ikfimg*>(g_kanji_font_image);
+		Ikfimg* p = dynamic_cast<Ikfimg*>(kanji_font_image_);
 		if(p == 0) {
 ///			std::cout << "Can't create kanji-font-image" << std::endl;
 		}
@@ -48,8 +49,8 @@ namespace img {
 	//-----------------------------------------------------------------//
 	void destroy_kfimg()
 	{
-		delete g_kanji_font_image;
-		g_kanji_font_image = 0;
+		delete kanji_font_image_;
+		kanji_font_image_ = 0;
 	}
 
 
@@ -107,74 +108,91 @@ void get_metrics(wchar_t code)
 
 		face_map_it it = find_face_(name);
 		if(it != face_map_.end()) {
-			alias_ = it->first;
-			face_  = it->second;
+			current_face_ = it;
 			return true;
 		}
 
-		FT_Error error = FT_New_Face(library_, fontfile.c_str(), 0, &face_);
+		FT_Face face;
+		FT_Error error = FT_New_Face(library_, fontfile.c_str(), 0, &face);
 		if(error) {
-			alias_.clear();
+			current_face_ = face_map_.end();
 			return false;
 		}
 
 ///		std::cout << "kfimg install: " << name << ", " << static_cast<int>(face_) << std::endl;
 
-		alias_ = name;
-		install_face_(name, face_);
+		face_t t(face);
 
 		FT_Vector pen;
 		pen.x = pen.y = 0;
-		FT_Set_Transform(face_, &matrix_, &pen);
+		FT_Set_Transform(face, &matrix_, &pen);
+		current_face_ = install_face_(name, t);
 
-		return true;
+		return current_face_ != face_map_.end();
 	}
 
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	フォントのビットマップを作成する(FreeType2 版）
-		@param[in]	w	フォントの横幅
-		@param[in]	h	フォントの高さ（優先）
-		@param[in]	code	対応するコード
-	*/
+		@brief	unicode に対応するビットマップを生成する。
+		@param[in]	size	生成するビットマップのサイズ
+		@param[in]	unicode	生成するビットマップの UNICODE
+	 */
 	//-----------------------------------------------------------------//
-	void kfimg_ft2::create_font_bitmap_(img_gray8& img, const vtx::spos& size, wchar_t code, bool antialias)
+	void kfimg_ft2::create_bitmap(int size, wchar_t unicode)
 	{
-		FT_Error error;
+		if(current_face_ == face_map_.end()) return;
 
-		error = FT_Set_Pixel_Sizes(face_, size.x, size.y);
-
-		// 基準点へのオフセットの計算
-		if(offset_y_.find(size.y) == offset_y_.end()) {
-			int max = 0;
+		// 基準点へのオフセットが無い場合
+		face_t& t = current_face_->second;
+		if(t.atr_map_.find(size) == t.atr_map_.end()) {
+			struct met {
+				int	ofs;
+				int rows;
+			};
+			std::vector<met> mets;
+			int offset = 0;
 			for(int ch = 0x21; ch <= 0x7f; ++ch) {
 				if(ch == 0x3f) continue;
-				FT_Load_Char(face_, ch, FT_LOAD_RENDER);
-				FT_GlyphSlot slot = face_->glyph;
-				int l = static_cast<int>(slot->metrics.horiBearingY / 64.0f);
-				if(max < l) max = l;
+				FT_Set_Pixel_Sizes(t.face_, size, size);
+				FT_Load_Char(t.face_, ch, FT_LOAD_RENDER);
+				FT_GlyphSlot slot = t.face_->glyph;
+				met m;
+				m.ofs = slot->metrics.horiBearingY / 64;
+				FT_Bitmap* bitmap = &slot->bitmap;
+				m.rows = bitmap->rows;
+				mets.push_back(m);
+				if(offset < m.ofs) offset = m.ofs;
 			}
-			if(0) {
-				FT_Load_Char(face_, L'ピ', FT_LOAD_RENDER);
-				FT_GlyphSlot slot = face_->glyph;
-				int l = static_cast<int>(slot->metrics.horiBearingY / 64.0f);
-				float h = (float)slot->metrics.height / 64.0f;
-std::cout << static_cast<int>(l) << ", H: " << h << std::endl;
-				if(max < l) max = l;
+			int height = 0;
+			BOOST_FOREACH(const met& m, mets) {
+				int l = offset - m.ofs + m.rows + 1;
+				if(height < l) height = l;
 			}
-			std::pair<int, int> v(size.y, max);
-// std::cout << max << std::endl;
-			offset_y_.insert(v);
+			atr_t at;
+			at.offset_ = offset;
+			if(height < size) height = size;
+			at.height_ = height;
+			std::pair<int, atr_t> v(size, at);
+/// std::cout << current_face_->first << ", Size: " << size << ", Height: " << at.height_ << std::endl;
+			t.atr_map_.insert(v);
 		}
 
-		if(antialias) {
-			error = FT_Load_Char(face_, code, FT_LOAD_RENDER);
+		const atr_t& at = t.atr_map_[size];
+
+		vtx::spos fs(size, at.height_);
+		img_.create(fs);
+		gray8 g(0);
+		img_.fill(g);
+
+		FT_Error error = FT_Set_Pixel_Sizes(t.face_, size, size);
+		if(antialias_) {
+			error = FT_Load_Char(t.face_, unicode, FT_LOAD_RENDER);
 		} else {
-			error = FT_Load_Char(face_, code, FT_LOAD_MONOCHROME);
+			error = FT_Load_Char(t.face_, unicode, FT_LOAD_MONOCHROME);
 		}
 
-		FT_GlyphSlot slot = face_->glyph;
+		FT_GlyphSlot slot = t.face_->glyph;
 		FT_Bitmap* bitmap = &slot->bitmap;
 
 		metrics_.bitmap_w = static_cast<float>(bitmap->width);
@@ -187,14 +205,15 @@ std::cout << static_cast<int>(l) << ", H: " << h << std::endl;
 		metrics_.vert_y   = static_cast<float>(slot->metrics.vertBearingY) / 64.0f;
 
 		int ox = static_cast<int>(metrics_.hori_x);
-		int oy = offset_y_[size.y] - static_cast<int>(metrics_.hori_y) - 1;
+		int oy = at.offset_ - static_cast<int>(metrics_.hori_y) + 1;
+
 	// グレイスケールでレンダリング出来なかった場合は、モノカラーとなる。
 		if(bitmap->pixel_mode != FT_PIXEL_MODE_MONO) {		// gray-scale 0 to 255
 			for(int j = 0; j < bitmap->rows; j++) {
 				for(int i = 0; i < bitmap->width; i++) {
 					img::gray8 c;
 					c.g = bitmap->buffer[j * bitmap->width + i];
-					img.put_pixel(ox + i, oy + j, c);
+					img_.put_pixel(ox + i, oy + j, c);
 				}
 			}
 		} else {	// monochrome
@@ -204,7 +223,7 @@ std::cout << static_cast<int>(l) << ", H: " << h << std::endl;
 					img::gray8 c;
 					if(bitmap->buffer[bitpos >> 3] & (1 << (~bitpos & 7))) c.g = 255; else c.g = 0;
 					bitpos++;
-					img.put_pixel(ox + i, oy + j, c);
+					img_.put_pixel(ox + i, oy + j, c);
 				}
 				if(bitpos & 7) {
 					bitpos |= 7;
@@ -213,21 +232,4 @@ std::cout << static_cast<int>(l) << ", H: " << h << std::endl;
 			}
 		}
 	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	unicode に対応するビットマップを生成する。
-		@param[in]	size	生成するビットマップのサイズ
-		@param[in]	unicode	生成するビットマップの UNICODE
-	 */
-	//-----------------------------------------------------------------//
-	void kfimg_ft2::create_bitmap(const vtx::spos& size, wchar_t unicode)
-	{
-		img_.create(size);
-		gray8 g(0);
-		img_.fill(g);
-		create_font_bitmap_(img_, size, unicode, antialias_);
-	}
-
 }
