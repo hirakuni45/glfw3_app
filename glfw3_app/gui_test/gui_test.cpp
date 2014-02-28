@@ -122,8 +122,8 @@ namespace app {
 		}
 
 		if(1) {	// チェックボックスのテスト
-			widget::param wp(vtx::srect(20, 350, 130, 30));
-			widget_check::param wp_("Disable");
+			widget::param wp(vtx::srect(20, 350, 130, 40));
+			widget_check::param wp_("Disable-g");
 			wd.add_widget<widget_check>(wp, wp_);
 		}
 
