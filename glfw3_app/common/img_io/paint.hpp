@@ -94,7 +94,7 @@ namespace img {
 		int					round_radius_;
 		std::vector<int>	round_offset_;
 
-		vtx::spos			font_size_;
+		short				font_size_;
 		short				font_space_;
 
 		bool				alpha_blend_;
@@ -212,7 +212,7 @@ namespace img {
 			@param[in]	size	サイズ
 		*/
 		//-----------------------------------------------------------------//
-		void set_font_size(const vtx::spos& size) { font_size_ = size; }
+		void set_font_size(int size) { font_size_ = size; }
 
 
 		//-----------------------------------------------------------------//

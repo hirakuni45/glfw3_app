@@ -414,7 +414,7 @@ namespace img {
 		const font_metrics::metrics& met = kf->get_metrics();
 
 		int w = static_cast<int>(met.width + met.hori_x);
-		for(int yy = 0; yy < font_size_.y; ++yy) {
+		for(int yy = 0; yy < bitmap->get_size().y; ++yy) {
 			for(int xx = 0; xx < w; ++xx) {
 				gray8 g;
 				bitmap->get_pixel(xx, yy, g);
