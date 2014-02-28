@@ -176,7 +176,7 @@ namespace gui {
 					text_(text), font_(),
 					proportional_(true), font_size_(24),
 					fore_color_(fc), shadow_color_(sc), placement_(pl),
-					shadow_offset_(2),
+					shadow_offset_(1),
 					offset_(0) { }
 		};
 
