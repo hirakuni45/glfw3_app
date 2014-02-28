@@ -41,6 +41,8 @@ namespace gl {
 		int				recv_file_id_;
 		utils::strings	recv_file_path_;
 
+		std::string		title_;
+
 		uint32_t	frame_count_;
 		double		frame_time_;
 		double		machine_cycle_;
@@ -62,6 +64,7 @@ namespace gl {
 		glcore() : window_(0),
 				   best_size_(0), limit_size_(0), size_(0), locate_(0),
 				   recv_file_id_(0),
+				   title_(),
 				   frame_count_(0), frame_time_(0.0),
 				   machine_cycle_(0.0), cpu_ghz_(0.0),
 				   cpu_spd_enable_(false), swap_ctrl_(false),

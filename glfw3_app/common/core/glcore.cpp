@@ -359,7 +359,10 @@ namespace gl {
 	void glcore::set_title(const std::string& title)
 	{
 		if(!title.empty()) {
-			glfwSetWindowTitle(window_, title.c_str());
+			if(title_ != title) {
+				glfwSetWindowTitle(window_, title.c_str());
+				title_ = title;
+			}
 		}
 	}
 
