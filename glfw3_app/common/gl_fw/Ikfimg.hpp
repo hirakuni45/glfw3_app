@@ -139,7 +139,7 @@ namespace img {
 			@param[in]	unicode	生成するビットマップの UNICODE
 		 */
 		//-----------------------------------------------------------------//
-		virtual void create_bitmap(const vtx::spos& size, wchar_t unicode) = 0;
+		virtual void create_bitmap(int size, wchar_t unicode) = 0;
 
 
 		//-----------------------------------------------------------------//

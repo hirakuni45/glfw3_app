@@ -437,7 +437,7 @@ namespace gl {
 		*/
 		//-----------------------------------------------------------------//
 		bool install_font(wchar_t code) {
-			kfm_->create_bitmap(vtx::spos(face_->info_.size, face_->info_.size), code);
+			kfm_->create_bitmap(face_->info_.size, code);
 			fcode_map_it it = install_image(code);
 			if(it == face_->fcode_map_.end()) return false;
 			else return true;

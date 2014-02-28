@@ -297,18 +297,18 @@ namespace gl {
 		tmap.met = kfm_->get_metrics();
 		float font_width = tmap.met.width + tmap.met.hori_x + 0.5f;
 		if(code == 0x20) {
-			font_width = static_cast<float>(isz.y / 4);
+ 			font_width = static_cast<float>(isz.y / 4);
 		}
-		if(allocate_font_texture((int)font_width, isz.y, tmap) != true) {
+		if(!allocate_font_texture(static_cast<int>(font_width), isz.y, tmap)) {
 			return face_->fcode_map_.end();
 		}
 
-		::glBindTexture(GL_TEXTURE_2D, tmap.id);
+		glBindTexture(GL_TEXTURE_2D, tmap.id);
 
-		::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 		int level = 0;
 		if(tmap.lcx == 0 && tmap.lcy == 0) {
@@ -343,12 +343,12 @@ namespace gl {
 				}
 			}
 #ifdef WIN32
-			::glTexSubImage2D(GL_TEXTURE_2D, level,
-							  tmap.lcx, tmap.lcy, isz.x, isz.y, GL_RGBA, GL_UNSIGNED_BYTE, rgba.get_img());
+			glTexSubImage2D(GL_TEXTURE_2D, level,
+				tmap.lcx, tmap.lcy, isz.x, isz.y, GL_RGBA, GL_UNSIGNED_BYTE, rgba.get_img());
 #endif
 #ifdef __PPU__
-			::glTexSubImage2D(GL_TEXTURE_2D, level,
-							  tmap.lcx, tmap.lcy, isz.x, isz.y, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, rgba.get_img());
+			glTexSubImage2D(GL_TEXTURE_2D, level,
+				tmap.lcx, tmap.lcy, isz.x, isz.y, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, rgba.get_img());
 #endif
 		}
 
@@ -499,18 +499,17 @@ namespace gl {
 	{
 		fcode_map_cit cit = find_font_code(code);
 		if(cit == face_->fcode_map_.end()) {
-			kfm_->create_bitmap(vtx::spos(face_->info_.size, face_->info_.size), code);
+			kfm_->create_bitmap(face_->info_.size, code);
 			cit = install_image(code);
 		}
 		const tex_map& tmap = cit->second;
 
 		short x  = pos.x;
 		short y  = pos.y;
-		short fw = tmap.w;
 		// 半角文字で、等幅表示の場合、中心に描画
 		if(face_->info_.center && !face_->info_.proportional && code >= 0x20 && code < 0x7f) {
-			if(fw < face_->info_.size) {
-				x += (face_->info_.size - fw) / 2;
+			if(tmap.w < face_->info_.size) {
+				x += (face_->info_.size - tmap.w) / 2;
 			}
 		}
 
@@ -522,19 +521,19 @@ namespace gl {
 //		if(clip.size.y < 0) { clip.org.y -= clip.org.y - m_face->m_info.size; clip.h = -clip.h; }
 
 		short	xt = x;
-		short	xe = x + fw;
+		short	xe = x + tmap.w;
 		short	clip_xe = clip.org.x + clip.size.x;
-		if(xe < clip.org.x) return font_width_(code, fw, tmap.h);	// clip out!
-		else if(clip_xe <= xt) return font_width_(code, fw, tmap.h);	// clip out!
+		if(xe < clip.org.x) return font_width_(code, tmap.w, tmap.h);	// clip out!
+		else if(clip_xe <= xt) return font_width_(code, tmap.w, tmap.h);	// clip out!
 
 		short	yt = y;
-		short	ye = y + face_->info_.size;
+		short	ye = y + tmap.h;
 		short	clip_ye = clip.org.y + clip.size.y;
-		if(ye < clip.org.y) return font_width_(code, fw, tmap.h);	// clip out!
-		else if(clip_ye <= yt) return font_width_(code, fw, tmap.h);	// clip out!
+		if(ye < clip.org.y) return font_width_(code, tmap.w, tmap.h);	// clip out!
+		else if(clip_ye <= yt) return font_width_(code, tmap.w, tmap.h);	// clip out!
 
 		short	ut = 0;
-		short	ue = fw;
+		short	ue = tmap.w;
 		if(xt < clip.org.x && clip.org.x <= xe) {
 			ut = clip.org.x - xt;
 			xt = clip.org.x;
@@ -545,7 +544,7 @@ namespace gl {
 		}
 
 		short	vt = 0;
-		short	ve = face_->info_.size;
+		short	ve = tmap.h;
 		if(yt < clip.org.y && clip.org.y <= ye) {
 			vt = clip.org.y - yt;
 			yt = clip.org.y;
@@ -641,7 +640,7 @@ namespace gl {
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 		glDisableClientState(GL_VERTEX_ARRAY);
 
-		return font_width_(code, fw, tmap.h);
+		return font_width_(code, tmap.w, tmap.h);
 	}
 
 
@@ -656,7 +655,7 @@ namespace gl {
 	{
 		fcode_map_cit cit = find_font_code(code);
 		if(cit == face_->fcode_map_.end()) {
-			kfm_->create_bitmap(vtx::spos(face_->info_.size, face_->info_.size), code);
+			kfm_->create_bitmap(face_->info_.size, code);
 			cit = install_image(code);
 		}
 		const tex_map& tmap = cit->second;
