@@ -58,7 +58,7 @@ namespace app {
 		}
 
 		if(1) {	// イメージのテスト
-			widget::param wp(vtx::srect(400, 20, 500, 250), 0);
+			widget::param wp(vtx::srect(400, 20, 500, 250));
 			img::paint pa;
 			pa.set_fore_color(img::rgba8(0, 255, 0));
 			pa.create(vtx::spos(500, 250), true);
@@ -72,11 +72,11 @@ namespace app {
 			pa.set_fore_color(img::rgba8(240, 40, 50));
 //			pa.fill_polygon(ss);
 			widget_image::param wp_(&pa);
-			wd.add_widget<widget_image>(wp, wp_);
+			image_ = wd.add_widget<widget_image>(wp, wp_);
 		}
 
 		if(1) {	// テキストのテスト
-			widget::param wp(vtx::srect(400, 20, 200, 250), 0);
+			widget::param wp(vtx::srect(40, 50, 200, 250), image_);
 			widget_text::param wp_;
 			wp_.text_param_.text_ = "日本の美しい漢字\nqwertyuiop\nzxcvbnm";
 			wp_.text_param_.placement_.vpt = vtx::placement::vertical::CENTER;
