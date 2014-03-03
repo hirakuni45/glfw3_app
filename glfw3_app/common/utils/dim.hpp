@@ -31,12 +31,12 @@ namespace utils {
 		public:
 			typedef T	value_type;
 			virtual ~dimx() { }
-			void resize(uint32_t s) { array_.resize(s); }
-			uint32_t size() const { return array_.size(); }
-			uint32_t unit_size() const { return sizeof(T); }
-			uint32_t get(uint32_t idx) const { return array_[idx]; }
-			void put(uint32_t idx, uint32_t val) { array_[idx] = val; }
-			void* ptr(uint32_t idx) { return &array_[idx]; } 
+			void resize(uint32_t s) override { array_.resize(s); }
+			uint32_t size() const override { return array_.size(); }
+			uint32_t unit_size() const override { return sizeof(T); }
+			uint32_t get(uint32_t idx) const override { return array_[idx]; }
+			void put(uint32_t idx, uint32_t val) override { array_[idx] = val; }
+			void* ptr(uint32_t idx) override { return &array_[idx]; } 
 		};
 
 		i_dim*		array_;
