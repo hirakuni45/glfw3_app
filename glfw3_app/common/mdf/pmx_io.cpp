@@ -94,7 +94,7 @@ namespace mdf {
 		bool utf16 = (reading_info_.text_encode_type == 0 ? true : false);
 		if(!model_info_.get(fio, utf16)) {
 			return false;
-		}
+ 		}
 //		std::cout << model_info_.name << std::endl;
 //		std::cout << model_info_.comment << std::endl;
 
@@ -112,10 +112,10 @@ namespace mdf {
 			uint32_t num;
 			if(!fio.get(num)) return false;
 ///			std::cout << "Face: " << num << std::endl;
+// std::cout << "Face Index sizeof: " << static_cast<int>(reading_info_.vertex_index_sizeof) << std::endl;
+			faces_.select(reading_info_.vertex_index_sizeof);
 			faces_.resize(num);
-			for(uint32_t i = 0; i < num; ++i) {
-				if(!get_(fio, reading_info_.vertex_index_sizeof, faces_[i])) return false;
-			}
+			if(!fio.read(faces_.ptr(), reading_info_.vertex_index_sizeof, num)) return false;
 		}
 
 		{  // テクスチャ
@@ -127,6 +127,7 @@ namespace mdf {
 				if(!get_text_(fio, textures_[i], reading_info_.text_encode_type)) return false;
 			}
 		}
+
 		{  // 材質
 			uint32_t num;
 			if(!fio.get(num)) return false;
@@ -136,14 +137,15 @@ namespace mdf {
 				if(!materials_[i].get(fio, reading_info_)) return false;
 			}
 		}
-		if(0) {  // ボーン
+
+		{  // ボーン
 			uint32_t num;
 			if(!fio.get(num)) return false;
 			std::cout << "Bone: " << num << std::endl;
-			bones_.resize(num);
-			for(uint32_t i = 0; i < num; ++i) {
-				if(!bones_[i].get(fio, reading_info_)) return false;
-			}
+//			bones_.resize(num);
+//			for(uint32_t i = 0; i < num; ++i) {
+//				if(!bones_[i].get(fio, reading_info_)) return false;
+//			}
 		}
 
 
@@ -194,13 +196,14 @@ namespace mdf {
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}
 
-		{ // インデックス・バッファの作成（マテリアル別に作成）
-			std::vector<uint32_t> idxes;
+		{ // インデックス・バッファの作成
+			utils::dim idxes;
+			idxes.select(faces_.unit_size());
 			idxes.resize(faces_.size());
 			for(uint32_t i = 0; i < (faces_.size() / 3); ++i) {
-				idxes[i * 3 + 0] = faces_[i * 3 + 0];
-				idxes[i * 3 + 1] = faces_[i * 3 + 2];
-				idxes[i * 3 + 2] = faces_[i * 3 + 1];
+				idxes.put(i * 3 + 0, faces_.get(i * 3 + 0));
+				idxes.put(i * 3 + 1, faces_.get(i * 3 + 2));
+				idxes.put(i * 3 + 2, faces_.get(i * 3 + 1));
 			}
 
 			idx_id_.resize(materials_.size());
@@ -210,16 +213,15 @@ namespace mdf {
 			uint32_t in = 0;
 			BOOST_FOREACH(const pmx_material& m, materials_) {
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idx_id_[n]);
-				glBufferData(GL_ELEMENT_ARRAY_BUFFER, m.face_num_ * sizeof(uint32_t),
-					&idxes[in], GL_STATIC_DRAW);
+				glBufferData(GL_ELEMENT_ARRAY_BUFFER, m.face_num_ * idxes.unit_size(),
+					idxes.ptr(in), GL_STATIC_DRAW);
 				in += m.face_num_;
 				++n;
 			}
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 		}
 
-		// テクスチャーの作成と登録
-		{
+		{  // テクスチャーの作成と登録
 			img::img_files imf;
 			imf.initialize();
 			tex_id_.resize(textures_.size());
@@ -272,11 +274,17 @@ namespace mdf {
 		glBindBuffer(GL_ARRAY_BUFFER, vtx_id_);
 		glInterleavedArrays(GL_T2F_N3F_V3F, 0, 0);
 
+		GLenum index_st;
+		if(faces_.unit_size() == 1) index_st = GL_UNSIGNED_BYTE;
+		else if(faces_.unit_size() == 2) index_st = GL_UNSIGNED_SHORT;
+		else if(faces_.unit_size() == 4) index_st = GL_UNSIGNED_INT;
+		else return;
+
 		uint32_t n = 0;
 		BOOST_FOREACH(const pmx_material& m, materials_) {
 			glColor4f(m.diffuse_.r, m.diffuse_.g, m.diffuse_.b, m.diffuse_.a);
 
-			if(m.normal_texture_index_ > 0) {
+			if(m.normal_texture_index_ >= 0 && m.normal_texture_index_ < tex_id_.size()) {
 				glEnable(GL_TEXTURE_2D);
 				glBindTexture(GL_TEXTURE_2D, tex_id_[m.normal_texture_index_]);
 				GLenum edge;
@@ -293,7 +301,7 @@ namespace mdf {
 				glDisable(GL_TEXTURE_2D);
 			}
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idx_id_[n]);
-			glDrawElements(GL_TRIANGLES, m.face_num_, GL_UNSIGNED_INT, 0);
+			glDrawElements(GL_TRIANGLES, m.face_num_, index_st, 0);
 			++n;
 		}
 		glDisable(GL_TEXTURE_2D);

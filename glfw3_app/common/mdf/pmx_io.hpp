@@ -14,6 +14,7 @@
 #include "utils/mtx.hpp"
 #include "utils/quat.hpp"
 #include "utils/file_io.hpp"
+#include "utils/dim.hpp"
 
 namespace mdf {
 
@@ -149,7 +150,6 @@ namespace mdf {
 		};
 		model_info		model_info_;
 
-
 		struct pmx_vertex {
  			vtx::fvtx	position_;
 			vtx::fvtx	normal_;
@@ -263,8 +263,7 @@ namespace mdf {
 		typedef std::vector<pmx_vertex>	pmx_vertexes;
 		pmx_vertexes	vertexes_;
 
-		typedef std::vector<uint32_t> pmx_faces;
-		pmx_faces		faces_;
+		utils::dim		faces_;
 
 		utils::strings	textures_;
 
