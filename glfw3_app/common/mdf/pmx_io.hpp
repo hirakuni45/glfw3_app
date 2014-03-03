@@ -346,6 +346,7 @@ namespace mdf {
 
 
 
+
 			bool get(utils::file_io& fio, const reading_info& info) {
 				if(!get_text_(fio, name_, info.text_encode_type)) return false;
 				if(!get_text_(fio, name_en_, info.text_encode_type)) return false;
