@@ -311,6 +311,11 @@ namespace mdf {
 			idx_id_.clear();
 		}
 
+		if(!tex_id_.empty()) {
+			glDeleteTextures(tex_id_.size(), &tex_id_[0]);
+			tex_id_.clear();
+		}
+
 		glDeleteLists(bone_list_id_, 1);
 	}
 
@@ -506,10 +511,13 @@ namespace mdf {
 		}
 
 		// マテリアル（テクスチャー）の作成と登録
+		tex_id_.resize(materials_.size());
+		glGenTextures(tex_id_.size(), &tex_id_[0]);
+		
 		img::img_files imf;
 		imf.initialize();
+		uint32_t i = 0;
 		BOOST_FOREACH(pmd_material& m, materials_) {
-			m.tex_id_ = 0;
 			std::string mats;
 			get_text_(m.texture_file_name, 20, mats);
 			if(!mats.empty()) {
@@ -524,8 +532,7 @@ namespace mdf {
 					const img::i_img* img = imf.get_image_if();
 					if(img == 0) continue;
 
-					glGenTextures(1, &m.tex_id_);
-					glBindTexture(GL_TEXTURE_2D, m.tex_id_);
+					glBindTexture(GL_TEXTURE_2D, tex_id_[i]);
 					int level = 0;
 					int border = 0;
 					int w = img->get_size().x;
@@ -534,6 +541,7 @@ namespace mdf {
 						GL_RGBA, GL_UNSIGNED_BYTE, img->get_image());
 				}
 			}
+			++i;
 		}
 
 		// Bone ジョイントの作成
@@ -580,9 +588,9 @@ namespace mdf {
 		uint32_t n = 0;
 		BOOST_FOREACH(const pmd_material& m, materials_) {
 			glColor4f(m.diffuse_color[0], m.diffuse_color[1], m.diffuse_color[2], m.alpha);
-			if(m.tex_id_) {
+			if(tex_id_[n]) {
 				glEnable(GL_TEXTURE_2D);
-				glBindTexture(GL_TEXTURE_2D, m.tex_id_);
+				glBindTexture(GL_TEXTURE_2D, tex_id_[n]);
 				GLenum edge;
 				if(m.edge_flag) {
 					edge = GL_CLAMP_TO_EDGE;

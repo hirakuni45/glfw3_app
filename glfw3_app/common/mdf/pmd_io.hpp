@@ -120,10 +120,6 @@ namespace mdf {
 				if(fio.write(texture_file_name, 20) != 20) return false;
 				return true;
 			}
-
-			GLuint	tex_id_;
-
-			pmd_material() : tex_id_(0) { }
 		};
 		typedef std::vector<pmd_material>	pmd_materials;
 
@@ -298,6 +294,8 @@ namespace mdf {
 
 		GLuint	vtx_id_;
 		std::vector<GLuint>	idx_id_;
+
+		std::vector<GLuint>	tex_id_;
 
 		float	bone_joint_size_;
 		GLuint	bone_list_id_;
