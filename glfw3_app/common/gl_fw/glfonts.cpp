@@ -216,11 +216,11 @@ namespace gl {
 	void fonts::restore_matrix()
 	{
 		if(setup_) {
-			::glMatrixMode(GL_TEXTURE);
-			::glLoadIdentity();
+			glMatrixMode(GL_TEXTURE);
+			glLoadIdentity();
 
-			::glMatrixMode(GL_MODELVIEW);
-			::glLoadIdentity();
+			glMatrixMode(GL_MODELVIEW);
+			glLoadIdentity();
 			setup_ = false;
 		}
 	}
