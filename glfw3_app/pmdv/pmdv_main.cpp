@@ -155,8 +155,10 @@ namespace app {
 			if(pmd_io_.load(filer_->get_file())) {
 				info_pmd_();
 				pmd_io_.render_setup();
+				pmx_enable_ = false;
 			} else if(pmx_io_.load(filer_->get_file())) {
-
+				pmx_io_.render_setup();
+				pmx_enable_ = true;
 			} else {
 
 			}
@@ -198,13 +200,18 @@ namespace app {
 			glDisable(GL_BLEND);
 		}
 
-		pmd_io_.render_surface();
-		if(bone_->get_check()) {
-			light_.enable();
-			light_.enable(bone_light_);
-			light_.service();
-			pmd_io_.render_bone(light_);
+		if(pmx_enable_) {
+			pmx_io_.render_surface();
+		} else {
+			pmd_io_.render_surface();
+			if(bone_->get_check()) {
+				light_.enable();
+				light_.enable(bone_light_);
+				light_.service();
+				pmd_io_.render_bone(light_);
+			}
 		}
+
 		light_.enable(false);
 
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
