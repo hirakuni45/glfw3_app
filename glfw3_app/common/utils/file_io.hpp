@@ -559,11 +559,11 @@ namespace utils {
 				}
 			} else {
 				for(uint32_t i = 0; i < size; ++i) {
-					wchar_t ch;
+					uint8_t ch[2];
 					if(!get(ch)) {
 						return i;
 					}
-					pad += ch;
+					pad += (ch[1] << 8) | ch[0];
 				}
 				return size;
 			}
