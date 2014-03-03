@@ -89,14 +89,14 @@ namespace mdf {
 		}
 ///		std::cout << "Appendix UV: " << static_cast<int>(reading_info_.appendix_uv) << std::endl;
 ///		std::cout << "Text Encodng: " << static_cast<int>(reading_info_.text_encode_type) << std::endl;
+///		std::cout << "wchar_t(sizeof): " << static_cast<int>(sizeof(wchar_t)) << std::endl;
 ///		std::cout << "Bone Index Sizeof: " << static_cast<int>(reading_info_.bone_index_sizeof) << std::endl;
 
-		bool utf16 = (reading_info_.text_encode_type == 0 ? true : false);
-		if(!model_info_.get(fio, utf16)) {
+		if(!model_info_.get(fio, reading_info_.text_encode_type)) {
 			return false;
  		}
-//		std::cout << model_info_.name << std::endl;
-//		std::cout << model_info_.comment << std::endl;
+///		std::cout << model_info_.name << std::endl;
+///		std::cout << model_info_.comment << std::endl;
 
 		{  // 頂点データの読み込み
 			uint32_t num;
@@ -141,11 +141,20 @@ namespace mdf {
 		{  // ボーン
 			uint32_t num;
 			if(!fio.get(num)) return false;
-			std::cout << "Bone: " << num << std::endl;
-//			bones_.resize(num);
-//			for(uint32_t i = 0; i < num; ++i) {
-//				if(!bones_[i].get(fio, reading_info_)) return false;
-//			}
+///			std::cout << "Bone: " << num << std::endl;
+			bones_.resize(num);
+			for(uint32_t i = 0; i < num; ++i) {
+				if(!bones_[i].get(fio, reading_info_)) return false;
+			}
+		}
+		{  // モーフ
+			uint32_t num;
+			if(!fio.get(num)) return false;
+			std::cout << "Morph: " << num << std::endl;
+			morphs_.resize(num);
+			for(uint32_t i = 0; i < num; ++i) {
+				if(!morphs_[i].get(fio, reading_info_)) return false;
+			}
 		}
 
 
@@ -256,6 +265,14 @@ namespace mdf {
 		if(vertexes_.empty()) return;
 		if(faces_.empty()) return;
 
+		glMatrixMode(GL_TEXTURE);
+		glLoadIdentity();
+
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+
+		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
 		glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
 		glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
 		glScalef(-1.0f, 1.0f, 1.0f);
@@ -304,7 +321,7 @@ namespace mdf {
 			glDrawElements(GL_TRIANGLES, m.face_num_, index_st, 0);
 			++n;
 		}
-		glDisable(GL_TEXTURE_2D);
+///		glDisable(GL_TEXTURE_2D);
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

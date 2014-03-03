@@ -567,6 +567,14 @@ namespace mdf {
 		if(vertexes_.empty()) return;
 		if(face_indexes_.empty()) return;
 
+		glMatrixMode(GL_TEXTURE);
+		glLoadIdentity();
+
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+
+		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
 		glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
 		glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
 		glScalef(-1.0f, 1.0f, 1.0f);
