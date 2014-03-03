@@ -5,9 +5,7 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include <cstdint>
 #include <vector>
-#include <boost/unordered_map.hpp>
 
 namespace utils {
 
@@ -17,48 +15,130 @@ namespace utils {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class dim {
+		struct i_dim {
+			virtual ~i_dim() { }
+			virtual void resize(uint32_t s) = 0;
+			virtual uint32_t size() const = 0;
+			virtual uint32_t unit_size() const = 0;
+			virtual uint32_t get(uint32_t idx) const = 0;
+			virtual void put(uint32_t idx, uint32_t val) = 0;
+			virtual void* ptr(uint32_t idx) = 0;
+		};
 
-		uint32_t				unit_size_;
-		std::vector<uint8_t>	array_;
+		template <typename T>
+		class dimx : public i_dim {
+			std::vector<T>	array_;
+		public:
+			typedef T	value_type;
+			virtual ~dimx() { }
+			void resize(uint32_t s) { array_.resize(s); }
+			uint32_t size() const { return array_.size(); }
+			uint32_t unit_size() const { return sizeof(T); }
+			uint32_t get(uint32_t idx) const { return array_[idx]; }
+			void put(uint32_t idx, uint32_t val) { array_[idx] = val; }
+			void* ptr(uint32_t idx) { return &array_[idx]; } 
+		};
 
+		i_dim*		array_;
 	public:
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		dim() : unit_size_(1) { }
+		dim() : array_(0) { }
 
-		void set_unit_size(uint32_t us) { unit_size_ = us; }
 
-		uint32_t get_unit_size() const { return unit_size_; }
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	デストラクター
+		*/
+		//-----------------------------------------------------------------//
+		~dim() { delete array_; }
 
-		void create(uint32_t size) { array_.resize(size); }
 
-		void* get_ptr(uint32_t idx) { return &array_[idx * unit_size_]; } 
-
-		uint32_t get(uint32_t idx) {
-			if(unit_size_ == 2) {
-				uint16_t* p = reinterpret_cast<uint16_t*>(&array_[0]);
-				return p[idx];
-			} else if(unit_size_ == 4) {
-				uint32_t* p = reinterpret_cast<uint32_t*>(&array_[0]);
-				return p[idx];
-			} else {
-				return array_[idx];
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ユニットサイズを選択
+			@param[in]	n	ユニットサイズ（１、２，４）
+		*/
+		//-----------------------------------------------------------------//
+		void select(uint32_t n) {
+			delete array_;
+			array_ = 0;
+			if(n == 1) {
+				array_ = new dimx<uint8_t>;
+			} else if(n == 2) {
+				array_ = new dimx<uint16_t>;
+			} else if(n == 4) {
+				array_ = new dimx<uint32_t>;
 			}
 		}
 
-		void put(uint32_t idx, uint32_t data) {
-			if(unit_size_ == 2) {
-				uint16_t* p = reinterpret_cast<uint16_t*>(&array_[0]);
-				p[idx] = data;
-			} else if(unit_size_ == 4) {
-				uint32_t* p = reinterpret_cast<uint32_t*>(&array_[0]);
-				p[idx] = data;
-			} else {
-				array_[idx] = data;
-			}
-		}
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	リサイズ
+			@param[in]	s	サイズ
+		*/
+		//-----------------------------------------------------------------//
+		void resize(uint32_t s) { array_->resize(s); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	要素サイズを返す
+			@return 要素サイズ
+		*/
+		//-----------------------------------------------------------------//
+		uint32_t size() const { return array_->size(); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	要素が空か？
+			@return 要素が空の場合「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool empty() const { return array_->size() == 0; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ユニットサイズを返す
+			@return ユニットサイズ
+		*/
+		//-----------------------------------------------------------------//
+		uint32_t unit_size() const { return array_->unit_size(); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	要素を取得
+			@param[in]	idx	要素位置
+			@return 要素
+		*/
+		//-----------------------------------------------------------------//
+		uint32_t get(uint32_t idx) const { return array_->get(idx); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	要素を設定
+			@param[in]	idx	要素位置
+			@param[in]	val	値
+		*/
+		//-----------------------------------------------------------------//
+		void put(uint32_t idx, uint32_t val) { array_->put(idx, val); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	要素をポインターを取得
+			@param[in]	idx	要素位置
+			@return 要素ポインター
+		*/
+		//-----------------------------------------------------------------//
+		void* ptr(uint32_t idx = 0) { return array_->ptr(idx); }
 	};
 }
