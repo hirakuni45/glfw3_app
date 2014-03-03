@@ -669,4 +669,37 @@ namespace mdf {
 
 		glDisable(GL_CULL_FACE);
 	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	ボーンのフルパスを生成
+		@param[in]	index	インデックス
+		@param[out]	path	フル・パスを受け取る参照	
+	*/
+	//-----------------------------------------------------------------//
+	bool pmd_io::create_bone_path(uint32_t index, std::string& path)
+	{
+		if(index >= bones_.size()) return false;
+
+		using namespace mdf;
+		std::vector<uint16_t> ids;
+		do {
+			const pmd_bone& bone = bones_[index];
+			ids.push_back(index);
+			index = bone.parent_index;
+		} while(index != 0xffff) ;
+
+		BOOST_REVERSE_FOREACH(uint16_t idx, ids) {
+			const pmd_bone& bone = bones_[idx];
+			std::string s;
+			pmd_io::get_text_(bone.name, sizeof(bone.name), s);
+			if(!s.empty()) {
+				path += '/';
+				path += s;
+			}
+		}
+		return true;
+	}
+
 }

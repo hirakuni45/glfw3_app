@@ -331,5 +331,35 @@ namespace mdf {
 		glPopMatrix();
 	}
 
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	ボーンのフルパスを生成
+		@param[in]	index	ボーンのインデックス
+		@param[out]	path	フル・パスを受け取る参照	
+	*/
+	//-----------------------------------------------------------------//
+	bool pmx_io::create_bone_path(uint32_t index, std::string& path)
+	{
+		if(index >= bones_.size()) return false;
+
+		using namespace mdf;
+		std::vector<int32_t> ids;
+		int32_t ix = static_cast<int32_t>(index);
+		do {
+			const pmx_bone& bone = bones_[ix];
+			ids.push_back(ix);
+			ix = bone.parent_index_;
+		} while(ix >= 0) ;
+
+		BOOST_REVERSE_FOREACH(uint32_t idx, ids) {
+			const pmx_bone& bone = bones_[idx];
+			if(!bone.name_.empty()) {
+				path += '/';
+				path += bone.name_;
+			}
+		}
+		return true;
+	}
 }
 

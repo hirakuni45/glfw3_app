@@ -479,5 +479,15 @@ namespace mdf {
 		//-----------------------------------------------------------------//
 		const pmd_bone_disp_names& get_bone_disp_names() const { return bone_disp_names_; }
 
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ボーンのフルパスを生成
+			@param[in]	index	インデックス
+			@param[out]	path	フル・パスを受け取る参照	
+		*/
+		//-----------------------------------------------------------------//
+		bool create_bone_path(uint32_t index, std::string& path);
+
 	};
 }

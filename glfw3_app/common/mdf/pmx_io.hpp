@@ -334,7 +334,7 @@ namespace mdf {
 
 			vtx::fvtx		position_;
 
-			int32_t			parents_index_;
+			int32_t			parent_index_;
 
 			int32_t	   		level_;
 
@@ -370,8 +370,8 @@ namespace mdf {
 			vtx::fvtx	bone_offset_;
 			int32_t		bone_index_;
 
-			int32_t		parents_bone_index_;
-			float		parents_bone_gain_;
+			int32_t		parent_bone_index_;
+			float		parent_bone_gain_;
 
 			vtx::fvtx	axis_direction_;
 
@@ -426,7 +426,7 @@ namespace mdf {
 				if(!get_text_(fio, name_, info.text_encode_type)) return false;
 				if(!get_text_(fio, name_en_, info.text_encode_type)) return false;
 				if(!fio.get(position_)) return false;
-				if(!get_(fio, info.bone_index_sizeof, parents_index_)) return false;
+				if(!get_(fio, info.bone_index_sizeof, parent_index_)) return false;
 				if(!fio.get(level_)) return false;
 				if(!flags_.get(fio)) return false;
 				if(flags_.test(flags::CONECTION)) {
@@ -437,11 +437,11 @@ namespace mdf {
 					bone_index_ = -1;
 				}
 				if(flags_.test(flags::ROTATE_) || flags_.test(flags::MOVE_)) {
-					if(!get_(fio, info.bone_index_sizeof, parents_bone_index_)) return false;
-					if(!fio.get(parents_bone_gain_)) return false;
+					if(!get_(fio, info.bone_index_sizeof, parent_bone_index_)) return false;
+					if(!fio.get(parent_bone_gain_)) return false;
 				} else {
-					parents_bone_index_ = -1;
-					parents_bone_gain_ = 0.0f;
+					parent_bone_index_ = -1;
+					parent_bone_gain_ = 0.0f;
 				}
 				if(flags_.test(flags::AXIS_LOCK)) {
 					if(!fio.get(axis_direction_)) return false;
@@ -466,7 +466,7 @@ namespace mdf {
 				return true;
 			}
 
-			pmx_bone() : bone_offset_(0.0f), bone_index_(-1), parents_bone_index_(-1), parents_bone_gain_(0.0f),
+			pmx_bone() : bone_offset_(0.0f), bone_index_(-1), parent_bone_index_(-1), parent_bone_gain_(0.0f),
 				axis_direction_(0.0f), axis_x_directioon_(0.0f), axis_z_directioon_(0.0f),
 				modify_ext_key_(0), ik_data_()
 			{ }
@@ -605,6 +605,25 @@ namespace mdf {
 		*/
 		//-----------------------------------------------------------------//
 		void render_surface();
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ボーンの参照
+			@return ボーン
+		*/
+		//-----------------------------------------------------------------//
+		const pmx_bones& get_bones() const { return bones_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ボーンのフルパスを生成
+			@param[in]	index	ボーンのインデックス
+			@param[out]	path	フル・パスを受け取る参照	
+		*/
+		//-----------------------------------------------------------------//
+		bool create_bone_path(uint32_t index, std::string& path);
 
 	};
 }
