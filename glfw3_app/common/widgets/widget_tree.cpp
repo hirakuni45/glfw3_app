@@ -20,6 +20,7 @@ namespace gui {
 		r.size.y = param_.height_;
 		tree_unit::unit_map_its its;
 		tree_unit_.create_list("", its);
+
 		BOOST_FOREACH(tree_unit::unit_map_it it, its) {
 			if(!it->second.value.w_) {
 				gl::IGLcore* igl = gl::get_glcore();
