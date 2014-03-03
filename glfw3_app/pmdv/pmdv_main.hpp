@@ -43,6 +43,7 @@ namespace app {
 		gl::light::handle	bone_light_;
 
 		void info_pmd_();
+		void info_pmx_();
 
 	public:
 		//-----------------------------------------------------------------//

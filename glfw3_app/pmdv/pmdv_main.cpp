@@ -13,27 +13,6 @@
 
 namespace app {
 
-	static void create_bone_path_(const mdf::pmd_io::pmd_bones& bones, uint16_t index, std::string& path) 
-	{
-		using namespace mdf;
-		std::vector<uint16_t> ids;
-		do {
-			const pmd_io::pmd_bone& bone = bones[index];
-			ids.push_back(index);
-			index = bone.parent_index;
-		} while(index != 0xffff) ;
-
-		BOOST_REVERSE_FOREACH(uint16_t idx, ids) {
-			const pmd_io::pmd_bone& bone = bones[idx];
-			std::string s;
-			pmd_io::get_text_(bone.name, sizeof(bone.name), s);
-			if(!s.empty()) {
-				path += '/';
-				path += s;
-			}
-		}
-	}
-
 	void pmdv_main::info_pmd_()
 	{
 		using namespace gui;
@@ -47,19 +26,41 @@ namespace app {
 
 		tu.make_directory("/bone");
 		tu.set_current_path("/bone");
-		uint16_t idx = 0;
-		BOOST_FOREACH(const pmd_io::pmd_bone& bone, pmd_io_.get_bones()) {
+
+		for(uint32_t i = 0; i < pmd_io_.get_bones().size(); ++i) {
 			std::string path;
-			create_bone_path_(pmd_io_.get_bones(), idx, path);
+			pmd_io_.create_bone_path(i, path);
 // std::cout << path << std::endl;
 			widget_tree::value v;
 			v.data_ = "0";			
 			tu.install(&path[1], v);
-			++idx;
 		}
 
-
 //		tu.make_directory("/bone_disp");
+	}
+
+
+	void pmdv_main::info_pmx_()
+	{
+		using namespace gui;
+		using namespace mdf;
+		{	// 廃棄
+			widget_tree::tree_unit t;
+			t.swap(tree_->at_tree_unit());
+		}
+
+		widget_tree::tree_unit& tu = tree_->at_tree_unit();
+
+		tu.make_directory("/bone");
+		tu.set_current_path("/bone");
+
+		for(uint32_t i = 0; i < pmx_io_.get_bones().size(); ++i) {
+			std::string path;
+			pmx_io_.create_bone_path(i, path);
+			widget_tree::value v;
+			v.data_ = "0";			
+			tu.install(&path[1], v);
+		}
 	}
 
 
@@ -157,6 +158,7 @@ namespace app {
 				pmd_io_.render_setup();
 				pmx_enable_ = false;
 			} else if(pmx_io_.load(filer_->get_file())) {
+				info_pmx_();
 				pmx_io_.render_setup();
 				pmx_enable_ = true;
 			} else {
