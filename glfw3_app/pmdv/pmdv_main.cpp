@@ -181,8 +181,6 @@ namespace app {
 		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 		gl::glColor(img::rgbaf(1.0f));
 
-		director_.at().widget_director_.service();
-
 		camera_.service();
 
 // glActiveTexture(0);
@@ -220,6 +218,7 @@ namespace app {
 		glDisable(GL_DEPTH_TEST);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+		director_.at().widget_director_.service();
 		director_.at().widget_director_.render();
 	}
 
