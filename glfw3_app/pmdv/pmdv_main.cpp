@@ -85,23 +85,26 @@ namespace app {
 		{	// ツールパレット
 			widget::param wp(vtx::srect(20, 20, 150, 350));
 			widget_frame::param wp_;
+			wp_.plate_param_.set_caption(12);
 			tools_ = wd.add_widget<widget_frame>(wp, wp_);
 			tools_->set_state(gui::widget::state::SIZE_LOCK);
 		}
+		short h = 12 + 10;
 		{	// ファイラー起動ボタン
-			widget::param wp(vtx::srect(10, 10, 100, 40), tools_);
+			widget::param wp(vtx::srect(10, h, 100, 40), tools_);
+			h += 40 + 10;
 			widget_button::param wp_("開く");
 			fopen_ = wd.add_widget<widget_button>(wp, wp_);
 		}
-		short h = 60;
 		{	// Grid、On/Off
 			widget::param wp(vtx::srect(10, h, 150, 30), tools_);
+			h += 30 + 10;
 			widget_check::param wp_("Grid", true);
 			grid_ = wd.add_widget<widget_check>(wp, wp_);
-			h += 40;
 		}
 		{	// ボーン、On/Off
 			widget::param wp(vtx::srect(10, h, 150, 30), tools_);
+			h += 30 + 10;
 			widget_check::param wp_("ボーン");
 			bone_ = wd.add_widget<widget_check>(wp, wp_);
 		}
@@ -118,6 +121,19 @@ namespace app {
 			tree_ = wd.add_widget<widget_tree>(wp, wp_);
 		}
 
+		{	// ターミナル
+			widget::param wp(vtx::srect(100, 400, 200, 200));
+			widget_frame::param wp_;
+			wp_.plate_param_.set_caption(12);
+			terminal_frame_ = wd.add_widget<widget_frame>(wp, wp_);
+		}
+		{
+			widget::param wp(vtx::srect(0), terminal_frame_);
+			widget_terminal::param wp_;
+			terminal_ = wd.add_widget<widget_terminal>(wp, wp_);
+		}
+
+
 		// ボーン表示用ライトの設定
 		bone_light_ = light_.create();
 		light_.set_position(bone_light_, vtx::fvtx(5.0f, 5.0f, 5.0f));
@@ -129,6 +145,9 @@ namespace app {
 		}
 		if(tree_frame_) {
 			tree_frame_->load(pre);
+		}
+		if(terminal_frame_) {
+			terminal_frame_->load(pre);
 		}
 	}
 
@@ -233,6 +252,9 @@ namespace app {
 	void pmdv_main::destroy()
 	{
 		sys::preference& pre = director_.at().preference_;
+		if(terminal_frame_) {
+			terminal_frame_->save(pre);
+		}
 		if(tree_frame_) {
 			tree_frame_->save(pre);
 		}
