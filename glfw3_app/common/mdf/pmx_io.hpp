@@ -91,7 +91,6 @@ namespace mdf {
 			return true;
 		}
 
-
 		float	version_;
 
 		struct reading_info {
@@ -123,6 +122,12 @@ namespace mdf {
 		};
 		reading_info	reading_info_;
 
+	public:
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	PMX モデル情報
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct model_info {
 			std::string		name;
 			std::string		name_en;
@@ -144,8 +149,13 @@ namespace mdf {
 				return true;
 			}
 		};
-		model_info		model_info_;
 
+
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	PMX 頂点情報
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct pmx_vertex {
  			vtx::fvtx	position_;
 			vtx::fvtx	normal_;
@@ -257,12 +267,13 @@ namespace mdf {
 			~pmx_vertex() { delete weight_; }
 		};
 		typedef std::vector<pmx_vertex>	pmx_vertexes;
-		pmx_vertexes	vertexes_;
 
-		utils::dim		faces_;
 
-		utils::strings	textures_;
-
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	PMX マテリアル情報
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct pmx_material {
 			std::string		name_;
 			std::string		name_en_;
@@ -326,16 +337,19 @@ namespace mdf {
 			}
 		};
 		typedef std::vector<pmx_material>	pmx_materials;
-		pmx_materials	materials_;
 
+
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	PMX ボーン情報
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct pmx_bone {
 			std::string		name_;
 			std::string		name_en_;
 
 			vtx::fvtx		position_;
-
 			int32_t			parent_index_;
-
 			int32_t	   		level_;
 
 			struct flags {
@@ -472,9 +486,15 @@ namespace mdf {
 			{ }
 		};
 		typedef std::vector<pmx_bone>	pmx_bones;
-		pmx_bones		bones_;
 
+
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	PMX モーフ情報
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct pmx_morph {
+
 
 
 			bool get(utils::file_io& fio, const reading_info& info) {
@@ -482,6 +502,15 @@ namespace mdf {
 			}
 		};
 		typedef std::vector<pmx_morph>	pmx_morphs;
+
+	private:
+
+		model_info		model_info_;
+		pmx_vertexes	vertexes_;
+		utils::dim		faces_;
+		utils::strings	textures_;
+		pmx_materials	materials_;
+		pmx_bones		bones_;
 		pmx_morphs		morphs_;
 
 		std::string		current_path_;
