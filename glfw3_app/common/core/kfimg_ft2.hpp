@@ -92,7 +92,7 @@ namespace img {
 			@brief	初期化
 		 */
 		//-----------------------------------------------------------------//
-		void initialize() {
+		void initialize() override {
 			FT_Error error = FT_Init_FreeType(&library_);
 			if(error) {
 				// throw error handling...
@@ -115,7 +115,7 @@ namespace img {
 			@return 成功した場合は「true」
 		 */
 		//-----------------------------------------------------------------//
-		bool install_font_type(const std::string& fontfile, const std::string& alias = "");
+		bool install_font_type(const std::string& fontfile, const std::string& alias = "") override;
 
 
 		//-----------------------------------------------------------------//
@@ -125,7 +125,7 @@ namespace img {
 			@return 正常なら「true」
 		 */
 		//-----------------------------------------------------------------//
-		bool set_font(const std::string& alias) {
+		bool set_font(const std::string& alias) override {
 			face_map_it it = find_face_(alias);
 			if(it != face_map_.end()) {
 				current_face_ = it;
@@ -145,7 +145,7 @@ namespace img {
 			@return フォントの別名を返す
 		 */
 		//-----------------------------------------------------------------//
-		const std::string& get_font() const {
+		const std::string& get_font() const override {
 			static std::string tmp;
 			if(current_face_ == face_map_.end()) return tmp;
 			return current_face_->first;
@@ -159,7 +159,7 @@ namespace img {
 			@return フォントがインストール済みの場合は「true」
 		 */
 		//-----------------------------------------------------------------//
-		bool find_font(const std::string& alias) const {
+		bool find_font(const std::string& alias) const override {
 			face_map_cit cit = face_map_.find(alias);
 			if(cit != face_map_.end()) {
 				return true;
@@ -176,7 +176,7 @@ namespace img {
 			@return 正常なら「true」
 		 */
 		//-----------------------------------------------------------------//
-		bool delete_font(const std::string& alias) {
+		bool delete_font(const std::string& alias) override {
 			face_map_it it = find_face_(alias);
 			if(it != face_map_.end()) {
 				FT_Done_Face(it->second.face_);
@@ -195,7 +195,7 @@ namespace img {
 								「false」 を指定すると、アンチエリアスし無効
 		 */
 		//-----------------------------------------------------------------//
-		void set_antialias(bool value = true) { antialias_ = value; }
+		void set_antialias(bool value = true) override { antialias_ = value; }
 
 
 		//-----------------------------------------------------------------//
@@ -205,7 +205,7 @@ namespace img {
 			@param[in]	unicode	生成するビットマップの UNICODE
 		 */
 		//-----------------------------------------------------------------//
-		void create_bitmap(int size, wchar_t unicode);
+		void create_bitmap(int size, wchar_t unicode) override;
 
 
 		//-----------------------------------------------------------------//
@@ -214,7 +214,7 @@ namespace img {
 			@return	ビットマップイメージの参照
 		 */
 		//-----------------------------------------------------------------//
-		const i_img* get_img() const { return dynamic_cast<const i_img*>(&img_); }
+		const i_img* get_img() const override { return dynamic_cast<const i_img*>(&img_); }
 
 
 		//-----------------------------------------------------------------//
@@ -223,7 +223,7 @@ namespace img {
 			@return	metrics 構造体
 		 */
 		//-----------------------------------------------------------------//
-		const font_metrics::metrics& get_metrics() const { return metrics_; }
+		const font_metrics::metrics& get_metrics() const override { return metrics_; }
 
 	};
 
