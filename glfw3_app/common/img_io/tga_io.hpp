@@ -49,7 +49,7 @@ namespace img {
 			@return ファイル拡張子の文字列
 		*/
 		//-----------------------------------------------------------------//
-		const char* get_file_ext() const { return "tga"; }
+		const char* get_file_ext() const override { return "tga"; }
 
 
 		//-----------------------------------------------------------------//
@@ -60,7 +60,7 @@ namespace img {
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool probe(utils::file_io& fin);
+		bool probe(utils::file_io& fin) override;
 
 
 		//-----------------------------------------------------------------//
@@ -71,7 +71,7 @@ namespace img {
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool info(utils::file_io& fin, img::img_info& fo);
+		bool info(utils::file_io& fin, img::img_info& fo) override;
 
 
 		//-----------------------------------------------------------------//
@@ -82,7 +82,7 @@ namespace img {
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool load(utils::file_io& fin, const std::string& opt = "");
+		bool load(utils::file_io& fin, const std::string& opt = "") override;
 
 
 		//-----------------------------------------------------------------//
@@ -94,7 +94,7 @@ namespace img {
 			@return エラーがあれば「false」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(utils::file_io& fout, const std::string& opt = "rle");
+		bool save(utils::file_io& fout, const std::string& opt = "rle") override;
 
 
 		//-----------------------------------------------------------------//
@@ -103,7 +103,7 @@ namespace img {
 			@return	イメージインターフェース
 		*/
 		//-----------------------------------------------------------------//
-		const i_img* get_image_if() const {
+		const i_img* get_image_if() const override {
 			if(!idx_.empty()) {
 				return dynamic_cast<const i_img*>(&idx_);
 			} else if(!img_.empty()) {
@@ -120,7 +120,7 @@ namespace img {
 			@param[in]	imf	イメージインターフェース
 		*/
 		//-----------------------------------------------------------------//
-		void set_image_if(const i_img* imf) { imf_ = imf; }
+		void set_image_if(const i_img* imf) override { imf_ = imf; }
 
 
 		//-----------------------------------------------------------------//
@@ -128,7 +128,7 @@ namespace img {
 			@brief	廃棄
 		*/
 		//-----------------------------------------------------------------//
-		void destroy() { imf_ = 0; idx_.destroy(); img_.destroy(); }
+		void destroy() override { imf_ = 0; idx_.destroy(); img_.destroy(); }
 
 	};
 }
