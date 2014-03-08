@@ -95,7 +95,7 @@ namespace gui {
 				if(wp.state_[widget::state::CLIP_PARENTS]) {
 					draw_mobj(wd_, objh_, wp.clip_);
 				} else {
-					wd_.at_mobj().draw(objh_, gl::mobj::attribute::normal, 0, 0);
+					wd_.at_mobj().draw(objh_, gl::mobj::attribute::normal, vtx::spos(0));
 				}
 			}
 		} else if(param_.mobj_ && param_.mobj_handle_) {
@@ -108,8 +108,7 @@ namespace gui {
 						mo.setup_matrix(wp.clip_.size.x, wp.clip_.size.y);
 				}
 				glScale(param_.scale_);
-				mo.draw(param_.mobj_handle_, gl::mobj::attribute::normal,
-					param_.offset_.x, param_.offset_.y, param_.linear_);
+				mo.draw(param_.mobj_handle_, gl::mobj::attribute::normal, param_.offset_, param_.linear_);
 			}
 		}
 		glPopMatrix();

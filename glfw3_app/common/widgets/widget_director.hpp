@@ -39,18 +39,24 @@ namespace gui {
 			gl::mobj::handle	un_radio_;	///< ラジオボタン解除
 			gl::mobj::handle	to_radio_;	///< ラジオボタン選択
 
-			gl::mobj::handle	minus_box_;	///< マイナス
-			gl::mobj::handle	plus_box_;	///< プラス
+			gl::mobj::handle	minus_box_;	///< マイナス箱
+			gl::mobj::handle	plus_box_;	///< プラス箱
 
 			gl::mobj::handle	up_box_;	///< up arrow
 			gl::mobj::handle	down_box_;	///< down arrow
 			gl::mobj::handle	left_box_;	///< left arrow
 			gl::mobj::handle	right_box_;	///< right arrow
 
+			gl::mobj::handle	VR_junction_;	///< 垂直、右、交差点（ト）
+			gl::mobj::handle	R_junction_;	///< 右、交差点（L）
+			gl::mobj::handle	V_line_;	  	///< 縦線（｜）
+			gl::mobj::handle	H_line_;		///< 横線（―）
+
 			share_img() : un_check_(0), to_check_(0),
 				un_radio_(0), to_radio_(0),
 				minus_box_(0), plus_box_(0),
-				up_box_(0), down_box_(0), left_box_(0), right_box_(0)
+				up_box_(0), down_box_(0), left_box_(0), right_box_(0),
+				VR_junction_(0), R_junction_(0), V_line_(0), H_line_(0)
 			{ }
 		};
 

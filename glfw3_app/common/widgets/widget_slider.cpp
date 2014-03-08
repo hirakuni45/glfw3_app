@@ -175,11 +175,10 @@ namespace gui {
 			if(wp.state_[widget::state::CLIP_PARENTS]) {
 				draw_mobj(wd_, base_h_, wp.clip_);
 			} else {
-				wd_.at_mobj().draw(base_h_, gl::mobj::attribute::normal, 0, 0);
+				wd_.at_mobj().draw(base_h_, gl::mobj::attribute::normal, vtx::spos(0));
 			}
 
-			wd_.at_mobj().draw(hand_h_, gl::mobj::attribute::normal,
-				handle_offset_.x, handle_offset_.y);
+			wd_.at_mobj().draw(hand_h_, gl::mobj::attribute::normal, handle_offset_);
 			glPopMatrix();
 			glViewport(0, 0, size.x, size.y);
 		}

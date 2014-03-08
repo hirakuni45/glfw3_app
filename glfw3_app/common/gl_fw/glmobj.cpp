@@ -576,13 +576,12 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	モーションオブジェクトのイメージを更新
-		@param[in]	h		ハンドル
-		@param[in]	src		ソース、イメージインターフェース
-		@param[in]	dst_x	ディスとネーションの X オフセット
-		@param[in]	dst_y	ディスとネーションの Y オフセット
+		@param[in]	h	ハンドル
+		@param[in]	src	ソース、イメージインターフェース
+		@param[in]	dst	ディスとネーションのオフセット
 	 */
 	//-----------------------------------------------------------------//
-	void mobj::copy_image(handle h, const img::i_img* src, int dst_x, int dst_y)
+	void mobj::copy_image(handle h, const img::i_img* src, const vtx::spos& dst)
 	{
 		const i_img* imif = src;
 		// RGBA8 以外の画像タイプなら、一旦 RGBA8 形式で画像を作成。
@@ -595,29 +594,29 @@ namespace gl {
 
 		const obj* m = objs_[h];
 		while(m != 0) {
-			::glBindTexture(GL_TEXTURE_2D, m->id);
+			glBindTexture(GL_TEXTURE_2D, m->id);
 			int level = 0;
 //			if(mop->link == 0 && mop->w >= imif->get_width() && mop->h >= imif->get_height()) {
-				::glTexSubImage2D(GL_TEXTURE_2D, level,
-								  m->tx + dst_x, m->ty + dst_y,
-								  imif->get_size().x, imif->get_size().y,
-								  GL_RGBA, GL_UNSIGNED_BYTE, imif->get_image());
+				glTexSubImage2D(GL_TEXTURE_2D, level, m->tx + dst.x, m->ty + dst.y,
+								imif->get_size().x, imif->get_size().y,
+								GL_RGBA, GL_UNSIGNED_BYTE, imif->get_image());
 //			}
 			m = m->link;
 		}
 		::glFlush();
 	}
 
-	static void tex_para(bool linear)
+
+	static void tex_para_(bool linear)
 	{
-		::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		if(linear) {
-			::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		} else {
-			::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		}
 	}
 
@@ -626,12 +625,11 @@ namespace gl {
 		@brief	モーション・オブジェクトを描画する。
 		@param[in]	h	ハンドル
 		@param[in]	atr	アトリビュート
-		@param[in]	xx	描画位置 X
-		@param[in]	yy	描画位置 Y
+		@param[in]	pos	描画位置
 		@param[in]	linear	「true」ならリニアフィルター
 	 */
 	//-----------------------------------------------------------------//
-	void mobj::draw(handle h, attribute::type atr, short xx, short yy, bool linear)
+	void mobj::draw(handle h, attribute::type atr, const vtx::spos& pos, bool linear)
 	{
 		if(h == 0 || h >= objs_.size()) return;
 
@@ -647,19 +645,19 @@ namespace gl {
 		do {
 			short xp;
 			if(hf) {
-				xp = xx + m->oxn;
+				xp = pos.x + m->oxn;
 			} else {
-				xp = xx + m->oxp;
+				xp = pos.x + m->oxp;
 			}
 			short yp;
 			if(vf) {
-				yp = yy + m->oyn;
+				yp = pos.y + m->oyn;
 			} else {
-				yp = yy + m->oyp;
+				yp = pos.y + m->oyp;
 			}
 			::glBindTexture(GL_TEXTURE_2D, m->id);
 
-			tex_para(linear);
+			tex_para_(linear);
 
 			spos vlist[4];
 			spos tlist[4];
@@ -710,13 +708,13 @@ namespace gl {
 				vlist[2].set(   xp + m->dw,    yp);
 				break;
 			}
-			::glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-			::glEnableClientState(GL_VERTEX_ARRAY);
-			::glTexCoordPointer(2, GL_SHORT, 0, &tlist[0]);
-			::glVertexPointer(2, GL_SHORT, 0, &vlist[0]);
-			::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-			::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-			::glDisableClientState(GL_VERTEX_ARRAY);
+			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glTexCoordPointer(2, GL_SHORT, 0, &tlist[0]);
+			glVertexPointer(2, GL_SHORT, 0, &vlist[0]);
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+			glDisableClientState(GL_VERTEX_ARRAY);
 
 			m = m->link;
 		} while(m != 0) ;
@@ -728,16 +726,13 @@ namespace gl {
 		@brief	モーション・オブジェクトの描画
 		@param[in]	h	ハンドル
 		@param[in]	atr	アトリビュート
-		@param[in]	xx	描画位置 X
-		@param[in]	yy	描画位置 Y
-		@param[in]	ox	オフセット X
-		@param[in]	oy	オフセット Y
-		@param[in]	ww	描画幅
-		@param[in]	hh	描画高さ
+		@param[in]	pos	描画位置
+		@param[in]	ofs	オフセット
+		@param[in]	wh	描画幅、高さ
 		@param[in]	linear	「true」ならリニアフィルター
 	 */
 	//-----------------------------------------------------------------//
-	void mobj::draw_sub(handle h, attribute::type atr, short xx, short yy, short ox, short oy, short ww, short hh, bool linear)
+	void mobj::draw_sub(handle h, attribute::type atr, const vtx::spos& pos, const vtx::spos& ofs, const vtx::spos& wh, bool linear)
 	{
 		if(h == 0 || h >= objs_.size()) return;
 
@@ -752,37 +747,37 @@ namespace gl {
 			short ty = m->ty;
 
 			short dx;
-			if(ox >= xp) dx = ox - xp + ww;
-			else dx = xp - ox + w;
+			if(ofs.x >= xp) dx = ofs.x - xp + wh.x;
+			else dx = xp - ofs.x + wh.x;
 
 			short dy;
-			if(oy >= yp) dy = oy - yp + hh;
-			else dy = yp - oy + h;
+			if(ofs.y >= yp) dy = ofs.y - yp + wh.y;
+			else dy = yp - ofs.y + wh.y;
 
-			if(dx < (w + ww) && dy < (h + hh)) {
-				if(ox >= xp) {
-					w  -= ox - xp;
-					if(w > ww) w = ww;
-					tx += ox - xp;
-					xp += ox - xp;
+			if(dx < (w + wh.x) && dy < (h + wh.y)) {
+				if(ofs.x >= xp) {
+					w  -= ofs.x - xp;
+					if(w > wh.x) w = wh.x;
+					tx += ofs.x - xp;
+					xp += ofs.x - xp;
 				} else {
-					w = ox - xp + ww;
+					w = ofs.x - xp + wh.x;
 				}
 
-				if(oy >= yp) {
-					h  -= ox - xp;
-					if(h > hh) h = hh;
-					ty += oy - yp;
-					yp += oy - yp;
+				if(ofs.y >= yp) {
+					h  -= ofs.y - yp;
+					if(h > wh.y) h = wh.y;
+					ty += ofs.y - yp;
+					yp += ofs.y - yp;
 				} else {
-					h = oy - yp + hh;
+					h = ofs.y - yp + wh.y;
 				}
 
-				xp += xx;
-				yp += yy;
+				xp += pos.x;
+				yp += pos.y;
 				::glBindTexture(GL_TEXTURE_2D, m->id);
 
-				tex_para(linear);
+				tex_para_(linear);
 
 				spos vlist[4];
 				spos tlist[4];
@@ -832,13 +827,13 @@ namespace gl {
 					vlist[2].set(xp + w, yp);
 					break;
 				}
-				::glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-				::glEnableClientState(GL_VERTEX_ARRAY);
-				::glTexCoordPointer(2, GL_SHORT, 0, &tlist[0]);
-				::glVertexPointer(2, GL_SHORT, 0, &vlist[0]);
-				::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-				::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-				::glDisableClientState(GL_VERTEX_ARRAY);
+				glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+				glEnableClientState(GL_VERTEX_ARRAY);
+				glTexCoordPointer(2, GL_SHORT, 0, &tlist[0]);
+				glVertexPointer(2, GL_SHORT, 0, &vlist[0]);
+				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+				glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+				glDisableClientState(GL_VERTEX_ARRAY);
 			}
 			m = m->link;
 		} while(m != 0) ;
@@ -850,18 +845,18 @@ namespace gl {
 		@brief	モーション・オブジェクト列の描画
 		@param[in]	hs	ハンドルのポインター
 		@param[in]	atr	アトリビュート
-		@param[in]	xx	描画位置 X
-		@param[in]	yy	描画位置 Y
+		@param[in]	pos	描画位置
 		@param[in]	linear	「true」ならリニア
 	 */
 	//-----------------------------------------------------------------//
-	void mobj::draws(const handle* hs, attribute::type atr, short xx, short yy, bool linear)
+	void mobj::draws(const handle* hs, attribute::type atr, const vtx::spos& pos, bool linear)
 	{
 		handle h;
+		vtx::spos p = pos;
 		while((h = *hs++) != 0) {
-			draw(h, atr, xx, yy, linear);
+			draw(h, atr, p, linear);
 			const vtx::spos& size = get_size(h);
-			xx += size.x + space_;
+			p.x += size.x + space_;
 		}
 	}
 

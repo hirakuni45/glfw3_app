@@ -72,7 +72,6 @@ namespace gui {
 	{
 		using namespace gl;
 		IGLcore* igl = get_glcore();
-		if(igl == 0) return;
 
 		const vtx::spos& size = igl->get_size();
 		const widget::param& wp = get_param();
@@ -92,7 +91,7 @@ namespace gui {
 				rect.org  = wp.rpos_;
 				rect.size = wp.rect_.size;
 			} else {
-				wd_.at_mobj().draw(h, gl::mobj::attribute::normal, ofs.x, ofs.y);
+				wd_.at_mobj().draw(h, gl::mobj::attribute::normal, ofs);
 				rect.org.set(0);
 				rect.size = wp.rect_.size;
 			}

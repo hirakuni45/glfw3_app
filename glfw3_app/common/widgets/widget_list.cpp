@@ -195,7 +195,7 @@ namespace gui {
 			short wf = param_.plate_param_.frame_width_;
 			short space = 4;
 			vtx::spos pos(size.x - bs.x - wf - space, (size.y - bs.y) / 2);
-			wd_.at_mobj().draw(h, gl::mobj::attribute::normal, pos.x, pos.y);
+			wd_.at_mobj().draw(h, gl::mobj::attribute::normal, pos);
 		}
 	}
 

@@ -198,7 +198,7 @@ namespace gui {
 		glViewport(clip.org.x, size.y - clip.org.y - clip.size.y, clip.size.x, clip.size.y);
 		wd.at_mobj().setup_matrix(clip.size.x, clip.size.y);
 
-		wd.at_mobj().draw(h, gl::mobj::attribute::normal, ofs.x, ofs.y);
+		wd.at_mobj().draw(h, gl::mobj::attribute::normal, ofs);
 	}
 
 
@@ -290,7 +290,7 @@ namespace gui {
 				rect.org  = wp.rpos_;
 				rect.size = wp.rect_.size;
 			} else {
-				wd.at_mobj().draw(oh, gl::mobj::attribute::normal, 0, 0);
+				wd.at_mobj().draw(oh, gl::mobj::attribute::normal, vtx::spos(0));
 				rect.org.set(0);
 				rect.size = wp.rect_.size;
 			}
@@ -375,7 +375,7 @@ namespace gui {
 			glViewport(clip.org.x, size.y - clip.org.y - clip.size.y,
 				clip.size.x, clip.size.y);
 			mo.setup_matrix(clip.size.x, clip.size.y);
-			mo.draw(moh, gl::mobj::attribute::normal, ofs.x, ofs.y);
+			mo.draw(moh, gl::mobj::attribute::normal, ofs);
 			glPopMatrix();
 			glViewport(0, 0, size.x, size.y);
 		}

@@ -59,6 +59,11 @@ namespace gui {
 
 		param				param_;
 
+		gl::mobj::handle	vr_;
+		gl::mobj::handle	r_;
+		gl::mobj::handle	v_;
+		gl::mobj::handle	h_;
+
 		tree_unit			tree_unit_;
 		uint32_t			serial_id_;
 		tree_unit::unit_map_its	tree_unit_its_;
@@ -69,6 +74,12 @@ namespace gui {
 
 		uint32_t			select_id_;
 		tree_unit::unit_map_it	select_it_;
+
+		struct root_t {
+			vtx::spos			pos;
+			gl::mobj::handle	h;
+		};
+		std::vector<root_t>	roots_;
 
 		void create_();
 		void destroy_();
@@ -81,6 +92,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_tree(widget_director& wd, const widget::param& bp, const param& p) :
 			wd_(wd), widget(bp), param_(p),
+			vr_(0), r_(0), v_(0), h_(0),
 			tree_unit_(), serial_id_(0),
 			speed_(0.0f), offset_(0.0f), position_(0.0f), select_id_(0), select_it_()
 			{ }

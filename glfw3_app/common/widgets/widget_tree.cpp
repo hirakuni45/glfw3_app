@@ -73,6 +73,11 @@ namespace gui {
 		at_param().state_.set(widget::state::RESIZE_ROOT);
 		at_param().state_.set(widget::state::CLIP_PARENTS);
 		at_param().state_.set(widget::state::AREA_ROOT);
+
+		vr_ = wd_.get_share_image().VR_junction_;
+		r_  = wd_.get_share_image().R_junction_;
+		v_  = wd_.get_share_image().V_line_;
+		h_  = wd_.get_share_image().H_line_;
 	}
 
 
@@ -136,11 +141,13 @@ namespace gui {
 			serial_id_ = tree_unit_.get_serial_id();
 		}
 
+		roots_.clear();
 		vtx::spos pos(0);
 		BOOST_FOREACH(tree_unit::unit_map_it it, tree_unit_its_) {
 			widget_check* w = it->second.value.w_;
 			if(w == 0) continue;
 			bool draw = true;
+			std::vector<bool> st;
 			uint32_t n = utils::count_char(it->first, '/');
 			if(n > 1) {
 				std::string path = it->first;
@@ -155,6 +162,7 @@ namespace gui {
 								draw = false;
 								break;
 							}
+							st.push_back(w->get_check());						
 						}
 					}
 					path = p;
@@ -165,6 +173,15 @@ namespace gui {
 				w->at_local_param().draw_box_ = tree_unit_.is_directory(it);
 				pos.x = (n - 1) * param_.height_;
 				w->at_rect().org = pos;
+				short x = 0;
+				BOOST_FOREACH(bool b, st) {
+					root_t r;
+					r.pos.x = x;
+					r.pos.y = pos.y;
+					r.h = h_;
+////					roots_.push_back(r);
+					x += param_.height_;
+				}
 				pos.y += param_.height_;
 			}
 		}
@@ -242,6 +259,29 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_tree::render()
 	{
+		using namespace gl;
+		IGLcore* igl = get_glcore();
+
+		const vtx::spos& size = igl->get_size();
+		const widget::param& wp = get_param();
+
+		// 各部品のルートを描画
+		if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) { 
+			BOOST_FOREACH(const root_t& r, roots_) {
+				glPushMatrix();
+				const vtx::spos& mosz = wd_.at_mobj().get_size(r.h);
+				vtx::spos ofs(0, (wp.rect_.size.y - mosz.y) / 2);
+				ofs += r.pos;
+				if(wp.state_[widget::state::CLIP_PARENTS]) {
+					draw_mobj(wd_, r.h, wp.clip_, ofs + wp.rpos_);
+				} else {
+					wd_.at_mobj().draw(r.h, gl::mobj::attribute::normal, ofs);
+				}
+				glPopMatrix();
+			}
+
+			glViewport(0, 0, size.x, size.y);
+		}
 	}
 
 
@@ -264,6 +304,7 @@ namespace gui {
 		BOOST_FOREACH(tree_unit::unit_map_it it, its) {
 			widget_check* w = it->second.value.w_;
 			if(w == 0) continue;
+			const vtx::spos& pos = w->get_rect().org;
 			
 		}
 

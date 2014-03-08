@@ -452,6 +452,26 @@ namespace gui {
 			pa.set_fore_color(default_check_color_.fore_color_);
 			pa.fill_circle(vtx::spos(12), 5);
 			share_img_.to_radio_ = mobj_.install(&pa);
+
+			// ツリー表示用部品
+			pa.fill(img::rgba8(0, 0));
+			pa.set_fore_color(default_check_color_.fore_color_);
+			pa.fill_rect(10,  0,  4, 14);
+			pa.fill_rect(10, 10, 14,  4);
+			share_img_.R_junction_ = mobj_.install(&pa);
+
+			pa.fill(img::rgba8(0, 0));
+			pa.set_fore_color(default_check_color_.fore_color_);
+			pa.fill_rect(10, 0, 4, 24);
+			share_img_.V_line_ = mobj_.install(&pa);
+
+			pa.fill_rect(10, 10, 14, 4);
+			share_img_.VR_junction_ = mobj_.install(&pa);
+
+			pa.fill(img::rgba8(0, 0));
+			pa.set_fore_color(default_check_color_.fore_color_);
+			pa.fill_rect(0, 10, 24, 4);
+			share_img_.H_line_ = mobj_.install(&pa);
 		}
 	}
 

@@ -388,13 +388,12 @@ namespace gl {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	モーションオブジェクトのイメージを更新
-			@param[in]	h		ハンドル
-			@param[in]	src		ソース、イメージインターフェース
-			@param[in]	dst_x	ディスとネーションの X オフセット
-			@param[in]	dst_y	ディスとネーションの Y オフセット
+			@param[in]	h	ハンドル
+			@param[in]	src	ソース、イメージインターフェース
+			@param[in]	dst	ディスとネーションの X オフセット
 		 */
 		//-----------------------------------------------------------------//
-		void copy_image(handle h, const img::i_img* src, int dst_x, int dst_y);
+		void copy_image(handle h, const img::i_img* src, const vtx::spos& dst);
 
 
 		//-----------------------------------------------------------------//
@@ -402,12 +401,11 @@ namespace gl {
 			@brief	モーション・オブジェクトの描画
 			@param[in]	h	ハンドル
 			@param[in]	atr	アトリビュート
-			@param[in]	xx	描画位置 X
-			@param[in]	yy	描画位置 Y
+			@param[in]	pos	描画位置
 			@param[in]	linear	「true」ならリニアフィルター
 		 */
 		//-----------------------------------------------------------------//
-		void draw(handle h, attribute::type atr, short xx, short yy, bool linear = true);
+		void draw(handle h, attribute::type atr, const vtx::spos& pos, bool linear = true);
 
 
 		//-----------------------------------------------------------------//
@@ -420,7 +418,7 @@ namespace gl {
 		//-----------------------------------------------------------------//
 		void draw_center(handle h, attribute::type atr, bool linear = true) {
 			const vtx::spos& size = get_size(h);
-			draw(h, atr, size.x / -2, size.y / -2, linear);
+			draw(h, atr, vtx::spos(size.x / -2, size.y / -2), linear);
 		}
 
 
@@ -429,16 +427,13 @@ namespace gl {
 			@brief	モーション・オブジェクトの描画
 			@param[in]	h	ハンドル
 			@param[in]	atr	アトリビュート
-			@param[in]	xx	描画位置 X
-			@param[in]	yy	描画位置 Y
-			@param[in]	ox	オフセット X
-			@param[in]	oy	オフセット Y
-			@param[in]	ww	描画幅
-			@param[in]	hh	描画高さ
+			@param[in]	pos	描画位置
+			@param[in]	ofs	オフセット
+			@param[in]	hw	描画高さ、幅
 			@param[in]	linear	「true」ならリニアフィルター
 		 */
 		//-----------------------------------------------------------------//
-		void draw_sub(handle h, attribute::type atr, short xx, short yy, short ox, short oy, short ww, short hh, bool liner = true);
+		void draw_sub(handle h, attribute::type atr, const vtx::spos& pos, const vtx::spos& ofs, const vtx::spos& hw, bool liner = true);
 
 
 		//-----------------------------------------------------------------//
@@ -446,12 +441,11 @@ namespace gl {
 			@brief	モーション・オブジェクト列の描画
 			@param[in]	hs	ハンドルのポインター
 			@param[in]	atr	アトリビュート
-			@param[in]	xx	描画位置 X
-			@param[in]	yy	描画位置 Y
+			@param[in]	pos	描画位置
 			@param[in]	linear	「true」ならリニア
 		 */
 		//-----------------------------------------------------------------//
-		void draws(const handle* hs, attribute::type atr, short xx, short yy, bool linear = true);
+		void draws(const handle* hs, attribute::type atr, const vtx::spos& pos, bool linear = true);
 
 
 		//-----------------------------------------------------------------//
@@ -475,8 +469,8 @@ namespace gl {
 		 */
 		//-----------------------------------------------------------------//
 		static void set_scissor(int x, int y, int w, int h) {
-			::glEnable(GL_SCISSOR_TEST);
-			::glScissor(x, y, w, h);
+			glEnable(GL_SCISSOR_TEST);
+			glScissor(x, y, w, h);
 		}
 
 
@@ -485,7 +479,7 @@ namespace gl {
 			@brief	シザー方形を廃棄
 		 */
 		//-----------------------------------------------------------------//
-		static void reset_scissor() { ::glDisable(GL_SCISSOR_TEST); }
+		static void reset_scissor() { glDisable(GL_SCISSOR_TEST); }
 
 
 		//-----------------------------------------------------------------//
@@ -494,8 +488,8 @@ namespace gl {
 		 */
 		//-----------------------------------------------------------------//
 		void restore_matrix() {
-			::glMatrixMode(GL_TEXTURE);
-			::glLoadIdentity();
+			glMatrixMode(GL_TEXTURE);
+			glLoadIdentity();
 		}
 
 
