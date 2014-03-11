@@ -354,28 +354,26 @@ namespace img {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	フォントを描画
-			@param[in]	x	X 開始位置
-			@param[in]	y	Y 開始位置
+			@param[in]	pos	開始位置
 			@param[in]	wc	文字コード
 			@return 描画幅
 		*/
 		//-----------------------------------------------------------------//
-		int draw_font(int x, int y, wchar_t wc);
+		int draw_font(const vtx::spos& pos, wchar_t wc);
 
 
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	フォントを描画
 			@param[in]	txt	文字列
-			@param[in]	x	X 開始位置
-			@param[in]	y	Y 開始位置
+			@param[in]	pos	開始位置
 			@return 描画幅
 		*/
 		//-----------------------------------------------------------------//
-		int draw_text(int x, int y, const utils::wstring& txt) {
+		int draw_text(const vtx::spos& pos, const utils::wstring& txt) {
 			int w = 0;
 			BOOST_FOREACH(wchar_t wc, txt) {
-				w += draw_font(x + w, y, wc);
+				w += draw_font(vtx::spos(pos.x + w, pos.y), wc);
 			}
 			return w;
 		}
@@ -384,16 +382,15 @@ namespace img {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	フォントを描画
-			@param[in]	x	X 開始位置
-			@param[in]	y	Y 開始位置
+			@param[in]	pos	開始位置
 			@param[in]	txt	文字列
 			@return 描画幅
 		*/
 		//-----------------------------------------------------------------//
-		int draw_text(int x, int y, const std::string& txt) {
+		int draw_text(const vtx::spos& pos, const std::string& txt) {
 			utils::wstring ws;
 			utils::utf8_to_utf16(txt, ws);
-			return draw_text(x, y, ws);
+			return draw_text(pos, ws);
 		}
 
 	};

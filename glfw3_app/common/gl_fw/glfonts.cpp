@@ -330,16 +330,17 @@ namespace gl {
 		{
 			img::img_rgba8	rgba;
 			rgba.create(isz, true);
-			img::rgba8	c;
-			img::gray8	g;
-			for(int y = 0; y < isz.y; ++y) {
-				for(int x = 0; x < isz.x; ++x) {
-					image->get_pixel(x, y, g);
+			img::rgba8 c;
+			img::gray8 g;
+			vtx::spos p;
+			for(p.y = 0; p.y < isz.y; ++p.y) {
+				for(p.x = 0; p.x < isz.x; ++p.x) {
+					image->get_pixel(p, g);
 					unsigned char inten;
 					if(g.g) inten = 255; else inten = 0;
 					c.r = c.g = c.b = inten;
 					c.a = g.g;
-					rgba.put_pixel(x, y, c);
+					rgba.put_pixel(p, c);
 				}
 			}
 #ifdef WIN32

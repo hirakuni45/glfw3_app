@@ -53,7 +53,7 @@ namespace gui {
 			pa.create(s, true);
 			pa.fill(img::rgba8(0, 0));
 
-			img::copy_to_rgba8(param_.image_, 0, 0, s.x, s.y, pa, o.x, o.y);
+			img::copy_to_rgba8(param_.image_, vtx::srect(vtx::spos(0), s), pa, o);
 
 			objh_ = wd_.at_mobj().install(&pa);
 		}

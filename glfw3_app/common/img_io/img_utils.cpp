@@ -30,11 +30,12 @@ namespace img {
 					src->get_clut(i, c);
 					tmp->put_clut(i, c);
 				}
-				for(int y = 0; y < src->get_size().y; ++y) {
-					for(int x = 0; x < src->get_size().x; ++x) {
+				vtx::spos p;
+				for(p.y = 0; p.y < src->get_size().y; ++p.y) {
+					for(p.x = 0; p.x < src->get_size().x; ++p.x) {
 						idx8 c;
-						src->get_pixel(x, y, c);
-						tmp->put_pixel(x, y, c);
+						src->get_pixel(p, c);
+						tmp->put_pixel(p, c);
 					}
 				}
 				if(opt) {
@@ -47,11 +48,12 @@ namespace img {
 			{
 				dst = dynamic_cast<i_img*>(new img_gray8);
 				dst->create(src->get_size(), false);
-				for(int y = 0; y < src->get_size().y; ++y) {
-					for(int x = 0; x < src->get_size().x; ++x) {
+				vtx::spos p;
+				for(p.y = 0; p.y < src->get_size().y; ++p.y) {
+					for(p.x = 0; p.x < src->get_size().x; ++p.x) {
 						gray8 c;
-						src->get_pixel(x, y, c);
-						dst->put_pixel(x, y, c);
+						src->get_pixel(p, c);
+						dst->put_pixel(p, c);
 					}
 				}
 			}
@@ -60,11 +62,12 @@ namespace img {
 			{
 				dst = dynamic_cast<i_img*>(new img_rgba8);
 				dst->create(src->get_size(), src->test_alpha());
-				for(int y = 0; y < src->get_size().y; ++y) {
-					for(int x = 0; x < src->get_size().x; ++x) {
+				vtx::spos p;
+				for(p.y = 0; p.y < src->get_size().y; ++p.y) {
+					for(p.x = 0; p.x < src->get_size().x; ++p.x) {
 						rgba8 c;
-						src->get_pixel(x, y, c);
-						dst->put_pixel(x, y, c);
+						src->get_pixel(p, c);
+						dst->put_pixel(p, c);
 					}
 				}
 			}
@@ -79,24 +82,21 @@ namespace img {
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	RGBA8 イメージへコピーする
-		@param[in]	src		ソースのイメージインターフェース
-		@param[in]	src_x	ソース画像の開始点 X
-		@param[in]	src_y	ソース画像の開始点 Y
-		@param[in]	src_w	ソース画像の横幅
-		@param[in]	src_h	ソース画像の高さ
-		@param[in]	dst		コピー先 RGBA8 イメージ（リファレンス）
-		@param[in]	dst_x	コピー先位置 X
-		@param[in]	dst_y	コピー先位置 Y
+		@param[in]	isrc	ソースのイメージインターフェース
+		@param[in]	rect	ソース画像領域
+		@param[in]	idst	コピー先 RGBA8 イメージ（リファレンス）
+		@param[in]	pos	コピー先位置
 	*/
 	//-----------------------------------------------------------------//
-	void copy_to_rgba8(const i_img* src, int src_x, int src_y, int src_w, int src_h, img_rgba8& dst, int dst_x, int dst_y)
+	void copy_to_rgba8(const i_img* isrc, const vtx::srect& rect, img_rgba8& idst, const vtx::spos& pos)
 	{
-		if(src == 0) return;
-		for(int y = 0; y < src_h; ++y) {
-			for(int x = 0; x < src_w; ++x) {
+		if(isrc == 0) return;
+		vtx::spos p;
+		for(p.y = 0; p.y < rect.size.y; ++p.y) {
+			for(p.x = 0; p.x < rect.size.x; ++p.x) {
 				rgba8 c;
-				src->get_pixel(src_x + x, src_y + y, c);
-				dst.put_pixel(dst_x + x, dst_y + y, c);
+				isrc->get_pixel(rect.org + p, c);
+				idst.put_pixel(pos + p, c);
 			}
 		}
 	}
@@ -105,25 +105,22 @@ namespace img {
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	IDX8 イメージへコピーする
-		@param[in]	src		ソースのイメージ
-		@param[in]	src_x	ソース画像の開始点 X
-		@param[in]	src_y	ソース画像の開始点 Y
-		@param[in]	src_w	ソース画像の横幅
-		@param[in]	src_h	ソース画像の高さ
-		@param[in]	dst		コピー先 RGBA8 イメージ（リファレンス）
-		@param[in]	dst_x	コピー先位置 X
-		@param[in]	dst_y	コピー先位置 Y
+		@param[in]	isrc   	ソースのイメージインターフェース
+		@param[in]	rect   	ソース画像
+		@param[in]	idst   	コピー先 RGBA8 イメージ（リファレンス）
+		@param[in]	pos   	コピー先位置
 		@return コピーに成功したら「true」を返す。
 	*/
 	//-----------------------------------------------------------------//
-	bool copy_to_idx8(const i_img* src, int src_x, int src_y, int src_w, int src_h, img_idx8& dst, int dst_x, int dst_y)
+	bool copy_to_idx8(const i_img* isrc, const vtx::srect& rect, img_idx8& idst, const vtx::spos& pos)
 	{
-		if(src->get_type() != IMG::INDEXED8) return false;
-		for(int y = 0; y < src_h; ++y) {
-			for(int x = 0; x < src_w; ++x) {
+		if(isrc->get_type() != IMG::INDEXED8) return false;
+		vtx::spos p;
+		for(p.y = 0; p.y < rect.size.y; ++p.y) {
+			for(p.x = 0; p.x < rect.size.x; ++p.x) {
 				idx8 ix;
-				src->get_pixel(src_x + x, src_y + y, ix);
-				dst.put_pixel(dst_x + x, dst_y + y, ix);
+				isrc->get_pixel(rect.org + p, ix);
+				idst.put_pixel(pos + p, ix);
 			}
 		}
 		return true;
@@ -259,14 +256,15 @@ namespace img {
 
 		float scn = 1.0f / scale;
 		if(scale > 1.0f) {
-			for(int h = 0; h < dh; ++h) {
-				float yy = (static_cast<float>(h) + 0.5f) * scn;
+			vtx::spos out;
+			for(out.y = 0; out.y < dh; ++out.y) {
+				float yy = (static_cast<float>(out.y) + 0.5f) * scn;
 				int ys = static_cast<int>(yy - n);
 				if(ys < 0) ys = 0;
 				int ye = static_cast<int>(yy + n);
 				if(ye > (sh - 1)) ye = sh - 1;
-				for(int w = 0; w < dw; ++w) {
-					float xx = (static_cast<float>(w) + 0.5f) * scn;
+				for(out.x = 0; out.x < dw; ++out.x) {
+					float xx = (static_cast<float>(out.x) + 0.5f) * scn;
 					int xs = static_cast<int>(xx - n);
 					if(xs < 0) xs = 0;
 					int xe = static_cast<int>(xx + n);
@@ -274,13 +272,14 @@ namespace img {
 
 					rgbaf col(0.0f);
 					float weight_total = 0.0f;
-					for(int y = ys; y <= ye; ++y) {
-						float yl = fabs((y + 0.5f) - yy);
-						for(int x = xs; x <= xe; ++x) {
-							float xl = fabs((x + 0.5f) - xx);
+					vtx::spos pos;
+					for(pos.y = ys; pos.y <= ye; ++pos.y) {
+						float yl = fabs((pos.y + 0.5f) - yy);
+						for(pos.x = xs; pos.x <= xe; ++pos.x) {
+							float xl = fabs((static_cast<float>(pos.x) + 0.5f) - xx);
 							float weight = lanczos_t(xl, yl, n);
 							rgba8 c;
-							src->get_pixel(x, y, c);
+							src->get_pixel(pos, c);
 							col.r += c.r * weight;
 							col.g += c.g * weight;
 							col.b += c.b * weight;
@@ -290,18 +289,19 @@ namespace img {
 					}
 					rgba8 c;
 					color_div(col, weight_total, c);
-					dst.put_pixel(w, h, c);
+					dst.put_pixel(out, c);
 				}
 			}
 		} else {
-			for(int h = 0; h < dh; ++h) {
-				float yy = static_cast<float>(h) + 0.5f;
+			vtx::spos out;
+			for(out.y = 0; out.y < dh; ++out.y) {
+				float yy = static_cast<float>(out.y) + 0.5f;
 				int ys = static_cast<int>((yy - n) * scn);
 				if(ys < 0) ys = 0;
 				int ye = static_cast<int>((yy + n) * scn);
 				if(ye > (sh - 1)) ye = sh - 1;
-				for(int w = 0; w < dw; ++w) {
-					float xx = static_cast<float>(w) + 0.5f;
+				for(out.x = 0; out.x < dw; ++out.x) {
+					float xx = static_cast<float>(out.x) + 0.5f;
 					int xs = static_cast<int>((xx - n) * scn);
 					if(xs < 0) xs = 0;
 					int xe = static_cast<int>((xx + n) * scn);
@@ -309,27 +309,26 @@ namespace img {
 
 					rgbaf col(0.0f);
 					float weight_total = 0.0f;
-					for(int y = ys; y <= ye; ++y) {
-						float yl = fabs((((float)y + 0.5f) * scale) - yy);
+					vtx::spos pos;
+					for(pos.y = ys; pos.y <= ye; ++pos.y) {
+						float yl = fabs(((static_cast<float>(pos.y) + 0.5f) * scale) - yy);
 						for(int x = xs; x <= xe; ++x) {
 							float xl = fabs((((float)x + 0.5f) * scale) - xx);
 							float weight = lanczos_t(xl, yl, n);
 							rgba8 c;
-							src->get_pixel(x, y, c);
-							col.r += (float)c.r * weight;
-							col.g += (float)c.g * weight;
-							col.b += (float)c.b * weight;
-							col.a += (float)c.a * weight;
+							src->get_pixel(pos, c);
+							col.r += static_cast<float>(c.r) * weight;
+							col.g += static_cast<float>(c.g) * weight;
+							col.b += static_cast<float>(c.b) * weight;
+							col.a += static_cast<float>(c.a) * weight;
 							weight_total += weight;
 						}
 					}
 					rgba8 c;
 					color_div(col, weight_total, c);
-					dst.put_pixel(w, h, c);
+					dst.put_pixel(out, c);
 				}
 			}
 		}
 	}
-
-
 }

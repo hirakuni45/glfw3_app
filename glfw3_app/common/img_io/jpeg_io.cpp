@@ -377,9 +377,6 @@ namespace img {
 			return false;
 		}
 
-		// 行バッファの領域設定
-		int row_stride = cinfo.output_width * cinfo.output_components;
-
 		img_.destroy();
 		if(cinfo.output_components == 3) {
 			img_.create(vtx::spos(cinfo.image_width, cinfo.image_height), false);
@@ -387,36 +384,37 @@ namespace img {
 			img_.create(vtx::spos(cinfo.image_width, cinfo.image_height), true);
 		}
 
-		unsigned char* line = new unsigned char[row_stride];
+		unsigned char* line = new unsigned char[cinfo.output_width * cinfo.output_components];
 		unsigned char* lines[1];
-		lines[0] = line;
-		for(int y = 0; y < cinfo.image_height; ++y) {
+		lines[0] = &line[0];
+		vtx::spos pos;
+		for(pos.y = 0; pos.y < cinfo.image_height; ++pos.y) {
 			jpeg_read_scanlines(&cinfo, (JSAMPLE**)lines, 1);
-			unsigned char* p = line;
+			unsigned char* p = &line[0];
 			if(cinfo.output_components == 4) {
-				for(int x = 0; x < cinfo.image_width; ++x) {
+				for(pos.x = 0; pos.x < cinfo.image_width; ++pos.x) {
 					img::rgba8 c;
 					c.r = *p++;
 					c.g = *p++;
 					c.b = *p++;
 					c.a = *p++;
-					img_.put_pixel(x, y, c);
+					img_.put_pixel(pos, c);
 				}
 			} else if(cinfo.output_components == 3) {
-				for(int x = 0; x < cinfo.image_width; ++x) {
+				for(pos.x = 0; pos.x < cinfo.image_width; ++pos.x) {
 					img::rgba8 c;
 					c.r = *p++;
 					c.g = *p++;
 					c.b = *p++;
 					c.a = 255;
-					img_.put_pixel(x, y, c);
+					img_.put_pixel(pos, c);
 				}
 			} else if(cinfo.output_components == 1) {
-				for(int x = 0; x < cinfo.image_width; ++x) {
+				for(pos.x = 0; pos.x < cinfo.image_width; ++pos.x) {
 					img::rgba8 c;
 					c.b = c.g = c.r = *p++;
 					c.a = 255;
-					img_.put_pixel(x, y, c);
+					img_.put_pixel(pos, c);
 				}
 			}
 		}
@@ -482,15 +480,16 @@ namespace img {
 
 		jpeg_start_compress(&cinfo, TRUE);
 
-		int y = 0;
 		JSAMPROW row_pointer[1];
 		unsigned char* tmp = new unsigned char[w * cinfo.input_components];
 		row_pointer[0] = (JSAMPLE *)tmp;
+		vtx::spos pos;
+		pos.y = 0;
 		while(cinfo.next_scanline < h) {
 			unsigned char* p = tmp;
-			for(int x = 0; x < w; ++x) {
+			for(pos.x = 0; pos.x < w; ++pos.x) {
 				rgba8 c;
-				imf_->get_pixel(x, y, c);
+				imf_->get_pixel(pos, c);
 				*p++ = c.r;
 				*p++ = c.g;
 				*p++ = c.b;
@@ -498,7 +497,7 @@ namespace img {
 			}
 			jpeg_write_scanlines(&cinfo, row_pointer, 1);
 			if(dst->error) break;
-			++y;
+			++pos.y;
 		}
 		delete[] tmp;
 

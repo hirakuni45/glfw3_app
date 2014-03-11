@@ -267,22 +267,23 @@ namespace img {
 
 		png_byte* im = new png_byte[width * height * ch];
 
-// ポインターの作成 [png_bytep]
+		// ポインターの作成 [png_bytep]
 		png_bytep*	pp = new png_bytep[height];
-		for(int i = 0; i < (int)height; ++i) {
+		for(png_uint_32 i = 0; i < height; ++i) {
 			pp[i] = &im[i * width * ch];
 		}
-		png_read_image(png_ptr, pp);
 
-		for(int y = 0; y < (int)height; ++y) {
-			png_byte*	p = pp[y];
+		png_read_image(png_ptr, pp);
+		vtx::spos pos;
+		for(pos.y = 0; pos.y < static_cast<short>(height); ++pos.y) {
+			png_byte* p = pp[pos.y];
 			if(color_type & PNG_COLOR_MASK_PALETTE) {
-				for(int x = 0; x < (int)width; ++x) {
+				for(pos.x = 0; pos.x < static_cast<short>(width); ++pos.x) {
 					idx8 idx(*p++);
-					idx_.put_pixel(x, y, idx);
+					idx_.put_pixel(pos, idx);
 				}
 			} else {
-				for(int x = 0; x < (int)width; ++x) {
+				for(pos.x = 0; pos.x < static_cast<short>(width); ++pos.x) {
 					img::rgba8 c;
 					if(gray) {
 						c.r = c.g = c.b = *p++;
@@ -306,7 +307,7 @@ namespace img {
 							c.a = 0;
 						}
 					}
-					img_.put_pixel(x, y, c);
+					img_.put_pixel(pos, c);
 				}
 			}
 		}
@@ -390,20 +391,21 @@ namespace img {
 		png_write_info(png_ptr, info_ptr);
 
 		png_bytep*	pp = new png_bytep[h];
-		for(int y = 0; y < h; ++y) {
-			pp[y] = new png_byte[w * ch];
-			png_byte*	p;
-			p = pp[y];
+		vtx::spos pos;
+		for(pos.y = 0; pos.y < h; ++pos.y) {
+			pp[pos.y] = new png_byte[w * ch];
+			png_byte* p;
+			p = pp[pos.y];
 			if(ch == 1) {
-				for(int x = 0; x < w; ++x) {
+				for(pos.x = 0; pos.x < w; ++pos.x) {
 					idx8	idx;
-					imf_->get_pixel(x, y, idx);
+					imf_->get_pixel(pos, idx);
 					*p++ = idx.i;
 				}
 			} else if(imf_->get_type() == IMG::FULL8) {
-				for(int x = 0; x < w; ++x) {
+				for(pos.x = 0; pos.x < w; ++pos.x) {
 					rgba8	c;
-					imf_->get_pixel(x, y, c);
+					imf_->get_pixel(pos, c);
 					*p++ = c.r;
 					*p++ = c.g;
 					*p++ = c.b;

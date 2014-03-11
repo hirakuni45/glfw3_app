@@ -1293,13 +1293,14 @@ void tx_compress_dxtn(GLint srccomps, GLint width, GLint height, const GLubyte *
 			{
 				unsigned char* buff = new unsigned char[width * 4];
 				img_.create(vtx::spos(width, height), true);
-				for(int h = 0; h < height; ++h) {
+				vtx::spos pos;
+				for(pos.y = 0; pos.y < height; ++pos.y) {
 					fin.read(buff, 4, width);
-					for(int w = 0; w < width; ++w) {
-						int i = w * 4;
+					for(pos.x = 0; pos.x < width; ++pos.x) {
+						int i = pos.x * 4;
 						img::rgba8 c;
-						c.set(buff[i+2], buff[i+1], buff[i+0], 255);
-						img_.put_pixel(w, h, c);
+						c.set(buff[i + 2], buff[i + 1], buff[i + 0], 255);
+						img_.put_pixel(pos, c);
 					}
 				}
 				delete[] buff;
@@ -1310,12 +1311,13 @@ void tx_compress_dxtn(GLint srccomps, GLint width, GLint height, const GLubyte *
 				img_.create(vtx::spos(width, height), true);
 				unsigned char* buff = new unsigned char[width * height];
 				fin.read(buff, 1, width * height);
-				for(int h = 0; h < height; ++h) {
-					for(int w = 0; w < width; ++w) {
+				vtx::spos pos;
+				for(pos.y = 0; pos.y < height; ++pos.y) {
+					for(pos.x = 0; pos.x < width; ++pos.x) {
 						img::rgba8 c;
-						fetch_2d_texel_rgba_dxt1(width / 2, buff, w, h, c);
+						fetch_2d_texel_rgba_dxt1(width / 2, buff, pos.x, pos.y, c);
 						// fetch_2d_texel_rgba_dxt1(DDSint srcRowStride, const DDSubyte *pixdata, DDSint i, DDSint j, DDSvoid *texel);
-						img_.put_pixel(w, h, c);
+						img_.put_pixel(pos, c);
 					}
 				}
 				delete[] buff;
@@ -1326,11 +1328,12 @@ void tx_compress_dxtn(GLint srccomps, GLint width, GLint height, const GLubyte *
 				img_.create(vtx::spos(width, height), true);
 				unsigned char* buff = new unsigned char[width * height];
 				fin.read(buff, 1, width * height);
-				for(int h = 0; h < height; ++h) {
-					for(int w = 0; w < width; ++w) {
+				vtx::spos pos;
+				for(pos.y = 0; pos.y < height; ++pos.y) {
+					for(pos.x = 0; pos.x < width; ++pos.x) {
 						img::rgba8 c;
-						fetch_2d_texel_rgba_dxt3(width, (DDSubyte*)buff, w, h, c);
-						img_.put_pixel(w, h, c);
+						fetch_2d_texel_rgba_dxt3(width, (DDSubyte*)buff, pos.x, pos.y, c);
+						img_.put_pixel(pos, c);
 					}
 				}
 				delete[] buff;
@@ -1341,11 +1344,12 @@ void tx_compress_dxtn(GLint srccomps, GLint width, GLint height, const GLubyte *
 				img_.create(vtx::spos(width, height), true);
 				unsigned char* buff = new unsigned char[width * height];
 				fin.read(buff, 1, width * height);
-				for(int h = 0; h < height; ++h) {
-					for(int w = 0; w < width; ++w) {
+				vtx::spos pos;
+				for(pos.y = 0; pos.y < height; ++pos.y) {
+					for(pos.x = 0; pos.x < width; ++pos.x) {
 						img::rgba8 c;
-						fetch_2d_texel_rgba_dxt5(width, (DDSubyte*)buff, w, h, c);
-						img_.put_pixel(w, h, c);
+						fetch_2d_texel_rgba_dxt5(width, (DDSubyte*)buff, pos.x, pos.y, c);
+						img_.put_pixel(pos, c);
 					}
 				}
 				delete[] buff;

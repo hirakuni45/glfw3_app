@@ -204,26 +204,27 @@ void get_metrics(wchar_t code)
 		metrics_.vert_x   = static_cast<float>(slot->metrics.vertBearingX) / 64.0f;
 		metrics_.vert_y   = static_cast<float>(slot->metrics.vertBearingY) / 64.0f;
 
-		int ox = static_cast<int>(metrics_.hori_x);
-		int oy = at.offset_ - static_cast<int>(metrics_.hori_y) + 1;
+		vtx::spos ofs(static_cast<short>(metrics_.hori_x), at.offset_ - static_cast<short>(metrics_.hori_y) + 1);
 
 	// グレイスケールでレンダリング出来なかった場合は、モノカラーとなる。
 		if(bitmap->pixel_mode != FT_PIXEL_MODE_MONO) {		// gray-scale 0 to 255
-			for(int j = 0; j < bitmap->rows; j++) {
-				for(int i = 0; i < bitmap->width; i++) {
+			vtx::spos p;
+			for(p.y = 0; p.y < bitmap->rows; p.y++) {
+				for(p.x = 0; p.x < bitmap->width; p.x++) {
 					img::gray8 c;
-					c.g = bitmap->buffer[j * bitmap->width + i];
-					img_.put_pixel(ox + i, oy + j, c);
+					c.g = bitmap->buffer[p.y * bitmap->width + p.x];
+					img_.put_pixel(p + ofs, c);
 				}
 			}
 		} else {	// monochrome
 			int bitpos = 0;
-			for(int j = 0; j < bitmap->rows; j++) {
-				for(int i = 0; i < bitmap->width; i++) {
+			vtx::spos p;
+			for(p.y = 0; p.y < bitmap->rows; p.y++) {
+				for(p.x = 0; p.x < bitmap->width; p.x++) {
 					img::gray8 c;
 					if(bitmap->buffer[bitpos >> 3] & (1 << (~bitpos & 7))) c.g = 255; else c.g = 0;
 					bitpos++;
-					img_.put_pixel(ox + i, oy + j, c);
+					img_.put_pixel(p + ofs, c);
 				}
 				if(bitpos & 7) {
 					bitpos |= 7;

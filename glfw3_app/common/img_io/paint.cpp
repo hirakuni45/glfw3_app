@@ -109,7 +109,7 @@ namespace img {
 	{
 		if(alpha_blend_) {
 			rgba8 bc;
-			if(get_pixel(p.x, p.y, bc)) {
+			if(get_pixel(p, bc)) {
 				u16 a = static_cast<u16>(bc.a) + 1;
 				a *= 256 - static_cast<u16>(c.a);
 				a >>= 8;
@@ -120,13 +120,13 @@ namespace img {
 				r += static_cast<u16>(c.r) * a;
 				g += static_cast<u16>(c.g) * a;
 				b += static_cast<u16>(c.b) * a;
-				put_pixel(p.x, p.y, rgba8(r >> 8, g >> 8, b >> 8, bc.a));
+				put_pixel(p, rgba8(r >> 8, g >> 8, b >> 8, bc.a));
 				return true;
 			} else {
 				return false;
 			}
 		} else {
-			return put_pixel(p.x, p.y, c);
+			return put_pixel(p, c);
 		}
 	}
 
@@ -397,13 +397,12 @@ namespace img {
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	フォントを描画
-		@param[in]	x	X 開始位置
-		@param[in]	y	Y 開始位置
+		@param[in]	pos	開始位置
 		@param[in]	wc	文字コード
 		@return 描画幅
 	*/
 	//-----------------------------------------------------------------//
-	int paint::draw_font(int x, int y, wchar_t wc)
+	int paint::draw_font(const vtx::spos& pos, wchar_t wc)
 	{
 		Ikfimg* kf = get_kfimg();
 		if(kf == 0) return 0;
@@ -413,15 +412,16 @@ namespace img {
 
 		const font_metrics::metrics& met = kf->get_metrics();
 
-		int w = static_cast<int>(met.width + met.hori_x);
-		for(int yy = 0; yy < bitmap->get_size().y; ++yy) {
-			for(int xx = 0; xx < w; ++xx) {
+		short w = static_cast<short>(met.width + met.hori_x);
+		vtx::spos p;
+		for(p.y = 0; p.y < bitmap->get_size().y; ++p.y) {
+			for(p.x = 0; p.x < w; ++p.x) {
 				gray8 g;
-				bitmap->get_pixel(xx, yy, g);
+				bitmap->get_pixel(p, g);
 				if(g.g > 0) {
 					rgba8 c = fore_color_;
 					c.a = (fore_color_.a * (g.g + 1)) >> 8;
-					alpha_pixel(x + xx, y + yy, c);
+					alpha_pixel(pos + p, c);
 				}
 			}
 		}

@@ -28,17 +28,13 @@ namespace img {
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	RGBA8 イメージへコピーする
-		@param[in]	src		ソースのイメージインターフェース
-		@param[in]	src_x	ソース画像の開始点 X
-		@param[in]	src_y	ソース画像の開始点 Y
-		@param[in]	src_w	ソース画像の横幅
-		@param[in]	src_h	ソース画像の高さ
-		@param[in]	dst		コピー先 RGBA8 イメージ（リファレンス）
-		@param[in]	dst_x	コピー先位置 X
-		@param[in]	dst_y	コピー先位置 Y
+		@param[in]	isrc	ソースのイメージインターフェース
+		@param[in]	rect	ソース画像領域
+		@param[in]	idst	コピー先 RGBA8 イメージ（リファレンス）
+		@param[in]	pos	コピー先位置
 	*/
 	//-----------------------------------------------------------------//
-	void copy_to_rgba8(const i_img* src, int src_x, int src_y, int src_w, int src_h, img_rgba8& dst, int dst_x, int dst_y);
+	void copy_to_rgba8(const i_img* isrc, const vtx::srect& rect, img_rgba8& idst, const vtx::spos& pos);
 
 
 	//-----------------------------------------------------------------//
@@ -84,47 +80,41 @@ namespace img {
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	IDX8 イメージへコピーする
-		@param[in]	src		ソースのイメージ
-		@param[in]	src_x	ソース画像の開始点 X
-		@param[in]	src_y	ソース画像の開始点 Y
-		@param[in]	src_w	ソース画像の横幅
-		@param[in]	src_h	ソース画像の高さ
-		@param[in]	dst		コピー先 RGBA8 イメージ（リファレンス）
-		@param[in]	dst_x	コピー先位置 X
-		@param[in]	dst_y	コピー先位置 Y
+		@param[in]	isrc   	ソースのイメージインターフェース
+		@param[in]	rect   	ソース画像
+		@param[in]	idst   	コピー先 RGBA8 イメージ（リファレンス）
+		@param[in]	pos   	コピー先位置
 		@return コピーに成功したら「true」を返す。
 	*/
 	//-----------------------------------------------------------------//
-	bool copy_to_idx8(const i_img* src, int src_x, int src_y, int src_w, int src_h, img_idx8& dst, int dst_x, int dst_y);
+	bool copy_to_idx8(const i_img* isrc, const vtx::srect& rect, img_idx8& idst, const vtx::spos& pos);
 
 
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	RGBA8 イメージへコピーする
-		@param[in]	src		ソースのイメージインターフェース
+		@param[in]	isrc	ソースのイメージインターフェース
 		@param[in]	dst		コピー先 RGBA8 イメージ（リファレンス）
-		@param[in]	dst_x	コピー先位置 X
-		@param[in]	dst_y	コピー先位置 Y
+		@param[in]	pos		コピー先位置
 	*/
 	//-----------------------------------------------------------------//
-	inline void copy_to_rgba8(const i_img* src, img_rgba8& dst, int dst_x = 0, int dst_y = 0) {
-		if(src == 0) return;
-		copy_to_rgba8(src, 0, 0, src->get_size().x, src->get_size().y, dst, dst_x, dst_y);
+	inline void copy_to_rgba8(const i_img* isrc, img_rgba8& dst, const vtx::spos& pos = vtx::spos(0)) {
+		if(isrc == 0) return;
+		copy_to_rgba8(isrc, vtx::srect(vtx::spos(0), isrc->get_size()), dst, pos);
 	}
 
 
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	IDX8 イメージへコピーする
-		@param[in]	src		ソースのイメージ
+		@param[in]	isrc	ソースのイメージ
 		@param[in]	dst		コピー先 IDX8 イメージ（リファレンス）
-		@param[in]	dst_x	コピー先位置 X
-		@param[in]	dst_y	コピー先位置 Y
+		@param[in]	pos		コピー先位置
 		@return コピーに成功したら「true」を返す。
 	*/
 	//-----------------------------------------------------------------//
-	inline bool copy_to_idx8(const i_img* src, img_idx8& dst, int dst_x = 0, int dst_y = 0) {
-		return copy_to_idx8(src, 0, 0, src->get_size().x, src->get_size().y, dst, dst_x, dst_y);
+	inline bool copy_to_idx8(const i_img* isrc, img_idx8& dst, const vtx::spos& pos = vtx::spos(0)) {
+		return copy_to_idx8(isrc, vtx::srect(vtx::spos(0), isrc->get_size()), dst, pos);
 	}
 
 
@@ -141,20 +131,21 @@ namespace img {
 		dst.destroy();
 		const vtx::spos& size = src->get_size();
 		dst.create(size / 2, src->test_alpha());
-		for(int y = 0; y < size.y; y += 2) {
-			for(int x = 0; x < size.x; x += 2) {
+		vtx::spos p;
+		for(p.y = 0; p.y < size.y; p.y += 2) {
+			for(p.x = 0; p.x < size.x; p.x += 2) {
 				int	r, g, b, a;
 			  	rgba8	c;
-				src->get_pixel(x, y, c);
+				src->get_pixel(p, c);
 				r = c.r; g = c.g; b = c.b; a = c.a;
-				src->get_pixel(x+1, y, c);
+				src->get_pixel(vtx::spos(p.x + 1, p.y), c);
 				r += c.r; g += c.g; b += c.b; a += c.a;
-				src->get_pixel(x, y+1, c);
+				src->get_pixel(vtx::spos(p.x, p.y + 1), c);
 				r += c.r; g += c.g; b += c.b; a += c.a;
-				src->get_pixel(x+1, y+1, c);
+				src->get_pixel(vtx::spos(p.x + 1, p.y + 1), c);
 				r += c.r; g += c.g; b += c.b; a += c.a;
 				c.r = r >> 2; c.g = g >> 2; c.b = b >> 2; c.a = a >> 2;
-				dst.put_pixel(x / 2, y / 2, c);
+				dst.put_pixel(vtx::spos(p.x / 2, p.y / 2), c);
 			}
 		}
 	}

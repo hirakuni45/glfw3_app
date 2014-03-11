@@ -47,7 +47,7 @@ namespace gl {
 			img_rgba8 dst;
 			dst.create(vtx::spos(pgw, pgh), true);
 			dst.fill(rgba8(0));
-			dst.copy(0, 0, im, 0, 0, im.get_size().x, im.get_size().y);
+			dst.copy(vtx::spos(0), im, vtx::srect(vtx::spos(0), im.get_size()));
 			::glTexImage2D(GL_TEXTURE_2D, 0,
 						   internalFormat, pgw, pgh, 0, GL_RGBA, GL_UNSIGNED_BYTE, dst.get_image());
 		} else {
@@ -290,7 +290,7 @@ namespace gl {
 				{
 					img_rgba8 im;
 					im.create(vtx::spos(txw, txh), true);
-					copy_to_rgba8(imf, ox, oy, txw, txh, im, 0, 0);
+					copy_to_rgba8(imf, vtx::srect(ox, oy, txw, txh), im, vtx::spos(0, 0));
 					bool f = false;
 					if(sox == 0 && soy == 0) {
 						f = allocate_texture(texture_mems_, mo);
@@ -409,19 +409,19 @@ namespace gl {
 					static const short sofs[3] = { 0, -1, -1 };
 					static const short cpyw[3] = { 1,  2,  1 };
 					static const short dofs[3] = { 1,  0,  0 };
-					copy_to_rgba8(imf, ox + sofs[i], oy + sofs[j],
-						mo->dw + cpyw[i], mo->dh + cpyw[j], im, dofs[i], dofs[j]);
+					copy_to_rgba8(imf, vtx::srect(ox + sofs[i], oy + sofs[j],
+						mo->dw + cpyw[i], mo->dh + cpyw[j]), im, vtx::spos(dofs[i], dofs[j]));
 					mo->tw = im.get_size().x;
 					mo->th = im.get_size().y;
 					bool f = allocate_texture(texture_mems_, mo);
 					if(!f) {
 						add_texture_page(texture_mems_, mo, im);
 					} else {
-						::glBindTexture(GL_TEXTURE_2D, mo->id);
-						::glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-						::glTexSubImage2D(GL_TEXTURE_2D, 0,
-										  mo->tx, mo->ty, im.get_size().x, im.get_size().y,
-										  GL_RGBA, GL_UNSIGNED_BYTE, im.get_image());
+						glBindTexture(GL_TEXTURE_2D, mo->id);
+						glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+						glTexSubImage2D(GL_TEXTURE_2D, 0,
+										mo->tx, mo->ty, im.get_size().x, im.get_size().y,
+										GL_RGBA, GL_UNSIGNED_BYTE, im.get_image());
 					}
 				}
 				mo->tx += 1;
@@ -455,20 +455,20 @@ namespace gl {
 		int level = 0;
 		const vtx::spos& size = imf->get_size();
 		if(imf->get_type() == IMG::FULL8) {
-			::glGenTextures(1, &id);
-			::glBindTexture(GL_TEXTURE_2D, id);
-			::glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-			::glTexImage2D(GL_TEXTURE_2D, level, internal_format_,
+			glGenTextures(1, &id);
+			glBindTexture(GL_TEXTURE_2D, id);
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+			glTexImage2D(GL_TEXTURE_2D, level, internal_format_,
 						   size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, imf->get_image());
 
 		} else if(imf->get_type() == IMG::INDEXED8) {
-			::glGenTextures(1, &id);
-			::glBindTexture(GL_TEXTURE_2D, id);
+			glGenTextures(1, &id);
+			glBindTexture(GL_TEXTURE_2D, id);
 			img_rgba8 im;
 			im.create(size, true);
-			copy_to_rgba8(imf, im, 0, 0);
-			::glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-			::glTexImage2D(GL_TEXTURE_2D, level, internal_format_,
+			copy_to_rgba8(imf, im, vtx::spos(0));
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+			glTexImage2D(GL_TEXTURE_2D, level, internal_format_,
 						   size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, im.get_image());
 		}
 		texture_pages_.push_back(id);
@@ -588,7 +588,7 @@ namespace gl {
 		img_rgba8 tmp;
 		if(src->get_type() != IMG::FULL8) {
 			tmp.create(src->get_size(), true);
-			copy_to_rgba8(src, tmp, 0, 0);
+			copy_to_rgba8(src, tmp);
 			imif = &tmp;
 		}
 

@@ -269,12 +269,13 @@ namespace img {
 		if(stride & 3) stride += 4 - (stride & 3);
 
 		char* buf = new char[stride];
-		int n, d;
+		short d;
+		vtx::spos pos;
 		if(bmp.topdown) {
-			n = 0;
+			pos.y = 0;
 			d = 1;
 		} else {
-			n = bmp.height - 1;
+			pos.y = bmp.height - 1;
 			d = -1;
 		}
 		for(unsigned int h = 0; h < bmp.height; ++h) {
@@ -283,21 +284,21 @@ namespace img {
 				return false;
 			}
 			int depth = 0;
-			for(unsigned int w = 0; w < bmp.width; ++w) {
+			for(pos.x = 0; pos.x < bmp.width; ++pos.x) {
 				unsigned char idx = buf[depth / 8];
 				if(bmp.depth == 4) {
-					if(~w & 1) idx >>= 4;
+					if(~pos.x & 1) idx >>= 4;
 					idx &= 15;
 				} else if(bmp.depth == 1) {
-					idx >>= (~w & 3);
+					idx >>= (~pos.x & 3);
 					idx &= 1;
 				}
 				depth += bmp.depth;
 				img::idx8 c;
 				c.i = idx;
-				img.put_pixel(w, n, c);
+				img.put_pixel(pos, c);
 			}
-			n += d;
+			pos.y += d;
 		}
 		delete[] buf;
 		return true;
@@ -314,12 +315,13 @@ namespace img {
 		if(stride & 3) stride += 4 - (stride & 3);
 
 		char* buf = new char[stride];
-		int n, d;
+		short d;
+		vtx::spos pos;
 		if(bmp.topdown) {
-			n = 0;
+			pos.y = 0;
 			d = 1;
 		} else {
-			n = bmp.height - 1;
+			pos.y = bmp.height - 1;
 			d = -1;
 		}
 		for(unsigned int h = 0; h < bmp.height; ++h) {
@@ -328,16 +330,16 @@ namespace img {
 				return false;
 			}
 			char* src = buf;
-			for(unsigned int w = 0; w < bmp.width; ++w) {
+			for(pos.x = 0; pos.x < bmp.width; ++pos.x) {
 				img::rgba8 c;
 				c.r = src[2];
 				c.g = src[1];
 				c.b = src[0];
 				c.a = 255;
-				img.put_pixel(w, n, c);
+				img.put_pixel(pos, c);
 				src += pads;
 			}
-			n += d;
+			pos.y += d;
 		}
 		delete[] buf;
 		return true;
@@ -399,24 +401,26 @@ namespace img {
 		size_t stride = (bmp.width * (bmp.depth / 8) + 3) & (~3);
 
 		char* rowb = new char[stride];
-		for(unsigned int h = 0; h < bmp.height; ++h) {
+		vtx::spos pos;
+		short d;
+		if(bmp.topdown) {
+			pos.y = 0;
+			d = 1;
+		} else {
+			pos.y = bmp.height - 1;
+			d = -1;
+		}
+		for(uint32_t h = 0; h < bmp.height; ++h) {
 			if(fin.read(rowb, 1, stride) != stride) {
-				delete rowb;
+				delete[] rowb;
 				return false;
 			}
 
 			char* src = rowb;
-			int n;
-			if(bmp.topdown) {
-				n = h;
-			} else {
-				n = bmp.height - h - 1;
-			}
-
 			switch(bmp.depth) {
 			case 16:
 				{
-					for(unsigned int w = 0; w < bmp.width; ++w) {
+					for(pos.x = 0; pos.x < bmp.width; ++pos.x) {
 						unsigned int v = *(unsigned char *)src++;
 						v |= ( *(unsigned char *)src++ ) << 8;
 						rgba8 c;
@@ -427,14 +431,14 @@ namespace img {
 						c.g = (c.g << (8 - bits_cnt.g)) | (c.g >> (8 - bits_cnt.g));
 						c.b = (c.b << (8 - bits_cnt.b)) | (c.b >> (8 - bits_cnt.b));
 						c.a = 255;
-						img.put_pixel(w, n, c);
+						img.put_pixel(pos, c);
 					}
 				}
 				break;
 
 			case 32:
 				{
-					for(unsigned int w = 0; w < bmp.width; ++w) {
+					for(pos.x = 0; pos.x < bmp.width; ++pos.x) {
 						rgba8 c;
 						c.r = src[2];
 						c.g = src[1];
@@ -442,11 +446,12 @@ namespace img {
 						if(img.test_alpha()) c.a = src[3];
 						else c.a = 255;
 						src += 4;
-						img.put_pixel(w, n, c);
+						img.put_pixel(pos, c);
 					}
 				}
 				break;
 			}
+			pos.y += d;
 		}
 		delete[] rowb;
 
@@ -464,11 +469,14 @@ namespace img {
 		stride >>= 3;
 		if(stride & 3) stride += 4 - (stride & 3);
 
-		unsigned int x = 0;
-		unsigned int y = 0;
-		int dy = 1;
-		if(!bmp.topdown) {
-			y = bmp.height - 1;
+		vtx::spos pos;
+		short dy;
+		pos.x = 0;
+		if(bmp.topdown) {
+			pos.y = 0;
+			dy = 1;
+		} else {
+			pos.y = bmp.height - 1;
 			dy = -1;
 		}
 		unsigned char buf[1024];		/* 258 or above */
@@ -483,14 +491,14 @@ namespace img {
 				if(bfptr != buf && bfcnt != 0) memmove(buf, bfptr, bfcnt);
 				size_t rd = fin.read(buf + bfcnt, 1, sizeof(buf) - bfcnt);
 				if(rd == 0) {
-					if(x >= bmp.width) { /*x = 0;*/ y += dy; }
-					if(y >= bmp.height) return false;	/* missing EoB marker */
+					if(pos.x >= bmp.width) { /*x = 0;*/ pos.y += dy; }
+					if(pos.y >= bmp.height) return false;	/* missing EoB marker */
 					else return false;	// ferror(fp) ? err_false : err_readeof;
 				}
 				bfptr  = buf;
 				bfcnt += rd;
 			}
-			if(y >= bmp.height) {
+			if(pos.y >= bmp.height) {
 				/* We simply discard the remaining records */
 				if(bfptr[0] == 0 && bfptr[1] == 1) break;	/* EoB marker */
 				bfptr += reclen;
@@ -502,21 +510,21 @@ namespace img {
 				idx8 c(bfptr[1]);
 				switch(bmp.depth) {
 				case 8:						/* BI_RLE8 */
-					while(n > 0 && x < bmp.width) {
-						img.put_pixel(x, y, c);
+					while(n > 0 && pos.x < bmp.width) {
+						img.put_pixel(pos, c);
 						--n;
-						++x;
+						++pos.x;
 					}
 					break;
 				case 4:						/* BI_RLE4 */
 					int o = 0;
 					idx8 c0(c.i >> 4);
 					idx8 c1(c.i & 0xf);
-					while(n > 0 && x < bmp.width) {
-						if(o & 1) img.put_pixel(x, y, c1);
-						else img.put_pixel(x, y, c0);
+					while(n > 0 && pos.x < bmp.width) {
+						if(o & 1) img.put_pixel(pos, c1);
+						else img.put_pixel(pos, c0);
 						--n;
-						++x;
+						++pos.x;
 						++o;
 					}
 					break;
@@ -526,32 +534,32 @@ namespace img {
 				unsigned char* p = bfptr + 2;
 				switch(bmp.depth) {
 				case 8:						/* BI_RLE8 */
-					while(n > 0 && x < bmp.width) {
+					while(n > 0 && pos.x < bmp.width) {
 						idx8 c( *p++ );
-						img.put_pixel(x, y, c);
+						img.put_pixel(pos, c);
 						--n;
-						++x;
+						++pos.x;
 					}
 					break;
 				case 4:						/* BI_RLE4 */
 					int o = 0;
-					while(n > 0 && x < bmp.width) {
+					while(n > 0 && pos.x < bmp.width) {
 						idx8 c0(p[o >> 1] >> 4);
 						idx8 c1(p[o >> 1] & 0xf);
-						if(o & 1) img.put_pixel(x, y, c1);
-						else img.put_pixel(x, y, c0);
+						if(o & 1) img.put_pixel(pos, c1);
+						else img.put_pixel(pos, c0);
 						--n;
-						++x;
+						++pos.x;
 						++o;
 					}
 					break;
 				}
 			} else if (bfptr[1] == 2) {			/* Delta record */
-				x += bfptr[2];
-				y += bfptr[3] * dy;
+				pos.x += bfptr[2];
+				pos.y += bfptr[3] * dy;
 			} else if (bfptr[1] == 0) {			/* End of line marker */
-				x = 0;
-				y += dy;
+				pos.x = 0;
+				pos.y += dy;
 			} else /*if (bfptr[1] == 1)*/ {		/* End of bitmap marker */
 				break;
 			}

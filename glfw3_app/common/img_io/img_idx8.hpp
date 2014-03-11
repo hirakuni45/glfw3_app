@@ -42,8 +42,7 @@ namespace img {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		img_idx8() : size_(0),
-			clut_max_(0), alpha_(false), color_map_(false) { }
+		img_idx8() : size_(0), clut_max_(0), alpha_(false), color_map_(false) { }
 
 
 		//-----------------------------------------------------------------//
@@ -60,18 +59,17 @@ namespace img {
 			@return	イメージタイプ
 		*/
 		//-----------------------------------------------------------------//
-		IMG::type get_type() const { return IMG::INDEXED8; }
+		IMG::type get_type() const override { return IMG::INDEXED8; }
 
 
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	イメージを確保する
-			@param[in]	width	横幅を指定
-			@param[in]	height	高さを指定
+			@param[in]	size	サイズ
 			@param[in]	alpha	アルファ・チャネルを有効にする場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		void create(const vtx::spos& size, bool alpha = false) {
+		void create(const vtx::spos& size, bool alpha = false) override {
 			destroy();
 			size_ = size;
 			clut_max_ = 0;
@@ -85,12 +83,16 @@ namespace img {
 			@brief	カラー・ルック・アップ・テーブルを設定
 			@param[in]	idx	テーブルの位置
 			@param[in]	c	設定するカラー
+			@return 正常なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		void put_clut(int idx, const rgba8& c) {
+		bool put_clut(int idx, const rgba8& c) {
 			if(idx >= 0 && idx < 256) {
 				if(idx >= clut_max_) clut_max_ = idx + 1;
 				clut_[idx] = c;
+				return true;
+			} else {
+				return false;
 			}
 		}
 
@@ -100,112 +102,116 @@ namespace img {
 			@brief	カラー・ルック・アップ・テーブルを得る
 			@param[in]	idx	テーブルの位置
 			@param[in]	c	受け取るカラー参照ポイント
+			@return 正常なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		void get_clut(int idx, rgba8& c) const {
+		bool get_clut(int idx, rgba8& c) const override {
 			if(idx >= 0 && idx < clut_max_) {
 				c = clut_[idx];
-			}
-		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	イメージに点を描画
-			@param[in]	x	描画位置Ｘ
-			@param[in]	y	描画位置Ｙ
-			@param[in]	c	描画するカラー
-			@return 領域なら「true」
-		*/
-		//-----------------------------------------------------------------//
-		bool put_pixel(int x, int y, const idx8& c) {
-			if(x >= 0 && x < size_.x && y >= 0 && y < size_.y) {
-				img_[size_.x * y + x] = c;
 				return true;
+			} else {
+				return false;
 			}
-			return false;
 		}
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	イメージの点を得る
-			@param[in]	x	描画位置Ｘ
-			@param[in]	y	描画位置Ｙ
-			@param[in]	c	描画されたカラーを受け取るリファレンス
+			@brief	イメージに点を描画
+			@param[in]	pos	描画位置
+			@param[in]	c	描画するカラー
 			@return 領域なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool get_pixel(int x, int y, idx8& c) const {
-			if(x >= 0 && x < size_.x && y >= 0 && y < size_.y) {
-				c  = img_[size_.x * y + x];
+		bool put_pixel(const vtx::spos& pos, const idx8& c) override {
+			if(img_.empty()) return false;
+			if(pos.x >= 0 && pos.x < size_.x && pos.y >= 0 && pos.y < size_.y) {
+				img_[size_.x * pos.y + pos.x] = c;
 				return true;
+			} else {
+				return false;
 			}
-			return false;
-		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	イメージに点を描画
-			@param[in]	x	描画位置Ｘ
-			@param[in]	y	描画位置Ｙ
-			@param[in]	c	描画するカラー
-			@return 領域なら「true」
-		*/
-		//-----------------------------------------------------------------//
-		bool put_pixel(int x, int y, const gray8& c) {
-			return false;
 		}
 
 
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	イメージの点を得る
-			@param[in]	x	描画位置Ｘ
-			@param[in]	y	描画位置Ｙ
+			@param[in]	pos	描画位置
 			@param[in]	c	描画されたカラーを受け取るリファレンス
 			@return 領域なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool get_pixel(int x, int y, gray8& c) const {
-			return false;
+		bool get_pixel(const vtx::spos& pos, idx8& c) const override {
+			if(img_.empty()) return false;
+			if(pos.x >= 0 && pos.x < size_.x && pos.y >= 0 && pos.y < size_.y) {
+				c  = img_[size_.x * pos.y + pos.x];
+				return true;
+			} else {
+				return false;
+			}
 		}
 
 
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	イメージに点を描画
-			@param[in]	x	描画位置Ｘ
-			@param[in]	y	描画位置Ｙ
+			@param[in]	pos	描画位置
 			@param[in]	c	描画するカラー
 			@return 領域なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool put_pixel(int x, int y, const rgba8& c) {
-			return false;
-		}
+		bool put_pixel(const vtx::spos& pos, const gray8& c) override { return false; }
 
 
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	イメージの点を得る
-			@param[in]	x	描画位置Ｘ
-			@param[in]	y	描画位置Ｙ
+			@param[in]	pos	描画位置
+			@param[in]	c	描画されたカラーを受け取るリファレンス
+			@return 領域なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool get_pixel(const vtx::spos& pos, gray8& c) const override { return false; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	イメージに点を描画
+			@param[in]	pos	描画位置
+			@param[in]	c	描画するカラー
+			@return 領域なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool put_pixel(const vtx::spos& pos, const rgba8& c) override { return false; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	イメージの点を得る
+			@param[in]	pos	描画位置
 			@param[in]	c	描画されたカラーを受け取るリファレンス
 		*/
 		//-----------------------------------------------------------------//
-		bool get_pixel(int x, int y, rgba8& c) const {
-			if(x >= 0 && x < size_.x && y >= 0 && y < size_.y) {
-				idx8 idx  = img_[size_.x * y + x];
+		bool get_pixel(const vtx::spos& pos, rgba8& c) const override {
+			if(img_.empty()) return false;
+			if(pos.x >= 0 && pos.x < size_.x && pos.y >= 0 && pos.y < size_.y) {
+				idx8 idx  = img_[size_.x * pos.y + pos.x];
 				c = clut_[idx.i];
 				return true;
+			} else {
+				return false;
 			}
-			return false;
 		}
 
 
-		const void* get_image() const { return static_cast<const void*>(&img_[0]); }
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	イメージのアドレスを得る。
+			@return	イメージのポインター
+		*/
+		//-----------------------------------------------------------------//
+		const void* get_image() const override { return static_cast<const void*>(&img_[0]); }
 
 
 		//-----------------------------------------------------------------//
@@ -214,7 +220,7 @@ namespace img {
 			@return	イメージのサイズ
 		*/
 		//-----------------------------------------------------------------//
-		const vtx::spos& get_size() const { return size_; }
+		const vtx::spos& get_size() const override { return size_; }
 
 
 		//-----------------------------------------------------------------//
@@ -223,7 +229,7 @@ namespace img {
 			@return	最大数
 		*/
 		//-----------------------------------------------------------------//
-		int get_clut_max() const { return clut_max_; }
+		int get_clut_max() const override { return clut_max_; }
 
 
 		//-----------------------------------------------------------------//
@@ -232,7 +238,7 @@ namespace img {
 			@return	アルファ・チャネルが有効なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool test_alpha() const { return alpha_; }
+		bool test_alpha() const override { return alpha_; }
 
 
 		//-----------------------------------------------------------------//
@@ -241,7 +247,7 @@ namespace img {
 			@return	「空」なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool empty() const { return img_.empty(); }
+		bool empty() const override { return img_.empty(); }
 
 
 		//-----------------------------------------------------------------//
@@ -250,18 +256,12 @@ namespace img {
 			@return	利用している色数
 		*/
 		//-----------------------------------------------------------------//
-		unsigned int count_color() const {
+		uint32_t count_color() const override {
 			boost::unordered_set<idx8> n;
 			BOOST_FOREACH(const idx8& c, img_) {
 				n.insert(c);
 			}
-#if 0
-			std::set<idx8> n;
-			for(std::vector<idx8>::const_iterator cit = img_.begin(); cit != img_.end(); ++cit) {
-				n.insert(*cit);
-			}
-#endif
-			return static_cast<unsigned int>(n.size());
+			return static_cast<uint32_t>(n.size());
 		}
 
 
@@ -325,7 +325,7 @@ namespace img {
 			@brief	イメージを廃棄する
 		*/
 		//-----------------------------------------------------------------//
-		void destroy() {
+		void destroy() override {
 			size_.set(0);
 			clut_max_ = 0;
 			std::vector<idx8>().swap(img_);

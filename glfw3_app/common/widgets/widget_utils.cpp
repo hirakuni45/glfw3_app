@@ -42,7 +42,7 @@ namespace gui {
 		}
 		pa.create(s, true);
 		pa.fill(img::rgba8(0));
-		img::copy_to_rgba8(image, 0, 0, s.x, s.y, pa, o.x, o.y);
+		img::copy_to_rgba8(image, vtx::srect(vtx::spos(0), s), pa, o);
 	}
 
 
@@ -72,11 +72,10 @@ namespace gui {
 			}
 
 			if(pp.round_style_ == widget::plate_param::round_style::TOP) {
-				pa.copy(0, size.y - pp.round_radius_, npa,
-					0, size.y - pp.round_radius_, size.x, pp.round_radius_);
+				pa.copy(vtx::spos(0, size.y - pp.round_radius_), npa,
+					vtx::srect(0, size.y - pp.round_radius_, size.x, pp.round_radius_));
 			} else if(pp.round_style_ == widget::plate_param::round_style::BOTTOM) {
-				pa.copy(0, 0, npa,
-					0, 0, size.x, pp.round_radius_);
+				pa.copy(vtx::spos(0), npa, vtx::srect(0, 0, size.x, pp.round_radius_));
 			}
 		}
 	}

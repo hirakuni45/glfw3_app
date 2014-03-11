@@ -354,37 +354,57 @@ namespace img {
 			if(rle_) {
 				buf = new uint8_t[bits / 8 * info_.w];
 			}
-			for(uint16_t y = 0; y < info_.h; ++y) {
-				uint16_t yy;
-				if(info_.v_flip) yy = info_.h - y - 1;
-				else yy = y;
 
+			vtx::spos pos;
+			short dy;
+			if(info_.v_flip) {
+				pos.y = info_.h - 1;
+				dy = -1;
+			} else {
+				pos.y = 0;
+				dy = 1;
+			}
+			for(uint16_t y = 0; y < info_.h; ++y) {
 				if(rle_) {
 					if(!decode_rle_(buf)) {
 						return false;
 					}
 					const uint8_t* p = buf;
+					short dx;
+					if(info_.h_flip) {
+						pos.x = info_.w - 1;
+						dx = -1;
+					} else {
+						pos.x = 0;
+						dx = 1;
+					}
 					for(uint16_t x = 0; x < info_.w; ++x) {
-						uint16_t xx;
-						if(info_.h_flip) xx = info_.w - x - 1;
-						else xx = x;
 						typename IMAGE::pixel_type pix;
 						set_pixel_(p, pix);
-						image.put_pixel(xx, yy, pix);
+						image.put_pixel(pos, pix);
 						p += bits / 8;
+						pos.x += dx;
 					}
 				} else {
+					const uint8_t* p = buf;
+					short dx;
+					if(info_.h_flip) {
+						pos.x = info_.w - 1;
+						dx = -1;
+					} else {
+						pos.x = 0;
+						dx = 1;
+					}
 					for(uint16_t x = 0; x < info_.w; ++x) {
-						uint16_t xx;
-						if(info_.h_flip) xx = info_.w - x - 1;
-						else xx = x;
 						typename IMAGE::pixel_type pix;
 						if(!read_pixel_(pix)) {
 							return false;
 						}
-						image.put_pixel(xx, yy, pix);
+						image.put_pixel(pos, pix);
+						pos.x += dx;
 					}
 				}
+				pos.y += dy;
 			}
 			delete[] buf;
 
@@ -457,20 +477,21 @@ namespace img {
 				uint32_t n = imf->get_size().x * info_.depth / 8;
 				buf = new uint8_t[n];
 			}
-			for(int y = 0; y < imf->get_size().y; ++y) {
-				int yy = imf->get_size().y - y - 1;
+			vtx::spos pos;
+			pos.y = imf->get_size().y - 1;
+			for(short y = 0; y < imf->get_size().y; ++y) {
 				if(rle_) {
 					uint8_t* p = buf;
 					if(imf->get_type() == IMG::INDEXED8) {
-						for(int x = 0; x < imf->get_size().x; ++x) {
+						for(pos.x = 0; pos.x < imf->get_size().x; ++pos.x) {
 							idx8 i;
-							imf->get_pixel(x, yy, i);
+							imf->get_pixel(pos, i);
 							*p++ = i.i;
 						}
 					} else {
-						for(int x = 0; x < imf->get_size().x; ++x) {
+						for(pos.x = 0; pos.x < imf->get_size().x; ++pos.x) {
 							rgba8 c;
-							imf->get_pixel(x, yy, c);
+							imf->get_pixel(pos, c);
 							*p++ = c.b;
 							*p++ = c.g;
 							*p++ = c.r;
@@ -483,15 +504,15 @@ namespace img {
 					}
 				} else {
 					if(imf->get_type() == IMG::INDEXED8) {
-						for(int x = 0; x < imf->get_size().x; ++x) {
+						for(pos.x = 0; pos.x < imf->get_size().x; ++pos.x) {
 							idx8 i;
-							imf->get_pixel(x, yy, i);
+							imf->get_pixel(pos, i);
 							if(!fio_.put(i.i)) return false;
 						}
 					} else {
-						for(int x = 0; x < imf->get_size().x; ++x) {
+						for(pos.x = 0; pos.x < imf->get_size().x; ++pos.x) {
 							rgba8 c;
-							imf->get_pixel(x, yy, c);
+							imf->get_pixel(pos, c);
 							if(!fio_.put(c.b)) return false;
 							if(!fio_.put(c.g)) return false;
 							if(!fio_.put(c.r)) return false;
@@ -501,6 +522,7 @@ namespace img {
 						}
 					}
 				}
+				--pos.y;
 			}
 			delete[] buf;
 			return true;

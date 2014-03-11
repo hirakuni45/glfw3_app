@@ -140,46 +140,50 @@ namespace img {
 
 		if(image->numcomps == 1) {
 			img.create(vtx::spos(wr, hr), false);
-			for(int y = 0; y < hr; ++y) {
-				for(int x = 0; x < wr; ++x) {
+			vtx::spos pos;
+			for(pos.y = 0; pos.y < hr; ++pos.y) {
+				for(pos.x = 0; pos.x < wr; ++pos.x) {
 					rgba8 c;
-					c.g = c.b = c.r = image->comps[0].data[y * w + x];
+					c.g = c.b = c.r = image->comps[0].data[pos.y * w + pos.x];
 					c.a = 255;
-					img.put_pixel(x, y, c);
+					img.put_pixel(pos, c);
 				}
 			}
 		} else if(image->numcomps == 2) {
 			img.create(vtx::spos(wr, hr), true);
-			for(int y = 0; y < hr; ++y) {
-				for(int x = 0; x < wr; ++x) {
+			vtx::spos pos;
+			for(pos.y = 0; pos.y < hr; ++pos.y) {
+				for(pos.x = 0; pos.x < wr; ++pos.x) {
 					rgba8 c;
-					c.g = c.b = c.r = image->comps[0].data[y * w + x];
-					c.a = image->comps[1].data[y * w + x];
-					img.put_pixel(x, y, c);
+					c.g = c.b = c.r = image->comps[0].data[pos.y * w + pos.x];
+					c.a = image->comps[1].data[pos.y * w + pos.x];
+					img.put_pixel(pos, c);
 				}
 			}
 		} else if(image->numcomps == 3) {
 			img.create(vtx::spos(wr, hr), false);
-			for(int y = 0; y < hr; ++y) {
-				for(int x = 0; x < wr; ++x) {
+			vtx::spos pos;
+			for(pos.y = 0; pos.y < hr; ++pos.y) {
+				for(pos.x = 0; pos.x < wr; ++pos.x) {
 					rgba8 c;
-					c.r = image->comps[0].data[y * w + x];
-					c.g = image->comps[1].data[y * w + x];
-					c.b = image->comps[2].data[y * w + x];
+					c.r = image->comps[0].data[pos.y * w + pos.x];
+					c.g = image->comps[1].data[pos.y * w + pos.x];
+					c.b = image->comps[2].data[pos.y * w + pos.x];
 					c.a = 255;
-					img.put_pixel(x, y, c);
+					img.put_pixel(pos, c);
 				}
 			}
 		} else if(image->numcomps == 4) {
 			img.create(vtx::spos(wr, hr), true);
-			for(int y = 0; y < hr; ++y) {
-				for(int x = 0; x < wr; ++x) {
+			vtx::spos pos;
+			for(pos.y = 0; pos.y < hr; ++pos.y) {
+				for(pos.x = 0; pos.x < wr; ++pos.x) {
 					rgba8 c;
-					c.r = image->comps[0].data[y * w + x];
-					c.g = image->comps[1].data[y * w + x];
-					c.b = image->comps[2].data[y * w + x];
-					c.a = image->comps[3].data[y * w + x];
-					img.put_pixel(x, y, c);
+					c.r = image->comps[0].data[pos.y * w + pos.x];
+					c.g = image->comps[1].data[pos.y * w + pos.x];
+					c.b = image->comps[2].data[pos.y * w + pos.x];
+					c.a = image->comps[3].data[pos.y * w + pos.x];
+					img.put_pixel(pos, c);
 				}
 			}
 		}
@@ -473,10 +477,11 @@ namespace img {
 // std::cout << (int)t.image->y1 << std::endl;
 
 		int idx = 0;
-		for(short y = 0; y < size.y; ++y) {
-			for(short x = 0; x < size.x; ++x) {
+		vtx::spos pos;
+		for(pos.y = 0; pos.y < size.y; ++pos.y) {
+			for(pos.x = 0; pos.x < size.x; ++pos.x) {
 				rgba8 c;
-				imf_->get_pixel(x, y, c);
+				imf_->get_pixel(pos, c);
 				t.image->comps[0].data[idx] = c.r;
 				t.image->comps[1].data[idx] = c.g;
 				t.image->comps[2].data[idx] = c.b;
