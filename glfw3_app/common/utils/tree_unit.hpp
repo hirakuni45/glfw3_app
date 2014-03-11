@@ -51,9 +51,12 @@ namespace utils {
 				value.list_all();
 			}
 #endif
-			unit_t() : id_(0) { }
+			unit_t() : id_(0), childs_() { }
 			void set_id(uint32_t id) { id_ = id; }
 			uint32_t get_id() const { return id_; }
+			bool find_child(const std::string& key) {
+				return childs_.find(key) != childs_.end();
+			}
 			void install_child(const std::string& key) {
 				childs_.insert(key);
 			}
