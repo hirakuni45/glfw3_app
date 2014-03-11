@@ -208,17 +208,17 @@ namespace img {
 		int ch;
 		bool alpha;
 		bool gray = false;
-		i_img* imf;
+		bool indexed = false;
 		if(color_type == PNG_COLOR_TYPE_GRAY) {
 			ch = 4;
 			gray = true;
 			alpha = false;
-			imf = dynamic_cast<i_img*>(&img_);
+			img_.create(vtx::spos(width, height), alpha);
 		} else if(color_type == PNG_COLOR_TYPE_GRAY_ALPHA) {
 			ch = 4;
 			gray = true;
 			alpha = true;
-			imf = dynamic_cast<i_img*>(&img_);
+			img_.create(vtx::spos(width, height), alpha);
 //			std::cout << "PNG gray scale with alpha\n";
 		} else if(color_type & PNG_COLOR_MASK_PALETTE) {
 			ch = 1;
@@ -227,26 +227,26 @@ namespace img {
 			png_color_16p tc;
 			png_get_tRNS(png_ptr, info_ptr, &ta, &nt, &tc);
 			if(nt) alpha = true; else alpha = false;
-			imf = dynamic_cast<i_img*>(&idx_);
+			indexed = true;
+			idx_.create(vtx::spos(width, height), alpha);
 		} else if(color_type & PNG_COLOR_MASK_ALPHA) {
 			ch = 4;
 			alpha = true;
-			imf = dynamic_cast<i_img*>(&img_);
+			img_.create(vtx::spos(width, height), alpha);
 //			std::cout << "PNG RGBA\n";
 		} else {
 			ch = 3;
 			alpha = false;
-			imf = dynamic_cast<i_img*>(&img_);
+			img_.create(vtx::spos(width, height), alpha);
 ///			std::cout << "PNG RGB\n";
 		}
 
+		uint32_t skip = 1;
 		if(bit_depth > 8) {
-			ch <<= 1;
+			skip = 2;
 		}
 
-		imf->create(vtx::spos(width, height), alpha);
-
-		if(color_type & PNG_COLOR_MASK_PALETTE) {
+		if(indexed) {  // カラーパレットの読み込み
 			png_bytep ta;
 			int nt;
 			png_color_16p tc;
@@ -261,39 +261,35 @@ namespace img {
 				}
 				const png_color* clut = &pal[i];
 				rgba8 c(clut->red, clut->green, clut->blue, a);
-				imf->put_clut(i, c);
+				idx_.put_clut(i, c);
 			}
 		}
 
-		png_byte* im = new png_byte[width * height * ch];
-
-		// ポインターの作成 [png_bytep]
-		png_bytep*	pp = new png_bytep[height];
-		for(png_uint_32 i = 0; i < height; ++i) {
-			pp[i] = &im[i * width * ch];
-		}
-
-		png_read_image(png_ptr, pp);
+		png_byte* iml = new png_byte[width * ch * skip];
 		vtx::spos pos;
 		for(pos.y = 0; pos.y < static_cast<short>(height); ++pos.y) {
-			png_byte* p = pp[pos.y];
-			if(color_type & PNG_COLOR_MASK_PALETTE) {
-				for(pos.x = 0; pos.x < static_cast<short>(width); ++pos.x) {
-					idx8 idx(*p++);
-					idx_.put_pixel(pos, idx);
-				}
-			} else {
-				for(pos.x = 0; pos.x < static_cast<short>(width); ++pos.x) {
-					img::rgba8 c;
+			png_read_row(png_ptr, iml, NULL);
+			png_byte* p = iml;
+			for(pos.x = 0; pos.x < static_cast<short>(width); ++pos.x) {
+				img::rgba8 c;
+				if(indexed) {
+					idx8 i(*p);
+					p += skip;
+					idx_.put_pixel(pos, i);
+				} else {
 					if(gray) {
-						c.r = c.g = c.b = *p++;
-						if(alpha) c.a = *p++;
+						c.r = c.g = c.b = *p;
+						p += skip;
+						if(alpha) { c.a = *p; p += skip; }
 						else c.a = 255;
 					} else {
-						c.r = *p++;
-						c.g = *p++;
-						c.b = *p++;
-						if(ch == 4) c.a = *p++;
+						c.r = *p;
+						p += skip;
+						c.g = *p;
+						p += skip;
+						c.b = *p;
+						p += skip;
+						if(alpha) { c.a = *p; p += skip; }
 						else c.a = 255;
 					}
 					if(color_key_enable_) {
@@ -311,9 +307,7 @@ namespace img {
 				}
 			}
 		}
-
-		delete[] pp;
-		delete[] im;
+		delete[] iml;
 
 		png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
 
@@ -370,12 +364,11 @@ namespace img {
 		png_set_IHDR(png_ptr, info_ptr, w, h, depth, type,
 			PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
 
-		unsigned char* clut_trans = 0;
-		png_color* clut = 0;
 		if(imf_->get_type() == IMG::INDEXED8) {
-			int color = 256;
+			int color = imf_->get_clut_max();
+			png_color* clut = new png_color[color];
+			unsigned char* clut_trans = 0;
 			if(imf_->test_alpha()) clut_trans = new unsigned char[color];
-			clut = new png_color[color];
 			for(int i = 0; i < color; ++i) {
 				rgba8 c;
 				imf_->get_clut(i, c);
@@ -386,16 +379,17 @@ namespace img {
 			}
 			png_set_PLTE(png_ptr, info_ptr, clut, color);
 			if(imf_->test_alpha()) png_set_tRNS(png_ptr, info_ptr, clut_trans, color, NULL);
+			png_write_info(png_ptr, info_ptr);
+			delete[] clut_trans;
+			delete[] clut;
+		} else {
+			png_write_info(png_ptr, info_ptr);
 		}
 
-		png_write_info(png_ptr, info_ptr);
-
-		png_bytep*	pp = new png_bytep[h];
 		vtx::spos pos;
+		png_byte* iml = new png_byte[w * ch];
 		for(pos.y = 0; pos.y < h; ++pos.y) {
-			pp[pos.y] = new png_byte[w * ch];
-			png_byte* p;
-			p = pp[pos.y];
+			png_byte* p = iml;
 			if(ch == 1) {
 				for(pos.x = 0; pos.x < w; ++pos.x) {
 					idx8	idx;
@@ -412,15 +406,9 @@ namespace img {
 					if(ch == 4) *p++ = c.a;
 				}
 			}
+			png_write_row(png_ptr, iml);
 		}
-		png_write_image(png_ptr, pp);
-
-		delete clut_trans;
-		delete clut;
-		for(int i = 0; i < h; ++i) {
-			delete[] pp[i];
-		}
-		delete[] pp;
+		delete[] iml;
 
 		png_write_end(png_ptr, info_ptr);
 		png_destroy_write_struct(&png_ptr, &info_ptr);

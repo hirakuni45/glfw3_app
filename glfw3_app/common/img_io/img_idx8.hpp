@@ -23,16 +23,17 @@ namespace img {
 	struct img_idx8 : public i_img {
 
 		typedef idx8	pixel_type;
+		typedef std::vector<idx8>	img_type;
 
 	private:
 		vtx::spos	size_;
 
-		int		clut_max_;
-		rgba8	clut_[256];
+		int			clut_max_;
+		rgba8		clut_[256];
 
-		std::vector<idx8>	img_;
+		img_type	img_;
 
-		bool	alpha_;
+		bool		alpha_;
 
 		bool	color_map_;
 
@@ -212,6 +213,15 @@ namespace img {
 		*/
 		//-----------------------------------------------------------------//
 		const void* get_image() const override { return static_cast<const void*>(&img_[0]); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	イメージへの参照
+			@return	イメージ
+		*/
+		//-----------------------------------------------------------------//
+		img_type& at() { return img_; }
 
 
 		//-----------------------------------------------------------------//
