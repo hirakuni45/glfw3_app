@@ -484,10 +484,7 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	bool widget_director::update()
 	{
-		IGLcore* igl = get_glcore();
-
-		// ダイアログがある場合の優先順位とストール処理
-		{
+		{  // ダイアログがある場合の優先順位とストール処理
 			reset_mark();
 			widgets ws;
 			BOOST_FOREACH(widget* w, widgets_) {
@@ -513,6 +510,7 @@ namespace gui {
 			}
 		}
 
+		IGLcore* igl = get_glcore();
 		const device& dev = igl->get_device();
 
 		scroll_ = dev.get_locator().scroll_;
@@ -587,12 +585,10 @@ namespace gui {
 				w->at_param().resize_ref_ = w->get_rect().size;
 				top_resize_ = w;	// リサイズを行う widget 候補
 			}
-			// 選択している widget 候補
-			if(left.lvl && focus) {
+			if(left.lvl && focus) {  // 選択している widget 候補
 				w->set_state(widget::state::DRAG);
 				select = w;
-				if(w->get_state(widget::state::DRAG_UNSELECT)
-				  && msp_length_ > unselect_length_) {
+				if(w->get_state(widget::state::DRAG_UNSELECT) && msp_length_ > unselect_length_) {
 					w->set_state(widget::state::SELECT, false);
 					w->set_state(widget::state::IS_SELECT, false);
 					select = 0;
@@ -683,15 +679,15 @@ namespace gui {
 			}
 		}
 
-		// 移動
-		if(top_move_ && !top_move_->get_state(widget::state::POSITION_LOCK)) {
+		if(top_move_ && !top_move_->get_state(widget::state::POSITION_LOCK)) {  // 移動
 			touch = true;
 			top_move_->at_rect().org = top_move_->get_param().move_pos_;
 		}
 
-		// 選択（top_widget）、トップ・フォーカス
-		if(select) {
-			top_widget_ = select;
+		if(select || top_move_ || top_resize_) {  // 選択（top_widget）、トップ・フォーカス
+			if(top_resize_) top_widget_ = top_resize_;
+			else if(top_move_) top_widget_ = top_move_;
+			else top_widget_ = select;
 			top_widget(root_widget(top_widget_));
 			top_widget(top_widget_);
 		}
