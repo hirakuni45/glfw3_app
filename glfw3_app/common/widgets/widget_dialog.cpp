@@ -89,17 +89,19 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_dialog::update()
 	{
-		bool f = false;
-		if(ok_ && ok_->get_selected()) {
+		bool close = false;
+		if(ok_ && ok_id_ != ok_->get_select_id()) {
+			ok_id_ = ok_->get_select_id();
 			param_.return_ok_ = true;
-			f = true;
+			close = true;
 		}
-		if(cancel_ && cancel_->get_selected()) {
+		if(cancel_ && cancel_id_ != cancel_->get_select_id()) {
+			cancel_id_ = cancel_->get_select_id();
 			param_.return_cancel_ = true;
-			f = true;
+			close = true;
 		}
 
-		if(f) {
+		if(close) {
 			enable(false);
 		}
 	}

@@ -29,12 +29,11 @@ namespace gui {
 			text_param		text_param_;	///< テキスト描画のパラメータ
 			const img::i_img*	image_;		///< ボタンに画像を使う場合
 			gl::mobj::handle	handle_;	///< ボタンにモーションオブジェクトを使う場合
-			uint32_t		counts_;		///< ボタンを押した回数
 
 			param(const std::string& text = "") :
 				plate_param_(), color_param_(widget_director::default_button_color_),
 				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255)),
-				image_(0), handle_(0), counts_(0) { }
+				image_(0), handle_(0) { }
 		};
 
 	private:
@@ -44,6 +43,9 @@ namespace gui {
 
 		gl::mobj::handle	objh_;
 
+		bool				select_in_;
+		uint32_t			id_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -51,7 +53,7 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_button(widget_director& wd, const widget::param& bp, const param& p) :
-			wd_(wd), widget(bp), param_(p), objh_(0) { }
+			wd_(wd), widget(bp), param_(p), objh_(0), select_in_(false), id_(0) { }
 
 
 		//-----------------------------------------------------------------//
@@ -108,11 +110,11 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	押した回数の取得
-			@return 押した回数
+			@brief	選択 ID を取得
+			@return 選択 ID
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t get_counts() const { return param_.counts_; }
+		uint32_t get_select_id() const { return id_; }
 
 
 		//-----------------------------------------------------------------//
