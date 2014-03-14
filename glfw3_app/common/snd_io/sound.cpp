@@ -11,8 +11,6 @@
 #include "pcm.hpp"
 #include "utils/file_info.hpp"
 
-#include <cstdio>
-
 namespace al {
 
 	using namespace al;
@@ -432,7 +430,8 @@ namespace al {
 		sstream_t_.time_  = 0;
 		sstream_t_.etime_ = 0;
 		sstream_t_.open_err_   = 0;
-		::pthread_create(&pth_, NULL, stream_task_, &sstream_t_);
+		pthread_create(&pth_, NULL, stream_task_, &sstream_t_);
+
 
 		return true;
 	}
@@ -467,7 +466,7 @@ namespace al {
 	{
 		if(stream_start_) {
 			sstream_t_.stop_ = true;
-			::pthread_join(pth_ , NULL);
+			pthread_join(pth_ , NULL);
 			stream_start_ = false;
 			sstream_t_.time_ = 0;
 			sstream_t_.etime_ = 0;
@@ -536,7 +535,7 @@ namespace al {
 				stream_tag_ = sstream_t_.tag_;
 			}
 			if(sstream_t_.finsh_) {
-				::pthread_detach(pth_);
+				pthread_detach(pth_);
 				stream_start_ = false;
 			}
 		}
