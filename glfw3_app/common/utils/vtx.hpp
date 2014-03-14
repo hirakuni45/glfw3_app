@@ -173,11 +173,12 @@ namespace vtx {
 		@brief	次元テンプレート共通クラス
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	template <typename T>
+	template <typename T, int NUM>
 	struct vertex_base {
-		typedef T value_type;
+		typedef T   value_type;
 
-		inline size_t size() const { return sizeof(T) * 2; }
+		inline uint32_t dim() const { return NUM; }
+		inline uint32_t size() const { return sizeof(T) * NUM; }
 		static inline T get_min() { T v; min_level(v); return v; }
 		static inline T get_max() { T v; max_level(v); return v; }
 	};
@@ -189,13 +190,9 @@ namespace vtx {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	template <typename T>
-	struct vertex2 : public vertex_base<T> {
+	struct vertex2 : public vertex_base<T, 2> {
 		T	x;
 		T	y;
-
-		enum {
-			dim = 2
-		};
 
 		inline vertex2() { }
 		inline vertex2(const spos& v) : x(v.x), y(v.y) { }
@@ -338,14 +335,10 @@ namespace vtx {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	template <typename T>
-	struct vertex3 : public vertex_base<T> {
+	struct vertex3 : public vertex_base<T, 3> {
 		T	x;
 		T	y;
 		T	z;
-
-		enum {
-			dim = 3
-		};
 
 		inline vertex3() { }
 		inline vertex3(const svtx& v) : x(v.x), y(v.y), z(v.z) { }
@@ -500,15 +493,11 @@ namespace vtx {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	template <typename T>
-	struct vertex4 : public vertex_base<T> {
+	struct vertex4 : public vertex_base<T, 4> {
 		T	x;
 		T	y;
 		T	z;
 		T	w;
-
-		enum {
-			dim = 4
-		};
 
 		inline vertex4() { }
 		explicit inline vertex4(T c) : x(c), y(c), z(c), w(c) { }
