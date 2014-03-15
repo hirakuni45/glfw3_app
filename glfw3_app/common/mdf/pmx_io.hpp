@@ -180,7 +180,7 @@ namespace mdf {
 			struct BDEF1 : public i_weight {
 				int32_t		index;
 				virtual ~BDEF1() { }
-				bool get(utils::file_io& fio, uint8_t index_sizeof) {
+				bool get(utils::file_io& fio, uint8_t index_sizeof) override {
 					return get_(fio, index_sizeof, index);
 				}
 			};
@@ -188,7 +188,7 @@ namespace mdf {
 				int32_t		index[2];
 				float		weight;
 				virtual ~BDEF2() { }
-				bool get(utils::file_io& fio, uint8_t index_sizeof) {
+				bool get(utils::file_io& fio, uint8_t index_sizeof) override {
 					if(!get_(fio, index_sizeof, index[0])) return false;
 					if(!get_(fio, index_sizeof, index[1])) return false;
 					if(!fio.get(weight)) return false;
@@ -199,7 +199,7 @@ namespace mdf {
 				int32_t		index[4];
 				float		weight[4];
 				virtual ~BDEF4() { }
-				bool get(utils::file_io& fio, uint8_t index_sizeof) {
+				bool get(utils::file_io& fio, uint8_t index_sizeof) override {
 					if(!get_(fio, index_sizeof, index[0])) return false;
 					if(!get_(fio, index_sizeof, index[1])) return false;
 					if(!get_(fio, index_sizeof, index[2])) return false;
@@ -218,7 +218,7 @@ namespace mdf {
 				vtx::fvtx	R0;
 				vtx::fvtx	R1;
 				virtual ~SDEF() { }
-				bool get(utils::file_io& fio, uint8_t index_sizeof) {
+				bool get(utils::file_io& fio, uint8_t index_sizeof) override {
 					if(!get_(fio, index_sizeof, index[0])) return false;
 					if(!get_(fio, index_sizeof, index[1])) return false;
 					if(!fio.get(weight)) return false;

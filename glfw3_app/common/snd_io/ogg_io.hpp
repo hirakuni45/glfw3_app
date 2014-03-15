@@ -22,13 +22,15 @@ namespace al {
 		i_audio*		audio_;
 		i_audio*		stream_;
 
+		tag				tag_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		ogg_io() : audio_(0), stream_(0) { }
+		ogg_io() : audio_(0), stream_(0), tag_() { }
 
 
 		//-----------------------------------------------------------------//
@@ -36,7 +38,7 @@ namespace al {
 			@brief	デストラクター
 		*/
 		//-----------------------------------------------------------------//
-		~ogg_io() { destroy(); }
+		virtual ~ogg_io() { destroy(); }
 
 
 		//-----------------------------------------------------------------//
@@ -44,7 +46,7 @@ namespace al {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() { }
+		void initialize() override { }
 
 
 		//-----------------------------------------------------------------//
@@ -53,7 +55,7 @@ namespace al {
 			@return ファイル拡張子の文字列
 		*/
 		//-----------------------------------------------------------------//
-		const char* get_file_ext() const { return "oog"; }
+		const char* get_file_ext() const override { return "oog"; }
 
 
 		//-----------------------------------------------------------------//
@@ -63,7 +65,7 @@ namespace al {
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool probe(utils::file_io& fin);
+		bool probe(utils::file_io& fin) override;
 
 
 		//-----------------------------------------------------------------//
@@ -74,7 +76,7 @@ namespace al {
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool info(utils::file_io& fin, audio_info& info);
+		bool info(utils::file_io& fin, audio_info& info) override;
 
 
 		//-----------------------------------------------------------------//
@@ -83,9 +85,7 @@ namespace al {
 			@return タグを返す
 		*/
 		//-----------------------------------------------------------------//
-//		const tag& get_tag() const {
-//			return tag_;
-//		}
+		const tag& get_tag() const override { return tag_; }
 
 
 		//-----------------------------------------------------------------//
@@ -96,7 +96,7 @@ namespace al {
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool load(utils::file_io& fin, const std::string& opt = "");
+		bool load(utils::file_io& fin, const std::string& opt = "") override;
 
 
 		//-----------------------------------------------------------------//
@@ -107,7 +107,7 @@ namespace al {
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool save(utils::file_io& fout, const std::string& opt = "");
+		bool save(utils::file_io& fout, const std::string& opt = "") override;
 
 
 		//-----------------------------------------------------------------//
@@ -119,7 +119,7 @@ namespace al {
 			@return 成功なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool open_stream(utils::file_io& fi, int size, audio_info& info);
+		bool open_stream(utils::file_io& fi, int size, audio_info& info) override;
 
 
 		//-----------------------------------------------------------------//
@@ -128,7 +128,7 @@ namespace al {
 			@return ストリーム用オーディオ・インターフェース
 		*/
 		//-----------------------------------------------------------------//
-		const i_audio* get_stream() const { return stream_; }
+		const i_audio* get_stream() const override { return stream_; }
 
 
 		//-----------------------------------------------------------------//
@@ -140,7 +140,7 @@ namespace al {
 			@return 読み込んだサンプル数
 		*/
 		//-----------------------------------------------------------------//
-		size_t read_stream(utils::file_io& fin, size_t offset, size_t samples);
+		size_t read_stream(utils::file_io& fin, size_t offset, size_t samples) override;
 
 
 		//-----------------------------------------------------------------//
@@ -148,7 +148,7 @@ namespace al {
 			@brief	ストリームをクローズ
 		*/
 		//-----------------------------------------------------------------//
-		void close_stream();
+		void close_stream() override;
 
 
 		//-----------------------------------------------------------------//
@@ -157,7 +157,7 @@ namespace al {
 			@return オーディオ・インターフェースクラス
 		*/
 		//-----------------------------------------------------------------//
-		const i_audio* get_audio_if() const { return audio_; }
+		const i_audio* get_audio_if() const override { return audio_; }
 
 
 		//-----------------------------------------------------------------//
@@ -166,7 +166,7 @@ namespace al {
 			@param[in]	aif	イメージインターフェース
 		*/
 		//-----------------------------------------------------------------//
-		void set_audio_if(const i_audio* aif) { }
+		void set_audio_if(const i_audio* aif) override { }
 
 
 		//-----------------------------------------------------------------//
@@ -174,7 +174,7 @@ namespace al {
 			@brief	廃棄
 		*/
 		//-----------------------------------------------------------------//
-		void destroy();
+		void destroy() override;
 
 	};
 
