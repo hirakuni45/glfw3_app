@@ -61,14 +61,8 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_button::update()
 	{
-		if(get_select_in()) {
-			select_in_ = true;
-		}
-		if(select_in_ && get_select_out()) {
-			++id_;
-		}
-		if(!get_select()) {
-			select_in_ = false;
+		if(get_selected()) {
+			++param_.id_;
 		}
 	}
 
