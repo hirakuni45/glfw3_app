@@ -259,8 +259,7 @@ namespace app {
 		gui::widget_director& wd = director_.at().widget_director_;
 
 		if(dialog_open_) {
-			if(dialog_open_id_ != dialog_open_->get_select_id()) {
-				dialog_open_id_ = dialog_open_->get_select_id();
+			if(dialog_open_->get_selected()) {
 				if(dialog_) {
 					dialog_->enable();
 				}
@@ -268,8 +267,7 @@ namespace app {
 		}
 
 		if(filer_open_) {
-			if(filer_open_id_ != filer_open_->get_select_id()) {
-				filer_open_id_ = filer_open_->get_select_id();
+			if(filer_open_->get_selected()) {
 				if(filer_) {
 					filer_->enable(!filer_->get_state(gui::widget::state::ENABLE));
 				}
@@ -283,8 +281,7 @@ namespace app {
 		}
 
 		if(menu_open_) {
-			if(menu_open_id_ != menu_open_->get_select_id()) {
-				menu_open_id_ = menu_open_->get_select_id();
+			if(menu_open_->get_selected()) {
 				if(menu_) {
 					menu_->enable(!menu_->get_state(gui::widget::state::ENABLE));
 					if(menu_->get_state(gui::widget::state::ENABLE)) {
