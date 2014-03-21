@@ -7,6 +7,7 @@
 #include "core/kfimg_ft2.hpp"
 #include "utils/string_utils.hpp"
 #include <boost/foreach.hpp>
+#include <ftoutln.h>
 
 using namespace std;
 
@@ -191,10 +192,15 @@ void get_metrics(wchar_t code)
 		} else {
 			error = FT_Load_Char(t.face_, unicode, FT_LOAD_MONOCHROME);
 		}
-
 		FT_GlyphSlot slot = t.face_->glyph;
+#if 0
+		if(slot->format == FT_GLYPH_FORMAT_OUTLINE) {
+			int strength = 2 << 6;
+			FT_Outline_Embolden(&slot->outline, strength);
+			FT_Render_Glyph(slot, FT_RENDER_MODE_NORMAL);
+		}
+#endif
 		FT_Bitmap* bitmap = &slot->bitmap;
-
 		metrics_.bitmap_w = static_cast<float>(bitmap->width);
 		metrics_.bitmap_h = static_cast<float>(bitmap->rows);
 		metrics_.width    = static_cast<float>(slot->metrics.width)  / 64.0f;
