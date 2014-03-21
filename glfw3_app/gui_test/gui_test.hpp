@@ -40,10 +40,6 @@ namespace app {
 		gui::widget_frame*		terminal_frame_;
 		gui::widget_terminal*	terminal_core_;
 
-		uint32_t	dialog_open_id_;
-		uint32_t	filer_open_id_;
-		uint32_t	menu_open_id_;
-
 		uint32_t	filer_id_;
 		uint32_t	menu_id_;
 
@@ -60,7 +56,6 @@ namespace app {
 			tree_frame_(0), tree_core_(0),
 			filer_(0),
 			terminal_frame_(0), terminal_core_(0),
-			dialog_open_id_(0), filer_open_id_(0), menu_open_id_(0),
 			filer_id_(0), menu_id_(0)
 		{ }
 
@@ -78,7 +73,7 @@ namespace app {
 			@brief  初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize();
+		void initialize() override;
 
 
 		//-----------------------------------------------------------------//
@@ -86,7 +81,7 @@ namespace app {
 			@brief  アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update();
+		void update() override;
 
 
 		//-----------------------------------------------------------------//
@@ -94,7 +89,7 @@ namespace app {
 			@brief  レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render();
+		void render() override;
 
 
 		//-----------------------------------------------------------------//
@@ -102,7 +97,7 @@ namespace app {
 			@brief  廃棄
 		*/
 		//-----------------------------------------------------------------//
-		void destroy();
+		void destroy() override;
 
 	};
 

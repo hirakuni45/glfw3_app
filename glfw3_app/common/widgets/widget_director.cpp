@@ -544,11 +544,12 @@ namespace gui {
 		if(left.pos) {
 			position_positive_ = msp;
 			position_level_ = msp;
-			msp_length_ = 0.0f;
 		}
 		if(left.lvl) {
 			msp_length_ += std::sqrt((msp - position_level_).sqr());
 			position_level_ = msp;
+		} else {
+			msp_length_ = 0.0f;
 		}
 		if(left.neg) {
 			position_negative_ = msp;
@@ -571,9 +572,9 @@ namespace gui {
 			if(w->get_state(widget::state::FOCUS_ENABLE)) {
 				w->set_state(widget::state::FOCUS, focus);
 			}
-			if(left.pos && focus) {
+			if(left.pos && focus) {  // 移動を行う widget 候補
 				w->at_param().move_org_ = w->get_rect().org;
-				top_move_ = w;	// 移動を行う widget 候補
+				top_move_ = w;
 			}
 			if(right.pos && focus) {
 				vtx::spos sign(1);
@@ -585,6 +586,8 @@ namespace gui {
 				w->at_param().resize_ref_ = w->get_rect().size;
 				top_resize_ = w;	// リサイズを行う widget 候補
 			}
+
+
 			if(left.lvl && focus) {  // 選択している widget 候補
 				w->set_state(widget::state::DRAG);
 				select = w;
@@ -594,6 +597,8 @@ namespace gui {
 					select = 0;
 				}
 			}
+
+
 			// 移動時
 			if(left.lvl) {
 				vtx::spos d = msp - position_positive_;
@@ -610,6 +615,9 @@ namespace gui {
 		BOOST_FOREACH(widget* w, widgets_) {
 			if(select == w) {
 				w->set_state(widget::state::SELECT);
+				if(left.pos) {
+					w->set_state(widget::state::SELECT_TRG);
+				}
 				touch = true;
 			} else {
 				w->set_state(widget::state::SELECT, false);
@@ -639,6 +647,9 @@ namespace gui {
 			w->set_state(widget::state::BEFORE_SELECT, f);
 			f = w->get_state(widget::state::SELECT);
 			w->set_state(widget::state::IS_SELECT, f);
+			if(!f && !w->get_state(widget::state::BEFORE_SELECT)) {
+				w->set_state(widget::state::SELECT_TRG, false);
+			}
 			if(f) { ++w->at_param().hold_frame_; }
 			else {
 				if(w->get_state(widget::state::BEFORE_SELECT)) {

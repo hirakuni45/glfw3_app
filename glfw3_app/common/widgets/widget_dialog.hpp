@@ -58,9 +58,7 @@ namespace gui {
 
 		widget_text*		text_;
 		widget_button*		ok_;
-		uint32_t			ok_id_;
 		widget_button*		cancel_;
-		uint32_t			cancel_id_;
 
 		void destroy_();
 	public:
@@ -71,7 +69,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_dialog(widget_director& wd, const widget::param& wp, const param& p) :
 			wd_(wd), widget(wp), param_(p), objh_(0),
-			text_(0), ok_(0), ok_id_(0), cancel_(0), cancel_id_(0)
+			text_(0), ok_(0), cancel_(0)
 		{ }
 
 
