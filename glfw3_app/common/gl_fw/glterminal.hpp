@@ -36,7 +36,7 @@ namespace gl {
 
 	private:
 		struct code {
-			wchar_t	cha;
+			uint16_t	cha;
 			img::rgba8		fore_color;
 			img::rgba8		back_color;
 			attribute::type	atr;
@@ -125,7 +125,7 @@ namespace gl {
 			@param[in]	ch	UTF-16 文字コード
 		*/
 		//-----------------------------------------------------------------//
-		void put(wchar_t ch);
+		void put(uint16_t ch);
 
 
 		//-----------------------------------------------------------------//
@@ -135,8 +135,8 @@ namespace gl {
 		*/
 		//-----------------------------------------------------------------//
 		void puts(const utils::wstring& st) {
-			wchar_t ch;
-			const wchar_t* p = st.c_str();
+			uint16_t ch;
+			const uint16_t* p = st.c_str();
 			while((ch = *p++) != 0) {
 				put(ch);
 			}

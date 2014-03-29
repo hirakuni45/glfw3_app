@@ -12,7 +12,7 @@ using namespace std;
 namespace gl {
 
 	// 初期化時に設定ビットマップを作成しておくフォント列（unicode）
-	static const wchar_t iniial_fonts[] = {
+	static const uint16_t iniial_fonts[] = {
 		
 		0x0000
 	};
@@ -132,7 +132,7 @@ namespace gl {
 			bool tmp = face_->info_.proportional;	
 			face_->info_.proportional = true;
 			int fixw = 0;
-			for(wchar_t i = 0x20; i < 0x7f; ++i) {
+			for(uint16_t i = 0x20; i < 0x7f; ++i) {
 				install_font(i);
 				int w = get_width(i);
 				if(fixw < w) fixw = w;
@@ -288,7 +288,7 @@ namespace gl {
 		@return 登録できたら iterator を返す。
 	*/
 	//-----------------------------------------------------------------//
-	fonts::fcode_map_it fonts::install_image(wchar_t code)
+	fonts::fcode_map_it fonts::install_image(uint16_t code)
 	{
 		const img::i_img* image = kfm_->get_img();
 		const vtx::spos& isz = image->get_size();
@@ -358,12 +358,12 @@ namespace gl {
 	}
 
 
-	static bool char_to_ucs(const char* text, utils::wstring& dst)
+	static bool char_to_ucs_(const char* text, utils::wstring& dst)
 	{
-		unsigned char c;
+		uint8_t c;
 		int cnt = 0;
-		wchar_t	code = 0;
-		while((c = *(unsigned char *)text++) != 0) {
+		uint16_t code = 0;
+		while((c = *(uint8_t *)text++) != 0) {
 			if(c < 0x80) { code = c; cnt = 0; }
 			else if((c & 0xf0) == 0xe0) { code = (c & 0x0f); cnt = 2; }
 			else if((c & 0xe0) == 0xc0) { code = (c & 0x1f); cnt = 1; }
@@ -394,10 +394,10 @@ namespace gl {
 		@return 登録できたら、「true」を返す。
 	*/
 	//-----------------------------------------------------------------//
-	bool fonts::install_font(const wchar_t* list)
+	bool fonts::install_font(const uint16_t* list)
 	{
 		bool f = false;
-		wchar_t wc;
+		uint16_t wc;
 		while((wc = *list++) != 0) {
 			if(install_font(wc)) f = true;
 		}
@@ -414,8 +414,8 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	bool fonts::install_font(const char* list)
 	{
-		wstring ws;
-		char_to_ucs(list, ws);
+		utils::wstring ws;
+		char_to_ucs_(list, ws);
 		return install_font(ws.c_str());
 	}
 
@@ -465,7 +465,7 @@ namespace gl {
 	}
 
 
-	int fonts::font_width_(wchar_t code, int fw, int fh)
+	int fonts::font_width_(uint16_t code, int fw, int fh)
 	{
 		int fow = 0;
 		// 等幅フォントで英数字の場合
@@ -496,7 +496,7 @@ namespace gl {
 		@return	描画に成功したらフォントの幅を返す。
 	 */
 	//-----------------------------------------------------------------//
-	int fonts::draw(const vtx::spos& pos, wchar_t code)
+	int fonts::draw(const vtx::spos& pos, uint16_t code)
 	{
 		fcode_map_cit cit = find_font_code(code);
 		if(cit == face_->fcode_map_.end()) {
@@ -652,7 +652,7 @@ namespace gl {
 		@return	フォントの幅を返す
 	 */
 	//-----------------------------------------------------------------//
-	int fonts::get_width(wchar_t code)
+	int fonts::get_width(uint16_t code)
 	{
 		fcode_map_cit cit = find_font_code(code);
 		if(cit == face_->fcode_map_.end()) {
@@ -680,8 +680,8 @@ namespace gl {
 		short y = pos.y;
 		short xt = x;
 		short xx = x;
-		const wchar_t* p = text.c_str();
-		while(wchar_t code = *p++) {
+		const uint16_t* p = text.c_str();
+		while(uint16_t code = *p++) {
 			if(code < 32) {
 				if(code == '\n') {
 					x = xt;
@@ -712,7 +712,7 @@ namespace gl {
 		short xx = x;
 		unsigned char c;
 		int cnt = 0;
-		wchar_t	code = 0;
+		uint16_t code = 0;
 		const char* p = text.c_str();
 		while((c = *(unsigned char *)p++) != 0) {
 			if(c < 0x80) { code = c; cnt = 0; }
@@ -760,7 +760,7 @@ namespace gl {
 		int xm = 0;
 		int x = 0;
 		int cnt = 0;
-		wchar_t	code = 0;
+		uint16_t code = 0;
 		BOOST_FOREACH(char c, text) {
 			unsigned char uc = static_cast<unsigned char>(c);
 			if(uc < 0x80) { code = uc; cnt = 0; }
@@ -800,7 +800,7 @@ namespace gl {
 	{
 		vtx::spos size(0, 0);
 		vtx::spos tmp(0, face_->info_.size);
-		BOOST_FOREACH(wchar_t wch, wt) {
+		BOOST_FOREACH(uint16_t wch, wt) {
 			if(wch >= 0x20) {
 				tmp.x += get_width(wch);
 			} else {

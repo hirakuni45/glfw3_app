@@ -102,23 +102,23 @@ namespace utils {
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	UTF-16 対応のファイルオープン
+		@brief	UTF-32 対応のファイルオープン
 		@param[in]	fn	ファイル名
 		@param[in]	md	オープンモード
 		@return オープンできれば、ファイル構造体のポインターを返す
 	*/
 	//-----------------------------------------------------------------//
-	std::FILE* wfopen(const utils::wstring& fn, const std::string& md);
+	std::FILE* wfopen(const utils::lstring& fn, const std::string& md);
 
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	ディレクトリーか調べる（UTF16）
+		@brief	ディレクトリーか調べる（UTF32）
 		@param[in]	fn	ファイル名
 		@return ディレクトリーなら「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool is_directory(const utils::wstring& fn);
+	bool is_directory(const utils::lstring& fn);
 
 
 	//-----------------------------------------------------------------//
@@ -129,21 +129,21 @@ namespace utils {
 	*/
 	//-----------------------------------------------------------------//
 	inline bool is_directory(const std::string& fn) {
-		utils::wstring wfn;
-		utils::utf8_to_utf16(fn, wfn);
-		return is_directory(wfn);
+		utils::lstring lfn;
+		utils::utf8_to_utf32(fn, lfn);
+		return is_directory(lfn);
 	}
 
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	ファイルの検査（UTF16)
+		@brief	ファイルの検査（UTF32)
 		@param[in]	fn	ファイル名
 		@param[in]	dir	「true」ならディレクトリーとして検査
 		@return ファイルが有効なら「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool probe_file(const utils::wstring& fn, bool dir = false);
+	bool probe_file(const utils::lstring& fn, bool dir = false);
 
 
 	//-----------------------------------------------------------------//
@@ -155,9 +155,9 @@ namespace utils {
 	*/
 	//-----------------------------------------------------------------//
 	inline bool probe_file(const std::string& fn, bool dir = false) {
-		utils::wstring ws;
-		utils::utf8_to_utf16(fn, ws);
-		return probe_file(ws, dir);
+		utils::lstring ls;
+		utils::utf8_to_utf32(fn, ls);
+		return probe_file(ls, dir);
 	}
 
 
@@ -246,7 +246,7 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	ファイル・オープン
-			@param[in]	fileame	ファイル名(wchar_t)
+			@param[in]	fileame	ファイル名
 			@param[in]	mode		モード
 			@return	正常なら「true」
 		*/
@@ -258,10 +258,10 @@ namespace utils {
 			fpath_ = filename;
 			mode_ = mode;
 
-			utils::wstring wfn;
-			utf8_to_utf16(fpath_, wfn);
+			utils::lstring lfn;
+			utf8_to_utf32(fpath_, lfn);
 
-			fp_ = wfopen(wfn, mode);
+			fp_ = wfopen(lfn, mode);
 			if(fp_ == 0) {
 				return false;
 			} else {
@@ -276,14 +276,14 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	ファイル・オープン
-			@param[in]	filename	ファイル名(char)
+			@param[in]	filename	ファイル名
 			@param[in]	mode		モード
 			@return	正常なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool open(const utils::wstring& filename, const std::string& mode) {
+		bool open(const utils::lstring& filename, const std::string& mode) {
 			std::string s;
-			utils::utf16_to_utf8(filename, s);
+			utils::utf32_to_utf8(filename, s);
 			return open(s, mode);
 		}
 
@@ -543,11 +543,11 @@ namespace utils {
 			@return	読み込んだ数
 		*/
 		//-----------------------------------------------------------------//
-		size_t get(utils::wstring& pad, uint32_t size = 0, wchar_t term = 0) {
+		size_t get(utils::wstring& pad, uint32_t size = 0, uint16_t term = 0) {
 			if(size == 0) {
 				uint32_t n = 0;
 				while(1) {
-					wchar_t ch;
+					uint16_t ch;
 					if(!get(ch)) {
 						return n;
 					}

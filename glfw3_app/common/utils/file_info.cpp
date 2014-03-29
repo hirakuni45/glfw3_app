@@ -23,40 +23,65 @@ namespace utils {
 	{
 		if(root.empty()) return false;
 
-#ifdef _INC__MINGW_H
+#if 1
 		utils::wstring wsr;
 		utf8_to_utf16(root, wsr);
-		_WDIR* dir = ::_wopendir(wsr.c_str());
+		wchar_t* wtmp = new wchar_t[wsr.size() + 1];
+		for(uint32_t i = 0; i < wsr.size(); ++i) {
+			wtmp[i] = wsr[i];
+		}
+		wtmp[wsr.size()] = 0;
+		_WDIR* dir = _wopendir(wtmp);
+		delete[] wtmp;
 #else
-		std::string rsjis;
-		utils::utf8_to_sjis(root, rsjis);
-		DIR* dir = ::opendir(rsjis.c_str());
+//		std::string rsjis;
+//		utils::utf8_to_sjis(root, rsjis);
+		DIR* dir = opendir(root.c_str());
 #endif
 		if(dir) {
 			int i = 0;
-#ifdef _INC__MINGW_H
+#if 1
 			struct _wdirent* ent;
-			while((ent = ::_wreaddir(dir)) != 0) {
+			while((ent = _wreaddir(dir)) != 0) {
 				struct _stat st;
 				utils::wstring fn;
 				utf8_to_utf16(root, fn);
 				fn += '/';
-				fn += ent->d_name;
-				if(ent->d_namlen > 0 && ::_wstat(fn.c_str(), &st) == 0) {
+				{
+					wchar_t wch;
+					wchar_t* p = ent->d_name;
+					while((wch = *p++) != 0) {					
+						fn += wch;
+					}
+				}
+				wchar_t* wfn = new wchar_t[fn.size() + 1];
+				for(uint32_t i = 0; i < fn.size(); ++i) {
+					wfn[i] = fn[i];
+				}
+				wfn[fn.size()] = 0;
+				if(ent->d_namlen > 0 && _wstat(wfn, &st) == 0) {
 					bool d = S_ISDIR(st.st_mode);
+					wstring ws;
+					wchar_t wch;
+					wchar_t* p = ent->d_name;
+					while((wch = *p++) != 0) {
+						ws += wch;
+					}
 					std::string s;
-					utf16_to_utf8(ent->d_name, s);
+					utf16_to_utf8(ws, s);
 					file_info info(s, d, st.st_size, st.st_mtime, st.st_mode);
 					list.push_back(info);
 					i++;
 				}
+				delete[] wfn;
 			}
-			::_wclosedir(dir);
+			_wclosedir(dir);
 #else
 			struct dirent* ent;
-			while((ent = ::readdir(dir)) != 0) {
+			while((ent = readdir(dir)) != 0) {
 				struct stat st;
-				std::string fn = rsjis;
+///				std::string fn = rsjis;
+				std::string fn = root;
 				fn += '/';
 				fn += ent->d_name;
 				if(::stat(fn.c_str(), &st) == 0) {
@@ -73,7 +98,7 @@ namespace utils {
 					i++;
 				}
 			}
-			::closedir(dir);
+			closedir(dir);
 #endif
 			if(i) return true;
 			else return false;

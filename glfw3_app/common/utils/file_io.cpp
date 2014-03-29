@@ -50,24 +50,6 @@ namespace utils {
 			init_ = true;
 			exit_ = false;
 		}
-
-#if 0
-		iconv_t icd = iconv_open("UTF-8", "Shift_JIS");
-		if(icd == 0) {
-			std::cout << "Can't open iconv..." << std::endl;
-			return false;
-		}
-
-		size_t srclen = strlen(src);
-		size_t dstlen = srclen * 4 + 1;
-		char* dst_tmp = new char[dstlen];
-		size_t st = iconv(icd, &src, &srclen, &dst_tmp, &dstlen);
-		dst_tmp[dstlen] = 0;
-		dst += dst_tmp;
-		delete[] dst_tmp;
-		iconv_close(icd);
-#endif
-
 #endif
 
 		if(path.empty()) {
@@ -76,7 +58,9 @@ namespace utils {
 			wchar_t buff[blen];
 			buff[0] = 0;
 			_wgetcwd(buff, blen);
-			utils::code_conv(utils::wstring(buff), '\\', '/', app_path_);
+			utils::wstring ws;
+			ws += (const uint16_t*)buff;
+   			utils::code_conv(ws, '\\', '/', app_path_);
 #else
 #ifdef __PPU__
 // PS3 ではカレントディレクトリーの概念が無い？
@@ -225,21 +209,29 @@ namespace utils {
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	UTF-16 対応のファイルオープン
+		@brief	UTF-32 対応のファイルオープン
 		@param[in]	fn	ファイル名
 		@param[in]	md	オープンモード
 		@return オープンできれば、ファイル構造体のポインターを返す
 	*/
 	//-----------------------------------------------------------------//
-	std::FILE* wfopen(const wstring& fn, const std::string& md)
+	std::FILE* wfopen(const lstring& fn, const std::string& md)
 	{
-		std::FILE* fp;
-// mingw サポート、UTF-16 対応 fopen
-
+		std::FILE* fp = 0;
 #ifdef WIN32
-		utils::wstring wsm;
-		utils::utf8_to_utf16(md, wsm);
-		fp = _wfopen(fn.c_str(), wsm.c_str());
+		wchar_t* wsm = new wchar_t[md.size() + 1];
+		for(uint32_t i = 0; i < md.size(); ++i) {
+			wsm[i] = md[i];
+		}
+		wsm[md.size()] = 0;
+		wchar_t* wfn = new wchar_t[fn.size() + 1];
+		for(uint32_t i = 0; i < fn.size(); ++i) {
+			wfn[i] = fn[i];
+		}
+		wfn[fn.size()] = 0;
+		fp = _wfopen(wfn, wsm);
+		delete[] wfn;
+		delete[] wsm;
 #else
 		std::string s;
 		utils::utf16_to_sjis(fn, s);
@@ -250,7 +242,7 @@ namespace utils {
 #ifndef NDEBUG
 		if(fp == 0) {
 			std::string s;
-			utils::utf16_to_utf8(fn, s);
+			utils::utf32_to_utf8(fn, s);
 			std::string tt;
 			if(strchr(md.c_str(), 'w')) tt = "output";
 			else tt = "input";
@@ -268,11 +260,18 @@ namespace utils {
 		@return ディレクトリーなら「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool is_directory(const wstring& fn)
+	bool is_directory(const lstring& fn)
 	{
 #ifdef WIN32
 		struct _stat st;
-		if(_wstat(fn.c_str(), &st) == 0) {
+		wchar_t* wfn = new wchar_t[fn.size() + 1];
+		for(uint32_t i = 0; i < fn.size(); ++i) {
+			wfn[i] = fn[i];
+		}
+		wfn[fn.size()] = 0;
+		int ret = _wstat(wfn, &st);
+		delete[] wfn;
+		if(ret == 0) {
 			return S_ISDIR(st.st_mode);
 		}
 #else
@@ -289,20 +288,27 @@ namespace utils {
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	ファイルの検査（UTF16)
+		@brief	ファイルの検査（UTF32)
 		@param[in]	fn	ファイル名
 		@param[in]	dir	「true」ならディレクトリーとして検査
 		@return ファイルが有効なら「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool probe_file(const wstring& fn, bool dir)
+	bool probe_file(const lstring& fn, bool dir)
 	{
 #ifdef WIN32
 		struct _stat st;
-		if(::_wstat(fn.c_str(), &st) == 0) {
+		wchar_t* wfn = new wchar_t[fn.size() + 1];
+		for(uint32_t i = 0; i < fn.size(); ++i) {
+			wfn[i] = fn[i];
+		}
+		wfn[fn.size()] = 0;
+		int ret = _wstat(wfn, &st);
+		delete[] wfn;
+		if(ret == 0) {
 #else
 		std::string s;
-		utf16_to_sjis(fn.c_str(), s);
+		utf32_to_utf8(fn, s);
 		struct stat st;
 		if(stat(s.c_str(), &st) == 0) {
 #endif

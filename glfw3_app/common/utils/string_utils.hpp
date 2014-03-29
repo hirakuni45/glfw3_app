@@ -15,9 +15,13 @@ namespace utils {
 	typedef std::string::iterator						string_it;
 	typedef std::string::const_iterator					string_cit;
 
-	typedef std::basic_string<wchar_t>					wstring;
-	typedef std::basic_string<wchar_t>::iterator		wstring_it;
-	typedef std::basic_string<wchar_t>::const_iterator	wstring_cit;
+	typedef std::basic_string<uint16_t>					wstring;
+	typedef std::basic_string<uint16_t>::iterator		wstring_it;
+	typedef std::basic_string<uint16_t>::const_iterator	wstring_cit;
+
+	typedef std::basic_string<uint32_t>					lstring;
+	typedef std::basic_string<uint32_t>::iterator		lstring_it;
+	typedef std::basic_string<uint32_t>::const_iterator	lstring_cit;
 
 	typedef std::vector<std::string>					strings;
 	typedef std::vector<std::string>::iterator			strings_it;
@@ -26,6 +30,10 @@ namespace utils {
 	typedef std::vector<wstring>						wstrings;
 	typedef std::vector<wstring>::iterator				wstrings_it;
 	typedef std::vector<wstring>::const_iterator		wstrings_cit;
+
+	typedef std::vector<lstring>						lstrings;
+	typedef std::vector<lstring>::iterator				lstrings_it;
+	typedef std::vector<lstring>::const_iterator		lstrings_cit;
 
 	typedef std::vector<strings>						strings_array;
 	typedef std::vector<strings>::iterator	   			strings_array_it;
@@ -48,6 +56,7 @@ namespace utils {
 	inline size_t string_strlenT(const T& src) { return src.size(); }
 	inline size_t string_strlen(const std::string& src) { return string_strlenT(src); }
 	inline size_t string_strlen(const wstring& src) { return string_strlenT(src); }
+	inline size_t string_strlen(const lstring& src) { return string_strlenT(src); }
 
 
 	//-----------------------------------------------------------------//
@@ -65,12 +74,13 @@ namespace utils {
 		else return &src[idx];
 	}
 	inline const char* string_strchr(const std::string& src, char ch) { return string_strchrT(src, ch); }
-	inline const wchar_t* string_strchr(const wstring& src, wchar_t ch) { return string_strchrT(src, ch); }
+	inline const uint16_t* string_strchr(const wstring& src, uint16_t ch) { return string_strchrT(src, ch); }
+	inline const uint32_t* string_strchr(const lstring& src, uint32_t ch) { return string_strchrT(src, ch); }
 
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	要するに、strrchr の string/wstring 版
+		@brief	要するに、strrchr の Xstring 版
 		@param[in]	src	ソース
 		@param[in]	ch	探す文字
 		@return 見つかればポインターを返す
@@ -83,7 +93,8 @@ namespace utils {
 		else return &src[idx];
 	}
 	inline const char* string_strrchr(const std::string& src, char ch) { return string_strrchrT(src, ch); }
-	inline const wchar_t* string_strrchr(const wstring& src, wchar_t ch) { return string_strrchrT(src, ch); }
+	inline const uint16_t* string_strrchr(const wstring& src, uint16_t ch) { return string_strrchrT(src, ch); }
+	inline const uint32_t* string_strrchr(const lstring& src, uint32_t ch) { return string_strrchrT(src, ch); }
 
 
 	//-----------------------------------------------------------------//
@@ -100,13 +111,15 @@ namespace utils {
 	}
 	inline int string_strcmp(const std::string& srca, const std::string& srcb) {
 		return string_strcmpT(srca, srcb); }
-	inline int string_strcmp(const wstring& srca, const utils::wstring& srcb) {
+	inline int string_strcmp(const wstring& srca, const wstring& srcb) {
+		return string_strcmpT(srca, srcb); }
+	inline int string_strcmp(const lstring& srca, const lstring& srcb) {
 		return string_strcmpT(srca, srcb); }
 
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	要するに、strncmp の string/wstring 版
+		@brief	要するに、strncmp の Xstring 版
 		@param[in]	srca 文字列 A
 		@param[in]	srcb 文字列 B
 		@param[in]	n	比較長さ
@@ -119,7 +132,9 @@ namespace utils {
 	}
 	inline int string_strncmp(const std::string& srca, const std::string& srcb, std::string::size_type n) {
 		return string_strncmpT(srca, srcb, n); }
-	inline int string_strncmp(const wstring& srca, const utils::wstring& srcb, wstring::size_type n) {
+	inline int string_strncmp(const wstring& srca, const wstring& srcb, wstring::size_type n) {
+		return string_strncmpT(srca, srcb, n); }
+	inline int string_strncmp(const lstring& srca, const lstring& srcb, lstring::size_type n) {
 		return string_strncmpT(srca, srcb, n); }
 
 
@@ -161,80 +176,56 @@ namespace utils {
 	inline int no_capital_strcmp(const std::string& srca, const std::string& srcb) {
 		return no_capital_strcmpT(srca, srcb);
 	}
-	inline int no_capital_strcmp(const wstring& srca, const utils::wstring& srcb) {
+	inline int no_capital_strcmp(const wstring& srca, const wstring& srcb) {
+		return no_capital_strcmpT(srca, srcb);
+	}
+	inline int no_capital_strcmp(const lstring& srca, const lstring& srcb) {
 		return no_capital_strcmpT(srca, srcb);
 	}
 
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	UTF-8(ucs2) から UTF-16 への変換
+		@brief	UTF-8 から UTF-16 への変換
 		@param[in]	src	UTF-8 ソース
 		@param[in]	dst	UTF-16 出力
 		@return 変換が正常なら「true」
 	*/
 	//-----------------------------------------------------------------//
-	inline bool utf8_to_utf16(const std::string& src, wstring& dst)
-	{
-		if(src.empty()) return false;
-
-		bool f = true;
-		int cnt = 0;
-		wchar_t	code = 0;
-		BOOST_FOREACH(char tc, src) {
-			unsigned char c = static_cast<unsigned char>(tc);
-			if(c < 0x80) { code = c; cnt = 0; }
-			else if((c & 0xf0) == 0xe0) { code = (c & 0x0f); cnt = 2; }
-			else if((c & 0xe0) == 0xc0) { code = (c & 0x1f); cnt = 1; }
-			else if((c & 0xc0) == 0x80) {
-				code <<= 6;
-				code |= c & 0x3f;
-				cnt--;
-				if(cnt == 0 && code < 0x80) {
-					code = 0;	// 不正なコードとして無視
-					f = false;
-				} else if(cnt < 0) {
-					code = 0;
-				}
-			}
-			if(cnt == 0 && code != 0) {
-				dst += code;
-			}
-		}
-		return f;
-	}
+	bool utf8_to_utf16(const std::string& src, wstring& dst);
 
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	UTF-16 から UTF-8(ucs2) への変換
+		@brief	UTF-8 から UTF-32 への変換
 		@param[in]	src	UTF-8 ソース
-		@param[in]	dst	UTF-16 出力
+		@param[in]	dst	UTF-32 出力
 		@return 変換が正常なら「true」
 	*/
 	//-----------------------------------------------------------------//
-	inline bool utf16_to_utf8(const wstring& src, std::string& dst)
-	{
-		if(src.empty()) return false;
+	bool utf8_to_utf32(const std::string& src, lstring& dst);
 
-		bool f = true;
-		BOOST_FOREACH(wchar_t c, src) {
-			uint16_t code = static_cast<uint16_t>(c);
-			if(code < 0x0080) {
-				dst += code;
-			} else if(code >= 0x0080 && code <= 0x07ff) {
-				dst += 0xc0 | ((code >> 6) & 0x1f);
-				dst += 0x80 | (code & 0x3f);
-			} else if(code >= 0x0800) {
-				dst += 0xe0 | ((code >> 12) & 0x0f);
-				dst += 0x80 | ((code >> 6) & 0x3f);
-				dst += 0x80 | (code & 0x3f);
-			} else {
-				f = false;
-			}
-		}
-		return f;
-	}
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	UTF-16 から UTF-8 への変換
+		@param[in]	src	UTF-16 ソース
+		@param[in]	dst	UTF-8 出力
+		@return 変換が正常なら「true」
+	*/
+	//-----------------------------------------------------------------//
+	bool utf16_to_utf8(const wstring& src, std::string& dst);
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	UTF-32 から UTF-8 への変換
+		@param[in]	src	UTF-32 ソース
+		@param[in]	dst	UTF-8 出力
+		@return 変換が正常なら「true」
+	*/
+	//-----------------------------------------------------------------//
+	bool utf32_to_utf8(const lstring& src, std::string& dst);
 
 
 	//-----------------------------------------------------------------//
@@ -458,7 +449,8 @@ namespace utils {
 		return src.c_str();
 	}
 	inline const char* get_file_name(const std::string& src) { return get_file_nameT(src); }
-	inline const wchar_t* get_file_name(const wstring& src) { return get_file_nameT(src); }
+	inline const uint16_t* get_file_name(const wstring& src) { return get_file_nameT(src); }
+	inline const uint32_t* get_file_name(const lstring& src) { return get_file_nameT(src); }
 
 
 	//-----------------------------------------------------------------//

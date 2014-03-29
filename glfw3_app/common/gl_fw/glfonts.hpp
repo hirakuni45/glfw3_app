@@ -79,11 +79,11 @@ namespace gl {
 		face_map		face_map_;
 		face_t*			face_;
 
-		fcode_map_cit find_font_code(wchar_t code) const {
+		fcode_map_cit find_font_code(uint16_t code) const {
 			return face_->fcode_map_.find((face_->info_.size << 16) | code);
 		}
 
-		fcode_map_it install_font_code(wchar_t code, const tex_map& tmap) {
+		fcode_map_it install_font_code(uint16_t code, const tex_map& tmap) {
 			std::pair<fcode_map_it, bool> ret;
 			ret = face_->fcode_map_.insert(fcode_pair(((face_->info_.size << 16) | code), tmap));
 			return ret.first;
@@ -135,7 +135,7 @@ namespace gl {
 		bool allocate_font_texture(int width, int height, tex_map& tmap);
 
 
-		int font_width_(wchar_t code, int fw, int fh);
+		int font_width_(uint16_t code, int fw, int fh);
 
 	public:
 		//-----------------------------------------------------------------//
@@ -426,7 +426,7 @@ namespace gl {
 			@return 登録できたら、「fcode_map」のイテレーターを返す
 		*/
 		//-----------------------------------------------------------------//
-		fcode_map_it install_image(wchar_t code);
+		fcode_map_it install_image(uint16_t code);
 
 
 		//-----------------------------------------------------------------//
@@ -436,7 +436,7 @@ namespace gl {
 			@return 登録できたら、「true」を返す。
 		*/
 		//-----------------------------------------------------------------//
-		bool install_font(wchar_t code) {
+		bool install_font(uint16_t code) {
 			kfm_->create_bitmap(face_->info_.size, code);
 			fcode_map_it it = install_image(code);
 			if(it == face_->fcode_map_.end()) return false;
@@ -451,7 +451,7 @@ namespace gl {
 			@return 登録できたら、「true」を返す。
 		*/
 		//-----------------------------------------------------------------//
-		bool install_font(const wchar_t* list);
+		bool install_font(const uint16_t* list);
 
 
 		//-----------------------------------------------------------------//
@@ -481,7 +481,7 @@ namespace gl {
 			@return	フォントの幅を返す。
 		 */
 		//-----------------------------------------------------------------//
-		int draw(const vtx::spos& pos, wchar_t code);
+		int draw(const vtx::spos& pos, uint16_t code);
 
 
 		//-----------------------------------------------------------------//
@@ -515,7 +515,7 @@ namespace gl {
 			@return	フォントの幅を返す
 		 */
 		//-----------------------------------------------------------------//
-		int get_width(wchar_t code);
+		int get_width(uint16_t code);
 
 
 		//-----------------------------------------------------------------//
@@ -528,7 +528,7 @@ namespace gl {
 		int get_width(const utils::wstring& text) {
 			int len = 0;
 			int lenmax = 0;
-			BOOST_FOREACH(wchar_t wc, text) {
+			BOOST_FOREACH(uint16_t wc, text) {
 				if(wc >= 0x20) {
 					len += get_width(wc);
 				} else if(wc == '\n') {
@@ -588,8 +588,8 @@ namespace gl {
 		//-----------------------------------------------------------------//
 		int get_height(const utils::wstring& text) const {
 			int h = face_->info_.size;
-			const wchar_t* p = text.c_str();
-			wchar_t wc;
+			const uint16_t* p = text.c_str();
+			uint16_t wc;
 			while((wc = *p++) != 0) {
 				if(wc == '\n' && *p != 0) {
 					h += face_->info_.size;

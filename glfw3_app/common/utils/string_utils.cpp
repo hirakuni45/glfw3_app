@@ -104,6 +104,169 @@ namespace utils {
 
 	//-----------------------------------------------------------------//
 	/*!
+		@brief	UTF-8 から UTF-16 への変換
+		@param[in]	src	UTF-8 ソース
+		@param[in]	dst	UTF-16 出力
+		@return 変換が正常なら「true」
+	*/
+	//-----------------------------------------------------------------//
+	bool utf8_to_utf16(const std::string& src, wstring& dst)
+	{
+		if(src.empty()) return false;
+
+		bool f = true;
+		int cnt = 0;
+		uint16_t code = 0;
+		BOOST_FOREACH(char tc, src) {
+			uint8_t c = static_cast<uint8_t>(tc);
+			if(c < 0x80) { code = c; cnt = 0; }
+			else if((c & 0xf0) == 0xe0) { code = (c & 0x0f); cnt = 2; }
+			else if((c & 0xe0) == 0xc0) { code = (c & 0x1f); cnt = 1; }
+			else if((c & 0xc0) == 0x80) {
+				code <<= 6;
+				code |= c & 0x3f;
+				cnt--;
+				if(cnt == 0 && code < 0x80) {
+					code = 0;	// 不正なコードとして無視
+					f = false;
+				} else if(cnt < 0) {
+					code = 0;
+				}
+			}
+			if(cnt == 0 && code != 0) {
+				dst += code;
+				code = 0;
+			}
+		}
+		return f;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	UTF-8 から UTF-32 への変換
+		@param[in]	src	UTF-8 ソース
+		@param[in]	dst	UTF-32 出力
+		@return 変換が正常なら「true」
+	*/
+	//-----------------------------------------------------------------//
+	bool utf8_to_utf32(const std::string& src, lstring& dst)
+	{
+		if(src.empty()) return false;
+
+		bool f = true;
+		int cnt = 0;
+		uint32_t code = 0;
+		BOOST_FOREACH(char tc, src) {
+			uint8_t c = static_cast<uint8_t>(tc);
+			if(c < 0x80) { code = c; cnt = 0; }
+			else if((c & 0xfe) == 0xfc) { code = (c & 0x03); cnt = 5; }
+			else if((c & 0xfc) == 0xf8) { code = (c & 0x07); cnt = 4; }
+			else if((c & 0xf8) == 0xf0) { code = (c & 0x0e); cnt = 3; }
+			else if((c & 0xf0) == 0xe0) { code = (c & 0x0f); cnt = 2; }
+			else if((c & 0xe0) == 0xc0) { code = (c & 0x1f); cnt = 1; }
+			else if((c & 0xc0) == 0x80) {
+				code <<= 6;
+				code |= c & 0x3f;
+				cnt--;
+				if(cnt == 0 && code < 0x80) {
+					code = 0;	// 不正なコードとして無視
+					f = false;
+				} else if(cnt < 0) {
+					code = 0;
+				}
+			}
+			if(cnt == 0 && code != 0) {
+				dst += code;
+				code = 0;
+			}
+		}
+		return f;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	UTF-16 から UTF-8 への変換
+		@param[in]	src	UTF-16 ソース
+		@param[in]	dst	UTF-8 出力
+		@return 変換が正常なら「true」
+	*/
+	//-----------------------------------------------------------------//
+	bool utf16_to_utf8(const wstring& src, std::string& dst)
+	{
+		if(src.empty()) return false;
+
+		bool f = true;
+		BOOST_FOREACH(uint16_t code, src) {
+			if(code < 0x0080) {
+				dst += code;
+			} else if(code >= 0x0080 && code <= 0x07ff) {
+				dst += 0xc0 | ((code >> 6) & 0x1f);
+				dst += 0x80 | (code & 0x3f);
+			} else if(code >= 0x0800) {
+				dst += 0xe0 | ((code >> 12) & 0x0f);
+				dst += 0x80 | ((code >> 6) & 0x3f);
+				dst += 0x80 | (code & 0x3f);
+			} else {
+				f = false;
+			}
+		}
+		return f;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	UTF-32 から UTF-8 への変換
+		@param[in]	src	UTF-32 ソース
+		@param[in]	dst	UTF-8 出力
+		@return 変換が正常なら「true」
+	*/
+	//-----------------------------------------------------------------//
+	bool utf32_to_utf8(const lstring& src, std::string& dst)
+	{
+		if(src.empty()) return false;
+
+		bool f = true;
+		BOOST_FOREACH(uint32_t code, src) {
+			if(code < 0x0080) {
+				dst += code;
+			} else if(code >= 0x0080 && code <= 0x07ff) {
+				dst += 0xc0 | ((code >> 6) & 0x1f);
+				dst += 0x80 | (code & 0x3f);
+			} else if(code >= 0x0800 && code <= 0xffff) {
+				dst += 0xe0 | ((code >> 12) & 0x0f);
+				dst += 0x80 | ((code >> 6) & 0x3f);
+				dst += 0x80 | (code & 0x3f);
+			} else if(code >= 0x00010000 && code <= 0x001fffff) {
+				dst += 0xf0 | ((code >> 18) & 0x07); 
+				dst += 0x80 | ((code >> 12) & 0x3f);
+				dst += 0x80 | ((code >> 6) & 0x3f);
+				dst += 0x80 | (code & 0x3f);
+			} else if(code >= 0x00200000 && code <= 0x03ffffff) {
+				dst += 0xF8 | ((code >> 24) & 0x03);
+				dst += 0x80 | ((code >> 18) & 0x3f);
+				dst += 0x80 | ((code >> 12) & 0x3f);
+				dst += 0x80 | ((code >> 6) & 0x3f);
+				dst += 0x80 | (code & 0x3f);
+			} else if(code >= 0x04000000 && code <= 0x7fffffff) {
+				dst += 0xfc | ((code >> 30) & 0x01);
+				dst += 0x80 | ((code >> 24) & 0x3f);
+				dst += 0x80 | ((code >> 18) & 0x3f);
+				dst += 0x80 | ((code >> 12) & 0x3f);
+				dst += 0x80 | ((code >> 6) & 0x3f);
+				dst += 0x80 | (code & 0x3f);
+			} else {
+				f = false;
+			}
+		}
+		return f;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
 		@brief	Shift-JIS から UTF-8(ucs2) への変換
 		@param[in]	src	Shift-JIS ソース
 		@param[in]	dst	UTF-8 出力
@@ -114,11 +277,14 @@ namespace utils {
 	{
 		if(src.empty()) return false;
 
-		size_t sz = src.size() + 1;
+		uint32_t sz = src.size() + 1;
 		wchar_t* tmp = new wchar_t[sz];
 		int len = mbstowcs(tmp, src.c_str(), sz);
-		tmp[len] = 0;
-		utf16_to_utf8(tmp, dst);
+		wstring ws;
+		for(uint32_t i = 0; i < len; ++i) {
+			ws += tmp[i];
+		}
+		utf16_to_utf8(ws, dst);
 		delete[] tmp;
 		return true;
 	}
@@ -136,11 +302,12 @@ namespace utils {
 	{
 		if(src.empty()) return false;
 
-		size_t sz = src.size() + 1;
+		uint32_t sz = src.size() + 1;
 		wchar_t* tmp = new wchar_t[sz];
 		int len = mbstowcs(tmp, src.c_str(), sz);
-		tmp[len] = 0;
-		dst += tmp;
+		for(uint32_t i = 0; i < len; ++i) {
+			dst += tmp[i];
+		}
 		delete[] tmp;
 		return true;
 	}
@@ -148,7 +315,7 @@ namespace utils {
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	UTF-8(ucs2) から Shift-JIS への変換
+		@brief	UTF-8 から Shift-JIS への変換
 		@param[in]	src	UTF8 ソース
 		@param[in]	dst	Shift-JIS 出力
 		@return 変換が正常なら「true」
@@ -158,14 +325,19 @@ namespace utils {
 	{
 		if(src.empty()) return false;
 
-		wstring stmp;
-		utf8_to_utf16(src.c_str(), stmp);
-		size_t sz = stmp.size() * 4 + 1;	// 一応４倍分のバイト数確保
+		wstring ws;
+		utf8_to_utf16(src, ws);
+		wchar_t* stmp = new wchar_t[ws.size()];
+		for(uint32_t i = 0; i < ws.size(); ++i) {
+			stmp[i] = ws[i];
+		}
+		uint32_t sz = ws.size() * 6 + 1;	// 一応6倍分のバイト数確保
 		char* dtmp = new char[sz];
-		int len = wcstombs(dtmp, stmp.c_str(), sz);
+		int len = wcstombs(dtmp, stmp, sz);
 		dtmp[len] = 0;
 		dst += dtmp;
 		delete[] dtmp;
+		delete[] stmp;
 		return true;
 	}
 
@@ -182,12 +354,17 @@ namespace utils {
 	{
 		if(src.empty()) return false;
 
-		size_t sz = src.size() * 4 + 1;	// 一応４倍分のバイト数確保
+		wchar_t* stmp = new wchar_t[src.size()];
+		for(uint32_t i = 0; i < src.size(); ++i) {
+			stmp[i] = src[i];
+		}
+		uint32_t sz = src.size() * 6 + 1;	// 一応6倍分のバイト数確保
 		char* dtmp = new char[sz];
-		int len = wcstombs(dtmp, src.c_str(), sz);
+		int len = wcstombs(dtmp, stmp, sz);
 		dtmp[len] = 0;
 		dst += dtmp;
 		delete[] dtmp;
+		delete[] stmp;
 		return true;
 	}
 
