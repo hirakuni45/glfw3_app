@@ -59,7 +59,10 @@ namespace utils {
 			buff[0] = 0;
 			_wgetcwd(buff, blen);
 			utils::wstring ws;
-			ws += (const uint16_t*)buff;
+			const wchar_t* p = buff;
+			while(wchar_t ch = *p++) {
+				ws += static_cast<char16_t>(ch);
+			}
    			utils::code_conv(ws, '\\', '/', app_path_);
 #else
 #ifdef __PPU__

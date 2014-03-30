@@ -135,8 +135,8 @@ namespace gl {
 		*/
 		//-----------------------------------------------------------------//
 		void puts(const utils::wstring& st) {
-			uint16_t ch;
-			const uint16_t* p = st.c_str();
+			char16_t ch;
+			const char16_t* p = st.c_str();
 			while((ch = *p++) != 0) {
 				put(ch);
 			}
