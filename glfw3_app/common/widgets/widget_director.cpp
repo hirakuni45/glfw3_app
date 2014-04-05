@@ -558,7 +558,9 @@ namespace gui {
 		// フォーカス、選択、を設定
 		widget* select = 0;
 		BOOST_FOREACH(widget* w, widgets_) {
+			w->set_state(widget::state::BEFORE_DRAG, w->get_state(widget::state::DRAG));
 			w->set_state(widget::state::DRAG, false);
+			w->set_state(widget::state::BEFORE_RESIZE, w->get_state(widget::state::RESIZE));
 			w->set_state(widget::state::RESIZE, false);
 			if(!w->get_state(widget::state::ENABLE) ||
 			  w->get_state(widget::state::STALL) ||

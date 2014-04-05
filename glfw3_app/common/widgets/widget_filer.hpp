@@ -117,8 +117,6 @@ namespace gui {
 
 		std::string	focus_path_;
 
-		bool		drag_;
-
 		static const char* key_path_;
 		static const char* key_locate_;
 		static const char* key_size_;
@@ -151,7 +149,7 @@ namespace gui {
 			request_right_(false),
 			speed_(0.0f), position_(0.0f), move_speed_(0.0f), select_pos_(0),
 			file_(),
-			select_file_id_(0), drag_(false)
+			select_file_id_(0)
 			{ }
 
 

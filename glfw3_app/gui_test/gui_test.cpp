@@ -78,7 +78,7 @@ namespace app {
 		if(1) {	// テキストのテスト
 			widget::param wp(vtx::srect(40, 50, 200, 250), image_);
 			widget_text::param wp_;
-			wp_.text_param_.text_ = "日本の美しい漢字\nqwertyuiop\nzxcvbnm";
+			wp_.text_param_.text_ = "日本の美しい漢字\n吉野家qwertyuiop\n𩸽zxcvbnm";
 			wp_.text_param_.placement_.vpt = vtx::placement::vertical::CENTER;
 			wd.add_widget<widget_text>(wp, wp_);
 		}

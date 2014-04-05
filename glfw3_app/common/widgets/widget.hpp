@@ -259,8 +259,10 @@ namespace gui {
 				RESIZE_V_ENABLE,		///< 垂直リサイズ許可
 				SIZE_LOCK,				///< サイズ固定
 
-				DRAG,					///< ドラッグ時有効
-				RESIZE,					///< リサイズ時有効
+				BEFORE_DRAG,			///< １フレーム前ドラッグの状態
+				DRAG,					///< ドラッグの状態
+				BEFORE_RESIZE,			///< １フレーム前リサイズの状態
+				RESIZE,					///< リサイズの状態
 
 				SERVICE,				///< サービスを呼び出す
 
