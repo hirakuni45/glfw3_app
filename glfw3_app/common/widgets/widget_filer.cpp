@@ -550,6 +550,7 @@ namespace gui {
 				get_regist_state_();
 			}
 		} else if(files_->get_state(widget::state::DRAG)) {
+			drag_ = true;
 			position_ = files_->get_param().move_pos_;
 			if(left_.size() > 0) {
 				position_.x += main_->get_rect().size.x;
@@ -566,16 +567,27 @@ namespace gui {
 				position_.y *= slip_gain;
 			}
 		} else {
+			if(drag_ && left_.size() > 0) {
+				short ref = files_->get_rect().org.x;
+				ref += main_->get_rect().size.x;
+				if(ref > (get_rect().size.x / 2)) {
+					request_right_ = false;
+					move_speed_ =  speed_move;
+				}
+			}
+			drag_ = false;
+
 			if(files_->get_select_out()) {
 				speed_ = files_->get_param().speed_;
 			}
+
 			position_ += speed_;
 			speed_ *= speed_gain;
 			position_.x *= gain;
-//			if(-0.5f < position_.x && position_.x < 0.5f) {
-//				position_.x = 0.0f;
-//				speed_.x = 0;
-//			}
+			if(-0.5f < position_.x && position_.x < 0.5f) {
+				position_.x = 0.0f;
+				speed_.x = 0;
+			}
 
 			// y 軸クリップ
 			{
