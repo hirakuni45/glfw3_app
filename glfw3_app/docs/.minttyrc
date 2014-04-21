@@ -1,0 +1,12 @@
+BoldAsFont=no
+Font=ＭＳ ゴシック
+Locale=ja_JP
+Charset=UTF-8
+FontHeight=12
+Columns=100
+Rows=34
+Transparency=medium
+Term=xterm-256color
+RightClickAction=paste
+OpaqueWhenFocused=no
+PgUpDnScroll=yes
