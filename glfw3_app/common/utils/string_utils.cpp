@@ -327,15 +327,18 @@ namespace utils {
 
 		wstring ws;
 		utf8_to_utf16(src, ws);
-		wchar_t* stmp = new wchar_t[ws.size()];
+		wchar_t* stmp = new wchar_t[ws.size() + 1];
 		for(uint32_t i = 0; i < ws.size(); ++i) {
 			stmp[i] = ws[i];
 		}
+		stmp[ws.size()] = 0;
 		uint32_t sz = ws.size() * 6 + 1;	// 一応6倍分のバイト数確保
 		char* dtmp = new char[sz];
 		int len = wcstombs(dtmp, stmp, sz);
-		dtmp[len] = 0;
-		dst += dtmp;
+		if(len >= 0) {
+			dtmp[len] = 0;
+			dst += dtmp;
+		}
 		delete[] dtmp;
 		delete[] stmp;
 		return true;
