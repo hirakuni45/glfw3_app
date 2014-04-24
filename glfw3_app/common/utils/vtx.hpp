@@ -511,7 +511,7 @@ namespace vtx {
 		inline T sqrY() const { return y * y; }
 		inline T sqrZ() const { return z * z; }
 		inline T sqrW() const { return w * w; }
-		inline T sqr() const { return (sqrX() + sqrY() + sqrZ + sqrW()); }
+		inline T sqr() const { return (sqrX() + sqrY() + sqrZ() + sqrW()); }
 		inline T len() const { return std::sqrt(sqrX() + sqrY() + sqrZ() + sqrW()); }
 
 		inline void set(T c) { x = y = z = w = c; }
