@@ -370,7 +370,12 @@ namespace gui {
 
 		// ターミナル用フォントのインストール
 		fonts.push_font_face();
-		fonts.install_font_type("c:/WINDOWS/Fonts/Inconsolata.otf", "Inconsolata");
+		{
+			std::string ff = "c:/WINDOWS/Fonts/Inconsolata.otf";
+			if(!fonts.install_font_type(ff, "Inconsolata")) {
+				std::cerr << boost::format("Can't find font file: '%s'") % ff << std::endl; 
+			}
+		}
 		fonts.pop_font_face();
 		fonts.install_font_type("c:/WINDOWS/Fonts/meiryo.ttc", "meiryo");
 		fonts.set_font_size(20);
