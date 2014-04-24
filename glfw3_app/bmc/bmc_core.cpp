@@ -80,72 +80,72 @@ namespace app {
 		if(option_[option::dither]) {
 			struct float_img {
 				std::vector<float>	img_;
-				int w_;
-				int h_;
-				bool clip_(int x, int y) const {
-					if(static_cast<uint32_t>(x) >= w_) return false;
-					if(static_cast<uint32_t>(y) >= h_) return false;
+				vtx::spos	size_;
+				bool clip_(const vtx::spos& p) const {
+					if(static_cast<uint16_t>(p.x) >= static_cast<uint16_t>(size_.x)) return false;
+					if(static_cast<uint16_t>(p.y) >= static_cast<uint16_t>(size_.y)) return false;
 					return true;
 				}
-				void create(int w, int h) { w_ = w; h_ = h; img_.resize(w * h); }
-				void put(int x, int y, float v) { if(clip_(x, y)) img_[y * w_ + x] = v; }
-				void add(int x, int y, float v) { if(clip_(x, y)) img_[y * w_ + x] += v; }
-				float get(int x, int y) const {
-					if(clip_(x, y)) return img_[y * w_ + x];
+				void create(const vtx::spos& size) { size_ = size; img_.resize(size_.x * size_.y); }
+				void put(const vtx::spos& pos, float v) { if(clip_(pos)) img_[pos.y * size_.x + pos.x] = v; }
+				void add(const vtx::spos& pos, float v) { if(clip_(pos)) img_[pos.y * size_.x + pos.x] += v; }
+				float get(const vtx::spos& pos) const {
+					if(clip_(pos)) return img_[pos.y * size_.x + pos.x];
 					else return 0.0f;
 				}
 			} gray;
-			int w = src_img_.get_size().x;
-			int h = src_img_.get_size().y;
-			gray.create(w, h);
+
+			gray.create(src_img_.get_size());
 			// Ditherring weight:
 			// (Floyd-Steinberg)
 			//       curr, 7/16
 			// 3/16, 5/16, 1/16
-			for(int y = 0; y < h; ++y) {
-				for(int x = 0; x < w; ++x) {
+			vtx::spos pos;
+			for(pos.y = 0; pos.y < src_img_.get_size().y; ++pos.y) {
+				for(pos.x = 0; pos.x < src_img_.get_size().x; ++pos.x) {
 					img::rgba8 c;
-					src_img_.get_pixel(x, y, c);
-					gray.put(x, y, static_cast<float>(c.getY()));
+					src_img_.get_pixel(pos, c);
+					gray.put(pos, static_cast<float>(c.getY()));
 				}
 			}
-			for(int y = 0; y < h; ++y) {
-				for(int x = 0; x < w; ++x) {
-					float g = gray.get(x, y);
+			for(pos.y = 0; pos.y < src_img_.get_size().y; ++pos.y) {
+				for(pos.x = 0; pos.x < src_img_.get_size().x; ++pos.x) {
+					float g = gray.get(pos);
 					bool f = false;
 					float e;
 					if(g > 127.0f) {
-						gray.put(x, y, 255.0f);
+						gray.put(pos, 255.0f);
 						e = g - 255.0f;
 						f = true;
 					} else {
-						gray.put(x, y, 0.0f);
+						gray.put(pos, 0.0f);
 						e = g;
 					}
-					gray.add(x + 1, y,     e * (7.0f/16.0f));
-					gray.add(x - 1, y + 1, e * (3.0f/16.0f));
-					gray.add(x + 0, y + 1, e * (5.0f/16.0f));
-					gray.add(x + 1, y + 1, e * (1.0f/16.0f));
+					gray.add(vtx::spos(pos.x + 1, pos.y + 0), e * (7.0f/16.0f));
+					gray.add(vtx::spos(pos.x - 1, pos.y + 1), e * (3.0f/16.0f));
+					gray.add(vtx::spos(pos.x + 0, pos.y + 1), e * (5.0f/16.0f));
+					gray.add(vtx::spos(pos.x + 1, pos.y + 1), e * (1.0f/16.0f));
 
 					if(option_[option::inverse]) f = !f;
 					bits_.put_bit(f);
 					img::rgba8 c;
 					if(f) c.set(255, 255, 255, 255);
 					else c.set(0, 0, 0, 255);
-					dst_img_.put_pixel(x, y, c);
+					dst_img_.put_pixel(pos, c);
 				}
 			}
 		} else {
-			for(int y = 0; y < src_img_.get_size().y; ++y) {
-				for(int x = 0; x < src_img_.get_size().x; ++x) {
+			vtx::spos pos;
+			for(pos.y = 0; pos.y < src_img_.get_size().y; ++pos.y) {
+				for(pos.x = 0; pos.x < src_img_.get_size().x; ++pos.x) {
 					img::rgba8 c;
-					src_img_.get_pixel(x, y, c);
+					src_img_.get_pixel(pos, c);
 					bool f = (c.getY() >= 128);
 					if(option_[option::inverse]) f = !f;
 					bits_.put_bit(f);
 					if(f) c.set(255, 255, 255, 255);
 					else c.set(0, 0, 0, 255);
-					dst_img_.put_pixel(x, y, c);
+					dst_img_.put_pixel(pos, c);
 				}
 			}
 		}
@@ -348,8 +348,7 @@ namespace app {
 				sr.size = clip_.size;
 			}
 			src_img_.create(sr.size, true);
-			img::copy_to_rgba8(imfs.get_image_if(), sr.org.x, sr.org.y, sr.size.x, sr.size.y,
-				src_img_, 0, 0); 
+			img::copy_to_rgba8(imfs.get_image_if(), sr, src_img_, vtx::spos(0)); 
 
 			// モノクロ変換
 			bitmap_convert_();
@@ -429,7 +428,7 @@ namespace app {
 						img::rgba8 c;
 						if(f) c.set(255, 255, 255, 255);
 						else c.set(0, 0, 0, 255);
-						dst_img_.put_pixel(x + i, y + j, c);
+						dst_img_.put_pixel(vtx::spos(x + i, y + j), c);
 					}
 				}
 			}
