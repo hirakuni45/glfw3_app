@@ -71,6 +71,7 @@ OPTLIBS		=	glfw3 glew32 opengl32 glu32 gdi32 imm32 \
 INC_SYS		=	/usr/local/boost_1_54_0
 
 INC_LIB		=	/usr/local/include \
+				/usr/local/include/libpng16 \
 				/usr/local/include/libjpeg_x86 \
 				/usr/local/include/openjpeg-2.0 \
 				/usr/local/include/freetype2

@@ -6,6 +6,7 @@
 //=====================================================================//
 #include "pmx_io.hpp"
 #include "img_io/img_files.hpp"
+#include <boost/format.hpp>
 
 namespace mdf {
 
@@ -124,7 +125,9 @@ namespace mdf {
 			textures_.resize(num);
 ///			std::cout << "Texture: " << num << std::endl;
 			for(uint32_t i = 0; i < num; ++i) {
-				if(!get_text_(fio, textures_[i], reading_info_.text_encode_type)) return false;
+				std::string s;
+				if(!get_text_(fio, s, reading_info_.text_encode_type)) return false;
+				utils::code_conv(s, '\\', '/',  textures_[i]);
 			}
 		}
 
@@ -237,7 +240,8 @@ namespace mdf {
 			glGenTextures(tex_id_.size(), &tex_id_[0]);
 			uint32_t i = 0;
 			BOOST_FOREACH(const std::string& s, textures_) {
-				if(imf.load(current_path_ + '/' + s)) {
+				std::string fn = current_path_ + '/' + s;
+				if(imf.load(fn)) {
 					const img::i_img* img = imf.get_image_if();
 					if(img == 0) continue;
 
@@ -246,8 +250,11 @@ namespace mdf {
 					int border = 0;
 					int w = img->get_size().x;
 					int h = img->get_size().y;
+// std::cout << w << ", " << h << std::endl;
 					glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA, w, h, border,
 						GL_RGBA, GL_UNSIGNED_BYTE, img->get_image());
+				} else {
+					std::cout << boost::format("Can't open texture: '%s'") % fn << std::endl;
 				}
 				++i;
 			}
