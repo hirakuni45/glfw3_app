@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <bitset>
+#include <boost/format.hpp>
 #include "gl_fw/IGLcore.hpp"
 #include "gl_fw/gllight.hpp"
 #include "utils/vtx.hpp"
@@ -334,6 +335,12 @@ namespace mdf {
 				if(!get_text_(fio, memo_, info.text_encode_type)) return false;
 				if(!fio.get(face_num_)) return false;
 				return true;
+			}
+			void list() {
+				std::cout << boost::format("Texure: '%s'") % name_ << std::endl;
+				std::cout << "Normal Texture: " << static_cast<int>(normal_texture_index_) << std::endl;
+				std::cout << "Sphere Texture: " << static_cast<int>(sphere_texture_index_) << std::endl;
+				std::cout << "Toon   Texture: " << static_cast<int>(toon_texture_index_) << std::endl;
 			}
 		};
 		typedef std::vector<pmx_material>	pmx_materials;

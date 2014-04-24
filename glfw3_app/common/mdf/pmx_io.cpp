@@ -138,6 +138,7 @@ namespace mdf {
 			materials_.resize(num);
 			for(uint32_t i = 0; i < num; ++i) {
 				if(!materials_[i].get(fio, reading_info_)) return false;
+//				materials_[i].list();
 			}
 		}
 
@@ -311,6 +312,7 @@ namespace mdf {
 		BOOST_FOREACH(const pmx_material& m, materials_) {
 			glColor4f(m.diffuse_.r, m.diffuse_.g, m.diffuse_.b, m.diffuse_.a);
 
+			bool tex = false;
 			if(m.normal_texture_index_ >= 0 && m.normal_texture_index_ < tex_id_.size()) {
 				glEnable(GL_TEXTURE_2D);
 				glBindTexture(GL_TEXTURE_2D, tex_id_[m.normal_texture_index_]);
@@ -324,10 +326,24 @@ namespace mdf {
        			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, edge);
        			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
        			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			} else {
-				glDisable(GL_TEXTURE_2D);
+				tex = true;
 			}
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idx_id_[n]);
+			 else if(m.sphere_texture_index_ >= 0 && m.sphere_texture_index_ < tex_id_.size()) {
+				glEnable(GL_TEXTURE_2D);
+				glBindTexture(GL_TEXTURE_2D, tex_id_[m.sphere_texture_index_]);
+				GLenum edge;
+				edge = GL_CLAMP_TO_EDGE;
+       			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, edge);
+       			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, edge);
+       			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+       			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				tex = true;
+			}
+			if(!tex) {
+				glDisable(GL_TEXTURE_2D);
+			} else {
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idx_id_[n]);
+			}
 			glDrawElements(GL_TRIANGLES, m.face_num_, index_st, 0);
 			++n;
 		}
