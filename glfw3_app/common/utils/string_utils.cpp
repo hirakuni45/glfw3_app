@@ -387,7 +387,7 @@ namespace utils {
 #ifdef WIN32
 		// WIN32 ではドライブレターの検査
 		if(path.size() >= 3 && path[1] == ':' &&
-			(path[0] >= 'A' && path[0] <= 'Z') || (path[0] >= 'a' && path[0] <= 'z')) {
+			((path[0] >= 'A' && path[0] <= 'Z') || (path[0] >= 'a' && path[0] <= 'z'))) {
 			ch = path[2];
 		} else {
 			ch = 0;

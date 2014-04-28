@@ -539,11 +539,10 @@ namespace mtx {
 		r0[4] = s * (r0[4] - r1[4] * m0), r0[5] = s * (r0[5] - r1[5] * m0),
 		r0[6] = s * (r0[6] - r1[6] * m0), r0[7] = s * (r0[7] - r1[7] * m0);
 
-		T* out = dst.m;
-		prc_(out,0,0) = r0[4]; prc_(out,0,1) = r0[5], prc_(out,0,2) = r0[6]; prc_(out,0,3) = r0[7],
-		prc_(out,1,0) = r1[4]; prc_(out,1,1) = r1[5], prc_(out,1,2) = r1[6]; prc_(out,1,3) = r1[7],
-		prc_(out,2,0) = r2[4]; prc_(out,2,1) = r2[5], prc_(out,2,2) = r2[6]; prc_(out,2,3) = r2[7],
-		prc_(out,3,0) = r3[4]; prc_(out,3,1) = r3[5], prc_(out,3,2) = r3[6]; prc_(out,3,3) = r3[7];
+		prc_(dst,0,0) = r0[4]; prc_(dst,0,1) = r0[5], prc_(dst,0,2) = r0[6]; prc_(dst,0,3) = r0[7],
+		prc_(dst,1,0) = r1[4]; prc_(dst,1,1) = r1[5], prc_(dst,1,2) = r1[6]; prc_(dst,1,3) = r1[7],
+		prc_(dst,2,0) = r2[4]; prc_(dst,2,1) = r2[5], prc_(dst,2,2) = r2[6]; prc_(dst,2,3) = r2[7],
+		prc_(dst,3,0) = r3[4]; prc_(dst,3,1) = r3[5], prc_(dst,3,2) = r3[6]; prc_(dst,3,3) = r3[7];
 
 		return true;
 	}
