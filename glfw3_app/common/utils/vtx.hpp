@@ -7,16 +7,16 @@
 //=====================================================================//
 #include <vector>
 #include <cmath>
-#include <float.h>
+#include <cfloat>
 #include <boost/unordered_set.hpp>
 #include <boost/unordered_map.hpp>
 
 namespace vtx {
 
-	const float  g_deg2rad_f = 3.14159265358979f / 180.0f;	///< DEG -> RAD の変換定数(float)
-	const float  g_radian_f  = 2.0f * 3.14159265358979f;	///< RADIAN のπ変換定数(float)
-	const double g_deg2rad_d = 3.14159265358979 / 180.0;	///< DEG -> RAD の変換定数(double)
-	const double g_radian_d  = 2.0 * 3.14159265358979;		///< RADIAN のπ変換定数(double)
+	const float  deg2rad_f_ = 3.14159265358979f / 180.0f;	///< DEG -> RAD の変換定数(float)
+	const float  radian_f_  = 2.0f * 3.14159265358979f;		///< RADIAN のπ変換定数(float)
+	const double deg2rad_d_ = 3.14159265358979 / 180.0;		///< DEG -> RAD の変換定数(double)
+	const double radian_d_  = 2.0 * 3.14159265358979;		///< RADIAN のπ変換定数(double)
 
 	inline void min_level(char& min) { min = 1; }
 	inline void min_level(short& min) { min = 1; }

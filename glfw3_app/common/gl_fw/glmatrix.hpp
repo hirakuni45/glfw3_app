@@ -453,7 +453,7 @@ namespace gl {
 		static void vertex_world(const mtx::matrix4<T>& mat, const vtx::vertex3<T>& inv, vtx::vertex4<T>& out) {
 			vtx::vertex4<T> in = inv;
 			T o[4];
-			mtx::matmul1<T>(o, mat.m, in.getXYZW());
+			mtx::matmul1<T>(o, mat(), in.getXYZW());
 			out.set(o[0], o[1], o[2], o[3]);
 		}
 

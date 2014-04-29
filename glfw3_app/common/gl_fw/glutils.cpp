@@ -780,10 +780,10 @@ namespace gl {
 	void draw_line_circle(const vtx::spos& pos, int rad, int step)
 	{
 		vtx::sposs list;
-		float a = g_radian_f / static_cast<float>(step);
+		float a = radian_f_ / static_cast<float>(step);
 		for(int i = 0; i < step; ++i) {
-			short si = static_cast<short>(sinf(a * static_cast<float>(i)) * static_cast<float>(rad));
-			short co = static_cast<short>(cosf(a * static_cast<float>(i)) * static_cast<float>(rad));
+			short si = static_cast<short>(std::sin(a * static_cast<float>(i)) * static_cast<float>(rad));
+			short co = static_cast<short>(std::cos(a * static_cast<float>(i)) * static_cast<float>(rad));
 			vtx::spos p(pos.x + co, pos.y - si);
 			list.push_back(p);
 		}
@@ -802,10 +802,10 @@ namespace gl {
 	void draw_line_circle(const vtx::fpos& pos, float rad, int step)
 	{
 		vtx::fposs list;
-		float a = g_radian_f / static_cast<float>(step);
+		float a = radian_f_ / static_cast<float>(step);
 		for(int i = 0; i < step; ++i) {
-			float si = sinf(a * static_cast<float>(i)) * rad;
-			float co = cosf(a * static_cast<float>(i)) * rad;
+			float si = std::sin(a * static_cast<float>(i)) * rad;
+			float co = std::cos(a * static_cast<float>(i)) * rad;
 			vtx::fpos p(pos.x + co, pos.y - si);
 			list.push_back(p);
 		}
@@ -825,10 +825,10 @@ namespace gl {
 	{
 		vtx::sposs list;
 		list.push_back(pos);
-		float a = g_radian_f / static_cast<float>(step);
+		float a = radian_f_ / static_cast<float>(step);
 		for(int i = 0; i < step; ++i) {
-			short si = static_cast<short>(sinf(a * static_cast<float>(i)) * static_cast<float>(rad));
-			short co = static_cast<short>(cosf(a * static_cast<float>(i)) * static_cast<float>(rad));
+			short si = static_cast<short>(std::sin(a * static_cast<float>(i)) * static_cast<float>(rad));
+			short co = static_cast<short>(std::cos(a * static_cast<float>(i)) * static_cast<float>(rad));
 			vtx::spos p(pos.x + co, pos.y - si);
 			list.push_back(p);
 		}
@@ -848,11 +848,11 @@ namespace gl {
 	void draw_filled_circle(const vtx::fpos& pos, float rad, int step)
 	{
 		vtx::fposs list;
-		float a = g_radian_f / static_cast<float>(step);
+		float a = radian_f_ / static_cast<float>(step);
 		list.push_back(pos);
 		for(int i = 0; i < step; ++i) {
-			float si = sinf(a * static_cast<float>(i)) * rad;
-			float co = cosf(a * static_cast<float>(i)) * rad;
+			float si = std::sin(a * static_cast<float>(i)) * rad;
+			float co = std::cos(a * static_cast<float>(i)) * rad;
 			vtx::fpos p(pos.x + co, pos.y - si);
 			list.push_back(p);
 		}
@@ -873,10 +873,10 @@ namespace gl {
 	void draw_filled_ring(const vtx::spos& pos, int orad, int irad, int step)
 	{
 		vtx::sposs list;
-		float a = g_radian_f / static_cast<float>(step);
+		float a = radian_f_ / static_cast<float>(step);
 		for(int i = 0; i < step; ++i) {
-			float si = sinf(a * static_cast<float>(i));
-			float co = cosf(a * static_cast<float>(i));
+			float si = std::sin(a * static_cast<float>(i));
+			float co = std::cos(a * static_cast<float>(i));
 			float r = static_cast<float>(irad);
 			vtx::spos p(pos.x + static_cast<short>(co * r), pos.y - static_cast<short>(si * r));
 			list.push_back(p);
@@ -902,10 +902,10 @@ namespace gl {
 	void draw_filled_ring(const vtx::fpos& pos, float orad, float irad, int step)
 	{
 		vtx::fposs list;
-		float a = g_radian_f / static_cast<float>(step);
+		float a = radian_f_ / static_cast<float>(step);
 		for(int i = 0; i < step; ++i) {
-			float si = sinf(a * static_cast<float>(i));
-			float co = cosf(a * static_cast<float>(i));
+			float si = std::sin(a * static_cast<float>(i));
+			float co = std::cos(a * static_cast<float>(i));
 			vtx::fpos p(pos.x + co * irad, pos.y - si * irad);
 			list.push_back(p);
 			p.set(pos.x + co * orad, pos.y - si * orad);
@@ -1138,10 +1138,10 @@ namespace gl {
 	{
 		vtx::fvtxs listm;
 		vtx::fvtxs listp;
-		float gain = g_radian_f / static_cast<float>(rstep);
+		float gain = radian_f_ / static_cast<float>(rstep);
 		for(int i = 0; i < rstep; ++i) {
-			float si = sinf(gain * static_cast<float>(i)) * radius;
-			float co = cosf(gain * static_cast<float>(i)) * radius;
+			float si = std::sin(gain * static_cast<float>(i)) * radius;
+			float co = std::cos(gain * static_cast<float>(i)) * radius;
 			vtx::fvtx pm(co, si, -length);
 			listm.push_back(pm);
 			vtx::fvtx pp(co, si,  length);

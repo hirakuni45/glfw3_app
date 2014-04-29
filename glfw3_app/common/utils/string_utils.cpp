@@ -93,7 +93,7 @@ namespace utils {
 		if(vv.size() == 16) {
 			for(int i = 0; i < 16; ++i) {
 				int j = ((i & 3) << 2) | ((i >> 2) & 3);
-				dst.m[j] = vv[i];
+				dst[j] = vv[i];
 			}
 			return true;
 		} else {

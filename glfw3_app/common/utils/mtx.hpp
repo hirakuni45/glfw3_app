@@ -6,20 +6,18 @@
 */
 //=====================================================================//
 #include <vector>
-#include <cmath>
-#include <float.h>
 #include "utils/vtx.hpp"
 
 namespace mtx {
 
 	static inline void deg_sin_cos_(float deg, float& si, float& co) {
-		si = sinf(deg * vtx::g_deg2rad_f);
-		co = cosf(deg * vtx::g_deg2rad_f);
+		si = std::sin(deg * vtx::deg2rad_f_);
+		co = std::cos(deg * vtx::deg2rad_f_);
 	}
 
 	static inline void deg_sin_cos_(double deg, double& si, double& co) {
-		si = sin(deg * vtx::g_deg2rad_d);
-		co = cos(deg * vtx::g_deg2rad_d);
+		si = std::sin(deg * vtx::deg2rad_d_);
+		co = std::cos(deg * vtx::deg2rad_d_);
 	}
 
 	template <typename T>
@@ -53,14 +51,25 @@ namespace mtx {
 	//-----------------------------------------------------------------//
 	template <class T>
 	void create_identity(T* m) {
-		m[ 0] = static_cast<T>(1); m[ 1] = static_cast<T>(0);
-		m[ 2] = static_cast<T>(0); m[ 3] = static_cast<T>(0);
-		m[ 4] = static_cast<T>(0); m[ 5] = static_cast<T>(1);
-		m[ 6] = static_cast<T>(0); m[ 7] = static_cast<T>(0);
-		m[ 8] = static_cast<T>(0); m[ 9] = static_cast<T>(0);
-		m[10] = static_cast<T>(1); m[11] = static_cast<T>(0);
-		m[12] = static_cast<T>(0); m[13] = static_cast<T>(0);
-		m[14] = static_cast<T>(0); m[15] = static_cast<T>(1);
+		m[ 0] = static_cast<T>(1);
+		m[ 1] = static_cast<T>(0);
+		m[ 2] = static_cast<T>(0);
+		m[ 3] = static_cast<T>(0);
+
+		m[ 4] = static_cast<T>(0);
+		m[ 5] = static_cast<T>(1);
+		m[ 6] = static_cast<T>(0);
+		m[ 7] = static_cast<T>(0);
+
+		m[ 8] = static_cast<T>(0);
+		m[ 9] = static_cast<T>(0);
+		m[10] = static_cast<T>(1);
+		m[11] = static_cast<T>(0);
+
+		m[12] = static_cast<T>(0);
+		m[13] = static_cast<T>(0);
+		m[14] = static_cast<T>(0);
+		m[15] = static_cast<T>(1);
 	}
 
 
@@ -559,29 +568,28 @@ namespace mtx {
 	template <class T>
 	bool invert_matrix_3d(const T* src, T* dst)
 	{
-		const T* in = src->m;
 		/* Calculate the determinant of upper left 3x3 submatrix and
 		* determine if the matrix is singular.
 		*/
 		T pos = static_cast<T>(0);
 		T neg = static_cast<T>(0);
 		T t;
-		t = grc_(in,0,0) * grc_(in,1,1) * grc_(in,2,2);
+		t = grc_(src,0,0) * grc_(src,1,1) * grc_(src,2,2);
 		if(t >= static_cast<T>(0)) pos += t; else neg += t;
 
-		t = grc_(in,1,0) * grc_(in,2,1) * grc_(in,0,2);
+		t = grc_(src,1,0) * grc_(src,2,1) * grc_(src,0,2);
 		if(t >= static_cast<T>(0)) pos += t; else neg += t;
 
-		t = grc_(in,2,0) * grc_(in,0,1) * grc_(in,1,2);
+		t = grc_(src,2,0) * grc_(src,0,1) * grc_(src,1,2);
 		if(t >= static_cast<T>(0)) pos += t; else neg += t;
 
-		t = -grc_(in,2,0) * grc_(in,1,1) * grc_(in,0,2);
+		t = -grc_(src,2,0) * grc_(src,1,1) * grc_(src,0,2);
 		if(t >= static_cast<T>(0)) pos += t; else neg += t;
 
-		t = -grc_(in,1,0) * grc_(in,0,1) * grc_(in,2,2);
+		t = -grc_(src,1,0) * grc_(src,0,1) * grc_(src,2,2);
 		if(t >= static_cast<T>(0)) pos += t; else neg += t;
 
-		t = -grc_(in,0,0) * grc_(in,2,1) * grc_(in,1,2);
+		t = -grc_(src,0,0) * grc_(src,2,1) * grc_(src,1,2);
 		if(t >= static_cast<T>(0)) pos += t; else neg += t;
 
 		T det = pos + neg;
@@ -591,26 +599,26 @@ namespace mtx {
 		}
 
 		det = static_cast<T>(1) / det;
-		prc_(dst,0,0) =  (grc_(in,1,1) * grc_(in,2,2) - grc_(in,2,1) * grc_(in,1,2)) * det;
-		prc_(dst,0,1) = -(grc_(in,0,1) * grc_(in,2,2) - grc_(in,2,1) * grc_(in,0,2)) * det;
-		prc_(dst,0,2) =  (grc_(in,0,1) * grc_(in,1,2) - grc_(in,1,1) * grc_(in,0,2)) * det;
-		prc_(dst,1,0) = -(grc_(in,1,0) * grc_(in,2,2) - grc_(in,2,0) * grc_(in,1,2)) * det;
-		prc_(dst,1,1) =  (grc_(in,0,0) * grc_(in,2,2) - grc_(in,2,0) * grc_(in,0,2)) * det;
-		prc_(dst,1,2) = -(grc_(in,0,0) * grc_(in,1,2) - grc_(in,1,0) * grc_(in,0,2)) * det;
-		prc_(dst,2,0) =  (grc_(in,1,0) * grc_(in,2,1) - grc_(in,2,0) * grc_(in,1,1)) * det;
-		prc_(dst,2,1) = -(grc_(in,0,0) * grc_(in,2,1) - grc_(in,2,0) * grc_(in,0,1)) * det;
-		prc_(dst,2,2) =  (grc_(in,0,0) * grc_(in,1,1) - grc_(in,1,0) * grc_(in,0,1)) * det;
+		prc_(dst,0,0) =  (grc_(src,1,1) * grc_(src,2,2) - grc_(src,2,1) * grc_(src,1,2)) * det;
+		prc_(dst,0,1) = -(grc_(src,0,1) * grc_(src,2,2) - grc_(src,2,1) * grc_(src,0,2)) * det;
+		prc_(dst,0,2) =  (grc_(src,0,1) * grc_(src,1,2) - grc_(src,1,1) * grc_(src,0,2)) * det;
+		prc_(dst,1,0) = -(grc_(src,1,0) * grc_(src,2,2) - grc_(src,2,0) * grc_(src,1,2)) * det;
+		prc_(dst,1,1) =  (grc_(src,0,0) * grc_(src,2,2) - grc_(src,2,0) * grc_(src,0,2)) * det;
+		prc_(dst,1,2) = -(grc_(src,0,0) * grc_(src,1,2) - grc_(src,1,0) * grc_(src,0,2)) * det;
+		prc_(dst,2,0) =  (grc_(src,1,0) * grc_(src,2,1) - grc_(src,2,0) * grc_(src,1,1)) * det;
+		prc_(dst,2,1) = -(grc_(src,0,0) * grc_(src,2,1) - grc_(src,2,0) * grc_(src,0,1)) * det;
+		prc_(dst,2,2) =  (grc_(src,0,0) * grc_(src,1,1) - grc_(src,1,0) * grc_(src,0,1)) * det;
 
 		/* Do the translation part */
-		prc_(dst,0,3) = -(grc_(in,0,3) * grc_(dst,0,0) +
-			grc_(in,1,3) * grc_(dst,0,1) +
-			grc_(in,2,3) * grc_(dst,0,2));
-		prc_(dst,1,3) = -(grc_(in,0,3) * grc_(dst,1,0) +
-			grc_(in,1,3) * grc_(dst,1,1) +
-			grc_(in,2,3) * grc_(dst,1,2));
-		prc_(dst,2,3) = -(grc_(in,0,3) * grc_(dst,2,0) +
-			grc_(in,1,3) * grc_(dst,2,1) +
-			grc_(in,2,3) * grc_(dst,2,2) );
+		prc_(dst,0,3) = -(grc_(src,0,3) * grc_(dst,0,0) +
+			grc_(src,1,3) * grc_(dst,0,1) +
+			grc_(src,2,3) * grc_(dst,0,2));
+		prc_(dst,1,3) = -(grc_(src,0,3) * grc_(dst,1,0) +
+			grc_(src,1,3) * grc_(dst,1,1) +
+			grc_(src,2,3) * grc_(dst,1,2));
+		prc_(dst,2,3) = -(grc_(src,0,3) * grc_(dst,2,0) +
+			grc_(src,1,3) * grc_(dst,2,1) +
+			grc_(src,2,3) * grc_(dst,2,2) );
 		return true;
 	}
 
@@ -622,9 +630,8 @@ namespace mtx {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	template <typename T>
 	class matrix4 {
+		T	m_[16] __attribute__((aligned(16)));
 	public:
-		T	m[16] __attribute__((aligned(16)));
-
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	コンストラクター
@@ -639,7 +646,7 @@ namespace mtx {
 			@param[in]	mm	ソースマトリックス配列
 		 */
 		//-----------------------------------------------------------------//
-		matrix4(const T* srcm) { matrix_copy(srcm, m); }
+		matrix4(const T* srcm) { matrix_copy(srcm, m_); }
 
 
 		//-----------------------------------------------------------------//
@@ -657,7 +664,7 @@ namespace mtx {
 		//-----------------------------------------------------------------//
 		void zero() {
 			for(uint32_t i = 0; i < 16; ++i) {
-				m[i] = static_cast<T>(0);
+				m_[i] = static_cast<T>(0);
 			}
 		}
 
@@ -667,7 +674,7 @@ namespace mtx {
 			@brief	単位ユニットの設定
 		 */
 		//-----------------------------------------------------------------//
-		void identity() { create_identity(m); }
+		void identity() { create_identity(m_); }
 
 
 		//-----------------------------------------------------------------//
@@ -676,7 +683,7 @@ namespace mtx {
 			@param[in]	srcm	ソース・マトリックス配列
 		 */
 		//-----------------------------------------------------------------//
-		void load(const T* srcm) { matrix_copy(srcm, m); }
+		void load(const T* srcm) { matrix_copy(srcm, m_); }
 
 
 		//-----------------------------------------------------------------//
@@ -686,7 +693,7 @@ namespace mtx {
 			@return エラーなら「false」
 		 */
 		//-----------------------------------------------------------------//
-		bool inverse(const T* srcm) { return invert_matrix<T>(srcm, m); }
+		bool inverse(const T* srcm) { return invert_matrix<T>(srcm, m_); }
 
 
 		//-----------------------------------------------------------------//
@@ -696,7 +703,7 @@ namespace mtx {
 			@return エラーなら「false」
 		 */
 		//-----------------------------------------------------------------//
-		bool inverse_3d(const T* srcm) { return invert_matrix_3d<T>(srcm, m); }
+		bool inverse_3d(const T* srcm) { return invert_matrix_3d<T>(srcm, m_); }
 
 
 		//-----------------------------------------------------------------//
@@ -705,7 +712,7 @@ namespace mtx {
 			@param[in]	v	スケールファクター
 		 */
 		//-----------------------------------------------------------------//
-		void scale(const vtx::vertex3<T>& v) { mult_scale<T>(m, v.x, v.y, v.z); }
+		void scale(const vtx::vertex3<T>& v) { mult_scale<T>(m_, v.x, v.y, v.z); }
 
 
 		//-----------------------------------------------------------------//
@@ -714,7 +721,7 @@ namespace mtx {
 			@param[in]	v	移動距離
 		 */
 		//-----------------------------------------------------------------//
-		void translate(const vtx::vertex3<T>& v) { mult_translate<T>(m, v.x, v.y, v.z); }
+		void translate(const vtx::vertex3<T>& v) { mult_translate<T>(m_, v.x, v.y, v.z); }
 
 
 		//-----------------------------------------------------------------//
@@ -728,7 +735,7 @@ namespace mtx {
 		void rotate(T angle, const vtx::vertex3<T>& v) {
 			T si, co;
 			deg_sin_cos_(angle, si, co);
-			mult_rotate<T>(m, si, co, v.x, v.y, v.z);
+			mult_rotate<T>(m_, si, co, v.x, v.y, v.z);
 		}
 
 
@@ -744,7 +751,7 @@ namespace mtx {
 		 */
 		//-----------------------------------------------------------------//
 		void frustum(T left, T right, T bottom, T top, T nearval, T farval) {
-			mult_frustum<T>(m, left, right, bottom, top, nearval, farval);
+			mult_frustum<T>(m_, left, right, bottom, top, nearval, farval);
 		}
 
 
@@ -760,7 +767,7 @@ namespace mtx {
 		 */
 		//-----------------------------------------------------------------//
 		void ortho(T left, T right, T bottom, T top, T nearval, T farval) {
-			mult_ortho<T>(m, left, right, bottom, top, nearval, farval);
+			mult_ortho<T>(m_, left, right, bottom, top, nearval, farval);
 		}
 
 
@@ -774,7 +781,7 @@ namespace mtx {
 		 */
 		//-----------------------------------------------------------------//
 		void perspective(T fovy, T aspect, T zNear, T zFar) {
-			mult_perspective<T>(m, fovy, aspect, zNear, zFar);
+			mult_perspective<T>(m_, fovy, aspect, zNear, zFar);
 		}
 
 
@@ -787,7 +794,7 @@ namespace mtx {
 		 */
 		//-----------------------------------------------------------------//
 		void look_at(const vtx::vertex3<T>& eye, const vtx::vertex3<T>& center, const vtx::vertex3<T>& up) {
-			mult_look_at<T>(m, eye, center, up);
+			mult_look_at<T>(m_, eye, center, up);
 		}
 
 
@@ -800,7 +807,7 @@ namespace mtx {
 		//-----------------------------------------------------------------//
 		void vertex_mult(const vtx::vertex3<T>& vin, vtx::vertex4<T>& out) {
 			vtx::vertex4<T> t(vin.x, vin.y, vin.z);
-			matmul1<T>(out, m, t.xyzw);
+			matmul1<T>(out, m_, t.xyzw);
 		}
 
 
@@ -814,7 +821,7 @@ namespace mtx {
 		void vertex_mult(const vtx::vertex3<T>& vin, vtx::vertex3<T>& out) {
 			vtx::vertex4<T> t(vin.x, vin.y, vin.z);
 			float o[4];
-			matmul1<T>(o, m, t.getXYZW());
+			matmul1<T>(o, m_, t.getXYZW());
 			out.x = o[0];
 			out.y = o[1];
 			out.z = o[2];
@@ -823,13 +830,13 @@ namespace mtx {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	「=」オペレーター 4x4（代入）
+			@brief	= オペレーター 4x4（代入）
 			@param[in]	srcm	ソースマトリックス(float*)
 		 */
 		//-----------------------------------------------------------------//
 		matrix4 operator = (const T* srcm) {
 			for(uint32_t i = 0; i < 16; ++i) {
-				m[i] = static_cast<T>(srcm[i]);
+				m_[i] = static_cast<T>(srcm[i]);
 			}
 			return *this;
 		}
@@ -837,54 +844,71 @@ namespace mtx {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	「*」オペレーター 4x4（マトリックスとの積）
+			@brief	* オペレーター 4x4（マトリックスとの積）
 			@param[in]	srcm	ソースマトリックス
 		 */
 		//-----------------------------------------------------------------//
 		matrix4 operator * (const matrix4& srcm) const {
 			matrix4	t;
-			matmul4(t.m, m, srcm.m);
+			matmul4(t(), m_, srcm.m);
 			return t;
 		}
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	「*=」オペレーター 4x4（マトリックスとの積）
+			@brief	*= オペレーター 4x4（マトリックスとの積）
 			@param[in]	srcm	ソースマトリックス
 		 */
 		//-----------------------------------------------------------------//
 		matrix4 operator *= (const matrix4& srcm) {
-			matmul4(m, m, srcm.m);
+			matmul4(m_, m_, srcm());
 			return *this;
 		}
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	「*」オペレーター 4（マトリックスとの積）
+			@brief	* オペレーター 4（マトリックスとの積）
 			@param[in]	srcv	ソースベクター
 		 */
 		//-----------------------------------------------------------------//
 		matrix4 operator * (const vtx::vertex4<T>& srcv) const {
 			matrix4 t;
-			matmul1(t, m, srcv);
+			matmul1(t, m_, srcv);
 			return t;
 		}
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	「*=」オペレーター 4（マトリックスとの積）
+			@brief	*= オペレーター 4（マトリックスとの積）
 			@param[in]	srcv	ソースベクター
 		 */
 		//-----------------------------------------------------------------//
 		matrix4 operator *= (const vtx::vertex4<T>& srcv) {
-			matmul1(m, m, srcv);
+			matmul1(m_, m_, srcv);
 			return *this;
 		}
 
-		const T* operator() () const { return &m[0]; }
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	[] オペレーター
+			@param[in]	n	配列の位置
+			@return 値の参照
+		 */
+		//-----------------------------------------------------------------//
+		T& operator[] (uint32_t n) { return m_[n]; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	() オペレーター
+			@return 先頭ポインター
+		 */
+		//-----------------------------------------------------------------//
+		const T* operator() () const { return &m_[0]; }
 	};
 
 	typedef matrix4<float>	fmat4;	///< 「float」型マトリックス

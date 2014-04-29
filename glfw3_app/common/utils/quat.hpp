@@ -239,25 +239,25 @@ namespace qtx {
 			T yt = y * t * cc;
 			T zt = z * t * cc;
 
-			m.m[ 0] = static_cast<T>(1) - y2 - z2;
-			m.m[ 1] = xy + zt;
-			m.m[ 2] = zx - yt;
-			m.m[ 3] = static_cast<T>(0);
+			m[ 0] = static_cast<T>(1) - y2 - z2;
+			m[ 1] = xy + zt;
+			m[ 2] = zx - yt;
+			m[ 3] = static_cast<T>(0);
 
-			m.m[ 4] = xy - zt;
-			m.m[ 5] = static_cast<T>(1) - z2 - x2;
-			m.m[ 6] = yz + xt;
-			m.m[ 7] = static_cast<T>(0);
+			m[ 4] = xy - zt;
+			m[ 5] = static_cast<T>(1) - z2 - x2;
+			m[ 6] = yz + xt;
+			m[ 7] = static_cast<T>(0);
 
-			m.m[ 8] = zx + yt;
-			m.m[ 9] = yz - xt;
-			m.m[10] = static_cast<T>(1) - x2 - y2;
-			m.m[11] = static_cast<T>(0);
+			m[ 8] = zx + yt;
+			m[ 9] = yz - xt;
+			m[10] = static_cast<T>(1) - x2 - y2;
+			m[11] = static_cast<T>(0);
 
-			m.m[12] = static_cast<T>(0);
-			m.m[13] = static_cast<T>(0);
-			m.m[14] = static_cast<T>(0);
-			m.m[15] = static_cast<T>(1);
+			m[12] = static_cast<T>(0);
+			m[13] = static_cast<T>(0);
+			m[14] = static_cast<T>(0);
+			m[15] = static_cast<T>(1);
 		}
 
 	};
