@@ -120,7 +120,8 @@ PFLAGS	=	-DWIN32 -DHAVE_STDINT_H
 # PFLAGS	=	-DWIN32 -mno-cygwin -DIPAD_EMU -DOPTION_MEMORY_ALOCATE
 # PFLAGS	=	-DWIN32 -mno-cygwin -DIPAD_EMU
 CFLAGS	=	-DWIN32
-LFLAGS	=	-static-libgcc -static-libstdc++
+# -static-libgcc -static-libstdc++
+LFLAGS	=
 
 # -Wuninitialized -Wunused -Werror -Wshadow
 CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
