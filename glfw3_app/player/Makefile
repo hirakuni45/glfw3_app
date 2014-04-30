@@ -1,61 +1,66 @@
 #-----------------------------------------------#
 # GNU-Makefile for "gcc"	 					#
 #-----------------------------------------------#
-TARGET		=	player
+TARGET		=	player.exe
+
+BUILD		=	release
+
+VPATH		=	../common
+
 PSOURCES	=	main.cpp \
 				player.cpp \
-				../common/core/glcore.cpp \
-				../common/core/device.cpp \
-				../common/core/kfimg_ft2.cpp \
-				../common/core/jfep_io.cpp \
-				../common/gl_fw/glfonts.cpp \
-				../common/gl_fw/glmobj.cpp \
-				../common/gl_fw/gltexfb.cpp \
-				../common/gl_fw/glterminal.cpp \
-				../common/utils/vtx.cpp \
-				../common/utils/vmath.cpp \
-				../common/utils/string_utils.cpp \
-				../common/utils/file_io.cpp \
-				../common/utils/file_info.cpp \
-				../common/utils/files.cpp \
-				../common/utils/preference.cpp \
-				../common/utils/keyboard.cpp \
-				../common/img_io/paint.cpp \
-				../common/img_io/png_io.cpp \
-				../common/img_io/jpeg_io.cpp \
-				../common/img_io/openjpeg_io.cpp \
-				../common/img_io/bmp_io.cpp \
-				../common/img_io/tga_io.cpp \
-				../common/img_io/dds_io.cpp \
-				../common/img_io/img_files.cpp \
-				../common/img_io/img_utils.cpp \
-				../common/snd_io/audio_io.cpp \
-				../common/snd_io/pcm.cpp \
-				../common/snd_io/wav_io.cpp \
-				../common/snd_io/mp3_io.cpp \
-				../common/snd_io/mp3_tag.cpp \
-				../common/snd_io/aac_io.cpp \
-				../common/snd_io/snd_files.cpp \
-				../common/snd_io/sound.cpp \
-				../common/widgets/common_parts.cpp \
-				../common/widgets/widget.cpp \
-				../common/widgets/widget_director.cpp \
-				../common/widgets/widget_utils.cpp \
-				../common/widgets/widget_image.cpp \
-				../common/widgets/widget_text.cpp \
-				../common/widgets/widget_frame.cpp \
-				../common/widgets/widget_button.cpp \
-				../common/widgets/widget_label.cpp \
-				../common/widgets/widget_slider.cpp \
-				../common/widgets/widget_list.cpp \
-				../common/widgets/widget_check.cpp \
-				../common/widgets/widget_radio.cpp \
-				../common/widgets/widget_menu.cpp \
-				../common/widgets/widget_dialog.cpp \
-				../common/widgets/widget_filer.cpp
+				core/glcore.cpp \
+				core/device.cpp \
+				core/kfimg_ft2.cpp \
+				core/jfep_io.cpp \
+				gl_fw/glfonts.cpp \
+				gl_fw/glmobj.cpp \
+				gl_fw/gltexfb.cpp \
+				gl_fw/glterminal.cpp \
+				utils/vtx.cpp \
+				utils/vmath.cpp \
+				utils/string_utils.cpp \
+				utils/file_io.cpp \
+				utils/file_info.cpp \
+				utils/files.cpp \
+				utils/preference.cpp \
+				utils/keyboard.cpp \
+				img_io/paint.cpp \
+				img_io/png_io.cpp \
+				img_io/jpeg_io.cpp \
+				img_io/openjpeg_io.cpp \
+				img_io/bmp_io.cpp \
+				img_io/tga_io.cpp \
+				img_io/dds_io.cpp \
+				img_io/img_files.cpp \
+				img_io/img_utils.cpp \
+				snd_io/audio_io.cpp \
+				snd_io/pcm.cpp \
+				snd_io/wav_io.cpp \
+				snd_io/mp3_io.cpp \
+				snd_io/mp3_tag.cpp \
+				snd_io/aac_io.cpp \
+				snd_io/snd_files.cpp \
+				snd_io/sound.cpp \
+				widgets/common_parts.cpp \
+				widgets/widget.cpp \
+				widgets/widget_director.cpp \
+				widgets/widget_utils.cpp \
+				widgets/widget_image.cpp \
+				widgets/widget_text.cpp \
+				widgets/widget_frame.cpp \
+				widgets/widget_button.cpp \
+				widgets/widget_label.cpp \
+				widgets/widget_slider.cpp \
+				widgets/widget_list.cpp \
+				widgets/widget_check.cpp \
+				widgets/widget_radio.cpp \
+				widgets/widget_menu.cpp \
+				widgets/widget_dialog.cpp \
+				widgets/widget_filer.cpp
 
-CSOURCES	=	../common/minizip/ioapi.c \
-				../common/minizip/unzip.c
+CSOURCES	=	minizip/ioapi.c \
+				minizip/unzip.c
 
 STDLIBS		=
 OPTLIBS		=	glfw3 glew32 opengl32 glu32 gdi32 imm32 \
@@ -76,8 +81,8 @@ INC_LIB		=	/usr/local/include \
 				/usr/local/include/openjpeg-2.0 \
 				/usr/local/include/freetype2
 
-PINC_APP	=	./ ../common
-CINC_APP	=	./ ../common
+PINC_APP	=	. ../common
+CINC_APP	=	. ../common
 LIBDIR		=	/usr/local/lib
 
 INC_S	=	$(addprefix -I, $(INC_SYS))
@@ -100,16 +105,12 @@ RC	=	windres
 
 POPT	=	-O2 -std=gnu++11
 COPT	=	-O2
-# POPT	=	-g
-# COPT	=	-g
 LOPT	=
 
 COF	=	-o
 LOF	=	-o
 
 PFLAGS	=	-DWIN32 -DHAVE_STDINT_H
-# PFLAGS	=	-DWIN32 -mno-cygwin -DIPAD_EMU -DOPTION_MEMORY_ALOCATE
-# PFLAGS	=	-DWIN32 -mno-cygwin -DIPAD_EMU
 CFLAGS	=	-DWIN32
 # 	-static-libgcc -static-libstdc++
 LFLAGS	=
@@ -119,45 +120,46 @@ CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
 			-Wformat
 CPPWARN	=	-Wall
 
-OBJECTS	=	$(PSOURCES:.cpp=.o) $(CSOURCES:.c=.o)
-DEPENDS =   $(PSOURCES:.cpp=.d) $(CSOURCES:.c=.d)
+OBJECTS	=	$(addprefix $(BUILD)/,$(patsubst %.cpp,%.o,$(PSOURCES))) \
+			$(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(CSOURCES)))
+DEPENDS =   $(patsubst %.o,%.d, $(OBJECTS))
 
 .SUFFIXES :
 .SUFFIXES : .rc .hpp .h .c .cpp .o
 
-$(TARGET).exe: $(OBJECTS) Makefile icon.o
-	$(LK) $(LOF)$(TARGET).exe $(LFLAGS) $(LIBS) $(OBJECTS) icon.o $(LIBN)
+all: $(BUILD) $(TARGET)
 
-.c.o:
-	$(CC) $(COPT) $(CFLAGS) $(CINCS) $(CCWARN) -c $< $(COF)$@
+$(TARGET): $(OBJECTS) Makefile icon.o
+	$(LK) $(LOF)$(TARGET) $(LFLAGS) $(LIBS) $(OBJECTS) icon.o $(LIBN)
 
-.cpp.o:
-	$(CP) $(POPT) $(PFLAGS) $(PINCS) $(CPWARN) -c $< $(COF)$@
+$(BUILD)/%.o : %.c
+	mkdir -p $(dir $@); \
+	$(CC) -c $(COPT) $(CFLAGS) $(CINCS) $(CCWARN) -o $@ $<
+
+$(BUILD)/%.o : %.cpp
+	mkdir -p $(dir $@); \
+	$(CP) -c $(POPT) $(PFLAGS) $(PINCS) $(CPWARN) -o $@ $<
 
 icon.o: icon.rc ./res/player.ico
 	$(RC) -i $< -o $@
 
-%.d: %.c %.h
-	echo '$*.o: \' > $@
-	$(CC) -MM -DDEPEND_ESCAPE $(COPT) $(CFLAGS) $(INC_C) $(CCWARN) $< | \
-	sed 's/.*://' >> $@
+$(BUILD)/%.d : %.c
+	mkdir -p $(dir $@); \
+	$(CC) -MM -DDEPEND_ESCAPE $(COPT) $(CFLAGS) $(INC_C) $< \
+	| sed 's/$(notdir $*).o/$(subst /,\/,$(patsubst %.d,%.o,$@) $@)/' > $@ ; \
+	[ -s $@ ] || rm -f $@
 
-%.d: %.cpp %.hpp
-	echo '$*.o: \' > $@
-	$(CP) -MM -DDEPEND_ESCAPE $(POPT) $(PFLAGS) $(INC_P) $(CPWARN) $< | \
-	sed 's/.*://' >> $@
-
-all:
-	make clean
-	make $(TARGET)
+$(BUILD)/%.d : %.cpp
+	mkdir -p $(dir $@); \
+	$(CC) -MM -DDEPEND_ESCAPE $(POPT) $(PFLAGS) $(INC_P) $< \
+	| sed 's/$(notdir $*).o/$(subst /,\/,$(patsubst %.d,%.o,$@) $@)/' > $@ ; \
+	[ -s $@ ] || rm -f $@
 
 run:
 	./$(TARGET).exe
 
 clean:
-	rm -f $(DEPENDS)
-	rm -f $(OBJECTS)
-	rm -f $(TARGET)
+	rm -rf $(BUILD_DIR) $(TARGET)
 
 dllname:
 	objdump -p $(TARGET).exe | grep "DLL Name"
@@ -203,4 +205,5 @@ mylib_arc:
 clean_depend:
 	rm -f $(DEPENDS)
 
+.PHONY: all clean
 -include $(DEPENDS)
