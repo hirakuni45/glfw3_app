@@ -156,13 +156,13 @@ $(BUILD)/%.d : %.cpp
 	[ -s $@ ] || rm -f $@
 
 run:
-	./$(TARGET).exe
+	./$(TARGET)
 
 clean:
 	rm -rf $(BUILD_DIR) $(TARGET)
 
 dllname:
-	objdump -p $(TARGET).exe | grep "DLL Name"
+	objdump -p $(TARGET) | grep "DLL Name"
 
 tarball:
 	chmod 644 \
@@ -190,12 +190,12 @@ tarball:
 	chmod 444 $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz
 
 bin_zip:
-	$(LK) $(LOF)$(TARGET).exe $(LFLAGS) $(LIBS) -mwindows $(OBJECTS) icon.o $(LIBN)
+	$(LK) $(LOF)$(TARGET) $(LFLAGS) $(LIBS) -mwindows $(OBJECTS) icon.o $(LIBN)
 	rm -f $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip
 	zip $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip *.exe *.dll res/*.*
 
 copy_build:
-	$(LK) $(LOF)$(TARGET).exe $(LFLAGS) $(LIBS) -mwindows $(OBJECTS) $(LIBN)
+	$(LK) $(LOF)$(TARGET) $(LFLAGS) $(LIBS) -mwindows $(OBJECTS) $(LIBN)
 	cp *.dll build/.
 	cp -r res build/.
 
