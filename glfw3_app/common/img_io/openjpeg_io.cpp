@@ -8,9 +8,10 @@
 #include <cstdlib>
 #define OPJ_STATIC
 #include <openjpeg.h>
-#include "../img_io/openjpeg_io.hpp"
-#include "../utils/string_utils.hpp"
+#include "img_io/openjpeg_io.hpp"
+#include "utils/string_utils.hpp"
 #include <boost/lexical_cast.hpp>
+#include <iostream>
 
 namespace img {
 

@@ -1,63 +1,72 @@
 #-----------------------------------------------#
-# GNU-Makefile for "gcc"	 					#
+# Application Binary Build Makefile             #
 #-----------------------------------------------#
-TARGET		=	open_ide
+TARGET		=	open_ide.exe
+
+#ICON_RC		=	icon.rc
+
+# 'debug' or 'release'
+BUILD		=	release
+
+VPATH		=	../common
+
+CSOURCES	=	minizip/ioapi.c \
+				minizip/unzip.c
+
 PSOURCES	=	main.cpp \
 				open_ide.cpp \
-				../common/core/glcore.cpp \
-				../common/core/device.cpp \
-				../common/core/kfimg_ft2.cpp \
-				../common/core/jfep_io.cpp \
-				../common/gl_fw/glfonts.cpp \
-				../common/gl_fw/glmobj.cpp \
-				../common/gl_fw/gltexfb.cpp \
-				../common/gl_fw/glterminal.cpp \
-				../common/utils/vtx.cpp \
-				../common/utils/vmath.cpp \
-				../common/utils/string_utils.cpp \
-				../common/utils/file_io.cpp \
-				../common/utils/file_info.cpp \
-				../common/utils/files.cpp \
-				../common/utils/preference.cpp \
-				../common/utils/keyboard.cpp \
-				../common/img_io/paint.cpp \
-				../common/img_io/png_io.cpp \
-				../common/img_io/jpeg_io.cpp \
-				../common/img_io/openjpeg_io.cpp \
-				../common/img_io/bmp_io.cpp \
-				../common/img_io/tga_io.cpp \
-				../common/img_io/dds_io.cpp \
-				../common/img_io/pdf_in.cpp \
-				../common/img_io/img_files.cpp \
-				../common/img_io/img_utils.cpp \
-				../common/snd_io/audio_io.cpp \
-				../common/snd_io/pcm.cpp \
-				../common/snd_io/wav_io.cpp \
-				../common/snd_io/mp3_io.cpp \
-				../common/snd_io/mp3_tag.cpp \
-				../common/snd_io/aac_io.cpp \
-				../common/snd_io/snd_files.cpp \
-				../common/snd_io/sound.cpp \
-				../common/widgets/common_parts.cpp \
-				../common/widgets/widget.cpp \
-				../common/widgets/widget_director.cpp \
-				../common/widgets/widget_utils.cpp \
-				../common/widgets/widget_image.cpp \
-				../common/widgets/widget_text.cpp \
-				../common/widgets/widget_frame.cpp \
-				../common/widgets/widget_button.cpp \
-				../common/widgets/widget_label.cpp \
-				../common/widgets/widget_slider.cpp \
-				../common/widgets/widget_list.cpp \
-				../common/widgets/widget_check.cpp \
-				../common/widgets/widget_radio.cpp \
-				../common/widgets/widget_dialog.cpp \
-				../common/widgets/widget_tree.cpp \
-				../common/widgets/widget_filer.cpp \
-				../common/widgets/widget_terminal.cpp
+				core/glcore.cpp \
+				core/device.cpp \
+				core/kfimg_ft2.cpp \
+				core/jfep_io.cpp \
+				gl_fw/glfonts.cpp \
+				gl_fw/glmobj.cpp \
+				gl_fw/gltexfb.cpp \
+				gl_fw/glterminal.cpp \
+				utils/vtx.cpp \
+				utils/vmath.cpp \
+				utils/string_utils.cpp \
+				utils/file_io.cpp \
+				utils/file_info.cpp \
+				utils/files.cpp \
+				utils/preference.cpp \
+				utils/keyboard.cpp \
+				img_io/paint.cpp \
+				img_io/png_io.cpp \
+				img_io/jpeg_io.cpp \
+				img_io/openjpeg_io.cpp \
+				img_io/bmp_io.cpp \
+				img_io/tga_io.cpp \
+				img_io/dds_io.cpp \
+				img_io/pdf_in.cpp \
+				img_io/img_files.cpp \
+				img_io/img_utils.cpp \
+				snd_io/audio_io.cpp \
+				snd_io/pcm.cpp \
+				snd_io/wav_io.cpp \
+				snd_io/mp3_io.cpp \
+				snd_io/mp3_tag.cpp \
+				snd_io/aac_io.cpp \
+				snd_io/snd_files.cpp \
+				snd_io/sound.cpp \
+				widgets/common_parts.cpp \
+				widgets/widget.cpp \
+				widgets/widget_director.cpp \
+				widgets/widget_utils.cpp \
+				widgets/widget_image.cpp \
+				widgets/widget_text.cpp \
+				widgets/widget_frame.cpp \
+				widgets/widget_button.cpp \
+				widgets/widget_label.cpp \
+				widgets/widget_slider.cpp \
+				widgets/widget_list.cpp \
+				widgets/widget_check.cpp \
+				widgets/widget_radio.cpp \
+				widgets/widget_dialog.cpp \
+				widgets/widget_tree.cpp \
+				widgets/widget_filer.cpp \
+				widgets/widget_terminal.cpp
 
-CSOURCES	=	../common/minizip/ioapi.c \
-				../common/minizip/unzip.c
 STDLIBS		=
 OPTLIBS		=	glfw3 glew32 opengl32 glu32 gdi32 imm32 \
 				pthread \
@@ -70,17 +79,16 @@ OPTLIBS		=	glfw3 glew32 opengl32 glu32 gdi32 imm32 \
 				mad \
 				faad mp4ff
 
-INC_SYS		=	/usr/local/boost_1_54_0 \
-				/usr/local/include
+INC_SYS		=	/usr/local/boost_1_54_0
 
-INC_LIB		=	/usr/local/include/libpng12 \
+INC_LIB		=	/usr/local/include \
+				/usr/local/include/libpng16 \
 				/usr/local/include/libjpeg_x86 \
 				/usr/local/include/openjpeg-2.0 \
-				/usr/local/include/freetype2 \
-				/usr/local/include/mupdf
+				/usr/local/include/freetype2
 
-PINC_APP	=	./ ../common
-CINC_APP	=	./ ../common
+PINC_APP	=	. ../common
+CINC_APP	=	. ../common
 LIBDIR		=	/usr/local/lib
 
 INC_S	=	$(addprefix -I, $(INC_SYS))
@@ -103,102 +111,90 @@ RC	=	windres
 
 POPT	=	-O2 -std=gnu++11
 COPT	=	-O2
-# POPT	=	-g
-# COPT	=	-g
 LOPT	=
 
-COF	=	-o
-LOF	=	-o
-
 PFLAGS	=	-DWIN32 -DHAVE_STDINT_H
-# PFLAGS	=	-DWIN32 -mno-cygwin -DIPAD_EMU -DOPTION_MEMORY_ALOCATE
-# PFLAGS	=	-DWIN32 -mno-cygwin -DIPAD_EMU
 CFLAGS	=	-DWIN32
-LFLAGS	=	-static-libgcc -static-libstdc++
+
+ifeq ($(BUILD),debug)
+	POPT += -g
+	COPT += -g
+	PFLAGS += -DDEBUG
+	CFLAGS += -DDEBUG
+endif
+
+ifeq ($(BUILD),release)
+	PFLAGS += -DNDEBUG
+	CFLAGS += -DNDEBUG
+endif
+
+# 	-static-libgcc -static-libstdc++
+LFLAGS	=
 
 # -Wuninitialized -Wunused -Werror -Wshadow
 CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
 			-Wformat
 CPPWARN	=	-Wall
 
-OBJECTS	=	$(PSOURCES:.cpp=.o) $(CSOURCES:.c=.o)
-DEPENDS =   $(PSOURCES:.cpp=.d) $(CSOURCES:.c=.d)
+OBJECTS	=	$(addprefix $(BUILD)/,$(patsubst %.cpp,%.o,$(PSOURCES))) \
+			$(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(CSOURCES)))
+DEPENDS =   $(patsubst %.o,%.d, $(OBJECTS))
 
+ifdef ICON_RC
+	ICON_OBJ =	$(addprefix $(BUILD)/,$(patsubst %.rc,%.o,$(ICON_RC)))
+endif
+
+.PHONY: all clean
 .SUFFIXES :
-.SUFFIXES : .res .hpp .h .c .cpp .o .d
+.SUFFIXES : .rc .hpp .h .c .cpp .o
 
-$(TARGET).exe: $(OBJECTS) Makefile
-	$(LK) $(LOF)$(TARGET).exe $(LFLAGS) $(LIBS) $(OBJECTS) $(LIBN)
+all: $(BUILD) $(TARGET)
 
-.c.o:
-	$(CC) $(COPT) $(CFLAGS) $(CINCS) $(CCWARN) -c $< $(COF)$@
+$(TARGET): $(OBJECTS) $(ICON_OBJ) Makefile
+	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -o $(TARGET)
 
-.cpp.o:
-	$(CP) $(POPT) $(PFLAGS) $(PINCS) $(CPWARN) -c $< $(COF)$@
+$(BUILD)/%.o : %.c
+	mkdir -p $(dir $@); \
+	$(CC) -c $(COPT) $(CFLAGS) $(CINCS) $(CCWARN) -o $@ $<
 
-.rc.c:
-	$(RC) $< $@
+$(BUILD)/%.o : %.cpp
+	mkdir -p $(dir $@); \
+	$(CP) -c $(POPT) $(PFLAGS) $(PINCS) $(CPWARN) -o $@ $<
 
-%.d: %.c %.h
-	echo '$*.o: \' > $@
-	$(CC) -MM -DDEPEND_ESCAPE $(COPT) $(CFLAGS) $(INC_C) $(CCWARN) $< | \
-	sed 's/.*://' >> $@
+$(ICON_OBJ): $(ICON_RC)
+	$(RC) -i $< -o $@
 
-%.d: %.cpp %.hpp
-	echo '$*.o: \' > $@
-	$(CP) -MM -DDEPEND_ESCAPE $(POPT) $(PFLAGS) $(INC_P) $(CPWARN) $< | \
-	sed 's/.*://' >> $@
+$(BUILD)/%.d : %.c
+	mkdir -p $(dir $@); \
+	$(CC) -MM -DDEPEND_ESCAPE $(COPT) $(CFLAGS) $(INC_C) $< \
+	| sed 's/$(notdir $*)\.o:/$(subst /,\/,$(patsubst %.d,%.o,$@) $@):/' > $@ ; \
+	[ -s $@ ] || rm -f $@
 
-all:
-	make clean
-	make depend
-	make $(TARGET)
-
-install:
-	cp ./$(TARGET).exe /usr/local/bin/.
+$(BUILD)/%.d : %.cpp
+	mkdir -p $(dir $@); \
+	$(CP) -MM -DDEPEND_ESCAPE $(POPT) $(PFLAGS) $(INC_P) $< \
+	| sed 's/$(notdir $*)\.o:/$(subst /,\/,$(patsubst %.d,%.o,$@) $@):/' > $@ ; \
+	[ -s $@ ] || rm -f $@
 
 run:
-	./$(TARGET).exe
+	./$(TARGET)
 
 clean:
-	rm -f $(DEPENDS)
-	rm -f $(OBJECTS)
-	rm -f $(TARGET)
-
-dllname:
-	objdump -p $(TARGET).exe | grep "DLL Name"
-
-tarball:
-	chmod 644 \
-			../common/core/*.[hc]pp \
-			../common/gl_fw/*.[hc]pp \
-			../common/utils/*.[hc]pp \
-			../common/img_io/*.[hc]pp \
-			../common/snd_io/*.[hc]pp \
-			../common/widgets/*.[hc]pp \
-			../common/minizip/*.[hc] \
-			../open_ide/*.[hc]pp Makefile
-	rm -f $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz
-	tar cfvz $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz \
-			../common/core/*.[hc]pp \
-			../common/gl_fw/*.[hc]pp \
-			../common/utils/*.[hc]pp \
-			../common/img_io/*.[hc]pp \
-			../common/snd_io/*.[hc]pp \
-			../common/widgets/*.[hc]pp \
-			../common/minizip/*.[hc] \
-			../open_ide/*.[hc]pp
-	chmod 444 $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz
-
-bin_zip:
-	$(LK) $(LOF)$(TARGET).exe $(LFLAGS) $(LIBS) -mwindows $(OBJECTS) $(LIBN)
-	rm -f $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip
-	zip $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip *.exe *.dll res/*.*
-
-mylib_arc:
-	tar cfvz mingw_pack.tgz /usr/local/include /usr/local/lib /usr/local/bin
+	rm -rf $(BUILD) $(TARGET)
 
 clean_depend:
 	rm -f $(DEPENDS)
+
+dllname:
+	objdump -p $(TARGET) | grep "DLL Name"
+
+tarball:
+	tar cfvz $(subst .exe,,$(TARGET))_$(shell date +%Y%m%d%H).tgz \
+	*.[hc]pp Makefile ../common/*/*.[hc]pp ../common/*/*.[hc]
+
+bin_zip:
+	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -mwindows -o $(TARGET) 
+	rm -f $(subst .exe,,$(TARGET))_$(shell date +%Y%m%d%H)_bin.zip
+	zip $(subst .exe,,$(TARGET))_$(shell date +%Y%m%d%H)_bin.zip *.exe *.dll
 
 -include $(DEPENDS)

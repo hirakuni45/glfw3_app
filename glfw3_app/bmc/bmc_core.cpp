@@ -4,6 +4,7 @@
 	@author 平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
+#include <iostream>
 #include "bmc_core.hpp"
 #include <boost/foreach.hpp>
 #include <boost/format.hpp>

@@ -169,7 +169,7 @@ $(BUILD)/%.d : %.c
 
 $(BUILD)/%.d : %.cpp
 	mkdir -p $(dir $@); \
-	$(CC) -MM -DDEPEND_ESCAPE $(POPT) $(PFLAGS) $(INC_P) $< \
+	$(CP) -MM -DDEPEND_ESCAPE $(POPT) $(PFLAGS) $(INC_P) $< \
 	| sed 's/$(notdir $*)\.o:/$(subst /,\/,$(patsubst %.d,%.o,$@) $@):/' > $@ ; \
 	[ -s $@ ] || rm -f $@
 
@@ -190,7 +190,7 @@ tarball:
 	*.[hc]pp Makefile ../common/*/*.[hc]pp ../common/*/*.[hc]
 
 bin_zip:
-	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) icon.o $(LIBN) -mwindows -o $(TARGET) 
+	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -mwindows -o $(TARGET) 
 	rm -f $(subst .exe,,$(TARGET))_$(shell date +%Y%m%d%H)_bin.zip
 	zip $(subst .exe,,$(TARGET))_$(shell date +%Y%m%d%H)_bin.zip *.exe *.dll res/*.*
 

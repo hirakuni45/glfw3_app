@@ -1,11 +1,17 @@
 #-----------------------------------------------#
-# GNU-Makefile for "gcc"	 					#
+# Application Binary Build Makefile             #
 #-----------------------------------------------#
 TARGET		=	pmdv.exe
 
+#ICON_RC		=	icon.rc
+
+# 'debug' or 'release'
 BUILD		=	release
 
 VPATH		=	../common
+
+CSOURCES	=	minizip/ioapi.c \
+				minizip/unzip.c
 
 PSOURCES	=	main.cpp \
 				pmdv_main.cpp \
@@ -67,8 +73,6 @@ PSOURCES	=	main.cpp \
 				mdf/pmx_io.cpp
 #				mdf/surface.cpp
 
-CSOURCES	=	minizip/ioapi.c \
-				minizip/unzip.c
 STDLIBS		=
 OPTLIBS		=	glfw3 glew32 opengl32 glu32 gdi32 imm32 \
 				pthread \
@@ -81,14 +85,13 @@ OPTLIBS		=	glfw3 glew32 opengl32 glu32 gdi32 imm32 \
 				mad \
 				faad mp4ff
 
-INC_SYS		=	/usr/local/boost_1_54_0 \
-				/usr/local/include
+INC_SYS		=	/usr/local/boost_1_54_0
 
-INC_LIB		=	/usr/local/include/libpng16 \
+INC_LIB		=	/usr/local/include \
+				/usr/local/include/libpng16 \
 				/usr/local/include/libjpeg_x86 \
 				/usr/local/include/openjpeg-2.0 \
-				/usr/local/include/freetype2 \
-				/usr/local/include/mupdf
+				/usr/local/include/freetype2
 
 PINC_APP	=	. ../common
 CINC_APP	=	. ../common
@@ -116,11 +119,21 @@ POPT	=	-O2 -std=gnu++11
 COPT	=	-O2
 LOPT	=
 
-COF	=	-o
-LOF	=	-o
-
 PFLAGS	=	-DWIN32 -DHAVE_STDINT_H
 CFLAGS	=	-DWIN32
+
+ifeq ($(BUILD),debug)
+	POPT += -g
+	COPT += -g
+	PFLAGS += -DDEBUG
+	CFLAGS += -DDEBUG
+endif
+
+ifeq ($(BUILD),release)
+	PFLAGS += -DNDEBUG
+	CFLAGS += -DNDEBUG
+endif
+
 # 	-static-libgcc -static-libstdc++
 LFLAGS	=
 
@@ -133,13 +146,18 @@ OBJECTS	=	$(addprefix $(BUILD)/,$(patsubst %.cpp,%.o,$(PSOURCES))) \
 			$(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(CSOURCES)))
 DEPENDS =   $(patsubst %.o,%.d, $(OBJECTS))
 
+ifdef ICON_RC
+	ICON_OBJ =	$(addprefix $(BUILD)/,$(patsubst %.rc,%.o,$(ICON_RC)))
+endif
+
+.PHONY: all clean
 .SUFFIXES :
 .SUFFIXES : .rc .hpp .h .c .cpp .o
 
 all: $(BUILD) $(TARGET)
 
-$(TARGET): $(OBJECTS) Makefile
-	$(LK) $(LOF)$(TARGET) $(LFLAGS) $(LIBS) $(OBJECTS) $(LIBN)
+$(TARGET): $(OBJECTS) $(ICON_OBJ) Makefile
+	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -o $(TARGET)
 
 $(BUILD)/%.o : %.c
 	mkdir -p $(dir $@); \
@@ -149,8 +167,8 @@ $(BUILD)/%.o : %.cpp
 	mkdir -p $(dir $@); \
 	$(CP) -c $(POPT) $(PFLAGS) $(PINCS) $(CPWARN) -o $@ $<
 
-#icon.o: icon.rc ./res/player.ico
-#	$(RC) -i $< -o $@
+$(ICON_OBJ): $(ICON_RC)
+	$(RC) -i $< -o $@
 
 $(BUILD)/%.d : %.c
 	mkdir -p $(dir $@); \
@@ -160,7 +178,7 @@ $(BUILD)/%.d : %.c
 
 $(BUILD)/%.d : %.cpp
 	mkdir -p $(dir $@); \
-	$(CC) -MM -DDEPEND_ESCAPE $(POPT) $(PFLAGS) $(INC_P) $< \
+	$(CP) -MM -DDEPEND_ESCAPE $(POPT) $(PFLAGS) $(INC_P) $< \
 	| sed 's/$(notdir $*)\.o:/$(subst /,\/,$(patsubst %.d,%.o,$@) $@):/' > $@ ; \
 	[ -s $@ ] || rm -f $@
 
@@ -168,30 +186,21 @@ run:
 	./$(TARGET)
 
 clean:
-	rm -rf $(BUILD_DIR) $(TARGET)
+	rm -rf $(BUILD) $(TARGET)
+
+clean_depend:
+	rm -f $(DEPENDS)
 
 dllname:
 	objdump -p $(TARGET) | grep "DLL Name"
 
 tarball:
-	echo $(PSOURCES)
-	echo $(CSOURCES)
+	tar cfvz $(subst .exe,,$(TARGET))_$(shell date +%Y%m%d%H).tgz \
+	*.[hc]pp Makefile ../common/*/*.[hc]pp ../common/*/*.[hc]
 
 bin_zip:
-	$(LK) $(LOF)$(TARGET) $(LFLAGS) $(LIBS) -mwindows $(OBJECTS) icon.o $(LIBN)
-	rm -f $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip
-	zip $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip $(TARGET) *.dll res/*.*
+	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -mwindows -o $(TARGET) 
+	rm -f $(subst .exe,,$(TARGET))_$(shell date +%Y%m%d%H)_bin.zip
+	zip $(subst .exe,,$(TARGET))_$(shell date +%Y%m%d%H)_bin.zip *.exe *.dll
 
-copy_build:
-	$(LK) $(LOF)$(TARGET) $(LFLAGS) $(LIBS) -mwindows $(OBJECTS) $(LIBN)
-	cp *.dll build/.
-	cp -r res build/.
-
-mylib_arc:
-	tar cfvz mingw_pack.tgz /usr/local/include /usr/local/lib /usr/local/bin
-
-clean_depend:
-	rm -f $(DEPENDS)
-
-.PHONY: all clean
 -include $(DEPENDS)

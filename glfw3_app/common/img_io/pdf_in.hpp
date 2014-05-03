@@ -8,7 +8,7 @@
 //=====================================================================//
 #include <string>
 extern "C" {
-#include <fitz.h>
+#include <mupdf/fitz.h>
 };
 #include "img_io/i_img_io.hpp"
 #include "img_io/img_rgba8.hpp"

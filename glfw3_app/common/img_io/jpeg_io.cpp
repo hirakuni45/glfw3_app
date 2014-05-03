@@ -4,16 +4,16 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 extern "C" {
 #include <jpeglib.h>
 #include <jerror.h>
 };
 #include "utils/file_io.hpp"
 #include "jpeg_io.hpp"
-
 #include <boost/lexical_cast.hpp>
+#include <iostream>
 
 namespace img {
 

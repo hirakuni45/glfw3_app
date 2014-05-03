@@ -148,6 +148,7 @@ namespace utils {
 			}
 		}
 
+#if 0
 		void dump() {
 			BOOST_FOREACH(const info_t& inf, infos_) {
 				std::cout << boost::format("%c: (%d)\n")
@@ -155,5 +156,6 @@ namespace utils {
 					% static_cast<int>(inf.type_);
 			}
 		}
+#endif
 	};
 }
