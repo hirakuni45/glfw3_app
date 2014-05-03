@@ -1,11 +1,17 @@
 #-----------------------------------------------#
-# GNU-Makefile for "gcc"	 					#
+# Application Binary Build Makefile             #
 #-----------------------------------------------#
 TARGET		=	player.exe
 
+ICON_RC		=	icon.rc
+
+# 'debug' or 'release'
 BUILD		=	release
 
 VPATH		=	../common
+
+CSOURCES	=	minizip/ioapi.c \
+				minizip/unzip.c
 
 PSOURCES	=	main.cpp \
 				player.cpp \
@@ -59,9 +65,6 @@ PSOURCES	=	main.cpp \
 				widgets/widget_dialog.cpp \
 				widgets/widget_filer.cpp
 
-CSOURCES	=	minizip/ioapi.c \
-				minizip/unzip.c
-
 STDLIBS		=
 OPTLIBS		=	glfw3 glew32 opengl32 glu32 gdi32 imm32 \
 				pthread \
@@ -107,11 +110,21 @@ POPT	=	-O2 -std=gnu++11
 COPT	=	-O2
 LOPT	=
 
-COF	=	-o
-LOF	=	-o
-
 PFLAGS	=	-DWIN32 -DHAVE_STDINT_H
 CFLAGS	=	-DWIN32
+
+ifeq ($(BUILD),debug)
+	POPT += -g
+	COPT += -g
+	PFLAGS += -DDEBUG
+	CFLAGS += -DDEBUG
+endif
+
+ifeq ($(BUILD),release)
+	PFLAGS += -DNDEBUG
+	CFLAGS += -DNDEBUG
+endif
+
 # 	-static-libgcc -static-libstdc++
 LFLAGS	=
 
@@ -124,13 +137,18 @@ OBJECTS	=	$(addprefix $(BUILD)/,$(patsubst %.cpp,%.o,$(PSOURCES))) \
 			$(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(CSOURCES)))
 DEPENDS =   $(patsubst %.o,%.d, $(OBJECTS))
 
+ifdef ICON_RC
+	ICON_OBJ =	$(addprefix $(BUILD)/,$(patsubst %.rc,%.o,$(ICON_RC)))
+endif
+
+.PHONY: all clean
 .SUFFIXES :
 .SUFFIXES : .rc .hpp .h .c .cpp .o
 
 all: $(BUILD) $(TARGET)
 
-$(TARGET): $(OBJECTS) Makefile icon.o
-	$(LK) $(LOF)$(TARGET) $(LFLAGS) $(LIBS) $(OBJECTS) icon.o $(LIBN)
+$(TARGET): $(OBJECTS) $(ICON_OBJ) Makefile
+	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -o $(TARGET)
 
 $(BUILD)/%.o : %.c
 	mkdir -p $(dir $@); \
@@ -140,70 +158,40 @@ $(BUILD)/%.o : %.cpp
 	mkdir -p $(dir $@); \
 	$(CP) -c $(POPT) $(PFLAGS) $(PINCS) $(CPWARN) -o $@ $<
 
-icon.o: icon.rc ./res/player.ico
+$(ICON_OBJ): $(ICON_RC)
 	$(RC) -i $< -o $@
 
 $(BUILD)/%.d : %.c
 	mkdir -p $(dir $@); \
 	$(CC) -MM -DDEPEND_ESCAPE $(COPT) $(CFLAGS) $(INC_C) $< \
-	| sed 's/$(notdir $*).o/$(subst /,\/,$(patsubst %.d,%.o,$@) $@)/' > $@ ; \
+	| sed 's/$(notdir $*)\.o:/$(subst /,\/,$(patsubst %.d,%.o,$@) $@):/' > $@ ; \
 	[ -s $@ ] || rm -f $@
 
 $(BUILD)/%.d : %.cpp
 	mkdir -p $(dir $@); \
 	$(CC) -MM -DDEPEND_ESCAPE $(POPT) $(PFLAGS) $(INC_P) $< \
-	| sed 's/$(notdir $*).o/$(subst /,\/,$(patsubst %.d,%.o,$@) $@)/' > $@ ; \
+	| sed 's/$(notdir $*)\.o:/$(subst /,\/,$(patsubst %.d,%.o,$@) $@):/' > $@ ; \
 	[ -s $@ ] || rm -f $@
 
 run:
 	./$(TARGET)
 
 clean:
-	rm -rf $(BUILD_DIR) $(TARGET)
+	rm -rf $(BUILD) $(TARGET)
+
+clean_depend:
+	rm -f $(DEPENDS)
 
 dllname:
 	objdump -p $(TARGET) | grep "DLL Name"
 
 tarball:
-	chmod 644 \
-			../common/core/*.[hc]pp \
-			../common/gl_fw/*.[hc]pp \
-			../common/utils/*.[hc]pp \
-			../common/img_io/*.[hc]pp \
-			../common/snd_io/*.[hc]pp \
-			../common/widgets/*.[hc]pp \
-			../common/minizip/*.[hc] \
-			../player/*.[hc]pp Makefile \
-			../player/res/*
-	rm -f $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz
-	tar cfvz $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz \
-			../common/core/*.[hc]pp \
-			../common/gl_fw/*.[hc]pp \
-			../common/utils/*.[hc]pp \
-			../common/img_io/*.[hc]pp \
-			../common/snd_io/*.[hc]pp \
-			../common/widgets/*.[hc]pp \
-			../common/minizip/*.[hc] \
-			../player/*.[hc]pp Makefile \
-			../player/res/*.png \
-			../player/res/*.ttf
-	chmod 444 $(TARGET)_$(shell date +%Y%m%d%H)_src.tgz
+	tar cfvz $(subst .exe,,$(TARGET))_$(shell date +%Y%m%d%H).tgz \
+	*.[hc]pp Makefile ../common/*/*.[hc]pp ../common/*/*.[hc]
 
 bin_zip:
-	$(LK) $(LOF)$(TARGET) $(LFLAGS) $(LIBS) -mwindows $(OBJECTS) icon.o $(LIBN)
-	rm -f $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip
-	zip $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip *.exe *.dll res/*.*
+	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) icon.o $(LIBN) -mwindows -o $(TARGET) 
+	rm -f $(subst .exe,,$(TARGET))_$(shell date +%Y%m%d%H)_bin.zip
+	zip $(subst .exe,,$(TARGET))_$(shell date +%Y%m%d%H)_bin.zip *.exe *.dll res/*.*
 
-copy_build:
-	$(LK) $(LOF)$(TARGET) $(LFLAGS) $(LIBS) -mwindows $(OBJECTS) $(LIBN)
-	cp *.dll build/.
-	cp -r res build/.
-
-mylib_arc:
-	tar cfvz mingw_pack.tgz /usr/local/include /usr/local/lib /usr/local/bin
-
-clean_depend:
-	rm -f $(DEPENDS)
-
-.PHONY: all clean
 -include $(DEPENDS)
