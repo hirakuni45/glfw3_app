@@ -582,8 +582,13 @@ namespace gui {
 			}
 			if(left.pos && focus) {  // 移動を行う widget 候補
 				w->at_param().move_org_ = w->get_rect().org;
+				w->set_state(widget::state::_ACTIVE);
 				top_move_ = w;
+			} else if(!left.lvl) {
+				w->set_state(widget::state::_ACTIVE, false);
+				select = 0;
 			}
+
 			if(right.pos && focus) {
 				vtx::spos sign(1);
 				if(msp.x < (w->get_rect().org.x + w->get_rect().size.x / 2)) sign.x = -1;
@@ -597,15 +602,16 @@ namespace gui {
 
 
 			if(left.lvl && focus) {  // 選択している widget 候補
-				w->set_state(widget::state::DRAG);
-				select = w;
-				if(w->get_state(widget::state::DRAG_UNSELECT) && msp_length_ > unselect_length_) {
-					w->set_state(widget::state::SELECT, false);
-					w->set_state(widget::state::IS_SELECT, false);
-					select = 0;
+				if(w->get_state(widget::state::_ACTIVE)) {
+					w->set_state(widget::state::DRAG);
+					select = w;
+					if(w->get_state(widget::state::DRAG_UNSELECT) && msp_length_ > unselect_length_) {
+						w->set_state(widget::state::SELECT, false);
+						w->set_state(widget::state::IS_SELECT, false);
+						select = 0;
+					}
 				}
 			}
-
 
 			// 移動時
 			if(left.lvl) {

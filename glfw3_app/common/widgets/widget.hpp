@@ -267,6 +267,8 @@ namespace gui {
 				SERVICE,				///< サービスを呼び出す
 
 				/// 以下ワーク用
+				_ACTIVE,				///< アクティブ状態用
+
 				SYSTEM_STALL,			///< システム用ストール
 				SYSTEM_SELECT,			///< システム用セレクト
 
