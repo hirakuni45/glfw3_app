@@ -607,7 +607,7 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		bool get_selected() const {
-			return get_state(state::SELECT_TRG) && get_focus() && get_select_out();
+			return get_focus() && get_select_out();
 		}
 
 

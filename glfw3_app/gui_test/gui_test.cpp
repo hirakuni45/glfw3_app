@@ -42,7 +42,7 @@ namespace app {
 		widget_director& wd = director_.at().widget_director_;
 
 		if(1) {	// ラジオボタンのテスト
-			widget::param wpr(vtx::srect(20, 20, 130, 200), 0);
+			widget::param wpr(vtx::srect(20, 20, 130, 130), 0);
 			widget_null::param wpr_;
 			widget* root = wd.add_widget<widget_null>(wpr, wpr_);
 			root->set_state(widget::state::POSITION_LOCK);
