@@ -153,12 +153,12 @@ namespace gl {
 	void fonts::setup_matrix()
 	{
 		if(setup_ == false) {
-			::glMatrixMode(GL_TEXTURE);
-			::glLoadIdentity();
-			::glScalef(1.0f / 256.0f, 1.0f / 256.0f, 1.0f);
+			glMatrixMode(GL_TEXTURE);
+			glLoadIdentity();
+			glScalef(1.0f / 256.0f, 1.0f / 256.0f, 1.0f);
 
-			::glMatrixMode(GL_MODELVIEW);
-			::glLoadIdentity();
+			glMatrixMode(GL_MODELVIEW);
+			glLoadIdentity();
 			setup_ = true;
 		}
 	}
@@ -176,17 +176,17 @@ namespace gl {
 	void fonts::setup_matrix(int scx, int scy, int scw, int sch)
 	{
 		if(setup_ == false) {
-			::glMatrixMode(GL_TEXTURE);
-			::glLoadIdentity();
-			::glScalef(1.0f / 256.0f, 1.0f / 256.0f, 1.0f);
+			glMatrixMode(GL_TEXTURE);
+			glLoadIdentity();
+			glScalef(1.0f / 256.0f, 1.0f / 256.0f, 1.0f);
 
-			::glMatrixMode(GL_PROJECTION);
-			::glLoadIdentity();
+			glMatrixMode(GL_PROJECTION);
+			glLoadIdentity();
 			glOrthof((float)scx, (float)scw,
 					(float)sch, (float)scy, -1.0f, 1.0f);
 
-			::glMatrixMode(GL_MODELVIEW);
-			::glLoadIdentity();
+			glMatrixMode(GL_MODELVIEW);
+			glLoadIdentity();
 			setup_ = true;
 		}
 	}
@@ -203,7 +203,7 @@ namespace gl {
 		int w = rect.size.x;
 		int h = rect.size.y;
 		int apph = ::glutGet(GLUT_WINDOW_HEIGHT);
-		::glViewport(rect.org.x, apph - rect.org.y - h, w, h);
+		glViewport(rect.org.x, apph - rect.org.y - h, w, h);
 		setup_matrix(w, h);
 	}
 #endif
@@ -256,7 +256,7 @@ namespace gl {
 		tex_page& tp = it->second;
 		if(tp.x == 0 && tp.y == 0) {
 			// OpenGL テクスチャー ID を生成
-			::glGenTextures(1, &tp.id);
+			glGenTextures(1, &tp.id);
 			if(tp.id == 0) return false;
 			pages_.push_back(tp.id);
 		}
@@ -312,22 +312,18 @@ namespace gl {
 
 		int level = 0;
 		if(tmap.lcx == 0 && tmap.lcy == 0) {
-			size_t	size = texture_page_width * texture_page_height * sizeof(img::rgba8);
-			unsigned char* img = new unsigned char[size];	///< RGBA
-			memset(img, 0x00, size);
+			std::vector<uint8_t> tmp;
+			tmp.resize(texture_page_width * texture_page_height);
 #ifdef WIN32
-			::glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-			::glTexImage2D(GL_TEXTURE_2D, level,
-						   GL_RGBA, texture_page_width, texture_page_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img);
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+			glTexImage2D(GL_TEXTURE_2D, level,
+				GL_ALPHA, texture_page_width, texture_page_height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, &tmp[0]);
+///				GL_RGBA, texture_page_width, texture_page_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img);
 #endif
-#ifdef __PPU__
-			::glTexImage2D(GL_TEXTURE_2D, level,
-						   GL_RGBA, texture_page_width, texture_page_height, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, img);
-#endif
-			delete[] img;
 		}
 
 		{
+#if 0
 			img::img_rgba8	rgba;
 			rgba.create(isz, true);
 			img::rgba8 c;
@@ -343,13 +339,11 @@ namespace gl {
 					rgba.put_pixel(p, c);
 				}
 			}
+#endif
 #ifdef WIN32
 			glTexSubImage2D(GL_TEXTURE_2D, level,
-				tmap.lcx, tmap.lcy, isz.x, isz.y, GL_RGBA, GL_UNSIGNED_BYTE, rgba.get_img());
-#endif
-#ifdef __PPU__
-			glTexSubImage2D(GL_TEXTURE_2D, level,
-				tmap.lcx, tmap.lcy, isz.x, isz.y, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, rgba.get_img());
+				tmap.lcx, tmap.lcy, isz.x, isz.y, GL_ALPHA, GL_UNSIGNED_BYTE, image->get_image());
+///				tmap.lcx, tmap.lcy, isz.x, isz.y, GL_RGBA, GL_UNSIGNED_BYTE, rgba.get_img());
 #endif
 		}
 
@@ -427,7 +421,7 @@ namespace gl {
 	void fonts::destroy()
 	{
 		if(!pages_.empty()) {
-			::glDeleteTextures(pages_.size(), &pages_[0]);
+			glDeleteTextures(pages_.size(), &pages_[0]);
 			pages_.clear();
 		}
 
@@ -443,12 +437,12 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	void fonts::draw_page(int page)
 	{
-		::glEnable(GL_TEXTURE_2D);
+		glEnable(GL_TEXTURE_2D);
 
-		::glBindTexture(GL_TEXTURE_2D, pages_[page]);
+		glBindTexture(GL_TEXTURE_2D, pages_[page]);
 
-		::glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		::glEnableClientState(GL_VERTEX_ARRAY);
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		glEnableClientState(GL_VERTEX_ARRAY);
 
 		coord_[0].u  =   0; coord_[0].v  =   0;
 		vertex_[0].x =   0; vertex_[0].y = 256;
@@ -458,9 +452,9 @@ namespace gl {
 		vertex_[3].x = 256; vertex_[3].y =   0;
 		coord_[2].u  = 256; coord_[2].v  =   0;
 		vertex_[2].x = 256; vertex_[2].y = 256;
-		::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-		::glDisable(GL_TEXTURE_2D);
+		glDisable(GL_TEXTURE_2D);
 	}
 
 
