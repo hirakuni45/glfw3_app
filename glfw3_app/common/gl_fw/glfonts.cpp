@@ -33,8 +33,6 @@ namespace gl {
 		img::create_kfimg();		// 漢字フォントイメージクラス作成
 		kfm_ = img::get_kfimg();	// 漢字フォントイメージクラス取得
 
-		kfm_->initialize();
-
 		install_font_type(default_font_path_, default_font_face_);
 
 		fore_color_.set(255, 255, 255, 255);
@@ -290,8 +288,8 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	fonts::fcode_map_it fonts::install_image(char16_t code)
 	{
-		const img::i_img* image = kfm_->get_img();
-		const vtx::spos& isz = image->get_size();
+		const img::img_gray8& gray = kfm_->get_img();
+		const vtx::spos& isz = gray.get_size();
 // std::cout << static_cast<int>(code) << ": " << static_cast<int>(isz.x) << ", " << static_cast<int>(isz.y) << std::endl;
 		tex_map tmap;
 		tmap.met = kfm_->get_metrics();
@@ -314,37 +312,14 @@ namespace gl {
 		if(tmap.lcx == 0 && tmap.lcy == 0) {
 			std::vector<uint8_t> tmp;
 			tmp.resize(texture_page_width * texture_page_height);
-#ifdef WIN32
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 			glTexImage2D(GL_TEXTURE_2D, level,
 				GL_ALPHA, texture_page_width, texture_page_height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, &tmp[0]);
-///				GL_RGBA, texture_page_width, texture_page_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img);
-#endif
 		}
 
 		{
-#if 0
-			img::img_rgba8	rgba;
-			rgba.create(isz, true);
-			img::rgba8 c;
-			img::gray8 g;
-			vtx::spos p;
-			for(p.y = 0; p.y < isz.y; ++p.y) {
-				for(p.x = 0; p.x < isz.x; ++p.x) {
-					image->get_pixel(p, g);
-					unsigned char inten;
-					if(g.g) inten = 255; else inten = 0;
-					c.r = c.g = c.b = inten;
-					c.a = g.g;
-					rgba.put_pixel(p, c);
-				}
-			}
-#endif
-#ifdef WIN32
 			glTexSubImage2D(GL_TEXTURE_2D, level,
-				tmap.lcx, tmap.lcy, isz.x, isz.y, GL_ALPHA, GL_UNSIGNED_BYTE, image->get_image());
-///				tmap.lcx, tmap.lcy, isz.x, isz.y, GL_RGBA, GL_UNSIGNED_BYTE, rgba.get_img());
-#endif
+				tmap.lcx, tmap.lcy, isz.x, isz.y, GL_ALPHA, GL_UNSIGNED_BYTE, gray.get_image());
 		}
 
 //		if(h & 7) { h |= 7; ++h; }

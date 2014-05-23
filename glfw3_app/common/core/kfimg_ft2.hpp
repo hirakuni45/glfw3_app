@@ -10,8 +10,6 @@
 #include <math.h>
 #include <boost/unordered_map.hpp>
 #include "gl_fw/Ikfimg.hpp"
-#include "img_io/i_img.hpp"
-#include "img_io/img_gray8.hpp"
 #ifndef DEPEND_ESCAPE
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -52,7 +50,7 @@ namespace img {
 		FT_Matrix	matrix_;
 
 		font_metrics::metrics	metrics_;
-		img_gray8	img_;
+		img_gray8	gray_;
 
 		bool		antialias_;
 
@@ -71,7 +69,7 @@ namespace img {
 		 */
 		//-----------------------------------------------------------------//
 		kfimg_ft2() : library_(), face_map_(), current_face_(face_map_.end()),
-			matrix_(), metrics_(), img_(), antialias_(false) { }
+			matrix_(), metrics_(), gray_(), antialias_(false) { }
 
 
 		//-----------------------------------------------------------------//
@@ -214,7 +212,7 @@ namespace img {
 			@return	ビットマップイメージの参照
 		 */
 		//-----------------------------------------------------------------//
-		const i_img* get_img() const override { return dynamic_cast<const i_img*>(&img_); }
+		const img_gray8& get_img() const override { return gray_; }
 
 
 		//-----------------------------------------------------------------//

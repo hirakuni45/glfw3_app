@@ -408,16 +408,16 @@ namespace img {
 		if(kf == 0) return 0;
 
 		kf->create_bitmap(font_size_, wc);
-		const i_img* bitmap = kf->get_img();
+		const img_gray8& gray = kf->get_img();
 
 		const font_metrics::metrics& met = kf->get_metrics();
 
 		short w = static_cast<short>(met.width + met.hori_x);
 		vtx::spos p;
-		for(p.y = 0; p.y < bitmap->get_size().y; ++p.y) {
+		for(p.y = 0; p.y < gray.get_size().y; ++p.y) {
 			for(p.x = 0; p.x < w; ++p.x) {
 				gray8 g;
-				bitmap->get_pixel(p, g);
+				gray.get_pixel(p, g);
 				if(g.g > 0) {
 					rgba8 c = fore_color_;
 					c.a = (fore_color_.a * (g.g + 1)) >> 8;

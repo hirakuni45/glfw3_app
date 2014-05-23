@@ -39,20 +39,19 @@ namespace gl {
 		tex_map_.resize(block_num_ >> 5);
 		for(int i = 0; i < (block_num_ >> 5); ++i) tex_map_[i] = 0;
 
-		::glGenTextures(1, &id_);
+		glGenTextures(1, &id_);
 
-		::glBindTexture(GL_TEXTURE_2D, id_);
-		::glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glBindTexture(GL_TEXTURE_2D, id_);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		if(im.get_size().x != pgw || im.get_size().y != pgh) {
 			img_rgba8 dst;
 			dst.create(vtx::spos(pgw, pgh), true);
-			dst.fill(rgba8(0));
 			dst.copy(vtx::spos(0), im, vtx::srect(vtx::spos(0), im.get_size()));
-			::glTexImage2D(GL_TEXTURE_2D, 0,
+			glTexImage2D(GL_TEXTURE_2D, 0,
 						   internalFormat, pgw, pgh, 0, GL_RGBA, GL_UNSIGNED_BYTE, dst.get_image());
 		} else {
-			::glTexImage2D(GL_TEXTURE_2D, 0,
-						   internalFormat, pgw, pgh, 0, GL_RGBA, GL_UNSIGNED_BYTE, im.get_image());
+			glTexImage2D(GL_TEXTURE_2D, 0,
+						 internalFormat, pgw, pgh, 0, GL_RGBA, GL_UNSIGNED_BYTE, im.get_image());
 		}
 #if 0
 		if(mp) {
@@ -298,9 +297,9 @@ namespace gl {
 					if(!f) {
 						add_texture_page(texture_mems_, mo, im);
 					} else {
-						::glBindTexture(GL_TEXTURE_2D, mo->id);
-						::glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-						::glTexSubImage2D(GL_TEXTURE_2D, 0,
+						glBindTexture(GL_TEXTURE_2D, mo->id);
+						glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+						glTexSubImage2D(GL_TEXTURE_2D, 0,
 							mo->tx, mo->ty, txw, txh, GL_RGBA, GL_UNSIGNED_BYTE,
 							im.get_image());
 					}

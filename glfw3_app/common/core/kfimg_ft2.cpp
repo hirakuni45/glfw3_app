@@ -24,6 +24,7 @@ namespace img {
 	{
 		if(kanji_font_image_ == 0) {
 			kanji_font_image_ = new kfimg_ft2;
+			kanji_font_image_->initialize();
 		}
 	}
 
@@ -37,9 +38,9 @@ namespace img {
 	Ikfimg* get_kfimg()
 	{
 		Ikfimg* p = dynamic_cast<Ikfimg*>(kanji_font_image_);
-		if(p == 0) {
+///		if(p == 0) {
 ///			std::cout << "Can't create kanji-font-image" << std::endl;
-		}
+///		}
 		return p;
 	}
 
@@ -182,9 +183,8 @@ void get_metrics(wchar_t code)
 		const atr_t& at = t.atr_map_[size];
 
 		vtx::spos fs(size, at.height_);
-		img_.create(fs);
-		gray8 g(0);
-		img_.fill(g);
+		gray_.create(fs);
+		gray_.fill(gray8(0));
 
 		FT_Error error = FT_Set_Pixel_Sizes(t.face_, size, size);
 		if(antialias_) {
@@ -219,7 +219,7 @@ void get_metrics(wchar_t code)
 				for(p.x = 0; p.x < bitmap->width; p.x++) {
 					img::gray8 c;
 					c.g = bitmap->buffer[p.y * bitmap->width + p.x];
-					img_.put_pixel(p + ofs, c);
+					gray_.put_pixel(p + ofs, c);
 				}
 			}
 		} else {	// monochrome
@@ -230,7 +230,7 @@ void get_metrics(wchar_t code)
 					img::gray8 c;
 					if(bitmap->buffer[bitpos >> 3] & (1 << (~bitpos & 7))) c.g = 255; else c.g = 0;
 					bitpos++;
-					img_.put_pixel(p + ofs, c);
+					gray_.put_pixel(p + ofs, c);
 				}
 				if(bitpos & 7) {
 					bitpos |= 7;
