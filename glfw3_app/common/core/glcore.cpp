@@ -20,6 +20,9 @@ namespace gl {
 
 #ifdef WIN32
 
+	static const char* default_font_path_ = "c:/WINDOWS/Fonts/MSGOTHIC.TTC";
+	static const char* default_font_face_ = "ms_gothic";
+
 	//=================================================================//
 	/*!
 		@brief	CPU のマシンサイクルをカウントする（WIN32-API）
@@ -312,7 +315,7 @@ namespace gl {
 			return -1;
 		}
 
-		fonts_.initialize();
+		fonts_.initialize(default_font_path_, default_font_face_);
 		fonts_.set_font_size(24);
 
         // 垂直同期を有効にする。

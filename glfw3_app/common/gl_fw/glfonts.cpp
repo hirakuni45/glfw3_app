@@ -24,9 +24,11 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	初期化
+		@param[in]	fpath	フォントパス
+		@param[in]	alias	フォント別名
 	*/
 	//-----------------------------------------------------------------//
-	void fonts::initialize()
+	void fonts::initialize(const std::string& fpath, const std::string& alias)
 	{
 		if(kfm_ != 0) return;
 
