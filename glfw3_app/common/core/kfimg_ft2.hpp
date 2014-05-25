@@ -203,7 +203,7 @@ namespace img {
 			@param[in]	unicode	生成するビットマップの UNICODE
 		 */
 		//-----------------------------------------------------------------//
-		void create_bitmap(int size, wchar_t unicode) override;
+		void create_bitmap(int size, uint32_t unicode) override;
 
 
 		//-----------------------------------------------------------------//

@@ -15,13 +15,13 @@ namespace utils {
 	typedef std::string::iterator						string_it;
 	typedef std::string::const_iterator					string_cit;
 
-	typedef std::basic_string<char16_t>					wstring;
-	typedef std::basic_string<char16_t>::iterator		wstring_it;
-	typedef std::basic_string<char16_t>::const_iterator	wstring_cit;
+	typedef std::basic_string<uint16_t>					wstring;
+	typedef std::basic_string<uint16_t>::iterator		wstring_it;
+	typedef std::basic_string<uint16_t>::const_iterator	wstring_cit;
 
-	typedef std::basic_string<char32_t>					lstring;
-	typedef std::basic_string<char32_t>::iterator		lstring_it;
-	typedef std::basic_string<char32_t>::const_iterator	lstring_cit;
+	typedef std::basic_string<uint32_t>					lstring;
+	typedef std::basic_string<uint32_t>::iterator		lstring_it;
+	typedef std::basic_string<uint32_t>::const_iterator	lstring_cit;
 
 	typedef std::vector<std::string>					strings;
 	typedef std::vector<std::string>::iterator			strings_it;
@@ -74,8 +74,8 @@ namespace utils {
 		else return &src[idx];
 	}
 	inline const char* string_strchr(const std::string& src, char ch) { return string_strchrT(src, ch); }
-	inline const char16_t* string_strchr(const wstring& src, char16_t ch) { return string_strchrT(src, ch); }
-	inline const char32_t* string_strchr(const lstring& src, char32_t ch) { return string_strchrT(src, ch); }
+	inline const uint16_t* string_strchr(const wstring& src, uint16_t ch) { return string_strchrT(src, ch); }
+	inline const uint32_t* string_strchr(const lstring& src, uint32_t ch) { return string_strchrT(src, ch); }
 
 
 	//-----------------------------------------------------------------//
@@ -93,8 +93,8 @@ namespace utils {
 		else return &src[idx];
 	}
 	inline const char* string_strrchr(const std::string& src, char ch) { return string_strrchrT(src, ch); }
-	inline const char16_t* string_strrchr(const wstring& src, char16_t ch) { return string_strrchrT(src, ch); }
-	inline const char32_t* string_strrchr(const lstring& src, char32_t ch) { return string_strrchrT(src, ch); }
+	inline const uint16_t* string_strrchr(const wstring& src, uint16_t ch) { return string_strrchrT(src, ch); }
+	inline const uint32_t* string_strrchr(const lstring& src, uint32_t ch) { return string_strrchrT(src, ch); }
 
 
 	//-----------------------------------------------------------------//
@@ -215,6 +215,20 @@ namespace utils {
 	*/
 	//-----------------------------------------------------------------//
 	bool utf16_to_utf8(const wstring& src, std::string& dst);
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	UTF-16 から UTF-32 への変換（単なるコピー）
+		@param[in]	src	UTF-16 ソース
+		@param[in]	dst	UTF-32 出力
+	*/
+	//-----------------------------------------------------------------//
+	inline void utf16_to_utf32(const wstring& src, lstring& dst) {
+		BOOST_FOREACH(uint16_t ch, src) {
+			dst += ch;
+		}
+	}
 
 
 	//-----------------------------------------------------------------//
@@ -449,8 +463,8 @@ namespace utils {
 		return src.c_str();
 	}
 	inline const char* get_file_name(const std::string& src) { return get_file_nameT(src); }
-	inline const char16_t* get_file_name(const wstring& src) { return get_file_nameT(src); }
-	inline const char32_t* get_file_name(const lstring& src) { return get_file_nameT(src); }
+	inline const uint16_t* get_file_name(const wstring& src) { return get_file_nameT(src); }
+	inline const uint32_t* get_file_name(const lstring& src) { return get_file_nameT(src); }
 
 
 	//-----------------------------------------------------------------//

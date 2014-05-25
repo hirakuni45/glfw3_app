@@ -57,7 +57,7 @@ namespace img {
 
 
 #if 0
-void get_metrics(wchar_t code)
+void get_metrics(uint32_t code)
 {
 	FT_Error error;
 
@@ -141,7 +141,7 @@ void get_metrics(wchar_t code)
 		@param[in]	unicode	生成するビットマップの UNICODE
 	 */
 	//-----------------------------------------------------------------//
-	void kfimg_ft2::create_bitmap(int size, wchar_t unicode)
+	void kfimg_ft2::create_bitmap(int size, uint32_t unicode)
 	{
 		if(current_face_ == face_map_.end()) return;
 

@@ -36,7 +36,7 @@ namespace gl {
 
 	private:
 		struct code {
-			uint16_t	cha;
+			uint32_t		cha;
 			img::rgba8		fore_color;
 			img::rgba8		back_color;
 			attribute::type	atr;
@@ -125,18 +125,18 @@ namespace gl {
 			@param[in]	ch	UTF-16 文字コード
 		*/
 		//-----------------------------------------------------------------//
-		void put(uint16_t ch);
+		void put(uint32_t ch);
 
 
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	文字出力
-			@param[in]	st	UTF-16 文字コードのポインター
+			@param[in]	st	UTF-32 文字コード郡
 		*/
 		//-----------------------------------------------------------------//
-		void puts(const utils::wstring& st) {
-			char16_t ch;
-			const char16_t* p = st.c_str();
+		void puts(const utils::lstring& st) {
+			uint32_t ch;
+			const uint32_t* p = st.c_str();
 			while((ch = *p++) != 0) {
 				put(ch);
 			}

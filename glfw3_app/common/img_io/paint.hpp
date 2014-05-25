@@ -310,29 +310,11 @@ namespace img {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	フォントの幅を取得
-			@param[in]	wc	文字コード
+			@param[in]	lc	文字コード
 			@return 幅
 		*/
 		//-----------------------------------------------------------------//
-		int get_font_width(wchar_t wc);
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	フォントを描画
-			@param[in]	txt	文字列
-			@param[in]	x	X 開始位置
-			@param[in]	y	Y 開始位置
-			@return 描画幅
-		*/
-		//-----------------------------------------------------------------//
-		int get_text_width(const utils::wstring& txt) {
-			int w = 0;
-			BOOST_FOREACH(wchar_t wc, txt) {
-				w += get_font_width(wc);
-			}
-			return w;
-		}
+		int get_font_width(uint32_t lc);
 
 
 		//-----------------------------------------------------------------//
@@ -345,38 +327,25 @@ namespace img {
 		*/
 		//-----------------------------------------------------------------//
 		int get_text_width(const std::string& txt) {
-			utils::wstring ws;
-			utils::utf8_to_utf16(txt, ws);
-			return get_text_width(ws);
-		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	フォントを描画
-			@param[in]	pos	開始位置
-			@param[in]	wc	文字コード
-			@return 描画幅
-		*/
-		//-----------------------------------------------------------------//
-		int draw_font(const vtx::spos& pos, wchar_t wc);
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	フォントを描画
-			@param[in]	txt	文字列
-			@param[in]	pos	開始位置
-			@return 描画幅
-		*/
-		//-----------------------------------------------------------------//
-		int draw_text(const vtx::spos& pos, const utils::wstring& txt) {
+			utils::lstring ls;
+			utils::utf8_to_utf32(txt, ls);
 			int w = 0;
-			BOOST_FOREACH(wchar_t wc, txt) {
-				w += draw_font(vtx::spos(pos.x + w, pos.y), wc);
+			BOOST_FOREACH(uint32_t lc, ls) {
+				w += get_font_width(lc);
 			}
 			return w;
 		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	フォントを描画
+			@param[in]	pos	開始位置
+			@param[in]	lc	文字コード
+			@return 描画幅
+		*/
+		//-----------------------------------------------------------------//
+		int draw_font(const vtx::spos& pos, uint32_t lc);
 
 
 		//-----------------------------------------------------------------//
@@ -388,9 +357,16 @@ namespace img {
 		*/
 		//-----------------------------------------------------------------//
 		int draw_text(const vtx::spos& pos, const std::string& txt) {
-			utils::wstring ws;
-			utils::utf8_to_utf16(txt, ws);
-			return draw_text(pos, ws);
+			utils::lstring ls;
+			utils::utf8_to_utf32(txt, ls);
+			int w = 0;
+			vtx::spos p = pos;
+			BOOST_FOREACH(uint32_t lc, ls) {
+				int chw = draw_font(p, lc);
+				w += chw;
+				p.x += chw;
+			}
+			return w;
 		}
 
 	};

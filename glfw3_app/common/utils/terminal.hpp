@@ -25,12 +25,12 @@ namespace utils {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct cha_t {
-			wchar_t		cha;
+			uint32_t	cha;
 			img::rgba8	fc;
 			img::rgba8	bc;
 
 			cha_t() { }
-			cha_t(wchar_t cha_, const img::rgba8& fc_, const img::rgba8& bc_) : cha(cha_), fc(fc_), bc(bc_) { } 
+			cha_t(uint32_t cha_, const img::rgba8& fc_, const img::rgba8& bc_) : cha(cha_), fc(fc_), bc(bc_) { } 
 		};
 
 	private:
@@ -182,7 +182,7 @@ namespace utils {
 			@param[in]	cha	文字
 		*/
 		//-----------------------------------------------------------------//
-		void output(wchar_t cha) {
+		void output(uint32_t cha) {
 			if(chaers_.empty()) return;
 			if(cha < ' ') {
 				if(cha == 0x0d) {

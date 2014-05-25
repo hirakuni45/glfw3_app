@@ -70,7 +70,7 @@ namespace img {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	OpenJPEG ファイル、ロード(wchar_t)
+			@brief	OpenJPEG ファイル、ロード
 			@param[in]	fin	file_io クラス
 			@param[in]	ext	フォーマット固有の設定文字列
 			@return エラーなら「false」を返す

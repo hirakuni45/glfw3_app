@@ -163,7 +163,7 @@ std::cout << boost::format("%x ") % c;
 							utils::sjis_to_utf8(tmp, dst);
 						} else if(text_code_ == ID3_FIELD_TEXTENCODING_UTF_16) {
 							id3_utf16_t* utf16 = id3_ucs4_utf16duplicate(ucs4);
-							utils::utf16_to_utf8((const char16_t*)utf16, dst);
+							utils::utf16_to_utf8((const uint16_t*)utf16, dst);
 							free(utf16);
 						} else if(text_code_ == ID3_FIELD_TEXTENCODING_UTF_8) {
 							id3_utf8_t* utf8 = id3_ucs4_utf8duplicate(ucs4);
@@ -196,7 +196,7 @@ std::cout << boost::format("%x ") % c;
 								free(sjis);
 							} else if(text_code_ == ID3_FIELD_TEXTENCODING_UTF_16) {
 								id3_utf16_t* utf16 = id3_ucs4_utf16duplicate(ucs4);
-								utils::utf16_to_utf8((char16_t*)utf16, dst);
+								utils::utf16_to_utf8((uint16_t*)utf16, dst);
 								free(utf16);
 							} else if(text_code_ == ID3_FIELD_TEXTENCODING_UTF_8) {
 								id3_utf8_t* utf8 = id3_ucs4_utf8duplicate(ucs4);

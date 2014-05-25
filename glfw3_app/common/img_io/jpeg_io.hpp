@@ -72,7 +72,7 @@ namespace img {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	JPEG ファイル、ロード(wchar_t)
+			@brief	JPEG ファイル、ロード
 			@param[in]	fin	file_io クラス
 			@param[in]	opt	フォーマット固有の設定文字列
 			@return エラーなら「false」を返す

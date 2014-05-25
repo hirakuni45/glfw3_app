@@ -18,7 +18,7 @@ namespace gui {
 		@param[in]	wch	文字
 	*/
 	//-----------------------------------------------------------------//
-	void widget_terminal::output(wchar_t wch)
+	void widget_terminal::output(uint32_t wch)
 	{
 		terminal_.output(wch);
 	}
@@ -34,11 +34,11 @@ namespace gui {
 	{
 		if(text.empty()) return;
 
-		utils::wstring ws;
-		utils::utf8_to_utf16(text, ws);
+		utils::lstring ls;
+		utils::utf8_to_utf32(text, ls);
 
-		BOOST_FOREACH(wchar_t wch, ws) {
-			output(wch);
+		BOOST_FOREACH(uint32_t ch, ls) {
+			output(ch);
 		}
 	}
 

@@ -116,7 +116,7 @@ namespace utils {
 
 		bool f = true;
 		int cnt = 0;
-		char16_t code = 0;
+		uint16_t code = 0;
 		BOOST_FOREACH(char tc, src) {
 			uint8_t c = static_cast<uint8_t>(tc);
 			if(c < 0x80) { code = c; cnt = 0; }
@@ -156,7 +156,7 @@ namespace utils {
 
 		bool f = true;
 		int cnt = 0;
-		char32_t code = 0;
+		uint32_t code = 0;
 		BOOST_FOREACH(char tc, src) {
 			uint8_t c = static_cast<uint8_t>(tc);
 			if(c < 0x80) { code = c; cnt = 0; }
@@ -198,7 +198,7 @@ namespace utils {
 		if(src.empty()) return false;
 
 		bool f = true;
-		BOOST_FOREACH(char16_t code, src) {
+		BOOST_FOREACH(uint16_t code, src) {
 			if(code < 0x0080) {
 				dst += code;
 			} else if(code >= 0x0080 && code <= 0x07ff) {
@@ -229,7 +229,7 @@ namespace utils {
 		if(src.empty()) return false;
 
 		bool f = true;
-		BOOST_FOREACH(char32_t code, src) {
+		BOOST_FOREACH(uint32_t code, src) {
 			if(code < 0x0080) {
 				dst += code;
 			} else if(code >= 0x0080 && code <= 0x07ff) {

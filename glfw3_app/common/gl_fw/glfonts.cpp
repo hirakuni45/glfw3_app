@@ -11,15 +11,50 @@ using namespace std;
 
 namespace gl {
 
-	// 初期化時に設定ビットマップを作成しておくフォント列（unicode）
-	static const char16_t iniial_fonts[] = {
-		
-		0x0000
-	};
+	bool fonts::allocate_font_texture_(int width, int height, tex_map& tmap)
+	{
+		int w;
+		if(width > height) w = width; else w = height;
+		if(w & 7) { w |= 7; ++w; }
+		int h = w;
 
-	// MSGOTHIC では、16 ピクセル、アンチエリアスモードは正しく生成されないので注意！
-	static const char* default_font_path_ = "c:/WINDOWS/Fonts/MSGOTHIC.TTC";
-	static const char* default_font_face_ = "ms_gothic";
+		tex_page_it it = tex_page_.find(h);
+		if(it == tex_page_.end()) {
+			tex_page tp;
+			tp.id = 0;
+			tp.size = h;
+			tp.x = 0;
+			tp.y = 0;
+			tex_page_.insert(std::pair<int, tex_page>(h, tp));
+			it = tex_page_.find(h);
+		}
+
+		tex_page& tp = it->second;
+		if(tp.x == 0 && tp.y == 0) {
+			// OpenGL テクスチャー ID を生成
+			glGenTextures(1, &tp.id);
+			if(tp.id == 0) return false;
+			pages_.push_back(tp.id);
+		}
+
+		tmap.id  = tp.id;
+		tmap.lcx = tp.x;
+		tmap.lcy = tp.y;
+		tmap.w = width;
+		tmap.h = height;
+
+		tp.x += w;
+		if((texture_page_width - tp.x) < w) {
+			tp.x = 0;
+			tp.y += h;
+			if((texture_page_height - tp.y) < h) {
+				tp.y = 0;
+			}
+		}
+
+		return true;
+	}
+
 
 	//-----------------------------------------------------------------//
 	/*!
@@ -35,7 +70,7 @@ namespace gl {
 		img::create_kfimg();		// 漢字フォントイメージクラス作成
 		kfm_ = img::get_kfimg();	// 漢字フォントイメージクラス取得
 
-		install_font_type(default_font_path_, default_font_face_);
+		install_font_type(fpath, alias);
 
 		fore_color_.set(255, 255, 255, 255);
 		back_color_.set(0, 0, 0, 255);
@@ -132,7 +167,7 @@ namespace gl {
 			bool tmp = face_->info_.proportional;	
 			face_->info_.proportional = true;
 			int fixw = 0;
-			for(char16_t i = 0x20; i < 0x7f; ++i) {
+			for(uint8_t i = 0x20; i < 0x7f; ++i) {
 				install_font(i);
 				int w = get_width(i);
 				if(fixw < w) fixw = w;
@@ -228,67 +263,13 @@ namespace gl {
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	開いているフォント・テクスチャーを確保する。
-		@param[in]	width	フォントの幅
-		@param[in]	height	フォントの高さ
-		@param[in]	tmap	フォントテクスチャーマップ構造体
-		@return	確保できれば「true」を返す。
-	*/
-	//-----------------------------------------------------------------//
-	bool fonts::allocate_font_texture(int width, int height, tex_map& tmap)
-	{
-		int w;
-		if(width > height) w = width; else w = height;
-		if(w & 7) { w |= 7; ++w; }
-		int h = w;
-
-		tex_page_it it = tex_page_.find(h);
-		if(it == tex_page_.end()) {
-			tex_page tp;
-			tp.id = 0;
-			tp.size = h;
-			tp.x = 0;
-			tp.y = 0;
-			tex_page_.insert(std::pair<int, tex_page>(h, tp));
-			it = tex_page_.find(h);
-		}
-
-		tex_page& tp = it->second;
-		if(tp.x == 0 && tp.y == 0) {
-			// OpenGL テクスチャー ID を生成
-			glGenTextures(1, &tp.id);
-			if(tp.id == 0) return false;
-			pages_.push_back(tp.id);
-		}
-
-		tmap.id  = tp.id;
-		tmap.lcx = tp.x;
-		tmap.lcy = tp.y;
-		tmap.w = width;
-		tmap.h = height;
-
-		tp.x += w;
-		if((texture_page_width - tp.x) < w) {
-			tp.x = 0;
-			tp.y += h;
-			if((texture_page_height - tp.y) < h) {
-				tp.y = 0;
-			}
-		}
-
-		return true;
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
 		@brief	フォントビットマップの登録
 		@param[in]	code	フォントのコード
 		@param[in]	kfm	フォントビットマップ
 		@return 登録できたら iterator を返す。
 	*/
 	//-----------------------------------------------------------------//
-	fonts::fcode_map_it fonts::install_image(char16_t code)
+	fonts::fcode_map_it fonts::install_image(uint32_t code)
 	{
 		const img::img_gray8& gray = kfm_->get_img();
 		const vtx::spos& isz = gray.get_size();
@@ -299,7 +280,7 @@ namespace gl {
 		if(code == 0x20) {
  			font_width = static_cast<float>(isz.y / 4);
 		}
-		if(!allocate_font_texture(static_cast<int>(font_width), isz.y, tmap)) {
+		if(!allocate_font_texture_(static_cast<int>(font_width), isz.y, tmap)) {
 			return face_->fcode_map_.end();
 		}
 
@@ -326,67 +307,6 @@ namespace gl {
 
 //		if(h & 7) { h |= 7; ++h; }
 		return install_font_code(code, tmap);
-	}
-
-
-	static bool char_to_ucs_(const char* text, utils::wstring& dst)
-	{
-		uint8_t c;
-		int cnt = 0;
-		char16_t code = 0;
-		while((c = *(uint8_t *)text++) != 0) {
-			if(c < 0x80) { code = c; cnt = 0; }
-			else if((c & 0xf0) == 0xe0) { code = (c & 0x0f); cnt = 2; }
-			else if((c & 0xe0) == 0xc0) { code = (c & 0x1f); cnt = 1; }
-			else if((c & 0xc0) == 0x80) {
-				code <<= 6;
-				code |= c & 0x3f;
-				cnt--;
-				if(cnt == 0 && code < 0x80) code = 0;	// 不正なコードとして無視
-				else if(cnt < 0) code = 0;
-			}
-			if(cnt == 0 && code != 0) {
-				if(code < 32) {
-					if(code == 0x0d) {
-					}
-				} else {
-					dst += code;
-				}
-			}
-		}
-		return true;
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	フォントの登録（文字列）
-		@param[in]	list	フォントのコード列
-		@return 登録できたら、「true」を返す。
-	*/
-	//-----------------------------------------------------------------//
-	bool fonts::install_font(const char16_t* list)
-	{
-		bool f = false;
-		while(char16_t wc = *list++) {
-			if(install_font(wc)) f = true;
-		}
-		return f;
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	フォントの登録（unicode 文字列）
-		@param[in]	list	フォントのコード列
-		@return 登録できたら、「true」を返す。
-	*/
-	//-----------------------------------------------------------------//
-	bool fonts::install_font(const char* list)
-	{
-		utils::wstring ws;
-		char_to_ucs_(list, ws);
-		return install_font(ws.c_str());
 	}
 
 
@@ -435,7 +355,7 @@ namespace gl {
 	}
 
 
-	int fonts::font_width_(char16_t code, int fw, int fh)
+	int fonts::font_width_(uint32_t code, int fw, int fh)
 	{
 		int fow = 0;
 		// 等幅フォントで英数字の場合
@@ -466,7 +386,7 @@ namespace gl {
 		@return	描画に成功したらフォントの幅を返す。
 	 */
 	//-----------------------------------------------------------------//
-	int fonts::draw(const vtx::spos& pos, char16_t code)
+	int fonts::draw(const vtx::spos& pos, uint32_t code)
 	{
 		fcode_map_cit cit = find_font_code(code);
 		if(cit == face_->fcode_map_.end()) {
@@ -617,12 +537,49 @@ namespace gl {
 
 	//-----------------------------------------------------------------//
 	/*!
+		@brief	フォントを描画する
+		@param[in]	pos	描画位置
+		@param[in]	text	描画ロング文字列
+		@param[in]	limit	改行のリミット幅
+		@return	描画幅を返す（複数行の場合、最大値）
+	 */
+	//-----------------------------------------------------------------//
+	int fonts::draw(const vtx::spos& pos, const utils::lstring& text, short limit)
+	{
+		short x = pos.x;
+		short y = pos.y;
+		short xx = x;
+		int cnt = 0;
+		BOOST_FOREACH(uint32_t code, text) {
+			if(code < 32) {
+				if(code == '\n') {
+					x = pos.x;
+					y += face_->info_.size;
+				}
+			} else {
+				if(limit) {
+					short w = get_width(code);
+					if((x + w) >= limit) {
+						x = pos.x;
+						y += face_->info_.size;
+					}	
+				}
+				x += draw(vtx::spos(x, y), code);
+				if(x > xx) xx = x;
+			}
+		}
+		return xx - pos.x;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
 		@brief	フォントの幅を計算する
 		@param[in]	code 計算するフォントのコード
 		@return	フォントの幅を返す
 	 */
 	//-----------------------------------------------------------------//
-	int fonts::get_width(char16_t code)
+	int fonts::get_width(uint32_t code)
 	{
 		fcode_map_cit cit = find_font_code(code);
 		if(cit == face_->fcode_map_.end()) {
@@ -637,144 +594,43 @@ namespace gl {
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	フォントを描画する
-		@param[in]	pos	描画位置
-		@param[in]	text	描画する文字列
-		@param[in]	limit	改行のリミット幅
-		@return	描画幅を返す（複数行の場合、最大値）
-	 */
-	//-----------------------------------------------------------------//
-	int fonts::draw(const vtx::spos& pos, const utils::wstring& text, short limit)
-	{
-		short x = pos.x;
-		short y = pos.y;
-		short xt = x;
-		short xx = x;
-		const char16_t* p = text.c_str();
-		while(char16_t code = *p++) {
-			if(code < 32) {
-				if(code == '\n') {
-					x = xt;
-					y += face_->info_.size;
-				}
-			} else {
-				x += draw(vtx::spos(x, y), code);
-				if(x > xx) xx = x;
-			}
-		}
-		return xx - xt;
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	フォントを描画する
-		@param[in]	pos		描画位置
-		@param[in]	text	描画する文字列 (UTF-8)
-		@param[in]	limit	改行のリミット幅
-		@return	描画幅を返す（複数行の場合、最大値）
-	 */
-	//-----------------------------------------------------------------//
-	int fonts::draw(const vtx::spos& pos, const std::string& text, short limit)
-	{
-		short x = pos.x;
-		short y = pos.y;
-		short xx = x;
-		unsigned char c;
-		int cnt = 0;
-		char16_t code = 0;
-		const char* p = text.c_str();
-		while((c = *(unsigned char *)p++) != 0) {
-			if(c < 0x80) { code = c; cnt = 0; }
-			else if((c & 0xf0) == 0xe0) { code = (c & 0x0f); cnt = 2; }
-			else if((c & 0xe0) == 0xc0) { code = (c & 0x1f); cnt = 1; }
-			else if((c & 0xc0) == 0x80) {
-				code <<= 6;
-				code |= c & 0x3f;
-				cnt--;
-				if(cnt == 0 && code < 0x80) code = 0;	// 不正なコードとして無視
-				else if(cnt < 0) code = 0;
-			}
-			if(cnt == 0 && code != 0) {
-				if(code < 32) {
-					if(code == '\n') {
-						x = pos.x;
-						y += face_->info_.size;
-					}
-				} else {
-					if(limit) {
-						short w = get_width(code);
-						if((x + w) >= limit) {
-							x = pos.x;
-							y += face_->info_.size;
-						}	
-					}
-					x += draw(vtx::spos(x, y), code);
-					if(x > xx) xx = x;
-				}
-			}
-		}
-		return xx - pos.x;
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
 		@brief	フォントの幅を計算する
-		@param[in]	text 計算するフォントのコード列
+		@param[in]	text フォントのロングコード列
 		@return	フォントの幅を返す
 	 */
 	//-----------------------------------------------------------------//
-	int fonts::get_width(const std::string& text)
+	int fonts::get_width(const utils::lstring& text)
 	{
-		int xm = 0;
-		int x = 0;
-		int cnt = 0;
-		char16_t code = 0;
-		BOOST_FOREACH(char c, text) {
-			unsigned char uc = static_cast<unsigned char>(c);
-			if(uc < 0x80) { code = uc; cnt = 0; }
-			else if((uc & 0xf0) == 0xe0) { code = (uc & 0x0f); cnt = 2; }
-			else if((uc & 0xe0) == 0xc0) { code = (uc & 0x1f); cnt = 1; }
-			else if((uc & 0xc0) == 0x80) {
-				code <<= 6;
-				code |= uc & 0x3f;
-				cnt--;
-				if(cnt == 0 && code < 0x80) code = 0;	// 不正なコードとして無視
-				else if(cnt < 0) code = 0;
+		int len = 0;
+		int lenmax = 0;
+		BOOST_FOREACH(uint32_t lc, text) {
+			if(lc >= 0x20) {
+				len += get_width(lc);
+			} else if(lc == '\n') {
+				len = 0;
 			}
-			if(cnt == 0 && code != 0) {
-				if(code < 32) {
-					if(code == '\n') {
-//						y -= size_;
-						x = 0;
-					}
-				} else {
-					x += get_width(code);
-					if(xm < x) xm = x;
-				}
-			}
+			if(lenmax < len) lenmax = len;
 		}
-		return xm;
+		return lenmax;
 	}
 
 
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	文字列全体の大きさを取得
-		@param[in]	wt	文字列
+		@param[in]	s	文字列
 		@return	大きさを返す
 	 */
 	//-----------------------------------------------------------------//
-	vtx::spos fonts::get_size(const utils::wstring& wt)
+	vtx::spos fonts::get_size(const utils::lstring& s)
 	{
 		vtx::spos size(0, 0);
 		vtx::spos tmp(0, face_->info_.size);
-		BOOST_FOREACH(char16_t wch, wt) {
-			if(wch >= 0x20) {
-				tmp.x += get_width(wch);
+		BOOST_FOREACH(uint32_t ch, s) {
+			if(ch >= 0x20) {
+				tmp.x += get_width(ch);
 			} else {
-				if(wch == '\n') {
+				if(ch == '\n') {
 					tmp.y += face_->info_.size;
 					if(size.x < tmp.x) size.x = tmp.x;
 					tmp.x = 0;

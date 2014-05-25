@@ -90,7 +90,6 @@ namespace mdf {
 		}
 ///		std::cout << "Appendix UV: " << static_cast<int>(reading_info_.appendix_uv) << std::endl;
 ///		std::cout << "Text Encodng: " << static_cast<int>(reading_info_.text_encode_type) << std::endl;
-///		std::cout << "wchar_t(sizeof): " << static_cast<int>(sizeof(wchar_t)) << std::endl;
 ///		std::cout << "Bone Index Sizeof: " << static_cast<int>(reading_info_.bone_index_sizeof) << std::endl;
 
 		if(!model_info_.get(fio, reading_info_.text_encode_type)) {

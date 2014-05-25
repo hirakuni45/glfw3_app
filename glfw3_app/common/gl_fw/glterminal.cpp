@@ -113,7 +113,7 @@ namespace gl {
 		@param[in]	ch	UTF-16 文字コード
 	*/
 	//-----------------------------------------------------------------//
-	void terminal::put(uint16_t ch)
+	void terminal::put(uint32_t ch)
 	{
 		if(ch < 0x20) {
 			if(ch == 0x0a) {

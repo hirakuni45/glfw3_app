@@ -383,7 +383,7 @@ namespace img {
 		@return 幅
 	*/
 	//-----------------------------------------------------------------//
-	int paint::get_font_width(wchar_t wc)
+	int paint::get_font_width(uint32_t wc)
 	{
 		Ikfimg* kf = get_kfimg();
 		if(kf == 0) return 0;
@@ -398,16 +398,16 @@ namespace img {
 	/*!
 		@brief	フォントを描画
 		@param[in]	pos	開始位置
-		@param[in]	wc	文字コード
+		@param[in]	ch	文字コード
 		@return 描画幅
 	*/
 	//-----------------------------------------------------------------//
-	int paint::draw_font(const vtx::spos& pos, wchar_t wc)
+	int paint::draw_font(const vtx::spos& pos, uint32_t ch)
 	{
 		Ikfimg* kf = get_kfimg();
 		if(kf == 0) return 0;
 
-		kf->create_bitmap(font_size_, wc);
+		kf->create_bitmap(font_size_, ch);
 		const img_gray8& gray = kf->get_img();
 
 		const font_metrics::metrics& met = kf->get_metrics();
