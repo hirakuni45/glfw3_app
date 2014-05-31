@@ -12,18 +12,19 @@
 
 namespace img {
 
-
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
 		@brief	8 ビット・グレースケールの画像を扱うクラス
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	class img_gray8 : public i_img {
+	struct img_gray8 : public i_img {
+
+		typedef gray8 value_type;
 
 	private:
 		vtx::spos	size_;
 
-		std::vector<gray8>	img_;
+		std::vector<value_type>	img_;
 
 		bool	alpha_;
 

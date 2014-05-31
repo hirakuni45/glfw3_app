@@ -379,7 +379,7 @@ namespace img {
 						dx = 1;
 					}
 					for(uint16_t x = 0; x < info_.w; ++x) {
-						typename IMAGE::pixel_type pix;
+						typename IMAGE::value_type pix;
 						set_pixel_(p, pix);
 						image.put_pixel(pos, pix);
 						p += bits / 8;
@@ -396,7 +396,7 @@ namespace img {
 						dx = 1;
 					}
 					for(uint16_t x = 0; x < info_.w; ++x) {
-						typename IMAGE::pixel_type pix;
+						typename IMAGE::value_type pix;
 						if(!read_pixel_(pix)) {
 							return false;
 						}

@@ -21,12 +21,12 @@ namespace img {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct img_rgba8 : public i_img {
 
-		typedef rgba8	pixel_type;
+		typedef rgba8	value_type;
 
 	private:
 		vtx::spos	size_;
 
-		std::vector<rgba8>	img_;
+		std::vector<value_type>	img_;
 
 		bool	alpha_;
 

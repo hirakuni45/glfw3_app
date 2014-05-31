@@ -39,6 +39,7 @@ namespace img {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct idx8 {
 		typedef	u8				value_type;
+		static const IMG::type	type_ = IMG::INDEXED8;
 
 		u8	i;
 
@@ -79,6 +80,7 @@ namespace img {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct idx16 {
 		typedef	u16				value_type;
+		static const IMG::type	type_ = IMG::INDEXED16;
 
 		u16	i;
 
@@ -118,6 +120,7 @@ namespace img {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct gray8 {
 		typedef	u8			value_type;
+		static const IMG::type	type_ = IMG::GRAY8;
 
 		u8	g;
 
@@ -157,6 +160,7 @@ namespace img {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct rgba8 {
 		typedef	u8			value_type;
+		static const IMG::type	type_ = IMG::FULL8;
 
 		u8	r,g,b,a;
 
@@ -260,7 +264,8 @@ namespace img {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct rgba16 {
-		typedef	u16				value_type;
+		typedef	u16			value_type;
+		static const IMG::type	type_ = IMG::FULL16;
 
 		u16	r,g,b,a;
 
