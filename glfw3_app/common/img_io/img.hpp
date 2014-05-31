@@ -115,11 +115,11 @@ namespace img {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
-		@brief	8 ビット、グレー・スケール
+		@brief	グレー・スケール
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct gray8 {
-		typedef	u8			value_type;
+		typedef	u8  value_type;
 		static const IMG::type	type_ = IMG::GRAY8;
 
 		u8	g;

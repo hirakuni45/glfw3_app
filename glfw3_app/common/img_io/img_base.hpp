@@ -6,9 +6,12 @@
 */
 //=====================================================================//
 #include <vector>
+#include <algorithm>
 #include <boost/unordered_set.hpp>
 #include <boost/foreach.hpp>
-#include "i_img.hpp"
+#include <boost/variant.hpp>
+#include "utils/vtx.hpp"
+#include "img_io/img.hpp"
 
 namespace img {
 
@@ -17,17 +20,19 @@ namespace img {
 		@brief	任意形式の画像を扱うクラス
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	template <class T, uint32_t clutsize = 0>
-	struct img_basic {
-		typedef T	value_type;
+	template <class BPX, uint32_t clutsize = 0>
+	struct img_base {
+		typedef BPX	value_type;
+		typedef std::vector<BPX>	img_type;
+		typedef std::vector<rgba8>	clut_type;
 
 	private:
 		vtx::spos	size_;
 		bool		alpha_;
-		std::vector<T>	img_;
+		img_type	img_;
 
-		uint32_t			clut_limit_;
-		std::vector<rgba8>	clut_;
+		uint32_t	clut_limit_;
+		clut_type	clut_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -35,7 +40,7 @@ namespace img {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		img_basic() : size_(0), alpha_(false), img_(),
+		img_base() : size_(0), alpha_(false), img_(),
 			clut_limit_(0) {
 			clut_.resize(clutsize);
 		}
@@ -46,7 +51,7 @@ namespace img {
 			@brief	デストラクター
 		*/
 		//-----------------------------------------------------------------//
-		virtual ~img_basic() { }
+		~img_base() { }
 
 
 		//-----------------------------------------------------------------//
@@ -55,7 +60,7 @@ namespace img {
 			@return	イメージタイプ
 		*/
 		//-----------------------------------------------------------------//
-		IMG::type get_type() const { return IMG::FULL8; }
+		IMG::type get_type() const { return BPX::type_; }
 
 
 		//-----------------------------------------------------------------//
@@ -117,7 +122,7 @@ namespace img {
 		//-----------------------------------------------------------------//
 		template <class PIX>
 		bool put_pixel(const vtx::spos& pos, const PIX& c) {
-			if(T::type_ != PIX::type_) return false;
+			if(BPX::type_ != PIX::type_) return false;
 			if(img_.empty()) return false;
 			if(pos.x >= 0 && pos.x < size_.x && pos.y >= 0 && pos.y < size_.y) {
 				img_[size_.x * pos.y + pos.x] = c;
@@ -138,7 +143,7 @@ namespace img {
 		//-----------------------------------------------------------------//
 		template <class PIX>
 		bool get_pixel(const vtx::spos& pos, PIX& c) const {
-			if(T::type_ != PIX::type_) return false;
+			if(BPX::type_ != PIX::type_) return false;
 			if(img_.empty()) return false;
 			if(pos.x >= 0 && pos.x < size_.x && pos.y >= 0 && pos.y < size_.y) {
 				c  = img_[size_.x * pos.y + pos.x];
@@ -158,7 +163,6 @@ namespace img {
 		*/
 		//-----------------------------------------------------------------//
 		bool alpha_pixel(const vtx::spos& pos, rgba8& c) {
-			if(T::type_ != PIX::type_) return false;
 			if(img_.empty()) return false;
 			if(pos.x >= 0 && pos.x < size_.x && pos.y >= 0 && pos.y < size_.y) {
 				rgba8 s = img_[size_.x * pos.y + pos.x];
@@ -176,15 +180,6 @@ namespace img {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	イメージのアドレスを得る。
-			@return	イメージのポインター
-		*/
-		//-----------------------------------------------------------------//
-		const void* get_image() const { return static_cast<const void*>(&img_[0]); }
-
-
-		//-----------------------------------------------------------------//
-		/*!
 			@brief	イメージのサイズを得る
 			@return	イメージのサイズ
 		*/
@@ -194,11 +189,47 @@ namespace img {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	イメージの参照
+			@return	イメージ
+		*/
+		//-----------------------------------------------------------------//
+		const img_type& get_image() const { return img_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	イメージの参照
+			@return	イメージ
+		*/
+		//-----------------------------------------------------------------//
+		img_type& at_image() { return img_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	カラー・ルック・アップ・テーブルの最大数を返す
 			@return	最大数
 		*/
 		//-----------------------------------------------------------------//
 		int get_clut_limit() const { return clut_limit_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	カラーテーブルの参照
+			@return	カラーテーブル
+		*/
+		//-----------------------------------------------------------------//
+		const clut_type& get_clut() const { return clut_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	カラーテーブルの参照
+			@return	カラーテーブル
+		*/
+		//-----------------------------------------------------------------//
+		clut_type& at_clut() { return clut_; }
 
 
 		//-----------------------------------------------------------------//
@@ -226,8 +257,8 @@ namespace img {
 		*/
 		//-----------------------------------------------------------------//
 		uint32_t count_color() const {
-			boost::unordered_set<T> n;
-			BOOST_FOREACH(const T& c, img_) {
+			boost::unordered_set<BPX> n;
+			BOOST_FOREACH(const BPX& c, img_) {
 				n.insert(c);
 			}
 			return static_cast<uint32_t>(n.size());
@@ -240,48 +271,36 @@ namespace img {
 			@param[in]	dst		コピー先
 			@param[in]	isrc	ソースイメージ
 			@param[in]	rsrc	ソースの領域
+			@return コピーに失敗すると「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		void copy(const vtx::spos& dst, const img_rgba8& isrc, const vtx::srect& rsrc) {
+		template <class SPX = rgba8, uint32_t csz = 0>
+		bool copy(const vtx::spos& dst, const img_base<SPX, csz>& isrc, const vtx::srect& rsrc) {
+			// FULL から INDEXED
+			if(SPX::type_ == IMG::FULL8 && BPX::type_ == IMG::INDEXED8) return false;
 			vtx::spos p;
 			for(p.y = 0; p.y < rsrc.size.y; ++p.y) {
 				for(p.x = 0; p.x < rsrc.size.x; ++p.x) {
-					rgba8 c;
+					SPX c;
 					if(isrc.get_pixel(p + rsrc.org, c)) {
 						put_pixel(p + dst, c);
 					}
 				}
 			}
+			return true;
 		}
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	rgba8 イメージからのコピー
+			@brief	コピー
 			@param[in]	src	ソースイメージ
+			@return コピーに失敗すると「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		void copy(const img_rgba8& src) { copy(vtx::spos(0), src, vtx::srect(vtx::spos(0), src.get_size())); }
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	idx8 イメージからのコピー
-			@param[in]	dst		コピー先の位置
-			@param[in]	isrc	ソースイメージ
-			@param[in]	rsrc	ソースの領域
-		*/
-		//-----------------------------------------------------------------//
-		void copy(const vtx::spos& dst, const img_idx8& isrc, const vtx::srect& rsrc) {
-			vtx::spos p;
-			for(p.y = 0; p.y < rsrc.size.y; ++p.y) {
-				for(p.x = 0; p.x < rsrc.size.x; ++p.x) {
-					rgba8 c;
-					if(isrc.get_pixel(p + rsrc.org, c)) {
-						put_pixel(p + dst, c);
-					}
-				}
-			}
+		template <class SPX = rgba8, uint32_t csz = 0>
+		bool copy(const img_base<SPX, csz>& src) {
+			return copy(vtx::spos(0), src, vtx::srect(vtx::spos(0), src.get_size()));
 		}
 
 
@@ -291,11 +310,12 @@ namespace img {
 			@param[in]	src	ソース・コンテキスト
 		*/
 		//-----------------------------------------------------------------//
-		void swap(img_basic& src) {
-			size_.swap(src.size_);
-			img_.swap(src.img_);
-			std::swap(clut_limit_, src.clut_limit_);
-			clut_.swap(src.clut_);
+		void swap(img_base& src) {
+//			size_.swap(src.size_);
+			img_.swap(src.at_image());
+//			std::swap(alpha_, src.alpha_);
+//			std::swap(clut_limit_, src.clut_limit_);
+			clut_.swap(src.at_clut());
 		}
 
 
@@ -303,11 +323,15 @@ namespace img {
 		/*!
 			@brief	単色で塗りつぶす
 			@param[in]	c	塗る色
+			@param[in]	r	領域（省略すると全体）
 		*/
 		//-----------------------------------------------------------------//
-		inline void fill(const rgba8& c) {
-			for(size_t i = 0; i < img_.size(); ++i) {
-				img_[i] = c;
+		void fill(const BPX& c, const vtx::srect& r = vtx::srect(vtx::spos(0), get_size())) {
+			vtx::spos pos = r.org;
+			for(pos.y = 0; pos.y < r.end_y(); ++pos.y) {
+				for(pos.x = 0; pos.x < r.end_x(); ++pos.x) {
+					put_pixel(pos, c);
+				}
 			}
 		}
 
@@ -320,10 +344,19 @@ namespace img {
 		void destroy() {
 			size_.set(0);
 			alpha_ = false;
-			std::vector<T>().swap(img_);
+			img_type().swap(img_);
 			clut_limit_ = 0;
-			std::vector<rgba8>.swap(clut_);
+			clut_type().swap(clut_);
 		}
 	};
+
+	typedef img_base<idx8>    img_idx8;
+	typedef img_base<idx16>   img_idx16;
+	typedef img_base<gray8>   img_gray8;
+//	typedef img_base<gray16>  img_gray16;
+	typedef img_base<rgba8>   img_rgba8;
+	typedef img_base<rgba16>  img_rgba16;
+
+	typedef boost::variant<img_idx8, img_gray8, img_rgba8>  image8;
 }
 
