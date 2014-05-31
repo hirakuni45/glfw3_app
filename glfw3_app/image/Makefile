@@ -29,6 +29,7 @@ PSOURCES	=	main.cpp \
 				utils/file_io.cpp \
 				utils/file_info.cpp \
 				utils/files.cpp \
+				utils/unzip.cpp \
 				utils/preference.cpp \
 				utils/keyboard.cpp \
 				img_io/paint.cpp \
