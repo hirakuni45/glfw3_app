@@ -26,7 +26,7 @@ namespace gl {
 		int		block_h_;
 		int		block_num_;
 
-		std::vector<unsigned int>	tex_map_;
+		std::vector<uint32_t>	tex_map_;
 
 		bool scan(int x, int w, int y, int h) {
 			for(int i = 0; i < h; ++i) {
@@ -61,7 +61,7 @@ namespace gl {
 			@brief	デストラクター
 		 */
 		//-----------------------------------------------------------------//
-		~texture_mem() { }
+		~texture_mem() { destroy(); }
 
 
 		//-----------------------------------------------------------------//

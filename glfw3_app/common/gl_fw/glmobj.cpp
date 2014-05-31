@@ -108,6 +108,8 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	void texture_mem::destroy()
 	{
+		glDeleteTextures(1, &id_);
+		id_ = 0;
 		std::vector<unsigned int>().swap(tex_map_);
 	}
 
@@ -180,14 +182,9 @@ namespace gl {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	void mobj::destroy_texture_page(texture_mems& mems)
 	{
-		unsigned int idsize = mems.size();
-		GLuint* idtbl = new GLuint[idsize];
-		for(unsigned int i = 0; i < idsize; ++i) {
-			texture_mem& mem = mems[i];
-			idtbl[i] = mem.get_id();
+		BOOST_FOREACH(texture_mem& txm, mems) {
+			txm.destroy();
 		}
-		::glDeleteTextures(idsize, idtbl);
-		delete[] idtbl;
 		texture_mems().swap(mems);
 	}
 
