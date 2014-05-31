@@ -44,7 +44,7 @@ namespace gl {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
-		@brief	glfonts クラス
+		@brief	fonts クラス
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class fonts {
@@ -62,11 +62,7 @@ namespace gl {
 			img::font_metrics::metrics	met;	///< フォントのメトリックス
 		};
 
-		typedef std::pair<size_code_t, tex_map>								fcode_pair;
-
 		typedef boost::unordered_map<size_code_t, tex_map>					fcode_map;
-		typedef boost::unordered_map<size_code_t, tex_map>::iterator		fcode_map_it;
-		typedef boost::unordered_map<size_code_t, tex_map>::const_iterator	fcode_map_cit;
 
 		// フォント基本環境
 		struct finfo_t {
@@ -82,11 +78,9 @@ namespace gl {
 		struct face_t {
 			fcode_map	fcode_map_;
 			/// 各サイズ毎の、半角文字の最大固定サイズ
-			typedef std::pair<int, int>	fix_width_pair;
 			typedef std::map<int, int>	fix_width_map;
-			typedef std::map<int, int>::iterator	fix_width_it;
-			fix_width_map	fix_width_;
-			finfo_t		info_;
+			fix_width_map	fix_width_map_;
+			finfo_t			info_;
 		};
 
 		struct font_face {
@@ -96,20 +90,17 @@ namespace gl {
 		std::stack<font_face>	stack_face_;
 
 		// フォント・フェース・マップ
-		typedef std::pair<std::string, face_t>					face_pair;
-		typedef std::map<std::string, face_t>					face_map;
-		typedef std::map<std::string, face_t>::iterator			face_map_it;
-		typedef std::map<std::string, face_t>::const_iterator	face_map_cit;
+		typedef std::map<std::string, face_t>	face_map;
 		face_map		face_map_;
 		face_t*			face_;
 
-		fcode_map_cit find_font_code(uint32_t code) const {
+		fcode_map::const_iterator find_font_code(uint32_t code) const {
 			return face_->fcode_map_.find(size_code_t(face_->info_.size, code));
 		}
 
-		fcode_map_it install_font_code(uint32_t code, const tex_map& tmap) {
-			std::pair<fcode_map_it, bool> ret;
-			ret = face_->fcode_map_.insert(fcode_pair(size_code_t(face_->info_.size, code), tmap));
+		fcode_map::iterator install_font_code(uint32_t code, const tex_map& tmap) {
+			std::pair<fcode_map::iterator, bool> ret;
+			ret = face_->fcode_map_.insert(fcode_map::value_type(size_code_t(face_->info_.size, code), tmap));
 			return ret.first;
 		}
 
@@ -121,9 +112,8 @@ namespace gl {
 		};
 
 		// サイズ別のマップ（効率が落ちるので、一つのページに複数のサイズを登録しない）
-		std::map<int, tex_page>	tex_page_;
-		typedef std::map<int, tex_page>::iterator		tex_page_it;
-		typedef std::map<int, tex_page>::const_iterator	tex_page_cit;
+		typedef std::map<int, tex_page> tex_page_map;
+		tex_page_map		tex_page_map_;
 
 		std::vector<GLuint>	pages_;
 
@@ -443,7 +433,7 @@ namespace gl {
 			@return 登録できたら、「fcode_map」のイテレーターを返す
 		*/
 		//-----------------------------------------------------------------//
-		fcode_map_it install_image(uint32_t code);
+		fcode_map::iterator install_image(uint32_t code);
 
 
 		//-----------------------------------------------------------------//
@@ -455,7 +445,7 @@ namespace gl {
 		//-----------------------------------------------------------------//
 		bool install_font(uint32_t code) {
 			kfm_->create_bitmap(face_->info_.size, code);
-			fcode_map_it it = install_image(code);
+			fcode_map::iterator it = install_image(code);
 			if(it == face_->fcode_map_.end()) return false;
 			else return true;
 		}

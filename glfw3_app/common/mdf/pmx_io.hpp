@@ -7,8 +7,8 @@
 //=====================================================================//
 #include <iostream>
 #include <string>
-#include <vector>
 #include <bitset>
+#include <vector>
 #include <boost/format.hpp>
 #include "gl_fw/IGLcore.hpp"
 #include "gl_fw/gllight.hpp"

@@ -18,15 +18,15 @@ namespace gl {
 		if(w & 7) { w |= 7; ++w; }
 		int h = w;
 
-		tex_page_it it = tex_page_.find(h);
-		if(it == tex_page_.end()) {
+		tex_page_map::iterator it = tex_page_map_.find(h);
+		if(it == tex_page_map_.end()) {
 			tex_page tp;
 			tp.id = 0;
 			tp.size = h;
 			tp.x = 0;
 			tp.y = 0;
-			tex_page_.insert(std::pair<int, tex_page>(h, tp));
-			it = tex_page_.find(h);
+			tex_page_map_.emplace(h, tp);
+			it = tex_page_map_.find(h);
 		}
 
 		tex_page& tp = it->second;
@@ -95,9 +95,9 @@ namespace gl {
 		}
 
 		face_t ft;
-		std::pair<face_map_it, bool> ret;
-		ret = face_map_.insert(face_pair(alias, ft));
-		face_map_it it = ret.first;
+		std::pair<face_map::iterator, bool> ret;
+		ret = face_map_.emplace(alias, ft);
+		face_map::iterator it = ret.first;
 		face_ = &it->second;
 
 		// 標準でアンチアリアスとする。
@@ -121,7 +121,7 @@ namespace gl {
 	{
 		if(kfm_ == 0) return false;
 
-		face_map_it it = face_map_.find(alias);
+		face_map::iterator it = face_map_.find(alias);
 		if(it == face_map_.end()) return false;
 
 		if(!kfm_->set_font(alias)) {
@@ -161,8 +161,8 @@ namespace gl {
 	{
 		face_->info_.size = s;
 
-		face_t::fix_width_it it = face_->fix_width_.find(s);
-		if(it == face_->fix_width_.end()) {
+		face_t::fix_width_map::iterator it = face_->fix_width_map_.find(s);
+		if(it == face_->fix_width_map_.end()) {
 			// 半角文字はとりあえず全部インストールしとく
 			bool tmp = face_->info_.proportional;	
 			face_->info_.proportional = true;
@@ -173,7 +173,7 @@ namespace gl {
 				if(fixw < w) fixw = w;
 /// std::cout << "Code: " << static_cast<int>(i) << ", W: " << w << std::endl;
 			}
-			face_->fix_width_.insert(face_t::fix_width_pair(s, fixw));
+			face_->fix_width_map_.emplace(s, fixw);
 			face_->info_.proportional = tmp;
 /// std::cout << "Size: " << s << ", Fixw: " << fixw << std::endl;
 		}
@@ -269,7 +269,7 @@ namespace gl {
 		@return 登録できたら iterator を返す。
 	*/
 	//-----------------------------------------------------------------//
-	fonts::fcode_map_it fonts::install_image(uint32_t code)
+	fonts::fcode_map::iterator fonts::install_image(uint32_t code)
 	{
 		const img::img_gray8& gray = kfm_->get_img();
 		const vtx::spos& isz = gray.get_size();
@@ -360,12 +360,12 @@ namespace gl {
 		int fow = 0;
 		// 等幅フォントで英数字の場合
 		if(!face_->info_.proportional && code >= 0x20 && code < 0x7f) {
-			face_t::fix_width_it it = face_->fix_width_.find(fh);
-			if(it != face_->fix_width_.end()) {
+			face_t::fix_width_map::iterator it = face_->fix_width_map_.find(fh);
+			if(it != face_->fix_width_map_.end()) {
 				fow = it->second;
 			} else {
 				set_font_size(fh);
-				face_t::fix_width_it it = face_->fix_width_.find(fh);
+				face_t::fix_width_map::iterator it = face_->fix_width_map_.find(fh);
 				fow = it->second;
 			}
 		} else {
@@ -388,7 +388,7 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	int fonts::draw(const vtx::spos& pos, uint32_t code)
 	{
-		fcode_map_cit cit = find_font_code(code);
+		fcode_map::const_iterator cit = find_font_code(code);
 		if(cit == face_->fcode_map_.end()) {
 			kfm_->create_bitmap(face_->info_.size, code);
 			cit = install_image(code);
@@ -581,7 +581,7 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	int fonts::get_width(uint32_t code)
 	{
-		fcode_map_cit cit = find_font_code(code);
+		fcode_map::const_iterator cit = find_font_code(code);
 		if(cit == face_->fcode_map_.end()) {
 			kfm_->create_bitmap(face_->info_.size, code);
 			cit = install_image(code);

@@ -36,9 +36,8 @@ namespace utils {
 
 		std::vector<std::string>	dirs_;
 
-		typedef boost::unordered_map<std::string, size_t>::iterator zmap_it;
-		typedef boost::unordered_map<std::string, size_t>::const_iterator zmap_cit;
-		boost::unordered_map<std::string, size_t>	map_;
+		typedef boost::unordered_map<std::string, size_t>	zmap;
+		zmap	zmap_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -81,7 +80,7 @@ namespace utils {
 			@return ファイル数を返す
 		*/
 		//-----------------------------------------------------------------//
-		int file_count() const;
+		uint32_t file_count() const;
 
 
 		//-----------------------------------------------------------------//
@@ -90,7 +89,7 @@ namespace utils {
 			@return ディレクトリー数を返す
 		*/
 		//-----------------------------------------------------------------//
-		int dir_count() const { return static_cast<int>(dirs_.size()); }
+		uint32_t dir_count() const { return static_cast<uint32_t>(dirs_.size()); }
 
 
 		//-----------------------------------------------------------------//
@@ -100,8 +99,8 @@ namespace utils {
 			@return ファイル名を返す
 		*/
 		//-----------------------------------------------------------------//
-		const std::string& get_file_name(int index) const {
-			if(index >= 0 && index < static_cast<int>(files_.size())) {
+		const std::string& get_file_name(uint32_t index) const {
+			if(index < static_cast<uint32_t>(files_.size())) {
 				return files_[index].path_;
 			} else {
 				static std::string null_string_;
@@ -117,8 +116,8 @@ namespace utils {
 			@return ディレクトリー名を返す
 		*/
 		//-----------------------------------------------------------------//
-		const std::string& get_dir_name(int index) const {
-			if(index >= 0 && index < static_cast<int>(dirs_.size())) {
+		const std::string& get_dir_name(uint32_t index) const {
+			if(index < static_cast<uint32_t>(dirs_.size())) {
 				return dirs_[index];
 			} else {
 				static std::string null_string_;
@@ -134,8 +133,8 @@ namespace utils {
 			@return ファイルサイズを返す
 		*/
 		//-----------------------------------------------------------------//
-		size_t get_filesize(int index) const {
-			if(index >= 0 && index < static_cast<int>(files_.size())) {
+		size_t get_filesize(uint32_t index) const {
+			if(index < static_cast<uint32_t>(files_.size())) {
 				return static_cast<size_t>(files_[index].info_.uncompressed_size);
 			} else {
 				return 0;
@@ -150,8 +149,8 @@ namespace utils {
 			@return 作成日時
 		*/
 		//-----------------------------------------------------------------//
-		time_t get_date(int index) const {
-			if(index >= 0 && index < static_cast<int>(files_.size())) {
+		time_t get_date(uint32_t index) const {
+			if(index < static_cast<uint32_t>(files_.size())) {
 				const tm_unz& tm_unz_t = files_[index].info_.tmu_date;
 				struct tm tm_t;
 				tm_t.tm_sec = tm_unz_t.tm_sec;
@@ -179,7 +178,7 @@ namespace utils {
 			@return エラーが無ければ「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool get_file(int index, char* buff);
+		bool get_file(uint32_t index, char* buff);
 
 
 		//-----------------------------------------------------------------//
@@ -190,7 +189,7 @@ namespace utils {
 			@return エラーが無ければ「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool create_file(int index, const std::string& filename);
+		bool create_file(uint32_t index, const std::string& filename);
 
 
 		//-----------------------------------------------------------------//
@@ -200,17 +199,7 @@ namespace utils {
 			@return 見つからない場合、負の値
 		*/
 		//-----------------------------------------------------------------//
-		int find(const std::string& key);
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	アーカイブ内の名前をスキャン（大文字小文字を評価しない）
-			@param[in]	key	スキャンするキー
-			@return 見つからない場合、負の値
-		*/
-		//-----------------------------------------------------------------//
-		int find_no_capital(const std::string& key);
+		uint32_t find(const std::string& key);
 
 
 		//-----------------------------------------------------------------//
@@ -220,7 +209,7 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		void list_name() {
 			for(size_t i = 0; i < file_count(); ++i) {
-				std::string s = get_file_name(i);
+				const std::string& s = get_file_name(i);
 				std::cout << s << std::endl;
 			}
 		}

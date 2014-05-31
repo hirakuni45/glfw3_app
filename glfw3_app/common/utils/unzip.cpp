@@ -48,10 +48,10 @@ namespace utils {
 				fi.ofs_ = unzGetOffset(hnd_);
 				fi.path_ = fn;
 
-				zmap_it it = map_.find(fn);
-				if(it == map_.end()) {
-					std::pair<std::string, size_t> stb(fn, files_.size());
-					map_.insert(stb);
+				zmap::iterator it = zmap_.find(fn);
+				if(it == zmap_.end()) {
+					zmap::value_type stb(fn, files_.size());
+					zmap_.insert(stb);
 					files_.push_back(fi);
 				} else {
 					files_[it->second] = fi;
@@ -73,9 +73,9 @@ namespace utils {
 		@return エラーが無ければ「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool unzip::get_file(int index, char* buff)
+	bool unzip::get_file(uint32_t index, char* buff)
 	{
-		if(index >= 0 && index < static_cast<int>(files_.size())) {
+		if(index < static_cast<uint32_t>(files_.size())) {
 			unzSetOffset(hnd_, files_[index].ofs_);
 
 			if(unzOpenCurrentFile(hnd_) != UNZ_OK) return false;
@@ -98,9 +98,9 @@ namespace utils {
 		@return エラーが無ければ「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool unzip::create_file(int index, const std::string& filename)
+	bool unzip::create_file(uint32_t index, const std::string& filename)
 	{
-		if(index >= 0 && index < static_cast<int>(files_.size())) {
+		if(index < static_cast<uint32_t>(files_.size())) {
 			unzSetOffset(hnd_, files_[index].ofs_);
 
 			if(unzOpenCurrentFile(hnd_) != UNZ_OK) return false;
@@ -128,10 +128,10 @@ namespace utils {
 		@return ファイル数を返す
 	*/
 	//-----------------------------------------------------------------//
-	int unzip::file_count() const
+	uint32_t unzip::file_count() const
 	{
 		if(hnd_) {
-			return static_cast<int>(files_.size());
+			return static_cast<uint32_t>(files_.size());
 		} else {
 			return 0;
 		}
@@ -145,31 +145,11 @@ namespace utils {
 		@return 見つからない場合、負の値
 	*/
 	//-----------------------------------------------------------------//
-	int unzip::find(const std::string& key)
+	uint32_t unzip::find(const std::string& key)
 	{
-		zmap_cit cit = map_.find(key);
-		if(cit == map_.end()) return -1;
-		return static_cast<int>(cit->second);
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	アーカイブ内の名前をスキャン（大文字小文字を評価しない）
-		@param[in]	key	スキャンするキー
-		@return 見つからない場合、負の値
-	*/
-	//-----------------------------------------------------------------//
-	int unzip::find_no_capital(const std::string& key)
-	{
-		int i = 0;
-		BOOST_FOREACH(const file_info& info, files_) {
-			if(utils::no_capital_strcmp(info.path_, key) == 0) {
-				return i;
-			}
-			++i;
-		}
-		return -1;
+		zmap::const_iterator cit = zmap_.find(key);
+		if(cit == zmap_.end()) return -1;
+		return static_cast<uint32_t>(cit->second);
 	}
 
 
@@ -187,7 +167,7 @@ namespace utils {
 		dirs_.clear();
 		files_.clear();
 		zname_.clear();
-		map_.clear();
+		zmap_.clear();
 	}
 
 
