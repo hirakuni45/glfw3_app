@@ -4,7 +4,7 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include "gl_fw/IGLcore.hpp"
+#include "core/glcore.hpp"
 #include "gl_fw/glutils.hpp"
 #include "widgets/widget_image.hpp"
 #include "widgets/widget_frame.hpp"
@@ -84,8 +84,8 @@ namespace gui {
 	void widget_image::render()
 	{
 		using namespace gl;
-		IGLcore* igl = get_glcore();
-		const vtx::spos& size = igl->get_size();
+		core& core = core::get_instance();
+		const vtx::spos& size = core.get_size();
 		const widget::param& wp = get_param();
 
 		glPushMatrix();

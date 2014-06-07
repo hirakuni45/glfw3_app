@@ -7,7 +7,9 @@
 #include "gl_fw/glmobj.hpp"
 #include "gl_fw/glutils.hpp"
 #include "img_io/img_utils.hpp"
+
 #include <boost/format.hpp>
+#include <iostream>
 
 using namespace std;
 using namespace vtx;
@@ -40,7 +42,7 @@ namespace gl {
 		for(int i = 0; i < (block_num_ >> 5); ++i) tex_map_[i] = 0;
 
 		glGenTextures(1, &id_);
-
+///		std::cout << "Mobj gen tex id: " << static_cast<int>(id_) << std::endl;
 		glBindTexture(GL_TEXTURE_2D, id_);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		if(im.get_size().x != pgw || im.get_size().y != pgh) {
@@ -58,7 +60,7 @@ namespace gl {
 			for(int i = 1; i < g_mipmap_level_max; ++i) {
 				pgw /= 2;
 				pgh /= 2;
-				::glTexImage2D(GL_TEXTURE_2D, i, internalFormat, pgw, pgh, 0, GL_RGBA, GL_UNSIGNED_BYTE, im.get_image());
+				glTexImage2D(GL_TEXTURE_2D, i, internalFormat, pgw, pgh, 0, GL_RGBA, GL_UNSIGNED_BYTE, im.get_image());
 			}
 		}
 #endif
@@ -108,8 +110,6 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	void texture_mem::destroy()
 	{
-		glDeleteTextures(1, &id_);
-		id_ = 0;
 		std::vector<unsigned int>().swap(tex_map_);
 	}
 
@@ -183,7 +183,9 @@ namespace gl {
 	void mobj::destroy_texture_page(texture_mems& mems)
 	{
 		BOOST_FOREACH(texture_mem& txm, mems) {
-			txm.destroy();
+			GLuint id = txm.get_id();
+///			std::cout << "Destroy tex: " << static_cast<int>(id) << std::endl;
+			glDeleteTextures(1, &id);
 		}
 		texture_mems().swap(mems);
 	}
@@ -286,6 +288,7 @@ namespace gl {
 				{
 					img_rgba8 im;
 					im.create(vtx::spos(txw, txh), true);
+					im.fill(img::rgba8(255, 0, 0, 255));
 					copy_to_rgba8(imf, vtx::srect(ox, oy, txw, txh), im, vtx::spos(0, 0));
 					bool f = false;
 					if(sox == 0 && soy == 0) {
@@ -294,6 +297,7 @@ namespace gl {
 					if(!f) {
 						add_texture_page(texture_mems_, mo, im);
 					} else {
+///						std::cout << boost::format("(%d), %d, %d") % mo->id % txw % txh << std::endl;
 						glBindTexture(GL_TEXTURE_2D, mo->id);
 						glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 						glTexSubImage2D(GL_TEXTURE_2D, 0,
@@ -310,7 +314,7 @@ namespace gl {
 							txw /= 2;
 							txh /= 2;
 ///							scale_50percent(imf, tmp);
-///							::glTexSubImage2D(GL_TEXTURE_2D, i, ofsx, ofsy, txw, txh, GL_RGBA, GL_UNSIGNED_BYTE, im);
+///							glTexSubImage2D(GL_TEXTURE_2D, i, ofsx, ofsy, txw, txh, GL_RGBA, GL_UNSIGNED_BYTE, im);
 						}
 					}
 				}
@@ -466,6 +470,8 @@ namespace gl {
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 			glTexImage2D(GL_TEXTURE_2D, level, internal_format_,
 						   size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, im.get_image());
+		} else {
+			std::cout << boost::format("Install Texture No Type: %d") % static_cast<int>(imf->get_type()) << std::endl;
 		}
 		texture_pages_.push_back(id);
 		return id;
@@ -529,14 +535,14 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	void mobj::setup_matrix()
 	{
-		::glMatrixMode(GL_TEXTURE);
-		::glLoadIdentity();
+		glMatrixMode(GL_TEXTURE);
+		glLoadIdentity();
 		float u = static_cast<float>(tex_page_w_);
 		float v = static_cast<float>(tex_page_h_);
-		::glScalef(1.0f / u, 1.0f / v, 1.0f);
+		glScalef(1.0f / u, 1.0f / v, 1.0f);
 
-		::glMatrixMode(GL_MODELVIEW);
-		::glLoadIdentity();
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
 	}
 
 
@@ -555,17 +561,12 @@ namespace gl {
 	{
 		setup_matrix();
 
-		::glMatrixMode(GL_PROJECTION);
-		::glLoadIdentity();
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
 		glOrthof(static_cast<float>(x), static_cast<float>(w),
 				 static_cast<float>(h), static_cast<float>(y), zn, zf);
-//		float ww = (float)w;
-//		float hh = (float)h;
-//		glTranslatef(ww * 0.5f, hh * 0.5f, 0.0f);
-//		glRotatef(-90.0f, 0.0f, 0.0f, 1.0f);
-//		glTranslatef(-ww * 0.5f, -hh * 0.5f, 0.0f);
-		::glMatrixMode(GL_MODELVIEW);
-		::glLoadIdentity();
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
 	}
 
 
@@ -599,7 +600,7 @@ namespace gl {
 //			}
 			m = m->link;
 		}
-		::glFlush();
+		glFlush();
 	}
 
 
@@ -651,9 +652,6 @@ namespace gl {
 			} else {
 				yp = pos.y + m->oyp;
 			}
-			::glBindTexture(GL_TEXTURE_2D, m->id);
-
-			tex_para_(linear);
 
 			spos vlist[4];
 			spos tlist[4];
@@ -704,10 +702,14 @@ namespace gl {
 				vlist[2].set(   xp + m->dw,    yp);
 				break;
 			}
+
+			glBindTexture(GL_TEXTURE_2D, m->id);
+			tex_para_(linear);
 			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 			glEnableClientState(GL_VERTEX_ARRAY);
 			glTexCoordPointer(2, GL_SHORT, 0, &tlist[0]);
 			glVertexPointer(2, GL_SHORT, 0, &vlist[0]);
+///			glColor4ub(255, 0, 0, 255);
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 			glDisableClientState(GL_VERTEX_ARRAY);

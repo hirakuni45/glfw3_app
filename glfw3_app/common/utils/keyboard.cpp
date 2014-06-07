@@ -5,7 +5,7 @@
 */
 //=====================================================================//
 #include "utils/keyboard.hpp"
-#include "gl_fw/IGLcore.hpp"
+#include "core/glcore.hpp"
 #include <boost/foreach.hpp>
 
 namespace sys {
@@ -183,14 +183,14 @@ namespace sys {
 	{
 		using namespace gl;
 
-		IGLcore* igl = get_glcore();
-		const device& dev = igl->get_device();
+		core& core = core::get_instance();
+		const device& dev = core.get_device();
 
 		input_.clear();
 		bool caps = dev.get_level(device::key::STATE_CAPS_LOCK);
 		const key_t* tbl;
 		int n;
-		if(igl->keyboard_japan()) {
+		if(core.keyboard_japan()) {
 			tbl = jp_key_type_tbls_;
 			n = sizeof(jp_key_type_tbls_) / sizeof(key_t);
 		} else {

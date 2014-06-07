@@ -318,7 +318,7 @@ namespace utils {
 		bool make_directory(const std::string& name)
 		{
 			T value;
-			bool f =  install_(name, value);
+			return install_(name, value);
 		}
 
 

@@ -5,7 +5,7 @@
 */
 //=====================================================================//
 #include "widgets/widget_terminal.hpp"
-#include "gl_fw/IGLcore.hpp"
+#include "core/glcore.hpp"
 #include "widgets/widget_frame.hpp"
 #include <boost/foreach.hpp>
 
@@ -61,8 +61,8 @@ namespace gui {
 		at_param().state_.set(widget::state::AREA_ROOT);
 
 		using namespace gl;
-		IGLcore* igl = get_glcore();
-		gl::fonts& fonts = igl->at_fonts();
+		core& core = core::get_instance();
+		fonts& fonts = core.at_fonts();
 
 		fonts.push_font_face();
 		fonts.set_font_type(param_.font_);
@@ -127,11 +127,9 @@ namespace gui {
 	void widget_terminal::render()
 	{
 		using namespace gl;
-		IGLcore* igl = get_glcore();
-
-		const vtx::spos& size = igl->get_size();
-
-		gl::fonts& fonts = igl->at_fonts();
+		core& core = core::get_instance();
+		const vtx::spos& size = core.get_size();
+		gl::fonts& fonts = core.at_fonts();
 
 		const widget::param& wp = get_param();
 

@@ -4,7 +4,7 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include "gl_fw/IGLcore.hpp"
+#include "core/glcore.hpp"
 #include "utils/string_utils.hpp"
 #include "img_io/paint.hpp"
 #include "img_io/img_utils.hpp"
@@ -189,10 +189,9 @@ namespace gui {
 	void draw_mobj(widget_director& wd, gl::mobj::handle h, const vtx::srect& clip, const vtx::spos& ofs)
 	{
 		using namespace gl;
-		IGLcore* igl = get_glcore();
-		if(igl == 0) return;
+		core& core = core::get_instance();
 
-		const vtx::spos& size = igl->get_size();
+		const vtx::spos& size = core.get_size();
 
 		glViewport(clip.org.x, size.y - clip.org.y - clip.size.y, clip.size.x, clip.size.y);
 		wd.at_mobj().setup_matrix(clip.size.x, clip.size.y);
@@ -213,12 +212,11 @@ namespace gui {
 	{
 		if(tp.text_.empty()) return;
 
-		gl::IGLcore* igl = gl::get_glcore();
-		if(igl == 0) return;
+		gl::core& core = gl::core::get_instance();
 
-		const vtx::spos& size = igl->get_size();
+		const vtx::spos& size = core.get_size();
 
-		gl::fonts& fonts = igl->at_fonts();
+		gl::fonts& fonts = core.at_fonts();
 
 		vtx::srect clip_ = clip;
 		vtx::srect rect_ = rect;
@@ -275,11 +273,11 @@ namespace gui {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	void render_text(widget_director& wd, gl::mobj::handle oh, const widget::param& wp, const widget::text_param& tp, const widget::plate_param& pp)
 	{
-		gl::IGLcore* igl = gl::get_glcore();
+		gl::core& core = gl::core::get_instance();
 
-		const vtx::spos& size = igl->get_size();
+		const vtx::spos& size = core.get_size();
 
-		gl::fonts& fonts = igl->at_fonts();
+		gl::fonts& fonts = core.at_fonts();
 
 		if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) { 
 			glPushMatrix();
@@ -365,9 +363,9 @@ namespace gui {
 		const vtx::spos& ofs)
 	{
 		using namespace gl;
-		IGLcore* igl = get_glcore();
+		core& core = core::get_instance();
 
-		const vtx::spos& size = igl->get_size();
+		const vtx::spos& size = core.get_size();
 
 		if(clip.size.x > 0 && clip.size.y > 0) {
 			glPushMatrix();

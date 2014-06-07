@@ -4,7 +4,7 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include "gl_fw/IGLcore.hpp"
+#include "core/glcore.hpp"
 #include "img_io/paint.hpp"
 #include "widgets/widget_button.hpp"
 #include "widgets/widget_utils.hpp"

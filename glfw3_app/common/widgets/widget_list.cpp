@@ -4,7 +4,7 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include "gl_fw/IGLcore.hpp"
+#include "core/glcore.hpp"
 #include "widgets/widget_list.hpp"
 #include "widgets/widget_utils.hpp"
 #include <boost/foreach.hpp>
@@ -165,8 +165,8 @@ namespace gui {
 	{
 		using namespace gl;
 
-		IGLcore* igl = get_glcore();
-		const vtx::spos& sc = igl->get_size();
+		core& core = core::get_instance();
+		const vtx::spos& sc = core.get_size();
 
 		gl::mobj::handle h = objh_;
 		if(get_select() || get_state(widget::state::SYSTEM_SELECT)) {

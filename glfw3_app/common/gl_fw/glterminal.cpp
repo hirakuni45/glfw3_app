@@ -7,6 +7,7 @@
 #include <cstring>
 #include <boost/foreach.hpp>
 #include "gl_fw/glterminal.hpp"
+#include "core/glcore.hpp"
 
 using namespace std;
 using namespace img;
@@ -22,8 +23,7 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	void terminal::initialize(int w, int h)
 	{
-		IGLcore* Igl = get_glcore();
-		if(Igl == 0) return;
+		core& core = core::get_instance();
 
 		buff_.clear();
 		limit_pos_.x = w;
@@ -40,7 +40,7 @@ namespace gl {
 		}
 
 		// 半角文字中で一番広い場合の幅検出
-		fonts& fonts = Igl->at_fonts();
+		fonts& fonts = core.at_fonts();
 		int max = 0;
 		for(int i = 0x20; i < 128; ++i) {
 			int ww = fonts.get_width(i);
@@ -151,9 +151,8 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	void terminal::service()
 	{
-		IGLcore* Igl = get_glcore();
-		if(Igl == 0) return;
-		fonts& fonts = Igl->at_fonts();
+		core& core = core::get_instance();
+		fonts& fonts = core.at_fonts();
 
 		fonts.set_fore_color(fore_color_);
 		fonts.set_back_color(back_color_);

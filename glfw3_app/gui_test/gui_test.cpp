@@ -7,8 +7,8 @@
 #include <iostream>
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
-#include "gui_test.hpp"
 #include "core/glcore.hpp"
+#include "gui_test.hpp"
 #include "widgets/widget_utils.hpp"
 #include "widgets/widget_null.hpp"
 #include "widgets/widget_frame.hpp"
@@ -23,10 +23,6 @@
 #include "widgets/widget_tree.hpp"
 #include "widgets/widget_filer.hpp"
 
-#include "img_io/img_base.hpp"
-
-img::img_base<img::rgba8> img_;
-
 namespace app {
 
 	//-----------------------------------------------------------------//
@@ -36,7 +32,7 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void gui_test::initialize()
 	{
-		gl::IGLcore* igl = gl::get_glcore();
+		gl::core& core = gl::core::get_instance();
 
 		using namespace gui;
 		widget_director& wd = director_.at().widget_director_;
@@ -155,7 +151,7 @@ namespace app {
 
 		if(1) {	// ファイラーのテスト
 			widget::param wp(vtx::srect(10, 30, 300, 200));
-			widget_filer::param wp_(igl->get_current_path());
+			widget_filer::param wp_(core.get_current_path());
 			filer_ = wd.add_widget<widget_filer>(wp, wp_);
 			filer_->enable(false);
 		}
@@ -253,8 +249,8 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void gui_test::update()
 	{
-		gl::IGLcore* igl = gl::get_glcore();
-		const vtx::spos& size = igl->get_size();
+		gl::core& core = gl::core::get_instance();
+		const vtx::spos& size = core.get_size();
 
 		gui::widget_director& wd = director_.at().widget_director_;
 

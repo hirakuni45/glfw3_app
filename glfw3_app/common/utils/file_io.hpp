@@ -113,25 +113,25 @@ namespace utils {
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	ディレクトリーか調べる（UTF32）
-		@param[in]	fn	ファイル名
-		@return ディレクトリーなら「true」
-	*/
-	//-----------------------------------------------------------------//
-	bool is_directory(const utils::lstring& fn);
-
-
-	//-----------------------------------------------------------------//
-	/*!
 		@brief	ディレクトリーか調べる（UTF8）
 		@param[in]	fn	ファイル名
 		@return ディレクトリーなら「true」
 	*/
 	//-----------------------------------------------------------------//
-	inline bool is_directory(const std::string& fn) {
-		utils::lstring lfn;
-		utils::utf8_to_utf32(fn, lfn);
-		return is_directory(lfn);
+	bool is_directory(const std::string& fn);
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	ディレクトリーか調べる（UTF32）
+		@param[in]	fn	ファイル名
+		@return ディレクトリーなら「true」
+	*/
+	//-----------------------------------------------------------------//
+	inline bool is_directory(const utils::lstring& fn) {
+		std::string s;
+		utils::utf32_to_utf8(fn, s);
+		return is_directory(s);
 	}
 
 
@@ -629,7 +629,7 @@ namespace utils {
 			}
 			char ch;
 			size_t n = 0;
-			while(ch = *text++) {
+			while((ch = *text++) != 0) {
 				if(!put_char(ch)) {
 					return n;
 				}

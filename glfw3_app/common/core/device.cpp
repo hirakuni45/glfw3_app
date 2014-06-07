@@ -59,8 +59,6 @@ namespace gl {
 
 		level_ = b;
 
-
-		locator_.cursor_ = poss.cursor_;
-		locator_.scroll_ = poss.scroll_;
+		locator_ = poss;
 	}
 }

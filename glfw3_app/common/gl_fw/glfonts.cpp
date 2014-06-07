@@ -6,6 +6,7 @@
 //=====================================================================//
 #include "gl_fw/glfonts.hpp"
 #include "img_io/img_utils.hpp"
+#include <iostream>
 
 using namespace std;
 
@@ -65,11 +66,6 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	void fonts::initialize(const std::string& fpath, const std::string& alias)
 	{
-		if(kfm_ != 0) return;
-
-		img::create_kfimg();		// 漢字フォントイメージクラス作成
-		kfm_ = img::get_kfimg();	// 漢字フォントイメージクラス取得
-
 		install_font_type(fpath, alias);
 
 		fore_color_.set(255, 255, 255, 255);
@@ -87,10 +83,9 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	bool fonts::install_font_type(const std::string& ttfname, const std::string& alias)
 	{
-		if(kfm_ == 0) return false;
-
-		bool f = kfm_->install_font_type(ttfname, alias);
+		bool f = img::ftimg::get_instance().install_font_type(ttfname, alias);
 		if(!f) {
+			std::cerr << "Install error: '" << ttfname << "'" << std::endl;
 			return false;
 		}
 
@@ -119,17 +114,15 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	bool fonts::set_font_type(const std::string& alias)
 	{
-		if(kfm_ == 0) return false;
-
 		face_map::iterator it = face_map_.find(alias);
 		if(it == face_map_.end()) return false;
 
-		if(!kfm_->set_font(alias)) {
+		if(!img::ftimg::get_instance().set_font(alias)) {
 			return false;
 		}
 
 		face_ = &it->second;
-		kfm_->set_antialias(face_->info_.antialias);
+		img::ftimg::get_instance().set_antialias(face_->info_.antialias);
 
 		return true;
 	}
@@ -143,11 +136,7 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	const std::string& fonts::get_font_type() const
 	{
-		if(kfm_ == 0) {
-			static std::string empty;
-			return empty;
-		}
-		return kfm_->get_font();
+		return img::ftimg::get_instance().get_font();
 	}
 
 
@@ -265,17 +254,16 @@ namespace gl {
 	/*!
 		@brief	フォントビットマップの登録
 		@param[in]	code	フォントのコード
-		@param[in]	kfm	フォントビットマップ
 		@return 登録できたら iterator を返す。
 	*/
 	//-----------------------------------------------------------------//
 	fonts::fcode_map::iterator fonts::install_image(uint32_t code)
 	{
-		const img::img_gray8& gray = kfm_->get_img();
+		const img::img_gray8& gray = img::ftimg::get_instance().get_img();
 		const vtx::spos& isz = gray.get_size();
 // std::cout << static_cast<int>(code) << ": " << static_cast<int>(isz.x) << ", " << static_cast<int>(isz.y) << std::endl;
 		tex_map tmap;
-		tmap.met = kfm_->get_metrics();
+		tmap.met = img::ftimg::get_instance().get_metrics();
 		float font_width = tmap.met.width + tmap.met.hori_x + 0.5f;
 		if(code == 0x20) {
  			font_width = static_cast<float>(isz.y / 4);
@@ -321,8 +309,6 @@ namespace gl {
 			glDeleteTextures(pages_.size(), &pages_[0]);
 			pages_.clear();
 		}
-
-		img::destroy_kfimg();
 	}
 
 
@@ -390,7 +376,7 @@ namespace gl {
 	{
 		fcode_map::const_iterator cit = find_font_code(code);
 		if(cit == face_->fcode_map_.end()) {
-			kfm_->create_bitmap(face_->info_.size, code);
+			img::ftimg::get_instance().create_bitmap(face_->info_.size, code);
 			cit = install_image(code);
 		}
 		const tex_map& tmap = cit->second;
@@ -583,7 +569,7 @@ namespace gl {
 	{
 		fcode_map::const_iterator cit = find_font_code(code);
 		if(cit == face_->fcode_map_.end()) {
-			kfm_->create_bitmap(face_->info_.size, code);
+			img::ftimg::get_instance().create_bitmap(face_->info_.size, code);
 			cit = install_image(code);
 		}
 		const tex_map& tmap = cit->second;

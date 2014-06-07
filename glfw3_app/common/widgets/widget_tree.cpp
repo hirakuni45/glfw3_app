@@ -4,7 +4,7 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include "gl_fw/IGLcore.hpp"
+#include "core/glcore.hpp"
 #include "widgets/widget_tree.hpp"
 #include "widgets/widget_frame.hpp"
 #include "widgets/widget_utils.hpp"
@@ -23,8 +23,8 @@ namespace gui {
 
 		BOOST_FOREACH(tree_unit::unit_map_it it, its) {
 			if(!it->second.value.w_) {
-				gl::IGLcore* igl = gl::get_glcore();
-				gl::fonts& fonts = igl->at_fonts();
+				gl::core& core = gl::core::get_instance();
+				gl::fonts& fonts = core.at_fonts();
 				r.size.x = fonts.get_width(utils::get_file_name(it->first)) + r.size.y + 8;
 				widget::param wp(r, this);
 				widget_check::param wp_(utils::get_file_name(it->first));
@@ -260,9 +260,9 @@ namespace gui {
 	void widget_tree::render()
 	{
 		using namespace gl;
-		IGLcore* igl = get_glcore();
+		core& core = core::get_instance();
 
-		const vtx::spos& size = igl->get_size();
+		const vtx::spos& size = core.get_size();
 		const widget::param& wp = get_param();
 
 		// 各部品のルートを描画

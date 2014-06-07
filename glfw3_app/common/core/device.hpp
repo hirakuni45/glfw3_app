@@ -10,11 +10,6 @@
 
 namespace gl {
 
-	// windows で define されてるので無効にする
-#ifdef WIN32
-	#undef DELETE
-#endif
-
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
 		@brief	device クラス
@@ -22,10 +17,25 @@ namespace gl {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class device {
 	public:
-		struct locator {
+		class locator {
+			vtx::fpos  	scale_;
 			vtx::spos	cursor_;
 			vtx::spos	scroll_;
-			locator() : cursor_(0), scroll_(0) { }
+		public:
+			locator() : scale_(1.0f), cursor_(0), scroll_(0) { }
+			void set_scale(const vtx::fpos& sc) { scale_ = sc; }
+			const vtx::fpos& get_scale() const { return scale_; }
+			void set_cursor(const vtx::spos& p) { cursor_ = p; }
+			void set_scroll(const vtx::spos& p) { scroll_ = p; }
+			void reset_scroll() { set_scroll(vtx::spos(0)); }
+			const vtx::spos& get_cursor() const { return cursor_; }
+			const vtx::spos& get_scroll() const { return scroll_; }
+			locator& operator = (const locator& src) {
+				scale_ = src.scale_;
+				cursor_ = src.cursor_;
+				scroll_ = src.scroll_;
+				return *this;
+			}
 		};
 
 		struct key {

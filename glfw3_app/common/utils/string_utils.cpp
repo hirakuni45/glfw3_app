@@ -8,7 +8,9 @@
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 
+#ifdef WIN32
 #include <windows.h>
+#endif
 
 namespace utils {
 
@@ -264,7 +266,7 @@ namespace utils {
 		return f;
 	}
 
-
+#ifdef WIN32
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	Shift-JIS から UTF-8(ucs2) への変換
@@ -370,7 +372,7 @@ namespace utils {
 		delete[] stmp;
 		return true;
 	}
-
+#endif
 
 	//-----------------------------------------------------------------//
 	/*!

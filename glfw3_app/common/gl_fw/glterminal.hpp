@@ -6,7 +6,6 @@
 */
 //=====================================================================//
 #include <vector>
-#include "gl_fw/IGLcore.hpp"
 #include "img_io/img.hpp"
 #include "utils/vtx.hpp"
 #include "utils/string_utils.hpp"

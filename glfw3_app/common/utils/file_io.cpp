@@ -71,13 +71,13 @@ namespace utils {
 
 			sjis_to_utf16(s, app_path_);
 #else
-			static const int blen = 1024;
-			char	cbuff[blen];
-			cbuff[0] = 0;
-			getcwd(cbuff, blen);
-			std::string s;
-			utils::code_conv(cbuff, '\\', '/', s);
-			utils::sjis_to_utf16(s.c_str(), app_path_);
+///			static const int blen = 1024;
+///			char	cbuff[blen];
+///			cbuff[0] = 0;
+///			getcwd(cbuff, blen);
+///			std::string s;
+///			utils::code_conv(cbuff, '\\', '/', s);
+///			utils::sjis_to_utf16(s.c_str(), app_path_);
 #endif
 #endif
 		} else {
@@ -237,10 +237,8 @@ namespace utils {
 		delete[] wsm;
 #else
 		std::string s;
-		utils::utf16_to_sjis(fn, s);
-		std::string m;
-		utils::utf16_to_utf8(md, m);
-		fp = fopen(s.c_str(), m.c_str());
+		utils::utf32_to_utf8(fn, s);
+		fp = fopen(s.c_str(), md.c_str());
 #endif
 #ifndef NDEBUG
 		if(fp == 0) {
@@ -263,7 +261,7 @@ namespace utils {
 		@return ディレクトリーなら「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool is_directory(const lstring& fn)
+	bool is_directory(const std::string& fn)
 	{
 #ifdef WIN32
 		struct _stat st;
@@ -275,14 +273,12 @@ namespace utils {
 		int ret = _wstat(wfn, &st);
 		delete[] wfn;
 		if(ret == 0) {
-			return S_ISDIR(st.st_mode);
+			return S_ISDIR(st.st_mode) != 0;
 		}
 #else
-		std::string s;
-		utf16_to_sjis(fn, s);
 		struct stat st;
-		if(stat(s.c_str(), &st) == 0) {
-			return S_ISDIR(st.st_mode);
+		if(stat(fn.c_str(), &st) == 0) {
+			return S_ISDIR(st.st_mode) != 0;
 		}
 #endif
 		return false;

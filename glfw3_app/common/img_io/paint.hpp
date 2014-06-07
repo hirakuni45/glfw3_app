@@ -5,7 +5,7 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include <unistd.h>
+/// #include <unistd.h>
 #include "img.hpp"
 #include "i_img.hpp"
 #include "img_rgba8.hpp"

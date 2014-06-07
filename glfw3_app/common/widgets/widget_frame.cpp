@@ -4,7 +4,7 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include "gl_fw/IGLcore.hpp"
+#include "core/glcore.hpp"
 #include "widgets/widget_frame.hpp"
 #include "widgets/widget_utils.hpp"
 
@@ -59,8 +59,8 @@ namespace gui {
 		if(param_.text_param_.text_.empty()) return;
  
 		using namespace gl;
-		IGLcore* igl = get_glcore();
-		const vtx::spos& size = igl->get_size();
+		core& core = core::get_instance();
+		const vtx::spos& size = core.get_size();
 		const widget::param& wp = get_param();
 
 		glPushMatrix();
@@ -77,7 +77,7 @@ namespace gui {
 		tmp.shadow_color_.alpha_scale(cf.a);
 		draw_text(tmp, rect, wp.clip_);
 
-		igl->at_fonts().restore_matrix();
+		core.at_fonts().restore_matrix();
 
 		glPopMatrix();
 		glViewport(0, 0, size.x, size.y);

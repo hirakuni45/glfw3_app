@@ -5,12 +5,12 @@
 */
 //=====================================================================//
 #include "img_io/img_files.hpp"
-#include "img_io/jpeg_io.hpp"
+/// #include "img_io/jpeg_io.hpp"
 #include "img_io/png_io.hpp"
 #include "img_io/bmp_io.hpp"
 #include "img_io/tga_io.hpp"
-#include "img_io/dds_io.hpp"
-#include "img_io/openjpeg_io.hpp"
+/// #include "img_io/dds_io.hpp"
+/// #include "img_io/openjpeg_io.hpp"
 #include <boost/foreach.hpp>
 
 namespace img {
@@ -61,8 +61,8 @@ namespace img {
 
 		add_image_file_io_context_(dynamic_cast<i_img_io*>(new bmp_io), exts);
 		add_image_file_io_context_(dynamic_cast<i_img_io*>(new png_io), exts);
-		add_image_file_io_context_(dynamic_cast<i_img_io*>(new jpeg_io), exts);
-		add_image_file_io_context_(dynamic_cast<i_img_io*>(new openjpeg_io), exts);
+///		add_image_file_io_context_(dynamic_cast<i_img_io*>(new jpeg_io), exts);
+///		add_image_file_io_context_(dynamic_cast<i_img_io*>(new openjpeg_io), exts);
 		// TGA フォーマットはシグネチュアが無いので、最後に評価する事
 		add_image_file_io_context_(dynamic_cast<i_img_io*>(new tga_io), exts);
 

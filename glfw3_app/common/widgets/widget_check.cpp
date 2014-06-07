@@ -4,7 +4,7 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include "gl_fw/IGLcore.hpp"
+#include "core/glcore.hpp"
 #include "widgets/widget_check.hpp"
 #include "widgets/widget_utils.hpp"
 #include "img_io/paint.hpp"
@@ -60,9 +60,9 @@ namespace gui {
 	void widget_check::render()
 	{
 		using namespace gl;
-		IGLcore* igl = get_glcore();
+		core& core = core::get_instance();
 
-		const vtx::spos& size = igl->get_size();
+		const vtx::spos& size = core.get_size();
 		const widget::param& wp = get_param();
 
 		if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) { 
@@ -99,7 +99,7 @@ namespace gui {
 
 			draw_text(tmp, rect, wp.clip_);
 
-			igl->at_fonts().restore_matrix();
+			core.at_fonts().restore_matrix();
 
 			param_.text_param_.fore_color_ = fc;
 

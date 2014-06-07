@@ -10,8 +10,8 @@
 #include <stack>
 #include <string>
 #include <boost/unordered_map.hpp>
+#include "core/ftimg.hpp"
 #include "gl_fw/gl_info.hpp"
-#include "gl_fw/Ikfimg.hpp"
 #include "img_io/i_img.hpp"
 #include "utils/vtx.hpp"
 #include "utils/string_utils.hpp"
@@ -52,17 +52,16 @@ namespace gl {
 		static const int texture_page_width  = 256;	///< テクスチャーページの幅
 		static const int texture_page_height = 256;	///< テクスチャーページの高さ
 
-		img::Ikfimg*	kfm_;
 		struct tex_map {
 			GLuint	id;		///< テクスチャー ID
 			int		lcx;	///< ロケーションX
 			int		lcy;	///< ロケーションY
 			int		w;		///< フォントの幅
 			int		h;		///< フォントの高さ
-			img::font_metrics::metrics	met;	///< フォントのメトリックス
+			img::ftimg::metrics	met;	///< フォントのメトリックス
 		};
 
-		typedef boost::unordered_map<size_code_t, tex_map>					fcode_map;
+		typedef boost::unordered_map<size_code_t, tex_map>	fcode_map;
 
 		// フォント基本環境
 		struct finfo_t {
@@ -148,11 +147,11 @@ namespace gl {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		fonts() : kfm_(0), face_(0),
+		fonts() : face_(0),
 			fore_color_(255, 255, 255, 255), back_color_(0, 0, 0, 255),
 			setup_(false),
-			render_back_(true), h_flip_(false), v_flip_(false), ccw_(false),
-			swap_color_(false), clip_(0, 0, 0, 0)
+			render_back_(false), h_flip_(false), v_flip_(false), ccw_(false),
+			swap_color_(false), clip_(0, 0, 1024, 1024)
 			{ }
 
 
@@ -256,7 +255,7 @@ namespace gl {
 		//-----------------------------------------------------------------//
 		void enable_antialias(bool f = true) {
 			face_->info_.antialias = f;
-			kfm_->set_antialias(f);
+			img::ftimg::get_instance().set_antialias(f);
 		}
 
 
@@ -429,7 +428,6 @@ namespace gl {
 		/*!
 			@brief	フォントビットマップの登録
 			@param[in]	code	フォントのコード
-			@param[in]	kfm		フォントのビットマップイメージ
 			@return 登録できたら、「fcode_map」のイテレーターを返す
 		*/
 		//-----------------------------------------------------------------//
@@ -444,7 +442,7 @@ namespace gl {
 		*/
 		//-----------------------------------------------------------------//
 		bool install_font(uint32_t code) {
-			kfm_->create_bitmap(face_->info_.size, code);
+			img::ftimg::get_instance().create_bitmap(face_->info_.size, code);
 			fcode_map::iterator it = install_image(code);
 			if(it == face_->fcode_map_.end()) return false;
 			else return true;

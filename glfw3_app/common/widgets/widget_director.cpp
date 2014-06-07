@@ -9,8 +9,8 @@
 #include <map>
 #include <boost/foreach.hpp>
 #include <boost/format.hpp>
+#include "core/glcore.hpp"
 #include "gl_fw/gl_info.hpp"
-#include "gl_fw/IGLcore.hpp"
 #include "widgets/widget_director.hpp"
 #include "widgets/widget_utils.hpp"
 #include "widgets/widget_null.hpp"
@@ -364,23 +364,21 @@ namespace gui {
 		default_list_color_select_.inten_rect_  = ir;
 		default_list_color_select_.ir_enable_ = true;
 
-		IGLcore* igl = get_glcore();
-		if(igl == 0) return;
-
-		fonts& fonts = igl->at_fonts();
+		core& core = core::get_instance();
+		fonts& fonts = core.at_fonts();
 
 		// ターミナル用フォントのインストール
 		fonts.push_font_face();
 		{
-			std::string ff = "c:/WINDOWS/Fonts/Inconsolata.otf";
+			std::string ff = "Inconsolata.otf";
 			if(!fonts.install_font_type(ff, "Inconsolata")) {
 				std::cerr << boost::format("Can't find font file: '%s'") % ff << std::endl; 
 			}
 		}
 		fonts.pop_font_face();
-		fonts.install_font_type("c:/WINDOWS/Fonts/meiryo.ttc", "meiryo");
+///		fonts.install_font_type("meiryo.ttc", "meiryo");
 		fonts.set_font_size(20);
-		fonts.set_clip_size(igl->get_size());
+		fonts.set_clip_size(core.get_size());
 
 		// 共通部品の作成
 		{
@@ -516,12 +514,12 @@ namespace gui {
 			}
 		}
 
-		IGLcore* igl = get_glcore();
-		const device& dev = igl->get_device();
+		core& core = core::get_instance();
+		const device& dev = core.get_device();
 
-		scroll_ = dev.get_locator().scroll_;
+		scroll_ = dev.get_locator().get_scroll();
 
-		const vtx::spos& msp = dev.get_locator().cursor_;
+		const vtx::spos& msp = dev.get_locator().get_cursor();
 
 		struct trg_t {
 			bool	lvl;
@@ -764,7 +762,7 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_director::render()
 	{
-		IGLcore* igl = get_glcore();
+		core& core = core::get_instance();
 
 		// クリップ領域を全てアップデート
 		reset_mark();
@@ -783,7 +781,7 @@ namespace gui {
 			}
 		}
 
-		const vtx::spos& size = igl->get_size();
+		const vtx::spos& size = core.get_size();
 
 		// 各 描画
 		glDisable(GL_DEPTH_TEST);
@@ -791,7 +789,7 @@ namespace gui {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		// フォントは基本、バックカラーを描画しない
-		igl->at_fonts().enable_back_color(false);
+		core.at_fonts().enable_back_color(false);
 
 		BOOST_FOREACH(widget* w, widgets_) {
 			const widget::param& pa = w->get_param();

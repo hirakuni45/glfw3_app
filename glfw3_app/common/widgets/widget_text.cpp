@@ -4,7 +4,7 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include "gl_fw/IGLcore.hpp"
+#include "core/glcore.hpp"
 #include "widgets/widget_text.hpp"
 #include "widgets/widget_utils.hpp"
 
@@ -42,10 +42,9 @@ namespace gui {
 	void widget_text::render()
 	{
 		using namespace gl;
-		IGLcore* igl = get_glcore();
-		if(igl == 0) return;
+		core& core = core::get_instance();
 
-		const vtx::spos& size = igl->get_size();
+		const vtx::spos& size = core.get_size();
 		const widget::param& wp = get_param();
 
 		if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) { 
@@ -69,7 +68,7 @@ namespace gui {
 			tpr.shadow_color_.alpha_scale(cf.a);
 			draw_text(tpr, rect, wp.clip_);
 
-			igl->at_fonts().restore_matrix();
+			core.at_fonts().restore_matrix();
 
 			glPopMatrix();
 			glViewport(0, 0, size.x, size.y);

@@ -16,20 +16,23 @@ static const vtx::spos limit_size_(800, 600);
 
 int main(int argc, char** argv)
 {
-	gl::create_glcore();
-
-	gl::IGLcore* igl = gl::get_glcore();
-
 	// カレントパスを生成
 	std::string tmp;
 	utils::convert_delimiter(argv[0], '\\', '/', tmp);
-	std::string pref;
-	utils::get_file_base(tmp, pref);
-	pref += ".pre";
+	std::string base;
+	utils::get_file_base(tmp, base);
+	char buff[2048];
 	std::string path;
-	utils::get_file_path(tmp, path);
+	path = getcwd(buff, sizeof(buff));
+	std::string pref = path;
+	pref += '/';
+	pref += base;
+	pref += ".pre";
 
-	if(!igl->initialize(path)) {
+	gl::core& core = gl::core::get_instance();
+
+	if(!core.initialize(path)) {
+		std::cerr << "Core initialize error" << std::endl;
 		return -1;
 	}
 
@@ -42,20 +45,22 @@ int main(int argc, char** argv)
 //		std::cout << "Load rect error..." << std::endl; 
 	}
 
-	if(!igl->setup(rect, app_title_, false)) {
+	if(!core.setup(rect, app_title_, false)) {
+		std::cerr << "Core setup error" << std::endl;
 		return -1;
 	}
-	igl->set_limit_size(limit_size_);
+	core.set_limit_size(limit_size_);
 
-	director.at().sound_.initialize(16);
+///	director.at().sound_.initialize(16);
 
 	director.at().widget_director_.initialize();
 
 	director.install_scene<start_app>();
 
-	while(!igl->get_exit_signal()) {
-		igl->service();
+	while(!core.get_exit_signal()) {
+		core.service();
 
+		glClearColor(0, 0, 0, 255);
 		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 		gl::glColor(img::rgbaf(1.0f));
 
@@ -67,22 +72,20 @@ int main(int argc, char** argv)
 
 		director.render();
 
-		igl->flip_frame();
+		core.flip_frame();
 
-		director.at().sound_.service();
+///		director.at().sound_.service();
 	}
 	// プログラム終了の廃棄
 	director.erase_scene();
 	director.render();
 
 	{
-		vtx::srect rect(igl->get_locate(), igl->get_size());
+		const vtx::srect& rect = core.get_rect();
 		director.at().preference_.save_rect(window_key_, rect);
 	}
 
 	director.at().preference_.save(pref);
 
-	igl->destroy();
-
-	gl::destroy_glcore();
+	core.destroy();
 }

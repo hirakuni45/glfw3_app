@@ -72,15 +72,17 @@ void get_metrics(uint32_t code)
 			return true;
 		}
 
+		string path;
+		if(fontfile[0] == '/') path = fontfile;
+		else path = root_path_ + fontfile;
 		FT_Face face;
-		FT_Error error = FT_New_Face(library_, fontfile.c_str(), 0, &face);
+		FT_Error error = FT_New_Face(library_, path.c_str(), 0, &face);
 		if(error) {
-			cerr << "kfimg install error: '" << fontfile << "'" << endl;
+			cerr << "ftimg install error: '" << path << "'" << endl;
 			current_face_ = face_map_.end();
 			return false;
 		}
-
-///		std::cout << "kfimg install: " << name << ", " << static_cast<int>(face_) << std::endl;
+///		cout << "ftimg install: " << path << ", " << static_cast<int>(face_) << endl;
 
 		face_t t(face);
 

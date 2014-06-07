@@ -241,7 +241,7 @@ namespace utils {
 	//-----------------------------------------------------------------//
 	bool utf32_to_utf8(const lstring& src, std::string& dst);
 
-
+#ifdef WIN32
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	Shift-JIS から UTF-8(ucs2) への変換
@@ -284,7 +284,7 @@ namespace utils {
 	*/
 	//-----------------------------------------------------------------//
 	bool utf16_to_sjis(const wstring& src, std::string& dst);
-
+#endif
 
 	//-----------------------------------------------------------------//
 	/*!
@@ -475,11 +475,14 @@ namespace utils {
 	*/
 	//-----------------------------------------------------------------//
 	inline void get_file_base(const std::string& src, std::string& dst) {
-		const char* p = strrchr(src.c_str(), '.');
-		if(p) {
-			dst.append(src.c_str(), p - src.c_str());
+		using namespace std;
+		string fn = get_file_name(src);
+		// ピリオドがあるか？
+		string::size_type pos = fn.find_last_of('.');
+		if(pos != string::npos) {
+			dst += fn.substr(0, pos);
 		} else {
-			dst += src;
+			dst += fn;
 		}
 	}
 

@@ -7,8 +7,9 @@
 //=====================================================================//
 #include <string>
 #include <stdint.h>
-#include "gl_fw/IGLcore.hpp"
+#include "utils/singleton_policy.hpp"
 #include "core/device.hpp"
+#include "gl_fw/glfonts.hpp"
 
 namespace gl {
 
@@ -18,9 +19,11 @@ namespace gl {
 				※ハードウェアー依存の操作を扱う部分を集積したクラス。
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	class glcore : public IGLcore {
+	class core : public utils::singleton_policy<core> {
+
+		friend class utils::singleton_policy<core>;
+
 	public:
-		static IGLcore* glcore_;
 		static device::bitsets	bitsets_;
 		static device::locator	locator_;
 	private:
@@ -36,7 +39,7 @@ namespace gl {
 		vtx::spos		best_size_;
 		vtx::spos		limit_size_;
 		vtx::spos		size_;
-		vtx::spos		locate_;
+		vtx::srect		rect_;
 
 		int				recv_file_id_;
 		utils::strings	recv_file_path_;
@@ -55,28 +58,30 @@ namespace gl {
 
 		bool		keyboard_jp_;
 
-	public:
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		glcore() : window_(0),
-				   best_size_(0), limit_size_(0), size_(0), locate_(0),
-				   recv_file_id_(0),
-				   title_(),
-				   frame_count_(0), frame_time_(0.0),
-				   machine_cycle_(0.0), cpu_ghz_(0.0),
-				   cpu_spd_enable_(false), swap_ctrl_(false),
-				   exit_signal_(false), full_screen_(false), keyboard_jp_(false) { }
+		core() : window_(0),
+				 best_size_(0), limit_size_(0), size_(0), rect_(0),
+				 recv_file_id_(0),
+				 title_(),
+				 frame_count_(0), frame_time_(0.0),
+				 machine_cycle_(0.0), cpu_ghz_(0.0),
+				 cpu_spd_enable_(false), swap_ctrl_(false),
+				 exit_signal_(false), full_screen_(false), keyboard_jp_(false) { }
 
+		core(const core& rhs);
+		core& operator = (const core& rhs);
 
+	public:
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	デストラクター
 		*/
 		//-----------------------------------------------------------------//
-		virtual ~glcore() { destroy(); }
+		virtual ~core() { destroy(); }
 
 
 		//-----------------------------------------------------------------//
@@ -86,7 +91,7 @@ namespace gl {
 			@return 正常終了したら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool initialize(const std::string& current_path) override;
+		bool initialize(const std::string& current_path);
 
 
 		//-----------------------------------------------------------------//
@@ -95,7 +100,7 @@ namespace gl {
 			@return	最大解像度
 		*/
 		//-----------------------------------------------------------------//
-		const vtx::spos& get_best_size() const override { return best_size_; }
+		const vtx::spos& get_best_size() const { return best_size_; }
 
 
 		//-----------------------------------------------------------------//
@@ -104,7 +109,7 @@ namespace gl {
 			@param[in]	size	最小解像度
 		*/
 		//-----------------------------------------------------------------//
-		void set_limit_size(const vtx::spos& size) override { limit_size_ = size; }
+		void set_limit_size(const vtx::spos& size) { limit_size_ = size; }
 
 
 		//-----------------------------------------------------------------//
@@ -113,7 +118,7 @@ namespace gl {
 			@return	最小解像度
 		*/
 		//-----------------------------------------------------------------//
-		const vtx::spos& get_limit_size() const override { return limit_size_; }
+		const vtx::spos& get_limit_size() const { return limit_size_; }
 
 
 		//-----------------------------------------------------------------//
@@ -122,16 +127,16 @@ namespace gl {
 			@return	解像度
 		*/
 		//-----------------------------------------------------------------//
-		const vtx::spos& get_size() const override { return size_; }
+		const vtx::spos& get_size() const { return size_; }
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	スクリーン位置を返す
-			@return	位置
+			@brief	スクリーン配置返す
+			@return	配置
 		*/
 		//-----------------------------------------------------------------//
-		const vtx::spos& get_locate() const override { return locate_; }
+		const vtx::srect& get_rect() const { return rect_; }
 
 
 		//-----------------------------------------------------------------//
@@ -140,7 +145,7 @@ namespace gl {
 			@return	ファイル受信 ID
 		*/
 		//-----------------------------------------------------------------//
-		int get_recv_file_id() const override { return recv_file_id_; }
+		int get_recv_file_id() const { return recv_file_id_; }
 
 
 		//-----------------------------------------------------------------//
@@ -149,7 +154,7 @@ namespace gl {
 			@return	ファイル受信 path
 		*/
 		//-----------------------------------------------------------------//
-		const utils::strings& get_recv_file_path() const override { return recv_file_path_; }
+		const utils::strings& get_recv_file_path() const { return recv_file_path_; }
 
 
 		//-----------------------------------------------------------------//
@@ -158,7 +163,7 @@ namespace gl {
 			@return	平均フレームレート
 		*/
 		//-----------------------------------------------------------------//
-		float get_frame_rate() const override { return (1.0 / frame_time_); }
+		float get_frame_rate() const { return (1.0 / frame_time_); }
 
 
 		//-----------------------------------------------------------------//
@@ -167,7 +172,7 @@ namespace gl {
 			@return	平均 CPU クロック(GHz)
 		*/
 		//-----------------------------------------------------------------//
-		float get_cpu_clock() const override { return cpu_ghz_; }
+		float get_cpu_clock() const { return cpu_ghz_; }
 
 
 		//-----------------------------------------------------------------//
@@ -176,7 +181,7 @@ namespace gl {
 			@return	「true」の場合、終了
 		*/
 		//-----------------------------------------------------------------//
-		bool get_exit_signal() const override { return exit_signal_; }
+		bool get_exit_signal() const { return exit_signal_; }
 
 
 		//-----------------------------------------------------------------//
@@ -188,7 +193,7 @@ namespace gl {
 			@return 正常終了したら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool setup(const vtx::srect& rect, const std::string& title, bool fullscreen) override;;
+		bool setup(const vtx::srect& rect, const std::string& title, bool fullscreen);
 
 
 		//-----------------------------------------------------------------//
@@ -197,7 +202,7 @@ namespace gl {
 			@param[in]	title	タイトル文字列
 		*/
 		//-----------------------------------------------------------------//
-		void set_title(const std::string& title) override;
+		void set_title(const std::string& title);
 
 
 		//-----------------------------------------------------------------//
@@ -215,7 +220,7 @@ namespace gl {
 			@param[in]	flag	全画面の場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		void full_screen(bool flag = true) override;
+		void full_screen(bool flag = true);
 
 
 		//-----------------------------------------------------------------//
@@ -224,7 +229,7 @@ namespace gl {
 			@return 全画面なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool is_full_screen() const override { return full_screen_; }
+		bool is_full_screen() const { return full_screen_; }
 
 
 		//-----------------------------------------------------------------//
@@ -233,7 +238,7 @@ namespace gl {
 			@return ファイルス・リソース
 		*/
 		//-----------------------------------------------------------------//
-		const std::string& get_current_path() const override { return current_path_; }
+		const std::string& get_current_path() const { return current_path_; }
 
 
 		//-----------------------------------------------------------------//
@@ -241,7 +246,7 @@ namespace gl {
 			@brief	フレーム・サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override;
+		void service();
 
 
 		//-----------------------------------------------------------------//
@@ -249,7 +254,7 @@ namespace gl {
 			@brief	フレーム・フリップ
 		*/
 		//-----------------------------------------------------------------//
-		void flip_frame() override;
+		void flip_frame();
 
 
 		//-----------------------------------------------------------------//
@@ -257,7 +262,7 @@ namespace gl {
 			@brief	廃棄プロセス
 		*/
 		//-----------------------------------------------------------------//
-		void destroy() override;
+		void destroy();
 
 
 		//-----------------------------------------------------------------//
@@ -266,7 +271,7 @@ namespace gl {
 			@return デバイス・クラス（const）
 		*/
 		//-----------------------------------------------------------------//
-		const device& get_device() const override { return device_; }
+		const device& get_device() const { return device_; }
 
 
 		//-----------------------------------------------------------------//
@@ -275,7 +280,7 @@ namespace gl {
 			@return デバイス・クラス
 		*/
 		//-----------------------------------------------------------------//
-		device& at_device() override { return device_; }
+		device& at_device() { return device_; }
 
 
 		//-----------------------------------------------------------------//
@@ -284,7 +289,7 @@ namespace gl {
 			@return デバイス・クラス
 		*/
 		//-----------------------------------------------------------------//
-		fonts& at_fonts() override { return fonts_; }
+		fonts& at_fonts() { return fonts_; }
 
 
 		//-----------------------------------------------------------------//
@@ -293,7 +298,7 @@ namespace gl {
 			@return 日本語キーボードの場合「true」が返る
 		*/
 		//-----------------------------------------------------------------//
-		bool keyboard_japan() const override { return keyboard_jp_; }
+		bool keyboard_japan() const { return keyboard_jp_; }
 
 	};
 }

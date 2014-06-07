@@ -88,22 +88,22 @@ namespace gl {
 		memset(img, 128, s);
 
 		for(int i = 0; i < 2; ++i) {
-			::glBindTexture(GL_TEXTURE_2D, tex_id_.ids_[i]);
+			glBindTexture(GL_TEXTURE_2D, tex_id_.ids_[i]);
 
 			int level = 0;
 			int border = 0;
 #ifdef WIN32
-			::glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-			::glTexImage2D(GL_TEXTURE_2D, level, tex_type_, tw, th, border, GL_RGBA, GL_UNSIGNED_BYTE, img);
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+			glTexImage2D(GL_TEXTURE_2D, level, tex_type_, tw, th, border, GL_RGBA, GL_UNSIGNED_BYTE, img);
 #endif
 
 #ifdef __PPU__
-			::glTexImage2D(GL_TEXTURE_2D, level, tex_type_, tw, th, border, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, img);
+			glTexImage2D(GL_TEXTURE_2D, level, tex_type_, tw, th, border, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, img);
 #endif
 
 #ifdef IPHONE_IPAD
-			::glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-			::glCompressedTexImage2D(GL_TEXTURE_2D, level,
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+			glCompressedTexImage2D(GL_TEXTURE_2D, level,
 									 GL_PALETTE4_RGBA8_OES, tw, th, border, 16 * 4 + (tw * th / 2), img);
 		//	::glTexImage2D(GL_TEXTURE_2D, level, m_tex_type, tw, th, border, GL_RGBA, GL_UNSIGNED_BYTE, img);
 #endif

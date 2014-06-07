@@ -13,6 +13,7 @@
 #include FT_FREETYPE_H
 #endif
 #include "utils/singleton_policy.hpp"
+#include "utils/file_io.hpp"
 #include "img_io/img_gray8.hpp"
 
 #include <iostream>
@@ -118,14 +119,28 @@ namespace img {
 		/*!
 			@brief	初期化
 			@param[in]	root	ルートパスの設定
+			@return エラーなら「false」
 		 */
 		//-----------------------------------------------------------------//
-		void initialize(const std::string& root) {
+		bool initialize(const std::string& root) {
+
 			root_path_ = root;
+			if(!root_path_.empty()) {
+				if(root_path_.back() != '/') root_path_ += '/';
+				if(!utils::is_directory(root)) {
+					std::cerr << "Warrning: fontfile path is not directory (" <<
+						root << ")" << std::endl;
+					return false;
+				}
+			} else {
+				std::cerr << "Warrning: fontfile root path to empty." << std::endl;
+				return false;
+			}
 
 			FT_Error error = FT_Init_FreeType(&library_);
 			if(error) {
 				std::cerr << "FT Library init error: " << static_cast<int>(error) << std::endl;
+				return false;
 			}
 
 			double	angle = (0.0 / 360) * 2.0 * 3.14159265398979;
@@ -133,6 +148,7 @@ namespace img {
 			matrix_.xy = static_cast<FT_Fixed>(-sin( angle ) * 0x10000L );
 			matrix_.yx = static_cast<FT_Fixed>( sin( angle ) * 0x10000L );
 			matrix_.yy = static_cast<FT_Fixed>( cos( angle ) * 0x10000L );
+			return true;
 		}
 
 

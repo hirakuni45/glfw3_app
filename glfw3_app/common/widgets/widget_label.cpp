@@ -4,9 +4,9 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
+#include "core/glcore.hpp"
 #include "widgets/widget_label.hpp"
 #include "widgets/widget_utils.hpp"
-#include "gl_fw/IGLcore.hpp"
 #include "img_io/paint.hpp"
 
 namespace gui {
@@ -56,9 +56,9 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_label::update()
 	{
-		gl::IGLcore* Igl = gl::get_glcore();
-		const vtx::spos& size = Igl->get_size();		
-		gl::fonts& fonts = Igl->at_fonts();
+		gl::core& core = gl::core::get_instance();
+		const vtx::spos& size = core.get_size();		
+		gl::fonts& fonts = core.at_fonts();
 
 		if(param_.text_in_) return;
 
@@ -155,8 +155,8 @@ namespace gui {
 
 			// テキスト幅が、収容範囲を超える場合
 			if(param_.text_in_) {
-				gl::IGLcore* Igl = gl::get_glcore();
-				gl::fonts& fonts = Igl->at_fonts();
+				gl::core& core = gl::core::get_instance();
+				gl::fonts& fonts = core.at_fonts();
 
 				if(!param_.text_param_.font_.empty()) {
 					fonts.push_font_face();

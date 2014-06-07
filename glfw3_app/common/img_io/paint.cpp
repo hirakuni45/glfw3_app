@@ -5,7 +5,7 @@
 */
 //=====================================================================//
 #include "paint.hpp"
-#include "gl_fw/Ikfimg.hpp"
+#include "core/ftimg.hpp"
 #include <cmath>
 
 namespace img {
@@ -88,7 +88,7 @@ namespace img {
 		for(int i = 0; i < divy; ++i) {
 			int v = st.x + divx * i / divy;
 			uint32_t pos = idx - min;
-			if(pos >= 0 && pos < lns.size()) {
+			if(pos < lns.size()) {
 				lns[pos].set(v);
 			}
 			if(st.y < en.y) ++idx;
@@ -385,11 +385,8 @@ namespace img {
 	//-----------------------------------------------------------------//
 	int paint::get_font_width(uint32_t wc)
 	{
-		Ikfimg* kf = get_kfimg();
-		if(kf == 0) return 0;
-
-		kf->create_bitmap(font_size_, wc);
-		const font_metrics::metrics met = kf->get_metrics();
+		img::ftimg::get_instance().create_bitmap(font_size_, wc);
+		const img::ftimg::metrics met = img::ftimg::get_instance().get_metrics();
 		return static_cast<int>(met.width + met.hori_x + font_space_);
 	}
 
@@ -404,13 +401,11 @@ namespace img {
 	//-----------------------------------------------------------------//
 	int paint::draw_font(const vtx::spos& pos, uint32_t ch)
 	{
-		Ikfimg* kf = get_kfimg();
-		if(kf == 0) return 0;
+		img::ftimg& fti = img::ftimg::get_instance();
+		fti.create_bitmap(font_size_, ch);
+		const img_gray8& gray = fti.get_img();
 
-		kf->create_bitmap(font_size_, ch);
-		const img_gray8& gray = kf->get_img();
-
-		const font_metrics::metrics& met = kf->get_metrics();
+		const img::ftimg::metrics& met = fti.get_metrics();
 
 		short w = static_cast<short>(met.width + met.hori_x);
 		vtx::spos p;

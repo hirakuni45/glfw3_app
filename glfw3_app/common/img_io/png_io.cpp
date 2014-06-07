@@ -247,16 +247,16 @@ namespace img {
 		}
 
 		if(indexed) {  // カラーパレットの読み込み
-			png_bytep ta;
-			int nt;
+			png_bytep ta = 0;
+			int nt = -1;
 			png_color_16p tc;
 			png_get_tRNS(png_ptr, info_ptr, &ta, &nt, &tc);
 			png_colorp pal;
 			int num;
 			png_get_PLTE(png_ptr, info_ptr, &pal, &num);
 			for(int i = 0; i < num; ++i) {
-				unsigned char a = 255;
-				if(nt) { // アルファチャネル
+				uint8_t a = 255;
+				if(ta && i < nt) { // アルファチャネル
 					a = ta[i];
 				}
 				const png_color* clut = &pal[i];

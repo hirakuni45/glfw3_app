@@ -4,7 +4,7 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include "gl_fw/IGLcore.hpp"
+#include "core/glcore.hpp"
 #include "widget_slider.hpp"
 #include "widget_utils.hpp"
 
@@ -158,14 +158,13 @@ namespace gui {
 		if(base_h_ == 0) return;
 
 		using namespace gl;
-		IGLcore* igl = get_glcore();
-		if(igl == 0) return;
+		core& core = core::get_instance();
 
 		if(param_.plate_param_.resizeble_) {
 			wd_.at_mobj().resize(base_h_, get_param().rect_.size);
 		}
 
-		const vtx::spos& size = igl->get_size();
+		const vtx::spos& size = core.get_size();
 
 		const widget::param& wp = get_param();
 

@@ -4,25 +4,37 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
+#ifdef WIN32
 #include <windows.h>
+#endif
 #include <iostream>
 #include "core/glcore.hpp"
+#include "core/ftimg.hpp"
 #include "utils/file_io.hpp"
 #include "utils/string_utils.hpp"
-#include <unistd.h>                
 #include <time.h>
 
+#ifdef WIN32
+#include <unistd.h>
 extern "C" {
 	DWORD NvOptimusEnablement = 0x00000001;
 };
+#endif
 
 namespace gl {
 
+#ifdef __APPLE__
+	static const char* root_font_path_ = "/System/Library/Fonts";
+	static const char* default_font_file_ = "ヒラギノ角ゴ ProN W3.otf";
+#endif
+
 #ifdef WIN32
+	static const char* root_font_path_ = "c:/WINDOWS/Fonts";
+	static const char* default_font_file_ = "MSGOTHIC.TTC";
+#endif
+	static const char* default_font_face_ = "gothic";
 
-	static const char* default_font_path_ = "c:/WINDOWS/Fonts/MSGOTHIC.TTC";
-	static const char* default_font_face_ = "ms_gothic";
-
+#ifdef WIN32
 	//=================================================================//
 	/*!
 		@brief	CPU のマシンサイクルをカウントする（WIN32-API）
@@ -53,51 +65,9 @@ namespace gl {
 
 // windows で define されているので無効にする。
 #undef DELETE
-
 #endif
 
-	IGLcore* glcore::glcore_ = 0;
-
-    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-    /*!
-        @brief  コアモジュールの生成
-    */
-    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-    void create_glcore()
-    {
-        glcore::glcore_ = new glcore;
-
-        if(glcore::glcore_ == 0) {
-            std::cout << "Can't create glcore..." << std::endl;
-            exit(0);
-        }
-    }
-
-
-    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-    /*!
-        @brief  コアモジュールのインターフェースクラスを得る
-        @return コアモジュールのインターフェースクラス
-    */
-    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-    IGLcore* get_glcore()
-    {
-        return dynamic_cast<IGLcore*>(glcore::glcore_);
-    }
-
-
-    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-    /*!
-        @brief  コアモジュールの廃棄
-    */
-    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-    void destroy_glcore()
-    {
-        delete glcore::glcore_;
-        glcore::glcore_ = 0;
-    }
-
-	device::bitsets glcore::bitsets_;
+	device::bitsets core::bitsets_;
 
 	static void key_callback_(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
@@ -173,21 +143,21 @@ namespace gl {
 			break;
 		}
 		if(ofs >= 0) {
-			glcore::bitsets_[ofs] = kv;
+			core::bitsets_[ofs] = kv;
 		}
 
 //		if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 //			glfwSetWindowShouldClose(window, GL_TRUE);
 //		}
 
-		if(mods & GLFW_MOD_SHIFT) glcore::bitsets_[device::key::SHIFT] = true;
-		else glcore::bitsets_[device::key::SHIFT] = false;
-		if(mods & GLFW_MOD_CONTROL) glcore::bitsets_[device::key::CONTROL] = true;
-		else glcore::bitsets_[device::key::CONTROL] = false;
-		if(mods & GLFW_MOD_ALT) glcore::bitsets_[device::key::ALT] = true;
-		else glcore::bitsets_[device::key::ALT] = false;
-		if(mods & GLFW_MOD_SUPER) glcore::bitsets_[device::key::SUPER] = true;
-		else glcore::bitsets_[device::key::SUPER] = false;
+		if(mods & GLFW_MOD_SHIFT) core::bitsets_[device::key::SHIFT] = true;
+		else core::bitsets_[device::key::SHIFT] = false;
+		if(mods & GLFW_MOD_CONTROL) core::bitsets_[device::key::CONTROL] = true;
+		else core::bitsets_[device::key::CONTROL] = false;
+		if(mods & GLFW_MOD_ALT) core::bitsets_[device::key::ALT] = true;
+		else core::bitsets_[device::key::ALT] = false;
+		if(mods & GLFW_MOD_SUPER) core::bitsets_[device::key::SUPER] = true;
+		else core::bitsets_[device::key::SUPER] = false;
 	}
 
 
@@ -206,7 +176,8 @@ namespace gl {
 			ofs = device::key::MOUSE_RIGHT;
 		}
 		if(ofs >= 0) {
-			glcore::bitsets_[ofs] = v;
+///			std::cout << "Mouse: " << ofs << std::endl;
+			core::bitsets_[ofs] = v;
 		}
 	}
 
@@ -218,21 +189,25 @@ namespace gl {
 		else {
 			return;
 		}
-		glcore::bitsets_[device::key::MOUSE_FOCUS] = v;
+		core::bitsets_[device::key::MOUSE_FOCUS] = v;
 	}
 
-	device::locator glcore::locator_;
-	
+	device::locator core::locator_;
+
 	static void cursor_callback_(GLFWwindow* window, double x, double y)
 	{
-		glcore::locator_.cursor_.x = static_cast<vtx::spos::value_type>(x);
-		glcore::locator_.cursor_.y = static_cast<vtx::spos::value_type>(y);
+///		std::cout << x << ", " << y << std::endl;
+		vtx::fpos pos(static_cast<vtx::spos::value_type>(x),
+					  static_cast<vtx::spos::value_type>(y));
+		const vtx::fpos& sc = core::locator_.get_scale();
+		core::locator_.set_cursor(pos * sc);
 	}
 
 	static void scroll_callback_(GLFWwindow* window, double x, double y)
 	{
-		glcore::locator_.scroll_.x = static_cast<vtx::spos::value_type>(x);
-		glcore::locator_.scroll_.y = static_cast<vtx::spos::value_type>(y);
+		vtx::fpos pos(static_cast<vtx::spos::value_type>(x),
+					  static_cast<vtx::spos::value_type>(y));
+		core::locator_.set_scroll(pos);
 	}
 
 #if 0
@@ -253,12 +228,11 @@ namespace gl {
 		@return 正常終了したら「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool glcore::initialize(const std::string& current_path)
+	bool core::initialize(const std::string& current_path)
 	{
 	    if (!glfwInit()) {
 			return false;
 		}
-
 		current_path_ = current_path;
 
 		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
@@ -266,7 +240,6 @@ namespace gl {
 		best_size_.x  = vm->width;
 		best_size_.y  = vm->height;
 		limit_size_ = best_size_  / 2;	///< 最小のサイズはベストの半分とする
-
 ///		setlocale(LC_CTYPE, "jpn");
 		setlocale(LC_CTYPE, "");
 
@@ -283,40 +256,48 @@ namespace gl {
 		@return 正常終了したら「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool glcore::setup(const vtx::srect& rect, const std::string& title, bool fullscreen)
+	bool core::setup(const vtx::srect& rect, const std::string& title, bool fullscreen)
 	{
-		locate_ = rect.org;
-		size_ = rect.size;
-		limit_size_ = size_ / 3;
+		rect_ = rect;
+		limit_size_ = rect_.size / 3;
 
-		window_ = glfwCreateWindow(size_.x, size_.y, title.c_str(), NULL, NULL);
+		window_ = glfwCreateWindow(rect_.size.x, rect_.size.y, title.c_str(), NULL, NULL);
 		if(!window_) {
+			std::cerr << "glcore setup false: 'glfwCreateWindow'" << std::endl;
 			return false;
 		}
-
-		// win32 handle glfwGetWin32Window
-//		HWND hw = glfwGetWin32Window(window_);
-
 
 		glfwSetKeyCallback(window_, key_callback_);
 		glfwSetMouseButtonCallback(window_, mouse_button_callback_);
 		glfwSetCursorPosCallback(window_, cursor_callback_);
 		glfwSetCursorEnterCallback(window_, cursor_enter_callback_);
 		glfwSetScrollCallback(window_, scroll_callback_);
-		glfwSetWindowPos(window_, locate_.x, locate_.y);
+		glfwSetWindowPos(window_, rect_.org.x, rect_.org.y);
 //		glfwSetWindowSizeCallback(window_, resize_window_);
 //		glfwSetFramebufferSizeCallback(window_, resize_framebuffer_);
 
 		glfwMakeContextCurrent(window_);
+		{
+			int x, y;
+			glfwGetFramebufferSize(window_, &x, &y);
+			size_.x = x;
+			size_.y = y;
+		}
 
+		// GLEWの初期化
 		int err = glewInit();
 		if(err != GLEW_OK) {
 			std::cout << "GLEW initalization error: " << err << std::endl;
 			return -1;
 		}
 
-		fonts_.initialize(default_font_path_, default_font_face_);
-		fonts_.set_font_size(24);
+		bool f = img::ftimg::get_instance().initialize(root_font_path_);
+		if(f) {
+			fonts_.initialize(default_font_file_, default_font_face_);
+			fonts_.set_font_size(24);
+		} else {
+			std::cerr << "FreeType initialize error..." << std::endl;
+		}
 
         // 垂直同期を有効にする。
 		if(glfwExtensionSupported("WGL_EXT_swap_control") == GL_TRUE) {
@@ -359,7 +340,7 @@ namespace gl {
 		@param[in]	title	タイトル文字列
 	*/
 	//-----------------------------------------------------------------//
-	void glcore::set_title(const std::string& title)
+	void core::set_title(const std::string& title)
 	{
 		if(!title.empty()) {
 			if(title_ != title) {
@@ -376,7 +357,7 @@ namespace gl {
 		@param[in]	flag	全画面の場合「true」
 	*/
 	//-----------------------------------------------------------------//
-	void glcore::full_screen(bool flag)
+	void core::full_screen(bool flag)
 	{
 		if(flag) {
 			full_screen_ = true;
@@ -391,42 +372,52 @@ namespace gl {
 		@brief	毎フレーム・サービス
 	*/
 	//-----------------------------------------------------------------//
-	void glcore::service()
+	void core::service()
 	{
 		if(window_ == 0) return;
 
-		device_.service(bitsets_, locator_);
-		locator_.scroll_.set(0);
-
-        /* Poll for and process events */
-        glfwPollEvents();
-
 		{
-			int w, h;
-			glfwGetWindowSize(window_, &w, &h);
-			if(w < limit_size_.x) {
-				w = limit_size_.x;
+			int x, y;
+			glfwGetWindowSize(window_, &x, &y);
+			bool toset = false;
+			if(x < limit_size_.x) {
+				x = limit_size_.x;
+				toset = true;
 			}
-			if(h < limit_size_.y) {
-				h = limit_size_.y;
+			if(y < limit_size_.y) {
+				y = limit_size_.y;
+				toset = true;
 			}
-			glfwSetWindowSize(window_, w, h);
+			if(toset) glfwSetWindowSize(window_, x, y);
 		}
 
 		{
 			int x, y;
+
+			glfwGetWindowPos(window_, &x, &y);
+			rect_.org.x = x;
+			rect_.org.y = y;
+
+			glfwGetWindowSize(window_, &x, &y);
+			rect_.size.x = x;
+			rect_.size.y = y;
+
+			// フレームバッファサイズとwindowのサイズは異なる
 			glfwGetFramebufferSize(window_, &x, &y);
 			size_.x = x;
 			size_.y = y;
 		}
 
-		{
-			int x, y;
-			glfwGetWindowPos(window_, &x, &y);
-			locate_.x = x;
-			locate_.y = y;
-		}
+		locator_.set_scale(vtx::fpos(
+		    static_cast<float>(size_.x) / static_cast<float>(rect_.size.x),
+			static_cast<float>(size_.y) / static_cast<float>(rect_.size.y)));
+		device_.service(bitsets_, locator_);
+		locator_.reset_scroll();
 
+        /* Poll for and process events */
+        glfwPollEvents();
+
+#ifdef WIN32
 		{
 			int id = glfwGetDropfilesId(window_);
 			if(recv_file_id_ != id) {
@@ -442,8 +433,8 @@ namespace gl {
 				}
 			}
 		}
-
-		glViewport(0, 0, size_.x, size_.y);
+#endif
+   		glViewport(0, 0, size_.x, size_.y);
 
 	 	if(glfwWindowShouldClose(window_)) {
 			exit_signal_ = true;
@@ -456,7 +447,7 @@ namespace gl {
 		@brief	フレーム・フリップ
 	*/
 	//-----------------------------------------------------------------//
-	void glcore::flip_frame()
+	void core::flip_frame()
 	{
 #ifdef WIN32
 		// ソフト同期
@@ -491,7 +482,7 @@ namespace gl {
 		@brief	廃棄プロセス
 	*/
 	//-----------------------------------------------------------------//
-	void glcore::destroy()
+	void core::destroy()
 	{
 		if(window_) {
 			glfwDestroyWindow(window_);

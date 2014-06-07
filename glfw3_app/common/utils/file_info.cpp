@@ -23,7 +23,7 @@ namespace utils {
 	{
 		if(root.empty()) return false;
 
-#if 1
+#ifdef WIN32
 		utils::wstring wsr;
 		utf8_to_utf16(root, wsr);
 		wchar_t* wtmp = new wchar_t[wsr.size() + 1];
@@ -40,7 +40,7 @@ namespace utils {
 #endif
 		if(dir) {
 			int i = 0;
-#if 1
+#ifdef WIN32
 			struct _wdirent* ent;
 			while((ent = _wreaddir(dir)) != 0) {
 				struct _stat st;
@@ -91,9 +91,7 @@ namespace utils {
 #else
 					bool d = S_ISDIR(st.st_mode);
 #endif
-					std::string s;
-					utils::sjis_to_utf8(ent->d_name, s);
-					file_info info(s, d, st.st_size, st.st_mtime, st.st_mode);
+					file_info info(ent->d_name, d, st.st_size, st.st_mtime, st.st_mode);
 					list.push_back(info);
 					i++;
 				}
