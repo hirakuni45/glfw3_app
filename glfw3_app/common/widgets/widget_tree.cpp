@@ -262,7 +262,7 @@ namespace gui {
 		using namespace gl;
 		core& core = core::get_instance();
 
-		const vtx::spos& size = core.get_size();
+		const vtx::spos& vsz = core.get_size();
 		const widget::param& wp = get_param();
 
 		// 各部品のルートを描画
@@ -280,7 +280,7 @@ namespace gui {
 				glPopMatrix();
 			}
 
-			glViewport(0, 0, size.x, size.y);
+			glViewport(0, 0, vsz.x, vsz.y);
 		}
 	}
 

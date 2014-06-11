@@ -15,6 +15,11 @@
 #include <AL/alext.h>
 #endif
 
+#ifdef __APPLE__
+#include <OpenAL/alc.h>
+#include <OpenAL/al.h>
+#endif
+
 #if defined(IPHONE) || defined(IPAD) || defined(IPHONE_IPAD)
 #include <OpenAL/alc.h>
 #include <OpenAL/al.h>

@@ -378,7 +378,7 @@ namespace gui {
 		fonts.pop_font_face();
 ///		fonts.install_font_type("meiryo.ttc", "meiryo");
 		fonts.set_font_size(20);
-		fonts.set_clip_size(core.get_size());
+		fonts.set_clip_size(core.get_rect().size);
 
 		// 共通部品の作成
 		{
@@ -781,7 +781,7 @@ namespace gui {
 			}
 		}
 
-		const vtx::spos& size = core.get_size();
+		const vtx::spos& size = core.get_rect().size;
 
 		// 各 描画
 		glDisable(GL_DEPTH_TEST);

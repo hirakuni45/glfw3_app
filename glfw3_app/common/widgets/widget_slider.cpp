@@ -164,7 +164,7 @@ namespace gui {
 			wd_.at_mobj().resize(base_h_, get_param().rect_.size);
 		}
 
-		const vtx::spos& size = core.get_size();
+		const vtx::spos& vsz = core.get_size();
 
 		const widget::param& wp = get_param();
 
@@ -179,7 +179,7 @@ namespace gui {
 
 			wd_.at_mobj().draw(hand_h_, gl::mobj::attribute::normal, handle_offset_);
 			glPopMatrix();
-			glViewport(0, 0, size.x, size.y);
+			glViewport(0, 0, vsz.x, vsz.y);
 		}
 	}
 

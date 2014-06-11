@@ -85,7 +85,8 @@ namespace gui {
 	{
 		using namespace gl;
 		core& core = core::get_instance();
-		const vtx::spos& size = core.get_size();
+		const vtx::spos& vsz = core.get_size();
+		const vtx::spos& siz = core.get_rect().size;
 		const widget::param& wp = get_param();
 
 		glPushMatrix();
@@ -103,8 +104,11 @@ namespace gui {
 			if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) { 
 //				vtx::srect rect;
 				if(wp.state_[widget::state::CLIP_PARENTS]) {
-					glViewport(wp.clip_.org.x, size.y - wp.clip_.org.y - wp.clip_.size.y,
-						wp.clip_.size.x, wp.clip_.size.y);
+					int sx = vsz.x / siz.x;
+					int sy = vsz.y / siz.y;
+					glViewport(wp.clip_.org.x * sx,
+							   vsz.y - wp.clip_.org.y * sy - wp.clip_.size.y * sy,
+						wp.clip_.size.x * sx, wp.clip_.size.y * sy);
 						mo.setup_matrix(wp.clip_.size.x, wp.clip_.size.y);
 				}
 				glScale(param_.scale_);
@@ -112,7 +116,8 @@ namespace gui {
 			}
 		}
 		glPopMatrix();
-		glViewport(0, 0, size.x, size.y);
+
+		glViewport(0, 0, vsz.x, vsz.y);
 	}
 
 

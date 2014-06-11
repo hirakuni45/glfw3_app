@@ -8,6 +8,7 @@
 #include <dirent.h>
 #include <boost/foreach.hpp>
 #include <boost/format.hpp>
+#include <iostream>
 
 namespace utils {
 
@@ -34,12 +35,9 @@ namespace utils {
 		_WDIR* dir = _wopendir(wtmp);
 		delete[] wtmp;
 #else
-//		std::string rsjis;
-//		utils::utf8_to_sjis(root, rsjis);
 		DIR* dir = opendir(root.c_str());
 #endif
 		if(dir) {
-			int i = 0;
 #ifdef WIN32
 			struct _wdirent* ent;
 			while((ent = _wreaddir(dir)) != 0) {
@@ -71,7 +69,6 @@ namespace utils {
 					utf16_to_utf8(ws, s);
 					file_info info(s, d, st.st_size, st.st_mtime, st.st_mode);
 					list.push_back(info);
-					i++;
 				}
 				delete[] wfn;
 			}
@@ -80,11 +77,11 @@ namespace utils {
 			struct dirent* ent;
 			while((ent = readdir(dir)) != 0) {
 				struct stat st;
-///				std::string fn = rsjis;
 				std::string fn = root;
 				fn += '/';
 				fn += ent->d_name;
-				if(::stat(fn.c_str(), &st) == 0) {
+				if(stat(fn.c_str(), &st) == 0) {
+///					std::cout << fn << std::endl;
 #ifdef __PPU__
 					bool d = false;
 					if(st.st_mode & CELL_FS_S_IFDIR) d = true;
@@ -93,13 +90,12 @@ namespace utils {
 #endif
 					file_info info(ent->d_name, d, st.st_size, st.st_mtime, st.st_mode);
 					list.push_back(info);
-					i++;
 				}
 			}
 			closedir(dir);
 #endif
-			if(i) return true;
-			else return false;
+			if(list.empty()) return false;
+			else return true;
 		} else {
 			return false;
 		}

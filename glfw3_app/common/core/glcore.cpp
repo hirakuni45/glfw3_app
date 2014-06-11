@@ -408,9 +408,9 @@ namespace gl {
 			size_.y = y;
 		}
 
-		locator_.set_scale(vtx::fpos(
-		    static_cast<float>(size_.x) / static_cast<float>(rect_.size.x),
-			static_cast<float>(size_.y) / static_cast<float>(rect_.size.y)));
+		locator_.set_scale(vtx::fpos(1.0f, 1.0f));
+///		    static_cast<float>(size_.x) / static_cast<float>(rect_.size.x),
+///			static_cast<float>(size_.y) / static_cast<float>(rect_.size.y)));
 		device_.service(bitsets_, locator_);
 		locator_.reset_scroll();
 

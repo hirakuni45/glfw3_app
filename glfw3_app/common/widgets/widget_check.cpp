@@ -62,7 +62,7 @@ namespace gui {
 		using namespace gl;
 		core& core = core::get_instance();
 
-		const vtx::spos& size = core.get_size();
+		const vtx::spos& vsz = core.get_size();
 		const widget::param& wp = get_param();
 
 		if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) { 
@@ -104,7 +104,7 @@ namespace gui {
 			param_.text_param_.fore_color_ = fc;
 
 			glPopMatrix();
-			glViewport(0, 0, size.x, size.y);
+			glViewport(0, 0, vsz.x, vsz.y);
 		}
 	}
 

@@ -191,9 +191,12 @@ namespace gui {
 		using namespace gl;
 		core& core = core::get_instance();
 
-		const vtx::spos& size = core.get_size();
+		const vtx::spos& vsz = core.get_size();
+		const vtx::spos& siz = core.get_rect().size;
 
-		glViewport(clip.org.x, size.y - clip.org.y - clip.size.y, clip.size.x, clip.size.y);
+		int sx = vsz.x / siz.x;
+		int sy = vsz.y / siz.y;
+		glViewport(clip.org.x * sx, vsz.y - clip.org.y * sy - clip.size.y * sy, clip.size.x *sx, clip.size.y * sy);
 		wd.at_mobj().setup_matrix(clip.size.x, clip.size.y);
 
 		wd.at_mobj().draw(h, gl::mobj::attribute::normal, ofs);
@@ -214,7 +217,8 @@ namespace gui {
 
 		gl::core& core = gl::core::get_instance();
 
-		const vtx::spos& size = core.get_size();
+		const vtx::spos& vsz = core.get_size();
+		const vtx::spos& siz = core.get_rect().size;
 
 		gl::fonts& fonts = core.at_fonts();
 
@@ -227,8 +231,10 @@ namespace gui {
 			fonts.set_font_size(tp.font_size_);
 		}
 
-		glViewport(clip_.org.x, size.y - clip_.org.y - clip_.size.y,
-			clip_.size.x, clip_.size.y);
+		int sx = vsz.x / siz.x;
+		int sy = vsz.y / siz.y;
+		glViewport(clip_.org.x * sx, vsz.y - clip_.org.y * sy - clip_.size.y * sy,
+			clip_.size.x * sx, clip_.size.y * sy);
 		fonts.setup_matrix(clip_.size.x, clip_.size.y);
 
 		fonts.enable_proportional(tp.proportional_);
@@ -275,7 +281,7 @@ namespace gui {
 	{
 		gl::core& core = gl::core::get_instance();
 
-		const vtx::spos& size = core.get_size();
+		const vtx::spos& vsz = core.get_size();
 
 		gl::fonts& fonts = core.at_fonts();
 
@@ -313,7 +319,7 @@ namespace gui {
 			fonts.restore_matrix();
 
 			glPopMatrix();
-			glViewport(0, 0, size.x, size.y);
+			glViewport(0, 0, vsz.x, vsz.y);
 		}
 	}
 
@@ -365,16 +371,19 @@ namespace gui {
 		using namespace gl;
 		core& core = core::get_instance();
 
-		const vtx::spos& size = core.get_size();
+		const vtx::spos& vsz = core.get_size();
+		const vtx::spos& siz = core.get_rect().size;
 
 		if(clip.size.x > 0 && clip.size.y > 0) {
 			glPushMatrix();
-			glViewport(clip.org.x, size.y - clip.org.y - clip.size.y,
-				clip.size.x, clip.size.y);
+			int sx = vsz.x / siz.x;
+			int sy = vsz.y / siz.y;
+			glViewport(clip.org.x * sx, vsz.y - clip.org.y * sy - clip.size.y * sy,
+				clip.size.x * sx, clip.size.y * sy);
 			mo.setup_matrix(clip.size.x, clip.size.y);
 			mo.draw(moh, gl::mobj::attribute::normal, ofs);
 			glPopMatrix();
-			glViewport(0, 0, size.x, size.y);
+			glViewport(0, 0, vsz.x, vsz.y);
 		}
 	}
 }

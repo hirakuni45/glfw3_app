@@ -17,12 +17,12 @@ namespace al {
 		@brief	PCM 波形を扱うクラス
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	template <class _T>
+	template <class T>
 	class pcm : public i_audio {
 		float			sample_rate_;
-		std::vector<_T>	waves_;
+		std::vector<T>	waves_;
 
-		_T				zero_;
+		T				zero_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -60,7 +60,7 @@ namespace al {
 			@param[in]	w	PCM データ
 		*/
 		//-----------------------------------------------------------------//
-		void fill(const _T& w) { BOOST_FOREACH(_T& v, waves_) { v = w; } }
+		void fill(const T& w) { BOOST_FOREACH(T& v, waves_) { v = w; } }
 
 
 		//-----------------------------------------------------------------//
@@ -68,7 +68,7 @@ namespace al {
 			@brief	バッファを「０」クリアする
 		*/
 		//-----------------------------------------------------------------//
-		void zero() { BOOST_FOREACH(_T& v, waves_) { v = zero_; } }
+		void zero() { BOOST_FOREACH(T& v, waves_) { v = zero_; } }
 
 
 		//-----------------------------------------------------------------//
@@ -170,7 +170,7 @@ namespace al {
 			@brief	廃棄
 		*/
 		//-----------------------------------------------------------------//
-		void destroy() { std::vector<_T>().swap(waves_); }
+		void destroy() { std::vector<T>().swap(waves_); }
 	};
 
 	typedef pcm<pcm8_m>		audio_mno8;
@@ -180,15 +180,15 @@ namespace al {
 	typedef pcm<pcm32_m>	audio_mno32;
 	typedef pcm<pcm32_s>	audio_sto32;
 
-	template <class _T>
-	void _copy_pcm(const pcm<_T>& src, pcm<_T>& dst);
+	template <class T>
+	void copy_pcm_(const pcm<T>& src, pcm<T>& dst);
 
-	inline void copy_pcm(const audio_mno8& src, audio_mno8& dst) { _copy_pcm<pcm8_m>(src, dst); }
-	inline void copy_pcm(const audio_sto8& src, audio_sto8& dst) { _copy_pcm<pcm8_s>(src, dst); }
-	inline void copy_pcm(const audio_mno16& src, audio_mno16& dst) { _copy_pcm<pcm16_m>(src, dst); }
-	inline void copy_pcm(const audio_sto16& src, audio_sto16& dst) { _copy_pcm<pcm16_s>(src, dst); }
-	inline void copy_pcm(const audio_mno32& src, audio_mno32& dst) { _copy_pcm<pcm32_m>(src, dst); }
-	inline void copy_pcm(const audio_sto32& src, audio_sto32& dst) { _copy_pcm<pcm32_s>(src, dst); }
+	inline void copy_pcm(const audio_mno8& src, audio_mno8& dst) { copy_pcm_<pcm8_m>(src, dst); }
+	inline void copy_pcm(const audio_sto8& src, audio_sto8& dst) { copy_pcm_<pcm8_s>(src, dst); }
+	inline void copy_pcm(const audio_mno16& src, audio_mno16& dst) { copy_pcm_<pcm16_m>(src, dst); }
+	inline void copy_pcm(const audio_sto16& src, audio_sto16& dst) { copy_pcm_<pcm16_s>(src, dst); }
+	inline void copy_pcm(const audio_mno32& src, audio_mno32& dst) { copy_pcm_<pcm32_m>(src, dst); }
+	inline void copy_pcm(const audio_sto32& src, audio_sto32& dst) { copy_pcm_<pcm32_s>(src, dst); }
 
 
 	//-----------------------------------------------------------------//

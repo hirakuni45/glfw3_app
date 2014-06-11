@@ -209,6 +209,9 @@ namespace img {
 		bool alpha;
 		bool gray = false;
 		bool indexed = false;
+   		png_bytep ta = 0;
+	   	int nt = 0;
+	   	png_color_16p tc = 0;
 		if(color_type == PNG_COLOR_TYPE_GRAY) {
 			ch = 4;
 			gray = true;
@@ -222,9 +225,6 @@ namespace img {
 //			std::cout << "PNG gray scale with alpha\n";
 		} else if(color_type & PNG_COLOR_MASK_PALETTE) {
 			ch = 1;
-			png_bytep ta;
-			int nt;
-			png_color_16p tc;
 			png_get_tRNS(png_ptr, info_ptr, &ta, &nt, &tc);
 			if(nt) alpha = true; else alpha = false;
 			indexed = true;
@@ -247,12 +247,8 @@ namespace img {
 		}
 
 		if(indexed) {  // カラーパレットの読み込み
-			png_bytep ta = 0;
-			int nt = -1;
-			png_color_16p tc;
-			png_get_tRNS(png_ptr, info_ptr, &ta, &nt, &tc);
 			png_colorp pal;
-			int num;
+			int num = 0;
 			png_get_PLTE(png_ptr, info_ptr, &pal, &num);
 			for(int i = 0; i < num; ++i) {
 				uint8_t a = 255;

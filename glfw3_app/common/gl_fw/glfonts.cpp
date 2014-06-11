@@ -206,9 +206,9 @@ namespace gl {
 
 			glMatrixMode(GL_PROJECTION);
 			glLoadIdentity();
-			glOrthof((float)scx, (float)scw,
-					(float)sch, (float)scy, -1.0f, 1.0f);
-
+			glOrthof(static_cast<float>(scx), static_cast<float>(scw),
+					 static_cast<float>(sch), static_cast<float>(scy),
+					 -1.0f, 1.0f);
 			glMatrixMode(GL_MODELVIEW);
 			glLoadIdentity();
 			setup_ = true;

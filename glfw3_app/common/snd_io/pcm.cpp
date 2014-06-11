@@ -10,7 +10,7 @@
 namespace al {
 
 	template <class _T>
-	void _copy_pcm(const pcm<_T>& src, pcm<_T>& dst)
+	void copy_pcm_(const pcm<_T>& src, pcm<_T>& dst)
 	{
 		dst.create(src.get_rate(), src.get_samples());
 		for(size_t i = 0; i < src.get_samples(); ++i) {

@@ -6,13 +6,15 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include <pthread.h>
-#include <semaphore.h>
 #include <string>
+#include <thread>
+#include <future>
+#include <tuple>
 #include "utils/drive_info.hpp"
 #include "utils/file_info.hpp"
 #include "utils/string_utils.hpp"
 #include "utils/handle_set.hpp"
+#include <iostream>
 
 namespace utils {
 
@@ -22,45 +24,29 @@ namespace utils {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class files {
-	public:
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		/*!
-			@brief	パス・タスク構造体
-		*/
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		struct files_io {
-			pthread_t	pth_t_;
-			sem_t	start_;
-			sem_t	send_;
-			sem_t	recv_;
+		typedef std::tuple<std::string, std::string> inp; 
 
-			std::string	path_;
-			std::string	exts_;
-
-			file_infos	file_infos_;
-
-			volatile bool	exit_;
-
-			bool set_path(const std::string& path, const std::string& exts) {
-				if(path.empty()) return false;
-				path_ = path;
-				exts_ = exts;
-				return true;
+		static file_infos task_(inp in) {
+			if(std::get<1>(in).empty()) {
+				file_infos fis;
+				create_file_list(std::get<0>(in), fis);
+				return fis;
+			} else {
+				file_infos tmp;
+				create_file_list(std::get<0>(in), tmp);
+				file_infos fis;
+				filter_file_infos(tmp, std::get<1>(in), fis);
+				return fis;
 			}
-			const std::string& get_path() const { return path_; }
-			const std::string& get_exts() const { return exts_; }
-			files_io() : exit_(false) { }
 		};
 
-	private:
-		files_io   	files_io_;
+		std::string		root_path_;
+		std::string		ext_;
 
-		file_infos	file_infos_;
+		std::future<file_infos>	future_;
 
-		bool	start_;
+		file_infos		file_infos_;
 
-		void init_task_();
-		void destroy_task_();
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -68,7 +54,7 @@ namespace utils {
 			@param[in]	path	パス
 		*/
 		//-----------------------------------------------------------------//
-		files() : start_(false) { init_task_(); }
+		files() { }
 
 
 		//-----------------------------------------------------------------//
@@ -76,7 +62,7 @@ namespace utils {
 			@brief	デストラクター
 		*/
 		//-----------------------------------------------------------------//
-		~files() { destroy_task_(); }
+		~files() { }
 
 
 		//-----------------------------------------------------------------//
@@ -87,14 +73,10 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		void set_path(const std::string& path, const std::string& ext = "") {
-			if(!start_) { // スレッドの起動
-				sem_wait(&files_io_.start_);
-				start_ = true;
-			}
-			if(files_io_.set_path(path, ext)) {
-				sem_post(&files_io_.recv_);
-				file_infos_.clear();
-			}
+			root_path_ = path;
+			ext_ = ext;
+			inp in = std::make_tuple(path, ext);
+			future_ = std::async(std::launch::async, task_, in);
 		}
 
 
@@ -104,7 +86,7 @@ namespace utils {
 			@return ルートパス
 		*/
 		//-----------------------------------------------------------------//
-		const std::string& get_path() const { return files_io_.get_path(); }
+		const std::string& get_path() const { return root_path_; }
 
 
 		//-----------------------------------------------------------------//
@@ -113,7 +95,7 @@ namespace utils {
 			@return 拡張子
 		*/
 		//-----------------------------------------------------------------//
-		const std::string& get_exts() const { return files_io_.get_exts(); }
+		const std::string& get_exts() const { return ext_; }
 
 
 		//-----------------------------------------------------------------//
@@ -122,7 +104,9 @@ namespace utils {
 			@return ファイル情報取得なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool probe();
+		bool probe() {
+			return future_.valid();
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -131,7 +115,10 @@ namespace utils {
 			@return ファイル情報郡
 		*/
 		//-----------------------------------------------------------------//
-		const file_infos& get();
+		const file_infos& get() {
+			file_infos_ =  future_.get();
+			return file_infos_;
+		}
 	};
 
 }
