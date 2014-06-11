@@ -166,7 +166,7 @@ namespace gui {
 		using namespace gl;
 
 		core& core = core::get_instance();
-		const vtx::spos& sc = core.get_size();
+		const vtx::spos& siz = core.get_rect().size;
 
 		gl::mobj::handle h = objh_;
 		if(get_select() || get_state(widget::state::SYSTEM_SELECT)) {
@@ -180,11 +180,11 @@ namespace gui {
 		render_text(wd_, h, get_param(), param_.text_param_, param_.plate_param_);
 
 		if(!param_.open_ && param_.drop_box_) {
-			wd_.at_mobj().setup_matrix(sc.x, sc.y);
+			wd_.at_mobj().setup_matrix(siz.x, siz.y);
 			wd_.set_TSC();
 			// チップの描画
 			gl::mobj::handle h;
-			if((get_rect().org.y + frame_->get_rect().size.y) > sc.y) {
+			if((get_rect().org.y + frame_->get_rect().size.y) > siz.y) {
 				h = wd_.get_share_image().up_box_;
 			} else {
 				h = wd_.get_share_image().down_box_;
