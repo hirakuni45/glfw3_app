@@ -73,7 +73,8 @@ namespace gui {
 
 		// ルートパスならドライブレターを加える
 		std::string pp;
-		if(!utils::previous_path(fsc_.get_path(), pp)) {
+		bool prevp = utils::previous_path(fsc_.get_path(), pp);
+		if(!prevp) {
 			for(uint32_t i = 0; i < drv_.get_num(); ++i) {
 				widget_file wf;
 				std::string fn;
@@ -93,6 +94,7 @@ namespace gui {
 
 			widget_file wf;
 			if(fn == "..") {
+				if(!prevp) continue;
 				wf.dir = true;
 			} else if(fi.is_directory()) {
 				fn += '/';
