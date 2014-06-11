@@ -23,6 +23,11 @@ PSOURCES	=	main.cpp \
 				gl_fw/glmobj.cpp \
 				gl_fw/gltexfb.cpp \
 				gl_fw/glterminal.cpp \
+				snd_io/audio_io.cpp \
+				snd_io/sound.cpp \
+				snd_io/pcm.cpp \
+				snd_io/wav_io.cpp \
+				snd_io/snd_files.cpp \
 				utils/vtx.cpp \
 				utils/vmath.cpp \
 				utils/string_utils.cpp \
@@ -113,7 +118,7 @@ endif
 # 	-static-libgcc -static-libstdc++
 LFLAGS	=	-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk \
 -Wl,-search_paths_first -Wl,-headerpad_max_install_names \
--framework AGL -framework Cocoa -framework OpenGL -framework IOKit -framework CoreFoundation -framework CoreVideo
+-framework AGL -framework Cocoa -framework OpenGL -framework IOKit -framework CoreFoundation -framework CoreVideo -framework OpenAL
 
 
 # -Wuninitialized -Wunused -Werror -Wshadow
