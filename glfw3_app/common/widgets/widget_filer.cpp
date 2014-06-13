@@ -345,6 +345,7 @@ namespace gui {
 		at_param().state_.set(widget::state::SIZE_LOCK, false);
 		at_param().state_.set(widget::state::RESIZE_H_ENABLE);
 		at_param().state_.set(widget::state::RESIZE_V_ENABLE);
+		at_param().state_.set(widget::state::RESIZE_EDGE_ENABLE);
 		at_param().state_.set(widget::state::SERVICE);
 		at_param().state_.set(widget::state::ENABLE, false);
 

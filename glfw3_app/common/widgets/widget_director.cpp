@@ -537,8 +537,10 @@ namespace gui {
 
 		if(!left.lvl) {
 			top_move_ = 0;
+			if(resize_edge_) top_resize_ = 0;
+			resize_edge_ = false;
 		}
-		if(!right.lvl) {
+		if(!right.lvl && !resize_edge_) {
 			top_resize_ = 0;
 		}
 
@@ -575,10 +577,19 @@ namespace gui {
 			}
 
 			bool focus = w->get_param().clip_.is_focus(msp);
+			bool resize_edge = false;
+			if(w->get_state(widget::state::RESIZE_EDGE_ENABLE) && focus) {
+				vtx::srect r = w->get_param().clip_;
+				r.org += 10;
+				r.size -= 20;
+				if(!r.is_focus(msp)) resize_edge = true;
+		   	}
+
 			if(w->get_state(widget::state::FOCUS_ENABLE)) {
 				w->set_state(widget::state::FOCUS, focus);
 			}
-			if(left.pos && focus) {  // 移動を行う widget 候補
+
+			if(left.pos && focus && !resize_edge) {  // 移動を行う widget 候補
 				w->at_param().move_org_ = w->get_rect().org;
 				w->set_state(widget::state::_ACTIVE);
 				top_move_ = w;
@@ -587,7 +598,8 @@ namespace gui {
 				select = 0;
 			}
 
-			if(right.pos && focus) {
+			// リサイズ候補
+			if((left.pos && resize_edge) || (right.pos && (focus || resize_edge))) {
 				vtx::spos sign(1);
 				if(msp.x < (w->get_rect().org.x + w->get_rect().size.x / 2)) sign.x = -1;
 				if(msp.y < (w->get_rect().org.y + w->get_rect().size.y / 2)) sign.y = -1;
@@ -596,10 +608,10 @@ namespace gui {
 				w->at_param().resize_org_ = w->get_rect().org;
 				w->at_param().resize_ref_ = w->get_rect().size;
 				top_resize_ = w;	// リサイズを行う widget 候補
+				resize_edge_ = resize_edge;
 			}
 
-
-			if(left.lvl && focus) {  // 選択している widget 候補
+			if(left.lvl && focus && top_resize_ == 0) {  // 選択している widget 候補
 				if(w->get_state(widget::state::_ACTIVE)) {
 					w->set_state(widget::state::DRAG);
 					select = w;
@@ -612,12 +624,13 @@ namespace gui {
 			}
 
 			// 移動時
-			if(left.lvl) {
+			if(left.lvl && !resize_edge) {
 				vtx::spos d = msp - position_positive_;
 				w->at_param().move_pos_ = w->get_param().move_org_ + d;
 			}
+
 			// リサイズ時
-			if(right.lvl && focus) {
+			if((right.lvl && focus) || (left.lvl && resize_edge)) {
 				w->set_state(widget::state::RESIZE);
 			}
 		}
@@ -627,7 +640,7 @@ namespace gui {
 		BOOST_FOREACH(widget* w, widgets_) {
 			if(select == w) {
 				w->set_state(widget::state::SELECT);
-				if(left.pos) {
+				if(left.pos || right.pos) {
 					w->set_state(widget::state::SELECT_TRG);
 				}
 				touch = true;
@@ -673,7 +686,7 @@ namespace gui {
 
 		// リサイズ処理
 		if(top_resize_ && !top_resize_->get_state(widget::state::SIZE_LOCK)) {
-			if(right.lvl) {
+			if(right.lvl || (left.lvl && resize_edge_)) {
 				const widget::param& param = top_resize_->get_param();
 				vtx::spos d = msp - param.resize_pos_;
 				if(param.resize_sign_.x < 0) d.x = -d.x;

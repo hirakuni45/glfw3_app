@@ -111,10 +111,9 @@ namespace gui {
 			short	caption_width_;		///< キャプション幅
 			vtx::spos	grid_;			///< リサイズ・グリッド
 			bool	resizeble_;			///< リサイズが可能な場合
-			bool	resize_edge_;   	///< フレームのエッジでのリサイズが可能な場合
 			plate_param() : round_style_(round_style::ALL),
 				round_radius_(8), frame_width_(4), caption_width_(0),
-							grid_(16), resizeble_(false), resize_edge_(false) { }
+							grid_(16), resizeble_(false) { }
 
 			void set_caption(short width) {
 				if(width <= 0) return;
@@ -132,7 +131,6 @@ namespace gui {
 				boost::hash_combine(h, frame_width_);
 				boost::hash_combine(h, caption_width_);
 				boost::hash_combine(h, resizeble_);
-				boost::hash_combine(h, resize_edge_);
 				return h;
 			}
 
@@ -142,8 +140,7 @@ namespace gui {
 					pp.frame_width_ == frame_width_ &&
 					pp.caption_width_ == caption_width_ &&
 					pp.grid_ == grid_ &&
-					pp.resizeble_ == resizeble_ &&
-					pp.resize_edge_ == resize_edge_;
+					pp.resizeble_ == resizeble_;
 			}
 		};
 
@@ -260,6 +257,7 @@ namespace gui {
 
 				RESIZE_H_ENABLE,		///< 水平リサイズ許可
 				RESIZE_V_ENABLE,		///< 垂直リサイズ許可
+				RESIZE_EDGE_ENABLE,		///< エッジ領域でのリサイズ許可
 				SIZE_LOCK,				///< サイズ固定
 
 				BEFORE_DRAG,			///< １フレーム前ドラッグの状態

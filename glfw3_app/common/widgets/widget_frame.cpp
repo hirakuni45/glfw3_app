@@ -21,6 +21,7 @@ namespace gui {
 		at_param().state_.set(widget::state::SIZE_LOCK, false);
 		at_param().state_.set(widget::state::RESIZE_H_ENABLE);
 		at_param().state_.set(widget::state::RESIZE_V_ENABLE);
+		at_param().state_.set(widget::state::RESIZE_EDGE_ENABLE);
 
 		param_.plate_param_.resizeble_ = true;
 		param_.text_param_.shadow_offset_.set(0);	// 通常「影」は付けない。
