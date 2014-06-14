@@ -120,8 +120,6 @@ LFLAGS	=	-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.p
 -Wl,-search_paths_first -Wl,-headerpad_max_install_names \
 -framework AGL -framework Cocoa -framework OpenGL -framework IOKit -framework CoreFoundation -framework CoreVideo -framework OpenAL
 
-
-# -Wuninitialized -Wunused -Werror -Wshadow
 CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
 			-Wformat
 CPPWARN	=	-Wall
