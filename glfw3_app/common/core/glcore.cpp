@@ -224,16 +224,24 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	初期化プロセス
-		@param[in]	current_path	カレント・パス
+		@param[in]	exec_path	コマンドパス
 		@return 正常終了したら「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool core::initialize(const std::string& current_path)
+	bool core::initialize(const std::string& exec_path)
 	{
+		std::string tmp;
+		utils::convert_delimiter(exec_path, '\\', '/', tmp);
+		std::string base;
+		utils::get_file_base(tmp, base);
+
+		char buff[2048];
+		current_path_ = getcwd(buff, sizeof(buff));
+		exec_path_ = current_path_ + '/' + base;
+
 	    if (!glfwInit()) {
 			return false;
 		}
-		current_path_ = current_path;
 
 		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
 		const GLFWvidmode* vm = glfwGetVideoMode(monitor);
