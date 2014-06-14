@@ -11,6 +11,7 @@
 #ifdef WIN32
 #include <windows.h>
 #endif
+#include <iostream>
 #include <boost/format.hpp>
 
 namespace al {
@@ -139,6 +140,7 @@ namespace al {
 		if(device_ == 0) {
 			ALenum error = alGetError();
 			if(error != AL_NO_ERROR) {
+				std::cout << "OpenAL error: alcOpenDevice" << std::endl;
 			// die("AL", (const char*)alGetString(error));
 			}
 			return;
