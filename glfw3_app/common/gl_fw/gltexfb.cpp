@@ -81,7 +81,7 @@ namespace gl {
 		tex_size_.x = tw;
 		tex_size_.y = th;
 
-		::glGenTextures(2, tex_id_.ids_);
+		glGenTextures(2, tex_id_.ids_);
 
 		size_t s = 4 * tex_size_.x * tex_size_.y;
 		char* img = new char[s];
@@ -92,21 +92,9 @@ namespace gl {
 
 			int level = 0;
 			int border = 0;
-#ifdef WIN32
+
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 			glTexImage2D(GL_TEXTURE_2D, level, tex_type_, tw, th, border, GL_RGBA, GL_UNSIGNED_BYTE, img);
-#endif
-
-#ifdef __PPU__
-			glTexImage2D(GL_TEXTURE_2D, level, tex_type_, tw, th, border, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, img);
-#endif
-
-#ifdef IPHONE_IPAD
-			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-			glCompressedTexImage2D(GL_TEXTURE_2D, level,
-									 GL_PALETTE4_RGBA8_OES, tw, th, border, 16 * 4 + (tw * th / 2), img);
-		//	::glTexImage2D(GL_TEXTURE_2D, level, m_tex_type, tw, th, border, GL_RGBA, GL_UNSIGNED_BYTE, img);
-#endif
 		}
 		delete[] img;
 
@@ -127,12 +115,12 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	void texfb::setup_matrix(int x, int y, int w, int h, float zn, float zf)
 	{
-		::glMatrixMode(GL_PROJECTION);
-		::glLoadIdentity();
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
 		glOrthof(static_cast<float>(x), static_cast<float>(w),
 				 static_cast<float>(h), static_cast<float>(y), zn, zf);
-		::glMatrixMode(GL_MODELVIEW);
-		::glLoadIdentity();
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
 	}
 
 
@@ -141,14 +129,14 @@ namespace gl {
 	/----------------------------------------------------------*/
 	void texfb::draw_quad_(GLuint tex_id)
 	{
-		::glEnable(GL_TEXTURE_2D);
+		glEnable(GL_TEXTURE_2D);
 
-		::glBindTexture(GL_TEXTURE_2D, tex_id);
+		glBindTexture(GL_TEXTURE_2D, tex_id);
 
-		::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
 		vtx::fpos uv_top;
 		uv_top.x = static_cast<float>(disp_start_.x) / static_cast<float>(tex_size_.x - 1);
@@ -176,15 +164,15 @@ namespace gl {
 		vec[2].set(static_cast<float>(disp_size_.x), static_cast<float>(disp_size_.y));
 		tex[3].set(bu, tv);
 		vec[3].set(static_cast<float>(disp_size_.x), 0.0f);
-		::glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		::glEnableClientState(GL_VERTEX_ARRAY);
-		::glTexCoordPointer(2, GL_FLOAT, 0, &tex[0]);
-		::glVertexPointer(2, GL_FLOAT, 0, &vec[0]);
-		::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-		::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-		::glDisableClientState(GL_VERTEX_ARRAY);
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glTexCoordPointer(2, GL_FLOAT, 0, &tex[0]);
+		glVertexPointer(2, GL_FLOAT, 0, &vec[0]);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		glDisableClientState(GL_VERTEX_ARRAY);
 
-		::glDisable(GL_TEXTURE_2D);
+		glDisable(GL_TEXTURE_2D);
 	}
 
 
@@ -291,40 +279,11 @@ namespace gl {
 		}
 
 		if(src) {
-			::glBindTexture(GL_TEXTURE_2D, tex_id_.ids_[disp_page_ ^ 1]);
+			glBindTexture(GL_TEXTURE_2D, tex_id_.ids_[disp_page_ ^ 1]);
 
-#ifdef WIN32
-			::glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-			::glTexSubImage2D(GL_TEXTURE_2D, 0,
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+			glTexSubImage2D(GL_TEXTURE_2D, 0,
 				disp_start_.x, disp_start_.y, disp_size_.x, disp_size_.y, GL_RGBA, GL_UNSIGNED_BYTE, src);
-#endif
-
-#ifdef __PPU__
-			// PS3 では、「glTexSubImage」は低速なので、全面書き換えの場合は、「glTexImage2D」で転送する。
-			int level = 0;
-			int border = 0;
-			if(w == m_tex_size.x && h == m_tex_size.y) {
-				::glTexImage2D(GL_TEXTURE_2D, level, m_tex_type,
-						   m_tex_size.x, m_tex_size.y, border, m_tex_type, GL_UNSIGNED_INT_8_8_8_8, src);
-			} else {
-				::glTexSubImage2D(GL_TEXTURE_2D, 0,
-					m_disp_start.x, m_disp_start.y, m_disp_size.x, m_disp_size.y, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, src);
-			}
-#endif
-
-#ifdef IPHONE
-			int level = 0;
-			int border = 0;
-			::glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-//			::glTexSubImage2D(GL_TEXTURE_2D, 0,
-//							  m_disp_start.x, m_disp_start.y, m_disp_size.x, m_disp_size.y, GL_RGBA, GL_UNSIGNED_BYTE, src);
-			::glCompressedTexImage2D(GL_TEXTURE_2D, level,
-									 GL_PALETTE4_RGBA8_OES, m_tex_size.x, m_tex_size.y, border, 16 * 4 + (m_tex_size.x * m_tex_size.y / 2), src);
-		//	::glCompressedTexSubImage2D(GL_TEXTURE_2D, level,
-		//								m_disp_start.x, m_disp_start.y, m_disp_size.x, m_disp_size.y, GL_PALETTE4_RGBA8_OES,
-		//								0, src);
-#endif
-/////			::glFlush();
 		}
 
 		if(dst) delete[] dst;
