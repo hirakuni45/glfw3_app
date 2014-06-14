@@ -56,7 +56,7 @@ namespace img {
 		*/
 		//-----------------------------------------------------------------//
 ///		void initialize(const std::string& exts = "bmp,png,jpg,jpeg,j2k,jp2,tga");
-		void initialize(const std::string& exts = "bmp,png,tga");
+		void initialize(const std::string& exts = "bmp,png,jpg,jpeg,tga");
 
 
 		//-----------------------------------------------------------------//
