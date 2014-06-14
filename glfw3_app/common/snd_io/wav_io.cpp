@@ -9,6 +9,8 @@
 
 namespace al {
 
+/// #define LOAD_INFO_
+
 	using namespace utils;
 
 #define WAVE_FORMAT_1M08 1
@@ -28,27 +30,27 @@ namespace al {
 #define WAVE_FORMAT_EXTENSIBLE 0xFFFE
 
 	struct WAVEFILEHEADER {
-		char			szRIFF[4];
-		unsigned long	ulRIFFSize;
-		char			szWAVE[4];
+		char	   	szRIFF[4];
+		uint32_t	ulRIFFSize;
+		char	   	szWAVE[4];
 	};
 
 	struct RIFFCHUNK {
-		char			szChunkName[4];
-		unsigned long	ulChunkSize;
+		char   		szChunkName[4];
+		uint32_t	ulChunkSize;
 	};
 
 	struct WAVEFMT {
-		unsigned short	usFormatTag;
-		unsigned short	usChannels;
-		unsigned long	ulSamplesPerSec;
-		unsigned long	ulAvgBytesPerSec;
-		unsigned short	usBlockAlign;
-		unsigned short	usBitsPerSample;
-		unsigned short	usSize;
-		unsigned short	usReserved;
-		unsigned long	ulChannelMask;
-		unsigned long	guidSubFormat;
+		uint16_t	usFormatTag;
+		uint16_t	usChannels;
+		uint32_t	ulSamplesPerSec;
+		uint32_t	ulAvgBytesPerSec;
+		uint16_t	usBlockAlign;
+		uint16_t	usBitsPerSample;
+		uint16_t	usSize;
+		uint16_t	usReserved;
+		uint32_t	ulChannelMask;
+		uint32_t	guidSubFormat;
 	};
 
 
@@ -262,11 +264,11 @@ namespace al {
 			} else {
 				std::cout << "Form: ext" << std::endl;
 			}
-			std::cout << "Chanel:        " << static_cast<int>(ext_.m_format.nChannels) << std::endl;
-			std::cout << "Sample / Sec:  " << static_cast<int>(ext_.m_format.nSamplesPerSec) << std::endl;
-			std::cout << "Bytes / Sec:   " << static_cast<int>(ext_.m_format.nAvgBytesPerSec) << std::endl;
-			std::cout << "Bits / Sample: " << static_cast<int>(ext_.m_format.wBitsPerSample) << std::endl;
-			std::cout << "Block Align:   " << static_cast<int>(ext_.m_format.nBlockAlign) << std::endl;
+			std::cout << "Chanel:        " << static_cast<int>(ext_.format.channels) << std::endl;
+			std::cout << "Sample / Sec:  " << static_cast<int>(ext_.format.samples_per_sec) << std::endl;
+			std::cout << "Bytes / Sec:   " << static_cast<int>(ext_.format.avg_bytes_per_sec) << std::endl;
+			std::cout << "Bits / Sample: " << static_cast<int>(ext_.format.bits_per_sample) << std::endl;
+			std::cout << "Block Align:   " << static_cast<int>(ext_.format.block_align) << std::endl;
 #endif
 			i_audio* aif = 0;
 			if(ext_.format.channels == 1) {		// mono

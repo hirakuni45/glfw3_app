@@ -17,9 +17,9 @@ namespace al {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class wav_io : public i_snd_io {
 
-		typedef short			WORD;	///< 2 bytes
-		typedef long			DWORD;	///< 4 bytes
-		typedef unsigned long	GUID;	///< 4 bytes
+		typedef int16_t	   	WORD;	///< 2 bytes
+		typedef int32_t	   	DWORD;	///< 4 bytes
+		typedef uint32_t	GUID;	///< 4 bytes
 
 		enum wavefile_type {
 			wf_null = 0,
@@ -43,7 +43,7 @@ namespace al {
 				WORD	valid_bits_per_sample;       /* bits of precision  */
 				WORD	samples_per_block;          /* valid if wBitsPerSample==0 */
 				WORD	reserved;                 /* If neither applies, set to zero. */
-			} samples;
+			};
 			DWORD			channel_mask;      /* which channels are */
 			GUID			sub_format;
 		};
