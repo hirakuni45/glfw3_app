@@ -145,11 +145,11 @@ namespace utils {
 		@return 見つからない場合、負の値
 	*/
 	//-----------------------------------------------------------------//
-	uint32_t unzip::find(const std::string& key)
+	int32_t unzip::find(const std::string& key)
 	{
 		zmap::const_iterator cit = zmap_.find(key);
 		if(cit == zmap_.end()) return -1;
-		return static_cast<uint32_t>(cit->second);
+		return static_cast<int32_t>(cit->second);
 	}
 
 
