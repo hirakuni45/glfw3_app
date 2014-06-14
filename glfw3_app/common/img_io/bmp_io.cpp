@@ -485,8 +485,8 @@ namespace img {
 		for( ; ; ) {
 			unsigned int reclen;
 			while(bfcnt < (reclen = 2) || (bfptr[0] == 0 && (
-					 (bfptr[1] == 2 && bfcnt < (reclen += 2)) || bfptr[1] >= 3 &&
-					 bfcnt < (reclen += (bfptr[1] * bmp.depth + 15) / 16 * 2)
+				 (bfptr[1] == 2 && bfcnt < (reclen += 2)) || (bfptr[1] >= 3 &&
+				  bfcnt < (reclen += (bfptr[1] * bmp.depth + 15) / 16 * 2))
 												   ))) {
 				if(bfptr != buf && bfcnt != 0) memmove(buf, bfptr, bfcnt);
 				size_t rd = fin.read(buf + bfcnt, 1, sizeof(buf) - bfcnt);
