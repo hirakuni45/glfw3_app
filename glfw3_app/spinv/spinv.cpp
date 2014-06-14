@@ -41,7 +41,12 @@ namespace app {
 					for(int i = 0; i < 9; ++i) {
 						std::string fn = sounds[i];
 						fn += ".wav";
-						int h = zip.find_no_capital(fn);
+						int h = zip.find(fn);
+						if(h < 0) {
+							fn = sounds[i];
+							fn += ".Wav";
+							h = zip.find(fn);
+						}
 						if(h >= 0) {
 							std::vector<char> wav;
 							size_t wn = zip.get_filesize(h);
@@ -52,8 +57,12 @@ namespace app {
 								se_id_[i] = sound.load_se(fin, "wav");
 								fin.close();
 							}
+						} else {
+							errstr += "load error: '" + fn + "'";
 						}
 					}
+				} else {
+					errstr = "Open sound archive files: '" + sda + "'";
 				}
 			} else {
 				errstr = "Can't open sound archive: '" + sda + "'";
@@ -81,7 +90,7 @@ namespace app {
 					"invaders.h", "invaders.g", "invaders.f", "invaders.e"
 				};
 				for(int i = 0; i < 4; ++i) {
-					int h = zip.find_no_capital(rom_files[i]);
+					int h = zip.find(rom_files[i]);
 					if(h < 0) {
 						if(!romerr.empty()) romerr += ", ";
 						romerr += rom_files[i];
@@ -98,9 +107,9 @@ namespace app {
 		}
 
 		if(!errstr.empty()) {
-			gl::IGLcore* igl = gl::get_glcore();
+			gl::core& core = gl::core::get_instance();
 			vtx::spos size(500, 100);
-			vtx::spos pos = (igl->get_size() - size) / 2;
+			vtx::spos pos = (core.get_rect().size - size) / 2;
             widget::param wp(vtx::srect(pos, size));
             widget_dialog::param wp_;
             wp_.style_ = widget_dialog::param::style::OK;
@@ -119,8 +128,9 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void spinv::update()
 	{
-		gl::IGLcore* igl = gl::get_glcore();
-		const gl::device& dev = igl->get_device();
+   		gl::core& core = gl::core::get_instance();
+
+		const gl::device& dev = core.get_device();
 
         gui::widget_director& wd = director_.at().widget_director_;
 
@@ -252,22 +262,23 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void spinv::render()
 	{
-		gl::IGLcore* igl = gl::get_glcore();
-		const vtx::spos& size = igl->get_size();
+   		gl::core& core = gl::core::get_instance();
 
-		texfb_.setup_matrix(0, 0, size.x, size.y);
+		const vtx::spos& siz = core.get_rect().size;
+
+		texfb_.setup_matrix(0, 0, siz.x, siz.y);
 
 		float scale = 1.0f;
 		float ofsx = 0.0f;
 		float ofsy = 0.0f;
-		if(size.x < size.y) {
-			scale = static_cast<float>(size.x) / static_cast<float>(InvadersMachine::ScreenWidth);
+		if(siz.x < siz.y) {
+			scale = static_cast<float>(siz.x) / static_cast<float>(InvadersMachine::ScreenWidth);
 			float h = static_cast<float>(InvadersMachine::ScreenHeight);
-			ofsy = (static_cast<float>(size.y) - h * scale) * 0.5f;
+			ofsy = (static_cast<float>(siz.y) - h * scale) * 0.5f;
 		} else {
-			scale = static_cast<float>(size.y) / static_cast<float>(InvadersMachine::ScreenHeight);
+			scale = static_cast<float>(siz.y) / static_cast<float>(InvadersMachine::ScreenHeight);
 			float w = static_cast<float>(InvadersMachine::ScreenWidth);
-			ofsx = (static_cast<float>(size.x) - w * scale) * 0.5f;
+			ofsx = (static_cast<float>(siz.x) - w * scale) * 0.5f;
 		}
 		gl::glTranslate(ofsx, ofsy);
 		gl::glScale(scale);

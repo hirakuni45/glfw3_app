@@ -1,7 +1,7 @@
 #-----------------------------------------------#
 # Application Binary Build Makefile             #
 #-----------------------------------------------#
-TARGET		=	spinv.exe
+TARGET		=	spinv
 
 # ICON_RC		=	icon.rc
 
@@ -13,6 +13,13 @@ VPATH		=	../common
 CSOURCES	=	minizip/ioapi.c \
 				minizip/unzip.c
 
+#				img_io/jpeg_io.cpp \
+#				img_io/openjpeg_io.cpp \
+#				snd_io/mp3_io.cpp \
+#				snd_io/mp3_tag.cpp \
+#				snd_io/aac_io.cpp \
+
+
 PSOURCES	=	main.cpp \
 				spinv.cpp \
 				side/arcade.cpp \
@@ -21,8 +28,7 @@ PSOURCES	=	main.cpp \
 				side/i8080sub.cpp \
 				core/glcore.cpp \
 				core/device.cpp \
-				core/kfimg_ft2.cpp \
-				core/jfep_io.cpp \
+				core/ftimg.cpp \
 				gl_fw/glfonts.cpp \
 				gl_fw/glmobj.cpp \
 				gl_fw/gltexfb.cpp \
@@ -38,8 +44,6 @@ PSOURCES	=	main.cpp \
 				utils/keyboard.cpp \
 				img_io/paint.cpp \
 				img_io/png_io.cpp \
-				img_io/jpeg_io.cpp \
-				img_io/openjpeg_io.cpp \
 				img_io/bmp_io.cpp \
 				img_io/tga_io.cpp \
 				img_io/dds_io.cpp \
@@ -48,9 +52,6 @@ PSOURCES	=	main.cpp \
 				snd_io/audio_io.cpp \
 				snd_io/pcm.cpp \
 				snd_io/wav_io.cpp \
-				snd_io/mp3_io.cpp \
-				snd_io/mp3_tag.cpp \
-				snd_io/aac_io.cpp \
 				snd_io/snd_files.cpp \
 				snd_io/sound.cpp \
 				widgets/common_parts.cpp \
@@ -72,7 +73,13 @@ PSOURCES	=	main.cpp \
 				widgets/widget_terminal.cpp
 
 STDLIBS		=
-OPTLIBS		=	glfw3 glew32 opengl32 glu32 gdi32 imm32 \
+OPTLIBS		=	glfw3 GLEW \
+				pthread \
+				png \
+				freetype \
+				z
+
+#	glfw3 glew32 opengl32 glu32 gdi32 imm32 \
 				pthread \
 				openal winmm dsound \
 				png16 jpeg_x86 openjp2 \
@@ -82,13 +89,11 @@ OPTLIBS		=	glfw3 glew32 opengl32 glu32 gdi32 imm32 \
 				mad \
 				faad mp4ff
 
-INC_SYS		=	/usr/local/boost_1_54_0
+INC_SYS		=	/usr/local/boost_1_55_0
 
 INC_LIB		=	/usr/local/include \
-				/usr/local/include/libpng16 \
-				/usr/local/include/libjpeg_x86 \
-				/usr/local/include/openjpeg-2.0 \
-				/usr/local/include/freetype2
+				/usr/local/include/freetype2 \
+				/usr/local/include/freetype2/freetype
 
 PINC_APP	=	. ../common
 CINC_APP	=	. ../common
@@ -107,17 +112,17 @@ LIBN	+=	$(addprefix -l, $(OPTLIBS))
 #
 # Compiler, Linker Options, Resource_compiler
 #
-CP	=	g++
-CC	=	gcc
-LK	=	g++
-RC	=	windres
+CP	=	clang++
+CC	=	clang
+LK	=	clang++
+RC	=
 
 POPT	=	-O2 -std=gnu++11
 COPT	=	-O2
 LOPT	=
 
-PFLAGS	=	-DWIN32 -DHAVE_STDINT_H
-CFLAGS	=	-DWIN32
+PFLAGS	=	-DHAVE_STDINT_H
+CFLAGS	=
 
 ifeq ($(BUILD),debug)
 	POPT += -g
@@ -132,7 +137,9 @@ ifeq ($(BUILD),release)
 endif
 
 # 	-static-libgcc -static-libstdc++
-LFLAGS	=
+LFLAGS	=	-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk \
+-Wl,-search_paths_first -Wl,-headerpad_max_install_names \
+-framework AGL -framework Cocoa -framework OpenGL -framework IOKit -framework CoreFoundation -framework CoreVideo -framework OpenAL
 
 # -Wuninitialized -Wunused -Werror -Wshadow
 CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
@@ -169,13 +176,13 @@ $(ICON_OBJ): $(ICON_RC)
 
 $(BUILD)/%.d : %.c
 	mkdir -p $(dir $@); \
-	$(CC) -MM -DDEPEND_ESCAPE $(COPT) $(CFLAGS) $(INC_C) $< \
+	$(CC) -MM -DDEPEND_ESCAPE $(COPT) $(CFLAGS) $(CINCS) $< \
 	| sed 's/$(notdir $*)\.o:/$(subst /,\/,$(patsubst %.d,%.o,$@) $@):/' > $@ ; \
 	[ -s $@ ] || rm -f $@
 
 $(BUILD)/%.d : %.cpp
 	mkdir -p $(dir $@); \
-	$(CP) -MM -DDEPEND_ESCAPE $(POPT) $(PFLAGS) $(INC_P) $< \
+	$(CP) -MM -DDEPEND_ESCAPE $(POPT) $(PFLAGS) $(PINCS) $< \
 	| sed 's/$(notdir $*)\.o:/$(subst /,\/,$(patsubst %.d,%.o,$@) $@):/' > $@ ; \
 	[ -s $@ ] || rm -f $@
 
