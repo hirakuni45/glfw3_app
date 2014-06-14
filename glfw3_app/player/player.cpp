@@ -87,14 +87,15 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void player::initialize()
 	{
-		gl::IGLcore* igl = gl::get_glcore();
+		gl::core& core = gl::core::get_instance();
 
 		mobj_.initialize();
 
-		gl::fonts& fonts = igl->at_fonts();
+		gl::fonts& fonts = core.at_fonts();
 		std::string cf = fonts.get_font_type();
-		if(!fonts.install_font_type("./res/seg12.ttf", "led")) {
-			std::cerr << "Can't install system TTF font..." << std::endl;
+		std::string fp = "res/seg12.ttf";
+		if(!fonts.install_font_type(fp, "led")) {
+			std::cerr << "Can't install system TTF font: '" << fp << "'" << std::endl;
 		}
 		fonts.set_spaceing(6);
 		fonts.set_font_type(cf);
@@ -108,7 +109,7 @@ namespace app {
 
 		{	// ファイラーリソースの生成
 			widget::param wp(vtx::srect(10, 10, 500, 350));
-			widget_filer::param wp_(igl->get_current_path(), sound.get_file_exts());
+			widget_filer::param wp_(core.get_current_path(), sound.get_file_exts());
 			filer_ = wd.add_widget<widget_filer>(wp, wp_);
 			filer_->enable(false);
 		}
@@ -187,7 +188,7 @@ namespace app {
 
 		// エラー用ダイアログリソースの生成
 		{
-			const vtx::spos& scs = igl->get_size();
+			const vtx::spos& scs = core.get_rect().size;
 			short w = 450;
 			short h = 150;
 			widget::param wp(vtx::srect((scs.x - w) / 2, (scs.y - h) / 2, w, h));
@@ -205,9 +206,9 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void player::update()
 	{
-		gl::IGLcore* igl = gl::get_glcore();
+		gl::core& core = gl::core::get_instance();
 
-		const vtx::spos& size = igl->get_size();
+		const vtx::spos& size = core.get_rect().size;
 
 		// ウィジェットのコア、更新
 		gui::widget_director& wd = director_.at().widget_director_;
@@ -286,7 +287,7 @@ namespace app {
 				sound.pause_stream();
 			}
 
-			igl->set_title(sound.get_file_stream());
+			core.set_title(sound.get_file_stream());
 
 		} else if(sound.get_state_stream() == al::sound::stream_state::PAUSE) {
 			wd.enable(play_btn_);
@@ -414,7 +415,7 @@ namespace app {
 
 		// ファイラーが有効で、マウス操作が無い状態が５秒続いたら、演奏ファイルへフォーカス
    		if(filer_->get_state(gui::widget::state::ENABLE)) {
-			const vtx::spos& msp = igl->get_device().get_locator().cursor_;
+			const vtx::spos& msp = core.get_device().get_locator().get_cursor();
 			if(msp == mouse_pos_) {
 				++filer_count_;
 				if(filer_count_ >= (60 * 5)) {
@@ -427,10 +428,10 @@ namespace app {
 		}
 
 		// Drag & Drop されたファイルを再生
-		int id = igl->get_recv_file_id();
+		int id = core.get_recv_file_id();
 		if(drop_file_id_ != id) {
 			drop_file_id_ = id;
-			const utils::strings& ss = igl->get_recv_file_path();
+			const utils::strings& ss = core.get_recv_file_path();
 			if(!ss.empty()) {
 				std::string file = ss[0];
 				if(ss.size() > 1) {
@@ -451,16 +452,17 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void player::render()
 	{
-		gl::IGLcore* igl = gl::get_glcore();
-		const vtx::spos& size = igl->get_size();
+		gl::core& core = gl::core::get_instance();
+///		const vtx::spos& vsz = core.get_size();
+		const vtx::spos& siz = core.get_rect().size;
 
 		if(jacket_) {			
-			mobj_.setup_matrix(size.x, size.y);
-			float refs = static_cast<float>(size.x) * 0.5f;
+			mobj_.setup_matrix(siz.x, siz.y);
+			float refs = static_cast<float>(siz.x) * 0.5f;
 			float scale = refs / static_cast<float>(mobj_.get_size(jacket_).x);
 			glScalef(scale, scale, scale);
 			float sci = 1.0f / scale;
-			float ofsx = (size.x * 0.5f) / 2 * sci;
+			float ofsx = (siz.x * 0.5f) / 2 * sci;
 			float ofsy = 10.0f * sci;
 			mobj_.draw(jacket_, gl::mobj::attribute::normal, vtx::spos(ofsx, ofsy));
 			mobj_.restore_matrix();
