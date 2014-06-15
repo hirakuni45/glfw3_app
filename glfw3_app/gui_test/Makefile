@@ -27,6 +27,9 @@ PSOURCES	=	main.cpp \
 				snd_io/sound.cpp \
 				snd_io/pcm.cpp \
 				snd_io/wav_io.cpp \
+				snd_io/mp3_io.cpp \
+				snd_io/mp3_tag.cpp \
+				snd_io/aac_io.cpp \
 				snd_io/snd_files.cpp \
 				utils/vtx.cpp \
 				utils/vmath.cpp \
@@ -66,8 +69,9 @@ STDLIBS		=
 OPTLIBS		=	glfw3 GLEW \
 				pthread \
 				png turbojpeg \
+				mad id3tag faad mp4ff \
 				freetype \
-				z
+				iconv z
 
 INC_SYS		=	/usr/local/boost_1_55_0
 
@@ -81,8 +85,8 @@ CINC_APP	=	. ../common
 LIBDIR		=	/usr/local/lib \
 				/opt/libjpeg-turbo/lib
 
-INC_S	=	$(addprefix -I, $(INC_SYS))
-INC_L	=	$(addprefix -I, $(INC_LIB))
+INC_S	=	$(addprefix -isystem, $(INC_SYS))
+INC_L	=	$(addprefix -isystem, $(INC_LIB))
 INC_P	=	$(addprefix -I, $(PINC_APP))
 INC_C	=	$(addprefix -I, $(CINC_APP))
 CINCS	=	$(INC_S) $(INC_L) $(INC_C)
