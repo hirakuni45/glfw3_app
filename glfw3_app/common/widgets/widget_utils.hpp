@@ -60,6 +60,8 @@ namespace gui {
 			w = wd.add_widget<WIDGET>(wp, wp_);
 		} else {
 			typename WIDGET::param wp_(utils::get_file_name(file));
+			// ロード出来ない場合の仮の大きさ
+			wp.rect_.size.set(32, 32);
 			w = wd.add_widget<WIDGET>(wp, wp_);
 		}
 		return w;
