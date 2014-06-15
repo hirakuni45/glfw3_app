@@ -195,8 +195,17 @@ namespace app {
 			short h = 150;
 			widget::param wp(vtx::srect((scs.x - w) / 2, (scs.y - h) / 2, w, h));
 			widget_dialog::param wp_;
+   			wp_.style_ = widget_dialog::param::style::OK;
 			error_dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
-			error_dialog_->enable(false);
+			const utils::strings& ss = wd.get_error_report();
+			if(ss.empty()) {
+				error_dialog_->enable(false);
+			} else {
+				std::string s;
+				utils::strings_to_string(ss, true, s);
+				error_dialog_->set_text(s);
+				std::cout << s << std::endl;
+			}
 		}
 	}
 
