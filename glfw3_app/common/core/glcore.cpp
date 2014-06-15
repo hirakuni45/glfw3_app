@@ -235,9 +235,16 @@ namespace gl {
 		std::string base;
 		utils::get_file_base(tmp, base);
 
-		char buff[2048];
-		current_path_ = getcwd(buff, sizeof(buff));
+		if(!tmp.empty() && tmp[0] == '/') {
+			utils::get_file_path(tmp, current_path_);
+		} else {
+			char buff[2048];
+			current_path_ = getcwd(buff, sizeof(buff));
+		}
 		exec_path_ = current_path_ + '/' + base;
+
+//		std::cout << "Current: '" << current_path_ << std::endl;
+//		std::cout << "Exec:    '" << exec_path_ << std::endl;
 
 	    if (!glfwInit()) {
 			return false;
