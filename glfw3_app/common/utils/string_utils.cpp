@@ -12,6 +12,12 @@
 #include <windows.h>
 #endif
 
+#ifdef __APPLE__
+#include <iconv.h>
+/// #include <cstring>
+#define USE_ICONV
+#endif
+
 namespace utils {
 
 	using namespace std;
@@ -266,7 +272,7 @@ namespace utils {
 		return f;
 	}
 
-#ifdef WIN32
+
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	Shift-JIS から UTF-8(ucs2) への変換
@@ -278,7 +284,23 @@ namespace utils {
 	bool sjis_to_utf8(const std::string& src, std::string& dst)
 	{
 		if(src.empty()) return false;
-
+#ifdef USE_ICONV
+		iconv_t ic = iconv_open("SHIFT_JIS", "UTF-8");
+		size_t insz = src.length() + 1;
+		char* inb = new char[insz];
+		strcpy(inb, src.c_str());
+		char* ptr_in = inb;
+		size_t outsz = insz * 4;
+		char* outb = new char[outsz];
+		char* ptr_out = outb;
+		size_t ret = iconv(ic, &ptr_in, &insz, &ptr_out, &outsz);
+		dst += outb;
+		delete[] outb;
+		delete[] inb;
+		iconv_close(ic);
+		return static_cast<int>(ret) >= 0;
+#else
+#ifdef WIN32
 		uint32_t sz = src.size() + 1;
 		wchar_t* tmp = new wchar_t[sz];
 		int len = mbstowcs(tmp, src.c_str(), sz);
@@ -289,6 +311,8 @@ namespace utils {
 		utf16_to_utf8(ws, dst);
 		delete[] tmp;
 		return true;
+#endif
+#endif
 	}
 
 
@@ -303,7 +327,13 @@ namespace utils {
 	bool sjis_to_utf16(const std::string& src, wstring& dst)
 	{
 		if(src.empty()) return false;
-
+#ifdef USE_ICONV
+		std::string tmp;
+		bool f = sjis_to_utf8(src, tmp);
+		if(f) utf8_to_utf16(tmp, dst);
+		return f;
+#else
+#ifdef WIN32
 		uint32_t sz = src.size() + 1;
 		wchar_t* tmp = new wchar_t[sz];
 		int len = mbstowcs(tmp, src.c_str(), sz);
@@ -312,6 +342,8 @@ namespace utils {
 		}
 		delete[] tmp;
 		return true;
+#endif
+#endif
 	}
 
 
@@ -326,7 +358,23 @@ namespace utils {
 	bool utf8_to_sjis(const std::string& src, std::string& dst)
 	{
 		if(src.empty()) return false;
-
+#ifdef USE_ICONV
+		iconv_t ic = iconv_open("UTF-8", "SHIFT_JIS");
+		size_t insz = src.length() + 1;
+		char* inb = new char[insz];
+		strcpy(inb, src.c_str());
+		char* ptr_in = inb;
+		size_t outsz = insz * 4;
+		char* outb = new char[outsz];
+		char* ptr_out = outb;
+		size_t ret = iconv(ic, &ptr_in, &insz, &ptr_out, &outsz);
+		dst += outb;
+		delete[] outb;
+		delete[] inb;
+		iconv_close(ic);
+		return static_cast<int>(ret) >= 0;
+#else
+#ifdef WIN32
 		wstring ws;
 		utf8_to_utf16(src, ws);
 		wchar_t* stmp = new wchar_t[ws.size() + 1];
@@ -344,6 +392,8 @@ namespace utils {
 		delete[] dtmp;
 		delete[] stmp;
 		return true;
+#endif
+#endif
 	}
 
 
@@ -358,7 +408,13 @@ namespace utils {
 	bool utf16_to_sjis(const wstring& src, std::string& dst)
 	{
 		if(src.empty()) return false;
-
+#ifdef USE_ICONV
+		std::string tmp;
+		utf16_to_utf8(src, tmp);
+		utf8_to_sjis(tmp, dst);
+		return true;
+#else
+#ifdef WIN32
 		wchar_t* stmp = new wchar_t[src.size()];
 		for(uint32_t i = 0; i < src.size(); ++i) {
 			stmp[i] = src[i];
@@ -371,8 +427,10 @@ namespace utils {
 		delete[] dtmp;
 		delete[] stmp;
 		return true;
-	}
 #endif
+#endif
+	}
+
 
 	//-----------------------------------------------------------------//
 	/*!
