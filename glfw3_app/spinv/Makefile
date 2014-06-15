@@ -52,6 +52,9 @@ PSOURCES	=	main.cpp \
 				snd_io/audio_io.cpp \
 				snd_io/pcm.cpp \
 				snd_io/wav_io.cpp \
+				snd_io/mp3_io.cpp \
+				snd_io/mp3_tag.cpp \
+				snd_io/aac_io.cpp \
 				snd_io/snd_files.cpp \
 				snd_io/sound.cpp \
 				widgets/common_parts.cpp \
@@ -75,9 +78,10 @@ PSOURCES	=	main.cpp \
 STDLIBS		=
 OPTLIBS		=	glfw3 GLEW \
 				pthread \
-				png \
+				png turbojpeg \
+				mad id3tag faad mp4ff \
 				freetype \
-				z
+				iocnv z
 
 #	glfw3 glew32 opengl32 glu32 gdi32 imm32 \
 				pthread \
