@@ -93,7 +93,8 @@ namespace app {
 
 		gl::fonts& fonts = core.at_fonts();
 		std::string cf = fonts.get_font_type();
-		std::string fp = "res/seg12.ttf";
+		std::string fp = core.get_current_path();
+		fp += "/res/seg12.ttf";
 		if(!fonts.install_font_type(fp, "led")) {
 			std::cerr << "Can't install system TTF font: '" << fp << "'" << std::endl;
 		}
@@ -114,12 +115,13 @@ namespace app {
 			filer_->enable(false);
 		}
 
-		file_btn_  = gui::create_image<widget_button>(wd, "res/select.png");
-		play_btn_  = gui::create_image<widget_button>(wd, "res/play.png");
-		pause_btn_ = gui::create_image<widget_button>(wd, "res/pause.png");
+		const std::string& curp = core.get_current_path();
+		file_btn_  = gui::create_image<widget_button>(wd, curp + "/res/select.png");
+		play_btn_  = gui::create_image<widget_button>(wd, curp + "/res/play.png");
+		pause_btn_ = gui::create_image<widget_button>(wd, curp + "/res/pause.png");
 
-		rew_btn_   = gui::create_image<widget_button>(wd, "res/rew.png");
-		ff_btn_    = gui::create_image<widget_button>(wd, "res/ff.png");
+		rew_btn_   = gui::create_image<widget_button>(wd, curp + "/res/rew.png");
+		ff_btn_    = gui::create_image<widget_button>(wd, curp + "/res/ff.png");
 
 		short lw = 40;
 		total_time_  = create_text_pad_(vtx::spos(16 * 3, lw), "00:00", "led", false);
@@ -127,7 +129,7 @@ namespace app {
 		{
 			widget::param wp(vtx::srect(10, 10, 500, 16), 0);
 			widget_slider::param wp_;
-			if(wd.at_img_files().load("res/seek_handle.png")) {
+			if(wd.at_img_files().load(curp + "/res/seek_handle.png")) {
 				wp_.hand_image_ = wd.at_img_files().get_image_if();
 			}
 			wp_.plate_param_.resizeble_ = true;
@@ -143,7 +145,7 @@ namespace app {
 		{
 			widget::param wp(vtx::srect(20, 500, 200, 20), 0);
 			widget_slider::param wp_;
-			if(wd.at_img_files().load("res/slider_handle.png")) {
+			if(wd.at_img_files().load(curp + "/res/slider_handle.png")) {
 				wp_.hand_image_ = wd.at_img_files().get_image_if();
 			}
    			volume_ = wd.add_widget<widget_slider>(wp, wp_);
@@ -151,11 +153,11 @@ namespace app {
 		{
 			widget::param wp(vtx::srect(0, 0, 0, 0), 0);
 			widget_image::param wp_;
-			if(wd.at_img_files().load("res/piano.png")) {
+			if(wd.at_img_files().load(curp + "/res/piano.png")) {
 				wp_.image_ = wd.at_img_files().get_image_if();
 			}
    			vol_min_img_ = wd.add_widget<widget_image>(wp, wp_);
-			if(wd.at_img_files().load("res/forte.png")) {
+			if(wd.at_img_files().load(curp + "/res/forte.png")) {
 				wp_.image_ = wd.at_img_files().get_image_if();
 			}
    			vol_max_img_ = wd.add_widget<widget_image>(wp, wp_);
@@ -391,7 +393,8 @@ namespace app {
    			if(tag.image_) {
 				jacket_ = mobj_.install(tag.image_);
 			} else {
-				if(wd.at_img_files().load("res/NoImage.png")) {
+				const std::string& curp = core.get_current_path();
+				if(wd.at_img_files().load(curp + "/res/NoImage.png")) {
 					jacket_ = mobj_.install(wd.at_img_files().get_image_if()); 
 				}
 			}

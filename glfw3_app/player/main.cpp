@@ -11,36 +11,28 @@ typedef app::player start_app;
 
 static const char* window_key_ = { "application/window" };
 static const char* app_title_ = { "player" };
+static const vtx::spos start_pos_(10, 40);
 static const vtx::spos start_size_(800, 600);
 static const vtx::spos limit_size_(800, 600);
 
 int main(int argc, char** argv)
 {
-	// カレントパスを生成
-	std::string tmp;
-	utils::convert_delimiter(argv[0], '\\', '/', tmp);
-	std::string base;
-	utils::get_file_base(tmp, base);
-	char buff[2048];
-	std::string path;
-	path = getcwd(buff, sizeof(buff));
-	std::string pref = path;
-	pref += '/';
-	pref += base;
-	pref += ".pre";
-
 	gl::core& core = gl::core::get_instance();
 
-	if(!core.initialize(path)) {
-		std::cerr << "Core initialize error" << std::endl;
+	if(!core.initialize(argv[0])) {
+		std::cerr << "glcore initialize error." << std::endl;
+///		fgetc(stdin);
 		return -1;
 	}
+	
+	std::string pref = core.get_exec_path();
+   	pref += ".pre";
 
 	utils::director<app::core> director;
 
 	director.at().preference_.load(pref);
 
-	vtx::srect rect(vtx::spos(10, 40), start_size_);
+	vtx::srect rect(start_pos_, start_size_);
 	if(!director.at().preference_.load_rect(window_key_, rect)) {
 //		std::cout << "Load rect error..." << std::endl; 
 	}

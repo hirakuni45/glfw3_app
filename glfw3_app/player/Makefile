@@ -32,6 +32,7 @@ PSOURCES	=	main.cpp \
 				utils/keyboard.cpp \
 				img_io/paint.cpp \
 				img_io/png_io.cpp \
+				img_io/jpeg_io.cpp \
 				img_io/bmp_io.cpp \
 				img_io/tga_io.cpp \
 				img_io/dds_io.cpp \
@@ -40,6 +41,9 @@ PSOURCES	=	main.cpp \
 				snd_io/audio_io.cpp \
 				snd_io/pcm.cpp \
 				snd_io/wav_io.cpp \
+				snd_io/aac_io.cpp \
+				snd_io/mp3_io.cpp \
+				snd_io/mp3_tag.cpp \
 				snd_io/snd_files.cpp \
 				snd_io/sound.cpp \
 				widgets/common_parts.cpp \
@@ -62,22 +66,25 @@ PSOURCES	=	main.cpp \
 STDLIBS		=
 OPTLIBS		=	glfw3 GLEW \
 				pthread \
-				png \
+				png turbojpeg\
 				freetype \
+				mad id3tag faad mp4ff \
 				z
 
 INC_SYS		=	/usr/local/boost_1_55_0
 
 INC_LIB		=	/usr/local/include \
 				/usr/local/include/freetype2 \
-				/usr/local/include/freetype2/freetype
+				/usr/local/include/freetype2/freetype \
+				/opt/libjpeg-turbo/include
 
 PINC_APP	=	. ../common
 CINC_APP	=	. ../common
-LIBDIR		=	/usr/local/lib
+LIBDIR		=	/usr/local/lib \
+				/opt/libjpeg-turbo/lib
 
-INC_S	=	$(addprefix -I, $(INC_SYS))
-INC_L	=	$(addprefix -I, $(INC_LIB))
+INC_S	=	$(addprefix -isystem, $(INC_SYS))
+INC_L	=	$(addprefix -isystem, $(INC_LIB))
 INC_P	=	$(addprefix -I, $(PINC_APP))
 INC_C	=	$(addprefix -I, $(CINC_APP))
 CINCS	=	$(INC_S) $(INC_L) $(INC_C)
@@ -177,6 +184,10 @@ dllname:
 tarball:
 	tar cfvz $(subst .exe,,$(TARGET))_$(shell date +%Y%m%d%H).tgz \
 	*.[hc]pp Makefile ../common/*/*.[hc]pp ../common/*/*.[hc]
+
+exec:
+	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -mwindows -o $(TARGET) 
+
 
 bin_zip:
 	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -mwindows -o $(TARGET) 
