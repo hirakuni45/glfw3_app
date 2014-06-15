@@ -93,6 +93,8 @@ namespace gui {
 
 		bool					resize_edge_;
 
+		utils::strings			error_list_;
+
 		void message_widget_(widget* w, const std::string& s);
 		void parents_widget_mark_(widget* root);
 	public:
@@ -392,5 +394,33 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		sys::keyboard& at_keyboard() { return keyboard_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	エラーレポートを報告
+			@param[in]	msg	エラーレポート文
+		*/
+		//-----------------------------------------------------------------//
+		void add_error_report(const std::string& msg) {
+			error_list_.push_back(msg);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	エラーレポートを取得
+			@return	エラーレポート
+		*/
+		//-----------------------------------------------------------------//
+		const utils::strings& get_error_report() const { return error_list_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	エラーレポートを消去
+		*/
+		//-----------------------------------------------------------------//
+		void clear_error_report() { error_list_.clear(); }
 	};
 }

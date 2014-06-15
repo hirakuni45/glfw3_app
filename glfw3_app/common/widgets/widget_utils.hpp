@@ -59,7 +59,8 @@ namespace gui {
 			wp_.image_ = wd.at_img_files().get_image_if();
 			w = wd.add_widget<WIDGET>(wp, wp_);
 		} else {
-			typename WIDGET::param wp_(utils::get_file_name(file));
+			wd.add_error_report("Can't load: " + file);
+			typename WIDGET::param wp_("X");
 			// ロード出来ない場合の仮の大きさ
 			wp.rect_.size.set(32, 32);
 			w = wd.add_widget<WIDGET>(wp, wp_);
