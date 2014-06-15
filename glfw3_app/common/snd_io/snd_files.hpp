@@ -60,8 +60,7 @@ namespace al {
 								アクセス可能なフォーマットを制御出来る。
 		*/
 		//-----------------------------------------------------------------//
-///		void initialize(const std::string& etxs = "wav,mp3,aac,m4a");
-		void initialize(const std::string& etxs = "wav");
+		void initialize(const std::string& etxs = "wav,mp3,aac,m4a");
 
 
 		//-----------------------------------------------------------------//

@@ -5,8 +5,10 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
+#ifdef WIN32
 #include <io.h>
 #include <fcntl.h>
+#endif
 #include "mp3_tag.hpp"
 #include "utils/file_io.hpp"
 
@@ -150,7 +152,7 @@ std::cout << boost::format("%x ") % c;
 							apic_string_[1] = ucs4[1];
 							apic_string_[2] = ucs4[2];
 							apic_string_[3] = ucs4[3];
-							apic_string_len_ = fd->string.length;
+							/// apic_string_len_ = fd->string.length;
 						} else {
 							apic_string_len_ = 0;
 						}
@@ -160,7 +162,7 @@ std::cout << boost::format("%x ") % c;
 						if(text_code_ == ID3_FIELD_TEXTENCODING_ISO_8859_1) {
 							std::string tmp;
 							ucs4_to_sjis_(ucs4, tmp);
-							utils::sjis_to_utf8(tmp, dst);
+							/// utils::sjis_to_utf8(tmp, dst);
 						} else if(text_code_ == ID3_FIELD_TEXTENCODING_UTF_16) {
 							id3_utf16_t* utf16 = id3_ucs4_utf16duplicate(ucs4);
 							utils::utf16_to_utf8((const uint16_t*)utf16, dst);
@@ -192,7 +194,7 @@ std::cout << boost::format("%x ") % c;
 							bool cnv = true;
 							if(text_code_ == ID3_FIELD_TEXTENCODING_ISO_8859_1) {
 								id3_latin1_t* sjis = id3_ucs4_latin1duplicate(ucs4);
-								utils::sjis_to_utf8((const char*)sjis, dst);
+								/// utils::sjis_to_utf8((const char*)sjis, dst);
 								free(sjis);
 							} else if(text_code_ == ID3_FIELD_TEXTENCODING_UTF_16) {
 								id3_utf16_t* utf16 = id3_ucs4_utf16duplicate(ucs4);

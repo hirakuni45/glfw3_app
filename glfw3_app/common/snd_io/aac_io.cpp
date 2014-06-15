@@ -419,16 +419,17 @@ namespace al {
 		char *item = 0;
 		int j = mp4ff_meta_get_num_items(infile);
 		for(int k = 0; k < j; k++) {
-			if (const char* item = mp4ff_meta_get_item(infile, k)) {
-				if (const char* tag = mp4ff_meta_get_value(infile, k)) {
-					if(std::string(item) == "cover") {
-						size_t size = mp4ff_meta_get_size(infile, k);
-						std::cout << boost::format("%s: (%d)\n") % item % size;
-					} else {
-						std::cout << boost::format("%s: %s\n") % item % tag;
-					}
-				}
-			}
+			char* item;
+			char* value;
+			if(mp4ff_meta_get_by_index(infile, k, &item, &value)) {
+   				if(std::string(item) == "cover") {
+	   				size_t size = mp4ff_meta_get_item_size(infile, k);
+	   				std::cout << boost::format("%s: (%d)\n") % item % size;
+	   			} else {
+	   				std::cout << boost::format("%s: %s\n") % item % value;
+	   			}
+				mp4ff_meta_free(infile, item, value);
+   			}
 		}
 		if (j > 0) std::cout << std::endl;
 #endif
@@ -699,36 +700,39 @@ namespace al {
 		tag_.clear();
 		int j = mp4ff_meta_get_num_items(dt.infile);
 		for(int k = 0; k < j; ++k) {
-			const char* item = mp4ff_meta_get_item(dt.infile, k);
-			if(item) {
-				const char* tag = mp4ff_meta_get_value(dt.infile, k);
-				if(tag) {
-					std::string s = item;
-					if(s == "title") tag_.title_ = tag;
-					else if(s == "artist") tag_.artist_ = tag;
-					else if(s == "writer") tag_.writer_ = tag;
-					else if(s == "album") tag_.album_ = tag;
-					else if(s == "track") tag_.track_ = tag;
-					else if(s == "totaltracks") tag_.total_tracks_ = tag;
-					else if(s == "disc") tag_.disc_ = tag;
-					else if(s == "totaldiscs") tag_.total_discs_ = tag;
-					else if(s == "date") tag_.date_ = tag;
-					else if(s == "cover") {
-						delete tag_.image_;
-						size_t size = mp4ff_meta_get_size(dt.infile, k);
-						utils::file_io fio;
-						fio.open(mp4ff_meta_get_value(dt.infile, k), size);
-						img::img_files imgf;
-						imgf.initialize();
-						imgf.load(fio);
-						if(imgf.get_image_if()) {
-							tag_.image_ = img::copy_image(imgf.get_image_if());
-						} else {
-							tag_.image_ = 0;
-						}
-						fio.close();
-					}
+			char* item;
+			char* value;
+			if(mp4ff_meta_get_by_index(dt.infile, k, &item, &value)) {
+   				std::string s = item;
+				{
+///					size_t size = mp4ff_meta_get_item_size(dt.infile, k);
+///					std::cout << s << ", " << static_cast<int>(size) << ", " << value << std::endl;
 				}
+	   			if(s == "title") tag_.title_ = value;
+		   		else if(s == "artist") tag_.artist_ = value;
+			   	else if(s == "writer") tag_.writer_ = value;
+				else if(s == "album") tag_.album_ = value;
+		   		else if(s == "track") tag_.track_ = value;
+		   		else if(s == "totaltracks") tag_.total_tracks_ = value;
+		   		else if(s == "disc") tag_.disc_ = value;
+		   		else if(s == "totaldiscs") tag_.total_discs_ = value;
+		   		else if(s == "date") tag_.date_ = value;
+		   		else if(s == "cover") {
+					delete tag_.image_;
+					size_t size = mp4ff_meta_get_item_size(dt.infile, k);
+		   			utils::file_io fio;
+		   			fio.open(value, size);
+		   			img::img_files imgf;
+		   			imgf.initialize();
+		   			imgf.load(fio);
+		   			if(imgf.get_image_if()) {
+		   				tag_.image_ = img::copy_image(imgf.get_image_if());
+		   			} else {
+		   				tag_.image_ = 0;
+		   			}
+		   			fio.close();
+		   		}
+				mp4ff_meta_free(dt.infile, item, value);
 			}
 		}
 		tag_.update();
