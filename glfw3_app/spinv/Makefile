@@ -43,9 +43,10 @@ PSOURCES	=	main.cpp \
 				utils/preference.cpp \
 				utils/keyboard.cpp \
 				img_io/paint.cpp \
-				img_io/png_io.cpp \
 				img_io/bmp_io.cpp \
 				img_io/tga_io.cpp \
+				img_io/png_io.cpp \
+				img_io/jpeg_io.cpp \
 				img_io/dds_io.cpp \
 				img_io/img_files.cpp \
 				img_io/img_utils.cpp \
@@ -79,9 +80,9 @@ STDLIBS		=
 OPTLIBS		=	glfw3 GLEW \
 				pthread \
 				png turbojpeg \
-				mad id3tag faad mp4ff \
 				freetype \
-				iocnv z
+				mad id3tag faad mp4ff \
+				iconv z
 
 #	glfw3 glew32 opengl32 glu32 gdi32 imm32 \
 				pthread \
@@ -97,11 +98,13 @@ INC_SYS		=	/usr/local/boost_1_55_0
 
 INC_LIB		=	/usr/local/include \
 				/usr/local/include/freetype2 \
-				/usr/local/include/freetype2/freetype
+				/usr/local/include/freetype2/freetype \
+				/opt/libjpeg-turbo/include
 
 PINC_APP	=	. ../common
 CINC_APP	=	. ../common
-LIBDIR		=	/usr/local/lib
+LIBDIR		=	/usr/local/lib \
+				/opt/libjpeg-turbo/lib
 
 INC_S	=	$(addprefix -I, $(INC_SYS))
 INC_L	=	$(addprefix -I, $(INC_LIB))
