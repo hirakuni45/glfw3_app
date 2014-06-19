@@ -709,7 +709,6 @@ namespace gl {
 			glEnableClientState(GL_VERTEX_ARRAY);
 			glTexCoordPointer(2, GL_SHORT, 0, &tlist[0]);
 			glVertexPointer(2, GL_SHORT, 0, &vlist[0]);
-///			glColor4ub(255, 0, 0, 255);
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 			glDisableClientState(GL_VERTEX_ARRAY);

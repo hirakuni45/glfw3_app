@@ -4,7 +4,8 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include "gl_fw/IGLcore.hpp"
+#include "core/glcore.hpp"
+#include "gl_fw/glutils.hpp"
 #include "gl_fw/glcamera.hpp"
 #include "gl_fw/glmatrix.hpp"
 
@@ -19,10 +20,10 @@ namespace gl {
 	{
 		using namespace vtx;
 
-		IGLcore* glc = get_glcore();
-		const device& dev = glc->get_device();
+		core& core = core::get_instance();
+		const device& dev = core.get_device();
 
-		const spos& mspos = dev.get_locator().cursor_;
+		const spos& mspos = dev.get_locator().get_cursor();
 		const spos msdiff = mspos - mouse_pos_;
 		mouse_pos_ = mspos;
 
@@ -94,15 +95,15 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	void camera::service()
 	{
-		IGLcore* igl = get_glcore();
-		const device& dev = igl->get_device();
+		core& core = core::get_instance();
+		const device& dev = core.get_device();
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
-		size_ = igl->get_size();
+		size_ = core.get_rect().size;
 		aspect_ = static_cast<float>(size_.x) / static_cast<float>(size_.y);
-		gluPerspective(fov_, aspect_, z_near_, z_far_);
-		gluLookAt(eye_.x, eye_.y, eye_.z,
+		gl::gluPerspective(fov_, aspect_, z_near_, z_far_);
+		gl::gluLookAt(eye_.x, eye_.y, eye_.z,
 			target_.x, target_.y, target_.z,
 			up_.x, up_.y, up_.z);
 
