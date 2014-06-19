@@ -21,7 +21,6 @@ int main(int argc, char** argv)
 
 	if(!core.initialize(argv[0])) {
 		std::cerr << "glcore initialize error." << std::endl;
-///		fgetc(stdin);
 		return -1;
 	}
 	

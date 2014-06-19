@@ -33,6 +33,7 @@ PSOURCES	=	main.cpp \
 				img_io/paint.cpp \
 				img_io/png_io.cpp \
 				img_io/jpeg_io.cpp \
+				img_io/openjpeg_io.cpp \
 				img_io/bmp_io.cpp \
 				img_io/tga_io.cpp \
 				img_io/dds_io.cpp \
@@ -66,7 +67,7 @@ PSOURCES	=	main.cpp \
 STDLIBS		=
 OPTLIBS		=	glfw3 GLEW \
 				pthread \
-				png turbojpeg\
+				png turbojpeg openjp2 \
 				freetype \
 				mad id3tag faad mp4ff \
 				iconv z
@@ -76,7 +77,8 @@ INC_SYS		=	/usr/local/boost_1_55_0
 INC_LIB		=	/usr/local/include \
 				/usr/local/include/freetype2 \
 				/usr/local/include/freetype2/freetype \
-				/opt/libjpeg-turbo/include
+				/opt/libjpeg-turbo/include \
+				/usr/local/include/openjpeg-2.0
 
 PINC_APP	=	. ../common
 CINC_APP	=	. ../common
