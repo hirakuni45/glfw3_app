@@ -256,7 +256,7 @@ namespace gl {
 		best_size_.y  = vm->height;
 		limit_size_ = best_size_  / 2;	///< 最小のサイズはベストの半分とする
 ///		setlocale(LC_CTYPE, "jpn");
-		setlocale(LC_CTYPE, "");
+/////		setlocale(LC_CTYPE, "");
 
 		return true;
 	}
