@@ -378,10 +378,19 @@ namespace img {
 		}
 
 		img_.destroy();
-		if(cinfo.output_components == 3) {
-			img_.create(vtx::spos(cinfo.image_width, cinfo.image_height), false);
-		} else {
+		/// cinfo.in_color_space
+		if(cinfo.output_components == 1) {
 			img_.create(vtx::spos(cinfo.image_width, cinfo.image_height), true);
+		} else if(cinfo.output_components == 3) {
+			img_.create(vtx::spos(cinfo.image_width, cinfo.image_height), true);
+		} else if(cinfo.output_components == 4) {
+			img_.create(vtx::spos(cinfo.image_width, cinfo.image_height), true);
+		} else {
+			std::cout << "JPEG decode error: Can not support components: " << 
+				static_cast<int>(cinfo.output_components) << std::endl;
+			jpeg_finish_decompress(&cinfo);
+			jpeg_destroy_decompress(&cinfo);
+			return false;
 		}
 
 		unsigned char* line = new unsigned char[cinfo.output_width * cinfo.output_components];
@@ -472,8 +481,12 @@ namespace img {
 		cinfo.image_width  = w;
 		cinfo.image_height = h;
 		cinfo.input_components = 3;
-		if(imf_->test_alpha()) ++cinfo.input_components;
-		cinfo.in_color_space = JCS_RGB;
+		if(imf_->test_alpha()) {
+			++cinfo.input_components;
+			cinfo.in_color_space = JCS_EXT_RGBA;
+		} else {
+			cinfo.in_color_space = JCS_RGB;
+		}
 
 		jpeg_set_defaults(&cinfo);
 		jpeg_set_quality(&cinfo, q, TRUE);

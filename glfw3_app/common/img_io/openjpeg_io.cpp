@@ -85,6 +85,7 @@ namespace img {
 		utils::file_io* fio = static_cast<utils::file_io*>(p_user_data);
 		bool f = fio->seek(skip, utils::file_io::seek::cur);
 		if(f) return skip;
+		else return 0;
 	}
 
 	OPJ_BOOL wstrm_seek_(OPJ_OFF_T seek_pos, void* p_user_data)
