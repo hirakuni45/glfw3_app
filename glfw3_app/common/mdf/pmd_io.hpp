@@ -7,7 +7,6 @@
 //=====================================================================//
 #include <string>
 #include <vector>
-#include "gl_fw/IGLcore.hpp"
 #include "gl_fw/gllight.hpp"
 #include "utils/vtx.hpp"
 #include "utils/mtx.hpp"

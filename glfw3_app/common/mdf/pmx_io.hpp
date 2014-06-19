@@ -10,7 +10,6 @@
 #include <bitset>
 #include <vector>
 #include <boost/format.hpp>
-#include "gl_fw/IGLcore.hpp"
 #include "gl_fw/gllight.hpp"
 #include "utils/vtx.hpp"
 #include "utils/mtx.hpp"

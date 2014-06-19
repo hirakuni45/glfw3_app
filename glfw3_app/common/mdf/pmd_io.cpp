@@ -21,7 +21,7 @@ namespace mdf {
 		for(uint32_t i = 0; i < n; ++i) {
 			char ch = *src++;
 			if(ch == 0) break;
-			if(ch != 0xfd) {
+			if(static_cast<uint8_t>(ch) != 0xfd) {
 				tmp += ch;
 			}
 		}
