@@ -102,8 +102,8 @@ namespace gl {
 		glLoadIdentity();
 		size_ = core.get_rect().size;
 		aspect_ = static_cast<float>(size_.x) / static_cast<float>(size_.y);
-		gl::gluPerspective(fov_, aspect_, z_near_, z_far_);
-		gl::gluLookAt(eye_.x, eye_.y, eye_.z,
+		gl::gluPerspectivef(fov_, aspect_, z_near_, z_far_);
+		gl::gluLookAtf(eye_.x, eye_.y, eye_.z,
 			target_.x, target_.y, target_.z,
 			up_.x, up_.y, up_.z);
 

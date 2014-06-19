@@ -5,8 +5,8 @@
 */
 //=====================================================================//
 #include <cmath>
+#include "core/glcore.hpp"
 #include "gl_fw/glutils.hpp"
-#include "gl_fw/IGLcore.hpp"
 
 using namespace vtx;
 
@@ -1716,8 +1716,8 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	img::img_rgba8* get_frame_buffer(int x, int y, int w, int h)
 	{
-		IGLcore* glif = get_glcore();
-		int fbh = glif->get_size().y;
+		gl::core& core = gl::core::get_instance();
+		int fbh = core.get_size().y;
 		img::img_rgba8* im = new img::img_rgba8;
 		im->create(vtx::spos(w, h), true);
 		::glReadBuffer(GL_BACK);
@@ -1744,8 +1744,8 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	void get_frame_bufferRGB(unsigned char* dst, int x, int y, int w, int h)
 	{
-		IGLcore* glif = get_glcore();
-		int fbh = glif->get_size().y;
+		gl::core& core = gl::core::get_instance();
+		int fbh = core.get_size().y;
 		::glReadBuffer(GL_BACK);
 		::glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		::glReadPixels(x, y, w, h, GL_RGB, GL_UNSIGNED_BYTE, dst);
@@ -1765,8 +1765,8 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	void get_frame_bufferRGBA(unsigned char* dst, int x, int y, int w, int h)
 	{
-		IGLcore* glif = get_glcore();
-		int fbh = glif->get_size().y;
+		gl::core& core = gl::core::get_instance();
+		int fbh = core.get_size().y;
 		::glReadBuffer(GL_BACK);
 		::glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		::glReadPixels(x, y, w, h, GL_RGBA, GL_UNSIGNED_BYTE, dst);

@@ -25,13 +25,17 @@ namespace gl {
 	}
 
 	inline void gluPerspectivef(float ang, float aspect, float ne, float fa) {
-///		gluPerspective(ang, aspect, ne, fa);
-		BOOST_ASSERT_MSG(0, "gluPerspective");
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+		gluPerspective(ang, aspect, ne, fa);
+#pragma clang diagnostic pop
 	}
 
 	inline void gluLookAtf(float eye_x, float eye_y, float eye_z, float tgt_x, float tgt_y, float tgt_z, float up_x, float up_y, float up_z) {
-///		gluLookAt(eye_x, eye_y, eye_z, tgt_x, tgt_y, tgt_z, up_x, up_y, up_z);
-		BOOST_ASSERT_MSG(0, "gluLookAt");
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+		gluLookAt(eye_x, eye_y, eye_z, tgt_x, tgt_y, tgt_z, up_x, up_y, up_z);
+#pragma clang diagnostic pop
 	}
 
 	inline void glOrtho(double l, double r, double b, double t, double aa, double bb) {
