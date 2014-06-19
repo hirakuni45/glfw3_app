@@ -19,7 +19,7 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void img_main::initialize()
 	{
-		gl::IGLcore* igl = gl::get_glcore();
+		gl::core& core = gl::core::get_instance();
 
 		using namespace gui;
 		widget_director& wd = director_.at().widget_director_;
@@ -93,7 +93,7 @@ namespace app {
 
 		{ // ファイラー本体
 			widget::param wp(vtx::srect(10, 30, 300, 200));
-			widget_filer::param wp_(igl->get_current_path());
+			widget_filer::param wp_(core.get_current_path());
 			filer_ = wd.add_widget<widget_filer>(wp, wp_);
 			filer_->enable(false);
 		}
@@ -127,8 +127,8 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void img_main::update()
 	{
-		gl::IGLcore* igl = gl::get_glcore();
-		const vtx::spos& size = igl->get_size();
+		gl::core& core = gl::core::get_instance();
+		const vtx::spos& vsz = core.get_size();
 
 		gui::widget_director& wd = director_.at().widget_director_;
 
@@ -142,10 +142,10 @@ namespace app {
 		}
 
 		std::string imfn;
-		int id = igl->get_recv_file_id();
+		int id = core.get_recv_file_id();
 		if(dd_id_ != id) {
 			dd_id_ = id;
-			const utils::strings& ss = igl->get_recv_file_path();
+			const utils::strings& ss = core.get_recv_file_path();
 			if(!ss.empty()) {
 				imfn = ss.back();
 			}
