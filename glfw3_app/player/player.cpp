@@ -359,9 +359,12 @@ namespace app {
 			gui::widget::slider_param& sp = seek_time_->at_slider_param();
 			if(total_t_) {
 				float limit = static_cast<float>(frame_limit_);
-				float t = static_cast<float>(remain_t_) * limit;
-				t += static_cast<float>(frame_count_);
-				sp.position_ = t / (static_cast<float>(total_t_) * limit);
+				if(limit > 0.0f) {
+					float t = static_cast<float>(sound.get_position_stream()) * limit;
+					sp.position_ = t / (static_cast<float>(sound.get_length_stream()) * limit);
+				} else {
+					sp.position_ = 0.0f;
+				}
 			} else {
 				sp.position_ = 0.0f;
 				frame_count_ = 0;

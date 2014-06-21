@@ -28,9 +28,12 @@ namespace al {
 		std::string		total_discs_;
 		std::string		date_;
 
-		img::i_img*		image_;
+		std::string			image_mime_;
+		char				image_cover_;
+		std::string			image_dscrp_;
+		const img::i_img*  	image_;
 
-		tag() : serial_(0), image_(0) { }
+		tag() : serial_(0), image_cover_(0), image_(0) { }
 
 		void clear() {
 			title_.clear();

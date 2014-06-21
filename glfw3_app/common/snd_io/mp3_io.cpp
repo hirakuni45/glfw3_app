@@ -6,10 +6,17 @@
 //=====================================================================//
 #include "mp3_io.hpp"
 #include "pcm.hpp"
+#include "img_io/img_utils.hpp"
 #include <boost/foreach.hpp>
 #include <boost/format.hpp>
-#include "img_io/img_utils.hpp"
+
 #include <iostream>
+
+#include <mpegfile.h>
+#include <id3v2tag.h>
+#include <id3v2header.h>
+#include <id3v1tag.h>
+#include <apetag.h>
 
 namespace al {
 
@@ -420,6 +427,35 @@ namespace al {
 	}
 #endif
 
+
+	static std::string convert_string_(const TagLib::String& s)
+	{
+		std::string out;
+	   	if(s.isLatin1()) {
+			utils::sjis_to_utf8(s.toCString(), out);
+		} else {
+			out = s.toCString(true);
+		}
+		return out;
+	}
+
+
+	static std::string convert_string_(const TagLib::uint n)
+	{
+		return (boost::format("%d") % static_cast<int>(n)).str();
+	}
+
+
+	static std::string convert_string_(const TagLib::StringList& list)
+	{
+		std::string out;
+		for(TagLib::StringList::ConstIterator i = list.begin(); i != list.end(); ++i) {
+			out += convert_string_( *i );
+		}
+		return out;
+	}
+
+
 	//=================================================================//
 	/*!
 		@brief	フレームの解析
@@ -435,55 +471,124 @@ namespace al {
 			return false;
 		}
 
+		// 現在のファイル位置を覚えておく
 		uint32_t pos = fin.tell();
 		uint32_t ofs = 0;
 		tag_.clear();
-		if(mp3_tag_.open(fin)) {
-			mp3_tag_.decode();
+		// 一旦クローズ
+		fin.close();
+		delete tag_.image_;
+		tag_.image_ = 0;
 
-			ofs = mp3_tag_.get_skip_head();
-			tag_.title_  = mp3_tag_.get_text(mp3::mp3_tag::id3_t::title);
-			tag_.artist_ = mp3_tag_.get_text(mp3::mp3_tag::id3_t::artist);
-			tag_.writer_ = mp3_tag_.get_text(mp3::mp3_tag::id3_t::artist2);
-			tag_.album_  = mp3_tag_.get_text(mp3::mp3_tag::id3_t::album);
-			tag_.disc_   = mp3_tag_.get_text(mp3::mp3_tag::id3_t::disc);
-			tag_.track_  = mp3_tag_.get_text(mp3::mp3_tag::id3_t::track);
-			tag_.date_   = mp3_tag_.get_text(mp3::mp3_tag::id3_t::release_year);
+		using namespace TagLib;
+		MPEG::File f(fin.get_path().c_str());
 
-			if(tag_.title_.empty()) {
-				// tag 情報が無い場合、ファイル名を曲名としておく
-				utils::get_file_base(utils::get_file_name(fin.get_path()), tag_.title_);
-			}	
-
-			delete tag_.image_;
-			if(mp3_tag_.get_image_if()) {
-				tag_.image_  = img::copy_image(mp3_tag_.get_image_if());
-			} else {
-				tag_.image_ = 0;
-			}
-			tag_.update();
-
-			mp3_tag_.close();	// ここでファイルはクローズしてしまう・・
-			fin.close();
-			fin.re_open();
+		ID3v1::Tag* v1 = f.ID3v1Tag();
+	   	if(v1) {
+   			tag_.title_  = convert_string_(v1->title()); 
+   			tag_.artist_ = convert_string_(v1->artist());
+	   		tag_.album_  = convert_string_(v1->album());
+			tag_.track_ = convert_string_(v1->track());
+			tag_.date_ = convert_string_(v1->year());
+			id3v1_ = true;
 		}
+		ID3v2::Tag* v2 = f.ID3v2Tag();
+		if(v2) {
+			ofs = v2->header()->tagSize();
+
+   			tag_.title_  = convert_string_(v2->title()); 
+   			tag_.artist_ = convert_string_(v2->artist());
+	   		tag_.album_  = convert_string_(v2->album());
+
+			const ID3v2::FrameListMap& map = v2->frameListMap();
+			typedef ID3v2::FrameListMap::ConstIterator const_it;
+			for(const_it cit = map.begin(); cit != map.end(); ++cit) {
+				std::string key = convert_string_(cit->first);
+				const ID3v2::FrameList& list = cit->second;
+				typedef ID3v2::FrameList::ConstIterator const_it;
+				std::string tmp;
+				for(const_it cit = list.begin(); cit != list.end(); ++cit) {
+					std::string s = convert_string_((*cit)->toString());
+///					std::cout << key << ": '" << s << "'" << std::endl;
+					tmp += s;
+				}
+				if(key == "TDRC") tag_.date_ = tmp;
+				else if(key == "TPE2") tag_.writer_ = tmp;
+				else if(key == "TPOS") tag_.disc_ = tmp;
+				else if(key == "TRCK") tag_.track_ = tmp;
+			}
+
+			// ジャケット画像
+			const_it apic = map.find("APIC");
+			if(apic != map.end()) {
+				const ID3v2::FrameList& list = apic->second;
+				typedef ID3v2::FrameList::ConstIterator const_it;
+				for(const_it cit = list.begin(); cit != list.end(); ++cit) {
+					size_t fsize = (*cit)->size();
+//					std::cout << (*cit)->toString() << std::endl;
+//					std::cout << "Frame size: " << static_cast<int>(fsize) << std::endl;
+					const ByteVector& image = (*cit)->render();
+//					std::cout << "Render size: " << static_cast<int>(image.size()) << std::endl;
+					int skip = 11;
+					const char* p = image.data();
+					// mime type
+					std::string mime;
+					while(p[skip] != 0) {
+						mime += p[skip];
+						++skip;
+					}
+					++skip;
+					tag_.image_mime_ = mime;
+
+					tag_.image_cover_ = p[skip];
+					skip += 1;	// picture type (cover)
+
+					// discription
+					std::string dscrp;
+					while(p[skip] != 0) {
+						dscrp += p[skip];
+						++skip;
+					}
+					++skip;
+					tag_.image_dscrp_ = dscrp;
+
+					int len = image.size();
+					if(len > skip) {
+						len -= skip;
+#if 0
+						std::cout << "<APIC> MIME: '" << mime << "', Description: " << dscrp << "'" << std::endl;
+						for(int i = 0; i < 32; ++i) {
+							std::cout <<
+								boost::format("%02X, ") % static_cast<unsigned int>(p[i]);
+	   					}
+		   				std::cout << std::endl;
+						std::cout << static_cast<int>(image.size()) << std::endl;
+#endif
+						p += skip;
+						utils::file_io fmem;
+						fmem.open(p, len);
+						if(img_files_.load(fmem)) {
+							if(img_files_.get_image_if()) {
+								tag_.image_ = img::copy_image(img_files_.get_image_if());
+							} else {
+								tag_.image_ = 0;
+							}
+						}
+						fmem.close();
+						break;
+					}
+				}
+			}
+		}
+		if(v1 == 0 && v2 == 0) {
+			// tag 情報が無い場合、ファイル名を曲名としておく
+			utils::get_file_base(utils::get_file_name(fin.get_path()), tag_.title_);
+		}
+		tag_.update();
+		fin.re_open();
 
 		if(!fin.is_open()) {
 			return false;
-		}
-
-// std::cout << boost::format("Ofs: %d\n") % ofs;
-		// id3v1 タグがあるか確認
-		{
-			fin.seek(fin.get_file_size() - 128, file_io::seek::set);
-			char tag[3];
-			fin.read(tag, 1, 3);
-			if(tag[0] == 'T' && tag[1] == 'A' && tag[2] == 'G') {
-				id3v1_ = true;
-// std::cout << boost::format("ID3 V1 !\n");
-			} else {
-				id3v1_ = false;
-			}
 		}
 
 		if(ofs) {
@@ -640,7 +745,7 @@ namespace al {
 	//-----------------------------------------------------------------//
 	void mp3_io::initialize()
 	{
-		mp3_tag_.initialize();
+		img_files_.initialize();
 	}
 
 
@@ -886,9 +991,11 @@ namespace al {
 	{
 		delete tag_.image_;
 		tag_.image_ = 0;
+
 		delete audio_;
 		audio_ = 0;
 		close_stream();
+		img_files_.destroy();
 	}
 
 }

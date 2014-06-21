@@ -9,7 +9,7 @@
 #include <cmath>
 #include <mad.h>
 #include "i_snd_io.hpp"
-#include "mp3_tag.hpp"
+#include "img_io/img_files.hpp"
 
 namespace al {
 
@@ -53,8 +53,6 @@ namespace al {
 
 		i_audio*		stream_;
 
-		mp3::mp3_tag	mp3_tag_;
-
 		mad_stream		mad_stream_;
 		mad_frame		mad_frame_;
 		mad_synth		mad_synth_;
@@ -74,6 +72,8 @@ namespace al {
 
 		unsigned char	input_buffer_[INPUT_BUFFER_SIZE + MAD_BUFFER_GUARD];
 		i_audio*		output_buffer_;
+
+		img::img_files	img_files_;
 
 		tag				tag_;
 
