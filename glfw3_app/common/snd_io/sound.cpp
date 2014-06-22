@@ -113,7 +113,9 @@ namespace al {
 					continue;
 				}
 
-				usleep(10000);	// 10ms くらいの時間待ち
+				// デコードのパフォーマンス的には１６ミリ秒程度のインターバルで
+				// 間に合うよう調整されているので、余裕を考えて、その２倍を設定する。
+				usleep(8000);	// 8ms くらいの時間待ち
 
 			}
 			sst->audio_->purge_stream(sst->slot_);
