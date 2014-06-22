@@ -13,6 +13,8 @@
 #include "utils/file_io.hpp"
 #include "utils/string_utils.hpp"
 #include <time.h>
+#include <thread>
+#include <chrono>
 
 #ifdef WIN32
 #include <unistd.h>
@@ -256,7 +258,7 @@ namespace gl {
 		best_size_.y  = vm->height;
 		limit_size_ = best_size_  / 2;	///< 最小のサイズはベストの半分とする
 ///		setlocale(LC_CTYPE, "jpn");
-/////		setlocale(LC_CTYPE, "");
+		setlocale(LC_CTYPE, "");
 
 		return true;
 	}
@@ -488,6 +490,9 @@ namespace gl {
 		}
 #endif
 #endif
+
+///		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		
 		glfwSwapBuffers(window_);
 	}
 
