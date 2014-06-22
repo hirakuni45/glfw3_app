@@ -131,7 +131,7 @@ LFLAGS	=	-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.p
 
 CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
 			-Wformat
-CPPWARN	=	-Wall
+CPWARN	=	-Wall -Werror
 
 OBJECTS	=	$(addprefix $(BUILD)/,$(patsubst %.cpp,%.o,$(PSOURCES))) \
 			$(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(CSOURCES)))

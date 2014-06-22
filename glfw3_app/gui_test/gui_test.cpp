@@ -249,9 +249,6 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void gui_test::update()
 	{
-		gl::core& core = gl::core::get_instance();
-		const vtx::spos& size = core.get_size();
-
 		gui::widget_director& wd = director_.at().widget_director_;
 
 		if(dialog_open_) {

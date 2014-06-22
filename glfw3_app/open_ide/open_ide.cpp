@@ -17,8 +17,6 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void open_ide::initialize()
 	{
-		using namespace gui;
-		widget_director& wd = director_.at().widget_director_;
 	}
 
 

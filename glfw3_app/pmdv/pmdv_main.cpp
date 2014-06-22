@@ -159,8 +159,6 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void pmdv_main::update()
 	{
-		gl::core& core = gl::core::get_instance();
-
 		gui::widget_director& wd = director_.at().widget_director_;
 
 		if(fopen_->get_selected()) {

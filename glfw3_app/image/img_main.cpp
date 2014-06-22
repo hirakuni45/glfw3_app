@@ -128,7 +128,6 @@ namespace app {
 	void img_main::update()
 	{
 		gl::core& core = gl::core::get_instance();
-		const vtx::spos& vsz = core.get_size();
 
 		gui::widget_director& wd = director_.at().widget_director_;
 

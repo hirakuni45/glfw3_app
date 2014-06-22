@@ -135,8 +135,8 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void bmc_main::update()
 	{
-		gl::core& core = gl::core::get_instance();
-		const vtx::spos& vsz = core.get_size();
+///		gl::core& core = gl::core::get_instance();
+///		const vtx::spos& vsz = core.get_size();
 
 		gui::widget_director& wd = director_.at().widget_director_;
 

@@ -43,15 +43,15 @@ namespace app {
 		static const uint32_t bdf_prev_x_ = 32;
 		static const uint32_t bdf_prev_y_ = 32;
 
+		int		argc_;
+		char**	argv_;
+
 		std::bitset<option::limit_>	option_;
 		std::string	inp_fname_;
 		std::string out_fname_;
 		uint32_t	header_size_;
 		std::string	symbol_;
 		vtx::srect	clip_;
-
-		int		argc_;
-		char**	argv_;
 
 		float	version_;
 
