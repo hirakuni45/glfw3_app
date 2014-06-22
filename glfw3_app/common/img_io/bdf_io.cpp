@@ -167,7 +167,7 @@ namespace img {
 						}
 						bitmap_ = false;
 					} else {
-						uint32_t bits;
+						uint32_t bits = 0;
 						char ch;
 						const char *p = ss[0].c_str();
 						int n = 0;

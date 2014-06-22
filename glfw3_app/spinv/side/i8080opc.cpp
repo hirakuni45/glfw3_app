@@ -1477,7 +1477,7 @@ void I8080::opcode_db()    // IN   A,(n)
 
 void I8080::opcode_dc()    // CALL C,nn
 {
-    unsigned    pc = nextWord();
+//    unsigned    pc = nextWord();
 
     if( F & Carry ) {
         callSub( nextWord() );

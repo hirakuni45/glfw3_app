@@ -546,7 +546,9 @@ namespace mdf {
 
 		// Bone ジョイントの作成
 		// bone joint size
+
 		bone_joint_size_ = (vertex_max_ - vertex_min_).len() / 200.0f;
+#if 0
 		GLUquadricObj* sphere = gluNewQuadric();
 		gluQuadricDrawStyle(sphere, GLU_FILL);
 		bone_list_id_ = glGenLists(1);
@@ -554,6 +556,7 @@ namespace mdf {
 		gluSphere(sphere, bone_joint_size_, 10.0f, 10.0f);
 		glEndList();
 		gluDeleteQuadric(sphere);
+#endif
 	}
 
 

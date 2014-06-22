@@ -84,7 +84,7 @@ namespace utils {
 		if(it == symbol_.end()) {
 			value v;
 			symbol_[name] = v;
-			symbol_map_it it = symbol_.find(name);
+///			symbol_map_it it = symbol_.find(name);
 		}
 		value& vp = (*it).second;
 		vp.integer_ = val;
@@ -108,7 +108,7 @@ namespace utils {
 		if(it == symbol_.end()) {
 			value v;
 			symbol_[name] = v;
-			symbol_map_it it = symbol_.find(name);
+///			symbol_map_it it = symbol_.find(name);
 		}
 		value& vp = (*it).second;
 		vp.integer_ = static_cast<long>(val);
@@ -132,7 +132,7 @@ namespace utils {
 		if(it == symbol_.end()) {
 			value v;
 			symbol_[name] = v;
-			symbol_map_it it = symbol_.find(name);
+///			symbol_map_it it = symbol_.find(name);
 		}
 		value& vp = (*it).second;
 		vp.integer_ = static_cast<long>(val);

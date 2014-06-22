@@ -35,7 +35,7 @@ namespace img {
 
 		utils::bit_array	bit_array_;
 
-		bool	alignment_bits_;
+///		bool	alignment_bits_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -45,7 +45,7 @@ namespace img {
 		//-----------------------------------------------------------------//
 		bdf_io() : lin_code_max_(0), jis_code_(0), bitmap_(false), map_max_(0),
 			jis_count_(0), lin_limit_(0),
-			bbx_width_(0), bbx_height_(0), alignment_bits_(8) { }
+				   bbx_width_(0), bbx_height_(0) /* alignment_bits_(8) */ { }
 
 
 		//-----------------------------------------------------------------//

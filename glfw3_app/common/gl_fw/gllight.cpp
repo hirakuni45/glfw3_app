@@ -246,12 +246,10 @@ namespace gl {
 	void light::set_material(material::type id) const
 	{
 		const light_material_& mte = light_material_tables_[id];
-#ifdef WIN32
 		glMaterialfv(GL_FRONT, GL_AMBIENT,   mte.ambient_);
 		glMaterialfv(GL_FRONT, GL_DIFFUSE,   mte.diffuse_);
 		glMaterialfv(GL_FRONT, GL_SPECULAR,  mte.specular_);
 		glMaterialfv(GL_FRONT, GL_SHININESS, &mte.shininess_);
-#endif
 
 #ifdef __PPU__
 		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,   mte.ambient_);

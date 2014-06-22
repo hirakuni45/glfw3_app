@@ -24,7 +24,7 @@ namespace gl {
 		const device& dev = core.get_device();
 
 		const spos& mspos = dev.get_locator().get_cursor();
-		const spos msdiff = mspos - mouse_pos_;
+///		const spos msdiff = mspos - mouse_pos_;
 		mouse_pos_ = mspos;
 
 		bool trans = dev.get_level(translate_key_);
@@ -96,7 +96,7 @@ namespace gl {
 	void camera::service()
 	{
 		core& core = core::get_instance();
-		const device& dev = core.get_device();
+///		const device& dev = core.get_device();
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();

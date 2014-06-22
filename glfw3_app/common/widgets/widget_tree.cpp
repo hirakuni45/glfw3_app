@@ -173,6 +173,7 @@ namespace gui {
 				w->at_local_param().draw_box_ = tree_unit_.is_directory(it);
 				pos.x = (n - 1) * param_.height_;
 				w->at_rect().org = pos;
+#if 0
 				short x = 0;
 				BOOST_FOREACH(bool b, st) {
 					root_t r;
@@ -182,6 +183,7 @@ namespace gui {
 ////					roots_.push_back(r);
 					x += param_.height_;
 				}
+#endif
 				pos.y += param_.height_;
 			}
 		}
@@ -304,7 +306,7 @@ namespace gui {
 		BOOST_FOREACH(tree_unit::unit_map_it it, its) {
 			widget_check* w = it->second.value.w_;
 			if(w == 0) continue;
-			const vtx::spos& pos = w->get_rect().org;
+///			const vtx::spos& pos = w->get_rect().org;
 			
 		}
 

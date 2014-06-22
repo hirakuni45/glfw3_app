@@ -1744,8 +1744,8 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	void get_frame_bufferRGB(unsigned char* dst, int x, int y, int w, int h)
 	{
-		gl::core& core = gl::core::get_instance();
-		int fbh = core.get_size().y;
+//		gl::core& core = gl::core::get_instance();
+//		int fbh = core.get_size().y;
 		::glReadBuffer(GL_BACK);
 		::glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		::glReadPixels(x, y, w, h, GL_RGB, GL_UNSIGNED_BYTE, dst);
@@ -1765,8 +1765,8 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	void get_frame_bufferRGBA(unsigned char* dst, int x, int y, int w, int h)
 	{
-		gl::core& core = gl::core::get_instance();
-		int fbh = core.get_size().y;
+///		gl::core& core = gl::core::get_instance();
+///		int fbh = core.get_size().y;
 		::glReadBuffer(GL_BACK);
 		::glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		::glReadPixels(x, y, w, h, GL_RGBA, GL_UNSIGNED_BYTE, dst);
