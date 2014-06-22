@@ -14,6 +14,7 @@ typedef app::bmc_main	start_app;
 
 static const char* window_key_ = { "application/window" };
 static const char* app_title_ = { "Bit Map Converter" };
+static const vtx::spos start_pos_(10, 50);
 static const vtx::spos start_size_(1024, 768);
 static const vtx::spos limit_size_(800, 600);
 
@@ -34,22 +35,16 @@ int main(int argc, char** argv)
 		return 0;
 	}
 
-	gl::create_glcore();
+	gl::core& core = gl::core::get_instance();
 
-	gl::IGLcore* igl = gl::get_glcore();
-
-	// カレントパスを生成
-	std::string tmp;
-	utils::convert_delimiter(argv[0], '\\', '/', tmp);
-	std::string pref;
-	utils::get_file_base(tmp, pref);
-	pref += ".pre";
-	std::string path;
-	utils::get_file_path(tmp, path);
-
-	if(!igl->initialize(path)) {
+	if(!core.initialize(argv[0])) {
+		std::cerr << "glcore initialize error." << std::endl;
+///		fgetc(stdin);
 		return -1;
 	}
+	
+	std::string pref = core.get_exec_path();
+   	pref += ".pre";
 
 	utils::director<app::core> director;
 
@@ -58,15 +53,15 @@ int main(int argc, char** argv)
 
 	director.at().preference_.load(pref);
 
-	vtx::srect rect(vtx::spos(10, 40), start_size_);
+	vtx::srect rect(start_pos_, start_size_);
 	if(!director.at().preference_.load_rect(window_key_, rect)) {
 //		std::cout << "Load rect error..." << std::endl; 
 	}
 
-	if(!igl->setup(rect, app_title_, false)) {
+	if(!core.setup(rect, app_title_, false)) {
 		return -1;
 	}
-	igl->set_limit_size(limit_size_);
+	core.set_limit_size(limit_size_);
 
 	director.at().sound_.initialize(16);
 
@@ -74,8 +69,8 @@ int main(int argc, char** argv)
 
 	director.install_scene<start_app>();
 
-	while(!igl->get_exit_signal()) {
-		igl->service();
+	while(!core.get_exit_signal()) {
+		core.service();
 
 		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 		gl::glColor(img::rgbaf(1.0f));
@@ -88,7 +83,7 @@ int main(int argc, char** argv)
 
 		director.render();
 
-		igl->flip_frame();
+		core.flip_frame();
 
 		director.at().sound_.service();
 	}
@@ -97,13 +92,10 @@ int main(int argc, char** argv)
 	director.render();
 
 	{
-		vtx::srect rect(igl->get_locate(), igl->get_size());
-		director.at().preference_.save_rect(window_key_, rect);
+		director.at().preference_.save_rect(window_key_, core.get_rect());
 	}
 
 	director.at().preference_.save(pref);
 
-	igl->destroy();
-
-	gl::destroy_glcore();
+	core.destroy();
 }
