@@ -50,7 +50,6 @@ PSOURCES	=	main.cpp \
 				snd_io/pcm.cpp \
 				snd_io/wav_io.cpp \
 				snd_io/mp3_io.cpp \
-				snd_io/mp3_tag.cpp \
 				snd_io/aac_io.cpp \
 				snd_io/snd_files.cpp \
 				snd_io/sound.cpp \
@@ -79,8 +78,8 @@ OPTLIBS		=	glfw3 GLEW \
 				pthread \
 				png turbojpeg openjp2 \
 				freetype \
-				mad id3tag faad mp4ff \
-				iconv z
+				mad faad mp4ff tag \
+				z
 
 # OPTLIBS		=	glfw3 glew32 opengl32 glu32 gdi32 imm32 \
 				pthread \
@@ -99,13 +98,8 @@ INC_LIB		=	/usr/local/include \
 				/usr/local/include/freetype2 \
 				/usr/local/include/freetype2/freetype \
 				/opt/libjpeg-turbo/include \
-				/usr/local/include/openjpeg-2.0
-
-#INC_LIB		=	/usr/local/include \
-				/usr/local/include/libpng16 \
-				/usr/local/include/libjpeg_x86 \
 				/usr/local/include/openjpeg-2.0 \
-				/usr/local/include/freetype2
+				/usr/local/include/taglib
 
 PINC_APP	=	. ../common
 CINC_APP	=	. ../common

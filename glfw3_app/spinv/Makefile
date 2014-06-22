@@ -13,13 +13,6 @@ VPATH		=	../common
 CSOURCES	=	minizip/ioapi.c \
 				minizip/unzip.c
 
-#				img_io/jpeg_io.cpp \
-#				img_io/openjpeg_io.cpp \
-#				snd_io/mp3_io.cpp \
-#				snd_io/mp3_tag.cpp \
-#				snd_io/aac_io.cpp \
-
-
 PSOURCES	=	main.cpp \
 				spinv.cpp \
 				side/arcade.cpp \
@@ -47,6 +40,7 @@ PSOURCES	=	main.cpp \
 				img_io/tga_io.cpp \
 				img_io/png_io.cpp \
 				img_io/jpeg_io.cpp \
+				img_io/openjpeg_io.cpp \
 				img_io/dds_io.cpp \
 				img_io/img_files.cpp \
 				img_io/img_utils.cpp \
@@ -54,7 +48,6 @@ PSOURCES	=	main.cpp \
 				snd_io/pcm.cpp \
 				snd_io/wav_io.cpp \
 				snd_io/mp3_io.cpp \
-				snd_io/mp3_tag.cpp \
 				snd_io/aac_io.cpp \
 				snd_io/snd_files.cpp \
 				snd_io/sound.cpp \
@@ -79,10 +72,10 @@ PSOURCES	=	main.cpp \
 STDLIBS		=
 OPTLIBS		=	glfw3 GLEW \
 				pthread \
-				png turbojpeg \
+				png turbojpeg openjp2 \
 				freetype \
-				mad id3tag faad mp4ff \
-				iconv z
+				mad faad mp4ff tag \
+				z
 
 #	glfw3 glew32 opengl32 glu32 gdi32 imm32 \
 				pthread \
@@ -99,7 +92,9 @@ INC_SYS		=	/usr/local/boost_1_55_0
 INC_LIB		=	/usr/local/include \
 				/usr/local/include/freetype2 \
 				/usr/local/include/freetype2/freetype \
-				/opt/libjpeg-turbo/include
+				/opt/libjpeg-turbo/include \
+				/usr/local/include/openjpeg-2.0 \
+				/usr/local/include/taglib
 
 PINC_APP	=	. ../common
 CINC_APP	=	. ../common

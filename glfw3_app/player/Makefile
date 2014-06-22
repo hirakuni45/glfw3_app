@@ -69,7 +69,7 @@ OPTLIBS		=	glfw3 GLEW \
 				png turbojpeg openjp2 \
 				freetype \
 				mad faad mp4ff tag \
-				iconv z
+				z
 
 INC_SYS		=	/usr/local/boost_1_55_0
 

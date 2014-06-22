@@ -44,8 +44,8 @@ I8080 & I8080::operator = ( const I8080 & cpu )
     PC = cpu.PC;
     SP = cpu.SP;
 
-    halted_ = halted_;
-    cycles_ = cycles_;
+//    halted_ = halted_;
+//    cycles_ = cycles_;
 
     return *this;
 }
