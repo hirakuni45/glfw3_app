@@ -430,11 +430,16 @@ namespace al {
 
 	static std::string convert_string_(const TagLib::String& s)
 	{
-		std::string out;
+		std::string tmp;
 	   	if(s.isLatin1()) {
-			utils::sjis_to_utf8(s.toCString(), out);
+			utils::sjis_to_utf8(s.toCString(), tmp);
 		} else {
-			out = s.toCString(true);
+			tmp = s.toCString(true);
+		}
+		std::string out;
+		BOOST_FOREACH(char ch, tmp) {
+			if(ch < 0x20 && ch >= 0) ;
+			else out += ch; 
 		}
 		return out;
 	}
@@ -495,10 +500,20 @@ namespace al {
 		ID3v2::Tag* v2 = f.ID3v2Tag();
 		if(v2) {
 			ofs = v2->header()->tagSize();
+			{
+				std::string s = convert_string_(v2->title());
+				if(!s.empty()) tag_.title_ = s;
+			} 
 
-   			tag_.title_  = convert_string_(v2->title()); 
-   			tag_.artist_ = convert_string_(v2->artist());
-	   		tag_.album_  = convert_string_(v2->album());
+			{
+				std::string s = convert_string_(v2->artist());
+				if(!s.empty()) tag_.artist_ = s; 
+			}
+
+			{
+				std::string s = convert_string_(v2->album());
+				if(!s.empty()) tag_.album_ = s;
+			}
 
 			const ID3v2::FrameListMap& map = v2->frameListMap();
 			typedef ID3v2::FrameListMap::ConstIterator const_it;
@@ -516,6 +531,9 @@ namespace al {
 				else if(key == "TPE2") tag_.writer_ = tmp;
 				else if(key == "TPOS") tag_.disc_ = tmp;
 				else if(key == "TRCK") tag_.track_ = tmp;
+				else if(key == "TIT3") {
+					if(tag_.title_.empty()) tag_.title_ = tmp;
+				}
 			}
 
 			// ジャケット画像
@@ -580,8 +598,8 @@ namespace al {
 				}
 			}
 		}
-		if(v1 == 0 && v2 == 0) {
-			// tag 情報が無い場合、ファイル名を曲名としておく
+		// tag 情報が無い場合、ファイル名を曲名としておく
+		if(tag_.title_.empty()) {
 			utils::get_file_base(utils::get_file_name(fin.get_path()), tag_.title_);
 		}
 		tag_.update();

@@ -698,6 +698,9 @@ namespace al {
 		}
 
 		tag_.clear();
+		delete tag_.image_;
+		tag_.image_ = 0;
+
 		int j = mp4ff_meta_get_num_items(dt.infile);
 		for(int k = 0; k < j; ++k) {
 			char* item;
@@ -718,7 +721,6 @@ namespace al {
 		   		else if(s == "totaldiscs") tag_.total_discs_ = value;
 		   		else if(s == "date") tag_.date_ = value;
 		   		else if(s == "cover") {
-					delete tag_.image_;
 					size_t size = mp4ff_meta_get_item_size(dt.infile, k);
 		   			utils::file_io fio;
 		   			fio.open(value, size);
@@ -987,6 +989,9 @@ namespace al {
 	//-----------------------------------------------------------------//
 	void aac_io::destroy()
 	{
+		delete tag_.image_;
+		tag_.image_ = 0;
+
 		delete buffer_;
 		buffer_ = 0;
 		delete stream_;

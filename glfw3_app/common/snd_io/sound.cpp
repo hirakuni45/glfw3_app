@@ -114,6 +114,7 @@ namespace al {
 				}
 
 				usleep(10000);	// 10ms くらいの時間待ち
+
 			}
 			sst->audio_->purge_stream(sst->slot_);
 			sst->pos_ = sst->len_;
@@ -430,8 +431,11 @@ namespace al {
 		sstream_t_.time_  = 0;
 		sstream_t_.etime_ = 0;
 		sstream_t_.open_err_   = 0;
-		pthread_create(&pth_, NULL, stream_task_, &sstream_t_);
 
+///		pthread_attr_init(&attr_);
+///		pthread_attr_setdetachstate(&attr_, PTHREAD_CREATE_DETACHED);
+
+		pthread_create(&pth_, NULL, stream_task_, &sstream_t_);
 
 		return true;
 	}
