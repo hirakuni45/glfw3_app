@@ -164,9 +164,9 @@ namespace gui {
 				text_(), font_(),
 				proportional_(true), font_size_(24),
 				fore_color_(255, 255), shadow_color_(0, 255),
+				shadow_offset_(1),
 				placement_(vtx::placement::holizontal::CENTER,
 					vtx::placement::vertical::CENTER),
-				shadow_offset_(1),
 				offset_(0) { }
 			text_param(const std::string& text,
 				const img::rgba8& fc, const img::rgba8& sc,
@@ -175,8 +175,8 @@ namespace gui {
 				vtx::placement::vertical::CENTER)) :
 					text_(text), font_(),
 					proportional_(true), font_size_(24),
-					fore_color_(fc), shadow_color_(sc), placement_(pl),
-					shadow_offset_(1),
+					fore_color_(fc), shadow_color_(sc), shadow_offset_(1),
+					placement_(pl),
 					offset_(0) { }
 		};
 
@@ -349,7 +349,8 @@ namespace gui {
 			@param[in]	sym		シンボル
 		*/
 		//-----------------------------------------------------------------//
-		widget(const param& para, const std::string& sym = "") : param_(para), symbol_(sym),
+		widget(const param& para, const std::string& sym = "") :
+			param_(para), symbol_(sym),
 			serial_(0), mark_(false)
 			{ }
 

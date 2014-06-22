@@ -28,6 +28,8 @@ namespace img {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class ftimg : public utils::singleton_policy<ftimg> {
 
+		friend struct utils::singleton_policy<ftimg>;
+
 	public:
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
@@ -48,8 +50,6 @@ namespace img {
 		};
 
 	private:
-		friend class utils::singleton_policy<ftimg>;
-
 		std::string	root_path_;
 
 		FT_Library	library_;

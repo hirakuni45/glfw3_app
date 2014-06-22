@@ -68,7 +68,7 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_dialog(widget_director& wd, const widget::param& wp, const param& p) :
-			wd_(wd), widget(wp), param_(p), objh_(0),
+			widget(wp), wd_(wd), param_(p), objh_(0),
 			text_(0), ok_(0), cancel_(0)
 		{ }
 

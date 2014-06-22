@@ -62,8 +62,9 @@ namespace utils {
 #else
 			drives_ = 0;
 #endif
-			uint32_t drvbits = drives_;
 #ifdef WIN32
+			uint32_t drvbits = drives_;
+
 			uint32_t bits = 1;
 			int idx = 0;
 			while(drvbits) {

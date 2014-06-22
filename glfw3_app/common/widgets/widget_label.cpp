@@ -57,7 +57,6 @@ namespace gui {
 	void widget_label::update()
 	{
 		gl::core& core = gl::core::get_instance();
-		const vtx::spos& size = core.get_size();		
 		gl::fonts& fonts = core.at_fonts();
 
 		if(param_.text_in_) return;

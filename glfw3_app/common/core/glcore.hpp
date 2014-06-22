@@ -21,7 +21,7 @@ namespace gl {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class core : public utils::singleton_policy<core> {
 
-		friend class utils::singleton_policy<core>;
+		friend struct utils::singleton_policy<core>;
 
 	public:
 		static device::bitsets	bitsets_;

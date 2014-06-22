@@ -44,7 +44,7 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_text(widget_director& wd, const widget::param& bp, const param& p) :
-			wd_(wd), widget(bp), param_(p) { }
+			widget(bp), wd_(wd), param_(p) { }
 
 
 		//-----------------------------------------------------------------//

@@ -44,9 +44,9 @@ namespace vtx {
 		return max;
 	}
 
-	template <typename T> class vertex2;
-	template <typename T> class vertex3;
-	template <typename T> class vertex4;
+	template <typename T> struct vertex2;
+	template <typename T> struct vertex3;
+	template <typename T> struct vertex4;
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!

@@ -70,7 +70,7 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_check(widget_director& wd, const widget::param& bp, const param& p) :
-			wd_(wd), widget(bp), param_(p),
+			widget(bp), wd_(wd), param_(p),
 			obj_state_(false), ena_h_(0), dis_h_(0) { }
 
 

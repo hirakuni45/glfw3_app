@@ -142,7 +142,7 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_filer(widget_director& wd, const widget::param& bp, const param& p) :
-			wd_(wd), widget(bp), param_(p), objh_(0),
+			widget(bp), wd_(wd), param_(p), objh_(0),
 			fsc_(),
 			path_(0), info_(0), main_(0), files_(0),
 			info_state_(info_state::NONE),

@@ -454,11 +454,12 @@ namespace img {
 		if(imf_ == 0) return false;
 
 		int q = 0;
+		// 0 to 100
 		if(!opt.empty()) {
 			try {
 				q = boost::lexical_cast<int>(opt);
 			} catch (boost::bad_lexical_cast&) {
-				q = 0;
+				q = 100;
 			}
 		}
 

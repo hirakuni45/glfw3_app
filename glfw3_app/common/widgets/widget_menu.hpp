@@ -65,7 +65,7 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_menu(widget_director& wd, const widget::param& wp, const param& p) :
-			wd_(wd), widget(wp), param_(p),
+			widget(wp), wd_(wd), param_(p),
 			list_(), select_id_(0)
 		{ }
 

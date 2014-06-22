@@ -63,6 +63,7 @@ namespace img {
 		unsigned int textureStage;
 	};
 
+#if 0
 	/// DDSurfaceDesc::flags はヘッダ内の有効な情報をあらわす
 	static const int DDSD_CAPS        =		0x00000001;	///< dwCaps/dwCpas2 が有効
 	static const int DDSD_HEIGHT      =		0x00000002;	///< dwHeight が有効
@@ -88,6 +89,8 @@ namespace img {
 	static const int DDSCAPS_COMPLEX =	0x00000008;	///< 複数のデータが含まれている場合 Palette/Mipmap/Cube/Volume 等
 	static const int DDSCAPS_TEXTURE =	0x00001000;	///< 常に 1
 	static const int DDSCAPS_MIPMAP  =	0x00400000;	///< MipMap が存在する場合 
+#endif
+	static const int DDSD_MIPMAPCOUNT =		0x00020000;	///< dwMipMapCount が有効
 
 	/// DDSCaps::caps2
 	static const int DDSCAPS2_CUBEMAP           =	0x00000200;	///< Cubemap が存在する場合
@@ -97,7 +100,7 @@ namespace img {
 	static const int DDSCAPS2_CUBEMAP_NEGATIVEY =	0x00002000;	///< Y 軸「負」
 	static const int DDSCAPS2_CUBEMAP_POSITIVEZ =	0x00004000;	///< Z 軸「正」
 	static const int DDSCAPS2_CUBEMAP_NEGATIVEZ =	0x00008000;	///< Z 軸「負」
-	static const int DDSCAPS2_VOLUME            =	0x00400000;	///< VolumeTexture の場合 
+//	static const int DDSCAPS2_VOLUME            =	0x00400000;	///< VolumeTexture の場合 
 
 
 #define UBYTE_TO_CHAN(b)  (b)
@@ -177,7 +180,7 @@ namespace img {
 		}
 	}
 
-
+#if 0
 	static void fetch_2d_texel_rgb_dxt1(DDSint srcRowStride, const DDSubyte *pixdata, DDSint i, DDSint j, img::rgba8& col)
 	{
 		/* Extract the (i,j) pixel from pixdata and return it
@@ -187,7 +190,7 @@ namespace img {
 		const DDSubyte *blksrc = (pixdata + ((srcRowStride + 3) / 4 * (j / 4) + (i / 4)) * 8);
 		dxt135_decode_imageblock(blksrc, (i&3), (j&3), 0, col);
 	}
-
+#endif
 
 	static void fetch_2d_texel_rgba_dxt1(DDSint srcRowStride, const DDSubyte *pixdata, DDSint i, DDSint j, img::rgba8& col)
 	{

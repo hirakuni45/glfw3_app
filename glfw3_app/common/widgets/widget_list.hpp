@@ -72,7 +72,7 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_list(widget_director& wd, const widget::param& bp, const param& p) :
-			wd_(wd), widget(bp), param_(p),
+			widget(bp), wd_(wd), param_(p),
 			objh_(0), select_objh_(0), frame_(0), list_()
 			{ }
 

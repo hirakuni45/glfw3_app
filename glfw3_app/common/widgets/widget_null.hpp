@@ -9,6 +9,9 @@
 
 namespace gui {
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-private-field" 
+
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
 		@brief	GUI widget_null クラス
@@ -39,7 +42,7 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_null(widget_director& wd, const widget::param& wp, const param& p) :
-			wd_(wd), widget(wp), param_(p) {
+			widget(wp), wd_(wd), param_(p) {
 		}
 
 
@@ -130,4 +133,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		bool load(const sys::preference& pre) { return true; }
 	};
+
+#pragma clang diagnostic pop
+
 }

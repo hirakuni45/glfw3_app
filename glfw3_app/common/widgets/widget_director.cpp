@@ -544,7 +544,6 @@ namespace gui {
 			top_resize_ = 0;
 		}
 
-		vtx::spos msp_speed = msp - msp_speed_;
 		msp_speed_ = msp;
 
 		if(left.pos) {

@@ -229,7 +229,7 @@ namespace al {
 		set_buffer(wh, aif);
 
 		if(wh == AL_NONE) {
-			ALenum alerror = alGetError();
+///			ALenum alerror = alGetError();
 			return 0;
 		}
 

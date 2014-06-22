@@ -103,7 +103,7 @@ namespace img {
 		return n;
 	}
 
-
+#if 0
 	static int int_floorlog2_(int a)
 	{
 		int l;
@@ -112,19 +112,19 @@ namespace img {
 		}
 		return l;
 	}
-
+#endif
 
 	static int int_ceildivpow2_(int a, int b)
 	{
 		return (a + (1 << b) - 1) >> b;
 	}
 
-
+#if 0
 	static int int_ceildiv_(int a, int b)
 	{
 		return (a + b - 1) / b;
 	}
-
+#endif
 
 	static void opj_image_to_rgba8_(opj_image_t* image, img_rgba8& img)
 	{
@@ -137,7 +137,7 @@ namespace img {
 		int wr = int_ceildivpow2_(image->comps[0].w, image->comps[0].factor);
 		// h = int_ceildiv(image->y1 - image->y0, image->comps[0].dy);
 		// hr = int_ceildiv(int_ceildivpow2(image->y1 - image->y0,image->factor), image->comps[0].dy);
-		int h = image->comps[0].h;
+//		int h = image->comps[0].h;
 		int hr = int_ceildivpow2_(image->comps[0].h, image->comps[0].factor);
 
 		if(image->numcomps == 1) {

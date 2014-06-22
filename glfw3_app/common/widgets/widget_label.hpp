@@ -81,7 +81,7 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_label(widget_director& wd, const widget::param& bp, const param& p) :
-			wd_(wd), widget(bp), param_(p), interval_(0), objh_(0), select_objh_(0) {
+			widget(bp), wd_(wd), param_(p), interval_(0), objh_(0), select_objh_(0) {
 		}
 
 

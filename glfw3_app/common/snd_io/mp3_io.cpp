@@ -450,7 +450,7 @@ namespace al {
 		return (boost::format("%d") % static_cast<int>(n)).str();
 	}
 
-
+#if 0
 	static std::string convert_string_(const TagLib::StringList& list)
 	{
 		std::string out;
@@ -459,7 +459,7 @@ namespace al {
 		}
 		return out;
 	}
-
+#endif
 
 	//=================================================================//
 	/*!
@@ -542,7 +542,7 @@ namespace al {
 				const ID3v2::FrameList& list = apic->second;
 				typedef ID3v2::FrameList::ConstIterator const_it;
 				for(const_it cit = list.begin(); cit != list.end(); ++cit) {
-					size_t fsize = (*cit)->size();
+//					size_t fsize = (*cit)->size();
 //					std::cout << (*cit)->toString() << std::endl;
 //					std::cout << "Frame size: " << static_cast<int>(fsize) << std::endl;
 					const ByteVector& image = (*cit)->render();
@@ -626,7 +626,7 @@ namespace al {
 		mad_frame_init(&frame);
 
 		int frame_cnt = 0;
-		int samples = 0;
+//		int samples = 0;
 		int ch = 0;
 		while(fill_read_buffer_(fin, stream) >= 0) {
 			if(mad_frame_decode(&frame, &stream)) {

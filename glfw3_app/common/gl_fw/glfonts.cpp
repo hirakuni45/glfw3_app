@@ -535,7 +535,6 @@ namespace gl {
 		short x = pos.x;
 		short y = pos.y;
 		short xx = x;
-		int cnt = 0;
 		BOOST_FOREACH(uint32_t code, text) {
 			if(code < 32) {
 				if(code == '\n') {

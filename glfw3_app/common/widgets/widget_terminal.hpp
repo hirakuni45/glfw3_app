@@ -53,7 +53,7 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_terminal(widget_director& wd, const widget::param& bp, const param& p) :
-			wd_(wd), widget(bp), param_(p), terminal_(), interval_(0),
+			widget(bp), wd_(wd), param_(p), terminal_(), interval_(0),
 			focus_(false) { }
 
 

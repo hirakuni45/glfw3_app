@@ -61,7 +61,7 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_slider(widget_director& wd, const widget::param& wp, const param& p) :
-			wd_(wd), widget(wp), param_(p), ref_position_(0.0f),
+			widget(wp), wd_(wd), param_(p), ref_position_(0.0f),
 			handle_offset_(0), base_h_(0), hand_h_(0)
 		{ }
 

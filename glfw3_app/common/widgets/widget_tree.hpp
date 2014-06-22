@@ -91,7 +91,7 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_tree(widget_director& wd, const widget::param& bp, const param& p) :
-			wd_(wd), widget(bp), param_(p),
+			widget(bp), wd_(wd), param_(p),
 			vr_(0), r_(0), v_(0), h_(0),
 			tree_unit_(), serial_id_(0),
 			speed_(0.0f), offset_(0.0f), position_(0.0f), select_id_(0), select_it_()

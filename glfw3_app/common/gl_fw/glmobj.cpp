@@ -491,7 +491,6 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	GLuint mobj::install_compressed_texture(const void* ptr, size_t size, int type, int w, int h)
 	{
-		int level = 0;
 		GLuint id;
 		::glGenTextures(1, &id);
 		::glBindTexture(GL_TEXTURE_2D, id);

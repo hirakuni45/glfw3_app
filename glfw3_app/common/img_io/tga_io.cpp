@@ -386,7 +386,7 @@ namespace img {
 						pos.x += dx;
 					}
 				} else {
-					const uint8_t* p = buf;
+//					const uint8_t* p = buf;
 					short dx;
 					if(info_.h_flip) {
 						pos.x = info_.w - 1;

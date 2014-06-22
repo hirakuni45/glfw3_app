@@ -127,6 +127,7 @@ namespace al {
 	}
 
 
+#if 0
 	static int FindAdtsSRIndex_(int sr)
 	{
 		for (int i = 0; i < 16; i++) {
@@ -182,7 +183,7 @@ namespace al {
 
 		return data;
 	}
-
+#endif
 
 	static i_audio* decode_aac_file_(utils::file_io& fin)
 	{
@@ -208,7 +209,7 @@ namespace al {
 		int bitrate = 0;
 		float length = 0;
 
-		int first_time = 1;
+///		int first_time = 1;
 
 		aac_buffer b(fin);
 
@@ -396,6 +397,7 @@ namespace al {
 	}
 
 
+#if 0
 	static void list_mp4(mp4ff_t* infile, mp4AudioSpecificConfig& mp4ASC, int track)
 	{
        	static const char* ot[] = {
@@ -415,8 +417,8 @@ namespace al {
 
 #define PRINT_MP4_METADATA
 #ifdef PRINT_MP4_METADATA
-		char *tag = 0;
-		char *item = 0;
+///		char *tag = 0;
+///		char *item = 0;
 		int j = mp4ff_meta_get_num_items(infile);
 		for(int k = 0; k < j; k++) {
 			char* item;
@@ -434,7 +436,7 @@ namespace al {
 		if (j > 0) std::cout << std::endl;
 #endif
 	}
-
+#endif
 
 	void aac_io::destroy_mp4_(decode_mp4_t& dt)
 	{
