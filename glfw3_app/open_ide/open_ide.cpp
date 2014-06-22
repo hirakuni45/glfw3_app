@@ -17,8 +17,6 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void open_ide::initialize()
 	{
-		gl::IGLcore* igl = gl::get_glcore();
-
 		using namespace gui;
 		widget_director& wd = director_.at().widget_director_;
 	}
@@ -31,9 +29,6 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void open_ide::update()
 	{
-		gl::IGLcore* igl = gl::get_glcore();
-		const vtx::spos& size = igl->get_size();
-
 		gui::widget_director& wd = director_.at().widget_director_;
 		wd.update();
 	}
