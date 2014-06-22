@@ -14,9 +14,10 @@
 
 #ifdef __APPLE__
 #include <iconv.h>
-/// #include <cstring>
-#define USE_ICONV
+#include "utils/cc932.hpp"
 #endif
+
+#include <iostream>
 
 namespace utils {
 
@@ -284,22 +285,33 @@ namespace utils {
 	bool sjis_to_utf8(const std::string& src, std::string& dst)
 	{
 		if(src.empty()) return false;
-#ifdef USE_ICONV
-		iconv_t ic = iconv_open("SHIFT_JIS", "UTF-8");
-		size_t insz = src.length() + 1;
-		char* inb = new char[insz];
-		strcpy(inb, src.c_str());
-		char* ptr_in = inb;
-		size_t outsz = insz * 4;
-		char* outb = new char[outsz];
-		char* ptr_out = outb;
-		size_t ret = iconv(ic, &ptr_in, &insz, &ptr_out, &outsz);
-		dst += outb;
-		delete[] outb;
-		delete[] inb;
-		iconv_close(ic);
-		return static_cast<int>(ret) >= 0;
-#else
+#ifdef __APPLE__
+		wstring ws;
+		uint16_t wc = 0;
+		BOOST_FOREACH(char ch, src) {
+			uint8_t c = static_cast<uint8_t>(ch);
+			if(wc) {
+				if(0x40 <= c && c <= 0x7e) {
+					wc <<= 8;
+					wc |= c;
+					ws += ff_convert(wc, 1);
+				} else if(0x80 <= c && c <= 0xfc) {
+					wc <<= 8;
+					wc |= c;
+					ws += ff_convert(wc, 1);
+				} else {
+					return false;
+				}
+				wc = 0;
+			} else {
+				if(0x81 <= c && c <= 0x9f) wc = c;
+				else if(0xe0 <= c && c <= 0xfc) wc = c;
+				else dst += ch;
+			}
+		}
+		utf16_to_utf8(ws, dst);
+		return true;
+#endif
 #ifdef WIN32
 		uint32_t sz = src.size() + 1;
 		wchar_t* tmp = new wchar_t[sz];
@@ -311,7 +323,6 @@ namespace utils {
 		utf16_to_utf8(ws, dst);
 		delete[] tmp;
 		return true;
-#endif
 #endif
 	}
 
@@ -327,7 +338,7 @@ namespace utils {
 	bool sjis_to_utf16(const std::string& src, wstring& dst)
 	{
 		if(src.empty()) return false;
-#ifdef USE_ICONV
+#ifdef __APPLE__
 		std::string tmp;
 		bool f = sjis_to_utf8(src, tmp);
 		if(f) utf8_to_utf16(tmp, dst);
@@ -358,22 +369,16 @@ namespace utils {
 	bool utf8_to_sjis(const std::string& src, std::string& dst)
 	{
 		if(src.empty()) return false;
-#ifdef USE_ICONV
-		iconv_t ic = iconv_open("UTF-8", "SHIFT_JIS");
-		size_t insz = src.length() + 1;
-		char* inb = new char[insz];
-		strcpy(inb, src.c_str());
-		char* ptr_in = inb;
-		size_t outsz = insz * 4;
-		char* outb = new char[outsz];
-		char* ptr_out = outb;
-		size_t ret = iconv(ic, &ptr_in, &insz, &ptr_out, &outsz);
-		dst += outb;
-		delete[] outb;
-		delete[] inb;
-		iconv_close(ic);
-		return static_cast<int>(ret) >= 0;
-#else
+#ifdef __APPLE__
+		wstring ws;
+		utf8_to_utf16(src, ws);
+		BOOST_FOREACH(uint16_t wc, ws) {
+			uint16_t ww = ff_convert(wc, 0);
+			dst += ww >> 8;
+			dst += ww & 0xff;
+		}
+		return true;
+#endif
 #ifdef WIN32
 		wstring ws;
 		utf8_to_utf16(src, ws);
@@ -393,7 +398,6 @@ namespace utils {
 		delete[] stmp;
 		return true;
 #endif
-#endif
 	}
 
 
@@ -408,7 +412,7 @@ namespace utils {
 	bool utf16_to_sjis(const wstring& src, std::string& dst)
 	{
 		if(src.empty()) return false;
-#ifdef USE_ICONV
+#ifdef __APPLE__
 		std::string tmp;
 		utf16_to_utf8(src, tmp);
 		utf8_to_sjis(tmp, dst);
