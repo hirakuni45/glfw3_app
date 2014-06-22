@@ -284,11 +284,13 @@ namespace app {
 		wd.enable(play_btn_, false);
 		wd.enable(pause_btn_, false);
 		al::sound& sound = director_.at().sound_;
+		std::string state;
 		if(sound.get_state_stream() == al::sound::stream_state::STALL) {
 			wd.enable(play_btn_);
 			play_btn_->set_state(gui::widget::state::STALL);
 			rew_btn_->set_state(gui::widget::state::STALL);
 			ff_btn_->set_state(gui::widget::state::STALL);
+			state = " (stalled)";
 		} else if(sound.get_state_stream() == al::sound::stream_state::PLAY) {
 			play_btn_->set_state(gui::widget::state::STALL, false);
 			rew_btn_->set_state(gui::widget::state::STALL, false);
@@ -297,9 +299,7 @@ namespace app {
 			if(pause_btn_->get_selected()) {
 				sound.pause_stream();
 			}
-
-			core.set_title(sound.get_file_stream());
-
+			state = " (playing)";
 		} else if(sound.get_state_stream() == al::sound::stream_state::PAUSE) {
 			wd.enable(play_btn_);
 			play_btn_->set_state(gui::widget::state::STALL, false);
@@ -308,10 +308,13 @@ namespace app {
 			if(play_btn_->get_selected()) {
 				sound.pause_stream(false);
 			}
+			state = " (pause)";
 		} else {	// to stop.
 			wd.enable(play_btn_);
 			play_btn_->set_state(gui::widget::state::STALL);
+			state = " (stoped)";
 		}
+		core.set_title(sound.get_file_stream() + state);
 
 		// ファイラーボタンの確認
 		if(filer_ && file_btn_->get_selected()) {
