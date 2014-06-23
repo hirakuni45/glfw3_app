@@ -6,7 +6,9 @@
 */
 //=====================================================================//
 #include <string>
-#include <stdint.h>
+#include <thread>
+#include <future>
+#include <unistd.h>
 #include "utils/singleton_policy.hpp"
 #include "core/device.hpp"
 #include "gl_fw/glfonts.hpp"
@@ -26,8 +28,8 @@ namespace gl {
 	public:
 		static device::bitsets	bitsets_;
 		static device::locator	locator_;
-	private:
 
+	private:
 		std::string		current_path_;
 		std::string		exec_path_;
 
@@ -47,6 +49,9 @@ namespace gl {
 
 		std::string		title_;
 
+		std::future<uint32_t>	v_sync_wait_;
+		uint32_t	sync_count_;
+
 		uint32_t	frame_count_;
 		double		frame_time_;
 		double		machine_cycle_;
@@ -59,6 +64,21 @@ namespace gl {
 
 		bool		keyboard_jp_;
 
+
+		static uint32_t sync_wait_task_(uint32_t in) {
+			usleep(16000);	// 16ms
+			++in;
+			return in;
+		}
+
+		void start_sync_() {
+			v_sync_wait_ = std::async(std::launch::async, sync_wait_task_, sync_count_);
+		}
+
+		void wait_sync_() {
+			sync_count_ = v_sync_wait_.get();
+		}
+
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	コンストラクター
@@ -68,6 +88,7 @@ namespace gl {
 				 best_size_(0), limit_size_(0), size_(0), rect_(0),
 				 recv_file_id_(0),
 				 title_(),
+				 sync_count_(0),
 				 frame_count_(0), frame_time_(0.0),
 				 machine_cycle_(0.0), cpu_ghz_(0.0),
 				 cpu_spd_enable_(false), swap_ctrl_(false),

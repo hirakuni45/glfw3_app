@@ -347,6 +347,8 @@ namespace gl {
 #endif
 		}
 
+		start_sync_();
+
 		return true;
 	}
 
@@ -492,8 +494,12 @@ namespace gl {
 #endif
 
 ///		std::this_thread::sleep_for(std::chrono::milliseconds(10));
-		
+
+		wait_sync_();
+
 		glfwSwapBuffers(window_);
+
+		start_sync_();
 	}
 
 
