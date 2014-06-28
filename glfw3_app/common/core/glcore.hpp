@@ -64,20 +64,19 @@ namespace gl {
 
 		bool		keyboard_jp_;
 
-
-		static uint32_t sync_wait_task_(uint32_t in) {
-			usleep(16000);	// 16ms
+		static uint32_t wait_sync_task_(uint32_t in) {
 			++in;
+			usleep(16000);	// 16ms
 			return in;
 		}
 
 		void start_sync_() {
-			v_sync_wait_ = std::async(std::launch::async, sync_wait_task_, sync_count_);
+			v_sync_wait_ = std::async(std::launch::async,
+									  wait_sync_task_,
+									  sync_count_);
 		}
 
-		void wait_sync_() {
-			sync_count_ = v_sync_wait_.get();
-		}
+		void wait_sync_() { sync_count_ = v_sync_wait_.get(); }
 
 		//-----------------------------------------------------------------//
 		/*!
