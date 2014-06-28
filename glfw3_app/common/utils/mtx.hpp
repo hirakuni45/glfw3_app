@@ -6,6 +6,7 @@
 */
 //=====================================================================//
 #include <vector>
+#include <stack>
 #include "utils/vtx.hpp"
 
 namespace mtx {
@@ -38,9 +39,9 @@ namespace mtx {
 		@param[in]	dst	コピー先
 	 */
 	//-----------------------------------------------------------------//
-	template <class T>
+	template <class T, int n>
 	void matrix_copy(const T* src, T* dst) {
-		for(uint32_t i = 0; i < 16; ++i) { dst[i] = src[i]; }
+		for(uint32_t i = 0; i < n; ++i) { dst[i] = src[i]; }
 	}
 
 	//-----------------------------------------------------------------//
@@ -629,8 +630,12 @@ namespace mtx {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	template <typename T>
-	class matrix4 {
+	struct matrix4 {
+		typedef T  value_type;
+
+	private:
 		T	m_[16] __attribute__((aligned(16)));
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -643,10 +648,19 @@ namespace mtx {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	コンストラクター
-			@param[in]	mm	ソースマトリックス配列
+			@param[in]	srcm	マトリックス
 		 */
 		//-----------------------------------------------------------------//
-		matrix4(const T* srcm) { matrix_copy(srcm, m_); }
+		explicit matrix4(const matrix4& srcm) { matrix_copy<T, 16>(srcm(), m_); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	コンストラクター
+			@param[in]	srcm	基本型のポインター
+		 */
+		//-----------------------------------------------------------------//
+		explicit matrix4(const T* srcm) { matrix_copy<T, 16>(srcm, m_); }
 
 
 		//-----------------------------------------------------------------//
@@ -683,7 +697,7 @@ namespace mtx {
 			@param[in]	srcm	ソース・マトリックス配列
 		 */
 		//-----------------------------------------------------------------//
-		void load(const T* srcm) { matrix_copy(srcm, m_); }
+		void load(const T* srcm) { matrix_copy<T, 16>(srcm, m_); }
 
 
 		//-----------------------------------------------------------------//
@@ -828,16 +842,28 @@ namespace mtx {
 		}
 
 
+
+
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	= オペレーター 4x4（代入）
 			@param[in]	srcm	ソースマトリックス(float*)
 		 */
 		//-----------------------------------------------------------------//
-		matrix4 operator = (const T* srcm) {
-			for(uint32_t i = 0; i < 16; ++i) {
-				m_[i] = static_cast<T>(srcm[i]);
-			}
+		matrix4& operator = (const T* srcm) {
+			matrix_copy<T, 16>(srcm, m_);
+			return *this;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	= オペレーター 4x4（代入）
+			@param[in]	srcm	ソースマトリックス(float*)
+		 */
+		//-----------------------------------------------------------------//
+		matrix4& operator = (const matrix4& srcm) {
+			matrix_copy<T, 16>(srcm(), m_);
 			return *this;
 		}
 
@@ -861,7 +887,7 @@ namespace mtx {
 			@param[in]	srcm	ソースマトリックス
 		 */
 		//-----------------------------------------------------------------//
-		matrix4 operator *= (const matrix4& srcm) {
+		matrix4& operator *= (const matrix4& srcm) {
 			matmul4(m_, m_, srcm());
 			return *this;
 		}
@@ -886,7 +912,7 @@ namespace mtx {
 			@param[in]	srcv	ソースベクター
 		 */
 		//-----------------------------------------------------------------//
-		matrix4 operator *= (const vtx::vertex4<T>& srcv) {
+		matrix4& operator *= (const vtx::vertex4<T>& srcv) {
 			matmul1(m_, m_, srcv);
 			return *this;
 		}
@@ -910,7 +936,6 @@ namespace mtx {
 		//-----------------------------------------------------------------//
 		const T* operator() () const { return &m_[0]; }
 	};
-
 	typedef matrix4<float>	fmat4;	///< 「float」型マトリックス
 	typedef matrix4<double>	dmat4;	///< 「double」型マトリックス
 
