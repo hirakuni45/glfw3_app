@@ -27,10 +27,11 @@ namespace gui {
 			plate_param		plate_param_;
 			color_param		color_param_;
 			text_param		text_param_;
+			shift_param		shift_param_;
 
 			param() : plate_param_(),
-				color_param_(widget_director::default_frame_color_),
-				text_param_()
+					  color_param_(widget_director::default_frame_color_),
+					  text_param_(), shift_param_()
 			{ }
 		};
 

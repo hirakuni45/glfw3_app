@@ -579,8 +579,8 @@ namespace gui {
 			bool resize_edge = false;
 			if(w->get_state(widget::state::RESIZE_EDGE_ENABLE) && focus) {
 				vtx::srect r = w->get_param().clip_;
-				r.org += 10;
-				r.size -= 20;
+				r.org += 8;
+				r.size -= 16;
 				if(!r.is_focus(msp)) resize_edge = true;
 		   	}
 

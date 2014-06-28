@@ -56,38 +56,10 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_label::update()
 	{
-		gl::core& core = gl::core::get_instance();
-		gl::fonts& fonts = core.at_fonts();
-
 		if(param_.text_in_) return;
 
-		const widget::param& bp = get_param();
-		if(param_.shift_every_ ||
-		  (param_.shift_enable_ && bp.hold_frame_ >= param_.shift_hold_frame_)) {
-			if(!param_.text_param_.font_.empty()) {
-				fonts.push_font_face();
-				fonts.set_font_type(param_.text_param_.font_);
-			}
-			fonts.enable_proportional(param_.text_param_.proportional_);
-			short fw = fonts.get_width(param_.text_param_.text_);
-			if(!param_.text_param_.font_.empty()) {
-				fonts.pop_font_face();
-			}
-			short w = get_rect().size.x - param_.plate_param_.frame_width_ * 2;
-			if(w < fw) {
-				param_.shift_offset_ -= param_.shift_speed_;
-				if((static_cast<short>(param_.shift_offset_) + fw) <= 0) {
-					param_.shift_offset_ = w;
-				}
-				param_.text_param_.offset_.x = param_.shift_offset_;
-			} else {
-				param_.text_param_.offset_.x = 0;
-				param_.shift_offset_ = 0.0f;
-			}
-		} else {
-			param_.text_param_.offset_.x = 0;
-			param_.shift_offset_ = 0.0f;
-		}
+		param_.shift_param_.size_ = get_rect().size.x - param_.plate_param_.frame_width_ * 2;
+		text_shift_update(get_param(), param_.text_param_, param_.shift_param_);
 	}
 
 

@@ -40,6 +40,8 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_frame::update()
 	{
+		param_.shift_param_.size_ = get_rect().size.x - param_.plate_param_.frame_width_ * 2;
+		text_shift_update(get_param(), param_.text_param_, param_.shift_param_);
 	}
 
 
@@ -67,8 +69,15 @@ namespace gui {
 		glPushMatrix();
 
 		vtx::srect rect;
-		rect.org.set(param_.plate_param_.frame_width_);
-		rect.size.set(get_rect().size.x, param_.plate_param_.caption_width_);
+		short fw = param_.plate_param_.frame_width_;
+		rect.org.set(0);
+		rect.size.set(get_rect().size.x - fw * 2, param_.plate_param_.caption_width_);
+
+		vtx::srect clip = wp.clip_;
+		clip.org.x += fw;
+		clip.org.y += fw;
+		clip.size.x -= fw * 2;
+		clip.size.y  = param_.plate_param_.caption_width_;
 
 		widget::text_param tmp = param_.text_param_;
 		const img::rgbaf& cf = wd_.get_color();
@@ -76,7 +85,8 @@ namespace gui {
 		tmp.fore_color_.alpha_scale(cf.a);
 		tmp.shadow_color_ *= cf.r;
 		tmp.shadow_color_.alpha_scale(cf.a);
-		draw_text(tmp, rect, wp.clip_);
+//		tmp.offset_.x += static_cast<short>(slide_pos_);
+		draw_text(tmp, rect, clip);
 
 		core.at_fonts().restore_matrix();
 

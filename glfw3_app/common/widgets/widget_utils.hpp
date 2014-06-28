@@ -165,4 +165,15 @@ namespace gui {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	void render_clipped_mobj(gl::mobj& mo, gl::mobj::handle moh, const vtx::srect& clip,
 		const vtx::spos& ofs);
+
+
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief	テキスト・シフト・サービス
+		@param[in]	bp	widget ベースパラメーター
+		@param[in]	tp	text パラメーター
+		@param[in]	sp	shift パラメーター
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	void text_shift_update(const widget::param& bp, widget::text_param& tp, widget::shift_param& sp);
 }

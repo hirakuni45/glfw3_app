@@ -34,11 +34,7 @@ namespace gui {
 			uint32_t	text_in_pos_;	///< テキスト入力位置
 			uint32_t	text_in_limit_;	///< テキスト入力最大数
 
-			bool		shift_enable_;	///< シフト表示を有効にする場合
-			bool		shift_every_;	///< 常にシフト動作の場合
-			float		shift_offset_;	///< シフト表示のオフセット
-			float		shift_speed_;	///< シフト表示の速度
-			uint32_t	shift_hold_frame_;	///< シフト表示までのホールドフレーム
+			shift_param	shift_param_;
 
 			bool		menu_enable_;	///< メニュー許可
 
@@ -57,9 +53,7 @@ namespace gui {
 						vtx::placement::vertical::CENTER)),
 				color_param_select_(widget_director::default_label_color_select_),
 				read_only_(ro), text_in_(false), text_in_pos_(0), text_in_limit_(0),
-				shift_enable_(true), shift_every_(false),
-				shift_offset_(0.0f), shift_speed_(0.5f),
-				shift_hold_frame_(2 * 60),
+				shift_param_(),
 				menu_enable_(false)
 				{ }
 		};

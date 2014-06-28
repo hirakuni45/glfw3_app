@@ -386,4 +386,52 @@ namespace gui {
 			glViewport(0, 0, vsz.x, vsz.y);
 		}
 	}
+
+
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief	テキスト・シフト・サービス
+		@param[in]	bp	widget ベースパラメーター
+		@param[in]	tp	text パラメーター
+		@param[in]	sp	shift パラメーター
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	void text_shift_update(const widget::param& bp, widget::text_param& tp, widget::shift_param& sp)
+	{
+		gl::core& core = gl::core::get_instance();
+		gl::fonts& fonts = core.at_fonts();
+
+		if(sp.every_ ||
+		  (sp.enable_ && bp.hold_frame_ >= sp.hold_frame_)) {
+			if(!tp.font_.empty()) {
+				fonts.push_font_face();
+				fonts.set_font_type(tp.font_);
+			}
+			fonts.enable_proportional(tp.proportional_);
+			short fw = fonts.get_width(tp.text_);
+			if(!tp.font_.empty()) {
+				fonts.pop_font_face();
+			}
+			if(sp.size_ < fw) {
+				if(sp.offset_ == 0 && sp.org_wait_count_) {
+					--sp.org_wait_count_;
+				} else {
+					sp.offset_ -= sp.speed_;
+					if(sp.offset_ == 0 && sp.org_wait_frame_) {
+						sp.org_wait_count_ = sp.org_wait_frame_;
+					}
+					if((static_cast<short>(sp.offset_) + fw) <= 0) {
+						sp.offset_ = sp.size_;
+					}
+				}
+				tp.offset_.x = sp.offset_;
+			} else {
+				tp.offset_.x = 0;
+				sp.offset_ = 0.0f;
+			}
+		} else {
+			tp.offset_.x = 0;
+			sp.offset_ = 0.0f;
+		}
+	}
 }
