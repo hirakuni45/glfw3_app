@@ -37,7 +37,7 @@ namespace al {
 		};
 
 		struct sstream_t {
-			audio_io*				audio_;
+			audio_io*				audio_io_;
 			audio_io::slot_handle	slot_;
 			std::string				root_;
 			std::string				file_;
@@ -59,7 +59,7 @@ namespace al {
 			std::string				fph_;
 			tag						tag_;
 
-			sstream_t() : audio_(0), slot_(0),
+			sstream_t() : audio_io_(0), slot_(0),
 				root_(), file_(),
 				start_(false), finsh_(false), stop_(false),
 				next_(false), replay_(false), prior_(false), pause_(false), seek_(false),
@@ -69,20 +69,15 @@ namespace al {
 		};
 
 	private:
-		al::audio_io	audio_;
+		al::audio_io	audio_io_;
 
 		al::snd_files	snd_files_;
 
-		std::vector<al::audio_io::slot_handle>	slots_;
+		typedef std::vector<al::audio_io::slot_handle>  slots;
+		slots			slots_;
 
-		struct se_t {
-			al::audio_io::wave_handle	wave_;
-			const i_audio*				wsrc_;
-			se_t() : wave_(0), wsrc_(0) { }
-			se_t(al::audio_io::wave_handle h, const i_audio* ia) : wave_(h), wsrc_(ia) { }
-		};
-		typedef std::vector<se_t>	se_ts;
-		se_ts			se_ts_;
+		typedef std::vector<al::audio_io::wave_handle>	ses;
+		ses				ses_;
 
 		int				slot_max_;
 
@@ -107,7 +102,7 @@ namespace al {
 		//-----------------------------------------------------------------//
 		sound() : slot_max_(0), stream_fph_cnt_(0),
 			stream_slot_(0) {
-			se_ts_.push_back(se_t());
+			ses_.push_back(0);
 		}
 
 
@@ -189,7 +184,7 @@ namespace al {
 			@return 波形ハンドルを返す。（「０」ならエラー）
 		 */
 		//-----------------------------------------------------------------//
-		audio_io::wave_handle request_se(int slot, const i_audio* aif, bool loop);
+		audio_io::wave_handle request_se(int slot, const audio aif, bool loop);
 
 
 		//-----------------------------------------------------------------//
@@ -303,7 +298,7 @@ namespace al {
 			@param[in]	gain	ゲイン（0.0 to 1.0）
 		 */
 		//-----------------------------------------------------------------//
-		void set_gain_stream(float gain) { audio_.set_gain(stream_slot_, gain); }
+		void set_gain_stream(float gain) { audio_io_.set_gain(stream_slot_, gain); }
 
 
 		//-----------------------------------------------------------------//

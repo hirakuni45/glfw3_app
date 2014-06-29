@@ -166,7 +166,7 @@ namespace al {
 				snd_file& io = sndios_[i];
 				if(check_file_exts_(io.ext, ext)) {
 					if(io.sio->load(fin, opt)) {
-						aif_ = io.sio->get_audio_if();
+						aif_ = io.sio->get_audio();
 						return true;
 					}
 					n = i;
@@ -178,7 +178,7 @@ namespace al {
 			if(n != i) {
 				snd_file& io = sndios_[i];
 				if(io.sio->load(fin, opt)) {
-					aif_ = io.sio->get_audio_if();
+					aif_ = io.sio->get_audio();
 					return true;
 				}
 			}
@@ -202,7 +202,7 @@ namespace al {
 			for(size_t i = 0; i < sndios_.size(); ++i) {
 				snd_file& io = sndios_[i];
 				if(check_file_exts_(io.ext, ext)) {
-					io.sio->set_audio_if(aif_);
+					io.sio->set_audio(aif_);
 					if(io.sio->save(fout, opt)) {
 						return true;
 					}
@@ -268,7 +268,7 @@ namespace al {
 		@return ストリーム用オーディオ・インターフェース
 	*/
 	//-----------------------------------------------------------------//
-	const i_audio* snd_files::get_stream()
+	const audio snd_files::get_stream()
 	{
 		if(stream_) {
 			return stream_->get_stream();

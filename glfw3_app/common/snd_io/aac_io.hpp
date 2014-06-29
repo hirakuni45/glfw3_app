@@ -48,9 +48,9 @@ namespace al {
 
 		decode_mp4_t	mp4_t_;
 
-		i_audio*		audio_;
-		i_audio*		stream_;
-		i_audio*		buffer_;
+		audio			audio_;
+		audio			stream_;
+		audio			buffer_;
 		uint32_t		index_;
 		uint32_t		stream_cnt_;
 		uint32_t		buffer_cnt_;
@@ -61,7 +61,7 @@ namespace al {
 		bool decode_audio_mp4_(decode_mp4_t& dt, uint32_t idx);
 		bool decode_track_mp4_(utils::file_io& fin, decode_mp4_t& dt);
 		bool decode_mp4_param_(decode_mp4_t& dt);
-		i_audio* decode_mp4_file_(utils::file_io& fin);
+		audio decode_mp4_file_(utils::file_io& fin);
 		bool create_mp4_info_(utils::file_io& fin, decode_mp4_t& dt, audio_info& info);
 
 	public:
@@ -70,8 +70,7 @@ namespace al {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		aac_io() : audio_(0), stream_(0), buffer_(0), index_(0),
-		  stream_cnt_(0), buffer_cnt_(0) { }
+		aac_io() : index_(0), stream_cnt_(0), buffer_cnt_(0) { }
 
 
 		//-----------------------------------------------------------------//
@@ -171,7 +170,7 @@ namespace al {
 			@return ストリーム用オーディオ・インターフェース
 		*/
 		//-----------------------------------------------------------------//
-		const i_audio* get_stream() const override { return stream_; }
+		const audio get_stream() const override { return stream_; }
 
 
 		//-----------------------------------------------------------------//
@@ -200,7 +199,7 @@ namespace al {
 			@return オーディオ・インターフェースクラス
 		*/
 		//-----------------------------------------------------------------//
-		const i_audio* get_audio_if() const override { return audio_; }
+		const audio get_audio() const override { return audio_; }
 
 
 		//-----------------------------------------------------------------//
@@ -209,7 +208,7 @@ namespace al {
 			@param[in]	aif	イメージインターフェース
 		*/
 		//-----------------------------------------------------------------//
-		void set_audio_if(const i_audio* aif) override { }
+		void set_audio(const audio aif) override { }
 
 
 		//-----------------------------------------------------------------//

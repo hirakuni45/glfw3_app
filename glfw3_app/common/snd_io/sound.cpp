@@ -90,18 +90,18 @@ namespace al {
 
 				if(pause != sst->pause_) {
 					pause = sst->pause_;
-					sst->audio_->pause_stream(sst->slot_, pause);
+					sst->audio_io_->pause_stream(sst->slot_, pause);
 				}
 				sst->pos_ = pos;
 				time_t t;
 				ainfo.sample_to_time(pos, t);
 				sst->time_ = t;
-				audio_io::wave_handle h = sst->audio_->status_stream(sst->slot_);
+				audio_io::wave_handle h = sst->audio_io_->status_stream(sst->slot_);
 				if(h != 0) {
 					uint32_t len = sdf.read_stream(fin, pos, stream_buff_size);
 					if(len) {
 						pos += len;
-						sst->audio_->queue_stream(sst->slot_, h, sdf.get_stream());
+						sst->audio_io_->queue_stream(sst->slot_, h, sdf.get_stream());
 					} else {
 						pos = ainfo.samples;
 					}
@@ -118,7 +118,7 @@ namespace al {
 				usleep(8000);	// 8ms くらいの時間待ち
 
 			}
-			sst->audio_->purge_stream(sst->slot_);
+			sst->audio_io_->purge_stream(sst->slot_);
 			sst->pos_ = sst->len_;
 			sdf.close_stream();
 			fin.close();
@@ -182,20 +182,20 @@ namespace al {
 		if(slot < 0) {
 			for(size_t i = 0; i < slots_.size(); ++i) {
 				audio_io::slot_handle sh = slots_[i];
-				if(!audio_.get_slot_status(sh)) {
-					audio_.set_wave(sh, wh);
-					audio_.set_loop(sh, loop);
-					audio_.play(sh);
+				if(!audio_io_.get_slot_status(sh)) {
+					audio_io_.set_wave(sh, wh);
+					audio_io_.set_loop(sh, loop);
+					audio_io_.play(sh);
 					f = true;
 					break;
 				}
 			}
 		} else if(static_cast<size_t>(slot) < slots_.size()) {
 			audio_io::slot_handle sh = slots_[slot];
-			audio_.stop(sh);
-			audio_.set_wave(sh, wh);	// 波形を登録して再生
-			audio_.set_loop(sh, loop);
-			audio_.play(sh);
+			audio_io_.stop(sh);
+			audio_io_.set_wave(sh, wh);	// 波形を登録して再生
+			audio_io_.set_loop(sh, loop);
+			audio_io_.play(sh);
 			f = true;
 		}
 		return f;
@@ -210,16 +210,16 @@ namespace al {
 	//-----------------------------------------------------------------//
 	void sound::initialize(int slot_max)
 	{
-		audio_.initialize();
+		audio_io_.initialize();
 
 		snd_files_.initialize();
 
 		slot_max_ = slot_max;
 		for(int i = 0; i < slot_max; ++i) {
-			slots_.push_back(audio_.create_slot(0));
+			slots_.push_back(audio_io_.create_slot(0));
 		}
 
-		stream_slot_ = audio_.create_slot(0);
+		stream_slot_ = audio_io_.create_slot(0);
 
 		destroy_se_all();
 
@@ -255,14 +255,12 @@ namespace al {
 		}
 
 		uint32_t no = 0;
-		const i_audio* aif = snd_files_.get_audio_if();
+		const audio aif = snd_files_.get_audio();
 		if(aif) {
-			al::audio_io::wave_handle wh = audio_.create_wave(aif);
+			al::audio_io::wave_handle wh = audio_io_.create_wave(aif);
 			if(wh) {
-				no = se_ts_.size();
-				se_ts_.push_back(se_t(wh, aif));
-			} else {
-				delete aif;
+				no = ses_.size();
+				ses_.push_back(wh);
 			}
 		}
 		return no;
@@ -278,10 +276,10 @@ namespace al {
 		@return 波形ハンドルを返す。（「０」ならエラー）
 	 */
 	//-----------------------------------------------------------------//
-	audio_io::wave_handle sound::request_se(int slot, const i_audio* aif, bool loop)
+	audio_io::wave_handle sound::request_se(int slot, const audio aif, bool loop)
 	{
-		audio_io::wave_handle wh = audio_.create_wave(aif);
-		if(aif != 0) {
+		audio_io::wave_handle wh = audio_io_.create_wave(aif);
+		if(aif) {
 			request_sub_(slot, wh, loop);
 		}
 		return wh;
@@ -300,8 +298,8 @@ namespace al {
 	bool sound::request_se(int slot, uint32_t se_no, bool loop)
 	{
 		bool f = false;
-		if(se_no > 0 && se_no < se_ts_.size()) {
-			f = request_sub_(slot, se_ts_[se_no].wave_, loop);
+		if(se_no > 0 && se_no < ses_.size()) {
+			f = request_sub_(slot, ses_[se_no], loop);
 		}
 		return f;
 	}
@@ -318,7 +316,7 @@ namespace al {
 	{
 		if(static_cast<size_t>(slot) < slots_.size()) {
 			audio_io::slot_handle sh = slots_[slot];
-			audio_.pause(sh);
+			audio_io_.pause(sh);
 			return true;
 		} else {
 			return false;
@@ -337,7 +335,7 @@ namespace al {
 	{
 		if(static_cast<size_t>(slot) < slots_.size()) {
 			audio_io::slot_handle sh = slots_[slot];
-			audio_.stop(sh);
+			audio_io_.stop(sh);
 			return true;
 		} else {
 			return false;
@@ -356,7 +354,7 @@ namespace al {
 	{
 		if(static_cast<size_t>(slot) < slots_.size()) {
 			audio_io::slot_handle sh = slots_[slot];
-			return audio_.get_slot_status(sh);
+			return audio_io_.get_slot_status(sh);
 		} else {
 			return false;
 		}
@@ -370,16 +368,13 @@ namespace al {
 	//-----------------------------------------------------------------//
 	void sound::destroy_se_all()
 	{
-		BOOST_FOREACH(const se_t& t, se_ts_) {
-			if(t.wave_) {
-				audio_.destroy_wave(t.wave_);
-			}
-			if(t.wsrc_) {
-				delete t.wsrc_;
+		BOOST_FOREACH(ses::value_type h, ses_) {
+			if(h) {
+				audio_io_.destroy_wave(h);
 			}
 		}
-		se_ts_.clear();
-		se_ts_.push_back(se_t());
+		ses_.clear();
+		ses_.push_back(0);
 	}
 
 
@@ -394,7 +389,7 @@ namespace al {
 	{
 		if(slot >= 0 && slot < static_cast<int>(slots_.size())) {
 			audio_io::slot_handle sh = slots_[slot];
-			audio_.set_gain(sh, gain);
+			audio_io_.set_gain(sh, gain);
 		}
 	}
 
@@ -416,7 +411,7 @@ namespace al {
 		stream_tag_.clear();
 
 		stream_start_ = true;
-		sstream_t_.audio_ = &audio_;
+		sstream_t_.audio_io_ = &audio_io_;
 		sstream_t_.slot_ = stream_slot_;
 		sstream_t_.root_ = root;
 		sstream_t_.file_ = file;
@@ -560,7 +555,7 @@ namespace al {
 		destroy_se_all();
 
 		for(size_t i = 0; i < slots_.size(); ++i) {
-			audio_.destroy_slot(slots_[i]);
+			audio_io_.destroy_slot(slots_[i]);
 		}
 		slots_.clear();
 	}

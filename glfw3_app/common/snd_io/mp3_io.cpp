@@ -170,7 +170,7 @@ namespace al {
 	}
 
 
-	bool mp3_io::decode_(file_io& fin, i_audio* out)
+	bool mp3_io::decode_(file_io& fin, audio out)
 	{
 		mad_stream_init(&mad_stream_);
 		mad_frame_init(&mad_frame_);
@@ -781,20 +781,17 @@ namespace al {
 	//-----------------------------------------------------------------//
 	bool mp3_io::load(utils::file_io& fin, const std::string& opt)
 	{
-		delete audio_;
-		audio_ = 0;
-
 		audio_info info;
 		mp3_info_.reset();
 		bool f = analize_frame_(fin, info, mp3_info_);
 		if(f) {
 			fin.seek(info.header_size, file_io::seek::set);
 
-			i_audio* aif = 0;
+			audio aif;
 			if(info.chanels == 1) {
-				aif = dynamic_cast<i_audio*>(new audio_mno16);
+				aif = audio(new audio_mno16);
 			} else if(info.chanels == 2) {
-				aif = dynamic_cast<i_audio*>(new audio_sto16);
+				aif = audio(new audio_sto16);
 			}
 			if(aif) {
 //				std::cout << boost::format("Sampling: %d [Hz]\n") % info.frequency;
@@ -803,8 +800,6 @@ namespace al {
 
 				if(decode_(fin, aif)) {
 					audio_ = aif;
-				} else {
-					delete aif;
 				}
 			} else {
 				f = false;
@@ -859,19 +854,19 @@ namespace al {
 
 			if(inf.chanels == 1) {
 				if(inf.bits == 8) {
-					stream_ = dynamic_cast<i_audio*>(new audio_mno8);
-					output_buffer_ = dynamic_cast<i_audio*>(new audio_mno8);
+					stream_ = audio(new audio_mno8);
+					output_buffer_ = audio(new audio_mno8);
 				} else if(inf.bits == 16) {
-					stream_ = dynamic_cast<i_audio*>(new audio_mno16);
-					output_buffer_ = dynamic_cast<i_audio*>(new audio_mno16);
+					stream_ = audio(new audio_mno16);
+					output_buffer_ = audio(new audio_mno16);
 				}
 			} else if(inf.chanels == 2) {
 				if(inf.bits == 8) {
-					stream_ = dynamic_cast<i_audio*>(new audio_sto8);
-					output_buffer_ = dynamic_cast<i_audio*>(new audio_sto8);
+					stream_ = audio(new audio_sto8);
+					output_buffer_ = audio(new audio_sto8);
 				} else if(inf.bits == 16) {
-					stream_ = dynamic_cast<i_audio*>(new audio_sto16);
-					output_buffer_ = dynamic_cast<i_audio*>(new audio_sto16);
+					stream_ = audio(new audio_sto16);
+					output_buffer_ = audio(new audio_sto16);
 				}
 			}
 
@@ -997,10 +992,6 @@ namespace al {
 			mad_frame_finish(&mad_frame_);
 			mad_stream_finish(&mad_stream_);
 		}
-		delete output_buffer_;
-		output_buffer_ = 0;
-		delete stream_;
-		stream_ = 0;
 	}
 
 
@@ -1011,8 +1002,6 @@ namespace al {
 	//-----------------------------------------------------------------//
 	void mp3_io::destroy()
 	{
-		delete audio_;
-		audio_ = 0;
 		close_stream();
 		img_files_.destroy();
 	}

@@ -97,7 +97,7 @@ namespace al {
 	}
 
 
-	bool audio_io::set_buffer(ALuint bh, const i_audio* aif)
+	bool audio_io::set_buffer_(ALuint bh, const audio aif)
 	{
 		ALsizei num = aif->get_samples();
 		ALenum format;
@@ -219,14 +219,14 @@ namespace al {
 		@return	波形・ハンドルを返す
 	*/
 	//-----------------------------------------------------------------//
-	audio_io::wave_handle audio_io::create_wave(const i_audio* aif)
+	audio_io::wave_handle audio_io::create_wave(const audio aif)
 	{
 		wave_handle wh;
 
 		if(aif == 0) return 0;
 
 		alGenBuffers(1, &wh);
-		set_buffer(wh, aif);
+		set_buffer_(wh, aif);
 
 		if(wh == AL_NONE) {
 ///			ALenum alerror = alGetError();
@@ -383,11 +383,11 @@ namespace al {
 						※常に、同じ構成を与える必要がある。
 	*/
 	//-----------------------------------------------------------------//
-	void audio_io::queue_stream(slot_handle ssh, wave_handle bh, const i_audio* aif)
+	void audio_io::queue_stream(slot_handle ssh, wave_handle bh, const audio aif)
 	{
 		if(ssh == 0 || bh == 0 || aif == 0) return;
 
-		set_buffer(bh, aif);
+		set_buffer_(bh, aif);
 		alSourceQueueBuffers(ssh, 1, &bh);
 
 		// ストリーム・ソースを「PLAY」

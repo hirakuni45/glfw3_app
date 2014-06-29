@@ -54,17 +54,17 @@ namespace al {
 		size_t					data_offset_;
 		int						riff_num_;
 
-		i_audio*		audio_;
+		audio			audio_;
 
-		i_audio*		stream_;
+		audio			stream_;
 		int				stream_blocks_;
 
-		const i_audio*	audio_source_;
+		audio		   	audio_source_;
 
 		tag				tag_;
 
 		bool parse_header_(utils::file_io& fin);
-		bool create_wav_(utils::file_io& fout, const i_audio* src);
+		bool create_wav_(utils::file_io& fout, const audio src);
 
 	public:
 		//-----------------------------------------------------------------//
@@ -72,7 +72,7 @@ namespace al {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		wav_io() : audio_(0), stream_(0), stream_blocks_(0), audio_source_(0) { }
+		wav_io() : stream_blocks_(0) { }
 
 
 		//-----------------------------------------------------------------//
@@ -173,11 +173,11 @@ namespace al {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	ストリーム読み込みバッファを取得する
-			@return ストリーム用オーディオ・インターフェース
+			@brief	ストリームを取得する
+			@return ストリーム用オーディオ
 		*/
 		//-----------------------------------------------------------------//
-		const i_audio* get_stream() const override { return stream_; }
+		const audio get_stream() const override { return stream_; }
 
 
 		//-----------------------------------------------------------------//
@@ -202,20 +202,20 @@ namespace al {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	オーディオ・インターフェースを取得する
-			@return オーディオ・インターフェースクラス
+			@brief	オーディオを取得する
+			@return オーディオ
 		*/
 		//-----------------------------------------------------------------//
-		const i_audio* get_audio_if() const override { return audio_; }
+		const audio get_audio() const override { return audio_; }
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	オーディオ・インターフェースを設定する
-			@param[in]	aif	オーディオ・インターフェースクラス
+			@brief	オーディオを設定する
+			@param[in]	au	オーディオ
 		*/
 		//-----------------------------------------------------------------//
-		void set_audio_if(const i_audio* aif) override { audio_source_ = aif; }
+		void set_audio(const audio au) override { audio_source_ = au; }
 
 
 		//-----------------------------------------------------------------//

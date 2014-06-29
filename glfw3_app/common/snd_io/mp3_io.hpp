@@ -49,9 +49,9 @@ namespace al {
 
 		mp3_info		mp3_info_;
 
-		i_audio*		audio_;
+		audio			audio_;
 
-		i_audio*		stream_;
+		audio			stream_;
 
 		mad_stream		mad_stream_;
 		mad_frame		mad_frame_;
@@ -71,7 +71,7 @@ namespace al {
 		bool			id3v1_;
 
 		unsigned char	input_buffer_[INPUT_BUFFER_SIZE + MAD_BUFFER_GUARD];
-		i_audio*		output_buffer_;
+		audio			output_buffer_;
 
 		img::img_files	img_files_;
 
@@ -80,7 +80,7 @@ namespace al {
 		void apply_filter_(mad_frame& frame);
 		int fill_read_buffer_(utils::file_io& fin, mad_stream& strm);
 		bool analize_frame_(utils::file_io& fin, audio_info& info, mp3_info& mp3info);
-		bool decode_(utils::file_io& fin, i_audio* out);
+		bool decode_(utils::file_io& fin, audio out);
 
 	public:
 		//-----------------------------------------------------------------//
@@ -88,8 +88,7 @@ namespace al {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		mp3_io() : audio_(0), stream_(0), subband_filter_enable_(false), id3v1_(false),
-				  output_buffer_(0) { }
+		mp3_io() : subband_filter_enable_(false), id3v1_(false) { }
 
 
 		//-----------------------------------------------------------------//
@@ -190,10 +189,10 @@ namespace al {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	ストリーム読み込みバッファを取得する
-			@return ストリーム用オーディオ・インターフェース
+			@return ストリーム用オーディオ
 		*/
 		//-----------------------------------------------------------------//
-		const i_audio* get_stream() const override { return stream_; }
+		const audio get_stream() const override { return stream_; }
 
 
 		//-----------------------------------------------------------------//
@@ -218,20 +217,20 @@ namespace al {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	オーディオ・インターフェースを取得する
-			@return オーディオ・インターフェースクラス
+			@brief	オーディオを取得する
+			@return オーディオ
 		*/
 		//-----------------------------------------------------------------//
-		const i_audio* get_audio_if() const override { return audio_; }
+		const audio get_audio() const override { return audio_; }
 
 
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	オーディオの登録
-			@param[in]	aif	イメージインターフェース
+			@param[in]	au	オーディオ
 		*/
 		//-----------------------------------------------------------------//
-		void set_audio_if(const i_audio* aif) override { }
+		void set_audio(const audio au) override { }
 
 
 		//-----------------------------------------------------------------//

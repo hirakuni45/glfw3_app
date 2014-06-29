@@ -54,7 +54,7 @@ namespace al {
 		bool	init_;
 		bool	destroy_;
 
-		bool set_buffer(ALuint bh, const i_audio* aif);
+		bool set_buffer_(ALuint bh, const audio aif);
 
 	public:
 		//-----------------------------------------------------------------//
@@ -105,7 +105,7 @@ namespace al {
 			@return	波形・ハンドルを返す
 		*/
 		//-----------------------------------------------------------------//
-		wave_handle create_wave(const i_audio* aif);
+		wave_handle create_wave(const audio aif);
 
 
 		//-----------------------------------------------------------------//
@@ -282,7 +282,7 @@ namespace al {
 							※常に、同じ構成を与える必要がある。
 		*/
 		//-----------------------------------------------------------------//
-		void queue_stream(slot_handle ssh, wave_handle bh, const i_audio* aif);
+		void queue_stream(slot_handle ssh, wave_handle bh, const audio aif);
 
 
 		//-----------------------------------------------------------------//

@@ -126,7 +126,7 @@ namespace al {
 		@param[in]	src		オーディオ・インターフェース
 	*/
 	//-----------------------------------------------------------------//
-	bool wav_io::create_wav_(file_io& fout, const i_audio* src)
+	bool wav_io::create_wav_(file_io& fout, const audio src)
 	{
 		int align;
 		int bits;
@@ -270,26 +270,25 @@ namespace al {
 			std::cout << "Bits / Sample: " << static_cast<int>(ext_.format.bits_per_sample) << std::endl;
 			std::cout << "Block Align:   " << static_cast<int>(ext_.format.block_align) << std::endl;
 #endif
-			i_audio* aif = 0;
+			audio aif;
 			if(ext_.format.channels == 1) {		// mono
 				if(ext_.format.bits_per_sample == 8) {
-					aif = dynamic_cast<i_audio*>(new audio_mno8);
+					aif = audio(new audio_mno8);
 				} else if(ext_.format.bits_per_sample == 16) {
-					aif = dynamic_cast<i_audio*>(new audio_mno16);
+					aif = audio(new audio_mno16);
 				} else {
 				}
 			} else if(ext_.format.channels == 2) {	// stereo
 				if(ext_.format.bits_per_sample == 8) {
-					aif = dynamic_cast<i_audio*>(new audio_sto8);
+					aif = audio(new audio_sto8);
 				} else if(ext_.format.bits_per_sample == 16) {
-					aif = dynamic_cast<i_audio*>(new audio_sto16);
+					aif = audio(new audio_sto16);
 				} else {
 				}
 			} else {
 			}
 			if(aif) {
 				if(!fin.seek(data_offset_, utils::file_io::seek::set)) {
-					delete aif;
 					return false;
 				}
 				aif->create(ext_.format.samples_per_sec,
@@ -317,25 +316,23 @@ namespace al {
 	//-----------------------------------------------------------------//
 	bool wav_io::open_stream(utils::file_io& fi, int size, audio_info& inf)
 	{
-		delete stream_;
-		stream_ = 0;
 		stream_blocks_ = 0;
 
 		if(info(fi, inf)) {
 			if(inf.chanels == 1) {
 				if(inf.bits == 8) {
-					stream_ = dynamic_cast<i_audio*>(new audio_mno8);
+					stream_ = audio(new audio_mno8);
 					stream_blocks_ = 1;
 				} else if(inf.bits == 16) {
-					stream_ = dynamic_cast<i_audio*>(new audio_mno16);
+					stream_ = audio(new audio_mno16);
 					stream_blocks_ = 2;
 				}
 			} else if(inf.chanels == 2) {
 				if(inf.bits == 8) {
-					stream_ = dynamic_cast<i_audio*>(new audio_sto8);
+					stream_ = audio(new audio_sto8);
 					stream_blocks_ = 2;
 				} else if(inf.bits == 16) {
-					stream_ = dynamic_cast<i_audio*>(new audio_sto16);
+					stream_ = audio(new audio_sto16);
 					stream_blocks_ = 4;
 				}
 			}
@@ -384,8 +381,6 @@ namespace al {
 	//-----------------------------------------------------------------//
 	void wav_io::close_stream()
 	{
-		delete stream_;
-		stream_ = 0;
 	}
 
 
@@ -399,18 +394,15 @@ namespace al {
 	//-----------------------------------------------------------------//
 	bool wav_io::save(utils::file_io& fout, const std::string& opt)
 	{
-		const i_audio* src = 0;
-		if(audio_source_ == 0) {
+		if(!audio_source_) {
 			return false;
 		}
 
-		src = audio_source_;
-
-		if(src->get_samples() == 0) {
+		if(audio_source_->get_samples() == 0) {
 			return false;
 		}
 
-		if(!create_wav_(fout, src)) {
+		if(!create_wav_(fout, audio_source_)) {
 			return false;
 		}
 

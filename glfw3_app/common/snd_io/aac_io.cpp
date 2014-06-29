@@ -185,7 +185,7 @@ namespace al {
 	}
 #endif
 
-	static i_audio* decode_aac_file_(utils::file_io& fin)
+	static audio decode_aac_file_(utils::file_io& fin)
 	{
 		int old_format = 0;
 		int outputFormat = FAAD_FMT_16BIT;
@@ -559,7 +559,7 @@ namespace al {
 	}
 
 
-	i_audio* aac_io::decode_mp4_file_(utils::file_io& fin)
+	audio aac_io::decode_mp4_file_(utils::file_io& fin)
 	{
 		decode_mp4_t dt;
 		if(!decode_track_mp4_(fin, dt)) {
@@ -577,18 +577,17 @@ namespace al {
 		}
 
 		uint32_t out_size = (dt.samples - 1) * dt.framesize;
-		i_audio* aif = 0;
-
+		audio aif;
 		if(dt.channels == 1) {
-			aif = dynamic_cast<i_audio*>(new audio_mno16);
+			aif = audio(new audio_mno16);
 		} else if(dt.channels == 2) {
-			aif = dynamic_cast<i_audio*>(new audio_sto16);
+			aif = audio(new audio_sto16);
 		} else {
 			std::cout << boost::format("Can't decode chanel: %d\n") % dt.channels;
 			fflush(stdout);
 			NeAACDecClose(dt.h_decoder);
 			mp4ff_close(dt.infile);
-			return 0;
+			return aif;
 		}
 		aif->create(dt.samplerate, out_size);
 
@@ -604,7 +603,6 @@ namespace al {
 			if(!f) {
 				std::cout << boost::format("Reading from MP4 file failed. (%d)\n") % dt.count;
 				destroy_mp4_(dt);
-				delete aif;
 				return 0;
 			}
 
@@ -825,11 +823,6 @@ namespace al {
 	//-----------------------------------------------------------------//
 	bool aac_io::open_stream(utils::file_io& fi, int size, audio_info& info)
 	{
-		delete stream_;
-		stream_ = 0;
-		delete buffer_;
-		buffer_ = 0;
-
 		long pos = fi.tell();
 		uint8_t header[8];
 		uint32_t len = fi.read(header, 1, 8);
@@ -841,12 +834,12 @@ namespace al {
 
 			if(mp4_t_.channels == 1) {
 				info.type = audio_format::PCM16_MONO;
-				stream_ = dynamic_cast<i_audio*>(new audio_mno16);
-				buffer_ = dynamic_cast<i_audio*>(new audio_mno16);
+				stream_ = audio(new audio_mno16);
+				buffer_ = audio(new audio_mno16);
 			} else if(mp4_t_.channels == 2) {
 				info.type = audio_format::PCM16_STEREO;
-				stream_ = dynamic_cast<i_audio*>(new audio_sto16);
-				buffer_ = dynamic_cast<i_audio*>(new audio_sto16);
+				stream_ = audio(new audio_sto16);
+				buffer_ = audio(new audio_sto16);
 			} else {
 				return false;
 			}
@@ -974,11 +967,6 @@ namespace al {
 	void aac_io::close_stream()
 	{
 		destroy_mp4_(mp4_t_);
-
-		delete buffer_;
-		buffer_ = 0;
-		delete stream_;
-		stream_ = 0;
 	}
 
 
@@ -989,10 +977,6 @@ namespace al {
 	//-----------------------------------------------------------------//
 	void aac_io::destroy()
 	{
-		delete buffer_;
-		buffer_ = 0;
-		delete stream_;
-		stream_ = 0;
 	}
 
 }

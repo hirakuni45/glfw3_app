@@ -5,6 +5,7 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
+#include <memory>
 #include "utils/file_io.hpp"
 #include "audio.hpp"
 
@@ -111,5 +112,7 @@ namespace al {
 		virtual void destroy() = 0;
 
 	};
+
+	typedef std::shared_ptr<i_audio>  audio;
 }
 
