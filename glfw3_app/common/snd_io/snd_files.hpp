@@ -5,6 +5,7 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
+#include <memory>
 #include "i_snd_io.hpp"
 
 namespace al {
@@ -17,7 +18,8 @@ namespace al {
 	class snd_files {
 
 		struct snd_file {
-			i_snd_io*	sio;
+			typedef std::shared_ptr<i_snd_io>  snd_io;
+			snd_io		sio;
 			std::string	ext;
 		};
 		typedef std::vector<snd_file>	sndios;
@@ -27,12 +29,12 @@ namespace al {
 
 		const i_audio*	aif_;
 
-		i_snd_io*		stream_;
+		snd_file::snd_io	stream_;
 		tag				tag_;
 
 		bool			init_;
 
-		void add_sound_fileio_context_(i_snd_io* sio, const std::string& exts);
+		void add_sound_fileio_context_(snd_file::snd_io sio, const std::string& exts);
 
 		static uint32_t	tag_serial_;
 

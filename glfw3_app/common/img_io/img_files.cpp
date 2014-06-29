@@ -28,7 +28,7 @@ namespace img {
 	}
 
 
-	void img_files::add_image_file_io_context_(i_img_io* imi, const std::string& exts)
+	void img_files::add_image_file_io_context_(img_file::img_io imi, const std::string& exts)
 	{
 		if(imi) {
 			utils::strings ss;
@@ -42,7 +42,6 @@ namespace img {
 					return;
 				}
 			}
-			delete imi;
 		}
 	}
 
@@ -59,12 +58,12 @@ namespace img {
 		if(init_) return;
 		init_ = true;
 
-		add_image_file_io_context_(dynamic_cast<i_img_io*>(new bmp_io), exts);
-		add_image_file_io_context_(dynamic_cast<i_img_io*>(new png_io), exts);
-		add_image_file_io_context_(dynamic_cast<i_img_io*>(new jpeg_io), exts);
-		add_image_file_io_context_(dynamic_cast<i_img_io*>(new openjpeg_io), exts);
+		add_image_file_io_context_(img_file::img_io(new bmp_io), exts);
+		add_image_file_io_context_(img_file::img_io(new png_io), exts);
+		add_image_file_io_context_(img_file::img_io(new jpeg_io), exts);
+		add_image_file_io_context_(img_file::img_io(new openjpeg_io), exts);
 		// TGA フォーマットはシグネチュアが無いので、最後に評価する事
-		add_image_file_io_context_(dynamic_cast<i_img_io*>(new tga_io), exts);
+		add_image_file_io_context_(img_file::img_io(new tga_io), exts);
 
 		imf_ = 0;
 	}
@@ -208,10 +207,6 @@ namespace img {
 	//-----------------------------------------------------------------//
 	void img_files::destroy()
 	{
-		BOOST_FOREACH(img_file& io, imgios_) {
-			delete io.igf;
-		}
-
 		imgios().swap(imgios_);
 
 		imf_ = 0;

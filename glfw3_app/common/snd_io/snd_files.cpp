@@ -26,7 +26,7 @@ namespace al {
 
 	uint32_t snd_files::tag_serial_ = 0;
 
-	void snd_files::add_sound_fileio_context_(i_snd_io* sio, const std::string& exts)
+	void snd_files::add_sound_fileio_context_(snd_file::snd_io sio, const std::string& exts)
 	{
 		if(sio) {
 			sio->initialize();
@@ -41,7 +41,6 @@ namespace al {
 					return;
 				}
 			}
-			delete sio;
 		}
 	}
 
@@ -61,11 +60,11 @@ namespace al {
 
 		exts_ = exts;
 
-		add_sound_fileio_context_(dynamic_cast<i_snd_io*>(new wav_io), exts);
-		add_sound_fileio_context_(dynamic_cast<i_snd_io*>(new aac_io), exts);
+		add_sound_fileio_context_(snd_file::snd_io(new wav_io), exts);
+		add_sound_fileio_context_(snd_file::snd_io(new aac_io), exts);
 
 		// MP3 はタグが、前、後、にあるのか不明な為、検出が難しい為、最後に調べる。
-		add_sound_fileio_context_(dynamic_cast<i_snd_io*>(new mp3_io), exts);
+		add_sound_fileio_context_(snd_file::snd_io(new mp3_io), exts);
 
 		aif_ = 0;
 		stream_ = 0;
@@ -319,9 +318,6 @@ namespace al {
 	//-----------------------------------------------------------------//
 	void snd_files::destroy()
 	{
-		BOOST_FOREACH(snd_file& sd, sndios_) {
-			delete sd.sio;
-		}
 		sndios().swap(sndios_);
 
 		aif_ = 0;

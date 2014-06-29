@@ -5,6 +5,7 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
+#include <memory>
 #include "img_io/i_img_io.hpp"
 #include "utils/file_io.hpp"
 
@@ -18,7 +19,8 @@ namespace img {
 	class img_files {
 
 		struct img_file {
-			i_img_io*	igf;
+			typedef std::shared_ptr<i_img_io>  img_io;
+			img_io		igf;
 			std::string	ext;
 		};
 
@@ -29,7 +31,7 @@ namespace img {
 
 		bool			init_;
 
-		void add_image_file_io_context_(i_img_io* imi, const std::string& exts);
+		void add_image_file_io_context_(img_file::img_io, const std::string& exts);
 
 	public:
 		//-----------------------------------------------------------------//
