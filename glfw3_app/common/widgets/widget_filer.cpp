@@ -68,7 +68,7 @@ namespace gui {
 		// ラベルを新規に作成
 		vtx::srect rect;
 		rect.org.set(ofs, 0);
-		rect.size.x = path_->get_rect().size.x;
+		rect.size.x = get_rect().size.x - (param_.plate_param_.frame_width_ * 2);
 		rect.size.y = param_.label_height_;
 
 		// ルートパスならドライブレターを加える
@@ -275,7 +275,7 @@ namespace gui {
 		destroy_files_(right_);
 		wd_.del_widget(files_);
 		wd_.del_widget(main_);
-		wd_.del_widget(path_);
+///		wd_.del_widget(path_);
 	}
 
 
@@ -349,6 +349,7 @@ namespace gui {
 		at_param().state_.set(widget::state::SERVICE);
 		at_param().state_.set(widget::state::ENABLE, false);
 
+		param_.plate_param_.set_caption(param_.label_height_);
 		param_.plate_param_.resizeble_ = true;
 		at_param().resize_min_ = param_.plate_param_.grid_ * 3;
 		at_param().resize_min_.x += 32;
@@ -379,10 +380,6 @@ namespace gui {
 			wp_.plate_param_.resizeble_ = true;
 			wp_.plate_param_.frame_width_  = 2;
 			wp_.plate_param_.round_radius_ = 4;
-			path_ = wd_.add_widget<widget_label>(wp, wp_);
-			path_->set_state(widget::state::POSITION_LOCK);
-			path_->set_state(widget::state::MOVE_ROOT);
-			path_->set_state(widget::state::RESIZE_ROOT);
 		}
 
 		// info ボタン
@@ -438,6 +435,8 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_filer::update()
 	{
+		param_.shift_param_.size_ = get_rect().size.x - param_.plate_param_.frame_width_ * 2;
+		shift_text_update(get_param(), param_.text_param_, param_.shift_param_);
 	}
 
 
@@ -488,9 +487,8 @@ namespace gui {
 			short fw = param_.plate_param_.frame_width_;
 			const vtx::spos& size = get_rect().size;
 			short bw = size.x - fw * 2;
-			path_->at_rect().size.x = bw - param_.path_height_;
 			main_->at_rect().size.x = bw;
-			main_->at_rect().size.y = size.y - path_->get_rect().size.y - fw * 2;
+			main_->at_rect().size.y = size.y - fw * 2;
 			short space = 4;
 			info_->at_rect().org.x = size.x - info_->get_rect().size.x - fw - space;
 			short bh = center_.size();
@@ -641,10 +639,10 @@ namespace gui {
 			if(ref > (get_rect().size.x / 3)) {
 				std::string np;
 				if(utils::previous_path(param_.path_, np)) {
-					path_->at_local_param().text_param_.text_ = np;
+					param_.text_param_.text_ = np;
 				}
 			} else {
-				path_->at_local_param().text_param_.text_ = param_.path_;
+				param_.text_param_.text_ = param_.path_;
 			}
 		}
 
@@ -734,6 +732,8 @@ namespace gui {
 		wd_.at_mobj().resize(objh_, get_param().rect_.size);
 		glEnable(GL_TEXTURE_2D);
 		wd_.at_mobj().draw(objh_, gl::mobj::attribute::normal, vtx::spos(0));
+
+		shift_text_render(get_param(), param_.text_param_, param_.plate_param_);
 	}
 
 

@@ -390,13 +390,13 @@ namespace gui {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
-		@brief	テキスト・シフト・サービス
+		@brief	シフト・テキスト更新
 		@param[in]	bp	widget ベースパラメーター
 		@param[in]	tp	text パラメーター
 		@param[in]	sp	shift パラメーター
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	void text_shift_update(const widget::param& bp, widget::text_param& tp, widget::shift_param& sp)
+	void shift_text_update(const widget::param& bp, widget::text_param& tp, widget::shift_param& sp)
 	{
 		gl::core& core = gl::core::get_instance();
 		gl::fonts& fonts = core.at_fonts();
@@ -434,4 +434,49 @@ namespace gui {
 			sp.offset_ = 0.0f;
 		}
 	}
+
+
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief	シフト・テキスト・レンダー
+		@param[in]	bp	widget ベースパラメーター
+		@param[in]	tp	text パラメーター
+		@param[in]	pp	plate パラメーター
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	void shift_text_render(const widget::param& bp, const widget::text_param& tp, const widget::plate_param& pp)
+	{
+		if(pp.caption_width_ <= 0) return;
+		if(tp.text_.empty()) return;
+
+		using namespace gl;
+		core& core = core::get_instance();
+		const vtx::spos& vsz = core.get_size();
+
+		glPushMatrix();
+		vtx::srect rect;
+		short fw = pp.frame_width_;
+		rect.org.set(0);
+		rect.size.set(bp.rect_.size.x - fw * 2, pp.caption_width_);
+
+		vtx::srect clip = bp.clip_;
+		clip.org.x += fw;
+		clip.org.y += fw;
+		clip.size.x -= fw * 2;
+		clip.size.y  = pp.caption_width_;
+
+		widget::text_param tmp = tp;
+///		const img::rgbaf& cf = wd_.get_color();
+///		tmp.fore_color_ *= cf.r;
+///		tmp.fore_color_.alpha_scale(cf.a);
+///		tmp.shadow_color_ *= cf.r;
+///		tmp.shadow_color_.alpha_scale(cf.a);
+		draw_text(tmp, rect, clip);
+
+		core.at_fonts().restore_matrix();
+
+		glPopMatrix();
+		glViewport(0, 0, vsz.x, vsz.y);
+	}
+
 }

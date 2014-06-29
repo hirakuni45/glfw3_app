@@ -34,6 +34,8 @@ namespace gui {
 		struct param {
 			plate_param		plate_param_;
 			color_param		color_param_;
+			text_param		text_param_;
+			shift_param		shift_param_;
 
 			std::string		path_;		///< 初期ファイル・パス
 			std::string		filter_;	///< 初期ファイル・フィルター
@@ -44,6 +46,7 @@ namespace gui {
 			param(const std::string& path = "", const std::string& filter = "") :
 				plate_param_(),
 				color_param_(widget_director::default_frame_color_),
+				text_param_(), shift_param_(),
 				path_(path), filter_(filter),
 				path_height_(32), label_height_(32)
 			{ }
@@ -59,7 +62,7 @@ namespace gui {
 		utils::files		fsc_;
 		utils::drive_info	drv_;
 
-		widget_label*	path_;	///< パス・フレーム
+///		widget_label*	path_;	///< パス・フレーム
 		widget_button*	info_;	///< インフォメーション切り替えボタン
 		widget*			main_;	///< メイン・フレーム
 		widget*			files_;	///< ファイル・フレーム
@@ -144,7 +147,8 @@ namespace gui {
 		widget_filer(widget_director& wd, const widget::param& bp, const param& p) :
 			widget(bp), wd_(wd), param_(p), objh_(0),
 			fsc_(),
-			path_(0), info_(0), main_(0), files_(0),
+///			path_(0),
+			info_(0), main_(0), files_(0),
 			info_state_(info_state::NONE),
 			request_right_(false),
 			speed_(0.0f), position_(0.0f), move_speed_(0.0f), select_pos_(0),

@@ -41,7 +41,7 @@ namespace gui {
 	void widget_frame::update()
 	{
 		param_.shift_param_.size_ = get_rect().size.x - param_.plate_param_.frame_width_ * 2;
-		text_shift_update(get_param(), param_.text_param_, param_.shift_param_);
+		shift_text_update(get_param(), param_.text_param_, param_.shift_param_);
 	}
 
 
@@ -58,40 +58,7 @@ namespace gui {
 		glEnable(GL_TEXTURE_2D);
 		wd_.at_mobj().draw(objh_, gl::mobj::attribute::normal, vtx::spos(0));
 
-		if(param_.plate_param_.caption_width_ <= 0) return;
-		if(param_.text_param_.text_.empty()) return;
- 
-		using namespace gl;
-		core& core = core::get_instance();
-		const vtx::spos& vsz = core.get_size();
-		const widget::param& wp = get_param();
-
-		glPushMatrix();
-
-		vtx::srect rect;
-		short fw = param_.plate_param_.frame_width_;
-		rect.org.set(0);
-		rect.size.set(get_rect().size.x - fw * 2, param_.plate_param_.caption_width_);
-
-		vtx::srect clip = wp.clip_;
-		clip.org.x += fw;
-		clip.org.y += fw;
-		clip.size.x -= fw * 2;
-		clip.size.y  = param_.plate_param_.caption_width_;
-
-		widget::text_param tmp = param_.text_param_;
-		const img::rgbaf& cf = wd_.get_color();
-		tmp.fore_color_ *= cf.r;
-		tmp.fore_color_.alpha_scale(cf.a);
-		tmp.shadow_color_ *= cf.r;
-		tmp.shadow_color_.alpha_scale(cf.a);
-//		tmp.offset_.x += static_cast<short>(slide_pos_);
-		draw_text(tmp, rect, clip);
-
-		core.at_fonts().restore_matrix();
-
-		glPopMatrix();
-		glViewport(0, 0, vsz.x, vsz.y);
+		shift_text_render(get_param(), param_.text_param_, param_.plate_param_);
 	}
 
 

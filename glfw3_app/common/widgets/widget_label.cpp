@@ -59,7 +59,7 @@ namespace gui {
 		if(param_.text_in_) return;
 
 		param_.shift_param_.size_ = get_rect().size.x - param_.plate_param_.frame_width_ * 2;
-		text_shift_update(get_param(), param_.text_param_, param_.shift_param_);
+		shift_text_update(get_param(), param_.text_param_, param_.shift_param_);
 	}
 
 
