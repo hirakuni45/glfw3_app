@@ -700,8 +700,6 @@ namespace al {
 		}
 
 		tag_.clear();
-		delete tag_.image_;
-		tag_.image_ = 0;
 
 		int j = mp4ff_meta_get_num_items(dt.infile);
 		for(int k = 0; k < j; ++k) {
@@ -730,7 +728,7 @@ namespace al {
 		   			imgf.initialize();
 		   			imgf.load(fio);
 		   			if(imgf.get_image_if()) {
-		   				tag_.image_ = img::copy_image(imgf.get_image_if());
+		   				tag_.image_ = tag::image(img::copy_image(imgf.get_image_if()));
 		   			} else {
 		   				tag_.image_ = 0;
 		   			}
@@ -991,9 +989,6 @@ namespace al {
 	//-----------------------------------------------------------------//
 	void aac_io::destroy()
 	{
-		delete tag_.image_;
-		tag_.image_ = 0;
-
 		delete buffer_;
 		buffer_ = 0;
 		delete stream_;

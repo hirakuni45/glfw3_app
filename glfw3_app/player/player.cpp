@@ -406,8 +406,9 @@ namespace app {
 			// ジャケット画像の取得とテクスチャーへの登録
 			mobj_.destroy();
 			mobj_.initialize();
-   			if(tag.image_) {
-				jacket_ = mobj_.install(tag.image_);
+			const img::i_img* im = tag.image_.get();
+   			if(im) {
+				jacket_ = mobj_.install(im);
 			} else {
 				const std::string& curp = core.get_current_path();
 				if(wd.at_img_files().load(curp + "/res/NoImage.png")) {

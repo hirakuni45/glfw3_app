@@ -488,8 +488,6 @@ namespace al {
 		tag_.clear();
 		// 一旦クローズ
 		fin.close();
-		delete tag_.image_;
-		tag_.image_ = 0;
 
 		using namespace TagLib;
 		MPEG::File f(fin.get_path().c_str());
@@ -593,7 +591,7 @@ namespace al {
 						fmem.open(p, len);
 						if(img_files_.load(fmem)) {
 							if(img_files_.get_image_if()) {
-								tag_.image_ = img::copy_image(img_files_.get_image_if());
+								tag_.image_ = tag::image(img::copy_image(img_files_.get_image_if()));
 							} else {
 								tag_.image_ = 0;
 							}
@@ -1013,9 +1011,6 @@ namespace al {
 	//-----------------------------------------------------------------//
 	void mp3_io::destroy()
 	{
-		delete tag_.image_;
-		tag_.image_ = 0;
-
 		delete audio_;
 		audio_ = 0;
 		close_stream();
