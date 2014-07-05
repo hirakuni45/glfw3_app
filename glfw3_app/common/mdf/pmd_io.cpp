@@ -529,7 +529,7 @@ namespace mdf {
 					tfn = mats;
 				}
 				if(imf.load(current_path_ + '/' + tfn)) {
-					const img::i_img* img = imf.get_image_if();
+					const img::i_img* img = imf.get_image();
 					if(img == 0) continue;
 
 					glBindTexture(GL_TEXTURE_2D, tex_id_[i]);
@@ -537,8 +537,9 @@ namespace mdf {
 					int border = 0;
 					int w = img->get_size().x;
 					int h = img->get_size().y;
+					glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 					glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA, w, h, border,
-						GL_RGBA, GL_UNSIGNED_BYTE, img->get_image());
+								 GL_RGBA, GL_UNSIGNED_BYTE, (*img)());
 				}
 			}
 			++i;

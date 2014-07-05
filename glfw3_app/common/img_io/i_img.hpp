@@ -5,6 +5,7 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
+#include <memory>
 #include "img.hpp"
 #include "utils/vtx.hpp"
 
@@ -138,7 +139,8 @@ namespace img {
 			@return	イメージのポインター
 		*/
 		//-----------------------------------------------------------------//
-		virtual const void* get_image() const = 0;
+//		virtual const void* get_image() const = 0;
+		virtual const void* operator() () const = 0;
 
 
 		//-----------------------------------------------------------------//
@@ -192,7 +194,7 @@ namespace img {
 		*/
 		//-----------------------------------------------------------------//
 		virtual void destroy() = 0;
-
 	};
 
+	typedef std::shared_ptr<i_img>  shared_img;
 };

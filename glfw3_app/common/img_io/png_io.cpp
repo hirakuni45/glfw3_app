@@ -188,7 +188,8 @@ namespace img {
 			return false;
 		}
 
-		destroy();
+		idx_.destroy();
+		img_.destroy();
 
 		png_set_read_fn(png_ptr, (png_voidp)&fin, png_io_read_func);
 		png_read_info(png_ptr, info_ptr);
@@ -321,7 +322,7 @@ namespace img {
 	//-----------------------------------------------------------------//
 	bool png_io::save(utils::file_io& fout, const std::string& ext)
 	{
-		if(imf_ == 0) return false;
+		if(!imf_) return false;
 
 		int w = imf_->get_size().x;
 		int h = imf_->get_size().y;
@@ -411,18 +412,5 @@ namespace img {
 
 		return true;
 	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	廃棄
-	*/
-	//-----------------------------------------------------------------//
-	void png_io::destroy()
-	{
-		idx_.destroy();
-		img_.destroy();
-	}
-
 }
 /* ----- End Of File "png_io.cpp" ----- */

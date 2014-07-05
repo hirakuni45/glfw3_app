@@ -44,23 +44,23 @@ namespace gl {
 		glGenTextures(1, &id_);
 ///		std::cout << "Mobj gen tex id: " << static_cast<int>(id_) << std::endl;
 		glBindTexture(GL_TEXTURE_2D, id_);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 		if(im.get_size().x != pgw || im.get_size().y != pgh) {
 			img_rgba8 dst;
 			dst.create(vtx::spos(pgw, pgh), true);
 			dst.copy(vtx::spos(0), im, vtx::srect(vtx::spos(0), im.get_size()));
 			glTexImage2D(GL_TEXTURE_2D, 0,
-						   internalFormat, pgw, pgh, 0, GL_RGBA, GL_UNSIGNED_BYTE, dst.get_image());
+						   internalFormat, pgw, pgh, 0, GL_RGBA, GL_UNSIGNED_BYTE, dst());
 		} else {
 			glTexImage2D(GL_TEXTURE_2D, 0,
-						 internalFormat, pgw, pgh, 0, GL_RGBA, GL_UNSIGNED_BYTE, im.get_image());
+						 internalFormat, pgw, pgh, 0, GL_RGBA, GL_UNSIGNED_BYTE, im());
 		}
 #if 0
 		if(mp) {
 			for(int i = 1; i < g_mipmap_level_max; ++i) {
 				pgw /= 2;
 				pgh /= 2;
-				glTexImage2D(GL_TEXTURE_2D, i, internalFormat, pgw, pgh, 0, GL_RGBA, GL_UNSIGNED_BYTE, im.get_image());
+				glTexImage2D(GL_TEXTURE_2D, i, internalFormat, pgw, pgh, 0, GL_RGBA, GL_UNSIGNED_BYTE, im());
 			}
 		}
 #endif
@@ -299,10 +299,10 @@ namespace gl {
 					} else {
 ///						std::cout << boost::format("(%d), %d, %d") % mo->id % txw % txh << std::endl;
 						glBindTexture(GL_TEXTURE_2D, mo->id);
-						glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+						glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 						glTexSubImage2D(GL_TEXTURE_2D, 0,
 							mo->tx, mo->ty, txw, txh, GL_RGBA, GL_UNSIGNED_BYTE,
-							im.get_image());
+							im());
 					}
 					if(mipmap) {
 						int ofsx = mo->tx;
@@ -418,10 +418,10 @@ namespace gl {
 						add_texture_page(texture_mems_, mo, im);
 					} else {
 						glBindTexture(GL_TEXTURE_2D, mo->id);
-						glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+						glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 						glTexSubImage2D(GL_TEXTURE_2D, 0,
 										mo->tx, mo->ty, im.get_size().x, im.get_size().y,
-										GL_RGBA, GL_UNSIGNED_BYTE, im.get_image());
+										GL_RGBA, GL_UNSIGNED_BYTE, im());
 					}
 				}
 				mo->tx += 1;
@@ -457,9 +457,9 @@ namespace gl {
 		if(imf->get_type() == IMG::FULL8) {
 			glGenTextures(1, &id);
 			glBindTexture(GL_TEXTURE_2D, id);
-			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 			glTexImage2D(GL_TEXTURE_2D, level, internal_format_,
-						   size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, imf->get_image());
+						 size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, (*imf)());
 
 		} else if(imf->get_type() == IMG::INDEXED8) {
 			glGenTextures(1, &id);
@@ -467,9 +467,9 @@ namespace gl {
 			img_rgba8 im;
 			im.create(size, true);
 			copy_to_rgba8(imf, im, vtx::spos(0));
-			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 			glTexImage2D(GL_TEXTURE_2D, level, internal_format_,
-						   size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, im.get_image());
+						   size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, im());
 		} else {
 			std::cout << boost::format("Install Texture No Type: %d") % static_cast<int>(imf->get_type()) << std::endl;
 		}
@@ -593,9 +593,10 @@ namespace gl {
 			glBindTexture(GL_TEXTURE_2D, m->id);
 			int level = 0;
 //			if(mop->link == 0 && mop->w >= imif->get_width() && mop->h >= imif->get_height()) {
-				glTexSubImage2D(GL_TEXTURE_2D, level, m->tx + dst.x, m->ty + dst.y,
-								imif->get_size().x, imif->get_size().y,
-								GL_RGBA, GL_UNSIGNED_BYTE, imif->get_image());
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+			glTexSubImage2D(GL_TEXTURE_2D, level, m->tx + dst.x, m->ty + dst.y,
+							imif->get_size().x, imif->get_size().y,
+							GL_RGBA, GL_UNSIGNED_BYTE, (*imif)());
 //			}
 			m = m->link;
 		}

@@ -289,8 +289,9 @@ namespace gl {
 		}
 
 		{
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 			glTexSubImage2D(GL_TEXTURE_2D, level,
-				tmap.lcx, tmap.lcy, isz.x, isz.y, GL_ALPHA, GL_UNSIGNED_BYTE, gray.get_image());
+							tmap.lcx, tmap.lcy, isz.x, isz.y, GL_ALPHA, GL_UNSIGNED_BYTE, gray());
 		}
 
 //		if(h & 7) { h |= 7; ++h; }

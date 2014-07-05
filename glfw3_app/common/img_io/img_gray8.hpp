@@ -198,7 +198,7 @@ namespace img {
 			@return	イメージのポインター
 		*/
 		//-----------------------------------------------------------------//
-		const void* get_image() const override { return static_cast<const void*>(&img_[0]); }
+		const void* operator() () const override { return static_cast<const void*>(&img_[0]); }
 
 
 		//-----------------------------------------------------------------//

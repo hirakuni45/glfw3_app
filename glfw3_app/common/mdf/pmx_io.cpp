@@ -242,7 +242,7 @@ namespace mdf {
 			BOOST_FOREACH(const std::string& s, textures_) {
 				std::string fn = current_path_ + '/' + s;
 				if(imf.load(fn)) {
-					const img::i_img* img = imf.get_image_if();
+					const img::i_img* img = imf.get_image();
 					if(img == 0) continue;
 
 					glBindTexture(GL_TEXTURE_2D, tex_id_[i]);
@@ -251,8 +251,9 @@ namespace mdf {
 					int w = img->get_size().x;
 					int h = img->get_size().y;
 // std::cout << w << ", " << h << std::endl;
+					glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 					glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA, w, h, border,
-						GL_RGBA, GL_UNSIGNED_BYTE, img->get_image());
+								 GL_RGBA, GL_UNSIGNED_BYTE, (*img)());
 				} else {
 					std::cout << boost::format("Can't open texture: '%s'") % fn << std::endl;
 				}

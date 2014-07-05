@@ -35,7 +35,7 @@ namespace img {
 			@brief	デストラクター
 		*/
 		//-----------------------------------------------------------------//
-		virtual ~openjpeg_io() { destroy(); }
+		virtual ~openjpeg_io() { }
 
 
 		//-----------------------------------------------------------------//
@@ -135,9 +135,9 @@ namespace img {
 			@return	イメージインターフェース
 		*/
 		//-----------------------------------------------------------------//
-		const i_img* get_image_if() const override {
+		const i_img* get_image() const override {
 			if(!img_.empty()) {
-				return dynamic_cast<const i_img*>(&img_);
+				return &img_;
 			} else {
 				return 0;
 			}
@@ -150,15 +150,7 @@ namespace img {
 			@param[in]	imf	イメージインターフェース
 		*/
 		//-----------------------------------------------------------------//
-		void set_image_if(const i_img* imf) override { imf_ = imf; }
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	廃棄
-		*/
-		//-----------------------------------------------------------------//
-		void destroy() override;
+		void set_image(const i_img* imf) override { imf_ = imf; }
 
 	};
 }

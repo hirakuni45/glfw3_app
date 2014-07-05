@@ -5,6 +5,7 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
+#include <memory>
 
 namespace utils {
 
@@ -49,4 +50,6 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		virtual void destroy() = 0;
 	};
+
+	typedef std::shared_ptr<i_scene>  shared_scene;
 }

@@ -18,9 +18,6 @@ namespace img {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class tga_io : public i_img_io {
 
-	public:
-
-	private:
 		const i_img*	imf_;
 
 		img_idx8	idx_;
@@ -40,7 +37,7 @@ namespace img {
 			@brief	デストラクター
 		*/
 		//-----------------------------------------------------------------//
-		virtual ~tga_io() { destroy(); }
+		virtual ~tga_io() { }
 
 
 		//-----------------------------------------------------------------//
@@ -103,11 +100,11 @@ namespace img {
 			@return	イメージインターフェース
 		*/
 		//-----------------------------------------------------------------//
-		const i_img* get_image_if() const override {
+		const i_img* get_image() const override {
 			if(!idx_.empty()) {
-				return dynamic_cast<const i_img*>(&idx_);
+				return &idx_;
 			} else if(!img_.empty()) {
-				return dynamic_cast<const i_img*>(&img_);
+				return &img_;
 			} else {
 				return 0;
 			}
@@ -120,15 +117,7 @@ namespace img {
 			@param[in]	imf	イメージインターフェース
 		*/
 		//-----------------------------------------------------------------//
-		void set_image_if(const i_img* imf) override { imf_ = imf; }
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	廃棄
-		*/
-		//-----------------------------------------------------------------//
-		void destroy() override { imf_ = 0; idx_.destroy(); img_.destroy(); }
+		void set_image(const i_img* img) override { imf_ = img; }
 
 	};
 }

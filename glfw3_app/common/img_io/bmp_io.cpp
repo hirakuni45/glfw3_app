@@ -760,8 +760,8 @@ namespace img {
 	//-----------------------------------------------------------------//
 	bool bmp_io::save(utils::file_io& fout, const std::string& opt)
 	{
-		int w = imf_->get_size().x;
-		int h = imf_->get_size().y;
+		int w = cimg_->get_size().x;
+		int h = cimg_->get_size().y;
 		if(w <= 0 || h <= 0) {
 			return false;
 		}

@@ -18,10 +18,7 @@ namespace img {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class bmp_io : public i_img_io {
 
-	public:
-
-	private:
-		const i_img*	imf_;
+		const i_img*	cimg_;
 
 		img_idx8	idx_;
 		img_rgba8	img_;
@@ -32,7 +29,7 @@ namespace img {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		bmp_io() : imf_(0) { }
+		bmp_io() : cimg_(0) { }
 
 
 		//-----------------------------------------------------------------//
@@ -40,7 +37,7 @@ namespace img {
 			@brief	デストラクター
 		*/
 		//-----------------------------------------------------------------//
-		virtual ~bmp_io() { destroy(); }
+		virtual ~bmp_io() { }
 
 
 		//-----------------------------------------------------------------//
@@ -101,11 +98,11 @@ namespace img {
 			@return	イメージインターフェース
 		*/
 		//-----------------------------------------------------------------//
-		const i_img* get_image_if() const override {
+		const i_img* get_image() const override {
 			if(!idx_.empty()) {
-				return dynamic_cast<const i_img*>(&idx_);
+				return &idx_;
 			} else if(!img_.empty()) {
-				return dynamic_cast<const i_img*>(&img_);
+				return &img_;
 			} else {
 				return 0;
 			}
@@ -118,15 +115,6 @@ namespace img {
 			@param[in]	imf	イメージインターフェース
 		*/
 		//-----------------------------------------------------------------//
-		void set_image_if(const i_img* imf) override { imf_ = imf; }
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	廃棄
-		*/
-		//-----------------------------------------------------------------//
-		void destroy() override { imf_ = 0; idx_.destroy(); img_.destroy(); }
-
+		void set_image(const i_img* cimg) override { cimg_ = cimg; }
 	};
 }

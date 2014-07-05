@@ -132,61 +132,61 @@ namespace img {
 		@brief	lanczos-3 アルゴリズム、重みの計算
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	static const float g_pi = 3.14159265358979f;
+	static const float pi_ = 3.14159265358979f;
 
-	static float sinc(float l)
+	static float sinc_(float l)
 	{
-		return sinf(g_pi * l) / (g_pi * l);
+		return std::sin(pi_ * l) / (pi_ * l);
 	}
 
-	static float lanczos(float d, float n)
+	static float lanczos_(float d, float n)
 	{
 		if(d == 0.0f) {
 			return 1.0f;
-		} else if(fabs(d) >= n) {
+		} else if(std::abs(d) >= n) {
 			return 0.0f;
 		} else {
-			return sinc(d) * sinc(d / n);
+			return sinc_(d) * sinc_(d / n);
 		}
 	}
 
-	static float g_lanczos_tbl[(12 + 1) * (12 + 1)];
-	static float g_lanczos_n = 0.0f;
+	static float lanczos_tbl_[(12 + 1) * (12 + 1)];
+	static float lanczos_n_ = 0.0f;
 	// -3.0, -2.5, -2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0
-	static void init_lanczos(float n)
+	static void init_lanczos_(float n)
 	{
-		if(g_lanczos_n == n) return;
+		if(lanczos_n_ == n) return;
 
 		float y = -3.0f;
 		for(int i = 0; i < (12 + 1); ++i) {
-			float yl = lanczos(y, n);
+			float yl = lanczos_(y, n);
 			float x = -3.0f;
 			for(int j = 0; j < (12 + 1); ++j) {
-				float xl = lanczos(x, n);
-				g_lanczos_tbl[i * (12 + 1) + j] = xl * yl;
+				float xl = lanczos_(x, n);
+				lanczos_tbl_[i * (12 + 1) + j] = xl * yl;
 				x += 0.5f;
 			}
 			y += 0.5f;
 		}
-		g_lanczos_n = n;
+		lanczos_n_ = n;
 	}
 
 
-	static float lanczos_t(float x, float y, float n)
+	static float lanczos_t_(float x, float y, float n)
 	{
 		int i = static_cast<int>(y * 2.0f);
 		i += 6;
 		int j = static_cast<int>(x * 2.0f);
 		j += 6;
 		if(i >= 0 && i < (12 + 1) && j >= 0 && j < (12 + 1)) {
-			return g_lanczos_tbl[i * (12 + 1) + j];
+			return lanczos_tbl_[i * (12 + 1) + j];
 		} else {
-			return lanczos(x, n) * lanczos(y, n);
+			return lanczos_(x, n) * lanczos_(y, n);
 		}
 	}
 
 
-	static void color_div(const rgbaf& col, float total, rgba8& c)
+	static void color_div_(const rgbaf& col, float total, rgba8& c)
 	{
 		rgbaf cc;
 		if(total != 0.0f) {
@@ -252,7 +252,7 @@ namespace img {
 		dst.create(vtx::spos(dw, dh), src->test_alpha());
 
 		float n = 3.0f;
-		init_lanczos(n);
+		init_lanczos_(n);
 
 		float scn = 1.0f / scale;
 		if(scale > 1.0f) {
@@ -276,8 +276,8 @@ namespace img {
 					for(pos.y = ys; pos.y <= ye; ++pos.y) {
 						float yl = fabs((pos.y + 0.5f) - yy);
 						for(pos.x = xs; pos.x <= xe; ++pos.x) {
-							float xl = fabs((static_cast<float>(pos.x) + 0.5f) - xx);
-							float weight = lanczos_t(xl, yl, n);
+							float xl = std::abs((static_cast<float>(pos.x) + 0.5f) - xx);
+							float weight = lanczos_t_(xl, yl, n);
 							rgba8 c;
 							src->get_pixel(pos, c);
 							col.r += c.r * weight;
@@ -288,7 +288,7 @@ namespace img {
 						}
 					}
 					rgba8 c;
-					color_div(col, weight_total, c);
+					color_div_(col, weight_total, c);
 					dst.put_pixel(out, c);
 				}
 			}
@@ -311,10 +311,10 @@ namespace img {
 					float weight_total = 0.0f;
 					vtx::spos pos;
 					for(pos.y = ys; pos.y <= ye; ++pos.y) {
-						float yl = fabs(((static_cast<float>(pos.y) + 0.5f) * scale) - yy);
-						for(int x = xs; x <= xe; ++x) {
-							float xl = fabs((((float)x + 0.5f) * scale) - xx);
-							float weight = lanczos_t(xl, yl, n);
+						float yl = std::abs(((static_cast<float>(pos.y) + 0.5f) * scale) - yy);
+						for(pos.x = xs; pos.x <= xe; ++pos.x) {
+							float xl = std::abs(((static_cast<float>(pos.x) + 0.5f) * scale) - xx);
+							float weight = lanczos_t_(xl, yl, n);
 							rgba8 c;
 							src->get_pixel(pos, c);
 							col.r += static_cast<float>(c.r) * weight;
@@ -325,7 +325,7 @@ namespace img {
 						}
 					}
 					rgba8 c;
-					color_div(col, weight_total, c);
+					color_div_(col, weight_total, c);
 					dst.put_pixel(out, c);
 				}
 			}

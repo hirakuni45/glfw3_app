@@ -590,8 +590,8 @@ namespace al {
 						utils::file_io fmem;
 						fmem.open(p, len);
 						if(img_files_.load(fmem)) {
-							if(img_files_.get_image_if()) {
-								tag_.image_ = tag::image(img::copy_image(img_files_.get_image_if()));
+							if(img_files_.get_image()) {
+								tag_.image_ = tag::image(img::copy_image(img_files_.get_image()));
 							} else {
 								tag_.image_ = 0;
 							}
@@ -1003,7 +1003,6 @@ namespace al {
 	void mp3_io::destroy()
 	{
 		close_stream();
-		img_files_.destroy();
 	}
 
 }

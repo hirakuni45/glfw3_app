@@ -725,8 +725,8 @@ namespace al {
 		   			img::img_files imgf;
 		   			imgf.initialize();
 		   			imgf.load(fio);
-		   			if(imgf.get_image_if()) {
-		   				tag_.image_ = tag::image(img::copy_image(imgf.get_image_if()));
+		   			if(imgf.get_image()) {
+		   				tag_.image_ = tag::image(img::copy_image(imgf.get_image()));
 		   			} else {
 		   				tag_.image_ = 0;
 		   			}

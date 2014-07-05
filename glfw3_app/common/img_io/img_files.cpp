@@ -150,7 +150,7 @@ namespace img {
 				img_file& io = imgios_[i];
 				if(check_file_exts_(io.ext, ext)) {
 					if(io.igf->load(fin, opt)) {
-						imf_ = io.igf->get_image_if();
+						imf_ = io.igf->get_image();
 						return true;
 					}
 					n = i;
@@ -163,7 +163,7 @@ namespace img {
 			if(n != i) {
 				img_file& io = imgios_[i];
 				if(io.igf->load(fin, opt)) {
-					imf_ = io.igf->get_image_if();
+					imf_ = io.igf->get_image();
 					return true;
 				}
 			}
@@ -187,7 +187,7 @@ namespace img {
 			for(size_t i = 0; i < imgios_.size(); ++i) {
 				img_file& io = imgios_[i];
 				if(check_file_exts_(io.ext, ext)) {
-					io.igf->set_image_if(imf_);
+					io.igf->set_image(imf_);
 					if(io.igf->save(fout, opt)) {
 						return true;
 					} else {
@@ -197,20 +197,6 @@ namespace img {
 			}
 		}
 		return false;
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	廃棄
-	*/
-	//-----------------------------------------------------------------//
-	void img_files::destroy()
-	{
-		imgios().swap(imgios_);
-
-		imf_ = 0;
-		init_ = false;
 	}
 
 }

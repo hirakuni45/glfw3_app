@@ -102,15 +102,6 @@ namespace al {
 		virtual void* at_wave(size_t n = 0) = 0;
 
 		virtual const void* get_wave(size_t n = 0) const = 0;
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	オーディオを廃棄する
-		*/
-		//-----------------------------------------------------------------//
-		virtual void destroy() = 0;
-
 	};
 
 	typedef std::shared_ptr<i_audio>  audio;
