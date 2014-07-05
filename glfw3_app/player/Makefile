@@ -31,12 +31,12 @@ PSOURCES	=	main.cpp \
 				utils/preference.cpp \
 				utils/keyboard.cpp \
 				img_io/paint.cpp \
-				img_io/png_io.cpp \
-				img_io/jpeg_io.cpp \
-				img_io/openjpeg_io.cpp \
 				img_io/bmp_io.cpp \
 				img_io/tga_io.cpp \
 				img_io/dds_io.cpp \
+				img_io/png_io.cpp \
+				img_io/jpeg_io.cpp \
+				img_io/openjpeg_io.cpp \
 				img_io/img_files.cpp \
 				img_io/img_utils.cpp \
 				snd_io/audio_io.cpp \
