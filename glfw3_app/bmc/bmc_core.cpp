@@ -341,7 +341,7 @@ namespace app {
 			}
 
 			// ソース画像をコピー
-			vtx::srect sr(vtx::spos(0), imfs.get_image_if()->get_size());
+			vtx::srect sr(vtx::spos(0), imfs.get_image()->get_size());
 			if(option_[option::offset]) {
 				sr.org = clip_.org;
 			}
@@ -349,7 +349,7 @@ namespace app {
 				sr.size = clip_.size;
 			}
 			src_img_.create(sr.size, true);
-			img::copy_to_rgba8(imfs.get_image_if(), sr, src_img_, vtx::spos(0)); 
+			img::copy_to_rgba8(imfs.get_image(), sr, src_img_, vtx::spos(0)); 
 
 			// モノクロ変換
 			bitmap_convert_();

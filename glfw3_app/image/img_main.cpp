@@ -168,20 +168,20 @@ namespace app {
 			} else {
 				if(term_) {
 					std::string s;
-					s = "W: " + boost::lexical_cast<std::string>(imf.get_image_if()->get_size().x) + '\r';
+					s = "W: " + boost::lexical_cast<std::string>(imf.get_image()->get_size().x) + '\r';
 					term_->output(s);
-					s = "H: " + boost::lexical_cast<std::string>(imf.get_image_if()->get_size().y) + '\r';
+					s = "H: " + boost::lexical_cast<std::string>(imf.get_image()->get_size().y) + '\r';
 					term_->output(s);
-					img::IMG::type t = imf.get_image_if()->get_type();
+					img::IMG::type t = imf.get_image()->get_type();
 					if(t == img::IMG::INDEXED8) {
 						term_->output("INDEXED8\r");
 					} else if(t == img::IMG::FULL8) {
 						term_->output("FULL8\r");
 					}
-					if(imf.get_image_if()->test_alpha()) {
+					if(imf.get_image()->test_alpha()) {
 						term_->output("Alpha\r");
 					}
-					s = "C: " + boost::lexical_cast<std::string>(imf.get_image_if()->count_color()) + '\r';
+					s = "C: " + boost::lexical_cast<std::string>(imf.get_image()->count_color()) + '\r';
 					term_->output(s);
 					term_->output('\r');
 				}
@@ -189,10 +189,10 @@ namespace app {
 				frame_->at_local_param().text_param_.text_ = imfn;
 				mobj_.destroy();
 				mobj_.initialize();
-				img_handle_ = mobj_.install(imf.get_image_if());
+				img_handle_ = mobj_.install(imf.get_image());
 				image_->at_local_param().mobj_ = mobj_;
 				image_->at_local_param().mobj_handle_ = img_handle_;
-// imf.set_image_if(imf.get_image_if());
+// imf.set_image(imf.get_image());
 // imf.save("test.jp2");
 			}
 		}
