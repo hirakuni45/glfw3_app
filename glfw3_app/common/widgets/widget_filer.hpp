@@ -62,7 +62,6 @@ namespace gui {
 		utils::files		fsc_;
 		utils::drive_info	drv_;
 
-///		widget_label*	path_;	///< パス・フレーム
 		widget_button*	info_;	///< インフォメーション切り替えボタン
 		widget*			main_;	///< メイン・フレーム
 		widget*			files_;	///< ファイル・フレーム
@@ -83,12 +82,16 @@ namespace gui {
 			widget_null*	base;
 			widget_label*	name;
 			widget_label*	info;
+			std::string		fname;
+			std::string		alias;
 			size_t			size;
 			time_t			time;
 			mode_t			mode;
 			bool			dir;
+			bool			alias_enable;
 			widget_file() : base(0), name(0), info(0),
-				size(0), time(0), mode(0), dir(false) { }
+							fname(), alias(), size(0), time(0), mode(0),
+							dir(false), alias_enable(false) { }
 		};
 		typedef std::vector<widget_file> widget_files;
 		typedef std::vector<widget_file>::iterator widget_files_it;
@@ -124,8 +127,7 @@ namespace gui {
 		static const char* key_locate_;
 		static const char* key_size_;
 
-		void create_file_(widget_file& wf, const vtx::srect& rect, short ofs,
-			const std::string& fn);
+		void create_file_(widget_file& wf, const vtx::srect& rect, short ofs);
 		void create_files_(widget_files& wfs, short ofs);
 		widget_files_cit scan_select_in_file_(widget_files& wfs) const;
 		widget_files_cit scan_select_file_(widget_files& wfs) const;
@@ -138,6 +140,7 @@ namespace gui {
 		void set_select_pos_(uint32_t pos);
 		void destroy_();
 		bool focus_(const std::string& fn);
+		std::string make_path_(const std::string path);
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -147,7 +150,6 @@ namespace gui {
 		widget_filer(widget_director& wd, const widget::param& bp, const param& p) :
 			widget(bp), wd_(wd), param_(p), objh_(0),
 			fsc_(),
-///			path_(0),
 			info_(0), main_(0), files_(0),
 			info_state_(info_state::NONE),
 			request_right_(false),
@@ -298,6 +300,35 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		bool focus_file(const std::string& path);
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	別名を設定する
+			@param[in]	path	ファイルパス
+			@param[in]	alias	別名
+			@return 該当するファイルが無い場合「false」
+		*/
+		//-----------------------------------------------------------------//
+		bool set_alias(const std::string& path, const std::string& alias) {
+			std::string fip = make_path_(path);
+			if(fip.empty()) return false;
+
+			
+
+			return false;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	別名を有効にする
+			@param[in]	path	ファイルパス
+			@param[in]	f		無効にする場合「false」
+		*/
+		//-----------------------------------------------------------------//
+		void enable_alias(const std::string& path, bool f = true) {
+		}
 
 
 		//-----------------------------------------------------------------//

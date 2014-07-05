@@ -12,7 +12,7 @@
 
 namespace gui {
 
-	void widget_filer::create_file_(widget_file& wf, const vtx::srect& rect, short ofs, const std::string& fn)
+	void widget_filer::create_file_(widget_file& wf, const vtx::srect& rect, short ofs)
 	{
 		{
 			widget::param wp(rect, files_);
@@ -32,7 +32,7 @@ namespace gui {
 			r.size.set(fns, param_.label_height_);
 			widget::param wp(r, wf.base);
 			wp.action_.set(widget::action::SELECT_HIGHLIGHT);
-			widget_label::param wp_(fn);
+			widget_label::param wp_(wf.fname);
 			wp_.text_param_.placement_.hpt = vtx::placement::holizontal::LEFT;
 			wp_.plate_param_.frame_width_ = 0;
 			wp_.plate_param_.round_radius_ = 0;
@@ -80,8 +80,9 @@ namespace gui {
 				std::string fn;
 				fn += 'A' + drv_.get_info(i).drive_;
 				fn += ":/";
+				wf.fname = fn;
 				wf.dir = true;
-				create_file_(wf, rect, ofs, fn);
+				create_file_(wf, rect, ofs);
 				wfs.push_back(wf);
 				rect.org.y += param_.label_height_;
 			}
@@ -101,7 +102,8 @@ namespace gui {
 				wf.dir = true;
 			}
 
-			create_file_(wf, rect, ofs, fn);
+			wf.fname = fn;
+			create_file_(wf, rect, ofs);
 
 			wf.size = fi.get_size();
 			wf.time = fi.get_time();
@@ -275,7 +277,6 @@ namespace gui {
 		destroy_files_(right_);
 		wd_.del_widget(files_);
 		wd_.del_widget(main_);
-///		wd_.del_widget(path_);
 	}
 
 
@@ -284,13 +285,14 @@ namespace gui {
 		uint32_t n = 0;
 		BOOST_FOREACH(const widget_file& wf, center_) {
 			std::string t;
-			utils::strip_last_of_delimita_path(wf.name->at_local_param().text_param_.text_, t);
+///			utils::strip_last_of_delimita_path(wf.name->at_local_param().text_param_.text_, t);
+			utils::strip_last_of_delimita_path(wf.fname, t);
 			if(t == fn) {
 				if(wf.name->get_state(widget::state::SYSTEM_SELECT)) {
 					return true;
 				}
 				short ofs = static_cast<short>(n) -
-				(main_->get_rect().size.y / param_.label_height_) / 2;
+					(main_->get_rect().size.y / param_.label_height_) / 2;
 				if(ofs >= 0) {
 					position_.y = static_cast<float>(ofs * -param_.label_height_);
 				}
@@ -300,6 +302,26 @@ namespace gui {
 			++n;
 		}
 		return false;
+	}
+
+
+	std::string widget_filer::make_path_(const std::string path)
+	{
+		std::string fin;
+		if(utils::probe_full_path(path)) {
+			std::string root;
+			if(utils::get_file_path(path, root)) {
+				if(param_.path_ != root) return fin;
+			}
+			const char* p = utils::get_file_name(path);
+			if(p == 0) {
+				return fin;
+			}
+			fin = p;
+		} else {
+			fin = path;
+		}
+		return fin;
 	}
 
 
@@ -488,7 +510,7 @@ namespace gui {
 			const vtx::spos& size = get_rect().size;
 			short bw = size.x - fw * 2;
 			main_->at_rect().size.x = bw;
-			main_->at_rect().size.y = size.y - fw * 2;
+			main_->at_rect().size.y = size.y - param_.path_height_ - fw * 2;
 			short space = 4;
 			info_->at_rect().org.x = size.x - info_->get_rect().size.x - fw - space;
 			short bh = center_.size();
@@ -746,20 +768,7 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	bool widget_filer::focus_file(const std::string& path)
 	{
-		if(utils::probe_full_path(path)) {
-			std::string root;
-			if(utils::get_file_path(path, root)) {
-				if(param_.path_ != root) return false;
-			}
-			const char* p = utils::get_file_name(path);
-			if(p == 0) {
-				return false;
-			}
-			focus_path_ = p;
-		} else {
-			focus_path_ = path;
-		}
-
+		focus_path_ = make_path_(path);
 		return focus_(focus_path_);
 	}
 
