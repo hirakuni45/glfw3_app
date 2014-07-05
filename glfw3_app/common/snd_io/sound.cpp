@@ -15,7 +15,7 @@ namespace al {
 
 	using namespace al;
 
-	static void play_task_(sound::sstream_t* sst, snd_files& sdf,
+	static void play_task_(sound::sstream_t& sst, snd_files& sdf,
 		std::string& root, utils::file_infos& src, const std::string& file)
 	{
 		static const int stream_buff_size = 2048;
@@ -33,9 +33,9 @@ namespace al {
 			}
 		}
 
-		while(i < fis.size()) {
-			if(sst->stop_) break;
-
+		bool exit = false;
+		bool pause = false;
+		while(!exit && i < fis.size()) {
 			const utils::file_info& fi = fis[i];
 
 			if(fi.get_name() == "." || fi.get_name() == "..") {
@@ -55,8 +55,10 @@ namespace al {
 				continue;
 			}
 
-			sst->fph_ = fn;
-			++sst->fph_cnt_;
+			pthread_mutex_lock(&sst.sync_);
+			sst.fph_ = fn;
+			++sst.fph_cnt_;
+			pthread_mutex_unlock(&sst.sync_);
 
 			utils::file_io fin;
 			audio_info	ainfo;
@@ -64,53 +66,73 @@ namespace al {
 				if(!sdf.open_stream(fin, stream_buff_size, ainfo)) {
 					sdf.close_stream();
 					fin.close();
-					++sst->open_err_;
+					++sst.open_err_;
 					++i;
 					continue;
 				}
 			} else {
 				fin.close();
-				++sst->open_err_;
+				++sst.open_err_;
 				++i;
 				continue;
 			}
 
-			sst->tag_ = sdf.get_tag();
+			pthread_mutex_lock(&sst.sync_);
+			sst.tag_ = sdf.get_tag();
+			pthread_mutex_unlock(&sst.sync_);
 
-			sst->len_ = ainfo.samples;
+			sst.len_ = ainfo.samples;
 			time_t t;
 			ainfo.sample_to_time(ainfo.samples, t);
-			sst->etime_ = t;
+			sst.etime_ = t;
 			size_t pos = 0;
-			volatile bool pause = sst->pause_;
+			bool cmdin = false;
+			sst.state_ = sound::stream_state::PLAY;
 			while(pos < ainfo.samples) {
-				if(sst->stop_ || sst->next_ || sst->replay_ || sst->prior_) {
-					break;
+				if(sst.request_.length()) {
+					const sound::request& r = sst.request_.get();
+					if(r.command_ == sound::request::command::NEXT) {
+						++i;
+						cmdin = true;
+						break;
+					} else if(r.command_ == sound::request::command::PRIOR) {
+						if(i) --i;
+						cmdin = true;
+						break;
+					} else if(r.command_ == sound::request::command::REPLAY) {
+						cmdin = true;
+						break;
+					} else if(r.command_ == sound::request::command::STOP) {
+						sst.state_ = sound::stream_state::STOP;
+						exit = true;
+						cmdin = true;
+						break;
+					} else if(r.command_ == sound::request::command::PAUSE) {
+						if(pause != r.pause_state_) {
+							pause = r.pause_state_;
+							sst.audio_io_->pause_stream(sst.slot_, pause);
+							if(pause) sst.state_ = sound::stream_state::PAUSE;
+							else sst.state_ = sound::stream_state::PLAY;
+						}
+					} else if(r.command_ == sound::request::command::SEEK) {
+						pos = r.seek_pos_;
+						continue;
+					}
 				}
 
-				if(pause != sst->pause_) {
-					pause = sst->pause_;
-					sst->audio_io_->pause_stream(sst->slot_, pause);
-				}
-				sst->pos_ = pos;
+				sst.pos_ = pos;
 				time_t t;
 				ainfo.sample_to_time(pos, t);
-				sst->time_ = t;
-				audio_io::wave_handle h = sst->audio_io_->status_stream(sst->slot_);
+				sst.time_ = t;
+				audio_io::wave_handle h = sst.audio_io_->status_stream(sst.slot_);
 				if(h != 0) {
 					uint32_t len = sdf.read_stream(fin, pos, stream_buff_size);
 					if(len) {
 						pos += len;
-						sst->audio_io_->queue_stream(sst->slot_, h, sdf.get_stream());
+						sst.audio_io_->queue_stream(sst.slot_, h, sdf.get_stream());
 					} else {
 						pos = ainfo.samples;
 					}
-				}
-
-				if(sst->seek_) {
-					pos = sst->seek_pos_;
-					sst->seek_ = false;
-					continue;
 				}
 
 				// デコードのパフォーマンス的には１６ミリ秒程度のインターバルで
@@ -118,22 +140,12 @@ namespace al {
 				usleep(8000);	// 8ms くらいの時間待ち
 
 			}
-			sst->audio_io_->purge_stream(sst->slot_);
-			sst->pos_ = sst->len_;
+			sst.audio_io_->purge_stream(sst.slot_);
+			sst.pos_ = sst.len_;
 			sdf.close_stream();
 			fin.close();
 
-			if(sst->replay_) {
-				sst->replay_ = false;
-			} else if(sst->prior_) {
-				sst->prior_ = false;
-				if(i) --i;
-			} else if(sst->next_) {
-				sst->next_ = false;
-				++i;
-			} else {
-				++i;
-			}
+			if(!cmdin) ++i;
 		}
 	}
 
@@ -147,23 +159,23 @@ namespace al {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	static void* stream_task_(void* entry)
 	{
-		sound::sstream_t* sst = static_cast<sound::sstream_t*>(entry);
+		sound::sstream_t& sst = *(static_cast<sound::sstream_t*>(entry));
 
 		snd_files sdf;
 		sdf.initialize();
 
-		sst->start_ = true;
+		sst.start_ = true;
 
 		utils::file_infos fis;
-		create_file_list(sst->root_, fis);
-		play_task_(sst, sdf, sst->root_, fis, sst->file_);
+		create_file_list(sst.root_, fis);
+		play_task_(sst, sdf, sst.root_, fis, sst.file_);
 
 		sdf.destroy();
 
-		sst->start_ = false;
-		sst->finsh_ = true;
+		sst.start_ = false;
+		sst.finsh_ = true;
 
-		return NULL;
+		return nullptr;
 	}
 
 
@@ -226,11 +238,7 @@ namespace al {
 		stream_start_ = false;
 		sstream_t_.start_ = false;
 		sstream_t_.finsh_ = false;
-		sstream_t_.stop_ = false;
-		sstream_t_.pause_ = false;
-		sstream_t_.seek_ = false;
 
-		sstream_t_.seek_pos_ = 0;
 		sstream_t_.pos_ = 0;
 		sstream_t_.len_ = 0;
 		sstream_t_.time_ = 0;
@@ -416,13 +424,11 @@ namespace al {
 		sstream_t_.root_ = root;
 		sstream_t_.file_ = file;
 		sstream_t_.start_ = false;
+
+		sstream_t_.request_.clear();
+
 		sstream_t_.finsh_ = false;
-		sstream_t_.stop_  = false;
-		sstream_t_.next_  = false;
-		sstream_t_.replay_ = false;
-		sstream_t_.prior_ = false;
-		sstream_t_.pause_ = false;
-		sstream_t_.seek_ = false;
+
 		sstream_t_.pos_ = 0;
 		sstream_t_.len_ = 0;
 		sstream_t_.time_  = 0;
@@ -432,7 +438,8 @@ namespace al {
 ///		pthread_attr_init(&attr_);
 ///		pthread_attr_setdetachstate(&attr_, PTHREAD_CREATE_DETACHED);
 
-		pthread_create(&pth_, NULL, stream_task_, &sstream_t_);
+		pthread_mutex_init(&sstream_t_.sync_, nullptr);
+		pthread_create(&pth_, nullptr, stream_task_, &sstream_t_);
 
 		return true;
 	}
@@ -440,80 +447,20 @@ namespace al {
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	ストリームの再生位置を変更
-		@param[in]	pos	再生開始位置
-		@return 成功なら「true」を返す。
-	 */
-	//-----------------------------------------------------------------//
-	bool sound::seek_stream(size_t pos)
-	{
-		if(stream_start_) {
-			sstream_t_.seek_pos_ = pos;
-			sstream_t_.seek_ = true;
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
 		@brief	ストリーム再生を停止
-		@return 正常なら「true」
 	 */
 	//-----------------------------------------------------------------//
-	bool sound::stop_stream()
+	void sound::stop_stream()
 	{
 		if(stream_start_) {
-			sstream_t_.stop_ = true;
-			pthread_join(pth_ , NULL);
+			sstream_t_.request_.put(request(request::command::STOP));
+			pthread_join(pth_ , nullptr);
+			pthread_mutex_destroy(&sstream_t_.sync_);
 			stream_start_ = false;
+			sstream_t_.state_ = stream_state::STOP;
 			sstream_t_.time_ = 0;
 			sstream_t_.etime_ = 0;
 			stream_fph_.clear();
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	ストリーム再生、次の曲
-	 */
-	//-----------------------------------------------------------------//
-	void sound::next_stream()
-	{
-		if(stream_start_) {
-			sstream_t_.next_ = true;
-		}
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	ストリーム再再生
-	 */
-	//-----------------------------------------------------------------//
-	void sound::replay_stream()
-	{
-		if(stream_start_) {
-			sstream_t_.replay_ = true;
-		}
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	ストリーム再生、前の曲
-	 */
-	//-----------------------------------------------------------------//
-	void sound::prior_stream()
-	{
-		if(stream_start_) {
-			sstream_t_.prior_ = true;
 		}
 	}
 
@@ -528,6 +475,7 @@ namespace al {
 	{
 		// 曲の終了を感知して、フラグを下げる～
 		if(stream_start_) {
+			pthread_mutex_lock(&sstream_t_.sync_);
 			if(stream_fph_cnt_ != sstream_t_.fph_cnt_) {
 				stream_fph_ = sstream_t_.fph_;
 				stream_fph_cnt_ = sstream_t_.fph_cnt_;
@@ -535,8 +483,10 @@ namespace al {
 			if(stream_tag_.serial_ != sstream_t_.tag_.serial_) {
 				stream_tag_ = sstream_t_.tag_;
 			}
+			pthread_mutex_unlock(&sstream_t_.sync_);
 			if(sstream_t_.finsh_) {
 				pthread_detach(pth_);
+				pthread_mutex_destroy(&sstream_t_.sync_);
 				stream_start_ = false;
 			}
 		}

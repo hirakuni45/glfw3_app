@@ -8,9 +8,10 @@
 #include <vector>
 #include <string>
 #include <pthread.h>
-#include "audio_io.hpp"
-#include "snd_files.hpp"
-#include "tag.hpp"
+#include "snd_io/audio_io.hpp"
+#include "snd_io/snd_files.hpp"
+#include "snd_io/tag.hpp"
+#include "utils/fifo.hpp"
 #include "utils/string_utils.hpp"
 
 namespace al {
@@ -36,36 +37,54 @@ namespace al {
 			};
 		};
 
+
+		struct request {
+			enum class command {
+				NONE,	///< 無効
+				STOP,	///< 停止
+				PLAY,	///< 再生
+				PAUSE,	///< 一時停止
+				REPLAY,	///< 再再生
+				NEXT,	///< 次
+				PRIOR,	///< 前
+				SEEK,	///< シーク
+			};
+			command		command_;
+			union {
+				uint32_t	seek_pos_;
+				bool		pause_state_;
+			};
+			explicit request(command cmd = command::NONE) : command_(cmd) { }
+		};
+
 		struct sstream_t {
 			audio_io*				audio_io_;
 			audio_io::slot_handle	slot_;
 			std::string				root_;
 			std::string				file_;
+
+			utils::fifo<request, 64> request_;
+			stream_state::type		state_;
+
 			volatile bool			start_;
 			volatile bool			finsh_;
-			volatile bool			stop_;
-			volatile bool			next_;
-			volatile bool			replay_;
-			volatile bool			prior_;
-			volatile bool			pause_;
-			volatile bool			seek_;
+
 			volatile size_t			pos_;
 			volatile size_t			len_;
 			volatile time_t			time_;
 			volatile time_t			etime_;
-			volatile size_t			seek_pos_;
 			volatile uint32_t		open_err_;
-			volatile uint32_t		fph_cnt_;
+
+			pthread_mutex_t			sync_;
+			uint32_t				fph_cnt_;
 			std::string				fph_;
 			tag						tag_;
 
 			sstream_t() : audio_io_(0), slot_(0),
-				root_(), file_(),
-				start_(false), finsh_(false), stop_(false),
-				next_(false), replay_(false), prior_(false), pause_(false), seek_(false),
-				pos_(0), len_(0), time_(0), etime_(0), seek_pos_(0),
-				open_err_(0), fph_cnt_(0), fph_(), tag_()
-			{ }
+						  root_(), file_(), state_(stream_state::STALL),
+						  start_(false), finsh_(false),
+						  pos_(0), len_(0), time_(0), etime_(0),
+						  open_err_(0), fph_cnt_(0), fph_(), tag_() { }
 		};
 
 	private:
@@ -318,7 +337,9 @@ namespace al {
 			@return ファイルパス
 		 */
 		//-----------------------------------------------------------------//
-		const std::string& get_file_stream() const { return stream_fph_; }
+		const std::string& get_file_stream() const {
+			return stream_fph_;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -327,16 +348,24 @@ namespace al {
 			@return タグ
 		 */
 		//-----------------------------------------------------------------//
-		const tag& get_tag_stream() const { return stream_tag_; }
+		const tag& get_tag_stream() const {
+			return stream_tag_;
+		}
 
 
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	ストリームを一時停止
-			@param[in]	stop	「false」でポーズ解除
+			@param[in]	state	「false」でポーズ解除
 		 */
 		//-----------------------------------------------------------------//
-		void pause_stream(bool stop = true) { sstream_t_.pause_ = stop; }
+		void pause_stream(bool state = true) {
+			if(stream_start_) {
+				request r(request::command::PAUSE);
+				r.pause_state_ = state;
+				sstream_t_.request_.put(r);
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -345,25 +374,22 @@ namespace al {
 			@return ステートを返す。
 		 */
 		//-----------------------------------------------------------------//
-		stream_state::type get_state_stream() const {
-			if(stream_start_) {
-				if(sstream_t_.pause_) return stream_state::PAUSE;
-				else if(sstream_t_.stop_) return stream_state::STOP;
-				else return stream_state::PLAY;
-			} else {
-				return stream_state::STALL;
-			}
-		}
+		stream_state::type get_state_stream() const { return sstream_t_.state_; }
 
 
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	ストリームの再生位置を変更
 			@param[in]	pos	再生開始位置
-			@return 成功なら「true」を返す。
 		 */
 		//-----------------------------------------------------------------//
-		bool seek_stream(size_t pos);
+		void seek_stream(size_t pos) {
+			if(stream_start_) {
+				request r(request::command::SEEK);
+				r.seek_pos_ = pos;
+				sstream_t_.request_.put(r);
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -371,7 +397,11 @@ namespace al {
 			@brief	ストリーム再生、次の曲
 		 */
 		//-----------------------------------------------------------------//
-		void next_stream();
+		void next_stream() {
+			if(stream_start_) {
+				sstream_t_.request_.put(request(request::command::NEXT));
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -379,7 +409,11 @@ namespace al {
 			@brief	ストリーム再再生
 		 */
 		//-----------------------------------------------------------------//
-		void replay_stream();
+		void replay_stream() {
+			if(stream_start_) {
+				sstream_t_.request_.put(request(request::command::REPLAY));
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -387,16 +421,19 @@ namespace al {
 			@brief	ストリーム再生、前の曲
 		 */
 		//-----------------------------------------------------------------//
-		void prior_stream();
+		void prior_stream() {
+			if(stream_start_) {
+				sstream_t_.request_.put(request(request::command::PRIOR));
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	ストリーム再生を停止
-			@return 正常なら「true」
 		 */
 		//-----------------------------------------------------------------//
-		bool stop_stream();
+		void stop_stream();
 
 
 		//-----------------------------------------------------------------//
