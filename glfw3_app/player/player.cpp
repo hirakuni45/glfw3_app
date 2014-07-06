@@ -321,7 +321,11 @@ namespace app {
 		if(filer_ && file_btn_->get_selected()) {
 			bool f = filer_->get_state(gui::widget::state::ENABLE);
 			filer_->enable(!f);
-			if(!f) filer_->focus_file(sound.get_file_stream());
+			if(!f) {
+				filer_->focus_file(sound.get_file_stream());
+				files_step_ = 0;
+				files_.clear();
+			}
 		}
 
 		// 「送り」ボタン
@@ -433,7 +437,8 @@ namespace app {
 			sound_play_(file);
 		}
 
-		// ファイラーが有効で、マウス操作が無い状態が５秒続いたら、演奏ファイルへフォーカス
+		// ファイラーが有効で、マウス操作が無い状態が５秒続いたら、
+		// 演奏ファイルへフォーカス
    		if(filer_->get_state(gui::widget::state::ENABLE)) {
 			const vtx::spos& msp = core.get_device().get_locator().get_cursor();
 			if(msp == mouse_pos_) {
@@ -445,6 +450,15 @@ namespace app {
 				filer_count_ = 0;
 				mouse_pos_ = msp;
 			}
+
+			// ファイルのタグをファイラーのエイリアスに設定
+//			if(files_.empty() && files_step_ == 0 && filer_->probe_file_list()) {
+//				filer_->get_file_list(files_);
+//			}
+//			if(files_step_ < files_.size()) {
+//				std::cout << files_[files_step_] << std::endl;
+//				++files_step_;
+//			}
 		}
 
 		// Drag & Drop されたファイルを再生
