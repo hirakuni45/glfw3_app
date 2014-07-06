@@ -60,6 +60,8 @@ namespace gui {
 		gl::mobj::handle	objh_;
 
 		utils::files		fsc_;
+		std::string			fsc_path_;
+		utils::file_infos	file_infos_;
 		utils::drive_info	drv_;
 
 		widget_button*	info_;	///< インフォメーション切り替えボタン
@@ -96,9 +98,13 @@ namespace gui {
 		typedef std::vector<widget_file> widget_files;
 		typedef std::vector<widget_file>::iterator widget_files_it;
 		typedef std::vector<widget_file>::const_iterator widget_files_cit;
+
+		typedef boost::unordered_map<std::string, uint32_t>	name_map;
+
 		widget_files	left_;
 		widget_files	center_;
 		widget_files	right_;
+
 		bool			request_right_;
 
 		vtx::fpos	speed_;
@@ -115,8 +121,6 @@ namespace gui {
 		};
 
 		typedef boost::unordered_map<std::string, file_t>	file_map;
-		typedef boost::unordered_map<std::string, file_t>::iterator	file_map_it;
-		typedef std::pair<std::string, file_t> file_map_pair;
 		file_map	file_map_;
 
 		uint32_t	select_file_id_;
@@ -265,11 +269,20 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	ファイルを返す
-			@return ファイル
+			@brief	選択されたファイルを返す
+			@return 選択されたファイル
 		*/
 		//-----------------------------------------------------------------//
 		const std::string& get_file() const { return file_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ファイル情報郡を取得
+			@return ファイル情報郡
+		*/
+		//-----------------------------------------------------------------//
+		const utils::file_infos& get_file_infos() const { return file_infos_; }
 
 
 		//-----------------------------------------------------------------//
@@ -280,16 +293,7 @@ namespace gui {
 			@return ファイル・パス・インデックス（負の値ならマッチ無し）
 		*/
 		//-----------------------------------------------------------------//
-		int get_file_list(utils::strings& ss, bool dir = false);
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	ファイル郡を取得
-			@return ファイル郡
-		*/
-		//-----------------------------------------------------------------//
-		const utils::files& get_files() const { return fsc_; }
+		int get_file_list(utils::strings& ss, bool dir = false) const;
 
 
 		//-----------------------------------------------------------------//
@@ -307,17 +311,11 @@ namespace gui {
 			@brief	別名を設定する
 			@param[in]	path	ファイルパス
 			@param[in]	alias	別名
+			@param[in]	f		有効にしない場合「false」
 			@return 該当するファイルが無い場合「false」
 		*/
 		//-----------------------------------------------------------------//
-		bool set_alias(const std::string& path, const std::string& alias) {
-			std::string fip = make_path_(path);
-			if(fip.empty()) return false;
-
-			
-
-			return false;
-		}
+		bool set_alias(const std::string& path, const std::string& alias, bool f = true);
 
 
 		//-----------------------------------------------------------------//
@@ -327,8 +325,7 @@ namespace gui {
 			@param[in]	f		無効にする場合「false」
 		*/
 		//-----------------------------------------------------------------//
-		void enable_alias(const std::string& path, bool f = true) {
-		}
+		void enable_alias(const std::string& path, bool f = true);
 
 
 		//-----------------------------------------------------------------//

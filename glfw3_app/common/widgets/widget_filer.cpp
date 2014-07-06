@@ -73,7 +73,7 @@ namespace gui {
 
 		// ルートパスならドライブレターを加える
 		std::string pp;
-		bool prevp = utils::previous_path(fsc_.get_path(), pp);
+		bool prevp = utils::previous_path(fsc_path_, pp);
 		if(!prevp) {
 			for(uint32_t i = 0; i < drv_.get_num(); ++i) {
 				widget_file wf;
@@ -88,8 +88,8 @@ namespace gui {
 			}
 		}
 
-		const utils::file_infos& fos = fsc_.get();
-		BOOST_FOREACH(const utils::file_info& fi, fos) {
+
+		BOOST_FOREACH(const utils::file_info& fi, file_infos_) {
 			std::string fn = fi.get_name();
 			if(fn == ".") continue;
 
@@ -234,7 +234,7 @@ namespace gui {
 	void widget_filer::get_regist_state_()
 	{
 		// 選択位置の回復
-		file_map_it it = file_map_.find(param_.path_);
+		file_map::iterator it = file_map_.find(param_.path_);
 		if(it != file_map_.end()) {
 			position_ = it->second.position_;
 			select_pos_ = it->second.select_pos_;
@@ -248,10 +248,10 @@ namespace gui {
 	void widget_filer::set_regist_state_()
 	{
 		// パスに紐づいた位置の記録
-		file_map_it it = file_map_.find(param_.path_);
+		file_map::iterator it = file_map_.find(param_.path_);
 		if(it == file_map_.end()) {
 			file_t t;
-			it = file_map_.insert(file_map_pair(param_.path_, t)).first;
+			it = file_map_.insert(file_map::value_type(param_.path_, t)).first;
 		}
 		file_t& f = it->second;
 		f.position_ = position_;
@@ -285,7 +285,6 @@ namespace gui {
 		uint32_t n = 0;
 		BOOST_FOREACH(const widget_file& wf, center_) {
 			std::string t;
-///			utils::strip_last_of_delimita_path(wf.name->at_local_param().text_param_.text_, t);
 			utils::strip_last_of_delimita_path(wf.fname, t);
 			if(t == fn) {
 				if(wf.name->get_state(widget::state::SYSTEM_SELECT)) {
@@ -333,11 +332,11 @@ namespace gui {
 		@return ファイル・パス・インデックス（負の値ならマッチ無し）
 	*/
 	//-----------------------------------------------------------------//
-	int widget_filer::get_file_list(utils::strings& ss, bool dir)
+	int widget_filer::get_file_list(utils::strings& ss, bool dir) const
 	{
 		uint32_t n = 0;
 		int ret = -1;
-		BOOST_FOREACH(const utils::file_info& fi, fsc_.get()) {
+		BOOST_FOREACH(const utils::file_info& fi, file_infos_) {
 			std::string fn;
 			if(fi.get_name() == ".") continue;
 			else if(fi.get_name() == "..") continue;
@@ -380,6 +379,8 @@ namespace gui {
 		// フレームの生成
 		objh_ = frame_init(wd_, at_param(), param_.plate_param_, param_.color_param_);
 
+		file_infos_.clear();
+		fsc_path_.clear();
 		fsc_.set_path(param_.path_, param_.filter_);
 
 		short frame_width = param_.plate_param_.frame_width_;
@@ -477,6 +478,8 @@ namespace gui {
 
 		// ファイル情報の取得と反映（ファイル情報収集はスレッドで動作）
 		if(fsc_.probe()) {
+			fsc_path_ = fsc_.get_path();
+			file_infos_ = fsc_.get();
 
 			if(center_.empty()) {
 				create_files_(center_, 0);
@@ -484,6 +487,8 @@ namespace gui {
 				if(left_.empty()) {
 					std::string pp;
 					if(utils::previous_path(param_.path_, pp)) {
+						file_infos_.clear();
+						fsc_path_.clear();
 						fsc_.set_path(pp);
 						request_right_ = false;
 					}
@@ -558,6 +563,8 @@ namespace gui {
 					center_.swap(left_);
 					focus_file(tmp);
 					if(utils::previous_path(param_.path_, pp)) {
+						file_infos_.clear();
+						fsc_path_.clear();
 						fsc_.set_path(pp, param_.filter_);
 					}
 				} else {
@@ -707,7 +714,7 @@ namespace gui {
 			if(cit != center_.end()) {
 				const widget_file& wf = *cit;
 				if(wf.name) {
-					const std::string& n = wf.name->get_local_param().text_param_.text_;
+					const std::string& n = wf.fname;
 					if(n == "..") {  // 一つ前に戻る
 						request_right_ = false;
 						move_speed_ =  speed_move;
@@ -721,6 +728,8 @@ namespace gui {
 							utils::append_path(param_.path_, n, ap);
 							utils::strip_last_of_delimita_path(ap, param_.path_);
 						}
+						file_infos_.clear();
+						fsc_path_.clear();
 						fsc_.set_path(param_.path_, param_.filter_);
 						destroy_files_(right_);
 					} else {
@@ -773,6 +782,67 @@ namespace gui {
 	}
 
 
+   	//-----------------------------------------------------------------//
+	/*!
+		@brief	別名を設定する
+		@param[in]	path	ファイルパス
+		@param[in]	alias	別名
+		@param[in]	f		有効にしない場合「false」
+		@return 該当するファイルが無い場合「false」
+	*/
+	//-----------------------------------------------------------------//
+	bool widget_filer::set_alias(const std::string& path, const std::string& alias, bool f)
+	{
+		std::string fip = make_path_(path);
+		if(fip.empty()) return false;
+		BOOST_FOREACH(widget_file& wf, center_) {
+			std::string t;
+			utils::strip_last_of_delimita_path(wf.fname, t);
+			if(t == fip) {
+				wf.alias = alias;
+				wf.alias_enable = f;
+				if(wf.name) {
+					if(f) {
+						wf.name->at_local_param().text_param_.text_ = wf.alias;
+					} else {
+						wf.name->at_local_param().text_param_.text_ = wf.fname;
+					}
+				}
+				return true;
+			}
+		}
+		return false;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	別名を有効にする
+		@param[in]	path	ファイルパス
+		@param[in]	f		無効にする場合「false」
+	*/
+	//-----------------------------------------------------------------//
+	void widget_filer::enable_alias(const std::string& path, bool f)
+	{
+		std::string fip = make_path_(path);
+		if(fip.empty()) return;
+		BOOST_FOREACH(widget_file& wf, center_) {
+			std::string t;
+			utils::strip_last_of_delimita_path(wf.fname, t);
+			if(t == fip) {
+				wf.alias_enable = f;
+				if(wf.name) {
+					if(f) {
+						wf.name->at_local_param().text_param_.text_ = wf.alias;
+					} else {
+						wf.name->at_local_param().text_param_.text_ = wf.fname;
+					}
+				}
+			}
+		}
+	}
+
+
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	状態のセーブ
@@ -811,6 +881,8 @@ namespace gui {
 		std::string s;
 		if(pre.get_text(path + "/current_path", s)) {
 			param_.path_ = s;
+			file_infos_.clear();
+			fsc_path_.clear();
 			fsc_.set_path(param_.path_, param_.filter_);
 			destroy_files_(left_);
 			destroy_files_(center_);
