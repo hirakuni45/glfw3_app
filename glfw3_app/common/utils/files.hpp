@@ -45,7 +45,7 @@ namespace utils {
 
 		std::future<file_infos>	future_;
 
-		file_infos		file_infos_;
+		utils::file_infos	file_infos_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -116,7 +116,7 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		const file_infos& get() {
-			file_infos_ =  future_.get();
+			file_infos_ = future_.get();
 			return file_infos_;
 		}
 	};
