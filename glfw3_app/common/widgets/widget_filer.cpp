@@ -12,7 +12,7 @@
 
 namespace gui {
 
-	void widget_filer::create_file_(widget_file& wf, const vtx::srect& rect, short ofs)
+	void widget_filer::create_file_(widget_file& wf, const vtx::srect& rect, short ofs, const std::string& str)
 	{
 		{
 			widget::param wp(rect, files_);
@@ -32,7 +32,7 @@ namespace gui {
 			r.size.set(fns, param_.label_height_);
 			widget::param wp(r, wf.base);
 			wp.action_.set(widget::action::SELECT_HIGHLIGHT);
-			widget_label::param wp_(wf.fname);
+			widget_label::param wp_(str);
 			wp_.text_param_.placement_.hpt = vtx::placement::holizontal::LEFT;
 			wp_.plate_param_.frame_width_ = 0;
 			wp_.plate_param_.round_radius_ = 0;
@@ -80,9 +80,8 @@ namespace gui {
 				std::string fn;
 				fn += 'A' + drv_.get_info(i).drive_;
 				fn += ":/";
-				wf.fname = fn;
 				wf.dir = true;
-				create_file_(wf, rect, ofs);
+				create_file_(wf, rect, ofs, fn);
 				wfs.push_back(wf);
 				rect.org.y += param_.label_height_;
 			}
@@ -102,8 +101,7 @@ namespace gui {
 				wf.dir = true;
 			}
 
-			wf.fname = fn;
-			create_file_(wf, rect, ofs);
+			create_file_(wf, rect, ofs, fn);
 
 			wf.size = fi.get_size();
 			wf.time = fi.get_time();
@@ -280,13 +278,26 @@ namespace gui {
 	}
 
 
+	widget_filer::widget_file_copt widget_filer::scan_item_(const std::string& path) const
+	{
+		BOOST_FOREACH(const widget_file& wf, center_) {
+			std::string t;
+			utils::strip_last_of_delimita_path(wf.name->get_text(), t);
+			if(wf.name && t == path) {
+				return widget_file_copt(wf);
+			}
+		}
+		return widget_file_copt();
+	}
+
+
 	bool widget_filer::focus_(const std::string& fn)
 	{
 		uint32_t n = 0;
 		BOOST_FOREACH(const widget_file& wf, center_) {
 			std::string t;
-			utils::strip_last_of_delimita_path(wf.fname, t);
-			if(t == fn) {
+			utils::strip_last_of_delimita_path(wf.name->get_text(), t);
+			if(wf.name && t == fn) {
 				if(wf.name->get_state(widget::state::SYSTEM_SELECT)) {
 					return true;
 				}
@@ -714,7 +725,7 @@ namespace gui {
 			if(cit != center_.end()) {
 				const widget_file& wf = *cit;
 				if(wf.name) {
-					const std::string& n = wf.fname;
+					const std::string& n = wf.name->get_text();
 					if(n == "..") {  // 一つ前に戻る
 						request_right_ = false;
 						move_speed_ =  speed_move;
@@ -782,62 +793,21 @@ namespace gui {
 	}
 
 
-   	//-----------------------------------------------------------------//
-	/*!
-		@brief	別名を設定する
-		@param[in]	path	ファイルパス
-		@param[in]	alias	別名
-		@param[in]	f		有効にしない場合「false」
-		@return 該当するファイルが無い場合「false」
-	*/
-	//-----------------------------------------------------------------//
-	bool widget_filer::set_alias(const std::string& path, const std::string& alias, bool f)
-	{
-		std::string fip = make_path_(path);
-		if(fip.empty()) return false;
-		BOOST_FOREACH(widget_file& wf, center_) {
-			std::string t;
-			utils::strip_last_of_delimita_path(wf.fname, t);
-			if(t == fip) {
-				wf.alias = alias;
-				wf.alias_enable = f;
-				if(wf.name) {
-					if(f) {
-						wf.name->at_local_param().text_param_.text_ = wf.alias;
-					} else {
-						wf.name->at_local_param().text_param_.text_ = wf.fname;
-					}
-				}
-				return true;
-			}
-		}
-		return false;
-	}
-
-
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	別名を有効にする
-		@param[in]	path	ファイルパス
-		@param[in]	f		無効にする場合「false」
+		@brief	代替テキスト（エリアス）を設定
+		@param[in]	path	選択するファイルパス
+		@param[in]	alias	代替テキスト
+		@param[in]	ena		不許可にする場合「false」
 	*/
 	//-----------------------------------------------------------------//
-	void widget_filer::enable_alias(const std::string& path, bool f)
+	void widget_filer::set_alias(const std::string& path, const std::string& alias, bool ena)
 	{
-		std::string fip = make_path_(path);
-		if(fip.empty()) return;
-		BOOST_FOREACH(widget_file& wf, center_) {
-			std::string t;
-			utils::strip_last_of_delimita_path(wf.fname, t);
-			if(t == fip) {
-				wf.alias_enable = f;
-				if(wf.name) {
-					if(f) {
-						wf.name->at_local_param().text_param_.text_ = wf.alias;
-					} else {
-						wf.name->at_local_param().text_param_.text_ = wf.fname;
-					}
-				}
+		widget_file_copt wfo = scan_item_(path);
+		if(wfo) {
+			const widget_file& wf = *wfo;
+			if(wf.name) {
+				wf.name->set_alias(alias, ena);
 			}
 		}
 	}

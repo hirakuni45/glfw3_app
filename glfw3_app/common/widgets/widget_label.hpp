@@ -181,6 +181,41 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		bool load(const sys::preference& pre);
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	テキストを設定
+			@param[in]	text	テキスト
+		*/
+		//-----------------------------------------------------------------//
+		void set_text(const std::string& text) {
+			at_local_param().text_param_.text_ = text;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	テキストを取得
+			@return	テキスト
+		*/
+		//-----------------------------------------------------------------//
+		const std::string& get_text() const {
+			return get_local_param().text_param_.text_;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	エイリアス・テキストを設定
+			@param[in]	text	テキスト
+			@param[in]	ena		不許可にする場合「false」
+		*/
+		//-----------------------------------------------------------------//
+		void set_alias(const std::string& text, bool ena = true) {
+			at_local_param().text_param_.alias_ = text;
+			at_local_param().text_param_.alias_enable_ = ena;
+		}
 	};
 
 	typedef std::vector<widget_label*>	widget_labels;

@@ -8,6 +8,7 @@
 //=====================================================================//
 #include <vector>
 #include <boost/unordered_map.hpp>
+#include <boost/optional.hpp>
 #include "utils/files.hpp"
 #include "utils/drive_info.hpp"
 #include "widgets/widget_director.hpp"
@@ -84,22 +85,21 @@ namespace gui {
 			widget_null*	base;
 			widget_label*	name;
 			widget_label*	info;
-			std::string		fname;
-			std::string		alias;
 			size_t			size;
 			time_t			time;
 			mode_t			mode;
 			bool			dir;
-			bool			alias_enable;
 			widget_file() : base(0), name(0), info(0),
-							fname(), alias(), size(0), time(0), mode(0),
-							dir(false), alias_enable(false) { }
+							size(0), time(0), mode(0),
+							dir(false) { }
 		};
 		typedef std::vector<widget_file> widget_files;
 		typedef std::vector<widget_file>::iterator widget_files_it;
 		typedef std::vector<widget_file>::const_iterator widget_files_cit;
 
 		typedef boost::unordered_map<std::string, uint32_t>	name_map;
+
+		typedef boost::optional<const widget_file&>  widget_file_copt;
 
 		widget_files	left_;
 		widget_files	center_;
@@ -131,7 +131,7 @@ namespace gui {
 		static const char* key_locate_;
 		static const char* key_size_;
 
-		void create_file_(widget_file& wf, const vtx::srect& rect, short ofs);
+		void create_file_(widget_file& wf, const vtx::srect& rect, short ofs, const std::string& str);
 		void create_files_(widget_files& wfs, short ofs);
 		widget_files_cit scan_select_in_file_(widget_files& wfs) const;
 		widget_files_cit scan_select_file_(widget_files& wfs) const;
@@ -143,6 +143,7 @@ namespace gui {
 		void set_regist_state_();
 		void set_select_pos_(uint32_t pos);
 		void destroy_();
+		widget_file_copt scan_item_(const std::string& path) const;
 		bool focus_(const std::string& fn);
 		std::string make_path_(const std::string path);
 	public:
@@ -260,6 +261,26 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	状態のセーブ
+			@param[in]	pre	プリファレンス参照
+			@return エラーが無い場合「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool save(sys::preference& pre);
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	状態のロード
+			@param[in]	pre	プリファレンス参照
+			@return エラーが無い場合「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool load(const sys::preference& pre);
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	ファイル選択シグナルを取得
 			@return ファイル選択シグナル
 		*/
@@ -308,43 +329,12 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	別名を設定する
-			@param[in]	path	ファイルパス
-			@param[in]	alias	別名
-			@param[in]	f		有効にしない場合「false」
-			@return 該当するファイルが無い場合「false」
+			@brief	代替テキスト（エリアス）を設定
+			@param[in]	path	選択するファイルパス
+			@param[in]	alias	代替テキスト
+			@param[in]	ena		不許可にする場合「false」
 		*/
 		//-----------------------------------------------------------------//
-		bool set_alias(const std::string& path, const std::string& alias, bool f = true);
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	別名を有効にする
-			@param[in]	path	ファイルパス
-			@param[in]	f		無効にする場合「false」
-		*/
-		//-----------------------------------------------------------------//
-		void enable_alias(const std::string& path, bool f = true);
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	状態のセーブ
-			@param[in]	pre	プリファレンス参照
-			@return エラーが無い場合「true」
-		*/
-		//-----------------------------------------------------------------//
-		bool save(sys::preference& pre);
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	状態のロード
-			@param[in]	pre	プリファレンス参照
-			@return エラーが無い場合「true」
-		*/
-		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre);
+		void set_alias(const std::string& path, const std::string& alias, bool ena = true);
 	};
 }

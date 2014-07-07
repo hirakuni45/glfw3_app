@@ -69,7 +69,7 @@ namespace gui {
 			img::rgba8		back_color_;			///< 背景色
 			img::paint::intensity_rect	inten_rect_;
 			bool			ir_enable_;
-			color_param(const img::rgba8& fc = img::rgba8(255), const img::rgba8& bc = img::rgba8(0)) :
+			explicit color_param(const img::rgba8& fc = img::rgba8(255), const img::rgba8& bc = img::rgba8(0)) :
 				fore_color_(fc), back_color_(bc), inten_rect_(), ir_enable_(false)
 			{ }
 
@@ -153,28 +153,31 @@ namespace gui {
 		struct text_param {
 			std::string		text_;				///< テキスト
 			std::string		font_;				///< フォントセット
-			bool			proportional_;		///< プロポーショナル・フォントの場合「true」
 			short			font_size_;			///< フォントサイズ
+			bool			proportional_;		///< プロポーショナル・フォントの場合「true」
+			bool			alias_enable_;		///< テキストの別名を有効にする
+			std::string		alias_;				///< テキストの別名（置き換え用）
+
 			img::rgba8		fore_color_;		///< テキスト色
 			img::rgba8		shadow_color_;		///< 影色
 			vtx::spos		shadow_offset_;		///< 影の相対位置
 			vtx::placement	placement_;			///< 配置方法
 			vtx::spos		offset_;			///< 描画オフセット（シフト表示用）
 			text_param() :
-				text_(), font_(),
-				proportional_(true), font_size_(24),
+				text_(), font_(), font_size_(24), proportional_(true),
+				alias_enable_(false), alias_(),
 				fore_color_(255, 255), shadow_color_(0, 255),
 				shadow_offset_(1),
 				placement_(vtx::placement::holizontal::CENTER,
 					vtx::placement::vertical::CENTER),
 				offset_(0) { }
-			text_param(const std::string& text,
+			explicit text_param(const std::string& text,
 				const img::rgba8& fc, const img::rgba8& sc,
 				const vtx::placement& pl = vtx::placement(
 				vtx::placement::holizontal::CENTER,
 				vtx::placement::vertical::CENTER)) :
-					text_(text), font_(),
-					proportional_(true), font_size_(24),
+					text_(text), font_(), font_size_(24), proportional_(true),
+					alias_enable_(false), alias_(),
 					fore_color_(fc), shadow_color_(sc), shadow_offset_(1),
 					placement_(pl),
 					offset_(0) { }
