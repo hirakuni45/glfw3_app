@@ -43,7 +43,7 @@ namespace app {
 
 		gui::widget_label*	total_time_;
 		gui::widget_label*	remain_time_;
-		gui::widget_slider*	seek_time_;
+		gui::widget_slider*	seek_handle_;
 		gui::widget_check*	resume_play_;
 
 		gui::widget_label*	title_pad_;
@@ -55,8 +55,6 @@ namespace app {
 
 		time_t			total_t_;
 		time_t			remain_t_;
-		uint32_t		frame_count_;
-		uint32_t		frame_limit_;
 
 		uint32_t			tag_serial_;
 		gl::mobj			mobj_;
@@ -85,10 +83,10 @@ namespace app {
 		  filer_(0),
 		  file_btn_(0), play_btn_(0), pause_btn_(0), rew_btn_(0), ff_btn_(0),
 		  volume_(0), vol_min_img_(0), vol_max_img_(0),
-		  total_time_(0), remain_time_(0), seek_time_(0), resume_play_(0),
+		  total_time_(0), remain_time_(0), seek_handle_(0), resume_play_(0),
 		  title_pad_(0), album_pad_(0), artist_pad_(0), other_pad_(0),
 		  error_dialog_(0),
-		  total_t_(0), remain_t_(0), frame_count_(0), frame_limit_(60),
+		  total_t_(0), remain_t_(0),
 		  tag_serial_(0), jacket_(0), drop_file_id_(0), select_file_id_(0),
 										   mouse_pos_(0), filer_count_(0),
 										   files_step_(0)

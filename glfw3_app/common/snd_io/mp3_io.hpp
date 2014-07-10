@@ -77,6 +77,8 @@ namespace al {
 
 		tag				tag_;
 
+		std::vector<uint32_t>	seek_points_;
+
 		void apply_filter_(mad_frame& frame);
 		int fill_read_buffer_(utils::file_io& fin, mad_stream& strm);
 		bool analize_frame_(utils::file_io& fin, audio_info& info, mp3_info& mp3info);

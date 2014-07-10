@@ -134,8 +134,8 @@ namespace app {
 				wp_.hand_image_ = wd.at_img_files().get_image();
 			}
 			wp_.plate_param_.resizeble_ = true;
-			wp_.hand_ctrl_ = false;
-			seek_time_ = wd.add_widget<widget_slider>(wp, wp_);
+			wp_.hand_ctrl_ = true;
+			seek_handle_ = wd.add_widget<widget_slider>(wp, wp_);
 		}
 
 		album_pad_  = create_text_pad_(vtx::spos(16 * 3, lw), "");
@@ -262,10 +262,10 @@ namespace app {
 		total_time_->at_rect().size.x = padsz;
 		total_time_->at_rect().org.x  = size.x - padsz - padspc;
 		total_time_->at_rect().org.y  = pady;
-		seek_time_->at_rect().org.x   = padsz + padspc * 2;
-		short ofs = total_time_->at_rect().size.y - seek_time_->at_rect().size.y;
-		seek_time_->at_rect().org.y   = pady + ofs / 2;
-		seek_time_->at_rect().size.x  = size.x - padsz * 2 - padspc * 4;
+		seek_handle_->at_rect().org.x   = padsz + padspc * 2;
+		short ofs = total_time_->at_rect().size.y - seek_handle_->at_rect().size.y;
+		seek_handle_->at_rect().org.y   = pady + ofs / 2;
+		seek_handle_->at_rect().size.x  = size.x - padsz * 2 - padspc * 4;
 
 		short vcen = size.x - (size.x / 2 + btw / 2 + btspc + btw);
 		volume_->at_rect().org.x = size.x - vcen / 2 - volume_->get_rect().size.x / 2;
@@ -343,39 +343,30 @@ namespace app {
 		}
 
 		// 時間表示
-		time_t t = remain_t_;
 		remain_t_ = sound.get_time_stream();
-		if(remain_t_ != t) {
-			frame_limit_ = frame_count_;
-			frame_count_ = 0;
-		} else {
-			if(sound.get_state_stream() == al::sound::stream_state::PLAY) {
-				++frame_count_;
-			}
-		}
-		t = total_t_;
 		total_t_ = sound.get_end_time_stream();
-		if(t != total_t_) frame_count_ = 0;
 		if(sound.get_state_stream() == al::sound::stream_state::STALL) {
-			frame_count_ = 0;
 			total_t_ = 0;
 			remain_t_ = 0;
 		}
 		set_time_(total_time_, total_t_);
+		if(seek_handle_->get_select()) {
+			const gui::widget::slider_param& sp = seek_handle_->get_slider_param();
+			remain_t_ = sp.position_ * sound.get_end_time_stream();
+		}
 		set_time_(remain_time_, remain_t_);
-		{
-			gui::widget::slider_param& sp = seek_time_->at_slider_param();
+
+		if(seek_handle_->get_select_out()) {
+			const gui::widget::slider_param& sp = seek_handle_->get_slider_param();
+			size_t pos = sp.position_ * static_cast<float>(sound.get_length_stream());
+			sound.seek_stream(pos);
+		} else if(!seek_handle_->get_select()) {
+			gui::widget::slider_param& sp = seek_handle_->at_slider_param();
 			if(total_t_) {
-				float limit = static_cast<float>(frame_limit_);
-				if(limit > 0.0f) {
-					float t = static_cast<float>(sound.get_position_stream()) * limit;
-					sp.position_ = t / (static_cast<float>(sound.get_length_stream()) * limit);
-				} else {
-					sp.position_ = 0.0f;
-				}
+				float t = static_cast<float>(sound.get_position_stream());
+				sp.position_ = t / static_cast<float>(sound.get_length_stream());
 			} else {
 				sp.position_ = 0.0f;
-				frame_count_ = 0;
 			}
 		}
 

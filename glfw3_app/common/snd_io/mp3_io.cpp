@@ -621,7 +621,6 @@ namespace al {
 
 		// ３フレーム以下はエラーとする・・
 		uint32_t limit_frame = 3;
-		uint32_t error = 0;
 		mp3info.reset();
 		info.header_size = mp3info.skip_head = fin.tell();
 		mad_stream stream;
@@ -632,7 +631,13 @@ namespace al {
 		int frame_cnt = 0;
 //		int samples = 0;
 		int ch = 0;
-		while(fill_read_buffer_(fin, stream) >= 0) {
+		seek_points_.clear();
+		uint32_t error = 0;
+		while(error == 0) {
+			seek_points_.push_back(fin.tell());
+			int ret = fill_read_buffer_(fin, stream);
+			if(ret < 0) break;
+
 			if(mad_frame_decode(&frame, &stream)) {
 				if(MAD_RECOVERABLE(stream.error)) {
 					++mp3info.recover_frame_error;
@@ -903,10 +908,14 @@ namespace al {
 		size_t end_pos = offset + samples;
 
 		if(offset != 0 && (offset_ + samples) != offset) {	// seek を検出
-//			std::cout << boost::format("Seek: %d -> %d\n") % static_cast<int>(offset_)
-//				% static_cast<int>(offset);
-//			output_pos_ = offset;
-//			fin.seek((long)output_pos_ + start_pos_, utils::file_io::set);
+			uint32_t n = offset / 1152;
+			if(n < seek_points_.size()) {
+				fin.seek(seek_points_[n], utils::file_io::seek::set);
+				output_pos_ = 1152 * n;
+			} else {
+				// seek error...
+				return 0;
+			}
 		}
 		offset_ = offset;
 		while(output_pos_ < end_pos) {
@@ -988,6 +997,8 @@ namespace al {
 	void mp3_io::close_stream()
 	{
 		if(stream_) {
+			stream_ = 0;
+			output_buffer_ = 0;
 			mad_synth_finish(&mad_synth_);
 			mad_frame_finish(&mad_frame_);
 			mad_stream_finish(&mad_stream_);
