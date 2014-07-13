@@ -97,6 +97,8 @@ namespace app {
 			widget::param wp(vtx::srect(30, 150, 100, 40));
 			widget_button::param wp_("Filer");
 			filer_open_ = wd.add_widget<widget_button>(wp, wp_);
+			filer_open_->at_local_param().text_param_.alias_ = "ファイラー";
+			filer_open_->at_local_param().text_param_.alias_enable_ = true;
 		}
 
 		if(1) { // ボタンのテスト（メニュー開始ボタン）
