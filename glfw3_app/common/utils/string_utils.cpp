@@ -13,8 +13,8 @@
 #endif
 
 #ifdef __APPLE__
-#include <iconv.h>
-#include "utils/cc932.hpp"
+// #include "utils/cc932.hpp"
+#include "utils/sjis_utf16.hpp"
 #endif
 
 #include <iostream>
@@ -294,11 +294,13 @@ namespace utils {
 				if(0x40 <= c && c <= 0x7e) {
 					wc <<= 8;
 					wc |= c;
-					ws += ff_convert(wc, 1);
+///					ws += ff_convert(wc, 1);
+					ws += sjis_to_utf16(wc);
 				} else if(0x80 <= c && c <= 0xfc) {
 					wc <<= 8;
 					wc |= c;
-					ws += ff_convert(wc, 1);
+///					ws += ff_convert(wc, 1);
+					ws += sjis_to_utf16(wc);
 				} else {
 					return false;
 				}
@@ -375,7 +377,8 @@ namespace utils {
 		wstring ws;
 		utf8_to_utf16(src, ws);
 		BOOST_FOREACH(uint16_t wc, ws) {
-			uint16_t ww = ff_convert(wc, 0);
+///			uint16_t ww = ff_convert(wc, 0);
+			uint16_t ww = utf16_to_sjis(wc);
 			dst += ww >> 8;
 			dst += ww & 0xff;
 		}
