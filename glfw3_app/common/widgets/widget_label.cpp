@@ -134,7 +134,9 @@ namespace gui {
 					fonts.set_font_type(param_.text_param_.font_);
 				}
 				fonts.enable_proportional(param_.text_param_.proportional_);
-				std::string s = param_.text_param_.text_;
+				std::string s;
+				if(param_.text_param_.alias_enable_) s = param_.text_param_.alias_;
+				else s = param_.text_param_.text_;
 				if(param_.text_in_pos_ < s.size()) {
 					s.erase(param_.text_in_pos_);
 				}

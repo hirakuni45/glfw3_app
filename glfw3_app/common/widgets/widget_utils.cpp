@@ -213,7 +213,11 @@ namespace gui {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	void draw_text(const widget::text_param& tp, const vtx::srect& rect, const vtx::srect& clip)
 	{
-		if(tp.text_.empty()) return;
+		std::string s;
+		if(tp.alias_enable_) s = tp.alias_;
+		else s = tp.text_;
+
+		if(s.empty()) return;
 
 		gl::core& core = gl::core::get_instance();
 
@@ -239,7 +243,7 @@ namespace gui {
 
 		fonts.enable_proportional(tp.proportional_);
 		vtx::spos pos;
-		const vtx::spos& fsize = fonts.get_size(tp.text_);
+		const vtx::spos& fsize = fonts.get_size(s);
 		vtx::placement tpl = tp.placement_;
 		if(fsize.x > clip_.size.x) {
 			tpl.hpt = vtx::placement::holizontal::LEFT;
@@ -247,19 +251,21 @@ namespace gui {
 		vtx::create_placement(rect_, fsize, tpl, pos);
 
 		short clx = 0;
-		if(utils::string_strchr(tp.text_, '\n')) {
+		if(utils::string_strchr(s, '\n')) {
 			clx = clip_.size.x;
 		}
+
+
 
 		pos += tp.offset_;
 		if(tp.shadow_offset_.x != 0 || tp.shadow_offset_.y != 0) {
 			vtx::spos p = pos + tp.shadow_offset_;
 			fonts.set_fore_color(tp.shadow_color_);
-			fonts.draw(p, tp.text_, clx);
+			fonts.draw(p, s, clx);
 		}
 
 		fonts.set_fore_color(tp.fore_color_);
-		fonts.draw(pos, tp.text_, clx);
+		fonts.draw(pos, s, clx);
 
 		if(!tp.font_.empty()) {
 			fonts.pop_font_face();
