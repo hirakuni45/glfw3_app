@@ -147,6 +147,7 @@ namespace al {
 
 			if(!cmdin) ++i;
 		}
+		sst.state_ = sound::stream_state::STALL;
 	}
 
 
