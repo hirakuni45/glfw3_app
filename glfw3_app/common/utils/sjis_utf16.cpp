@@ -1269,6 +1269,13 @@ static uint16_t sjis_utf16_tbl_[] = {
 	}
 
 
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief	SJIS から UTF-16 コードを求める
+		@param[in]	sjis	SJIS コード
+		@return UTF16 コード
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	uint16_t sjis_to_utf16(uint16_t sjis)
 	{
 		uint32_t i = sjis_to_liner_(sjis);
@@ -1280,6 +1287,11 @@ static uint16_t sjis_utf16_tbl_[] = {
 	}
 
 
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief	UTF-16 から SJIS コードを求めるマップの生成
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	void init_utf16_to_sjis()
 	{
 		struct tbl {
@@ -1303,7 +1315,7 @@ static uint16_t sjis_utf16_tbl_[] = {
 						uint16_t sjis = (hi << 8) | lo;
 						uint16_t utf16 = sjis_to_utf16(sjis);
 						if(utf16 != 0xffff && utf16 != 0) {
-							utf16_to_sjis_map_.insert(std::pair<uint16_t, uint16_t>(sjis, utf16));
+							utf16_to_sjis_map_.insert(std::pair<uint16_t, uint16_t>(utf16, sjis));
 						}
 					}
 				}
@@ -1312,6 +1324,13 @@ static uint16_t sjis_utf16_tbl_[] = {
 	}
 
 
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief	UTF-16 から SJIS コードを求める
+		@param[in]	utf16	UTF-16 コード
+		@return SJIS コード
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	uint16_t utf16_to_sjis(uint16_t utf16)
 	{
 		utf16_to_sjis_map::const_iterator cit = utf16_to_sjis_map_.find(utf16);

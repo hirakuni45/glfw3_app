@@ -8,13 +8,14 @@
 #include <windows.h>
 #endif
 #include <iostream>
+#include <thread>
+#include <chrono>
+#include <time.h>
 #include "core/glcore.hpp"
 #include "core/ftimg.hpp"
 #include "utils/file_io.hpp"
 #include "utils/string_utils.hpp"
-#include <time.h>
-#include <thread>
-#include <chrono>
+#include "utils/sjis_utf16.hpp"
 
 #ifdef WIN32
 #include <unistd.h>
@@ -259,6 +260,8 @@ namespace gl {
 		limit_size_ = best_size_  / 2;	///< 最小のサイズはベストの半分とする
 ///		setlocale(LC_CTYPE, "jpn");
 		setlocale(LC_CTYPE, "");
+
+		utils::init_utf16_to_sjis();
 
 		return true;
 	}
