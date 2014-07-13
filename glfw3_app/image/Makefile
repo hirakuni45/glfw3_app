@@ -26,6 +26,7 @@ PSOURCES	=	main.cpp \
 				gl_fw/glterminal.cpp \
 				utils/vtx.cpp \
 				utils/vmath.cpp \
+				utils/sjis_utf16.cpp \
 				utils/string_utils.cpp \
 				utils/file_io.cpp \
 				utils/file_info.cpp \
