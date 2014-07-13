@@ -348,8 +348,10 @@ namespace utils {
 		uint32_t sz = src.size() + 1;
 		wchar_t* tmp = new wchar_t[sz];
 		int len = mbstowcs(tmp, src.c_str(), sz);
-		for(uint32_t i = 0; i < len; ++i) {
-			dst += tmp[i];
+		if(len > 0) {
+			for(uint32_t i = 0; i < len; ++i) {
+				dst += tmp[i];
+			}
 		}
 		delete[] tmp;
 		return true;
