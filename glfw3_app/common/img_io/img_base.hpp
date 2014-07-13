@@ -5,6 +5,7 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
+#include <iostream>
 #include <vector>
 #include <algorithm>
 #include <boost/unordered_set.hpp>
@@ -43,6 +44,7 @@ namespace img {
 		img_base() : size_(0), alpha_(false), img_(),
 			clut_limit_(0) {
 			clut_.resize(clutsize);
+std::cout << "Const: " << static_cast<int>(get_type()) << std::endl;
 		}
 
 
@@ -51,7 +53,9 @@ namespace img {
 			@brief	デストラクター
 		*/
 		//-----------------------------------------------------------------//
-		~img_base() { }
+		~img_base() {
+std::cout << "Destr: " << static_cast<int>(get_type()) << std::endl;
+		}
 
 
 		//-----------------------------------------------------------------//
