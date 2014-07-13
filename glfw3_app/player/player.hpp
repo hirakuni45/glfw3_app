@@ -4,6 +4,8 @@
 	@author 平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
+#include <thread>
+#include <future>
 #include <time.h>
 #include "main.hpp"
 #include "utils/director.hpp"
@@ -69,6 +71,10 @@ namespace app {
 		utils::strings	files_;
 		uint32_t		files_step_;
 
+		typedef std::future<std::string>  tag_future;
+		tag_future		tag_future_;
+
+		static std::string tag_server_(const std::string path);
 		void sound_play_(const std::string& file);
 		gui::widget* create_image_button_(const std::string& file, const vtx::spos& pos);
 		gui::widget_label* create_text_pad_(const vtx::spos& size, const std::string& text,

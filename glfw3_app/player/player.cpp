@@ -19,6 +19,16 @@ namespace app {
 	static const char* remain_pos_path_ = { "/player/remain/position" };
 	static const char* remain_file_path_ = { "/player/remain/file" };
 
+	/// ファイルのタグを読み出す
+	std::string player::tag_server_(const std::string path)
+	{
+		std::string alias;
+
+		alias = path;
+
+		return alias;
+	}
+
 
 	void player::sound_play_(const std::string& file)
 	{
@@ -429,7 +439,7 @@ namespace app {
 		}
 
 		// ファイラーが有効で、マウス操作が無い状態が５秒続いたら、
-		// 演奏ファイルへフォーカス
+		// 演奏ファイルパスへフォーカス
    		if(filer_->get_state(gui::widget::state::ENABLE)) {
 			const vtx::spos& msp = core.get_device().get_locator().get_cursor();
 			if(msp == mouse_pos_) {
@@ -443,13 +453,19 @@ namespace app {
 			}
 
 			// ファイルのタグをファイラーのエイリアスに設定
-//			if(files_.empty() && files_step_ == 0 && filer_->probe_file_list()) {
-//				filer_->get_file_list(files_);
-//			}
-//			if(files_step_ < files_.size()) {
-//				std::cout << files_[files_step_] << std::endl;
-//				++files_step_;
-//			}
+#if 0
+			if(files_.empty() && files_step_ == 0 && !filer_->get_file_infos().empty()) {
+				filer_->get_file_list(files_);
+			}
+			if(!files_.empty() && files_step_ < files_.size()) {
+				if(tag_future_.valid()) {
+					std::cout << tag_future_.get() << std::endl;
+					++files_step_;
+				} else {
+					tag_future_ = std::async(std::launch::async, tag_server_, files_[files_step_]);
+				}
+			}
+#endif
 		}
 
 		// Drag & Drop されたファイルを再生
