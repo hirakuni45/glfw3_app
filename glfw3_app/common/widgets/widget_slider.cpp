@@ -99,11 +99,21 @@ namespace gui {
 				vtx::spos ref = get_param().in_point_ - ref_point_;
 				if(sp.direction_ == slider_param::direction::HOLIZONTAL) {
 					short sz = size.x - fw * 2;
-					short ofs = sz * sp.handle_ratio_;
+					short ofs;
+					if(param_.hand_image_) {
+						ofs = wd_.at_mobj().get_size(hand_h_).x;
+					} else {
+						ofs = sz * sp.handle_ratio_;
+					}						
 					ratio = static_cast<float>(ref.x) / static_cast<float>(sz - ofs);
 				} else if(sp.direction_ == slider_param::direction::VERTICAL) {
 					short sz = size.y - fw * 2;
-					short ofs = sz * sp.handle_ratio_;
+					short ofs;
+					if(param_.hand_image_) {
+						ofs = wd_.at_mobj().get_size(hand_h_).y;
+					} else {
+						ofs = sz * sp.handle_ratio_;
+					}						
 					ratio = static_cast<float>(ref.y) / static_cast<float>(sz - ofs);
 				}
 				ratio += ref_position_;
