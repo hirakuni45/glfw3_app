@@ -72,19 +72,21 @@ OPTLIBS		=	glfw3 GLEW \
 				mad faad mp4ff tag \
 				z
 
-INC_SYS		=	/usr/local/boost_1_55_0
+INC_SYS		=	/opt/local/include/boost
 
-INC_LIB		=	/usr/local/include \
-				/usr/local/include/freetype2 \
-				/usr/local/include/freetype2/freetype \
-				/opt/libjpeg-turbo/include \
-				/usr/local/include/openjpeg-2.0 \
-				/usr/local/include/taglib
+INC_LIB		=	/opt/libjpeg-turbo/include \
+				/usr/local/include \
+				/opt/local/include \
+				/opt/local/include/freetype2 \
+				/opt/local/include/openjpeg-2.1 \
+				/opt/local/include/taglib
 
 PINC_APP	=	. ../common
 CINC_APP	=	. ../common
-LIBDIR		=	/usr/local/lib \
-				/opt/libjpeg-turbo/lib
+LIBDIR		=	/opt/libjpeg-turbo/lib \
+				/usr/local/lib \
+				/opt/local/lib
+
 
 INC_S	=	$(addprefix -isystem, $(INC_SYS))
 INC_L	=	$(addprefix -isystem, $(INC_LIB))
@@ -160,15 +162,16 @@ $(BUILD)/%.o : %.cpp
 $(ICON_OBJ): $(ICON_RC)
 	$(RC) -i $< -o $@
 
+# 	$(CC) -MM -DDEPEND_ESCAPE $(COPT) $(CFLAGS) $(CINCS) $<
 $(BUILD)/%.d : %.c
 	mkdir -p $(dir $@); \
-	$(CC) -MM -DDEPEND_ESCAPE $(COPT) $(CFLAGS) $(CINCS) $< \
+	$(CC) -MM $(COPT) $(CFLAGS) $(CINCS) $< \
 	| sed 's/$(notdir $*)\.o:/$(subst /,\/,$(patsubst %.d,%.o,$@) $@):/' > $@ ; \
 	[ -s $@ ] || rm -f $@
 
 $(BUILD)/%.d : %.cpp
 	mkdir -p $(dir $@); \
-	$(CP) -MM -DDEPEND_ESCAPE $(POPT) $(PFLAGS) $(PINCS) $< \
+	$(CP) -MM $(POPT) $(PFLAGS) $(PINCS) $< \
 	| sed 's/$(notdir $*)\.o:/$(subst /,\/,$(patsubst %.d,%.o,$@) $@):/' > $@ ; \
 	[ -s $@ ] || rm -f $@
 

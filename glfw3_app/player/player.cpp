@@ -366,15 +366,28 @@ namespace app {
 		}
 		set_time_(remain_time_, remain_t_);
 
+		// シークハンドルの操作と応答
+		float stream_length = static_cast<float>(sound.get_length_stream());
+		if(seek_handle_->get_select_in()) {
+			const gui::widget::slider_param& sp = seek_handle_->get_slider_param();
+			seek_pos_ = sp.position_ * stream_length;
+		}
 		if(seek_handle_->get_select_out()) {
 			const gui::widget::slider_param& sp = seek_handle_->get_slider_param();
-			size_t pos = sp.position_ * static_cast<float>(sound.get_length_stream());
+			size_t pos = sp.position_ * stream_length;
 			sound.seek_stream(pos);
-		} else if(!seek_handle_->get_select()) {
+		} else if(seek_handle_->get_select()) {
+			const gui::widget::slider_param& sp = seek_handle_->get_slider_param();
+			uint32_t new_pos = sp.position_ * stream_length;
+			if(seek_pos_ != new_pos) {
+				seek_pos_ = new_pos;
+				sound.seek_stream(seek_pos_);
+			}
+		} else {
 			gui::widget::slider_param& sp = seek_handle_->at_slider_param();
 			if(total_t_) {
-				float t = static_cast<float>(sound.get_position_stream());
-				sp.position_ = t / static_cast<float>(sound.get_length_stream());
+				float pos = static_cast<float>(sound.get_position_stream());
+				sp.position_ = pos / static_cast<float>(sound.get_length_stream());
 			} else {
 				sp.position_ = 0.0f;
 			}

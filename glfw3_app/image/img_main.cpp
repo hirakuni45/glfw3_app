@@ -45,34 +45,40 @@ namespace app {
 			tools_ = wd.add_widget<widget_frame>(wp, wp_);
 			tools_->set_state(widget::state::SIZE_LOCK);
 		}
-		{ // ファイラー起動ボタン
-			widget::param wp(vtx::srect(10, 10, 100, 40), tools_);
-			widget_button::param wp_("file");
-			open_ = wd.add_widget<widget_button>(wp, wp_);
+		{ // ロード起動ボタン
+			widget::param wp(vtx::srect(10, 10+50*0, 100, 40), tools_);
+			widget_button::param wp_("load");
+			load_ = wd.add_widget<widget_button>(wp, wp_);
 		}
+		{ // セーブ起動ボタン
+			widget::param wp(vtx::srect(10, 10+50*1, 100, 40), tools_);
+			widget_button::param wp_("save");
+			save_ = wd.add_widget<widget_button>(wp, wp_);
+		}
+		short ofs = 110;
 		{ // スケール FIT
-			widget::param wp(vtx::srect(10, 60+30*0, 90, 30), tools_);
+			widget::param wp(vtx::srect(10, ofs+30*0, 90, 30), tools_);
 			widget_radio::param wp_("fit");
 			wp_.check_ = true;
 			scale_fit_ = wd.add_widget<widget_radio>(wp, wp_);	
 		}
 		{ // スケール 1X
-			widget::param wp(vtx::srect(10, 60+30*1, 90, 30), tools_);
+			widget::param wp(vtx::srect(10, ofs+30*1, 90, 30), tools_);
 			widget_radio::param wp_("1x");
 			scale_1x_ = wd.add_widget<widget_radio>(wp, wp_);	
 		}
 		{ // スケール 2X
-			widget::param wp(vtx::srect(10, 60+30*2, 90, 30), tools_);
+			widget::param wp(vtx::srect(10, ofs+30*2, 90, 30), tools_);
 			widget_radio::param wp_("2x");
 			scale_2x_ = wd.add_widget<widget_radio>(wp, wp_);	
 		}
 		{ // スケール 3X
-			widget::param wp(vtx::srect(10, 60+30*3, 90, 30), tools_);
+			widget::param wp(vtx::srect(10, ofs+30*3, 90, 30), tools_);
 			widget_radio::param wp_("3x");
 			scale_3x_ = wd.add_widget<widget_radio>(wp, wp_);	
 		}
 		{ // スケール 4X
-			widget::param wp(vtx::srect(10, 60+30*4, 90, 30), tools_);
+			widget::param wp(vtx::srect(10, ofs+30*4, 90, 30), tools_);
 			widget_radio::param wp_("4x");
 			scale_4x_ = wd.add_widget<widget_radio>(wp, wp_);	
 		}
@@ -131,8 +137,8 @@ namespace app {
 
 		gui::widget_director& wd = director_.at().widget_director_;
 
-		if(open_) {
-			if(open_->get_selected()) {
+		if(load_) {
+			if(load_->get_selected()) {
 				if(filer_) {
 					bool f = filer_->get_state(gui::widget::state::ENABLE);
 					filer_->enable(!f);
@@ -199,6 +205,12 @@ namespace app {
 
 		// frame 内 image のサイズを設定
 		if(frame_ && image_) {
+			if(image_->get_local_param().mobj_handle_) {
+				save_->set_state(gui::widget::state::STALL, false);
+			} else {
+				save_->set_state(gui::widget::state::STALL);
+			}
+
 			float s = 1.0f;
 			if(scale_fit_->get_check()) {
 				vtx::fpos is = mobj_.get_size(img_handle_);
