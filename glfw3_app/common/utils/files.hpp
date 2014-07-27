@@ -13,7 +13,6 @@
 #include "utils/drive_info.hpp"
 #include "utils/file_info.hpp"
 #include "utils/string_utils.hpp"
-#include "utils/handle_set.hpp"
 #include <iostream>
 
 namespace utils {

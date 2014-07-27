@@ -14,11 +14,16 @@ namespace utils {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
 		@brief	ハンドル管理テンプレート・クラス
+		@param[in]	HANDLE	ハンドルの型
+		@param[in]	SET		管理用 set コンテナ
+		@param[in]	ARRAY	アレイコンテナ
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	template <class T, class HANDLE = uint32_t, class ARRAY = std::vector<T>, class SET = std::set<HANDLE> >
+	template <class T,
+			  class HANDLE = uint32_t,
+			  class SET = std::set<HANDLE>,
+			  class ARRAY = std::vector<T> > 
 	struct handle_set {
-
 		typedef T		value_type;
 		typedef HANDLE	handle_type;
 		typedef ARRAY	array_type;
@@ -33,17 +38,23 @@ namespace utils {
 		set_type		erase_set_;
 		typedef typename set_type::iterator	set_it;
 
+		bool			zero_handle_enable_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	コンストラクター
+			@param[in]	zhe	０番ハンドルを無効にする場合「false」	
+			@param[in]	fas	初期アレイサイズ
 		*/
 		//-----------------------------------------------------------------//
-		handle_set(uint32_t n = 0) : array_(), erase_set_() {
-			if(n) {
-				array_.reserve(n);
+		handle_set(bool zhe = true, uint32_t fas = 0) : array_(), erase_set_(),
+														zero_handle_enable_(zhe) {
+			if(fas) {
+				array_.reserve(fas);
 				array_.clear();
 			}
+			if(zero_handle_enable_) array_.push_back(T());
 		}
 
 
@@ -61,7 +72,19 @@ namespace utils {
 			@return 使用サイズ
 		*/
 		//-----------------------------------------------------------------//
-		inline handle_type size() const { return static_cast<handle_type>(array_.size()); }
+		handle_type size() const { return static_cast<handle_type>(array_.size()); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ハンドルを消去
+		*/
+		//-----------------------------------------------------------------//
+		void clear() {
+			erase_set_.clear();
+			array_.clear();
+			if(zero_handle_enable_) array_.push_back(T());
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -151,7 +174,5 @@ namespace utils {
 				return optional_const_value_type();
 			}
 		}
-
 	};
-
 }
