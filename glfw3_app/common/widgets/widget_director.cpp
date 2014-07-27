@@ -692,9 +692,17 @@ namespace gui {
 				if(param.resize_sign_.y < 0) d.y = -d.y;
 				if(!top_resize_->get_state(widget::state::RESIZE_H_ENABLE)) d.x = 0;
 				if(!top_resize_->get_state(widget::state::RESIZE_V_ENABLE)) d.y = 0;
+				// X、Y が、フレームの中心付近（１／３）にある場合は片軸固定
+				{
+					vtx::spos ds = param.resize_pos_ - param.resize_org_;
+					vtx::spos s = param.resize_ref_ / 3;
+					ds -= s;
+					if(ds.x >= 0 && ds.x < s.x) d.x = 0;
+					if(ds.y >= 0 && ds.y < s.y) d.y = 0;
+				}
 				const vtx::spos& min = param.resize_min_;
-				vtx::spos newsize = param.resize_ref_ + d;
 				const vtx::spos& ref = param.resize_ref_;
+				vtx::spos newsize = ref + d;
 				if(ref.x >= min.x) {
 					if(newsize.x < min.x) newsize.x = min.x;
 				} else {
@@ -707,8 +715,8 @@ namespace gui {
 				}
 				touch = true;
 				vtx::spos ofs(0);
-				if(param.resize_sign_.x < 0) ofs.x = param.resize_ref_.x - newsize.x;
-				if(param.resize_sign_.y < 0) ofs.y = param.resize_ref_.y - newsize.y;
+				if(param.resize_sign_.x < 0) ofs.x = ref.x - newsize.x;
+				if(param.resize_sign_.y < 0) ofs.y = ref.y - newsize.y;
 				top_resize_->at_rect().org  = param.resize_org_ + ofs;
 				top_resize_->at_rect().size = newsize;
 			}

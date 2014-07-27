@@ -263,13 +263,12 @@ namespace gui {
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct state {
 			enum type {
-				ENABLE,					///< 全体の許可・不許可
+				ENABLE,					///< 全体の許可・不許可（表示しない）
 
 				STALL,					///< 停止中（アップデートは無効）
 
 				RENDER_ENABLE,			///< widget の描画
 			   	FOCUS_ENABLE,			///< フォーカス許可
-				SELECT_ENABLE,			///< セレクト許可
 				UPDATE_ENABLE,			///< アップデート許可
 
 				POSITION_LOCK,			///< 位置固定
@@ -351,7 +350,6 @@ namespace gui {
 				state_.set(state::ENABLE);
 				state_.set(state::RENDER_ENABLE);
 				state_.set(state::FOCUS_ENABLE);
-				state_.set(state::SELECT_ENABLE);
 				state_.set(state::UPDATE_ENABLE);
 			}
 		};
