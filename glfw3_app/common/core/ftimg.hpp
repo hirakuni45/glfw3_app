@@ -8,10 +8,8 @@
 #include <string>
 #include <map>
 #include <boost/unordered_map.hpp>
-#ifndef DEPEND_ESCAPE
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#endif
 #include "utils/singleton_policy.hpp"
 #include "utils/file_io.hpp"
 #include "img_io/img_gray8.hpp"
