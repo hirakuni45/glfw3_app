@@ -61,7 +61,7 @@ namespace gl {
 			size_(0.0f), aspect_(1.0f), fov_(30.0f), z_near_(10.0f), z_far_(50000.0f),
 			eye_(0.0f, -15.0f, 6.0f),
 			target_(0.0f, 0.0f, 0.0f),
-			up_(0.0f, 1.0f, 0.0f), touch_(false) { glmat_.initialize(); }
+			up_(0.0f, 1.0f, 0.0f), touch_(false) { }
 
 
 		//-----------------------------------------------------------------//

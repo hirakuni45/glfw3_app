@@ -5,6 +5,7 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
+#include <stack>
 #include "utils/vtx.hpp"
 #include "utils/mtx.hpp"
 
@@ -18,6 +19,9 @@ namespace gl {
 	template <typename T>
 	struct matrix {
 
+		typedef T	value_type;
+		typedef mtx::matrix4<T> matrix_type;
+
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	マトリックス・モード
@@ -27,37 +31,15 @@ namespace gl {
 			enum type {
 				modelview,
 				projection,
-				texture,
-				camera,
-
 				num_
 			};
 		};
 
 	private:
-		static const int matrix_stack_size_ = 8;
+		typename mode::type		mode_;
 
-		// スタック・オペレーション
-		class matrix_stack {
-			mtx::matrix4<T>	stack_[matrix_stack_size_];
-			int		pos_;
-
-		public:
-			matrix_stack() : pos_(0) { }
-			void push(const mtx::matrix4<T>& m) {
-				stack_[pos_] = m;
-				if(pos_ < matrix_stack_size_) ++pos_;
-			}
-			const mtx::matrix4<T>& pop() {
-				if(pos_ > 0) { pos_--; } return stack_[pos_]; }
-			const mtx::matrix4<T>& get() { return stack_[pos_]; }
-			void set(const mtx::matrix4<T>& m) { stack_[pos_] = m; }
-			int size() { return matrix_stack_size_; }
-		};
-
-		typename mode::type	mode_;
-		mtx::matrix4<T>	acc_[mode::num_];
-		matrix_stack	mat_stack_[mode::num_];
+		matrix_type				acc_[mode::num_];
+		std::stack<matrix_type>	stack_[mode::num_];
 
 		T			near_;
 		T			far_;
@@ -74,7 +56,8 @@ namespace gl {
 		 */
 		//-----------------------------------------------------------------//
 		matrix() : mode_(mode::modelview),
-			vp_x_(0), vp_y_(0), vp_w_(0), vp_h_(0)
+				   near_(0.0f), far_(1.0f),
+				   vp_x_(0), vp_y_(0), vp_w_(0), vp_h_(0)
 		{ }
 
 
@@ -88,42 +71,21 @@ namespace gl {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	初期化
-		 */
-		//-----------------------------------------------------------------//
-		void initialize() {
-			for(int i = 0; i < mode::num_; ++i) {
-				acc_[i].identity();
-			}
-			mode(mode::modelview);
-		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
 			@brief	OpenGL マトリックスモードを設定
+			@param[in]	mode	マトリックス・モード
 		 */
 		//-----------------------------------------------------------------//
 		void mode(typename mode::type mode) { mode_ = mode; }
 
 
-#if 0
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	マトリックスの縦、横を入れ替えてコピー
-			@param[in]	src	コピー元（source）マトリックス
-			@param[in]	dst コピー先（destnation）マトリックス
+			@brief	OpenGL マトリックスモードを取得
+			@return マトリックスモード
 		 */
 		//-----------------------------------------------------------------//
-		static void copy_swap(const glmatrix& src, glmatrix& dst) {
-			for(int i = 0; i < 4; ++i) {
-				dst.m[0+i*4] = src.m[0+i];
-				dst.m[1+i*4] = src.m[4+i];
-				dst.m[2+i*4] = src.m[8+i];
-				dst.m[3+i*4] = src.m[12+i];
-			}
-		}
-#endif
+		typename mode::type get_mode() const { return mode_; }
+
 
 		//-----------------------------------------------------------------//
 		/*!
@@ -173,7 +135,7 @@ namespace gl {
 			@param[in]	m	マトリックスのポインター先頭（fmat4）
 		 */
 		//-----------------------------------------------------------------//
-		void load(const mtx::matrix4<T>& m) { acc_[mode_] = m; }
+		void load(const value_type& m) { acc_[mode_] = m; }
 
 
 		//-----------------------------------------------------------------//
@@ -182,7 +144,7 @@ namespace gl {
 			@param[in]	m	マトリックスのポインター先頭（float）
 		 */
 		//-----------------------------------------------------------------//
-		void load(const float* m) { acc_[mode_] = m; }
+		void load(const T* m) { acc_[mode_] = m; }
 
 
 		//-----------------------------------------------------------------//
@@ -233,7 +195,7 @@ namespace gl {
 			@brief	OpenGL カレント・マトリックスをスタックに退避
 		 */
 		//-----------------------------------------------------------------//
-		void push() { mat_stack_[mode_].push(acc_[mode_]); }
+		void push() { stack_[mode_].push(acc_[mode_]); }
 
 
 		//-----------------------------------------------------------------//
@@ -241,7 +203,7 @@ namespace gl {
 			@brief	OpenGL カレント・マトリックスをスタックから復帰
 		 */
 		//-----------------------------------------------------------------//
-		void pop() { acc_[mode_] = mat_stack_[mode_].pop(); }
+		void pop() { stack_[mode_].pop(); acc_[mode_] = stack_[mode_].top(); }
 
 
 		//-----------------------------------------------------------------//
@@ -311,16 +273,23 @@ namespace gl {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	OpenGL スケール（拡大／縮小）行列をカレント・マトリックスに合成する
+			@brief	OpenGL スケール
+			@param[in]	v	スケール
+		 */
+		//-----------------------------------------------------------------//
+		void scale(const vtx::vertex3<T>& v) { acc_[mode_].scale(v); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	OpenGL スケール
 			@param[in]	x	X スケール
 			@param[in]	y	Y スケール
 			@param[in]	z	Z スケール
 		 */
 		//-----------------------------------------------------------------//
-		void scale(T x, T y, T z) {
-			acc_[mode_].scale(vtx::fvtx(x, y, z));
-		}
-
+		void scale(T x, T y, T z) { acc_[mode_].scale(vtx::vertex3<T>(x, y, z)); }
+ 
 
 		//-----------------------------------------------------------------//
 		/*!
@@ -331,7 +300,7 @@ namespace gl {
 		 */
 		//-----------------------------------------------------------------//
 		void translate(T x, T y, T z) {
-			acc_[mode_].translate(vtx::fvtx(x, y, z));
+			acc_[mode_].translate(vtx::vertex3<T>(x, y, z));
 		}
 
 
@@ -387,28 +356,6 @@ namespace gl {
 		const mtx::matrix4<T>& get_modelview_matrix() const {
 			return acc_[mode::modelview];
 		};
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	テクスチャー・マトリックスを得る
-			@return	OpenGL 並びの、テクスチャー・マトリックス
-		 */
-		//-----------------------------------------------------------------//
-		const mtx::matrix4<T>& get_texture_matrix() const {
-			return acc_[mode::texture];
-		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	カメラ・マトリックスを得る
-			@return	OpenGL 並びの、カメラ・マトリックス
-		 */
-		//-----------------------------------------------------------------//
-		const mtx::matrix4<T>& get_camera_matrix() const {
-			return acc_[mode::camera];
-		}
 
 
 		//-----------------------------------------------------------------//

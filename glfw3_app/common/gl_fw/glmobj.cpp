@@ -42,12 +42,12 @@ namespace gl {
 		for(int i = 0; i < (block_num_ >> 5); ++i) tex_map_[i] = 0;
 
 		glGenTextures(1, &id_);
-///		std::cout << "Mobj gen tex id: " << static_cast<int>(id_) << std::endl;
 		glBindTexture(GL_TEXTURE_2D, id_);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 		if(im.get_size().x != pgw || im.get_size().y != pgh) {
 			img_rgba8 dst;
 			dst.create(vtx::spos(pgw, pgh), true);
+			dst.fill(rgba8(0, 0, 0, 0));
 			dst.copy(vtx::spos(0), im, vtx::srect(vtx::spos(0), im.get_size()));
 			glTexImage2D(GL_TEXTURE_2D, 0,
 						   internalFormat, pgw, pgh, 0, GL_RGBA, GL_UNSIGNED_BYTE, dst());
@@ -184,7 +184,6 @@ namespace gl {
 	{
 		BOOST_FOREACH(texture_mem& txm, mems) {
 			GLuint id = txm.get_id();
-///			std::cout << "Destroy tex: " << static_cast<int>(id) << std::endl;
 			glDeleteTextures(1, &id);
 		}
 		texture_mems().swap(mems);
@@ -288,7 +287,6 @@ namespace gl {
 				{
 					img_rgba8 im;
 					im.create(vtx::spos(txw, txh), true);
-					im.fill(img::rgba8(255, 0, 0, 255));
 					copy_to_rgba8(imf, vtx::srect(ox, oy, txw, txh), im, vtx::spos(0, 0));
 					bool f = false;
 					if(sox == 0 && soy == 0) {
@@ -297,7 +295,6 @@ namespace gl {
 					if(!f) {
 						add_texture_page(texture_mems_, mo, im);
 					} else {
-///						std::cout << boost::format("(%d), %d, %d") % mo->id % txw % txh << std::endl;
 						glBindTexture(GL_TEXTURE_2D, mo->id);
 						glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 						glTexSubImage2D(GL_TEXTURE_2D, 0,
