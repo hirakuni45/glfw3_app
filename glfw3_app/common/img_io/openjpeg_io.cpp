@@ -234,7 +234,7 @@ namespace img {
 		opj_stream_set_read_function(t.stream, strm_read_);
 		opj_stream_set_skip_function(t.stream, strm_skip_);
 		opj_stream_set_seek_function(t.stream, strm_seek_);
-		opj_stream_set_user_data(t.stream, &sb);
+		opj_stream_set_user_data(t.stream, &sb, nullptr);
 		// Set the length to avoid an assert
 		opj_stream_set_user_data_length(t.stream, sz);
 
@@ -503,7 +503,7 @@ namespace img {
 		opj_stream_set_write_function(t.stream, wstrm_write_);
 		opj_stream_set_skip_function(t.stream, wstrm_skip_);
 		opj_stream_set_seek_function(t.stream, wstrm_seek_);
-		opj_stream_set_user_data(t.stream, &fout);
+		opj_stream_set_user_data(t.stream, &fout, nullptr);
 		opj_stream_set_user_data_length(t.stream, 0);
 
 		bool f = false;
