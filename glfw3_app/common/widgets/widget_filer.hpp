@@ -44,12 +44,14 @@ namespace gui {
 			short			path_height_;
 			short			label_height_;
 
+			bool			new_file_;	///< 新規ファイル作成
+
 			param(const std::string& path = "", const std::string& filter = "") :
 				plate_param_(),
 				color_param_(widget_director::default_frame_color_),
 				text_param_(), shift_param_(),
 				path_(path), filter_(filter),
-				path_height_(32), label_height_(32)
+				path_height_(32), label_height_(32), new_file_(false)
 			{ }
 		};
 
@@ -131,6 +133,9 @@ namespace gui {
 		static const char* key_locate_;
 		static const char* key_size_;
 
+		bool		new_file_enable_;
+		bool		new_file_in_;
+
 		void create_file_(widget_file& wf, const vtx::srect& rect, short ofs, const std::string& str);
 		void create_files_(widget_files& wfs, short ofs);
 		widget_files_cit scan_select_in_file_(widget_files& wfs) const;
@@ -160,7 +165,7 @@ namespace gui {
 			request_right_(false),
 			speed_(0.0f), position_(0.0f), move_speed_(0.0f), select_pos_(0),
 			file_(),
-			select_file_id_(0)
+			select_file_id_(0), new_file_enable_(false), new_file_in_(false)
 			{ }
 
 

@@ -12,6 +12,7 @@
 
 namespace gui {
 
+
 	void widget_filer::create_file_(widget_file& wf, const vtx::srect& rect, short ofs, const std::string& str)
 	{
 		{
@@ -87,6 +88,19 @@ namespace gui {
 			}
 		}
 
+		// 新規ファイルタグ
+		if(param_.new_file_) {
+			widget_file wf;
+			wf.dir = true;
+			create_file_(wf, rect, ofs, "New File");
+
+			wf.size = 0;
+			wf.time = 0;
+			wf.mode = 0;
+
+			wfs.push_back(wf);
+			rect.org.y += param_.label_height_;
+		}
 
 		BOOST_FOREACH(const utils::file_info& fi, file_infos_) {
 			std::string fn = fi.get_name();
@@ -471,6 +485,15 @@ namespace gui {
 	{
 		param_.shift_param_.size_ = get_rect().size.x - param_.plate_param_.frame_width_ * 2;
 		shift_text_update(get_param(), param_.text_param_, param_.shift_param_);
+		if(param_.new_file_ && new_file_enable_) {
+			if(new_file_in_ && !center_[0].name->get_local_param().text_in_) {
+				const std::string& n = center_[0].name->get_text();
+				utils::append_path(param_.path_, n, file_);
+				++select_file_id_;
+				enable(false);
+			}
+			new_file_in_ = center_[0].name->get_local_param().text_in_;
+		}
 	}
 
 
@@ -724,7 +747,14 @@ namespace gui {
 			widget_files_cit cit = scan_selected_file_(center_);
 			if(cit != center_.end()) {
 				const widget_file& wf = *cit;
-				if(wf.name) {
+				if(param_.new_file_ && cit == center_.begin()) {
+					new_file_enable_ = !new_file_enable_;
+					center_[0].name->set_text("");
+					center_[0].name->at_local_param().read_only_ = false;
+					center_[0].name->at_local_param().text_in_ = true;
+					new_file_in_ = true;
+					
+				} else if(wf.name) {
 					const std::string& n = wf.name->get_text();
 					if(n == "..") {  // 一つ前に戻る
 						request_right_ = false;
