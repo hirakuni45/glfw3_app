@@ -30,7 +30,8 @@ namespace app {
 
 		utils::director<core>&	director_;
 
-		gui::widget_filer*		filer_;
+		gui::widget_filer*		load_ctx_;
+		gui::widget_filer*		save_ctx_;
 		gui::widget_frame*		frame_;
 		gui::widget_image*		image_;
 		gui::widget_frame*		tools_;
@@ -51,7 +52,8 @@ namespace app {
 		gl::mobj::handle	img_handle_;
 
 		int			dd_id_;
-		uint32_t	filer_id_;
+		uint32_t	load_id_;
+		uint32_t	save_id_;
 
 		vtx::fpos	image_offset_;
 
@@ -61,12 +63,14 @@ namespace app {
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		img_main(utils::director<core>& d) : director_(d),
-			filer_(0), frame_(0), image_(0),
+		img_main(utils::director<core>& d) :
+			director_(d),
+			load_ctx_(0), save_ctx_(0), 
+			frame_(0), image_(0),
 			tools_(0), load_(0), save_(0),
 			scale_fit_(0), scale_1x_(0), scale_2x_(0), scale_3x_(0), scale_4x_(0),
 			info_(0), term_(0), dialog_(0),
-			img_handle_(0), dd_id_(0), filer_id_(0),
+			img_handle_(0), dd_id_(0), load_id_(0), save_id_(0),
 			image_offset_(0.0f)
 		{ }
 

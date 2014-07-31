@@ -97,11 +97,18 @@ namespace app {
 			}
 		}
 
-		{ // ファイラー本体
+		{ // load ファイラー本体
 			widget::param wp(vtx::srect(10, 30, 300, 200));
 			widget_filer::param wp_(core.get_current_path());
-			filer_ = wd.add_widget<widget_filer>(wp, wp_);
-			filer_->enable(false);
+			load_ctx_ = wd.add_widget<widget_filer>(wp, wp_);
+			load_ctx_->enable(false);
+		}
+		{ // save ファイラー本体
+			widget::param wp(vtx::srect(10, 30, 300, 200));
+			widget_filer::param wp_(core.get_current_path());
+			wp_.new_file_ = true;
+			save_ctx_ = wd.add_widget<widget_filer>(wp, wp_);
+			save_ctx_->enable(false);
 		}
 		{ // ダイアログ
 			widget::param wp(vtx::srect(10, 30, 450, 200));
@@ -114,7 +121,8 @@ namespace app {
 
 		// プリファレンスの取得
 		sys::preference& pre = director_.at().preference_;
-		if(filer_) filer_->load(pre);
+		if(load_ctx_) load_ctx_->load(pre);
+		if(save_ctx_) save_ctx_->load(pre);
 		if(frame_) frame_->load(pre);
 		if(tools_) tools_->load(pre);
 		if(scale_fit_) scale_fit_->load(pre);
@@ -139,9 +147,18 @@ namespace app {
 
 		if(load_) {
 			if(load_->get_selected()) {
-				if(filer_) {
-					bool f = filer_->get_state(gui::widget::state::ENABLE);
-					filer_->enable(!f);
+				if(load_ctx_) {
+					bool f = load_ctx_->get_state(gui::widget::state::ENABLE);
+					load_ctx_->enable(!f);
+				}
+			}
+		}
+
+		if(save_) {
+			if(save_->get_selected()) {
+				if(save_ctx_) {
+					bool f = save_ctx_->get_state(gui::widget::state::ENABLE);
+					save_ctx_->enable(!f);
 				}
 			}
 		}
@@ -156,12 +173,11 @@ namespace app {
 			}
 		}
 
-		if(filer_) {
-			wd.top_widget(filer_);
-
-			if(filer_id_ != filer_->get_select_file_id()) {
-				filer_id_ = filer_->get_select_file_id();
-				imfn = filer_->get_file();
+		if(load_ctx_) {
+			wd.top_widget(load_ctx_);
+			if(load_id_ != load_ctx_->get_select_file_id()) {
+				load_id_ = load_ctx_->get_select_file_id();
+				imfn = load_ctx_->get_file();
 			}
 		}
 
@@ -169,7 +185,7 @@ namespace app {
 			img::img_files& imf = wd.at_img_files();
 			if(!imf.load(imfn)) {
 				dialog_->set_text("Can't decode image file:\n '"
-					+ filer_->get_file() + "'");
+					+ load_ctx_->get_file() + "'");
 				dialog_->enable();
 			} else {
 				if(term_) {
@@ -235,6 +251,15 @@ namespace app {
 			image_->at_local_param().scale_ = s;
 		}
 
+		if(save_ctx_) {
+			wd.top_widget(save_ctx_);
+			if(save_id_ != save_ctx_->get_select_file_id()) {
+				save_id_ = save_ctx_->get_select_file_id();
+				const std::string& sfn = save_ctx_->get_file();
+				std::cout << sfn << std::endl;
+			}
+		}
+
 		wd.update();
 	}
 
@@ -259,7 +284,8 @@ namespace app {
 	void img_main::destroy()
 	{
 		sys::preference& pre = director_.at().preference_;
-		if(filer_) filer_->save(pre);
+		if(load_ctx_) load_ctx_->save(pre);
+		if(save_ctx_) save_ctx_->save(pre);
 		if(frame_) frame_->save(pre);
 		if(tools_) tools_->save(pre);
 		if(scale_fit_) scale_fit_->save(pre);
