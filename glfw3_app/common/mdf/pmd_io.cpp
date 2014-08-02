@@ -529,7 +529,7 @@ namespace mdf {
 					tfn = mats;
 				}
 				if(imf.load(current_path_ + '/' + tfn)) {
-					const img::i_img* img = imf.get_image();
+					const img::i_img* img = imf.get_image().get();
 					if(img == 0) continue;
 
 					glBindTexture(GL_TEXTURE_2D, tex_id_[i]);

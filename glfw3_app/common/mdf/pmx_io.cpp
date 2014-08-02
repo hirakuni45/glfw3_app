@@ -242,7 +242,7 @@ namespace mdf {
 			BOOST_FOREACH(const std::string& s, textures_) {
 				std::string fn = current_path_ + '/' + s;
 				if(imf.load(fn)) {
-					const img::i_img* img = imf.get_image();
+					const img::i_img* img = imf.get_image().get();
 					if(img == 0) continue;
 
 					glBindTexture(GL_TEXTURE_2D, tex_id_[i]);
