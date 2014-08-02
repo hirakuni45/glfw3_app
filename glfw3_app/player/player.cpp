@@ -141,7 +141,7 @@ namespace app {
 			widget::param wp(vtx::srect(10, 10, 500, 16), 0);
 			widget_slider::param wp_;
 			if(wd.at_img_files().load(curp + "/res/seek_handle.png")) {
-				wp_.hand_image_ = wd.at_img_files().get_image();
+				wp_.hand_image_ = wd.at_img_files().get_image().get();
 			}
 			wp_.plate_param_.resizeble_ = true;
 			wp_.hand_ctrl_ = true;
@@ -157,7 +157,7 @@ namespace app {
 			widget::param wp(vtx::srect(20, 500, 200, 20), 0);
 			widget_slider::param wp_;
 			if(wd.at_img_files().load(curp + "/res/slider_handle.png")) {
-				wp_.hand_image_ = wd.at_img_files().get_image();
+				wp_.hand_image_ = wd.at_img_files().get_image().get();
 			}
    			volume_ = wd.add_widget<widget_slider>(wp, wp_);
 		}
@@ -165,11 +165,11 @@ namespace app {
 			widget::param wp(vtx::srect(0, 0, 0, 0), 0);
 			widget_image::param wp_;
 			if(wd.at_img_files().load(curp + "/res/piano.png")) {
-				wp_.image_ = wd.at_img_files().get_image();
+				wp_.image_ = wd.at_img_files().get_image().get();
 			}
    			vol_min_img_ = wd.add_widget<widget_image>(wp, wp_);
 			if(wd.at_img_files().load(curp + "/res/forte.png")) {
-				wp_.image_ = wd.at_img_files().get_image();
+				wp_.image_ = wd.at_img_files().get_image().get();
 			}
    			vol_max_img_ = wd.add_widget<widget_image>(wp, wp_);
 		}
@@ -430,7 +430,7 @@ namespace app {
 			} else {
 				const std::string& curp = core.get_current_path();
 				if(wd.at_img_files().load(curp + "/res/NoImage.png")) {
-					jacket_ = mobj_.install(wd.at_img_files().get_image()); 
+					jacket_ = mobj_.install(wd.at_img_files().get_image().get()); 
 				}
 			}
 
