@@ -18,9 +18,7 @@ namespace img {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class dds_io : public i_img_io {
 
-		const i_img*		imf_;
-
-		img_rgba8		img_;
+		shared_img	img_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -28,7 +26,7 @@ namespace img {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		dds_io() : imf_(0) { }
+		dds_io() { }
 
 
 		//-----------------------------------------------------------------//
@@ -97,13 +95,7 @@ namespace img {
 			@return	イメージインターフェース
 		*/
 		//-----------------------------------------------------------------//
-		const i_img* get_image() const override {
-			if(!img_.empty()) {
-				return dynamic_cast<const i_img*>(&img_);
-			} else {
-				return 0;
-			}
-		}
+		shared_img get_image() override { return img_; }
 
 
 		//-----------------------------------------------------------------//
@@ -112,7 +104,7 @@ namespace img {
 			@param[in]	imf	イメージインターフェース
 		*/
 		//-----------------------------------------------------------------//
-		void set_image(const i_img* imf) override { imf_ = imf; }
+		void set_image(shared_img img) override { img_ = img; }
 	};
 
 }

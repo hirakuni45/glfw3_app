@@ -261,7 +261,7 @@ namespace img {
 	/*----------------------------------------------------------------------/
 	/	インデックス・カラー(無圧縮 1, 4, 8 ビット) 形式の画像データを展開	/
 	/----------------------------------------------------------------------*/
-	static bool read_idx(utils::file_io& fin, img::img_idx8& img, const bmp_info& bmp)
+	static bool read_idx(utils::file_io& fin, shared_img img, const bmp_info& bmp)
 	{
 		size_t stride = bmp.width * bmp.depth;
 		if(stride & 7) stride += 8;
@@ -296,7 +296,7 @@ namespace img {
 				depth += bmp.depth;
 				img::idx8 c;
 				c.i = idx;
-				img.put_pixel(pos, c);
+				img->put_pixel(pos, c);
 			}
 			pos.y += d;
 		}
@@ -308,7 +308,7 @@ namespace img {
 	/*------------------------------------------------------/
 	/	BGR (無圧縮 24/32 ビット) 形式の画像データを展開	/
 	/------------------------------------------------------*/
-	static bool read_rgb(utils::file_io& fin, img::img_rgba8& img, const bmp_info& bmp)
+	static bool read_rgb(utils::file_io& fin, shared_img img, const bmp_info& bmp)
 	{
 		int pads = bmp.depth / 8;
 		size_t stride = bmp.width * pads;
@@ -336,7 +336,7 @@ namespace img {
 				c.g = src[1];
 				c.b = src[0];
 				c.a = 255;
-				img.put_pixel(pos, c);
+				img->put_pixel(pos, c);
 				src += pads;
 			}
 			pos.y += d;
@@ -378,7 +378,7 @@ namespace img {
 	/*----------------------------------------------/
 	/	BI_BITFIELDS 形式の画像データを展開			/
 	/----------------------------------------------*/
-	static bool read_bitfield(utils::file_io& fin, img_rgba8& img, const bmp_info& bmp)
+	static bool read_bitfield(utils::file_io& fin, shared_img img, const bmp_info& bmp)
 	{
 		volatile BGRA_PAD shift_cnt;
 		volatile BGRA_PAD bits_cnt;
@@ -431,7 +431,7 @@ namespace img {
 						c.g = (c.g << (8 - bits_cnt.g)) | (c.g >> (8 - bits_cnt.g));
 						c.b = (c.b << (8 - bits_cnt.b)) | (c.b >> (8 - bits_cnt.b));
 						c.a = 255;
-						img.put_pixel(pos, c);
+						img->put_pixel(pos, c);
 					}
 				}
 				break;
@@ -443,10 +443,10 @@ namespace img {
 						c.r = src[2];
 						c.g = src[1];
 						c.b = src[0];
-						if(img.test_alpha()) c.a = src[3];
+						if(img->test_alpha()) c.a = src[3];
 						else c.a = 255;
 						src += 4;
-						img.put_pixel(pos, c);
+						img->put_pixel(pos, c);
 					}
 				}
 				break;
@@ -462,7 +462,7 @@ namespace img {
 	/*----------------------------------------------/
 	/	BI_RLE8 / BI_RLE4 形式の画像データを展開	/
 	/----------------------------------------------*/
-	static bool decompress_rle(utils::file_io& fin, img_idx8& img, const bmp_info& bmp)
+	static bool decompress_rle(utils::file_io& fin, shared_img img, const bmp_info& bmp)
 	{
 		size_t stride = bmp.width * bmp.depth;
 		if(stride & 7) stride += 8;
@@ -511,7 +511,7 @@ namespace img {
 				switch(bmp.depth) {
 				case 8:						/* BI_RLE8 */
 					while(n > 0 && pos.x < bmp.width) {
-						img.put_pixel(pos, c);
+						img->put_pixel(pos, c);
 						--n;
 						++pos.x;
 					}
@@ -521,8 +521,8 @@ namespace img {
 					idx8 c0(c.i >> 4);
 					idx8 c1(c.i & 0xf);
 					while(n > 0 && pos.x < bmp.width) {
-						if(o & 1) img.put_pixel(pos, c1);
-						else img.put_pixel(pos, c0);
+						if(o & 1) img->put_pixel(pos, c1);
+						else img->put_pixel(pos, c0);
 						--n;
 						++pos.x;
 						++o;
@@ -536,7 +536,7 @@ namespace img {
 				case 8:						/* BI_RLE8 */
 					while(n > 0 && pos.x < bmp.width) {
 						idx8 c( *p++ );
-						img.put_pixel(pos, c);
+						img->put_pixel(pos, c);
 						--n;
 						++pos.x;
 					}
@@ -546,8 +546,8 @@ namespace img {
 					while(n > 0 && pos.x < bmp.width) {
 						idx8 c0(p[o >> 1] >> 4);
 						idx8 c1(p[o >> 1] & 0xf);
-						if(o & 1) img.put_pixel(pos, c1);
-						else img.put_pixel(pos, c0);
+						if(o & 1) img->put_pixel(pos, c1);
+						else img->put_pixel(pos, c0);
 						--n;
 						++pos.x;
 						++o;
@@ -670,12 +670,12 @@ namespace img {
 			return false;
 		}
 
-		idx_.destroy();
-		img_.destroy();
 		if(bmp.depth <= 8) {
-			idx_.create(vtx::spos(bmp.width, bmp.height));
+			img_ = shared_img(new img_idx8);
+			img_->create(vtx::spos(bmp.width, bmp.height));
 		} else {
-			img_.create(vtx::spos(bmp.width, bmp.height), bmp.alpha_chanel);
+			img_ = shared_img(new img_rgba8);
+			img_->create(vtx::spos(bmp.width, bmp.height), bmp.alpha_chanel);
 		}
 
 		int clutnum = 0;
@@ -707,7 +707,7 @@ namespace img {
 				c.r = rgbq[RGBQ_RED];
 				c.g = rgbq[RGBQ_GREEN];
 				c.b = rgbq[RGBQ_BLUE];
-				idx_.put_clut(i, c);
+				img_->put_clut(i, c);
 			}
 		}
 
@@ -727,7 +727,7 @@ namespace img {
 			if(bmp.depth == 24 || bmp.depth == 32) {
 				f = read_rgb(fin, img_, bmp);
 			} else if(bmp.depth == 1 || bmp.depth == 4 || bmp.depth == 8) {
-				f = read_idx(fin, idx_, bmp);
+				f = read_idx(fin, img_, bmp);
 			}
 			break;
 		case BI_BITFIELDS:	// 16, 32
@@ -735,14 +735,13 @@ namespace img {
 			break;
 		case BI_RLE8:
 		case BI_RLE4:
-			f = decompress_rle(fin, idx_, bmp);
+			f = decompress_rle(fin, img_, bmp);
 			break;
 		default:
 			break;
 		}
 		if(!f) {
-			idx_.destroy();
-			img_.destroy();
+			img_ = nullptr;
 			fin.seek(pos, utils::file_io::seek::set);
 		}
 
@@ -760,8 +759,9 @@ namespace img {
 	//-----------------------------------------------------------------//
 	bool bmp_io::save(utils::file_io& fout, const std::string& opt)
 	{
-		int w = cimg_->get_size().x;
-		int h = cimg_->get_size().y;
+		if(!img_) return false;
+		int w = img_->get_size().x;
+		int h = img_->get_size().y;
 		if(w <= 0 || h <= 0) {
 			return false;
 		}

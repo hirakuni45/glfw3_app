@@ -18,10 +18,7 @@ namespace img {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class tga_io : public i_img_io {
 
-		const i_img*	imf_;
-
-		img_idx8	idx_;
-		img_rgba8	img_;
+		shared_img	img_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -29,7 +26,7 @@ namespace img {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		tga_io() : imf_(0) { }
+		tga_io() { }
 
 
 		//-----------------------------------------------------------------//
@@ -100,24 +97,16 @@ namespace img {
 			@return	イメージインターフェース
 		*/
 		//-----------------------------------------------------------------//
-		const i_img* get_image() const override {
-			if(!idx_.empty()) {
-				return &idx_;
-			} else if(!img_.empty()) {
-				return &img_;
-			} else {
-				return 0;
-			}
-		}
+		shared_img get_image() override { return img_; }
 
 
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	イメージインターフェースの登録
-			@param[in]	imf	イメージインターフェース
+			@param[in]	img	イメージインターフェース
 		*/
 		//-----------------------------------------------------------------//
-		void set_image(const i_img* img) override { imf_ = img; }
+		void set_image(shared_img img) override { img_ = img; }
 
 	};
 }

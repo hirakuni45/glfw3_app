@@ -6,8 +6,6 @@
 */
 //=====================================================================//
 #include "i_img_io.hpp"
-#include "img_idx8.hpp"
-#include "img_rgba8.hpp"
 
 namespace img {
 
@@ -18,12 +16,9 @@ namespace img {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class png_io : public i_img_io {
 
-		const i_img*   	imf_;
+		shared_img	img_;
 
-		img_idx8		idx_;
-		img_rgba8		img_;
-
-		bool			color_key_enable_;
+		bool		color_key_enable_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -31,7 +26,7 @@ namespace img {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		png_io() : imf_(0), color_key_enable_(false) { }
+		png_io() : color_key_enable_(false) { }
 
 
 		//-----------------------------------------------------------------//
@@ -148,24 +143,16 @@ namespace img {
 			@return	イメージインターフェース
 		*/
 		//-----------------------------------------------------------------//
-		const i_img* get_image() const override {
-			if(!idx_.empty()) {
-				return &idx_;
-			} else if(!img_.empty()) {
-				return &img_;
-			} else {
-				return 0;
-			}
-		}
+		shared_img get_image() override { return img_; }
 
 
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	イメージの登録
-			@param[in]	simg	イメージ
+			@param[in]	img	イメージ
 		*/
 		//-----------------------------------------------------------------//
-		void set_image(const i_img* img) override { imf_ = img; }
+		void set_image(shared_img img) override { img_ = img; }
 
 	};
 

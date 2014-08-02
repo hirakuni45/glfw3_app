@@ -1294,8 +1294,9 @@ void tx_compress_dxtn(GLint srccomps, GLint width, GLint height, const GLubyte *
 		switch(form) {
 		case form_RGBA:
 			{
+				img_ = shared_img(new img_rgba8);
 				unsigned char* buff = new unsigned char[width * 4];
-				img_.create(vtx::spos(width, height), true);
+				img_->create(vtx::spos(width, height), true);
 				vtx::spos pos;
 				for(pos.y = 0; pos.y < height; ++pos.y) {
 					fin.read(buff, 4, width);
@@ -1303,7 +1304,7 @@ void tx_compress_dxtn(GLint srccomps, GLint width, GLint height, const GLubyte *
 						int i = pos.x * 4;
 						img::rgba8 c;
 						c.set(buff[i + 2], buff[i + 1], buff[i + 0], 255);
-						img_.put_pixel(pos, c);
+						img_->put_pixel(pos, c);
 					}
 				}
 				delete[] buff;
@@ -1311,7 +1312,8 @@ void tx_compress_dxtn(GLint srccomps, GLint width, GLint height, const GLubyte *
 			break;
 		case form_DXT1:
 			{
-				img_.create(vtx::spos(width, height), true);
+				img_ = shared_img(new img_rgba8);
+				img_->create(vtx::spos(width, height), true);
 				unsigned char* buff = new unsigned char[width * height];
 				fin.read(buff, 1, width * height);
 				vtx::spos pos;
@@ -1320,7 +1322,7 @@ void tx_compress_dxtn(GLint srccomps, GLint width, GLint height, const GLubyte *
 						img::rgba8 c;
 						fetch_2d_texel_rgba_dxt1(width / 2, buff, pos.x, pos.y, c);
 						// fetch_2d_texel_rgba_dxt1(DDSint srcRowStride, const DDSubyte *pixdata, DDSint i, DDSint j, DDSvoid *texel);
-						img_.put_pixel(pos, c);
+						img_->put_pixel(pos, c);
 					}
 				}
 				delete[] buff;
@@ -1328,7 +1330,8 @@ void tx_compress_dxtn(GLint srccomps, GLint width, GLint height, const GLubyte *
 			break;
 		case form_DXT3:
 			{
-				img_.create(vtx::spos(width, height), true);
+				img_ = shared_img(new img_rgba8);
+				img_->create(vtx::spos(width, height), true);
 				unsigned char* buff = new unsigned char[width * height];
 				fin.read(buff, 1, width * height);
 				vtx::spos pos;
@@ -1336,7 +1339,7 @@ void tx_compress_dxtn(GLint srccomps, GLint width, GLint height, const GLubyte *
 					for(pos.x = 0; pos.x < width; ++pos.x) {
 						img::rgba8 c;
 						fetch_2d_texel_rgba_dxt3(width, (DDSubyte*)buff, pos.x, pos.y, c);
-						img_.put_pixel(pos, c);
+						img_->put_pixel(pos, c);
 					}
 				}
 				delete[] buff;
@@ -1344,7 +1347,8 @@ void tx_compress_dxtn(GLint srccomps, GLint width, GLint height, const GLubyte *
 			break;
 		case form_DXT5:
 			{
-				img_.create(vtx::spos(width, height), true);
+				img_ = shared_img(new img_rgba8);
+				img_->create(vtx::spos(width, height), true);
 				unsigned char* buff = new unsigned char[width * height];
 				fin.read(buff, 1, width * height);
 				vtx::spos pos;
@@ -1352,7 +1356,7 @@ void tx_compress_dxtn(GLint srccomps, GLint width, GLint height, const GLubyte *
 					for(pos.x = 0; pos.x < width; ++pos.x) {
 						img::rgba8 c;
 						fetch_2d_texel_rgba_dxt5(width, (DDSubyte*)buff, pos.x, pos.y, c);
-						img_.put_pixel(pos, c);
+						img_->put_pixel(pos, c);
 					}
 				}
 				delete[] buff;
@@ -1381,8 +1385,9 @@ void tx_compress_dxtn(GLint srccomps, GLint width, GLint height, const GLubyte *
 	//-----------------------------------------------------------------//
 	bool dds_io::save(utils::file_io& fout, const std::string& ext)
 	{
-		int w = imf_->get_size().x;
-		int h = imf_->get_size().y;
+		if(!img_) return false;
+		int w = img_->get_size().x;
+		int h = img_->get_size().y;
 		if(w <= 0 || h <= 0) {
 			return false;
 		}

@@ -17,9 +17,7 @@ namespace img {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class openjpeg_io : public i_img_io {
 
-		img_rgba8	img_;
-
-		const i_img*	imf_;
+		shared_img	img_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -27,7 +25,7 @@ namespace img {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		openjpeg_io() : imf_(0) { }
+		openjpeg_io() { }
 
 
 		//-----------------------------------------------------------------//
@@ -135,22 +133,16 @@ namespace img {
 			@return	イメージインターフェース
 		*/
 		//-----------------------------------------------------------------//
-		const i_img* get_image() const override {
-			if(!img_.empty()) {
-				return &img_;
-			} else {
-				return 0;
-			}
-		}
+		shared_img get_image() override { return img_; }
 
 
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	イメージインターフェースの登録
-			@param[in]	imf	イメージインターフェース
+			@param[in]	img	イメージインターフェース
 		*/
 		//-----------------------------------------------------------------//
-		void set_image(const i_img* imf) override { imf_ = imf; }
+		void set_image(shared_img img) override { img_ = img; }
 
 	};
 }

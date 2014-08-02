@@ -188,9 +188,6 @@ namespace img {
 			return false;
 		}
 
-		idx_.destroy();
-		img_.destroy();
-
 		png_set_read_fn(png_ptr, (png_voidp)&fin, png_io_read_func);
 		png_read_info(png_ptr, info_ptr);
 
@@ -217,28 +214,33 @@ namespace img {
 			ch = 4;
 			gray = true;
 			alpha = false;
-			img_.create(vtx::spos(width, height), alpha);
+			img_ = shared_img(new img_rgba8);
+			img_->create(vtx::spos(width, height), alpha);
 		} else if(color_type == PNG_COLOR_TYPE_GRAY_ALPHA) {
 			ch = 4;
 			gray = true;
 			alpha = true;
-			img_.create(vtx::spos(width, height), alpha);
+			img_ = shared_img(new img_rgba8);
+			img_->create(vtx::spos(width, height), alpha);
 //			std::cout << "PNG gray scale with alpha\n";
 		} else if(color_type & PNG_COLOR_MASK_PALETTE) {
 			ch = 1;
 			png_get_tRNS(png_ptr, info_ptr, &ta, &nt, &tc);
 			if(nt) alpha = true; else alpha = false;
 			indexed = true;
-			idx_.create(vtx::spos(width, height), alpha);
+			img_ = shared_img(new img_idx8);
+			img_->create(vtx::spos(width, height), alpha);
 		} else if(color_type & PNG_COLOR_MASK_ALPHA) {
 			ch = 4;
 			alpha = true;
-			img_.create(vtx::spos(width, height), alpha);
+			img_ = shared_img(new img_rgba8);
+			img_->create(vtx::spos(width, height), alpha);
 //			std::cout << "PNG RGBA\n";
 		} else {
 			ch = 3;
 			alpha = false;
-			img_.create(vtx::spos(width, height), alpha);
+			img_ = shared_img(new img_rgba8);
+			img_->create(vtx::spos(width, height), alpha);
 ///			std::cout << "PNG RGB\n";
 		}
 
@@ -258,21 +260,21 @@ namespace img {
 				}
 				const png_color* clut = &pal[i];
 				rgba8 c(clut->red, clut->green, clut->blue, a);
-				idx_.put_clut(i, c);
+				img_->put_clut(i, c);
 			}
 		}
 
 		png_byte* iml = new png_byte[width * ch * skip];
 		vtx::spos pos;
 		for(pos.y = 0; pos.y < static_cast<short>(height); ++pos.y) {
-			png_read_row(png_ptr, iml, NULL);
+			png_read_row(png_ptr, iml, nullptr);
 			png_byte* p = iml;
 			for(pos.x = 0; pos.x < static_cast<short>(width); ++pos.x) {
 				img::rgba8 c;
 				if(indexed) {
 					idx8 i(*p);
 					p += skip;
-					idx_.put_pixel(pos, i);
+					img_->put_pixel(pos, i);
 				} else {
 					if(gray) {
 						c.r = c.g = c.b = *p;
@@ -300,7 +302,7 @@ namespace img {
 							c.a = 0;
 						}
 					}
-					img_.put_pixel(pos, c);
+					img_->put_pixel(pos, c);
 				}
 			}
 		}
@@ -322,10 +324,11 @@ namespace img {
 	//-----------------------------------------------------------------//
 	bool png_io::save(utils::file_io& fout, const std::string& ext)
 	{
-		if(!imf_) return false;
+		if(!img_) return false;
+		if(img_->get_size().x == 0 || img_->get_size().y == 0) return false;
 
-		int w = imf_->get_size().x;
-		int h = imf_->get_size().y;
+		int w = img_->get_size().x;
+		int h = img_->get_size().y;
 		if(w <= 0 || h <= 0) {
 			return false;
 		}
@@ -344,11 +347,11 @@ namespace img {
 
 		int	type;
 		int ch;
-		if(imf_->get_type() == IMG::INDEXED8) {
+		if(img_->get_type() == IMG::INDEXED8) {
 			type = PNG_COLOR_TYPE_PALETTE;
 			ch = 1;
 		} else {
-			if(imf_->test_alpha()) {
+			if(img_->test_alpha()) {
 				type = PNG_COLOR_TYPE_RGB_ALPHA;
 				ch = 4;
 			} else {
@@ -361,21 +364,21 @@ namespace img {
 		png_set_IHDR(png_ptr, info_ptr, w, h, depth, type,
 			PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
 
-		if(imf_->get_type() == IMG::INDEXED8) {
-			int color = imf_->get_clut_max();
+		if(img_->get_type() == IMG::INDEXED8) {
+			int color = img_->get_clut_max();
 			png_color* clut = new png_color[color];
 			unsigned char* clut_trans = 0;
-			if(imf_->test_alpha()) clut_trans = new unsigned char[color];
+			if(img_->test_alpha()) clut_trans = new unsigned char[color];
 			for(int i = 0; i < color; ++i) {
 				rgba8 c;
-				imf_->get_clut(i, c);
+				img_->get_clut(i, c);
 				clut[i].red   = c.r;
 				clut[i].green = c.g;
 				clut[i].blue  = c.b;
-				if(imf_->test_alpha()) clut_trans[i] = c.a;
+				if(img_->test_alpha()) clut_trans[i] = c.a;
 			}
 			png_set_PLTE(png_ptr, info_ptr, clut, color);
-			if(imf_->test_alpha()) png_set_tRNS(png_ptr, info_ptr, clut_trans, color, NULL);
+			if(img_->test_alpha()) png_set_tRNS(png_ptr, info_ptr, clut_trans, color, nullptr);
 			png_write_info(png_ptr, info_ptr);
 			delete[] clut_trans;
 			delete[] clut;
@@ -389,14 +392,14 @@ namespace img {
 			png_byte* p = iml;
 			if(ch == 1) {
 				for(pos.x = 0; pos.x < w; ++pos.x) {
-					idx8	idx;
-					imf_->get_pixel(pos, idx);
+					idx8 idx;
+					img_->get_pixel(pos, idx);
 					*p++ = idx.i;
 				}
-			} else if(imf_->get_type() == IMG::FULL8) {
+			} else if(img_->get_type() == IMG::FULL8) {
 				for(pos.x = 0; pos.x < w; ++pos.x) {
-					rgba8	c;
-					imf_->get_pixel(pos, c);
+					rgba8 c;
+					img_->get_pixel(pos, c);
 					*p++ = c.r;
 					*p++ = c.g;
 					*p++ = c.b;

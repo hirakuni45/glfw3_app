@@ -65,7 +65,7 @@ namespace img {
 		// TGA フォーマットはシグネチュアが無いので、最後に評価する事
 		add_image_file_io_context_(img_file::img_io(new tga_io), exts);
 
-		imf_ = 0;
+		img_ = nullptr;
 	}
 
 
@@ -143,14 +143,14 @@ namespace img {
 	//-----------------------------------------------------------------//
 	bool img_files::load(utils::file_io& fin, const std::string& ext, const std::string& opt)
 	{
-		imf_ = 0;
+		img_ = nullptr;
 		size_t n = imgios_.size();
 		if(!ext.empty()) {
 			for(size_t i = 0; i < imgios_.size(); ++i) {
 				img_file& io = imgios_[i];
 				if(check_file_exts_(io.ext, ext)) {
 					if(io.igf->load(fin, opt)) {
-						imf_ = io.igf->get_image();
+						img_ = io.igf->get_image();
 						return true;
 					}
 					n = i;
@@ -163,7 +163,7 @@ namespace img {
 			if(n != i) {
 				img_file& io = imgios_[i];
 				if(io.igf->load(fin, opt)) {
-					imf_ = io.igf->get_image();
+					img_ = io.igf->get_image();
 					return true;
 				}
 			}
@@ -183,11 +183,11 @@ namespace img {
 	//-----------------------------------------------------------------//
 	bool img_files::save(utils::file_io& fout, const std::string& ext, const std::string& opt)
 	{
-		if(!ext.empty() && imf_) {
+		if(!ext.empty() && img_) {
 			for(size_t i = 0; i < imgios_.size(); ++i) {
 				img_file& io = imgios_[i];
 				if(check_file_exts_(io.ext, ext)) {
-					io.igf->set_image(imf_);
+					io.igf->set_image(img_);
 					if(io.igf->save(fout, opt)) {
 						return true;
 					} else {

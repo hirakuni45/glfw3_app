@@ -179,32 +179,32 @@ namespace img {
 			return true;
 		}
 
-		bool write_info(const img::i_img* imf)
+		bool write_info(shared_img img)
 		{
 	        info_.id_length = 0;
 	
-			if(imf->get_type() == IMG::INDEXED8) {
+			if(img->get_type() == IMG::INDEXED8) {
 				info_.clut_t = 1;
 				info_.image_t = rle_ ? 9 : 1;
 				info_.clut_first = 0;
-				info_.clut_num = imf->get_clut_max();
-				info_.clut_depth = imf->test_alpha() ? 32 : 24;
+				info_.clut_num = img->get_clut_max();
+				info_.clut_depth = img->test_alpha() ? 32 : 24;
 				info_.depth = 8;
-			} else if(imf->get_type() == IMG::FULL8) {
+			} else if(img->get_type() == IMG::FULL8) {
 				info_.clut_t = 0;
 				info_.image_t = rle_ ? 10 : 2;
 				info_.clut_first = 0;
 				info_.clut_num = 0;
 				info_.clut_depth = 0;
-				info_.depth = imf->test_alpha() ? 32 : 24;
+				info_.depth = img->test_alpha() ? 32 : 24;
 			} else {
 				return false;
 			}
 			info_.x = 0;
 			info_.y = 0;
-			info_.w = imf->get_size().x;
-			info_.h = imf->get_size().y;
-			info_.alpha = imf->test_alpha() ? 8 : 0;
+			info_.w = img->get_size().x;
+			info_.h = img->get_size().y;
+			info_.alpha = img->test_alpha() ? 8 : 0;
 
 			if(!info_.put(fio_)) {
 				return false;
@@ -339,8 +339,8 @@ namespace img {
 			return true;
 		}
 
-		template <class IMAGE>
-		bool decode(IMAGE& image)
+
+		bool decode_(shared_img img)
 		{
 			uint32_t n = info_.clut_num * info_.clut_depth / 8;
 			if(!fio_.seek(offset_ + HEADER_SIZE + info_.id_length + n,
@@ -379,9 +379,15 @@ namespace img {
 						dx = 1;
 					}
 					for(uint16_t x = 0; x < info_.w; ++x) {
-						typename IMAGE::value_type pix;
-						set_pixel_(p, pix);
-						image.put_pixel(pos, pix);
+						if(img->get_type() == img::IMG::FULL8) {
+							rgba8 c;
+							set_pixel_(p, c);
+							img->put_pixel(pos, c);
+						} else {
+							idx8 i;
+							set_pixel_(p, i);
+							img->put_pixel(pos, i);
+						}
 						p += bits / 8;
 						pos.x += dx;
 					}
@@ -396,11 +402,19 @@ namespace img {
 						dx = 1;
 					}
 					for(uint16_t x = 0; x < info_.w; ++x) {
-						typename IMAGE::value_type pix;
-						if(!read_pixel_(pix)) {
-							return false;
+						if(img->get_type() == img::IMG::FULL8) {
+							rgba8 c;
+							if(!read_pixel_(c)) {
+								return false;
+							}
+							img->put_pixel(pos, c);
+						} else {
+							idx8 c;
+							if(!read_pixel_(c)) {
+								return false;
+							}
+							img->put_pixel(pos, c);
 						}
-						image.put_pixel(pos, pix);
 						pos.x += dx;
 					}
 				}
@@ -469,29 +483,29 @@ namespace img {
 			return true;
 		}
 
-		bool encode(const i_img* imf)
+		bool encode(shared_img img)
 		{
 // std::cout << static_cast<int>(rle) << std::endl;
 			uint8_t* buf = 0;
 			if(rle_) {
-				uint32_t n = imf->get_size().x * info_.depth / 8;
+				uint32_t n = img->get_size().x * info_.depth / 8;
 				buf = new uint8_t[n];
 			}
 			vtx::spos pos;
-			pos.y = imf->get_size().y - 1;
-			for(short y = 0; y < imf->get_size().y; ++y) {
+			pos.y = img->get_size().y - 1;
+			for(short y = 0; y < img->get_size().y; ++y) {
 				if(rle_) {
 					uint8_t* p = buf;
-					if(imf->get_type() == IMG::INDEXED8) {
-						for(pos.x = 0; pos.x < imf->get_size().x; ++pos.x) {
+					if(img->get_type() == IMG::INDEXED8) {
+						for(pos.x = 0; pos.x < img->get_size().x; ++pos.x) {
 							idx8 i;
-							imf->get_pixel(pos, i);
+							img->get_pixel(pos, i);
 							*p++ = i.i;
 						}
 					} else {
-						for(pos.x = 0; pos.x < imf->get_size().x; ++pos.x) {
+						for(pos.x = 0; pos.x < img->get_size().x; ++pos.x) {
 							rgba8 c;
-							imf->get_pixel(pos, c);
+							img->get_pixel(pos, c);
 							*p++ = c.b;
 							*p++ = c.g;
 							*p++ = c.r;
@@ -503,20 +517,20 @@ namespace img {
 						return false;
 					}
 				} else {
-					if(imf->get_type() == IMG::INDEXED8) {
-						for(pos.x = 0; pos.x < imf->get_size().x; ++pos.x) {
+					if(img->get_type() == IMG::INDEXED8) {
+						for(pos.x = 0; pos.x < img->get_size().x; ++pos.x) {
 							idx8 i;
-							imf->get_pixel(pos, i);
+							img->get_pixel(pos, i);
 							if(!fio_.put(i.i)) return false;
 						}
 					} else {
-						for(pos.x = 0; pos.x < imf->get_size().x; ++pos.x) {
+						for(pos.x = 0; pos.x < img->get_size().x; ++pos.x) {
 							rgba8 c;
-							imf->get_pixel(pos, c);
+							img->get_pixel(pos, c);
 							if(!fio_.put(c.b)) return false;
 							if(!fio_.put(c.g)) return false;
 							if(!fio_.put(c.r)) return false;
-							if(imf->test_alpha()) {
+							if(img->test_alpha()) {
 								if(!fio_.put(c.a)) return false;
 							}
 						}
@@ -598,22 +612,22 @@ namespace img {
 				return false;
 			}
 
-			img_.destroy();
-			idx_.create(vtx::spos(fo.width, fo.height), alpha);
+			img_ = shared_img(new img_idx8);
+			img_->create(vtx::spos(fo.width, fo.height), alpha);
 
 			for(int i = 0; i < fo.clut_num; ++i) {
-				idx_.put_clut(i, clut[i]);
+				img_->put_clut(i, clut[i]);
 			}
 
-			if(!tga_.decode(idx_)) {
+			if(!tga_.decode_(img_)) {
 				return false;
 			}
 
 		} else {
-			idx_.destroy();
-			img_.create(vtx::spos(fo.width, fo.height), alpha);
+			img_ = shared_img(new img_rgba8);
+			img_->create(vtx::spos(fo.width, fo.height), alpha);
 
-			if(!tga_.decode(img_)) {
+			if(!tga_.decode_(img_)) {
 				return false;
 			}
 		}
@@ -632,26 +646,25 @@ namespace img {
 	//-----------------------------------------------------------------//
 	bool tga_io::save(utils::file_io& fout, const std::string& opt)
 	{
-		if(imf_ == 0) {
-			return false;
-		}
+		if(!img_) return false;
+		if(img_->get_size().x == 0 || img_->get_size().y == 0) return false;
 
 		tga tga_(fout);
 
 		if(opt == "rle") tga_.enable_rle(); else tga_.enable_rle(false);
 
-		if(!tga_.write_info(imf_)) {
+		if(!tga_.write_info(img_)) {
 			return false;
 		}
 
-		if(imf_->get_type() == IMG::INDEXED8) {
+		if(img_->get_type() == IMG::INDEXED8) {
 			// CLUT の書き込み
 			tga::clut_type clut;
-			clut.reserve(imf_->get_clut_max());
+			clut.reserve(img_->get_clut_max());
 			clut.clear();
-			for(int i = 0; i < imf_->get_clut_max(); ++i) {
+			for(int i = 0; i < img_->get_clut_max(); ++i) {
 				rgba8 c;
-				imf_->get_clut(i, c);
+				img_->get_clut(i, c);
 				clut.push_back(c);
 			}
 			if(!tga_.write_clut(clut)) {
@@ -660,6 +673,6 @@ namespace img {
 		}
 
 		// ピクセルの書き込み
-		return tga_.encode(imf_);
+		return tga_.encode(img_);
 	}
 }

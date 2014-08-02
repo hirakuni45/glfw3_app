@@ -126,7 +126,7 @@ namespace img {
 	}
 #endif
 
-	static void opj_image_to_rgba8_(opj_image_t* image, img_rgba8& img)
+	static void opj_image_to_rgba8_(opj_image_t* image, shared_img img)
 	{
 		// image->x1 - image->x0;
 		// image->y1 - image->y0;
@@ -141,29 +141,29 @@ namespace img {
 		int hr = int_ceildivpow2_(image->comps[0].h, image->comps[0].factor);
 
 		if(image->numcomps == 1) {
-			img.create(vtx::spos(wr, hr), false);
+			img->create(vtx::spos(wr, hr), false);
 			vtx::spos pos;
 			for(pos.y = 0; pos.y < hr; ++pos.y) {
 				for(pos.x = 0; pos.x < wr; ++pos.x) {
 					rgba8 c;
 					c.g = c.b = c.r = image->comps[0].data[pos.y * w + pos.x];
 					c.a = 255;
-					img.put_pixel(pos, c);
+					img->put_pixel(pos, c);
 				}
 			}
 		} else if(image->numcomps == 2) {
-			img.create(vtx::spos(wr, hr), true);
+			img->create(vtx::spos(wr, hr), true);
 			vtx::spos pos;
 			for(pos.y = 0; pos.y < hr; ++pos.y) {
 				for(pos.x = 0; pos.x < wr; ++pos.x) {
 					rgba8 c;
 					c.g = c.b = c.r = image->comps[0].data[pos.y * w + pos.x];
 					c.a = image->comps[1].data[pos.y * w + pos.x];
-					img.put_pixel(pos, c);
+					img->put_pixel(pos, c);
 				}
 			}
 		} else if(image->numcomps == 3) {
-			img.create(vtx::spos(wr, hr), false);
+			img->create(vtx::spos(wr, hr), false);
 			vtx::spos pos;
 			for(pos.y = 0; pos.y < hr; ++pos.y) {
 				for(pos.x = 0; pos.x < wr; ++pos.x) {
@@ -172,11 +172,11 @@ namespace img {
 					c.g = image->comps[1].data[pos.y * w + pos.x];
 					c.b = image->comps[2].data[pos.y * w + pos.x];
 					c.a = 255;
-					img.put_pixel(pos, c);
+					img->put_pixel(pos, c);
 				}
 			}
 		} else if(image->numcomps == 4) {
-			img.create(vtx::spos(wr, hr), true);
+			img->create(vtx::spos(wr, hr), true);
 			vtx::spos pos;
 			for(pos.y = 0; pos.y < hr; ++pos.y) {
 				for(pos.x = 0; pos.x < wr; ++pos.x) {
@@ -185,7 +185,7 @@ namespace img {
 					c.g = image->comps[1].data[pos.y * w + pos.x];
 					c.b = image->comps[2].data[pos.y * w + pos.x];
 					c.a = image->comps[3].data[pos.y * w + pos.x];
-					img.put_pixel(pos, c);
+					img->put_pixel(pos, c);
 				}
 			}
 		}
@@ -300,7 +300,7 @@ namespace img {
 	}
 
 
-	static bool decode_(utils::file_io& fin, CODEC_FORMAT form, img_rgba8& img)
+	static bool decode_(utils::file_io& fin, CODEC_FORMAT form, shared_img img)
 	{
 		sub_t t;
 		if(!decode_sub_(fin, form, t)) {
@@ -387,9 +387,10 @@ namespace img {
 	{
 		CODEC_FORMAT form = probe_(fin);
 		if(form != OPJ_CODEC_UNKNOWN) {
-			img_.destroy();
+			img_ = shared_img(new img_rgba8);
 			return decode_(fin, form, img_);
 		} else {
+			img_ = nullptr;
 			return false;
 		}
 	}
@@ -405,6 +406,10 @@ namespace img {
 	//-----------------------------------------------------------------//
 	bool openjpeg_io::save(utils::file_io& fout, const std::string& opt)
 	{
+		if(!img_) return false;
+		const vtx::spos& size = img_->get_size();
+		if(size.x == 0 || size.y == 0) return false;
+
 		CODEC_FORMAT form;
 		const std::string& fp = fout.get_path();
 		if(utils::no_capital_strcmp(utils::get_file_ext(fp), "j2k") == 0) {
@@ -415,13 +420,8 @@ namespace img {
 			return false;
 		}
 
-		if(imf_ == 0) return false;
-
-		const vtx::spos& size = imf_->get_size();
-		if(size.x == 0 || size.y == 0) return false;
-
 		int nc = 3;
-		if(imf_->test_alpha()) ++nc; 
+		if(img_->test_alpha()) ++nc; 
 
 		// 品質パラメーター
 		float q = 0.0f;
@@ -483,11 +483,11 @@ namespace img {
 		for(pos.y = 0; pos.y < size.y; ++pos.y) {
 			for(pos.x = 0; pos.x < size.x; ++pos.x) {
 				rgba8 c;
-				imf_->get_pixel(pos, c);
+				img_->get_pixel(pos, c);
 				t.image->comps[0].data[idx] = c.r;
 				t.image->comps[1].data[idx] = c.g;
 				t.image->comps[2].data[idx] = c.b;
-				if(imf_->test_alpha()) t.image->comps[3].data[idx] = c.a;
+				if(img_->test_alpha()) t.image->comps[3].data[idx] = c.a;
 				++idx;
 			}
 		}

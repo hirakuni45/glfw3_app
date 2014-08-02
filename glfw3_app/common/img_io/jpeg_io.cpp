@@ -377,15 +377,18 @@ namespace img {
 			return false;
 		}
 
-		img_.destroy();
 		/// cinfo.in_color_space
 		if(cinfo.output_components == 1) {
-			img_.create(vtx::spos(cinfo.image_width, cinfo.image_height), true);
+			img_ = shared_img(new img_rgba8);
+			img_->create(vtx::spos(cinfo.image_width, cinfo.image_height), true);
 		} else if(cinfo.output_components == 3) {
-			img_.create(vtx::spos(cinfo.image_width, cinfo.image_height), true);
+			img_ = shared_img(new img_rgba8);
+			img_->create(vtx::spos(cinfo.image_width, cinfo.image_height), true);
 		} else if(cinfo.output_components == 4) {
-			img_.create(vtx::spos(cinfo.image_width, cinfo.image_height), true);
+			img_ = shared_img(new img_rgba8);
+			img_->create(vtx::spos(cinfo.image_width, cinfo.image_height), true);
 		} else {
+			img_ = 0;
 			std::cout << "JPEG decode error: Can not support components: " << 
 				static_cast<int>(cinfo.output_components) << std::endl;
 			jpeg_finish_decompress(&cinfo);
@@ -407,7 +410,7 @@ namespace img {
 					c.g = *p++;
 					c.b = *p++;
 					c.a = *p++;
-					img_.put_pixel(pos, c);
+					img_->put_pixel(pos, c);
 				}
 			} else if(cinfo.output_components == 3) {
 				for(pos.x = 0; pos.x < cinfo.image_width; ++pos.x) {
@@ -416,14 +419,14 @@ namespace img {
 					c.g = *p++;
 					c.b = *p++;
 					c.a = 255;
-					img_.put_pixel(pos, c);
+					img_->put_pixel(pos, c);
 				}
 			} else if(cinfo.output_components == 1) {
 				for(pos.x = 0; pos.x < cinfo.image_width; ++pos.x) {
 					img::rgba8 c;
 					c.b = c.g = c.r = *p++;
 					c.a = 255;
-					img_.put_pixel(pos, c);
+					img_->put_pixel(pos, c);
 				}
 			}
 		}
@@ -451,7 +454,8 @@ namespace img {
 	//-----------------------------------------------------------------//
 	bool jpeg_io::save(utils::file_io& fout, const std::string& opt)
 	{
-		if(imf_ == 0) return false;
+		if(!img_) return false;
+		if(img_->get_size().x == 0 || img_->get_size().y == 0) return false;
 
 		int q = 0;
 		// 0 to 100
@@ -477,15 +481,15 @@ namespace img {
 		fio_jpeg_file_io_dst(&cinfo, &fout);
 		fio_dst_ptr dst = (fio_dst_ptr)cinfo.dest;
 
-		int w = imf_->get_size().x;
-		int h = imf_->get_size().y;
+		int w = img_->get_size().x;
+		int h = img_->get_size().y;
 		cinfo.image_width  = w;
 		cinfo.image_height = h;
-		cinfo.input_components = 3;
-		if(imf_->test_alpha()) {
-			++cinfo.input_components;
+		if(img_->test_alpha()) {
+			cinfo.input_components = 4;
 			cinfo.in_color_space = JCS_EXT_RGBA;
 		} else {
+			cinfo.input_components = 3;
 			cinfo.in_color_space = JCS_RGB;
 		}
 
@@ -503,11 +507,11 @@ namespace img {
 			unsigned char* p = tmp;
 			for(pos.x = 0; pos.x < w; ++pos.x) {
 				rgba8 c;
-				imf_->get_pixel(pos, c);
+				img_->get_pixel(pos, c);
 				*p++ = c.r;
 				*p++ = c.g;
 				*p++ = c.b;
-				if(imf_->test_alpha()) *p++ = c.a;
+				if(img_->test_alpha()) *p++ = c.a;
 			}
 			jpeg_write_scanlines(&cinfo, row_pointer, 1);
 			if(dst->error) break;

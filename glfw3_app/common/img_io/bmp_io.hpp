@@ -18,10 +18,7 @@ namespace img {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class bmp_io : public i_img_io {
 
-		const i_img*	cimg_;
-
-		img_idx8	idx_;
-		img_rgba8	img_;
+		shared_img	img_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -29,7 +26,7 @@ namespace img {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		bmp_io() : cimg_(0) { }
+		bmp_io() { }
 
 
 		//-----------------------------------------------------------------//
@@ -98,15 +95,7 @@ namespace img {
 			@return	イメージインターフェース
 		*/
 		//-----------------------------------------------------------------//
-		const i_img* get_image() const override {
-			if(!idx_.empty()) {
-				return &idx_;
-			} else if(!img_.empty()) {
-				return &img_;
-			} else {
-				return 0;
-			}
-		}
+		shared_img get_image() override { return img_; }
 
 
 		//-----------------------------------------------------------------//
@@ -115,6 +104,6 @@ namespace img {
 			@param[in]	imf	イメージインターフェース
 		*/
 		//-----------------------------------------------------------------//
-		void set_image(const i_img* cimg) override { cimg_ = cimg; }
+		void set_image(shared_img img) override { img_ = img; }
 	};
 }

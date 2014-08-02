@@ -25,11 +25,11 @@ namespace img {
 		};
 
 		typedef std::vector<img_file>	imgios;
-		imgios			imgios_;
+		imgios	   	imgios_;
 
-		const i_img*	imf_;
+		shared_img	img_;
 
-		bool			init_;
+		bool	   	init_;
 
 		void add_image_file_io_context_(img_file::img_io, const std::string& exts);
 
@@ -39,7 +39,7 @@ namespace img {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		img_files() : imf_(0), init_(false) { }
+		img_files() : init_(false) { }
 
 
 		//-----------------------------------------------------------------//
@@ -291,16 +291,16 @@ namespace img {
 			@return	イメージインターフェース
 		*/
 		//-----------------------------------------------------------------//
-		const i_img* get_image() const { return imf_; }
+		shared_img get_image() const { return img_; }
 
 
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	イメージインターフェースを設定
-			@param[in]	imf	イメージ・インターフェース
+			@param[in]	img	イメージ・インターフェース
 		*/
 		//-----------------------------------------------------------------//
-		void set_image(const i_img* imf) { imf_ = imf; }
+		void set_image(shared_img img) { img_ = img; }
 
 	};
 

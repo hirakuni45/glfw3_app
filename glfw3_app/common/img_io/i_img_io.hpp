@@ -89,16 +89,16 @@ namespace img {
 			@return	イメージ
 		*/
 		//-----------------------------------------------------------------//
-		virtual const i_img* get_image() const = 0;
+		virtual shared_img get_image() = 0;
 
 
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	画像の登録
-			@param[in]	simg	イメージ
+			@param[in]	img	イメージ
 		*/
 		//-----------------------------------------------------------------//
-		virtual void set_image(const i_img* img) = 0;
+		virtual void set_image(shared_img img) = 0;
 
 	};
 }
