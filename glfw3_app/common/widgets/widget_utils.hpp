@@ -56,7 +56,7 @@ namespace gui {
 		widget::param wp(rect, parents);
 		if(wd.at_img_files().load(file)) {
 			typename WIDGET::param wp_;
-			wp_.image_ = wd.at_img_files().get_image();
+			wp_.image_ = wd.at_img_files().get_image().get();
 			w = wd.add_widget<WIDGET>(wp, wp_);
 		} else {
 			wd.add_error_report("Can't load: " + file);
