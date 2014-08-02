@@ -591,7 +591,7 @@ namespace al {
 						fmem.open(p, len);
 						if(img_files_.load(fmem)) {
 							if(img_files_.get_image()) {
-								tag_.image_ = tag::image(img::copy_image(img_files_.get_image()));
+								tag_.image_ = tag::image(img::copy_image(img_files_.get_image().get()));
 							} else {
 								tag_.image_ = 0;
 							}
