@@ -5,12 +5,21 @@
 */
 //=====================================================================//
 #include <iostream>
+#include <tuple>
 #include "img_main.hpp"
 #include "core/glcore.hpp"
 #include "widgets/widget_utils.hpp"
 #include <boost/lexical_cast.hpp>
 
 namespace app {
+
+	typedef std::tuple<const std::string, const img::shared_img> save_t;
+	bool save_task_(save_t t)
+	{
+		
+		return true;
+	}
+
 
 	//-----------------------------------------------------------------//
 	/*!
@@ -173,8 +182,14 @@ namespace app {
 			}
 		}
 
+		bool load_stall = false;
+		bool save_stall = false;
+
 		if(load_ctx_) {
-			wd.top_widget(load_ctx_);
+			if(load_ctx_->get_state(gui::widget::state::ENABLE)) {
+				save_stall = true;
+				wd.top_widget(load_ctx_);
+			}
 			if(load_id_ != load_ctx_->get_select_file_id()) {
 				load_id_ = load_ctx_->get_select_file_id();
 				imfn = load_ctx_->get_file();
@@ -211,20 +226,18 @@ namespace app {
 				frame_->at_local_param().text_param_.text_ = imfn;
 				mobj_.destroy();
 				mobj_.initialize();
-				img_handle_ = mobj_.install(imf.get_image());
+				img_handle_ = mobj_.install(imf.get_image().get());
 				image_->at_local_param().mobj_ = mobj_;
 				image_->at_local_param().mobj_handle_ = img_handle_;
-// imf.set_image(imf.get_image());
-// imf.save("test.jp2");
+
+				
 			}
 		}
 
 		// frame 内 image のサイズを設定
 		if(frame_ && image_) {
-			if(image_->get_local_param().mobj_handle_) {
-				save_->set_state(gui::widget::state::STALL, false);
-			} else {
-				save_->set_state(gui::widget::state::STALL);
+			if(!image_->get_local_param().mobj_handle_) {
+				save_stall = true;
 			}
 
 			float s = 1.0f;
@@ -252,15 +265,34 @@ namespace app {
 		}
 
 		if(save_ctx_) {
-			wd.top_widget(save_ctx_);
+			if(save_ctx_->get_state(gui::widget::state::ENABLE)) {
+				load_stall = true;
+				wd.top_widget(save_ctx_);
+			}
 			if(save_id_ != save_ctx_->get_select_file_id()) {
 				save_id_ = save_ctx_->get_select_file_id();
-				const std::string& sfn = save_ctx_->get_file();
-				std::cout << sfn << std::endl;
+				save_file_name_ = save_ctx_->get_file();
 			}
 		}
 
+		load_->set_state(gui::widget::state::STALL, load_stall);
+		save_->set_state(gui::widget::state::STALL, save_stall);
+
 		wd.update();
+
+		// 画像ファイルのセーブタスク起動
+		if(!save_file_name_.empty()) {
+			if(image_saver_.valid()) {
+				if(image_saver_.get()) {
+					// turn on error dialog
+				}
+				save_file_name_.clear();
+			} else {
+				img::shared_img img;
+				save_t t = std::make_tuple(save_file_name_, img);
+				image_saver_ = std::async(std::launch::async, save_task_, t);
+			}
+		}
 	}
 
 
