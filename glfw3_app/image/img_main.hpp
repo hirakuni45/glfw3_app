@@ -5,6 +5,8 @@
 	@author 平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
+#include <thread>
+#include <future>
 #include "main.hpp"
 #include "utils/i_scene.hpp"
 #include "utils/director.hpp"
@@ -56,6 +58,10 @@ namespace app {
 		uint32_t	save_id_;
 
 		vtx::fpos	image_offset_;
+
+		std::string	save_file_name_;
+
+		std::future<bool>	image_saver_;
 
 	public:
 		//-----------------------------------------------------------------//
