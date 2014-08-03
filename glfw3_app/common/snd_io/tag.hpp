@@ -33,8 +33,7 @@ namespace al {
 		char			image_cover_;
 		std::string		image_dscrp_;
 
-		typedef std::shared_ptr<const img::i_img>  image;
-		image  			image_;
+		img::shared_img	image_;
 
 		tag() : serial_(0), image_cover_(0) { }
 
@@ -48,6 +47,7 @@ namespace al {
 			disc_.clear();
 			total_discs_.clear();
 			date_.clear();
+			image_ = nullptr;
 		}
 		void reset() {
 			serial_ = 0;
