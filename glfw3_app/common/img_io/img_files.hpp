@@ -291,7 +291,7 @@ namespace img {
 			@return	イメージインターフェース
 		*/
 		//-----------------------------------------------------------------//
-		shared_img get_image() const { return img_; }
+		const shared_img get_image() const { return img_; }
 
 
 		//-----------------------------------------------------------------//

@@ -89,7 +89,7 @@ namespace img {
 			@return	イメージ
 		*/
 		//-----------------------------------------------------------------//
-		virtual shared_img get_image() = 0;
+		virtual const shared_img get_image() const = 0;
 
 
 		//-----------------------------------------------------------------//

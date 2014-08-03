@@ -424,12 +424,12 @@ namespace img {
 		if(img_->test_alpha()) ++nc; 
 
 		// 品質パラメーター
-		float q = 0.0f;
+		float q = 0.75f;
 		if(!opt.empty()) {
 			try {
 				q = boost::lexical_cast<float>(opt);
 			} catch (boost::bad_lexical_cast&) {
-				q = 0.0f;
+				q = 0.75f;
 			}
 		}
 

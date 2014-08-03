@@ -97,7 +97,7 @@ namespace img {
 			@return	イメージインターフェース
 		*/
 		//-----------------------------------------------------------------//
-		shared_img get_image() override { return img_; }
+		const shared_img get_image() const override { return img_; }
 
 
 		//-----------------------------------------------------------------//

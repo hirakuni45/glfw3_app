@@ -457,13 +457,13 @@ namespace img {
 		if(!img_) return false;
 		if(img_->get_size().x == 0 || img_->get_size().y == 0) return false;
 
-		int q = 0;
+		int q = 75;
 		// 0 to 100
 		if(!opt.empty()) {
 			try {
 				q = boost::lexical_cast<int>(opt);
 			} catch (boost::bad_lexical_cast&) {
-				q = 100;
+				q = 75;
 			}
 		}
 
