@@ -49,6 +49,7 @@ namespace app {
 		gui::widget_terminal*	term_;
 
 		gui::widget_dialog*		dialog_;
+		gui::widget_dialog*		dialog_yes_no_;
 
 		gl::mobj			mobj_;
 		gl::mobj::handle	img_handle_;
@@ -59,9 +60,15 @@ namespace app {
 
 		vtx::fpos	image_offset_;
 
-		std::string	save_file_name_;
+		img::shared_img	src_image_;
+
+		std::string		save_file_name_;
 
 		std::future<bool>	image_saver_;
+
+		bool			save_dialog_;
+
+		void image_info_(const std::string& file, const img::i_img* img);
 
 	public:
 		//-----------------------------------------------------------------//
@@ -75,9 +82,9 @@ namespace app {
 			frame_(0), image_(0),
 			tools_(0), load_(0), save_(0),
 			scale_fit_(0), scale_1x_(0), scale_2x_(0), scale_3x_(0), scale_4x_(0),
-			info_(0), term_(0), dialog_(0),
+			info_(0), term_(0), dialog_(0), dialog_yes_no_(0),
 			img_handle_(0), dd_id_(0), load_id_(0), save_id_(0),
-			image_offset_(0.0f)
+			image_offset_(0.0f), save_dialog_(false)
 		{ }
 
 

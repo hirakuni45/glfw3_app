@@ -16,8 +16,35 @@ namespace app {
 	typedef std::tuple<const std::string, const img::shared_img> save_t;
 	bool save_task_(save_t t)
 	{
-		
-		return true;
+		img::img_files imfs;
+		imfs.initialize();
+		imfs.set_image(std::get<1>(t));
+		return imfs.save(std::get<0>(t));
+	}
+
+
+	void img_main::image_info_(const std::string& file, const img::i_img* img)
+	{
+		std::string s;
+		size_t fsz = utils::get_file_size(file);
+		s = ": " + boost::lexical_cast<std::string>(fsz) + '\r';
+		term_->output(s);
+		s = "W: " + boost::lexical_cast<std::string>(img->get_size().x) + '\r';
+		term_->output(s);
+		s = "H: " + boost::lexical_cast<std::string>(img->get_size().y) + '\r';
+		term_->output(s);
+		img::IMG::type t = img->get_type();
+		if(t == img::IMG::INDEXED8) {
+			term_->output("INDEXED8\r");
+		} else if(t == img::IMG::FULL8) {
+			term_->output("FULL8\r");
+		}
+		if(img->test_alpha()) {
+			term_->output("Alpha\r");
+		}
+		s = "C: " + boost::lexical_cast<std::string>(img->count_color()) + '\r';
+		term_->output(s);
+		term_->output('\r');
 	}
 
 
@@ -125,6 +152,12 @@ namespace app {
 			dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
 			dialog_->enable(false);
 		}
+		{ // ダイアログ(cancel/ok)
+			widget::param wp(vtx::srect(10, 30, 450, 200));
+			widget_dialog::param wp_(widget_dialog::param::style::CANCEL_OK);
+			dialog_yes_no_ = wd.add_widget<widget_dialog>(wp, wp_);
+			dialog_yes_no_->enable(false);
+		}
 
 		mobj_.initialize();
 
@@ -188,7 +221,7 @@ namespace app {
 		if(load_ctx_) {
 			if(load_ctx_->get_state(gui::widget::state::ENABLE)) {
 				save_stall = true;
-				wd.top_widget(load_ctx_);
+///				wd.top_widget(load_ctx_);
 			}
 			if(load_id_ != load_ctx_->get_select_file_id()) {
 				load_id_ = load_ctx_->get_select_file_id();
@@ -200,28 +233,12 @@ namespace app {
 			img::img_files& imf = wd.at_img_files();
 			if(!imf.load(imfn)) {
 				dialog_->set_text("Can't decode image file:\n '"
-					+ load_ctx_->get_file() + "'");
+								  + load_ctx_->get_file() + "'");
 				dialog_->enable();
 			} else {
-				if(term_) {
-					std::string s;
-					s = "W: " + boost::lexical_cast<std::string>(imf.get_image()->get_size().x) + '\r';
-					term_->output(s);
-					s = "H: " + boost::lexical_cast<std::string>(imf.get_image()->get_size().y) + '\r';
-					term_->output(s);
-					img::IMG::type t = imf.get_image()->get_type();
-					if(t == img::IMG::INDEXED8) {
-						term_->output("INDEXED8\r");
-					} else if(t == img::IMG::FULL8) {
-						term_->output("FULL8\r");
-					}
-					if(imf.get_image()->test_alpha()) {
-						term_->output("Alpha\r");
-					}
-					s = "C: " + boost::lexical_cast<std::string>(imf.get_image()->count_color()) + '\r';
-					term_->output(s);
-					term_->output('\r');
-				}
+				src_image_ = imf.get_image();
+				term_->output("Load");
+				image_info_(load_ctx_->get_file(), src_image_.get());
 				image_offset_.set(0.0f);
 				frame_->at_local_param().text_param_.text_ = imfn;
 				mobj_.destroy();
@@ -267,11 +284,20 @@ namespace app {
 		if(save_ctx_) {
 			if(save_ctx_->get_state(gui::widget::state::ENABLE)) {
 				load_stall = true;
-				wd.top_widget(save_ctx_);
+///				wd.top_widget(save_ctx_);
 			}
 			if(save_id_ != save_ctx_->get_select_file_id()) {
 				save_id_ = save_ctx_->get_select_file_id();
-				save_file_name_ = save_ctx_->get_file();
+				const std::string& fn = save_ctx_->get_file();
+				if(utils::probe_file(fn)) {
+					dialog_yes_no_->set_text("Over write ?:\n'"
+											 + fn + "'");
+					dialog_yes_no_->enable();
+					save_dialog_ = true;
+				} else {
+					save_dialog_ = false;
+				}
+				save_file_name_ = fn;
 			}
 		}
 
@@ -283,14 +309,30 @@ namespace app {
 		// 画像ファイルのセーブタスク起動
 		if(!save_file_name_.empty()) {
 			if(image_saver_.valid()) {
-				if(image_saver_.get()) {
-					// turn on error dialog
+				if(!image_saver_.get()) {
+					dialog_->set_text("Can't encode image file:\n'"
+									  + save_file_name_ + "'");
+					dialog_->enable();
+				} else {
+					term_->output("Save");
+					image_info_(save_file_name_, src_image_.get());
 				}
 				save_file_name_.clear();
 			} else {
-				img::shared_img img;
-				save_t t = std::make_tuple(save_file_name_, img);
-				image_saver_ = std::async(std::launch::async, save_task_, t);
+				bool launch = false;
+				if(save_dialog_) {
+					if(!dialog_yes_no_->get_state(gui::widget::state::ENABLE)) {
+						if(dialog_yes_no_->get_local_param().return_ok_) {
+							launch = true;
+						}
+					}
+				} else {
+					launch = true;
+				}
+				if(launch) {
+					save_t t = std::make_tuple(save_file_name_, src_image_);
+					image_saver_ = std::async(std::launch::async, save_task_, t);
+				}
 			}
 		}
 	}
