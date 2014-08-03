@@ -59,13 +59,13 @@ namespace gui {
 				widget::param wp(vtx::srect(vtx::spos(fw + ofs, y),
 				btn_size), this);
 				widget_button::param wp_("Cancel");
-				ok_ = wd_.add_widget<widget_button>(wp, wp_);
+				cancel_ = wd_.add_widget<widget_button>(wp, wp_);
 			}
 			{
 				widget::param wp(vtx::srect(vtx::spos(fw + ofs + btn_width + ofs, y),
 				btn_size), this);
 				widget_button::param wp_("OK");
-				cancel_ = wd_.add_widget<widget_button>(wp, wp_);
+				ok_ = wd_.add_widget<widget_button>(wp, wp_);
 			}
 		}
 
@@ -91,10 +91,12 @@ namespace gui {
 	{
 		bool close = false;
 		if(ok_ && ok_->get_selected()) {
-			param_.return_ok_ = true;
+			param_.return_ok_     = true;
+			param_.return_cancel_ = false;
 			close = true;
 		}
 		if(cancel_ && cancel_->get_selected()) {
+			param_.return_ok_     = false;
 			param_.return_cancel_ = true;
 			close = true;
 		}
