@@ -209,11 +209,32 @@ namespace gui {
 		/*!
 			@brief	エイリアス・テキストを設定
 			@param[in]	text	テキスト
+		*/
+		//-----------------------------------------------------------------//
+		void set_alias(const std::string& text) {
+			at_local_param().text_param_.alias_ = text;
+			at_local_param().text_param_.alias_enable_ = true;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	エイリアス・テキストを取得
+			@return エイリアス・テキスト
+		*/
+		//-----------------------------------------------------------------//
+		const std::string& get_alias() const {
+			return get_local_param().text_param_.alias_;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	エイリアスの許可、不許可
 			@param[in]	ena		不許可にする場合「false」
 		*/
 		//-----------------------------------------------------------------//
-		void set_alias(const std::string& text, bool ena = true) {
-			at_local_param().text_param_.alias_ = text;
+		void enable_alias(bool ena = true) {
 			at_local_param().text_param_.alias_enable_ = ena;
 		}
 	};

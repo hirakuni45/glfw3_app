@@ -407,6 +407,7 @@ namespace gui {
 		file_infos_.clear();
 		fsc_path_.clear();
 		fsc_.set_path(param_.path_, param_.filter_);
+		fsc_wait_ = true;
 
 		short frame_width = param_.plate_param_.frame_width_;
 		// path（ハンドル）
@@ -514,6 +515,7 @@ namespace gui {
 		if(fsc_.probe()) {
 			fsc_path_ = fsc_.get_path();
 			file_infos_ = fsc_.get();
+			fsc_wait_ = false;
 
 			if(center_.empty()) {
 				create_files_(center_, 0);
@@ -524,6 +526,7 @@ namespace gui {
 						file_infos_.clear();
 						fsc_path_.clear();
 						fsc_.set_path(pp);
+						fsc_wait_ = true;
 						request_right_ = false;
 					}
 				}
@@ -600,6 +603,7 @@ namespace gui {
 						file_infos_.clear();
 						fsc_path_.clear();
 						fsc_.set_path(pp, param_.filter_);
+						fsc_wait_ = true;
 					}
 				} else {
 					destroy_files_(left_);
@@ -772,6 +776,7 @@ namespace gui {
 						file_infos_.clear();
 						fsc_path_.clear();
 						fsc_.set_path(param_.path_, param_.filter_);
+						fsc_wait_ = true;
 						destroy_files_(right_);
 					} else {
 						utils::append_path(param_.path_, n, file_);
@@ -828,16 +833,34 @@ namespace gui {
 		@brief	代替テキスト（エリアス）を設定
 		@param[in]	path	選択するファイルパス
 		@param[in]	alias	代替テキスト
-		@param[in]	ena		不許可にする場合「false」
 	*/
 	//-----------------------------------------------------------------//
-	void widget_filer::set_alias(const std::string& path, const std::string& alias, bool ena)
+	void widget_filer::set_alias(const std::string& path, const std::string& alias)
 	{
 		widget_file_copt wfo = scan_item_(path);
 		if(wfo) {
 			const widget_file& wf = *wfo;
 			if(wf.name) {
-				wf.name->set_alias(alias, ena);
+				wf.name->set_alias(alias);
+			}
+		}
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	代替テキスト（エリアス）を有効、無効
+		@param[in]	path	選択するファイルパス
+		@param[in]	ena		無効にする場合「false」
+	*/
+	//-----------------------------------------------------------------//
+	void widget_filer::enable_alias(const std::string& path, bool ena)
+	{
+		widget_file_copt wfo = scan_item_(path);
+		if(wfo) {
+			const widget_file& wf = *wfo;
+			if(wf.name) {
+				wf.name->enable_alias(ena);
 			}
 		}
 	}
@@ -884,6 +907,7 @@ namespace gui {
 			file_infos_.clear();
 			fsc_path_.clear();
 			fsc_.set_path(param_.path_, param_.filter_);
+			fsc_wait_ = true;
 			destroy_files_(left_);
 			destroy_files_(center_);
 			destroy_files_(right_);

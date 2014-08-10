@@ -64,6 +64,7 @@ namespace gui {
 
 		utils::files		fsc_;
 		std::string			fsc_path_;
+		bool				fsc_wait_;
 		utils::file_infos	file_infos_;
 		utils::drive_info	drv_;
 
@@ -78,6 +79,7 @@ namespace gui {
 				SIZE,	///< サイズ表示
 				TIME,	///< 時間表示
 				MODE,	///< モード表示
+				ALIAS,	///< エイリアス表示
 				limit_
 			};
 		};
@@ -159,7 +161,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_filer(widget_director& wd, const widget::param& bp, const param& p) :
 			widget(bp), wd_(wd), param_(p), objh_(0),
-			fsc_(),
+			fsc_(), fsc_path_(), fsc_wait_(false),
 			info_(0), main_(0), files_(0),
 			info_state_(info_state::NONE),
 			request_right_(false),
@@ -295,6 +297,15 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	ファイル取得状態を取得
+			@return 
+		*/
+		//-----------------------------------------------------------------//
+		bool get_file_state() const { return fsc_wait_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	選択されたファイルを返す
 			@return 選択されたファイル
 		*/
@@ -337,9 +348,18 @@ namespace gui {
 			@brief	代替テキスト（エリアス）を設定
 			@param[in]	path	選択するファイルパス
 			@param[in]	alias	代替テキスト
-			@param[in]	ena		不許可にする場合「false」
 		*/
 		//-----------------------------------------------------------------//
-		void set_alias(const std::string& path, const std::string& alias, bool ena = true);
+		void set_alias(const std::string& path, const std::string& alias);
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	代替テキスト（エリアス）を有効、無効
+			@param[in]	path	選択するファイルパス
+			@param[in]	ena		無効にする場合「false」
+		*/
+		//-----------------------------------------------------------------//
+		void enable_alias(const std::string& path, bool ena = true);
 	};
 }
