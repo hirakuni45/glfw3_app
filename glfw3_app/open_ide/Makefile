@@ -1,7 +1,7 @@
 #-----------------------------------------------#
 # Application Binary Build Makefile             #
 #-----------------------------------------------#
-TARGET		=	open_ide.exe
+TARGET		=	open_ide
 
 #ICON_RC		=	icon.rc
 
@@ -24,6 +24,7 @@ PSOURCES	=	main.cpp \
 				gl_fw/glterminal.cpp \
 				utils/vtx.cpp \
 				utils/vmath.cpp \
+				utils/sjis_utf16.cpp \
 				utils/string_utils.cpp \
 				utils/file_io.cpp \
 				utils/file_info.cpp \
@@ -68,39 +69,24 @@ STDLIBS		=
 OPTLIBS		=	glfw3 GLEW \
 				pthread \
 				png turbojpeg openjp2 \
-				mad faad mp4ff tag \
 				freetype \
+				mad faad mp4ff tag \
 				z
 
-# OPTLIBS		=	glfw3 glew32 opengl32 glu32 gdi32 imm32 \
-				pthread \
-				openal winmm dsound \
-				mupdf mupdf-js-none \
-				png jpeg-turbo openjp2 \
-				freetype \
-				z \
-				mad \
-				faad mp4ff
+INC_SYS		=	/opt/local/include/boost
 
-INC_SYS		=	/usr/local/boost_1_55_0
-
-INC_LIB		=	/usr/local/include \
-				/usr/local/include/freetype2 \
-				/usr/local/include/freetype2/freetype \
-				/opt/libjpeg-turbo/include \
-				/usr/local/include/openjpeg-2.0 \
-				/usr/local/include/taglib
-
-# INC_LIB		=	/usr/local/include \
-				/usr/local/include/libpng16 \
-				/usr/local/include/libjpeg_x86 \
-				/usr/local/include/openjpeg-2.0 \
-				/usr/local/include/freetype2
+INC_LIB		=	/opt/libjpeg-turbo/include \
+				/usr/local/include \
+				/opt/local/include \
+				/opt/local/include/freetype2 \
+				/opt/local/include/openjpeg-2.1 \
+				/opt/local/include/taglib
 
 PINC_APP	=	. ../common
 CINC_APP	=	. ../common
-LIBDIR		=	/usr/local/lib \
-				/opt/libjpeg-turbo/lib
+LIBDIR		=	/opt/libjpeg-turbo/lib \
+				/usr/local/lib \
+				/opt/local/lib
 
 INC_S	=	$(addprefix -isystem, $(INC_SYS))
 INC_L	=	$(addprefix -isystem, $(INC_LIB))

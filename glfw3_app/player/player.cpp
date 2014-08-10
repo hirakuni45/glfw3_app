@@ -16,7 +16,8 @@ namespace app {
 
 	static const char* resume_path_ = { "/player/resume" };
 	static const char* volume_path_ = { "/player/volume" };
-	static const char* remain_pos_path_ = { "/player/remain/position" };
+	static const char* remain_pos_path_  = { "/player/remain/position" };
+	static const char* remain_type_path_ = { "/player/remain/type" };
 	static const char* remain_file_path_ = { "/player/remain/file" };
 
 	/// ファイルのタグを読み出す
@@ -179,26 +180,6 @@ namespace app {
 			resume_play_ = wd.add_widget<widget_check>(wp, wp_);
 		}
 
-		// プリファレンスの取得
-		sys::preference& pre = director_.at().preference_;
-		pre.get_boolean(resume_path_, resume_play_->at_local_param().check_);
-		if(resume_play_->at_local_param().check_) {
-			int pos = 0;
-			pre.get_integer(remain_pos_path_, pos);
-			std::string file;
-			pre.get_text(remain_file_path_, file);
-			std::string path;
-			utils::get_file_path(file, path);
-			if(!file.empty() && !path.empty()) {
-				sound.play_stream(path, utils::get_file_name(file));
-				sound.seek_stream(static_cast<size_t>(pos));
-			}
-		}
-		pre.get_real(volume_path_, volume_->at_slider_param().position_);
-		if(filer_) {
-			filer_->load(pre);
-		}
-
 		// エラー用ダイアログリソースの生成
 		{
 			const vtx::spos& scs = core.get_rect().size;
@@ -217,6 +198,35 @@ namespace app {
 				error_dialog_->set_text(s);
 				std::cout << s << std::endl;
 			}
+		}
+
+		// プリファレンスの取得
+		sys::preference& pre = director_.at().preference_;
+		pre.get_boolean(resume_path_, resume_play_->at_local_param().check_);
+		if(resume_play_->at_local_param().check_) {
+			int pos = 0;
+			pre.get_integer(remain_pos_path_, pos);
+			std::string file;
+			pre.get_text(remain_file_path_, file);
+			std::string path;
+			utils::get_file_path(file, path);
+			int type;
+			pre.get_integer(remain_type_path_, type);
+			al::sound::stream_state::type t = static_cast<al::sound::stream_state::type>(type);
+			if(!file.empty() && !path.empty()) {
+				if(t == al::sound::stream_state::PAUSE) {
+					sound.play_stream(path, utils::get_file_name(file));
+					sound.seek_stream(static_cast<size_t>(pos));
+					sound.pause_stream();
+				} else if(t == al::sound::stream_state::PLAY) {
+					sound.play_stream(path, utils::get_file_name(file));
+					sound.seek_stream(static_cast<size_t>(pos));
+				}
+			}
+		}
+		pre.get_real(volume_path_, volume_->at_slider_param().position_);
+		if(filer_) {
+			filer_->load(pre);
 		}
 	}
 
@@ -301,11 +311,13 @@ namespace app {
 			play_btn_->set_state(gui::widget::state::STALL);
 			rew_btn_->set_state(gui::widget::state::STALL);
 			ff_btn_->set_state(gui::widget::state::STALL);
+			seek_handle_->set_state(gui::widget::state::STALL);
 			state = " (stalled)";
 		} else if(sound.get_state_stream() == al::sound::stream_state::PLAY) {
 			play_btn_->set_state(gui::widget::state::STALL, false);
 			rew_btn_->set_state(gui::widget::state::STALL, false);
 			ff_btn_->set_state(gui::widget::state::STALL, false);
+			seek_handle_->set_state(gui::widget::state::STALL, false);
 			wd.enable(pause_btn_);
 			if(pause_btn_->get_selected()) {
 				sound.pause_stream();
@@ -316,6 +328,7 @@ namespace app {
 			play_btn_->set_state(gui::widget::state::STALL, false);
 			rew_btn_->set_state(gui::widget::state::STALL, false);
 			ff_btn_->set_state(gui::widget::state::STALL, false);
+			seek_handle_->set_state(gui::widget::state::STALL, false);
 			if(play_btn_->get_selected()) {
 				sound.pause_stream(false);
 			}
@@ -507,7 +520,6 @@ namespace app {
 	void player::render()
 	{
 		gl::core& core = gl::core::get_instance();
-///		const vtx::spos& vsz = core.get_size();
 		const vtx::spos& siz = core.get_rect().size;
 
 		if(jacket_) {			
@@ -546,6 +558,7 @@ namespace app {
 			po = static_cast<int>(sound.get_position_stream());
 			fn = sound.get_file_stream();
 		}
+		pre.put_integer(remain_type_path_, sound.get_state_stream());
 		pre.put_integer(remain_pos_path_, po);
 		pre.put_text(remain_file_path_, fn);
 
@@ -558,5 +571,4 @@ namespace app {
 			filer_->save(pre);
 		}
 	}
-
 }

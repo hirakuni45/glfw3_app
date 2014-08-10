@@ -77,31 +77,21 @@ OPTLIBS		=	glfw3 GLEW \
 				mad faad mp4ff tag \
 				z
 
-# OPTLIBS		=	glfw3 glew32 opengl32 glu32 gdi32 imm32 \
-				pthread \
-				openal winmm dsound \
-				mupdf mupdf-js-none \
-				png jpeg_x86 openjp2 jbig2dec \
-				freetype \
-				id3tag \
-				z \
-				mad \
-				faad mp4ff
-
 INC_SYS		=	/opt/local/include/boost
 
 INC_LIB		=	/opt/libjpeg-turbo/include \
-				/usr/local/include \
 				/opt/local/include \
 				/opt/local/include/freetype2 \
 				/opt/local/include/openjpeg-2.1 \
-				/opt/local/include/taglib
+				/opt/local/include/taglib \
+				/usr/local/include
 
 PINC_APP	=	. ../common
 CINC_APP	=	. ../common
+
 LIBDIR		=	/opt/libjpeg-turbo/lib \
-				/usr/local/lib \
-				/opt/local/lib
+				/opt/local/lib \
+				/usr/local/lib
 
 INC_S	=	$(addprefix -isystem, $(INC_SYS))
 INC_L	=	$(addprefix -isystem, $(INC_LIB))

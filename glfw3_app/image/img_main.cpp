@@ -113,11 +113,12 @@ namespace app {
 			widget_radio::param wp_("3x");
 			scale_3x_ = wd.add_widget<widget_radio>(wp, wp_);	
 		}
-		{ // スケール 4X
-			widget::param wp(vtx::srect(10, ofs+30*4, 90, 30), tools_);
-			widget_radio::param wp_("4x");
-			scale_4x_ = wd.add_widget<widget_radio>(wp, wp_);	
+		{ // スケーラーボタン
+			widget::param wp(vtx::srect(10, ofs+30*4+10, 100, 40), tools_);
+			widget_button::param wp_("scale");
+			scale_ = wd.add_widget<widget_button>(wp, wp_);
 		}
+
 		{ // ターミナル
 			{
 				widget::param wp(vtx::srect(10, 320, 9*14-8, 18*16+28));
@@ -158,6 +159,12 @@ namespace app {
 			dialog_yes_no_ = wd.add_widget<widget_dialog>(wp, wp_);
 			dialog_yes_no_->enable(false);
 		}
+		{ // ダイアログ(scale)
+			widget::param wp(vtx::srect(10, 30, 450, 200));
+			widget_dialog::param wp_(widget_dialog::param::style::CANCEL_OK);
+			dialog_scale_ = wd.add_widget<widget_dialog>(wp, wp_);
+			dialog_scale_->enable(false);
+		}
 
 		mobj_.initialize();
 
@@ -171,7 +178,6 @@ namespace app {
 		if(scale_1x_) scale_1x_->load(pre);
 		if(scale_2x_) scale_2x_->load(pre);
 		if(scale_3x_) scale_3x_->load(pre);
-		if(scale_4x_) scale_4x_->load(pre);
 		if(info_) info_->load(pre);
 	}
 
@@ -205,6 +211,13 @@ namespace app {
 			}
 		}
 
+		if(scale_) {
+			if(scale_->get_selected()) {
+				bool f = dialog_scale_->get_state(gui::widget::state::ENABLE);
+				dialog_scale_->enable(!f);
+			}
+		}
+
 		std::string imfn;
 		int id = core.get_recv_file_id();
 		if(dd_id_ != id) {
@@ -221,7 +234,6 @@ namespace app {
 		if(load_ctx_) {
 			if(load_ctx_->get_state(gui::widget::state::ENABLE)) {
 				save_stall = true;
-///				wd.top_widget(load_ctx_);
 			}
 			if(load_id_ != load_ctx_->get_select_file_id()) {
 				load_id_ = load_ctx_->get_select_file_id();
@@ -237,7 +249,7 @@ namespace app {
 				dialog_->enable();
 			} else {
 				src_image_ = imf.get_image();
-				term_->output("Load");
+				term_->output("Ld");
 				image_info_(load_ctx_->get_file(), src_image_.get());
 				image_offset_.set(0.0f);
 				frame_->at_local_param().text_param_.text_ = imfn;
@@ -268,7 +280,6 @@ namespace app {
 				if(scale_1x_->get_check()) s = 1.0f;
  				else if(scale_2x_->get_check()) s = 2.0f;
  				else if(scale_3x_->get_check()) s = 3.0f;
- 				else if(scale_4x_->get_check()) s = 4.0f;
 
 				if(image_->get_select_in()) {
 					image_offset_ = image_->get_local_param().offset_;
@@ -284,7 +295,6 @@ namespace app {
 		if(save_ctx_) {
 			if(save_ctx_->get_state(gui::widget::state::ENABLE)) {
 				load_stall = true;
-///				wd.top_widget(save_ctx_);
 			}
 			if(save_id_ != save_ctx_->get_select_file_id()) {
 				save_id_ = save_ctx_->get_select_file_id();
@@ -314,7 +324,7 @@ namespace app {
 									  + save_file_name_ + "'");
 					dialog_->enable();
 				} else {
-					term_->output("Save");
+					term_->output("Sv");
 					image_info_(save_file_name_, src_image_.get());
 				}
 				save_file_name_.clear();
@@ -366,7 +376,6 @@ namespace app {
 		if(scale_1x_) scale_1x_->save(pre);
 		if(scale_2x_) scale_2x_->save(pre);
 		if(scale_3x_) scale_3x_->save(pre);
-		if(scale_4x_) scale_4x_->save(pre);
 		if(info_) info_->save(pre);
 	}
 }
