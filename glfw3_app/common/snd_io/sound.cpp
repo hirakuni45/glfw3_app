@@ -116,7 +116,6 @@ namespace al {
 						}
 					} else if(r.command_ == sound::request::command::SEEK) {
 						pos = r.seek_pos_;
-						continue;
 					}
 				}
 

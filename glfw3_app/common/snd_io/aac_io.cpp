@@ -719,6 +719,7 @@ namespace al {
 		   		else if(s == "totaldiscs") tag_.total_discs_ = value;
 		   		else if(s == "date") tag_.date_ = value;
 		   		else if(s == "cover") {
+#if 0
 					size_t size = mp4ff_meta_get_item_size(dt.infile, k);
 		   			utils::file_io fio;
 		   			fio.open(value, size);
@@ -729,8 +730,9 @@ namespace al {
 		   				tag_.image_ = imgf.get_image();
 					}
 		   			fio.close();
+#endif
 		   		}
-				mp4ff_meta_free(dt.infile, item, value);
+///				mp4ff_meta_free(dt.infile, item, value);
 			}
 		}
 		tag_.update();
