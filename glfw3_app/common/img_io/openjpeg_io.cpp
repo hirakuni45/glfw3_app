@@ -217,14 +217,7 @@ namespace img {
 		opj_dparameters_t parameters;
 		opj_set_default_decoder_parameters(&parameters);
 
-		t.codec = opj_create_decompress(form);
-		opj_set_info_handler(t.codec, info_callback_, 0);
-		opj_set_warning_handler(t.codec, warning_callback_, 0);
-		opj_set_error_handler(t.codec, error_callback_, 0);
-
-		if(!opj_setup_decoder(t.codec, &parameters)) {
-			return false;
-		}
+///		t.stream = opj_stream_create_default_file_stream(parameters.infile, 1);
 
 		stream_block sb;
 		t.stream = opj_stream_default_create(OPJ_TRUE);
@@ -238,15 +231,27 @@ namespace img {
 		// Set the length to avoid an assert
 		opj_stream_set_user_data_length(t.stream, sz);
 
+		t.codec = opj_create_decompress(form);
+
+		opj_set_info_handler(t.codec, info_callback_, 0);
+		opj_set_warning_handler(t.codec, warning_callback_, 0);
+		opj_set_error_handler(t.codec, error_callback_, 0);
+
+		if(!opj_setup_decoder(t.codec, &parameters)) {
+			opj_stream_destroy(t.stream);
+			opj_destroy_codec(t.codec);
+			return false;
+		}
+
 		if(!opj_read_header(t.stream, t.codec, &t.image)) {
 			opj_stream_destroy(t.stream);
 			opj_destroy_codec(t.codec);
 			return false;
 		}
 
-//		int w  = t.image->x1 - t.image->x0;
-//		int h = t.image->y1 - t.image->y0;
-//		std::cout << w << ", " << h << std::endl;
+		int w  = t.image->x1 - t.image->x0;
+		int h = t.image->y1 - t.image->y0;
+		std::cout << w << ", " << h << std::endl;
 
 		return true;
 	}
@@ -258,7 +263,7 @@ namespace img {
 		if(!decode_sub_(fin, form, t, false)) {
 			return false;
 		}
-
+#if 0
 		fo.width  = t.image->x1 - t.image->x0;
 		fo.height = t.image->y1 - t.image->y0;
 		fo.mipmap_level = 0;
@@ -292,6 +297,7 @@ namespace img {
 		} else {
 			return false;
 		}
+#endif
 		opj_image_destroy(t.image);
 		opj_stream_destroy(t.stream);
 		opj_destroy_codec(t.codec);
