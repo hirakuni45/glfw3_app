@@ -74,6 +74,7 @@ namespace app {
 
 		typedef std::future<std::string>  tag_future;
 		tag_future		tag_future_;
+		bool			tag_wait_;
 
 		static std::string tag_server_(const std::string path);
 		void sound_play_(const std::string& file);
@@ -86,17 +87,18 @@ namespace app {
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		player(utils::director<core>& d) : director_(d),
-		  filer_(0),
-		  file_btn_(0), play_btn_(0), pause_btn_(0), rew_btn_(0), ff_btn_(0),
-		  volume_(0), vol_min_img_(0), vol_max_img_(0),
-		  total_time_(0), remain_time_(0), seek_handle_(0), resume_play_(0),
-		  title_pad_(0), album_pad_(0), artist_pad_(0), other_pad_(0),
-		  error_dialog_(0),
-		  total_t_(0), remain_t_(0), seek_pos_(0),
-		  tag_serial_(0), jacket_(0), drop_file_id_(0), select_file_id_(0),
-		  mouse_pos_(0), filer_count_(0),
-		  files_step_(0)
+		player(utils::director<core>& d) :
+			director_(d),
+			filer_(0),
+			file_btn_(0), play_btn_(0), pause_btn_(0), rew_btn_(0), ff_btn_(0),
+			volume_(0), vol_min_img_(0), vol_max_img_(0),
+			total_time_(0), remain_time_(0), seek_handle_(0), resume_play_(0),
+			title_pad_(0), album_pad_(0), artist_pad_(0), other_pad_(0),
+			error_dialog_(0),
+			total_t_(0), remain_t_(0), seek_pos_(0),
+			tag_serial_(0), jacket_(0), drop_file_id_(0), select_file_id_(0),
+			mouse_pos_(0), filer_count_(0),
+			files_step_(0), tag_wait_(false)
 		{ }
 
 

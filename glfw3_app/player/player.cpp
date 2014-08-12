@@ -11,6 +11,7 @@
 #include "widgets/widget_null.hpp"
 #include "widgets/widget_button.hpp"
 #include "widgets/widget_image.hpp"
+#include "snd_io/snd_files.hpp"
 
 namespace app {
 
@@ -20,13 +21,19 @@ namespace app {
 	static const char* remain_type_path_ = { "/player/remain/type" };
 	static const char* remain_file_path_ = { "/player/remain/file" };
 
+	static al::snd_files snd_files_;
+
 	/// ファイルのタグを読み出す
 	std::string player::tag_server_(const std::string path)
 	{
 		std::string alias;
-
-		alias = path;
-
+		al::audio_info ai;
+		if(snd_files_.info(path, ai)) {
+			const al::tag& t = snd_files_.get_tag();
+			alias = t.track_ + " " + t.title_;
+		} else {
+			alias = path;
+		}
 		return alias;
 	}
 
@@ -199,6 +206,8 @@ namespace app {
 				std::cout << s << std::endl;
 			}
 		}
+
+		snd_files_.initialize();
 
 		// プリファレンスの取得
 		sys::preference& pre = director_.at().preference_;
@@ -465,7 +474,7 @@ namespace app {
 		}
 
 		// ファイラーが有効で、マウス操作が無い状態が５秒続いたら、
-		// 演奏ファイルパスへフォーカス
+		// 演奏ファイルパスへフォーカスする
    		if(filer_->get_state(gui::widget::state::ENABLE)) {
 			const vtx::spos& msp = core.get_device().get_locator().get_cursor();
 			if(msp == mouse_pos_) {
@@ -479,19 +488,27 @@ namespace app {
 			}
 
 			// ファイルのタグをファイラーのエイリアスに設定
+			if(filer_->get_file_state()) {
+				files_.clear();
+				files_step_ = 0;
+				tag_wait_ = false;
+			} else {
+				if(files_.empty()) {
+					filer_->get_file_list(files_);
+				} else if(files_step_ < files_.size()) {
 #if 0
-			if(files_.empty() && files_step_ == 0 && !filer_->get_file_infos().empty()) {
-				filer_->get_file_list(files_);
-			}
-			if(!files_.empty() && files_step_ < files_.size()) {
-				if(tag_future_.valid()) {
-					std::cout << tag_future_.get() << std::endl;
-					++files_step_;
-				} else {
-					tag_future_ = std::async(std::launch::async, tag_server_, files_[files_step_]);
+					if(tag_future_.valid()) {
+						std::cout << tag_future_.get() << std::endl;
+						++files_step_;
+						tag_wait_ = false;
+					} else if(!tag_wait_) {
+						const std::string& fp = files_[files_step_];
+						tag_future_ = std::async(std::launch::async, tag_server_, fp);
+						tag_wait_ = true;
+					}
+#endif
 				}
 			}
-#endif
 		}
 
 		// Drag & Drop されたファイルを再生
