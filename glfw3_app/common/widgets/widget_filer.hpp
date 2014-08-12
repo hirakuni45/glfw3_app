@@ -145,6 +145,7 @@ namespace gui {
 		widget_files_cit scan_selected_file_(widget_files& wfs) const;
 		void resize_files_(widget_files& wfs, short ofs, short width);
 		void update_files_info_(widget_files& wfs);
+		void update_files_alias_(widget_files& wfs);
 		void destroy_files_(widget_files& wfs);
 		void get_regist_state_();
 		void set_regist_state_();
@@ -297,8 +298,8 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	ファイル取得状態を取得
-			@return 
+			@brief	ファイル取得ステータス
+			@return 「true」なら取得中、「false」で取得済み
 		*/
 		//-----------------------------------------------------------------//
 		bool get_file_state() const { return fsc_wait_; }
@@ -311,15 +312,6 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		const std::string& get_file() const { return file_; }
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	ファイル情報郡を取得
-			@return ファイル情報郡
-		*/
-		//-----------------------------------------------------------------//
-		const utils::file_infos& get_file_infos() const { return file_infos_; }
 
 
 		//-----------------------------------------------------------------//

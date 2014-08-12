@@ -180,7 +180,7 @@ namespace gui {
 				info_size = info_limit;
 				name_size = width - space - info_limit;
 			}
-			if(info_state_ == info_state::NONE) {
+			if(info_state_ == info_state::NONE || info_state_ == info_state::ALIAS) {
 				name_size = width;
 				info_size = 0;
 			}
@@ -227,6 +227,20 @@ namespace gui {
 				}
 				wf.info->at_local_param().text_param_.text_ = s;
 			}
+		}
+	}
+
+
+	void widget_filer::update_files_alias_(widget_files& wfs)
+	{
+		for(widget_files_cit cit = wfs.begin(); cit != wfs.end(); ++cit) {
+			const widget_file& wf = *cit;
+			if(!wf.name) continue;
+			if(wf.size == 0 && wf.time == 0 && wf.mode == 0) continue;
+			if(wf.name->get_text() == "..") continue;
+			bool f = info_state_ == info_state::ALIAS;
+			if(wf.name->get_alias().empty()) f = false; 
+			wf.name->enable_alias(f);
 		}
 	}
 
@@ -359,21 +373,21 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	int widget_filer::get_file_list(utils::strings& ss, bool dir) const
 	{
-		uint32_t n = 0;
 		int ret = -1;
-		BOOST_FOREACH(const utils::file_info& fi, file_infos_) {
+		const widget_files& wfs = center_;
+		for(widget_files_cit cit = wfs.begin(); cit != wfs.end(); ++cit) {
+			const widget_file& wf = *cit;
+			if(wf.size == 0 && wf.time == 0 && wf.mode == 0) continue;
+			const std::string& fp = wf.name->get_text();
+			if(fp == "..") continue;
 			std::string fn;
-			if(fi.get_name() == ".") continue;
-			else if(fi.get_name() == "..") continue;
-			utils::append_path(param_.path_, fi.get_name(), fn);
-			if(fn == file_) ret = n;
-			if(dir && fi.is_directory()) {
-				fn += "/";
+			utils::append_path(param_.path_, fp, fn);
+			if(fn == file_) ret = ss.size();
+			if(dir) {
 				ss.push_back(fn);
-				++n;
 			} else {
+				if(wf.dir) continue;
 				ss.push_back(fn);
-				++n;
 			}
 		}
 		return ret;
@@ -742,8 +756,11 @@ namespace gui {
 				info_state_ = info_state::NONE;
 			}
 			update_files_info_(left_);
+			update_files_alias_(left_);
 			update_files_info_(center_);
+			update_files_alias_(center_);
 			update_files_info_(right_);
+			update_files_alias_(right_);
 		}
 
 		// 選択の確認と動作
