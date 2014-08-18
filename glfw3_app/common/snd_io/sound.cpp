@@ -182,13 +182,12 @@ namespace al {
 		snd_files sdf;
 
 		while(t.loop_) {
-			pthread_mutex_lock(&t.sync_);
-			std::string path = t.path_;
-			t.path_.clear();
-			pthread_mutex_unlock(&t.sync_);
-			if(!path.empty()) {
+			if(t.path_.length()) {
+				pthread_mutex_lock(&t.sync_);
+				const std::string& path = t.path_.get();
+				pthread_mutex_unlock(&t.sync_);
 				al::audio_info ai;
-				if(sdf.info(t.path_, ai)) {
+				if(sdf.info(path, ai)) {
 					pthread_mutex_lock(&t.sync_);
 					t.tag_ = sdf.get_tag();
 					pthread_mutex_unlock(&t.sync_);
@@ -518,13 +517,13 @@ namespace al {
 				stream_start_ = false;
 			}
 		}
+
 		volatile uint32_t n = tag_info_.count_;
 		if(n != tag_count_) {
 			pthread_mutex_lock(&tag_info_.sync_);
 			tag_ = tag_info_.tag_;
 			pthread_mutex_unlock(&tag_info_.sync_);
 			tag_count_ = n;
-			tag_valid_ = true;
 		}
 	}
 
@@ -533,10 +532,14 @@ namespace al {
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	タグ情報取得をリクエスト
+		@param[in]	fpath	ファイル・パス
+		@return 「false」なら失敗
 	*/
 	//-----------------------------------------------------------------//
-	void sound::request_tag_info(const std::string& fpath)
+	bool sound::request_tag_info(const std::string& fpath)
 	{
+		if(tag_info_.path_.length()) return false;
+
 		if(!tag_thread_) {
 			// スレッドを生成
 			pthread_mutex_init(&tag_info_.sync_, nullptr);
@@ -544,9 +547,10 @@ namespace al {
 			tag_thread_ = true;
 		}
 		pthread_mutex_lock(&tag_info_.sync_);
-		tag_info_.path_ = fpath;
+		tag_info_.path_.put(fpath);
 		pthread_mutex_unlock(&tag_info_.sync_);
-		tag_valid_ = false;
+
+		return true;
 	}
 
 
@@ -561,6 +565,7 @@ namespace al {
 			tag_info_.loop_ = false;
 			pthread_join(tag_pth_ , nullptr);
 			pthread_mutex_destroy(&tag_info_.sync_);
+			tag_thread_ = false;
 		}
 
 		stop_stream();

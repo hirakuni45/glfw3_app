@@ -89,10 +89,10 @@ namespace al {
 		};
 
 		struct tag_info {
+			utils::fifo<std::string, 2> path_;
 			volatile uint32_t	count_;
 			volatile bool		loop_;
 			pthread_mutex_t		sync_;
-			std::string			path_;
 			tag					tag_;
 			tag_info() : count_(0), loop_(true) { }
 		};
@@ -125,7 +125,6 @@ namespace al {
 		tag_info				tag_info_;
 		volatile uint32_t		tag_count_;
 		bool					tag_thread_;
-		bool					tag_valid_;
 		tag						tag_;
 
 		bool request_sub_(int slot, al::audio_io::wave_handle wh, bool loop);
@@ -138,7 +137,7 @@ namespace al {
 		//-----------------------------------------------------------------//
 		sound() : slot_max_(0), stream_fph_cnt_(0),
 				  stream_slot_(0),
-				  tag_count_(0), tag_thread_(false), tag_valid_(false) {
+				  tag_count_(0), tag_thread_(false) {
 			ses_.push_back(0);
 		}
 
@@ -466,19 +465,11 @@ namespace al {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	タグ情報取得をリクエスト
-			@param[in]	fpath	ファイルパス
+			@param[in]	fpath	ファイル・パス
+			@return 「false」なら失敗
 		 */
 		//-----------------------------------------------------------------//
-		void request_tag_info(const std::string& fpath);
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	タグ情報が有効か？
-			@return タグ情報が有効なら「true」
-		 */
-		//-----------------------------------------------------------------//
-		bool tag_valid() const { return tag_valid_; }
+		bool request_tag_info(const std::string& fpath);
 
 
 		//-----------------------------------------------------------------//
