@@ -76,7 +76,9 @@ namespace gl {
 									  sync_count_);
 		}
 
-		void wait_sync_() { sync_count_ = v_sync_wait_.get(); }
+		void wait_sync_() {
+			sync_count_ = v_sync_wait_.get();
+		}
 
 		//-----------------------------------------------------------------//
 		/*!
