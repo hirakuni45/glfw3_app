@@ -162,7 +162,6 @@ namespace al {
 		sound::sstream_t& sst = *(static_cast<sound::sstream_t*>(entry));
 
 		snd_files sdf;
-		sdf.initialize();
 
 		sst.start_ = true;
 
@@ -170,10 +169,41 @@ namespace al {
 		create_file_list(sst.root_, fis);
 		play_task_(sst, sdf, sst.root_, fis, sst.file_);
 
-		sdf.destroy();
-
 		sst.start_ = false;
 		sst.finsh_ = true;
+
+		return nullptr;
+	}
+
+
+	static void* tag_task_(void* entry)
+	{
+		sound::tag_info& t = *(static_cast<sound::tag_info*>(entry));
+		snd_files sdf;
+
+		while(t.loop_) {
+			pthread_mutex_lock(&t.sync_);
+			std::string path = t.path_;
+			t.path_.clear();
+			pthread_mutex_unlock(&t.sync_);
+			if(!path.empty()) {
+				al::audio_info ai;
+				if(sdf.info(t.path_, ai)) {
+					pthread_mutex_lock(&t.sync_);
+					t.tag_ = sdf.get_tag();
+					pthread_mutex_unlock(&t.sync_);
+				} else {
+					pthread_mutex_lock(&t.sync_);
+					t.tag_.clear();
+					pthread_mutex_unlock(&t.sync_);
+				}
+				++t.count_;
+			} else {
+				usleep(20000);	// 20ms
+			}
+		}
+		// 抜ける前に少し待つ〜
+		usleep(10000);	// 10ms
 
 		return nullptr;
 	}
@@ -223,8 +253,6 @@ namespace al {
 	void sound::initialize(int slot_max)
 	{
 		audio_io_.initialize();
-
-		snd_files_.initialize();
 
 		slot_max_ = slot_max;
 		for(int i = 0; i < slot_max; ++i) {
@@ -490,6 +518,35 @@ namespace al {
 				stream_start_ = false;
 			}
 		}
+		volatile uint32_t n = tag_info_.count_;
+		if(n != tag_count_) {
+			pthread_mutex_lock(&tag_info_.sync_);
+			tag_ = tag_info_.tag_;
+			pthread_mutex_unlock(&tag_info_.sync_);
+			tag_count_ = n;
+			tag_valid_ = true;
+		}
+	}
+
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	タグ情報取得をリクエスト
+	*/
+	//-----------------------------------------------------------------//
+	void sound::request_tag_info(const std::string& fpath)
+	{
+		if(!tag_thread_) {
+			// スレッドを生成
+			pthread_mutex_init(&tag_info_.sync_, nullptr);
+			pthread_create(&tag_pth_, nullptr, tag_task_, &tag_info_);
+			tag_thread_ = true;
+		}
+		pthread_mutex_lock(&tag_info_.sync_);
+		tag_info_.path_ = fpath;
+		pthread_mutex_unlock(&tag_info_.sync_);
+		tag_valid_ = false;
 	}
 
 
@@ -500,6 +557,12 @@ namespace al {
 	//-----------------------------------------------------------------//
 	void sound::destroy()
 	{
+		if(tag_thread_) {
+			tag_info_.loop_ = false;
+			pthread_join(tag_pth_ , nullptr);
+			pthread_mutex_destroy(&tag_info_.sync_);
+		}
+
 		stop_stream();
 
 		destroy_se_all();

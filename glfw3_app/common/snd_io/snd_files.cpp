@@ -12,6 +12,9 @@
 
 namespace al {
 
+	uint32_t snd_files::tag_serial_ = 0;
+
+
 	static bool check_file_exts_(const std::string& exts, const std::string& ext)
 	{
 		utils::strings ss;
@@ -24,7 +27,6 @@ namespace al {
 		return false;
 	}
 
-	uint32_t snd_files::tag_serial_ = 0;
 
 	void snd_files::add_sound_fileio_context_(snd_file::snd_io sio, const std::string& exts)
 	{
@@ -45,19 +47,8 @@ namespace al {
 	}
 
 
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	初期化
-		@param[in]	exts	ファイルの拡張子（複数）を与える事で、@n
-							アクセス可能なフォーマットを制御出来る。
-
-	*/
-	//-----------------------------------------------------------------//
-	void snd_files::initialize(const std::string& exts)
+	void snd_files::initialize_(const std::string& exts)
 	{
-		if(init_) return;
-		init_ = true;
-
 		exts_ = exts;
 
 		add_sound_fileio_context_(snd_file::snd_io(new wav_io), exts);
@@ -65,9 +56,6 @@ namespace al {
 
 		// MP3 はタグが、前、後、にあるのか不明な為、検出が難しい為、最後に調べる。
 		add_sound_fileio_context_(snd_file::snd_io(new mp3_io), exts);
-
-		aif_ = 0;
-		stream_ = 0;
 	}
 
 
@@ -110,18 +98,19 @@ namespace al {
 		@brief	音楽ファイルの情報を取得する
 		@param[in]	fin	file_io クラス
 		@param[in]	fo	情報を受け取る構造体
+		@param[in]	apic	画像情報を受けたらない場合「false」
 		@param[in]	ext	拡張子（無くても可）
 		@return エラーなら「false」を返す
 	*/
 	//-----------------------------------------------------------------//
-	bool snd_files::info(utils::file_io& fin, audio_info& fo, const std::string& ext)
+	bool snd_files::info(utils::file_io& fin, audio_info& fo, bool apic, const std::string& ext)
 	{
 		size_t n = sndios_.size();
 		if(!ext.empty()) {
 			for(size_t i = 0; i < sndios_.size(); ++i) {
 				snd_file& io = sndios_[i];
 				if(check_file_exts_(io.ext, ext)) {
-					if(io.sio->info(fin, fo)) {
+					if(io.sio->info(fin, fo, apic)) {
 						tag_ = io.sio->get_tag();
 						// snd_files のタグ更新シリアルを上書き
 						++tag_serial_;
@@ -135,7 +124,7 @@ namespace al {
 		for(size_t i = 0; i < sndios_.size(); ++i) {
 			if(n != i) {
 				snd_file& io = sndios_[i];
-				if(io.sio->info(fin, fo)) {
+				if(io.sio->info(fin, fo, apic)) {
 					tag_ = io.sio->get_tag();
 					// snd_files のタグ更新シリアルを上書き
 					++tag_serial_;
@@ -309,21 +298,4 @@ namespace al {
 			stream_ = 0;
 		}
 	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	廃棄
-	*/
-	//-----------------------------------------------------------------//
-	void snd_files::destroy()
-	{
-		sndios().swap(sndios_);
-
-		aif_ = 0;
-
-		init_ = false;
-		stream_ = 0;
-	}
-
 }

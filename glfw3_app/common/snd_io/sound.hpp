@@ -7,6 +7,7 @@
 //=====================================================================//
 #include <vector>
 #include <string>
+#include <memory>
 #include <pthread.h>
 #include "snd_io/audio_io.hpp"
 #include "snd_io/snd_files.hpp"
@@ -87,6 +88,15 @@ namespace al {
 						  open_err_(0), fph_cnt_(0), fph_(), tag_() { }
 		};
 
+		struct tag_info {
+			volatile uint32_t	count_;
+			volatile bool		loop_;
+			pthread_mutex_t		sync_;
+			std::string			path_;
+			tag					tag_;
+			tag_info() : count_(0), loop_(true) { }
+		};
+
 	private:
 		al::audio_io	audio_io_;
 
@@ -102,14 +112,21 @@ namespace al {
 
 		sstream_t		sstream_t_;
 
-		pthread_attr_t	attr_;
-		pthread_t		pth_;
+///		pthread_attr_t	attr_;
+		pthread_t			pth_;
 		volatile uint32_t	stream_fph_cnt_;
 		std::string			stream_fph_;
 		tag					stream_tag_;
 
 		audio_io::slot_handle	stream_slot_;
 		bool					stream_start_;
+
+		pthread_t				tag_pth_;
+		tag_info				tag_info_;
+		volatile uint32_t		tag_count_;
+		bool					tag_thread_;
+		bool					tag_valid_;
+		tag						tag_;
 
 		bool request_sub_(int slot, al::audio_io::wave_handle wh, bool loop);
 
@@ -120,7 +137,8 @@ namespace al {
 		*/
 		//-----------------------------------------------------------------//
 		sound() : slot_max_(0), stream_fph_cnt_(0),
-			stream_slot_(0) {
+				  stream_slot_(0),
+				  tag_count_(0), tag_thread_(false), tag_valid_(false) {
 			ses_.push_back(0);
 		}
 
@@ -447,6 +465,33 @@ namespace al {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	タグ情報取得をリクエスト
+			@param[in]	fpath	ファイルパス
+		 */
+		//-----------------------------------------------------------------//
+		void request_tag_info(const std::string& fpath);
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	タグ情報が有効か？
+			@return タグ情報が有効なら「true」
+		 */
+		//-----------------------------------------------------------------//
+		bool tag_valid() const { return tag_valid_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	タグ情報取得
+			@return タグ情報
+		 */
+		//-----------------------------------------------------------------//
+		const tag& get_tag_info() const { return tag_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	廃棄
 		 */
 		//-----------------------------------------------------------------//
@@ -455,4 +500,3 @@ namespace al {
 	};
 
 }
-

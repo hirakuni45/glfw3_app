@@ -32,19 +32,21 @@ namespace al {
 		snd_file::snd_io	stream_;
 		tag				tag_;
 
-		bool			init_;
+		static uint32_t	tag_serial_;
 
 		void add_sound_fileio_context_(snd_file::snd_io sio, const std::string& exts);
-
-		static uint32_t	tag_serial_;
+		void initialize_(const std::string& etxs);
 
 	public:
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	コンストラクター
+			@param[in]	exts	拡張子
 		*/
 		//-----------------------------------------------------------------//
-		snd_files() : aif_(0), stream_(0), init_(false) { }
+		snd_files(const std::string& exts = "wav,mp3,aac,m4a") :
+			aif_(0), stream_(0)
+			{ initialize_(exts); }
 
 
 		//-----------------------------------------------------------------//
@@ -52,17 +54,7 @@ namespace al {
 			@brief	デストラクター
 		*/
 		//-----------------------------------------------------------------//
-		~snd_files() { destroy(); }
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	初期化
-			@param[in]	exts	ファイルの拡張子（複数）を与える事で、@n
-								アクセス可能なフォーマットを制御出来る。
-		*/
-		//-----------------------------------------------------------------//
-		void initialize(const std::string& etxs = "wav,mp3,aac,m4a");
+		~snd_files() { }
 
 
 		//-----------------------------------------------------------------//
@@ -134,11 +126,12 @@ namespace al {
 			@brief	音楽ファイルの情報を取得する
 			@param[in]	fin	file_io クラス
 			@param[in]	fo	情報を受け取る構造体
+			@param[in]	apic	画像情報を受けたらない場合「false」
 			@param[in]	ext	拡張子（無くても可）
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool info(utils::file_io& fin, audio_info& fo, const std::string& ext = 0);
+		bool info(utils::file_io& fin, audio_info& fo, bool apic = true, const std::string& ext = 0);
 
 
 		//-----------------------------------------------------------------//
@@ -146,14 +139,15 @@ namespace al {
 			@brief	音楽ファイルの情報を取得する
 			@param[in]	filename	ファイル名
 			@param[in]	fo	情報を受け取る構造体
+			@param[in]	apic	画像情報を受けたらない場合「false」
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool info(const std::string& filename, audio_info& fo) {
+		bool info(const std::string& filename, audio_info& fo, bool apic = true) {
 			bool f = false;
 			utils::file_io fin;
 			if(fin.open(filename, "rb")) {
-				f = info(fin, fo, utils::get_file_ext(filename));
+				f = info(fin, fo, apic, utils::get_file_ext(filename));
 				fin.close();
 			}
 			return f;
@@ -289,14 +283,6 @@ namespace al {
 		*/
 		//-----------------------------------------------------------------//
 		void set_audio(const audio aif) { aif_ = aif; }
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	廃棄
-		*/
-		//-----------------------------------------------------------------//
-		void destroy();
 
 	};
 

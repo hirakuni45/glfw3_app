@@ -473,10 +473,11 @@ namespace al {
 		@param[in]	fin	ファイル入力コンテキスト
 		@param[in]	info	オーデイオ情報
 		@param[in]	mp3info	MP3 情報
+		@param[in]	apic	画像情報取得なら［true」
 		@return エラーなら「false」
 	*/
 	//=================================================================//
-	bool mp3_io::analize_frame_(utils::file_io& fin, audio_info& info, mp3_info& mp3info)
+	bool mp3_io::analize_frame_(utils::file_io& fin, audio_info& info, mp3_info& mp3info, bool apic)
 	{
 		if(!fin.is_open()) {
 			return false;
@@ -541,9 +542,9 @@ namespace al {
 			}
 
 			// ジャケット画像
-			const_it apic = map.find("APIC");
-			if(apic != map.end()) {
-				const ID3v2::FrameList& list = apic->second;
+			const_it acit = map.find("APIC");
+			if(apic && acit != map.end()) {
+				const ID3v2::FrameList& list = acit->second;
 				typedef ID3v2::FrameList::ConstIterator const_it;
 				for(const_it cit = list.begin(); cit != list.end(); ++cit) {
 //					size_t fsize = (*cit)->size();
@@ -577,24 +578,9 @@ namespace al {
 					int len = image.size();
 					if(len > skip) {
 						len -= skip;
-#if 0
-						std::cout << "<APIC> MIME: '" << mime << "', Description: " << dscrp << "'" << std::endl;
-						for(int i = 0; i < 32; ++i) {
-							std::cout <<
-								boost::format("%02X, ") % static_cast<unsigned int>(p[i]);
-	   					}
-		   				std::cout << std::endl;
-						std::cout << static_cast<int>(image.size()) << std::endl;
-#endif
-						p += skip;
-						utils::file_io fmem;
-						fmem.open(p, len);
-						if(img_files_.load(fmem)) {
-							if(img_files_.get_image()) {
-								tag_.image_ = img_files_.get_image();
-							}
-						}
-						fmem.close();
+						p += skip;		
+						tag_.image_ = utils::shared_array_u8(new utils::array_u8);
+						tag_.image_->copy(p, len);
 						break;
 					}
 				}
@@ -770,7 +756,6 @@ namespace al {
 	//-----------------------------------------------------------------//
 	void mp3_io::initialize()
 	{
-		img_files_.initialize();
 	}
 
 
@@ -786,7 +771,7 @@ namespace al {
 	{
 		audio_info info;
 		mp3_info_.reset();
-		bool f = analize_frame_(fin, info, mp3_info_);
+		bool f = analize_frame_(fin, info, mp3_info_, true);
 		if(f) {
 			fin.seek(info.header_size, file_io::seek::set);
 

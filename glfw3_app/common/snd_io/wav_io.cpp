@@ -206,10 +206,11 @@ namespace al {
 		@brief	WAV ファイルの情報を取得する
 		@param[in]	fin	file_io クラス
 		@param[in]	fo	情報を受け取る構造体
+		@param[in]	apic	画像情報を受けたらない場合「false」
 		@return エラーなら「false」を返す
 	*/
 	//-----------------------------------------------------------------//
-	bool wav_io::info(utils::file_io& fin, audio_info& info)
+	bool wav_io::info(utils::file_io& fin, audio_info& info, bool apic)
 	{
 		long start_offset = fin.tell();
 		bool f = parse_header_(fin);
@@ -318,7 +319,7 @@ namespace al {
 	{
 		stream_blocks_ = 0;
 
-		if(info(fi, inf)) {
+		if(info(fi, inf, false)) {
 			if(inf.chanels == 1) {
 				if(inf.bits == 8) {
 					stream_ = audio(new audio_mno8);
