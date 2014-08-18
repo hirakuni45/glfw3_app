@@ -176,7 +176,8 @@ namespace al {
 	}
 
 
-	static void* tag_task_(void* entry)
+	// タグ情報収集タスク
+	static void* tag_info_task_(void* entry)
 	{
 		sound::tag_info& t = *(static_cast<sound::tag_info*>(entry));
 		snd_files sdf;
@@ -184,25 +185,21 @@ namespace al {
 		while(t.loop_) {
 			if(t.path_.length()) {
 				pthread_mutex_lock(&t.sync_);
-				const std::string& path = t.path_.get();
+				std::string path = t.path_.top();
 				pthread_mutex_unlock(&t.sync_);
 				al::audio_info ai;
-				if(sdf.info(path, ai)) {
-					pthread_mutex_lock(&t.sync_);
-					t.tag_ = sdf.get_tag();
-					pthread_mutex_unlock(&t.sync_);
-				} else {
-					pthread_mutex_lock(&t.sync_);
-					t.tag_.clear();
-					pthread_mutex_unlock(&t.sync_);
-				}
-				++t.count_;
+				bool f = sdf.info(path, ai, false );
+				pthread_mutex_lock(&t.sync_);
+				t.path_.get();
+				if(f) t.tag_ = sdf.get_tag();
+				else t.tag_.clear();
+				pthread_mutex_unlock(&t.sync_);
 			} else {
 				usleep(20000);	// 20ms
 			}
 		}
 		// 抜ける前に少し待つ〜
-		usleep(10000);	// 10ms
+		usleep(1000);	// 1ms
 
 		return nullptr;
 	}
@@ -518,15 +515,14 @@ namespace al {
 			}
 		}
 
-		volatile uint32_t n = tag_info_.count_;
-		if(n != tag_count_) {
+		volatile uint32_t n = tag_info_.tag_.serial_;
+		if(n != tag_serial_) {
 			pthread_mutex_lock(&tag_info_.sync_);
 			tag_ = tag_info_.tag_;
 			pthread_mutex_unlock(&tag_info_.sync_);
-			tag_count_ = n;
+			tag_serial_ = n;
 		}
 	}
-
 
 
 	//-----------------------------------------------------------------//
@@ -540,12 +536,13 @@ namespace al {
 	{
 		if(tag_info_.path_.length()) return false;
 
+		// スレッドを生成
 		if(!tag_thread_) {
-			// スレッドを生成
 			pthread_mutex_init(&tag_info_.sync_, nullptr);
-			pthread_create(&tag_pth_, nullptr, tag_task_, &tag_info_);
+			pthread_create(&tag_pth_, nullptr, tag_info_task_, &tag_info_);
 			tag_thread_ = true;
 		}
+
 		pthread_mutex_lock(&tag_info_.sync_);
 		tag_info_.path_.put(fpath);
 		pthread_mutex_unlock(&tag_info_.sync_);

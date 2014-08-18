@@ -17,7 +17,7 @@ namespace al {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct tag {
-		uint32_t		serial_;		///< タグのＩＤ
+		volatile uint32_t		serial_;		///< タグのＩＤ
 
 		std::string		title_;			///< タイトル
 		std::string		artist_;		///< アーティスト

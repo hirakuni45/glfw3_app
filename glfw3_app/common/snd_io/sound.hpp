@@ -39,6 +39,11 @@ namespace al {
 		};
 
 
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	ストリーム・スレッド・コマンド／構造体
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct request {
 			enum class command {
 				NONE,	///< 無効
@@ -58,6 +63,12 @@ namespace al {
 			explicit request(command cmd = command::NONE) : command_(cmd) { }
 		};
 
+
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	ストリーム構造体
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct sstream_t {
 			audio_io*				audio_io_;
 			audio_io::slot_handle	slot_;
@@ -88,14 +99,20 @@ namespace al {
 						  open_err_(0), fph_cnt_(0), fph_(), tag_() { }
 		};
 
+
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	タグ情報構造体
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct tag_info {
 			utils::fifo<std::string, 2> path_;
-			volatile uint32_t	count_;
 			volatile bool		loop_;
 			pthread_mutex_t		sync_;
 			tag					tag_;
-			tag_info() : count_(0), loop_(true) { }
+			tag_info() : loop_(true) { }
 		};
+
 
 	private:
 		al::audio_io	audio_io_;
@@ -123,7 +140,7 @@ namespace al {
 
 		pthread_t				tag_pth_;
 		tag_info				tag_info_;
-		volatile uint32_t		tag_count_;
+		volatile uint32_t		tag_serial_;
 		bool					tag_thread_;
 		tag						tag_;
 
@@ -137,7 +154,7 @@ namespace al {
 		//-----------------------------------------------------------------//
 		sound() : slot_max_(0), stream_fph_cnt_(0),
 				  stream_slot_(0),
-				  tag_count_(0), tag_thread_(false) {
+				  tag_serial_(0), tag_thread_(false) {
 			ses_.push_back(0);
 		}
 
@@ -460,6 +477,15 @@ namespace al {
 		 */
 		//-----------------------------------------------------------------//
 		void service();
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	タグ情報取得の状態
+			@return 取得中なら「true」、空きなら「false」
+		 */
+		//-----------------------------------------------------------------//
+		bool state_tag_info() const { return (tag_info_.path_.length() != 0); }
 
 
 		//-----------------------------------------------------------------//
