@@ -4,8 +4,6 @@
 	@author 平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include <thread>
-#include <future>
 #include <time.h>
 #include "main.hpp"
 #include "utils/director.hpp"
@@ -71,10 +69,7 @@ namespace app {
 
 		utils::strings	files_;
 		uint32_t		files_step_;
-
-		typedef std::future<std::string>  tag_future;
-		tag_future		tag_future_;
-		bool			tag_wait_;
+		uint32_t		tag_info_serial_;
 
 		static std::string tag_server_(const std::string path);
 		void sound_play_(const std::string& file);
@@ -98,7 +93,7 @@ namespace app {
 			total_t_(0), remain_t_(0), seek_pos_(0),
 			tag_serial_(0), jacket_(0), drop_file_id_(0), select_file_id_(0),
 			mouse_pos_(0), filer_count_(0),
-			files_step_(0), tag_wait_(false)
+			files_step_(0), tag_info_serial_(0)
 		{ }
 
 

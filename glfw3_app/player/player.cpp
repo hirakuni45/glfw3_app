@@ -21,23 +21,6 @@ namespace app {
 	static const char* remain_type_path_ = { "/player/remain/type" };
 	static const char* remain_file_path_ = { "/player/remain/file" };
 
-	static al::snd_files snd_files_;
-
-	/// ファイルのタグを読み出す
-	std::string player::tag_server_(const std::string path)
-	{
-		std::string alias;
-		al::audio_info ai;
-		if(snd_files_.info(path, ai)) {
-			const al::tag& t = snd_files_.get_tag();
-			alias = t.track_ + " " + t.title_;
-		} else {
-			alias = path;
-		}
-		return alias;
-	}
-
-
 	void player::sound_play_(const std::string& file)
 	{
 		al::sound& sound = director_.at().sound_;
@@ -206,8 +189,6 @@ namespace app {
 				std::cout << s << std::endl;
 			}
 		}
-
-		snd_files_.initialize();
 
 		// プリファレンスの取得
 		sys::preference& pre = director_.at().preference_;
@@ -446,8 +427,9 @@ namespace app {
 			// ジャケット画像の取得とテクスチャーへの登録
 			mobj_.destroy();
 			mobj_.initialize();
-			const img::i_img* im = tag.image_.get();
-   			if(im) {
+			img::shared_img sig = tag.decode_image();
+   			if(sig) {
+				const img::i_img* im = sig.get();
 				jacket_ = mobj_.install(im);
 			} else {
 				const std::string& curp = core.get_current_path();
@@ -455,7 +437,6 @@ namespace app {
 					jacket_ = mobj_.install(wd.at_img_files().get_image().get()); 
 				}
 			}
-
 			// 演奏ファイル名を取得して、ファイラーのフォーカスを設定
 			{ 
 				filer_->focus_file(sound.get_file_stream());
@@ -491,22 +472,23 @@ namespace app {
 			if(filer_->get_file_state()) {
 				files_.clear();
 				files_step_ = 0;
-				tag_wait_ = false;
+				tag_info_serial_ = sound.get_tag_info().serial_;
 			} else {
 				if(files_.empty()) {
 					filer_->get_file_list(files_);
 				} else if(files_step_ < files_.size()) {
-#if 0
-					if(tag_future_.valid()) {
-						std::cout << tag_future_.get() << std::endl;
+					const al::tag& t = sound.get_tag_info();
+					if(t.serial_ == tag_info_serial_) {
+						sound.request_tag_info(files_[files_step_]);
+					} else {
+						std::string a = t.track_ + " " + t.title_;
+						const char* p = utils::get_file_name(files_[files_step_]);
+						filer_->set_alias(p, a);
+//						filer_->enable_alias(p);
+///						std::cout << p << " -> " << a << std::endl;
 						++files_step_;
-						tag_wait_ = false;
-					} else if(!tag_wait_) {
-						const std::string& fp = files_[files_step_];
-						tag_future_ = std::async(std::launch::async, tag_server_, fp);
-						tag_wait_ = true;
+						tag_info_serial_ = t.serial_;
 					}
-#endif
 				}
 			}
 		}
