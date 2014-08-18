@@ -46,26 +46,14 @@ namespace img {
 	}
 
 
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	初期化
-		@param[in]	exts	ファイルの拡張子（複数）を与える事で、@n
-							アクセス可能なフォーマットを制御出来る。
-	*/
-	//-----------------------------------------------------------------//
-	void img_files::initialize(const std::string& exts)
+	void img_files::initialize_(const std::string& exts)
 	{
-		if(init_) return;
-		init_ = true;
-
 		add_image_file_io_context_(img_file::img_io(new bmp_io), exts);
 		add_image_file_io_context_(img_file::img_io(new png_io), exts);
 		add_image_file_io_context_(img_file::img_io(new jpeg_io), exts);
 		add_image_file_io_context_(img_file::img_io(new openjpeg_io), exts);
 		// TGA フォーマットはシグネチュアが無いので、最後に評価する事
 		add_image_file_io_context_(img_file::img_io(new tga_io), exts);
-
-		img_ = nullptr;
 	}
 
 

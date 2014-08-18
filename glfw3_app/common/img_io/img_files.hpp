@@ -29,17 +29,17 @@ namespace img {
 
 		shared_img	img_;
 
-		bool	   	init_;
-
 		void add_image_file_io_context_(img_file::img_io, const std::string& exts);
-
+		void initialize_(const std::string& exts);
 	public:
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		img_files() : init_(false) { }
+		img_files(const std::string& exts = "bmp,png,jpg,jpeg,j2k,jp2,tga") {
+			initialize_(exts);
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -48,16 +48,6 @@ namespace img {
 		*/
 		//-----------------------------------------------------------------//
 		~img_files() { }
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	初期化
-			@param[in]	exts	ファイルの拡張子（複数）を与える事で、@n
-								アクセス可能なフォーマットを制御出来る。
-		*/
-		//-----------------------------------------------------------------//
-		void initialize(const std::string& exts = "bmp,png,jpg,jpeg,j2k,jp2,tga");
 
 
 		//-----------------------------------------------------------------//
