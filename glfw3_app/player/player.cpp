@@ -472,10 +472,12 @@ namespace app {
 			if(filer_->get_file_state()) {
 				files_.clear();
 				files_step_ = 0;
-				tag_info_serial_ = sound.get_tag_info().serial_;
 			} else {
 				if(files_.empty()) {
-					filer_->get_file_list(files_);
+					if(!sound.state_tag_info()) {
+						filer_->get_file_list(files_);
+						tag_info_serial_ = sound.get_tag_info().serial_;
+					}
 				} else if(files_step_ < files_.size()) {
 					const al::tag& t = sound.get_tag_info();
 					if(t.serial_ == tag_info_serial_) {
@@ -484,8 +486,8 @@ namespace app {
 						std::string a = t.track_ + " " + t.title_;
 						const char* p = utils::get_file_name(files_[files_step_]);
 						filer_->set_alias(p, a);
-//						filer_->enable_alias(p);
-///						std::cout << p << " -> " << a << std::endl;
+///						int i = t.serial_;
+///						std::cout << '(' << i << ") " << p << " -> " << a << std::endl;
 						++files_step_;
 						tag_info_serial_ = t.serial_;
 					}
