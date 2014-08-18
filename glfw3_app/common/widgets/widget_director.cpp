@@ -273,8 +273,6 @@ namespace gui {
 	{
 		using namespace gl;
 
-		img_files_.initialize();
-
 		mobj_.initialize();
 
 		// 「各」標準的な色彩や、形状などの設定
