@@ -188,11 +188,19 @@ namespace al {
 				std::string path = t.path_.top();
 				pthread_mutex_unlock(&t.sync_);
 				al::audio_info ai;
-				bool f = sdf.info(path, ai, false );
+				bool f = sdf.info(path, ai, false);
 				pthread_mutex_lock(&t.sync_);
-				t.path_.get();
-				if(f) t.tag_ = sdf.get_tag();
-				else t.tag_.clear();
+				if(t.path_.length()) {
+					t.path_.get();
+				}
+				t.tag_ = sdf.get_tag();
+				if(!f) {
+					uint32_t n = t.tag_.serial_;
+					t.tag_.clear();
+					t.tag_.title_ = utils::get_file_name(path);
+					t.tag_.serial_ = n + 1;
+				}
+				// if(!f) std::cout << "Error: '" << path << "'" << std::endl;
 				pthread_mutex_unlock(&t.sync_);
 			} else {
 				usleep(20000);	// 20ms
