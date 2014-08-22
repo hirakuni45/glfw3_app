@@ -135,7 +135,6 @@ namespace gui {
 
 		// ツリーが更新されたら、アイテムを作り直す
 		if(tree_unit_.get_serial_id() != serial_id_) {
-			destroy_();
 			create_();
 			tree_unit_.create_list("", tree_unit_its_);
 			serial_id_ = tree_unit_.get_serial_id();
