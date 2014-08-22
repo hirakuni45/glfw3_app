@@ -151,14 +151,13 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	クリア
+			@param[in]	all	全てをクリアする場合は「true」
 		*/
 		//-----------------------------------------------------------------//
-		void clear() {
+		void clear(bool all = true) {
 			unit_map_.clear();
-
-			serial_id_ = 0;
-
 			current_path_.clear();
+			if(all) serial_id_ = 0;
 		}
 
 
