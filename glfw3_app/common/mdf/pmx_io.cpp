@@ -235,7 +235,6 @@ namespace mdf {
 
 		{  // テクスチャーの作成と登録
 			img::img_files imf;
-			imf.initialize();
 			tex_id_.resize(textures_.size());
 			glGenTextures(tex_id_.size(), &tex_id_[0]);
 			uint32_t i = 0;

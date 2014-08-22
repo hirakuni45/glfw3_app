@@ -515,7 +515,6 @@ namespace mdf {
 		glGenTextures(tex_id_.size(), &tex_id_[0]);
 		
 		img::img_files imf;
-		imf.initialize();
 		uint32_t i = 0;
 		BOOST_FOREACH(pmd_material& m, materials_) {
 			std::string mats;
