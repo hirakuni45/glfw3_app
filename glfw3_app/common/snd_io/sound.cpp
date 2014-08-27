@@ -15,6 +15,23 @@ namespace al {
 
 	using namespace al;
 
+	static void silent_(sound::sstream_t& sst, const audio_info& ainfo, uint32_t len)
+	{
+		audio_io::wave_handle h = sst.audio_io_->status_stream(sst.slot_);
+		if(h) {
+			audio aif;
+			if(ainfo.chanels == 1) {
+				aif = audio(new audio_mno16);
+			} else if(ainfo.chanels == 2) {
+				aif = audio(new audio_sto16);
+			}
+			aif->create(ainfo.frequency, len);
+			aif->zero();
+			sst.audio_io_->queue_stream(sst.slot_, h, aif);
+		}
+	}
+
+
 	static void play_task_(sound::sstream_t& sst, snd_files& sdf,
 		std::string& root, utils::file_infos& src, const std::string& file)
 	{
@@ -61,7 +78,7 @@ namespace al {
 			pthread_mutex_unlock(&sst.sync_);
 
 			utils::file_io fin;
-			audio_info	ainfo;
+			audio_info ainfo;
 			if(fin.open(fn, "rb")) {
 				if(!sdf.open_stream(fin, stream_buff_size, ainfo)) {
 					sdf.close_stream();
@@ -88,6 +105,7 @@ namespace al {
 			size_t pos = 0;
 			bool cmdin = false;
 			sst.state_ = sound::stream_state::PLAY;
+			bool first_pause = true;
 			while(pos < ainfo.samples) {
 				if(sst.request_.length()) {
 					const sound::request& r = sst.request_.get();
@@ -110,9 +128,16 @@ namespace al {
 					} else if(r.command_ == sound::request::command::PAUSE) {
 						if(pause != r.pause_state_) {
 							pause = r.pause_state_;
+							if(pause) {
+								sst.state_ = sound::stream_state::PAUSE;
+								if(first_pause) {
+									first_pause = false;
+									silent_(sst, ainfo, stream_buff_size);
+								}
+							} else {
+								sst.state_ = sound::stream_state::PLAY;
+							}
 							sst.audio_io_->pause_stream(sst.slot_, pause);
-							if(pause) sst.state_ = sound::stream_state::PAUSE;
-							else sst.state_ = sound::stream_state::PLAY;
 						}
 					} else if(r.command_ == sound::request::command::SEEK) {
 						pos = r.seek_pos_;
@@ -123,8 +148,11 @@ namespace al {
 				time_t t;
 				ainfo.sample_to_time(pos, t);
 				sst.time_ = t;
+
+				if(pause) continue;
+
 				audio_io::wave_handle h = sst.audio_io_->status_stream(sst.slot_);
-				if(h != 0) {
+				if(h) {
 					uint32_t len = sdf.read_stream(fin, pos, stream_buff_size);
 					if(len) {
 						pos += len;
