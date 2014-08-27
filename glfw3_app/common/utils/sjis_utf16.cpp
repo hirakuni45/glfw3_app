@@ -7,6 +7,9 @@
 #include "utils/sjis_utf16.hpp"
 #include <boost/unordered_map.hpp>
 
+#include <iostream>
+#include <boost/format.hpp>
+
 namespace utils {
 
 static uint16_t sjis_utf16_tbl_[] = {
@@ -1278,11 +1281,34 @@ static uint16_t sjis_utf16_tbl_[] = {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	uint16_t sjis_to_utf16(uint16_t sjis)
 	{
+#if 0
+		switch(sjis) {
+		case 0x8160: // return 0x301c;
+		case 0x8161: // return 0x2016;
+		case 0x817c: // return 0x2212;
+		case 0x8191: // return 0x00a2;
+		case 0x8192: // return 0x00a3;
+		case 0x81ca: // return 0x00ac;
+		case 0x815c: // return 0x2014;
+///			std::cout << boost::format("SJIS: %04x") % sjis << std::endl;
+			break;
+		default:
+			break;
+		}
+#endif
+		if(0x0020 <= sjis && sjis <= 0x007d) {
+			return sjis;
+		} else if(sjis == 0x07e) {
+			return 0x203e;
+		} else if(0x00a1 <= sjis && sjis <= 0x00df) { // 半角カナ
+			return 0xff61 + sjis - 0x00a1;
+		}
+
 		uint32_t i = sjis_to_liner_(sjis);
 		if(i < ((sizeof(sjis_utf16_tbl_) - 2) / 2)) {
 			return sjis_utf16_tbl_[i];
 		} else {
-			return 0xffff;
+			return sjis;
 		}
 	}
 

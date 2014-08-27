@@ -301,14 +301,12 @@ namespace utils {
 					wc |= c;
 ///					ws += ff_convert(wc, 1);
 					ws += sjis_to_utf16(wc);
-				} else {
-					return false;
 				}
 				wc = 0;
 			} else {
 				if(0x81 <= c && c <= 0x9f) wc = c;
 				else if(0xe0 <= c && c <= 0xfc) wc = c;
-				else dst += ch;
+				else ws += sjis_to_utf16(c);
 			}
 		}
 		utf16_to_utf8(ws, dst);
