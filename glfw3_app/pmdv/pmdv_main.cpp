@@ -17,12 +17,11 @@ namespace app {
 	{
 		using namespace gui;
 		using namespace mdf;
-		{	// 廃棄
-			widget_tree::tree_unit t;
-			t.swap(tree_->at_tree_unit());
-		}
+
+		tree_->clear();
 
 		widget_tree::tree_unit& tu = tree_->at_tree_unit();
+		/// シリアルIDはクリアしない
 
 		tu.make_directory("/bone");
 		tu.set_current_path("/bone");
@@ -30,6 +29,7 @@ namespace app {
 		for(uint32_t i = 0; i < pmd_io_.get_bones().size(); ++i) {
 			std::string path;
 			pmd_io_.create_bone_path(i, path);
+			if(path.empty()) continue;
 // std::cout << path << std::endl;
 			widget_tree::value v;
 			v.data_ = "0";			
@@ -44,12 +44,11 @@ namespace app {
 	{
 		using namespace gui;
 		using namespace mdf;
-		{	// 廃棄
-			widget_tree::tree_unit t;
-			t.swap(tree_->at_tree_unit());
-		}
+
+		tree_->clear();
 
 		widget_tree::tree_unit& tu = tree_->at_tree_unit();
+		/// シリアルIDはクリアしない
 
 		tu.make_directory("/bone");
 		tu.set_current_path("/bone");
@@ -91,21 +90,28 @@ namespace app {
 		}
 		short h = 12 + 10;
 		{	// ファイラー起動ボタン
-			widget::param wp(vtx::srect(10, h, 100, 40), tools_);
-			h += 40 + 10;
+			widget::param wp(vtx::srect(10, h, 100, 36), tools_);
+			h += 40;
 			widget_button::param wp_("開く");
 			fopen_ = wd.add_widget<widget_button>(wp, wp_);
 		}
 		{	// Grid、On/Off
 			widget::param wp(vtx::srect(10, h, 150, 30), tools_);
-			h += 30 + 10;
+			h += 30;
 			widget_check::param wp_("Grid", true);
 			grid_ = wd.add_widget<widget_check>(wp, wp_);
 		}
+		{	// ボディー、On/Off
+			widget::param wp(vtx::srect(10, h, 150, 30), tools_);
+			h += 30;
+			widget_check::param wp_("Body");
+			body_ = wd.add_widget<widget_check>(wp, wp_);
+			body_->set_check();
+		}
 		{	// ボーン、On/Off
 			widget::param wp(vtx::srect(10, h, 150, 30), tools_);
-			h += 30 + 10;
-			widget_check::param wp_("ボーン");
+			h += 30;
+			widget_check::param wp_("Bone");
 			bone_ = wd.add_widget<widget_check>(wp, wp_);
 		}
 
@@ -166,6 +172,7 @@ namespace app {
 			filer_->enable(!f);
 		}
 
+		/// ファイラー、ファイル選択
 		if(filer_id_ != filer_->get_select_file_id()) {
 			filer_id_ = filer_->get_select_file_id();
 
@@ -173,15 +180,15 @@ namespace app {
 				info_pmd_();
 				pmd_io_.render_setup();
 				pmx_enable_ = false;
+				std::string info;
+				pmd_io_.get_info(info);
+				terminal_->output(info);
 			} else if(pmx_io_.load(filer_->get_file())) {
 				info_pmx_();
 				pmx_io_.render_setup();
 				pmx_enable_ = true;
-			} else {
-
 			}
 		}
-
 
 		if(!wd.update()) {
 			camera_.update();
@@ -217,13 +224,18 @@ namespace app {
 		}
 
 		if(pmx_enable_) {
-			pmx_io_.render_surface();
+			if(body_->get_check()) {
+				pmx_io_.render_surface();
+			}
+
 		} else {
-			pmd_io_.render_surface();
+			if(body_->get_check()) {
+				pmd_io_.render_surface();
+			}
 			if(bone_->get_check()) {
-				light_.enable();
-				light_.enable(bone_light_);
-				light_.service();
+///				light_.enable();
+///				light_.enable(bone_light_);
+///				light_.service();
 				pmd_io_.render_bone(light_);
 			}
 		}

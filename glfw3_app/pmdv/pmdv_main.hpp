@@ -30,6 +30,7 @@ namespace app {
 		gui::widget_frame*		tools_;
 		gui::widget_button*		fopen_;
 		gui::widget_check*		grid_;
+		gui::widget_check*		body_;
 		gui::widget_check*		bone_;
 
 		gui::widget_frame*		tree_frame_;
@@ -55,9 +56,10 @@ namespace app {
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		pmdv_main(utils::director<core>& d) : director_(d),
+		pmdv_main(utils::director<core>& d) :
+			director_(d),
 			filer_(0), filer_id_(0),
-			tools_(0), fopen_(0), grid_(0), bone_(0),
+			tools_(0), fopen_(0), grid_(0), body_(0), bone_(0),
 			tree_frame_(0), tree_(0),
 			terminal_frame_(0), terminal_(0),
 			pmd_io_(), pmx_io_(), pmx_enable_(false),
