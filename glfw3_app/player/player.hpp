@@ -70,6 +70,7 @@ namespace app {
 		utils::strings	files_;
 		uint32_t		files_step_;
 		uint32_t		tag_info_serial_;
+		bool			tag_wait_;
 
 		static std::string tag_server_(const std::string path);
 		void sound_play_(const std::string& file);
@@ -93,7 +94,7 @@ namespace app {
 			total_t_(0), remain_t_(0), seek_pos_(0),
 			tag_serial_(0), jacket_(0), drop_file_id_(0), select_file_id_(0),
 			mouse_pos_(0), filer_count_(0),
-			files_step_(0), tag_info_serial_(0)
+			files_step_(0), tag_info_serial_(0), tag_wait_(false)
 		{ }
 
 

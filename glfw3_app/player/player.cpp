@@ -206,8 +206,8 @@ namespace app {
 			if(!file.empty() && !path.empty()) {
 				if(t == al::sound::stream_state::PAUSE) {
 					sound.play_stream(path, utils::get_file_name(file));
-					sound.seek_stream(static_cast<size_t>(pos));
 					sound.pause_stream();
+					sound.seek_stream(static_cast<size_t>(pos));
 				} else if(t == al::sound::stream_state::PLAY) {
 					sound.play_stream(path, utils::get_file_name(file));
 					sound.seek_stream(static_cast<size_t>(pos));
@@ -477,19 +477,39 @@ namespace app {
 					if(!sound.state_tag_info()) {
 						filer_->get_file_list(files_);
 						tag_info_serial_ = sound.get_tag_info().serial_;
+						tag_wait_ = false;
 					}
 				} else if(files_step_ < files_.size()) {
 					const al::tag& t = sound.get_tag_info();
 					if(t.serial_ == tag_info_serial_) {
-						sound.request_tag_info(files_[files_step_]);
+						if(!tag_wait_) {
+							sound.request_tag_info(files_[files_step_]);
+							tag_wait_ = true;
+						}
 					} else {
-						std::string a = t.track_ + " " + t.title_;
-						const char* p = utils::get_file_name(files_[files_step_]);
-						filer_->set_alias(p, a);
+						tag_wait_ = false;
+						tag_info_serial_ = t.serial_;
+						using namespace std;
+						const string p = utils::get_file_name(files_[files_step_]);
+						if(p.find(t.title_) == string::npos) {
+							string n;
+							if(t.track_.empty()) {
+								n = "  ";
+							} else {
+								string::size_type pos;
+								if((pos = t.track_.find('/')) != string::npos) {
+									n = t.track_.substr(0, pos);
+								} else {
+									n = t.track_;
+								}
+								if(n.size() == 1) n = '0' + n;
+							}
+							std::string a = n + "-" + t.title_;
+							filer_->set_alias(p, a);
+						}
 ///						int i = t.serial_;
 ///						std::cout << '(' << i << ") " << p << " -> " << a << std::endl;
 						++files_step_;
-						tag_info_serial_ = t.serial_;
 					}
 				}
 			}
