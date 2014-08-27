@@ -1341,10 +1341,17 @@ static uint16_t sjis_utf16_tbl_[] = {
 						uint16_t sjis = (hi << 8) | lo;
 						uint16_t utf16 = sjis_to_utf16(sjis);
 						if(utf16 != 0xffff && utf16 != 0) {
-							utf16_to_sjis_map_.insert(std::pair<uint16_t, uint16_t>(utf16, sjis));
+							utf16_to_sjis_map_.emplace(utf16, sjis);
 						}
 					}
 				}
+			}
+		}
+		// 半角カナ
+		for(uint16_t sjis = 0x00a1; sjis <= 0x00df; ++sjis) {
+			uint16_t utf16 = sjis_to_utf16(sjis);
+			if(utf16 != 0xffff && utf16 != 0) {
+				utf16_to_sjis_map_.emplace(utf16, sjis);
 			}
 		}
 	}
