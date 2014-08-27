@@ -27,7 +27,7 @@ namespace mdf {
 		std::string	comment_;
 
 	public:
-		typedef std::vector<uint16_t>	pmd_indexes;
+		typedef std::vector<uint16_t>	pmd_indices;
 
 		struct pmd_vertex {
 			vtx::fvtx	pos;
@@ -69,7 +69,7 @@ namespace mdf {
 				return true;
 			}
 		};
-		typedef std::vector<pmd_vertex>	pmd_vertexes;
+		typedef std::vector<pmd_vertex>	pmd_vertices;
 
 		struct pmd_material {
 			float	diffuse_color[3];
@@ -124,7 +124,7 @@ namespace mdf {
 
 
 		struct pmd_bone {
-			enum bone_type {
+			enum class bone_type {
 				ROTATE,			///< (0) 回転
 				ROTATE_MOVE,	///< (1) 回転と移動
 				IK,				///< (2) IK
@@ -256,17 +256,17 @@ namespace mdf {
 		static void get_text_(const char* src, uint32_t n, std::string& dst);
 
 	private:
-		pmd_vertexes		vertexes_;
+		pmd_vertices		vertices_;
 		vtx::fvtx			vertex_min_;
 		vtx::fvtx			vertex_max_;
 
-		pmd_indexes			face_indexes_;
+		pmd_indices			face_indices_;
 
 		pmd_materials		materials_;
 		pmd_bones			bones_;
 		pmd_iks				iks_;
 		pmd_skins			skins_;
-		pmd_indexes			skin_indexes_;
+		pmd_indices			skin_indices_;
 
 		pmd_bone_disp_names	bone_disp_names_;
 		pmd_bone_disps		bone_disps_;
@@ -300,8 +300,6 @@ namespace mdf {
 		GLuint	bone_list_id_;
 		GLuint	joint_list_id_;
 
-		bool	init_;
-
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -310,8 +308,7 @@ namespace mdf {
 		//-----------------------------------------------------------------//
 		pmd_io() : version_(1.0f),
 			vertex_min_(0.0f), vertex_max_(0.0f), vtx_id_(0),
-			bone_joint_size_(0.0f), bone_list_id_(0), joint_list_id_(0),
-			init_(false)
+			bone_joint_size_(0.0f), bone_list_id_(0), joint_list_id_(0)
 		{ initialize_(); }
 
 
@@ -360,6 +357,15 @@ namespace mdf {
 		*/
 		//-----------------------------------------------------------------//
 		const std::string& get_comment() const { return comment_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	PMD ファイル情報の取得
+			@param[in]	info	PMD ファイル情報
+		*/
+		//-----------------------------------------------------------------//
+		void get_info(std::string& info);
 
 
 		//-----------------------------------------------------------------//

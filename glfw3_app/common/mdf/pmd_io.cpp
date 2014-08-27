@@ -22,10 +22,13 @@ namespace mdf {
 			char ch = *src++;
 			if(ch == 0) break;
 			if(static_cast<uint8_t>(ch) != 0xfd) {
+///				uint32_t n = static_cast<uint8_t>(ch);
+///				std::cout << boost::format("%02X, ") % n;
 				tmp += ch;
 			}
 		}
 		utils::sjis_to_utf8(tmp, dst);
+///		std::cout << "'" << dst << "'" << std::endl;
 	}
 
 	bool pmd_io::parse_vertex_(utils::file_io& fio)
@@ -35,8 +38,8 @@ namespace mdf {
 			return false;
 		}
 
-		vertexes_.reserve(n);
-		vertexes_.clear();
+		vertices_.reserve(n);
+		vertices_.clear();
 		for(uint32_t i = 0; i < n; ++i) {
 			pmd_vertex v;
 			if(!v.get(fio)) {
@@ -45,7 +48,7 @@ namespace mdf {
 			if(i == 0) vertex_min_ = vertex_max_ = v.pos;
 			vtx::set_min(v.pos, vertex_min_);
 			vtx::set_max(v.pos, vertex_max_);
-			vertexes_.push_back(v);
+			vertices_.push_back(v);
 		}
 		return true;
 	}
@@ -57,14 +60,14 @@ namespace mdf {
 			return false;
 		}
 
-		face_indexes_.reserve(n);
-		face_indexes_.clear();
+		face_indices_.reserve(n);
+		face_indices_.clear();
 		for(uint32_t i = 0; i < n; ++i) {
 			uint16_t v;
 			if(!fio.get(v)) {
 				return false;
 			}
-			face_indexes_.push_back(v);
+			face_indices_.push_back(v);
 		}
 		return true;
 	}
@@ -172,14 +175,14 @@ namespace mdf {
 		}
 ///		std::cout << "Skin index num: " << static_cast<int>(n) << std::endl;
 
-		skin_indexes_.reserve(n);
-		skin_indexes_.clear();
+		skin_indices_.reserve(n);
+		skin_indices_.clear();
 		for(uint32_t i = 0; i < n; ++i) {
 			uint16_t v;
 			if(!fio.get(v)) {
 				return false;
 			}
-			skin_indexes_.push_back(v);
+			skin_indices_.push_back(v);
 		}
 
 		return true;
@@ -288,9 +291,6 @@ namespace mdf {
 
 	void pmd_io::initialize_()
 	{
-		if(init_) return;
-		init_ = true;
-
 		// Joint オブジェクトの生成
 		joint_list_id_ = glGenLists(1);
 		glNewList(joint_list_id_, GL_COMPILE);		
@@ -330,6 +330,20 @@ namespace mdf {
 			return false;
 		}
 		return true;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	PMD ファイル情報の取得
+		@param[in]	info	PMD ファイル情報
+	*/
+	//-----------------------------------------------------------------//
+	void pmd_io::get_info(std::string& info)
+	{
+		info += (boost::format("Version: %1.3f\n") % version_).str();
+		info += (boost::format("Vertices: %d\n") % vertices_.size()).str();
+		info += (boost::format("Face: %d\n") % face_indices_.size()).str();
 	}
 
 
@@ -463,14 +477,14 @@ namespace mdf {
 	//-----------------------------------------------------------------//
 	void pmd_io::render_setup()
 	{
-		if(vertexes_.empty()) return;
-		if(face_indexes_.empty()) return;
+		if(vertices_.empty()) return;
+		if(face_indices_.empty()) return;
 
 		{	// 頂点バッファの作成
 			std::vector<vbo_t> vbos;
-			vbos.reserve(vertexes_.size());
+			vbos.reserve(vertices_.size());
 			vbos.clear();
-			BOOST_FOREACH(pmd_vertex& v, vertexes_) {
+			BOOST_FOREACH(pmd_vertex& v, vertices_) {
 				vbo_t vbo;
 				vbo.uv = v.uv;
 				vbo.n = v.normal;			
@@ -486,13 +500,13 @@ namespace mdf {
 		}
 
 		{ // インデックス・バッファの作成（マテリアル別に作成）
-			std::vector<uint16_t> idxes;
-			idxes.reserve(face_indexes_.size());
-			idxes.clear();
-			for(uint32_t i = 0; i < (face_indexes_.size() / 3); ++i) {
-				idxes.push_back(face_indexes_[i * 3 + 0]);
-				idxes.push_back(face_indexes_[i * 3 + 2]);
-				idxes.push_back(face_indexes_[i * 3 + 1]);
+			std::vector<uint16_t> ids;
+			ids.reserve(face_indices_.size());
+			ids.clear();
+			for(uint32_t i = 0; i < (face_indices_.size() / 3); ++i) {
+				ids.push_back(face_indices_[i * 3 + 0]);
+				ids.push_back(face_indices_[i * 3 + 2]);
+				ids.push_back(face_indices_[i * 3 + 1]);
 			}
 
 			idx_id_.resize(materials_.size());
@@ -502,8 +516,9 @@ namespace mdf {
 			uint32_t in = 0;
 			BOOST_FOREACH(const pmd_material& m, materials_) {
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idx_id_[n]);
-				glBufferData(GL_ELEMENT_ARRAY_BUFFER, m.face_vert_count * sizeof(uint16_t),
-					&idxes[in], GL_STATIC_DRAW);
+				glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+							 m.face_vert_count * sizeof(uint16_t),
+							 &ids[in], GL_STATIC_DRAW);
 				in += m.face_vert_count;
 				++n;
 			}
@@ -567,8 +582,8 @@ namespace mdf {
 	//-----------------------------------------------------------------//
 	void pmd_io::render_surface()
 	{
-		if(vertexes_.empty()) return;
-		if(face_indexes_.empty()) return;
+		if(vertices_.empty()) return;
+		if(face_indices_.empty()) return;
 
 		glMatrixMode(GL_TEXTURE);
 		glLoadIdentity();
@@ -640,32 +655,44 @@ namespace mdf {
 	{
 		if(bones_.empty()) return;
 
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+
+		glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+		glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
+		glScalef(-1.0f, 1.0f, 1.0f);
+
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_BLEND);
 		glDisable(GL_TEXTURE_2D);
 
+		glLineWidth(4.0f);
+
 		BOOST_FOREACH(const pmd_bone& bone, bones_) {
-			if(bone.type == pmd_bone::NO_DISP) {
+#if 0
+			if(static_cast<pmd_bone::bone_type>(bone.type) == pmd_bone::bone_type::NO_DISP) {
 				lig.set_material(gl::light::material::turquoise);
 			} else {
 				lig.set_material(gl::light::material::pearl);
 			}
-			glPushMatrix();
-			gl::glTranslate(bone.head_pos);
-			glCallList(bone_list_id_);
-			lig.set_material(gl::light::material::pearl);
-			glPopMatrix();
+#endif
+///			glPushMatrix();
+///			gl::glTranslate(bone.head_pos);
+///			glCallList(bone_list_id_);
+///			lig.set_material(gl::light::material::pearl);
+///			glPopMatrix();
 
 			uint16_t idx = bone.parent_index;
 			if(idx < bones_.size()) {
 				glPushMatrix();
-				gl::glTranslate(bone.head_pos);
-				vtx::fvtx sc((bone.head_pos - bones_[idx].head_pos).len());
-				gl::glScale(sc);
-				glCallList(joint_list_id_);
-//				gl::draw_line(bone.head_pos, bone_[idx].head_pos);
+///				gl::glTranslate(bone.head_pos);
+///				vtx::fvtx sc((bone.head_pos - bones_[idx].head_pos).len());
+///				gl::glScale(sc);
+///				glCallList(joint_list_id_);
+				glColor3f(1.0f, 1.0f, 1.0f);
+				gl::draw_line(bone.head_pos, bones_[idx].head_pos);
 				glPopMatrix();
 			}
 		}
