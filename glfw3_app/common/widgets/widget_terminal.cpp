@@ -177,11 +177,11 @@ namespace gui {
 			for(pos.y = 0; pos.y < terminal_.size().y; ++pos.y) {
 				for(pos.x = 0; pos.x < terminal_.size().x; ++pos.x) {
 					const utils::terminal::cha_t& t = terminal_.get_char(pos);
-					img::rgba8 fc  = t.fc;
+					img::rgba8 fc  = t.fc_;
 					fc *= cf.r;
 					fc.alpha_scale(cf.a);
 					fonts.set_fore_color(fc);
-					img::rgba8 bc = t.bc;
+					img::rgba8 bc = t.bc_;
 					bc *= cf.r;
 					bc.alpha_scale(cf.a);
 					fonts.set_back_color(bc);
@@ -192,7 +192,7 @@ namespace gui {
 					}
 					vtx::srect br(chs, vtx::spos(param_.font_width_, param_.height_));
 					fonts.draw_back(br);
-					chs.x += fonts.draw(chs, t.cha);
+					chs.x += fonts.draw(chs, t.cha_);
 					fonts.swap_color(false);
 				}
 				chs.y += param_.height_;
