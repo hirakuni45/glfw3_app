@@ -25,12 +25,13 @@ namespace utils {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct cha_t {
-			uint32_t	cha;
-			img::rgba8	fc;
-			img::rgba8	bc;
+			uint32_t	cha_;
+			img::rgba8	fc_;
+			img::rgba8	bc_;
 
 			cha_t() { }
-			cha_t(uint32_t cha_, const img::rgba8& fc_, const img::rgba8& bc_) : cha(cha_), fc(fc_), bc(bc_) { } 
+			cha_t(uint32_t cha, const img::rgba8& fc, const img::rgba8& bc) :
+				cha_(cha), fc_(fc), bc_(bc) { } 
 		};
 
 	private:
@@ -85,7 +86,7 @@ namespace utils {
 			}
 			cha_t ch;
 			ch = cha_;
-			ch.cha = ' ';
+			ch.cha_ = ' ';
 			chaers_.resize(size.x * size.y, ch);
 			if(!destroy && !tmp.empty()) {
 				uint32_t xx = size.x < size_.x ? size.x : size_.x;
@@ -112,7 +113,7 @@ namespace utils {
 			if(pos.x < 0 || pos.x >= size_.x) return;
 			if(pos.y < 0 || pos.y >= size_.y) return;
 
-			cha_.cha = ' ';
+			cha_.cha_ = ' ';
 			for(uint32_t x = pos.x; x < size_.x; ++x) {
 				chaers_[pos.y * size_.x + x] = cha_;
 			}			
@@ -130,7 +131,7 @@ namespace utils {
 			if(rect.org.y < 0 || rect.org.y >= size_.y) return;
 			if(rect.end_x() >= size_.x) return;
 			if(rect.end_y() >= size_.y) return;
-			cha_.cha = ' ';
+			cha_.cha_ = ' ';
 			for(uint32_t y = rect.org.y; y < rect.end_y(); ++y) {
 				for(uint32_t x = rect.org.x; x < rect.end_x(); ++x) {
 					chaers_[y * size_.x + x] = cha_;
@@ -185,7 +186,7 @@ namespace utils {
 		void output(uint32_t cha) {
 			if(chaers_.empty()) return;
 			if(cha < ' ') {
-				if(cha == 0x0d) {
+				if(cha == '\n') {
 					clear_line(cursor_);
 					cursor_.x = 0;
 					line_feed();
@@ -204,7 +205,7 @@ namespace utils {
 				}
 				return;
 			}
-			cha_.cha = cha;
+			cha_.cha_ = cha;
 			chaers_[cursor_.y * size_.x + cursor_.x] = cha_;
 			++cursor_.x;
 			if(cursor_.x >= size_.x) {

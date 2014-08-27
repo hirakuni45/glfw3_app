@@ -1296,11 +1296,11 @@ static uint16_t sjis_utf16_tbl_[] = {
 			break;
 		}
 #endif
-		if(0x0020 <= sjis && sjis <= 0x007d) {
+		if(sjis <= 0x007d) {  // alphabet
 			return sjis;
 		} else if(sjis == 0x07e) {
 			return 0x203e;
-		} else if(0x00a1 <= sjis && sjis <= 0x00df) { // 半角カナ
+		} else if(0x00a1 <= sjis && sjis <= 0x00df) {  // 半角カナ
 			return 0xff61 + sjis - 0x00a1;
 		}
 
@@ -1308,7 +1308,7 @@ static uint16_t sjis_utf16_tbl_[] = {
 		if(i < ((sizeof(sjis_utf16_tbl_) - 2) / 2)) {
 			return sjis_utf16_tbl_[i];
 		} else {
-			return sjis;
+			return 0xffff;
 		}
 	}
 
