@@ -81,7 +81,7 @@ namespace al {
 
 		void apply_filter_(mad_frame& frame);
 		int fill_read_buffer_(utils::file_io& fin, mad_stream& strm);
-		bool analize_frame_(utils::file_io& fin, audio_info& info, mp3_info& mp3info, bool apic);
+		bool analize_frame_(utils::file_io& fin, audio_info& info, mp3_info& mp3info, info_state st);
 		bool decode_(utils::file_io& fin, audio out);
 
 	public:
@@ -127,7 +127,7 @@ namespace al {
 		//-----------------------------------------------------------------//
 		bool probe(utils::file_io& fin) override {
 			audio_info info;
-			return analize_frame_(fin, info, mp3_info_, false);
+			return analize_frame_(fin, info, mp3_info_, info_state::none);
 		}
 
 
@@ -136,12 +136,12 @@ namespace al {
 			@brief	MP3 ファイルの情報を取得する
 			@param[in]	fin		file_io クラス
 			@param[in]	info	情報を受け取る構造体
-			@param[in]	apic	画像情報を受けたらない場合「false」
+			@param[in]	st		画像情報ステート
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool info(utils::file_io& fin, audio_info& info, bool apic = true) override {
-			return analize_frame_(fin, info, mp3_info_, apic);
+		bool info(utils::file_io& fin, audio_info& info, info_state st = info_state::all) override {
+			return analize_frame_(fin, info, mp3_info_, st);
 		}
 
 

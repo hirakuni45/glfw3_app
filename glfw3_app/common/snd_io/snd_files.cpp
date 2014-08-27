@@ -103,14 +103,14 @@ namespace al {
 		@return エラーなら「false」を返す
 	*/
 	//-----------------------------------------------------------------//
-	bool snd_files::info(utils::file_io& fin, audio_info& fo, bool apic, const std::string& ext)
+	bool snd_files::info(utils::file_io& fin, audio_info& fo, i_snd_io::info_state st, const std::string& ext)
 	{
 		size_t n = sndios_.size();
 		if(!ext.empty()) {
 			for(size_t i = 0; i < sndios_.size(); ++i) {
 				snd_file& io = sndios_[i];
 				if(check_file_exts_(io.ext, ext)) {
-					if(io.sio->info(fin, fo, apic)) {
+					if(io.sio->info(fin, fo, st)) {
 						tag_ = io.sio->get_tag();
 						// snd_files のタグ更新シリアルを上書き
 						++tag_serial_;
@@ -124,7 +124,7 @@ namespace al {
 		for(size_t i = 0; i < sndios_.size(); ++i) {
 			if(n != i) {
 				snd_file& io = sndios_[i];
-				if(io.sio->info(fin, fo, apic)) {
+				if(io.sio->info(fin, fo, st)) {
 					tag_ = io.sio->get_tag();
 					// snd_files のタグ更新シリアルを上書き
 					++tag_serial_;

@@ -120,11 +120,11 @@ namespace al {
 			@brief	WAV ファイルの情報を取得する
 			@param[in]	fin		file_io クラス
 			@param[in]	info	情報を受け取る構造体
-			@param[in]	apic	画像情報を受けたらない場合「false」
+			@param[in]	st		画像情報ステート
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool info(utils::file_io& fin, audio_info& info, bool apic = true) override;
+		bool info(utils::file_io& fin, audio_info& info, info_state st = info_state::all) override;
 
 
 		//-----------------------------------------------------------------//

@@ -126,12 +126,14 @@ namespace al {
 			@brief	音楽ファイルの情報を取得する
 			@param[in]	fin	file_io クラス
 			@param[in]	fo	情報を受け取る構造体
-			@param[in]	apic	画像情報を受けたらない場合「false」
+			@param[in]	st	情報ステート
 			@param[in]	ext	拡張子（無くても可）
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool info(utils::file_io& fin, audio_info& fo, bool apic = true, const std::string& ext = 0);
+		bool info(utils::file_io& fin, audio_info& fo,
+				  i_snd_io::info_state st = i_snd_io::info_state::all,
+				  const std::string& ext = 0);
 
 
 		//-----------------------------------------------------------------//
@@ -139,15 +141,16 @@ namespace al {
 			@brief	音楽ファイルの情報を取得する
 			@param[in]	filename	ファイル名
 			@param[in]	fo	情報を受け取る構造体
-			@param[in]	apic	画像情報を受けたらない場合「false」
+			@param[in]	st	情報ステート
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool info(const std::string& filename, audio_info& fo, bool apic = true) {
+		bool info(const std::string& filename, audio_info& fo,
+				  i_snd_io::info_state st = i_snd_io::info_state::all) {
 			bool f = false;
 			utils::file_io fin;
 			if(fin.open(filename, "rb")) {
-				f = info(fin, fo, apic, utils::get_file_ext(filename));
+				f = info(fin, fo, st, utils::get_file_ext(filename));
 				fin.close();
 			}
 			return f;

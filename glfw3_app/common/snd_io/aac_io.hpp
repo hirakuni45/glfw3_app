@@ -62,7 +62,7 @@ namespace al {
 		bool decode_track_mp4_(utils::file_io& fin, decode_mp4_t& dt);
 		bool decode_mp4_param_(decode_mp4_t& dt);
 		audio decode_mp4_file_(utils::file_io& fin);
-		bool create_mp4_info_(utils::file_io& fin, decode_mp4_t& dt, audio_info& info, bool apic);
+		bool create_mp4_info_(utils::file_io& fin, decode_mp4_t& dt, audio_info& info, info_state st);
 
 	public:
 		//-----------------------------------------------------------------//
@@ -113,11 +113,11 @@ namespace al {
 			@brief	AAC ファイルの情報を取得する
 			@param[in]	fin		file_io クラス
 			@param[in]	info	情報を受け取る構造体
-			@param[in]	apic	画像情報を受けたらない場合「false」
+			@param[in]	st		情報ステート
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool info(utils::file_io& fin, audio_info& info, bool apic = true) override;
+		bool info(utils::file_io& fin, audio_info& info, info_state st = info_state::all) override;
 
 
 		//-----------------------------------------------------------------//

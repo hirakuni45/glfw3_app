@@ -477,7 +477,7 @@ namespace al {
 		@return エラーなら「false」
 	*/
 	//=================================================================//
-	bool mp3_io::analize_frame_(utils::file_io& fin, audio_info& info, mp3_info& mp3info, bool apic)
+	bool mp3_io::analize_frame_(utils::file_io& fin, audio_info& info, mp3_info& mp3info, info_state st)
 	{
 		if(!fin.is_open()) {
 			return false;
@@ -543,7 +543,7 @@ namespace al {
 
 			// ジャケット画像
 			const_it acit = map.find("APIC");
-			if(apic && acit != map.end()) {
+			if(static_cast<uint8_t>(st) & static_cast<uint8_t>(info_state::apic) && acit != map.end()) {
 				const ID3v2::FrameList& list = acit->second;
 				typedef ID3v2::FrameList::ConstIterator const_it;
 				for(const_it cit = list.begin(); cit != list.end(); ++cit) {
@@ -601,6 +601,10 @@ namespace al {
 			fin.seek(ofs, file_io::seek::set);
 		} else {
 			fin.seek(pos, file_io::seek::set);
+		}
+
+		if((static_cast<uint8_t>(st) & static_cast<uint8_t>(info_state::time)) == 0) {
+			return true;
 		}
 
 		// ３フレーム以下はエラーとする・・
@@ -771,7 +775,7 @@ namespace al {
 	{
 		audio_info info;
 		mp3_info_.reset();
-		bool f = analize_frame_(fin, info, mp3_info_, true);
+		bool f = analize_frame_(fin, info, mp3_info_, info_state::all);
 		if(f) {
 			fin.seek(info.header_size, file_io::seek::set);
 

@@ -667,7 +667,7 @@ namespace al {
 	}
 
 
-	bool aac_io::create_mp4_info_(utils::file_io& fin, decode_mp4_t& dt, audio_info& info, bool apic)
+	bool aac_io::create_mp4_info_(utils::file_io& fin, decode_mp4_t& dt, audio_info& info, info_state st)
 	{
 		dt.no_gapless = false;
 		dt.initial = false;
@@ -718,7 +718,7 @@ namespace al {
 		   		else if(s == "disc") tag_.disc_ = value;
 		   		else if(s == "totaldiscs") tag_.total_discs_ = value;
 		   		else if(s == "date") tag_.date_ = value;
-		   		else if(s == "cover" && apic) {
+		   		else if(s == "cover" && static_cast<uint8_t>(st) & static_cast<uint8_t>(info_state::apic)) {
 #if 0
 					size_t size = mp4ff_meta_get_item_size(dt.infile, k);
 		   			utils::file_io fio;
@@ -746,11 +746,11 @@ namespace al {
 		@brief	AAC ファイルの情報を取得する
 		@param[in]	fin		file_io クラス
 		@param[in]	info	情報を受け取る構造体
-		@param[in]	apic	画像情報を受けたらない場合「false」
+		@param[in]	st		情報ステート
 		@return エラーなら「false」を返す
 	*/
 	//-----------------------------------------------------------------//
-	bool aac_io::info(utils::file_io& fin, audio_info& info, bool apic)
+	bool aac_io::info(utils::file_io& fin, audio_info& info, info_state st)
 	{
 		long pos = fin.tell();
 		uint8_t header[8];
@@ -760,7 +760,7 @@ namespace al {
 
 		if(header[4] == 'f' && header[5] == 't' && header[6] == 'y' && header[7] == 'p') {
 			decode_mp4_t dt;
-			bool ret = create_mp4_info_(fin, dt, info, apic);
+			bool ret = create_mp4_info_(fin, dt, info, st);
 			destroy_mp4_(dt);
 			return ret;
 		} else {
@@ -831,7 +831,7 @@ namespace al {
 		if(len != 8) return false;
 
 		if(header[4] == 'f' && header[5] == 't' && header[6] == 'y' && header[7] == 'p') {
-			create_mp4_info_(fi, mp4_t_, info, true);
+			create_mp4_info_(fi, mp4_t_, info, info_state::all);
 
 			if(mp4_t_.channels == 1) {
 				info.type = audio_format::PCM16_MONO;
