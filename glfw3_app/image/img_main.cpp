@@ -17,7 +17,6 @@ namespace app {
 	bool save_task_(save_t t)
 	{
 		img::img_files imfs;
-		imfs.initialize();
 		imfs.set_image(std::get<1>(t));
 		return imfs.save(std::get<0>(t));
 	}
