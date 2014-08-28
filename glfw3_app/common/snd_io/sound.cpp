@@ -149,19 +149,19 @@ namespace al {
 				ainfo.sample_to_time(pos, t);
 				sst.time_ = t;
 
-				if(pause) continue;
+				if(!pause) {
 
-				audio_io::wave_handle h = sst.audio_io_->status_stream(sst.slot_);
-				if(h) {
-					uint32_t len = sdf.read_stream(fin, pos, stream_buff_size);
-					if(len) {
-						pos += len;
-						sst.audio_io_->queue_stream(sst.slot_, h, sdf.get_stream());
-					} else {
-						pos = ainfo.samples;
+					audio_io::wave_handle h = sst.audio_io_->status_stream(sst.slot_);
+					if(h) {
+						uint32_t len = sdf.read_stream(fin, pos, stream_buff_size);
+						if(len) {
+							pos += len;
+							sst.audio_io_->queue_stream(sst.slot_, h, sdf.get_stream());
+						} else {
+							pos = ainfo.samples;
+						}
 					}
 				}
-
 				// デコードのパフォーマンス的には１６ミリ秒程度のインターバルで
 				// 間に合うよう調整されているので、余裕を考えて、その２倍を設定する。
 				usleep(8000);	// 8ms くらいの時間待ち
