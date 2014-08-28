@@ -333,7 +333,6 @@ namespace app {
 
 		} else { // 通常の画像ファイル
 			img::img_files	imfs;
-			imfs.initialize();
 
 			if(!imfs.load(inp_fname_)) {
 				cerr << "Can't load source image: " << inp_fname_ << "'" << endl;
