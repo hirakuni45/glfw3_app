@@ -491,7 +491,8 @@ namespace app {
 						tag_info_serial_ = t.serial_;
 						using namespace std;
 						const string p = utils::get_file_name(files_[files_step_]);
-						if(p.find(t.title_) == string::npos) {
+						if(utils::compare(p, t.title_) < 0.75f) {  // 75% 一致しない
+///						if(p.find(t.title_) == string::npos) {
 							string n;
 							if(t.track_.empty()) {
 								n = "  ";
@@ -504,7 +505,7 @@ namespace app {
 								}
 								if(n.size() == 1) n = '0' + n;
 							}
-							std::string a = n + "-" + t.title_;
+							std::string a = n + " " + t.title_;
 							filer_->set_alias(p, a);
 						}
 ///						int i = t.serial_;

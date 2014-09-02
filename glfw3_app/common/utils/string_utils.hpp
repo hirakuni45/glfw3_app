@@ -12,6 +12,7 @@
 
 namespace utils {
 
+	typedef std::string									string;
 	typedef std::string::iterator						string_it;
 	typedef std::string::const_iterator					string_cit;
 
@@ -35,9 +36,9 @@ namespace utils {
 	typedef std::vector<lstring>::iterator				lstrings_it;
 	typedef std::vector<lstring>::const_iterator		lstrings_cit;
 
-	typedef std::vector<strings>						strings_array;
-	typedef std::vector<strings>::iterator	   			strings_array_it;
-	typedef std::vector<strings>::const_iterator	   	strings_array_cit;
+//	typedef std::vector<strings>						strings_array;
+//	typedef std::vector<strings>::iterator	   			strings_array_it;
+//	typedef std::vector<strings>::const_iterator	   	strings_array_cit;
 
 	bool string_to_int(const std::string& src, int& dst);
 	bool string_to_int(const std::string& src, std::vector<int>& dst);
@@ -266,7 +267,7 @@ namespace utils {
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	UTF-8(ucs2) から Shift-JIS への変換
+		@brief	UTF-8 から Shift-JIS への変換
 		@param[in]	src	UTF8 ソース
 		@param[in]	dst	Shift-JIS 出力
 		@return 変換が正常なら「true」
@@ -284,6 +285,34 @@ namespace utils {
 	*/
 	//-----------------------------------------------------------------//
 	bool utf16_to_sjis(const wstring& src, std::string& dst);
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	文字列の評価比較
+		@param[in]	srca	ソース文字列 A
+		@param[in]	srcb	ソース文字列 B
+		@return 正確に一致したら 1.0 を返す
+	*/
+	//-----------------------------------------------------------------//
+	float compare(const lstring& srca, const lstring& srcb);
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	文字列の評価比較
+		@param[in]	srca	ソース文字列 A
+		@param[in]	srcb	ソース文字列 B
+		@return 正確に一致したら 1.0 を返す
+	*/
+	//-----------------------------------------------------------------//
+	inline float compare(const std::string& srca, const std::string& srcb) {
+		lstring a;
+		utf8_to_utf32(srca, a);
+		lstring b;
+		utf8_to_utf32(srcb, b);
+		return compare(a, b);
+	}
 
 
 	//-----------------------------------------------------------------//
@@ -382,16 +411,17 @@ namespace utils {
 		@param[in]	limit	分割する最大数を設定する場合正の値
 	*/
 	//-----------------------------------------------------------------//
-	template <class T>
-	void split_text(const typename T::value_type& src,
-					const typename T::value_type& list, T& dst, int limit = 0)
+	template <class SS>
+	void split_text(const typename SS::value_type& src,
+					const typename SS::value_type& list,
+					SS& dst, int limit = 0)
 	{
 		bool tab_back = true;
-		typename T::value_type word;
-		BOOST_FOREACH(typename T::value_type::value_type c, src) {
+		typename SS::value_type word;
+		BOOST_FOREACH(typename SS::value_type::value_type ch, src) {
 			bool tab = false;
 			if(limit <= 0 || static_cast<int>(dst.size()) < (limit - 1)) {
-				if(string_strchr(list, c)) {
+				if(string_strchr(list, ch)) {
 					tab = true;
 				}
 			}
@@ -399,7 +429,7 @@ namespace utils {
 				dst.push_back(word);
 				word.clear();
 			}
-			if(!tab) word += c;
+			if(!tab) word += ch;
 			tab_back = tab;
 		}
 		if(!word.empty()) {
@@ -420,12 +450,40 @@ namespace utils {
 	//-----------------------------------------------------------------//
 	template <class T, class M>
 	int code_conv(const T& src, typename T::value_type a, typename T::value_type b, M& dst) {
-		int i = 0;
+		int n = 0;
 		BOOST_FOREACH(typename T::value_type c, src) {
-			if(c == a) { c = b; i++; }
+			if(c == a) { c = b; n++; }
 			dst += static_cast<typename M::value_type>(c);
 		}
-		return i;
+		return n;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	文字列中の文字コードを変換
+		@param[in]	src ソース文字列
+		@param[in]	tbl 変換表（変換前、返還後と交互に並べる）@n
+					※「返還後」コードとして０を指定すると、バッファから除外される。
+		@param[out]	dst 変換後の文字列
+		@return 変換された数
+	*/
+	//-----------------------------------------------------------------//
+	template <class STR>
+	int code_conv(const STR& src, const STR& tbl, STR& dst) {
+		int n = 0;
+		uint32_t tsz = tbl.size();
+		if(tsz & 1) --tsz;
+		BOOST_FOREACH(typename STR::value_type ch, src) {
+			for(uint32_t i = 0; i < tsz; i += 2) {
+				if(ch == tbl[i]) {
+					ch = tbl[i + 1];
+					++n;
+				}
+			}
+			if(ch) dst += ch;
+		}
+		return n;
 	}
 
 
