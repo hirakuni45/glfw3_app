@@ -283,6 +283,7 @@ namespace gl {
 		if(tmap.lcx == 0 && tmap.lcy == 0) {
 			std::vector<uint8_t> clrimg;
 			clrimg.resize(texture_page_width * texture_page_height);
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 			glTexImage2D(GL_TEXTURE_2D, level,
 						 GL_ALPHA, texture_page_width, texture_page_height,
 						 0, GL_ALPHA, GL_UNSIGNED_BYTE, &clrimg[0]);
