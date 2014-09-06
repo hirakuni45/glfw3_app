@@ -709,7 +709,7 @@ namespace gui {
 				if(ref.y >= min.y) {
 					if(newsize.y < min.y) newsize.y = min.y;
 				} else {
-					newsize.x = ref.x;
+					newsize.y = ref.y;
 				}
 				touch = true;
 				vtx::spos ofs(0);

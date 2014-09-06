@@ -81,23 +81,38 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_terminal::update()
 	{
-		bool resize = false;
 		if(get_param().parents_ && get_state(widget::state::AREA_ROOT)) {
 			if(get_param().parents_->type() == get_type_id<widget_frame>()) {
+				// 親になってるフレームを取得
 				widget_frame* w = static_cast<widget_frame*>(at_param().parents_);
-				vtx::srect sr;
-				w->get_draw_area(sr);
-				if(param_.auto_fit_) {
-					vtx::spos ss(sr.size.x / param_.font_width_, sr.size.y / param_.height_);
-					w->set_draw_area(vtx::spos(ss.x * param_.font_width_, ss.y * param_.height_));
+				if(w) {
+					bool resize = false;
+					vtx::srect sr;
 					w->get_draw_area(sr);
-				}
-				if(sr.size != get_rect().size) resize = true;
-				at_rect() = sr;
-				if(resize) {
-					terminal_.resize(
-						vtx::spos(sr.size.x / param_.font_width_, sr.size.y / param_.height_)
-					);
+					if(param_.auto_fit_) {
+						vtx::spos ss(sr.size.x / param_.font_width_,
+									 sr.size.y / param_.height_);
+						ss.x *= param_.font_width_;
+//						if(ss.x < w->get_param().resize_min_.x) {
+//							ss.x = w->get_param().resize_min_.x / param_.font_width_;
+//							ss.x *= param_.font_width_;
+//						}
+						ss.y *= param_.height_;
+//						if(ss.y < w->get_param().resize_min_.y) {
+//							ss.y = w->get_param().resize_min_.y / param_.height_;
+//							ss.y *= param_.height_;
+//						}
+						w->set_draw_area(ss);
+						w->get_draw_area(sr);
+					}
+					if(sr.size != get_rect().size) resize = true;
+					at_rect() = sr;
+					if(resize) {
+						terminal_.resize(
+							vtx::spos(sr.size.x / param_.font_width_,
+									  sr.size.y / param_.height_)
+							);
+					}
 				}
 			}
 		}
