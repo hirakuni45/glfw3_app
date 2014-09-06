@@ -113,58 +113,6 @@ namespace utils {
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	文字列の評価比較
-		@param[in]	srca	ソース文字列 A
-		@param[in]	srcb	ソース文字列 B
-		@return 正確に一致したら 1.0 を返す
-	*/
-	//-----------------------------------------------------------------//
-	float compare(const lstring& srca, const lstring& srcb)
-	{
-		if(srca.empty() || srcb.empty()) return 0.0f;
-
-		static const lstring tbl = {
-			0x0009, ' ',	/// TAB ---> SPACE
-		};
-
-		lstring a;
-		code_conv(srca, tbl, a);
-		lstring b;
-		code_conv(srcb, tbl, b);
-
-		lstring spc = { ' ' };
-		lstrings aa;
-		split_text(a, spc, aa);
-		lstrings bb;
-		split_text(b, spc, bb);
-
-		uint32_t anum = aa.size();
-		BOOST_FOREACH(const lstring& s, aa) {
-			anum += s.size();
-		}
-		uint32_t bnum = bb.size();
-		BOOST_FOREACH(const lstring& s, bb) {
-			bnum += s.size();
-		}
-
-		float ans = 0.0f;
-		uint32_t n = aa.size();
-		uint32_t num = anum;
-		if(n > bb.size()) {
-			n = bb.size();
-			num = bnum;
-		}
-		for(uint32_t i = 0; i < n; ++i) {
-			if(aa[i] == bb[i]) {
-				ans += static_cast<float>(aa[i].size()) / static_cast<float>(num);
-			}
-		}
-		return ans;
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
 		@brief	UTF-8 から UTF-16 への変換
 		@param[in]	src	UTF-8 ソース
 		@param[in]	dst	UTF-16 出力
@@ -488,6 +436,91 @@ namespace utils {
 		return true;
 #endif
 #endif
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	文字列の評価変換
+		@param[in]	src	ソース文字列
+		@param[out]	dst 変換後の文字列
+		@return 変換された文字数
+	*/
+	//-----------------------------------------------------------------//
+	int string_conv(const lstring& src, lstring& dst)
+	{
+		if(src.empty()) return 0;
+
+		static const lstring tbl = {
+			0x0009, ' ',	/// TAB ---> SPACE
+			0x3000, ' ',	/// 全角スペース ---> SPACE
+		};
+
+		lstring s;
+		int n = code_conv(src, tbl, s);
+
+		lstring spc = { ' ' };
+		lstrings ss;
+		split_text(s, spc, ss);
+
+		BOOST_FOREACH(const lstring& l, ss) {
+			dst += l;
+			dst += ' ';
+		}
+
+		return n;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	文字列の評価比較
+		@param[in]	srca	ソース文字列 A
+		@param[in]	srcb	ソース文字列 B
+		@return 正確に一致したら 1.0 を返す
+	*/
+	//-----------------------------------------------------------------//
+	float compare(const lstring& srca, const lstring& srcb)
+	{
+		if(srca.empty() || srcb.empty()) return 0.0f;
+
+		static const lstring tbl = {
+			0x0009, ' ',	/// TAB ---> SPACE
+		};
+
+		lstring a;
+		code_conv(srca, tbl, a);
+		lstring b;
+		code_conv(srcb, tbl, b);
+
+		lstring spc = { ' ' };
+		lstrings aa;
+		split_text(a, spc, aa);
+		lstrings bb;
+		split_text(b, spc, bb);
+
+		uint32_t anum = 0;
+		BOOST_FOREACH(const lstring& s, aa) {
+			anum += s.size();
+		}
+		uint32_t bnum = 0;
+		BOOST_FOREACH(const lstring& s, bb) {
+			bnum += s.size();
+		}
+
+		float ans = 0.0f;
+		uint32_t n = aa.size();
+		uint32_t num = anum;
+		if(n > bb.size()) {
+			n = bb.size();
+			num = bnum;
+		}
+		for(uint32_t i = 0; i < n; ++i) {
+			if(aa[i] == bb[i]) {
+				ans += static_cast<float>(aa[i].size()) / static_cast<float>(num);
+			}
+		}
+		return ans;
 	}
 
 

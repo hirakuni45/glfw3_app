@@ -289,34 +289,6 @@ namespace utils {
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	文字列の評価比較
-		@param[in]	srca	ソース文字列 A
-		@param[in]	srcb	ソース文字列 B
-		@return 正確に一致したら 1.0 を返す
-	*/
-	//-----------------------------------------------------------------//
-	float compare(const lstring& srca, const lstring& srcb);
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	文字列の評価比較
-		@param[in]	srca	ソース文字列 A
-		@param[in]	srcb	ソース文字列 B
-		@return 正確に一致したら 1.0 を返す
-	*/
-	//-----------------------------------------------------------------//
-	inline float compare(const std::string& srca, const std::string& srcb) {
-		lstring a;
-		utf8_to_utf32(srca, a);
-		lstring b;
-		utf8_to_utf32(srcb, b);
-		return compare(a, b);
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
 		@brief	文字列リストの変換
 		@param[in]	src		入力文字列リスト
 		@param[out]	dst		出力文字列リスト
@@ -484,6 +456,45 @@ namespace utils {
 			if(ch) dst += ch;
 		}
 		return n;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	文字列の評価変換
+		@param[in]	src	ソース文字列
+		@param[out]	dst 変換後の文字列
+		@return 変換された文字数
+	*/
+	//-----------------------------------------------------------------//
+	int string_conv(const lstring& src, lstring& dst);
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	文字列の評価比較
+		@param[in]	srca	ソース文字列 A
+		@param[in]	srcb	ソース文字列 B
+		@return 正確に一致したら 1.0 を返す
+	*/
+	//-----------------------------------------------------------------//
+	float compare(const lstring& srca, const lstring& srcb);
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	文字列の評価比較
+		@param[in]	srca	ソース文字列 A
+		@param[in]	srcb	ソース文字列 B
+		@return 正確に一致したら 1.0 を返す
+	*/
+	//-----------------------------------------------------------------//
+	inline float compare(const std::string& srca, const std::string& srcb) {
+		lstring a;
+		utf8_to_utf32(srca, a);
+		lstring b;
+		utf8_to_utf32(srcb, b);
+		return compare(a, b);
 	}
 
 
