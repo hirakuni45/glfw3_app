@@ -526,7 +526,7 @@ namespace gui {
 		wd_.top_widget(this);
 
 		// ファイル情報の取得と反映（ファイル情報収集はスレッドで動作）
-		if(fsc_.probe()) {
+		if(fsc_wait_ && fsc_.probe()) {
 			fsc_path_ = fsc_.get_path();
 			file_infos_ = fsc_.get();
 			fsc_wait_ = false;
