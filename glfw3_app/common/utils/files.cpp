@@ -8,97 +8,61 @@
 #include <unistd.h>
 
 namespace utils {
-#if 0
-	static sem_t* recv_ = 0;
 
-	static void* files_task_(void* ptr)
+	uint32_t files::init_ = 0;
+	files::file_t files::file_t_;
+	pthread_t files::pth_;
+
+	void files::sleep_(uint32_t ms)
 	{
-		files::files_io* io = static_cast<files::files_io*>(ptr);
-		while(!io->exit_) {
-///			sem_wait(&io->recv_);
-			int ret = sem_wait(recv_);
-			std::cout << "Task: " << io->path_ << " " << ret << std::endl;
-			if(io->exit_) break;
+		usleep(ms * 1000);
+	}
 
-			io->file_infos_.clear();			
-			if(io->exts_.empty()) {
-				create_file_list(io->path_, io->file_infos_);
+	void* files::task_(void* in)
+	{
+		file_t& t = *(static_cast<file_t*>(in));
+
+		volatile uint32_t idx = t.idx_;
+		while(t.loop_) {
+			if(idx != t.idx_) {
+				pthread_mutex_lock(&t.sync_);
+				t.infos_.clear();
+				if(t.filter_.empty()) {
+					create_file_list(t.path_, t.infos_);
+				} else {
+					file_infos fis;
+					create_file_list(t.path_, fis);
+					filter_file_infos(fis, t.filter_, t.infos_);
+				}
+				idx = t.idx_;
+				pthread_mutex_unlock(&t.sync_);
 			} else {
-				file_infos fis;
-   				create_file_list(io->path_, fis);
-				filter_file_infos(fis, io->exts_, io->file_infos_);
+				sleep_(10);
 			}
-			sem_post(&io->send_);
 		}
-		return 0;
+
+		return nullptr;
 	}
 
-
-	void files::init_task_()
+	void files::start_()
 	{
-		return;
-		files_io_ = new files_io;
-		std::cout << "Task init" << std::endl;
-		pthread_attr_init(&files_io_->attr_);
-		pthread_attr_setdetachstate(&files_io_->attr_, PTHREAD_CREATE_DETACHED);
-		sem_init(&files_io_->send_, 0, 0);
-		sem_init(&files_io_->recv_, 0, 0);
-		recv_ = sem_open("files_recv", O_CREAT, 0777, 0);
-		pthread_create(&files_io_->pth_t_, &files_io_->attr_, files_task_, files_io_);
-	}
-
-
-	void files::destroy_task_()
-	{
-		return;
-
-		if(files_io_ == 0) return;
-		files_io_->exit_ = true;
-		sem_post(&files_io_->recv_);
-		sem_post(recv_);
-		pthread_join(files_io_->pth_t_, 0);
-		sem_destroy(&files_io_->recv_);
-		sem_destroy(&files_io_->send_);
-///		sem_destroy(recv_);
-		sem_close(recv_);
-		sem_unlink("files_recv");
-		pthread_attr_destroy(&files_io_->attr_);
-		delete files_io_;
-		files_io_ = 0;
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	ファイル情報取得かどうか？
-		@return ファイル情報取得なら「true」
-	*/
-	//-----------------------------------------------------------------//
-	bool files::probe()
-	{
-#if 0
-		if(files_io_ == 0) return false;
-		if(sem_trywait(&files_io_->send_) == 0) {
-			file_infos_ = files_io_->file_infos_;
-			return true;
-		} else {
-			return false;
+		if(init_ == 0) {
+			pthread_mutex_init(&file_t_.sync_, nullptr);
+			pthread_create(&pth_, nullptr, task_, &file_t_);
 		}
-#endif
-		return false;
+		++init_;
 	}
 
 
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	ファイル情報郡を取得
-		@return ファイル情報郡
-	*/
-	//-----------------------------------------------------------------//
-	const file_infos& files::get()
+	void files::end_()
 	{
-///		probe();
-		return file_infos_;
+		if(init_) {
+			--init_;
+			if(init_ == 0) {
+				file_t_.loop_ = false;
+				pthread_join(pth_, nullptr);
+				pthread_mutex_destroy(&file_t_.sync_);
+			}
+		}
 	}
-#endif
 }

@@ -7,9 +7,7 @@
 */
 //=====================================================================//
 #include <string>
-#include <thread>
-#include <future>
-#include <tuple>
+#include <pthread.h>
 #include "utils/drive_info.hpp"
 #include "utils/file_info.hpp"
 #include "utils/string_utils.hpp"
@@ -23,28 +21,28 @@ namespace utils {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class files {
-		typedef std::tuple<std::string, std::string> inp; 
 
-		static file_infos task_(inp in) {
-			if(std::get<1>(in).empty()) {
-				file_infos fis;
-				create_file_list(std::get<0>(in), fis);
-				return fis;
-			} else {
-				file_infos tmp;
-				create_file_list(std::get<0>(in), tmp);
-				file_infos fis;
-				filter_file_infos(tmp, std::get<1>(in), fis);
-				return fis;
-			}
+		struct file_t {
+			volatile bool		loop_;
+			volatile uint32_t	idx_;
+			pthread_mutex_t		sync_;
+			std::string			path_;
+			std::string			filter_;
+			file_infos			infos_;
+			file_t() : loop_(true), idx_(0) { }
 		};
 
-		std::string		root_path_;
-		std::string		ext_;
+		volatile uint32_t	idx_;
 
-		std::future<file_infos>	future_;
+		static uint32_t		init_;
+		static file_t		file_t_;
+		static pthread_t	pth_;
 
-		utils::file_infos	file_infos_;
+		static void start_();
+		static void end_();
+
+		static void sleep_(uint32_t ms);
+		static void* task_(void* in);
 
 	public:
 		//-----------------------------------------------------------------//
@@ -53,7 +51,7 @@ namespace utils {
 			@param[in]	path	パス
 		*/
 		//-----------------------------------------------------------------//
-		files() { }
+		files() : idx_(0) { start_(); }
 
 
 		//-----------------------------------------------------------------//
@@ -61,21 +59,23 @@ namespace utils {
 			@brief	デストラクター
 		*/
 		//-----------------------------------------------------------------//
-		~files() { }
+		~files() { end_(); }
 
 
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	ルートパスを設定
 			@param[in]	path	パス
-			@param[in]	ext		拡張子フィルター
+			@param[in]	filter	拡張子フィルター
 		*/
 		//-----------------------------------------------------------------//
-		void set_path(const std::string& path, const std::string& ext = "") {
-			root_path_ = path;
-			ext_ = ext;
-			inp in = std::make_tuple(path, ext);
-			future_ = std::async(std::launch::async, task_, in);
+		void set_path(const std::string& path, const std::string& filter = "") {
+			pthread_mutex_lock(&file_t_.sync_);
+			idx_ = file_t_.idx_;
+			file_t_.path_ = path;
+			file_t_.filter_ = filter;
+			++file_t_.idx_;
+			pthread_mutex_unlock(&file_t_.sync_);
 		}
 
 
@@ -85,7 +85,7 @@ namespace utils {
 			@return ルートパス
 		*/
 		//-----------------------------------------------------------------//
-		const std::string& get_path() const { return root_path_; }
+		const std::string& get_path() const { return file_t_.path_; }
 
 
 		//-----------------------------------------------------------------//
@@ -94,7 +94,7 @@ namespace utils {
 			@return 拡張子
 		*/
 		//-----------------------------------------------------------------//
-		const std::string& get_exts() const { return ext_; }
+		const std::string& get_exts() const { return file_t_.filter_; }
 
 
 		//-----------------------------------------------------------------//
@@ -103,9 +103,7 @@ namespace utils {
 			@return ファイル情報取得なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool probe() {
-			return future_.valid();
-		}
+		bool probe() { return idx_ != file_t_.idx_; }
 
 
 		//-----------------------------------------------------------------//
@@ -115,9 +113,10 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		const file_infos& get() {
-			file_infos_ = future_.get();
-			return file_infos_;
+			while(!probe()) {
+				sleep_(10);
+			}
+			return file_t_.infos_;
 		}
 	};
-
 }
