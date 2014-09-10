@@ -49,8 +49,10 @@ namespace gl {
 
 		std::string		title_;
 
+#ifdef __APPLE__
 		std::future<uint32_t>	v_sync_wait_;
 		uint32_t	sync_count_;
+#endif
 
 		uint32_t	frame_count_;
 		double		frame_time_;
@@ -64,6 +66,7 @@ namespace gl {
 
 		bool		keyboard_jp_;
 
+#ifdef __APPLE__
 		static uint32_t wait_sync_task_(uint32_t in) {
 			++in;
 			usleep(16000);	// 16ms
@@ -79,6 +82,7 @@ namespace gl {
 		void wait_sync_() {
 			sync_count_ = v_sync_wait_.get();
 		}
+#endif
 
 		//-----------------------------------------------------------------//
 		/*!
@@ -89,7 +93,9 @@ namespace gl {
 				 best_size_(0), limit_size_(0), size_(0), rect_(0),
 				 recv_file_id_(0),
 				 title_(),
+#ifdef __APPLE__
 				 sync_count_(0),
+#endif
 				 frame_count_(0), frame_time_(0.0),
 				 machine_cycle_(0.0), cpu_ghz_(0.0),
 				 cpu_spd_enable_(false), swap_ctrl_(false),

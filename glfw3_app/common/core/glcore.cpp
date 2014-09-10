@@ -350,7 +350,9 @@ namespace gl {
 #endif
 		}
 
+#ifdef __APPLE__
 		start_sync_();
+#endif
 
 		return true;
 	}
@@ -497,12 +499,13 @@ namespace gl {
 #endif
 
 ///		std::this_thread::sleep_for(std::chrono::milliseconds(10));
-
+#ifdef __APPLE__
 		wait_sync_();
-
+#endif
 		glfwSwapBuffers(window_);
-
+#ifdef __APPLE__
 		start_sync_();
+#endif
 	}
 
 
