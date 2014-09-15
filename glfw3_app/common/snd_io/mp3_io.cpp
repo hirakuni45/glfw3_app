@@ -23,7 +23,7 @@ namespace al {
 	using namespace utils;
 
 	// デコード済みテンポラリー、５０フレーム分確保（44.1KHz で１．３秒）
-	static const int g_output_buffer_size = 50;
+	static const int output_buffer_size_ = 50;
 
 	static const short SHRT_MAX_ = 32767;
 
@@ -491,14 +491,13 @@ namespace al {
 		fin.close();
 
 		using namespace TagLib;
-		std::string fn;
-//#ifdef WIN32
-//		utils::utf8_to_sjis(fin.get_path(), fn);
-//#else
-		fn = fin.get_path();
-//#endif
-		MPEG::File f(fn.c_str());
-
+#ifdef WIN32
+		utils::wstring ws;
+		utils::utf8_to_utf16(fin.get_path(), ws);
+		MPEG::File f(reinterpret_cast<const wchar_t*>(ws.c_str()));
+#else
+		MPEG::File f(fin.get_path());
+#endif
 		ID3v1::Tag* v1 = f.ID3v1Tag();
 	   	if(v1) {
    			tag_.title_  = convert_string_(v1->title()); 
@@ -835,7 +834,7 @@ namespace al {
 	{
 		close_stream();
 
-		output_max_ = 1152 * g_output_buffer_size;
+		output_max_ = 1152 * output_buffer_size_;
 
 		offset_ = 0;
 

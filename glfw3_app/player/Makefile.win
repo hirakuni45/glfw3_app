@@ -124,7 +124,7 @@ ifeq ($(BUILD),release)
 	CFLAGS += -DNDEBUG
 endif
 
-LFLAGS	=	
+LFLAGS	=	-mwindows	
 
 # -Wuninitialized -Wunused -Werror -Wshadow
 CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
@@ -147,7 +147,7 @@ endif
 
 all: $(BUILD) $(TARGET)
 
-$(TARGET): $(OBJECTS) $(ICON_OBJ) Makefile
+$(TARGET): $(OBJECTS) $(ICON_OBJ) Makefile.win
 	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -o $(TARGET)
 
 $(BUILD)/%.o : %.c
