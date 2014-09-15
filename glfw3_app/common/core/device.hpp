@@ -8,6 +8,11 @@
 #include <bitset>
 #include "utils/vtx.hpp"
 
+#ifdef WIN32
+// windows で define されているので無効にする。
+#undef DELETE
+#endif
+
 namespace gl {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//

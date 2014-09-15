@@ -8,10 +8,10 @@
 #include "widgets/widget_director.hpp"
 
 namespace gui {
-
+#ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-private-field" 
-
+#endif
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
 		@brief	GUI widget_null クラス
@@ -133,7 +133,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		bool load(const sys::preference& pre) { return true; }
 	};
-
+#ifdef __clang__
 #pragma clang diagnostic pop
-
+#endif
 }

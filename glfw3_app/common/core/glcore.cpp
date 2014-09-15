@@ -233,6 +233,8 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	bool core::initialize(const std::string& exec_path)
 	{
+///		std::cout << "Exec path: '" << exec_path << std::endl;
+
 		std::string tmp;
 		utils::convert_delimiter(exec_path, '\\', '/', tmp);
 		std::string base;
@@ -242,12 +244,15 @@ namespace gl {
 			utils::get_file_path(tmp, current_path_);
 		} else {
 			char buff[2048];
-			current_path_ = getcwd(buff, sizeof(buff));
+			std::string tmp;
+			tmp = getcwd(buff, sizeof(buff));
+			utils::convert_delimiter(tmp, '\\', '/', current_path_);
+///			std::cout << "Current(getcwd): '" << current_path_ << std::endl;
 		}
 		exec_path_ = current_path_ + '/' + base;
 
-//		std::cout << "Current: '" << current_path_ << std::endl;
-//		std::cout << "Exec:    '" << exec_path_ << std::endl;
+///		std::cout << "Current: '" << current_path_ << std::endl;
+///		std::cout << "Exec:    '" << exec_path_ << std::endl;
 
 	    if (!glfwInit()) {
 			return false;

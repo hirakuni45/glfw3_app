@@ -73,7 +73,7 @@ void get_metrics(uint32_t code)
 		}
 
 		string path;
-		if(fontfile[0] == '/') path = fontfile;
+		if(utils::probe_full_path(fontfile)) path = fontfile;
 		else path = root_path_ + fontfile;
 		FT_Face face;
 		FT_Error error = FT_New_Face(library_, path.c_str(), 0, &face);

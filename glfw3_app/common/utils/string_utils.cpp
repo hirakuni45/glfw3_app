@@ -7,15 +7,7 @@
 #include "utils/string_utils.hpp"
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
-
-#ifdef WIN32
-#include <windows.h>
-#endif
-
-#ifdef __APPLE__
-// #include "utils/cc932.hpp"
 #include "utils/sjis_utf16.hpp"
-#endif
 
 #include <iostream>
 
@@ -285,7 +277,6 @@ namespace utils {
 	bool sjis_to_utf8(const std::string& src, std::string& dst)
 	{
 		if(src.empty()) return false;
-#ifdef __APPLE__
 		wstring ws;
 		uint16_t wc = 0;
 		BOOST_FOREACH(char ch, src) {
@@ -294,12 +285,10 @@ namespace utils {
 				if(0x40 <= c && c <= 0x7e) {
 					wc <<= 8;
 					wc |= c;
-///					ws += ff_convert(wc, 1);
 					ws += sjis_to_utf16(wc);
 				} else if(0x80 <= c && c <= 0xfc) {
 					wc <<= 8;
 					wc |= c;
-///					ws += ff_convert(wc, 1);
 					ws += sjis_to_utf16(wc);
 				}
 				wc = 0;
@@ -311,19 +300,6 @@ namespace utils {
 		}
 		utf16_to_utf8(ws, dst);
 		return true;
-#endif
-#ifdef WIN32
-		uint32_t sz = src.size() + 1;
-		wchar_t* tmp = new wchar_t[sz];
-		int len = mbstowcs(tmp, src.c_str(), sz);
-		wstring ws;
-		for(uint32_t i = 0; i < len; ++i) {
-			ws += tmp[i];
-		}
-		utf16_to_utf8(ws, dst);
-		delete[] tmp;
-		return true;
-#endif
 	}
 
 
@@ -338,25 +314,10 @@ namespace utils {
 	bool sjis_to_utf16(const std::string& src, wstring& dst)
 	{
 		if(src.empty()) return false;
-#ifdef __APPLE__
 		std::string tmp;
 		bool f = sjis_to_utf8(src, tmp);
 		if(f) utf8_to_utf16(tmp, dst);
 		return f;
-#else
-#ifdef WIN32
-		uint32_t sz = src.size() + 1;
-		wchar_t* tmp = new wchar_t[sz];
-		int len = mbstowcs(tmp, src.c_str(), sz);
-		if(len > 0) {
-			for(uint32_t i = 0; i < len; ++i) {
-				dst += tmp[i];
-			}
-		}
-		delete[] tmp;
-		return true;
-#endif
-#endif
 	}
 
 
@@ -371,36 +332,15 @@ namespace utils {
 	bool utf8_to_sjis(const std::string& src, std::string& dst)
 	{
 		if(src.empty()) return false;
-#ifdef __APPLE__
+
 		wstring ws;
 		utf8_to_utf16(src, ws);
 		BOOST_FOREACH(uint16_t wc, ws) {
-///			uint16_t ww = ff_convert(wc, 0);
 			uint16_t ww = utf16_to_sjis(wc);
 			dst += ww >> 8;
 			dst += ww & 0xff;
 		}
 		return true;
-#endif
-#ifdef WIN32
-		wstring ws;
-		utf8_to_utf16(src, ws);
-		wchar_t* stmp = new wchar_t[ws.size() + 1];
-		for(uint32_t i = 0; i < ws.size(); ++i) {
-			stmp[i] = ws[i];
-		}
-		stmp[ws.size()] = 0;
-		uint32_t sz = ws.size() * 6 + 1;	// 一応6倍分のバイト数確保
-		char* dtmp = new char[sz];
-		int len = wcstombs(dtmp, stmp, sz);
-		if(len >= 0) {
-			dtmp[len] = 0;
-			dst += dtmp;
-		}
-		delete[] dtmp;
-		delete[] stmp;
-		return true;
-#endif
 	}
 
 
@@ -415,27 +355,11 @@ namespace utils {
 	bool utf16_to_sjis(const wstring& src, std::string& dst)
 	{
 		if(src.empty()) return false;
-#ifdef __APPLE__
+
 		std::string tmp;
 		utf16_to_utf8(src, tmp);
 		utf8_to_sjis(tmp, dst);
 		return true;
-#else
-#ifdef WIN32
-		wchar_t* stmp = new wchar_t[src.size()];
-		for(uint32_t i = 0; i < src.size(); ++i) {
-			stmp[i] = src[i];
-		}
-		uint32_t sz = src.size() * 6 + 1;	// 一応6倍分のバイト数確保
-		char* dtmp = new char[sz];
-		int len = wcstombs(dtmp, stmp, sz);
-		dtmp[len] = 0;
-		dst += dtmp;
-		delete[] dtmp;
-		delete[] stmp;
-		return true;
-#endif
-#endif
 	}
 
 

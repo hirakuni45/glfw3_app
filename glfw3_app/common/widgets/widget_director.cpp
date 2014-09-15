@@ -374,7 +374,9 @@ namespace gui {
 			}
 		}
 		fonts.pop_font_face();
-///		fonts.install_font_type("meiryo.ttc", "meiryo");
+#ifdef WIN32
+		fonts.install_font_type("meiryo.ttc", "meiryo");
+#endif
 		fonts.set_font_size(20);
 		fonts.set_clip_size(core.get_rect().size);
 

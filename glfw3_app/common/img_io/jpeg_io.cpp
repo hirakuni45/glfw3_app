@@ -485,14 +485,19 @@ namespace img {
 		int h = img_->get_size().y;
 		cinfo.image_width  = w;
 		cinfo.image_height = h;
+#if (defined JCS_ALPHA_EXTENSIONS)
 		if(img_->test_alpha()) {
 			cinfo.input_components = 4;
 			cinfo.in_color_space = JCS_EXT_RGBA;
+
 		} else {
 			cinfo.input_components = 3;
 			cinfo.in_color_space = JCS_RGB;
 		}
-
+#else
+		cinfo.input_components = 3;
+		cinfo.in_color_space = JCS_RGB;
+#endif
 		jpeg_set_defaults(&cinfo);
 		jpeg_set_quality(&cinfo, q, TRUE);
 
@@ -511,7 +516,9 @@ namespace img {
 				*p++ = c.r;
 				*p++ = c.g;
 				*p++ = c.b;
+#if (defined JCS_ALPHA_EXTENSIONS)
 				if(img_->test_alpha()) *p++ = c.a;
+#endif
 			}
 			jpeg_write_scanlines(&cinfo, row_pointer, 1);
 			if(dst->error) break;

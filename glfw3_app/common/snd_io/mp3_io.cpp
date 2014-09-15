@@ -491,7 +491,13 @@ namespace al {
 		fin.close();
 
 		using namespace TagLib;
-		MPEG::File f(fin.get_path().c_str());
+		std::string fn;
+//#ifdef WIN32
+//		utils::utf8_to_sjis(fin.get_path(), fn);
+//#else
+		fn = fin.get_path();
+//#endif
+		MPEG::File f(fn.c_str());
 
 		ID3v1::Tag* v1 = f.ID3v1Tag();
 	   	if(v1) {
