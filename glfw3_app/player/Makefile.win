@@ -3,7 +3,7 @@
 #-----------------------------------------------#
 TARGET		=	player
 
-# ICON_RC		=	icon.rc
+ICON_RC		=	icon.rc
 # 'debug' or 'release'
 BUILD		=	release
 
@@ -102,7 +102,7 @@ LIBN	+=	$(addprefix -l, $(OPTLIBS))
 CP	=	g++
 CC	=	gcc
 LK	=	g++
-RC	=
+RC	=	windres
 
 POPT	=	-O2 -std=gnu++11
 COPT	=	-O2
