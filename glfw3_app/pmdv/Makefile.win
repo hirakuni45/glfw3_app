@@ -1,9 +1,10 @@
 #-----------------------------------------------#
 # Application Binary Build Makefile             #
 #-----------------------------------------------#
-TARGET		=	player
+TARGET		=	pmdv
 
-# ICON_RC		=	icon.rc
+ICON_RC		=
+#	icon.rc
 # 'debug' or 'release'
 BUILD		=	release
 
@@ -13,7 +14,7 @@ CSOURCES	=	minizip/ioapi.c \
 				minizip/unzip.c
 
 PSOURCES	=	main.cpp \
-				player.cpp \
+				pmdv_main.cpp \
 				core/glcore.cpp \
 				core/device.cpp \
 				core/ftimg.cpp \
@@ -21,6 +22,9 @@ PSOURCES	=	main.cpp \
 				gl_fw/glmobj.cpp \
 				gl_fw/gltexfb.cpp \
 				gl_fw/glterminal.cpp \
+				gl_fw/glcamera.cpp \
+				gl_fw/gllight.cpp \
+				gl_fw/glutils.cpp \
 				utils/vtx.cpp \
 				utils/vmath.cpp \
 				utils/sjis_utf16.cpp \
@@ -61,7 +65,11 @@ PSOURCES	=	main.cpp \
 				widgets/widget_radio.cpp \
 				widgets/widget_menu.cpp \
 				widgets/widget_dialog.cpp \
-				widgets/widget_filer.cpp
+				widgets/widget_filer.cpp \
+				widgets/widget_terminal.cpp \
+				widgets/widget_tree.cpp \
+				mdf/pmd_io.cpp \
+				mdf/pmx_io.cpp
 
 STDLIBS		=
 OPTLIBS		=	glfw3 glew32 opengl32 glu32 gdi32 imm32 \

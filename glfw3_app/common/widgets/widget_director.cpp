@@ -784,6 +784,10 @@ namespace gui {
 	{
 		core& core = core::get_instance();
 
+		const vtx::spos& size = core.get_rect().size;
+		// WIN32 では、アプリケーションを待機状態にすると、サイズが「０」などが来る
+		if(size.x <= 0 || size.y <= 0) return;
+
 		// クリップ領域を全てアップデート
 		reset_mark();
 		BOOST_FOREACH(widget* w, widgets_) {
@@ -800,8 +804,6 @@ namespace gui {
 				clip_widgets_(ws, true);
 			}
 		}
-
-		const vtx::spos& size = core.get_rect().size;
 
 		// 各 描画
 		glDisable(GL_DEPTH_TEST);

@@ -10,7 +10,7 @@
 typedef app::gui_test start_app;
 
 static const char* window_key_ = { "application/window" };
-static const char* app_title_ = { "player" };
+static const char* app_title_ = { "gui_test" };
 static const vtx::spos start_pos_(10, 40);
 static const vtx::spos start_size_(800, 600);
 static const vtx::spos limit_size_(800, 600);

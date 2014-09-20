@@ -135,6 +135,7 @@ namespace utils {
 
 			// レンダリング処理
 			BOOST_FOREACH(i_scene* is, current_scenes_) {
+				current_scene_ = is;
 				is->render();
 			}
 
