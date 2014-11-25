@@ -683,8 +683,17 @@ namespace gui {
 			}
 		}
 
+		// 移動
+		bool move_it = false;
+		if(top_move_ && !top_move_->get_state(widget::state::POSITION_LOCK)) {
+			touch = true;
+			top_move_->at_rect().org = top_move_->get_param().move_pos_;
+			move_it = true;
+		}
+
 		// リサイズ処理
-		if(top_resize_ && !top_resize_->get_state(widget::state::SIZE_LOCK)) {
+		// 移動がある場合、リサイズしない
+		if(!move_it && top_resize_ && !top_resize_->get_state(widget::state::SIZE_LOCK)) {
 			if(right.lvl || (left.lvl && resize_edge_)) {
 				const widget::param& param = top_resize_->get_param();
 				vtx::spos d = msp - param.resize_pos_;
@@ -720,11 +729,6 @@ namespace gui {
 				top_resize_->at_rect().org  = param.resize_org_ + ofs;
 				top_resize_->at_rect().size = newsize;
 			}
-		}
-
-		if(top_move_ && !top_move_->get_state(widget::state::POSITION_LOCK)) {  // 移動
-			touch = true;
-			top_move_->at_rect().org = top_move_->get_param().move_pos_;
 		}
 
 		if(select || top_move_ || top_resize_) {  // 選択（top_widget）、トップ・フォーカス

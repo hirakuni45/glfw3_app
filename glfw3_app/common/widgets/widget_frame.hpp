@@ -186,10 +186,26 @@ namespace gui {
 		/*!
 			@brief	状態のロード
 			@param[in]	pre	プリファレンス参照
+			@param[in]	w_ena	幅を無視する場合「false」
+			@param[in]	h_ena	縦を無視する場合「false」
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre);
+		bool load(const sys::preference& pre) {
+			return load(pre, true, true);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	状態のロード
+			@param[in]	pre	プリファレンス参照
+			@param[in]	w_ena	幅を無視する場合「false」
+			@param[in]	h_ena	縦を無視する場合「false」
+			@return エラーが無い場合「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool load(const sys::preference& pre, bool w_ena, bool h_ena);
 	};
 
 }

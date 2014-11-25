@@ -87,10 +87,12 @@ namespace gui {
 	/*!
 		@brief	状態のロード
 		@param[in]	pre	プリファレンス参照
+		@param[in]	w_ena	幅を無視する場合「false」
+		@param[in]	h_ena	縦を無視する場合「false」
 		@return エラーが無い場合「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool widget_frame::load(const sys::preference& pre)
+	bool widget_frame::load(const sys::preference& pre, bool w_ena, bool h_ena)
 	{
 		std::string path;
 		path += '/';
@@ -104,7 +106,8 @@ namespace gui {
 			++err;
 		}
 		if(pre.get_position(path + "/size", p)) {
-			at_rect().size = p;
+			if(w_ena) at_rect().size.x = p.x;
+			if(h_ena) at_rect().size.y = p.y;
 		} else {
 			++err;
 		}
