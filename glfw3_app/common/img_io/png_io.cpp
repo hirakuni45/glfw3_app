@@ -203,6 +203,9 @@ namespace img {
 ///		std::cout << "Compression: " << comp_type << std::endl;
 ///		std::cout << "Filter: " << filter_type << std::endl;
 
+		prgl_ref_ = height;
+		prgl_pos_ = 0;
+
 		int ch;
 		bool alpha;
 		bool gray = false;
@@ -305,6 +308,7 @@ namespace img {
 					img_->put_pixel(pos, c);
 				}
 			}
+			prgl_pos_ = pos.y;
 		}
 		delete[] iml;
 
@@ -344,6 +348,9 @@ namespace img {
 			return false;
 		}
 		png_set_write_fn(png_ptr, (png_voidp)&fout, png_io_write_func, png_io_flush_func);
+
+		prgl_ref_ = h;
+		prgl_pos_ = 0;
 
 		int	type;
 		int ch;
@@ -407,6 +414,7 @@ namespace img {
 				}
 			}
 			png_write_row(png_ptr, iml);
+			prgl_pos_ = pos.y;
 		}
 		delete[] iml;
 

@@ -111,8 +111,7 @@ namespace img {
 		std::string line;
 		map_max_ = 0;
 		while(fin.get_line(line) == true) {
-			utils::strings ss;
-			utils::split_text(line, " ", ss);
+			utils::strings ss = utils::split_text(line, " ");
 			if(ss.size() == 5) {
 				if(ss[0] == "FONTBOUNDINGBOX") {
 					int ww;
