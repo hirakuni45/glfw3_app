@@ -245,10 +245,9 @@ namespace sys {
 		string s;
 		while(inp.get_line(s) == true) {
 			if(s.empty()) continue;
-			utils::strings ss;
 			if(s[0] == '#') ;
 			else {
-				utils::split_text(s, " ", ss, 3);
+				utils::strings ss = utils::split_text(s, " ", 3);
 				if(ss.size() == 3) {
 					int n = -1;
 					sscanf(ss[1].c_str(), "%d", &n);

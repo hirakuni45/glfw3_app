@@ -160,7 +160,7 @@ namespace utils {
 	{
 		utils::strings ss;
 		if(!filter.empty()) {
-			utils::split_text(filter, ",", ss);
+			ss = utils::split_text(filter, ",");
 		}
 
 		BOOST_FOREACH(const file_info& f, src) {
