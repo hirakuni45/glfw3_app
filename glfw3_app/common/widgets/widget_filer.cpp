@@ -73,9 +73,8 @@ namespace gui {
 		rect.size.y = param_.label_height_;
 
 		// ルートパスならドライブレターを加える
-		std::string pp;
-		bool prevp = utils::previous_path(fsc_path_, pp);
-		if(!prevp) {
+		std::string pp = utils::previous_path(fsc_path_);
+		if(!pp.empty()) {
 			for(uint32_t i = 0; i < drv_.get_num(); ++i) {
 				widget_file wf;
 				std::string fn;
@@ -108,7 +107,7 @@ namespace gui {
 
 			widget_file wf;
 			if(fn == "..") {
-				if(!prevp) continue;
+				if(pp.empty()) continue;
 				wf.dir = true;
 			} else if(fi.is_directory()) {
 				fn += '/';
@@ -535,8 +534,8 @@ namespace gui {
 				create_files_(center_, 0);
 				update_files_info_(center_);
 				if(left_.empty()) {
-					std::string pp;
-					if(utils::previous_path(param_.path_, pp)) {
+					std::string pp = utils::previous_path(param_.path_);
+					if(!pp.empty()) {
 						file_infos_.clear();
 						fsc_path_.clear();
 						fsc_.set_path(pp);
@@ -604,16 +603,18 @@ namespace gui {
 				move_speed_ = spd;
 			}
 			if(move_speed_ > 0.0f && position_.x >= main_->get_rect().size.x) {
+				selected_enable_ = true;
 				move_speed_ = 0.0f;
 				position_.x = 0.0f;
-				std::string pp;
-				if(utils::previous_path(param_.path_, pp)) {
+				std::string pp = utils::previous_path(param_.path_);
+				if(!pp.empty()) {
 					std::string tmp = param_.path_;
 					param_.path_ = pp;
 					destroy_files_(center_);
 					center_.swap(left_);
 					focus_file(tmp);
-					if(utils::previous_path(param_.path_, pp)) {
+					pp = utils::previous_path(param_.path_);
+					if(!pp.empty()) {
 						file_infos_.clear();
 						fsc_path_.clear();
 						fsc_.set_path(pp, param_.filter_);
@@ -624,6 +625,7 @@ namespace gui {
 				}
 				get_regist_state_();
 			} else if(move_speed_ < 0.0f && position_.x <= -main_->get_rect().size.x) {
+				selected_enable_ = true;
 				move_speed_ = 0.0f;
 				position_.x = 0.0f;
 				destroy_files_(left_);
@@ -718,10 +720,7 @@ namespace gui {
 			short ref = files_->get_rect().org.x;
 			if(left_.size() > 0) ref += main_->get_rect().size.x;
 			if(ref > (get_rect().size.x / 3)) {
-				std::string np;
-				if(utils::previous_path(param_.path_, np)) {
-					param_.text_param_.text_ = np;
-				}
+				param_.text_param_.text_ = utils::previous_path(param_.path_);
 			} else {
 				param_.text_param_.text_ = param_.path_;
 			}
@@ -764,9 +763,11 @@ namespace gui {
 		}
 
 		// 選択の確認と動作
-		{
+		if(selected_enable_) {
 			widget_files_cit cit = scan_selected_file_(center_);
 			if(cit != center_.end()) {
+				selected_enable_ = false;
+
 				const widget_file& wf = *cit;
 				if(param_.new_file_ && cit == center_.begin()) {
 					new_file_enable_ = !new_file_enable_;
@@ -799,7 +800,10 @@ namespace gui {
 						utils::append_path(param_.path_, n, file_);
 						++select_file_id_;
 						enable(false);
+						selected_enable_ = true;
 					}
+				} else {
+					selected_enable_ = true;
 				}
 #if 0
 			} else if(!files_->get_state(widget::state::DRAG)){
