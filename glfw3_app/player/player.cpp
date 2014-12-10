@@ -183,8 +183,7 @@ namespace app {
 			if(ss.empty()) {
 				error_dialog_->enable(false);
 			} else {
-				std::string s;
-				utils::strings_to_string(ss, true, s);
+				std::string s = utils::strings_to_string(ss, true);
 				error_dialog_->set_text(s);
 				std::cout << s << std::endl;
 			}
