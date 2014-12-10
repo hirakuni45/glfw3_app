@@ -76,6 +76,7 @@ namespace gui {
 		widget*					top_move_;
 		widget*					top_scroll_;
 		widget*					top_resize_;
+		widget*					top_unselect_;
 		widget*					top_widget_;
 
 		float					msp_length_;
@@ -121,7 +122,9 @@ namespace gui {
 		widget_director() : img_files_(),
 			mobj_(), common_parts_(mobj_), serial_(0), widgets_(),
 			unselect_length_(7.0f), position_(0.0f), scale_(1.0f),
-			top_move_(0), top_scroll_(0), top_resize_(0), top_widget_(0),
+			top_move_(0), top_scroll_(0), top_resize_(0),
+							top_unselect_(0),
+							top_widget_(0),
 			msp_length_(0.0f), msp_speed_(0),
 			position_positive_(0), position_level_(0), position_negative_(0),
 			scroll_(0), share_img_(), keyboard_(), del_mark_(),

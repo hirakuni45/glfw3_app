@@ -508,6 +508,8 @@ namespace gui {
 			}
 			new_file_in_ = center_[0].name->get_local_param().text_in_;
 		}
+
+		wd_.top_widget(this);
 	}
 
 
@@ -522,7 +524,7 @@ namespace gui {
 			return;
 		}
 
-		wd_.top_widget(this);
+//		wd_.top_widget(this);
 
 		// ファイル情報の取得と反映（ファイル情報収集はスレッドで動作）
 		if(fsc_wait_ && fsc_.probe()) {
