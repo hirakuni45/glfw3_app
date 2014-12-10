@@ -72,7 +72,8 @@ PSOURCES	=	main.cpp \
 				widgets/widget_filer.cpp \
 				widgets/widget_terminal.cpp \
 				mdf/pmd_io.cpp \
-				mdf/pmx_io.cpp
+				mdf/pmx_io.cpp \
+				mdf/mmd_io.cpp
 
 STDLIBS		=
 OPTLIBS		=	glfw3 GLEW \
