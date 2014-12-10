@@ -165,24 +165,24 @@ namespace utils {
 	//-----------------------------------------------------------------//
 	bool file_io::get_char(char& ch)
 	{
-		if(open_ == false) return false;
 		if(fp_) {
 			int cha = ::fgetc(fp_);
 			if(cha != EOF) {
 				ch = cha;
 				return true;
-			} else {
-				return false;
 			}
-		} else if(rbuff_ != 0 && size_ > 0) {
-			if(fpos_ < size_) {
-				ch = rbuff_[fpos_];
-				fpos_++;
-				return true;
-			} else {
-				return false;
+		} else if(open_) {
+			if(rbuff_ != 0 && size_ > 0) {
+				if(fpos_ < size_) {
+					ch = rbuff_[fpos_];
+					fpos_++;
+					return true;
+				} else {
+					return false;
+				}
 			}
-		} else return false;
+		}
+		return false;
 	}
 
 
@@ -195,11 +195,11 @@ namespace utils {
 	//-----------------------------------------------------------------//
 	bool file_io::put_char(char c)
 	{
-		if(open_ == false) return false;
 		if(fp_) {
-			::fputc(c, fp_);
+			fputc(c, fp_);
 			return true;
 		} else {
+			if(!open_) return false;
 			wbuff_.push_back(c);
 			return true;
 		}
