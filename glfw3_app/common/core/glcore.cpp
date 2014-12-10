@@ -237,8 +237,7 @@ namespace gl {
 
 		std::string tmp;
 		utils::convert_delimiter(exec_path, '\\', '/', tmp);
-		std::string base;
-		utils::get_file_base(tmp, base);
+		std::string base = utils::get_file_base(tmp);
 
 		if(!tmp.empty() && tmp[0] == '/') {
 			utils::get_file_path(tmp, current_path_);
