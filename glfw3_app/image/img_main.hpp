@@ -37,7 +37,9 @@ namespace app {
 
 		gui::widget_frame*		frame_;
 		gui::widget_image*		image_;
+
 		gui::widget_frame*		tools_;
+		gui::widget_button*		new_;
 		gui::widget_button*		load_;
 		gui::widget_button*		save_;
 		gui::widget_radio*		scale_fit_;
@@ -52,6 +54,7 @@ namespace app {
 		gui::widget_dialog*		dialog_;
 		gui::widget_dialog*		dialog_yes_no_;
 		gui::widget_dialog*		dialog_scale_;
+		gui::widget_dialog*		dialog_new_;
 
 		gl::mobj			mobj_;
 		gl::mobj::handle	img_handle_;
@@ -70,6 +73,7 @@ namespace app {
 
 		bool			save_dialog_;
 
+		void create_new_image_(const vtx::spos& size);
 		void image_info_(const std::string& file, const img::i_img* img);
 
 	public:
@@ -82,11 +86,11 @@ namespace app {
 			director_(d),
 			load_ctx_(0), save_ctx_(0), 
 			frame_(0), image_(0),
-			tools_(0), load_(0), save_(0),
+			tools_(0), new_(0), load_(0), save_(0),
 			scale_fit_(0), scale_1x_(0), scale_2x_(0), scale_3x_(0),
 			scale_(0),
 			info_(0), term_(0),
-			dialog_(0), dialog_yes_no_(0), dialog_scale_(0),
+			dialog_(0), dialog_yes_no_(0), dialog_scale_(0), dialog_new_(0),
 			img_handle_(0), dd_id_(0), load_id_(0), save_id_(0),
 			image_offset_(0.0f), save_dialog_(false)
 		{ }

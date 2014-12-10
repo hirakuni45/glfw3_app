@@ -14,6 +14,7 @@
 namespace app {
 
 	typedef std::tuple<const std::string, const img::shared_img> save_t;
+
 	bool save_task_(save_t t)
 	{
 		img::img_files imfs;
@@ -22,12 +23,20 @@ namespace app {
 	}
 
 
+	void img_main::create_new_image_(const vtx::spos& size)
+	{
+
+	}
+
+
 	void img_main::image_info_(const std::string& file, const img::i_img* img)
 	{
 		std::string s;
-		size_t fsz = utils::get_file_size(file);
-		s = ": " + boost::lexical_cast<std::string>(fsz) + '\r';
-		term_->output(s);
+		if(!file.empty()) {
+			size_t fsz = utils::get_file_size(file);
+			if(fsz > 0) s = ": " + boost::lexical_cast<std::string>(fsz) + '\r';
+			term_->output(s);
+		}
 		s = "W: " + boost::lexical_cast<std::string>(img->get_size().x) + '\r';
 		term_->output(s);
 		s = "H: " + boost::lexical_cast<std::string>(img->get_size().y) + '\r';
@@ -75,22 +84,27 @@ namespace app {
 		}
 
 		{ // 機能ツールパレット
-			widget::param wp(vtx::srect(10, 10, 130, 300));
+			widget::param wp(vtx::srect(10, 10, 130, 350));
 			widget_frame::param wp_;
 			tools_ = wd.add_widget<widget_frame>(wp, wp_);
 			tools_->set_state(widget::state::SIZE_LOCK);
 		}
-		{ // ロード起動ボタン
+		{ // 新規作成ボタン
 			widget::param wp(vtx::srect(10, 10+50*0, 100, 40), tools_);
+			widget_button::param wp_("new");
+			new_ = wd.add_widget<widget_button>(wp, wp_);
+		}
+		{ // ロード起動ボタン
+			widget::param wp(vtx::srect(10, 10+50*1, 100, 40), tools_);
 			widget_button::param wp_("load");
 			load_ = wd.add_widget<widget_button>(wp, wp_);
 		}
 		{ // セーブ起動ボタン
-			widget::param wp(vtx::srect(10, 10+50*1, 100, 40), tools_);
+			widget::param wp(vtx::srect(10, 10+50*2, 100, 40), tools_);
 			widget_button::param wp_("save");
 			save_ = wd.add_widget<widget_button>(wp, wp_);
 		}
-		short ofs = 110;
+		short ofs = 160;
 		{ // スケール FIT
 			widget::param wp(vtx::srect(10, ofs+30*0, 90, 30), tools_);
 			widget_radio::param wp_("fit");
@@ -164,6 +178,12 @@ namespace app {
 			dialog_scale_ = wd.add_widget<widget_dialog>(wp, wp_);
 			dialog_scale_->enable(false);
 		}
+		{ // ダイアログ(new)
+			widget::param wp(vtx::srect(10, 30, 450, 200));
+			widget_dialog::param wp_(widget_dialog::param::style::CANCEL_OK);
+			dialog_new_ = wd.add_widget<widget_dialog>(wp, wp_);
+			dialog_new_->enable(false);
+		}
 
 		mobj_.initialize();
 
@@ -172,7 +192,7 @@ namespace app {
 		if(load_ctx_) load_ctx_->load(pre);
 		if(save_ctx_) save_ctx_->load(pre);
 		if(frame_) frame_->load(pre);
-		if(tools_) tools_->load(pre);
+		if(tools_) tools_->load(pre, false, false);
 		if(scale_fit_) scale_fit_->load(pre);
 		if(scale_1x_) scale_1x_->load(pre);
 		if(scale_2x_) scale_2x_->load(pre);
@@ -191,6 +211,27 @@ namespace app {
 		gl::core& core = gl::core::get_instance();
 
 		gui::widget_director& wd = director_.at().widget_director_;
+
+		if(new_) {
+			if(new_->get_selected()) {
+				img::img_rgba8* img = new img::img_rgba8;
+				img->create(vtx::spos(960, 720), true);
+				img->fill(img::rgba8(0, 0, 0, 0));
+				src_image_ = img::shared_img(img);
+				term_->output("Ld");
+				image_info_("new image", src_image_.get());
+				image_offset_.set(0.0f);
+				frame_->at_local_param().text_param_.text_ = "new image";
+				mobj_.destroy();
+				mobj_.initialize();
+				img_handle_ = mobj_.install(src_image_.get());
+				image_->at_local_param().mobj_ = mobj_;
+				image_->at_local_param().mobj_handle_ = img_handle_;
+
+///				bool f = dialog_new_->get_state(gui::widget::state::ENABLE);
+///				dialog_new_->enable(!f);				
+			}
+		}
 
 		if(load_) {
 			if(load_->get_selected()) {
@@ -257,8 +298,6 @@ namespace app {
 				img_handle_ = mobj_.install(imf.get_image().get());
 				image_->at_local_param().mobj_ = mobj_;
 				image_->at_local_param().mobj_handle_ = img_handle_;
-
-				
 			}
 		}
 
