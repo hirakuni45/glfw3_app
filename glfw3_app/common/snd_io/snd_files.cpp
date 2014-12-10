@@ -17,8 +17,7 @@ namespace al {
 
 	static bool check_file_exts_(const std::string& exts, const std::string& ext)
 	{
-		utils::strings ss;
-		utils::split_text(exts, ",", ss);
+		utils::strings ss = utils::split_text(exts, ",");
 		BOOST_FOREACH(std::string& s, ss) {
 			if(utils::no_capital_strcmp(ext, s) == 0) {
 				return true;
@@ -32,8 +31,7 @@ namespace al {
 	{
 		if(sio) {
 			sio->initialize();
-			utils::strings ss;
-			utils::split_text(exts, ",", ss);
+			utils::strings ss = utils::split_text(exts, ",");
 			BOOST_FOREACH(std::string& s, ss) {
 				if(check_file_exts_(sio->get_file_ext(), s)) {
 					snd_file sd;
