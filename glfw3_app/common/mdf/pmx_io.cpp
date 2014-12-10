@@ -173,7 +173,7 @@ namespace mdf {
 		@return 成功なら「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool pmx_io::save(utils::file_io fio)
+	bool pmx_io::save(utils::file_io& fio)
 	{
 		return false;
 	}

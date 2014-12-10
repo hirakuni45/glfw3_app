@@ -71,11 +71,16 @@ namespace mdf {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	モデル名を取得
+			@param[in]	en	英語表記の場合「true」
 			@return モデル名
 		*/
 		//-----------------------------------------------------------------//
-		const std::string& get_model_name() const {
-
+		const std::string& get_model_name(bool en = false) const {
+			if(type_ == type::pmd) return pmd_.get_model_name();
+			else if(type_ == type::pmx) {
+				if(en) return pmx_.get_model_info().name_en;
+				else return pmx_.get_model_info().name;
+			}
 			static std::string dummy;
 			return dummy;
 		}
@@ -84,11 +89,16 @@ namespace mdf {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	コメントを取得
+			@param[in]	en	英語表記の場合「true」
 			@return コメント
 		*/
 		//-----------------------------------------------------------------//
-		const std::string& get_comment() const {
-
+		const std::string& get_comment(bool en = false) const {
+			if(type_ == type::pmd) return pmd_.get_comment();
+			else if(type_ == type::pmx) {
+				if(en) return pmx_.get_model_info().comment_en;
+				else return pmx_.get_model_info().comment;
+			}
 			static std::string dummy;
 			return dummy;
 		}
