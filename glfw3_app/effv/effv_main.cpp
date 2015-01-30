@@ -62,6 +62,39 @@ namespace app {
 	}
 
 
+#if 0
+	// エフェクトの停止
+	g_manager->StopEffect( g_handle );
+
+	// エフェクトの破棄
+	ES_SAFE_RELEASE( g_effect );
+
+	// 先にエフェクト管理用インスタンスを破棄
+	g_manager->Destroy();
+
+	// 次に音再生用インスタンスを破棄
+	g_sound->Destory();
+
+	// 次に描画用インスタンスを破棄
+	g_renderer->Destory();
+
+	// OpenALの解放
+	alcDestroyContext(g_alcctx);
+	alcCloseDevice(g_alcdev);
+	
+	g_alcctx = NULL;
+	g_alcdev = NULL;
+
+	// OpenGLの解放
+	wglMakeCurrent( 0, 0 );
+	wglDeleteContext( g_hGLRC );
+	timeEndPeriod(1);
+
+	// COMの終了処理
+	CoUninitialize();
+#endif
+
+
 	//-----------------------------------------------------------------//
 	/*!
 		@brief  初期化
@@ -137,6 +170,34 @@ namespace app {
 		}
 	}
 
+#if 0
+			// エフェクトの移動処理を行う
+			g_manager->AddLocation( g_handle, ::Effekseer::Vector3D( 0.2f, 0.0f, 0.0f ) );
+
+			// エフェクトの更新処理を行う
+			g_manager->Update();
+			
+			
+			wglMakeCurrent( g_hDC, g_hGLRC );
+			wglSwapIntervalEXT( 1 );
+
+			glClearColor( 0.0f, 0.0f, 0.0f, 0.0f);
+			glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			// エフェクトの描画開始処理を行う。
+			g_renderer->BeginRendering();
+
+			// エフェクトの描画を行う。
+			g_manager->Draw();
+
+			// エフェクトの描画終了処理を行う。
+			g_renderer->EndRendering();
+
+			glFlush();
+			wglMakeCurrent( 0, 0 );
+			WaitFrame();
+			SwapBuffers( g_hDC );
+#endif
 
 	//-----------------------------------------------------------------//
 	/*!
