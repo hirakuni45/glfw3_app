@@ -5,18 +5,18 @@
 //----------------------------------------------------------------------------------
 // Include
 //----------------------------------------------------------------------------------
-#include "Effekseer.Base.h"
+#include "Base.h"
 
-#include "Effekseer.Vector3D.h"
-#include "Effekseer.Matrix43.h"
-#include "Effekseer.RectF.h"
-#include "Effekseer.Color.h"
+#include "Vector3D.h"
+#include "Matrix43.h"
+#include "RectF.h"
+#include "Color.h"
 
-#include "Effekseer.EffectNodeSprite.h"
-#include "Effekseer.EffectNodeRibbon.h"
-#include "Effekseer.EffectNodeRing.h"
-#include "Effekseer.EffectNodeModel.h"
-#include "Effekseer.EffectNodeTrack.h"
+#include "EffectNodeSprite.h"
+#include "EffectNodeRibbon.h"
+#include "EffectNodeRing.h"
+#include "EffectNodeModel.h"
+#include "EffectNodeTrack.h"
 
 //----------------------------------------------------------------------------------
 //

@@ -5,9 +5,9 @@
 //----------------------------------------------------------------------------------
 // Include
 //----------------------------------------------------------------------------------
-#include "Effekseer.Base.h"
-#include "Effekseer.EffectLoader.h"
-#include "Effekseer.DefaultFile.h"
+#include "Base.h"
+#include "EffectLoader.h"
+#include "DefaultFile.h"
 
 //----------------------------------------------------------------------------------
 //

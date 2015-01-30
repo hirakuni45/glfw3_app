@@ -13,11 +13,11 @@
 //----------------------------------------------------------------------------------
 // Include
 //----------------------------------------------------------------------------------
-#include "Effekseer.Base.h"
-#include "Effekseer.Manager.h"
-#include "Effekseer.Vector2D.h"
-#include "Effekseer.Vector3D.h"
-#include "Effekseer.Color.h"
+#include "Base.h"
+#include "Manager.h"
+#include "Vector2D.h"
+#include "Vector3D.h"
+#include "Color.h"
 
 //----------------------------------------------------------------------------------
 //

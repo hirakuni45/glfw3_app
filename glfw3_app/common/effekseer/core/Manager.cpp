@@ -3,32 +3,34 @@
 //----------------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------------
-#include "Effekseer.Effect.h"
-#include "Effekseer.EffectImplemented.h"
+#include "Effect.h"
+#include "EffectImplemented.h"
 
-#include "Effekseer.EffectNode.h"
-#include "Effekseer.Instance.h"
-#include "Effekseer.InstanceContainer.h"
-#include "Effekseer.InstanceGlobal.h"
-#include "Effekseer.InstanceGroup.h"
-#include "Effekseer.Manager.h"
-#include "Effekseer.ManagerImplemented.h"
+#include "EffectNode.h"
+#include "Instance.h"
+#include "InstanceContainer.h"
+#include "InstanceGlobal.h"
+#include "InstanceGroup.h"
+#include "Manager.h"
+#include "ManagerImplemented.h"
 
-#include "Effekseer.DefaultEffectLoader.h"
-#include "Effekseer.TextureLoader.h"
+#include "DefaultEffectLoader.h"
+#include "TextureLoader.h"
 
-#include "Effekseer.Setting.h"
+#include "Setting.h"
 
-#include "Renderer/Effekseer.SpriteRenderer.h"
-#include "Renderer/Effekseer.RibbonRenderer.h"
-#include "Renderer/Effekseer.RingRenderer.h"
-#include "Renderer/Effekseer.ModelRenderer.h"
-#include "Renderer/Effekseer.TrackRenderer.h"
+#include "effekseer/gl/SpriteRenderer.h"
+#include "effekseer/gl/RibbonRenderer.h"
+#include "effekseer/gl/RingRenderer.h"
+#include "effekseer/gl/ModelRenderer.h"
+#include "effekseer/gl/TrackRenderer.h"
 
+#ifdef WITH_SOUND
 #include "Effekseer.SoundLoader.h"
 #include "Sound/Effekseer.SoundPlayer.h"
+#endif
 
-#include "Effekseer.ModelLoader.h"
+#include "ModelLoader.h"
 
 #ifdef _WIN32
 #include <windows.h>

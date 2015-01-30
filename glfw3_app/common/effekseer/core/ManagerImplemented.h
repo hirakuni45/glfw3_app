@@ -5,10 +5,10 @@
 //----------------------------------------------------------------------------------
 // Include
 //----------------------------------------------------------------------------------
-#include "Effekseer.Base.h"
-#include "Effekseer.Manager.h"
-#include "Effekseer.Matrix43.h"
-#include "Effekseer.CriticalSection.h"
+#include "Base.h"
+#include "Manager.h"
+#include "Matrix43.h"
+#include "CriticalSection.h"
 
 //----------------------------------------------------------------------------------
 //

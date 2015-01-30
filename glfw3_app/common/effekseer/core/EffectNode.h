@@ -5,13 +5,15 @@
 //----------------------------------------------------------------------------------
 // Include
 //----------------------------------------------------------------------------------
-#include "Effekseer.Base.h"
-#include "Effekseer.Color.h"
-#include "Effekseer.Vector3D.h"
-#include "Effekseer.RectF.h"
-#include "Effekseer.InternalStruct.h"
-#include "Sound/Effekseer.SoundPlayer.h"
-#include "Effekseer.FCurves.h"
+#include "Base.h"
+#include "Color.h"
+#include "Vector3D.h"
+#include "RectF.h"
+#include "InternalStruct.h"
+#include "FCurves.h"
+#ifdef WITH_SOUND
+#include "Sound/SoundPlayer.h"
+#endif
 
 //----------------------------------------------------------------------------------
 //
@@ -744,12 +746,12 @@ public:
 		@brief	描画部分更新
 	*/
 	virtual float GetFadeAlpha( const Instance& instance );
-
+#ifdef WITH_SOUND
 	/**
 		@brief	サウンド再生
 	*/
 	virtual void PlaySound_(Instance& instance, SoundTag tag, Manager* manager);
-
+#endif
 	/**
 		@brief	エフェクトノード生成
 	*/
