@@ -13,6 +13,55 @@
 
 namespace app {
 
+	void effv_main::init_effekseer_()
+	{
+		// 描画用インスタンスの生成
+		renderer_ = ::EffekseerRendererGL::Renderer::Create( 2000 );
+
+		// エフェクト管理用インスタンスの生成
+		manager_ = ::Effekseer::Manager::Create( 2000 );
+
+		// 描画用インスタンスから描画機能を設定
+		manager_->SetSpriteRenderer( renderer_->CreateSpriteRenderer() );
+		manager_->SetRibbonRenderer( renderer_->CreateRibbonRenderer() );
+		manager_->SetRingRenderer( renderer_->CreateRingRenderer() );
+		manager_->SetModelRenderer( renderer_->CreateModelRenderer() );
+#if 0
+	// 描画用インスタンスからテクスチャの読込機能を設定
+	// 独自拡張可能、現在はファイルから読み込んでいる。
+	g_manager->SetTextureLoader( g_renderer->CreateTextureLoader() );
+	g_manager->SetModelLoader( g_renderer->CreateModelLoader() );
+
+	// 音再生用インスタンスの生成
+	g_sound = EffekseerSound::Sound::Create( 32 );
+
+	// 音再生用インスタンスから再生機能を指定
+	g_manager->SetSoundPlayer( g_sound->CreateSoundPlayer() );
+	
+	// 音再生用インスタンスからサウンドデータの読込機能を設定
+	// 独自拡張可能、現在はファイルから読み込んでいる。
+	g_manager->SetSoundLoader( g_sound->CreateSoundLoader() );
+
+	// 視点位置を確定
+	g_position = ::Effekseer::Vector3D( 10.0f, 5.0f, 20.0f );
+
+	// 投影行列を設定
+	g_renderer->SetProjectionMatrix(
+		::Effekseer::Matrix44().PerspectiveFovRH_OpenGL( 90.0f / 180.0f * 3.14f, (float)g_window_width / (float)g_window_height, 1.0f, 50.0f ) );
+
+	// カメラ行列を設定
+	g_renderer->SetCameraMatrix(
+		::Effekseer::Matrix44().LookAtRH( g_position, ::Effekseer::Vector3D( 0.0f, 0.0f, 0.0f ), ::Effekseer::Vector3D( 0.0f, 1.0f, 0.0f ) ) );
+	
+	// エフェクトの読込
+	g_effect = Effekseer::Effect::Create( g_manager, (const EFK_CHAR*)L"test.efk" );
+
+	// エフェクトの再生
+	g_handle = g_manager->Play( g_effect, 0, 0, 0 );
+#endif
+	}
+
+
 	//-----------------------------------------------------------------//
 	/*!
 		@brief  初期化
@@ -51,6 +100,8 @@ namespace app {
 			widget_check::param wp_("Grid", true);
 			grid_ = wd.add_widget<widget_check>(wp, wp_);
 		}
+
+		init_effekseer_();
 
 		// プリファレンスの取得
 		sys::preference& pre = director_.at().preference_;

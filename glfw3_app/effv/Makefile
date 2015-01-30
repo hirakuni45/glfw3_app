@@ -75,6 +75,7 @@ PSOURCES	=	main.cpp \
 				effekseer/core/Matrix44.cpp \
 				effekseer/core/Matrix43.cpp \
 				effekseer/core/Color.cpp \
+				effekseer/core/Manager.cpp \
 				effekseer/common/IndexBufferBase.cpp \
 				effekseer/common/ModelRendererBase.cpp \
 				effekseer/common/PngTextureLoader.cpp \

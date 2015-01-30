@@ -18,6 +18,8 @@
 #include "gl_fw/glcamera.hpp"
 #include "gl_fw/gllight.hpp"
 
+#include "effekseer/gl/renderer.h"
+
 namespace app {
 
 	class effv_main : public utils::i_scene {
@@ -33,6 +35,14 @@ namespace app {
 
 		gl::camera		camera_;
 
+		::Effekseer::Manager*			manager_;
+		::EffekseerRenderer::Renderer*	renderer_;
+		::Effekseer::Effect*			effect_;
+// static ::Effekseer::Handle				g_handle = -1;
+// static ::Effekseer::Vector3D			g_position;
+
+		void init_effekseer_();
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -43,7 +53,8 @@ namespace app {
 			director_(d),
 			filer_(0), filer_id_(0),
 			tools_(0), fopen_(0), grid_(0),
-			camera_()
+			camera_(),
+			manager_(nullptr), renderer_(nullptr), effect_(nullptr)
 		{ }
 
 
