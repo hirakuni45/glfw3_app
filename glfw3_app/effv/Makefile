@@ -73,6 +73,8 @@ PSOURCES	=	main.cpp \
 				widgets/widget_terminal.cpp \
 				effekseer/core/Vector3D.cpp \
 				effekseer/core/Matrix44.cpp \
+				effekseer/core/Matrix43.cpp \
+				effekseer/core/Color.cpp \
 				effekseer/common/IndexBufferBase.cpp \
 				effekseer/common/ModelRendererBase.cpp \
 				effekseer/common/PngTextureLoader.cpp \
@@ -82,7 +84,21 @@ PSOURCES	=	main.cpp \
 				effekseer/common/RingRendererBase.cpp \
 				effekseer/common/SpriteRendererBase.cpp \
 				effekseer/common/TrackRendererBase.cpp \
-				effekseer/common/VertexBufferBase.cpp
+				effekseer/common/VertexBufferBase.cpp \
+				effekseer/gl/DeviceObject.cpp \
+				effekseer/gl/GLExtension.cpp \
+				effekseer/gl/IndexBuffer.cpp \
+				effekseer/gl/ModelLoader.cpp \
+				effekseer/gl/ModelRenderer.cpp \
+				effekseer/gl/Renderer.cpp \
+				effekseer/gl/RenderState.cpp \
+				effekseer/gl/RibbonRenderer.cpp \
+				effekseer/gl/RingRenderer.cpp \
+				effekseer/gl/Shader.cpp \
+				effekseer/gl/SpriteRenderer.cpp \
+				effekseer/gl/TextureLoader.cpp \
+				effekseer/gl/TrackRenderer.cpp \
+				effekseer/gl/VertexBuffer.cpp
 
 STDLIBS		=
 OPTLIBS		=	glfw3 GLEW \
@@ -150,7 +166,7 @@ LFLAGS	=	-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.p
 # -Wuninitialized -Wunused -Werror -Wshadow
 CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
 			-Wformat
-CPWARN	=	-Wall -Werror
+CPWARN	=	-Wall -Wno-unused-variable -Wno-unused-private-field -Werror
 
 OBJECTS	=	$(addprefix $(BUILD)/,$(patsubst %.cpp,%.o,$(PSOURCES))) \
 			$(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(CSOURCES)))
