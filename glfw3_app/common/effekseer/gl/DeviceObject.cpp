@@ -2,8 +2,8 @@
 //----------------------------------------------------------------------------------
 // Include
 //----------------------------------------------------------------------------------
-#include "EffekseerRendererGL.RendererImplemented.h"
-#include "EffekseerRendererGL.DeviceObject.h"
+#include "RendererImplemented.h"
+#include "DeviceObject.h"
 
 //----------------------------------------------------------------------------------
 //

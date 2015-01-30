@@ -2,9 +2,9 @@
 //-----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------------
-#include "EffekseerRendererGL.Shader.h"
-#include "EffekseerRendererGL.Renderer.h"
-#include "EffekseerRendererGL.GLExtension.h"
+#include "Shader.h"
+#include "Renderer.h"
+#include "GLExtension.h"
 
 #if _WIN32
 #include <windows.h>

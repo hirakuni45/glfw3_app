@@ -10,7 +10,7 @@
 #include <GL/gl.h>
 #endif
 #include <stddef.h>
-#include "EffekseerRendererGL.Base.Pre.h"
+#include "effekseer/gl/Base_Pre.h"
 
 //-----------------------------------------------------------------------------------
 //

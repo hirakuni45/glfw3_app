@@ -5,9 +5,9 @@
 //----------------------------------------------------------------------------------
 // Include
 //----------------------------------------------------------------------------------
-#include "../../EffekseerRendererCommon/EffekseerRenderer.RenderStateBase.h"
-#include "EffekseerRendererGL.Base.h"
-#include "EffekseerRendererGL.Renderer.h"
+#include "effekseer/common/RenderStateBase.h"
+#include "Base.h"
+#include "Renderer.h"
 
 //#define __USE_SAMPLERS	1
 //-----------------------------------------------------------------------------------

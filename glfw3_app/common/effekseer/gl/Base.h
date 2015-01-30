@@ -5,9 +5,9 @@
 //----------------------------------------------------------------------------------
 // Include
 //----------------------------------------------------------------------------------
-#include "EffekseerRendererGL.Base.Pre.h"
+#include "Base_Pre.h"
 
-#include <Effekseer.h>
+#include "effekseer/Effekseer.h"
 
 #include <stdio.h>
 #include <math.h>

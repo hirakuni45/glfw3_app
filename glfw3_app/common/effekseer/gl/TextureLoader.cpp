@@ -5,11 +5,11 @@
 // Include
 //----------------------------------------------------------------------------------
 #include <memory>
-#include "EffekseerRendererGL.RendererImplemented.h"
-#include "EffekseerRendererGL.TextureLoader.h"
-#include "EffekseerRendererGL.GLExtension.h"
-#include "../../EffekseerRendererCommon/EffekseerRenderer.CommonUtils.h"
-#include "../../EffekseerRendererCommon/EffekseerRenderer.PngTextureLoader.h"
+#include "RendererImplemented.h"
+#include "TextureLoader.h"
+#include "GLExtension.h"
+#include "effekseer/common/CommonUtils.h"
+#include "effekseer/common/PngTextureLoader.h"
 
 //-----------------------------------------------------------------------------------
 //

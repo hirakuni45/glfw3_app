@@ -2,26 +2,26 @@
 //----------------------------------------------------------------------------------
 // Include
 //----------------------------------------------------------------------------------
-#include "EffekseerRendererGL.Renderer.h"
-#include "EffekseerRendererGL.RendererImplemented.h"
-#include "EffekseerRendererGL.RenderState.h"
+#include "Renderer.h"
+#include "RendererImplemented.h"
+#include "RenderState.h"
 
-#include "EffekseerRendererGL.Shader.h"
-#include "EffekseerRendererGL.VertexBuffer.h"
-#include "EffekseerRendererGL.IndexBuffer.h"
-#include "EffekseerRendererGL.DeviceObject.h"
-#include "EffekseerRendererGL.SpriteRenderer.h"
-#include "EffekseerRendererGL.RibbonRenderer.h"
-#include "EffekseerRendererGL.RingRenderer.h"
-#include "EffekseerRendererGL.TrackRenderer.h"
-#include "EffekseerRendererGL.ModelRenderer.h"
-#include "EffekseerRendererGL.TextureLoader.h"
-#include "EffekseerRendererGL.ModelLoader.h"
+#include "Shader.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
+#include "DeviceObject.h"
+#include "SpriteRenderer.h"
+#include "RibbonRenderer.h"
+#include "RingRenderer.h"
+#include "TrackRenderer.h"
+#include "ModelRenderer.h"
+#include "TextureLoader.h"
+#include "ModelLoader.h"
 
-#include "EffekseerRendererGL.GLExtension.h"
+#include "GLExtension.h"
 
 #ifdef __EFFEKSEER_RENDERER_INTERNAL_LOADER__
-#include "../../EffekseerRendererCommon/EffekseerRenderer.PngTextureLoader.h"
+#include "effekseer/common/PngTextureLoader.h"
 #endif
 
 //----------------------------------------------------------------------------------

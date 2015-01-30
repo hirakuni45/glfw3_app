@@ -5,8 +5,8 @@
 //----------------------------------------------------------------------------------
 // Include
 //----------------------------------------------------------------------------------
-#include "EffekseerRendererGL.Renderer.h"
-#include "../../EffekseerRendererCommon/EffekseerRenderer.RibbonRendererBase.h"
+#include "Renderer.h"
+#include "effekseer/common/RibbonRendererBase.h"
 
 //-----------------------------------------------------------------------------------
 //

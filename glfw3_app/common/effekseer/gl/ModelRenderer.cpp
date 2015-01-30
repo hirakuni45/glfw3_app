@@ -2,13 +2,13 @@
 //----------------------------------------------------------------------------------
 // Include
 //----------------------------------------------------------------------------------
-#include "EffekseerRendererGL.RendererImplemented.h"
-#include "EffekseerRendererGL.RenderState.h"
+#include "RendererImplemented.h"
+#include "RenderState.h"
 
-#include "EffekseerRendererGL.VertexBuffer.h"
-#include "EffekseerRendererGL.IndexBuffer.h"
-#include "EffekseerRendererGL.ModelRenderer.h"
-#include "EffekseerRendererGL.Shader.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
+#include "ModelRenderer.h"
+#include "Shader.h"
 
 #include <string>
 

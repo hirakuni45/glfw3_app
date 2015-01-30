@@ -5,8 +5,8 @@
 //----------------------------------------------------------------------------------
 // Include
 //----------------------------------------------------------------------------------
-#include "EffekseerRendererGL.Renderer.h"
-#include "../../EffekseerRendererCommon/EffekseerRenderer.TrackRendererBase.h"
+#include "Renderer.h"
+#include "effekseer/common/TrackRendererBase.h"
 
 //-----------------------------------------------------------------------------------
 //

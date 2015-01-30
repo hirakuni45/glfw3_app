@@ -5,8 +5,8 @@
 //----------------------------------------------------------------------------------
 // Include
 //----------------------------------------------------------------------------------
-#include "EffekseerRendererGL.Base.h"
-#include "../../EffekseerRendererCommon/EffekseerRenderer.Renderer.h"
+#include "Base.h"
+#include "effekseer/common/Renderer.h"
 
 //----------------------------------------------------------------------------------
 // Lib

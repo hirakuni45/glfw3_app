@@ -4,9 +4,9 @@
 //----------------------------------------------------------------------------------
 // Include
 //----------------------------------------------------------------------------------
-#include "EffekseerRendererGL.RendererImplemented.h"
-#include "../../EffekseerRendererCommon/EffekseerRenderer.IndexBufferBase.h"
-#include "EffekseerRendererGL.DeviceObject.h"
+#include "RendererImplemented.h"
+#include "effekseer/common/IndexBufferBase.h"
+#include "DeviceObject.h"
 
 //-----------------------------------------------------------------------------------
 //

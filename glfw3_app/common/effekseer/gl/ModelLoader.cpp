@@ -5,8 +5,8 @@
 // Include
 //----------------------------------------------------------------------------------
 #include <memory>
-#include "EffekseerRendererGL.Renderer.h"
-#include "EffekseerRendererGL.ModelLoader.h"
+#include "Renderer.h"
+#include "ModelLoader.h"
 
 //-----------------------------------------------------------------------------------
 //

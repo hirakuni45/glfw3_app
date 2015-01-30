@@ -5,8 +5,8 @@
 //----------------------------------------------------------------------------------
 // Include
 //----------------------------------------------------------------------------------
-#include "EffekseerRendererGL.RendererImplemented.h"
-#include "../../EffekseerRendererCommon/EffekseerRenderer.RingRendererBase.h"
+#include "RendererImplemented.h"
+#include "effekseer/common/RingRendererBase.h"
 
 //-----------------------------------------------------------------------------------
 //

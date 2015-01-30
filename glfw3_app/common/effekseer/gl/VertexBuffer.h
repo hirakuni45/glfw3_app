@@ -4,9 +4,9 @@
 //----------------------------------------------------------------------------------
 // Include
 //----------------------------------------------------------------------------------
-#include "EffekseerRendererGL.RendererImplemented.h"
-#include "../../EffekseerRendererCommon/EffekseerRenderer.VertexBufferBase.h"
-#include "EffekseerRendererGL.DeviceObject.h"
+#include "RendererImplemented.h"
+#include "effekseer/common/VertexBufferBase.h"
+#include "DeviceObject.h"
 
 //-----------------------------------------------------------------------------------
 //

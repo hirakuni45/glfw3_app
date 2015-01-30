@@ -2,12 +2,12 @@
 //----------------------------------------------------------------------------------
 // Include
 //----------------------------------------------------------------------------------
-#include "EffekseerRendererGL.RenderState.h"
+#include "RenderState.h"
 
-#include "EffekseerRendererGL.Renderer.h"
-#include "EffekseerRendererGL.RendererImplemented.h"
+#include "Renderer.h"
+#include "RendererImplemented.h"
 
-#include "EffekseerRendererGL.GLExtension.h"
+#include "GLExtension.h"
 
 //-----------------------------------------------------------------------------------
 //

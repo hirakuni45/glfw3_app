@@ -5,9 +5,9 @@
 //----------------------------------------------------------------------------------
 // Include
 //----------------------------------------------------------------------------------
-#include "EffekseerRendererGL.Base.h"
-#include "EffekseerRendererGL.Renderer.h"
-#include "../../EffekseerRendererCommon/EffekseerRenderer.RenderStateBase.h"
+#include "effekseer/gl/Base.h"
+#include "effekseer/gl/Renderer.h"
+#include "effekseer/common/RenderStateBase.h"
 
 #if defined(_M_IX86) || defined(__x86__)
 #define EFK_SSE2
