@@ -33,16 +33,20 @@ namespace app {
 		gui::widget_button*		fopen_;
 		gui::widget_check*		grid_;
 
+		gui::widget_button*		play_;
+		gui::widget_check*		loop_;
+
 		gl::camera		camera_;
 
 		::Effekseer::Manager*			manager_;
 		::EffekseerRenderer::Renderer*	renderer_;
 		::Effekseer::Effect*			effect_;
-// static ::Effekseer::Handle				g_handle = -1;
-// static ::Effekseer::Vector3D			g_position;
 
-		void init_effekseer_();
+		::Effekseer::Vector3D		position_;
+		::Effekseer::Handle			handle_;
 
+		void init_effekseer_(const vtx::spos& size);
+		void destroy_effekseer_();
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -52,9 +56,11 @@ namespace app {
 		effv_main(utils::director<core>& d) :
 			director_(d),
 			filer_(0), filer_id_(0),
-			tools_(0), fopen_(0), grid_(0),
+			tools_(nullptr), fopen_(nullptr), grid_(nullptr),
+			play_(nullptr), loop_(nullptr),
 			camera_(),
-			manager_(nullptr), renderer_(nullptr), effect_(nullptr)
+			manager_(nullptr), renderer_(nullptr), effect_(nullptr),
+			handle_(-1)
 		{ }
 
 
@@ -63,7 +69,7 @@ namespace app {
 			@brief  デストラクター
 		*/
 		//-----------------------------------------------------------------//
-		virtual ~effv_main() { }
+		virtual ~effv_main() { destroy_effekseer_(); }
 
 
 		//-----------------------------------------------------------------//

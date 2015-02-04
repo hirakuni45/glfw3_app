@@ -71,11 +71,30 @@ PSOURCES	=	main.cpp \
 				widgets/widget_tree.cpp \
 				widgets/widget_filer.cpp \
 				widgets/widget_terminal.cpp \
+				effekseer/core/CriticalSection.cpp \
+				effekseer/core/Setting.cpp \
+				effekseer/core/DefaultEffectLoader.cpp \
+				effekseer/core/DefaultFile.cpp \
+				effekseer/core/RectF.cpp \
+				effekseer/core/Vector2D.cpp \
 				effekseer/core/Vector3D.cpp \
 				effekseer/core/Matrix44.cpp \
 				effekseer/core/Matrix43.cpp \
+				effekseer/core/FCurves.cpp \
 				effekseer/core/Color.cpp \
 				effekseer/core/Manager.cpp \
+				effekseer/core/Instance.cpp \
+				effekseer/core/InstanceGlobal.cpp \
+				effekseer/core/InstanceGroup.cpp \
+				effekseer/core/InstanceContainer.cpp \
+				effekseer/core/Effect.cpp \
+				effekseer/core/EffectNode.cpp \
+				effekseer/core/EffectNodeRoot.cpp \
+				effekseer/core/EffectNodeRing.cpp \
+				effekseer/core/EffectNodeRibbon.cpp \
+				effekseer/core/EffectNodeTrack.cpp \
+				effekseer/core/EffectNodeSprite.cpp \
+				effekseer/core/EffectNodeModel.cpp \
 				effekseer/common/IndexBufferBase.cpp \
 				effekseer/common/ModelRendererBase.cpp \
 				effekseer/common/PngTextureLoader.cpp \
@@ -167,7 +186,7 @@ LFLAGS	=	-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.p
 # -Wuninitialized -Wunused -Werror -Wshadow
 CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
 			-Wformat
-CPWARN	=	-Wall -Wno-unused-variable -Wno-unused-private-field -Werror
+CPWARN	=	-Wall -Wno-unused-variable -Wno-unused-private-field -Wno-reorder -Wno-delete-incomplete -Wno-int-to-void-pointer-cast -Werror
 
 OBJECTS	=	$(addprefix $(BUILD)/,$(patsubst %.cpp,%.o,$(PSOURCES))) \
 			$(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(CSOURCES)))
