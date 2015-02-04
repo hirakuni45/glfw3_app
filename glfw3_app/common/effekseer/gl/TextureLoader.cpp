@@ -1,5 +1,5 @@
 
-#ifdef __EFFEKSEER_RENDERER_INTERNAL_LOADER__
+/// #ifdef __EFFEKSEER_RENDERER_INTERNAL_LOADER__
 
 //----------------------------------------------------------------------------------
 // Include
@@ -10,6 +10,9 @@
 #include "GLExtension.h"
 #include "effekseer/common/CommonUtils.h"
 #include "effekseer/common/PngTextureLoader.h"
+
+#include <iostream>
+#include "utils/string_utils.hpp"
 
 //-----------------------------------------------------------------------------------
 //
@@ -41,6 +44,10 @@ TextureLoader::~TextureLoader()
 //----------------------------------------------------------------------------------
 void* TextureLoader::Load( const EFK_CHAR* path )
 {
+	std::string s;
+	utils::utf16_to_utf8(path, s);
+	std::cout << "Texture: '" << s << "'" << std::endl;
+
 	std::auto_ptr<Effekseer::FileReader> 
 		reader( m_fileInterface->OpenRead( path ) );
 	
@@ -51,7 +58,7 @@ void* TextureLoader::Load( const EFK_CHAR* path )
 		reader->Read( data_texture, size_texture );
 		EffekseerRenderer::PngTextureLoader::Load( data_texture, size_texture, false);
 		delete [] data_texture;
-		
+		std::cout << "PNG: " << static_cast<int>(size_texture) << std::endl;
 		GLuint texture = 0;
 		glGenTextures(1, &texture);
 		glBindTexture(GL_TEXTURE_2D, texture);
@@ -96,4 +103,4 @@ void TextureLoader::Unload( void* data )
 //
 //----------------------------------------------------------------------------------
 
-#endif
+/// #endif

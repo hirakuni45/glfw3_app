@@ -20,9 +20,9 @@
 
 #include "GLExtension.h"
 
-#ifdef __EFFEKSEER_RENDERER_INTERNAL_LOADER__
+/// #ifdef __EFFEKSEER_RENDERER_INTERNAL_LOADER__
 #include "effekseer/common/PngTextureLoader.h"
-#endif
+/// #endif
 
 //----------------------------------------------------------------------------------
 //
@@ -62,9 +62,9 @@ RendererImplemented::RendererImplemented( int32_t squareMaxCount )
 	::Effekseer::Color lightAmbient( 40, 40, 40, 255 );
 	SetLightAmbientColor( lightAmbient );
 
-#ifdef __EFFEKSEER_RENDERER_INTERNAL_LOADER__
+/// #ifdef __EFFEKSEER_RENDERER_INTERNAL_LOADER__
 	EffekseerRenderer::PngTextureLoader::Initialize();
-#endif
+/// #endif
 }
 
 //----------------------------------------------------------------------------------
@@ -72,9 +72,9 @@ RendererImplemented::RendererImplemented( int32_t squareMaxCount )
 //----------------------------------------------------------------------------------
 RendererImplemented::~RendererImplemented()
 {
-#ifdef __EFFEKSEER_RENDERER_INTERNAL_LOADER__
+/// #ifdef __EFFEKSEER_RENDERER_INTERNAL_LOADER__
 	EffekseerRenderer::PngTextureLoader::Finalize();
-#endif
+/// #endif
 
 	assert( m_reference == 0 );
 	ES_SAFE_DELETE( m_renderState );
@@ -434,11 +434,11 @@ void RendererImplemented::SetCameraMatrix( const ::Effekseer::Matrix44& mat )
 //----------------------------------------------------------------------------------
 ::Effekseer::TextureLoader* RendererImplemented::CreateTextureLoader( ::Effekseer::FileInterface* fileInterface )
 {
-#ifdef __EFFEKSEER_RENDERER_INTERNAL_LOADER__
+/// #ifdef __EFFEKSEER_RENDERER_INTERNAL_LOADER__
 	return new TextureLoader( fileInterface );
-#else
-	return NULL;
-#endif
+/// #else
+///	return NULL;
+/// #endif
 }
 
 //----------------------------------------------------------------------------------
@@ -446,11 +446,11 @@ void RendererImplemented::SetCameraMatrix( const ::Effekseer::Matrix44& mat )
 //----------------------------------------------------------------------------------
 ::Effekseer::ModelLoader* RendererImplemented::CreateModelLoader( ::Effekseer::FileInterface* fileInterface )
 {
-#ifdef __EFFEKSEER_RENDERER_INTERNAL_LOADER__
+/// #ifdef __EFFEKSEER_RENDERER_INTERNAL_LOADER__
 	return new ModelLoader( fileInterface );
-#else
-	return NULL;
-#endif
+///#else
+///	return NULL;
+///#endif
 }
 
 //----------------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 
-#ifdef __EFFEKSEER_RENDERER_INTERNAL_LOADER__
+/// #ifdef __EFFEKSEER_RENDERER_INTERNAL_LOADER__
 
 #ifndef	__EFFEKSEERRENDERER_GL_TEXTURELOADER_H__
 #define	__EFFEKSEERRENDERER_GL_TEXTURELOADER_H__
@@ -43,4 +43,4 @@ public:
 //----------------------------------------------------------------------------------
 #endif	// __EFFEKSEERRENDERER_GL_TEXTURELOADER_H__
 
-#endif
+/// #endif

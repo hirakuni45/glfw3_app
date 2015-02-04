@@ -1,5 +1,5 @@
 
-#ifdef __EFFEKSEER_RENDERER_INTERNAL_LOADER__
+/// #ifdef __EFFEKSEER_RENDERER_INTERNAL_LOADER__
 
 #ifndef	__EFFEKSEERRENDERER_GL_MODELLOADER_H__
 #define	__EFFEKSEERRENDERER_GL_MODELLOADER_H__
@@ -43,4 +43,4 @@ public:
 //----------------------------------------------------------------------------------
 #endif	// __EFFEKSEERRENDERER_GL_MODELLOADER_H__
 
-#endif // __EFFEKSEER_RENDERER_INTERNAL_LOADER__
+/// #endif // __EFFEKSEER_RENDERER_INTERNAL_LOADER__

@@ -1,5 +1,5 @@
 
-#ifdef __EFFEKSEER_RENDERER_INTERNAL_LOADER__
+/// #ifdef __EFFEKSEER_RENDERER_INTERNAL_LOADER__
 
 //----------------------------------------------------------------------------------
 // Include
@@ -81,4 +81,4 @@ void ModelLoader::Unload( void* data )
 //
 //----------------------------------------------------------------------------------
 
-#endif // __EFFEKSEER_RENDERER_INTERNAL_LOADER__
+/// #endif // __EFFEKSEER_RENDERER_INTERNAL_LOADER__

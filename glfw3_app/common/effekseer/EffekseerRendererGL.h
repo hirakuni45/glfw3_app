@@ -9,21 +9,12 @@
 
 #if defined(__EFFEKSEER_RENDERER_GL_GLEW__)
 
-#if _WIN32
-#include <gl/GL.h>
-#else
 #include <GL/glew.h>
-#endif
 
 #elif defined(__EFFEKSEER_RENDERER_GL_GLEW_S__)
 
-#if _WIN32
-#include <gl/GL.h>
-#else
 #define GLEW_STATIC
 #include <GL/glew.h>
-#endif
-
 
 #elif defined(__EFFEKSEER_RENDERER_GLES2__)
 
@@ -43,10 +34,6 @@
 #include <GL/gl.h>
 #endif
 
-#endif
-
-#if _WIN32
-#pragma comment(lib, "gdiplus.lib")
 #endif
 
 //----------------------------------------------------------------------------------
