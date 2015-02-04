@@ -3,18 +3,20 @@
 //----------------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------------
-#include "Effekseer.Effect.h"
-#include "Effekseer.EffectImplemented.h"
-#include "Effekseer.Manager.h"
-#include "Effekseer.ManagerImplemented.h"
-#include "Effekseer.EffectNode.h"
-#include "Effekseer.EffectLoader.h"
-#include "Effekseer.TextureLoader.h"
-#include "Effekseer.SoundLoader.h"
-#include "Effekseer.ModelLoader.h"
-#include "Effekseer.DefaultEffectLoader.h"
+#include "Effect.h"
+#include "EffectImplemented.h"
+#include "Manager.h"
+#include "ManagerImplemented.h"
+#include "EffectNode.h"
+#include "EffectLoader.h"
+#include "TextureLoader.h"
+#include "SoundLoader.h"
+#include "ModelLoader.h"
+#include "DefaultEffectLoader.h"
 
-#include "Effekseer.Setting.h"
+#include "Setting.h"
+
+#include <iostream>
 
 //----------------------------------------------------------------------------------
 //
@@ -84,6 +86,8 @@ Effect* Effect::Create(Manager* manager, const EFK_CHAR* path, float magnificati
 	int32_t size = 0;
 
 	if (!eLoader->Load(path, data, size)) return NULL;
+
+	std::cout << "File size: " << size << std::endl;
 
 	EFK_CHAR parentDir[512];
 	if (materialPath == NULL)

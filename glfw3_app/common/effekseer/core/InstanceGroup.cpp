@@ -3,12 +3,12 @@
 //----------------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------------
-#include "Effekseer.ManagerImplemented.h"
+#include "ManagerImplemented.h"
 
-#include "Effekseer.InstanceGroup.h"
-#include "Effekseer.Instance.h"
-#include "Effekseer.InstanceContainer.h"
-#include "Effekseer.InstanceGlobal.h"
+#include "InstanceGroup.h"
+#include "Instance.h"
+#include "InstanceContainer.h"
+#include "InstanceGlobal.h"
 
 //----------------------------------------------------------------------------------
 //

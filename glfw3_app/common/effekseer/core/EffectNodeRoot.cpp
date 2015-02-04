@@ -3,12 +3,12 @@
 //----------------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------------
-#include "Effekseer.Manager.h"
-#include "Effekseer.Effect.h"
-#include "Effekseer.EffectNode.h"
-#include "Effekseer.Vector3D.h"
-#include "Effekseer.Instance.h"
-#include "Effekseer.EffectNodeRoot.h"
+#include "Manager.h"
+#include "Effect.h"
+#include "EffectNode.h"
+#include "Vector3D.h"
+#include "Instance.h"
+#include "EffectNodeRoot.h"
 
 //----------------------------------------------------------------------------------
 //

@@ -4,7 +4,9 @@
 //----------------------------------------------------------------------------------
 #include <assert.h>
 #include <stdio.h>
-#include "Effekseer.DefaultFile.h"
+#include "DefaultFile.h"
+
+#include <iostream>
 
 //----------------------------------------------------------------------------------
 //
@@ -135,6 +137,7 @@ FileReader* DefaultFileInterface::OpenRead( const EFK_CHAR* path )
 #else
 	int8_t path8[256];
 	ConvertUtf16ToUtf8( path8, 256, (const int16_t*)path );
+	std::cout << "File: '" << path8 << "'" << std::endl;
 	filePtr = fopen( (const char*)path8, "rb" );
 #endif
 	

@@ -5,10 +5,10 @@
 //----------------------------------------------------------------------------------
 // Include
 //----------------------------------------------------------------------------------
-#include "Effekseer.Base.h"
-#include "Effekseer.Vector2D.h"
-#include "Effekseer.Vector3D.h"
-#include "Effekseer.Manager.h"
+#include "Base.h"
+#include "Vector2D.h"
+#include "Vector3D.h"
+#include "Manager.h"
 
 //----------------------------------------------------------------------------------
 //

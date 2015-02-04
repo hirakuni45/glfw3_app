@@ -3,8 +3,8 @@
 // Include
 //----------------------------------------------------------------------------------
 #include <memory>
-#include "../Effekseer.h"
-#include "Effekseer.DefaultEffectLoader.h"
+#include "DefaultEffectLoader.h"
+#include <iostream>
 
 //----------------------------------------------------------------------------------
 //

@@ -3,16 +3,16 @@
 //----------------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------------
-#include "Effekseer.Manager.h"
-#include "Effekseer.Instance.h"
-#include "Effekseer.InstanceContainer.h"
-#include "Effekseer.InstanceGlobal.h"
-#include "Effekseer.InstanceGroup.h"
+#include "Manager.h"
+#include "Instance.h"
+#include "InstanceContainer.h"
+#include "InstanceGlobal.h"
+#include "InstanceGroup.h"
 
-#include "Effekseer.Effect.h"
-#include "Effekseer.EffectNode.h"
+#include "Effect.h"
+#include "EffectNode.h"
 
-#include "Renderer/Effekseer.SpriteRenderer.h"
+#include "effekseer/core/renderer/SpriteRenderer.h"
 
 //----------------------------------------------------------------------------------
 //

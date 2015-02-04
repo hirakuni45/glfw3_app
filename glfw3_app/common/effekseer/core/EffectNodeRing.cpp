@@ -3,16 +3,16 @@
 //----------------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------------
-#include "Effekseer.Manager.h"
-#include "Effekseer.Effect.h"
-#include "Effekseer.EffectNode.h"
-#include "Effekseer.Vector3D.h"
-#include "Effekseer.Instance.h"
-#include "Effekseer.EffectNodeRing.h"
+#include "Manager.h"
+#include "Effect.h"
+#include "EffectNode.h"
+#include "Vector3D.h"
+#include "Instance.h"
+#include "EffectNodeRing.h"
 
-#include "Renderer/Effekseer.RingRenderer.h"
+#include "effekseer/core/renderer/RingRenderer.h"
 
-#include "Effekseer.Setting.h"
+#include "Setting.h"
 
 //----------------------------------------------------------------------------------
 //

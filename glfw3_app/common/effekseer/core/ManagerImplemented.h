@@ -80,8 +80,8 @@ private:
 			, IsPaused					( false )
 			, IsShown					( true )
 			, IsRemoving				( false )
-			, RemovingCallback			( NULL )
 			, DoUseBaseMatrix			( false )
+			, RemovingCallback			( NULL )
 			, Speed						( 1.0f )
 		{
 		
@@ -346,7 +346,7 @@ public:
 		@brief	テクスチャ読込クラスを設定する。
 	*/
 	void SetTextureLoader( TextureLoader* textureLoader );
-	
+
 	/**
 		@brief	サウンド再生取得
 	*/

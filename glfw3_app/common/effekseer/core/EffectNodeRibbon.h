@@ -6,7 +6,7 @@
 // Include
 //----------------------------------------------------------------------------------
 #include "EffectNode.h"
-#include "effekseer/gl/RibbonRenderer.h"
+#include "effekseer/core/renderer/RibbonRenderer.h"
 
 //----------------------------------------------------------------------------------
 //

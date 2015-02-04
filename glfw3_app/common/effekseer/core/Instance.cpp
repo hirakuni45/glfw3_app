@@ -2,16 +2,16 @@
 //----------------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------------
-#include "Effekseer.Manager.h"
-#include "Effekseer.EffectNode.h"
-#include "Effekseer.Instance.h"
-#include "Effekseer.InstanceGroup.h"
-#include "Effekseer.InstanceContainer.h"
-#include "Effekseer.InstanceGlobal.h"
-#include "Effekseer.ManagerImplemented.h"
-#include "Effekseer.Effect.h"
-#include "Effekseer.EffectImplemented.h"
-#include "Effekseer.Model.h"
+#include "Manager.h"
+#include "EffectNode.h"
+#include "Instance.h"
+#include "InstanceGroup.h"
+#include "InstanceContainer.h"
+#include "InstanceGlobal.h"
+#include "ManagerImplemented.h"
+#include "Effect.h"
+#include "EffectImplemented.h"
+#include "Model.h"
 
 //----------------------------------------------------------------------------------
 //
@@ -502,6 +502,7 @@ void Instance::Update( float deltaFrame, bool shown )
 		/* ‰¹‚ÌXV(Œ»ó•ú’u) */
 		if (m_pEffectNode->SoundType == ParameterSoundType_Use)
 		{
+#ifdef WITH_SOUND
 			float living_time = m_LivingTime;
 			float living_time_p = living_time + deltaFrame;
 
@@ -509,6 +510,7 @@ void Instance::Update( float deltaFrame, bool shown )
 			{
 				m_pEffectNode->PlaySound_(*this, m_pContainer->GetRootInstance(), m_pManager);
 			}
+#endif
 		}
 	}
 

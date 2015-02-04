@@ -19,15 +19,15 @@
 
 #include "Setting.h"
 
-#include "effekseer/gl/SpriteRenderer.h"
-#include "effekseer/gl/RibbonRenderer.h"
-#include "effekseer/gl/RingRenderer.h"
-#include "effekseer/gl/ModelRenderer.h"
-#include "effekseer/gl/TrackRenderer.h"
+#include "effekseer/core/renderer/SpriteRenderer.h"
+#include "effekseer/core/renderer/RibbonRenderer.h"
+#include "effekseer/core/renderer/RingRenderer.h"
+#include "effekseer/core/renderer/ModelRenderer.h"
+#include "effekseer/core/renderer/TrackRenderer.h"
 
+#include "SoundLoader.h"
 #ifdef WITH_SOUND
-#include "Effekseer.SoundLoader.h"
-#include "Sound/Effekseer.SoundPlayer.h"
+#include "Sound/SoundPlayer.h"
 #endif
 
 #include "ModelLoader.h"
@@ -175,11 +175,12 @@ void ManagerImplemented::GCDrawSet( bool isRemovingManager )
 								break;
 							}
 						}
-					
+
 						if( maxcreate_count == pRootInstance->m_pEffectNode->GetChildrenCount() )
 						{
 							// ‰¹‚ªÄ¶’†‚Å‚È‚¢‚Æ‚«
-							if (!GetSoundPlayer() || !GetSoundPlayer()->CheckPlayingTag(draw_set.GlobalPointer))
+///							if (!GetSoundPlayer() || !GetSoundPlayer()->CheckPlayingTag(draw_set.GlobalPointer))
+							if (!GetSoundPlayer())
 							{
 								isRemoving = true;
 							}
@@ -278,10 +279,12 @@ void ManagerImplemented::ExecuteEvents()
 			InstanceContainer* pContainer = (*it).second.InstanceContainerPointer;
 			pContainer->KillAllInstances( true );
 			(*it).second.IsRemoving = true;
+#ifdef WITH_SOUND
 			if (GetSoundPlayer() != NULL)
 			{
 				GetSoundPlayer()->StopTag((*it).second.GlobalPointer);
 			}
+#endif
 		}
 
 		if( (*it).second.GoingToStopRoot )
@@ -305,11 +308,6 @@ ManagerImplemented::ManagerImplemented( int instance_max, bool autoFlip )
 	, m_setting			( NULL )
 	, m_sequenceNumber	( 0 )
 
-	, m_MallocFunc(NULL)
-	, m_FreeFunc(NULL)
-	, m_randFunc(NULL)
-	, m_randMax(0)
-
 	, m_spriteRenderer(NULL)
 	, m_ribbonRenderer(NULL)
 	, m_ringRenderer(NULL)
@@ -317,6 +315,12 @@ ManagerImplemented::ManagerImplemented( int instance_max, bool autoFlip )
 	, m_trackRenderer(NULL)
 
 	, m_soundPlayer(NULL)
+
+	, m_MallocFunc(NULL)
+	, m_FreeFunc(NULL)
+	, m_randFunc(NULL)
+	, m_randMax(0)
+
 {
 	m_setting = Setting::Create();
 

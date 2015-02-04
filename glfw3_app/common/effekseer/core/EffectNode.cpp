@@ -3,20 +3,21 @@
 //----------------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------------
-#include "Effekseer.Manager.h"
-#include "Effekseer.Effect.h"
-#include "Effekseer.EffectNode.h"
-#include "Effekseer.Vector3D.h"
+#include "Manager.h"
+#include "Effect.h"
+#include "EffectNode.h"
+#include "Vector3D.h"
 
-#include "Effekseer.Instance.h"
+#include "Instance.h"
 
-#include "Effekseer.EffectNodeRoot.h"
-#include "Effekseer.EffectNodeSprite.h"
-#include "Effekseer.EffectNodeRibbon.h"
-#include "Effekseer.EffectNodeRing.h"
+#include "EffectNodeRoot.h"
+#include "EffectNodeSprite.h"
+#include "EffectNodeRibbon.h"
+#include "EffectNodeRing.h"
+#ifdef WITH_SOUND
 #include "Sound/Effekseer.SoundPlayer.h"
-
-#include "Effekseer.Setting.h"
+#endif
+#include "Setting.h"
 
 //----------------------------------------------------------------------------------
 //
@@ -618,17 +619,19 @@ float EffectNode::GetFadeAlpha( const Instance& instance )
 	return alpha;
 }
 
+
 //----------------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------------
-void EffectNode::PlaySound_(Instance& instance, SoundTag tag, Manager* manager)
+///void EffectNode::PlaySound_(Instance& instance, SoundTag tag, Manager* manager)
+void EffectNode::PlaySound_(Instance& instance, Manager* manager)
 {
 	SoundPlayer* player = manager->GetSoundPlayer();
 	if( player == NULL )
 	{
 		return;
 	}
-
+#if 0
 	if( Sound.WaveId >= 0 )
 	{
 		SoundPlayer::InstanceParameter parameter;
@@ -644,7 +647,9 @@ void EffectNode::PlaySound_(Instance& instance, SoundTag tag, Manager* manager)
 
 		player->Play( tag, parameter );
 	}
+#endif
 }
+
 
 //----------------------------------------------------------------------------------
 //

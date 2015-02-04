@@ -6,7 +6,7 @@
 // Include
 //----------------------------------------------------------------------------------
 #include "EffectNode.h"
-#include "effekseer/gl/TrackRenderer.h"
+#include "effekseer/core/renderer/TrackRenderer.h"
 
 //----------------------------------------------------------------------------------
 //

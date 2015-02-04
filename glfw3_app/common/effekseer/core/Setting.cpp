@@ -2,20 +2,20 @@
 //----------------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------------
-#include "Effekseer.Setting.h"
+#include "Setting.h"
 
-#include "Effekseer.RectF.h"
+#include "RectF.h"
 
-#include "Effekseer.EffectLoader.h"
-#include "Effekseer.TextureLoader.h"
-#include "Effekseer.ModelLoader.h"
-#include "Effekseer.SoundLoader.h"
+#include "EffectLoader.h"
+#include "TextureLoader.h"
+#include "ModelLoader.h"
+#include "SoundLoader.h"
 
-#include "Renderer/Effekseer.SpriteRenderer.h"
-#include "Renderer/Effekseer.RibbonRenderer.h"
-#include "Renderer/Effekseer.RingRenderer.h"
-#include "Renderer/Effekseer.ModelRenderer.h"
-#include "Renderer/Effekseer.TrackRenderer.h"
+#include "effekseer/core/Renderer/SpriteRenderer.h"
+#include "effekseer/core/Renderer/RibbonRenderer.h"
+#include "effekseer/core/Renderer/RingRenderer.h"
+#include "effekseer/core/Renderer/ModelRenderer.h"
+#include "effekseer/core/Renderer/TrackRenderer.h"
 
 //----------------------------------------------------------------------------------
 //
@@ -163,7 +163,6 @@ void Setting::SetSoundLoader(SoundLoader* loader)
 	ES_SAFE_DELETE(m_soundLoader);
 	m_soundLoader = loader;
 }
-
 
 
 

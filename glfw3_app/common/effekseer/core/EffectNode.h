@@ -746,12 +746,13 @@ public:
 		@brief	描画部分更新
 	*/
 	virtual float GetFadeAlpha( const Instance& instance );
-#ifdef WITH_SOUND
+
 	/**
 		@brief	サウンド再生
 	*/
-	virtual void PlaySound_(Instance& instance, SoundTag tag, Manager* manager);
-#endif
+///	virtual void PlaySound_(Instance& instance, SoundTag tag, Manager* manager);
+	virtual void PlaySound_(Instance& instance, Manager* manager);
+
 	/**
 		@brief	エフェクトノード生成
 	*/
