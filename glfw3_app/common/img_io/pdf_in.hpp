@@ -1,5 +1,4 @@
-#ifndef PDFIN_HPP
-#define PDFIN_HPP
+#pragma once
 //=====================================================================//
 /*!	@file
 	@brief	PDF ファイル（入力のみ）を扱うクラス（ヘッダー）
@@ -184,4 +183,4 @@ namespace img {
 
 	};
 }
-#endif
+
