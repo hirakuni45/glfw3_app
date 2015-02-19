@@ -10,6 +10,7 @@
 #include "widgets/widget.hpp"
 #include "widgets/widget_button.hpp"
 #include "widgets/widget_label.hpp"
+#include "widgets/widget_check.hpp"
 #include "widgets/widget_slider.hpp"
 #include "widgets/widget_menu.hpp"
 #include "widgets/widget_dialog.hpp"
@@ -28,6 +29,7 @@ namespace app {
 		gui::widget_button*		dialog_open_;
 		gui::widget_button*		filer_open_;
 		gui::widget_button*		menu_open_;
+		gui::widget_check*		check_;
 		gui::widget_slider*		slider_;
 		gui::widget_dialog*		dialog_;
 		gui::widget_image*		image_;
@@ -51,6 +53,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		gui_test(utils::director<core>& d) : director_(d),
 			dialog_open_(0), filer_open_(0), menu_open_(0),
+			check_(0),
 			slider_(0),
 			dialog_(0), image_(0), label_(0), frame_(0), menu_(0),
 			tree_frame_(0), tree_core_(0),

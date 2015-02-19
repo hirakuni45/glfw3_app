@@ -120,9 +120,9 @@ namespace app {
 		}
 
 		if(1) {	// チェックボックスのテスト
-			widget::param wp(vtx::srect(20, 350, 130, 40));
+			widget::param wp(vtx::srect(20, 350, 150, 40));
 			widget_check::param wp_("Disable-g");
-			wd.add_widget<widget_check>(wp, wp_);
+			check_ = wd.add_widget<widget_check>(wp, wp_);
 		}
 
 		if(1) { // リストのテスト
@@ -232,6 +232,12 @@ namespace app {
 		if(label_) {
 			label_->load(pre);
 		}
+		if(slider_) {
+			slider_->load(pre);
+		}
+		if(check_) {
+			check_->load(pre);
+		}
 		if(frame_) {
 			frame_->load(pre);
 		}
@@ -333,6 +339,12 @@ namespace app {
 		}
 		if(tree_frame_) {
 			tree_frame_->save(pre);
+		}
+		if(check_) {
+			check_->save(pre);
+		}
+		if(slider_) {
+			slider_->save(pre);
 		}
 		if(label_) {
 			label_->save(pre);

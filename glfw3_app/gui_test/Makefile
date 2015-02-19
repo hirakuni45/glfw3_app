@@ -45,6 +45,7 @@ PSOURCES	=	main.cpp \
 				img_io/openjpeg_io.cpp \
 				img_io/bmp_io.cpp \
 				img_io/tga_io.cpp \
+				img_io/pdf_in.cpp \
 				img_io/img_files.cpp \
 				img_io/img_utils.cpp \
 				widgets/common_parts.cpp \
@@ -69,7 +70,7 @@ PSOURCES	=	main.cpp \
 STDLIBS		=
 OPTLIBS		=	glfw3 GLEW \
 				pthread \
-				png jpeg openjp2 \
+				png jpeg openjp2 mupdf \
 				mad faad mp4ff tag \
 				freetype \
 				z
