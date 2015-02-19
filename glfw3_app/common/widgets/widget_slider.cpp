@@ -203,7 +203,13 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	bool widget_slider::save(sys::preference& pre)
 	{
-		return true;
+		std::string path;
+		path += '/';
+		path += wd_.create_widget_name(this);
+
+		int err = 0;
+		if(!pre.put_real(path + "/level", param_.slider_param_.position_)) ++err;
+		return err == 0;
 	}
 
 
@@ -216,6 +222,12 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	bool widget_slider::load(const sys::preference& pre)
 	{
-		return true;
+		std::string path;
+		path += '/';
+		path += wd_.create_widget_name(this);
+
+		int err = 0;
+		if(!pre.get_real(path + "/level", param_.slider_param_.position_)) ++err;
+		return err == 0;
 	}
 }
