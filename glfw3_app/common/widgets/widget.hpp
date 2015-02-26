@@ -263,7 +263,7 @@ namespace gui {
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct state {
 			enum type {
-				ENABLE,					///< 全体の許可・不許可（表示しない）
+				ENABLE,					///< 全体の許可・不許可（処理しない）
 
 				STALL,					///< 停止中（アップデートは無効）
 
@@ -280,6 +280,9 @@ namespace gui {
 				RESIZE_ROOT,			///< リサイズの選択権をルートに与える
 				AREA_ROOT,				///< ルートの描画領域を継承
 
+				MOVE_TOP,				///< 移動時最上位にする。
+				RESIZE_TOP,				///< リサイズ時最上位にする。
+
 				RESIZE_H_ENABLE,		///< 水平リサイズ許可
 				RESIZE_V_ENABLE,		///< 垂直リサイズ許可
 				RESIZE_EDGE_ENABLE,		///< エッジ領域でのリサイズ許可
@@ -293,8 +296,6 @@ namespace gui {
 				SERVICE,				///< サービスを呼び出す
 
 				/// 以下ワーク用
-				_ACTIVE,				///< アクティブ状態用
-
 				SYSTEM_STALL,			///< システム用ストール
 				SYSTEM_SELECT,			///< システム用セレクト
 
@@ -305,8 +306,6 @@ namespace gui {
 				BEFORE_SELECT,			///< １フレーム前選択状態
 				IS_SELECT,				///< 選択状態
 				SELECT,					///< セレクト（テンポラリー）
-
-				SELECT_TRG,				///< セレクト・トリガー
 
 				limit_
 			};
