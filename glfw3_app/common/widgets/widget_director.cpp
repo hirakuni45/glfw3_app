@@ -169,9 +169,10 @@ namespace gui {
 		}
 		widgets_ = ws;
 
-		if(top_move_ == w) top_move_ = 0;
-		if(top_scroll_ == w) top_scroll_ = 0;
-		if(top_resize_ == w) top_resize_ = 0;
+		if(select_widget_ == w) select_widget_ = 0;
+		if(move_widget_ == w) move_widget_ = 0;
+		if(resize_l_widget_ == w) resize_l_widget_ = 0;
+		if(resize_r_widget_ == w) resize_r_widget_ = 0;
 		if(top_widget_ == w) top_widget_ = 0;
 
 		del_mark_.insert(w);
@@ -387,7 +388,7 @@ namespace gui {
 			spos size(24);
 			img::paint fr;
 			widget::plate_param pp;
-			pp.frame_width_ = 4;
+			pp.frame_width_  = 4;
 			pp.round_radius_ = 4;
 			create_round_frame(fr, pp, default_check_color_, size);
 			share_img_.un_check_ = mobj_.install(&fr);
@@ -395,15 +396,23 @@ namespace gui {
 			img::paint pa;
 			pa = fr;
 
+			// スクエアドットでチェックされた見た目
 			pa.swap_color();
 			pa.fill_rect(8, 8, 8, 8);
 			share_img_.to_check_ = mobj_.install(&pa);
 
+			// でチェックされた見た目
+//			pa.swap_color();
+//			pa.fill_rect(8, 8, 8, 8);
+//			share_img_.to_check_ = mobj_.install(&pa);
+
+			// 「ー」でチェックされた見た目
 			pa = fr;
 			pa.swap_color();
 			pa.fill_rect(6, 10, 12, 4);
 			share_img_.minus_box_ = mobj_.install(&pa);
 
+			// 「＋」でチェックされた見た目
 			pa.fill_rect(10, 6, 4, 12);
 			share_img_.plus_box_ = mobj_.install(&pa);
 
@@ -536,15 +545,24 @@ namespace gui {
 		right.neg = dev.get_negative(device::key::MOUSE_RIGHT);
 
 		if(!left.lvl) {
-			top_move_ = 0;
-			if(resize_edge_) {
-				top_resize_ = 0;
-				resize_edge_ = false;
+			if(select_widget_) {
+				select_widget_->set_state(widget::state::SELECT, false);
+				select_widget_ = nullptr;
 			}
-			top_unselect_ = 0;
+			if(move_widget_) {
+				move_widget_->set_state(widget::state::SELECT, false);
+				move_widget_ = nullptr;
+			}
+			if(resize_l_widget_) {
+				resize_l_widget_->set_state(widget::state::SELECT, false);
+				resize_l_widget_ = nullptr;
+			}
 		}
-		if(!right.lvl && !resize_edge_) {
-			top_resize_ = 0;
+		if(!right.lvl) {
+			if(resize_r_widget_) {
+				resize_r_widget_->set_state(widget::state::SELECT, false);
+				resize_r_widget_ = nullptr;
+			}
 		}
 
 		msp_speed_ = msp;
@@ -563,8 +581,9 @@ namespace gui {
 			position_negative_ = msp;
 		}
 
-		// フォーカス、選択、を設定
-		widget* select = 0;
+		// フォーカス、選択、を決定
+		widget* left_select = nullptr;
+		widget* right_select = nullptr;
 		BOOST_FOREACH(widget* w, widgets_) {
 			w->set_state(widget::state::BEFORE_DRAG, w->get_state(widget::state::DRAG));
 			w->set_state(widget::state::DRAG, false);
@@ -578,92 +597,84 @@ namespace gui {
 				continue;
 			}
 
+			// フォーカス（クリッピング範囲）は、優先順位に関係なく常に評価する。
+			// ※FOCUS_ENABLE が有効な場合に限る
 			bool focus = w->get_param().clip_.is_focus(msp);
-			bool resize_edge = false;
-			if(w->get_state(widget::state::RESIZE_EDGE_ENABLE) && focus) {
-				vtx::srect r = w->get_param().clip_;
-				r.org += 8;
-				r.size -= 16;
-				if(!r.is_focus(msp)) resize_edge = true;
-		   	}
-
 			if(w->get_state(widget::state::FOCUS_ENABLE)) {
 				w->set_state(widget::state::FOCUS, focus);
 			}
 
-			if(left.pos && focus && !resize_edge) {  // 移動を行う widget 候補
-				w->at_param().move_org_ = w->get_rect().org;
-				w->set_state(widget::state::_ACTIVE);
-				top_move_ = w;
-			} else if(!left.lvl) {
-				w->set_state(widget::state::_ACTIVE, false);
-				select = 0;
-			}
-
-			// 選択している widget 候補
-			if(left.lvl && focus && top_resize_ == 0) {
-				if(w->get_state(widget::state::_ACTIVE)) {
-					w->set_state(widget::state::DRAG);
-					select = w;
-					if(w->get_state(widget::state::DRAG_UNSELECT) && msp_length_ > unselect_length_) {
-						w->set_state(widget::state::SELECT, false);
-						w->set_state(widget::state::IS_SELECT, false);
-						top_unselect_ = w;
-						select = 0;
-					}
+			if(focus) {
+				if(left.lvl) {  // LEFT 選択
+					left_select = w;
+				}
+				if(right.lvl) {  // RIGHT 選択
+					right_select = w;
 				}
 			}
+		}
 
-			// リサイズ候補
-			if((left.pos && resize_edge && top_unselect_ == 0)
-			   || (right.pos && (focus || resize_edge) && top_unselect_ == 0)) {
-				vtx::spos sign(1);
-				if(msp.x < (w->get_rect().org.x + w->get_rect().size.x / 2)) sign.x = -1;
-				if(msp.y < (w->get_rect().org.y + w->get_rect().size.y / 2)) sign.y = -1;
-				w->at_param().resize_sign_ = sign;
-				w->at_param().resize_pos_ = msp;
-				w->at_param().resize_org_ = w->get_rect().org;
-				w->at_param().resize_ref_ = w->get_rect().size;
-				top_resize_ = w;	// リサイズを行う widget 候補
-				resize_edge_ = resize_edge;
+		bool resize_trigger = false;
+		// 　右ボタン・リサイズの場合
+		if(right_select && right.pos) {
+			if(right_select->get_state(widget::state::RESIZE_ROOT)) {
+				right_select = root_widget(right_select);
 			}
-
-			// 移動時
-			if(left.lvl && !resize_edge) {
-				vtx::spos d = msp - position_positive_;
-				w->at_param().move_pos_ = w->get_param().move_org_ + d;
-			}
-
-			// リサイズ時
-			if((right.lvl && focus) || (left.lvl && resize_edge)) {
-				w->set_state(widget::state::RESIZE);
+			if(!right_select->get_state(widget::state::SIZE_LOCK)) {
+				resize_r_widget_ = right_select;
+				resize_trigger = true;
 			}
 		}
 
-		bool touch = false;
-		// 一番手前だけ選択される
-		BOOST_FOREACH(widget* w, widgets_) {
-			if(select == w) {
-				w->set_state(widget::state::SELECT);
-				if(left.pos || right.pos) {
-					w->set_state(widget::state::SELECT_TRG);
+		// 選択、移動、エッジリサイズ
+		if(left_select && left.pos) {
+			bool resize = false;
+			widget* ww = left_select;
+			if(left_select->get_state(widget::state::RESIZE_ROOT)) {
+				ww = root_widget(left_select);
+			}
+			if(!ww->get_state(widget::state::SIZE_LOCK)
+			   && ww->get_state(widget::state::RESIZE_EDGE_ENABLE)) {  // リサイズ
+				vtx::srect r = ww->get_param().clip_;
+				r.org += 8;
+				r.size -= 16;
+				if(!r.is_focus(msp)) {
+					resize_l_widget_ = ww;
+					resize_trigger = true;
+					resize = true;
 				}
-				touch = true;
-			} else {
-				w->set_state(widget::state::SELECT, false);
+			}
+			if(!resize) {  // 選択、移動の場合
+				if(left_select->get_state(widget::state::MOVE_ROOT)) {
+					left_select = root_widget(left_select);
+				}
+				left_select->set_state(widget::state::SELECT);
+				select_widget_ = left_select;
+				if(!left_select->get_state(widget::state::POSITION_LOCK)) {
+					move_widget_ = left_select;
+					move_widget_->at_param().move_org_ = move_widget_->get_rect().org;
+				}
 			}
 		}
 
-		if(top_move_) {
-			if(top_move_->get_state(widget::state::MOVE_ROOT)) {
-				top_move_ = root_widget(top_move_);
+		if(resize_trigger && (resize_l_widget_ || resize_r_widget_)) {
+			widget* rw = resize_l_widget_;
+			if(resize_r_widget_) rw = resize_r_widget_;
+			rw->at_param().resize_org_ = rw->get_rect().org;
+			vtx::spos sign(1);
+			if(msp.x < (rw->get_rect().org.x + rw->get_rect().size.x / 2)) {
+				sign.x = -1;
 			}
-		}
-		if(top_resize_) {
-			if(top_resize_->get_state(widget::state::RESIZE_ROOT)) {
-				top_resize_ = root_widget(top_resize_);
+			if(msp.y < (rw->get_rect().org.y + rw->get_rect().size.y / 2)) {
+				sign.y = -1;
 			}
+			rw->at_param().resize_sign_ = sign;
+			rw->at_param().resize_pos_ = msp;
+			rw->at_param().resize_org_ = rw->get_rect().org;
+			rw->at_param().resize_ref_ = rw->get_rect().size;
+			rw->set_state(widget::state::SELECT);
 		}
+
 
 		// フォーカス、セレクトの動的な状態は常に作成
 		BOOST_FOREACH(widget* w, widgets_) {
@@ -677,9 +688,6 @@ namespace gui {
 			w->set_state(widget::state::BEFORE_SELECT, f);
 			f = w->get_state(widget::state::SELECT);
 			w->set_state(widget::state::IS_SELECT, f);
-			if(!f && !w->get_state(widget::state::BEFORE_SELECT)) {
-				w->set_state(widget::state::SELECT_TRG, false);
-			}
 			if(f) { ++w->at_param().hold_frame_; }
 			else {
 				if(w->get_state(widget::state::BEFORE_SELECT)) {
@@ -689,24 +697,35 @@ namespace gui {
 			}
 		}
 
-		// 移動
-		bool move_it = false;
-		if(top_move_ && !top_move_->get_state(widget::state::POSITION_LOCK)) {
+		bool touch = false;
+
+		// 移動時
+		if(move_widget_ && left.lvl) {
+			if(move_widget_->get_state(widget::state::MOVE_TOP)) {
+				top_widget(move_widget_);
+			}
+			vtx::spos d = msp - position_positive_;
+			move_widget_->at_param().move_pos_ = move_widget_->get_param().move_org_ + d;
+			move_widget_->at_rect().org = move_widget_->get_param().move_pos_;
 			touch = true;
-			top_move_->at_rect().org = top_move_->get_param().move_pos_;
-			move_it = true;
 		}
 
 		// リサイズ処理
 		// 移動がある場合、リサイズしない
-		if(!move_it && top_resize_ && !top_resize_->get_state(widget::state::SIZE_LOCK)) {
-			if(right.lvl || (left.lvl && resize_edge_)) {
-				const widget::param& param = top_resize_->get_param();
+		if(!touch && (resize_l_widget_ || resize_r_widget_)) {
+			widget* rw = nullptr;
+			if(left.lvl && resize_l_widget_) rw = resize_l_widget_;
+			if(right.lvl && resize_r_widget_) rw = resize_r_widget_;
+			if(rw) {
+				if(rw->get_state(widget::state::RESIZE_TOP)) {
+					top_widget(rw);
+				}
+				const widget::param& param = rw->get_param();
 				vtx::spos d = msp - param.resize_pos_;
 				if(param.resize_sign_.x < 0) d.x = -d.x;
 				if(param.resize_sign_.y < 0) d.y = -d.y;
-				if(!top_resize_->get_state(widget::state::RESIZE_H_ENABLE)) d.x = 0;
-				if(!top_resize_->get_state(widget::state::RESIZE_V_ENABLE)) d.y = 0;
+				if(!rw->get_state(widget::state::RESIZE_H_ENABLE)) d.x = 0;
+				if(!rw->get_state(widget::state::RESIZE_V_ENABLE)) d.y = 0;
 				// X、Y が、フレームの中心付近（１／３）にある場合は片軸固定
 				{
 					vtx::spos ds = param.resize_pos_ - param.resize_org_;
@@ -728,21 +747,18 @@ namespace gui {
 				} else {
 					newsize.y = ref.y;
 				}
-				touch = true;
 				vtx::spos ofs(0);
 				if(param.resize_sign_.x < 0) ofs.x = ref.x - newsize.x;
 				if(param.resize_sign_.y < 0) ofs.y = ref.y - newsize.y;
-				top_resize_->at_rect().org  = param.resize_org_ + ofs;
-				top_resize_->at_rect().size = newsize;
+				rw->at_rect().org  = param.resize_org_ + ofs;
+				rw->at_rect().size = newsize;
+				touch = true;
 			}
 		}
 
-		if(select || top_move_ || top_resize_) {  // 選択（top_widget）、トップ・フォーカス
-			if(top_resize_) top_widget_ = top_resize_;
-			else if(top_move_) top_widget_ = top_move_;
-			else top_widget_ = select;
-			top_widget(root_widget(top_widget_));
-			top_widget(top_widget_);
+		// 最上位を更新
+		if(!widgets_.empty()) {
+			top_widget_ = root_widget(widgets_.back());
 		}
 
 		// 最後に各部品の update 処理 
