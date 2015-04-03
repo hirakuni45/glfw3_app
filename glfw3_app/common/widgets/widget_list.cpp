@@ -144,10 +144,8 @@ namespace gui {
 				BOOST_FOREACH(widget_label* w, list_) {
 					if(n == param_.select_pos_) {
 						w->set_action(widget::action::SELECT_HIGHLIGHT);
-						w->set_state(widget::state::SYSTEM_SELECT);
 					} else {
 						w->set_action(widget::action::SELECT_HIGHLIGHT, false);
-						w->set_state(widget::state::SYSTEM_SELECT, false);
 					}
 					++n;
 				}
@@ -169,7 +167,7 @@ namespace gui {
 		const vtx::spos& siz = core.get_rect().size;
 
 		gl::mobj::handle h = objh_;
-		if(get_select() || get_state(widget::state::SYSTEM_SELECT)) {
+		if(get_select()) {
 			h = select_objh_;
 		}
 

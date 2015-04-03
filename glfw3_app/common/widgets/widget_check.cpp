@@ -40,7 +40,6 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_check::update()
 	{
-//		bool f = param_.check_;
 		if(get_select()) {
 			obj_state_ = !param_.check_;
 		} else if(get_selected()) {

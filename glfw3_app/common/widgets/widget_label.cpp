@@ -164,7 +164,7 @@ namespace gui {
 	void widget_label::render()
 	{
 		gl::mobj::handle h = objh_;
-		if(get_select() || get_state(widget::state::SYSTEM_SELECT)) {
+		if(get_select()) {
 			h = select_objh_;
 		}
 

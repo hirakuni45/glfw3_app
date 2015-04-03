@@ -274,10 +274,14 @@ namespace gui {
 				POSITION_LOCK,			///< 位置固定
 				CLIP_PARENTS,			///< ペアレントの領域でクリッピングを行う
 				DRAG_UNSELECT,			///< ドラッグされたらセレクトを外す
-				SELECT_PARENTS,			///< ペアレント全てが選択
+				FOCUS_CHILDS,			///< 子供全てにフォーカスを与える
 
+				SELECT_PARENTS,			///< 選択権を「親」に移動
+				SELECT_CHILDS,			///< 子供を全て選択
+				SELECT_ROOT,			///< 選択権をルートに与える
 				MOVE_ROOT,				///< 移動の選択権をルートに与える
 				RESIZE_ROOT,			///< リサイズの選択権をルートに与える
+
 				AREA_ROOT,				///< ルートの描画領域を継承
 
 				MOVE_TOP,				///< 移動時最上位にする。
@@ -297,7 +301,6 @@ namespace gui {
 
 				/// 以下ワーク用
 				SYSTEM_STALL,			///< システム用ストール
-				SYSTEM_SELECT,			///< システム用セレクト
 
 				BEFORE_FOCUS,			///< １フレーム前フォーカスの状態
 				IS_FOCUS,				///< フォーカスの状態

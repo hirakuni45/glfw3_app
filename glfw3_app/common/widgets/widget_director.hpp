@@ -94,8 +94,12 @@ namespace gui {
 
 		utils::strings			error_list_;
 
+		float					unselect_length_;
+
 		void message_widget_(widget* w, const std::string& s);
 		void parents_widget_mark_(widget* root);
+		void unselect_parents_(widget* root);
+
 	public:
 		static widget::color_param		default_frame_color_;
 		static widget::color_param		default_button_color_;
@@ -127,7 +131,8 @@ namespace gui {
 			top_widget_(nullptr),
 			msp_length_(0.0f), msp_speed_(0),
 			position_positive_(0), position_level_(0), position_negative_(0),
-			scroll_(0), share_img_(), keyboard_(), del_mark_()
+			scroll_(0), share_img_(), keyboard_(), del_mark_(),
+			unselect_length_(6.0f)
 			{ }
 
 

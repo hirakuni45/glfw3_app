@@ -138,6 +138,7 @@ namespace gui {
 		bool		selected_enable_;
 		bool		new_file_enable_;
 		bool		new_file_in_;
+		bool		back_directory_;
 
 		void create_file_(widget_file& wf, const vtx::srect& rect, short ofs, const std::string& str);
 		void create_files_(widget_files& wfs, short ofs);
@@ -171,7 +172,8 @@ namespace gui {
 			file_(),
 			select_file_id_(0),
 			selected_enable_(true),
-			new_file_enable_(false), new_file_in_(false)
+			new_file_enable_(false), new_file_in_(false),
+			back_directory_(false)
 			{ }
 
 

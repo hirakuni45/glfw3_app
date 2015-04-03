@@ -126,6 +126,28 @@ namespace gui {
 	}
 
 
+	void widget_director::unselect_parents_(widget* root)
+	{
+		if(root == nullptr) return;
+
+		root->set_state(widget::state::SELECT, false);
+		root->set_state(widget::state::FOCUS, false);
+		root->set_state(widget::state::DRAG, false);
+
+		if(root->get_state(widget::state::SELECT_CHILDS)) {
+			widgets ws;
+			parents_widget(root, ws);
+			BOOST_FOREACH(widget* w, ws) {
+				if(w->get_state(widget::state::SELECT_PARENTS)) {
+					w->set_state(widget::state::SELECT, false);
+					w->set_state(widget::state::FOCUS, false);
+					w->set_state(widget::state::DRAG, false);
+				}
+			}
+		}
+	}
+
+
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	ウィジェットの許可、不許可
@@ -545,22 +567,23 @@ namespace gui {
 		right.neg = dev.get_negative(device::key::MOUSE_RIGHT);
 
 		if(!left.lvl) {
-			if(select_widget_) {
-				select_widget_->set_state(widget::state::SELECT, false);
-				select_widget_ = nullptr;
-			}
+			unselect_parents_(select_widget_);
+			select_widget_ = nullptr;
 			if(move_widget_) {
 				move_widget_->set_state(widget::state::SELECT, false);
+				move_widget_->set_state(widget::state::DRAG, false);
 				move_widget_ = nullptr;
 			}
 			if(resize_l_widget_) {
 				resize_l_widget_->set_state(widget::state::SELECT, false);
+				resize_l_widget_->set_state(widget::state::DRAG, false);
 				resize_l_widget_ = nullptr;
 			}
 		}
 		if(!right.lvl) {
 			if(resize_r_widget_) {
 				resize_r_widget_->set_state(widget::state::SELECT, false);
+				resize_r_widget_->set_state(widget::state::DRAG, false);
 				resize_r_widget_ = nullptr;
 			}
 		}
@@ -582,13 +605,9 @@ namespace gui {
 		}
 
 		// フォーカス、選択、を決定
-		widget* left_select = nullptr;
-		widget* right_select = nullptr;
+		bool resize_trigger = false;
+		bool select_trigger = false;
 		BOOST_FOREACH(widget* w, widgets_) {
-			w->set_state(widget::state::BEFORE_DRAG, w->get_state(widget::state::DRAG));
-			w->set_state(widget::state::DRAG, false);
-			w->set_state(widget::state::BEFORE_RESIZE, w->get_state(widget::state::RESIZE));
-			w->set_state(widget::state::RESIZE, false);
 			if(!w->get_state(widget::state::ENABLE) ||
 			  w->get_state(widget::state::STALL) ||
 			  w->get_state(widget::state::SYSTEM_STALL)) {
@@ -597,62 +616,83 @@ namespace gui {
 				continue;
 			}
 
-			// フォーカス（クリッピング範囲）は、優先順位に関係なく常に評価する。
+			// フォーカス（クリッピング範囲）は、全てに対して評価する。
 			// ※FOCUS_ENABLE が有効な場合に限る
 			bool focus = w->get_param().clip_.is_focus(msp);
 			if(w->get_state(widget::state::FOCUS_ENABLE)) {
 				w->set_state(widget::state::FOCUS, focus);
 			}
 
-			if(focus) {
-				if(left.lvl) {  // LEFT 選択
-					left_select = w;
-				}
-				if(right.lvl) {  // RIGHT 選択
-					right_select = w;
-				}
-			}
-		}
+			if(!focus) continue;
 
-		bool resize_trigger = false;
-		// 　右ボタン・リサイズの場合
-		if(right_select && right.pos) {
-			if(right_select->get_state(widget::state::RESIZE_ROOT)) {
-				right_select = root_widget(right_select);
-			}
-			if(!right_select->get_state(widget::state::SIZE_LOCK)) {
-				resize_r_widget_ = right_select;
+			if(left.pos) {  // LEFT 選択、移動、エッジリサイズ
+				if(w->get_state(widget::state::RESIZE_EDGE_ENABLE)) {
+					vtx::srect r = w->get_param().clip_;
+					r.org  += 8;
+					r.size -= 16;
+					if(!r.is_focus(msp)) {
+						if(w->get_state(widget::state::SIZE_LOCK)) continue;
+						resize_l_widget_ = w;
+						resize_trigger = true;
+						continue;
+					}
+				}
+
+				select_widget_ = w;
+//				std::cout << "Sel: " << select_widget_->type_name() << std::endl << std::flush;
+				select_trigger = true;
+				if(w->get_state(widget::state::POSITION_LOCK)) continue;
+				w->at_param().move_org_ = w->get_rect().org;
+//				std::cout << "Move: " << w->type_name() << std::endl << std::flush;
+				move_widget_ = w;
+			} else if(right.pos) {  // RIGHT 選択
+				if(w->get_state(widget::state::SIZE_LOCK)) continue;
+				resize_r_widget_ = w;
 				resize_trigger = true;
 			}
 		}
 
-		// 選択、移動、エッジリサイズ
-		if(left_select && left.pos) {
-			bool resize = false;
-			widget* ww = left_select;
-			if(left_select->get_state(widget::state::RESIZE_ROOT)) {
-				ww = root_widget(left_select);
+		// 選択権の追跡
+		if(select_trigger) {
+			if(select_widget_->get_state(widget::state::SELECT_ROOT)) {
+				select_widget_ = root_widget(select_widget_);
 			}
-			if(!ww->get_state(widget::state::SIZE_LOCK)
-			   && ww->get_state(widget::state::RESIZE_EDGE_ENABLE)) {  // リサイズ
-				vtx::srect r = ww->get_param().clip_;
-				r.org += 8;
-				r.size -= 16;
-				if(!r.is_focus(msp)) {
-					resize_l_widget_ = ww;
-					resize_trigger = true;
-					resize = true;
+			select_widget_->set_state(widget::state::SELECT);
+			if(move_widget_) {
+				if(move_widget_->get_state(widget::state::MOVE_ROOT)) {
+					move_widget_ = root_widget(move_widget_);
+				}
+				move_widget_->set_state(widget::state::SELECT);
+			}
+		}
+		if(resize_trigger) {
+			if(resize_l_widget_) {
+				if(resize_l_widget_->get_state(widget::state::RESIZE_ROOT)) {
+					resize_l_widget_ = root_widget(resize_l_widget_);
 				}
 			}
-			if(!resize) {  // 選択、移動の場合
-				if(left_select->get_state(widget::state::MOVE_ROOT)) {
-					left_select = root_widget(left_select);
+			if(resize_r_widget_) {
+				if(resize_r_widget_->get_state(widget::state::RESIZE_ROOT)) {
+					resize_r_widget_ = root_widget(resize_r_widget_);
 				}
-				left_select->set_state(widget::state::SELECT);
-				select_widget_ = left_select;
-				if(!left_select->get_state(widget::state::POSITION_LOCK)) {
-					move_widget_ = left_select;
-					move_widget_->at_param().move_org_ = move_widget_->get_rect().org;
+			}
+		}
+
+		// 「ペアレンツ選択」の操作
+		if(select_trigger) {
+			if(select_widget_ && select_widget_->get_state(widget::state::SELECT_PARENTS)) {
+				widget* w = select_widget_->get_param().parents_;
+				if(w) {
+					select_widget_ = w;
+					if(select_widget_->get_state(widget::state::SELECT_CHILDS)) {
+						widgets ws;
+						parents_widget(select_widget_, ws);
+						BOOST_FOREACH(widget* w, ws) {
+							if(w->get_state(widget::state::SELECT_PARENTS)) {
+								w->set_state(widget::state::SELECT);
+							}
+						}
+					}
 				}
 			}
 		}
@@ -675,10 +715,38 @@ namespace gui {
 			rw->set_state(widget::state::SELECT);
 		}
 
+		// フォーカスの伝搬
+		if(select_widget_ && select_widget_->get_state(widget::state::FOCUS_CHILDS)) {
+			widgets ws;
+			parents_widget(select_widget_, ws);
+			BOOST_FOREACH(widget* w, ws) {
+				if(!w->get_state(widget::state::FOCUS_ENABLE)) continue;
+				w->set_state(widget::state::FOCUS);
+			}
+		}
+
+		// ドラッグにより非選択になり「移動」に掴み直す
+		if(select_widget_ && left.lvl) {
+			widget* w = select_widget_;
+			if(w->get_state(widget::state::DRAG_UNSELECT) && msp_length_ > unselect_length_) {
+				unselect_parents_(w);
+				if(move_widget_) {
+					position_positive_ = msp;
+					move_widget_->at_param().move_org_ = move_widget_->get_rect().org;
+					move_widget_->set_state(widget::state::SELECT);
+					move_widget_->set_state(widget::state::DRAG);
+				}
+				select_widget_ = nullptr;
+			}
+		}
 
 		// フォーカス、セレクトの動的な状態は常に作成
 		BOOST_FOREACH(widget* w, widgets_) {
 			bool f;
+			f = w->get_state(widget::state::DRAG);
+			w->set_state(widget::state::BEFORE_DRAG, f);
+			f = w->get_state(widget::state::RESIZE);
+			w->set_state(widget::state::BEFORE_RESIZE, f);
 			f = w->get_state(widget::state::IS_FOCUS);
 			w->set_state(widget::state::BEFORE_FOCUS, f);
 			f = w->get_state(widget::state::FOCUS);
@@ -688,8 +756,9 @@ namespace gui {
 			w->set_state(widget::state::BEFORE_SELECT, f);
 			f = w->get_state(widget::state::SELECT);
 			w->set_state(widget::state::IS_SELECT, f);
-			if(f) { ++w->at_param().hold_frame_; }
-			else {
+			if(f) {
+				++w->at_param().hold_frame_;
+			} else {
 				if(w->get_state(widget::state::BEFORE_SELECT)) {
 					w->at_param().holded_frame_ = w->get_param().hold_frame_;
 				}
@@ -720,6 +789,7 @@ namespace gui {
 				if(rw->get_state(widget::state::RESIZE_TOP)) {
 					top_widget(rw);
 				}
+				rw->set_state(widget::state::RESIZE);
 				const widget::param& param = rw->get_param();
 				vtx::spos d = msp - param.resize_pos_;
 				if(param.resize_sign_.x < 0) d.x = -d.x;
@@ -872,7 +942,7 @@ namespace gui {
 					y -= static_cast<float>(pa.rect_.size.y) * ss;
 				}
 			}
-			if(w->get_select() || w->get_state(widget::state::SYSTEM_SELECT)) {
+			if(w->get_select() && w->get_focus()) {
 				if(pa.action_[widget::action::SELECT_HIGHLIGHT]) {
 					i = 1.0f;
 				}
