@@ -51,11 +51,13 @@ PSOURCES	=	main.cpp \
 				widgets/common_parts.cpp \
 				widgets/widget.cpp \
 				widgets/widget_director.cpp \
+				widgets/ui_policy.cpp \
 				widgets/widget_utils.cpp \
 				widgets/widget_image.cpp \
 				widgets/widget_text.cpp \
 				widgets/widget_frame.cpp \
 				widgets/widget_button.cpp \
+				widgets/widget_dial.cpp \
 				widgets/widget_label.cpp \
 				widgets/widget_slider.cpp \
 				widgets/widget_list.cpp \
@@ -132,7 +134,7 @@ LFLAGS	=	-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.p
 
 CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
 			-Wformat
-CPWARN	=	-Wall -Werror
+CPWARN	=	-Wall -Werror -Wno-unused-private-field
 
 OBJECTS	=	$(addprefix $(BUILD)/,$(patsubst %.cpp,%.o,$(PSOURCES))) \
 			$(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(CSOURCES)))

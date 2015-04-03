@@ -79,12 +79,6 @@ namespace app {
 			wd.add_widget<widget_text>(wp, wp_);
 		}
 
-		if(1) { // フレームのテスト
-			widget::param wp(vtx::srect(200, 20, 100, 80));
-			widget_frame::param wp_;
-			frame_ = wd.add_widget<widget_frame>(wp, wp_);
-		}
-
 		if(1) { // ダイアログのテスト
 			widget::param wp(vtx::srect(300, 300, 300, 200));
 			widget_dialog::param wp_;
@@ -149,6 +143,12 @@ namespace app {
 			wp_.text_list_.push_back("Third");
 			wp_.text_list_.push_back("Force");
 			menu_ = wd.add_widget<widget_menu>(wp, wp_);
+		}
+
+		if(1) { // フレームのテスト
+			widget::param wp(vtx::srect(200, 20, 100, 80));
+			widget_frame::param wp_;
+			frame_ = wd.add_widget<widget_frame>(wp, wp_);
 		}
 
 		if(1) {	// ファイラーのテスト
@@ -278,6 +278,7 @@ namespace app {
 			if(filer_id_ != filer_->get_select_file_id()) {
 				filer_id_ = filer_->get_select_file_id();
 				std::cout << "Filer: '" << filer_->get_file() << "'" << std::endl;
+				std::cout << std::flush;
 			}
 		}
 
