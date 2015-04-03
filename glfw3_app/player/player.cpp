@@ -482,7 +482,8 @@ namespace app {
 					const al::tag& t = sound.get_tag_info();
 					if(t.serial_ == tag_info_serial_) {
 						if(!tag_wait_) {
-							sound.request_tag_info(files_[files_step_]);
+							const std::string fn = files_[files_step_];
+							sound.request_tag_info(fn);
 							tag_wait_ = true;
 						}
 					} else {
