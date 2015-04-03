@@ -17,9 +17,9 @@ namespace img {
 	}
 
 	// 明るさの勾配を計算する
-	typedef std::vector<unsigned char>	slopeT;
-	typedef slopeT::iterator			slopeT_it;
-	typedef slopeT::const_iterator		slopeT_cit;
+	typedef std::vector<uint8_t>	slopeT;
+	typedef slopeT::iterator	   	slopeT_it;
+	typedef slopeT::const_iterator 	slopeT_cit;
 	static void make_slope_(int top, int center, int end, slopeT& slope)
 	{
 		float a = static_cast<float>(top);
