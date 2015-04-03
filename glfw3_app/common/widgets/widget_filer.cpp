@@ -599,6 +599,7 @@ namespace gui {
 		if(back_directory_ && files_->get_select_out()) {
 			request_right_ = false;
 			move_speed_ =  speed_move;
+			back_directory_ = false;
 		}
 
 		// 左右スクロールと、スプリング効果など
