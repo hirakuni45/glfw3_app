@@ -715,7 +715,7 @@ namespace gui {
 			rw->set_state(widget::state::SELECT);
 		}
 
-		// フォーカスの伝搬
+		// グループ的「選択」を実現するフォーカスの伝搬機能
 		if(select_widget_ && select_widget_->get_state(widget::state::FOCUS_CHILDS)) {
 			widgets ws;
 			parents_widget(select_widget_, ws);
@@ -725,17 +725,11 @@ namespace gui {
 			}
 		}
 
-		// ドラッグにより非選択になり「移動」に掴み直す
+		// ドラッグにより非選択になる
 		if(select_widget_ && left.lvl) {
 			widget* w = select_widget_;
 			if(w->get_state(widget::state::DRAG_UNSELECT) && msp_length_ > unselect_length_) {
 				unselect_parents_(w);
-				if(move_widget_) {
-					position_positive_ = msp;
-					move_widget_->at_param().move_org_ = move_widget_->get_rect().org;
-					move_widget_->set_state(widget::state::SELECT);
-					move_widget_->set_state(widget::state::DRAG);
-				}
 				select_widget_ = nullptr;
 			}
 		}
@@ -770,6 +764,9 @@ namespace gui {
 
 		// 移動時
 		if(move_widget_ && left.lvl) {
+			if(msp_length_) {
+				move_widget_->set_state(widget::state::DRAG);
+			}
 			if(move_widget_->get_state(widget::state::MOVE_TOP)) {
 				top_widget(move_widget_);
 			}
