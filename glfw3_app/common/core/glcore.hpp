@@ -44,8 +44,8 @@ namespace gl {
 		vtx::spos		size_;
 		vtx::srect		rect_;
 
-		int				recv_file_id_;
-		utils::strings	recv_file_path_;
+		int				recv_files_id_;
+		utils::strings	recv_files_path_;
 
 		std::string		title_;
 
@@ -91,7 +91,7 @@ namespace gl {
 		//-----------------------------------------------------------------//
 		core() : window_(0),
 				 best_size_(0), limit_size_(0), size_(0), rect_(0),
-				 recv_file_id_(0),
+				 recv_files_id_(0), recv_files_path_(),
 				 title_(),
 #ifdef __APPLE__
 				 sync_count_(0),
@@ -170,11 +170,29 @@ namespace gl {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	ファイル受信の設定
+			@param[in] num	受信ファイル数
+			@param[in] path 受信ファイルパス
+		*/
+		//-----------------------------------------------------------------//
+		void set_recv_files(int num, const char** path) {
+			++recv_files_id_;
+			recv_files_path_.clear();
+			for(int i = 0; i < num; ++i) {
+				std::string file;
+				utils::code_conv(std::string(path[i]), '\\', '/', file);
+				recv_files_path_.push_back(file);
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	ファイル受信 ID の取得
 			@return	ファイル受信 ID
 		*/
 		//-----------------------------------------------------------------//
-		int get_recv_file_id() const { return recv_file_id_; }
+		int get_recv_files_id() const { return recv_files_id_; }
 
 
 		//-----------------------------------------------------------------//
@@ -183,7 +201,7 @@ namespace gl {
 			@return	ファイル受信 path
 		*/
 		//-----------------------------------------------------------------//
-		const utils::strings& get_recv_file_path() const { return recv_file_path_; }
+		const utils::strings& get_recv_files_path() const { return recv_files_path_; }
 
 
 		//-----------------------------------------------------------------//

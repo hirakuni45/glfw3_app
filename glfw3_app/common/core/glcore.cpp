@@ -224,6 +224,13 @@ namespace gl {
 	}
 #endif
 
+
+	static void dropfile_callback_(GLFWwindow* window, int num, const char** path)
+	{
+		core::get_instance().set_recv_files(num, path);
+	}
+
+
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	初期化プロセス
@@ -299,6 +306,7 @@ namespace gl {
 		glfwSetWindowPos(window_, rect_.org.x, rect_.org.y);
 //		glfwSetWindowSizeCallback(window_, resize_window_);
 //		glfwSetFramebufferSizeCallback(window_, resize_framebuffer_);
+		glfwSetDropCallback(window_, dropfile_callback_);
 
 		glfwMakeContextCurrent(window_);
 		{
@@ -445,23 +453,6 @@ namespace gl {
         /* Poll for and process events */
         glfwPollEvents();
 
-#ifdef WIN32
-		{
-			int id = glfwGetDropfilesId(window_);
-			if(recv_file_id_ != id) {
-				recv_file_id_ = id;
-				int n;
-				const char** pp = glfwGetDropfilesString(window_, &n);
-				recv_file_path_.clear();
-				for(int i = 0; i < n; ++i) {
-					std::string src = pp[i];
-					std::string file;
-					utils::code_conv(src, '\\', '/', file);
-					recv_file_path_.push_back(file);
-				}
-			}
-		}
-#endif
    		glViewport(0, 0, size_.x, size_.y);
 
 	 	if(glfwWindowShouldClose(window_)) {
