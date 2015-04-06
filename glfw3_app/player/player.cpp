@@ -517,10 +517,10 @@ namespace app {
 		}
 
 		// Drag & Drop されたファイルを再生
-		int id = core.get_recv_file_id();
+		int id = core.get_recv_files_id();
 		if(drop_file_id_ != id) {
 			drop_file_id_ = id;
-			const utils::strings& ss = core.get_recv_file_path();
+			const utils::strings& ss = core.get_recv_files_path();
 			if(!ss.empty()) {
 				std::string file = ss[0];
 				if(ss.size() > 1) {
