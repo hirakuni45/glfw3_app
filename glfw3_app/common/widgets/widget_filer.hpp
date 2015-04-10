@@ -145,6 +145,7 @@ namespace gui {
 		widget_files_cit scan_select_in_file_(widget_files& wfs) const;
 		widget_files_cit scan_select_file_(widget_files& wfs) const;
 		widget_files_cit scan_selected_file_(widget_files& wfs) const;
+		void un_selected_(widget_files& wfs);
 		void resize_files_(widget_files& wfs, short ofs, short width);
 		void update_files_info_(widget_files& wfs);
 		void update_files_alias_(widget_files& wfs);

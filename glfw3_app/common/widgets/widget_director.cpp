@@ -953,6 +953,9 @@ namespace gui {
 					y -= static_cast<float>(pa.rect_.size.y) * ss;
 				}
 			}
+			if(w->get_state(widget::state::SELECTED)) {
+				i = 1.0f;
+			}
 			if(w->get_state(widget::state::STALL) ||
 				w->get_state(widget::state::SYSTEM_STALL)) {
 				i = 0.25f;

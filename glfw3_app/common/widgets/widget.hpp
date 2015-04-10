@@ -299,7 +299,8 @@ namespace gui {
 
 				SERVICE,				///< サービスを呼び出す
 
-				/// 以下ワーク用
+				/// 以下、読み出し専用フラグ
+				SELECTED,				///< 選択済
 				SYSTEM_STALL,			///< システム用ストール
 
 				BEFORE_FOCUS,			///< １フレーム前フォーカスの状態

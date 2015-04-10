@@ -161,6 +161,15 @@ namespace gui {
 	}
 
 
+	void widget_filer::un_selected_(widget_files& wfs)
+	{
+		BOOST_FOREACH(widget_file& wf, wfs) {
+			wf.name->set_state(widget::state::SELECTED, false);
+			wf.info->set_state(widget::state::SELECTED, false);
+		}
+	}
+
+
 	void widget_filer::resize_files_(widget_files& wfs, short ofs, short width)
 	{
 		for(widget_files_cit cit = wfs.begin(); cit != wfs.end(); ++cit) {
@@ -285,10 +294,7 @@ namespace gui {
 
 	void widget_filer::set_select_pos_(uint32_t pos)
 	{
-//		BOOST_FOREACH(const widget_file& wf, center_) {
-//			wf.name->set_state(widget::state::SYSTEM_SELECT, false);
-//			wf.info->set_state(widget::state::SYSTEM_SELECT, false);
-//		}
+		un_selected_(center_);
 		select_pos_ = pos;
 		set_regist_state_();
 	}
@@ -324,15 +330,17 @@ namespace gui {
 			std::string t;
 			utils::strip_last_of_delimita_path(wf.name->get_text(), t);
 			if(wf.name && t == fn) {
-//				if(wf.name->get_state(widget::state::SYSTEM_SELECT)) {
-//					return true;
-//				}
+				if(wf.name->get_state(widget::state::SELECTED)) {
+					return true;
+				}
 				short ofs = static_cast<short>(n) -
 					(main_->get_rect().size.y / param_.label_height_) / 2;
 				if(ofs >= 0) {
 					position_.y = static_cast<float>(ofs * -param_.label_height_);
 				}
 				set_select_pos_(n);
+				wf.name->set_state(widget::state::SELECTED);
+				wf.info->set_state(widget::state::SELECTED);
 				return true;
 			}
 			++n;
@@ -522,8 +530,6 @@ namespace gui {
 		if(!get_state(widget::state::ENABLE)) {
 			return;
 		}
-
-//		wd_.top_widget(this);
 
 		// ファイル情報の取得と反映（ファイル情報収集はスレッドで動作）
 		if(fsc_wait_ && fsc_.probe()) {
@@ -736,6 +742,7 @@ namespace gui {
 			}
 		}
 
+		// 選択された瞬間
 		widget_files_cit cit = scan_select_in_file_(center_);
 		if(cit != center_.end()) {
 			set_select_pos_(cit - center_.begin());
@@ -770,6 +777,8 @@ namespace gui {
 					new_file_in_ = true;
 					
 				} else if(wf.name) {
+					wf.name->set_state(widget::state::SELECTED);
+					wf.info->set_state(widget::state::SELECTED);
 					const std::string& n = wf.name->get_text();
 					if(n == "..") {  // 一つ前に戻る
 						request_right_ = false;
