@@ -939,7 +939,8 @@ namespace gui {
 					y -= static_cast<float>(pa.rect_.size.y) * ss;
 				}
 			}
-			if(w->get_select() && w->get_focus()) {
+			if((w->get_select() && w->get_focus())
+			   || w->get_state(widget::state::SELECTED)) {
 				if(pa.action_[widget::action::SELECT_HIGHLIGHT]) {
 					i = 1.0f;
 				}
@@ -952,9 +953,6 @@ namespace gui {
 					x -= static_cast<float>(pa.rect_.size.x) * ss;
 					y -= static_cast<float>(pa.rect_.size.y) * ss;
 				}
-			}
-			if(w->get_state(widget::state::SELECTED)) {
-				i = 1.0f;
 			}
 			if(w->get_state(widget::state::STALL) ||
 				w->get_state(widget::state::SYSTEM_STALL)) {
