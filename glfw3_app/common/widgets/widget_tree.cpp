@@ -64,7 +64,6 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_tree::initialize()
 	{
-		at_param().state_.set(widget::state::POSITION_LOCK);
 		at_param().state_.set(widget::state::SIZE_LOCK);
 		at_param().state_.set(widget::state::RESIZE_H_ENABLE, false);
 		at_param().state_.set(widget::state::RESIZE_V_ENABLE, false);
