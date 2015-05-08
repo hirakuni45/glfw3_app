@@ -18,6 +18,8 @@ namespace gui {
 
 		typedef widget_check value_type;
 
+		typedef std::function< void (bool) > select_func_type;
+
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	widget_check 表示タイプ
@@ -43,6 +45,8 @@ namespace gui {
 			bool	disable_gray_text_;	///< 不許可時、文字をグレースケールする場合
 			bool	draw_box_;			///< ボックスの表示を行わない場合 false
 			bool	check_;				///< 許可、不許可の状態
+			select_func_type	select_func_ = [=](bool f) { };
+
 			param(const std::string& text = "", bool check = false) :
 				type_(style::CHECKED),
 				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255),
@@ -63,6 +67,8 @@ namespace gui {
 		gl::mobj::handle	ena_h_;
 		gl::mobj::handle	dis_h_;
 
+		bool				check_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -71,7 +77,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_check(widget_director& wd, const widget::param& bp, const param& p) :
 			widget(bp), wd_(wd), param_(p),
-			obj_state_(false), ena_h_(0), dis_h_(0) { }
+			obj_state_(false), ena_h_(0), dis_h_(0), check_(p.check_) { }
 
 
 		//-----------------------------------------------------------------//
@@ -165,7 +171,12 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() { }
+		void service() {
+			if(check_ != param_.check_) {
+				param_.select_func_(param_.check_);
+				check_ = param_.check_;
+			}
+		}
 
 
 		//-----------------------------------------------------------------//

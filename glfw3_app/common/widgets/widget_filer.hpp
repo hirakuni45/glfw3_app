@@ -27,6 +27,8 @@ namespace gui {
 
 		typedef widget_filer value_type;
 
+		typedef std::function< void (const std::string&) > select_file_func_type;
+
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	widget_filer パラメーター
@@ -45,6 +47,8 @@ namespace gui {
 			short			label_height_;
 
 			bool			new_file_;	///< 新規ファイル作成
+
+			select_file_func_type	select_file_func_ = [=](const std::string&) { };
 
 			param(const std::string& path = "", const std::string& filter = "") :
 				plate_param_(),
@@ -295,8 +299,8 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	ファイル選択シグナルを取得
-			@return ファイル選択シグナル
+			@brief	ファイル選択 ID を取得
+			@return ファイル選択 ID
 		*/
 		//-----------------------------------------------------------------//
 		uint32_t get_select_file_id() const { return select_file_id_; }

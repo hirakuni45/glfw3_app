@@ -512,6 +512,7 @@ namespace gui {
 				utils::append_path(param_.path_, n, file_);
 				++select_file_id_;
 				enable(false);
+				/// select_file_func_(file_);
 			}
 			new_file_in_ = center_[0].name->get_local_param().text_in_;
 		}
@@ -803,6 +804,7 @@ namespace gui {
 						++select_file_id_;
 						enable(false);
 						selected_enable_ = true;
+						param_.select_file_func_(file_);
 					}
 				} else {
 					selected_enable_ = true;

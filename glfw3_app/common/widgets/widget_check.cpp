@@ -20,6 +20,7 @@ namespace gui {
 	void widget_check::initialize()
 	{
 		// ボタンは標準的に固定
+		at_param().state_.set(widget::state::SERVICE);
 		at_param().state_.set(widget::state::POSITION_LOCK);
 		at_param().state_.set(widget::state::SIZE_LOCK);
 
@@ -142,6 +143,7 @@ namespace gui {
 
 		int err = 0;
 		if(!pre.get_boolean(path + "/state", param_.check_)) ++err;
+		check_ = param_.check_;
 		return err == 0;
 	}
 }
