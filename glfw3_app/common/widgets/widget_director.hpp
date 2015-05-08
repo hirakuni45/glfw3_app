@@ -6,6 +6,7 @@
 */
 //=====================================================================//
 #include <vector>
+#include <functional>
 #include <boost/unordered_set.hpp>
 #include "widgets/widget.hpp"
 #include "widgets/common_parts.hpp"
