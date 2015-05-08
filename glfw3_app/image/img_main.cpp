@@ -259,10 +259,10 @@ namespace app {
 		}
 
 		std::string imfn;
-		int id = core.get_recv_file_id();
+		int id = core.get_recv_files_id();
 		if(dd_id_ != id) {
 			dd_id_ = id;
-			const utils::strings& ss = core.get_recv_file_path();
+			const utils::strings& ss = core.get_recv_files_path();
 			if(!ss.empty()) {
 				imfn = ss.back();
 			}
