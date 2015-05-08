@@ -48,11 +48,11 @@ namespace gui {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	template <class WIDGET>
-	widget* create_image(widget_director& wd, const std::string& file,
+	WIDGET* create_image(widget_director& wd, const std::string& file,
 		const vtx::srect& rect = vtx::srect(0), widget* parents = 0) {
 		using namespace gui;
 
-		widget* w;
+		WIDGET* w;
 		widget::param wp(rect, parents);
 		if(wd.at_img_files().load(file)) {
 			typename WIDGET::param wp_;
