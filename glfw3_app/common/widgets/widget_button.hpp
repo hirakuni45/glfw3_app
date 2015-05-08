@@ -6,7 +6,6 @@
 */
 //=====================================================================//
 #include "widgets/widget_director.hpp"
-#include <functional>
 
 namespace gui {
 
@@ -18,6 +17,8 @@ namespace gui {
 	struct widget_button : public widget {
 
 		typedef widget_button value_type;
+
+		typedef std::function< void() > select_func_type;
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
@@ -32,7 +33,7 @@ namespace gui {
 			gl::mobj::handle	handle_;	///< ボタンにモーションオブジェクトを使う場合
 			uint32_t			id_;		///< セレクト ID （押された回数）
 
-			std::function< void() >  select_func_ = [=]() { };
+			select_func_type	select_func_ = [=]() { };
 
 			param(const std::string& text = "") :
 				plate_param_(), color_param_(widget_director::default_button_color_),

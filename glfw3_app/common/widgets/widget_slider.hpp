@@ -6,7 +6,6 @@
 */
 //=====================================================================//
 #include <bitset>
-#include <functional>
 #include "widget_director.hpp"
 
 namespace gui {
@@ -19,6 +18,8 @@ namespace gui {
 	struct widget_slider : public widget {
 
 		typedef widget_slider value_type;
+
+		typedef std::function< void(float) > select_func_type;
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
@@ -35,7 +36,7 @@ namespace gui {
 
 			bool					hand_ctrl_;		///< ハンドル・コントロール
 
-			std::function< void() > select_func_ = [=]() { };
+			select_func_type		select_func_ = [=](float v) { };
 
 			param() : plate_param_(),
 				color_param_(widget_director::default_slider_color_),
@@ -173,7 +174,7 @@ namespace gui {
 		void service() {
 			if(position_ != param_.slider_param_.position_) {
 				if(get_select_out()) {
-					param_.select_func_();
+					param_.select_func_(param_.slider_param_.position_);
 					position_ = param_.slider_param_.position_;
 				}
 			}
