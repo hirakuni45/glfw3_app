@@ -641,6 +641,7 @@ namespace gui {
 				select_widget_ = w;
 //				std::cout << "Sel: " << select_widget_->type_name() << std::endl << std::flush;
 				select_trigger = true;
+				if(w->get_state(widget::state::MOVE_STALL)) move_widget_ = nullptr;
 				if(w->get_state(widget::state::POSITION_LOCK)) continue;
 				w->at_param().move_org_ = w->get_rect().org;
 //				std::cout << "Move: " << w->type_name() << std::endl << std::flush;
