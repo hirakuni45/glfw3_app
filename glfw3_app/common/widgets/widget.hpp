@@ -280,6 +280,7 @@ namespace gui {
 				SELECT_CHILDS,			///< 子供を全て選択
 				SELECT_ROOT,			///< 選択権をルートに与える
 				MOVE_ROOT,				///< 移動の選択権をルートに与える
+				MOVE_STALL,             ///< 移動の選択権を停止する
 				RESIZE_ROOT,			///< リサイズの選択権をルートに与える
 
 				AREA_ROOT,				///< ルートの描画領域を継承

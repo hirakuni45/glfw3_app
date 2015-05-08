@@ -20,6 +20,7 @@ namespace gui {
 		// 標準的設定
 		at_param().state_.set(widget::state::POSITION_LOCK);
 		at_param().state_.set(widget::state::SIZE_LOCK);
+		at_param().state_.set(widget::state::MOVE_STALL);
 
 		vtx::spos size = get_rect().size;
 		img::paint pa;
@@ -104,7 +105,7 @@ namespace gui {
 						ofs = wd_.at_mobj().get_size(hand_h_).x;
 					} else {
 						ofs = sz * sp.handle_ratio_;
-					}						
+					}
 					ratio = static_cast<float>(ref.x) / static_cast<float>(sz - ofs);
 				} else if(sp.direction_ == slider_param::direction::VERTICAL) {
 					short sz = size.y - fw * 2;
@@ -113,7 +114,7 @@ namespace gui {
 						ofs = wd_.at_mobj().get_size(hand_h_).y;
 					} else {
 						ofs = sz * sp.handle_ratio_;
-					}						
+					}
 					ratio = static_cast<float>(ref.y) / static_cast<float>(sz - ofs);
 				}
 				ratio += ref_position_;
