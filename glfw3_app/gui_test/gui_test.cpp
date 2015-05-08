@@ -170,6 +170,7 @@ namespace app {
 			widget_tree::param wp_;
 			tree_core_ = wd.add_widget<widget_tree>(wp, wp_);
 			tree_core_->set_state(widget::state::CLIP_PARENTS);
+///			tree_core_->set_state(widget::state::POSITION_LOCK);
 			tree_core_->set_state(widget::state::RESIZE_ROOT);
 			tree_core_->set_state(widget::state::MOVE_ROOT, false);
 
