@@ -18,6 +18,7 @@ namespace gui {
 	void widget_slider::initialize()
 	{
 		// 標準的設定
+		at_param().state_.set(widget::state::SERVICE);
 		at_param().state_.set(widget::state::POSITION_LOCK);
 		at_param().state_.set(widget::state::SIZE_LOCK);
 		at_param().state_.set(widget::state::MOVE_STALL);
@@ -144,7 +145,7 @@ namespace gui {
 				ofs = wd_.at_mobj().get_size(hand_h_).x;
 			} else {
 				ofs = sz * sp.handle_ratio_;
-			}						
+			}
 			handle_offset_.x = fw + sp.position_ * (sz - ofs);
 		} else if(sp.direction_ == slider_param::direction::VERTICAL) {
 			short sz = size.y - fw * 2;
@@ -153,7 +154,7 @@ namespace gui {
 				ofs = wd_.at_mobj().get_size(hand_h_).y;
 			} else {
 				ofs = sz * sp.handle_ratio_;
-			}						
+			}
 			handle_offset_.y = fw + sp.position_ * (sz - ofs);
 		}
 	}
@@ -179,7 +180,7 @@ namespace gui {
 
 		const widget::param& wp = get_param();
 
-		if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) { 
+		if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) {
 			glPushMatrix();
 			vtx::srect rect;
 			if(wp.state_[widget::state::CLIP_PARENTS]) {

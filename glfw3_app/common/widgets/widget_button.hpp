@@ -6,6 +6,7 @@
 */
 //=====================================================================//
 #include "widgets/widget_director.hpp"
+#include <functional>
 
 namespace gui {
 
@@ -30,6 +31,8 @@ namespace gui {
 			const img::i_img*	image_;		///< ボタンに画像を使う場合
 			gl::mobj::handle	handle_;	///< ボタンにモーションオブジェクトを使う場合
 			uint32_t			id_;		///< セレクト ID （押された回数）
+
+			std::function< void() >  select_func_ = [=]() { };
 
 			param(const std::string& text = "") :
 				plate_param_(), color_param_(widget_director::default_button_color_),
@@ -127,7 +130,11 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override { }
+		void service() override {
+			if(get_selected()) {
+				param_.select_func_();
+			}
+		}
 
 
 		//-----------------------------------------------------------------//

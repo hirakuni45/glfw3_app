@@ -6,6 +6,7 @@
 */
 //=====================================================================//
 #include <bitset>
+#include <functional>
 #include "widget_director.hpp"
 
 namespace gui {
@@ -34,6 +35,8 @@ namespace gui {
 
 			bool					hand_ctrl_;		///< ハンドル・コントロール
 
+			std::function< void() > select_func_ = [=]() { };
+
 			param() : plate_param_(),
 				color_param_(widget_director::default_slider_color_),
 				slider_param_(),
@@ -54,6 +57,8 @@ namespace gui {
 		gl::mobj::handle	base_h_;	///< ベース
 		gl::mobj::handle	hand_h_;	///< ハンドル
 
+		float               position_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -62,7 +67,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_slider(widget_director& wd, const widget::param& wp, const param& p) :
 			widget(wp), wd_(wd), param_(p), ref_position_(0.0f),
-			handle_offset_(0), base_h_(0), hand_h_(0)
+			handle_offset_(0), base_h_(0), hand_h_(0), position_(p.slider_param_.position_)
 		{ }
 
 
@@ -165,7 +170,14 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() { }
+		void service() {
+			if(position_ != param_.slider_param_.position_) {
+				if(get_select_out()) {
+					param_.select_func_();
+					position_ = param_.slider_param_.position_;
+				}
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
