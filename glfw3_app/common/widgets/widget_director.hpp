@@ -80,6 +80,8 @@ namespace gui {
 
 		widget*					top_widget_;
 
+		widget*					focus_widget_;
+
 		float					msp_length_;
 		vtx::spos				msp_speed_;
 		vtx::spos				position_positive_;
@@ -126,10 +128,10 @@ namespace gui {
 			img_files_(),
 			mobj_(), common_parts_(mobj_), serial_(0), widgets_(),
 			position_(0.0f), scale_(1.0f),
-			select_widget_(nullptr), 
+			select_widget_(nullptr),
 			move_widget_(nullptr),
 			resize_l_widget_(nullptr), resize_r_widget_(nullptr),
-			top_widget_(nullptr),
+			top_widget_(nullptr), focus_widget_(nullptr),
 			msp_length_(0.0f), msp_speed_(0),
 			position_positive_(0), position_level_(0), position_negative_(0),
 			scroll_(0), share_img_(), keyboard_(), del_mark_(),
@@ -245,6 +247,15 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget* get_top_widget() const { return top_widget_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	フォーカスを取得
+			@return フォーカス・ウィジェット
+		*/
+		//-----------------------------------------------------------------//
+		widget* get_focus_widget() const { return focus_widget_; }
 
 
 		//-----------------------------------------------------------------//

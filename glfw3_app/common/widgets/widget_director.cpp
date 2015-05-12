@@ -181,7 +181,7 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	bool widget_director::del_widget(widget* w)
 	{
-		if(w == 0) return false;
+		if(w == nullptr) return false;
 
 		widgets ws;
 		BOOST_FOREACH(widget* ww, widgets_) {
@@ -191,11 +191,12 @@ namespace gui {
 		}
 		widgets_ = ws;
 
-		if(select_widget_ == w) select_widget_ = 0;
-		if(move_widget_ == w) move_widget_ = 0;
-		if(resize_l_widget_ == w) resize_l_widget_ = 0;
-		if(resize_r_widget_ == w) resize_r_widget_ = 0;
-		if(top_widget_ == w) top_widget_ = 0;
+		if(select_widget_ == w) select_widget_ = nullptr;
+		if(move_widget_ == w) move_widget_ = nullptr;
+		if(resize_l_widget_ == w) resize_l_widget_ = nullptr;
+		if(resize_r_widget_ == w) resize_r_widget_ = nullptr;
+		if(top_widget_ == w) top_widget_ = nullptr;
+		if(focus_widget_ == w) select_widget_ = nullptr;
 
 		del_mark_.insert(w);
 
@@ -232,10 +233,10 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	widget* widget_director::root_widget(widget* w) const
 	{
-		if(w == 0) return 0;
+		if(w == nullptr) return nullptr;
 
 		do {
-			if(w->get_param().parents_ == 0) {
+			if(w->get_param().parents_ == nullptr) {
 				break;
 			}
 			w = w->get_param().parents_;
@@ -265,7 +266,7 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_director::top_widget(widget* w)
 	{
-		if(w == 0) return;
+		if(w == nullptr) return;
 
 		reset_mark();
 		widgets ws;
@@ -616,7 +617,7 @@ namespace gui {
 				continue;
 			}
 
-			// フォーカス（クリッピング範囲）は、全てに対して評価する。
+			// クリッピングフォーカス（クリッピング範囲）は、全てに対して評価する。
 			// ※FOCUS_ENABLE が有効な場合に限る
 			bool focus = w->get_param().clip_.is_focus(msp);
 			if(w->get_state(widget::state::FOCUS_ENABLE)) {
@@ -626,6 +627,8 @@ namespace gui {
 			if(!focus) continue;
 
 			if(left.pos) {  // LEFT 選択、移動、エッジリサイズ
+				focus_widget_ = w;
+
 				if(w->get_state(widget::state::RESIZE_EDGE_ENABLE)) {
 					vtx::srect r = w->get_param().clip_;
 					r.org  += 8;
@@ -829,7 +832,7 @@ namespace gui {
 			top_widget_ = root_widget(widgets_.back());
 		}
 
-		// 最後に各部品の update 処理 
+		// 最後に各部品の update 処理
 		{
 			del_mark_.clear();
 			widgets ws = widgets_;
@@ -967,9 +970,7 @@ namespace gui {
 
 			set_TSC();
 
-//			w->run_signal(widget::render_before);
 			w->render();
-			w->run_signal(widget::signal_group::render_later);
 		}
 	}
 
