@@ -8,7 +8,6 @@
 #include <vector>
 #include <string>
 #include <bitset>
-#include <boost/signals2.hpp>
 #include "img_io/img.hpp"
 #include "img_io/paint.hpp"
 #include "utils/vtx.hpp"
@@ -37,27 +36,6 @@ namespace gui {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct widget {
-
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		/*!
-			@brief	シグナル・タイプ
-		*/
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		typedef boost::signals2::signal<void (widget*)> signal_type;
-
-
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		/*!
-			@brief	シグナル・グループ
-		*/
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		enum class signal_group {
-			update_before,		///< アップデート前
-			update_later,		///< アップデート後
-			render_before,		///< レンダリング前
-			render_later		///< レンダリング後
-		};
-
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
@@ -163,6 +141,8 @@ namespace gui {
 			vtx::spos		shadow_offset_;		///< 影の相対位置
 			vtx::placement	placement_;			///< 配置方法
 			vtx::spos		offset_;			///< 描画オフセット（シフト表示用）
+
+			int				cursor_;			///< カーソル（反転文字）表示位置
 			text_param() :
 				text_(), font_(), font_size_(24), proportional_(true),
 				alias_enable_(false), alias_(),
@@ -170,7 +150,7 @@ namespace gui {
 				shadow_offset_(1),
 				placement_(vtx::placement::holizontal::CENTER,
 					vtx::placement::vertical::CENTER),
-				offset_(0) { }
+				offset_(0), cursor_(-1) { }
 			explicit text_param(const std::string& text,
 				const img::rgba8& fc, const img::rgba8& sc,
 				const vtx::placement& pl = vtx::placement(
@@ -180,7 +160,7 @@ namespace gui {
 					alias_enable_(false), alias_(),
 					fore_color_(fc), shadow_color_(sc), shadow_offset_(1),
 					placement_(pl),
-					offset_(0) { }
+					offset_(0), cursor_(-1) { }
 		};
 
 
@@ -364,8 +344,6 @@ namespace gui {
 		std::string	symbol_;
 
 		uint32_t	serial_;
-
-		signal_type	sig_;
 
 		bool		mark_;
 
@@ -676,22 +654,6 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		uint32_t get_serial() const { return serial_; }
 
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	シグナルを追加
-			@param[in]	group	シグナルグループ
-			@param[in]	signal	シグナル
-		*/
-		//-----------------------------------------------------------------//
-		void set_signal(signal_group group, void (*signal)(widget*)) {
-			sig_.connect(signal);
-		}
-
-
-		void run_signal(signal_group group) {
-			sig_(this);
-		}
 	};
 
 	typedef std::vector<widget*> widgets;
