@@ -109,7 +109,7 @@ namespace app {
 
 		if(1) { // ラベルのテスト
 			widget::param wp(vtx::srect(30, 300, 150, 40));
-			widget_label::param wp_("ピLabel", false);
+			widget_label::param wp_("Asdfg", false);
 			label_ = wd.add_widget<widget_label>(wp, wp_);
 		}
 
@@ -153,7 +153,7 @@ namespace app {
 
 		if(1) {	// ファイラーのテスト
 			widget::param wp(vtx::srect(10, 30, 300, 200));
-			widget_filer::param wp_(core.get_current_path());
+			widget_filer::param wp_(core.get_current_path(), "", true);
 			filer_ = wd.add_widget<widget_filer>(wp, wp_);
 			filer_->enable(false);
 		}
