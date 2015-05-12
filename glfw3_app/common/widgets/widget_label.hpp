@@ -63,6 +63,8 @@ namespace gui {
 
 		param				param_;
 
+		utils::lstring		text_;
+
 		uint32_t			interval_;
 
 		gl::mobj::handle	objh_;

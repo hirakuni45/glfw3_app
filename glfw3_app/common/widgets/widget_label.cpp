@@ -35,7 +35,13 @@ namespace gui {
 		}
 
 		if(!param_.read_only_) {
-			param_.text_in_pos_ = param_.text_param_.text_.size();
+			utils::lstring ls;
+			if(param_.text_param_.alias_enable_) {
+				utils::utf8_to_utf32(param_.text_param_.alias_, ls);
+			} else {
+				utils::utf8_to_utf32(param_.text_param_.text_, ls);
+			}
+			param_.text_in_pos_ = ls.size();
 		}
 
 		share_t t;
@@ -58,6 +64,13 @@ namespace gui {
 	{
 		if(param_.text_in_) return;
 
+		text_.clear();
+		if(param_.text_param_.alias_enable_) {
+			utils::utf8_to_utf32(param_.text_param_.alias_, text_);
+		} else {
+			utils::utf8_to_utf32(param_.text_param_.text_, text_);
+		}
+
 		param_.shift_param_.size_ = get_rect().size.x - param_.plate_param_.frame_width_ * 2;
 		shift_text_update(get_param(), param_.text_param_, param_.shift_param_);
 	}
@@ -75,7 +88,7 @@ namespace gui {
 				param_.text_in_ = true;
 			}
 		}
-		if(wd_.get_top_widget() != this) {
+		if(wd_.get_focus_widget() != this) {
 			param_.text_in_ = false;
 		} else {
 			if(!param_.read_only_ && param_.text_in_) {
@@ -86,18 +99,18 @@ namespace gui {
 						continue;
 					}
 					if(ch == sys::keyboard::ctrl::DELETE) {
-						if(param_.text_in_pos_ < param_.text_param_.text_.size()) {
-							param_.text_param_.text_.erase(param_.text_in_pos_, 1);
+						if(param_.text_in_pos_ < text_.size()) {
+							text_.erase(param_.text_in_pos_, 1);
 						}
 					} else if(ch < 0x20) {
 						if(ch == sys::keyboard::ctrl::BS) {
 							if(param_.text_in_pos_) {
 								--param_.text_in_pos_;
-								param_.text_param_.text_.erase(param_.text_in_pos_, 1);
+								text_.erase(param_.text_in_pos_, 1);
 							}
 						} else if(ch == sys::keyboard::ctrl::CR) {
-							if(param_.text_in_pos_ < param_.text_param_.text_.size()) {
-								param_.text_param_.text_.erase(param_.text_in_pos_);
+							if(param_.text_in_pos_ < text_.size()) {
+								text_.erase(param_.text_in_pos_);
 							}
 							param_.text_param_.offset_.x = 0;
 							param_.text_in_ = false;
@@ -105,7 +118,7 @@ namespace gui {
 							param_.text_param_.offset_.x = 0;
 							param_.text_in_ = false;
 						} else if(ch == sys::keyboard::ctrl::RIGHT) {
-							if(param_.text_in_pos_ < param_.text_param_.text_.size()) {
+							if(param_.text_in_pos_ < text_.size()) {
 								++param_.text_in_pos_;
 							}
 						} else if(ch == sys::keyboard::ctrl::LEFT) {
@@ -114,12 +127,20 @@ namespace gui {
 							}
 						}
 					} else {
-						if(param_.text_param_.text_.size() <= param_.text_in_pos_) {
-							param_.text_param_.text_ += ch;
+						if(text_.size() <= param_.text_in_pos_) {
+							text_ += ch;
 						} else {
-							param_.text_param_.text_[param_.text_in_pos_] = ch;
+							text_[param_.text_in_pos_] = ch;
 						}
 						++param_.text_in_pos_;
+					}
+
+					if(param_.text_param_.alias_enable_) {
+						param_.text_param_.alias_.clear();
+						utils::utf32_to_utf8(text_, param_.text_param_.alias_);
+					} else {
+						param_.text_param_.text_.clear();
+						utils::utf32_to_utf8(text_, param_.text_param_.text_);
 					}
 				}
 			}
@@ -134,14 +155,12 @@ namespace gui {
 					fonts.set_font_type(param_.text_param_.font_);
 				}
 				fonts.enable_proportional(param_.text_param_.proportional_);
-				std::string s;
-				if(param_.text_param_.alias_enable_) s = param_.text_param_.alias_;
-				else s = param_.text_param_.text_;
-				if(param_.text_in_pos_ < s.size()) {
-					s.erase(param_.text_in_pos_);
+				utils::lstring ls = text_;
+				if(param_.text_in_pos_ < ls.size()) {
+					ls.erase(param_.text_in_pos_);
 				}
-				s += '|';
-				short fw = fonts.get_width(s);
+				ls += ' ';
+				short fw = fonts.get_width(ls);
 				if(!param_.text_param_.font_.empty()) {
 					fonts.pop_font_face();
 				}
@@ -173,15 +192,23 @@ namespace gui {
 		}
 
 		text_param tp = param_.text_param_;
-		if(wd_.get_top_widget() == this && param_.text_in_) {
+		if(param_.text_in_ && this == wd_.get_focus_widget()) {
 			if((interval_ % 40) < 20) {
-				if(tp.text_.size() <= param_.text_in_pos_) {
-					tp.text_ += '|';
+				if(text_.size() <= param_.text_in_pos_) {
+					param_.text_param_.cursor_ = text_.size();
+					if(tp.alias_enable_) {
+						tp.alias_ += ' ';
+					} else {
+						tp.text_ += ' ';
+					}
 				} else {
-					tp.text_[param_.text_in_pos_] = '|';
+					param_.text_param_.cursor_ = param_.text_in_pos_;
 				}
+			} else {
+				param_.text_param_.cursor_ = -1;
 			}
 		}
+
 		render_text(wd_, h, get_param(), tp, param_.plate_param_);
 		++interval_;
 	}
@@ -221,7 +248,9 @@ namespace gui {
 
 		bool f = pre.get_text(path + "/text", param_.text_param_.text_);
 		if(f) {
-			param_.text_in_pos_ = param_.text_param_.text_.size();
+			utils::lstring ls;
+			utils::utf8_to_utf32(param_.text_param_.text_, ls);
+			param_.text_in_pos_ = ls.size();
 		}
 		return f;
 	}
