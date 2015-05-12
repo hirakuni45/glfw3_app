@@ -370,11 +370,12 @@ namespace gl {
 	/*!
 		@brief	フォントを１文字描画する
 		@param[in]	pos	描画位置
-		@param[in]	code	描画するコード
+		@param[in]	code 描画するコード
+		@param[in]	inv	反転文字の場合「true」
 		@return	描画に成功したらフォントの幅を返す。
 	 */
 	//-----------------------------------------------------------------//
-	int fonts::draw(const vtx::spos& pos, uint32_t code)
+	int fonts::draw(const vtx::spos& pos, uint32_t code, bool inv)
 	{
 		fcode_map::const_iterator cit = find_font_code(code);
 		if(cit == face_->fcode_map_.end()) {
@@ -464,9 +465,9 @@ namespace gl {
 
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(2, GL_SHORT, 0, vertex_);
-		if(render_back_) {
+		if(render_back_ || inv) {
 			img::rgba8 bc;
-			if(swap_color_) {
+			if(swap_color_ || inv) {
 				bc = fore_color_;
 			} else {
 				bc = back_color_;
@@ -502,7 +503,7 @@ namespace gl {
 		}
 
 		img::rgba8 fc;
-		if(swap_color_) {
+		if(swap_color_ || inv) {
 			fc = back_color_;
 		} else {
 			fc = fore_color_;
@@ -529,14 +530,16 @@ namespace gl {
 		@param[in]	pos	描画位置
 		@param[in]	text	描画ロング文字列
 		@param[in]	limit	改行のリミット幅
+		@param[in]	cursor カーソル位置反転文字
 		@return	描画幅を返す（複数行の場合、最大値）
 	 */
 	//-----------------------------------------------------------------//
-	int fonts::draw(const vtx::spos& pos, const utils::lstring& text, short limit)
+	int fonts::draw(const vtx::spos& pos, const utils::lstring& text, short limit, short cursor)
 	{
 		short x = pos.x;
 		short y = pos.y;
 		short xx = x;
+		short n = 0;
 		BOOST_FOREACH(uint32_t code, text) {
 			if(code < 32) {
 				if(code == '\n') {
@@ -549,11 +552,12 @@ namespace gl {
 					if((x + w) >= limit) {
 						x = pos.x;
 						y += face_->info_.size;
-					}	
+					}
 				}
-				x += draw(vtx::spos(x, y), code);
+				x += draw(vtx::spos(x, y), code, n == cursor);
 				if(x > xx) xx = x;
 			}
+			++n;
 		}
 		return xx - pos.x;
 	}
