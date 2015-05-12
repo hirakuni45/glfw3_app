@@ -9,6 +9,7 @@
 #include "img.hpp"
 #include "i_img.hpp"
 #include "img_rgba8.hpp"
+#include "img_utils.hpp"
 #include <stack>
 #include "utils/vtx.hpp"
 #include "utils/string_utils.hpp"
@@ -123,7 +124,7 @@ namespace img {
 			@brief	デストラクター
 		*/
 		//-----------------------------------------------------------------//
-		~paint() { }
+		virtual ~paint() { }
 
 
 		//-----------------------------------------------------------------//
@@ -259,7 +260,7 @@ namespace img {
 			@param[in]	xy1	終点
 		*/
 		//-----------------------------------------------------------------//
-		inline void line(const vtx::spos& xy0, const vtx::spos& xy1) {
+		void line(const vtx::spos& xy0, const vtx::spos& xy1) {
 			line(xy0.x, xy0.y, xy1.x, xy1.y);
 		}
 

@@ -367,6 +367,36 @@ namespace img {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	イメージのブレンド
+			@param[in]	pdst	ブレンド先
+			@param[in]	isrc	ソースイメージ
+			@param[in]	rsrc	ソースの領域
+		*/
+		//-----------------------------------------------------------------//
+		void blend(const vtx::spos& pdst, const img_rgba8& isrc, const vtx::srect& rsrc) {
+			vtx::spos p;
+			for(p.y = 0; p.y < rsrc.size.y; ++p.y) {
+				for(p.x = 0; p.x < rsrc.size.x; ++p.x) {
+					rgba8 sc;
+					if(isrc.get_pixel(p + rsrc.org, sc)) {
+						rgba8 dc;
+						if(get_pixel(p + pdst, dc)) {
+							dc.r = ((static_cast<uint16_t>(sc.a + 1) * static_cast<uint16_t>(sc.r)) >> 8) +
+								((static_cast<uint16_t>(256 - sc.a) * static_cast<uint16_t>(dc.r)) >> 8);
+							dc.g = ((static_cast<uint16_t>(sc.a + 1) * static_cast<uint16_t>(sc.g)) >> 8) +
+								((static_cast<uint16_t>(256 - sc.a) * static_cast<uint16_t>(dc.g)) >> 8);
+							dc.b = ((static_cast<uint16_t>(sc.a + 1) * static_cast<uint16_t>(sc.b)) >> 8) +
+								((static_cast<uint16_t>(256 - sc.a) * static_cast<uint16_t>(dc.b)) >> 8);
+							put_pixel(p + pdst, dc);
+						}
+					}
+				}
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	交換
 			@param[in]	src	ソース・コンテキスト
 		*/
@@ -421,7 +451,7 @@ namespace img {
 				}
 			}
 			return *this;
-		} 
+		}
 	};
 }
 

@@ -233,7 +233,7 @@ namespace img {
 	{
 		vtx::spos adr(x0, y0);
 		short dx = x1 - x0;
-		short dy = y1 - y0;    
+		short dy = y1 - y0;
 		short du, dv, u, v;
 		vtx::spos uincr, vincr;
 		if(std::abs(dx) > std::abs(dy)) {
@@ -315,7 +315,7 @@ namespace img {
 				u16 gain = dx & 255;
 				short len = ln - l;
 				if(len == 0) len = 1;
-				if(gain || len > 1) {	
+				if(gain || len > 1) {
 					if(gain == 0) gain = 255;
 					rgba8 c = fore_color_;
 					c.a = (static_cast<u16>(fore_color_.a) * (gain + 1)) >> 8;
@@ -362,7 +362,7 @@ namespace img {
 			const spos& t = points[i];
 			uint32_t j = i + 1;
 			if(j >= points.size()) j = 0;
-			const spos& b = points[j]; 
+			const spos& b = points[j];
 			make_scan_line_(t, b, ly.min, ls);
 		}
 
