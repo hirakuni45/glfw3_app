@@ -18,15 +18,17 @@ namespace gui {
 
 		typedef widget_label value_type;
 
+		typedef std::function<void (const std::string&)> select_func_type;
+
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	Widget label パラメーター
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
-			plate_param	plate_param_;	///< プレート・パラメーター
-			color_param	color_param_;	///< カラーパラメーター
-			text_param	text_param_;	///< テキスト描画のパラメーター
+			plate_param	plate_param_;			///< プレート・パラメーター
+			color_param	color_param_;			///< カラーパラメーター
+			text_param	text_param_;			///< テキスト描画のパラメーター
 			color_param	color_param_select_;	///< 選択時のカラーパラメーター
 
 			bool		read_only_;		///< 読み出し専用の場合
@@ -37,6 +39,8 @@ namespace gui {
 			shift_param	shift_param_;
 
 			bool		menu_enable_;	///< メニュー許可
+
+			select_func_type	select_func_ = [=](const std::string& t) { };
 
 			//-------------------------------------------------------------//
 			/*!
@@ -67,6 +71,8 @@ namespace gui {
 
 		uint32_t			interval_;
 
+		bool				focus_;
+
 		gl::mobj::handle	objh_;
 		gl::mobj::handle	select_objh_;
 
@@ -77,8 +83,8 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_label(widget_director& wd, const widget::param& bp, const param& p) :
-			widget(bp), wd_(wd), param_(p), interval_(0), objh_(0), select_objh_(0) {
-		}
+			widget(bp), wd_(wd), param_(p), interval_(0), focus_(false),
+			objh_(0), select_objh_(0) { }
 
 
 		//-----------------------------------------------------------------//
@@ -193,6 +199,9 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void set_text(const std::string& text) {
 			at_local_param().text_param_.text_ = text;
+			text_.clear();
+			utils::utf8_to_utf32(text, text_);
+			param_.text_in_pos_ = text_.size();
 		}
 
 

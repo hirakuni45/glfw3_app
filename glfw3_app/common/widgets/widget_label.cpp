@@ -36,11 +36,7 @@ namespace gui {
 
 		if(!param_.read_only_) {
 			utils::lstring ls;
-			if(param_.text_param_.alias_enable_) {
-				utils::utf8_to_utf32(param_.text_param_.alias_, ls);
-			} else {
-				utils::utf8_to_utf32(param_.text_param_.text_, ls);
-			}
+			utils::utf8_to_utf32(param_.text_param_.text_, ls);
 			param_.text_in_pos_ = ls.size();
 		}
 
@@ -65,10 +61,11 @@ namespace gui {
 		if(param_.text_in_) return;
 
 		text_.clear();
-		if(param_.text_param_.alias_enable_) {
-			utils::utf8_to_utf32(param_.text_param_.alias_, text_);
-		} else {
-			utils::utf8_to_utf32(param_.text_param_.text_, text_);
+		utils::utf8_to_utf32(param_.text_param_.text_, text_);
+
+		// テキスト入力位置を調整
+		if(param_.text_in_pos_ > text_.size()) {
+			param_.text_in_pos_ = text_.size();
 		}
 
 		param_.shift_param_.size_ = get_rect().size.x - param_.plate_param_.frame_width_ * 2;
@@ -88,10 +85,15 @@ namespace gui {
 				param_.text_in_ = true;
 			}
 		}
-		if(wd_.get_focus_widget() != this) {
-			param_.text_in_ = false;
+		if(wd_.get_focus_widget() == this || wd_.get_focus_widget() == wd_.root_widget(this)) {
+			focus_ = true;
 		} else {
+			param_.text_param_.cursor_ = -1;
+			focus_ = false;
+		}
+		if(focus_) {
 			if(!param_.read_only_ && param_.text_in_) {
+				bool text_in = param_.text_in_;
 				const std::string& ins = wd_.get_keyboard().input();
 				BOOST_FOREACH(char ch, ins) {
 					if(param_.text_in_limit_ > 0 && param_.text_in_limit_ <= param_.text_in_pos_) {
@@ -130,18 +132,17 @@ namespace gui {
 						if(text_.size() <= param_.text_in_pos_) {
 							text_ += ch;
 						} else {
-							text_[param_.text_in_pos_] = ch;
+							text_.insert(param_.text_in_pos_, 1, ch);
 						}
 						++param_.text_in_pos_;
 					}
 
-					if(param_.text_param_.alias_enable_) {
-						param_.text_param_.alias_.clear();
-						utils::utf32_to_utf8(text_, param_.text_param_.alias_);
-					} else {
-						param_.text_param_.text_.clear();
-						utils::utf32_to_utf8(text_, param_.text_param_.text_);
-					}
+					param_.text_param_.text_.clear();
+					utils::utf32_to_utf8(text_, param_.text_param_.text_);
+				}
+				// 入力完了、ファンクション呼び出し
+				if(text_in && !param_.text_in_) {
+					param_.select_func_(param_.text_param_.text_);
 				}
 			}
 
@@ -192,20 +193,15 @@ namespace gui {
 		}
 
 		text_param tp = param_.text_param_;
-		if(param_.text_in_ && this == wd_.get_focus_widget()) {
+		param_.text_param_.cursor_ = -1;
+		if(param_.text_in_ && focus_) {
 			if((interval_ % 40) < 20) {
 				if(text_.size() <= param_.text_in_pos_) {
 					param_.text_param_.cursor_ = text_.size();
-					if(tp.alias_enable_) {
-						tp.alias_ += ' ';
-					} else {
-						tp.text_ += ' ';
-					}
+					tp.text_ += ' ';
 				} else {
 					param_.text_param_.cursor_ = param_.text_in_pos_;
 				}
-			} else {
-				param_.text_param_.cursor_ = -1;
 			}
 		}
 
@@ -246,11 +242,10 @@ namespace gui {
 		path += '/';
 		path += wd_.create_widget_name(this);
 
-		bool f = pre.get_text(path + "/text", param_.text_param_.text_);
+		std::string s;
+		bool f = pre.get_text(path + "/text", s);
 		if(f) {
-			utils::lstring ls;
-			utils::utf8_to_utf32(param_.text_param_.text_, ls);
-			param_.text_in_pos_ = ls.size();
+			set_text(s);
 		}
 		return f;
 	}
