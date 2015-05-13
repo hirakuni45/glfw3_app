@@ -19,36 +19,37 @@ namespace app {
 		return (x < min) ? min : ((max < x) ? max : x);
 	}
 
-	void pn_main::create_texture_(double frequency, int octaves)
+	void pn_main::create_texture_()
 	{
-		int w = 512;
-		int h = 512;
+		if(!src_image_) return;
 
-		src_image_ = img::shared_img(new img::img_rgba8);
-		src_image_->create(vtx::spos(w, h), true);
+		int w = src_image_->get_size().x;
+		int h = src_image_->get_size().y;
+
+		prn_image_.create(vtx::spos(w, h), true);
 
 		const PerlinNoise perlin(12345);
-		const double fx = static_cast<double>(w) / frequency;
-		const double fy = static_cast<double>(h) / frequency;
+		const double fx = static_cast<double>(w) / frequency_value_;
+		const double fy = static_cast<double>(h) / frequency_value_;
 
 		for(int y = 0; y < h; ++y) {
 			for(int x = 0; x < w; ++x) {
-				double n = perlin.octaveNoise(x / fx, y / fy, octaves);
+				double n = perlin.octaveNoise(x / fx, y / fy, octave_value_);
 				n = Clamp(n*0.5+0.5,0.0,1.0);
 				const uint8_t gray = static_cast<uint8_t>(n * 255);
-				src_image_->put_pixel(vtx::spos(x, y), img::rgba8(gray, gray, gray, 255));
-//				const RGB rgb = { gray, gray, gray };
-//				bmp.data[y][x] = rgb;
+				prn_image_.put_pixel(vtx::spos(x, y), img::rgba8(gray, gray, gray, gray ^ 255));
 			}
 		}
+	}
 
-//		src_image_ = imf.get_image();
-//		image_info_(load_ctx_->get_file(), src_image_.get());
-		image_offset_.set(0.0f);
-//		frame_->at_local_param().text_param_.text_ = imfn;
+	void pn_main::blend_()
+	{
 		mobj_.destroy();
 		mobj_.initialize();
-		img_handle_ = mobj_.install(src_image_.get());
+		bld_image_ = img::shared_img(img::copy_image(src_image_.get()));
+		img::img_rgba8* img = static_cast<img::img_rgba8*>(bld_image_.get());
+		img->blend(vtx::spos(0), prn_image_, vtx::srect(vtx::spos(0), prn_image_.get_size()));
+		img_handle_ = mobj_.install(img);
 		image_->at_local_param().mobj_ = mobj_;
 		image_->at_local_param().mobj_handle_ = img_handle_;
 	}
@@ -118,33 +119,59 @@ namespace app {
 		}
 
 		{ // 機能ツールパレット
-			widget::param wp(vtx::srect(10, 10, 130, 350));
+			widget::param wp(vtx::srect(10, 10, 130, 370));
 			widget_frame::param wp_;
 			tools_ = wd.add_widget<widget_frame>(wp, wp_);
 			tools_->set_state(widget::state::SIZE_LOCK);
 		}
 		{ // octave slider
-			widget::param wp(vtx::srect(10, 10+50*0, 100, 20), tools_);
+			widget::param wp(vtx::srect(10, 10+30*0, 100, 20), tools_);
 			widget_slider::param wp_;
-			wp_.slider_param_.grid_ = 1.0f / 15.0f;
-			wp_.select_func_ = [this](){
-				int octaves = static_cast<int>(octave_->get_local_param().slider_param_.position_ * 15.0f);
-				create_texture_(8.0, octaves + 1);
-//				std::cout << "Change pos: " << octave_->get_local_param().slider_param_.position_ << std::endl;
+			wp_.slider_param_.grid_ = 1.0f / 7.0f;
+			wp_.select_func_ = [this](float pos){
+				octave_value_ = static_cast<int>(pos * 7.0f);
+				create_texture_();
+				blend_();
 			};
 			octave_ = wd.add_widget<widget_slider>(wp, wp_);
 		}
-		{ // ロード起動ボタン
-			widget::param wp(vtx::srect(10, 10+50*1, 100, 40), tools_);
+		{ // frequency slider
+			widget::param wp(vtx::srect(10, 10+30, 100, 20), tools_);
+			widget_slider::param wp_;
+			wp_.slider_param_.grid_ = 1.0f / 15.0f;
+			wp_.select_func_ = [this](float pos){
+				frequency_value_ = pos * 15.0f + 1.0f;
+				create_texture_();
+				blend_();
+			};
+			frequency_ = wd.add_widget<widget_slider>(wp, wp_);
+		}
+
+		{ // ロードボタン
+			widget::param wp(vtx::srect(10, 20+50*1, 100, 40), tools_);
 			widget_button::param wp_("load");
 			load_ = wd.add_widget<widget_button>(wp, wp_);
+			load_->at_local_param().select_func_ = [this]() {
+				if(load_ctx_) {
+					bool f = load_ctx_->get_state(gui::widget::state::ENABLE);
+					load_ctx_->enable(!f);
+				}
+			};
 		}
-		{ // セーブ起動ボタン
-			widget::param wp(vtx::srect(10, 10+50*2, 100, 40), tools_);
+
+		{ // セーブボタン
+			widget::param wp(vtx::srect(10, 20+50*2, 100, 40), tools_);
 			widget_button::param wp_("save");
 			save_ = wd.add_widget<widget_button>(wp, wp_);
+			save_->at_local_param().select_func_ = [this]() {
+				if(save_ctx_) {
+					bool f = save_ctx_->get_state(gui::widget::state::ENABLE);
+					save_ctx_->enable(!f);
+				}
+			};
 		}
-		short ofs = 160;
+
+		short ofs = 170;
 		{ // スケール FIT
 			widget::param wp(vtx::srect(10, ofs+30*0, 90, 30), tools_);
 			widget_radio::param wp_("fit");
@@ -193,6 +220,14 @@ namespace app {
 			load_ctx_ = wd.add_widget<widget_filer>(wp, wp_);
 			load_ctx_->enable(false);
 		}
+
+		{ // save ファイラー本体
+			widget::param wp(vtx::srect(10, 30, 300, 200));
+			widget_filer::param wp_(core.get_current_path(), "", true);
+			save_ctx_ = wd.add_widget<widget_filer>(wp, wp_);
+			save_ctx_->enable(false);
+		}
+
 		{ // ダイアログ
 			widget::param wp(vtx::srect(10, 30, 450, 200));
 			widget_dialog::param wp_;
@@ -239,26 +274,6 @@ namespace app {
 
 		gui::widget_director& wd = director_.at().widget_director_;
 
-		if(load_) {
-			if(load_->get_selected()) {
-				int octaves = static_cast<int>(octave_->get_local_param().slider_param_.position_ * 15.0f);
-				create_texture_(8.0, octaves + 1);
-///				if(load_ctx_) {
-///					bool f = load_ctx_->get_state(gui::widget::state::ENABLE);
-///					load_ctx_->enable(!f);
-///				}
-			}
-		}
-
-		if(save_) {
-			if(save_->get_selected()) {
-				if(save_ctx_) {
-					bool f = save_ctx_->get_state(gui::widget::state::ENABLE);
-					save_ctx_->enable(!f);
-				}
-			}
-		}
-
 		if(scale_) {
 			if(scale_->get_selected()) {
 				bool f = dialog_scale_->get_state(gui::widget::state::ENABLE);
@@ -266,7 +281,6 @@ namespace app {
 			}
 		}
 
-#if 0
 		std::string imfn;
 		int id = core.get_recv_files_id();
 		if(dd_id_ != id) {
@@ -276,7 +290,7 @@ namespace app {
 				imfn = ss.back();
 			}
 		}
-#endif
+
 		bool load_stall = false;
 		bool save_stall = false;
 
@@ -286,12 +300,10 @@ namespace app {
 			}
 			if(load_id_ != load_ctx_->get_select_file_id()) {
 				load_id_ = load_ctx_->get_select_file_id();
-///				imfn = load_ctx_->get_file();
+				imfn = load_ctx_->get_file();
 			}
 		}
 
-
-#if 0
 		if(!imfn.empty()) {
 			img::img_files& imf = wd.at_img_files();
 			if(!imf.load(imfn)) {
@@ -303,15 +315,13 @@ namespace app {
 				term_->output("Ld");
 				image_info_(load_ctx_->get_file(), src_image_.get());
 				image_offset_.set(0.0f);
-				frame_->at_local_param().text_param_.text_ = imfn;
-				mobj_.destroy();
-				mobj_.initialize();
-				img_handle_ = mobj_.install(imf.get_image().get());
-				image_->at_local_param().mobj_ = mobj_;
-				image_->at_local_param().mobj_handle_ = img_handle_;
+				frame_->at_local_param().text_param_.set_text(imfn);
+
+				create_texture_();
+				blend_();
 			}
 		}
-#endif
+
 
 		// frame 内 image のサイズを設定
 		if(frame_ && image_) {
@@ -390,7 +400,7 @@ namespace app {
 					launch = true;
 				}
 				if(launch) {
-					save_t t = std::make_tuple(save_file_name_, src_image_);
+					save_t t = std::make_tuple(save_file_name_, bld_image_);
 					image_saver_ = std::async(std::launch::async, save_task_, t);
 				}
 			}

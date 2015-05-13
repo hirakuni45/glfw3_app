@@ -43,6 +43,7 @@ namespace app {
 
 		gui::widget_frame*		tools_;
 		gui::widget_slider*		octave_;
+		gui::widget_slider*		frequency_;
 		gui::widget_button*		load_;
 		gui::widget_button*		save_;
 
@@ -69,6 +70,8 @@ namespace app {
 		vtx::fpos		image_offset_;
 
 		img::shared_img	src_image_;
+		img::img_rgba8	prn_image_;
+		img::shared_img	bld_image_;
 
 		std::string		save_file_name_;
 
@@ -76,9 +79,11 @@ namespace app {
 
 		bool			save_dialog_;
 
-		PerlinNoise    pn_;
+		int				octave_value_;
+		double			frequency_value_;
 
-		void create_texture_(double frequency, int octaves);
+		void create_texture_();
+		void blend_();
 		void image_info_(const std::string& file, const img::i_img* img);
 
 	public:
@@ -91,13 +96,16 @@ namespace app {
 			director_(d),
 			load_ctx_(0), save_ctx_(0),
 			frame_(0), image_(0),
-			tools_(0), octave_(0), load_(0), save_(0),
+			tools_(nullptr),
+			octave_(nullptr), frequency_(nullptr),
+			load_(0), save_(0),
 			scale_fit_(0), scale_1x_(0), scale_2x_(0), scale_3x_(0),
 			scale_(0),
 			info_(0), term_(0),
 			dialog_(0), dialog_yes_no_(0), dialog_scale_(0),
 			img_handle_(0), dd_id_(0), load_id_(0), save_id_(0),
-			image_offset_(0.0f), save_dialog_(false)
+			image_offset_(0.0f), save_dialog_(false),
+			octave_value_(8), frequency_value_(8.0)
 		{ }
 
 
