@@ -76,7 +76,8 @@ namespace app {
 		if(1) {	// テキストのテスト
 			widget::param wp(vtx::srect(40, 50, 200, 250), image_);
 			widget_text::param wp_;
-			wp_.text_param_.text_ = "日本の美しい漢字\n吉野家qwertyuiop\n𩸽zxcvbnm";
+			wp_.text_param_.set_text("日本の美しい漢字\n吉野家qwertyuiop\nxcvbnm"
+				);
 			wp_.text_param_.placement_.vpt = vtx::placement::vertical::CENTER;
 			wd.add_widget<widget_text>(wp, wp_);
 		}
@@ -93,7 +94,7 @@ namespace app {
 			widget::param wp(vtx::srect(30, 150, 100, 40));
 			widget_button::param wp_("Filer");
 			filer_open_ = wd.add_widget<widget_button>(wp, wp_);
-			filer_open_->at_local_param().text_param_.alias_ = "ファイラー";
+			filer_open_->at_local_param().text_param_.set_alias("ファイラー");
 			filer_open_->at_local_param().text_param_.alias_enable_ = true;
 		}
 
