@@ -36,12 +36,14 @@ namespace gui {
 
 			bool					hand_ctrl_;		///< ハンドル・コントロール
 
+			bool					select_fin_;	///< 選択が完了した場合に呼び出す
 			select_func_type		select_func_ = [=](float v) { };
 
 			param() : plate_param_(),
 				color_param_(widget_director::default_slider_color_),
 				slider_param_(),
-				base_image_(0), hand_image_(0), hand_ctrl_(true)
+				base_image_(0), hand_image_(0), hand_ctrl_(true),
+				select_fin_(false)
 				{ }
 		};
 
@@ -173,7 +175,15 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void service() {
 			if(position_ != param_.slider_param_.position_) {
-				if(get_select_out()) {
+				bool f = false;
+				if(param_.select_fin_) {
+					if(get_select_out()) {
+						f = true;
+					}
+				} else {
+					f = true;
+				}
+				if(f) {
 					param_.select_func_(param_.slider_param_.position_);
 					position_ = param_.slider_param_.position_;
 				}
