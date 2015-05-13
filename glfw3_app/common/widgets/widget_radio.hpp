@@ -18,6 +18,8 @@ namespace gui {
 
 		typedef widget_radio value_type;
 
+		typedef std::function<void (bool, int)>	select_func_type;
+
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	widget_check パラメーター
@@ -28,6 +30,9 @@ namespace gui {
 			float	gray_text_gain_;	///< 不許可時のグレースケールゲイン
 			bool	disable_gray_text_;	///< 不許可時、文字をグレースケールする場合
 			bool	check_;				///< 許可、不許可の状態
+
+			select_func_type	select_func_ = [=](bool f, int n) { };
+
 			param(const std::string& text = "") :
 				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255),
 					vtx::placement(vtx::placement::holizontal::LEFT,
@@ -43,6 +48,9 @@ namespace gui {
 
 		bool				obj_state_;
 
+		bool				back_state_;
+		int					no_;
+
 		gl::mobj::handle	ena_h_;
 		gl::mobj::handle	dis_h_;
 
@@ -54,7 +62,9 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_radio(widget_director& wd, const widget::param& bp, const param& p) :
 			widget(bp), wd_(wd), param_(p),
-			obj_state_(false), ena_h_(0), dis_h_(0) { }
+			obj_state_(false),
+			back_state_(false), no_(-1),
+			ena_h_(0), dis_h_(0) { }
 
 
 		//-----------------------------------------------------------------//
@@ -156,7 +166,12 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() { }
+		void service() {
+			if(back_state_ != obj_state_) {
+				param_.select_func_(obj_state_, no_);
+				back_state_ = obj_state_;
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
