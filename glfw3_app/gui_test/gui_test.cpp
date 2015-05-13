@@ -45,12 +45,14 @@ namespace app {
 
 			widget::param wp(vtx::srect(0, 0, 130, 30), root);
 			widget_radio::param wp_("Enable");
-			wd.add_widget<widget_radio>(wp, wp_);
-			wp.rect_.org.y += 40;
-			wd.add_widget<widget_radio>(wp, wp_);
-			wp.rect_.org.y += 40;
-			wp_.check_ = true;
-			wd.add_widget<widget_radio>(wp, wp_);
+			for(int i = 0; i < 3; ++i) {
+				if(i == 2) wp_.check_ = true;
+				widget_radio* w = wd.add_widget<widget_radio>(wp, wp_);
+				w->at_local_param().select_func_ = [this](bool f, int n) {
+					std::cout << "Radio button: " << static_cast<int>(f) << " (" << n << ")" << std::endl;
+				};
+				wp.rect_.org.y += 40;
+			}
 		}
 
 		if(1) {	// イメージのテスト
@@ -111,12 +113,18 @@ namespace app {
 			widget::param wp(vtx::srect(30, 300, 150, 40));
 			widget_label::param wp_("Asdfg", false);
 			label_ = wd.add_widget<widget_label>(wp, wp_);
+			label_->at_local_param().select_func_ = [this](const std::string& t) {
+				std::cout << "Label: " << t << std::endl << std::flush;
+			};
 		}
 
 		if(1) {	// チェックボックスのテスト
 			widget::param wp(vtx::srect(20, 350, 150, 40));
 			widget_check::param wp_("Disable-g");
 			check_ = wd.add_widget<widget_check>(wp, wp_);
+			check_->at_local_param().select_func_ = [this](bool f) {
+				std::cout << "Check: " << static_cast<int>(f) << std::endl;
+			};
 		}
 
 		if(1) { // リストのテスト
