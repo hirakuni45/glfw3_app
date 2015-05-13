@@ -46,16 +46,20 @@ namespace gui {
 			short			path_height_;
 			short			label_height_;
 
+			bool			every_top_;	///< 有効なら、常に手前
+
 			bool			new_file_;	///< 新規ファイル作成
 
 			select_file_func_type	select_file_func_ = [=](const std::string&) { };
 
-			param(const std::string& path = "", const std::string& filter = "") :
+			param(const std::string& path = "", const std::string& filter = "", bool new_file = false) :
 				plate_param_(),
 				color_param_(widget_director::default_frame_color_),
 				text_param_(), shift_param_(),
 				path_(path), filter_(filter),
-				path_height_(32), label_height_(32), new_file_(false)
+				path_height_(32), label_height_(32),
+				every_top_(true),
+				new_file_(new_file)
 			{ }
 		};
 
@@ -140,8 +144,6 @@ namespace gui {
 		static const char* key_size_;
 
 		bool		selected_enable_;
-		bool		new_file_enable_;
-		bool		new_file_in_;
 		bool		back_directory_;
 
 		void create_file_(widget_file& wf, const vtx::srect& rect, short ofs, const std::string& str);
@@ -177,7 +179,6 @@ namespace gui {
 			file_(),
 			select_file_id_(0),
 			selected_enable_(true),
-			new_file_enable_(false), new_file_in_(false),
 			back_directory_(false)
 			{ }
 

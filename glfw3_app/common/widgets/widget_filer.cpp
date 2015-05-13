@@ -12,6 +12,7 @@
 
 namespace gui {
 
+	static const std::string new_file_text_ = "New File...";
 
 	void widget_filer::create_file_(widget_file& wf, const vtx::srect& rect, short ofs, const std::string& str)
 	{
@@ -90,7 +91,14 @@ namespace gui {
 		if(param_.new_file_) {
 			widget_file wf;
 			wf.dir = true;
-			create_file_(wf, rect, ofs, "New File");
+			create_file_(wf, rect, ofs, new_file_text_);
+			wf.name->at_local_param().read_only_ = false;
+			wf.name->at_local_param().select_func_ = [this](const std::string& filename) {
+				utils::append_path(param_.path_, filename, file_);
+				++select_file_id_;
+				enable(false);
+				param_.select_file_func_(file_);
+			};
 
 			wf.size = 0;
 			wf.time = 0;
@@ -242,11 +250,12 @@ namespace gui {
 	{
 		for(widget_files_cit cit = wfs.begin(); cit != wfs.end(); ++cit) {
 			const widget_file& wf = *cit;
+			if(param_.new_file_ && cit == wfs.begin()) continue;
 			if(!wf.name) continue;
 			if(wf.size == 0 && wf.time == 0 && wf.mode == 0) continue;
 			if(wf.name->get_text() == "..") continue;
 			bool f = info_state_ == info_state::ALIAS;
-			if(wf.name->get_alias().empty()) f = false; 
+			if(wf.name->get_alias().empty()) f = false;
 			wf.name->enable_alias(f);
 		}
 	}
@@ -506,18 +515,21 @@ namespace gui {
 	{
 		param_.shift_param_.size_ = get_rect().size.x - param_.plate_param_.frame_width_ * 2;
 		shift_text_update(get_param(), param_.text_param_, param_.shift_param_);
-		if(param_.new_file_ && new_file_enable_) {
-			if(new_file_in_ && !center_[0].name->get_local_param().text_in_) {
-				const std::string& n = center_[0].name->get_text();
-				utils::append_path(param_.path_, n, file_);
-				++select_file_id_;
-				enable(false);
-				/// select_file_func_(file_);
+
+		if(!center_.empty()) {
+			widget_files_cit cit = scan_select_in_file_(center_);
+			if(param_.new_file_ && cit != center_.end()) {
+				if(cit == center_.begin()) {
+					center_[0].name->set_text("");
+				} else {
+					center_[0].name->set_text(new_file_text_);
+				}
 			}
-			new_file_in_ = center_[0].name->get_local_param().text_in_;
 		}
 
-		wd_.top_widget(this);
+		if(param_.every_top_) {
+			wd_.top_widget(this);
+		}
 	}
 
 
@@ -743,12 +755,6 @@ namespace gui {
 			}
 		}
 
-		// 選択された瞬間
-		widget_files_cit cit = scan_select_in_file_(center_);
-		if(cit != center_.end()) {
-			set_select_pos_(cit - center_.begin());
-		}
-
 		// 情報ボタンが押された場合の処理
 		if(info_->get_selected()) {
 			info_state_ = static_cast<info_state::type>(info_state_ + 1);
@@ -764,50 +770,40 @@ namespace gui {
 		}
 
 		// 選択の確認と動作
-		if(selected_enable_) {
+		if(selected_enable_ && !center_.empty()) {
 			widget_files_cit cit = scan_selected_file_(center_);
-			if(cit != center_.end()) {
-				selected_enable_ = false;
+			if(cit == center_.end()) return;
 
-				const widget_file& wf = *cit;
-				if(param_.new_file_ && cit == center_.begin()) {
-					new_file_enable_ = !new_file_enable_;
-					center_[0].name->set_text("");
-					center_[0].name->at_local_param().read_only_ = false;
-					center_[0].name->at_local_param().text_in_ = true;
-					new_file_in_ = true;
-					
-				} else if(wf.name) {
-					wf.name->set_state(widget::state::SELECTED);
-					wf.info->set_state(widget::state::SELECTED);
-					const std::string& n = wf.name->get_text();
-					if(n == "..") {  // 一つ前に戻る
-						request_right_ = false;
-						move_speed_ =  speed_move;
-					} else if(wf.dir) {
-						request_right_ = true;
-						move_speed_ = -speed_move;
-						std::string ap;
-						if(n.size() > 2 && 'A' <= n[0] && n[0] <= 'Z' && n[1] == ':') {
-							param_.path_ = n;
-						} else {
-							utils::append_path(param_.path_, n, ap);
-							utils::strip_last_of_delimita_path(ap, param_.path_);
-						}
-						file_infos_.clear();
-						fsc_path_.clear();
-						fsc_.set_path(param_.path_, param_.filter_);
-						fsc_wait_ = true;
-						destroy_files_(right_);
+			selected_enable_ = false;
+			const widget_file& wf = *cit;
+			if(param_.new_file_ && cit == center_.begin()) ;
+			else if(wf.name) {
+				wf.name->set_state(widget::state::SELECTED);
+				wf.info->set_state(widget::state::SELECTED);
+				const std::string& n = wf.name->get_text();
+				if(n == "..") {  // 一つ前に戻る
+					request_right_ = false;
+					move_speed_ =  speed_move;
+				} else if(wf.dir) {
+					request_right_ = true;
+					move_speed_ = -speed_move;
+					std::string ap;
+					if(n.size() > 2 && 'A' <= n[0] && n[0] <= 'Z' && n[1] == ':') {
+						param_.path_ = n;
 					} else {
-						utils::append_path(param_.path_, n, file_);
-						++select_file_id_;
-						enable(false);
-						selected_enable_ = true;
-						param_.select_file_func_(file_);
+						utils::append_path(param_.path_, n, ap);
+						utils::strip_last_of_delimita_path(ap, param_.path_);
 					}
+					file_infos_.clear();
+					fsc_path_.clear();
+					fsc_.set_path(param_.path_, param_.filter_);
+					fsc_wait_ = true;
+					destroy_files_(right_);
 				} else {
-					selected_enable_ = true;
+					utils::append_path(param_.path_, n, file_);
+					++select_file_id_;
+					enable(false);
+					param_.select_file_func_(file_);
 				}
 			}
 		}
