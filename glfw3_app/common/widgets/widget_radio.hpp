@@ -31,14 +31,15 @@ namespace gui {
 			bool	disable_gray_text_;	///< 不許可時、文字をグレースケールする場合
 			bool	check_;				///< 許可、不許可の状態
 
-			select_func_type	select_func_ = [=](bool f, int n) { };
+			select_func_type	select_func_;
 
 			param(const std::string& text = "") :
 				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255),
-					vtx::placement(vtx::placement::holizontal::LEFT,
-					vtx::placement::vertical::CENTER)),
+				vtx::placement(vtx::placement::holizontal::LEFT,
+				vtx::placement::vertical::CENTER)),
 				gray_text_gain_(0.65f), disable_gray_text_(true),
-				check_(false) { }
+				check_(false),
+				select_func_() { }
 		};
 
 	private:
@@ -168,7 +169,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void service() {
 			if(back_state_ != obj_state_) {
-				param_.select_func_(obj_state_, no_);
+				if(param_.select_func_) param_.select_func_(obj_state_, no_);
 				back_state_ = obj_state_;
 			}
 		}

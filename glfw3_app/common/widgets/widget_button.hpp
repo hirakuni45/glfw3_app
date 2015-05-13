@@ -33,12 +33,14 @@ namespace gui {
 			gl::mobj::handle	handle_;	///< ボタンにモーションオブジェクトを使う場合
 			uint32_t			id_;		///< セレクト ID （押された回数）
 
-			select_func_type	select_func_ = [=]() { };
+			select_func_type	select_func_;	///< セレクト関数
 
 			param(const std::string& text = "") :
 				plate_param_(), color_param_(widget_director::default_button_color_),
 				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255)),
-				image_(0), handle_(0), id_(0) { }
+				image_(0), handle_(0), id_(0),
+				select_func_()
+				{ }
 		};
 
 	private:
@@ -133,7 +135,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void service() override {
 			if(get_selected()) {
-				param_.select_func_();
+				if(param_.select_func_) param_.select_func_();
 			}
 		}
 

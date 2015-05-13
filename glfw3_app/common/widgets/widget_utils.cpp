@@ -213,16 +213,15 @@ namespace gui {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	void draw_text(const widget::text_param& tp, const vtx::srect& rect, const vtx::srect& clip)
 	{
+		gl::core& core = gl::core::get_instance();
+
 		utils::lstring ls;
 		if(tp.alias_enable_) {
-			utils::utf8_to_utf32(tp.alias_, ls);
+			ls = tp.alias_;
 		} else {
-			utils::utf8_to_utf32(tp.text_, ls);
+			ls = tp.text_;
 		}
-
 		if(ls.empty()) return;
-
-		gl::core& core = gl::core::get_instance();
 
 		const vtx::spos& vsz = core.get_size();
 		const vtx::spos& siz = core.get_rect().size;

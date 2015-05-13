@@ -45,15 +45,15 @@ namespace gui {
 			bool	disable_gray_text_;	///< 不許可時、文字をグレースケールする場合
 			bool	draw_box_;			///< ボックスの表示を行わない場合 false
 			bool	check_;				///< 許可、不許可の状態
-			select_func_type	select_func_ = [=](bool f) { };
+			select_func_type	select_func_;
 
 			param(const std::string& text = "", bool check = false) :
 				type_(style::CHECKED),
 				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255),
-					vtx::placement(vtx::placement::holizontal::LEFT,
-					vtx::placement::vertical::CENTER)),
-					gray_text_gain_(0.65f), disable_gray_text_(true), draw_box_(true),
-					check_(check)
+				vtx::placement(vtx::placement::holizontal::LEFT,
+				vtx::placement::vertical::CENTER)),
+				gray_text_gain_(0.65f), disable_gray_text_(true), draw_box_(true),
+				check_(check), select_func_()
 				{ }
 		};
 
@@ -173,7 +173,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void service() {
 			if(check_ != param_.check_) {
-				param_.select_func_(param_.check_);
+				if(param_.select_func_) param_.select_func_(param_.check_);
 				check_ = param_.check_;
 			}
 		}

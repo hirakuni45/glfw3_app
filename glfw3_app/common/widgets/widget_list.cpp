@@ -19,9 +19,9 @@ namespace gui {
 	void widget_list::initialize()
 	{
 		// 標準的に固定、リサイズ不可
+		at_param().state_.set(widget::state::SERVICE);
 		at_param().state_.set(widget::state::POSITION_LOCK);
 		at_param().state_.set(widget::state::SIZE_LOCK);
-		at_param().state_.set(widget::state::SERVICE);
 
 		vtx::spos size;
 		if(param_.plate_param_.resizeble_) {
@@ -60,7 +60,7 @@ namespace gui {
 			wp_.plate_param_.frame_width_ = 0;
 			int n = 0;
 			BOOST_FOREACH(const std::string& s, param_.text_list_) {
-				wp_.text_param_.text_ = s;
+				wp_.text_param_.set_text(s);
 				if(n == 0) {
 					wp_.plate_param_.round_radius_ = param_.plate_param_.round_radius_;
 					wp_.plate_param_.round_style_
@@ -118,8 +118,7 @@ namespace gui {
 			BOOST_FOREACH(widget_label* w, list_) {
 				if(w->get_select()) {
 					param_.select_pos_ = n;
-					at_local_param().text_param_.text_
-						= w->get_local_param().text_param_.text_;
+					param_.text_param_.text_ = w->get_local_param().text_param_.text_;
 				} else if(w->get_selected()) {
 					selected = true;
 				}

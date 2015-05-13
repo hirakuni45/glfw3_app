@@ -50,7 +50,7 @@ namespace gui {
 
 			bool			new_file_;	///< 新規ファイル作成
 
-			select_file_func_type	select_file_func_ = [=](const std::string&) { };
+			select_file_func_type	select_file_func_;	///< セレクト関数
 
 			param(const std::string& path = "", const std::string& filter = "", bool new_file = false) :
 				plate_param_(),
@@ -59,7 +59,8 @@ namespace gui {
 				path_(path), filter_(filter),
 				path_height_(32), label_height_(32),
 				every_top_(true),
-				new_file_(new_file)
+				new_file_(new_file),
+				select_file_func_()
 			{ }
 		};
 

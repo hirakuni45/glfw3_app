@@ -57,7 +57,7 @@ namespace gui {
 			if(wl) {
 				type += ": ";
 				type += "'";
-				type += wl->get_local_param().text_param_.text_;
+				type += wl->get_local_param().text_param_.get_text();
 				type += "'";
 			}
 		} else if(w->type() == get_type_id<widget_button>()) {
@@ -65,7 +65,7 @@ namespace gui {
 			if(wl) {
 				type += ": ";
 				type += "'";
-				type += wl->get_local_param().text_param_.text_;
+				type += wl->get_local_param().text_param_.get_text();
 				type += "'";
 			}
 		} else if(w->type() == get_type_id<widget_check>()) {
@@ -73,7 +73,7 @@ namespace gui {
 			if(wl) {
 				type += ": ";
 				type += "'";
-				type += wl->get_local_param().text_param_.text_;
+				type += wl->get_local_param().text_param_.get_text();
 				type += "'";
 			}
 		} else if(w->type() == get_type_id<widget_radio>()) {
@@ -81,7 +81,7 @@ namespace gui {
 			if(wl) {
 				type += ": ";
 				type += "'";
-				type += wl->get_local_param().text_param_.text_;
+				type += wl->get_local_param().text_param_.get_text();
 				type += "'";
 			}
 		}

@@ -35,9 +35,7 @@ namespace gui {
 		}
 
 		if(!param_.read_only_) {
-			utils::lstring ls;
-			utils::utf8_to_utf32(param_.text_param_.text_, ls);
-			param_.text_in_pos_ = ls.size();
+			param_.text_in_pos_ = param_.text_param_.text_.size();
 		}
 
 		share_t t;
@@ -60,12 +58,9 @@ namespace gui {
 	{
 		if(param_.text_in_) return;
 
-		text_.clear();
-		utils::utf8_to_utf32(param_.text_param_.text_, text_);
-
 		// テキスト入力位置を調整
-		if(param_.text_in_pos_ > text_.size()) {
-			param_.text_in_pos_ = text_.size();
+		if(param_.text_in_pos_ > param_.text_param_.text_.size()) {
+			param_.text_in_pos_ = param_.text_param_.text_.size();
 		}
 
 		param_.shift_param_.size_ = get_rect().size.x - param_.plate_param_.frame_width_ * 2;
@@ -101,18 +96,18 @@ namespace gui {
 						continue;
 					}
 					if(ch == sys::keyboard::ctrl::DELETE) {
-						if(param_.text_in_pos_ < text_.size()) {
-							text_.erase(param_.text_in_pos_, 1);
+						if(param_.text_in_pos_ < param_.text_param_.text_.size()) {
+							param_.text_param_.text_.erase(param_.text_in_pos_, 1);
 						}
 					} else if(ch < 0x20) {
 						if(ch == sys::keyboard::ctrl::BS) {
 							if(param_.text_in_pos_) {
 								--param_.text_in_pos_;
-								text_.erase(param_.text_in_pos_, 1);
+								param_.text_param_.text_.erase(param_.text_in_pos_, 1);
 							}
 						} else if(ch == sys::keyboard::ctrl::CR) {
-							if(param_.text_in_pos_ < text_.size()) {
-								text_.erase(param_.text_in_pos_);
+							if(param_.text_in_pos_ < param_.text_param_.text_.size()) {
+								param_.text_param_.text_.erase(param_.text_in_pos_);
 							}
 							param_.text_param_.offset_.x = 0;
 							param_.text_in_ = false;
@@ -120,7 +115,7 @@ namespace gui {
 							param_.text_param_.offset_.x = 0;
 							param_.text_in_ = false;
 						} else if(ch == sys::keyboard::ctrl::RIGHT) {
-							if(param_.text_in_pos_ < text_.size()) {
+							if(param_.text_in_pos_ < param_.text_param_.text_.size()) {
 								++param_.text_in_pos_;
 							}
 						} else if(ch == sys::keyboard::ctrl::LEFT) {
@@ -129,20 +124,17 @@ namespace gui {
 							}
 						}
 					} else {
-						if(text_.size() <= param_.text_in_pos_) {
-							text_ += ch;
+						if(param_.text_param_.text_.size() <= param_.text_in_pos_) {
+							param_.text_param_.text_ += ch;
 						} else {
-							text_.insert(param_.text_in_pos_, 1, ch);
+							param_.text_param_.text_.insert(param_.text_in_pos_, 1, ch);
 						}
 						++param_.text_in_pos_;
 					}
-
-					param_.text_param_.text_.clear();
-					utils::utf32_to_utf8(text_, param_.text_param_.text_);
 				}
 				// 入力完了、ファンクション呼び出し
 				if(text_in && !param_.text_in_) {
-					param_.select_func_(param_.text_param_.text_);
+					if(param_.select_func_) param_.select_func_(param_.text_param_.get_text());
 				}
 			}
 
@@ -156,7 +148,7 @@ namespace gui {
 					fonts.set_font_type(param_.text_param_.font_);
 				}
 				fonts.enable_proportional(param_.text_param_.proportional_);
-				utils::lstring ls = text_;
+				utils::lstring ls = param_.text_param_.text_;
 				if(param_.text_in_pos_ < ls.size()) {
 					ls.erase(param_.text_in_pos_);
 				}
@@ -196,8 +188,8 @@ namespace gui {
 		param_.text_param_.cursor_ = -1;
 		if(param_.text_in_ && focus_) {
 			if((interval_ % 40) < 20) {
-				if(text_.size() <= param_.text_in_pos_) {
-					param_.text_param_.cursor_ = text_.size();
+				if(param_.text_param_.text_.size() <= param_.text_in_pos_) {
+					param_.text_param_.cursor_ = param_.text_param_.text_.size();
 					tp.text_ += ' ';
 				} else {
 					param_.text_param_.cursor_ = param_.text_in_pos_;
@@ -224,7 +216,7 @@ namespace gui {
 		path += wd_.create_widget_name(this);
 
 		int err = 0;
-		if(!pre.put_text(path + "/text", param_.text_param_.text_)) ++err;
+		if(!pre.put_text(path + "/text", get_text())) ++err;
 		return err == 0;
 	}
 

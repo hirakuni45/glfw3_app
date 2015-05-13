@@ -97,7 +97,7 @@ namespace gui {
 				utils::append_path(param_.path_, filename, file_);
 				++select_file_id_;
 				enable(false);
-				param_.select_file_func_(file_);
+				if(param_.select_file_func_) param_.select_file_func_(file_);
 			};
 
 			wf.size = 0;
@@ -211,11 +211,10 @@ namespace gui {
 		for(widget_files_cit cit = wfs.begin(); cit != wfs.end(); ++cit) {
 			const widget_file& wf = *cit;
 			if(info_state_ == info_state::SIZE) {
-				std::string& s = wf.info->at_local_param().text_param_.text_;
 				if(wf.dir) {
-					s = " -";
+					wf.info->at_local_param().text_param_.set_text(" -");
 				} else {
-					s = ' ' + boost::lexical_cast<std::string>(wf.size);
+					wf.info->at_local_param().text_param_.set_text(" " + boost::lexical_cast<std::string>(wf.size));
 				}
 			} else if(info_state_ == info_state::TIME) {
 				std::string s;
@@ -225,7 +224,7 @@ namespace gui {
 				s += (boost::format("%d/%d ")
 					% (t->tm_mon + 1) % t->tm_mday).str();
 				s += (boost::format("%4d") % (t->tm_year + 1900)).str();
-				wf.info->at_local_param().text_param_.text_ = s;
+				wf.info->at_local_param().text_param_.set_text(s);
 			} else if(info_state_ == info_state::MODE) {
 				std::string s;
 				s += ' ';
@@ -240,7 +239,7 @@ namespace gui {
 					}
 					bit >>= 1;
 				}
-				wf.info->at_local_param().text_param_.text_ = s;
+				wf.info->at_local_param().text_param_.set_text(s);
 			}
 		}
 	}
@@ -747,10 +746,10 @@ namespace gui {
 			short ref = files_->get_rect().org.x;
 			if(left_.size() > 0) ref += main_->get_rect().size.x;
 			if(ref > (get_rect().size.x / 3)) {
-				param_.text_param_.text_ = utils::previous_path(param_.path_);
+				param_.text_param_.set_text(utils::previous_path(param_.path_));
 				back_directory_ = true;
 			} else {
-				param_.text_param_.text_ = param_.path_;
+				param_.text_param_.set_text(param_.path_);
 				back_directory_ = false;
 			}
 		}
@@ -803,7 +802,7 @@ namespace gui {
 					utils::append_path(param_.path_, n, file_);
 					++select_file_id_;
 					enable(false);
-					param_.select_file_func_(file_);
+					if(param_.select_file_func_) param_.select_file_func_(file_);
 				}
 			}
 		}

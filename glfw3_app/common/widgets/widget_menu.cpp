@@ -16,9 +16,9 @@ namespace gui {
 	void widget_menu::initialize()
 	{
 		// 標準的に固定、リサイズ不可
+		at_param().state_.set(widget::state::SERVICE);
 		at_param().state_.set(widget::state::POSITION_LOCK);
 		at_param().state_.set(widget::state::SIZE_LOCK);
-		at_param().state_.set(widget::state::SERVICE);
 		at_param().state_.set(widget::state::ENABLE, false);
 
 		widget::param wp(vtx::srect(vtx::spos(0), get_rect().size), this);
@@ -28,7 +28,7 @@ namespace gui {
 		wp_.plate_param_.frame_width_ = 0;
 		int n = 0;
 		BOOST_FOREACH(const std::string& s, param_.text_list_) {
-			wp_.text_param_.text_ = s;
+			wp_.text_param_.set_text(s);
 			if(n == 0 && param_.round_) {
 				wp_.plate_param_.round_radius_ = param_.plate_param_.round_radius_;
 				wp_.plate_param_.round_style_
@@ -89,10 +89,11 @@ namespace gui {
 		}
 		if(selected) {
 			if(param_.select_pos_ < list_.size()) {
-				param_.select_text_ = list_[param_.select_pos_]->get_local_param().text_param_.text_;
+				param_.select_text_ = list_[param_.select_pos_]->get_local_param().text_param_.get_text();
 			}
 			++select_id_;
 			wd_.enable(this, false, true);
+			if(param_.select_func_) param_.select_func_(param_.select_text_);
 		} else {
 			const vtx::spos& scr = wd_.get_scroll();
 			if(get_focus() && scr.y != 0) {

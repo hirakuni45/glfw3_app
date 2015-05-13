@@ -129,12 +129,12 @@ namespace gui {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct text_param {
-			std::string		text_;				///< テキスト
-			std::string		font_;				///< フォントセット
+			utils::lstring		text_;			///< テキスト
+			std::string		font_;			///< フォントセット
 			short			font_size_;			///< フォントサイズ
 			bool			proportional_;		///< プロポーショナル・フォントの場合「true」
 			bool			alias_enable_;		///< テキストの別名を有効にする
-			std::string		alias_;				///< テキストの別名（置き換え用）
+			utils::lstring		alias_;			///< テキストの別名（置き換え用）
 
 			img::rgba8		fore_color_;		///< テキスト色
 			img::rgba8		shadow_color_;		///< 影色
@@ -156,11 +156,33 @@ namespace gui {
 				const vtx::placement& pl = vtx::placement(
 				vtx::placement::holizontal::CENTER,
 				vtx::placement::vertical::CENTER)) :
-					text_(text), font_(), font_size_(24), proportional_(true),
+					text_(), font_(), font_size_(24), proportional_(true),
 					alias_enable_(false), alias_(),
 					fore_color_(fc), shadow_color_(sc), shadow_offset_(1),
 					placement_(pl),
-					offset_(0), cursor_(-1) { }
+					offset_(0), cursor_(-1) { utils::utf8_to_utf32(text, text_); }
+
+			void set_text(const std::string& text) {
+				text_.clear();
+				utils::utf8_to_utf32(text, text_);
+			}
+
+			const std::string get_text() const {
+				std::string s;
+				utils::utf32_to_utf8(text_, s);
+				return s;
+			}
+
+			void set_alias(const std::string& alias) {
+				alias_.clear();
+				utils::utf8_to_utf32(alias, alias_);
+			}
+
+			const std::string get_alias() const {
+				std::string s;
+				utils::utf32_to_utf8(alias_, s);
+				return s;
+			}
 		};
 
 

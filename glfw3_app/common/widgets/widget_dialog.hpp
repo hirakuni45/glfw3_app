@@ -140,7 +140,11 @@ namespace gui {
 			@param[in]	text	文書
 		*/
 		//-----------------------------------------------------------------//
-		void set_text(const std::string& text);
+		void set_text(const std::string& text) {
+			if(text_) {
+				text_->at_local_param().text_param_.set_text(text);
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -149,13 +153,12 @@ namespace gui {
 			@return	文書
 		*/
 		//-----------------------------------------------------------------//
-		const std::string& get_text() const {
+		const std::string get_text() const {
+			std::string s;
 			if(text_) {
-				return text_->get_local_param().text_param_.text_;
-			} else {
-				static std::string s;
-				return s;
+				utils::utf32_to_utf8(text_->get_local_param().text_param_.text_, s);
 			}
+			return s;
 		}
 
 

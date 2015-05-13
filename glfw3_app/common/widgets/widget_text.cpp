@@ -89,7 +89,7 @@ namespace gui {
 		path += '/';
 		path += wd_.create_widget_name(this);
 		int err = 0;
-		if(!pre.put_text(path + "/text", param_.text_param_.text_)) ++err;
+		if(!pre.put_text(path + "/text", param_.text_param_.get_text())) ++err;
 //		if(!pre.put_position(path + "/locate", vtx::ipos(get_rect().org))) ++err;
 //		if(!pre.put_position(path + "/size", vtx::ipos(get_rect().size))) ++err;
 		return err == 0;
@@ -110,8 +110,11 @@ namespace gui {
 		path += wd_.create_widget_name(this);
 
 		int err = 0;
-		if(!pre.get_text(path + "/text", param_.text_param_.text_)) {
+		std::string s;
+		if(!pre.get_text(path + "/text", s)) {
 			++err;
+		} else {
+			param_.text_param_.set_text(s);
 		}
 		return err == 0;
 	}

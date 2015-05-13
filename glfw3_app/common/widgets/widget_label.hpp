@@ -40,7 +40,7 @@ namespace gui {
 
 			bool		menu_enable_;	///< メニュー許可
 
-			select_func_type	select_func_ = [=](const std::string& t) { };
+			select_func_type	select_func_;
 
 			//-------------------------------------------------------------//
 			/*!
@@ -53,12 +53,13 @@ namespace gui {
 				plate_param_(),
 				color_param_(widget_director::default_label_color_),
 				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255),
-					vtx::placement(vtx::placement::holizontal::LEFT,
-						vtx::placement::vertical::CENTER)),
+				vtx::placement(vtx::placement::holizontal::LEFT,
+				vtx::placement::vertical::CENTER)),
 				color_param_select_(widget_director::default_label_color_select_),
 				read_only_(ro), text_in_(false), text_in_pos_(0), text_in_limit_(0),
 				shift_param_(),
-				menu_enable_(false)
+				menu_enable_(false),
+				select_func_()
 				{ }
 		};
 
@@ -66,8 +67,6 @@ namespace gui {
 		widget_director&	wd_;
 
 		param				param_;
-
-		utils::lstring		text_;
 
 		uint32_t			interval_;
 
@@ -198,10 +197,9 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		void set_text(const std::string& text) {
-			at_local_param().text_param_.text_ = text;
-			text_.clear();
-			utils::utf8_to_utf32(text, text_);
-			param_.text_in_pos_ = text_.size();
+			param_.text_param_.text_.clear();
+			utils::utf8_to_utf32(text, param_.text_param_.text_);
+			param_.text_in_pos_ = param_.text_param_.text_.size();
 		}
 
 
@@ -211,8 +209,10 @@ namespace gui {
 			@return	テキスト
 		*/
 		//-----------------------------------------------------------------//
-		const std::string& get_text() const {
-			return get_local_param().text_param_.text_;
+		const std::string get_text() const {
+			std::string s;
+			utils::utf32_to_utf8(param_.text_param_.text_, s);
+			return s;
 		}
 
 
@@ -223,8 +223,9 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		void set_alias(const std::string& text) {
-			at_local_param().text_param_.alias_ = text;
-			at_local_param().text_param_.alias_enable_ = true;
+			param_.text_param_.alias_.clear();
+			utils::utf8_to_utf32(text, param_.text_param_.alias_);
+			param_.text_param_.alias_enable_ = true;
 		}
 
 
@@ -234,8 +235,10 @@ namespace gui {
 			@return エイリアス・テキスト
 		*/
 		//-----------------------------------------------------------------//
-		const std::string& get_alias() const {
-			return get_local_param().text_param_.alias_;
+		const std::string get_alias() const {
+			std::string s;
+			utils::utf32_to_utf8(param_.text_param_.alias_, s);
+			return s;
 		}
 
 
@@ -246,7 +249,7 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		void enable_alias(bool ena = true) {
-			at_local_param().text_param_.alias_enable_ = ena;
+			param_.text_param_.alias_enable_ = ena;
 		}
 	};
 

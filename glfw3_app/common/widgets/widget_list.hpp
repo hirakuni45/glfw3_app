@@ -20,6 +20,8 @@ namespace gui {
 
 		typedef widget_list value_type;
 
+		typedef std::function<void (const std::string&)> select_func_type;
+
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	widget_button パラメーター
@@ -40,16 +42,19 @@ namespace gui {
 			bool		open_before_;
 			bool		open_;
 
+			select_func_type	select_func_;	///< セレクト関数
+
 			param(const std::string& text = "") :
 				plate_param_(),
 				color_param_(widget_director::default_list_color_),
 				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255),
-					vtx::placement(vtx::placement::holizontal::LEFT,
-						vtx::placement::vertical::CENTER)),
+				vtx::placement(vtx::placement::holizontal::LEFT,
+				vtx::placement::vertical::CENTER)),
 				color_param_select_(widget_director::default_list_color_select_),
 				text_list_(),
 				select_pos_(0), drop_box_(true),
-				open_before_(false), open_(false)
+				open_before_(false), open_(false),
+				select_func_()
 			{ }
 		};
 
