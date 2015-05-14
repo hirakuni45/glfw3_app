@@ -298,12 +298,12 @@ namespace gui {
 				RESIZE_EDGE_ENABLE,		///< エッジ領域でのリサイズ許可
 				SIZE_LOCK,				///< サイズ固定
 
+				SERVICE,				///< サービスを呼び出す
+
 				BEFORE_DRAG,			///< １フレーム前ドラッグの状態
 				DRAG,					///< ドラッグの状態
 				BEFORE_RESIZE,			///< １フレーム前リサイズの状態
 				RESIZE,					///< リサイズの状態
-
-				SERVICE,				///< サービスを呼び出す
 
 				/// 以下、読み出し専用フラグ
 				SELECTED,				///< 選択済

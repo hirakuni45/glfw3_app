@@ -44,6 +44,7 @@ namespace gui {
 			wf.name->set_state(widget::state::POSITION_LOCK);
 			wf.name->set_state(widget::state::CLIP_PARENTS);
 			wf.name->set_state(widget::state::SELECT_PARENTS);
+			wf.name->set_state(widget::state::MOVE_STALL, false);
 		}
 		{
 			vtx::srect r;
@@ -60,6 +61,7 @@ namespace gui {
 			wf.info->set_state(widget::state::POSITION_LOCK);
 			wf.info->set_state(widget::state::CLIP_PARENTS);
 			wf.info->set_state(widget::state::SELECT_PARENTS);
+			wf.info->set_state(widget::state::MOVE_STALL, false);
 		}
 	}
 
@@ -439,6 +441,7 @@ namespace gui {
 
 		short frame_width = param_.plate_param_.frame_width_;
 		// path（ハンドル）
+#if 0
 		{
 			vtx::srect r;
 			r.org.set(frame_width);
@@ -458,6 +461,7 @@ namespace gui {
 			wp_.plate_param_.frame_width_  = 2;
 			wp_.plate_param_.round_radius_ = 4;
 		}
+#endif
 
 		// info ボタン
 		{
