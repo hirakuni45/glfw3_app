@@ -28,17 +28,31 @@ namespace app {
 
 		prn_image_.create(vtx::spos(w, h), true);
 
-		const PerlinNoise perlin(12345);
-		const double fx = static_cast<double>(w) / frequency_value_;
-		const double fy = static_cast<double>(h) / frequency_value_;
-
-		for(int y = 0; y < h; ++y) {
-			for(int x = 0; x < w; ++x) {
-				double n = perlin.octaveNoise(x / fx, y / fy, octave_value_);
-				n = Clamp(n*0.5+0.5,0.0,1.0);
-				const uint8_t gray = static_cast<uint8_t>(n * 255);
-				prn_image_.put_pixel(vtx::spos(x, y), img::rgba8(gray, gray, gray, gray ^ 255));
+		int task = 0;
+		if(pn_menu_) {
+			task = pn_menu_->get_local_param().select_pos_;
+		}
+		if(task == 0) {
+			for(int y = 0; y < h; ++y) {
+				for(int x = 0; x < w; ++x) {
+					prn_image_.put_pixel(vtx::spos(x, y), img::rgba8(0, 0, 0, 0));
+				}
 			}
+		} else if(task == 1) {
+			const PerlinNoise perlin(12345);
+			const double fx = static_cast<double>(w) / frequency_value_;
+			const double fy = static_cast<double>(h) / frequency_value_;
+
+			for(int y = 0; y < h; ++y) {
+				for(int x = 0; x < w; ++x) {
+					double n = perlin.octaveNoise(x / fx, y / fy, octave_value_);
+					n = Clamp(n*0.5+0.5,0.0,1.0);
+					const uint8_t gray = static_cast<uint8_t>(n * 255);
+					prn_image_.put_pixel(vtx::spos(x, y), img::rgba8(gray, gray, gray, gray ^ 255));
+				}
+			}
+		} else if(task == 2) {
+
 		}
 	}
 
@@ -69,25 +83,25 @@ namespace app {
 		std::string s;
 		if(!file.empty()) {
 			size_t fsz = utils::get_file_size(file);
-			if(fsz > 0) s = ": " + boost::lexical_cast<std::string>(fsz) + '\r';
+			if(fsz > 0) s = ": " + boost::lexical_cast<std::string>(fsz) + '\n';
 			term_->output(s);
 		}
-		s = "W: " + boost::lexical_cast<std::string>(img->get_size().x) + '\r';
+		s = "W: " + boost::lexical_cast<std::string>(img->get_size().x) + '\n';
 		term_->output(s);
-		s = "H: " + boost::lexical_cast<std::string>(img->get_size().y) + '\r';
+		s = "H: " + boost::lexical_cast<std::string>(img->get_size().y) + '\n';
 		term_->output(s);
 		img::IMG::type t = img->get_type();
 		if(t == img::IMG::INDEXED8) {
-			term_->output("INDEXED8\r");
+			term_->output("INDEXED8\n");
 		} else if(t == img::IMG::FULL8) {
-			term_->output("FULL8\r");
+			term_->output("FULL8\n");
 		}
 		if(img->test_alpha()) {
-			term_->output("Alpha\r");
+			term_->output("Alpha\n");
 		}
-		s = "C: " + boost::lexical_cast<std::string>(img->count_color()) + '\r';
+		s = "C: " + boost::lexical_cast<std::string>(img->count_color()) + '\n';
 		term_->output(s);
-		term_->output('\r');
+		term_->output('\n');
 	}
 
 
@@ -119,16 +133,16 @@ namespace app {
 		}
 
 		{ // 機能ツールパレット
-			widget::param wp(vtx::srect(10, 10, 130, 370));
+			widget::param wp(vtx::srect(10, 10, 150, 410));
 			widget_frame::param wp_;
 			tools_ = wd.add_widget<widget_frame>(wp, wp_);
 			tools_->set_state(widget::state::SIZE_LOCK);
 		}
 		{ // octave slider
-			widget::param wp(vtx::srect(10, 10+30*0, 100, 20), tools_);
+			widget::param wp(vtx::srect(10, 10+30*0, 130, 20), tools_);
 			widget_slider::param wp_;
 			wp_.slider_param_.grid_ = 1.0f / 7.0f;
-			wp_.select_func_ = [this](float pos){
+			wp_.select_func_ = [this](float pos) {
 				octave_value_ = static_cast<int>(pos * 7.0f);
 				create_texture_();
 				blend_();
@@ -136,7 +150,7 @@ namespace app {
 			octave_ = wd.add_widget<widget_slider>(wp, wp_);
 		}
 		{ // frequency slider
-			widget::param wp(vtx::srect(10, 10+30, 100, 20), tools_);
+			widget::param wp(vtx::srect(10, 10+30*1, 130, 20), tools_);
 			widget_slider::param wp_;
 			wp_.slider_param_.grid_ = 1.0f / 15.0f;
 			wp_.select_func_ = [this](float pos){
@@ -146,9 +160,22 @@ namespace app {
 			};
 			frequency_ = wd.add_widget<widget_slider>(wp, wp_);
 		}
+		{ // リスト
+			widget::param wp(vtx::srect(10, 10+30*2, 130, 40), tools_);
+			widget_list::param wp_;
+			wp_.text_list_.push_back("None");
+			wp_.text_list_.push_back("Smoke");
+			wp_.text_list_.push_back("Wood");
+			pn_menu_ = wd.add_widget<widget_list>(wp, wp_);
+			pn_menu_->at_local_param().select_func_ = [this](const std::string& text, int pos) {
+				create_texture_();
+				blend_();
+			};
+		}
 
+		short ofs = 120;
 		{ // ロードボタン
-			widget::param wp(vtx::srect(10, 20+50*1, 100, 40), tools_);
+			widget::param wp(vtx::srect(10, ofs+50*0, 100, 40), tools_);
 			widget_button::param wp_("load");
 			load_ = wd.add_widget<widget_button>(wp, wp_);
 			load_->at_local_param().select_func_ = [this]() {
@@ -160,7 +187,7 @@ namespace app {
 		}
 
 		{ // セーブボタン
-			widget::param wp(vtx::srect(10, 20+50*2, 100, 40), tools_);
+			widget::param wp(vtx::srect(10, ofs+50*1, 100, 40), tools_);
 			widget_button::param wp_("save");
 			save_ = wd.add_widget<widget_button>(wp, wp_);
 			save_->at_local_param().select_func_ = [this]() {
@@ -170,8 +197,8 @@ namespace app {
 				}
 			};
 		}
+		ofs += 100;
 
-		short ofs = 170;
 		{ // スケール FIT
 			widget::param wp(vtx::srect(10, ofs+30*0, 90, 30), tools_);
 			widget_radio::param wp_("fit");
@@ -254,6 +281,9 @@ namespace app {
 		if(load_ctx_) load_ctx_->load(pre);
 		if(save_ctx_) save_ctx_->load(pre);
 		if(frame_) frame_->load(pre);
+		if(octave_) octave_->load(pre);
+		if(frequency_) frequency_->load(pre);
+		if(pn_menu_) pn_menu_->load(pre);
 		if(tools_) tools_->load(pre, false, false);
 		if(scale_fit_) scale_fit_->load(pre);
 		if(scale_1x_) scale_1x_->load(pre);
@@ -432,6 +462,9 @@ namespace app {
 		if(save_ctx_) save_ctx_->save(pre);
 		if(frame_) frame_->save(pre);
 		if(tools_) tools_->save(pre);
+		if(octave_) octave_->save(pre);
+		if(frequency_) frequency_->save(pre);
+		if(pn_menu_) pn_menu_->save(pre);
 		if(scale_fit_) scale_fit_->save(pre);
 		if(scale_1x_) scale_1x_->save(pre);
 		if(scale_2x_) scale_2x_->save(pre);

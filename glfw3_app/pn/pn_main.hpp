@@ -11,8 +11,9 @@
 #include "utils/i_scene.hpp"
 #include "utils/director.hpp"
 #include "widgets/widget.hpp"
-#include "widgets/widget_button.hpp"
 #include "widgets/widget_slider.hpp"
+#include "widgets/widget_list.hpp"
+#include "widgets/widget_button.hpp"
 #include "widgets/widget_radio.hpp"
 #include "widgets/widget_dialog.hpp"
 #include "widgets/widget_filer.hpp"
@@ -44,6 +45,7 @@ namespace app {
 		gui::widget_frame*		tools_;
 		gui::widget_slider*		octave_;
 		gui::widget_slider*		frequency_;
+		gui::widget_list*		pn_menu_;
 		gui::widget_button*		load_;
 		gui::widget_button*		save_;
 
@@ -97,7 +99,7 @@ namespace app {
 			load_ctx_(0), save_ctx_(0),
 			frame_(0), image_(0),
 			tools_(nullptr),
-			octave_(nullptr), frequency_(nullptr),
+			octave_(nullptr), frequency_(nullptr), pn_menu_(nullptr),
 			load_(0), save_(0),
 			scale_fit_(0), scale_1x_(0), scale_2x_(0), scale_3x_(0),
 			scale_(0),
