@@ -35,14 +35,18 @@ namespace gui {
 			const img::i_img*		hand_image_;	///< ハンドル画像を使う場合
 
 			bool					hand_ctrl_;		///< ハンドル・コントロール
+			bool					scroll_ctrl_;	///< スクロール・コントロール
+			float					scroll_gain_;	///< スクロール・ゲイン
 
 			bool					select_fin_;	///< 選択が完了した場合に呼び出す
 			select_func_type		select_func_;
 
-			param() : plate_param_(),
+			param() :
+				plate_param_(),
 				color_param_(widget_director::default_slider_color_),
 				slider_param_(),
 				base_image_(0), hand_image_(0), hand_ctrl_(true),
+				scroll_ctrl_(true), scroll_gain_(0.01f),
 				select_fin_(false), select_func_()
 				{ }
 		};

@@ -20,7 +20,7 @@ namespace gui {
 
 		typedef widget_list value_type;
 
-		typedef std::function<void (const std::string&)> select_func_type;
+		typedef std::function<void (const std::string&, int)> select_func_type;
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
@@ -35,7 +35,7 @@ namespace gui {
 
 			utils::strings	text_list_;	///< テキスト・リスト
 
-			uint32_t	select_pos_;	///< テキスト・リストの選択位置
+			int			select_pos_;	///< テキスト・リストの選択位置
 
 			bool		drop_box_;		///< ドロップ・ボックスの表示
 

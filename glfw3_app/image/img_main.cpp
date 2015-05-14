@@ -34,25 +34,25 @@ namespace app {
 		std::string s;
 		if(!file.empty()) {
 			size_t fsz = utils::get_file_size(file);
-			if(fsz > 0) s = ": " + boost::lexical_cast<std::string>(fsz) + '\r';
+			if(fsz > 0) s = ": " + boost::lexical_cast<std::string>(fsz) + '\n';
 			term_->output(s);
 		}
-		s = "W: " + boost::lexical_cast<std::string>(img->get_size().x) + '\r';
+		s = "W: " + boost::lexical_cast<std::string>(img->get_size().x) + '\n';
 		term_->output(s);
-		s = "H: " + boost::lexical_cast<std::string>(img->get_size().y) + '\r';
+		s = "H: " + boost::lexical_cast<std::string>(img->get_size().y) + '\n';
 		term_->output(s);
 		img::IMG::type t = img->get_type();
 		if(t == img::IMG::INDEXED8) {
-			term_->output("INDEXED8\r");
+			term_->output("INDEXED8\n");
 		} else if(t == img::IMG::FULL8) {
-			term_->output("FULL8\r");
+			term_->output("FULL8\n");
 		}
 		if(img->test_alpha()) {
-			term_->output("Alpha\r");
+			term_->output("Alpha\n");
 		}
-		s = "C: " + boost::lexical_cast<std::string>(img->count_color()) + '\r';
+		s = "C: " + boost::lexical_cast<std::string>(img->count_color()) + '\n';
 		term_->output(s);
-		term_->output('\r');
+		term_->output('\n');
 	}
 
 
@@ -109,22 +109,22 @@ namespace app {
 			widget::param wp(vtx::srect(10, ofs+30*0, 90, 30), tools_);
 			widget_radio::param wp_("fit");
 			wp_.check_ = true;
-			scale_fit_ = wd.add_widget<widget_radio>(wp, wp_);	
+			scale_fit_ = wd.add_widget<widget_radio>(wp, wp_);
 		}
 		{ // スケール 1X
 			widget::param wp(vtx::srect(10, ofs+30*1, 90, 30), tools_);
 			widget_radio::param wp_("1x");
-			scale_1x_ = wd.add_widget<widget_radio>(wp, wp_);	
+			scale_1x_ = wd.add_widget<widget_radio>(wp, wp_);
 		}
 		{ // スケール 2X
 			widget::param wp(vtx::srect(10, ofs+30*2, 90, 30), tools_);
 			widget_radio::param wp_("2x");
-			scale_2x_ = wd.add_widget<widget_radio>(wp, wp_);	
+			scale_2x_ = wd.add_widget<widget_radio>(wp, wp_);
 		}
 		{ // スケール 3X
 			widget::param wp(vtx::srect(10, ofs+30*3, 90, 30), tools_);
 			widget_radio::param wp_("3x");
-			scale_3x_ = wd.add_widget<widget_radio>(wp, wp_);	
+			scale_3x_ = wd.add_widget<widget_radio>(wp, wp_);
 		}
 		{ // スケーラーボタン
 			widget::param wp(vtx::srect(10, ofs+30*4+10, 100, 40), tools_);
@@ -221,7 +221,7 @@ namespace app {
 				term_->output("Ld");
 				image_info_("new image", src_image_.get());
 				image_offset_.set(0.0f);
-				frame_->at_local_param().text_param_.text_ = "new image";
+				frame_->at_local_param().text_param_.set_text("new image");
 				mobj_.destroy();
 				mobj_.initialize();
 				img_handle_ = mobj_.install(src_image_.get());
@@ -229,7 +229,7 @@ namespace app {
 				image_->at_local_param().mobj_handle_ = img_handle_;
 
 ///				bool f = dialog_new_->get_state(gui::widget::state::ENABLE);
-///				dialog_new_->enable(!f);				
+///				dialog_new_->enable(!f);
 			}
 		}
 
@@ -292,7 +292,7 @@ namespace app {
 				term_->output("Ld");
 				image_info_(load_ctx_->get_file(), src_image_.get());
 				image_offset_.set(0.0f);
-				frame_->at_local_param().text_param_.text_ = imfn;
+				frame_->at_local_param().text_param_.set_text(imfn);
 				mobj_.destroy();
 				mobj_.initialize();
 				img_handle_ = mobj_.install(imf.get_image().get());

@@ -22,6 +22,7 @@ namespace gui {
 		at_param().state_.set(widget::state::POSITION_LOCK);
 		at_param().state_.set(widget::state::SIZE_LOCK);
 		at_param().state_.set(widget::state::SERVICE);
+		at_param().state_.set(widget::state::MOVE_STALL);
 
 		vtx::spos size;
 		if(param_.plate_param_.resizeble_) {

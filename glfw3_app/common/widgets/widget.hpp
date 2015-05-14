@@ -79,7 +79,7 @@ namespace gui {
 			struct round_style {
 				enum type {
 					ALL,		///< 全てラウンド
-					TOP,		///< 上側をラウンド 
+					TOP,		///< 上側をラウンド
 					BOTTOM,		///< 下側をラウンド
 				};
 			};
@@ -129,20 +129,21 @@ namespace gui {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct text_param {
-			utils::lstring		text_;			///< テキスト
+			utils::lstring	text_;			///< テキスト
 			std::string		font_;			///< フォントセット
-			short			font_size_;			///< フォントサイズ
-			bool			proportional_;		///< プロポーショナル・フォントの場合「true」
-			bool			alias_enable_;		///< テキストの別名を有効にする
-			utils::lstring		alias_;			///< テキストの別名（置き換え用）
+			short			font_size_;		///< フォントサイズ
+			bool			proportional_;	///< プロポーショナル・フォントの場合「true」
+			bool			alias_enable_;	///< テキストの別名を有効にする
+			utils::lstring	alias_;			///< テキストの別名（置き換え用）
 
-			img::rgba8		fore_color_;		///< テキスト色
-			img::rgba8		shadow_color_;		///< 影色
-			vtx::spos		shadow_offset_;		///< 影の相対位置
-			vtx::placement	placement_;			///< 配置方法
-			vtx::spos		offset_;			///< 描画オフセット（シフト表示用）
+			img::rgba8		fore_color_;	///< テキスト色
+			img::rgba8		shadow_color_;	///< 影色
+			vtx::spos		shadow_offset_;	///< 影の相対位置
+			vtx::placement	placement_;		///< 配置方法
+			vtx::spos		offset_;		///< 描画オフセット（シフト表示用）
 
-			int				cursor_;			///< カーソル（反転文字）表示位置
+			int				cursor_;		///< カーソル位置反転表示（エリアスは無効になる）
+
 			text_param() :
 				text_(), font_(), font_size_(24), proportional_(true),
 				alias_enable_(false), alias_(),
@@ -151,6 +152,7 @@ namespace gui {
 				placement_(vtx::placement::holizontal::CENTER,
 					vtx::placement::vertical::CENTER),
 				offset_(0), cursor_(-1) { }
+
 			explicit text_param(const std::string& text,
 				const img::rgba8& fc, const img::rgba8& sc,
 				const vtx::placement& pl = vtx::placement(
@@ -188,7 +190,7 @@ namespace gui {
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
-			@brief	シフト・パラメーター
+			@brief	シフト・パラメーター（文字列の横スクロール）
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct shift_param {
@@ -201,10 +203,11 @@ namespace gui {
 			uint16_t	org_wait_frame_;	///< シフト先頭の場合の待ちフレーム
 			uint16_t	org_wait_count_;	///< シフト先頭の場合の待ちカウンタ
 
-			shift_param(bool ena = true) : enable_(ena), every_(false), size_(0),
-										   offset_(0.0f), speed_(0.5f),
-										   hold_frame_(2 * 60),
-										   org_wait_frame_(0), org_wait_count_(0)
+			shift_param(bool ena = true) :
+				enable_(ena), every_(false), size_(0),
+				offset_(0.0f), speed_(0.5f),
+				hold_frame_(2 * 60),
+				org_wait_frame_(0), org_wait_count_(0)
 				{ }
 		};
 
@@ -295,12 +298,12 @@ namespace gui {
 				RESIZE_EDGE_ENABLE,		///< エッジ領域でのリサイズ許可
 				SIZE_LOCK,				///< サイズ固定
 
+				SERVICE,				///< サービスを呼び出す
+
 				BEFORE_DRAG,			///< １フレーム前ドラッグの状態
 				DRAG,					///< ドラッグの状態
 				BEFORE_RESIZE,			///< １フレーム前リサイズの状態
 				RESIZE,					///< リサイズの状態
-
-				SERVICE,				///< サービスを呼び出す
 
 				/// 以下、読み出し専用フラグ
 				SELECTED,				///< 選択済

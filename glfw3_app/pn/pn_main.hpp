@@ -11,13 +11,15 @@
 #include "utils/i_scene.hpp"
 #include "utils/director.hpp"
 #include "widgets/widget.hpp"
-#include "widgets/widget_button.hpp"
+#include "widgets/widget_frame.hpp"
+#include "widgets/widget_null.hpp"
+#include "widgets/widget_image.hpp"
 #include "widgets/widget_slider.hpp"
+#include "widgets/widget_list.hpp"
+#include "widgets/widget_button.hpp"
 #include "widgets/widget_radio.hpp"
 #include "widgets/widget_dialog.hpp"
 #include "widgets/widget_filer.hpp"
-#include "widgets/widget_frame.hpp"
-#include "widgets/widget_image.hpp"
 #include "widgets/widget_terminal.hpp"
 #include "img_io/bdf_io.hpp"
 #include "gl_fw/glmobj.hpp"
@@ -39,11 +41,14 @@ namespace app {
 		gui::widget_filer*		save_ctx_;
 
 		gui::widget_frame*		frame_;
+		gui::widget_null*		area_;
 		gui::widget_image*		image_;
 
 		gui::widget_frame*		tools_;
 		gui::widget_slider*		octave_;
 		gui::widget_slider*		frequency_;
+		gui::widget_slider*		gain_;
+		gui::widget_list*		pn_menu_;
 		gui::widget_button*		load_;
 		gui::widget_button*		save_;
 
@@ -80,7 +85,8 @@ namespace app {
 		bool			save_dialog_;
 
 		int				octave_value_;
-		double			frequency_value_;
+		float			frequency_value_;
+		float			gain_value_;
 
 		void create_texture_();
 		void blend_();
@@ -95,9 +101,9 @@ namespace app {
 		pn_main(utils::director<core>& d) :
 			director_(d),
 			load_ctx_(0), save_ctx_(0),
-			frame_(0), image_(0),
+			frame_(nullptr), area_(nullptr), image_(nullptr),
 			tools_(nullptr),
-			octave_(nullptr), frequency_(nullptr),
+			octave_(nullptr), frequency_(nullptr), gain_(nullptr), pn_menu_(nullptr),
 			load_(0), save_(0),
 			scale_fit_(0), scale_1x_(0), scale_2x_(0), scale_3x_(0),
 			scale_(0),
@@ -105,7 +111,7 @@ namespace app {
 			dialog_(0), dialog_yes_no_(0), dialog_scale_(0),
 			img_handle_(0), dd_id_(0), load_id_(0), save_id_(0),
 			image_offset_(0.0f), save_dialog_(false),
-			octave_value_(8), frequency_value_(8.0)
+			octave_value_(8), frequency_value_(8.0f), gain_value_(0.0f)
 		{ }
 
 

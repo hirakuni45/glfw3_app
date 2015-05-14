@@ -31,7 +31,7 @@ namespace utils {
 
 			cha_t() { }
 			cha_t(uint32_t cha, const img::rgba8& fc, const img::rgba8& bc) :
-				cha_(cha), fc_(fc), bc_(bc) { } 
+				cha_(cha), fc_(fc), bc_(bc) { }
 		};
 
 	private:
@@ -93,7 +93,7 @@ namespace utils {
 				uint32_t yy = size.y < size_.y ? size.y : size_.y;
 				for(uint32_t y = 0; y < yy; ++y) {
 					for(uint32_t x = 0; x < xx; ++x) {
-						chaers_[y * size.x + x] = tmp[y * size_.x + x];						
+						chaers_[y * size.x + x] = tmp[y * size_.x + x];
 					}
 				}
 			}
@@ -116,7 +116,7 @@ namespace utils {
 			cha_.cha_ = ' ';
 			for(uint32_t x = pos.x; x < size_.x; ++x) {
 				chaers_[pos.y * size_.x + x] = cha_;
-			}			
+			}
 		}
 
 

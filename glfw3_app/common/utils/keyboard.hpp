@@ -56,7 +56,7 @@ namespace sys {
 		*/
 		//-----------------------------------------------------------------//
 		keyboard() : input_(),
-			repeat_delay_(30), repeat_delay_cnt_(0),
+			repeat_delay_(60), repeat_delay_cnt_(0),
 			repeat_cycle_(3), repeat_cycle_cnt_(0), last_key_idx_(-1), repeat_enable_(true),
 			last_char_(0) { }
 
