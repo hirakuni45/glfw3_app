@@ -79,7 +79,7 @@ namespace gui {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	template <class W>
 	void set_widget_text(W* w, const std::string& text) {
-		w->at_local_param().text_param_.text_ = text;
+		w->at_local_param().text_param_.set_text(text);
 	}
 
 
