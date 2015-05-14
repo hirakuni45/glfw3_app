@@ -109,22 +109,22 @@ namespace app {
 			widget::param wp(vtx::srect(10, ofs+30*0, 90, 30), tools_);
 			widget_radio::param wp_("fit");
 			wp_.check_ = true;
-			scale_fit_ = wd.add_widget<widget_radio>(wp, wp_);	
+			scale_fit_ = wd.add_widget<widget_radio>(wp, wp_);
 		}
 		{ // スケール 1X
 			widget::param wp(vtx::srect(10, ofs+30*1, 90, 30), tools_);
 			widget_radio::param wp_("1x");
-			scale_1x_ = wd.add_widget<widget_radio>(wp, wp_);	
+			scale_1x_ = wd.add_widget<widget_radio>(wp, wp_);
 		}
 		{ // スケール 2X
 			widget::param wp(vtx::srect(10, ofs+30*2, 90, 30), tools_);
 			widget_radio::param wp_("2x");
-			scale_2x_ = wd.add_widget<widget_radio>(wp, wp_);	
+			scale_2x_ = wd.add_widget<widget_radio>(wp, wp_);
 		}
 		{ // スケール 3X
 			widget::param wp(vtx::srect(10, ofs+30*3, 90, 30), tools_);
 			widget_radio::param wp_("3x");
-			scale_3x_ = wd.add_widget<widget_radio>(wp, wp_);	
+			scale_3x_ = wd.add_widget<widget_radio>(wp, wp_);
 		}
 		{ // スケーラーボタン
 			widget::param wp(vtx::srect(10, ofs+30*4+10, 100, 40), tools_);
@@ -221,7 +221,7 @@ namespace app {
 				term_->output("Ld");
 				image_info_("new image", src_image_.get());
 				image_offset_.set(0.0f);
-				frame_->at_local_param().text_param_.text_ = "new image";
+				frame_->at_local_param().text_param_.set_text("new image");
 				mobj_.destroy();
 				mobj_.initialize();
 				img_handle_ = mobj_.install(src_image_.get());
@@ -229,7 +229,7 @@ namespace app {
 				image_->at_local_param().mobj_handle_ = img_handle_;
 
 ///				bool f = dialog_new_->get_state(gui::widget::state::ENABLE);
-///				dialog_new_->enable(!f);				
+///				dialog_new_->enable(!f);
 			}
 		}
 
@@ -292,7 +292,7 @@ namespace app {
 				term_->output("Ld");
 				image_info_(load_ctx_->get_file(), src_image_.get());
 				image_offset_.set(0.0f);
-				frame_->at_local_param().text_param_.text_ = imfn;
+				frame_->at_local_param().text_param_.set_text(imfn);
 				mobj_.destroy();
 				mobj_.initialize();
 				img_handle_ = mobj_.install(imf.get_image().get());
