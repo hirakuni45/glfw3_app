@@ -91,6 +91,10 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_list::update()
 	{
+		if(param_.select_pos_ < list_.size()) {
+			widget_label* w = list_[param_.select_pos_];
+			param_.text_param_.text_ = w->get_local_param().text_param_.text_;
+		}
 	}
 
 
@@ -220,7 +224,13 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	bool widget_list::save(sys::preference& pre)
 	{
-		return true;
+		std::string path;
+		path += '/';
+		path += wd_.create_widget_name(this);
+
+		int err = 0;
+		if(!pre.put_integer(path + "/selector", param_.select_pos_)) ++err;
+		return err == 0;
 	}
 
 
@@ -233,6 +243,12 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	bool widget_list::load(const sys::preference& pre)
 	{
-		return true;
+		std::string path;
+		path += '/';
+		path += wd_.create_widget_name(this);
+
+		int err = 0;
+		if(!pre.get_integer(path + "/selector", param_.select_pos_)) ++err;
+		return err == 0;
 	}
 }
