@@ -47,17 +47,32 @@ namespace app {
 				for(int x = 0; x < w; ++x) {
 					double n = perlin.octaveNoise(x / fx, y / fy, octave_value_);
 					n = Clamp(n*0.5+0.5,0.0,1.0);
-					const uint8_t gray = static_cast<uint8_t>(n * 255);
+					n *= gain_value_;
+					uint8_t gray = static_cast<uint8_t>(n * 255);
 					prn_image_.put_pixel(vtx::spos(x, y), img::rgba8(gray, gray, gray, gray ^ 255));
 				}
 			}
 		} else if(task == 2) {
+			const PerlinNoise perlin(12345);
+			const double fx = static_cast<double>(w) / frequency_value_;
+			const double fy = static_cast<double>(h) / frequency_value_;
 
+			for(int y = 0; y < h; ++y) {
+				for(int x = 0; x < w; ++x) {
+					double n = perlin.octaveNoise(x / fx, y / fy, octave_value_);
+					n *= 0.5;
+					n = Clamp(n*0.5+0.5,0.0,1.0);
+					uint8_t gray = static_cast<uint8_t>(n * 255);
+					prn_image_.put_pixel(vtx::spos(x, y), img::rgba8(gray, gray, gray, gray ^ 255));
+				}
+			}
 		}
 	}
 
 	void pn_main::blend_()
 	{
+		if(!src_image_) return;
+
 		mobj_.destroy();
 		mobj_.initialize();
 		bld_image_ = img::shared_img(img::copy_image(src_image_.get()));
@@ -123,8 +138,16 @@ namespace app {
 			wp_.plate_param_.set_caption(30);
 			frame_ = wd.add_widget<widget_frame>(wp, wp_);
 		}
-		{ // 画像ファイル表示イメージ
+		{ // 画像表示用領域
 			widget::param wp(vtx::srect(0, 0, 256, 256), frame_);
+			widget_null::param wp_;
+			area_ = wd.add_widget<widget_null>(wp, wp_);
+			area_->set_state(widget::state::CLIP_PARENTS);
+			area_->set_state(widget::state::RESIZE_ROOT);
+			area_->set_state(widget::state::MOVE_STALL);
+		}
+		{ // 画像ファイル表示イメージ
+			widget::param wp(vtx::srect(0, 0, 256, 256), area_);
 			widget_image::param wp_;
 			image_ = wd.add_widget<widget_image>(wp, wp_);
 			image_->set_state(widget::state::CLIP_PARENTS);
@@ -133,12 +156,12 @@ namespace app {
 		}
 
 		{ // 機能ツールパレット
-			widget::param wp(vtx::srect(10, 10, 150, 410));
+			widget::param wp(vtx::srect(10, 10, 150, 430));
 			widget_frame::param wp_;
 			tools_ = wd.add_widget<widget_frame>(wp, wp_);
 			tools_->set_state(widget::state::SIZE_LOCK);
 		}
-		{ // octave slider
+		{ // octave スライダー
 			widget::param wp(vtx::srect(10, 10+30*0, 130, 20), tools_);
 			widget_slider::param wp_;
 			wp_.slider_param_.grid_ = 1.0f / 7.0f;
@@ -149,7 +172,7 @@ namespace app {
 			};
 			octave_ = wd.add_widget<widget_slider>(wp, wp_);
 		}
-		{ // frequency slider
+		{ // frequency スライダー
 			widget::param wp(vtx::srect(10, 10+30*1, 130, 20), tools_);
 			widget_slider::param wp_;
 			wp_.slider_param_.grid_ = 1.0f / 15.0f;
@@ -160,8 +183,19 @@ namespace app {
 			};
 			frequency_ = wd.add_widget<widget_slider>(wp, wp_);
 		}
+		{ // gain スライダー
+			widget::param wp(vtx::srect(10, 10+30*2, 130, 20), tools_);
+			widget_slider::param wp_;
+			wp_.slider_param_.grid_ = 1.0f / 20.0f;
+			wp_.select_func_ = [this](float pos){
+				gain_value_ = pos * 20.0f;
+				create_texture_();
+				blend_();
+			};
+			gain_ = wd.add_widget<widget_slider>(wp, wp_);
+		}
 		{ // リスト
-			widget::param wp(vtx::srect(10, 10+30*2, 130, 40), tools_);
+			widget::param wp(vtx::srect(10, 10+30*3, 130, 40), tools_);
 			widget_list::param wp_;
 			wp_.text_list_.push_back("None");
 			wp_.text_list_.push_back("Smoke");
@@ -173,7 +207,7 @@ namespace app {
 			};
 		}
 
-		short ofs = 120;
+		short ofs = 150;
 		{ // ロードボタン
 			widget::param wp(vtx::srect(10, ofs+50*0, 100, 40), tools_);
 			widget_button::param wp_("load");
@@ -354,7 +388,7 @@ namespace app {
 
 
 		// frame 内 image のサイズを設定
-		if(frame_ && image_) {
+		if(frame_ && area_ && image_) {
 			if(!image_->get_local_param().mobj_handle_) {
 				save_stall = true;
 			}
@@ -380,6 +414,10 @@ namespace app {
 				}
 			}
 			image_->at_local_param().scale_ = s;
+
+			//エリアの作成
+///			area_->at_param().rect_.org.set(0);
+///			area_->at_param().rect_.size = frame_->get_param().rect_.size;
 		}
 
 		if(save_ctx_) {
