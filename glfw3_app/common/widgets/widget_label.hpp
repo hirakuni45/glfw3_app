@@ -197,8 +197,7 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		void set_text(const std::string& text) {
-			param_.text_param_.text_.clear();
-			utils::utf8_to_utf32(text, param_.text_param_.text_);
+			param_.text_param_.set_text(text);
 			param_.text_in_pos_ = param_.text_param_.text_.size();
 		}
 
@@ -219,12 +218,11 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	エイリアス・テキストを設定
-			@param[in]	text	テキスト
+			@param[in]	alias	テキスト
 		*/
 		//-----------------------------------------------------------------//
-		void set_alias(const std::string& text) {
-			param_.text_param_.alias_.clear();
-			utils::utf8_to_utf32(text, param_.text_param_.alias_);
+		void set_alias(const std::string& alias) {
+			param_.text_param_.set_alias(alias);
 			param_.text_param_.alias_enable_ = true;
 		}
 
