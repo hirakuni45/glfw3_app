@@ -216,7 +216,7 @@ namespace gui {
 		gl::core& core = gl::core::get_instance();
 
 		utils::lstring ls;
-		if(tp.alias_enable_) {
+		if(tp.alias_enable_ && tp.cursor_ < 0) {
 			ls = tp.alias_;
 		} else {
 			ls = tp.text_;
