@@ -34,25 +34,25 @@ namespace app {
 		std::string s;
 		if(!file.empty()) {
 			size_t fsz = utils::get_file_size(file);
-			if(fsz > 0) s = ": " + boost::lexical_cast<std::string>(fsz) + '\r';
+			if(fsz > 0) s = ": " + boost::lexical_cast<std::string>(fsz) + '\n';
 			term_->output(s);
 		}
-		s = "W: " + boost::lexical_cast<std::string>(img->get_size().x) + '\r';
+		s = "W: " + boost::lexical_cast<std::string>(img->get_size().x) + '\n';
 		term_->output(s);
-		s = "H: " + boost::lexical_cast<std::string>(img->get_size().y) + '\r';
+		s = "H: " + boost::lexical_cast<std::string>(img->get_size().y) + '\n';
 		term_->output(s);
 		img::IMG::type t = img->get_type();
 		if(t == img::IMG::INDEXED8) {
-			term_->output("INDEXED8\r");
+			term_->output("INDEXED8\n");
 		} else if(t == img::IMG::FULL8) {
-			term_->output("FULL8\r");
+			term_->output("FULL8\n");
 		}
 		if(img->test_alpha()) {
-			term_->output("Alpha\r");
+			term_->output("Alpha\n");
 		}
-		s = "C: " + boost::lexical_cast<std::string>(img->count_color()) + '\r';
+		s = "C: " + boost::lexical_cast<std::string>(img->count_color()) + '\n';
 		term_->output(s);
-		term_->output('\r');
+		term_->output('\n');
 	}
 
 
