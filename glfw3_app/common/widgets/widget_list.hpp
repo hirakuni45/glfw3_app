@@ -20,7 +20,7 @@ namespace gui {
 
 		typedef widget_list value_type;
 
-		typedef std::function<void (const std::string&)> select_func_type;
+		typedef std::function<void (const std::string&, int)> select_func_type;
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
