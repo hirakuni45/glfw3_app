@@ -28,7 +28,7 @@ namespace app {
 			widget::param wp(vtx::srect(30, 30, 256, 256));
 			widget_frame::param wp_;
 			wp_.plate_param_.set_caption(30);
-			wp_.text_param_.text_ = "元画像";
+			wp_.text_param_.set_text("元画像");
 			src_frame_ = wd.add_widget<widget_frame>(wp, wp_);
 		}
 		{ // 画像ファイル表示イメージ
@@ -45,7 +45,7 @@ namespace app {
 			widget::param wp(vtx::srect(60, 60, 256, 256));
 			widget_frame::param wp_;
 			wp_.plate_param_.set_caption(30);
-			wp_.text_param_.text_ = "変換後";
+			wp_.text_param_.set_text("変換後");
 			dst_frame_ = wd.add_widget<widget_frame>(wp, wp_);
 		}
 		{ // 画像ファイル表示イメージ
