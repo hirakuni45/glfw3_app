@@ -34,12 +34,12 @@ namespace utils {
 
 		volatile uint32_t	idx_;
 
-		static uint32_t		init_;
-		static file_t		file_t_;
-		static pthread_t	pth_;
+		uint32_t	init_;
+		file_t		file_t_;
+		pthread_t	pth_;
 
-		static void start_();
-		static void end_();
+		void start_();
+		void end_();
 
 		static void sleep_(uint32_t ms);
 		static void* task_(void* in);
@@ -51,7 +51,7 @@ namespace utils {
 			@param[in]	path	パス
 		*/
 		//-----------------------------------------------------------------//
-		files() : idx_(0) { start_(); }
+		files() : idx_(0), init_(0) { start_(); }
 
 
 		//-----------------------------------------------------------------//
