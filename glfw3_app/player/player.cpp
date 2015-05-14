@@ -41,20 +41,20 @@ namespace app {
 	{
 		gui::widget_label::param& pa = w->at_local_param();
 		time_t tt = t / 3600;
+		std::string s;
 		if(tt) {
-			pa.text_param_.text_  = boost::lexical_cast<std::string>(tt / 10);
-			pa.text_param_.text_ += boost::lexical_cast<std::string>(tt % 10);
-			pa.text_param_.text_ += ':';
-		} else {
-			pa.text_param_.text_.clear();
+			s  = boost::lexical_cast<std::string>(tt / 10);
+			s += boost::lexical_cast<std::string>(tt % 10);
+			s += ':';
 		}
 		tt = t / 60;
-		pa.text_param_.text_ += boost::lexical_cast<std::string>(tt / 10);
-		pa.text_param_.text_ += boost::lexical_cast<std::string>(tt % 10);
-		pa.text_param_.text_ += ':';
+		s += boost::lexical_cast<std::string>(tt / 10);
+		s += boost::lexical_cast<std::string>(tt % 10);
+		s += ':';
 		tt = t % 60;
-		pa.text_param_.text_ += boost::lexical_cast<std::string>(tt / 10);
-		pa.text_param_.text_ += boost::lexical_cast<std::string>(tt % 10);
+		s += boost::lexical_cast<std::string>(tt / 10);
+		s += boost::lexical_cast<std::string>(tt % 10);
+		pa.text_param_.set_text(s);
 	}
 
 
@@ -115,15 +115,44 @@ namespace app {
 			widget_filer::param wp_(core.get_current_path(), sound.get_file_exts());
 			filer_ = wd.add_widget<widget_filer>(wp, wp_);
 			filer_->enable(false);
+			filer_->at_local_param().select_file_func_ = [this](const std::string& file) {
+			   	sound_play_(file);
+			};
 		}
 
 		const std::string& curp = core.get_current_path();
 		file_btn_  = gui::create_image<widget_button>(wd, curp + "/res/select.png");
+		file_btn_->at_local_param().select_func_ = [this]() {
+			bool f = filer_->get_state(gui::widget::state::ENABLE);
+			filer_->enable(!f);
+			if(!f) {
+				al::sound& sound = director_.at().sound_;
+				filer_->focus_file(sound.get_file_stream());
+				files_step_ = 0;
+				files_.clear();
+			}
+		};
+
 		play_btn_  = gui::create_image<widget_button>(wd, curp + "/res/play.png");
+
 		pause_btn_ = gui::create_image<widget_button>(wd, curp + "/res/pause.png");
 
 		rew_btn_   = gui::create_image<widget_button>(wd, curp + "/res/rew.png");
+		rew_btn_->at_local_param().select_func_ = [this]() {
+			al::sound& sound = director_.at().sound_;
+			// 開始５秒以降なら、曲の先頭に～
+			if(sound.get_time_stream() < seek_change_time_) {
+				sound.prior_stream();
+			} else {
+				sound.replay_stream();
+			}
+		};
+
 		ff_btn_    = gui::create_image<widget_button>(wd, curp + "/res/ff.png");
+		ff_btn_->at_local_param().select_func_ = [this]() {
+			al::sound& sound = director_.at().sound_;
+			sound.next_stream();
+		};
 
 		short lw = 40;
 		total_time_  = create_text_pad_(vtx::spos(16 * 3, lw), "00:00", "led", false);
@@ -151,6 +180,11 @@ namespace app {
 				wp_.hand_image_ = wd.at_img_files().get_image().get();
 			}
    			volume_ = wd.add_widget<widget_slider>(wp, wp_);
+			volume_->at_local_param().select_func_ = [this](float pos) {
+				// ストリームのゲイン(volume)を設定
+				al::sound& sound = director_.at().sound_;
+				sound.set_gain_stream(pos);
+			};
 		}
 		{
 			widget::param wp(vtx::srect(0, 0, 0, 0), 0);
@@ -213,7 +247,12 @@ namespace app {
 				}
 			}
 		}
-		pre.get_real(volume_path_, volume_->at_slider_param().position_);
+		{
+			float pos;
+			pre.get_real(volume_path_, pos);
+			volume_->at_slider_param().position_ = pos;
+			sound.set_gain_stream(pos);
+		}
 		if(filer_) {
 			filer_->load(pre);
 		}
@@ -329,31 +368,6 @@ namespace app {
 		}
 		core.set_title(sound.get_file_stream() + state);
 
-		// ファイラーボタンの確認
-		if(filer_ && file_btn_->get_selected()) {
-			bool f = filer_->get_state(gui::widget::state::ENABLE);
-			filer_->enable(!f);
-			if(!f) {
-				filer_->focus_file(sound.get_file_stream());
-				files_step_ = 0;
-				files_.clear();
-			}
-		}
-
-		// 「送り」ボタン
-		if(ff_btn_->get_selected()) {
-			sound.next_stream();
-		}
-		// 「戻り」ボタン
-		if(rew_btn_->get_selected()) {
-			// 開始５秒以降なら、曲の先頭に～
-			if(sound.get_time_stream() < seek_change_time_) {
-				sound.prior_stream();
-			} else {
-				sound.replay_stream();
-			}
-		}
-
 		// 時間表示
 		remain_t_ = sound.get_time_stream();
 		total_t_ = sound.get_end_time_stream();
@@ -443,16 +457,6 @@ namespace app {
 			tag_serial_ = tag.serial_;
 		}
 
-		// ストリームのゲイン(volume)を設定
-		sound.set_gain_stream(volume_->get_slider_param().position_);
-
-		// ファイラーがファイル選択をした場合
-		if(filer_->get_select_file_id() != select_file_id_) {
-			select_file_id_ = filer_->get_select_file_id();
-			const std::string& file = filer_->get_file();
-			sound_play_(file);
-		}
-
 		// ファイラーが有効で、マウス操作が無い状態が５秒続いたら、
 		// 演奏ファイルパスへフォーカスする
    		if(filer_->get_state(gui::widget::state::ENABLE)) {
@@ -467,7 +471,7 @@ namespace app {
 				mouse_pos_ = msp;
 			}
 
-			// ファイルのタグをファイラーのエイリアスに設定
+			// ファイルのタグ情報をファイラーのエイリアスに設定
 			if(filer_->get_file_state()) {
 				files_.clear();
 				files_step_ = 0;
