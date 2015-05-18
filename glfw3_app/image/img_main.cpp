@@ -81,6 +81,7 @@ namespace app {
 			image_->set_state(widget::state::CLIP_PARENTS);
 			image_->set_state(widget::state::RESIZE_ROOT);
 			image_->set_state(widget::state::MOVE_ROOT, false);
+			image_->set_state(widget::state::POSITION_LOCK, false);
 		}
 
 		{ // 機能ツールパレット
