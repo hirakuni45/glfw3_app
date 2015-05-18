@@ -230,8 +230,9 @@ namespace gui {
 			float		grid_;				///< グリッド
 			bool		accelerator_;		///< アクセレーターを有効にする場合
 			bool		handle_resize_;		///< ハンドル・リサイズ
-			slider_param() : direction_(direction::HOLIZONTAL),
-				position_(0.0f), handle_ratio_(0.1f), grid_(0.0f),
+			slider_param(float pos = 0.0f, direction::type dir = direction::HOLIZONTAL) :
+				direction_(dir), position_(pos),
+				handle_ratio_(0.1f), grid_(0.0f),
 				accelerator_(true), handle_resize_(true)
 			{ }
 		};
