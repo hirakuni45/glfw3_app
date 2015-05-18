@@ -23,6 +23,7 @@ namespace gui {
 		at_param().state_.set(widget::state::SERVICE);
 		at_param().state_.set(widget::state::POSITION_LOCK);
 		at_param().state_.set(widget::state::SIZE_LOCK);
+		at_param().state_.set(widget::state::MOVE_STALL);
 
 		dis_h_ = wd_.get_share_image().un_radio_;
 		ena_h_ = wd_.get_share_image().to_radio_;
