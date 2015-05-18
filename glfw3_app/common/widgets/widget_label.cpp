@@ -79,6 +79,7 @@ namespace gui {
 		if(get_select_in()) {
 			if(!param_.read_only_) {
 				param_.text_in_ = true;
+				param_.before_text_ = param_.text_param_.text_;
 			}
 		}
 		if(wd_.get_focus_widget() == this || wd_.get_focus_widget() == wd_.root_widget(this)) {

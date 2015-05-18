@@ -31,12 +31,14 @@ namespace gui {
 			text_param	text_param_;			///< テキスト描画のパラメーター
 			color_param	color_param_select_;	///< 選択時のカラーパラメーター
 
+			utils::lstring	before_text_;	///< 以前のテキスト
+
 			bool		read_only_;		///< 読み出し専用の場合
 			bool		text_in_;		///< テキスト入力状態
 			uint32_t	text_in_pos_;	///< テキスト入力位置
 			uint32_t	text_in_limit_;	///< テキスト入力最大数
 
-			shift_param	shift_param_;
+			shift_param	shift_param_;	///< 文字列スクロールパラメーター
 
 			bool		menu_enable_;	///< メニュー許可
 
