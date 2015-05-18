@@ -773,18 +773,17 @@ namespace gui {
 		}
 
 		// 選択の確認と動作
-		if(selected_enable_ && !center_.empty()) {
+///		if(selected_enable_ && !center_.empty()) {
+		if(!center_.empty()) {
 			widget_files_cit cit = scan_selected_file_(center_);
 			if(cit == center_.end()) return;
 
 			selected_enable_ = false;
+
 			const widget_file& wf = *cit;
 			if(param_.new_file_ && cit == center_.begin()) ;
 			else if(wf.name) {
-				wf.name->set_state(widget::state::SELECTED);
-				wf.info->set_state(widget::state::SELECTED);
 				const std::string& n = wf.name->get_text();
-				un_selected_(center_);
 				if(n == "..") {  // 一つ前に戻る
 					request_right_ = false;
 					move_speed_ =  speed_move;
