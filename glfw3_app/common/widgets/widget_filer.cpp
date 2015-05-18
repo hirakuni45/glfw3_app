@@ -784,6 +784,7 @@ namespace gui {
 				wf.name->set_state(widget::state::SELECTED);
 				wf.info->set_state(widget::state::SELECTED);
 				const std::string& n = wf.name->get_text();
+				un_selected_(center_);
 				if(n == "..") {  // 一つ前に戻る
 					request_right_ = false;
 					move_speed_ =  speed_move;
