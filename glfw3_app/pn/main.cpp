@@ -34,7 +34,7 @@ int main(int argc, char** argv)
 
 	vtx::srect rect(start_pos_, start_size_);
 	if(!director.at().preference_.load_rect(window_key_, rect)) {
-//		std::cout << "Load rect error..." << std::endl; 
+//		std::cout << "Load rect error..." << std::endl;
 	}
 
 	if(!core.setup(rect, app_title_, false)) {
