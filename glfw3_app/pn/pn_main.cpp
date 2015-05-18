@@ -138,21 +138,15 @@ namespace app {
 			wp_.plate_param_.set_caption(30);
 			frame_ = wd.add_widget<widget_frame>(wp, wp_);
 		}
-		{ // 画像表示用領域
-			widget::param wp(vtx::srect(0, 0, 256, 256), frame_);
-			widget_null::param wp_;
-			area_ = wd.add_widget<widget_null>(wp, wp_);
-			area_->set_state(widget::state::CLIP_PARENTS);
-			area_->set_state(widget::state::RESIZE_ROOT);
-			area_->set_state(widget::state::MOVE_STALL);
-		}
+
 		{ // 画像ファイル表示イメージ
-			widget::param wp(vtx::srect(0, 0, 256, 256), area_);
+			widget::param wp(vtx::srect(0, 0, 256, 256), frame_);
 			widget_image::param wp_;
 			image_ = wd.add_widget<widget_image>(wp, wp_);
 			image_->set_state(widget::state::CLIP_PARENTS);
 			image_->set_state(widget::state::RESIZE_ROOT);
 			image_->set_state(widget::state::MOVE_ROOT, false);
+			image_->set_state(widget::state::POSITION_LOCK, false);
 		}
 
 		{ // 機能ツールパレット
@@ -185,7 +179,7 @@ namespace app {
 		}
 		{ // gain スライダー
 			widget::param wp(vtx::srect(10, 10+30*2, 130, 20), tools_);
-			widget_slider::param wp_;
+			widget_slider::param wp_(1.0f / 20.0f);
 			wp_.slider_param_.grid_ = 1.0f / 20.0f;
 			wp_.select_func_ = [this](float pos){
 				gain_value_ = pos * 20.0f;
@@ -388,7 +382,7 @@ namespace app {
 
 
 		// frame 内 image のサイズを設定
-		if(frame_ && area_ && image_) {
+		if(frame_ && image_) {
 			if(!image_->get_local_param().mobj_handle_) {
 				save_stall = true;
 			}

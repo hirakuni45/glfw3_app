@@ -41,7 +41,6 @@ namespace app {
 		gui::widget_filer*		save_ctx_;
 
 		gui::widget_frame*		frame_;
-		gui::widget_null*		area_;
 		gui::widget_image*		image_;
 
 		gui::widget_frame*		tools_;
@@ -101,7 +100,7 @@ namespace app {
 		pn_main(utils::director<core>& d) :
 			director_(d),
 			load_ctx_(0), save_ctx_(0),
-			frame_(nullptr), area_(nullptr), image_(nullptr),
+			frame_(nullptr), image_(nullptr),
 			tools_(nullptr),
 			octave_(nullptr), frequency_(nullptr), gain_(nullptr), pn_menu_(nullptr),
 			load_(0), save_(0),
