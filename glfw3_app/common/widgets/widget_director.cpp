@@ -642,18 +642,18 @@ namespace gui {
 				}
 
 				select_widget_ = w;
-//				std::cout << "Sel: " << select_widget_->type_name() << std::endl << std::flush;
 				select_trigger = true;
 				if(w->get_state(widget::state::MOVE_STALL)) move_widget_ = nullptr;
 				if(w->get_state(widget::state::POSITION_LOCK)) continue;
-				w->at_param().move_org_ = w->get_rect().org;
-//				std::cout << "Move: " << w->type_name() << std::endl << std::flush;
 				move_widget_ = w;
 			} else if(right.pos) {  // RIGHT 選択
 				if(w->get_state(widget::state::SIZE_LOCK)) continue;
 				resize_r_widget_ = w;
 				resize_trigger = true;
 			}
+		}
+		if(left.pos && move_widget_) {
+			move_widget_->at_param().move_org_ = move_widget_->get_rect().org;
 		}
 
 		// 選択権の追跡
