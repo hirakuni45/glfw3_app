@@ -13,9 +13,8 @@ PerlinNoise::PerlinNoise( unsigned seed )
 		seed = std::mt19937::default_seed;
 	}
 
-	// p[0]..p[255] contains all numbers in [0..255] in random order		
+	// p[0]..p[255] contains all numbers in [0..255] in random order
 	std::iota(std::begin(p),std::begin(p)+256,0);
-	
 	std::shuffle(std::begin(p),std::begin(p)+256,std::mt19937(seed));
 
 	for(int i=0; i<256; ++i)
