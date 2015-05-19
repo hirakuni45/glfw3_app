@@ -160,6 +160,9 @@ namespace gui {
 	{
 		if(root == 0) return;
 
+		if(!root->get_param().state_[widget::state::ENABLE] && flag) {
+			set_focus_widget(root);
+		}
 		root->at_param().state_[widget::state::ENABLE] = flag;
 		if(!child) {
 			return;
