@@ -5,11 +5,12 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include "img.hpp"
-#include "i_img.hpp"
-#include "img_idx8.hpp"
-#include "img_gray8.hpp"
-#include "img_rgba8.hpp"
+#include "img_io/img.hpp"
+#include "img_io/i_img.hpp"
+#include "img_io/img_idx8.hpp"
+#include "img_io/img_gray8.hpp"
+#include "img_io/img_rgba8.hpp"
+#include "img_io/perlin_noise.hpp"
 
 namespace img {
 
@@ -117,6 +118,4 @@ namespace img {
 	*/
 	//-----------------------------------------------------------------//
 	void resize_image(const i_img* src, img_rgba8& dst, float scale);
-
-
 }

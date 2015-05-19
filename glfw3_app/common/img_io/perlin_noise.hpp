@@ -8,6 +8,7 @@
 #include <cmath>
 #include <random>
 #include <algorithm>
+#include "img_io/img_gray8.hpp"
 
 namespace img {
 
@@ -35,10 +36,19 @@ namespace img {
 			return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
 		}
 
+		REAL clamp_(REAL x, REAL min, REAL max) {
+			return (x < min) ? min : ((max < x) ? max : x);
+		}
+
 		float floor_(float a) const { return floorf(a); }
 		double floor_(double a) const { return floor(a); }
 
 	public:
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	コンストラクター
+		*/
+		//-----------------------------------------------------------------//
 		explicit perlin_noise(uint32_t seed = 1) {
 			if(seed == 0) {
 				seed = std::mt19937::default_seed;
@@ -129,6 +139,32 @@ namespace img {
 				amp /= static_cast<REAL>(2);
 			}
 			return result;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	パーリンノイズでグレースケール画像の作成
+			@param[out]	dst	リサイズイメージ
+			@param[in]	octave	オクターブパラメーター
+			@param[in]	frequemncy	周波数パラメーター
+		*/
+		//-----------------------------------------------------------------//
+		void create_perlin_noize(img_gray8& dst, REAL octave, REAL frequency) {
+			REAL fx = static_cast<REAL>(dst.get_size().x) / frequency;
+			REAL fy = static_cast<REAL>(dst.get_size().y) / frequency;
+			REAL fh = 1 / static_cast<REAL>(2);
+
+			vtx::spos pos;
+			for(pos.y = 0; pos.y < dst.get_size().y; ++pos.y) {
+				for(pos.x = 0; pos.x < dst.get_size().x; ++pos.x) {
+					REAL n = octave_noise(static_cast<REAL>(pos.x) / fx,
+										  static_cast<REAL>(pos.y) / fy, octave);
+					n = clamp_(n * fh + fh, 0.0, 1.0);
+					gray8 g(static_cast<uint8_t>(n * static_cast<REAL>(255)));
+					dst.put_pixel(pos, g);
+				}
+			}
 		}
 	};
 }
