@@ -320,8 +320,11 @@ namespace gui {
 	}
 
 
-	widget_filer::widget_file_copt widget_filer::scan_item_(const std::string& path) const
+	widget_filer::widget_file_copt widget_filer::scan_item_(const std::string& fn) const
 	{
+		std::string path;
+		utils::strip_last_of_delimita_path(fn, path);
+
 		BOOST_FOREACH(const widget_file& wf, center_) {
 			std::string t;
 			utils::strip_last_of_delimita_path(wf.name->get_text(), t);
@@ -333,8 +336,11 @@ namespace gui {
 	}
 
 
-	bool widget_filer::focus_(const std::string& fn)
+	bool widget_filer::focus_(const std::string& path)
 	{
+		std::string fn;
+		utils::strip_last_of_delimita_path(path, fn);
+
 		uint32_t n = 0;
 		BOOST_FOREACH(const widget_file& wf, center_) {
 			std::string t;
@@ -440,29 +446,6 @@ namespace gui {
 		fsc_wait_ = true;
 
 		short frame_width = param_.plate_param_.frame_width_;
-		// path（ハンドル）
-#if 0
-		{
-			vtx::srect r;
-			r.org.set(frame_width);
-			r.size.x = get_rect().size.x - frame_width * 2;
-			r.size.y = param_.path_height_;
-			widget::param wp(r, this);
-			wp.action_.set(widget::action::SELECT_HIGHLIGHT);
-			widget_label::param wp_(param_.path_);
-			wp_.text_param_.placement_.hpt = vtx::placement::holizontal::LEFT;
-			wp_.color_param_.fore_color_.set(236, 181, 63);
-			wp_.color_param_.back_color_.set(131, 104, 45);
-			wp_.color_param_select_.fore_color_ = wp_.color_param_.fore_color_;
-			wp_.color_param_select_.back_color_ = wp_.color_param_.back_color_;
-			wp_.color_param_select_.fore_color_.gainY(1.3f);
-			wp_.color_param_select_.back_color_.gainY(1.3f);
-			wp_.plate_param_.resizeble_ = true;
-			wp_.plate_param_.frame_width_  = 2;
-			wp_.plate_param_.round_radius_ = 4;
-		}
-#endif
-
 		// info ボタン
 		{
 			gl::mobj::handle hnd = wd_.get_share_image().right_box_;
@@ -519,7 +502,12 @@ namespace gui {
 		param_.shift_param_.size_ = get_rect().size.x - param_.plate_param_.frame_width_ * 2;
 		shift_text_update(get_param(), param_.text_param_, param_.shift_param_);
 
+		if(param_.every_top_) {
+			wd_.top_widget(this);
+		}
+
 		if(!center_.empty()) {
+			// 「new file」がキャンセルされた場合に文字列を再設定
 			widget_files_cit cit = scan_select_in_file_(center_);
 			if(param_.new_file_ && cit != center_.end()) {
 				if(cit == center_.begin()) {
@@ -528,10 +516,29 @@ namespace gui {
 					center_[0].name->set_text(new_file_text_);
 				}
 			}
-		}
 
-		if(param_.every_top_) {
-			wd_.top_widget(this);
+			// アクセレーターキーの設定
+			// new_file にフォーカスがある場合は、キーの設定をしない
+			acc_key_ = 0;
+			if(param_.new_file_ && wd_.get_focus_widget() == (*cit).base) ;
+			else if(wd_.get_focus_widget() == this || wd_.get_focus_widget() == wd_.root_widget(this)) {
+				const std::string& ins = wd_.get_keyboard().input();
+				if(!ins.empty()) {
+					char ch = ins.back();
+					if(ch >= 'a' && ch <= 'z') ch -= 0x20;
+					if(ch == '\r' || ch == sys::keyboard::ctrl::UP || ch == sys::keyboard::ctrl::DOWN) {
+						acc_key_ = ch;
+						acc_cnt_ = 0;
+					} else if((ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z')) {
+						acc_key_ = ch;
+						if(acc_key_ch_ != ch) acc_cnt_ = 0;
+						else ++acc_cnt_;
+						acc_key_ch_ = ch;
+					} else {
+						acc_cnt_ = 0;
+					}
+				}
+			}
 		}
 	}
 
@@ -580,6 +587,48 @@ namespace gui {
 				}
 			}
 			focus_(focus_path_);
+		}
+
+		// アクセレーターキー操作によるフォーカス
+		if(param_.acc_focus_ && acc_key_ && !center_.empty()) {
+			if(acc_key_ >= ' ') {
+				utils::strings ss;
+				BOOST_FOREACH(const widget_file& wf, center_) {
+					char ch = wf.name->get_text()[0];
+					if(ch >= 'a' && ch <= 'z') ch -= 0x20;
+					if(ch == acc_key_) {
+						ss.push_back(wf.name->get_text());
+					}
+				}
+				if(!ss.empty()) {
+					focus_path_ = ss[acc_cnt_ % ss.size()];
+					focus_(focus_path_);
+				}
+			} else if(acc_key_ == '\r') {
+				BOOST_FOREACH(const widget_file& wf, center_) {
+					if(wf.name->get_text() == focus_path_) {
+						utils::append_path(param_.path_, wf.name->get_text(), file_);
+						++select_file_id_;
+						enable(false);
+						if(param_.select_file_func_) param_.select_file_func_(file_);
+						break;
+					}
+				}
+			} else if(acc_key_ == sys::keyboard::ctrl::UP || acc_key_ == sys::keyboard::ctrl::DOWN) {
+				uint32_t n = 0;
+				BOOST_FOREACH(const widget_file& wf, center_) {
+					if(wf.name->get_text() == focus_path_) {
+						break;
+					}
+					++n;
+				}
+				if(acc_key_ == sys::keyboard::ctrl::UP) --n;
+				else ++n;
+				if(n < center_.size()) {
+					focus_path_ = center_[n].name->get_text();
+					focus_(focus_path_);
+				}
+			}
 		}
 
 		// フレームのサイズを、仮想ウィジェットに反映
@@ -633,7 +682,6 @@ namespace gui {
 				move_speed_ = spd;
 			}
 			if(move_speed_ > 0.0f && position_.x >= main_->get_rect().size.x) {
-				selected_enable_ = true;
 				move_speed_ = 0.0f;
 				position_.x = 0.0f;
 				std::string pp = utils::previous_path(param_.path_);
@@ -655,7 +703,6 @@ namespace gui {
 				}
 				get_regist_state_();
 			} else if(move_speed_ < 0.0f && position_.x <= -main_->get_rect().size.x) {
-				selected_enable_ = true;
 				move_speed_ = 0.0f;
 				position_.x = 0.0f;
 				destroy_files_(left_);
@@ -773,12 +820,9 @@ namespace gui {
 		}
 
 		// 選択の確認と動作
-///		if(selected_enable_ && !center_.empty()) {
 		if(!center_.empty()) {
 			widget_files_cit cit = scan_selected_file_(center_);
 			if(cit == center_.end()) return;
-
-			selected_enable_ = false;
 
 			const widget_file& wf = *cit;
 			if(param_.new_file_ && cit == center_.begin()) ;

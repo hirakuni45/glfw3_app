@@ -47,6 +47,7 @@ namespace gui {
 			short			label_height_;
 
 			bool			every_top_;	///< 有効なら、常に手前
+			bool			acc_focus_;	///< アクセレーターキーによるフォーカス
 
 			bool			new_file_;	///< 新規ファイル作成
 
@@ -58,7 +59,7 @@ namespace gui {
 				text_param_(), shift_param_(),
 				path_(path), filter_(filter),
 				path_height_(32), label_height_(32),
-				every_top_(true),
+				every_top_(true), acc_focus_(true),
 				new_file_(new_file),
 				select_file_func_()
 			{ }
@@ -144,7 +145,10 @@ namespace gui {
 		static const char* key_locate_;
 		static const char* key_size_;
 
-		bool		selected_enable_;
+		char				acc_key_;
+		char				acc_key_ch_;
+		uint32_t			acc_cnt_;
+
 		bool		back_directory_;
 
 		void create_file_(widget_file& wf, const vtx::srect& rect, short ofs, const std::string& str);
@@ -179,7 +183,7 @@ namespace gui {
 			speed_(0.0f), position_(0.0f), move_speed_(0.0f), select_pos_(0),
 			file_(),
 			select_file_id_(0),
-			selected_enable_(true),
+			acc_key_(0), acc_key_ch_(0), acc_cnt_(0),
 			back_directory_(false)
 			{ }
 
