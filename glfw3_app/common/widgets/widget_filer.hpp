@@ -46,10 +46,10 @@ namespace gui {
 			short			path_height_;
 			short			label_height_;
 
-			bool			every_top_;	///< 有効なら、常に手前
-			bool			acc_focus_;	///< アクセレーターキーによるフォーカス
+			bool			every_top_;		///< 有効なら、常に手前
+			bool			acc_focus_;		///< アクセレーターキーによるフォーカス
 
-			bool			new_file_;	///< 新規ファイル作成
+			bool			new_file_;		///< 新規ファイル作成
 
 			select_file_func_type	select_file_func_;	///< セレクト関数
 

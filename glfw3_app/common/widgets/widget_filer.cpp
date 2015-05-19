@@ -629,6 +629,7 @@ namespace gui {
 					focus_(focus_path_);
 				}
 			}
+			acc_key_ = 0;
 		}
 
 		// フレームのサイズを、仮想ウィジェットに反映
