@@ -193,7 +193,7 @@ namespace app {
 			widget_list::param wp_;
 			wp_.text_list_.push_back("None");
 			wp_.text_list_.push_back("Smoke");
-			wp_.text_list_.push_back("Wood");
+			wp_.text_list_.push_back("Flow");
 			pn_menu_ = wd.add_widget<widget_list>(wp, wp_);
 			pn_menu_->at_local_param().select_func_ = [this](const std::string& text, int pos) {
 				create_texture_();
@@ -311,6 +311,7 @@ namespace app {
 		if(frame_) frame_->load(pre);
 		if(octave_) octave_->load(pre);
 		if(frequency_) frequency_->load(pre);
+		if(gain_) gain_->load(pre);
 		if(pn_menu_) pn_menu_->load(pre);
 		if(tools_) tools_->load(pre, false, false);
 		if(scale_fit_) scale_fit_->load(pre);
@@ -496,6 +497,7 @@ namespace app {
 		if(tools_) tools_->save(pre);
 		if(octave_) octave_->save(pre);
 		if(frequency_) frequency_->save(pre);
+		if(gain_) gain_->save(pre);
 		if(pn_menu_) pn_menu_->save(pre);
 		if(scale_fit_) scale_fit_->save(pre);
 		if(scale_1x_) scale_1x_->save(pre);
