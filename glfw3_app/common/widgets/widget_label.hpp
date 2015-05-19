@@ -6,6 +6,7 @@
 */
 //=====================================================================//
 #include "widgets/widget_director.hpp"
+#include <utility>
 
 namespace gui {
 
@@ -213,7 +214,7 @@ namespace gui {
 		const std::string get_text() const {
 			std::string s;
 			utils::utf32_to_utf8(param_.text_param_.text_, s);
-			return s;
+			return std::move(s);
 		}
 
 
