@@ -24,7 +24,7 @@
 #include "img_io/bdf_io.hpp"
 #include "gl_fw/glmobj.hpp"
 
-#include "PerlinNoise.hpp"
+#include "img_io/perlin_noise.hpp"
 
 namespace app {
 

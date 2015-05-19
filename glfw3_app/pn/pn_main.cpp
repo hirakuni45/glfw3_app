@@ -39,13 +39,13 @@ namespace app {
 				}
 			}
 		} else if(task == 1) {
-			const PerlinNoise perlin(12345);
-			const double fx = static_cast<double>(w) / frequency_value_;
-			const double fy = static_cast<double>(h) / frequency_value_;
+			img::perlin_noise<float> perlin(12345);
+			float fx = static_cast<float>(w) / frequency_value_;
+			float fy = static_cast<float>(h) / frequency_value_;
 
 			for(int y = 0; y < h; ++y) {
 				for(int x = 0; x < w; ++x) {
-					double n = perlin.octaveNoise(x / fx, y / fy, octave_value_);
+					float n = perlin.octave_noise(x / fx, y / fy, octave_value_);
 					n = Clamp(n*0.5+0.5,0.0,1.0);
 					n *= gain_value_;
 					uint8_t gray = static_cast<uint8_t>(n * 255);
@@ -53,13 +53,13 @@ namespace app {
 				}
 			}
 		} else if(task == 2) {
-			const PerlinNoise perlin(12345);
+			img::perlin_noise<double> perlin(12345);
 			const double fx = static_cast<double>(w) / frequency_value_;
 			const double fy = static_cast<double>(h) / frequency_value_;
 
 			for(int y = 0; y < h; ++y) {
 				for(int x = 0; x < w; ++x) {
-					double n = perlin.octaveNoise(x / fx, y / fy, octave_value_);
+					double n = perlin.octave_noise(x / fx, y / fy, octave_value_);
 					n *= 0.5;
 					n = Clamp(n*0.5+0.5,0.0,1.0);
 					uint8_t gray = static_cast<uint8_t>(n * 255);
