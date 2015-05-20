@@ -1,7 +1,7 @@
 #pragma once
 //=====================================================================//
 /*!	@file
-	@brief	パーリンノイズ生成
+	@brief	パーリン・ノイズ生成
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
@@ -14,12 +14,15 @@ namespace img {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
-		@brief	パーリンノイズ・クラス
+		@brief	パーリン・ノイズ・クラス
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	template <typename REAL>
 	class perlin_noise {
+	public:
+		typedef REAL	value_type;
 
+	private:
 		uint32_t p_[512];
 
 		REAL fade_(REAL t) const {
@@ -36,12 +39,10 @@ namespace img {
 			return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
 		}
 
-		REAL clamp_(REAL x, REAL min, REAL max) {
-			return (x < min) ? min : ((max < x) ? max : x);
-		}
-
 		float floor_(float a) const { return floorf(a); }
 		double floor_(double a) const { return floor(a); }
+
+		perlin_noise();
 
 	public:
 		//-----------------------------------------------------------------//
@@ -49,7 +50,7 @@ namespace img {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		explicit perlin_noise(uint32_t seed = 1) {
+		explicit perlin_noise(uint32_t seed) {
 			if(seed == 0) {
 				seed = std::mt19937::default_seed;
 			}
@@ -60,6 +61,44 @@ namespace img {
 			for(uint32_t i = 0; i < 256; ++i) {
 				p_[256 + i] = p_[i];
 			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	クランプ
+			@param[in]	a	入力値
+			@param[in]	min	最小値
+			@param[in]	max	最大値
+			@return クランプされた値
+		*/
+		//-----------------------------------------------------------------//
+		static REAL clamp(REAL a, REAL min, REAL max) {
+			if(a < min) a = min;
+			if(a > max) a = max;
+			return a;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	コンプレッサー (min < th_min < th_max < max)
+			@param[in]	a	入力値
+			@param[in]	min	最小値
+			@param[in]	th_min	最小値スレッショルド
+			@param[in]	th_max	最大値スレッショルド
+			@param[in]	max	最大値
+			@return クランプされた値
+		*/
+		//-----------------------------------------------------------------//
+		static REAL compressor(REAL a, REAL min, REAL th_min, REAL th_max, REAL max) {
+			if(a < th_min) {
+				a = (th_min - a) * (th_min - min) - th_min;
+			}
+			if(a > th_max) {
+				a = (a - th_max) * (max - th_max) + th_max;
+			}
+			return a;
 		}
 
 
@@ -89,7 +128,7 @@ namespace img {
 			uint32_t A = p_[X  ]+Y, AA = p_[A]+Z, AB = p_[A+1]+Z;
 			uint32_t B = p_[X+1]+Y, BA = p_[B]+Z, BB = p_[B+1]+Z;
 
-			return lerp_(w, lerp_(v, lerp_(u, grad_(p_[AA  ], x  , y  , z   ),
+			return lerp_(w, lerp_(v, lerp_(u, grad_(p_[AA  ], x  , y  , z),
 										grad_(p_[BA  ], x-1, y  , z   )),
 								lerp_(u, grad_(p_[AB  ], x  , y-1, z   ),
 									 grad_(p_[BB  ], x-1, y-1, z   ))),
@@ -160,7 +199,7 @@ namespace img {
 				for(pos.x = 0; pos.x < dst.get_size().x; ++pos.x) {
 					REAL n = octave_noise(static_cast<REAL>(pos.x) / fx,
 										  static_cast<REAL>(pos.y) / fy, octave);
-					n = clamp_(n * fh + fh, 0.0, 1.0);
+					n = clamp(n * fh + fh, 0.0, 1.0);
 					gray8 g(static_cast<uint8_t>(n * static_cast<REAL>(255)));
 					dst.put_pixel(pos, g);
 				}
