@@ -11,14 +11,17 @@
 #include "widgets/widget_button.hpp"
 #include "widgets/widget_label.hpp"
 #include "widgets/widget_check.hpp"
+#include "widgets/widget_radio.hpp"
 #include "widgets/widget_slider.hpp"
 #include "widgets/widget_menu.hpp"
+#include "widgets/widget_list.hpp"
 #include "widgets/widget_dialog.hpp"
 #include "widgets/widget_filer.hpp"
 #include "widgets/widget_tree.hpp"
 #include "widgets/widget_frame.hpp"
 #include "widgets/widget_image.hpp"
 #include "widgets/widget_terminal.hpp"
+#include "widgets/widget_progress.hpp"
 
 namespace app {
 

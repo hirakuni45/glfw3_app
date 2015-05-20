@@ -10,18 +10,6 @@
 #include "core/glcore.hpp"
 #include "gui_test.hpp"
 #include "widgets/widget_utils.hpp"
-#include "widgets/widget_null.hpp"
-#include "widgets/widget_frame.hpp"
-#include "widgets/widget_button.hpp"
-#include "widgets/widget_label.hpp"
-#include "widgets/widget_slider.hpp"
-#include "widgets/widget_check.hpp"
-#include "widgets/widget_radio.hpp"
-#include "widgets/widget_list.hpp"
-#include "widgets/widget_image.hpp"
-#include "widgets/widget_text.hpp"
-#include "widgets/widget_tree.hpp"
-#include "widgets/widget_filer.hpp"
 
 namespace app {
 
