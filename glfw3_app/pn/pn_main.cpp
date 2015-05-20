@@ -13,15 +13,11 @@
 
 namespace app {
 
-	template<typename Type>
-	inline const Type& Clamp( const Type& x, const Type& min, const Type& max )
-	{
-		return (x < min) ? min : ((max < x) ? max : x);
-	}
-
 	void pn_main::create_texture_()
 	{
-		if(!src_image_) return;
+//		std::cout << "Ovtv: " << octave_value_ << std::endl;
+//		std::cout << "Freq: " << frequency_value_ << std::endl;
+//		std::cout << "Gain: " << gain_value_ << std::endl;
 
 		int w = src_image_->get_size().x;
 		int h = src_image_->get_size().y;
@@ -39,40 +35,30 @@ namespace app {
 				}
 			}
 		} else if(task == 1) {
-			img::perlin_noise<float> perlin(12345);
+			typedef img::perlin_noise<float> perlin_noise;
+			perlin_noise pn(12345);
 			float fx = static_cast<float>(w) / frequency_value_;
 			float fy = static_cast<float>(h) / frequency_value_;
 
 			for(int y = 0; y < h; ++y) {
 				for(int x = 0; x < w; ++x) {
-					float n = perlin.octave_noise(x / fx, y / fy, octave_value_);
-					n = Clamp(n*0.5+0.5,0.0,1.0);
-					n *= gain_value_;
+					float n = pn.octave_noise(x / fx, y / fy, octave_value_) * gain_value_;
+//					n = perlin_noise::clamp(n * 0.5f + 0.5f, 0.0, 1.0);
+					n = perlin_noise::compressor(n, -1.0f, -0.8f, 0.8f, 1.0f);
+					n += 1.0f;
+					n *= 0.5f;
 					uint8_t gray = static_cast<uint8_t>(n * 255);
 					prn_image_.put_pixel(vtx::spos(x, y), img::rgba8(gray, gray, gray, gray ^ 255));
 				}
 			}
 		} else if(task == 2) {
-			img::perlin_noise<double> perlin(12345);
-			const double fx = static_cast<double>(w) / frequency_value_;
-			const double fy = static_cast<double>(h) / frequency_value_;
 
-			for(int y = 0; y < h; ++y) {
-				for(int x = 0; x < w; ++x) {
-					double n = perlin.octave_noise(x / fx, y / fy, octave_value_);
-					n *= 0.5;
-					n = Clamp(n*0.5+0.5,0.0,1.0);
-					uint8_t gray = static_cast<uint8_t>(n * 255);
-					prn_image_.put_pixel(vtx::spos(x, y), img::rgba8(gray, gray, gray, gray ^ 255));
-				}
-			}
+
 		}
 	}
 
 	void pn_main::blend_()
 	{
-		if(!src_image_) return;
-
 		mobj_.destroy();
 		mobj_.initialize();
 		bld_image_ = img::shared_img(img::copy_image(src_image_.get()));
@@ -161,8 +147,8 @@ namespace app {
 			wp_.slider_param_.grid_ = 1.0f / 7.0f;
 			wp_.select_func_ = [this](float pos) {
 				octave_value_ = static_cast<int>(pos * 7.0f);
-				create_texture_();
-				blend_();
+				update_ = true;
+//				std::cout << "Ovtv: " << octave_value_ << ", " << pos << std::endl;
 			};
 			octave_ = wd.add_widget<widget_slider>(wp, wp_);
 		}
@@ -172,19 +158,17 @@ namespace app {
 			wp_.slider_param_.grid_ = 1.0f / 15.0f;
 			wp_.select_func_ = [this](float pos){
 				frequency_value_ = pos * 15.0f + 1.0f;
-				create_texture_();
-				blend_();
+				update_ = true;
 			};
 			frequency_ = wd.add_widget<widget_slider>(wp, wp_);
 		}
 		{ // gain スライダー
 			widget::param wp(vtx::srect(10, 10+30*2, 130, 20), tools_);
-			widget_slider::param wp_(1.0f / 20.0f);
+			widget_slider::param wp_;
 			wp_.slider_param_.grid_ = 1.0f / 20.0f;
 			wp_.select_func_ = [this](float pos){
 				gain_value_ = pos * 20.0f;
-				create_texture_();
-				blend_();
+				update_ = true;
 			};
 			gain_ = wd.add_widget<widget_slider>(wp, wp_);
 		}
@@ -196,8 +180,7 @@ namespace app {
 			wp_.text_list_.push_back("Flow");
 			pn_menu_ = wd.add_widget<widget_list>(wp, wp_);
 			pn_menu_->at_local_param().select_func_ = [this](const std::string& text, int pos) {
-				create_texture_();
-				blend_();
+				update_ = true;
 			};
 		}
 
@@ -333,6 +316,14 @@ namespace app {
 
 		gui::widget_director& wd = director_.at().widget_director_;
 
+		if(update_) {
+			if(src_image_) {
+				create_texture_();
+				blend_();
+				update_ = false;
+			}
+		}
+
 		if(scale_) {
 			if(scale_->get_selected()) {
 				bool f = dialog_scale_->get_state(gui::widget::state::ENABLE);
@@ -375,9 +366,7 @@ namespace app {
 				image_info_(load_ctx_->get_file(), src_image_.get());
 				image_offset_.set(0.0f);
 				frame_->at_local_param().text_param_.set_text(imfn);
-
-				create_texture_();
-				blend_();
+				update_ = true;
 			}
 		}
 

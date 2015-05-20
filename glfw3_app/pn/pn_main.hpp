@@ -82,6 +82,7 @@ namespace app {
 		std::future<bool>	image_saver_;
 
 		bool			save_dialog_;
+		bool			update_;
 
 		int				octave_value_;
 		float			frequency_value_;
@@ -110,7 +111,8 @@ namespace app {
 			dialog_(0), dialog_yes_no_(0), dialog_scale_(0),
 			img_handle_(0), dd_id_(0), load_id_(0), save_id_(0),
 			image_offset_(0.0f), save_dialog_(false),
-			octave_value_(8), frequency_value_(8.0f), gain_value_(0.0f)
+			update_(false),
+			octave_value_(0), frequency_value_(0.0f), gain_value_(0.0f)
 		{ }
 
 
