@@ -156,9 +156,9 @@ namespace gui {
 		const std::string get_text() const {
 			std::string s;
 			if(text_) {
-				utils::utf32_to_utf8(text_->get_local_param().text_param_.text_, s);
+				s = text_->get_local_param().text_param_.get_text();
 			}
-			return s;
+			return std::move(s);
 		}
 
 
