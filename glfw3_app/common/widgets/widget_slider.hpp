@@ -6,7 +6,7 @@
 */
 //=====================================================================//
 #include <bitset>
-#include "widget_director.hpp"
+#include "widgets/widget_director.hpp"
 
 namespace gui {
 
@@ -74,7 +74,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_slider(widget_director& wd, const widget::param& wp, const param& p) :
 			widget(wp), wd_(wd), param_(p), ref_position_(0.0f),
-			handle_offset_(0), base_h_(0), hand_h_(0), position_(p.slider_param_.position_)
+			handle_offset_(0), base_h_(0), hand_h_(0), position_(-1.0f)
 		{ }
 
 

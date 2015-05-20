@@ -5,8 +5,8 @@
 */
 //=====================================================================//
 #include "core/glcore.hpp"
-#include "widget_slider.hpp"
-#include "widget_utils.hpp"
+#include "widgets/widget_slider.hpp"
+#include "widgets/widget_utils.hpp"
 
 namespace gui {
 
@@ -239,7 +239,7 @@ namespace gui {
 
 		int err = 0;
 		if(!pre.get_real(path + "/level", param_.slider_param_.position_)) ++err;
-		position_ = param_.slider_param_.position_;
+
 		return err == 0;
 	}
 }
