@@ -37,6 +37,7 @@ namespace gui {
 	widget::color_param widget_director::default_label_color_;
 	widget::color_param widget_director::default_label_color_select_;
 	widget::color_param widget_director::default_slider_color_;
+	widget::color_param widget_director::default_progress_color_;
 	widget::color_param widget_director::default_check_color_;
 	widget::color_param widget_director::default_list_color_;
 	widget::color_param widget_director::default_list_color_select_;
@@ -322,6 +323,10 @@ namespace gui {
 		fc.set( 48, 193, 241);
 		bc.set( 31,  72,  86);
 		default_slider_color_ = widget::color_param(fc, bc);
+
+		fc.set( 48, 193, 241);
+		bc.set( 31,  72,  86);
+		default_progress_color_ = widget::color_param(fc, bc);
 
 		fc.set( 72, 193, 241);
 		bc.set( 47,  72,  86);
