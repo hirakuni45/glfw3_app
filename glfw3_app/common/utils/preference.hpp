@@ -10,7 +10,9 @@
 #include <string>
 #include <stack>
 #include <map>
+#include <utility>
 #include <boost/format.hpp>
+#include <boost/foreach.hpp>
 #include "utils/vtx.hpp"
 #include "utils/file_io.hpp"
 
@@ -62,6 +64,33 @@ namespace sys {
 		std::stack<std::string>			stack_path_;
 
 		void get_full_path_(const std::string& name, std::string& out) const;
+
+		const std::string int_to_hexs_(int v) const {
+			char tmp[9];
+			int i = 8;
+			tmp[i] = 0;
+			tmp[i - 1] = '0';
+			while(v != 0) {
+				--i;
+				uint8_t nib = v & 15;
+				v >>= 4;
+				if(nib < 10) tmp[i] = '0' + nib;
+				else tmp[i] = 'A' + nib - 10;
+			}
+			std::string s = tmp;
+			return std::move(s);
+		}
+
+		int hexs_to_int_(const std::string& s) const {
+			int v = 0;
+			BOOST_FOREACH(char ch, s) {
+				v <<= 4;
+				if(ch >= '0' && ch <= '9') v |= (ch - '0');
+				else if(ch >= 'A' && ch <= 'F') v |= (ch - 'A') + 10;
+				else if(ch >= 'a' && ch <= 'f') v |= (ch - 'a') + 10;
+			}
+			return v;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -230,8 +259,8 @@ namespace sys {
 		*/
 		//-----------------------------------------------------------------//
 		bool put_real(const std::string& key, float v) {
-			std::string t = boost::io::str( boost::format("%1%") % v );
-			value_t vt(value::float32, t);
+			const int* p = reinterpret_cast<const int*>(&v);
+			value_t vt(value::float32, int_to_hexs_(*p));
 			return put_(key, vt);
 		}
 
@@ -344,11 +373,9 @@ namespace sys {
 			value_t vt;
 			if(get_(key, vt)) {
 				if(vt.type_ == value::float32) {
-					float i;
-					if(sscanf(vt.value_.c_str(), "%g", &i) == 1) {
-						v = i;
-						return true;
-					}
+					const int iv = hexs_to_int_(vt.value_);
+					const float* p = reinterpret_cast<const float*>(&iv);
+					v = *p;
 				}
 			}
 			return false;
