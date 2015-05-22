@@ -168,6 +168,8 @@ namespace gui {
 		widget_file_copt scan_item_(const std::string& path) const;
 		bool focus_(const std::string& fn);
 		std::string make_path_(const std::string path);
+		void select_path_(const std::string& n);
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
