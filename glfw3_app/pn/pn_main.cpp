@@ -34,7 +34,7 @@ namespace app {
 					prn_image_.put_pixel(vtx::spos(x, y), img::rgba8(0, 0, 0, 0));
 				}
 			}
-		} else if(task == 1) {
+		} else if(task == 1 || task == 2) {
 			typedef img::perlin_noise<float> perlin_noise;
 			perlin_noise pn(12345);
 			float fx = static_cast<float>(w) / frequency_value_;
@@ -43,17 +43,17 @@ namespace app {
 			for(int y = 0; y < h; ++y) {
 				for(int x = 0; x < w; ++x) {
 					float n = pn.octave_noise(x / fx, y / fy, octave_value_) * gain_value_;
-//					n = perlin_noise::clamp(n * 0.5f + 0.5f, 0.0, 1.0);
-					n = perlin_noise::compressor(n, -1.0f, -0.8f, 0.8f, 1.0f);
-					n += 1.0f;
-					n *= 0.5f;
+					if(task == 1) {
+						n = perlin_noise::clamp(n * 0.5f + 0.5f, 0.0, 1.0);
+					} else {
+						n = perlin_noise::compressor(n, -1.0f, -0.8f, 0.8f, 1.0f);
+						n += 1.0f;
+						n *= 0.5f;
+					}
 					uint8_t gray = static_cast<uint8_t>(n * 255);
 					prn_image_.put_pixel(vtx::spos(x, y), img::rgba8(gray, gray, gray, gray ^ 255));
 				}
 			}
-		} else if(task == 2) {
-
-
 		}
 	}
 
