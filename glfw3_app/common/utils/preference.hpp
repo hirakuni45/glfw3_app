@@ -66,30 +66,30 @@ namespace sys {
 		void get_full_path_(const std::string& name, std::string& out) const;
 
 		const std::string int_to_hexs_(int v) const {
+			uint32_t val = static_cast<uint32_t>(v);;
 			char tmp[9];
-			int i = 8;
+			int i = sizeof(tmp) - 1;
 			tmp[i] = 0;
-			tmp[i - 1] = '0';
-			while(v != 0) {
+			do {
 				--i;
-				uint8_t nib = v & 15;
-				v >>= 4;
+				uint8_t nib = val & 15;
+				val >>= 4;
 				if(nib < 10) tmp[i] = '0' + nib;
 				else tmp[i] = 'A' + nib - 10;
-			}
-			std::string s = tmp;
+			} while(val != 0) ;
+			std::string s = &tmp[i];
 			return std::move(s);
 		}
 
 		int hexs_to_int_(const std::string& s) const {
-			int v = 0;
+			uint32_t v = 0;
 			BOOST_FOREACH(char ch, s) {
 				v <<= 4;
 				if(ch >= '0' && ch <= '9') v |= (ch - '0');
 				else if(ch >= 'A' && ch <= 'F') v |= (ch - 'A') + 10;
 				else if(ch >= 'a' && ch <= 'f') v |= (ch - 'a') + 10;
 			}
-			return v;
+			return static_cast<int>(v);
 		}
 
 
