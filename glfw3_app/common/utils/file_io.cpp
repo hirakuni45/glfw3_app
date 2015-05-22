@@ -71,6 +71,27 @@ namespace utils {
 
 	//-----------------------------------------------------------------//
 	/*!
+		@brief	ディレクトリーを作成する（UTF8）
+		@param[in]	dir	ディレクトリー名
+		@return 作成出来たら「true」
+	*/
+	//-----------------------------------------------------------------//
+	bool create_directory(const std::string& dir)
+	{
+		bool ret = true;
+#ifdef WIN32
+		utils::wstring ws;
+		utf8_to_utf16(dir, ws);
+		if(_wmkdir(ws.c_str() != 0) ret = false;
+#else
+		if(mkdir(dir.c_str(), 0x755) != 0) ret = false;
+#endif
+		return ret;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
 		@brief	ディレクトリーか調べる
 		@param[in]	fn	ファイル名
 		@return ディレクトリーなら「true」

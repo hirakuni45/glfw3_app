@@ -25,6 +25,16 @@ namespace utils {
 
 	//-----------------------------------------------------------------//
 	/*!
+		@brief	ディレクトリーを作成する（UTF8）
+		@param[in]	dir	ディレクトリー名
+		@return 作成出来たら「true」
+	*/
+	//-----------------------------------------------------------------//
+	bool create_directory(const std::string& dir);
+
+
+	//-----------------------------------------------------------------//
+	/*!
 		@brief	ディレクトリーか調べる（UTF8）
 		@param[in]	fn	ファイル名
 		@return ディレクトリーなら「true」
@@ -288,7 +298,7 @@ namespace utils {
 			if(open_) return false;
 
 			if(count_ == 0) return false;
- 
+
 			if(file_) {
 				std::string fn = fpath_;
 				std::string md = mode_;
