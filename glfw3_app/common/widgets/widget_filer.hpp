@@ -150,6 +150,7 @@ namespace gui {
 		uint32_t			acc_cnt_;
 
 		bool		back_directory_;
+		bool		center_update_;
 
 		void create_file_(widget_file& wf, const vtx::srect& rect, short ofs, const std::string& str);
 		void create_files_(widget_files& wfs, short ofs);
@@ -186,7 +187,7 @@ namespace gui {
 			file_(),
 			select_file_id_(0),
 			acc_key_(0), acc_key_ch_(0), acc_cnt_(0),
-			back_directory_(false)
+			back_directory_(false), center_update_(false)
 			{ }
 
 

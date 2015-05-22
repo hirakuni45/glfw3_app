@@ -100,10 +100,20 @@ namespace gui {
 			create_file_(wf, rect, ofs, new_file_text_);
 			wf.name->at_local_param().read_only_ = false;
 			wf.name->at_local_param().select_func_ = [this](const std::string& filename) {
-				utils::append_path(param_.path_, filename, file_);
-				++select_file_id_;
-				enable(false);
-				if(param_.select_file_func_) param_.select_file_func_(file_);
+				if(filename == "..") {
+
+				} else if(filename.back() == '/') {  // for make directory
+					std::string path;
+					utils::strip_last_of_delimita_path(filename, path);
+					std::string tmp;
+					utils::append_path(param_.path_, path, tmp);
+					utils::create_directory(tmp);
+					center_update_ = true;
+				} else {
+					utils::append_path(param_.path_, filename, file_);
+					++select_file_id_;
+					enable(false);
+				}
 			};
 
 			wf.size = 0;
@@ -593,6 +603,12 @@ namespace gui {
 	{
 		if(!get_state(widget::state::ENABLE)) {
 			return;
+		}
+
+		if(center_update_) {
+			destroy_files_(center_);
+			fsc_wait_ = true;
+			center_update_ = false;
 		}
 
 		// ファイル情報の取得と反映（ファイル情報収集はスレッドで動作）
