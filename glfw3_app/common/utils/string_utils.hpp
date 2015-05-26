@@ -659,11 +659,10 @@ namespace utils {
 		@brief	パスを追加
 		@param[in]	src	ソースパス
 		@param[in]	add	追加パス
-		@param[out]	dst	出力パス
-		@return エラーなら「false」
+		@return 合成パス（エラーならempty）
 	*/
 	//-----------------------------------------------------------------//
-	bool append_path(const std::string& src, const std::string& add, std::string& dst);
+	std::string append_path(const std::string& src, const std::string& add);
 
 
 	//-----------------------------------------------------------------//
@@ -672,11 +671,10 @@ namespace utils {
 		@param[in]	src	ソースパス
 		@param[in]	org_ch 元のキャラクター
 		@param[in]	cnv_ch  変換後のキャラクター
-		@param[out]	dst	出力パス
-		@return エラーなら「false」
+		@return 出力パス
 	*/
 	//-----------------------------------------------------------------//
-	bool convert_delimiter(const std::string& src, char org_ch, char cnv_ch, std::string& dst);
+	std::string convert_delimiter(const std::string& src, char org_ch, char cnv_ch);
 
 
 	//-----------------------------------------------------------------//
