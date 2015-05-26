@@ -242,8 +242,7 @@ namespace gl {
 	{
 ///		std::cout << "Exec path: '" << exec_path << std::endl;
 
-		std::string tmp;
-		utils::convert_delimiter(exec_path, '\\', '/', tmp);
+		std::string tmp = utils::convert_delimiter(exec_path, '\\', '/');
 		std::string base = utils::get_file_base(tmp);
 
 		if(!tmp.empty() && tmp[0] == '/') {
@@ -252,7 +251,7 @@ namespace gl {
 			char buff[2048];
 			std::string tmp;
 			tmp = getcwd(buff, sizeof(buff));
-			utils::convert_delimiter(tmp, '\\', '/', current_path_);
+			current_path_ = utils::convert_delimiter(tmp, '\\', '/');
 ///			std::cout << "Current(getcwd): '" << current_path_ << std::endl;
 		}
 		exec_path_ = current_path_ + '/' + base;
