@@ -478,7 +478,7 @@ namespace app {
 			} else {
 				if(files_.empty()) {
 					if(!sound.state_tag_info()) {
-						filer_->get_file_list(files_);
+						files_ = filer_->get_file_list();
 						tag_info_serial_ = sound.get_tag_info().serial_;
 						tag_wait_ = false;
 					}
