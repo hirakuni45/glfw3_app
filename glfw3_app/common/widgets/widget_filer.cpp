@@ -9,6 +9,7 @@
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
+#include <utility>
 
 namespace gui {
 
@@ -105,12 +106,10 @@ namespace gui {
 				} else if(filename.back() == '/') {  // for make directory
 					std::string path;
 					utils::strip_last_of_delimita_path(filename, path);
-					std::string tmp;
-					utils::append_path(param_.path_, path, tmp);
-					utils::create_directory(tmp);
+					utils::create_directory(utils::append_path(param_.path_, path));
 					center_update_ = true;
 				} else {
-					utils::append_path(param_.path_, filename, file_);
+					file_ = utils::append_path(param_.path_, filename);
 					++select_file_id_;
 					enable(false);
 				}
@@ -418,7 +417,7 @@ namespace gui {
 			if(n.size() > 2 && 'A' <= n[0] && n[0] <= 'Z' && n[1] == ':') {
 				param_.path_ = n;
 			} else {
-				utils::append_path(param_.path_, n, ap);
+				ap = utils::append_path(param_.path_, n);
 				utils::strip_last_of_delimita_path(ap, param_.path_);
 			}
 			file_infos_.clear();
@@ -427,7 +426,7 @@ namespace gui {
 			fsc_wait_ = true;
 			destroy_files_(right_);
 		} else {
-			utils::append_path(param_.path_, n, file_);
+			file_ = utils::append_path(param_.path_, n);
 			++select_file_id_;
 			enable(false);
 			if(param_.select_file_func_) param_.select_file_func_(file_);
@@ -438,31 +437,29 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	ファイル・リストを取得
-		@param[out]	ss	ファイル・リスト
 		@param[in]	dir	ディレクトリーを含める場合「true」
-		@return ファイル・パス・インデックス（負の値ならマッチ無し）
+		@return ファイル・リスト
 	*/
 	//-----------------------------------------------------------------//
-	int widget_filer::get_file_list(utils::strings& ss, bool dir) const
+	utils::strings widget_filer::get_file_list(bool dir) const
 	{
-		int ret = -1;
+		utils::strings ss;
 		const widget_files& wfs = center_;
 		for(widget_files_cit cit = wfs.begin(); cit != wfs.end(); ++cit) {
 			const widget_file& wf = *cit;
 			if(wf.size == 0 && wf.time == 0 && wf.mode == 0) continue;
 			const std::string& fp = wf.name->get_text();
 			if(fp == "..") continue;
-			std::string fn;
-			utils::append_path(param_.path_, fp, fn);
-			if(fn == file_) ret = ss.size();
+			std::string fn = utils::append_path(param_.path_, fp);
 			if(dir) {
+				fn += '/';
 				ss.push_back(fn);
 			} else {
 				if(wf.dir) continue;
 				ss.push_back(fn);
 			}
 		}
-		return ret;
+		return std::move(ss);
 	}
 
 
@@ -605,6 +602,7 @@ namespace gui {
 			return;
 		}
 
+		// センターコンテキストを作り直す
 		if(center_update_) {
 			destroy_files_(center_);
 			fsc_wait_ = true;
