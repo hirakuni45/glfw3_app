@@ -15,10 +15,53 @@ namespace utils {
 
 	using namespace std;
 
-	bool string_to_int(const std::string& src, int& dst)
+	bool string_to_hex(const std::string& src, uint32_t& dst)
+	{
+		uint32_t v = 0;
+		BOOST_FOREACH(char ch, src) {
+			v <<= 4;
+			if(ch >= '0' && ch <= '9') v |= ch - '0';
+			else if(ch >= 'A' && ch <= 'F') v |= ch - 'A' + 10;
+			else if(ch >= 'a' && ch <= 'f') v |= ch - 'a' + 10;
+			else return false;
+		}
+		dst = v;
+		return true;
+	}
+
+
+	bool string_to_hex(const std::string& src, std::vector<uint32_t>& dst, const std::string& spc)
+	{
+		string s;
+		BOOST_FOREACH(char ch, src) {
+			if(string_strchr(spc, ch) != nullptr) {
+				uint32_t v;
+				if(string_to_hex(s, v)) {
+					dst.push_back(v);
+					s.clear();
+				} else {
+					return false;
+				}
+			} else {
+				s += ch;
+			}
+		}
+		if(!s.empty()) {
+			uint32_t v;
+			if(string_to_hex(s, v)) {
+				dst.push_back(v);
+			} else {
+				return false;
+			}
+		}
+		return true;
+	}
+
+
+	bool string_to_int(const std::string& src, int32_t& dst)
 	{
 		try {
-			dst = boost::lexical_cast<int>(src);
+			dst = boost::lexical_cast<int32_t>(src);
 		} catch(boost::bad_lexical_cast& bad) {
 			return false;
 		}
@@ -26,21 +69,21 @@ namespace utils {
 	}
 
 
-	bool string_to_int(const std::string& src, std::vector<int>& dst)
+	bool string_to_int(const std::string& src, std::vector<int32_t>& dst, const std::string& spc)
 	{
 		try {
 			string s;
 			BOOST_FOREACH(char ch, src) {
-				if(ch == ' ') {
-					int v = boost::lexical_cast<int>(s);
-					dst.push_back(v);  
+				if(string_strchr(spc, ch) != nullptr) {
+					int32_t v = boost::lexical_cast<int32_t>(s);
+					dst.push_back(v);
 					s.clear();
 				} else {
 					s += ch;
 				}
 			}
 			if(!s.empty()) {
-				int v = boost::lexical_cast<int>(s);
+				int32_t v = boost::lexical_cast<int32_t>(s);
 				dst.push_back(v);
 			}
 		} catch(boost::bad_lexical_cast& bad) {
@@ -61,14 +104,14 @@ namespace utils {
 	}
 
 
-	bool string_to_float(const std::string& src, std::vector<float>& dst)
+	bool string_to_float(const std::string& src, std::vector<float>& dst, const std::string& spc)
 	{
 		try {
 			string s;
 			BOOST_FOREACH(char ch, src) {
-				if(ch == ' ') {
+				if(string_strchr(spc, ch) != nullptr) {
 					float v = boost::lexical_cast<float>(s);
-					dst.push_back(v);  
+					dst.push_back(v);
 					s.clear();
 				} else {
 					s += ch;

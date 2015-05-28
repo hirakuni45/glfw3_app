@@ -36,10 +36,13 @@ namespace utils {
 	typedef std::vector<lstring>::iterator				lstrings_it;
 	typedef std::vector<lstring>::const_iterator		lstrings_cit;
 
-	bool string_to_int(const std::string& src, int& dst);
-	bool string_to_int(const std::string& src, std::vector<int>& dst);
+	bool string_to_hex(const std::string& src, uint32_t& dst);
+	bool string_to_hex(const std::string& src, std::vector<uint32_t>& dst, const std::string& spc = " ,:");
+	bool string_to_int(const std::string& src, int32_t& dst);
+	bool string_to_int(const std::string& src, std::vector<int32_t>& dst, const std::string& spc = " ,:");
 	bool string_to_float(const std::string& src, float& dst);
-	bool string_to_float(const std::string& src, std::vector<float>& dst);
+	bool string_to_float(const std::string& src, std::vector<float>& dst, const std::string& spc = " ,:");
+
 	bool string_to_matrix4x4(const std::string& src, mtx::fmat4& dst);
 
 	//-----------------------------------------------------------------//
