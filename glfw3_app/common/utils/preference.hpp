@@ -29,44 +29,34 @@ namespace sys {
 			@brief	プリファレンス値型
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		struct value {
-			//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-			/*!
-				@brief	タイプ
-			*/
-			//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-			enum type {
-				invalid = -1,
-				int32 = 0,
-				float32,
-				text,
-				position_int32,
-				position_float32,
-				boolean,
-			};
+		enum class vtype {
+			invalid = -1,
+			int32 = 0,
+			float32,
+			text,
+			position_int32,
+			position_float32,
+			boolean,
 		};
 
 	private:
 		struct value_t {
-			value::type		type_;
+			vtype			vtype_;
 			std::string		value_;
 			value_t() { }
-			value_t(value::type t, const std::string& v) : type_(t), value_(v) { }
+			explicit value_t(vtype t, const std::string& v) : vtype_(t), value_(v) { }
 		};
 
-		typedef std::pair<std::string, value_t>					item_pair;
-		typedef std::map<std::string, value_t>::iterator		item_it;
-		typedef std::map<std::string, value_t>::const_iterator	item_cit;
-		typedef std::pair<item_it, bool>						item_ret;
-		std::map<std::string, value_t>	map_;
+		typedef std::map<std::string, value_t>	item_map;
+		typedef std::pair<item_map::iterator, bool>  item_ret;
+		item_map					map_;
 
-		std::string						path_;
-		std::stack<std::string>			stack_path_;
+		std::string					path_;
+		std::stack<std::string>		stack_path_;
 
 		void get_full_path_(const std::string& name, std::string& out) const;
 
-		const std::string int_to_hexs_(int v) const {
-			uint32_t val = static_cast<uint32_t>(v);;
+		const std::string uint_to_hexs_(uint32_t val) const {
 			char tmp[9];
 			int i = sizeof(tmp) - 1;
 			tmp[i] = 0;
@@ -81,7 +71,7 @@ namespace sys {
 			return std::move(s);
 		}
 
-		int hexs_to_int_(const std::string& s) const {
+		uint32_t hexs_to_uint_(const std::string& s) const {
 			uint32_t v = 0;
 			BOOST_FOREACH(char ch, s) {
 				v <<= 4;
@@ -89,7 +79,7 @@ namespace sys {
 				else if(ch >= 'A' && ch <= 'F') v |= (ch - 'A') + 10;
 				else if(ch >= 'a' && ch <= 'f') v |= (ch - 'a') + 10;
 			}
-			return static_cast<int>(v);
+			return v;
 		}
 
 
@@ -201,7 +191,7 @@ namespace sys {
 			@return キーワードのタイプ
 		*/
 		//-----------------------------------------------------------------//
-		value::type get_type(const std::string& key) const;
+		vtype get_type(const std::string& key) const;
 
 
 		//-----------------------------------------------------------------//
@@ -213,7 +203,11 @@ namespace sys {
 		*/
 		//-----------------------------------------------------------------//
 		bool put_text(const std::string& key, const std::string& v) {
-			value_t vt(value::text, v);
+			std::string s;
+			s += '"';
+			s += v;
+			s += '"';
+			value_t vt(vtype::text, s);
 			return put_(key, vt);
 		}
 
@@ -230,7 +224,7 @@ namespace sys {
 			std::string t;
 			if(v) t = boost::io::str( boost::format("%1%") % "1" );
 			else t = boost::io::str( boost::format("%1%") % "0" );
-			value_t vt(value::boolean, t);
+			value_t vt(vtype::boolean, t);
 			return put_(key, vt);
 		}
 
@@ -245,7 +239,7 @@ namespace sys {
 		//-----------------------------------------------------------------//
 		bool put_integer(const std::string& key, int v) {
 			std::string t = boost::io::str( boost::format("%1%") % v );
-			value_t vt(value::int32, t);
+			value_t vt(vtype::int32, t);
 			return put_(key, vt);
 		}
 
@@ -259,8 +253,8 @@ namespace sys {
 		*/
 		//-----------------------------------------------------------------//
 		bool put_real(const std::string& key, float v) {
-			const int* p = reinterpret_cast<const int*>(&v);
-			value_t vt(value::float32, int_to_hexs_(*p));
+			const uint32_t* p = reinterpret_cast<const uint32_t*>(&v);
+			value_t vt(vtype::float32, uint_to_hexs_(*p));
 			return put_(key, vt);
 		}
 
@@ -275,7 +269,7 @@ namespace sys {
 		//-----------------------------------------------------------------//
 		bool put_position(const std::string& key, const vtx::ipos& pos) {
 			std::string t = boost::io::str( boost::format("%d,%d") % pos.x % pos.y );
-			value_t vt(value::position_int32, t);
+			value_t vt(vtype::position_int32, t);
 			return put_(key, vt);
 		}
 
@@ -290,7 +284,7 @@ namespace sys {
 		//-----------------------------------------------------------------//
 		bool put_position(const std::string& key, const vtx::fpos& pos) {
 			std::string t = boost::io::str( boost::format("%f,%f") % pos.x % pos.y );
-			value_t vt(value::position_float32, t);
+			value_t vt(vtype::position_float32, t);
 			return put_(key, vt);
 		}
 
@@ -306,8 +300,12 @@ namespace sys {
 		bool get_text(const std::string& key, std::string& v) const {
 			value_t vt;
 			if(get_(key, vt)) {
-				if(vt.type_ == value::text) {
-					v = vt.value_;
+				if(vt.vtype_ == vtype::text) {
+					if(vt.value_.size() >= 2 && vt.value_[0] == '"' && vt.value_.back() == '"') {
+						v = vt.value_.substr(1, vt.value_.size() - 2);
+					} else {
+						v = vt.value_;
+					}
 					return true;
 				}
 			}
@@ -326,7 +324,7 @@ namespace sys {
 		bool get_boolean(const std::string& key, bool& v) const {
 			value_t vt;
 			if(get_(key, vt)) {
-				if(vt.type_ == value::boolean) {
+				if(vt.vtype_ == vtype::boolean) {
 					int i;
 					if(sscanf(vt.value_.c_str(), "%d", &i) == 1) {
 						if(i) v = true; else v = false;
@@ -349,7 +347,7 @@ namespace sys {
 		bool get_integer(const std::string& key, int& v) const {
 			value_t vt;
 			if(get_(key, vt)) {
-				if(vt.type_ == value::int32) {
+				if(vt.vtype_ == vtype::int32) {
 					int i;
 					if(sscanf(vt.value_.c_str(), "%d", &i) == 1) {
 						v = i;
@@ -372,8 +370,8 @@ namespace sys {
 		bool get_real(const std::string& key, float& v) const {
 			value_t vt;
 			if(get_(key, vt)) {
-				if(vt.type_ == value::float32) {
-					const int iv = hexs_to_int_(vt.value_);
+				if(vt.vtype_ == vtype::float32) {
+					const uint32_t iv = hexs_to_uint_(vt.value_);
 					const float* p = reinterpret_cast<const float*>(&iv);
 					v = *p;
 				}
@@ -393,7 +391,7 @@ namespace sys {
 		bool get_position(const std::string& key, vtx::ipos& pos) const {
 			value_t vt;
 			if(get_(key, vt)) {
-				if(vt.type_ == value::position_int32) {
+				if(vt.vtype_ == vtype::position_int32) {
 					int x, y;
 					if(sscanf(vt.value_.c_str(), "%d,%d", &x, &y) == 2) {
 						pos.set(x, y);
@@ -416,7 +414,7 @@ namespace sys {
 		bool get_position(const std::string& key, vtx::fpos& pos) {
 			value_t vt;
 			if(get_(key, vt)) {
-				if(vt.type_ == value::position_float32) {
+				if(vt.vtype_ == vtype::position_float32) {
 					float x, y;
 					if(sscanf(vt.value_.c_str(), "%g,%g", &x, &y) == 2) {
 						pos.set(x, y);
