@@ -11,6 +11,8 @@
 
 namespace img {
 
+	struct bmp_info;
+
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
 		@brief	BMP 画像クラス
@@ -20,13 +22,20 @@ namespace img {
 
 		shared_img	img_;
 
+		uint32_t	prgl_ref_;
+		uint32_t	prgl_pos_;
+
+		bool read_idx_(utils::file_io& fin, shared_img img, const bmp_info& bmp);
+		bool read_rgb_(utils::file_io& fin, shared_img img, const bmp_info& bmp);
+		bool read_bitfield_(utils::file_io& fin, shared_img img, const bmp_info& bmp);
+		bool decompress_rle_(utils::file_io& fin, shared_img img, const bmp_info& bmp);
 	public:
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		bmp_io() { }
+		bmp_io() : prgl_ref_(0), prgl_pos_(0) { }
 
 
 		//-----------------------------------------------------------------//
@@ -105,5 +114,17 @@ namespace img {
 		*/
 		//-----------------------------------------------------------------//
 		void set_image(shared_img img) override { img_ = img; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	decode/encode の進行状態を取得する
+			@return 完了の場合 scale を返す
+		*/
+		//-----------------------------------------------------------------//
+		uint32_t get_progless(uint32_t scale) const override {
+			if(prgl_ref_ == 0) return 0;
+			return prgl_pos_ * scale / prgl_ref_;
+		} 
 	};
 }

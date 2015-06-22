@@ -6,7 +6,7 @@
 */
 //=====================================================================//
 #include <bitset>
-#include "widget_director.hpp"
+#include "widgets/widget_director.hpp"
 
 namespace gui {
 
@@ -18,6 +18,8 @@ namespace gui {
 	struct widget_slider : public widget {
 
 		typedef widget_slider value_type;
+
+		typedef std::function< void(float) > select_func_type;
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
@@ -33,11 +35,19 @@ namespace gui {
 			const img::i_img*		hand_image_;	///< ハンドル画像を使う場合
 
 			bool					hand_ctrl_;		///< ハンドル・コントロール
+			bool					scroll_ctrl_;	///< スクロール・コントロール
+			float					scroll_gain_;	///< スクロール・ゲイン
 
-			param() : plate_param_(),
+			bool					select_fin_;	///< 選択が完了した場合に呼び出す
+			select_func_type		select_func_;
+
+			param(float pos = 0.0f, slider_param::direction::type dir = slider_param::direction::HOLIZONTAL) :
+				plate_param_(),
 				color_param_(widget_director::default_slider_color_),
 				slider_param_(),
-				base_image_(0), hand_image_(0), hand_ctrl_(true)
+				base_image_(0), hand_image_(0), hand_ctrl_(true),
+				scroll_ctrl_(true), scroll_gain_(0.01f),
+				select_fin_(false), select_func_()
 				{ }
 		};
 
@@ -54,6 +64,8 @@ namespace gui {
 		gl::mobj::handle	base_h_;	///< ベース
 		gl::mobj::handle	hand_h_;	///< ハンドル
 
+		float               position_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -62,7 +74,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_slider(widget_director& wd, const widget::param& wp, const param& p) :
 			widget(wp), wd_(wd), param_(p), ref_position_(0.0f),
-			handle_offset_(0), base_h_(0), hand_h_(0)
+			handle_offset_(0), base_h_(0), hand_h_(0), position_(-1.0f)
 		{ }
 
 
@@ -165,7 +177,22 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() { }
+		void service() {
+			if(position_ != param_.slider_param_.position_) {
+				bool f = false;
+				if(param_.select_fin_) {
+					if(get_select_out()) {
+						f = true;
+					}
+				} else {
+					f = true;
+				}
+				if(f) {
+					if(param_.select_func_) param_.select_func_(param_.slider_param_.position_);
+					position_ = param_.slider_param_.position_;
+				}
+			}
+		}
 
 
 		//-----------------------------------------------------------------//

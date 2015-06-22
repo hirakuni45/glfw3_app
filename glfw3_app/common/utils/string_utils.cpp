@@ -15,10 +15,53 @@ namespace utils {
 
 	using namespace std;
 
-	bool string_to_int(const std::string& src, int& dst)
+	bool string_to_hex(const std::string& src, uint32_t& dst)
+	{
+		uint32_t v = 0;
+		BOOST_FOREACH(char ch, src) {
+			v <<= 4;
+			if(ch >= '0' && ch <= '9') v |= ch - '0';
+			else if(ch >= 'A' && ch <= 'F') v |= ch - 'A' + 10;
+			else if(ch >= 'a' && ch <= 'f') v |= ch - 'a' + 10;
+			else return false;
+		}
+		dst = v;
+		return true;
+	}
+
+
+	bool string_to_hex(const std::string& src, std::vector<uint32_t>& dst, const std::string& spc)
+	{
+		string s;
+		BOOST_FOREACH(char ch, src) {
+			if(string_strchr(spc, ch) != nullptr) {
+				uint32_t v;
+				if(string_to_hex(s, v)) {
+					dst.push_back(v);
+					s.clear();
+				} else {
+					return false;
+				}
+			} else {
+				s += ch;
+			}
+		}
+		if(!s.empty()) {
+			uint32_t v;
+			if(string_to_hex(s, v)) {
+				dst.push_back(v);
+			} else {
+				return false;
+			}
+		}
+		return true;
+	}
+
+
+	bool string_to_int(const std::string& src, int32_t& dst)
 	{
 		try {
-			dst = boost::lexical_cast<int>(src);
+			dst = boost::lexical_cast<int32_t>(src);
 		} catch(boost::bad_lexical_cast& bad) {
 			return false;
 		}
@@ -26,21 +69,21 @@ namespace utils {
 	}
 
 
-	bool string_to_int(const std::string& src, std::vector<int>& dst)
+	bool string_to_int(const std::string& src, std::vector<int32_t>& dst, const std::string& spc)
 	{
 		try {
 			string s;
 			BOOST_FOREACH(char ch, src) {
-				if(ch == ' ') {
-					int v = boost::lexical_cast<int>(s);
-					dst.push_back(v);  
+				if(string_strchr(spc, ch) != nullptr) {
+					int32_t v = boost::lexical_cast<int32_t>(s);
+					dst.push_back(v);
 					s.clear();
 				} else {
 					s += ch;
 				}
 			}
 			if(!s.empty()) {
-				int v = boost::lexical_cast<int>(s);
+				int32_t v = boost::lexical_cast<int32_t>(s);
 				dst.push_back(v);
 			}
 		} catch(boost::bad_lexical_cast& bad) {
@@ -61,14 +104,14 @@ namespace utils {
 	}
 
 
-	bool string_to_float(const std::string& src, std::vector<float>& dst)
+	bool string_to_float(const std::string& src, std::vector<float>& dst, const std::string& spc)
 	{
 		try {
 			string s;
 			BOOST_FOREACH(char ch, src) {
-				if(ch == ' ') {
+				if(string_strchr(spc, ch) != nullptr) {
 					float v = boost::lexical_cast<float>(s);
-					dst.push_back(v);  
+					dst.push_back(v);
 					s.clear();
 				} else {
 					s += ch;
@@ -107,13 +150,13 @@ namespace utils {
 	/*!
 		@brief	UTF-8 から UTF-16 への変換
 		@param[in]	src	UTF-8 ソース
-		@param[in]	dst	UTF-16 出力
-		@return 変換が正常なら「true」
+		@param[out]	dst	UTF-16（追記）
+		@return 変換エラーが無ければ「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool utf8_to_utf16(const std::string& src, wstring& dst)
+	bool utf8_to_utf16(const std::string& src, wstring& dst) noexcept
 	{
-		if(src.empty()) return false;
+		if(src.empty()) return true;
 
 		bool f = true;
 		int cnt = 0;
@@ -147,11 +190,11 @@ namespace utils {
 	/*!
 		@brief	UTF-8 から UTF-32 への変換
 		@param[in]	src	UTF-8 ソース
-		@param[in]	dst	UTF-32 出力
+		@param[out]	dst	UTF-32（追記）
 		@return 変換が正常なら「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool utf8_to_utf32(const std::string& src, lstring& dst)
+	bool utf8_to_utf32(const std::string& src, lstring& dst) noexcept
 	{
 		if(src.empty()) return false;
 
@@ -190,11 +233,11 @@ namespace utils {
 	/*!
 		@brief	UTF-16 から UTF-8 への変換
 		@param[in]	src	UTF-16 ソース
-		@param[in]	dst	UTF-8 出力
+		@param[out]	dst	UTF-8（追記）
 		@return 変換が正常なら「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool utf16_to_utf8(const wstring& src, std::string& dst)
+	bool utf16_to_utf8(const wstring& src, std::string& dst) noexcept
 	{
 		if(src.empty()) return false;
 
@@ -221,11 +264,11 @@ namespace utils {
 	/*!
 		@brief	UTF-32 から UTF-8 への変換
 		@param[in]	src	UTF-32 ソース
-		@param[in]	dst	UTF-8 出力
+		@param[out]	dst	UTF-8（追記）
 		@return 変換が正常なら「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool utf32_to_utf8(const lstring& src, std::string& dst)
+	bool utf32_to_utf8(const lstring& src, std::string& dst) noexcept
 	{
 		if(src.empty()) return false;
 
@@ -270,11 +313,11 @@ namespace utils {
 	/*!
 		@brief	Shift-JIS から UTF-8(ucs2) への変換
 		@param[in]	src	Shift-JIS ソース
-		@param[in]	dst	UTF-8 出力
+		@param[out]	dst	UTF-8（追記）
 		@return 変換が正常なら「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool sjis_to_utf8(const std::string& src, std::string& dst)
+	bool sjis_to_utf8(const std::string& src, std::string& dst) noexcept
 	{
 		if(src.empty()) return false;
 		wstring ws;
@@ -306,12 +349,12 @@ namespace utils {
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	Shift-JIS から UTF-16 への変換
-		@param[in]	Shift-JIS src	ソース
-		@param[in]	UTF-16 dst	出力
+		@param[in]	src	Shift-JIS	ソース
+		@param[out]	dst	UTF-16（追記）
 		@return 変換が正常なら「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool sjis_to_utf16(const std::string& src, wstring& dst)
+	bool sjis_to_utf16(const std::string& src, wstring& dst) noexcept
 	{
 		if(src.empty()) return false;
 		std::string tmp;
@@ -325,11 +368,11 @@ namespace utils {
 	/*!
 		@brief	UTF-8 から Shift-JIS への変換
 		@param[in]	src	UTF8 ソース
-		@param[in]	dst	Shift-JIS 出力
+		@param[out]	dst	Shift-JIS（追記）
 		@return 変換が正常なら「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool utf8_to_sjis(const std::string& src, std::string& dst)
+	bool utf8_to_sjis(const std::string& src, std::string& dst) noexcept
 	{
 		if(src.empty()) return false;
 
@@ -348,11 +391,11 @@ namespace utils {
 	/*!
 		@brief	UTF-16 から Shift-JIS への変換
 		@param[in]	src	UTF16 ソース
-		@param[in]	dst	Shift-JIS 出力
+		@param[out]	dst	Shift-JIS（追記）
 		@return 変換が正常なら「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool utf16_to_sjis(const wstring& src, std::string& dst)
+	bool utf16_to_sjis(const wstring& src, std::string& dst) noexcept
 	{
 		if(src.empty()) return false;
 
@@ -384,8 +427,7 @@ namespace utils {
 		int n = code_conv(src, tbl, s);
 
 		lstring spc = { ' ' };
-		lstrings ss;
-		split_text(s, spc, ss);
+		lstrings ss = split_text(s, spc);
 
 		BOOST_FOREACH(const lstring& l, ss) {
 			dst += l;
@@ -408,20 +450,14 @@ namespace utils {
 	{
 		if(srca.empty() || srcb.empty()) return 0.0f;
 
-		static const lstring tbl = {
-			0x0009, ' ',	/// TAB ---> SPACE
-		};
-
 		lstring a;
-		code_conv(srca, tbl, a);
+		string_conv(srca, a);
 		lstring b;
-		code_conv(srcb, tbl, b);
+		string_conv(srcb, b);
 
-		lstring spc = { ' ' };
-		lstrings aa;
-		split_text(a, spc, aa);
-		lstrings bb;
-		split_text(b, spc, bb);
+		lstring spcs = { ' ' };
+		lstrings aa = split_text(a, spcs);
+		lstrings bb = split_text(b, spcs);
 
 		uint32_t anum = 0;
 		BOOST_FOREACH(const lstring& s, aa) {
@@ -480,27 +516,27 @@ namespace utils {
 	/*!
 		@brief	階層を一つ戻ったパスを得る
 		@param[in]	src	ソースパス
-		@param[out]	dst	出力パス
-		@return エラーなら「false」
+		@return 戻ったパス
 	*/
 	//-----------------------------------------------------------------//
-	bool previous_path(const std::string& src, std::string& dst)
+	std::string previous_path(const std::string& src)
 	{
-		if(src.empty()) return false;
-
+		std::string dst;
+		if(src.empty()) {
+			return std::move(dst);
+		}
 		std::string tmp;
 		strip_last_of_delimita_path(src, tmp);
 		std::string::size_type n = tmp.find_last_of('/');
 		if(n == std::string::npos) {
-			dst = src;
-			return false;
+			return std::move(dst);
 		}
 		dst = tmp.substr(0, n);
 		// ルートの場合
 		if(dst.find('/') == std::string::npos) {
 			dst += '/';
 		}
-		return true;
+		return std::move(dst);
 	}
 
 
@@ -509,25 +545,25 @@ namespace utils {
 		@brief	パスを追加
 		@param[in]	src	ソースパス
 		@param[in]	add	追加パス
-		@param[out]	dst	出力パス
-		@return エラーなら「false」
+		@return 合成パス（エラーならempty）
 	*/
 	//-----------------------------------------------------------------//
-	bool append_path(const std::string& src, const std::string& add, std::string& dst)
+	std::string append_path(const std::string& src, const std::string& add)
 	{
-		if(src.empty() || add.empty()) return false;
+		if(src.empty() || add.empty()) return std::string();
+		std::string dst;
 		if(add[0] == '/') {	// 新規パスとなる
 			if(add.size() > 1) {
 				dst = add;
 			} else {
-				return false;
+				return std::string();
 			}
 		} else {
 			std::string tmp;
 			strip_last_of_delimita_path(src, tmp);
 			dst = tmp + '/' + add;
 		}
-		return true;
+		return std::move(dst);
 	}
 
 
@@ -537,13 +573,13 @@ namespace utils {
 		@param[in]	src	ソースパス
 		@param[in]	org_ch 元のキャラクター
 		@param[in]	cnv_ch  変換後のキャラクター
-		@param[out]	dst	出力パス
-		@return エラーなら「false」
+		@return 出力パス
 	*/
 	//-----------------------------------------------------------------//
-	bool convert_delimiter(const std::string& src, char org_ch, char cnv_ch, std::string& dst)
+	std::string convert_delimiter(const std::string& src, char org_ch, char cnv_ch)
 	{
 		char back = 0;
+		std::string dst;
 		BOOST_FOREACH(char ch, src) {
 			if(ch == org_ch) {
 				if(back != 0 && back != cnv_ch) ch = cnv_ch;
@@ -553,7 +589,7 @@ namespace utils {
 		}
 		if(back) dst += back;
 
-		return true;
+		return std::move(dst);
 	}
 
 
@@ -562,14 +598,14 @@ namespace utils {
 		@brief	拡張子フィルター
 		@param[in]	src	ソース
 		@param[in]	ext	拡張子
-		@param[out]	dst	出力
 		@param[in]	cap	「false」なら大文字小文字を判定する
+		@return リスト
 	*/
 	//-----------------------------------------------------------------//
-	void ext_filter_path(const strings& src, const std::string& ext, strings& dst, bool cap)
+	strings ext_filter_path(const strings& src, const std::string& ext, bool cap) noexcept
 	{
-		strings exts;
-		split_text(ext, ",", exts);
+		strings dst;
+		strings exts = split_text(ext, ",");
 		BOOST_FOREACH(const std::string& s, src) {
 			std::string src_ext = get_file_ext(s);
 			BOOST_FOREACH(const std::string& ex, exts) {
@@ -584,6 +620,7 @@ namespace utils {
 				}
 			}
 		}
+		return std::move(dst);
 	}
 
 }

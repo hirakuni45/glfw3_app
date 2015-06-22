@@ -81,6 +81,12 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_terminal::update()
 	{
+		if(wd_.get_focus_widget() == this || wd_.get_focus_widget() == wd_.root_widget(this)) {
+			focus_ = true;
+		} else {
+			focus_ = false;
+		}
+
 		if(get_param().parents_ && get_state(widget::state::AREA_ROOT)) {
 			if(get_param().parents_->type() == get_type_id<widget_frame>()) {
 				// 親になってるフレームを取得
@@ -149,13 +155,7 @@ namespace gui {
 
 		const widget::param& wp = get_param();
 
-		if(wd_.get_top_widget() == this || wd_.get_top_widget() == wd_.root_widget(this)) {
-			focus_ = true;
-		} else {
-			focus_ = false;
-		}
-
-		if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) { 
+		if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) {
 
 			glPushMatrix();
 

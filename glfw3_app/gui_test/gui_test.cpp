@@ -10,18 +10,6 @@
 #include "core/glcore.hpp"
 #include "gui_test.hpp"
 #include "widgets/widget_utils.hpp"
-#include "widgets/widget_null.hpp"
-#include "widgets/widget_frame.hpp"
-#include "widgets/widget_button.hpp"
-#include "widgets/widget_label.hpp"
-#include "widgets/widget_slider.hpp"
-#include "widgets/widget_check.hpp"
-#include "widgets/widget_radio.hpp"
-#include "widgets/widget_list.hpp"
-#include "widgets/widget_image.hpp"
-#include "widgets/widget_text.hpp"
-#include "widgets/widget_tree.hpp"
-#include "widgets/widget_filer.hpp"
 
 namespace app {
 
@@ -45,12 +33,14 @@ namespace app {
 
 			widget::param wp(vtx::srect(0, 0, 130, 30), root);
 			widget_radio::param wp_("Enable");
-			wd.add_widget<widget_radio>(wp, wp_);
-			wp.rect_.org.y += 40;
-			wd.add_widget<widget_radio>(wp, wp_);
-			wp.rect_.org.y += 40;
-			wp_.check_ = true;
-			wd.add_widget<widget_radio>(wp, wp_);
+			for(int i = 0; i < 3; ++i) {
+				if(i == 2) wp_.check_ = true;
+				widget_radio* w = wd.add_widget<widget_radio>(wp, wp_);
+				w->at_local_param().select_func_ = [this](bool f, int n) {
+					std::cout << "Radio button: " << static_cast<int>(f) << " (" << n << ")" << std::endl;
+				};
+				wp.rect_.org.y += 40;
+			}
 		}
 
 		if(1) {	// イメージのテスト
@@ -74,15 +64,10 @@ namespace app {
 		if(1) {	// テキストのテスト
 			widget::param wp(vtx::srect(40, 50, 200, 250), image_);
 			widget_text::param wp_;
-			wp_.text_param_.text_ = "日本の美しい漢字\n吉野家qwertyuiop\n𩸽zxcvbnm";
+			wp_.text_param_.set_text("日本の美しい漢字\n吉野家qwertyuiop\nxcvbnm"
+				);
 			wp_.text_param_.placement_.vpt = vtx::placement::vertical::CENTER;
 			wd.add_widget<widget_text>(wp, wp_);
-		}
-
-		if(1) { // フレームのテスト
-			widget::param wp(vtx::srect(200, 20, 100, 80));
-			widget_frame::param wp_;
-			frame_ = wd.add_widget<widget_frame>(wp, wp_);
 		}
 
 		if(1) { // ダイアログのテスト
@@ -97,7 +82,7 @@ namespace app {
 			widget::param wp(vtx::srect(30, 150, 100, 40));
 			widget_button::param wp_("Filer");
 			filer_open_ = wd.add_widget<widget_button>(wp, wp_);
-			filer_open_->at_local_param().text_param_.alias_ = "ファイラー";
+			filer_open_->at_local_param().text_param_.set_alias("ファイラー");
 			filer_open_->at_local_param().text_param_.alias_enable_ = true;
 		}
 
@@ -115,14 +100,20 @@ namespace app {
 
 		if(1) { // ラベルのテスト
 			widget::param wp(vtx::srect(30, 300, 150, 40));
-			widget_label::param wp_("ピLabel", false);
+			widget_label::param wp_("Asdfg", false);
 			label_ = wd.add_widget<widget_label>(wp, wp_);
+			label_->at_local_param().select_func_ = [this](const std::string& t) {
+				std::cout << "Label: " << t << std::endl << std::flush;
+			};
 		}
 
 		if(1) {	// チェックボックスのテスト
-			widget::param wp(vtx::srect(20, 350, 130, 40));
+			widget::param wp(vtx::srect(20, 350, 150, 40));
 			widget_check::param wp_("Disable-g");
-			wd.add_widget<widget_check>(wp, wp_);
+			check_ = wd.add_widget<widget_check>(wp, wp_);
+			check_->at_local_param().select_func_ = [this](bool f) {
+				std::cout << "Check: " << static_cast<int>(f) << std::endl;
+			};
 		}
 
 		if(1) { // リストのテスト
@@ -151,9 +142,15 @@ namespace app {
 			menu_ = wd.add_widget<widget_menu>(wp, wp_);
 		}
 
+		if(1) { // フレームのテスト
+			widget::param wp(vtx::srect(200, 20, 100, 80));
+			widget_frame::param wp_;
+			frame_ = wd.add_widget<widget_frame>(wp, wp_);
+		}
+
 		if(1) {	// ファイラーのテスト
 			widget::param wp(vtx::srect(10, 30, 300, 200));
-			widget_filer::param wp_(core.get_current_path());
+			widget_filer::param wp_(core.get_current_path(), "", true);
 			filer_ = wd.add_widget<widget_filer>(wp, wp_);
 			filer_->enable(false);
 		}
@@ -170,6 +167,7 @@ namespace app {
 			widget_tree::param wp_;
 			tree_core_ = wd.add_widget<widget_tree>(wp, wp_);
 			tree_core_->set_state(widget::state::CLIP_PARENTS);
+///			tree_core_->set_state(widget::state::POSITION_LOCK);
 			tree_core_->set_state(widget::state::RESIZE_ROOT);
 			tree_core_->set_state(widget::state::MOVE_ROOT, false);
 
@@ -232,6 +230,12 @@ namespace app {
 		if(label_) {
 			label_->load(pre);
 		}
+		if(slider_) {
+			slider_->load(pre);
+		}
+		if(check_) {
+			check_->load(pre);
+		}
 		if(frame_) {
 			frame_->load(pre);
 		}
@@ -272,6 +276,7 @@ namespace app {
 			if(filer_id_ != filer_->get_select_file_id()) {
 				filer_id_ = filer_->get_select_file_id();
 				std::cout << "Filer: '" << filer_->get_file() << "'" << std::endl;
+				std::cout << std::flush;
 			}
 		}
 
@@ -333,6 +338,12 @@ namespace app {
 		}
 		if(tree_frame_) {
 			tree_frame_->save(pre);
+		}
+		if(check_) {
+			check_->save(pre);
+		}
+		if(slider_) {
+			slider_->save(pre);
 		}
 		if(label_) {
 			label_->save(pre);

@@ -22,6 +22,7 @@ namespace gui {
 		at_param().state_.set(widget::state::POSITION_LOCK);
 		at_param().state_.set(widget::state::SIZE_LOCK);
 		at_param().state_.set(widget::state::SERVICE);
+		at_param().state_.set(widget::state::MOVE_STALL);
 
 		vtx::spos size;
 		if(param_.plate_param_.resizeble_) {
@@ -58,6 +59,11 @@ namespace gui {
 	{
 		if(param_.text_in_) return;
 
+		// テキスト入力位置を調整
+		if(param_.text_in_pos_ > param_.text_param_.text_.size()) {
+			param_.text_in_pos_ = param_.text_param_.text_.size();
+		}
+
 		param_.shift_param_.size_ = get_rect().size.x - param_.plate_param_.frame_width_ * 2;
 		shift_text_update(get_param(), param_.text_param_, param_.shift_param_);
 	}
@@ -73,12 +79,18 @@ namespace gui {
 		if(get_select_in()) {
 			if(!param_.read_only_) {
 				param_.text_in_ = true;
+				param_.before_text_ = param_.text_param_.text_;
 			}
 		}
-		if(wd_.get_top_widget() != this) {
-			param_.text_in_ = false;
+		if(wd_.get_focus_widget() == this || wd_.get_focus_widget() == wd_.root_widget(this)) {
+			focus_ = true;
 		} else {
+			param_.text_param_.cursor_ = -1;
+			focus_ = false;
+		}
+		if(focus_) {
 			if(!param_.read_only_ && param_.text_in_) {
+				bool text_in = param_.text_in_;
 				const std::string& ins = wd_.get_keyboard().input();
 				BOOST_FOREACH(char ch, ins) {
 					if(param_.text_in_limit_ > 0 && param_.text_in_limit_ <= param_.text_in_pos_) {
@@ -117,10 +129,14 @@ namespace gui {
 						if(param_.text_param_.text_.size() <= param_.text_in_pos_) {
 							param_.text_param_.text_ += ch;
 						} else {
-							param_.text_param_.text_[param_.text_in_pos_] = ch;
+							param_.text_param_.text_.insert(param_.text_in_pos_, 1, ch);
 						}
 						++param_.text_in_pos_;
 					}
+				}
+				// 入力完了、ファンクション呼び出し
+				if(text_in && !param_.text_in_) {
+					if(param_.select_func_) param_.select_func_(param_.text_param_.get_text());
 				}
 			}
 
@@ -134,14 +150,12 @@ namespace gui {
 					fonts.set_font_type(param_.text_param_.font_);
 				}
 				fonts.enable_proportional(param_.text_param_.proportional_);
-				std::string s;
-				if(param_.text_param_.alias_enable_) s = param_.text_param_.alias_;
-				else s = param_.text_param_.text_;
-				if(param_.text_in_pos_ < s.size()) {
-					s.erase(param_.text_in_pos_);
+				utils::lstring ls = param_.text_param_.text_;
+				if(param_.text_in_pos_ < ls.size()) {
+					ls.erase(param_.text_in_pos_);
 				}
-				s += '|';
-				short fw = fonts.get_width(s);
+				ls += ' ';
+				short fw = fonts.get_width(ls);
 				if(!param_.text_param_.font_.empty()) {
 					fonts.pop_font_face();
 				}
@@ -164,7 +178,7 @@ namespace gui {
 	void widget_label::render()
 	{
 		gl::mobj::handle h = objh_;
-		if(get_select() || get_state(widget::state::SYSTEM_SELECT)) {
+		if(get_select() || get_state(widget::state::SELECTED)) {
 			h = select_objh_;
 		}
 
@@ -173,15 +187,18 @@ namespace gui {
 		}
 
 		text_param tp = param_.text_param_;
-		if(wd_.get_top_widget() == this && param_.text_in_) {
+		param_.text_param_.cursor_ = -1;
+		if(param_.text_in_ && focus_) {
 			if((interval_ % 40) < 20) {
-				if(tp.text_.size() <= param_.text_in_pos_) {
-					tp.text_ += '|';
+				if(param_.text_param_.text_.size() <= param_.text_in_pos_) {
+					param_.text_param_.cursor_ = param_.text_param_.text_.size();
+					tp.text_ += ' ';
 				} else {
-					tp.text_[param_.text_in_pos_] = '|';
+					param_.text_param_.cursor_ = param_.text_in_pos_;
 				}
 			}
 		}
+
 		render_text(wd_, h, get_param(), tp, param_.plate_param_);
 		++interval_;
 	}
@@ -201,7 +218,7 @@ namespace gui {
 		path += wd_.create_widget_name(this);
 
 		int err = 0;
-		if(!pre.put_text(path + "/text", param_.text_param_.text_)) ++err;
+		if(!pre.put_text(path + "/text", get_text())) ++err;
 		return err == 0;
 	}
 
@@ -219,9 +236,10 @@ namespace gui {
 		path += '/';
 		path += wd_.create_widget_name(this);
 
-		bool f = pre.get_text(path + "/text", param_.text_param_.text_);
+		std::string s;
+		bool f = pre.get_text(path + "/text", s);
 		if(f) {
-			param_.text_in_pos_ = param_.text_param_.text_.size();
+			set_text(s);
 		}
 		return f;
 	}

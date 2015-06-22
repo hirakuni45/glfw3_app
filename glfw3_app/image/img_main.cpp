@@ -14,6 +14,7 @@
 namespace app {
 
 	typedef std::tuple<const std::string, const img::shared_img> save_t;
+
 	bool save_task_(save_t t)
 	{
 		img::img_files imfs;
@@ -22,28 +23,36 @@ namespace app {
 	}
 
 
+	void img_main::create_new_image_(const vtx::spos& size)
+	{
+
+	}
+
+
 	void img_main::image_info_(const std::string& file, const img::i_img* img)
 	{
 		std::string s;
-		size_t fsz = utils::get_file_size(file);
-		s = ": " + boost::lexical_cast<std::string>(fsz) + '\r';
+		if(!file.empty()) {
+			size_t fsz = utils::get_file_size(file);
+			if(fsz > 0) s = ": " + boost::lexical_cast<std::string>(fsz) + '\n';
+			term_->output(s);
+		}
+		s = "W: " + boost::lexical_cast<std::string>(img->get_size().x) + '\n';
 		term_->output(s);
-		s = "W: " + boost::lexical_cast<std::string>(img->get_size().x) + '\r';
-		term_->output(s);
-		s = "H: " + boost::lexical_cast<std::string>(img->get_size().y) + '\r';
+		s = "H: " + boost::lexical_cast<std::string>(img->get_size().y) + '\n';
 		term_->output(s);
 		img::IMG::type t = img->get_type();
 		if(t == img::IMG::INDEXED8) {
-			term_->output("INDEXED8\r");
+			term_->output("INDEXED8\n");
 		} else if(t == img::IMG::FULL8) {
-			term_->output("FULL8\r");
+			term_->output("FULL8\n");
 		}
 		if(img->test_alpha()) {
-			term_->output("Alpha\r");
+			term_->output("Alpha\n");
 		}
-		s = "C: " + boost::lexical_cast<std::string>(img->count_color()) + '\r';
+		s = "C: " + boost::lexical_cast<std::string>(img->count_color()) + '\n';
 		term_->output(s);
-		term_->output('\r');
+		term_->output('\n');
 	}
 
 
@@ -72,45 +81,51 @@ namespace app {
 			image_->set_state(widget::state::CLIP_PARENTS);
 			image_->set_state(widget::state::RESIZE_ROOT);
 			image_->set_state(widget::state::MOVE_ROOT, false);
+			image_->set_state(widget::state::POSITION_LOCK, false);
 		}
 
 		{ // 機能ツールパレット
-			widget::param wp(vtx::srect(10, 10, 130, 300));
+			widget::param wp(vtx::srect(10, 10, 130, 350));
 			widget_frame::param wp_;
 			tools_ = wd.add_widget<widget_frame>(wp, wp_);
 			tools_->set_state(widget::state::SIZE_LOCK);
 		}
-		{ // ロード起動ボタン
+		{ // 新規作成ボタン
 			widget::param wp(vtx::srect(10, 10+50*0, 100, 40), tools_);
+			widget_button::param wp_("new");
+			new_ = wd.add_widget<widget_button>(wp, wp_);
+		}
+		{ // ロード起動ボタン
+			widget::param wp(vtx::srect(10, 10+50*1, 100, 40), tools_);
 			widget_button::param wp_("load");
 			load_ = wd.add_widget<widget_button>(wp, wp_);
 		}
 		{ // セーブ起動ボタン
-			widget::param wp(vtx::srect(10, 10+50*1, 100, 40), tools_);
+			widget::param wp(vtx::srect(10, 10+50*2, 100, 40), tools_);
 			widget_button::param wp_("save");
 			save_ = wd.add_widget<widget_button>(wp, wp_);
 		}
-		short ofs = 110;
+		short ofs = 160;
 		{ // スケール FIT
 			widget::param wp(vtx::srect(10, ofs+30*0, 90, 30), tools_);
 			widget_radio::param wp_("fit");
 			wp_.check_ = true;
-			scale_fit_ = wd.add_widget<widget_radio>(wp, wp_);	
+			scale_fit_ = wd.add_widget<widget_radio>(wp, wp_);
 		}
 		{ // スケール 1X
 			widget::param wp(vtx::srect(10, ofs+30*1, 90, 30), tools_);
 			widget_radio::param wp_("1x");
-			scale_1x_ = wd.add_widget<widget_radio>(wp, wp_);	
+			scale_1x_ = wd.add_widget<widget_radio>(wp, wp_);
 		}
 		{ // スケール 2X
 			widget::param wp(vtx::srect(10, ofs+30*2, 90, 30), tools_);
 			widget_radio::param wp_("2x");
-			scale_2x_ = wd.add_widget<widget_radio>(wp, wp_);	
+			scale_2x_ = wd.add_widget<widget_radio>(wp, wp_);
 		}
 		{ // スケール 3X
 			widget::param wp(vtx::srect(10, ofs+30*3, 90, 30), tools_);
 			widget_radio::param wp_("3x");
-			scale_3x_ = wd.add_widget<widget_radio>(wp, wp_);	
+			scale_3x_ = wd.add_widget<widget_radio>(wp, wp_);
 		}
 		{ // スケーラーボタン
 			widget::param wp(vtx::srect(10, ofs+30*4+10, 100, 40), tools_);
@@ -164,6 +179,12 @@ namespace app {
 			dialog_scale_ = wd.add_widget<widget_dialog>(wp, wp_);
 			dialog_scale_->enable(false);
 		}
+		{ // ダイアログ(new)
+			widget::param wp(vtx::srect(10, 30, 450, 200));
+			widget_dialog::param wp_(widget_dialog::param::style::CANCEL_OK);
+			dialog_new_ = wd.add_widget<widget_dialog>(wp, wp_);
+			dialog_new_->enable(false);
+		}
 
 		mobj_.initialize();
 
@@ -172,7 +193,7 @@ namespace app {
 		if(load_ctx_) load_ctx_->load(pre);
 		if(save_ctx_) save_ctx_->load(pre);
 		if(frame_) frame_->load(pre);
-		if(tools_) tools_->load(pre);
+		if(tools_) tools_->load(pre, false, false);
 		if(scale_fit_) scale_fit_->load(pre);
 		if(scale_1x_) scale_1x_->load(pre);
 		if(scale_2x_) scale_2x_->load(pre);
@@ -191,6 +212,27 @@ namespace app {
 		gl::core& core = gl::core::get_instance();
 
 		gui::widget_director& wd = director_.at().widget_director_;
+
+		if(new_) {
+			if(new_->get_selected()) {
+				img::img_rgba8* img = new img::img_rgba8;
+				img->create(vtx::spos(960, 720), true);
+				img->fill(img::rgba8(0, 0, 0, 0));
+				src_image_ = img::shared_img(img);
+				term_->output("Ld");
+				image_info_("new image", src_image_.get());
+				image_offset_.set(0.0f);
+				frame_->at_local_param().text_param_.set_text("new image");
+				mobj_.destroy();
+				mobj_.initialize();
+				img_handle_ = mobj_.install(src_image_.get());
+				image_->at_local_param().mobj_ = mobj_;
+				image_->at_local_param().mobj_handle_ = img_handle_;
+
+///				bool f = dialog_new_->get_state(gui::widget::state::ENABLE);
+///				dialog_new_->enable(!f);
+			}
+		}
 
 		if(load_) {
 			if(load_->get_selected()) {
@@ -218,10 +260,10 @@ namespace app {
 		}
 
 		std::string imfn;
-		int id = core.get_recv_file_id();
+		int id = core.get_recv_files_id();
 		if(dd_id_ != id) {
 			dd_id_ = id;
-			const utils::strings& ss = core.get_recv_file_path();
+			const utils::strings& ss = core.get_recv_files_path();
 			if(!ss.empty()) {
 				imfn = ss.back();
 			}
@@ -251,14 +293,12 @@ namespace app {
 				term_->output("Ld");
 				image_info_(load_ctx_->get_file(), src_image_.get());
 				image_offset_.set(0.0f);
-				frame_->at_local_param().text_param_.text_ = imfn;
+				frame_->at_local_param().text_param_.set_text(imfn);
 				mobj_.destroy();
 				mobj_.initialize();
 				img_handle_ = mobj_.install(imf.get_image().get());
 				image_->at_local_param().mobj_ = mobj_;
 				image_->at_local_param().mobj_handle_ = img_handle_;
-
-				
 			}
 		}
 

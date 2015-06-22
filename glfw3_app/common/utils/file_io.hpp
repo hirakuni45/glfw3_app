@@ -25,6 +25,16 @@ namespace utils {
 
 	//-----------------------------------------------------------------//
 	/*!
+		@brief	ディレクトリーを作成する（UTF8）
+		@param[in]	dir	ディレクトリー名
+		@return 作成出来たら「true」
+	*/
+	//-----------------------------------------------------------------//
+	bool create_directory(const std::string& dir);
+
+
+	//-----------------------------------------------------------------//
+	/*!
 		@brief	ディレクトリーか調べる（UTF8）
 		@param[in]	fn	ファイル名
 		@return ディレクトリーなら「true」
@@ -288,7 +298,7 @@ namespace utils {
 			if(open_) return false;
 
 			if(count_ == 0) return false;
- 
+
 			if(file_) {
 				std::string fn = fpath_;
 				std::string md = mode_;
@@ -317,6 +327,34 @@ namespace utils {
 			} else {
 				if(fpos_ >= size_) return true;
 				else return false;
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	エラーを検査
+			@return	エラーなら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool error() const {
+			if(fp_) {
+				if(ferror(fp_)) return true;
+				else return false;
+			} else {
+				return false;
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	エラーをリセット
+		*/
+		//-----------------------------------------------------------------//
+		void reset_error() {
+			if(fp_) {
+				clearerr(fp_);
 			}
 		}
 
@@ -496,7 +534,7 @@ namespace utils {
 		/*!
 			@brief	T の読み込み
 			@param[out]	pad	読み込み先
-			@return	正常なら「true」
+			@return	ファイルの終端なら「false」
 		*/
 		//-----------------------------------------------------------------//
 		template <typename T>

@@ -396,6 +396,9 @@ namespace img {
 			return false;
 		}
 
+		prgl_ref_ = cinfo.image_height;
+		prgl_pos_ = 0;
+
 		unsigned char* line = new unsigned char[cinfo.output_width * cinfo.output_components];
 		unsigned char* lines[1];
 		lines[0] = &line[0];
@@ -429,6 +432,7 @@ namespace img {
 					img_->put_pixel(pos, c);
 				}
 			}
+			prgl_pos_ = pos.y;
 		}
 		delete[] line;
 
@@ -483,6 +487,10 @@ namespace img {
 
 		int w = img_->get_size().x;
 		int h = img_->get_size().y;
+
+		prgl_ref_ = h;
+		prgl_pos_ = 0;
+
 		cinfo.image_width  = w;
 		cinfo.image_height = h;
 #if (defined JCS_ALPHA_EXTENSIONS)
@@ -523,6 +531,7 @@ namespace img {
 			jpeg_write_scanlines(&cinfo, row_pointer, 1);
 			if(dst->error) break;
 			++pos.y;
+			++prgl_pos_;
 		}
 		delete[] tmp;
 

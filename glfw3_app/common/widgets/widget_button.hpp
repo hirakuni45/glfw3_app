@@ -18,6 +18,8 @@ namespace gui {
 
 		typedef widget_button value_type;
 
+		typedef std::function< void() > select_func_type;
+
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	widget_button パラメーター
@@ -31,10 +33,14 @@ namespace gui {
 			gl::mobj::handle	handle_;	///< ボタンにモーションオブジェクトを使う場合
 			uint32_t			id_;		///< セレクト ID （押された回数）
 
+			select_func_type	select_func_;	///< セレクト関数
+
 			param(const std::string& text = "") :
 				plate_param_(), color_param_(widget_director::default_button_color_),
 				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255)),
-				image_(0), handle_(0), id_(0) { }
+				image_(0), handle_(0), id_(0),
+				select_func_()
+				{ }
 		};
 
 	private:
@@ -67,7 +73,7 @@ namespace gui {
 			@brief	型を取得
 		*/
 		//-----------------------------------------------------------------//
-		type_id type() const { return get_type_id<value_type>(); }
+		type_id type() const override { return get_type_id<value_type>(); }
 
 
 		//-----------------------------------------------------------------//
@@ -76,7 +82,7 @@ namespace gui {
 			@return widget 型の基本名称
 		*/
 		//-----------------------------------------------------------------//
-		const char* type_name() const { return "button"; }
+		const char* type_name() const override { return "button"; }
 
 
 		//-----------------------------------------------------------------//
@@ -85,7 +91,7 @@ namespace gui {
 			@return ハイブリッド・ウィジェットの場合「true」を返す。
 		*/
 		//-----------------------------------------------------------------//
-		bool hybrid() const { return false; }
+		bool hybrid() const override { return false; }
 
 
 		//-----------------------------------------------------------------//
@@ -111,7 +117,7 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize();
+		void initialize() override;
 
 
 		//-----------------------------------------------------------------//
@@ -119,7 +125,7 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update();
+		void update() override;
 
 
 		//-----------------------------------------------------------------//
@@ -127,7 +133,11 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() { }
+		void service() override {
+			if(get_selected()) {
+				if(param_.select_func_) param_.select_func_();
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -135,7 +145,7 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render();
+		void render() override;
 
 
 		//-----------------------------------------------------------------//
@@ -145,7 +155,7 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(sys::preference& pre);
+		bool save(sys::preference& pre) override;
 
 
 		//-----------------------------------------------------------------//
@@ -155,7 +165,7 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre);
+		bool load(const sys::preference& pre) override;
 	};
 
 }

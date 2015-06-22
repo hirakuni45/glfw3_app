@@ -33,8 +33,7 @@ namespace app {
 
 		uint32_t n = 0;
 		if(option_[option::text]) {
-			utils::strings ss;
-			utils::split_text(symbol_, ",", ss);
+			utils::strings ss = utils::split_text(symbol_, ",");
 			std::string label;
 			if(option_[option::c_style]) {
 				if(ss.size() == 1) {
@@ -178,8 +177,7 @@ namespace app {
 
 	static bool scan_pos_(const std::string& str, vtx::spos& pos)
 	{
-		utils::strings ss;
-		utils::split_text(str, ",", ss);
+		utils::strings ss = utils::split_text(str, ",");
 		if(ss.size() == 2) {
 			for(int i = 0; i < 2; ++i) {
 				utils::arith a;

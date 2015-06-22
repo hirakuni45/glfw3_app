@@ -30,12 +30,12 @@ namespace app {
 
 		gui::widget_filer*	filer_;
 
-		gui::widget*	file_btn_;
-		gui::widget*	play_btn_;
-		gui::widget*	pause_btn_;
+		gui::widget_button*	file_btn_;
+		gui::widget_button*	play_btn_;
+		gui::widget_button*	pause_btn_;
 
-		gui::widget*	rew_btn_;
-		gui::widget*	ff_btn_;
+		gui::widget_button*	rew_btn_;
+		gui::widget_button*	ff_btn_;
 
 		gui::widget_slider*	volume_;
 		gui::widget*		vol_min_img_;
@@ -62,7 +62,6 @@ namespace app {
 		gl::mobj::handle	jacket_;
 
 		int				drop_file_id_;
-		uint32_t		select_file_id_;
 
 		vtx::spos		mouse_pos_;
 		uint32_t		filer_count_;
@@ -92,7 +91,7 @@ namespace app {
 			title_pad_(0), album_pad_(0), artist_pad_(0), other_pad_(0),
 			error_dialog_(0),
 			total_t_(0), remain_t_(0), seek_pos_(0),
-			tag_serial_(0), jacket_(0), drop_file_id_(0), select_file_id_(0),
+			tag_serial_(0), jacket_(0), drop_file_id_(0),
 			mouse_pos_(0), filer_count_(0),
 			files_step_(0), tag_info_serial_(0), tag_wait_(false)
 		{ }

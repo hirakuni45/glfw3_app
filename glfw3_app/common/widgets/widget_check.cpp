@@ -20,8 +20,10 @@ namespace gui {
 	void widget_check::initialize()
 	{
 		// ボタンは標準的に固定
+		at_param().state_.set(widget::state::SERVICE);
 		at_param().state_.set(widget::state::POSITION_LOCK);
 		at_param().state_.set(widget::state::SIZE_LOCK);
+		at_param().state_.set(widget::state::MOVE_STALL);
 
 		if(param_.type_ == style::CHECKED) {
 			dis_h_ = wd_.get_share_image().un_check_;
@@ -40,7 +42,6 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_check::update()
 	{
-//		bool f = param_.check_;
 		if(get_select()) {
 			obj_state_ = !param_.check_;
 		} else if(get_selected()) {
@@ -143,6 +144,7 @@ namespace gui {
 
 		int err = 0;
 		if(!pre.get_boolean(path + "/state", param_.check_)) ++err;
+		check_ = param_.check_;
 		return err == 0;
 	}
 }

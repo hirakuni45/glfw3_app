@@ -504,26 +504,28 @@ namespace gl {
 		/*!
 			@brief	フォントを描画する
 			@param[in]	pos	描画位置
-			@param[in]	code	描画するコード
+			@param[in]	code 描画するコード
+			@param[in]	inv	反転文字の場合「true」
 			@return	フォントの幅を返す。
 		 */
 		//-----------------------------------------------------------------//
-		int draw(const vtx::spos& pos, uint32_t code);
+		int draw(const vtx::spos& pos, uint32_t code, bool inv = false);
 
 
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	フォントを描画する
 			@param[in]	pos	描画位置
-			@param[in]	text	描画文字列
-			@param[in]	limit	改行のリミット幅
+			@param[in]	text 描画文字列
+			@param[in]	limit 改行のリミット幅
+			@param[in]	cursor カーソル位置反転文字
 			@return	描画幅を返す（複数行の場合、最大値）
 		 */
 		//-----------------------------------------------------------------//
-		int draw(const vtx::spos& pos, const std::string& text, short limit = 0) {
+		int draw(const vtx::spos& pos, const std::string& text, short limit = 0, short cursor = -1) {
 			utils::lstring ls;
 			utils::utf8_to_utf32(text, ls);
-			return draw(pos, ls, limit);
+			return draw(pos, ls, limit, cursor);
 		}
 
 		//-----------------------------------------------------------------//
@@ -532,13 +534,14 @@ namespace gl {
 			@param[in]	pos	描画位置
 			@param[in]	text	描画するワイド文字列
 			@param[in]	limit	改行のリミット幅
+			@param[in]	cursor カーソル位置反転文字
 			@return	描画幅を返す（複数行の場合、最大値）
 		 */
 		//-----------------------------------------------------------------//
-		int draw(const vtx::spos& pos, const utils::wstring& text, short limit = 0) {
+		int draw(const vtx::spos& pos, const utils::wstring& text, short limit = 0, short cursor = -1) {
 			utils::lstring ls;
 			utils::utf16_to_utf32(text, ls);
-			return draw(pos, ls, limit);
+			return draw(pos, ls, limit, cursor);
 		}
 
 
@@ -548,10 +551,11 @@ namespace gl {
 			@param[in]	pos	描画位置
 			@param[in]	text	描画ロング文字列
 			@param[in]	limit	改行のリミット幅
+			@param[in]	cursor カーソル位置反転文字
 			@return	描画幅を返す（複数行の場合、最大値）
 		 */
 		//-----------------------------------------------------------------//
-		int draw(const vtx::spos& pos, const utils::lstring& text, short limit = 0);
+		int draw(const vtx::spos& pos, const utils::lstring& text, short limit = 0, short cursor = -1);
 
 
 		//-----------------------------------------------------------------//

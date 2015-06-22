@@ -80,6 +80,7 @@ namespace img {
 		return OPJ_TRUE;
 	}
 
+
 	OPJ_OFF_T wstrm_skip_(OPJ_OFF_T skip, void* p_user_data)
 	{
 		utils::file_io* fio = static_cast<utils::file_io*>(p_user_data);
@@ -87,6 +88,7 @@ namespace img {
 		if(f) return skip;
 		else return 0;
 	}
+
 
 	OPJ_BOOL wstrm_seek_(OPJ_OFF_T seek_pos, void* p_user_data)
 	{
@@ -96,6 +98,7 @@ namespace img {
 		else return OPJ_FALSE;
 	}
 
+
 	OPJ_SIZE_T wstrm_write_(void* p_buffer, OPJ_SIZE_T p_nb_bytes, void* p_user_data)
 	{
 		utils::file_io* fio = static_cast<utils::file_io*>(p_user_data);
@@ -103,41 +106,17 @@ namespace img {
 		return n;
 	}
 
-#if 0
-	static int int_floorlog2_(int a)
-	{
-		int l;
-		for (l = 0; a > 1; l++) {
-			a >>= 1;
-		}
-		return l;
-	}
-#endif
 
 	static int int_ceildivpow2_(int a, int b)
 	{
 		return (a + (1 << b) - 1) >> b;
 	}
 
-#if 0
-	static int int_ceildiv_(int a, int b)
-	{
-		return (a + b - 1) / b;
-	}
-#endif
 
 	static void opj_image_to_rgba8_(opj_image_t* image, shared_img img)
 	{
-		// image->x1 - image->x0;
-		// image->y1 - image->y0;
-
-		// w = int_ceildiv(image->x1 - image->x0, image->comps[0].dx);
-		// wr = int_ceildiv(int_ceildivpow2(image->x1 - image->x0,image->factor), image->comps[0].dx);
 		int w = image->comps[0].w;
 		int wr = int_ceildivpow2_(image->comps[0].w, image->comps[0].factor);
-		// h = int_ceildiv(image->y1 - image->y0, image->comps[0].dy);
-		// hr = int_ceildiv(int_ceildivpow2(image->y1 - image->y0,image->factor), image->comps[0].dy);
-//		int h = image->comps[0].h;
 		int hr = int_ceildivpow2_(image->comps[0].h, image->comps[0].factor);
 
 		if(image->numcomps == 1) {
@@ -191,6 +170,7 @@ namespace img {
 		}
 	}
 
+
 	struct sub_t {
 		array_uc		array;
 		opj_codec_t*	codec;
@@ -198,6 +178,7 @@ namespace img {
 		opj_image_t*	image;
 		sub_t() : codec(0), stream(0), image(0) { }
 	};
+
 
 	bool decode_sub_(utils::file_io& fin, CODEC_FORMAT form, sub_t& t, bool all = true)
 	{
@@ -216,8 +197,6 @@ namespace img {
 
 		opj_dparameters_t parameters;
 		opj_set_default_decoder_parameters(&parameters);
-
-///		t.stream = opj_stream_create_default_file_stream(parameters.infile, 1);
 
 		stream_block sb;
 		t.stream = opj_stream_default_create(OPJ_TRUE);
@@ -249,9 +228,9 @@ namespace img {
 			return false;
 		}
 
-		int w  = t.image->x1 - t.image->x0;
-		int h = t.image->y1 - t.image->y0;
-		std::cout << w << ", " << h << std::endl;
+///		int w  = t.image->x1 - t.image->x0;
+///		int h = t.image->y1 - t.image->y0;
+///		std::cout << w << ", " << h << std::endl;
 
 		return true;
 	}
@@ -263,41 +242,6 @@ namespace img {
 		if(!decode_sub_(fin, form, t, false)) {
 			return false;
 		}
-#if 0
-		fo.width  = t.image->x1 - t.image->x0;
-		fo.height = t.image->y1 - t.image->y0;
-		fo.mipmap_level = 0;
-		fo.multi_level = 0;
-		fo.i_depth = 0;
-		if(t.image->color_space == OPJ_CLRSPC_SRGB) fo.grayscale = false;
-		else if(t.image->color_space == OPJ_CLRSPC_GRAY) fo.grayscale = true;
-
-///		std::cout << "Header components: " << static_cast<int>(image->numcomps) << std::endl;
-
-		if(t.image->numcomps == 1) {
-			fo.r_depth = 8;
-			fo.g_depth = 8;
-			fo.b_depth = 8;
-			fo.a_depth = 0;
-		} else if(t.image->numcomps == 2) {
-			fo.r_depth = 8;
-			fo.g_depth = 8;
-			fo.b_depth = 8;
-			fo.a_depth = 8;
-		} else if(t.image->numcomps == 3) {
-			fo.r_depth = 8;
-			fo.g_depth = 8;
-			fo.b_depth = 8;
-			fo.a_depth = 0;
-		} else if(t.image->numcomps == 4) {
-			fo.r_depth = 8;
-			fo.g_depth = 8;
-			fo.b_depth = 8;
-			fo.a_depth = 8;
-		} else {
-			return false;
-		}
-#endif
 		opj_image_destroy(t.image);
 		opj_stream_destroy(t.stream);
 		opj_destroy_codec(t.codec);
@@ -306,12 +250,23 @@ namespace img {
 	}
 
 
-	static bool decode_(utils::file_io& fin, CODEC_FORMAT form, shared_img img)
+	static bool decode_(utils::file_io& fin, CODEC_FORMAT form, shared_img img, uint32_t& prgl_ref, uint32_t& prgl_pos)
 	{
 		sub_t t;
 		if(!decode_sub_(fin, form, t)) {
 			return false;
 		}
+
+		prgl_pos = 0;
+		prgl_ref = t.image->y1 - t.image->y0;
+
+
+#if 0
+		opj_set_decode_area(opj_codec_t *p_codec,
+							opj_image_t* p_image,
+							OPJ_INT32 p_start_x, OPJ_INT32 p_start_y,
+							OPJ_INT32 p_end_x, OPJ_INT32 p_end_y );
+#endif
 
 		if(!opj_decode(t.codec, t.stream, t.image)) {
 			opj_image_destroy(t.image);
@@ -319,6 +274,7 @@ namespace img {
 			opj_destroy_codec(t.codec);
 			return false;
 		}
+		prgl_pos = prgl_ref;
 
 		opj_image_to_rgba8_(t.image, img);
 
@@ -394,7 +350,7 @@ namespace img {
 		CODEC_FORMAT form = probe_(fin);
 		if(form != OPJ_CODEC_UNKNOWN) {
 			img_ = shared_img(new img_rgba8);
-			return decode_(fin, form, img_);
+			return decode_(fin, form, img_, prgl_ref_, prgl_pos_);
 		} else {
 			img_ = nullptr;
 			return false;
@@ -425,6 +381,9 @@ namespace img {
 		} else {
 			return false;
 		}
+
+		prgl_ref_ = size.y;
+		prgl_pos_ = 0;
 
 		int nc = 3;
 		if(img_->test_alpha()) ++nc; 
@@ -496,6 +455,7 @@ namespace img {
 				if(img_->test_alpha()) t.image->comps[3].data[idx] = c.a;
 				++idx;
 			}
+			prgl_pos_ = pos.y;
 		}
 
 		t.codec = opj_create_compress(form);

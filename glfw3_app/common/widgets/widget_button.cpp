@@ -18,9 +18,11 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_button::initialize()
 	{
-		// ボタンは標準的に固定、サイズ固定、選択時スケーリング
+		// ボタンは標準的に固定、サイズ固定、選択時拡大
+		at_param().state_.set(widget::state::SERVICE);
 		at_param().state_.set(widget::state::POSITION_LOCK);
 		at_param().state_.set(widget::state::SIZE_LOCK);
+		at_param().state_.set(widget::state::MOVE_STALL);
 		at_param().action_.set(widget::action::SELECT_SCALE);
 
 		using namespace img;

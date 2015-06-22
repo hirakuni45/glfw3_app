@@ -11,30 +11,21 @@ typedef app::spinv start_app;
 
 static const char* window_key_ = { "application/window" };
 static const char* app_title_ = { "Space Invader" };
+static const vtx::spos start_pos_(10, 40);
 static const vtx::spos start_size_(512, 512);
 static const vtx::spos limit_size_(512, 512);
 
 int main(int argc, char** argv)
 {
-	// カレントパスを生成
-	std::string tmp;
-	utils::convert_delimiter(argv[0], '\\', '/', tmp);
-	std::string base;
-	utils::get_file_base(tmp, base);
-	char buff[2048];
-	std::string path;
-	path = getcwd(buff, sizeof(buff));
-	std::string pref = path;
-	pref += '/';
-	pref += base;
-	pref += ".pre";
-
 	gl::core& core = gl::core::get_instance();
 
-	if(!core.initialize(path)) {
-		std::cerr << "Core initialize error" << std::endl;
+    if(!core.initialize(argv[0])) {
+		std::cerr << "glcore initialize error." << std::endl;
 		return -1;
-	}
+    }
+
+	std::string pref = core.get_exec_path();
+    pref += ".pre";
 
 	utils::director<app::core> director;
 

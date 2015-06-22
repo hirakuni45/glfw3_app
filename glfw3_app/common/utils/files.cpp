@@ -9,10 +9,6 @@
 
 namespace utils {
 
-	uint32_t files::init_ = 0;
-	files::file_t files::file_t_;
-	pthread_t files::pth_;
-
 	void files::sleep_(uint32_t ms)
 	{
 		usleep(ms * 1000);

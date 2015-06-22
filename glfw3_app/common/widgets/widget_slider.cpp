@@ -5,8 +5,8 @@
 */
 //=====================================================================//
 #include "core/glcore.hpp"
-#include "widget_slider.hpp"
-#include "widget_utils.hpp"
+#include "widgets/widget_slider.hpp"
+#include "widgets/widget_utils.hpp"
 
 namespace gui {
 
@@ -18,8 +18,10 @@ namespace gui {
 	void widget_slider::initialize()
 	{
 		// 標準的設定
+		at_param().state_.set(widget::state::SERVICE);
 		at_param().state_.set(widget::state::POSITION_LOCK);
 		at_param().state_.set(widget::state::SIZE_LOCK);
+		at_param().state_.set(widget::state::MOVE_STALL);
 
 		vtx::spos size = get_rect().size;
 		img::paint pa;
@@ -104,7 +106,7 @@ namespace gui {
 						ofs = wd_.at_mobj().get_size(hand_h_).x;
 					} else {
 						ofs = sz * sp.handle_ratio_;
-					}						
+					}
 					ratio = static_cast<float>(ref.x) / static_cast<float>(sz - ofs);
 				} else if(sp.direction_ == slider_param::direction::VERTICAL) {
 					short sz = size.y - fw * 2;
@@ -113,7 +115,7 @@ namespace gui {
 						ofs = wd_.at_mobj().get_size(hand_h_).y;
 					} else {
 						ofs = sz * sp.handle_ratio_;
-					}						
+					}
 					ratio = static_cast<float>(ref.y) / static_cast<float>(sz - ofs);
 				}
 				ratio += ref_position_;
@@ -124,13 +126,22 @@ namespace gui {
 					ratio = ((step + 1) / 2) * sp.grid_;
 				}
 				param_.slider_param_.position_ = ratio;
-			}
-			// アクセレーター・アクセス
-			if(get_select_out()) {
-				if(sp.direction_ == slider_param::direction::HOLIZONTAL) {
-
-				} else if(sp.direction_ == slider_param::direction::VERTICAL) {
-
+			} else if(param_.scroll_ctrl_) {
+				const vtx::spos& scr = wd_.get_scroll();
+				float ratio = param_.slider_param_.position_;
+				if(scr.y != 0) {
+					if(sp.direction_ == slider_param::direction::HOLIZONTAL) {
+						ratio += static_cast<float>(scr.y) * -param_.scroll_gain_;
+					} else if(sp.direction_ == slider_param::direction::VERTICAL) {
+						ratio += static_cast<float>(scr.y) *  param_.scroll_gain_;
+					}
+					if(ratio < 0.0f) ratio = 0.0f;
+					else if(ratio > 1.0f) ratio = 1.0f;
+					if(sp.grid_ > 0.0f) {
+						short step = ratio / (sp.grid_ * 0.5f);
+						ratio = ((step + 1) / 2) * sp.grid_;
+					}
+					param_.slider_param_.position_ = ratio;
 				}
 			}
 		}
@@ -143,7 +154,7 @@ namespace gui {
 				ofs = wd_.at_mobj().get_size(hand_h_).x;
 			} else {
 				ofs = sz * sp.handle_ratio_;
-			}						
+			}
 			handle_offset_.x = fw + sp.position_ * (sz - ofs);
 		} else if(sp.direction_ == slider_param::direction::VERTICAL) {
 			short sz = size.y - fw * 2;
@@ -152,7 +163,7 @@ namespace gui {
 				ofs = wd_.at_mobj().get_size(hand_h_).y;
 			} else {
 				ofs = sz * sp.handle_ratio_;
-			}						
+			}
 			handle_offset_.y = fw + sp.position_ * (sz - ofs);
 		}
 	}
@@ -178,7 +189,7 @@ namespace gui {
 
 		const widget::param& wp = get_param();
 
-		if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) { 
+		if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) {
 			glPushMatrix();
 			vtx::srect rect;
 			if(wp.state_[widget::state::CLIP_PARENTS]) {
@@ -203,7 +214,13 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	bool widget_slider::save(sys::preference& pre)
 	{
-		return true;
+		std::string path;
+		path += '/';
+		path += wd_.create_widget_name(this);
+
+		int err = 0;
+		if(!pre.put_real(path + "/level", param_.slider_param_.position_)) ++err;
+		return err == 0;
 	}
 
 
@@ -216,6 +233,13 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	bool widget_slider::load(const sys::preference& pre)
 	{
-		return true;
+		std::string path;
+		path += '/';
+		path += wd_.create_widget_name(this);
+
+		int err = 0;
+		if(!pre.get_real(path + "/level", param_.slider_param_.position_)) ++err;
+
+		return err == 0;
 	}
 }

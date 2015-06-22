@@ -4,10 +4,10 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include "Utils/preference.hpp"
+#include "utils/preference.hpp"
 #include <boost/foreach.hpp>
-
 #include <iostream>
+#include "utils/string_utils.hpp"
 
 namespace sys {
 
@@ -40,7 +40,7 @@ namespace sys {
 	{
 		string s;
 		get_full_path_(key, s);
-		item_cit cit = map_.find(s);
+		item_map::const_iterator cit = map_.find(s);
 		if(cit == map_.end()) {
 			return false;
 		} else {
@@ -62,9 +62,9 @@ namespace sys {
 	{
 		string s;
 		get_full_path_(key, s);
-		item_it it = map_.find(s);
+		item_map::iterator it = map_.find(s);
 		if(it == map_.end()) {
-			item_pair pa(s, vt);
+			item_map::value_type pa(s, vt);
 			item_ret r = map_.insert(pa);
 			return r.second;
 		} else {
@@ -106,9 +106,9 @@ namespace sys {
 	//-----------------------------------------------------------------//
 	void preference::create_current_list(utils::strings& ss)
 	{
-		BOOST_FOREACH(const item_pair& cit, map_) {
-			const string& s = cit.first;
-			if(strncmp(s.c_str(), path_.c_str(), strlen(path_.c_str())) == 0) {
+		BOOST_FOREACH(const item_map::value_type& t, map_) {
+			const string& s = t.first;
+			if(utils::string_strncmp(s, path_, path_.size()) == 0) {
 				ss.push_back(s);
 			}
 		}
@@ -126,7 +126,7 @@ namespace sys {
 	{
 		string s;
 		get_full_path_(key, s);
-		item_cit cit = map_.find(s);
+		item_map::const_iterator cit = map_.find(s);
 		if(cit == map_.end()) {
 			return false;
 		} else {
@@ -160,15 +160,15 @@ namespace sys {
 		@return キーワードのタイプ
 	*/
 	//-----------------------------------------------------------------//
-	preference::value::type preference::get_type(const std::string& key) const
+	preference::vtype preference::get_type(const std::string& key) const
 	{
-		value::type t = value::invalid;
+		vtype t = vtype::invalid;
 		string s;
 		get_full_path_(key, s);
-		item_cit cit = map_.find(s);
+		item_map::const_iterator cit = map_.find(s);
 		if(cit != map_.end()) {
 			const value_t& vt = cit->second;
-			t = vt.type_;
+			t = vt.vtype_;
 		}
 		return t;
 	}
@@ -242,25 +242,28 @@ namespace sys {
 			return false;
 		}
 
+		uint32_t err = 0;
 		string s;
 		while(inp.get_line(s) == true) {
 			if(s.empty()) continue;
-			utils::strings ss;
-			if(s[0] == '#') ;
+			if(s[0] == '#') ;  // コメント行は無視
 			else {
-				utils::split_text(s, " ", ss, 3);
+				utils::strings ss = utils::split_text(s, " \t", 3);
 				if(ss.size() == 3) {
-					int n = -1;
-					sscanf(ss[1].c_str(), "%d", &n);
-					value_t vt(static_cast<value::type>(n), ss[2]);
-					put_(ss[0], vt);
+					int n;
+					if(utils::string_to_int(ss[1], n)) {
+						value_t vt(static_cast<vtype>(n), ss[2]);
+						put_(ss[0], vt);
+					} else {
+						++err;
+					}
 				}
 			}
 			s.clear();
 		}
 		inp.close();
 
-		return true;
+		return err == 0;
 	}
 
 
@@ -278,10 +281,10 @@ namespace sys {
 			return false;
 		}
 
-		for(item_cit cit = map_.begin(); cit != map_.end(); ++cit) {
+		for(item_map::const_iterator cit = map_.begin(); cit != map_.end(); ++cit) {
 			out.put(cit->first);
 			out.put_char(' ');
-			out.put_char(0x30 + static_cast<int>(cit->second.type_));
+			out.put_char(0x30 + static_cast<int>(cit->second.vtype_));
 			out.put_char(' ');
 			out.put(cit->second.value_);
 			out.put_char('\n');

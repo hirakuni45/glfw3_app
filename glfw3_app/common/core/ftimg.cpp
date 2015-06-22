@@ -61,7 +61,7 @@ void get_metrics(uint32_t code)
 		if(fontfile.empty()) return false;
 
 		if(alias.empty()) {
-			utils::get_file_base(utils::get_file_name(fontfile), name);
+			name = utils::get_file_base(utils::get_file_name(fontfile));
 		} else {
 			name = alias;
 		}

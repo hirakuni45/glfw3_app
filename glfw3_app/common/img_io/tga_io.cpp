@@ -302,6 +302,7 @@ namespace img {
 			return true;
 		}
 
+
 		bool decode_rle_(uint8_t* buf)
 		{
 			uint8_t repeat = 0;
@@ -340,7 +341,7 @@ namespace img {
 		}
 
 
-		bool decode_(shared_img img)
+		bool decode(shared_img img, uint32_t& prgl_pos)
 		{
 			uint32_t n = info_.clut_num * info_.clut_depth / 8;
 			if(!fio_.seek(offset_ + HEADER_SIZE + info_.id_length + n,
@@ -419,11 +420,13 @@ namespace img {
 					}
 				}
 				pos.y += dy;
+				prgl_pos = y;
 			}
 			delete[] buf;
 
 			return true;
 		}
+
 
 		bool encode_rle_(const uint8_t* buf)
 		{
@@ -483,7 +486,7 @@ namespace img {
 			return true;
 		}
 
-		bool encode(shared_img img)
+		bool encode(shared_img img, uint32_t& prgl_pos)
 		{
 // std::cout << static_cast<int>(rle) << std::endl;
 			uint8_t* buf = 0;
@@ -537,6 +540,7 @@ namespace img {
 					}
 				}
 				--pos.y;
+				prgl_pos = y;
 			}
 			delete[] buf;
 			return true;
@@ -603,6 +607,9 @@ namespace img {
 			return false;
 		}
 
+		prgl_pos_ = 0;
+		prgl_ref_ = fo.height;
+
 		bool alpha = false;
 		if(fo.a_depth) alpha = true;
 
@@ -619,7 +626,7 @@ namespace img {
 				img_->put_clut(i, clut[i]);
 			}
 
-			if(!tga_.decode_(img_)) {
+			if(!tga_.decode(img_, prgl_pos_)) {
 				return false;
 			}
 
@@ -627,7 +634,7 @@ namespace img {
 			img_ = shared_img(new img_rgba8);
 			img_->create(vtx::spos(fo.width, fo.height), alpha);
 
-			if(!tga_.decode_(img_)) {
+			if(!tga_.decode(img_, prgl_pos_)) {
 				return false;
 			}
 		}
@@ -648,6 +655,9 @@ namespace img {
 	{
 		if(!img_) return false;
 		if(img_->get_size().x == 0 || img_->get_size().y == 0) return false;
+
+		prgl_pos_ = 0;
+		prgl_ref_ = img_->get_size().y;
 
 		tga tga_(fout);
 
@@ -673,6 +683,6 @@ namespace img {
 		}
 
 		// ピクセルの書き込み
-		return tga_.encode(img_);
+		return tga_.encode(img_, prgl_pos_);
 	}
 }

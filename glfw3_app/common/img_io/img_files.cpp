@@ -17,8 +17,7 @@ namespace img {
 
 	static bool check_file_exts_(const std::string& exts, const std::string& ext)
 	{
-		utils::strings ss;
-		utils::split_text(exts, ",", ss);
+		utils::strings ss = utils::split_text(exts, ",");
 		BOOST_FOREACH(std::string& s, ss) {
 			if(utils::no_capital_strcmp(ext, s) == 0) {
 				return true;
@@ -31,8 +30,7 @@ namespace img {
 	void img_files::add_image_file_io_context_(img_file::img_io imi, const std::string& exts)
 	{
 		if(imi) {
-			utils::strings ss;
-			utils::split_text(exts, ",", ss);
+			utils::strings ss = utils::split_text(exts, ",");
 			BOOST_FOREACH(std::string& s, ss) {
 				if(check_file_exts_(imi->get_file_ext(), s)) {
 					img_file io;

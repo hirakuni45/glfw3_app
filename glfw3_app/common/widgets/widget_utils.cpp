@@ -213,13 +213,15 @@ namespace gui {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	void draw_text(const widget::text_param& tp, const vtx::srect& rect, const vtx::srect& clip)
 	{
-		std::string s;
-		if(tp.alias_enable_) s = tp.alias_;
-		else s = tp.text_;
-
-		if(s.empty()) return;
-
 		gl::core& core = gl::core::get_instance();
+
+		utils::lstring ls;
+		if(tp.alias_enable_ && tp.cursor_ < 0) {
+			ls = tp.alias_;
+		} else {
+			ls = tp.text_;
+		}
+		if(ls.empty()) return;
 
 		const vtx::spos& vsz = core.get_size();
 		const vtx::spos& siz = core.get_rect().size;
@@ -243,7 +245,7 @@ namespace gui {
 
 		fonts.enable_proportional(tp.proportional_);
 		vtx::spos pos;
-		const vtx::spos& fsize = fonts.get_size(s);
+		const vtx::spos& fsize = fonts.get_size(ls);
 		vtx::placement tpl = tp.placement_;
 		if(fsize.x > clip_.size.x) {
 			tpl.hpt = vtx::placement::holizontal::LEFT;
@@ -251,21 +253,19 @@ namespace gui {
 		vtx::create_placement(rect_, fsize, tpl, pos);
 
 		short clx = 0;
-		if(utils::string_strchr(s, '\n')) {
+		if(utils::string_strchr(ls, '\n')) {
 			clx = clip_.size.x;
 		}
-
-
 
 		pos += tp.offset_;
 		if(tp.shadow_offset_.x != 0 || tp.shadow_offset_.y != 0) {
 			vtx::spos p = pos + tp.shadow_offset_;
 			fonts.set_fore_color(tp.shadow_color_);
-			fonts.draw(p, s, clx);
+			fonts.draw(p, ls, clx);
 		}
 
 		fonts.set_fore_color(tp.fore_color_);
-		fonts.draw(pos, s, clx);
+		fonts.draw(pos, ls, clx, tp.cursor_);
 
 		if(!tp.font_.empty()) {
 			fonts.pop_font_face();
@@ -291,7 +291,7 @@ namespace gui {
 
 		gl::fonts& fonts = core.at_fonts();
 
-		if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) { 
+		if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) {
 			glPushMatrix();
 			vtx::srect rect;
 			if(wp.state_[widget::state::CLIP_PARENTS]) {

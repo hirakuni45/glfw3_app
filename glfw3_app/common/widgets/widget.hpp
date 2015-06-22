@@ -8,7 +8,6 @@
 #include <vector>
 #include <string>
 #include <bitset>
-#include <boost/signals2.hpp>
 #include "img_io/img.hpp"
 #include "img_io/paint.hpp"
 #include "utils/vtx.hpp"
@@ -37,27 +36,6 @@ namespace gui {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct widget {
-
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		/*!
-			@brief	シグナル・タイプ
-		*/
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		typedef boost::signals2::signal<void (widget*)> signal_type;
-
-
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		/*!
-			@brief	シグナル・グループ
-		*/
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		enum class signal_group {
-			update_before,		///< アップデート前
-			update_later,		///< アップデート後
-			render_before,		///< レンダリング前
-			render_later		///< レンダリング後
-		};
-
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
@@ -101,7 +79,7 @@ namespace gui {
 			struct round_style {
 				enum type {
 					ALL,		///< 全てラウンド
-					TOP,		///< 上側をラウンド 
+					TOP,		///< 上側をラウンド
 					BOTTOM,		///< 下側をラウンド
 				};
 			};
@@ -151,18 +129,21 @@ namespace gui {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct text_param {
-			std::string		text_;				///< テキスト
-			std::string		font_;				///< フォントセット
-			short			font_size_;			///< フォントサイズ
-			bool			proportional_;		///< プロポーショナル・フォントの場合「true」
-			bool			alias_enable_;		///< テキストの別名を有効にする
-			std::string		alias_;				///< テキストの別名（置き換え用）
+			utils::lstring	text_;			///< テキスト
+			std::string		font_;			///< フォントセット
+			short			font_size_;		///< フォントサイズ
+			bool			proportional_;	///< プロポーショナル・フォントの場合「true」
+			bool			alias_enable_;	///< テキストの別名を有効にする
+			utils::lstring	alias_;			///< テキストの別名（置き換え用）
 
-			img::rgba8		fore_color_;		///< テキスト色
-			img::rgba8		shadow_color_;		///< 影色
-			vtx::spos		shadow_offset_;		///< 影の相対位置
-			vtx::placement	placement_;			///< 配置方法
-			vtx::spos		offset_;			///< 描画オフセット（シフト表示用）
+			img::rgba8		fore_color_;	///< テキスト色
+			img::rgba8		shadow_color_;	///< 影色
+			vtx::spos		shadow_offset_;	///< 影の相対位置
+			vtx::placement	placement_;		///< 配置方法
+			vtx::spos		offset_;		///< 描画オフセット（シフト表示用）
+
+			int				cursor_;		///< カーソル位置反転表示（エリアスは無効になる）
+
 			text_param() :
 				text_(), font_(), font_size_(24), proportional_(true),
 				alias_enable_(false), alias_(),
@@ -170,23 +151,46 @@ namespace gui {
 				shadow_offset_(1),
 				placement_(vtx::placement::holizontal::CENTER,
 					vtx::placement::vertical::CENTER),
-				offset_(0) { }
+				offset_(0), cursor_(-1) { }
+
 			explicit text_param(const std::string& text,
 				const img::rgba8& fc, const img::rgba8& sc,
 				const vtx::placement& pl = vtx::placement(
 				vtx::placement::holizontal::CENTER,
 				vtx::placement::vertical::CENTER)) :
-					text_(text), font_(), font_size_(24), proportional_(true),
+					text_(), font_(), font_size_(24), proportional_(true),
 					alias_enable_(false), alias_(),
 					fore_color_(fc), shadow_color_(sc), shadow_offset_(1),
 					placement_(pl),
-					offset_(0) { }
+					offset_(0), cursor_(-1) { utils::utf8_to_utf32(text, text_); }
+
+			void set_text(const std::string& text) {
+				text_.clear();
+				utils::utf8_to_utf32(text, text_);
+			}
+
+			const std::string get_text() const {
+				std::string s;
+				utils::utf32_to_utf8(text_, s);
+				return s;
+			}
+
+			void set_alias(const std::string& alias) {
+				alias_.clear();
+				utils::utf8_to_utf32(alias, alias_);
+			}
+
+			const std::string get_alias() const {
+				std::string s;
+				utils::utf32_to_utf8(alias_, s);
+				return s;
+			}
 		};
 
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
-			@brief	シフト・パラメーター
+			@brief	シフト・パラメーター（文字列の横スクロール）
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct shift_param {
@@ -199,10 +203,11 @@ namespace gui {
 			uint16_t	org_wait_frame_;	///< シフト先頭の場合の待ちフレーム
 			uint16_t	org_wait_count_;	///< シフト先頭の場合の待ちカウンタ
 
-			shift_param(bool ena = true) : enable_(ena), every_(false), size_(0),
-										   offset_(0.0f), speed_(0.5f),
-										   hold_frame_(2 * 60),
-										   org_wait_frame_(0), org_wait_count_(0)
+			shift_param(bool ena = true) :
+				enable_(ena), every_(false), size_(0),
+				offset_(0.0f), speed_(0.5f),
+				hold_frame_(2 * 60),
+				org_wait_frame_(0), org_wait_count_(0)
 				{ }
 		};
 
@@ -225,8 +230,9 @@ namespace gui {
 			float		grid_;				///< グリッド
 			bool		accelerator_;		///< アクセレーターを有効にする場合
 			bool		handle_resize_;		///< ハンドル・リサイズ
-			slider_param() : direction_(direction::HOLIZONTAL),
-				position_(0.0f), handle_ratio_(0.1f), grid_(0.0f),
+			slider_param(float pos = 0.0f, direction::type dir = direction::HOLIZONTAL) :
+				direction_(dir), position_(pos),
+				handle_ratio_(0.1f), grid_(0.0f),
 				accelerator_(true), handle_resize_(true)
 			{ }
 		};
@@ -263,7 +269,7 @@ namespace gui {
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct state {
 			enum type {
-				ENABLE,					///< 全体の許可・不許可（表示しない）
+				ENABLE,					///< 全体の許可・不許可（処理しない）
 
 				STALL,					///< 停止中（アップデートは無効）
 
@@ -274,29 +280,35 @@ namespace gui {
 				POSITION_LOCK,			///< 位置固定
 				CLIP_PARENTS,			///< ペアレントの領域でクリッピングを行う
 				DRAG_UNSELECT,			///< ドラッグされたらセレクトを外す
-				SELECT_PARENTS,			///< ペアレント全てが選択
+				FOCUS_CHILDS,			///< 子供全てにフォーカスを与える
 
+				SELECT_PARENTS,			///< 選択権を「親」に移動
+				SELECT_CHILDS,			///< 子供を全て選択
+				SELECT_ROOT,			///< 選択権をルートに与える
 				MOVE_ROOT,				///< 移動の選択権をルートに与える
+				MOVE_STALL,             ///< 移動の選択権を停止する
 				RESIZE_ROOT,			///< リサイズの選択権をルートに与える
+
 				AREA_ROOT,				///< ルートの描画領域を継承
+
+				MOVE_TOP,				///< 移動時最上位にする。
+				RESIZE_TOP,				///< リサイズ時最上位にする。
 
 				RESIZE_H_ENABLE,		///< 水平リサイズ許可
 				RESIZE_V_ENABLE,		///< 垂直リサイズ許可
 				RESIZE_EDGE_ENABLE,		///< エッジ領域でのリサイズ許可
 				SIZE_LOCK,				///< サイズ固定
 
+				SERVICE,				///< サービスを呼び出す
+
 				BEFORE_DRAG,			///< １フレーム前ドラッグの状態
 				DRAG,					///< ドラッグの状態
 				BEFORE_RESIZE,			///< １フレーム前リサイズの状態
 				RESIZE,					///< リサイズの状態
 
-				SERVICE,				///< サービスを呼び出す
-
-				/// 以下ワーク用
-				_ACTIVE,				///< アクティブ状態用
-
+				/// 以下、読み出し専用フラグ
+				SELECTED,				///< 選択済
 				SYSTEM_STALL,			///< システム用ストール
-				SYSTEM_SELECT,			///< システム用セレクト
 
 				BEFORE_FOCUS,			///< １フレーム前フォーカスの状態
 				IS_FOCUS,				///< フォーカスの状態
@@ -305,8 +317,6 @@ namespace gui {
 				BEFORE_SELECT,			///< １フレーム前選択状態
 				IS_SELECT,				///< 選択状態
 				SELECT,					///< セレクト（テンポラリー）
-
-				SELECT_TRG,				///< セレクト・トリガー
 
 				limit_
 			};
@@ -360,8 +370,6 @@ namespace gui {
 		std::string	symbol_;
 
 		uint32_t	serial_;
-
-		signal_type	sig_;
 
 		bool		mark_;
 
@@ -672,22 +680,6 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		uint32_t get_serial() const { return serial_; }
 
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	シグナルを追加
-			@param[in]	group	シグナルグループ
-			@param[in]	signal	シグナル
-		*/
-		//-----------------------------------------------------------------//
-		void set_signal(signal_group group, void (*signal)(widget*)) {
-			sig_.connect(signal);
-		}
-
-
-		void run_signal(signal_group group) {
-			sig_(this);
-		}
 	};
 
 	typedef std::vector<widget*> widgets;

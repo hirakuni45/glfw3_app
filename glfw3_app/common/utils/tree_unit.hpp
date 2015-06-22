@@ -94,8 +94,7 @@ namespace utils {
 			}
 
 			bool f = false;
-			utils::strings ss;
-			split_text(fpath, "/", ss);
+			utils::strings ss = split_text(fpath, "/");
 			std::string p;
 			for(uint32_t i = 0; i < ss.size(); ++i) {
 				p += '/';

@@ -104,6 +104,48 @@ namespace img {
 
 	//-----------------------------------------------------------------//
 	/*!
+		@brief	IDX8 のカラー・ルック・アップ・テーブルをコピー
+		@param[in]	src		ソースのイメージ
+		@param[in]	dst		コピー先 RGBA8 イメージ（リファレンス）
+	*/
+	//-----------------------------------------------------------------//
+	bool copy_to_idx8_clut(const i_img* src, img_idx8& dst)
+	{
+		if(src->get_type() != IMG::INDEXED8) return false;
+		for(int i = 0; i < src->get_clut_max(); ++i) {
+			rgba8 c;
+			src->get_clut(i, c);
+			dst.put_clut(i, c);
+		}
+		return true;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	IDX8 のカラー・ルック・アップ・テーブルが同じか検査
+		@param[in]	src		ソースのイメージ
+		@param[in]	dst		比較の IDX8 イメージ（リファレンス）
+		@return 同じなら「true」を返す
+	*/
+	//-----------------------------------------------------------------//
+	bool match_idx8_clut(const i_img* src, img_idx8& dst)
+	{
+		if(src->get_type() != IMG::INDEXED8) return false;
+		if(src->get_clut_max() < dst.get_clut_max()) return false;
+		for(int i = 0; i < src->get_clut_max(); ++i) {
+			rgba8 sc;
+			src->get_clut(i, sc);
+			rgba8 dc;
+			dst.get_clut(i, dc);
+			if(sc != dc) return false;
+		}
+		return true;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
 		@brief	IDX8 イメージへコピーする
 		@param[in]	isrc   	ソースのイメージインターフェース
 		@param[in]	rect   	ソース画像
@@ -124,6 +166,40 @@ namespace img {
 			}
 		}
 		return true;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	50% にリサイズされた画像イメージを生成する
+		@param[in]	src	ソースのイメージ
+		@param[out]	dst	リサイズイメージ
+	*/
+	//-----------------------------------------------------------------//
+	void scale_50percent(const i_img* src, img_rgba8& dst)
+	{
+		if(src == 0) return;
+
+		dst.destroy();
+		const vtx::spos& size = src->get_size();
+		dst.create(size / 2, src->test_alpha());
+		vtx::spos p;
+		for(p.y = 0; p.y < size.y; p.y += 2) {
+			for(p.x = 0; p.x < size.x; p.x += 2) {
+				int	r, g, b, a;
+			  	rgba8	c;
+				src->get_pixel(p, c);
+				r = c.r; g = c.g; b = c.b; a = c.a;
+				src->get_pixel(vtx::spos(p.x + 1, p.y), c);
+				r += c.r; g += c.g; b += c.b; a += c.a;
+				src->get_pixel(vtx::spos(p.x, p.y + 1), c);
+				r += c.r; g += c.g; b += c.b; a += c.a;
+				src->get_pixel(vtx::spos(p.x + 1, p.y + 1), c);
+				r += c.r; g += c.g; b += c.b; a += c.a;
+				c.r = r >> 2; c.g = g >> 2; c.b = b >> 2; c.a = a >> 2;
+				dst.put_pixel(vtx::spos(p.x / 2, p.y / 2), c);
+			}
+		}
 	}
 
 

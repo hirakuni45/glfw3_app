@@ -6,6 +6,7 @@
 */
 //=====================================================================//
 #include <vector>
+#include <functional>
 #include <boost/unordered_set.hpp>
 #include "widgets/widget.hpp"
 #include "widgets/common_parts.hpp"
@@ -68,15 +69,18 @@ namespace gui {
 		uint32_t				serial_;
 		widgets					widgets_;
 
-		float					unselect_length_;
 		vtx::fvtx	   			position_;
 		float					scale_;
 		img::rgbaf				color_;
 
-		widget*					top_move_;
-		widget*					top_scroll_;
-		widget*					top_resize_;
+		widget*					select_widget_;
+		widget*					move_widget_;
+		widget*					resize_l_widget_;
+		widget*					resize_r_widget_;
+
 		widget*					top_widget_;
+
+		widget*					focus_widget_;
 
 		float					msp_length_;
 		vtx::spos				msp_speed_;
@@ -91,18 +95,21 @@ namespace gui {
 
 		boost::unordered_set<widget*>	del_mark_;
 
-		bool					resize_edge_;
-
 		utils::strings			error_list_;
+
+		float					unselect_length_;
 
 		void message_widget_(widget* w, const std::string& s);
 		void parents_widget_mark_(widget* root);
+		void unselect_parents_(widget* root);
+
 	public:
 		static widget::color_param		default_frame_color_;
 		static widget::color_param		default_button_color_;
 		static widget::color_param		default_label_color_;
 		static widget::color_param		default_label_color_select_;
 		static widget::color_param		default_slider_color_;
+		static widget::color_param		default_progress_color_;
 		static widget::color_param		default_check_color_;
 		static widget::color_param		default_list_color_;
 		static widget::color_param		default_list_color_select_;
@@ -118,14 +125,18 @@ namespace gui {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		widget_director() : img_files_(),
+		widget_director() :
+			img_files_(),
 			mobj_(), common_parts_(mobj_), serial_(0), widgets_(),
-			unselect_length_(7.0f), position_(0.0f), scale_(1.0f),
-			top_move_(0), top_scroll_(0), top_resize_(0), top_widget_(0),
+			position_(0.0f), scale_(1.0f),
+			select_widget_(nullptr),
+			move_widget_(nullptr),
+			resize_l_widget_(nullptr), resize_r_widget_(nullptr),
+			top_widget_(nullptr), focus_widget_(nullptr),
 			msp_length_(0.0f), msp_speed_(0),
 			position_positive_(0), position_level_(0), position_negative_(0),
 			scroll_(0), share_img_(), keyboard_(), del_mark_(),
-			resize_edge_(false)
+			unselect_length_(6.0f)
 			{ }
 
 
@@ -227,7 +238,7 @@ namespace gui {
 			@return 前面移動ウィジェット
 		*/
 		//-----------------------------------------------------------------//
-		widget* get_top_move() const { return top_move_; }
+		widget* get_move_widget() const { return move_widget_; }
 
 
 		//-----------------------------------------------------------------//
@@ -237,6 +248,24 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget* get_top_widget() const { return top_widget_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	フォーカスを取得
+			@return フォーカス・ウィジェット
+		*/
+		//-----------------------------------------------------------------//
+		widget* get_focus_widget() const { return focus_widget_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	フォーカスを設定
+			@param[in]	w	フォーカス・ウィジェット
+		*/
+		//-----------------------------------------------------------------//
+		void set_focus_widget(widget* w) { focus_widget_ = w; }
 
 
 		//-----------------------------------------------------------------//

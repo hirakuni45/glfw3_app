@@ -71,6 +71,27 @@ namespace utils {
 
 	//-----------------------------------------------------------------//
 	/*!
+		@brief	ディレクトリーを作成する（UTF8）
+		@param[in]	dir	ディレクトリー名
+		@return 作成出来たら「true」
+	*/
+	//-----------------------------------------------------------------//
+	bool create_directory(const std::string& dir)
+	{
+		bool ret = true;
+#ifdef WIN32
+		utils::wstring ws;
+		utf8_to_utf16(dir, ws);
+		if(_wmkdir(ws.c_str() != 0) ret = false;
+#else
+		if(mkdir(dir.c_str(), 0x755) != 0) ret = false;
+#endif
+		return ret;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
 		@brief	ディレクトリーか調べる
 		@param[in]	fn	ファイル名
 		@return ディレクトリーなら「true」
@@ -165,24 +186,24 @@ namespace utils {
 	//-----------------------------------------------------------------//
 	bool file_io::get_char(char& ch)
 	{
-		if(open_ == false) return false;
 		if(fp_) {
 			int cha = ::fgetc(fp_);
 			if(cha != EOF) {
 				ch = cha;
 				return true;
-			} else {
-				return false;
 			}
-		} else if(rbuff_ != 0 && size_ > 0) {
-			if(fpos_ < size_) {
-				ch = rbuff_[fpos_];
-				fpos_++;
-				return true;
-			} else {
-				return false;
+		} else if(open_) {
+			if(rbuff_ != 0 && size_ > 0) {
+				if(fpos_ < size_) {
+					ch = rbuff_[fpos_];
+					fpos_++;
+					return true;
+				} else {
+					return false;
+				}
 			}
-		} else return false;
+		}
+		return false;
 	}
 
 
@@ -195,11 +216,11 @@ namespace utils {
 	//-----------------------------------------------------------------//
 	bool file_io::put_char(char c)
 	{
-		if(open_ == false) return false;
 		if(fp_) {
-			::fputc(c, fp_);
+			fputc(c, fp_);
 			return true;
 		} else {
+			if(!open_) return false;
 			wbuff_.push_back(c);
 			return true;
 		}

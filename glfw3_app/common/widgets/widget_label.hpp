@@ -6,6 +6,7 @@
 */
 //=====================================================================//
 #include "widgets/widget_director.hpp"
+#include <utility>
 
 namespace gui {
 
@@ -18,25 +19,31 @@ namespace gui {
 
 		typedef widget_label value_type;
 
+		typedef std::function<void (const std::string&)> select_func_type;
+
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	Widget label パラメーター
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
-			plate_param	plate_param_;	///< プレート・パラメーター
-			color_param	color_param_;	///< カラーパラメーター
-			text_param	text_param_;	///< テキスト描画のパラメーター
+			plate_param	plate_param_;			///< プレート・パラメーター
+			color_param	color_param_;			///< カラーパラメーター
+			text_param	text_param_;			///< テキスト描画のパラメーター
 			color_param	color_param_select_;	///< 選択時のカラーパラメーター
+
+			utils::lstring	before_text_;	///< 以前のテキスト
 
 			bool		read_only_;		///< 読み出し専用の場合
 			bool		text_in_;		///< テキスト入力状態
 			uint32_t	text_in_pos_;	///< テキスト入力位置
 			uint32_t	text_in_limit_;	///< テキスト入力最大数
 
-			shift_param	shift_param_;
+			shift_param	shift_param_;	///< 文字列スクロールパラメーター
 
 			bool		menu_enable_;	///< メニュー許可
+
+			select_func_type	select_func_;
 
 			//-------------------------------------------------------------//
 			/*!
@@ -49,12 +56,13 @@ namespace gui {
 				plate_param_(),
 				color_param_(widget_director::default_label_color_),
 				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255),
-					vtx::placement(vtx::placement::holizontal::LEFT,
-						vtx::placement::vertical::CENTER)),
+				vtx::placement(vtx::placement::holizontal::LEFT,
+				vtx::placement::vertical::CENTER)),
 				color_param_select_(widget_director::default_label_color_select_),
 				read_only_(ro), text_in_(false), text_in_pos_(0), text_in_limit_(0),
 				shift_param_(),
-				menu_enable_(false)
+				menu_enable_(false),
+				select_func_()
 				{ }
 		};
 
@@ -64,6 +72,8 @@ namespace gui {
 		param				param_;
 
 		uint32_t			interval_;
+
+		bool				focus_;
 
 		gl::mobj::handle	objh_;
 		gl::mobj::handle	select_objh_;
@@ -75,8 +85,8 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_label(widget_director& wd, const widget::param& bp, const param& p) :
-			widget(bp), wd_(wd), param_(p), interval_(0), objh_(0), select_objh_(0) {
-		}
+			widget(bp), wd_(wd), param_(p), interval_(0), focus_(false),
+			objh_(0), select_objh_(0) { }
 
 
 		//-----------------------------------------------------------------//
@@ -190,7 +200,8 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		void set_text(const std::string& text) {
-			at_local_param().text_param_.text_ = text;
+			param_.text_param_.set_text(text);
+			param_.text_in_pos_ = param_.text_param_.text_.size();
 		}
 
 
@@ -200,20 +211,22 @@ namespace gui {
 			@return	テキスト
 		*/
 		//-----------------------------------------------------------------//
-		const std::string& get_text() const {
-			return get_local_param().text_param_.text_;
+		const std::string get_text() const {
+			std::string s;
+			utils::utf32_to_utf8(param_.text_param_.text_, s);
+			return std::move(s);
 		}
 
 
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	エイリアス・テキストを設定
-			@param[in]	text	テキスト
+			@param[in]	alias	テキスト
 		*/
 		//-----------------------------------------------------------------//
-		void set_alias(const std::string& text) {
-			at_local_param().text_param_.alias_ = text;
-			at_local_param().text_param_.alias_enable_ = true;
+		void set_alias(const std::string& alias) {
+			param_.text_param_.set_alias(alias);
+			param_.text_param_.alias_enable_ = true;
 		}
 
 
@@ -223,8 +236,10 @@ namespace gui {
 			@return エイリアス・テキスト
 		*/
 		//-----------------------------------------------------------------//
-		const std::string& get_alias() const {
-			return get_local_param().text_param_.alias_;
+		const std::string get_alias() const {
+			std::string s;
+			utils::utf32_to_utf8(param_.text_param_.alias_, s);
+			return s;
 		}
 
 
@@ -235,7 +250,7 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		void enable_alias(bool ena = true) {
-			at_local_param().text_param_.alias_enable_ = ena;
+			param_.text_param_.alias_enable_ = ena;
 		}
 	};
 

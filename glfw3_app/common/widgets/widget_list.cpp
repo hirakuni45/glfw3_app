@@ -19,9 +19,10 @@ namespace gui {
 	void widget_list::initialize()
 	{
 		// 標準的に固定、リサイズ不可
+		at_param().state_.set(widget::state::SERVICE);
 		at_param().state_.set(widget::state::POSITION_LOCK);
 		at_param().state_.set(widget::state::SIZE_LOCK);
-		at_param().state_.set(widget::state::SERVICE);
+		at_param().state_.set(widget::state::MOVE_STALL);
 
 		vtx::spos size;
 		if(param_.plate_param_.resizeble_) {
@@ -60,7 +61,7 @@ namespace gui {
 			wp_.plate_param_.frame_width_ = 0;
 			int n = 0;
 			BOOST_FOREACH(const std::string& s, param_.text_list_) {
-				wp_.text_param_.text_ = s;
+				wp_.text_param_.set_text(s);
 				if(n == 0) {
 					wp_.plate_param_.round_radius_ = param_.plate_param_.round_radius_;
 					wp_.plate_param_.round_style_
@@ -91,6 +92,10 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_list::update()
 	{
+		if(param_.select_pos_ < list_.size()) {
+			widget_label* w = list_[param_.select_pos_];
+			param_.text_param_.text_ = w->get_local_param().text_param_.text_;
+		}
 	}
 
 
@@ -118,8 +123,7 @@ namespace gui {
 			BOOST_FOREACH(widget_label* w, list_) {
 				if(w->get_select()) {
 					param_.select_pos_ = n;
-					at_local_param().text_param_.text_
-						= w->get_local_param().text_param_.text_;
+					param_.text_param_.text_ = w->get_local_param().text_param_.text_;
 				} else if(w->get_selected()) {
 					selected = true;
 				}
@@ -128,6 +132,9 @@ namespace gui {
 			if(selected) {
 				param_.open_ = false;
 				wd_.enable(frame_, param_.open_, true);
+				if(param_.select_func_) {
+					param_.select_func_(param_.text_param_.get_text(), param_.select_pos_);
+				}
 			} else {
 				const vtx::spos& scr = wd_.get_scroll();
 				if(frame_->get_focus() && scr.y != 0) {
@@ -144,10 +151,8 @@ namespace gui {
 				BOOST_FOREACH(widget_label* w, list_) {
 					if(n == param_.select_pos_) {
 						w->set_action(widget::action::SELECT_HIGHLIGHT);
-						w->set_state(widget::state::SYSTEM_SELECT);
 					} else {
 						w->set_action(widget::action::SELECT_HIGHLIGHT, false);
-						w->set_state(widget::state::SYSTEM_SELECT, false);
 					}
 					++n;
 				}
@@ -169,7 +174,7 @@ namespace gui {
 		const vtx::spos& siz = core.get_rect().size;
 
 		gl::mobj::handle h = objh_;
-		if(get_select() || get_state(widget::state::SYSTEM_SELECT)) {
+		if(get_select()) {
 			h = select_objh_;
 		}
 
@@ -223,7 +228,13 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	bool widget_list::save(sys::preference& pre)
 	{
-		return true;
+		std::string path;
+		path += '/';
+		path += wd_.create_widget_name(this);
+
+		int err = 0;
+		if(!pre.put_integer(path + "/selector", param_.select_pos_)) ++err;
+		return err == 0;
 	}
 
 
@@ -236,6 +247,12 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	bool widget_list::load(const sys::preference& pre)
 	{
-		return true;
+		std::string path;
+		path += '/';
+		path += wd_.create_widget_name(this);
+
+		int err = 0;
+		if(!pre.get_integer(path + "/selector", param_.select_pos_)) ++err;
+		return err == 0;
 	}
 }

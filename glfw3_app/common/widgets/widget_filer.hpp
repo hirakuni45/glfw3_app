@@ -27,6 +27,8 @@ namespace gui {
 
 		typedef widget_filer value_type;
 
+		typedef std::function< void (const std::string&) > select_file_func_type;
+
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	widget_filer パラメーター
@@ -44,14 +46,22 @@ namespace gui {
 			short			path_height_;
 			short			label_height_;
 
-			bool			new_file_;	///< 新規ファイル作成
+			bool			every_top_;		///< 有効なら、常に手前
+			bool			acc_focus_;		///< アクセレーターキーによるフォーカス
 
-			param(const std::string& path = "", const std::string& filter = "") :
+			bool			new_file_;		///< 新規ファイル作成
+
+			select_file_func_type	select_file_func_;	///< セレクト関数
+
+			param(const std::string& path = "", const std::string& filter = "", bool new_file = false) :
 				plate_param_(),
 				color_param_(widget_director::default_frame_color_),
 				text_param_(), shift_param_(),
 				path_(path), filter_(filter),
-				path_height_(32), label_height_(32), new_file_(false)
+				path_height_(32), label_height_(32),
+				every_top_(true), acc_focus_(true),
+				new_file_(new_file),
+				select_file_func_()
 			{ }
 		};
 
@@ -135,14 +145,19 @@ namespace gui {
 		static const char* key_locate_;
 		static const char* key_size_;
 
-		bool		new_file_enable_;
-		bool		new_file_in_;
+		char				acc_key_;
+		char				acc_key_ch_;
+		uint32_t			acc_cnt_;
+
+		bool		back_directory_;
+		bool		center_update_;
 
 		void create_file_(widget_file& wf, const vtx::srect& rect, short ofs, const std::string& str);
 		void create_files_(widget_files& wfs, short ofs);
 		widget_files_cit scan_select_in_file_(widget_files& wfs) const;
 		widget_files_cit scan_select_file_(widget_files& wfs) const;
 		widget_files_cit scan_selected_file_(widget_files& wfs) const;
+		void un_selected_(widget_files& wfs);
 		void resize_files_(widget_files& wfs, short ofs, short width);
 		void update_files_info_(widget_files& wfs);
 		void update_files_alias_(widget_files& wfs);
@@ -154,6 +169,8 @@ namespace gui {
 		widget_file_copt scan_item_(const std::string& path) const;
 		bool focus_(const std::string& fn);
 		std::string make_path_(const std::string path);
+		void select_path_(const std::string& n);
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -168,7 +185,9 @@ namespace gui {
 			request_right_(false),
 			speed_(0.0f), position_(0.0f), move_speed_(0.0f), select_pos_(0),
 			file_(),
-			select_file_id_(0), new_file_enable_(false), new_file_in_(false)
+			select_file_id_(0),
+			acc_key_(0), acc_key_ch_(0), acc_cnt_(0),
+			back_directory_(false), center_update_(false)
 			{ }
 
 
@@ -289,8 +308,8 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	ファイル選択シグナルを取得
-			@return ファイル選択シグナル
+			@brief	ファイル選択 ID を取得
+			@return ファイル選択 ID
 		*/
 		//-----------------------------------------------------------------//
 		uint32_t get_select_file_id() const { return select_file_id_; }
@@ -317,12 +336,11 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	ファイル・リストを取得
-			@param[out]	ss	ファイル・リスト
 			@param[in]	dir	ディレクトリーを含める場合「true」
-			@return ファイル・パス・インデックス（負の値ならマッチ無し）
+			@return ファイル・リスト
 		*/
 		//-----------------------------------------------------------------//
-		int get_file_list(utils::strings& ss, bool dir = false) const;
+		utils::strings get_file_list(bool dir = false) const;
 
 
 		//-----------------------------------------------------------------//

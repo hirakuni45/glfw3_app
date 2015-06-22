@@ -91,7 +91,7 @@ namespace gui {
 
 		glPushMatrix();
 		if(objh_) {
-			if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) { 
+			if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) {
 				vtx::srect rect;
 				if(wp.state_[widget::state::CLIP_PARENTS]) {
 					draw_mobj(wd_, objh_, wp.clip_);
@@ -101,7 +101,7 @@ namespace gui {
 			}
 		} else if(param_.mobj_ && param_.mobj_handle_) {
 			mobj& mo = *param_.mobj_;
-			if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) { 
+			if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) {
 //				vtx::srect rect;
 				if(wp.state_[widget::state::CLIP_PARENTS]) {
 					int sx = vsz.x / siz.x;

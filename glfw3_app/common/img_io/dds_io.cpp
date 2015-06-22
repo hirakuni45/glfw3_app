@@ -1162,8 +1162,7 @@ void tx_compress_dxtn(GLint srccomps, GLint width, GLint height, const GLubyte *
 		int multi_level = 0;
 		int mipmap_level = 0;
 		if(!ext.empty()) {
-			utils::strings ss;
-			utils::split_text(ext, ",", ss);
+			utils::strings ss = utils::split_text(ext, ",");
 			BOOST_FOREACH(const string& s, ss) {
 				int n = -1;
 				if(sscanf(s.c_str(), "multi:%d", &n) == 1) {

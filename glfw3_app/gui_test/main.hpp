@@ -7,6 +7,7 @@
 //=====================================================================//
 #include "snd_io/sound.hpp"
 #include "widgets/widget_director.hpp"
+#include "widgets/ui_policy.hpp"
 #include "utils/preference.hpp"
 #include "core/glcore.hpp"
 #include "utils/director.hpp"
@@ -26,9 +27,12 @@ namespace app {
 		al::sound	sound_;
 
 		gui::widget_director	widget_director_;
+		gui::ui_policy			ui_policy_;
 
 		sys::preference		preference_;
 
-		core() { }
+		core() : sound_()
+			   , widget_director_(), ui_policy_(widget_director_)
+			   , preference_() { }
 	};
 }

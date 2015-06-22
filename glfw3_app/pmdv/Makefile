@@ -72,7 +72,8 @@ PSOURCES	=	main.cpp \
 				widgets/widget_filer.cpp \
 				widgets/widget_terminal.cpp \
 				mdf/pmd_io.cpp \
-				mdf/pmx_io.cpp
+				mdf/pmx_io.cpp \
+				mdf/mmd_io.cpp
 
 STDLIBS		=
 OPTLIBS		=	glfw3 GLEW \
@@ -82,20 +83,18 @@ OPTLIBS		=	glfw3 GLEW \
 				mad faad mp4ff tag \
 				z
 
-INC_SYS		=	/opt/local/include/boost
+INC_SYS		=	/usr/local/include/boost
 
-INC_LIB		=	/opt/libjpeg-turbo/include \
+INC_LIB		=	/usr/local/opt/jpeg-turbo/include \
 				/usr/local/include \
-				/opt/local/include \
-				/opt/local/include/freetype2 \
-				/opt/local/include/openjpeg-2.1 \
-				/opt/local/include/taglib
+				/usr/local/include/freetype2 \
+				/usr/local/include/openjpeg-2.1 \
+				/usr/local/include/taglib
 
 PINC_APP	=	. ../common
 CINC_APP	=	. ../common
-LIBDIR		=	/opt/libjpeg-turbo/lib \
-				/usr/local/lib \
-				/opt/local/lib
+LIBDIR		=	/usr/local/opt/jpeg-turbo/lib \
+				/usr/local/lib
 
 INC_S	=	$(addprefix -isystem, $(INC_SYS))
 INC_L	=	$(addprefix -isystem, $(INC_LIB))

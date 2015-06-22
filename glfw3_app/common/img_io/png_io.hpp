@@ -20,13 +20,16 @@ namespace img {
 
 		bool		color_key_enable_;
 
+		uint32_t	prgl_ref_;
+		uint32_t	prgl_pos_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		png_io() : color_key_enable_(false) { }
+		png_io() : color_key_enable_(false), prgl_ref_(0), prgl_pos_(0) { }
 
 
 		//-----------------------------------------------------------------//
@@ -154,6 +157,17 @@ namespace img {
 		//-----------------------------------------------------------------//
 		void set_image(shared_img img) override { img_ = img; }
 
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	decode/encode の進行状態を取得する
+			@return 完了の場合 scale を返す
+		*/
+		//-----------------------------------------------------------------//
+		uint32_t get_progless(uint32_t scale) const override {
+			if(prgl_ref_ == 0) return 0;
+			return prgl_pos_ * scale / prgl_ref_;
+		} 
 	};
 
 }

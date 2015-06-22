@@ -496,7 +496,7 @@ namespace al {
 		utils::utf8_to_utf16(fin.get_path(), ws);
 		MPEG::File f(reinterpret_cast<const wchar_t*>(ws.c_str()));
 #else
-		MPEG::File f(fin.get_path());
+		MPEG::File f(fin.get_path().c_str());
 #endif
 		ID3v1::Tag* v1 = f.ID3v1Tag();
 	   	if(v1) {
@@ -593,7 +593,7 @@ namespace al {
 		}
 		// tag 情報が無い場合、ファイル名を曲名としておく
 		if(tag_.title_.empty()) {
-			utils::get_file_base(utils::get_file_name(fin.get_path()), tag_.title_);
+			tag_.title_ = utils::get_file_base(utils::get_file_name(fin.get_path()));
 		}
 		tag_.update();
 		fin.re_open();

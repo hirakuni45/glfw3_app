@@ -9,9 +9,15 @@
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
+#include <utility>
 
 namespace gui {
 
+	static const std::string new_file_text_ = "New File...";
+	static const float def_gain = 0.85f;
+	static const float slip_gain = 0.5f;
+	static const float speed_gain = 0.95f;
+	static const float speed_move = 38.0f;	/// 横スクロールの初期速度
 
 	void widget_filer::create_file_(widget_file& wf, const vtx::srect& rect, short ofs, const std::string& str)
 	{
@@ -23,7 +29,8 @@ namespace gui {
 			wf.base->set_state(widget::state::SIZE_LOCK);
 			wf.base->set_state(widget::state::CLIP_PARENTS);
 			wf.base->set_state(widget::state::DRAG_UNSELECT);
-			wf.base->set_state(widget::state::SELECT_PARENTS);
+			wf.base->set_state(widget::state::FOCUS_CHILDS);
+			wf.base->set_state(widget::state::SELECT_CHILDS);
 		}
 		short fns = rect.size.x * 2 / 3;
 		short ats = rect.size.x - fns - 2;
@@ -41,8 +48,8 @@ namespace gui {
 			wf.name = wd_.add_widget<widget_label>(wp, wp_);
 			wf.name->set_state(widget::state::POSITION_LOCK);
 			wf.name->set_state(widget::state::CLIP_PARENTS);
-			wf.name->set_state(widget::state::DRAG_UNSELECT);
-			wf.name->set_state(widget::state::RESIZE_ROOT);
+			wf.name->set_state(widget::state::SELECT_PARENTS);
+			wf.name->set_state(widget::state::MOVE_STALL, false);
 		}
 		{
 			vtx::srect r;
@@ -58,8 +65,8 @@ namespace gui {
 			wf.info = wd_.add_widget<widget_label>(wp, wp_);
 			wf.info->set_state(widget::state::POSITION_LOCK);
 			wf.info->set_state(widget::state::CLIP_PARENTS);
-			wf.info->set_state(widget::state::DRAG_UNSELECT);
-			wf.info->set_state(widget::state::RESIZE_ROOT);
+			wf.info->set_state(widget::state::SELECT_PARENTS);
+			wf.info->set_state(widget::state::MOVE_STALL, false);
 		}
 	}
 
@@ -73,9 +80,8 @@ namespace gui {
 		rect.size.y = param_.label_height_;
 
 		// ルートパスならドライブレターを加える
-		std::string pp;
-		bool prevp = utils::previous_path(fsc_path_, pp);
-		if(!prevp) {
+		std::string pp = utils::previous_path(fsc_path_);
+		if(!pp.empty()) {
 			for(uint32_t i = 0; i < drv_.get_num(); ++i) {
 				widget_file wf;
 				std::string fn;
@@ -92,7 +98,22 @@ namespace gui {
 		if(param_.new_file_) {
 			widget_file wf;
 			wf.dir = true;
-			create_file_(wf, rect, ofs, "New File");
+			create_file_(wf, rect, ofs, new_file_text_);
+			wf.name->at_local_param().read_only_ = false;
+			wf.name->at_local_param().select_func_ = [this](const std::string& filename) {
+				if(filename == "..") {
+
+				} else if(filename.back() == '/') {  // for make directory
+					std::string path;
+					utils::strip_last_of_delimita_path(filename, path);
+					utils::create_directory(utils::append_path(param_.path_, path));
+					center_update_ = true;
+				} else {
+					file_ = utils::append_path(param_.path_, filename);
+					++select_file_id_;
+					enable(false);
+				}
+			};
 
 			wf.size = 0;
 			wf.time = 0;
@@ -108,7 +129,7 @@ namespace gui {
 
 			widget_file wf;
 			if(fn == "..") {
-				if(!prevp) continue;
+				if(pp.empty()) continue;
 				wf.dir = true;
 			} else if(fi.is_directory()) {
 				fn += '/';
@@ -163,6 +184,15 @@ namespace gui {
 	}
 
 
+	void widget_filer::un_selected_(widget_files& wfs)
+	{
+		BOOST_FOREACH(widget_file& wf, wfs) {
+			wf.name->set_state(widget::state::SELECTED, false);
+			wf.info->set_state(widget::state::SELECTED, false);
+		}
+	}
+
+
 	void widget_filer::resize_files_(widget_files& wfs, short ofs, short width)
 	{
 		for(widget_files_cit cit = wfs.begin(); cit != wfs.end(); ++cit) {
@@ -196,11 +226,10 @@ namespace gui {
 		for(widget_files_cit cit = wfs.begin(); cit != wfs.end(); ++cit) {
 			const widget_file& wf = *cit;
 			if(info_state_ == info_state::SIZE) {
-				std::string& s = wf.info->at_local_param().text_param_.text_;
 				if(wf.dir) {
-					s = " -";
+					wf.info->at_local_param().text_param_.set_text(" -");
 				} else {
-					s = ' ' + boost::lexical_cast<std::string>(wf.size);
+					wf.info->at_local_param().text_param_.set_text(" " + boost::lexical_cast<std::string>(wf.size));
 				}
 			} else if(info_state_ == info_state::TIME) {
 				std::string s;
@@ -210,7 +239,7 @@ namespace gui {
 				s += (boost::format("%d/%d ")
 					% (t->tm_mon + 1) % t->tm_mday).str();
 				s += (boost::format("%4d") % (t->tm_year + 1900)).str();
-				wf.info->at_local_param().text_param_.text_ = s;
+				wf.info->at_local_param().text_param_.set_text(s);
 			} else if(info_state_ == info_state::MODE) {
 				std::string s;
 				s += ' ';
@@ -225,7 +254,7 @@ namespace gui {
 					}
 					bit >>= 1;
 				}
-				wf.info->at_local_param().text_param_.text_ = s;
+				wf.info->at_local_param().text_param_.set_text(s);
 			}
 		}
 	}
@@ -235,11 +264,12 @@ namespace gui {
 	{
 		for(widget_files_cit cit = wfs.begin(); cit != wfs.end(); ++cit) {
 			const widget_file& wf = *cit;
+			if(param_.new_file_ && cit == wfs.begin()) continue;
 			if(!wf.name) continue;
 			if(wf.size == 0 && wf.time == 0 && wf.mode == 0) continue;
 			if(wf.name->get_text() == "..") continue;
 			bool f = info_state_ == info_state::ALIAS;
-			if(wf.name->get_alias().empty()) f = false; 
+			if(wf.name->get_alias().empty()) f = false;
 			wf.name->enable_alias(f);
 		}
 	}
@@ -287,10 +317,7 @@ namespace gui {
 
 	void widget_filer::set_select_pos_(uint32_t pos)
 	{
-		BOOST_FOREACH(const widget_file& wf, center_) {
-			wf.name->set_state(widget::state::SYSTEM_SELECT, false);
-			wf.info->set_state(widget::state::SYSTEM_SELECT, false);
-		}
+		un_selected_(center_);
 		select_pos_ = pos;
 		set_regist_state_();
 	}
@@ -306,8 +333,11 @@ namespace gui {
 	}
 
 
-	widget_filer::widget_file_copt widget_filer::scan_item_(const std::string& path) const
+	widget_filer::widget_file_copt widget_filer::scan_item_(const std::string& fn) const
 	{
+		std::string path;
+		utils::strip_last_of_delimita_path(fn, path);
+
 		BOOST_FOREACH(const widget_file& wf, center_) {
 			std::string t;
 			utils::strip_last_of_delimita_path(wf.name->get_text(), t);
@@ -319,22 +349,34 @@ namespace gui {
 	}
 
 
-	bool widget_filer::focus_(const std::string& fn)
+	bool widget_filer::focus_(const std::string& path)
 	{
+		std::string fn;
+		utils::strip_last_of_delimita_path(path, fn);
+
 		uint32_t n = 0;
 		BOOST_FOREACH(const widget_file& wf, center_) {
 			std::string t;
 			utils::strip_last_of_delimita_path(wf.name->get_text(), t);
 			if(wf.name && t == fn) {
-				if(wf.name->get_state(widget::state::SYSTEM_SELECT)) {
+				if(wf.name->get_state(widget::state::SELECTED)) {
 					return true;
 				}
-				short ofs = static_cast<short>(n) -
-					(main_->get_rect().size.y / param_.label_height_) / 2;
+				// センターリング
+				short lh = param_.label_height_;
+				short len = main_->get_rect().size.y / lh;
+				short ofs = static_cast<short>(n) - (len / 2);
 				if(ofs >= 0) {
-					position_.y = static_cast<float>(ofs * -param_.label_height_);
+					if(center_.size() > len) {
+						if((center_.size() * lh - main_->get_rect().size.y / 2) > n * lh) {
+							position_.y = static_cast<float>(ofs * -lh);
+						}
+					}
 				}
+
 				set_select_pos_(n);
+				wf.name->set_state(widget::state::SELECTED);
+				wf.info->set_state(widget::state::SELECTED);
 				return true;
 			}
 			++n;
@@ -363,34 +405,61 @@ namespace gui {
 	}
 
 
+	void widget_filer::select_path_(const std::string& n)
+	{
+		if(n == "..") {  // 一つ前に戻る
+			request_right_ = false;
+			move_speed_ =  speed_move;
+		} else if(n.back() == '/') {
+			request_right_ = true;
+			move_speed_ = -speed_move;
+			std::string ap;
+			if(n.size() > 2 && 'A' <= n[0] && n[0] <= 'Z' && n[1] == ':') {
+				param_.path_ = n;
+			} else {
+				ap = utils::append_path(param_.path_, n);
+				utils::strip_last_of_delimita_path(ap, param_.path_);
+			}
+			file_infos_.clear();
+			fsc_path_.clear();
+			fsc_.set_path(param_.path_, param_.filter_);
+			fsc_wait_ = true;
+			destroy_files_(right_);
+		} else {
+			file_ = utils::append_path(param_.path_, n);
+			++select_file_id_;
+			enable(false);
+			if(param_.select_file_func_) param_.select_file_func_(file_);
+		}
+	}
+
+
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	ファイル・リストを取得
-		@param[out]	ss	ファイル・リスト
 		@param[in]	dir	ディレクトリーを含める場合「true」
-		@return ファイル・パス・インデックス（負の値ならマッチ無し）
+		@return ファイル・リスト
 	*/
 	//-----------------------------------------------------------------//
-	int widget_filer::get_file_list(utils::strings& ss, bool dir) const
+	utils::strings widget_filer::get_file_list(bool dir) const
 	{
-		int ret = -1;
+		utils::strings ss;
 		const widget_files& wfs = center_;
 		for(widget_files_cit cit = wfs.begin(); cit != wfs.end(); ++cit) {
 			const widget_file& wf = *cit;
 			if(wf.size == 0 && wf.time == 0 && wf.mode == 0) continue;
 			const std::string& fp = wf.name->get_text();
 			if(fp == "..") continue;
-			std::string fn;
-			utils::append_path(param_.path_, fp, fn);
-			if(fn == file_) ret = ss.size();
+			std::string fn = utils::append_path(param_.path_, fp);
 			if(dir) {
+				fn += '/';
 				ss.push_back(fn);
 			} else {
 				if(wf.dir) continue;
 				ss.push_back(fn);
 			}
 		}
-		return ret;
+		return std::move(ss);
 	}
 
 
@@ -424,27 +493,6 @@ namespace gui {
 		fsc_wait_ = true;
 
 		short frame_width = param_.plate_param_.frame_width_;
-		// path（ハンドル）
-		{
-			vtx::srect r;
-			r.org.set(frame_width);
-			r.size.x = get_rect().size.x - frame_width * 2;
-			r.size.y = param_.path_height_;
-			widget::param wp(r, this);
-			wp.action_.set(widget::action::SELECT_HIGHLIGHT);
-			widget_label::param wp_(param_.path_);
-			wp_.text_param_.placement_.hpt = vtx::placement::holizontal::LEFT;
-			wp_.color_param_.fore_color_.set(236, 181, 63);
-			wp_.color_param_.back_color_.set(131, 104, 45);
-			wp_.color_param_select_.fore_color_ = wp_.color_param_.fore_color_;
-			wp_.color_param_select_.back_color_ = wp_.color_param_.back_color_;
-			wp_.color_param_select_.fore_color_.gainY(1.3f);
-			wp_.color_param_select_.back_color_.gainY(1.3f);
-			wp_.plate_param_.resizeble_ = true;
-			wp_.plate_param_.frame_width_  = 2;
-			wp_.plate_param_.round_radius_ = 4;
-		}
-
 		// info ボタン
 		{
 			gl::mobj::handle hnd = wd_.get_share_image().right_box_;
@@ -500,14 +548,45 @@ namespace gui {
 	{
 		param_.shift_param_.size_ = get_rect().size.x - param_.plate_param_.frame_width_ * 2;
 		shift_text_update(get_param(), param_.text_param_, param_.shift_param_);
-		if(param_.new_file_ && new_file_enable_) {
-			if(new_file_in_ && !center_[0].name->get_local_param().text_in_) {
-				const std::string& n = center_[0].name->get_text();
-				utils::append_path(param_.path_, n, file_);
-				++select_file_id_;
-				enable(false);
+
+		if(param_.every_top_) {
+			wd_.top_widget(this);
+		}
+
+		if(!center_.empty()) {
+			// 「new file」がキャンセルされた場合に文字列を再設定
+			widget_files_cit cit = scan_select_in_file_(center_);
+			if(param_.new_file_ && cit != center_.end()) {
+				if(cit == center_.begin()) {
+					center_[0].name->set_text("");
+				} else {
+					center_[0].name->set_text(new_file_text_);
+				}
 			}
-			new_file_in_ = center_[0].name->get_local_param().text_in_;
+
+			// アクセレーターキーの設定
+			// new_file にフォーカスがある場合は、キーの設定をしない
+			acc_key_ = 0;
+			if(param_.new_file_ && wd_.get_focus_widget() == (*cit).base) ;
+			else if(wd_.get_focus_widget() == this || wd_.get_focus_widget() == wd_.root_widget(this)) {
+				const std::string& ins = wd_.get_keyboard().input();
+				if(!ins.empty()) {
+					char ch = ins.back();
+					if(ch >= 'a' && ch <= 'z') ch -= 0x20;
+					if(ch == 0x1b || ch == '\r' ||
+					   ch == sys::keyboard::ctrl::UP || ch == sys::keyboard::ctrl::DOWN) {
+						acc_key_ = ch;
+						acc_cnt_ = 0;
+					} else if((ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z')) {
+						acc_key_ = ch;
+						if(acc_key_ch_ != ch) acc_cnt_ = 0;
+						else ++acc_cnt_;
+						acc_key_ch_ = ch;
+					} else {
+						acc_cnt_ = 0;
+					}
+				}
+			}
 		}
 	}
 
@@ -523,7 +602,12 @@ namespace gui {
 			return;
 		}
 
-		wd_.top_widget(this);
+		// センターコンテキストを作り直す
+		if(center_update_) {
+			destroy_files_(center_);
+			fsc_wait_ = true;
+			center_update_ = false;
+		}
 
 		// ファイル情報の取得と反映（ファイル情報収集はスレッドで動作）
 		if(fsc_wait_ && fsc_.probe()) {
@@ -535,8 +619,8 @@ namespace gui {
 				create_files_(center_, 0);
 				update_files_info_(center_);
 				if(left_.empty()) {
-					std::string pp;
-					if(utils::previous_path(param_.path_, pp)) {
+					std::string pp = utils::previous_path(param_.path_);
+					if(!pp.empty()) {
 						file_infos_.clear();
 						fsc_path_.clear();
 						fsc_.set_path(pp);
@@ -558,6 +642,53 @@ namespace gui {
 				}
 			}
 			focus_(focus_path_);
+		}
+
+		// アクセレーターキー操作
+		if(param_.acc_focus_ && acc_key_ && !center_.empty()) {
+			if(acc_key_ >= ' ') {
+				utils::strings ss;
+				BOOST_FOREACH(const widget_file& wf, center_) {
+					char ch = wf.name->get_text()[0];
+					if(ch >= 'a' && ch <= 'z') ch -= 0x20;
+					if(ch == acc_key_) {
+						ss.push_back(wf.name->get_text());
+					}
+				}
+				if(!ss.empty()) {
+					focus_path_ = ss[acc_cnt_ % ss.size()];
+					focus_(focus_path_);
+				}
+			} else if(acc_key_ == 0x1b) { // ESC
+				enable(false);
+			} else if(acc_key_ == '\r') { // Enter (CR)
+				BOOST_FOREACH(const widget_file& wf, center_) {
+					if(wf.name->get_text() == focus_path_) {
+						select_path_(focus_path_);
+						break;
+					}
+				}
+			} else if(acc_key_ == sys::keyboard::ctrl::UP || acc_key_ == sys::keyboard::ctrl::DOWN) {
+				if(focus_path_.empty()) {
+					focus_path_ = center_[0].name->get_text();
+					focus_(focus_path_);
+				} else {
+					uint32_t n = 0;
+					BOOST_FOREACH(const widget_file& wf, center_) {
+						if(wf.name->get_text() == focus_path_) {
+							break;
+						}
+						++n;
+					}
+					if(acc_key_ == sys::keyboard::ctrl::UP) --n;
+					else ++n;
+					if(n < center_.size()) {
+						focus_path_ = center_[n].name->get_text();
+						focus_(focus_path_);
+					}
+				}
+			}
+			acc_key_ = 0;
 		}
 
 		// フレームのサイズを、仮想ウィジェットに反映
@@ -590,10 +721,13 @@ namespace gui {
 
 		short base_size = main_->get_rect().size.y;
 		short d = base_size - center_.size() * param_.label_height_;
-		float gain = 0.85f;
-		float slip_gain = 0.5f;
-		float speed_gain = 0.95f;
-		float speed_move = 38.0f;	/// 横スクロールの初期速度
+
+		// ドラッグアクションで、一つ前に戻る
+		if(back_directory_ && files_->get_select_out()) {
+			request_right_ = false;
+			move_speed_ =  speed_move;
+			back_directory_ = false;
+		}
 
 		// 左右スクロールと、スプリング効果など
 		if(move_speed_ != 0.0f) {
@@ -606,14 +740,15 @@ namespace gui {
 			if(move_speed_ > 0.0f && position_.x >= main_->get_rect().size.x) {
 				move_speed_ = 0.0f;
 				position_.x = 0.0f;
-				std::string pp;
-				if(utils::previous_path(param_.path_, pp)) {
+				std::string pp = utils::previous_path(param_.path_);
+				if(!pp.empty()) {
 					std::string tmp = param_.path_;
 					param_.path_ = pp;
 					destroy_files_(center_);
 					center_.swap(left_);
 					focus_file(tmp);
-					if(utils::previous_path(param_.path_, pp)) {
+					pp = utils::previous_path(param_.path_);
+					if(!pp.empty()) {
 						file_infos_.clear();
 						fsc_path_.clear();
 						fsc_.set_path(pp, param_.filter_);
@@ -663,7 +798,7 @@ namespace gui {
 
 			position_ += speed_;
 			speed_ *= speed_gain;
-			position_.x *= gain;
+			position_.x *= def_gain;
 			if(-0.5f < position_.x && position_.x < 0.5f) {
 				position_.x = 0.0f;
 				speed_.x = 0;
@@ -674,14 +809,14 @@ namespace gui {
 				if(d < 0) {
 					if(position_.y < d) {
 						position_.y -= d;
-						position_.y *= gain;
+						position_.y *= def_gain;
 						position_.y += d;
 						speed_.y = 0.0f;
 						if(position_.y > (d - 0.5f)) {
 							position_.y = d;
 						}
 					} else if(position_.y > 0.0f) {
-						position_.y *= gain;
+						position_.y *= def_gain;
 						speed_.y = 0.0f;
 						if(position_.y < 0.5f) {
 							position_.y = 0.0f;
@@ -698,7 +833,7 @@ namespace gui {
 						}
 					}
 				} else {
-					position_.y *= gain;
+					position_.y *= def_gain;
 					if(-0.5f < position_.y && position_.y < 0.5f) {
 						position_.y = 0.0f;
 						speed_.y = 0.0f;
@@ -718,34 +853,11 @@ namespace gui {
 			short ref = files_->get_rect().org.x;
 			if(left_.size() > 0) ref += main_->get_rect().size.x;
 			if(ref > (get_rect().size.x / 3)) {
-				std::string np;
-				if(utils::previous_path(param_.path_, np)) {
-					param_.text_param_.text_ = np;
-				}
+				param_.text_param_.set_text(utils::previous_path(param_.path_));
+				back_directory_ = true;
 			} else {
-				param_.text_param_.text_ = param_.path_;
-			}
-		}
-
-		// 選択されたファイルをハイライトする位置の検出
-		BOOST_FOREACH(const widget_file& wf, left_) {
-			wf.name->set_state(widget::state::SYSTEM_SELECT, false);
-			wf.info->set_state(widget::state::SYSTEM_SELECT, false);
-		}
-		BOOST_FOREACH(const widget_file& wf, right_) {
-			wf.name->set_state(widget::state::SYSTEM_SELECT, false);
-			wf.info->set_state(widget::state::SYSTEM_SELECT, false);
-		}
-		widget_files_cit cit = scan_select_in_file_(center_);
-		if(cit != center_.end()) {
-			set_select_pos_(cit - center_.begin());
-		} else if(scan_select_file_(center_) != center_.end()) {
-			// 何もしない
-		} else if(!files_->get_state(widget::state::DRAG)){
-			if(select_pos_ < center_.size()) {
-				widget_file& wf = center_[select_pos_];
-				wf.name->set_state(widget::state::SYSTEM_SELECT);
-				wf.info->set_state(widget::state::SYSTEM_SELECT);
+				param_.text_param_.set_text(param_.path_);
+				back_directory_ = false;
 			}
 		}
 
@@ -764,51 +876,14 @@ namespace gui {
 		}
 
 		// 選択の確認と動作
-		{
+		if(!center_.empty()) {
 			widget_files_cit cit = scan_selected_file_(center_);
-			if(cit != center_.end()) {
-				const widget_file& wf = *cit;
-				if(param_.new_file_ && cit == center_.begin()) {
-					new_file_enable_ = !new_file_enable_;
-					center_[0].name->set_text("");
-					center_[0].name->at_local_param().read_only_ = false;
-					center_[0].name->at_local_param().text_in_ = true;
-					new_file_in_ = true;
-					
-				} else if(wf.name) {
-					const std::string& n = wf.name->get_text();
-					if(n == "..") {  // 一つ前に戻る
-						request_right_ = false;
-						move_speed_ =  speed_move;
-					} else if(wf.dir) {
-						request_right_ = true;
-						move_speed_ = -speed_move;
-						std::string ap;
-						if(n.size() > 2 && 'A' <= n[0] && n[0] <= 'Z' && n[1] == ':') {
-							param_.path_ = n;
-						} else {
-							utils::append_path(param_.path_, n, ap);
-							utils::strip_last_of_delimita_path(ap, param_.path_);
-						}
-						file_infos_.clear();
-						fsc_path_.clear();
-						fsc_.set_path(param_.path_, param_.filter_);
-						fsc_wait_ = true;
-						destroy_files_(right_);
-					} else {
-						utils::append_path(param_.path_, n, file_);
-						++select_file_id_;
-						enable(false);
-					}
-				}
-#if 0
-			} else if(!files_->get_state(widget::state::DRAG)){
-				short ref = files_->get_rect().org.x;
-				if(left_.size() > 0) ref += main_->get_rect().size.x;
-				if(ref > (get_rect().size.x / 2)) {
-					move_speed_ = 30.0f;
-				}
-#endif
+			if(cit == center_.end()) return;
+
+			const widget_file& wf = *cit;
+			if(param_.new_file_ && cit == center_.begin()) ;
+			else if(wf.name) {
+				select_path_(wf.name->get_text());
 			}
 		}
 	}

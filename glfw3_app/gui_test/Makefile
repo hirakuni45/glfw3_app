@@ -45,16 +45,19 @@ PSOURCES	=	main.cpp \
 				img_io/openjpeg_io.cpp \
 				img_io/bmp_io.cpp \
 				img_io/tga_io.cpp \
+				img_io/pdf_in.cpp \
 				img_io/img_files.cpp \
 				img_io/img_utils.cpp \
 				widgets/common_parts.cpp \
 				widgets/widget.cpp \
 				widgets/widget_director.cpp \
+				widgets/ui_policy.cpp \
 				widgets/widget_utils.cpp \
 				widgets/widget_image.cpp \
 				widgets/widget_text.cpp \
 				widgets/widget_frame.cpp \
 				widgets/widget_button.cpp \
+				widgets/widget_dial.cpp \
 				widgets/widget_label.cpp \
 				widgets/widget_slider.cpp \
 				widgets/widget_list.cpp \
@@ -64,30 +67,29 @@ PSOURCES	=	main.cpp \
 				widgets/widget_dialog.cpp \
 				widgets/widget_tree.cpp \
 				widgets/widget_filer.cpp \
-				widgets/widget_terminal.cpp
+				widgets/widget_terminal.cpp \
+				widgets/widget_progress.cpp
 
 STDLIBS		=
 OPTLIBS		=	glfw3 GLEW \
 				pthread \
-				png turbojpeg openjp2 \
+				png jpeg openjp2 mupdf \
 				mad faad mp4ff tag \
 				freetype \
 				z
 
-INC_SYS		=	/opt/local/include/boost
+INC_SYS		=	/usr/local/include/boost
 
-INC_LIB		=	/opt/libjpeg-turbo/include \
+INC_LIB		=	/usr/local/opt/jpeg-turbo/include \
 				/usr/local/include \
-				/opt/local/include \
-				/opt/local/include/freetype2 \
-				/opt/local/include/openjpeg-2.1 \
-				/opt/local/include/taglib
+				/usr/local/include/freetype2 \
+				/usr/local/include/openjpeg-2.1 \
+				/usr/local/include/taglib
 
 PINC_APP	=	. ../common
 CINC_APP	=	. ../common
-LIBDIR		=	/opt/libjpeg-turbo/lib \
-				/usr/local/lib \
-				/opt/local/lib
+LIBDIR		=	/usr/local/opt/jpeg-turbo/lib \
+				/usr/local/lib
 
 INC_S	=	$(addprefix -isystem, $(INC_SYS))
 INC_L	=	$(addprefix -isystem, $(INC_LIB))
@@ -133,7 +135,7 @@ LFLAGS	=	-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.p
 
 CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
 			-Wformat
-CPWARN	=	-Wall -Werror
+CPWARN	=	-Wall -Werror -Wno-unused-private-field
 
 OBJECTS	=	$(addprefix $(BUILD)/,$(patsubst %.cpp,%.o,$(PSOURCES))) \
 			$(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(CSOURCES)))

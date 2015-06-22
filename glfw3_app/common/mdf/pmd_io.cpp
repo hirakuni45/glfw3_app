@@ -31,6 +31,7 @@ namespace mdf {
 ///		std::cout << "'" << dst << "'" << std::endl;
 	}
 
+
 	bool pmd_io::parse_vertex_(utils::file_io& fio)
 	{
 		uint32_t n;
@@ -52,6 +53,7 @@ namespace mdf {
 		}
 		return true;
 	}
+
 
 	bool pmd_io::parse_face_vertex_(utils::file_io& fio)
 	{
@@ -109,7 +111,6 @@ namespace mdf {
 				return false;
 			}
 			bones_.push_back(b);
-
 //			std::string s;
 //			get_text_(b.name, 20, s);
 //			std::cout << "Bone: '" << s << "', type: " << static_cast<int>(b.type)
@@ -157,7 +158,6 @@ namespace mdf {
 				return false;
 			}
 			skins_.push_back(ps);
-
 ///			std::string s;
 ///			get_text_(ps.name, 20, s);
 ///			std::cout << "Skin: " << s << std::endl;
@@ -205,7 +205,6 @@ namespace mdf {
 				return false;
 			}
 			bone_disp_names_.push_back(bdl);
-
 //			std::string s;
 //			get_text_(bdl.name, 50, s);
 //			std::cout << "Bone disp list: " << s << std::endl;
@@ -462,7 +461,7 @@ namespace mdf {
 		@return 成功なら「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool pmd_io::save(utils::file_io fio)
+	bool pmd_io::save(utils::file_io& fio)
 	{
 
 

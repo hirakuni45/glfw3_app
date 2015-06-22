@@ -20,8 +20,10 @@ namespace gui {
 	void widget_radio::initialize()
 	{
 		// ボタンは標準的に固定
+		at_param().state_.set(widget::state::SERVICE);
 		at_param().state_.set(widget::state::POSITION_LOCK);
 		at_param().state_.set(widget::state::SIZE_LOCK);
+		at_param().state_.set(widget::state::MOVE_STALL);
 
 		dis_h_ = wd_.get_share_image().un_radio_;
 		ena_h_ = wd_.get_share_image().to_radio_;
@@ -49,6 +51,8 @@ namespace gui {
 		if(!f && param_.check_) {
 			widgets ws;
 			wd_.parents_widget(get_param().parents_, ws);
+			int i = 0;
+			no_ = -1;
 			BOOST_FOREACH(widget* w, ws) {
 				if(w->type() == get_type_id<widget_radio>()) {
 					if(w != this) {
@@ -56,8 +60,11 @@ namespace gui {
 						if(wl) {
 							wl->at_local_param().check_ = false;
 						}
+					} else {
+						no_ = i;
 					}
 				}
+				++i;
 			}
 		}
 	}

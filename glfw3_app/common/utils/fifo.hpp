@@ -12,16 +12,17 @@ namespace utils {
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
     /*!
         @brief  fifo クラス
-		@param[in]	size	バッファサイズ
+		@param[in]	T		基本型
+		@param[in]	SIZE	バッファサイズ
 	*/
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	template <class T, uint32_t size_ = 256>
+	template <class T, uint32_t SIZE>
 	class fifo {
 
 		volatile uint32_t	get_;
 		volatile uint32_t	put_;
 
-		T	buff_[size_];
+		T	buff_[SIZE];
 
 	public:
         //-----------------------------------------------------------------//
@@ -49,7 +50,7 @@ namespace utils {
 		void put(const T& v) {
 			buff_[put_] = v;
 			++put_;
-			if(put_ >= size_) {
+			if(put_ >= SIZE) {
 				put_ = 0;
 			}
 		}
@@ -73,7 +74,7 @@ namespace utils {
 		const T& get() {
 			uint32_t pos = get_;
 			++get_;
-			if(get_ >= size_) {
+			if(get_ >= SIZE) {
 				get_ = 0;
 			}
 			return buff_[pos];
@@ -82,13 +83,13 @@ namespace utils {
 
         //-----------------------------------------------------------------//
         /*!
-            @brief  長さを返す
+            @brief  バッファ長さを返す
 			@return	長さ
 		*/
         //-----------------------------------------------------------------//
 		uint32_t length() const {
 			if(put_ >= get_) return (put_ - get_);
-			else return (size_ + put_ - get_);
+			else return (SIZE + put_ - get_);
 		}
 
 
@@ -116,7 +117,7 @@ namespace utils {
 			@return	バッファのサイズ
 		*/
         //-----------------------------------------------------------------//
-		uint32_t size() const { return size_; }
+		uint32_t size() const { return SIZE; }
 
 	};
 

@@ -261,7 +261,7 @@ namespace img {
 	/*----------------------------------------------------------------------/
 	/	インデックス・カラー(無圧縮 1, 4, 8 ビット) 形式の画像データを展開	/
 	/----------------------------------------------------------------------*/
-	static bool read_idx(utils::file_io& fin, shared_img img, const bmp_info& bmp)
+	bool bmp_io::read_idx_(utils::file_io& fin, shared_img img, const bmp_info& bmp)
 	{
 		size_t stride = bmp.width * bmp.depth;
 		if(stride & 7) stride += 8;
@@ -280,7 +280,7 @@ namespace img {
 		}
 		for(unsigned int h = 0; h < bmp.height; ++h) {
 			if(fin.read(buf, 1, stride) != stride) {
-				delete buf;
+				delete[] buf;
 				return false;
 			}
 			int depth = 0;
@@ -299,6 +299,7 @@ namespace img {
 				img->put_pixel(pos, c);
 			}
 			pos.y += d;
+			++prgl_pos_;
 		}
 		delete[] buf;
 		return true;
@@ -308,7 +309,7 @@ namespace img {
 	/*------------------------------------------------------/
 	/	BGR (無圧縮 24/32 ビット) 形式の画像データを展開	/
 	/------------------------------------------------------*/
-	static bool read_rgb(utils::file_io& fin, shared_img img, const bmp_info& bmp)
+	bool bmp_io::read_rgb_(utils::file_io& fin, shared_img img, const bmp_info& bmp)
 	{
 		int pads = bmp.depth / 8;
 		size_t stride = bmp.width * pads;
@@ -326,7 +327,7 @@ namespace img {
 		}
 		for(unsigned int h = 0; h < bmp.height; ++h) {
 			if(fin.read(buf, 1, stride) != stride) {
-				delete buf;
+				delete[] buf;
 				return false;
 			}
 			char* src = buf;
@@ -340,6 +341,7 @@ namespace img {
 				src += pads;
 			}
 			pos.y += d;
+			++prgl_pos_;
 		}
 		delete[] buf;
 		return true;
@@ -378,7 +380,7 @@ namespace img {
 	/*----------------------------------------------/
 	/	BI_BITFIELDS 形式の画像データを展開			/
 	/----------------------------------------------*/
-	static bool read_bitfield(utils::file_io& fin, shared_img img, const bmp_info& bmp)
+	bool bmp_io::read_bitfield_(utils::file_io& fin, shared_img img, const bmp_info& bmp)
 	{
 		volatile BGRA_PAD shift_cnt;
 		volatile BGRA_PAD bits_cnt;
@@ -452,6 +454,7 @@ namespace img {
 				break;
 			}
 			pos.y += d;
+			++prgl_pos_;
 		}
 		delete[] rowb;
 
@@ -462,7 +465,7 @@ namespace img {
 	/*----------------------------------------------/
 	/	BI_RLE8 / BI_RLE4 形式の画像データを展開	/
 	/----------------------------------------------*/
-	static bool decompress_rle(utils::file_io& fin, shared_img img, const bmp_info& bmp)
+	bool bmp_io::decompress_rle_(utils::file_io& fin, shared_img img, const bmp_info& bmp)
 	{
 		size_t stride = bmp.width * bmp.depth;
 		if(stride & 7) stride += 8;
@@ -479,7 +482,7 @@ namespace img {
 			pos.y = bmp.height - 1;
 			dy = -1;
 		}
-		unsigned char buf[1024];		/* 258 or above */
+		unsigned char buf[258 * 4];		/* 258 or above */
 		unsigned char* bfptr = buf;
 		size_t bfcnt = 0;
 		for( ; ; ) {
@@ -491,7 +494,10 @@ namespace img {
 				if(bfptr != buf && bfcnt != 0) memmove(buf, bfptr, bfcnt);
 				size_t rd = fin.read(buf + bfcnt, 1, sizeof(buf) - bfcnt);
 				if(rd == 0) {
-					if(pos.x >= bmp.width) { /*x = 0;*/ pos.y += dy; }
+					if(pos.x >= bmp.width) {
+						pos.y += dy;
+						++prgl_pos_;
+					}
 					if(pos.y >= bmp.height) return false;	/* missing EoB marker */
 					else return false;	// ferror(fp) ? err_false : err_readeof;
 				}
@@ -557,9 +563,11 @@ namespace img {
 			} else if (bfptr[1] == 2) {			/* Delta record */
 				pos.x += bfptr[2];
 				pos.y += bfptr[3] * dy;
+				prgl_pos_ += bfptr[3];
 			} else if (bfptr[1] == 0) {			/* End of line marker */
 				pos.x = 0;
 				pos.y += dy;
+				++prgl_pos_;
 			} else /*if (bfptr[1] == 1)*/ {		/* End of bitmap marker */
 				break;
 			}
@@ -678,6 +686,9 @@ namespace img {
 			img_->create(vtx::spos(bmp.width, bmp.height), bmp.alpha_chanel);
 		}
 
+		prgl_pos_ = 0;
+		prgl_ref_ = bmp.height;
+
 		int clutnum = 0;
 		if(bmp.depth <= 8) {
 			if(bmp.skip >= bmp.palette_size << bmp.depth) {
@@ -725,17 +736,17 @@ namespace img {
 		switch(bmp.compression) {
 		case BI_RGB:		// 1, 4, 8, 24, 32 bits
 			if(bmp.depth == 24 || bmp.depth == 32) {
-				f = read_rgb(fin, img_, bmp);
+				f = read_rgb_(fin, img_, bmp);
 			} else if(bmp.depth == 1 || bmp.depth == 4 || bmp.depth == 8) {
-				f = read_idx(fin, img_, bmp);
+				f = read_idx_(fin, img_, bmp);
 			}
 			break;
 		case BI_BITFIELDS:	// 16, 32
-			f = read_bitfield(fin, img_, bmp);
+			f = read_bitfield_(fin, img_, bmp);
 			break;
 		case BI_RLE8:
 		case BI_RLE4:
-			f = decompress_rle(fin, img_, bmp);
+			f = decompress_rle_(fin, img_, bmp);
 			break;
 		default:
 			break;
