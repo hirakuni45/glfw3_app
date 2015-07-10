@@ -9,15 +9,13 @@
 #include <vector>
 #include <cmath>
 
-#ifdef WIN32
-#include <AL/alc.h>
-#include <AL/al.h>
-#include <AL/alext.h>
-#endif
-
 #ifdef __APPLE__
-#include <OpenAL/alc.h>
 #include <OpenAL/al.h>
+#include <OpenAL/alc.h>
+#else
+#include <AL/al.h>
+#include <AL/alc.h>
+#include <AL/alext.h>
 #endif
 
 #if defined(IPHONE) || defined(IPAD) || defined(IPHONE_IPAD)

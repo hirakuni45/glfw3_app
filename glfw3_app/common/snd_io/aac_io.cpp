@@ -701,15 +701,15 @@ namespace al {
 
 		int j = mp4ff_meta_get_num_items(dt.infile);
 		for(int k = 0; k < j; ++k) {
-#ifdef WIN32
-			const char* item = mp4ff_meta_get_item(dt.infile, k);
-			const char* value = mp4ff_meta_get_value(dt.infile, k);
-			if(item != nullptr && value != nullptr) {
-#else
+//#ifdef WIN32
+//			const char* item = mp4ff_meta_get_item(dt.infile, k);
+//			const char* value = mp4ff_meta_get_value(dt.infile, k);
+//			if(item != nullptr && value != nullptr) {
+//#else
 			char* item;
 			char* value;
 			if(mp4ff_meta_get_by_index(dt.infile, k, &item, &value)) {
-#endif
+//#endif
    				std::string s = item;
 				{
 ///					size_t size = mp4ff_meta_get_item_size(dt.infile, k);
