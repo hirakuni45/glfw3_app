@@ -86,7 +86,7 @@ namespace img {
 			@return 正常なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool put_clut(int idx, const rgba8& c) {
+		bool put_clut(int idx, const rgba8& c) override {
 			if(idx >= 0 && idx < 256) {
 				if(idx >= clut_max_) clut_max_ = idx + 1;
 				clut_[idx] = c;
