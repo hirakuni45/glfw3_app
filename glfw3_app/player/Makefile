@@ -3,7 +3,11 @@
 #-----------------------------------------------#
 TARGET		=	player
 
-#ICON_RC		=	icon.rc
+ifeq ($(OS),Windows_NT)
+ICON_RC		=	icon.rc
+else
+ICON_RC		=
+endif
 
 # 'debug' or 'release'
 BUILD		=	release
@@ -110,7 +114,7 @@ LIBN	+=	$(addprefix -l, $(OPTLIBS))
 CP	=	clang++
 CC	=	clang
 LK	=	clang++
-RC	=
+RC	=	windres
 
 POPT	=	-O2 -std=gnu++11
 COPT	=	-O2
