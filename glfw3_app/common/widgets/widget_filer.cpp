@@ -81,7 +81,7 @@ namespace gui {
 
 		// ルートパスならドライブレターを加える
 		std::string pp = utils::previous_path(fsc_path_);
-		if(!pp.empty()) {
+		if(pp.empty()) {
 			for(uint32_t i = 0; i < drv_.get_num(); ++i) {
 				widget_file wf;
 				std::string fn;
