@@ -11,10 +11,10 @@
 #include <stack>
 #include <map>
 #include <utility>
-#include <boost/format.hpp>
-#include <boost/foreach.hpp>
 #include "utils/vtx.hpp"
 #include "utils/file_io.hpp"
+#include <boost/format.hpp>
+#include <boost/foreach.hpp>
 
 namespace sys {
 

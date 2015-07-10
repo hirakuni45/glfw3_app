@@ -82,9 +82,9 @@ namespace utils {
 #ifdef WIN32
 		utils::wstring ws;
 		utf8_to_utf16(dir, ws);
-		if(_wmkdir(ws.c_str() != 0) ret = false;
+		if(_wmkdir((const wchar_t*)ws.c_str()) != 0) ret = false;
 #else
-		if(mkdir(dir.c_str(), 0x755) != 0) ret = false;
+		if(mkdir(dir.c_str()) != 0) ret = false;
 #endif
 		return ret;
 	}

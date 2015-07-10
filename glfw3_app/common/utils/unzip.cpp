@@ -22,14 +22,7 @@ namespace utils {
 	{
 		close();
 
-		std::string s;
-#ifdef WIN32
-		// ※ Windows では、アーカイブ名は、sjis にする必要があるようだ・・
-		utils::utf8_to_sjis(archive, s);
-#else
-		s = archive;
-#endif
-		hnd_ = unzOpen(s.c_str());
+		hnd_ = unzOpen(archive.c_str());
 		if(hnd_ == 0) {
 			return false;
 		}

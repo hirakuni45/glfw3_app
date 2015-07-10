@@ -5,13 +5,23 @@
 */
 //=====================================================================//
 #include "files.hpp"
-#include <unistd.h>
+// #include <unistd.h>
+#include <time.h>
 
 namespace utils {
 
 	void files::sleep_(uint32_t ms)
 	{
-		usleep(ms * 1000);
+//		usleep(ms * 1000);
+#if 1
+		struct timespec in;
+		in.tv_sec = 0;
+		in.tv_nsec = ms * 1000 * 1000;
+		struct timespec out;
+		out.tv_sec = 0;
+		out.tv_nsec = 0;
+		nanosleep(&in, &out);
+#endif
 	}
 
 	void* files::task_(void* in)
