@@ -45,7 +45,8 @@ namespace gl {
 	*/
 	//=================================================================//
 	static inline double rdtsc_() {
-		LARGE_INTEGER tc = { 0, 0 };
+		LARGE_INTEGER tc;
+		tc.QuadPart = 0;
         // 使用するCPUコアを限定する
         SetThreadAffinityMask(GetCurrentThread(), 1);
 		QueryPerformanceCounter(&tc);
@@ -60,7 +61,8 @@ namespace gl {
 	*/
 	//=================================================================//
 	static inline double get_cpu_clock_() {
-		LARGE_INTEGER tc = { 0, 0 };
+		LARGE_INTEGER tc;
+		tc.QuadPart = 0;
         SetThreadAffinityMask(GetCurrentThread(), 1);
 		QueryPerformanceFrequency(&tc);
 		return static_cast<double>(tc.QuadPart);
