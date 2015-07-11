@@ -212,7 +212,8 @@ endif
 # -Wuninitialized -Wunused -Werror -Wshadow
 CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
 			-Wformat
-CPWARN	=	-Wall -Werror -Wno-unused-private-field
+CPWARN	=	-Wall -Wno-unused-variable -Wno-unused-private-field -Wno-reorder -Wno-delete-incomplete -Wno-int-to-void-pointer-cast -Werror
+# CPWARN	=	-Wall -Werror -Wno-unused-private-field
 
 OBJECTS	=	$(addprefix $(BUILD)/,$(patsubst %.cpp,%.o,$(PSOURCES))) \
 			$(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(CSOURCES)))

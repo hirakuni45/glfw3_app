@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------------------
 #include "PngTextureLoader.h"
 
-#if _WIN32
+#if _WIN32 && !defined(__MINGW_EXTENSION)
 #define __PNG_DDI 1
 #else
 #define __PNG_DDI 0

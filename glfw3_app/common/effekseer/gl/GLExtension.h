@@ -5,9 +5,9 @@
 //----------------------------------------------------------------------------------
 // Include
 //----------------------------------------------------------------------------------
-#if _WIN32
-#include <Windows.h>
-#include <GL/gl.h>
+#if _WIN32 && !defined(__MINGW_EXTENSION)
+//#include <Windows.h>
+//#include <GL/gl.h>
 #endif
 #include <stddef.h>
 #include "effekseer/gl/Base_Pre.h"

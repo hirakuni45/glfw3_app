@@ -47,7 +47,7 @@ class RibbonRenderer;
 
 class TextureLoader;
 
-#if _WIN32
+#if _WIN32 && !defined(__MINGW_EXTENSION)
 #include <gl/GLU.h>
 #pragma comment(lib, "glu32.lib")
 #ifdef _DEBUG
