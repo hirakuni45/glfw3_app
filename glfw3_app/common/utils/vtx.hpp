@@ -6,10 +6,10 @@
 */
 //=====================================================================//
 #include <vector>
-#include <cmath>
-#include <cfloat>
 #include <boost/unordered_set.hpp>
 #include <boost/unordered_map.hpp>
+#include <cmath>
+#include <cfloat>
 
 namespace vtx {
 

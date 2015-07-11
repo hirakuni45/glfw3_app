@@ -428,8 +428,18 @@ namespace app {
 
 		wd.update();
 
-		// 画像ファイルのセーブタスク起動
 		if(!save_file_name_.empty()) {
+			save_t t = std::make_tuple(save_file_name_, src_image_);
+			if(!save_task_(t)) {
+				dialog_->set_text("Can't encode image file:\n'"
+								  + save_file_name_ + "'");
+				dialog_->enable();
+			} else {
+				term_->output("Sv");
+				image_info_(save_file_name_, src_image_.get());
+			}
+			save_file_name_.clear();
+#if 0
 			if(image_saver_.valid()) {
 				if(!image_saver_.get()) {
 					dialog_->set_text("Can't encode image file:\n'"
@@ -452,10 +462,11 @@ namespace app {
 					launch = true;
 				}
 				if(launch) {
-					save_t t = std::make_tuple(save_file_name_, bld_image_);
+					save_t t = std::make_tuple(save_file_name_, src_image_);
 					image_saver_ = std::async(std::launch::async, save_task_, t);
 				}
 			}
+#endif
 		}
 	}
 

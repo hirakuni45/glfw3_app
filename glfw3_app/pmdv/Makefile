@@ -29,6 +29,9 @@ PSOURCES	=	main.cpp \
 				gl_fw/glmobj.cpp \
 				gl_fw/gltexfb.cpp \
 				gl_fw/glterminal.cpp \
+				gl_fw/glcamera.cpp \
+				gl_fw/gllight.cpp \
+				gl_fw/glutils.cpp \
 				utils/vtx.cpp \
 				utils/vmath.cpp \
 				utils/sjis_utf16.cpp \
@@ -72,13 +75,16 @@ PSOURCES	=	main.cpp \
 				widgets/widget_tree.cpp \
 				widgets/widget_filer.cpp \
 				widgets/widget_terminal.cpp \
-				widgets/widget_progress.cpp
+				widgets/widget_progress.cpp \
+				mdf/pmd_io.cpp \
+				mdf/pmx_io.cpp \
+				mdf/mmd_io.cpp
 
 STDLIBS		=
 
 ifeq ($(OS),Windows_NT)
 LOCAL_PATH	=	/mingw64
-OPTLIBS		=	opengl32 glfw3 glew32 \
+OPTLIBS		=	opengl32 glu32 glfw3 glew32 \
 				pthread \
 				png turbojpeg jpeg openjp2 \
 				freetype \
@@ -130,7 +136,7 @@ PFLAGS	=	-DHAVE_STDINT_H
 CFLAGS	=
 
 ifeq ($(OS),Windows_NT)
-	PFLAGS += -DWIN32
+	PFLAGS += -DWIN32 -DBOOST_USE_WINDOWS_H
 	CFLAGS += -DWIN32
 endif
 

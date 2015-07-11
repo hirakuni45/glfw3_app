@@ -5,8 +5,6 @@
 	@author 平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include <thread>
-#include <future>
 #include "main.hpp"
 #include "utils/i_scene.hpp"
 #include "utils/director.hpp"
@@ -79,7 +77,7 @@ namespace app {
 
 		std::string		save_file_name_;
 
-		std::future<bool>	image_saver_;
+//		std::future<bool>	image_saver_;
 
 		bool			save_dialog_;
 		bool			update_;

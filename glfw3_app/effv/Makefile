@@ -3,7 +3,14 @@
 #-----------------------------------------------#
 TARGET		=	effv
 
-#ICON_RC		=	icon.rc
+ifeq ($(OS),Windows_NT)
+FEXT	=	.exe
+ICON_RC		=
+#	icon.rc
+else
+FEXT	=
+ICON_RC		=
+endif
 
 # 'debug' or 'release'
 BUILD		=	release
@@ -12,8 +19,6 @@ VPATH		=	../common
 
 CSOURCES	=	minizip/ioapi.c \
 				minizip/unzip.c
-
-# 				img_io/pdf_in.cpp
 
 PSOURCES	=	main.cpp \
 				effv_main.cpp \
@@ -34,24 +39,22 @@ PSOURCES	=	main.cpp \
 				utils/file_io.cpp \
 				utils/file_info.cpp \
 				utils/files.cpp \
-				utils/unzip.cpp \
 				utils/preference.cpp \
 				utils/keyboard.cpp \
 				img_io/paint.cpp \
-				img_io/png_io.cpp \
-				img_io/jpeg_io.cpp \
-				img_io/openjpeg_io.cpp \
 				img_io/bmp_io.cpp \
 				img_io/tga_io.cpp \
 				img_io/dds_io.cpp \
-				img_io/bdf_io.cpp \
+				img_io/png_io.cpp \
+				img_io/jpeg_io.cpp \
+				img_io/openjpeg_io.cpp \
 				img_io/img_files.cpp \
 				img_io/img_utils.cpp \
 				snd_io/audio_io.cpp \
 				snd_io/pcm.cpp \
 				snd_io/wav_io.cpp \
-				snd_io/mp3_io.cpp \
 				snd_io/aac_io.cpp \
+				snd_io/mp3_io.cpp \
 				snd_io/snd_files.cpp \
 				snd_io/sound.cpp \
 				widgets/common_parts.cpp \
@@ -67,10 +70,15 @@ PSOURCES	=	main.cpp \
 				widgets/widget_list.cpp \
 				widgets/widget_check.cpp \
 				widgets/widget_radio.cpp \
+				widgets/widget_menu.cpp \
 				widgets/widget_dialog.cpp \
 				widgets/widget_tree.cpp \
 				widgets/widget_filer.cpp \
 				widgets/widget_terminal.cpp \
+				widgets/widget_progress.cpp \
+				mdf/pmd_io.cpp \
+				mdf/pmx_io.cpp \
+				mdf/mmd_io.cpp \
 				effekseer/core/CriticalSection.cpp \
 				effekseer/core/Setting.cpp \
 				effekseer/core/DefaultEffectLoader.cpp \
@@ -121,28 +129,37 @@ PSOURCES	=	main.cpp \
 				effekseer/gl/VertexBuffer.cpp
 
 STDLIBS		=
+
+ifeq ($(OS),Windows_NT)
+LOCAL_PATH	=	/mingw64
+OPTLIBS		=	opengl32 glu32 glfw3 glew32 \
+				pthread \
+				png turbojpeg jpeg openjp2 \
+				freetype \
+				mad faad mp4ff tag \
+				z OpenAL32
+else
+LOCAL_PATH	=	/usr/local
 OPTLIBS		=	glfw3 GLEW \
 				pthread \
 				png turbojpeg openjp2 \
 				freetype \
 				mad faad mp4ff tag \
 				z
+endif
 
-INC_SYS		=	/usr/local/include/boost
-
-INC_LIB		=	/usr/local/opt/jpeg-turbo/include \
-				/usr/local/include \
-				/usr/local/include/freetype2 \
-				/usr/local/include/openjpeg-2.1 \
-				/usr/local/include/taglib
+INC_SYS		=	$(LOCAL_PATH)/include \
+				$(LOCAL_PATH)/include/freetype2 \
+				$(LOCAL_PATH)/include/openjpeg-2.1 \
+				$(LOCAL_PATH)/include/taglib
+INC_LIB		=
+LIBDIR		=	$(LOCAL_PATH)/lib
 
 PINC_APP	=	. ../common
 CINC_APP	=	. ../common
-LIBDIR		=	/usr/local/opt/jpeg-turbo/lib \
-				/usr/local/lib
 
-INC_S	=	$(addprefix -isystem, $(INC_SYS))
-INC_L	=	$(addprefix -isystem, $(INC_LIB))
+INC_S	=	$(addprefix -isystem , $(INC_SYS))
+INC_L	=	$(addprefix -isystem , $(INC_LIB))
 INC_P	=	$(addprefix -I, $(PINC_APP))
 INC_C	=	$(addprefix -I, $(CINC_APP))
 CINCS	=	$(INC_S) $(INC_L) $(INC_C)
@@ -157,7 +174,7 @@ LIBN	+=	$(addprefix -l, $(OPTLIBS))
 CP	=	clang++
 CC	=	clang
 LK	=	clang++
-RC	=
+RC	=	windres
 
 POPT	=	-O2 -std=gnu++11
 COPT	=	-O2
@@ -165,6 +182,11 @@ LOPT	=
 
 PFLAGS	=	-DHAVE_STDINT_H
 CFLAGS	=
+
+ifeq ($(OS),Windows_NT)
+	PFLAGS += -DWIN32 -DBOOST_USE_WINDOWS_H
+	CFLAGS += -DWIN32
+endif
 
 ifeq ($(BUILD),debug)
 	POPT += -g
@@ -179,14 +201,18 @@ ifeq ($(BUILD),release)
 endif
 
 # 	-static-libgcc -static-libstdc++
+ifeq ($(OS),Windows_NT)
+LFLAGS	=
+else
 LFLAGS	=	-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk \
 -Wl,-search_paths_first -Wl,-headerpad_max_install_names \
 -framework AGL -framework Cocoa -framework OpenGL -framework IOKit -framework CoreFoundation -framework CoreVideo -framework OpenAL
+endif
 
 # -Wuninitialized -Wunused -Werror -Wshadow
 CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
 			-Wformat
-CPWARN	=	-Wall -Wno-unused-variable -Wno-unused-private-field -Wno-reorder -Wno-delete-incomplete -Wno-int-to-void-pointer-cast -Werror
+CPWARN	=	-Wall -Werror -Wno-unused-private-field
 
 OBJECTS	=	$(addprefix $(BUILD)/,$(patsubst %.cpp,%.o,$(PSOURCES))) \
 			$(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(CSOURCES)))
@@ -200,10 +226,10 @@ endif
 .SUFFIXES :
 .SUFFIXES : .rc .hpp .h .c .cpp .o
 
-all: $(BUILD) $(TARGET)
+all: $(BUILD) $(TARGET)$(FEXT)
 
-$(TARGET): $(OBJECTS) $(ICON_OBJ) Makefile
-	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -o $(TARGET)
+$(TARGET)$(FEXT): $(OBJECTS) $(ICON_OBJ) Makefile
+	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -o $(TARGET)$(FEXT)
 
 $(BUILD)/%.o : %.c
 	mkdir -p $(dir $@); \
@@ -228,25 +254,30 @@ $(BUILD)/%.d : %.cpp
 	| sed 's/$(notdir $*)\.o:/$(subst /,\/,$(patsubst %.d,%.o,$@) $@):/' > $@ ; \
 	[ -s $@ ] || rm -f $@
 
+ifeq ($(OS),Windows_NT)
+strip:
+	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -mwindows -o $(TARGET)$(FEXT)
+endif
+
 run:
 	./$(TARGET)
 
 clean:
-	rm -rf $(BUILD) $(TARGET)
+	rm -rf $(BUILD) $(TARGET)$(FEXT)
 
 clean_depend:
 	rm -f $(DEPENDS)
 
 dllname:
-	objdump -p $(TARGET) | grep "DLL Name"
+	objdump -p $(TARGET)$(FEXT) | grep "DLL Name"
 
 tarball:
-	tar cfvz $(subst .exe,,$(TARGET))_$(shell date +%Y%m%d%H).tgz \
+	tar cfvz $(TARGET)_$(shell date +%Y%m%d%H).tgz \
 	*.[hc]pp Makefile ../common/*/*.[hc]pp ../common/*/*.[hc]
 
 bin_zip:
-	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -mwindows -o $(TARGET) 
-	rm -f $(subst .exe,,$(TARGET))_$(shell date +%Y%m%d%H)_bin.zip
-	zip $(subst .exe,,$(TARGET))_$(shell date +%Y%m%d%H)_bin.zip *.exe *.dll
+	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -mwindows -o $(TARGET)$(FEXT) 
+	rm -f $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip
+	zip $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip *.exe *.dll
 
 -include $(DEPENDS)
