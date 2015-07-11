@@ -10,6 +10,8 @@
 #include "bmc_core.hpp"
 #include "img_io/img_files.hpp"
 
+#include <memory>
+
 typedef app::bmc_main	start_app;
 
 static const char* window_key_ = { "application/window" };
@@ -20,7 +22,10 @@ static const vtx::spos limit_size_(800, 600);
 
 int main(int argc, char** argv)
 {
-	app::bmc_core bmc(argc, argv);
+// 標準的スタックサイズだと、bmc_core を作れない・・・
+//	app::bmc_core bmc(argc, argv);
+	auto bmcp = std::shared_ptr<app::bmc_core>(new app::bmc_core(argc, argv));
+	app::bmc_core& bmc = *bmcp.get();
 
 	if(!bmc.analize() || bmc.get_inp_file().empty()) {
 		bmc.help();
