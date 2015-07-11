@@ -4,8 +4,10 @@
 TARGET		=	player
 
 ifeq ($(OS),Windows_NT)
+FEXT	=	.exe
 ICON_RC		=	icon.rc
 else
+FEXT	=
 ICON_RC		=
 endif
 
@@ -143,12 +145,10 @@ endif
 # 	-static-libgcc -static-libstdc++
 ifeq ($(OS),Windows_NT)
 LFLAGS	=
-FEXT	=	.exe
 else
 LFLAGS	=	-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk \
 -Wl,-search_paths_first -Wl,-headerpad_max_install_names \
 -framework AGL -framework Cocoa -framework OpenGL -framework IOKit -framework CoreFoundation -framework CoreVideo -framework OpenAL
-FEXT	=
 endif
 
 # -Wuninitialized -Wunused -Werror -Wshadow
@@ -196,8 +196,10 @@ $(BUILD)/%.d : %.cpp
 	| sed 's/$(notdir $*)\.o:/$(subst /,\/,$(patsubst %.d,%.o,$@) $@):/' > $@ ; \
 	[ -s $@ ] || rm -f $@
 
+ifeq ($(OS),Windows_NT)
 strip:
 	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -mwindows -o $(TARGET)$(FEXT)
+endif
 
 run:
 	./$(TARGET)
@@ -212,12 +214,12 @@ dllname:
 	objdump -p $(TARGET)$(FEXT) | grep "DLL Name"
 
 tarball:
-	tar cfvz $(subst .exe,,$(TARGET))_$(shell date +%Y%m%d%H).tgz \
+	tar cfvz $(TARGET)_$(shell date +%Y%m%d%H).tgz \
 	*.[hc]pp Makefile ../common/*/*.[hc]pp ../common/*/*.[hc]
 
 bin_zip:
-	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -mwindows -o $(TARGET) 
-	rm -f $(subst .exe,,$(TARGET))_$(shell date +%Y%m%d%H)_bin.zip
-	zip $(subst .exe,,$(TARGET))_$(shell date +%Y%m%d%H)_bin.zip *.exe *.dll
+	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -mwindows -o $(TARGET)$(FEXT) 
+	rm -f $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip
+	zip $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip *.exe *.dll
 
 -include $(DEPENDS)
