@@ -94,8 +94,7 @@ namespace utils {
 			}
 			closedir(dir);
 #endif
-			if(list.empty()) return false;
-			else return true;
+			return true;
 		} else {
 			return false;
 		}
@@ -181,5 +180,4 @@ namespace utils {
 			if(add) dst.push_back(f);
 		}
 	}
-
 }
