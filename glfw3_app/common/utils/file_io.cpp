@@ -84,7 +84,8 @@ namespace utils {
 		utf8_to_utf16(dir, ws);
 		if(_wmkdir((const wchar_t*)ws.c_str()) != 0) ret = false;
 #else
-		if(mkdir(dir.c_str()) != 0) ret = false;
+		mode_t t = S_IRWXU | (S_IRGRP | S_IXGRP) | (S_IROTH | S_IXOTH);
+		if(mkdir(dir.c_str(), t) != 0) ret = false;
 #endif
 		return ret;
 	}
