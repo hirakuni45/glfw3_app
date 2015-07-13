@@ -407,6 +407,9 @@ namespace gui {
 
 	void widget_filer::select_path_(const std::string& n)
 	{
+		// 移動中は無視！
+		if(move_speed_ != 0.0f) return;
+
 		if(n == "..") {  // 一つ前に戻る
 			request_right_ = false;
 			move_speed_ =  speed_move;
