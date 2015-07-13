@@ -1,6 +1,6 @@
 //=====================================================================//
 /*! @file
-	@brief  main
+	@brief  メイン
 	@author 平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
@@ -20,12 +20,12 @@ int main(int argc, char** argv)
 	gl::core& core = gl::core::get_instance();
 
 	if(!core.initialize(argv[0])) {
-		std::cerr << "Core initialize error" << std::endl;
+		std::cerr << "glcore initialize error." << std::endl;
 		return -1;
 	}
-
+	
 	std::string pref = core.get_exec_path();
-	pref += ".pre";
+   	pref += ".pre";
 
 	utils::director<app::core> director;
 
@@ -37,6 +37,7 @@ int main(int argc, char** argv)
 	}
 
 	if(!core.setup(rect, app_title_, false)) {
+		std::cerr << "Core setup error" << std::endl;
 		return -1;
 	}
 	core.set_limit_size(limit_size_);
@@ -50,6 +51,7 @@ int main(int argc, char** argv)
 	while(!core.get_exit_signal()) {
 		core.service();
 
+		glClearColor(0, 0, 0, 255);
 		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 		gl::glColor(img::rgbaf(1.0f));
 
@@ -69,7 +71,10 @@ int main(int argc, char** argv)
 	director.erase_scene();
 	director.render();
 
-	director.at().preference_.save_rect(window_key_, core.get_rect());
+	{
+		const vtx::srect& rect = core.get_rect();
+		director.at().preference_.save_rect(window_key_, rect);
+	}
 
 	director.at().preference_.save(pref);
 
