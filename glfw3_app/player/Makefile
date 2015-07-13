@@ -123,7 +123,7 @@ CC	=	clang
 LK	=	clang++
 RC	=	windres
 
-POPT	=	-O2 -std=gnu++11
+POPT	=	-O2 -std=c++14
 COPT	=	-O2
 LOPT	=
 
