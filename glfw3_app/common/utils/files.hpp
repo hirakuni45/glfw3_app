@@ -25,11 +25,12 @@ namespace utils {
 		struct file_t {
 			volatile bool		loop_;
 			volatile uint32_t	idx_;
+			volatile uint32_t	retry_;
 			pthread_mutex_t		sync_;
 			std::string			path_;
 			std::string			filter_;
 			file_infos			infos_;
-			file_t() : loop_(true), idx_(0) { }
+			file_t() : loop_(true), idx_(0), retry_(5) { }
 		};
 
 		volatile uint32_t	idx_;

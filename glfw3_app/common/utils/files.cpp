@@ -33,12 +33,23 @@ namespace utils {
 			if(idx != t.idx_) {
 				pthread_mutex_lock(&t.sync_);
 				t.infos_.clear();
-				if(t.filter_.empty()) {
-					create_file_list(t.path_, t.infos_);
-				} else {
-					file_infos fis;
-					create_file_list(t.path_, fis);
-					filter_file_infos(fis, t.filter_, t.infos_);
+				uint32_t retry = t.retry_;
+				while(retry > 0) {
+					bool flag = false;
+					if(t.filter_.empty()) {
+						flag = create_file_list(t.path_, t.infos_);
+					} else {
+						file_infos fis;
+						flag = create_file_list(t.path_, fis);
+						if(flag) {
+							filter_file_infos(fis, t.filter_, t.infos_);
+						}
+					}
+					if(flag) break;
+					else {
+						--retry;
+						sleep_(200);
+					}
 				}
 				idx = t.idx_;
 				pthread_mutex_unlock(&t.sync_);
