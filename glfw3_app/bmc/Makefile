@@ -100,6 +100,11 @@ INC_SYS		=	$(LOCAL_PATH)/include \
 				$(LOCAL_PATH)/include/taglib
 INC_LIB		=
 LIBDIR		=	$(LOCAL_PATH)/lib
+ifeq ($(OS),Windows_NT)
+else
+INC_SYS		+=	$(LOCAL_PATH)/opt/jpeg-turbo/include
+LIBDIR		+=	$(LOCAL_PATH)/opt/jpeg-turbo/lib
+endif
 
 PINC_APP	=	. ../common
 CINC_APP	=	. ../common
