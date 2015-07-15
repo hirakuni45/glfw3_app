@@ -22,13 +22,13 @@ static const vtx::spos limit_size_(800, 600);
 
 int main(int argc, char** argv)
 {
-// 標準的スタックサイズだと、bmc_core を作れない・・・
-//	app::bmc_core bmc(argc, argv);
-	auto bmcp = std::shared_ptr<app::bmc_core>(new app::bmc_core(argc, argv));
-	app::bmc_core& bmc = *bmcp.get();
+	app::bmc_core bmc;
+//	std::cout << static_cast<int>(sizeof(app::bmc_core)) << std::endl;
+//	auto bmcp = std::shared_ptr<app::bmc_core>(new app::bmc_core(argc, argv));
+//	app::bmc_core& bmc = *bmcp.get();
 
-	if(!bmc.analize() || bmc.get_inp_file().empty()) {
-		bmc.help();
+	if(!bmc.analize(argc, argv) || bmc.get_inp_file().empty()) {
+		bmc.help(argv[0]);
 	} else {
 		if(!bmc.execute()) {
 			return 0;
