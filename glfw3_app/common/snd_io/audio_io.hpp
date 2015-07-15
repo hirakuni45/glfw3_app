@@ -60,7 +60,7 @@ namespace al {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		audio_io() : device_(0), context_(0),
+		audio_io() : device_(nullptr), context_(nullptr),
 					queue_max_(16), init_(false), destroy_(false) { }
 
 
