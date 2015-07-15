@@ -230,16 +230,15 @@ namespace app {
 			if(body_->get_check()) {
 				pmx_io_.render_surface();
 			}
-
+			if(bone_->get_check()) {
+				pmx_io_.render_bone();
+			}
 		} else {
 			if(body_->get_check()) {
 				pmd_io_.render_surface();
 			}
 			if(bone_->get_check()) {
-///				light_.enable();
-///				light_.enable(bone_light_);
-///				light_.service();
-				pmd_io_.render_bone(light_);
+				pmd_io_.render_bone();
 			}
 		}
 
