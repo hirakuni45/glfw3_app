@@ -136,8 +136,8 @@ namespace al {
 	{
 		if(init_) return;
 
-		ALCdevice* device_ = alcOpenDevice(NULL);
-		if(device_ == 0) {
+		device_ = alcOpenDevice(nullptr);
+		if(device_ == nullptr) {
 			ALenum error = alGetError();
 			if(error != AL_NO_ERROR) {
 				std::cout << "OpenAL error: alcOpenDevice" << std::endl;
@@ -146,8 +146,8 @@ namespace al {
 			return;
 		}
 
-		ALCcontext* context_ = alcCreateContext(device_, NULL);
-		if(context_ == 0) {
+		context_ = alcCreateContext(device_, nullptr);
+		if(context_ == nullptr) {
 			ALCenum error = alcGetError(device_);
 			if(error != ALC_NO_ERROR) {
 			// die("ALC", (const char*)alcGetString(device, error));
@@ -514,7 +514,7 @@ namespace al {
 
 		purge_stream(0);
 
-		alcMakeContextCurrent(NULL);
+		alcMakeContextCurrent(nullptr);
 		alcDestroyContext(context_);
 		alcCloseDevice(device_);
 		destroy_ = true;
