@@ -647,10 +647,9 @@ namespace mdf {
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	ボーンのレンダリング
-		@param[in]	lig	ライトのコンテキスト
 	*/
 	//-----------------------------------------------------------------//
-	void pmd_io::render_bone(gl::light& lig)
+	void pmd_io::render_bone()
 	{
 		if(bones_.empty()) return;
 
@@ -670,20 +669,13 @@ namespace mdf {
 		glLineWidth(4.0f);
 
 		BOOST_FOREACH(const pmd_bone& bone, bones_) {
-#if 0
-			if(static_cast<pmd_bone::bone_type>(bone.type) == pmd_bone::bone_type::NO_DISP) {
-				lig.set_material(gl::light::material::turquoise);
-			} else {
-				lig.set_material(gl::light::material::pearl);
-			}
-#endif
 ///			glPushMatrix();
 ///			gl::glTranslate(bone.head_pos);
 ///			glCallList(bone_list_id_);
 ///			lig.set_material(gl::light::material::pearl);
 ///			glPopMatrix();
 
-			uint16_t idx = bone.parent_index;
+			uint16_t idx = bone.parent_index_;
 			if(idx < bones_.size()) {
 				glPushMatrix();
 ///				gl::glTranslate(bone.head_pos);
@@ -691,7 +683,7 @@ namespace mdf {
 ///				gl::glScale(sc);
 ///				glCallList(joint_list_id_);
 				glColor3f(1.0f, 1.0f, 1.0f);
-				gl::draw_line(bone.head_pos, bones_[idx].head_pos);
+				gl::draw_line(bone.position_, bones_[idx].position_);
 				glPopMatrix();
 			}
 		}
@@ -716,13 +708,13 @@ namespace mdf {
 		do {
 			const pmd_bone& bone = bones_[index];
 			ids.push_back(index);
-			index = bone.parent_index;
+			index = bone.parent_index_;
 		} while(index != 0xffff) ;
 
 		BOOST_REVERSE_FOREACH(uint16_t idx, ids) {
 			const pmd_bone& bone = bones_[idx];
 			std::string s;
-			pmd_io::get_text_(bone.name, sizeof(bone.name), s);
+			pmd_io::get_text_(bone.name_, sizeof(bone.name_), s);
 			if(!s.empty()) {
 				path += '/';
 				path += s;

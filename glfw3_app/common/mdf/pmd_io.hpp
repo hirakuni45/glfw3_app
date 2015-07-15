@@ -134,34 +134,34 @@ namespace mdf {
 				IK_LINK,		///< (6) IK 接続先
 				NO_DISP			///< (7) 非表示
 			};
-			char		name[20];			///< ボーン名
-			uint16_t	parent_index;		///< 親ボーン番号（無い場合は 0xffff）
-			uint16_t	tail_pos_index;		///< tail 位置のボーン番号（末端の場合０）
-			uint8_t		type;				///< ボーン種
-			uint16_t	ik_parent_index;	///< IK ボーン番号（無い場合０）
-			vtx::fvtx	head_pos;			///< 基準位置
+			char		name_[20];			///< ボーン名
+			uint16_t	parent_index_;		///< 親ボーン番号（無い場合は 0xffff）
+			uint16_t	tail_pos_index_;	///< tail 位置のボーン番号（末端の場合０）
+			uint8_t		type_;				///< ボーン種
+			uint16_t	ik_parent_index_;	///< IK ボーン番号（無い場合０）
+			vtx::fvtx	position_;			///< 基準位置
 
 			bool get(utils::file_io& fio) {
-				if(fio.read(name, 20) != 20) return false;
-				if(!fio.get(parent_index)) return false;
-				if(!fio.get(tail_pos_index)) return false;
-				if(!fio.get(type)) return false;
-				if(!fio.get(ik_parent_index)) return false;
-				if(!fio.get(head_pos.x)) return false;
-				if(!fio.get(head_pos.y)) return false;
-				if(!fio.get(head_pos.z)) return false;
+				if(fio.read(name_, 20) != 20) return false;
+				if(!fio.get(parent_index_)) return false;
+				if(!fio.get(tail_pos_index_)) return false;
+				if(!fio.get(type_)) return false;
+				if(!fio.get(ik_parent_index_)) return false;
+				if(!fio.get(position_.x)) return false;
+				if(!fio.get(position_.y)) return false;
+				if(!fio.get(position_.z)) return false;
 				return true;
 			}
 
 			bool put(utils::file_io& fio) {
-				if(fio.write(name, 20) != 20) return false;
-				if(!fio.put(parent_index)) return false;
-				if(!fio.put(tail_pos_index)) return false;
-				if(!fio.put(type)) return false;
-				if(!fio.put(ik_parent_index)) return false;
-				if(!fio.put(head_pos.x)) return false;
-				if(!fio.put(head_pos.y)) return false;
-				if(!fio.put(head_pos.z)) return false;
+				if(fio.write(name_, 20) != 20) return false;
+				if(!fio.put(parent_index_)) return false;
+				if(!fio.put(tail_pos_index_)) return false;
+				if(!fio.put(type_)) return false;
+				if(!fio.put(ik_parent_index_)) return false;
+				if(!fio.put(position_.x)) return false;
+				if(!fio.put(position_.y)) return false;
+				if(!fio.put(position_.z)) return false;
 				return true;
 			}
 		};
@@ -443,10 +443,9 @@ namespace mdf {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	ボーンのレンダリング
-			@param[in]	lig	ライトのコンテキスト
 		*/
 		//-----------------------------------------------------------------//
-		void render_bone(gl::light& lig);
+		void render_bone();
 
 
 		//-----------------------------------------------------------------//

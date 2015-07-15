@@ -7,8 +7,39 @@
 #include "pmx_io.hpp"
 #include "img_io/img_files.hpp"
 #include <boost/format.hpp>
+#include "gl_fw/gl_info.hpp"
+#include "gl_fw/glutils.hpp"
+#include <cmath>
 
 namespace mdf {
+
+	static void draw_sphere_(float radius, int lats, int longs)
+	{
+		static const float PI = 3.14159265f;
+		int i, j;
+		for(i = 0; i <= lats; i++) {
+			float lat0 = PI * (-0.5f + static_cast<float>(i - 1) / lats);
+			float z0  = radius * std::sin(lat0);
+			float zr0 = radius * std::cos(lat0);
+
+			float lat1 = PI * (-0.5f + static_cast<float>(i) / lats);
+			float z1  = radius * std::sin(lat1);
+			float zr1 = radius * std::cos(lat1);
+
+			glBegin(GL_QUAD_STRIP);
+			for(j = 0; j <= longs; j++) {
+				float lng = 2 * PI * static_cast<float>(j - 1) / longs;
+				float x = std::cos(lng);
+				float y = std::sin(lng);
+				glNormal3f(x * zr1, y * zr1, z1);
+				glVertex3f(x * zr1, y * zr1, z1);
+				glNormal3f(x * zr0, y * zr0, z0);
+				glVertex3f(x * zr0, y * zr0, z0);
+			}
+			glEnd();
+		}
+	}
+
 
 	void pmx_io::initialize_()
 	{
@@ -354,6 +385,56 @@ namespace mdf {
 		glDisable(GL_CULL_FACE);
 
 		glPopMatrix();
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	ボーンのレンダリング
+	*/
+	//-----------------------------------------------------------------//
+	void pmx_io::render_bone()
+	{
+		if(bones_.empty()) return;
+
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+
+		glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+		glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
+		glScalef(-1.0f, 1.0f, 1.0f);
+
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_BLEND);
+		glDisable(GL_TEXTURE_2D);
+
+		glLineWidth(4.0f);
+
+		BOOST_FOREACH(const pmx_bone& bone, bones_) {
+///			glPushMatrix();
+///			gl::glTranslate(bone.head_pos);
+///			glCallList(bone_list_id_);
+///			lig.set_material(gl::light::material::pearl);
+///			glPopMatrix();
+
+			uint16_t idx = bone.parent_index_;
+			if(idx < bones_.size()) {
+				glPushMatrix();
+				gl::glTranslate(bone.position_);
+				glColor3f(1.0f, 0.0f, 1.0f);
+				draw_sphere_(0.05f, 10, 10);
+				glPopMatrix();
+
+				glPushMatrix();
+				glColor3f(1.0f, 1.0f, 1.0f);
+				gl::draw_line(bone.position_, bones_[idx].position_);
+				glPopMatrix();
+			}
+		}
+
+		glDisable(GL_CULL_FACE);
 	}
 
 
