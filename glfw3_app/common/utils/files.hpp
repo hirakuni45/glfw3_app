@@ -25,15 +25,15 @@ namespace utils {
 		struct file_t {
 			volatile bool		loop_;
 			volatile uint32_t	idx_;
-			volatile uint32_t	retry_;
+			volatile uint32_t	ans_;
 			pthread_mutex_t		sync_;
 			std::string			path_;
 			std::string			filter_;
 			file_infos			infos_;
-			file_t() : loop_(true), idx_(0), retry_(5) { }
+			file_t() : loop_(true), idx_(0), ans_(0) { }
 		};
 
-		volatile uint32_t	idx_;
+		volatile uint32_t	ans_;
 
 		uint32_t	init_;
 		file_t		file_t_;
@@ -52,7 +52,7 @@ namespace utils {
 			@param[in]	path	パス
 		*/
 		//-----------------------------------------------------------------//
-		files() : idx_(0), init_(0) { start_(); }
+		files() : ans_(0), init_(0) { start_(); }
 
 
 		//-----------------------------------------------------------------//
@@ -72,7 +72,7 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		void set_path(const std::string& path, const std::string& filter = "") {
 			pthread_mutex_lock(&file_t_.sync_);
-			idx_ = file_t_.idx_;
+			ans_ = file_t_.ans_;
 			file_t_.path_ = path;
 			file_t_.filter_ = filter;
 			++file_t_.idx_;
@@ -104,7 +104,7 @@ namespace utils {
 			@return ファイル情報取得なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool probe() { return idx_ != file_t_.idx_; }
+		bool probe() { return ans_ != file_t_.ans_; }
 
 
 		//-----------------------------------------------------------------//
