@@ -609,6 +609,8 @@ namespace al {
 			audio_io_.destroy_slot(slots_[i]);
 		}
 		slots_.clear();
+
+		audio_io_.destroy();
 	}
 
 };
