@@ -6,7 +6,7 @@
 */
 //=====================================================================//
 #include <vector>
-#include <cmath>
+#include <utility>
 #include "utils/vtx.hpp"
 #include "utils/mtx.hpp"
 
@@ -204,17 +204,18 @@ namespace qtx {
 			@param[in]	up_dir	上方向
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		void look_rotation(const vtx::fvtx& lookat, const vtx::fvtx& up_dir)
+		void look_rotation(const vtx::vertex3<T>& lookat, const vtx::vertex3<T>& up_dir)
 		{
-			vtx::fvtx forward;
+			vtx::vertex3<T> forward;
 			vtx::normalize(lookat, forward);
-			vtx::fvtx up;
+			vtx::vertex3<T> up;
 			vtx::ortho_normalize(up_dir, forward, up);
-			vtx::fvtx right;
+			vtx::vertex3<T> right;
 			vtx::cross(up, forward, right); 
 
-			t = std::sqrt(1.0f + right.x + up.y + forward.z) * 0.5f;
-			T w4_recip = 1.0f / (4.0f * t);
+			T t = std::sqrt(static_cast<T>(1) + right.x + up.y + forward.z)
+				/ static_cast<T>(2);
+			T w4_recip = static_cast<T>(1) / (static_cast<T>(4) * t);
 			x = (     up.z - forward.y) * w4_recip;
 			y = (forward.x -   right.z) * w4_recip;
 			z = (  right.y -      up.x) * w4_recip;
@@ -224,10 +225,10 @@ namespace qtx {
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	マトリックス(OpenGL 系）へ変換
-			@param[out]	m	マトリックス
+			@return	マトリックス
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		inline void create_rotate_matrix(mtx::matrix4<T>& m) {
+		mtx::matrix4<T> create_rotate_matrix() const {
 			T cc = static_cast<T>(2);
 			T x2 = x * x * cc;
 			T y2 = y * y * cc;
@@ -239,6 +240,7 @@ namespace qtx {
 			T yt = y * t * cc;
 			T zt = z * t * cc;
 
+			mtx::matrix4<T> m;
 			m[ 0] = static_cast<T>(1) - y2 - z2;
 			m[ 1] = xy + zt;
 			m[ 2] = zx - yt;
@@ -258,6 +260,7 @@ namespace qtx {
 			m[13] = static_cast<T>(0);
 			m[14] = static_cast<T>(0);
 			m[15] = static_cast<T>(1);
+			return m;
 		}
 
 	};
@@ -278,4 +281,3 @@ namespace qtx {
 	typedef quaternion<double>	dquat;
 
 }
-

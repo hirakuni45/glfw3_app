@@ -651,7 +651,7 @@ namespace mtx {
 			@param[in]	srcm	マトリックス
 		 */
 		//-----------------------------------------------------------------//
-		explicit matrix4(const matrix4& srcm) { matrix_copy<T, 16>(srcm(), m_); }
+		matrix4(const matrix4<T>& srcm) { matrix_copy<T, 16>(srcm(), m_); }
 
 
 		//-----------------------------------------------------------------//
@@ -842,15 +842,13 @@ namespace mtx {
 		}
 
 
-
-
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	= オペレーター 4x4（代入）
 			@param[in]	srcm	ソースマトリックス(float*)
 		 */
 		//-----------------------------------------------------------------//
-		matrix4& operator = (const T* srcm) {
+		matrix4<T>& operator = (const T* srcm) {
 			matrix_copy<T, 16>(srcm, m_);
 			return *this;
 		}
@@ -862,7 +860,7 @@ namespace mtx {
 			@param[in]	srcm	ソースマトリックス(float*)
 		 */
 		//-----------------------------------------------------------------//
-		matrix4& operator = (const matrix4& srcm) {
+		matrix4<T>& operator = (const matrix4<T>& srcm) {
 			matrix_copy<T, 16>(srcm(), m_);
 			return *this;
 		}
@@ -874,8 +872,8 @@ namespace mtx {
 			@param[in]	srcm	ソースマトリックス
 		 */
 		//-----------------------------------------------------------------//
-		matrix4 operator * (const matrix4& srcm) const {
-			matrix4	t;
+		matrix4<T> operator * (const matrix4<T>& srcm) const {
+			matrix4<T> t;
 			matmul4(t(), m_, srcm.m);
 			return t;
 		}
@@ -887,7 +885,7 @@ namespace mtx {
 			@param[in]	srcm	ソースマトリックス
 		 */
 		//-----------------------------------------------------------------//
-		matrix4& operator *= (const matrix4& srcm) {
+		matrix4<T>& operator *= (const matrix4<T>& srcm) {
 			matmul4(m_, m_, srcm());
 			return *this;
 		}
@@ -899,7 +897,7 @@ namespace mtx {
 			@param[in]	srcv	ソースベクター
 		 */
 		//-----------------------------------------------------------------//
-		matrix4 operator * (const vtx::vertex4<T>& srcv) const {
+		matrix4<T> operator * (const vtx::vertex4<T>& srcv) const {
 			matrix4 t;
 			matmul1(t, m_, srcv);
 			return t;
@@ -912,7 +910,7 @@ namespace mtx {
 			@param[in]	srcv	ソースベクター
 		 */
 		//-----------------------------------------------------------------//
-		matrix4& operator *= (const vtx::vertex4<T>& srcv) {
+		matrix4<T>& operator *= (const vtx::vertex4<T>& srcv) {
 			matmul1(m_, m_, srcv);
 			return *this;
 		}
