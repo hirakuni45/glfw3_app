@@ -495,25 +495,27 @@ namespace app {
 						tag_info_serial_ = t.serial_;
 						using namespace std;
 						const string p = utils::get_file_name(files_[files_step_]);
-						if(utils::compare(p, t.title_) < 0.75f) {  // 75% 一致しない
-///						if(p.find(t.title_) == string::npos) {
-							string n;
-							if(t.track_.empty()) {
-								n = "  ";
-							} else {
-								string::size_type pos;
-								if((pos = t.track_.find('/')) != string::npos) {
+						// 75% 一致しない場合
+						if(utils::compare(p, t.title_) < 0.75f) {
+							if(t.title_.empty()) {
+								filer_->set_alias(p, p);
+							} if(!t.track_.empty()) {
+								string n;
+								auto pos = t.track_.find('/');
+								if(pos != string::npos) {
 									n = t.track_.substr(0, pos);
 								} else {
 									n = t.track_;
 								}
-								if(n.size() == 1) n = '0' + n;
+								if(n.size() == 1) {
+									if(n[0] == '0') n.clear();
+									else if(n[0] >= '0' && n[0] <= '9') n = '0' + n;
+								}
+								filer_->set_alias(p, n + " " + t.title_);
+							} else {
+								filer_->set_alias(p, t.title_);
 							}
-							std::string a = n + " " + t.title_;
-							filer_->set_alias(p, a);
 						}
-///						int i = t.serial_;
-///						std::cout << '(' << i << ") " << p << " -> " << a << std::endl;
 						++files_step_;
 					}
 				}
