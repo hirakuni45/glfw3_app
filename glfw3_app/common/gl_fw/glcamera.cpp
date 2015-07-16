@@ -64,7 +64,7 @@ namespace gl {
 					vtx::fpos qh = d * -0.005f;
 					qtx::fquat q;
 					if(q.rot_xz(qh.x, qh.y, 1.0f)) {
-						q.create_rotate_matrix(glmat_.at_current_matrix());
+						glmat_.at_current_matrix() = q.create_rotate_matrix();
 						vtx::fvtx4 fv;
 						matrixf::vertex_world(glmat_.get_current_matrix(), up_first_, fv);
 						up_.set(fv.x,  fv.y,  fv.z);
