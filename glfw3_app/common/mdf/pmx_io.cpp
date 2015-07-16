@@ -9,7 +9,7 @@
 #include <boost/format.hpp>
 #include "gl_fw/gl_info.hpp"
 #include "gl_fw/glutils.hpp"
-#include <cmath>
+#include "utils/quat.hpp"
 
 namespace mdf {
 
@@ -38,6 +38,43 @@ namespace mdf {
 			}
 			glEnd();
 		}
+	}
+
+
+	void draw_cylinder_(float radius, float halfHeight, int upAxis)
+	{
+
+		glPushMatrix();
+		switch (upAxis) {
+		case 0:
+			glRotatef(-90.0, 0.0, 1.0, 0.0);
+			glTranslatef(0.0, 0.0, -halfHeight);
+			break;
+		case 1:
+			glRotatef(-90.0, 1.0, 0.0, 0.0);
+			glTranslatef(0.0, 0.0, -halfHeight);
+			break;
+		case 2:
+			glTranslatef(0.0, 0.0, -halfHeight);
+			break;
+		default:
+			return;
+		}
+
+		GLUquadricObj* qobj = gluNewQuadric();
+
+		gluQuadricDrawStyle(qobj, (GLenum)GLU_FILL);
+		gluQuadricNormals(qobj, (GLenum)GLU_SMOOTH);
+
+		gluDisk(qobj, 0, radius, 15, 10);
+
+		gluCylinder(qobj, radius, radius, 2.f * halfHeight, 15, 10);
+		glTranslatef(0.0f, 0.0f, 2.f * halfHeight);
+		glRotatef(-180.0f, 0.0f, 1.0f, 0.0f);
+		gluDisk(qobj, 0.f, radius, 15, 10);
+
+		glPopMatrix();
+		gluDeleteQuadric(qobj);
 	}
 
 
@@ -425,11 +462,21 @@ namespace mdf {
 				gl::glTranslate(bone.position_);
 				glColor3f(1.0f, 0.0f, 1.0f);
 				draw_sphere_(0.05f, 10, 10);
-				glPopMatrix();
 
-				glPushMatrix();
+				qtx::fquat q;
+				vtx::fvtx n;
+				vtx::normalize(bones_[idx].position_ - bone.position_, n);
+				q.look_rotation(n, vtx::fvtx(0.0f, 0.0f, 1.0));
+				auto m = q.create_rotate_matrix();
+
 				glColor3f(1.0f, 1.0f, 1.0f);
-				gl::draw_line(bone.position_, bones_[idx].position_);
+				draw_cylinder_(0.05f, vtx::distance(bones_[idx].position_, bone.position_), 0);
+
+//				glPushMatrix();
+//				glColor3f(1.0f, 1.0f, 1.0f);
+//				gl::draw_line(bone.position_, bones_[idx].position_);
+//				glPopMatrix();
+
 				glPopMatrix();
 			}
 		}

@@ -12,6 +12,7 @@
 #include "img_io/img_files.hpp"
 #include "gl_fw/gl_info.hpp"
 #include "gl_fw/glutils.hpp"
+#include "utils/quat.hpp"
 
 namespace mdf {
 
