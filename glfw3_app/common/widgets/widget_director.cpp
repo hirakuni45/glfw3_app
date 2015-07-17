@@ -816,16 +816,8 @@ namespace gui {
 				const vtx::spos& min = param.resize_min_;
 				const vtx::spos& ref = param.resize_ref_;
 				vtx::spos newsize = ref + d;
-				if(ref.x >= min.x) {
-					if(newsize.x < min.x) newsize.x = min.x;
-				} else {
-					newsize.x = ref.x;
-				}
-				if(ref.y >= min.y) {
-					if(newsize.y < min.y) newsize.y = min.y;
-				} else {
-					newsize.y = ref.y;
-				}
+				if(newsize.x < min.x) newsize.x = min.x;
+				if(newsize.y < min.y) newsize.y = min.y;
 				vtx::spos ofs(0);
 				if(param.resize_sign_.x < 0) ofs.x = ref.x - newsize.x;
 				if(param.resize_sign_.y < 0) ofs.y = ref.y - newsize.y;
