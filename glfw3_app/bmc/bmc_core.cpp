@@ -195,7 +195,7 @@ namespace app {
 
 
 	// タイトルの表示と簡単な説明
-	void bmc_core::help() const
+	void bmc_core::help(const char* cmd) const
 	{
 		using namespace std;
 
@@ -203,10 +203,10 @@ namespace app {
 		cout << "Copyright (C) 2013, Hiramatsu Kunihito" << endl;
 		cout << "Version " << boost::format("%1.2f") % version_ << endl;
 		cout << "usage:" << endl;
-		string cmd;
-		const char* p = strrchr(argv_[0], '\\');
-		if(p) { cmd = p + 1; }
-		cout << "    " << cmd << " [options] in-file [out-file]" << endl;
+		string cm;
+		const char* p = strrchr(cmd, '\\');
+		if(p) { cm = p + 1; }
+		cout << "    " << cm << " [options] in-file [out-file]" << endl;
 		cout << "    -preview,-pre     preview image (OpenGL)" << endl;
 		cout << "    -header size      output header" << endl;
 		cout << "    -text             text base output" << endl;
@@ -228,7 +228,7 @@ namespace app {
 		@return エラーが無ければ「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool bmc_core::analize()
+	bool bmc_core::analize(int argc, char** argv)
 	{
 		using namespace std;
 
@@ -237,8 +237,8 @@ namespace app {
 		bool symbol = false;
 		bool offset = false;
 		bool size = false;
-		for(int i = 1; i < argc_; ++i) {
-			string s = argv_[i];
+		for(int i = 1; i < argc; ++i) {
+			string s = argv[i];
 			if(s[0] == '-') {
 				if(s == "-preview") option_.set(option::preview);
 				else if(s == "-pre") option_.set(option::preview);

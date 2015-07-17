@@ -43,9 +43,6 @@ namespace app {
 		static const uint32_t bdf_prev_x_ = 32;
 		static const uint32_t bdf_prev_y_ = 32;
 
-		int		argc_;
-		char**	argv_;
-
 		std::bitset<option::limit_>	option_;
 		std::string	inp_fname_;
 		std::string out_fname_;
@@ -73,7 +70,7 @@ namespace app {
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		bmc_core(int argc, char** argv) : argc_(argc), argv_(argv),
+		bmc_core() :
 			header_size_(0), clip_(0),
 			version_(0.6f), bdf_num_(0), bdf_pages_(0), bdf_fsize_(0) { }
 
@@ -81,9 +78,10 @@ namespace app {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  help 表示
+			@param[in]	cmd	コマンド文字列
 		*/
 		//-----------------------------------------------------------------//
-		void help() const;
+		void help(const char* cmd) const;
 
 
 		//-----------------------------------------------------------------//
@@ -92,7 +90,7 @@ namespace app {
 			@return エラーが無ければ「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool analize();
+		bool analize(int argc, char** argv);
 
 
 		//-----------------------------------------------------------------//
