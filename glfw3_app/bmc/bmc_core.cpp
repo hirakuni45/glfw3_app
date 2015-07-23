@@ -200,7 +200,7 @@ namespace app {
 		using namespace std;
 
 		cout << "BitMap Converter" << endl;
-		cout << "Copyright (C) 2013, Hiramatsu Kunihito" << endl;
+		cout << "Copyright (C) 2013/2015, Hiramatsu Kunihito" << endl;
 		cout << "Version " << boost::format("%1.2f") % version_ << endl;
 		cout << "usage:" << endl;
 		string cm;
