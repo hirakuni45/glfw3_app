@@ -208,7 +208,7 @@ namespace app {
 		if(p) { cm = p + 1; }
 		cout << "    " << cm << " [options] in-file [out-file]" << endl;
 		cout << "    -preview,-pre     preview image (OpenGL)" << endl;
-		cout << "    -header size      output header" << endl;
+		cout << "    -header bits      output width,height" << endl;
 		cout << "    -text             text base output" << endl;
 		cout << "    -c_style symbol   C style table output" << endl;
 		cout << "    -offset x,y       offset location" << endl;
