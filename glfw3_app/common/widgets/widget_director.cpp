@@ -636,16 +636,28 @@ namespace gui {
 
 			if(left.pos) {  // LEFT 選択、移動、エッジリサイズ
 				focus_widget_ = w;
-
+				
 				if(w->get_state(widget::state::RESIZE_EDGE_ENABLE)) {
-					vtx::srect r = w->get_param().clip_;
-					r.org  += 8;
-					r.size -= 16;
-					if(!r.is_focus(msp)) {
-						if(w->get_state(widget::state::SIZE_LOCK)) continue;
-						resize_l_widget_ = w;
-						resize_trigger = true;
-						continue;
+					// キャプションを握った場合はリサイズしない（現状キャプションがあるのは、「frame」のみ）
+					bool caption = false;
+					if(w->type() == get_type_id<widget_frame>()) {
+						widget_frame* wf = static_cast<widget_frame*>(w);
+						vtx::srect r = w->get_param().clip_;
+						r.size.y = wf->get_local_param().plate_param_.caption_width_;
+						if(r.is_focus(msp)) {
+							caption = true;
+						}
+					}
+					if(!caption) {
+						vtx::srect r = w->get_param().clip_;
+						r.org  += 8;
+						r.size -= 16;
+						if(!r.is_focus(msp)) {
+							if(w->get_state(widget::state::SIZE_LOCK)) continue;
+							resize_l_widget_ = w;
+							resize_trigger = true;
+							continue;
+						}
 					}
 				}
 
