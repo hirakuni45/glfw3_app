@@ -213,12 +213,14 @@ namespace qtx {
 			vtx::vertex3<T> right;
 			vtx::cross(up, forward, right); 
 
-			T t = std::sqrt(static_cast<T>(1) + right.x + up.y + forward.z)
-				/ static_cast<T>(2);
+			t = std::sqrt(static_cast<T>(1) + right.x + up.y + forward.z) / static_cast<T>(2);
 			T w4_recip = static_cast<T>(1) / (static_cast<T>(4) * t);
-			x = (     up.z - forward.y) * w4_recip;
-			y = (forward.x -   right.z) * w4_recip;
-			z = (  right.y -      up.x) * w4_recip;
+//			x = (     up.z - forward.y) * w4_recip;
+//			y = (forward.x -   right.z) * w4_recip;
+//			z = (  right.y -      up.x) * w4_recip;
+			x = (forward.y -      up.z) * w4_recip;
+			y = (right.z   - forward.x) * w4_recip;
+			z = (up.x      -   right.y) * w4_recip;
 		}
 
 
