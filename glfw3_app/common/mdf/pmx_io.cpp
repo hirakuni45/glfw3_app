@@ -15,20 +15,18 @@ namespace mdf {
 
 	static void draw_sphere_(float radius, int lats, int longs)
 	{
-		static const float PI = 3.14159265f;
-		int i, j;
-		for(i = 0; i <= lats; i++) {
-			float lat0 = PI * (-0.5f + static_cast<float>(i - 1) / lats);
+		for(int i = 0; i <= lats; ++i) {
+			float lat0 = vtx::get_pi<float>() * (-0.5f + static_cast<float>(i - 1) / lats);
 			float z0  = radius * std::sin(lat0);
 			float zr0 = radius * std::cos(lat0);
 
-			float lat1 = PI * (-0.5f + static_cast<float>(i) / lats);
+			float lat1 = vtx::get_pi<float>() * (-0.5f + static_cast<float>(i) / lats);
 			float z1  = radius * std::sin(lat1);
 			float zr1 = radius * std::cos(lat1);
 
 			glBegin(GL_QUAD_STRIP);
-			for(j = 0; j <= longs; j++) {
-				float lng = 2 * PI * static_cast<float>(j - 1) / longs;
+			for(int j = 0; j <= longs; ++j) {
+				float lng = 2 * vtx::get_pi<float>() * static_cast<float>(j - 1) / longs;
 				float x = std::cos(lng);
 				float y = std::sin(lng);
 				glNormal3f(x * zr1, y * zr1, z1);
@@ -41,40 +39,27 @@ namespace mdf {
 	}
 
 
-	void draw_cylinder_(float radius, float halfHeight, int upAxis)
+	void draw_cone_(float radius_org, float radius_len, float length)
 	{
-
-		glPushMatrix();
-		switch (upAxis) {
-		case 0:
-			glRotatef(-90.0, 0.0, 1.0, 0.0);
-			glTranslatef(0.0, 0.0, -halfHeight);
-			break;
-		case 1:
-			glRotatef(-90.0, 1.0, 0.0, 0.0);
-			glTranslatef(0.0, 0.0, -halfHeight);
-			break;
-		case 2:
-			glTranslatef(0.0, 0.0, -halfHeight);
-			break;
-		default:
-			return;
+		int divide = 12;
+		float a = 0.0f;
+		float d = 2.0f * vtx::get_pi<float>() / static_cast<float>(divide);
+		glBegin(GL_TRIANGLE_STRIP);
+		for(int i = 0; i < divide; ++i) {
+			float x = std::sin(a);
+			float y = std::cos(a);
+			a += d;
+			glVertex3f(x * radius_org, 0.0f,   y * radius_org);
+			glVertex3f(x * radius_len, length, y * radius_len);
 		}
-
-		GLUquadricObj* qobj = gluNewQuadric();
-
-		gluQuadricDrawStyle(qobj, (GLenum)GLU_FILL);
-		gluQuadricNormals(qobj, (GLenum)GLU_SMOOTH);
-
-		gluDisk(qobj, 0, radius, 15, 10);
-
-		gluCylinder(qobj, radius, radius, 2.f * halfHeight, 15, 10);
-		glTranslatef(0.0f, 0.0f, 2.f * halfHeight);
-		glRotatef(-180.0f, 0.0f, 1.0f, 0.0f);
-		gluDisk(qobj, 0.f, radius, 15, 10);
-
-		glPopMatrix();
-		gluDeleteQuadric(qobj);
+		{
+			a = 0.0f;
+			float x = std::sin(a);
+			float y = std::cos(a);
+			glVertex3f(x * radius_org, 0.0f,   y * radius_org);
+			glVertex3f(x * radius_len, length, y * radius_len);
+		}
+		glEnd();
 	}
 
 
@@ -460,17 +445,18 @@ namespace mdf {
 			if(idx < bones_.size()) {
 				glPushMatrix();
 				gl::glTranslate(bone.position_);
-				glColor3f(1.0f, 0.0f, 1.0f);
+				glColor3f(1.0f, 0.3f, 1.0f);
 				draw_sphere_(0.05f, 10, 10);
 
 				qtx::fquat q;
 				vtx::fvtx n;
 				vtx::normalize(bones_[idx].position_ - bone.position_, n);
-				q.look_rotation(n, vtx::fvtx(0.0f, 0.0f, 1.0));
+				q.look_rotation(n, vtx::fvtx(0.0f, 0.0f, 1.0f));
 				auto m = q.create_rotate_matrix();
 
-				glColor3f(1.0f, 1.0f, 1.0f);
-				draw_cylinder_(0.05f, vtx::distance(bones_[idx].position_, bone.position_), 0);
+				glColor3f(0.7f, 1.0f, 0.7f);
+				glMultMatrixf(m());
+				draw_cone_(0.025f, 0.075f, vtx::distance(bones_[idx].position_, bone.position_));
 
 //				glPushMatrix();
 //				glColor3f(1.0f, 1.0f, 1.0f);
