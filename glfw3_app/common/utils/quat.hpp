@@ -200,12 +200,66 @@ namespace qtx {
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	指定方向に向ける
-			@param[in]	lookat	回転方向
-			@param[in]	up_dir	上方向
+			@param[in]	forward	方向
+			@param[in]	up		上方向
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		void look_rotation(const vtx::vertex3<T>& lookat, const vtx::vertex3<T>& up_dir)
+		void look_rotation(const vtx::vertex3<T>& forward, const vtx::vertex3<T>& up)
 		{
+///			forward.Normalize();
+			vtx::vertex3<T> vector1;
+			vtx::normalize(forward, vector1);
+			vtx::vertex3<T> vector2;
+			vtx::vertex3<T> cross;
+			vtx::vertex3<T>::cross(up, vector1, cross);
+			vtx::normalize(cross, vector2);
+			vtx::vertex3<T> vector3;
+			vtx::vertex3<T>::cross(vector1, vector2, vector3);
+			T m00 = vector2.x;
+			T m01 = vector2.y;
+			T m02 = vector2.z;
+			T m10 = vector3.x;
+			T m11 = vector3.y;
+			T m12 = vector3.z;
+			T m20 = vector1.x;
+			T m21 = vector1.y;
+			T m22 = vector1.z;
+
+			T num8 = (m00 + m11) + m22;
+			if (num8 > 0.0f) {
+				T num = std::sqrt(num8 + 1.0f);
+				t = num * 0.5f;
+				num = 0.5f / num;
+				x = (m12 - m21) * num;
+				y = (m20 - m02) * num;
+				z = (m01 - m10) * num;
+				return;
+			}
+			if((m00 >= m11) && (m00 >= m22)) {
+				T num7 = std::sqrt(((1.0f + m00) - m11) - m22);
+				T num4 = 0.5f / num7;
+				x = 0.5f * num7;
+				y = (m01 + m10) * num4;
+				z = (m02 + m20) * num4;
+				t = (m12 - m21) * num4;
+				return;
+			}
+			if(m11 > m22) {
+				T num6 = std::sqrt(((1.0f + m11) - m00) - m22);
+				T num3 = 0.5f / num6;
+				x = (m10+ m01) * num3;
+				y = 0.5f * num6;
+				z = (m21 + m12) * num3;
+				t = (m20 - m02) * num3;
+				return;
+			}
+			T num5 = std::sqrt(((1.0f + m22) - m00) - m11);
+			T num2 = 0.5f / num5;
+			x = (m20 + m02) * num2;
+			y = (m21 + m12) * num2;
+			z = 0.5f * num5;
+			t = (m01 - m10) * num2;
+#if 0
 			vtx::vertex3<T> forward;
 			vtx::normalize(lookat, forward);
 			vtx::vertex3<T> up;
@@ -221,6 +275,7 @@ namespace qtx {
 			x = (forward.y -      up.z) * w4_recip;
 			y = (right.z   - forward.x) * w4_recip;
 			z = (up.x      -   right.y) * w4_recip;
+#endif
 		}
 
 
