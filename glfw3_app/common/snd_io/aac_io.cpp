@@ -700,46 +700,44 @@ namespace al {
 		tag_.clear();
 
 		int j = mp4ff_meta_get_num_items(dt.infile);
+		int l = -1;
+		char* art_ptr = nullptr;
+		uint32_t art_size = 0;
 		for(int k = 0; k < j; ++k) {
-//#ifdef WIN32
-//			const char* item = mp4ff_meta_get_item(dt.infile, k);
-//			const char* value = mp4ff_meta_get_value(dt.infile, k);
-//			if(item != nullptr && value != nullptr) {
-//#else
 			char* item;
 			char* value;
 			if(mp4ff_meta_get_by_index(dt.infile, k, &item, &value)) {
-//#endif
-   				std::string s = item;
-				{
-///					size_t size = mp4ff_meta_get_item_size(dt.infile, k);
-///					std::cout << s << ", " << static_cast<int>(size) << ", " << value << std::endl;
-				}
-	   			if(s == "title") tag_.title_ = value;
-		   		else if(s == "artist") tag_.artist_ = value;
-			   	else if(s == "writer") tag_.writer_ = value;
+				std::string s = item;
+				if(s == "title") tag_.title_ = value;
+				else if(s == "artist") tag_.artist_ = value;
+				else if(s == "writer") tag_.writer_ = value;
 				else if(s == "album") tag_.album_ = value;
-		   		else if(s == "track") tag_.track_ = value;
-		   		else if(s == "totaltracks") tag_.total_tracks_ = value;
-		   		else if(s == "disc") tag_.disc_ = value;
-		   		else if(s == "totaldiscs") tag_.total_discs_ = value;
-		   		else if(s == "date") tag_.date_ = value;
-		   		else if(s == "cover" && static_cast<uint8_t>(st) & static_cast<uint8_t>(info_state::apic)) {
-#if 0
-					size_t size = mp4ff_meta_get_item_size(dt.infile, k);
-		   			utils::file_io fio;
-		   			fio.open(value, size);
-		   			img::img_files imgf;
-		   			imgf.initialize();
-		   			imgf.load(fio);
-		   			if(imgf.get_image()) {
-		   				tag_.image_ = imgf.get_image();
-					}
-		   			fio.close();
-#endif
-		   		}
-///				mp4ff_meta_free(dt.infile, item, value);
+				else if(s == "track") tag_.track_ = value;
+				else if(s == "totaltracks") tag_.total_tracks_ = value;
+				else if(s == "disc") tag_.disc_ = value;
+				else if(s == "totaldiscs") tag_.total_discs_ = value;
+				else if(s == "date") tag_.date_ = value;
+				else if(s == "cover" && static_cast<uint8_t>(st) & static_cast<uint8_t>(info_state::apic)) {
+					art_ptr = value;
+					l = k;
+				}
 			}
+			if(art_ptr != nullptr && (l + 1) == k) {
+				art_size = value - art_ptr;
+			}
+		}
+		if(art_ptr != nullptr) {
+//			const uint8_t* p = (const uint8_t*)art_ptr;
+//			for(int i = 0; i < 64; ++i) {
+//				std::cout << boost::format("%02X") % (uint32_t)(*p);
+//				if((i & 15) == 15) std::cout << std::endl;
+//				else std::cout << ", ";
+//				++p;
+//			}
+//			std::cout << std::endl;
+//			uint32_t len = 65536 * 2;
+//			tag_.image_ = utils::shared_array_u8(new utils::array_u8);
+//			tag_.image_->copy(art_ptr, len);
 		}
 		tag_.update();
 
