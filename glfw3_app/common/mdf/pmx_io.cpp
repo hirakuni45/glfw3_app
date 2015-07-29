@@ -13,56 +13,6 @@
 
 namespace mdf {
 
-	static void draw_sphere_(float radius, int lats, int longs)
-	{
-		for(int i = 0; i <= lats; ++i) {
-			float lat0 = vtx::get_pi<float>() * (-0.5f + static_cast<float>(i - 1) / lats);
-			float z0  = radius * std::sin(lat0);
-			float zr0 = radius * std::cos(lat0);
-
-			float lat1 = vtx::get_pi<float>() * (-0.5f + static_cast<float>(i) / lats);
-			float z1  = radius * std::sin(lat1);
-			float zr1 = radius * std::cos(lat1);
-
-			glBegin(GL_QUAD_STRIP);
-			for(int j = 0; j <= longs; ++j) {
-				float lng = 2 * vtx::get_pi<float>() * static_cast<float>(j - 1) / longs;
-				float x = std::cos(lng);
-				float y = std::sin(lng);
-				glNormal3f(x * zr1, y * zr1, z1);
-				glVertex3f(x * zr1, y * zr1, z1);
-				glNormal3f(x * zr0, y * zr0, z0);
-				glVertex3f(x * zr0, y * zr0, z0);
-			}
-			glEnd();
-		}
-	}
-
-
-	void draw_cone_(float radius_org, float radius_len, float length)
-	{
-		int divide = 12;
-		float a = 0.0f;
-		float d = 2.0f * vtx::get_pi<float>() / static_cast<float>(divide);
-		glBegin(GL_TRIANGLE_STRIP);
-		for(int i = 0; i < divide; ++i) {
-			float x = std::sin(a);
-			float y = std::cos(a);
-			a += d;
-			glVertex3f(x * radius_org, 0.0f,   y * radius_org);
-			glVertex3f(x * radius_len, length, y * radius_len);
-		}
-		{
-			a = 0.0f;
-			float x = std::sin(a);
-			float y = std::cos(a);
-			glVertex3f(x * radius_org, 0.0f,   y * radius_org);
-			glVertex3f(x * radius_len, length, y * radius_len);
-		}
-		glEnd();
-	}
-
-
 	void pmx_io::initialize_()
 	{
 	}
@@ -432,8 +382,6 @@ namespace mdf {
 		glDisable(GL_BLEND);
 		glDisable(GL_TEXTURE_2D);
 
-		glLineWidth(4.0f);
-
 		BOOST_FOREACH(const pmx_bone& bone, bones_) {
 ///			glPushMatrix();
 ///			gl::glTranslate(bone.head_pos);
@@ -446,22 +394,23 @@ namespace mdf {
 				glPushMatrix();
 				gl::glTranslate(bone.position_);
 				glColor3f(1.0f, 0.3f, 1.0f);
-				draw_sphere_(0.05f, 10, 10);
+				draw_sphere(0.05f, 5, 5);
 
 				qtx::fquat q;
-				vtx::fvtx n;
-				vtx::normalize(bones_[idx].position_ - bone.position_, n);
-				q.look_rotation(n, vtx::fvtx(0.0f, 0.0f, 1.0f));
+				vtx::fvtx n = bone.position_ - bones_[idx].position_;
+				q.look_rotation(n, vtx::fvtx(1.0f, 0.0f, 0.0f));
 				auto m = q.create_rotate_matrix();
 
 				glColor3f(0.7f, 1.0f, 0.7f);
-				glMultMatrixf(m());
-				draw_cone_(0.025f, 0.075f, vtx::distance(bones_[idx].position_, bone.position_));
 
-//				glPushMatrix();
-//				glColor3f(1.0f, 1.0f, 1.0f);
-//				gl::draw_line(bone.position_, bones_[idx].position_);
-//				glPopMatrix();
+				glLoadIdentity();
+//				glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+//				glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
+//				glScalef(-1.0f, 1.0f, 1.0f);
+				gl::glTranslate(bone.position_);
+//				glMultMatrixf(m());
+
+				draw_cylinder(0.025f, 0.075f, vtx::distance(bones_[idx].position_, bone.position_), 5);
 
 				glPopMatrix();
 			}
