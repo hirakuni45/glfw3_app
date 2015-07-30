@@ -8,6 +8,8 @@
 #include "utils/i_scene.hpp"
 #include "utils/director.hpp"
 #include "widgets/widget.hpp"
+#include "widgets/widget_frame.hpp"
+#include "widgets/widget_terminal.hpp"
 
 namespace app {
 
@@ -15,13 +17,17 @@ namespace app {
 
 		utils::director<core>&	director_;
 
+		gui::widget_frame*		terminal_frame_;
+		gui::widget_terminal*	terminal_core_;
+		
 	public:
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		open_ide(utils::director<core>& d) : director_(d) { }
+		open_ide(utils::director<core>& d) : director_(d),
+											 terminal_frame_(nullptr), terminal_core_(nullptr) { }
 
 
 		//-----------------------------------------------------------------//

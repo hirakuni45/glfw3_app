@@ -76,6 +76,7 @@ PSOURCES	=	main.cpp \
 				widgets/widget_filer.cpp \
 				widgets/widget_terminal.cpp \
 				widgets/widget_progress.cpp \
+				mdf/surface.cpp \
 				mdf/pmd_io.cpp \
 				mdf/pmx_io.cpp \
 				mdf/mmd_io.cpp

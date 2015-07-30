@@ -200,7 +200,7 @@ namespace app {
 		using namespace std;
 
 		cout << "BitMap Converter" << endl;
-		cout << "Copyright (C) 2013, Hiramatsu Kunihito" << endl;
+		cout << "Copyright (C) 2013/2015, Hiramatsu Kunihito" << endl;
 		cout << "Version " << boost::format("%1.2f") % version_ << endl;
 		cout << "usage:" << endl;
 		string cm;
@@ -208,11 +208,11 @@ namespace app {
 		if(p) { cm = p + 1; }
 		cout << "    " << cm << " [options] in-file [out-file]" << endl;
 		cout << "    -preview,-pre     preview image (OpenGL)" << endl;
-		cout << "    -header size      output header" << endl;
+		cout << "    -header bits      output width,height" << endl;
 		cout << "    -text             text base output" << endl;
-		cout << "    -c-style symbol   C style table output" << endl;
+		cout << "    -c_style symbol   C style table output" << endl;
 		cout << "    -offset x,y       offset location" << endl;
-		cout << "    -clip x,y         clipping area" << endl;
+		cout << "    -size x,y         clipping size" << endl;
 		cout << "    -bdf              BDF file input" << endl;
 		cout << "    -append           append file" << endl;
 		cout << "    -inverse          inverse mono color" << endl;

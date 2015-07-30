@@ -11,7 +11,28 @@
 #include "gl_fw/gl_info.hpp"
 
 namespace mdf {
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief	球を描画
+		@param[in]	radius	半径
+		@param[in]	lats	分割数
+		@param[in]	longs	分割数
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	void draw_sphere(float radius, int lats, int longs);
 
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief	シリンダーを描画
+		@param[in]	radius_org	半径（開始）
+		@param[in]	radius_end	半径（終点）
+		@param[in]	length		長さ
+		@param[in]	lats	分割数
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	void draw_cylinder(float radius_org, float radius_end, float length, int lats);
+
+	
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
 		@brief	surface クラス
@@ -19,6 +40,17 @@ namespace mdf {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	template <typename INDEX_TYPE = uint16_t>
 	struct surface {
+
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	球を描画
+			@param[in]	radius	半径
+			@param[in]	lats	分割数
+			@param[in]	longs	分割数
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		static void draw_sphere(float radius, int lats, int longs);
+
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
@@ -37,10 +69,8 @@ namespace mdf {
 			@brief	エレメント種別
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		struct element {
-			enum type {
-				TRIANGLE,	///< トライアングル
-			};
+		enum class element {
+			TRIANGLE,	///< トライアングル
 		};
 
 		typedef uint32_t	handle;
@@ -109,7 +139,7 @@ namespace mdf {
 			@return 成功なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool begin_element(element::type t, uint32_t n = 0);
+		bool begin_element(element t, uint32_t n = 0);
 
 
 		//-----------------------------------------------------------------//

@@ -8,6 +8,73 @@
 
 namespace mdf {
 
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief	球を描画
+		@param[in]	radius	半径
+		@param[in]	lats	分割数
+		@param[in]	longs	分割数
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	void draw_sphere(float radius, int lats, int longs)
+	{
+		for(int i = 0; i <= lats; ++i) {
+			float lat0 = vtx::get_pi<float>() * (-0.5f + static_cast<float>(i - 1) / lats);
+			float z0  = radius * std::sin(lat0);
+			float zr0 = radius * std::cos(lat0);
+
+			float lat1 = vtx::get_pi<float>() * (-0.5f + static_cast<float>(i) / lats);
+			float z1  = radius * std::sin(lat1);
+			float zr1 = radius * std::cos(lat1);
+
+			glBegin(GL_QUAD_STRIP);
+			for(int j = 0; j <= longs; ++j) {
+				float lng = 2 * vtx::get_pi<float>() * static_cast<float>(j - 1) / longs;
+				float x = std::cos(lng);
+				float y = std::sin(lng);
+				glNormal3f(x * zr1, y * zr1, z1);
+				glVertex3f(x * zr1, y * zr1, z1);
+				glNormal3f(x * zr0, y * zr0, z0);
+				glVertex3f(x * zr0, y * zr0, z0);
+			}
+			glEnd();
+		}
+	}
+
+
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief	シリンダーを描画
+		@param[in]	radius_org	半径（開始）
+		@param[in]	radius_end	半径（終点）
+		@param[in]	length		長さ
+		@param[in]	lats	分割数
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	void draw_cylinder(float radius_org, float radius_len, float length, int lats)
+	{
+		int divide = 12;
+		float a = 0.0f;
+		float d = 2.0f * vtx::get_pi<float>() / static_cast<float>(divide);
+		glBegin(GL_TRIANGLE_STRIP);
+		for(int i = 0; i < divide; ++i) {
+			float x = std::sin(a);
+			float y = std::cos(a);
+			a += d;
+			glVertex3f(x * radius_org, 0.0f,   y * radius_org);
+			glVertex3f(x * radius_len, length, y * radius_len);
+		}
+		{
+			a = 0.0f;
+			float x = std::sin(a);
+			float y = std::cos(a);
+			glVertex3f(x * radius_org, 0.0f,   y * radius_org);
+			glVertex3f(x * radius_len, length, y * radius_len);
+		}
+		glEnd();
+	}
+
+
 #if 0
 	void surface::destroy_vertex_()
 	{

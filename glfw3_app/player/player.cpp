@@ -511,11 +511,9 @@ namespace app {
 									if(n[0] == '0') n.clear();
 									else if(n[0] >= '0' && n[0] <= '9') {
 										n = '0' + n;
-										n += ' ';
-									} else {
-										n += ' ';
 									}
 								}
+								if(!n.empty()) n += ' ';
 								filer_->set_alias(p, n + t.title_);
 							} else {
 								filer_->set_alias(p, t.title_);

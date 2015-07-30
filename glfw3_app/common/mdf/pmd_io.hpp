@@ -12,6 +12,7 @@
 #include "utils/mtx.hpp"
 #include "utils/quat.hpp"
 #include "utils/file_io.hpp"
+#include "mdf/surface.hpp"
 
 namespace mdf {
 
