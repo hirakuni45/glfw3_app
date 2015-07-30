@@ -37,8 +37,7 @@ namespace al {
 	{
 		static const int stream_buff_size = 2048;
 
-		utils::file_infos fis;
-		utils::filter_file_infos(src, sdf.get_file_exts(), fis);
+		auto fis = utils::filter_file_infos(src, sdf.get_file_exts());
 
 		uint32_t i = 0;
 		if(!file.empty()) {
