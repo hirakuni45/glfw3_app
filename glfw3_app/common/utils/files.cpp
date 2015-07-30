@@ -34,11 +34,11 @@ namespace utils {
 				pthread_mutex_lock(&t.sync_);
 				t.infos_.clear();
 				if(t.filter_.empty()) {
-					create_file_list(t.path_, t.infos_);
+					t.infos_ = create_file_list(t.path_);
 				} else {
 					file_infos fis;
 					create_file_list(t.path_, fis);
-					filter_file_infos(fis, t.filter_, t.infos_);
+					t.infos_ = filter_file_infos(fis, t.filter_);
 				}
 				idx = t.idx_;
 				++t.ans_;
