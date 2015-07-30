@@ -136,6 +136,20 @@ namespace utils {
 
 	//-----------------------------------------------------------------//
 	/*!
+		@brief	ディレクトリーのファイルリストを作成
+		@param[in]	root	ルート・パス
+		@return		ファイルリスト
+	*/
+	//-----------------------------------------------------------------//
+	inline file_infos create_file_list(const std::string& root) {
+		file_infos dst;
+		create_file_list(root, dst);
+		return std::move(dst);
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
 		@brief	ファイル情報からフォーマットされた文字列を生成
 		@param[in]	list	fileinfos クラス
 		@param[in]	format	フォーマット（ディレクトリー出力専用形式）
@@ -150,9 +164,10 @@ namespace utils {
 		@brief	ファイル情報リストを正規表現フィルターで再構成
 		@param[in]	src		fileinfos クラス
 		@param[in]	filter	拡張子文字列
-		@param[in]	dst		出力先列
+		@param[in]	cap	「false」なら大文字小文字を判定する
+		@return		出力列
 	*/
 	//-----------------------------------------------------------------//
-	void filter_file_infos(const file_infos& src, const std::string& filter, file_infos& dst);
+	file_infos filter_file_infos(const file_infos& src, const std::string& filter, bool cap = true);
 
 }

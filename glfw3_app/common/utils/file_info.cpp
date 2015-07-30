@@ -149,14 +149,17 @@ namespace utils {
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	ファイル情報リストを拡張子フィルターで再構成
+		@brief	ファイル情報リストを正規表現フィルターで再構成
 		@param[in]	src		fileinfos クラス
 		@param[in]	filter	拡張子文字列
-		@param[in]	dst		出力先列
+		@param[in]	cap	「false」なら大文字小文字を判定する
+		@return		出力列
 	*/
 	//-----------------------------------------------------------------//
-	void filter_file_infos(const file_infos& src, const std::string& filter, file_infos& dst)
+	file_infos filter_file_infos(const file_infos& src, const std::string& filter, bool cap)
 	{
+		file_infos dst;
+
 		utils::strings ss;
 		if(!filter.empty()) {
 			ss = utils::split_text(filter, ",");
@@ -170,14 +173,23 @@ namespace utils {
 				BOOST_FOREACH(const std::string& s, ss) {
 					const char* p = strrchr(n.c_str(), '.');
 					if(p) {
-						if(utils::no_capital_strcmp(std::string(p + 1), s) == 0) {
-							add = true;
-							break;
+						std::string ext(p + 1);
+						if(cap) {
+							if(s == ext) {
+								add = true;
+								break;
+							}
+						} else {
+							if(utils::no_capital_strcmp(ext, s) == 0) {
+								add = true;
+								break;
+							}
 						}
 					}
 				}
 			}
 			if(add) dst.push_back(f);
 		}
+		return std::move(dst);
 	}
 }

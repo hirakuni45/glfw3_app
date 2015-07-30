@@ -684,7 +684,7 @@ namespace utils {
 	/*!
 		@brief	拡張子フィルター
 		@param[in]	src	ソース
-		@param[in]	ext	拡張子
+		@param[in]	ext	拡張子（「,」で複数指定）
 		@param[in]	cap	「false」なら大文字小文字を判定する
 		@return リスト
 	*/
