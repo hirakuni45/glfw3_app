@@ -416,18 +416,19 @@ namespace app {
 			gui::set_widget_text(album_pad_, tag.album_);
 			gui::set_widget_text(title_pad_, tag.title_);
 			std::string s = tag.track_;
+			if(s == "0") s.clear();
 			if(!s.empty()) {
 				if(!tag.total_tracks_.empty()) {
 					s += " / " + tag.total_tracks_;
 				}
 			}
-			if(!tag.disc_.empty()) {
+			if(!tag.disc_.empty() && tag.disc_ != "0") {
 				s += " : " + tag.disc_;
 				if(!tag.total_discs_.empty()) {
 					s += " / " + tag.total_discs_;
 				}
 			}
-			if(!tag.date_.empty()) {
+			if(!tag.date_.empty() && tag.date_ != "0") {
 				s += " : " + tag.date_;
 			}
 			gui::set_widget_text(other_pad_, s);
