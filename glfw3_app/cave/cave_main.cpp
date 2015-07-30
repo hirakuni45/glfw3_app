@@ -25,7 +25,27 @@ namespace app {
 		using namespace gui;
 		widget_director& wd = director_.at().widget_director_;
 
+		{	// ターミナルのテスト
+			{
+				widget::param wp(vtx::srect(10, 10, 200, 200));
+				widget_frame::param wp_;
+				wp_.plate_param_.set_caption(30);
+				terminal_frame_ = wd.add_widget<widget_frame>(wp, wp_);
+			}
+			{
+				widget::param wp(vtx::srect(0), terminal_frame_);
+				widget_terminal::param wp_;
+				terminal_core_ = wd.add_widget<widget_terminal>(wp, wp_);
+			}
+		}
 
+
+		// プリファレンスの取得
+		sys::preference& pre = director_.at().preference_;
+
+		if(terminal_frame_) {
+			terminal_frame_->load(pre);
+		}
 	}
 
 
@@ -36,7 +56,11 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void cave_main::update()
 	{
-//		gui::widget_director& wd = director_.at().widget_director_;
+		gui::widget_director& wd = director_.at().widget_director_;
+
+
+
+		wd.update();
 	}
 
 
@@ -47,9 +71,8 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void cave_main::render()
 	{
-		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-		gl::glColor(img::rgbaf(1.0f));
-
+		director_.at().widget_director_.service();
+		director_.at().widget_director_.render();
 	}
 
 
@@ -60,5 +83,10 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void cave_main::destroy()
 	{
+		sys::preference& pre = director_.at().preference_;
+
+		if(terminal_frame_) {
+			terminal_frame_->save(pre);
+		}
 	}
 }
