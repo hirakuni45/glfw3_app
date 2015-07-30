@@ -107,22 +107,27 @@ namespace img {
 	//-----------------------------------------------------------------//
 	bool png_io::info(utils::file_io& fin, img::img_info& fo)
 	{
+		long pos = fin.tell();
+
 		if(probe(fin) == false) {
+			fin.seek(pos, utils::file_io::seek::set);
 			return false;
 		}
 
 		//	png_ptr 構造体を確保・初期化します
 		png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, err_func_);
 		if(png_ptr == NULL) {
+			fin.seek(pos, utils::file_io::seek::set);
 			return false;
 		}
 		//  info_ptr 構造体を確保・初期化します
 		png_infop info_ptr = png_create_info_struct(png_ptr);
 		if(info_ptr == NULL) {
+			fin.seek(pos, utils::file_io::seek::set);
 			return false;
 		}
 
-		long pos = fin.tell();
+///		long pos = fin.tell();
 
 		png_set_read_fn(png_ptr, (png_voidp)&fin, png_io_read_func);
 		png_read_info(png_ptr, info_ptr);

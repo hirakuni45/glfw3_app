@@ -262,6 +262,10 @@ namespace img {
 	//-----------------------------------------------------------------//
 	bool jpeg_io::info(utils::file_io& fin, img::img_info& fo)
 	{
+		if(!probe(fin)) {
+			return false;
+		}
+
 		struct jpeg_decompress_struct cinfo;
 		struct jpeg_error_mgr errmgr;
 

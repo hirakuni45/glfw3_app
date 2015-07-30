@@ -12,6 +12,7 @@
 /// #include "img_io/dds_io.hpp"
 #include "img_io/openjpeg_io.hpp"
 #include <boost/foreach.hpp>
+/// #include <iostream>
 
 namespace img {
 
@@ -108,12 +109,15 @@ namespace img {
 				}
 			}
 		}
+
 		for(size_t i = 0; i < imgios_.size(); ++i) {
 			if(n != i) {
 				img_file& io = imgios_[i];
+///				std::cout << io.ext << std::endl;
 				if(io.igf->info(fin, fo)) return true;
 			}
 		}
+
 		return false;
 	}
 
