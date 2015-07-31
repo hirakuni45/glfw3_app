@@ -36,8 +36,7 @@ namespace utils {
 				if(t.filter_.empty()) {
 					t.infos_ = create_file_list(t.path_);
 				} else {
-					file_infos fis;
-					create_file_list(t.path_, fis);
+					auto fis = create_file_list(t.path_);
 					t.infos_ = filter_file_infos(fis, t.filter_);
 				}
 				idx = t.idx_;
