@@ -81,8 +81,15 @@ namespace qtx {
 		}
 
 
-// We need to get the inverse of a quaternion to properly apply a quaternion-rotation to a vector
-// The conjugate of a quaternion is the same as the inverse, as long as the quaternion is unit-length
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	We need to get the inverse of a quaternion to properly
+					apply a quaternion-rotation to a vector
+					The conjugate of a quaternion is the same as the inverse,
+					as long as the quaternion is unit-length
+			@return 答え
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		quaternion get_conjugate() const {
 			return std::move(quaternion(-x, -y, -z, w));
 		}
