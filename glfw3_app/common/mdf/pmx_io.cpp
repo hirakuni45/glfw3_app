@@ -369,6 +369,12 @@ namespace mdf {
 	{
 		if(bones_.empty()) return;
 
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_BLEND);
+		glDisable(GL_TEXTURE_2D);
+
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 
@@ -376,19 +382,7 @@ namespace mdf {
 		glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
 		glScalef(-1.0f, 1.0f, 1.0f);
 
-		glEnable(GL_CULL_FACE);
-		glCullFace(GL_BACK);
-		glDisable(GL_DEPTH_TEST);
-		glDisable(GL_BLEND);
-		glDisable(GL_TEXTURE_2D);
-
 		BOOST_FOREACH(const pmx_bone& bone, bones_) {
-///			glPushMatrix();
-///			gl::glTranslate(bone.head_pos);
-///			glCallList(bone_list_id_);
-///			lig.set_material(gl::light::material::pearl);
-///			glPopMatrix();
-
 			uint16_t idx = bone.parent_index_;
 			if(idx < bones_.size()) {
 				glPushMatrix();
@@ -398,19 +392,16 @@ namespace mdf {
 
 				qtx::fquat q;
 				vtx::fvtx n = bone.position_ - bones_[idx].position_;
-				q.look_rotation(n, vtx::fvtx(1.0f, 0.0f, 0.0f));
-				auto m = q.create_rotate_matrix();
+				q.look_rotation(vtx::fvtx(0.0f, 0.0f, 1.0f), vtx::fvtx(0.0f, 0.0f, 1.0f));
+				auto m = q.create_matrix();
 
 				glColor3f(0.7f, 1.0f, 0.7f);
 
-				glLoadIdentity();
-//				glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-//				glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
-//				glScalef(-1.0f, 1.0f, 1.0f);
-				gl::glTranslate(bone.position_);
-//				glMultMatrixf(m());
+//				glLoadIdentity();
+//				gl::glTranslate(bone.position_);
+				glMultMatrixf(m());
 
-				draw_cylinder(0.025f, 0.075f, vtx::distance(bones_[idx].position_, bone.position_), 5);
+				draw_cylinder(0.025f, 0.075f, n.len(), 5);
 
 				glPopMatrix();
 			}
