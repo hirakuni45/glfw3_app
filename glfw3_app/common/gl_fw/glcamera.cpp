@@ -61,10 +61,9 @@ namespace gl {
 					fpos d;
 					d.x = static_cast<float>(diff_pos.x);
 					d.y = static_cast<float>(diff_pos.y);
-					vtx::fpos qh = d * -0.005f;
-					qtx::fquat q;
-					if(q.rot_xz(qh.x, qh.y, 1.0f)) {
-						glmat_.at_current_matrix() = q.create_matrix();
+					vtx::fpos qh = d * -0.0025f;
+					if(quat_.rot_xz(qh.x, qh.y, 1.0f)) {
+						glmat_.at_current_matrix() = quat_.create_matrix();
 						vtx::fvtx4 fv;
 						matrixf::vertex_world(glmat_.get_current_matrix(), up_first_, fv);
 						up_.set(fv.x,  fv.y,  fv.z);
