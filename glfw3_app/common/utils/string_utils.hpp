@@ -665,14 +665,14 @@ namespace utils {
 	//-----------------------------------------------------------------//
 	template <class T>
 	inline const typename T::value_type* get_file_nameT(const T& src) {
-		if(src.empty()) return 0;
+		if(src.empty()) return nullptr;
 		const typename T::value_type* p = string_strrchr(src, '/');
-		if(p != 0) {
+		if(p != nullptr) {
 			++p;
 			return p;
 		} else {
 			const typename T::value_type* p = string_strrchr(src, ':');
-			if(p != 0) {
+			if(p != nullptr) {
 				++p;
 				return p;
 			}
@@ -718,12 +718,15 @@ namespace utils {
 		if(src.empty()) return s;
 		auto p = string_strrchr(src, '.');
 		if(p != nullptr) {
-			if((p = string_strrchr(p + 1, '/')) != nullptr) {
-				s = p + 1;
+			++p;
+			auto q = string_strrchr(p, '/');
+			if(q != nullptr) {
+				s = q + 1;
+			} else {
+				s = p;
 			}
-			s = p;
 		}
-		return s;
+		return std::move(s);
 	}
 
 	inline std::string get_file_ext(const std::string& src) {
