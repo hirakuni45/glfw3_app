@@ -76,9 +76,6 @@ PSOURCES	=	main.cpp \
 				widgets/widget_filer.cpp \
 				widgets/widget_terminal.cpp \
 				widgets/widget_progress.cpp \
-				mdf/pmd_io.cpp \
-				mdf/pmx_io.cpp \
-				mdf/mmd_io.cpp \
 				effekseer/core/CriticalSection.cpp \
 				effekseer/core/Setting.cpp \
 				effekseer/core/DefaultEffectLoader.cpp \
