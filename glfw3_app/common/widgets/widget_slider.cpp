@@ -10,6 +10,47 @@
 
 namespace gui {
 
+	void widget_slider::update_offset_()
+	{
+		const slider_param& sp = param_.slider_param_;
+		if(sp.direction_ == slider_param::direction::HOLIZONTAL) {
+			handle_offset_.x = param_.plate_param_.frame_width_;
+			short ofs = wd_.at_mobj().get_size(hand_h_).y - wd_.at_mobj().get_size(base_h_).y;
+			handle_offset_.y = -ofs / 2;
+		} else if(sp.direction_ == slider_param::direction::VERTICAL) {
+			short ofs = wd_.at_mobj().get_size(hand_h_).x - wd_.at_mobj().get_size(base_h_).x;
+			handle_offset_.x = -ofs / 2;
+			handle_offset_.y = param_.plate_param_.frame_width_;
+		}		
+	}
+
+	void widget_slider::update_position_()
+	{
+		const slider_param& sp = param_.slider_param_;
+		const vtx::spos& size = get_rect().size;
+		short fw = param_.plate_param_.frame_width_;
+		if(sp.direction_ == slider_param::direction::HOLIZONTAL) {
+			short sz = size.x - fw * 2;
+			short ofs;
+			if(param_.hand_image_) {
+				ofs = wd_.at_mobj().get_size(hand_h_).x;
+			} else {
+				ofs = sz * sp.handle_ratio_;
+			}
+			handle_offset_.x = fw + sp.position_ * (sz - ofs);
+		} else if(sp.direction_ == slider_param::direction::VERTICAL) {
+			short sz = size.y - fw * 2;
+			short ofs;
+			if(param_.hand_image_) {
+				ofs = wd_.at_mobj().get_size(hand_h_).y;
+			} else {
+				ofs = sz * sp.handle_ratio_;
+			}
+			handle_offset_.y = fw + sp.position_ * (sz - ofs);
+		}
+	}
+
+
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	初期化
@@ -68,6 +109,9 @@ namespace gui {
 			}
 		}
 		hand_h_ = wd_.at_mobj().install(&pa);
+
+		update_offset_();
+		update_position_();
 	}
 
 
@@ -78,18 +122,10 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_slider::update()
 	{
+		update_offset_();
+
 		const slider_param& sp = param_.slider_param_;
 		short fw = param_.plate_param_.frame_width_;
-		if(sp.direction_ == slider_param::direction::HOLIZONTAL) {
-			handle_offset_.x = param_.plate_param_.frame_width_;
-			short ofs = wd_.at_mobj().get_size(hand_h_).y - wd_.at_mobj().get_size(base_h_).y;
-			handle_offset_.y = -ofs / 2;
-		} else if(sp.direction_ == slider_param::direction::VERTICAL) {
-			short ofs = wd_.at_mobj().get_size(hand_h_).x - wd_.at_mobj().get_size(base_h_).x;
-			handle_offset_.x = -ofs / 2;
-			handle_offset_.y = param_.plate_param_.frame_width_;
-		}
-
 		if(get_focus() && param_.hand_ctrl_) {
 			if(get_select()) {
 				if(get_select_in()) {
@@ -146,26 +182,7 @@ namespace gui {
 			}
 		}
 
-		const vtx::spos& size = get_rect().size;
-		if(sp.direction_ == slider_param::direction::HOLIZONTAL) {
-			short sz = size.x - fw * 2;
-			short ofs;
-			if(param_.hand_image_) {
-				ofs = wd_.at_mobj().get_size(hand_h_).x;
-			} else {
-				ofs = sz * sp.handle_ratio_;
-			}
-			handle_offset_.x = fw + sp.position_ * (sz - ofs);
-		} else if(sp.direction_ == slider_param::direction::VERTICAL) {
-			short sz = size.y - fw * 2;
-			short ofs;
-			if(param_.hand_image_) {
-				ofs = wd_.at_mobj().get_size(hand_h_).y;
-			} else {
-				ofs = sz * sp.handle_ratio_;
-			}
-			handle_offset_.y = fw + sp.position_ * (sz - ofs);
-		}
+		update_position_();
 	}
 
 

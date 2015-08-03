@@ -66,6 +66,9 @@ namespace gui {
 
 		float               position_;
 
+		void update_offset_();
+		void update_position_();
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
