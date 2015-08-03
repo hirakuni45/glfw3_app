@@ -197,6 +197,20 @@ namespace utils {
 
 	//-----------------------------------------------------------------//
 	/*!
+		@brief	UTF-8 から UTF-16 への変換
+		@param[in]	src	UTF-8 ソース
+		@return	UTF-16
+	*/
+	//-----------------------------------------------------------------//
+	inline wstring utf8_to_utf16(const std::string& src) noexcept {
+		wstring dst;
+		utf8_to_utf16(src, dst);
+		return std::move(dst);
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
 		@brief	UTF-8 から UTF-32 への変換
 		@param[in]	src	UTF-8 ソース
 		@param[out]	dst	UTF-32（追記）
@@ -204,6 +218,20 @@ namespace utils {
 	*/
 	//-----------------------------------------------------------------//
 	bool utf8_to_utf32(const std::string& src, lstring& dst) noexcept;
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	UTF-8 から UTF-32 への変換
+		@param[in]	src	UTF-8 ソース
+		@return	UTF-32
+	*/
+	//-----------------------------------------------------------------//
+	inline lstring utf8_to_utf32(const std::string& src) noexcept {
+		lstring dst;
+		utf8_to_utf32(src, dst);
+		return std::move(dst);
+	}
 
 
 	//-----------------------------------------------------------------//
@@ -219,9 +247,24 @@ namespace utils {
 
 	//-----------------------------------------------------------------//
 	/*!
+		@brief	UTF-16 から UTF-8 への変換
+		@param[in]	src	UTF-16 ソース
+		@return	UTF-8
+	*/
+	//-----------------------------------------------------------------//
+	inline std::string utf16_to_utf8(const wstring& src) noexcept {
+		std::string dst;
+		utf16_to_utf8(src, dst);
+		return std::move(dst);
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
 		@brief	UTF-16 から UTF-32 への変換（単なるコピー）
 		@param[in]	src	UTF-16 ソース文字列
 		@param[out]	dst	UTF-32（追記）
+		@return 変換が正常なら「true」
 	*/
 	//-----------------------------------------------------------------//
 	inline bool utf16_to_utf32(const wstring& src, lstring& dst) noexcept {
@@ -229,6 +272,20 @@ namespace utils {
 			dst += ch;
 		}
 		return true;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	UTF-16 から UTF-32 への変換（単なるコピー）
+		@param[in]	src	UTF-16 ソース文字列
+		@return	UTF-32
+	*/
+	//-----------------------------------------------------------------//
+	inline lstring utf16_to_utf32(const wstring& src) noexcept {
+		lstring dst;
+		utf16_to_utf32(src, dst);
+		return std::move(dst);
 	}
 
 
@@ -245,6 +302,20 @@ namespace utils {
 
 	//-----------------------------------------------------------------//
 	/*!
+		@brief	UTF-32 から UTF-8 への変換
+		@param[in]	src	UTF-32 ソース
+		@return	UTF-8
+	*/
+	//-----------------------------------------------------------------//
+	inline std::string utf32_to_utf8(const lstring& src) noexcept {
+		std::string dst;
+		utf32_to_utf8(src, dst);
+		return std::move(dst);
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
 		@brief	Shift-JIS から UTF-8 への変換
 		@param[in]	src	Shift-JIS ソース
 		@param[out]	dst	UTF-8（追記）
@@ -252,6 +323,20 @@ namespace utils {
 	*/
 	//-----------------------------------------------------------------//
 	bool sjis_to_utf8(const std::string& src, std::string& dst) noexcept;
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	Shift-JIS から UTF-8 への変換
+		@param[in]	src	Shift-JIS ソース
+		@return	UTF-8
+	*/
+	//-----------------------------------------------------------------//
+	inline std::string sjis_to_utf8(const std::string& src) noexcept {
+		std::string dst;
+		sjis_to_utf8(src, dst);
+		return std::move(dst);
+	}
 
 
 	//-----------------------------------------------------------------//
@@ -267,6 +352,20 @@ namespace utils {
 
 	//-----------------------------------------------------------------//
 	/*!
+		@brief	Shift-JIS から UTF-16 への変換
+		@param[in]	src	Shift-JIS ソース
+		@return	UTF-16（追記）
+	*/
+	//-----------------------------------------------------------------//
+	inline wstring sjis_to_utf16(const std::string& src) noexcept {
+		wstring dst;
+		sjis_to_utf16(src, dst);
+		return std::move(dst);
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
 		@brief	UTF-8 から Shift-JIS への変換
 		@param[in]	src	UTF8 ソース
 		@param[out]	dst	Shift-JIS 出力
@@ -278,6 +377,20 @@ namespace utils {
 
 	//-----------------------------------------------------------------//
 	/*!
+		@brief	UTF-8 から Shift-JIS への変換
+		@param[in]	src	UTF8 ソース
+		@return	Shift-JIS 出力
+	*/
+	//-----------------------------------------------------------------//
+	inline std::string utf8_to_sjis(const std::string& src) noexcept {
+		std::string dst;
+		utf8_to_sjis(src, dst);
+		return std::move(dst);
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
 		@brief	UTF-16 から Shift-JIS への変換
 		@param[in]	src	UTF16 ソース
 		@param[out]	dst	Shift-JIS 出力
@@ -285,6 +398,21 @@ namespace utils {
 	*/
 	//-----------------------------------------------------------------//
 	bool utf16_to_sjis(const wstring& src, std::string& dst) noexcept;
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	UTF-16 から Shift-JIS への変換
+		@param[in]	src	UTF16 ソース
+		@param[out]	dst	Shift-JIS 出力
+		@return 変換が正常なら「true」
+	*/
+	//-----------------------------------------------------------------//
+	inline std::string utf16_to_sjis(const wstring& src) noexcept {
+		std::string dst;
+		utf16_to_sjis(src, dst);
+		return std::move(dst);
+	}
 
 
 	//-----------------------------------------------------------------//
@@ -552,8 +680,8 @@ namespace utils {
 		return src.c_str();
 	}
 	inline const char* get_file_name(const std::string& src) { return get_file_nameT(src); }
-	inline const uint16_t* get_file_name(const wstring& src) { return get_file_nameT(src); }
-	inline const uint32_t* get_file_name(const lstring& src) { return get_file_nameT(src); }
+	inline const wstring::value_type* get_file_name(const wstring& src) { return get_file_nameT(src); }
+	inline const lstring::value_type* get_file_name(const lstring& src) { return get_file_nameT(src); }
 
 
 	//-----------------------------------------------------------------//
@@ -586,26 +714,26 @@ namespace utils {
 	//-----------------------------------------------------------------//
 	template <class T>
 	inline T get_file_extT(const T& src) {
-		static T empty;
-		if(src.empty()) return empty;
-		const typename T::value_type* p = string_strrchr(src, '.');
-		if(p) {
-			++p;
-			if((p - &src[0]) <= 0) {
-				return empty;
+		T s;
+		if(src.empty()) return s;
+		auto p = string_strrchr(src, '.');
+		if(p != nullptr) {
+			if((p = string_strrchr(p + 1, '/')) != nullptr) {
+				s = p + 1;
 			}
-			if(string_strchr(p, '/')) {
-				return empty;
-			}
-			return p;
+			s = p;
 		}
-		return empty;
+		return s;
 	}
+
 	inline std::string get_file_ext(const std::string& src) {
 		return get_file_extT<std::string>(src);
 	}
 	inline wstring get_file_ext(const wstring& src) {
 		return get_file_extT<wstring>(src);
+	}
+	inline lstring get_file_ext(const lstring& src) {
+		return get_file_extT<lstring>(src);
 	}
 
 
