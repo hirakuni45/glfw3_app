@@ -548,6 +548,40 @@ namespace utils {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	リトルエンディアン 16 bits 読み込み
+			@param[out]	val	読み込み先
+			@return	ファイルの終端なら「false」
+		*/
+		//-----------------------------------------------------------------//
+		bool get16(uint16_t& val) {
+			uint8_t tmp[2];
+			if(read(tmp, 2) != 2) {
+				return false;
+			}
+			val = tmp[0] | (tmp[1] << 8);
+			return true;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	リトルエンディアン 32 bits 読み込み
+			@param[out]	val	読み込み先
+			@return	ファイルの終端なら「false」
+		*/
+		//-----------------------------------------------------------------//
+		bool get32(uint32_t& val) {
+			uint8_t tmp[4];
+			if(read(tmp, 4) != 4) {
+				return false;
+			}
+			val = tmp[0] | (tmp[1] << 8) | (tmp[2] << 16) | (tmp[3] << 24);
+			return true;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	１バイト書き出し
 			@param[in]	c	書き出しデータ
 			@return	エラーなら「false」
@@ -609,6 +643,44 @@ namespace utils {
 		template <typename T>
 		bool put(const T& pad) {
 			if(write(&pad, sizeof(T)) != sizeof(T)) {
+				return false;
+			}
+			return true;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	リトルエンディアン 16 bits 書き込み
+			@param[in]	val	書き込み元
+			@return	正常なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool put16(uint16_t val) {
+			uint8_t tmp[2];
+			tmp[0] = val & 255;
+			tmp[1] = val >> 8;			
+			if(write(tmp, 2) != 2) {
+				return false;
+			}
+			return true;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	リトルエンディアン 32 bits 書き込み
+			@param[in]	val	書き込み元
+			@return	正常なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool put32(uint32_t val) {
+			uint8_t tmp[4];
+			tmp[0] = val & 255;
+			tmp[1] = val >> 8;
+			tmp[2] = val >> 16;
+			tmp[2] = val >> 24;
+			if(write(tmp, 4) != 4) {
 				return false;
 			}
 			return true;
