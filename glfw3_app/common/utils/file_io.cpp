@@ -189,7 +189,7 @@ namespace utils {
 	{
 #ifdef WIN32
 		auto fname = utf8_to_sjis(fn);
-		std::cout << fname << std::endl;
+//		std::cout << fname << std::endl;
 		return remove(fname.c_str()) == 0;
 #else
 		return remove(fn.c_str()) == 0;
