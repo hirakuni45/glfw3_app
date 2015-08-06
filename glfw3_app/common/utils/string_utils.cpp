@@ -380,8 +380,12 @@ namespace utils {
 		utf8_to_utf16(src, ws);
 		BOOST_FOREACH(uint16_t wc, ws) {
 			uint16_t ww = utf16_to_sjis(wc);
-			dst += ww >> 8;
-			dst += ww & 0xff;
+			if(ww <= 255) {
+				dst += ww;
+			} else {
+				dst += ww >> 8;
+				dst += ww & 0xff;
+			}
 		}
 		return true;
 	}

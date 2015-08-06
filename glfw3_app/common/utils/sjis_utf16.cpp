@@ -1342,6 +1342,12 @@ static uint16_t sjis_utf16_tbl_[] = {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	uint16_t utf16_to_sjis(uint16_t utf16)
 	{
+		if(utf16 < 128) return utf16; // alphabet
+
+		if(utf16_to_sjis_map_.size() == 0) {
+			init_utf16_to_sjis();
+		}
+
 		utf16_to_sjis_map::const_iterator cit = utf16_to_sjis_map_.find(utf16);
 		if(cit == utf16_to_sjis_map_.end()) {
 			return 0xffff;
