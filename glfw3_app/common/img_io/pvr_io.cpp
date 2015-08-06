@@ -151,7 +151,7 @@ namespace img {
 		//If Y is the larger dimension - switch the min/max values.
 		if(YSize < XSize) {
 			MinDimension = YSize;
-			MaxValue	 = XPos;
+			MaxValue     = XPos;
 		}
 
 		// Step through all the bits in the "minimum" dimension
@@ -409,7 +409,7 @@ namespace img {
 									   uint32_t xPos, uint32_t yPos, uint8_t ui8Bpp)
 	{
 		if(ui8Bpp == 2) {
-			const int RepVals0[4] = {0, 3, 5, 8};				
+			const int RepVals0[4] = {0, 3, 5, 8};
 
 			// extract the modulation value. If a simple encoding
 			if(i32ModulationModes[xPos][yPos]==0) {
@@ -417,13 +417,13 @@ namespace img {
 			} else {
 				// if this is a stored value
 				if(((xPos^yPos)&1)==0) {
-					return RepVals0[i32ModulationValues[xPos][yPos]];				
+					return RepVals0[i32ModulationValues[xPos][yPos]];
 				} else if(i32ModulationModes[xPos][yPos] == 1) {  // else average from the neighbours
 					// if H&V interpolation...
-					return (RepVals0[i32ModulationValues[xPos][yPos-1]] + 
-							RepVals0[i32ModulationValues[xPos][yPos+1]] + 
-							RepVals0[i32ModulationValues[xPos-1][yPos]] + 
-							RepVals0[i32ModulationValues[xPos+1][yPos]] + 2) / 4;				
+					return (RepVals0[i32ModulationValues[xPos][yPos-1]] +
+							RepVals0[i32ModulationValues[xPos][yPos+1]] +
+							RepVals0[i32ModulationValues[xPos-1][yPos]] +
+							RepVals0[i32ModulationValues[xPos+1][yPos]] + 2) / 4;
 				} else if(i32ModulationModes[xPos][yPos] == 2) {  // else if H-Only
 				return (RepVals0[i32ModulationValues[xPos-1][yPos]] + 
 						RepVals0[i32ModulationValues[xPos+1][yPos]] + 1) / 2;
@@ -439,10 +439,8 @@ namespace img {
 	}
 
 
-	static void pvrtcGetDecompressedPixels(const PVRTCWord& P, const PVRTCWord& Q,
-								const PVRTCWord& R, const PVRTCWord& S,
-								Pixel32* pColourData,
-								uint8_t ui8Bpp)
+	static void pvrtcGetDecompressedPixels(const PVRTCWord& P, const PVRTCWord& Q, const PVRTCWord& R, const PVRTCWord& S,
+								Pixel32* pColourData, uint8_t ui8Bpp)
 	{
 		//4bpp only needs 8*8 values, but 2bpp needs 16*8, so rather than wasting processor time we just statically allocate 16*8.
 		int32_t i32ModulationValues[16][8];
@@ -454,8 +452,8 @@ namespace img {
 
 		uint32_t ui32WordWidth = 4;
 		uint32_t ui32WordHeight = 4;
-		if(ui8Bpp==2) {
-			ui32WordWidth=8;
+		if(ui8Bpp == 2) {
+			ui32WordWidth = 8;
 		}
 
 		//Get the modulations from each word.
@@ -465,19 +463,19 @@ namespace img {
 		unpackModulations(S, ui32WordWidth, ui32WordHeight, i32ModulationValues, i32ModulationModes, ui8Bpp);
 
 		// Bilinear upscale image data from 2x2 -> 4x4
-		interpolateColours(getColourA(P.u32ColourData), getColourA(Q.u32ColourData), 
-						   getColourA(R.u32ColourData), getColourA(S.u32ColourData), 
+		interpolateColours(getColourA(P.u32ColourData), getColourA(Q.u32ColourData),
+						   getColourA(R.u32ColourData), getColourA(S.u32ColourData),
 						   upscaledColourA, ui8Bpp);
-		interpolateColours(getColourB(P.u32ColourData), getColourB(Q.u32ColourData), 
-						   getColourB(R.u32ColourData), getColourB(S.u32ColourData), 
+		interpolateColours(getColourB(P.u32ColourData), getColourB(Q.u32ColourData),
+						   getColourB(R.u32ColourData), getColourB(S.u32ColourData),
 						   upscaledColourB, ui8Bpp);
 
-		for(uint32_t y=0; y < ui32WordHeight; y++) {
-			for(uint32_t x=0; x < ui32WordWidth; x++) {
+		for(uint32_t y = 0; y < ui32WordHeight; y++) {
+			for(uint32_t x = 0; x < ui32WordWidth; x++) {
 				int32_t mod = getModulationValues(i32ModulationValues, i32ModulationModes,
 												  x+ui32WordWidth/2, y+ui32WordHeight/2, ui8Bpp);
 				bool punchthroughAlpha = false;
-				if(mod>10) {
+				if(mod > 10) {
 					punchthroughAlpha = true;
 					mod -= 10;
 				}
@@ -554,13 +552,13 @@ namespace img {
 		uint32_t i32NumYWords = ui32Height / ui32WordHeight;
 
 		Pixel32* pPixels = new Pixel32[ui32WordWidth * ui32WordHeight];
-
+//		std::cout << i32NumXWords << ", " << i32NumYWords << std::endl;
 		// Structs used for decompression
 		PVRTCWordIndices indices;	
 		// For each row of words
-		for(int32_t wordY = -1; wordY < i32NumYWords - 1; ++wordY) {
+		for(int32_t wordY = -1; wordY < static_cast<int32_t>(i32NumYWords - 1); ++wordY) {
 			// for each column of words
-			for(int32_t wordX = -1; wordX < i32NumXWords - 1; ++wordX) {
+			for(int32_t wordX = -1; wordX < static_cast<int32_t>(i32NumXWords - 1); ++wordX) {
 				indices.P[0] = wrapWordIndex(i32NumXWords, wordX);
 				indices.P[1] = wrapWordIndex(i32NumYWords, wordY);
 				indices.Q[0] = wrapWordIndex(i32NumXWords, wordX + 1);
@@ -579,7 +577,7 @@ namespace img {
 				};
 
 				//Access individual elements to fill out PVRTCWord
-				PVRTCWord P,Q,R,S;
+				PVRTCWord P, Q, R, S;
 				P.u32ColourData = pWordMembers[WordOffsets[0]+1];
 				P.u32ModulationData = pWordMembers[WordOffsets[0]];
 				Q.u32ColourData = pWordMembers[WordOffsets[1]+1];
@@ -663,7 +661,7 @@ namespace img {
 		}
 
 		std::vector<uint8_t> input;
-		std::cout << v2.data_size << std::endl;
+//		std::cout << v2.data_size << std::endl;
 		input.resize(v2.data_size);
 		if(fin.read(&input[0], v2.data_size) != v2.data_size) {
 //			std::cerr << "Read data error!" << std::endl;
@@ -683,11 +681,16 @@ namespace img {
 		img_->create(vtx::spos(v2.width, v2.height), alpha);
 
 		for(int y = 0; y < v2.height; ++y) {
+			int yy;
+			if(v2.flags & PVRTEX_VERTICAL_FLIP) {
+				yy = v2.height - y - 1;
+			} else {
+				yy = y;
+			}
 			for(int x = 0; x < v2.width; ++x) {
 				const Pixel32& c = output[v2.width * y + x];
-//				rgba8 cc(c.red, c.green, c.blue, c.alpha);
-				rgba8 cc(c.red, c.green, c.blue, 255);
-				img_->put_pixel(vtx::spos(x, y), cc);
+				rgba8 cc(c.red, c.green, c.blue, c.alpha);
+				img_->put_pixel(vtx::spos(x, yy), cc);
 			}
 		}
 
