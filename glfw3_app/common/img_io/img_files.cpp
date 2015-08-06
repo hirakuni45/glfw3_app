@@ -9,6 +9,7 @@
 #include "img_io/png_io.hpp"
 #include "img_io/bmp_io.hpp"
 #include "img_io/tga_io.hpp"
+#include "img_io/pvr_io.hpp"
 /// #include "img_io/dds_io.hpp"
 #include "img_io/openjpeg_io.hpp"
 #include <boost/foreach.hpp>
@@ -51,6 +52,7 @@ namespace img {
 		add_image_file_io_context_(img_file::img_io(new png_io), exts);
 		add_image_file_io_context_(img_file::img_io(new jpeg_io), exts);
 		add_image_file_io_context_(img_file::img_io(new openjpeg_io), exts);
+		add_image_file_io_context_(img_file::img_io(new pvr_io), exts);
 		// TGA フォーマットはシグネチュアが無いので、最後に評価する事
 		add_image_file_io_context_(img_file::img_io(new tga_io), exts);
 	}

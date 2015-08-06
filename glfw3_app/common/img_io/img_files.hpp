@@ -37,7 +37,7 @@ namespace img {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		img_files(const std::string& exts = "bmp,png,jpg,jpeg,j2k,jp2,tga") {
+		img_files(const std::string& exts = "bmp,png,jpg,jpeg,j2k,jp2,pvr,tga") {
 			initialize_(exts);
 		}
 
