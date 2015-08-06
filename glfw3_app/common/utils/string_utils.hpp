@@ -761,6 +761,20 @@ namespace utils {
 
 	//-----------------------------------------------------------------//
 	/*!
+		@brief	ファイル・パスを取得
+		@param[in]	src	フルパス文字列
+		@return	ファイルパス
+	*/
+	//-----------------------------------------------------------------//
+	inline std::string get_file_path(const std::string& src) {
+		std::string dst;
+		get_file_path(src, dst);
+		return std::move(dst);
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
 		@brief	文字列終端が「/」なら取り除く
 		@param[in]	src	ソースパス
 		@param[out]	dst	出力パス
