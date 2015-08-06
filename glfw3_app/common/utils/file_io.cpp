@@ -180,6 +180,25 @@ namespace utils {
 
 	//-----------------------------------------------------------------//
 	/*!
+		@brief	ファイルを消去
+		@param[in]	fn	ファイル名
+		@return 成功なら「true」
+	*/
+	//-----------------------------------------------------------------//
+	bool remove_file(const std::string& fn)
+	{
+#ifdef WIN32
+		auto fname = utf8_to_sjis(fn);
+		std::cout << fname << std::endl;
+		return remove(fname.c_str()) == 0;
+#else
+		return remove(fn.c_str()) == 0;
+#endif
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
 		@brief	１バイト読み出し
 		@param[out]	ch	読み込み先
 		@return	ファイルの終端なら「false」
