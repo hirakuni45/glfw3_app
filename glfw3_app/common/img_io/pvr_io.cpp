@@ -21,7 +21,6 @@ namespace img {
 	const uint32_t PVRTEX_VOLUME		= (1<<14);		///< Is this a volume texture. DEPRECATED.
 	const uint32_t PVRTEX_ALPHA			= (1<<15);		///< v2.1. Is there transparency info in the texture. DEPRECATED.
 	const uint32_t PVRTEX_VERTICAL_FLIP	= (1<<16);		///< v2.1. Is the texture vertically flipped. DEPRECATED.
-
 	const uint32_t PVRTEX_PIXELTYPE		= 0xff;			///< Pixel type is always in the last 16bits of the flags. DEPRECATED.
 
 	struct pvr_info_v2 {
@@ -53,22 +52,20 @@ namespace img {
 			fin.get32(a_bit_mask);
 			fin.read(iden, 4);
 			fin.get32(num_surface);
-			return !fin.eof();
-		}
-
-
-		bool probe(utils::file_io& fin) {
-			long pos = fin.tell();
-			if(!get(fin)) {
-				fin.seek(pos, utils::file_io::seek::set);
-				return false;
-			}
-			fin.seek(pos, utils::file_io::seek::set);
+			if(fin.eof()) return false;
 			if(header_size == 0x34 && iden[0] == 'P' && iden[1] == 'V' && iden[2] == 'R' && iden[3] == '!') {
 				return true;
 			} else {
 				return false;
 			}
+		}
+
+
+		bool probe(utils::file_io& fin) {
+			long pos = fin.tell();
+			bool f = get(fin);
+			fin.seek(pos, utils::file_io::seek::set);
+			return f;
 		}
 	};
 
@@ -504,10 +501,8 @@ namespace img {
 	}
 
 
-	static void mapDecompressedData(Pixel32* pOutput, int width,
-									const Pixel32* pWord,
-									const PVRTCWordIndices& words,
-									const uint8_t ui8Bpp)
+	static void mapDecompressedData(const Pixel32* pWord, const PVRTCWordIndices& words, uint8_t ui8Bpp,
+									shared_img img, bool flip)
 	{
 		uint32_t ui32WordWidth = 4;
 		uint32_t ui32WordHeight = 4;
@@ -515,29 +510,55 @@ namespace img {
 			ui32WordWidth = 8;
 		}
 
-		for(unsigned int y=0; y < ui32WordHeight/2; y++) {
-			for(unsigned int x=0; x < ui32WordWidth/2; x++) {
-				pOutput[(((words.P[1] * ui32WordHeight) + y + ui32WordHeight/2)
-						 * width + words.P[0] * ui32WordWidth + x + ui32WordWidth/2)] = pWord[y*ui32WordWidth+x];  // map P
-
-				pOutput[(((words.Q[1] * ui32WordHeight) + y + ui32WordHeight/2)	
-						 * width + words.Q[0] *ui32WordWidth + x)] = pWord[y*ui32WordWidth+x+ui32WordWidth/2];  // map Q
-
-				pOutput[(((words.R[1] * ui32WordHeight) + y)
-						 * width + words.R[0] *ui32WordWidth + x + ui32WordWidth/2)] = pWord[(y+ui32WordHeight/2)*ui32WordWidth+x];		// map R
-
-				pOutput[(((words.S[1] * ui32WordHeight) + y)
-						 * width + words.S[0] *ui32WordWidth + x)] = pWord[(y+ui32WordHeight/2)*ui32WordWidth+x+ui32WordWidth/2];	// map S
+		for(uint32_t y = 0; y < ui32WordHeight / 2; ++y) {
+			for(uint32_t x = 0; x < ui32WordWidth / 2; ++x) {
+				{
+					vtx::spos pos;
+					pos.x = (words.P[0] * ui32WordWidth)  + x + ui32WordWidth  / 2;
+					short yy = (words.P[1] * ui32WordHeight) + y + ui32WordHeight / 2;
+					if(flip) pos.y = img->get_size().y - yy - 1;
+					else pos.y = yy;
+					const Pixel32& wc = pWord[y * ui32WordWidth + x];
+					rgba8 c(wc.red, wc.green, wc.blue, wc.alpha);
+					img->put_pixel(pos, c);
+				}
+				{
+					vtx::spos pos;
+					pos.x = (words.Q[0] * ui32WordWidth)  + x;
+					short yy = (words.Q[1] * ui32WordHeight) + y + ui32WordHeight / 2;
+					if(flip) pos.y = img->get_size().y - yy - 1;
+					else pos.y = yy;
+					const Pixel32& wc = pWord[y * ui32WordWidth + x + ui32WordWidth / 2];
+					rgba8 c(wc.red, wc.green, wc.blue, wc.alpha);
+					img->put_pixel(pos, c);
+				}
+				{
+					vtx::spos pos;
+					pos.x = (words.R[0] * ui32WordWidth)  + x + ui32WordWidth / 2;
+					short yy = (words.R[1] * ui32WordHeight) + y;
+					if(flip) pos.y = img->get_size().y - yy - 1;
+					else pos.y = yy;
+					const Pixel32& wc = pWord[(y + ui32WordHeight / 2) * ui32WordWidth + x];
+					rgba8 c(wc.red, wc.green, wc.blue, wc.alpha);
+					img->put_pixel(pos, c);
+				}
+				{
+					vtx::spos pos;
+					pos.x = (words.S[0] * ui32WordWidth)  + x;
+					short yy = (words.S[1] * ui32WordHeight) + y;
+					if(flip) pos.y = img->get_size().y - yy - 1;
+					else pos.y = yy;
+					const Pixel32& wc = pWord[(y + ui32WordHeight / 2) * ui32WordWidth + x + ui32WordWidth / 2];
+					rgba8 c(wc.red, wc.green, wc.blue, wc.alpha);
+					img->put_pixel(pos, c);
+				}
 			}
 		}
 	}
 
 
-	static uint32_t pvrtc_decompress(const uint8_t* pCompressedData,
-									 Pixel32* pOutput,
-									 uint32_t ui32Width,
-									 uint32_t ui32Height,
-									 uint32_t ui8Bpp)
+	static uint32_t pvrtc_decompress(const void* pCompressedData, uint32_t ui32Width, uint32_t ui32Height, uint32_t ui8Bpp,
+									 shared_img img, bool flip)
 	{
 		uint32_t ui32WordWidth = 4;
 		uint32_t ui32WordHeight = 4;
@@ -545,14 +566,13 @@ namespace img {
 			ui32WordWidth = 8;
 		}
 
-		const uint32_t* pWordMembers = (const uint32_t*)pCompressedData;
+		const uint32_t* pWordMembers = static_cast<const uint32_t*>(pCompressedData);
 
 		// Calculate number of words
 		uint32_t i32NumXWords = ui32Width / ui32WordWidth;
 		uint32_t i32NumYWords = ui32Height / ui32WordHeight;
 
 		Pixel32* pPixels = new Pixel32[ui32WordWidth * ui32WordHeight];
-//		std::cout << i32NumXWords << ", " << i32NumYWords << std::endl;
 		// Structs used for decompression
 		PVRTCWordIndices indices;	
 		// For each row of words
@@ -589,7 +609,7 @@ namespace img {
 
 				// assemble 4 words into struct to get decompressed pixels from
 				pvrtcGetDecompressedPixels(P, Q, R, S, pPixels, ui8Bpp);
-				mapDecompressedData(pOutput, ui32Width, pPixels, indices, ui8Bpp);
+				mapDecompressedData(pPixels, indices, ui8Bpp, img, flip);
 			}
 		}
 
@@ -656,45 +676,25 @@ namespace img {
 	bool pvr_io::load(utils::file_io& fin, const std::string& opt)
 	{
 		pvr_info_v2 v2;
-		if(!v2.get(fin)) {
-			return false;
-		}
+		if(v2.get(fin)) {
 
-		std::vector<uint8_t> input;
-//		std::cout << v2.data_size << std::endl;
-		input.resize(v2.data_size);
-		if(fin.read(&input[0], v2.data_size) != v2.data_size) {
-//			std::cerr << "Read data error!" << std::endl;
-			return false;
-		}
-
-//		std::cout << boost::format("%d, %d (%d)\n") % v2.width % v2.height % v2.bit_count;
-
-		std::vector<Pixel32> output;
-		output.resize(v2.width * v2.height);
-
-		pvrtc_decompress(&input[0], &output[0], v2.width, v2.height, v2.bit_count);
-
-		bool alpha = false;
-		if(v2.flags & PVRTEX_ALPHA) alpha = true;
-		img_ = shared_img(new img_rgba8);
-		img_->create(vtx::spos(v2.width, v2.height), alpha);
-
-		for(int y = 0; y < v2.height; ++y) {
-			int yy;
-			if(v2.flags & PVRTEX_VERTICAL_FLIP) {
-				yy = v2.height - y - 1;
-			} else {
-				yy = y;
+			std::vector<uint8_t> input;
+			input.resize(v2.data_size);
+			if(fin.read(&input[0], v2.data_size) != v2.data_size) {
+				return false;
 			}
-			for(int x = 0; x < v2.width; ++x) {
-				const Pixel32& c = output[v2.width * y + x];
-				rgba8 cc(c.red, c.green, c.blue, c.alpha);
-				img_->put_pixel(vtx::spos(x, yy), cc);
-			}
-		}
 
-		return true;
+			bool alpha = (v2.flags & PVRTEX_ALPHA) != 0;
+			img_ = shared_img(new img_rgba8);
+			img_->create(vtx::spos(v2.width, v2.height), alpha);
+
+			bool flip = (v2.flags & PVRTEX_VERTICAL_FLIP) != 0;
+			pvrtc_decompress(&input[0], v2.width, v2.height, v2.bit_count, img_, flip);
+			return true;
+		} else {
+
+		}
+		return false;
 	}
 
 
