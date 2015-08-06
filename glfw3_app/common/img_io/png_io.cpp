@@ -10,6 +10,8 @@
 #include "img_rgba8.hpp"
 #include <boost/format.hpp>
 
+#include <iostream>
+
 using namespace std;
 
 namespace img {
@@ -334,8 +336,7 @@ namespace img {
 	bool png_io::save(utils::file_io& fout, const std::string& ext)
 	{
 		if(!img_) return false;
-		if(img_->get_size().x == 0 || img_->get_size().y == 0) return false;
-
+		
 		int w = img_->get_size().x;
 		int h = img_->get_size().y;
 		if(w <= 0 || h <= 0) {

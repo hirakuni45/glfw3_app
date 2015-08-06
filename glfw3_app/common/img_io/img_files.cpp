@@ -13,7 +13,7 @@
 /// #include "img_io/dds_io.hpp"
 #include "img_io/openjpeg_io.hpp"
 #include <boost/foreach.hpp>
-/// #include <iostream>
+#include <iostream>
 
 namespace img {
 
@@ -175,7 +175,7 @@ namespace img {
 	//-----------------------------------------------------------------//
 	bool img_files::save(utils::file_io& fout, const std::string& ext, const std::string& opt)
 	{
-		if(!ext.empty() && img_) {
+		if(!ext.empty() && img_ != nullptr) {
 			for(size_t i = 0; i < imgios_.size(); ++i) {
 				img_file& io = imgios_[i];
 				if(check_file_exts_(io.ext, ext)) {
