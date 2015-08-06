@@ -7,23 +7,23 @@
 #include "img_io/pvr_io.hpp"
 #include "img_io/img_rgba8.hpp"
 
-#include <iostream>
-#include <boost/format.hpp>
+// #include <iostream>
+// #include <boost/format.hpp>
 
 namespace img {
 
-	const uint32_t PVRTEX_MIPMAP		= (1<<8);		///< Has mip map levels. DEPRECATED.
-	const uint32_t PVRTEX_TWIDDLE		= (1<<9);		///< Is twiddled. DEPRECATED.
-	const uint32_t PVRTEX_BUMPMAP		= (1<<10);		///< Has normals encoded for a bump map. DEPRECATED.
-	const uint32_t PVRTEX_TILING		= (1<<11);		///< Is bordered for tiled pvr. DEPRECATED.
-	const uint32_t PVRTEX_CUBEMAP		= (1<<12);		///< Is a cubemap/skybox. DEPRECATED.
-	const uint32_t PVRTEX_FALSEMIPCOL	= (1<<13);		///< Are there false coloured MIP levels. DEPRECATED.
-	const uint32_t PVRTEX_VOLUME		= (1<<14);		///< Is this a volume texture. DEPRECATED.
-	const uint32_t PVRTEX_ALPHA			= (1<<15);		///< v2.1. Is there transparency info in the texture. DEPRECATED.
-	const uint32_t PVRTEX_VERTICAL_FLIP	= (1<<16);		///< v2.1. Is the texture vertically flipped. DEPRECATED.
-	const uint32_t PVRTEX_PIXELTYPE		= 0xff;			///< Pixel type is always in the last 16bits of the flags. DEPRECATED.
-
 	struct pvr_info_v2 {
+		static const uint32_t PVRTEX_MIPMAP		 = (1<<8);		///< Has mip map levels. DEPRECATED.
+		static const uint32_t PVRTEX_TWIDDLE	 = (1<<9);		///< Is twiddled. DEPRECATED.
+		static const uint32_t PVRTEX_BUMPMAP	 = (1<<10);		///< Has normals encoded for a bump map. DEPRECATED.
+		static const uint32_t PVRTEX_TILING		 = (1<<11);		///< Is bordered for tiled pvr. DEPRECATED.
+		static const uint32_t PVRTEX_CUBEMAP	 = (1<<12);		///< Is a cubemap/skybox. DEPRECATED.
+		static const uint32_t PVRTEX_FALSEMIPCOL = (1<<13);		///< Are there false coloured MIP levels. DEPRECATED.
+		static const uint32_t PVRTEX_VOLUME		 = (1<<14);		///< Is this a volume texture. DEPRECATED.
+		static const uint32_t PVRTEX_ALPHA		 = (1<<15);		///< v2.1. Is there transparency info in the texture. DEPRECATED.
+		static const uint32_t PVRTEX_VERTICAL_FLIP = (1<<16);	///< v2.1. Is the texture vertically flipped. DEPRECATED.
+		static const uint32_t PVRTEX_PIXELTYPE	= 0xff;		///< Pixel type is always in the last 16bits of the flags. DEPRECATED.
+
 		uint32_t	header_size;	///< size of the structure
 		uint32_t	height;			///< height of surface to be created
 		uint32_t	width;			///< width of input surface
@@ -653,7 +653,7 @@ namespace img {
 			fo.r_depth = 8;
 			fo.g_depth = 8;
 			fo.b_depth = 8;
-			fo.a_depth = 8;
+			fo.a_depth = (v2.flags & pvr_info_v2::PVRTEX_ALPHA) != 0 ? 8 : 0;
 			fo.i_depth = 0;
 			fo.clut_num = 0;
 			fo.mipmap_level = 0;
@@ -684,11 +684,11 @@ namespace img {
 				return false;
 			}
 
-			bool alpha = (v2.flags & PVRTEX_ALPHA) != 0;
+			bool alpha = (v2.flags & pvr_info_v2::PVRTEX_ALPHA) != 0;
 			img_ = shared_img(new img_rgba8);
 			img_->create(vtx::spos(v2.width, v2.height), alpha);
 
-			bool flip = (v2.flags & PVRTEX_VERTICAL_FLIP) != 0;
+			bool flip = (v2.flags & pvr_info_v2::PVRTEX_VERTICAL_FLIP) != 0;
 			pvrtc_decompress(&input[0], v2.width, v2.height, v2.bit_count, img_, flip);
 			return true;
 		} else {
