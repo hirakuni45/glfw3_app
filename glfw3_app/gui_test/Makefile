@@ -45,6 +45,7 @@ PSOURCES	=	main.cpp \
 				img_io/png_io.cpp \
 				img_io/jpeg_io.cpp \
 				img_io/openjpeg_io.cpp \
+				img_io/pvr_io.cpp \
 				img_io/img_files.cpp \
 				img_io/img_utils.cpp \
 				snd_io/audio_io.cpp \
