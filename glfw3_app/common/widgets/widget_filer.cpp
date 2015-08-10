@@ -351,17 +351,11 @@ namespace gui {
 
 	bool widget_filer::focus_(const std::string& path)
 	{
-		std::string fn;
-		utils::strip_last_of_delimita_path(path, fn);
-
+		auto fn = utils::strip_last_of_delimita_path(path);
 		uint32_t n = 0;
 		BOOST_FOREACH(const widget_file& wf, center_) {
-			std::string t;
-			utils::strip_last_of_delimita_path(wf.name->get_text(), t);
-			if(wf.name && t == fn) {
-				if(wf.name->get_state(widget::state::SELECTED)) {
-					return true;
-				}
+			auto t = utils::strip_last_of_delimita_path(wf.name->get_text());
+			if(wf.name && !t.empty() && t == fn) {
 				// センターリング
 				short lh = param_.label_height_;
 				short len = main_->get_rect().size.y / lh;
@@ -373,7 +367,9 @@ namespace gui {
 						}
 					}
 				}
-
+				if(wf.name->get_state(widget::state::SELECTED)) {
+					return true;
+				}
 				set_select_pos_(n);
 				wf.name->set_state(widget::state::SELECTED);
 				wf.info->set_state(widget::state::SELECTED);
@@ -401,7 +397,7 @@ namespace gui {
 		} else {
 			fin = path;
 		}
-		return fin;
+		return std::move(fin);
 	}
 
 
