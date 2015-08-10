@@ -794,6 +794,20 @@ namespace utils {
 
 	//-----------------------------------------------------------------//
 	/*!
+		@brief	文字列終端が「/」なら取り除く
+		@param[in]	src	ソースパス
+		@return	出力パス
+	*/
+	//-----------------------------------------------------------------//
+	inline std::string strip_last_of_delimita_path(const std::string& src) {
+		std::string dst;
+		strip_last_of_delimita_path(src, dst);
+		return std::move(dst);
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
 		@brief	階層を一つ戻ったパスを得る
 		@param[in]	src	ソースパス
 		@return 戻ったパス
