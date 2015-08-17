@@ -129,7 +129,6 @@ namespace al {
 
 		sstream_t		sstream_t_;
 
-///		pthread_attr_t	attr_;
 		pthread_t			pth_;
 		volatile uint32_t	stream_fph_cnt_;
 		std::string			stream_fph_;
