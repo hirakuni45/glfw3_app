@@ -100,9 +100,8 @@ namespace al {
 			} else if(strncmp(rc.szChunkName, "data", 4) == 0) {
 				data_size_ = rc.ulChunkSize;
 				data_offset_ = fin.tell();
-			} else if(strncmp(rc.szChunkName, "LIST", 4) == 0) {
-			} else if(strncmp(rc.szChunkName, "iwep", 4) == 0) {
-			} else if(strncmp(rc.szChunkName, "iwem", 4) == 0) {
+				break;
+			} else {
 			}
 			riff_num_++;
 			if(ofs) {
@@ -111,7 +110,7 @@ namespace al {
 			}
 		}
 
-		if(data_size_ != 0 && data_offset_ != 0 && ((type_ == wf_ex) || (type_ == wf_ext))) {
+		if(data_size_ > 0 && data_offset_ != 0 && ((type_ == wf_ex) || (type_ == wf_ext))) {
 			return true;
 		} else {
 			return false;
