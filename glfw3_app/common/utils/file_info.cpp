@@ -27,6 +27,13 @@ namespace utils {
 #ifdef WIN32
 		utils::wstring wsr;
 		utf8_to_utf16(root, wsr);
+		if(!wsr.empty()) {
+			// driver latter convert
+			if(root[0] == '/' && ((root[1] >= 'A' && root[1] <= 'Z') || (root[1] >= 'a' && root[1] <= 'z')) && root[2] == '/') {
+				wsr[0] = wsr[1];
+				wsr[1] = ':';
+			}
+		}
 		wchar_t* wtmp = new wchar_t[wsr.size() + 1];
 		for(uint32_t i = 0; i < wsr.size(); ++i) {
 			wtmp[i] = wsr[i];
