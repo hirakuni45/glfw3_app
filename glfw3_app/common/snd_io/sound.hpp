@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <functional>
 #include <pthread.h>
 #include "snd_io/audio_io.hpp"
 #include "snd_io/snd_files.hpp"
@@ -24,6 +25,9 @@ namespace al {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class sound {
 	public:
+		typedef std::function<void (i_audio*)>	wave_gen_func;
+
+
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	ストリームの状態
@@ -143,6 +147,8 @@ namespace al {
 		bool					tag_thread_;
 		tag						tag_;
 
+		wave_gen_func			wave_gen_func_;
+
 		bool request_sub_(int slot, al::audio_io::wave_handle wh, bool loop);
 
 	public:
@@ -153,7 +159,7 @@ namespace al {
 		//-----------------------------------------------------------------//
 		sound() : slot_max_(0), stream_fph_cnt_(0),
 				  stream_slot_(0),
-				  tag_serial_(0), tag_thread_(false) {
+				  tag_serial_(0), tag_thread_(false), wave_gen_func_() {
 			ses_.push_back(0);
 		}
 
@@ -237,6 +243,18 @@ namespace al {
 		 */
 		//-----------------------------------------------------------------//
 		audio_io::wave_handle request_se(int slot, const audio aif, bool loop);
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	動的波形リクエスト
+			@param[in]	slot	発音スロット（-1: auto）
+			@param[in]	aform	オーディオ形式
+			@param[in]	func	発音生成関数
+			@return 波形ハンドルを返す。（「０」ならエラー）
+		 */
+		//-----------------------------------------------------------------//
+		audio_io::wave_handle request_pw(int slot, audio_format aform, const wave_gen_func& func);
 
 
 		//-----------------------------------------------------------------//

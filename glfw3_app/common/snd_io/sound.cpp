@@ -374,6 +374,39 @@ namespace al {
 
 	//-----------------------------------------------------------------//
 	/*!
+		@brief	動的波形リクエスト
+		@param[in]	slot	発音スロット（-1: auto）
+		@param[in]	aform	オーディオ形式
+		@param[in]	func	発音生成関数
+		@return 波形ハンドルを返す。（「０」ならエラー）
+	 */
+	//-----------------------------------------------------------------//
+	audio_io::wave_handle sound::request_pw(int slot, audio_format aform, const wave_gen_func& func)
+	{
+		wave_gen_func_ = func;
+#if 0
+		audio aif;
+		if(ainfo.chanels == 1) {
+			aif = audio(new audio_mno16);
+		} else if(ainfo.chanels == 2) {
+			aif = audio(new audio_sto16);
+		}
+		aif->create(ainfo.frequency, len);
+		aif->zero();
+
+		audio_io::wave_handle wh = audio_io_.create_wave(aif);
+		if(aif) {
+			bool loop = false;
+			request_sub_(slot, wh, loop);
+		}
+		return wh;
+#endif
+		return 0;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
 		@brief	SE 一時停止
 		@param[in]	slot	スロット番号
 		@return 正常なら「true」

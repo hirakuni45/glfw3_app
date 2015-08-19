@@ -19,7 +19,7 @@ namespace al {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	template <class T>
 	class pcm : public i_audio {
-		float			sample_rate_;
+		uint32_t		sample_rate_;
 		std::vector<T>	waves_;
 
 		T				zero_;
@@ -30,7 +30,7 @@ namespace al {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		pcm() : sample_rate_(0.0f), zero_(0) { }
+		pcm() : sample_rate_(0), zero_(0) { }
 
 
 		//-----------------------------------------------------------------//
@@ -48,7 +48,7 @@ namespace al {
 			@param[in]	samples	サンプル数
 		*/
 		//-----------------------------------------------------------------//
-		void create(float rate, int samples) {
+		void create(uint32_t rate, int samples) {
 			sample_rate_ = rate;
 			waves_.resize(samples);
 		}
@@ -86,7 +86,7 @@ namespace al {
 			@return	オーディオ・タイプ
 		*/
 		//-----------------------------------------------------------------//
-		audio_format::type get_type() const { return zero_.type(); }
+		audio_format get_type() const { return zero_.type(); }
 
 
 		//-----------------------------------------------------------------//
@@ -104,7 +104,7 @@ namespace al {
 			@return	サンプリング・レート「Hz」
 		*/
 		//-----------------------------------------------------------------//
-		float get_rate() const { return sample_rate_; }
+		uint32_t get_rate() const { return sample_rate_; }
 
 
 		//-----------------------------------------------------------------//
@@ -148,6 +148,8 @@ namespace al {
 		void get(size_t pos, pcm8_s& wave) const { wave = waves_[pos]; }
 		void get(size_t pos, pcm16_m& wave) const { wave = waves_[pos]; }
 		void get(size_t pos, pcm16_s& wave) const { wave = waves_[pos]; }
+		void get(size_t pos, pcm24_m& wave) const { wave = waves_[pos]; }
+		void get(size_t pos, pcm24_s& wave) const { wave = waves_[pos]; }
 		void get(size_t pos, pcm32_m& wave) const { wave = waves_[pos]; }
 		void get(size_t pos, pcm32_s& wave) const { wave = waves_[pos]; }
 
@@ -155,6 +157,8 @@ namespace al {
 		void put(size_t pos, const pcm8_s& wave) { waves_[pos] = wave; }
 		void put(size_t pos, const pcm16_m& wave) { waves_[pos] = wave; }
 		void put(size_t pos, const pcm16_s& wave) { waves_[pos] = wave; }
+		void put(size_t pos, const pcm24_m& wave) { waves_[pos] = wave; }
+		void put(size_t pos, const pcm24_s& wave) { waves_[pos] = wave; }
 		void put(size_t pos, const pcm32_m& wave) { waves_[pos] = wave; }
 		void put(size_t pos, const pcm32_s& wave) { waves_[pos] = wave; }
 
@@ -177,18 +181,38 @@ namespace al {
 	typedef pcm<pcm8_s>		audio_sto8;
 	typedef pcm<pcm16_m>	audio_mno16;
 	typedef pcm<pcm16_s>	audio_sto16;
+	typedef pcm<pcm24_m>	audio_mno24;
+	typedef pcm<pcm24_s>	audio_sto24;
 	typedef pcm<pcm32_m>	audio_mno32;
 	typedef pcm<pcm32_s>	audio_sto32;
 
 	template <class T>
 	void copy_pcm_(const pcm<T>& src, pcm<T>& dst);
 
-	inline void copy_pcm(const audio_mno8& src, audio_mno8& dst) { copy_pcm_<pcm8_m>(src, dst); }
-	inline void copy_pcm(const audio_sto8& src, audio_sto8& dst) { copy_pcm_<pcm8_s>(src, dst); }
-	inline void copy_pcm(const audio_mno16& src, audio_mno16& dst) { copy_pcm_<pcm16_m>(src, dst); }
-	inline void copy_pcm(const audio_sto16& src, audio_sto16& dst) { copy_pcm_<pcm16_s>(src, dst); }
-	inline void copy_pcm(const audio_mno32& src, audio_mno32& dst) { copy_pcm_<pcm32_m>(src, dst); }
-	inline void copy_pcm(const audio_sto32& src, audio_sto32& dst) { copy_pcm_<pcm32_s>(src, dst); }
+	inline void copy_pcm(const audio_mno8& src, audio_mno8& dst) {
+		copy_pcm_<pcm8_m>(src, dst);
+	}
+	inline void copy_pcm(const audio_sto8& src, audio_sto8& dst) {
+		copy_pcm_<pcm8_s>(src, dst);
+	}
+	inline void copy_pcm(const audio_mno16& src, audio_mno16& dst) {
+		copy_pcm_<pcm16_m>(src, dst);
+	}
+	inline void copy_pcm(const audio_sto16& src, audio_sto16& dst) {
+		copy_pcm_<pcm16_s>(src, dst);
+	}
+	inline void copy_pcm(const audio_mno24& src, audio_mno24& dst) {
+		copy_pcm_<pcm24_m>(src, dst);
+	}
+	inline void copy_pcm(const audio_sto24& src, audio_sto24& dst) {
+		copy_pcm_<pcm24_s>(src, dst);
+	}
+	inline void copy_pcm(const audio_mno32& src, audio_mno32& dst) {
+		copy_pcm_<pcm32_m>(src, dst);
+	}
+	inline void copy_pcm(const audio_sto32& src, audio_sto32& dst) {
+		copy_pcm_<pcm32_s>(src, dst);
+	}
 
 
 	//-----------------------------------------------------------------//
@@ -200,4 +224,43 @@ namespace al {
 	//-----------------------------------------------------------------//
 	i_audio* copy_audio(const i_audio* src);
 
+
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief	オーディオフォーマットから波形生成
+		@return 波形を返す
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	inline audio create_audio(audio_format aform) {
+		audio a;
+		switch(aform) {
+		case audio_format::NONE:
+			break;
+		case audio_format::PCM8_MONO:
+			a = audio(new audio_mno8);
+			break;
+		case audio_format::PCM8_STEREO:
+			a = audio(new audio_sto8);
+			break;
+		case audio_format::PCM16_MONO:
+			a = audio(new audio_mno16);
+			break;
+		case audio_format::PCM16_STEREO:
+			a = audio(new audio_sto16);
+			break;
+		case audio_format::PCM24_MONO:
+			a = audio(new audio_mno24);
+			break;
+		case audio_format::PCM24_STEREO:
+			a = audio(new audio_sto24);
+			break;
+		case audio_format::PCM32_MONO:
+			a = audio(new audio_mno32);
+			break;
+		case audio_format::PCM32_STEREO:
+			a = audio(new audio_sto32);
+			break;
+		}
+		return a;
+	}
 }

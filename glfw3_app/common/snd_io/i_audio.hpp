@@ -34,7 +34,7 @@ namespace al {
 			@param[in]	sample 	サンプル数を指定
 		*/
 		//-----------------------------------------------------------------//
-		virtual void create(float rate, int samples) = 0;
+		virtual void create(uint32_t rate, int samples) = 0;
 
 
 		//-----------------------------------------------------------------//
@@ -51,7 +51,7 @@ namespace al {
 			@return オーディオタイプ
 		*/
 		//-----------------------------------------------------------------//
-		virtual audio_format::type get_type() const = 0;
+		virtual audio_format get_type() const = 0;
 
 
 		//-----------------------------------------------------------------//
@@ -66,10 +66,10 @@ namespace al {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	サンプリングレートを返す
-			@return サンプリングレート（周波数）
+			@return サンプリングレート（周波数[Hz]）
 		*/
 		//-----------------------------------------------------------------//
-		virtual float get_rate() const = 0;
+		virtual uint32_t get_rate() const = 0;
 
 
 		//-----------------------------------------------------------------//
@@ -89,12 +89,16 @@ namespace al {
 		virtual void get(size_t pos, pcm8_s& wave) const = 0;
 		virtual void get(size_t pos, pcm16_m& wave) const = 0;
 		virtual void get(size_t pos, pcm16_s& wave) const = 0;
+		virtual void get(size_t pos, pcm24_m& wave) const = 0;
+		virtual void get(size_t pos, pcm24_s& wave) const = 0;
 		virtual void get(size_t pos, pcm32_m& wave) const = 0;
 		virtual void get(size_t pos, pcm32_s& wave) const = 0;
 
 		virtual void put(size_t pos, const pcm8_m& wave) = 0;
 		virtual void put(size_t pos, const pcm8_s& wave) = 0;
 		virtual void put(size_t pos, const pcm16_m& wave) = 0;
+		virtual void put(size_t pos, const pcm24_s& wave) = 0;
+		virtual void put(size_t pos, const pcm24_m& wave) = 0;
 		virtual void put(size_t pos, const pcm16_s& wave) = 0;
 		virtual void put(size_t pos, const pcm32_m& wave) = 0;
 		virtual void put(size_t pos, const pcm32_s& wave) = 0;
@@ -105,5 +109,5 @@ namespace al {
 	};
 
 	typedef std::shared_ptr<i_audio>  audio;
-}
 
+}
