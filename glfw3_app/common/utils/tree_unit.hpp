@@ -11,8 +11,8 @@
 #include <algorithm>
 #include <stack>
 #include <vector>
-#include <boost/unordered_map.hpp>
-#include <boost/unordered_set.hpp>
+#include <unordered_set>
+#include <unordered_map>
 #include <boost/foreach.hpp>
 #include <boost/optional.hpp>
 #include "utils/string_utils.hpp"
@@ -36,7 +36,7 @@ namespace utils {
 		struct unit_t {
 			T				value;	///< ユーザー利用データ
 
-			typedef boost::unordered_set<std::string>	childs;
+			typedef std::unordered_set<std::string>	childs;
 			typedef childs::iterator		childs_it;
 			typedef childs::const_iterator	childs_cit;
 
@@ -69,12 +69,12 @@ namespace utils {
 
 		typedef std::pair<std::string, unit_t>	unit_pair;
 
-		typedef boost::unordered_map<std::string, unit_t>	unit_map;
-		typedef typename unit_map::const_iterator			unit_map_cit;
-		typedef typename unit_map::iterator					unit_map_it;
+		typedef std::unordered_map<std::string, unit_t>	unit_map;
+		typedef typename unit_map::const_iterator		unit_map_cit;
+		typedef typename unit_map::iterator				unit_map_it;
 
-		typedef std::vector<unit_map_cit>					unit_map_cits;
-		typedef std::vector<unit_map_it>					unit_map_its;
+		typedef std::vector<unit_map_cit>				unit_map_cits;
+		typedef std::vector<unit_map_it>				unit_map_its;
 
 	private:
 		unit_map	   	unit_map_;
@@ -176,7 +176,7 @@ namespace utils {
 				return true;
 			}
 			fullpath += current_path_;
-			if(fullpath.empty() || fullpath[fullpath.size() - 1] != '/') fullpath += '/';
+			if(fullpath.empty() || fullpath.back() != '/') fullpath += '/';
 			fullpath += name;
 			return true;
 		}
