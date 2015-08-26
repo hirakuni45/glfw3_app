@@ -9,6 +9,7 @@
 #include <vector>
 #include "img_io/img.hpp"
 #include "utils/vtx.hpp"
+#include "utils/string_utils.hpp"
 
 namespace utils {
 
@@ -43,6 +44,10 @@ namespace utils {
 		vtx::spos	size_;
 		vtx::spos	cursor_;
 
+		utils::lstring	current_;
+		uint32_t	line_max_;
+		utils::lstrings	lines_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -52,7 +57,8 @@ namespace utils {
 		terminal() :
 			cha_(' ', img::rgba8(255, 255, 255, 255), img::rgba8(0, 0, 0, 255)),
 			chaers_(),
-			size_(0), cursor_(0) { }
+			size_(0), cursor_(0),
+			current_(), line_max_(200), lines_() { }
 
 
 		//-----------------------------------------------------------------//
@@ -114,7 +120,7 @@ namespace utils {
 			if(pos.y < 0 || pos.y >= size_.y) return;
 
 			cha_.cha_ = ' ';
-			for(uint32_t x = pos.x; x < size_.x; ++x) {
+			for(int x = pos.x; x < size_.x; ++x) {
 				chaers_[pos.y * size_.x + x] = cha_;
 			}
 		}
@@ -132,8 +138,8 @@ namespace utils {
 			if(rect.end_x() >= size_.x) return;
 			if(rect.end_y() >= size_.y) return;
 			cha_.cha_ = ' ';
-			for(uint32_t y = rect.org.y; y < rect.end_y(); ++y) {
-				for(uint32_t x = rect.org.x; x < rect.end_x(); ++x) {
+			for(int y = rect.org.y; y < rect.end_y(); ++y) {
+				for(int x = rect.org.x; x < rect.end_x(); ++x) {
 					chaers_[y * size_.x + x] = cha_;
 				}
 			}
@@ -154,8 +160,8 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		void scroll() {
-			for(uint32_t y = 1; y < size_.y; ++y) {
-				for(uint32_t x = 0; x < size_.x; ++x) {
+			for(int y = 1; y < size_.y; ++y) {
+				for(int x = 0; x < size_.x; ++x) {
 					chaers_[(y - 1) * size_.x + x] = chaers_[y * size_.x + x];
 				}
 			}
@@ -184,6 +190,13 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		void output(uint32_t cha) {
+
+			if(cha == '\n') {
+				
+			} else {
+				current_ += cha;
+			}
+#if 0
 			if(chaers_.empty()) return;
 			if(cha < ' ') {
 				if(cha == '\n') {
@@ -212,6 +225,7 @@ namespace utils {
 				cursor_.x = 0;
 				line_feed();
 			}
+#endif
 		}
 
 
