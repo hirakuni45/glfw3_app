@@ -1,65 +1,135 @@
 #pragma once
-#include <array>
-#include "vfs.hpp"
-#include "handle_set.hpp"
+//=====================================================================//
+/*!	@file
+	@brief	ファイル I/O ラッパー
+	@author	平松邦仁 (hira@bexide.co.jp)
+*/
+//=====================================================================//
+#include <stdint.h>
+#include <string>
+#ifdef WIN32
+#include <cstdio>
+#include <cstdlib>
+#endif
+#include "finfo.hpp"
 
-namespace utils {
+namespace vfs {
 
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief	ファイル I/O クラス
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class fio {
-		files&	files_;
 
-		static const uint32_t files_max_ = 16;
+		static const uint32_t file_align_size_ = 512;
+		
+		std::string	base_;
+		uint32_t	idx_;
 
-		typedef handle_set<uint16_t> hndset;
-		hndset	hndset_;
-
-		typedef std::vector<vfs> vfss;
-		vfss	vfss_;
+		std::string hex_to_string_(uint16_t nmb) {
+			std::string s;
+			for(int i = 0; i < 4; ++i) {
+				uint16_t n = (nmb >> ((4 - i - 1) * 4)) & 15;
+				if(n < 10) s += '0' + n;
+				else s += 'A' + n - 10;
+			}
+			return s;
+		}
 
 	public:
-		fio(files& fs) : files_(fs), hndset_(files_max_), vfss_(files_max_, vfs(files_)) { }
+		fio(const std::string& base) : base_(base), idx_(1) { }
 
-		uint32_t open(const std::string& path, open_mode mode) {
-			uint32_t hnd = hndset_.create();
-			vfs& fs = vfss_[hnd];
-			if(!fs.open(path, mode)) {
-				hndset_.erase(hnd);
-				return 0;
+
+		int file_size(const std::string& path) {
+#ifdef WIN32
+			FILE* fp = fopen(path.c_str(), "rb");
+			if(fp != nullptr) {
+				int sz = fseek(fp, 0, SEEK_END);
+				return sz;
 			}
-			return hnd;
+			return -1;
+#endif
 		}
 
 
-		int read(uint32_t hnd, const void* ptr, uint32_t len) {
-			if(!hndset_.probe(hnd)) {
-				return -1;
+		void falign_(FILE* fp, uint32_t al) {
+#ifdef WIN32
+			uint32_t pos = fseek(fp, 0, SEEK_CUR);
+			uint32_t mod = pos % al;
+			if(mod) {
+				std::vector<uint8_t> tmp;
+				tmp.resize(mod);
+				fwrite(&tmp[0], mod, 1, fp);
 			}
-			return vfss_[hnd].read(ptr, len);
+#endif
+		}
+
+		
+		void write_cash(finfo& fi, bool close) {
+#ifdef WIN32
+			if(fi.idxs_.empty()) {
+				auto fn = base_ + hex_to_string_(idx_);
+				FILE* fp = fopen(fn.c_str(), "wb");
+				if(fp != nullptr) {
+					fwrite(&fi.cash_[0], fi.cpos_, 1, fp);
+					if(close) falign_(fp, file_align_size_);
+					fclose(fp);
+					fi.idxs_.push_back(idx_);
+					++idx_;
+				}
+			} else {
+				auto fn = base_ + hex_to_string_(fi.idxs_.back());
+				int fs = file_size(fn);
+				if(fs < 0) {
+					// 重大なエラー
+					return;
+				}
+				if((fs + fi.cpos_) <= (1024 * 1024)) {  // 1MB 以内
+					FILE* fp = fopen(fn.c_str(), "ab");
+					if(fp != nullptr) {
+						fwrite(&fi.cash_[0], fi.cpos_, 1, fp);
+						if(close) falign_(fp, file_align_size_);
+						fclose(fp);
+					}
+				} else {
+					
+					
+				}
+			}
+
+
+
+#endif
 		}
 
 
-		int write(uint32_t hnd, void* ptr, uint32_t len) {
-			if(!hndset_.probe(hnd)) {
-				return -1;
-			}
-			return vfss_[hnd].write(ptr, len);
+
+
+
+		void read_dir(finfos& finfos_) {
+#ifdef WIN32
+			
+//			FILE* fp = fopen(path.c_str(), "rb");
+//			if(fp != nullptr) {
+
+
+//			fclose(fp);
+#endif
 		}
 
 
-		int seek(uint32_t hnd, seek_mode mode, uint32_t offset) {
-			if(!hndset_.probe(hnd)) {
-				return -1;
-			}
-			return vfss_[hnd].seek(mode, offset);
+		void write_dir(const finfos& finfos_) {
+#ifdef WIN32
+//			FILE* fp = fopen(path.c_str(), "wb");
+//			if(fp != nullptr) {
+//				for(auto fi : finfos_) {
+//					auto path = tree_unit_.find(fi.handle_);
+					
+//				}
+//				fclose(fp);
+//			}
+#endif
 		}
-
-
-		int close(uint32_t hnd) {
-			if(!hndset_.probe(hnd)) {
-				return -1;
-			}
-			return vfss_[hnd].close();
-		}
-
 	};
 }

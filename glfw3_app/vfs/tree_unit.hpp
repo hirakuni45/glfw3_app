@@ -2,13 +2,13 @@
 //=====================================================================//
 /*!	@file
 	@brief	階層的構造を管理するクラス
-	@author	平松邦仁 (hira@rvf-rc45.net)
+	@author	平松邦仁 (hira@bexide.co.jp)
 */
 //=====================================================================//
 #ifndef NDEBUG
 #define DEBUG_TREE_UNIT_
 #endif
-#define DEBUG_TREE_UNIT_
+// #define DEBUG_TREE_UNIT_
 
 #ifdef DEBUG_TREE_UNIT_
 #include <iostream>
@@ -31,11 +31,11 @@ namespace utils {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct tree_unit {
 
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	unit_t 型
 		*/
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		class unit_t {
 			uint32_t	id_;
 
@@ -90,6 +90,8 @@ namespace utils {
 		typedef std::vector<unit_map_cit>				unit_map_cits;
 		typedef std::vector<unit_map_it>				unit_map_its;
 
+		typedef std::vector<uint32_t> handles;
+
 	private:
 		unit_map	   	unit_map_;
 
@@ -134,26 +136,29 @@ namespace utils {
 		}
 
 
-		bool erase_(const std::string& fpath)
+		uint32_t erase_(const std::string& fpath, handles& hnds)
 		{
 			unit_map_it it = unit_map_.find(fpath);
-			if(it == unit_map_.end()) return false;
+			if(it == unit_map_.end()) return 0;
 
 			auto tpath = strip_last_of_delimita_path(fpath);
 			auto bpath = get_file_path(tpath);
 			bpath += '/';
 			if(fpath.back() == '/') {  // is directory
+				// erase sub directories
 				unit_t::childs chs = it->second.get_childs();
 				for(auto s : chs) {
-					std::cout << "Loop: " << (fpath + s) << std::endl;
-					erase_(fpath + s);
+//					std::cout << "Loop: " << (fpath + s) << std::endl;
+					auto hnd = erase_(fpath + s, hnds);
+					hnds.push_back(hnd);
 				}
 			}
 
+			uint32_t hnd = 0;
 			{
 				unit_map_it it = unit_map_.find(fpath);
-				if(it == unit_map_.end()) return false;
-				uint32_t hnd = it->second.get_id();
+				if(it == unit_map_.end()) return 0;
+				hnd = it->second.get_id();
 				handle_set_.erase(hnd);
 				unit_map_.erase(it);
 				hnd_map_.erase(hnd);
@@ -165,12 +170,9 @@ namespace utils {
 					std::string s = get_file_name(tpath);
 					if(fpath.back() == '/') s += '/';
 					it->second.erase_child(s);
-				} else {
-					return false;
 				}
 			}
-
-			return true;
+			return hnd;
 		}
 
 	public:
@@ -252,19 +254,23 @@ namespace utils {
 		/*!
 			@brief	パスを削除（ディレクトリーを指定するとエラー）
 			@param[in]	path	パス
-			@return 成功したら「true」
+			@return 成功したら削除したハンドルを返す
 		*/
 		//-----------------------------------------------------------------//
-		bool erase(const std::string& path)
+		handles erase(const std::string& path)
 		{
+			handles hnds;
 			auto fpath = create_full_path(path);
 			if(fpath.empty()) {
-				return false;
+				return hnds;
 			}
 
-			if(fpath.back() == '/') return false;
+			if(fpath.back() == '/') return hnds;
 
-			return erase_(fpath);
+			auto hnd = erase_(fpath, hnds);
+			if(hnd) hnds.push_back(hnd);
+
+			return hnds;
 		}
 
 
@@ -340,7 +346,7 @@ namespace utils {
 		{
 			auto fpath = create_full_path(path);
 			if(fpath.empty()) {
-				return false;
+				return 0;
 			}
 
 			if(fpath.back() != '/') fpath += '/';
@@ -353,21 +359,22 @@ namespace utils {
 		/*!
 			@brief	ディレクトリーを削除
 			@param[in]	path	ディレクトリー名
-			@return 正常なら「０」以上の値
+			@return 成功したら削除したハンドルを返す
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t remove_directory(const std::string& path)
+		handles remove_directory(const std::string& path)
 		{
+			handles hnds;
 			auto fpath = create_full_path(path);
 			if(fpath.empty()) {
-				return 0;
+				return hnds;
 			}
 
 			if(fpath.back() != '/') fpath += '/';
-
-			std::cout << "Remove dir: " << fpath << std::endl;
-
-			return erase_(fpath);
+//			std::cout << "Remove dir: " << fpath << std::endl;
+			auto hnd = erase_(fpath, hnds);
+			if(hnd) hnds.push_back(hnd);
+			return hnds;
 		}
 
 
