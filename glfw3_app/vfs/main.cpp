@@ -21,12 +21,19 @@ static bytes make_bytes_(uint32_t size)
 	return bs;
 }
 
+// #define READ_DIR
 
 int main(int argc, char** argv)
 {
 	vfs::files fs("VFS");
 
+#ifdef READ_DIR
+	fs.start(true);
+	fs.list();
+	return 0;
+#else
 	fs.start();
+#endif
 
 	fs.mkdir("qwe");
 	fs.mkdir("asd");
@@ -64,6 +71,8 @@ int main(int argc, char** argv)
 
 	{
 		auto h = fs.open("readme.txt", vfs::open_mode::write);
+		auto data = make_bytes_(300);
+		fs.write(h, &data[0], 300);
 		fs.close(h);
 	}
 

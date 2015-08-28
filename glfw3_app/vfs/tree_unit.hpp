@@ -97,11 +97,6 @@ namespace utils {
 
 		handle_set<uint32_t>	handle_set_;
 
-		typedef std::unordered_map<uint32_t, std::string>	hnd_map;
-		typedef typename hnd_map::const_iterator			hnd_map_cit;
-		typedef typename hnd_map::iterator					hnd_map_it;
-		hnd_map			hnd_map_;
-
 		std::string		current_path_;
 
 		typedef std::stack<std::string>		string_stack;
@@ -131,7 +126,6 @@ namespace utils {
 			unit_t u;
 			u.set_id(hnd);
 			unit_map_.emplace(fpath, u);
-			hnd_map_.emplace(hnd, fpath);
 			return hnd;
 		}
 
@@ -161,7 +155,6 @@ namespace utils {
 				hnd = it->second.get_id();
 				handle_set_.erase(hnd);
 				unit_map_.erase(it);
-				hnd_map_.erase(hnd);
 			}
 
 			{  // previous directory
@@ -182,8 +175,7 @@ namespace utils {
 			@param[in]	max_handle	最大ハンドル数（標準は６５５３６個）
 		*/
 		//-----------------------------------------------------------------//
-		tree_unit(uint32_t max_handle = 0x10000) : handle_set_(max_handle), current_path_("/") {
-			install_("/");
+		tree_unit(uint32_t max_handle = 0x10000) : handle_set_(max_handle), current_path_() {
 		}
 
 
@@ -204,7 +196,6 @@ namespace utils {
 		{
 			unit_map_.clear();
 			handle_set_.clear();
-			hnd_map_.clear();
 			current_path_ = "/";
 			string_stack a;
 			a.swap(stack_path_);
@@ -402,23 +393,6 @@ namespace utils {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	ハンドルからパスを得る
-			@param[in]	hnd	ハンドル
-			@return パスを返す
-		*/
-		//-----------------------------------------------------------------//
-		const std::string& find(uint32_t hnd) const {
-			hnd_map_cit cit = hnd_map_.find(hnd);
-			if(cit == hnd_map_.end()) {
-				static std::string empty;
-				return empty;
-			}
-			return cit->second;
-		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
 			@brief	ディレクトリーかどうか？
 			@param[in]	cit	イテレーター
 			@return ディレクトリーなら「true」
@@ -577,7 +551,6 @@ namespace utils {
 		void swap(tree_unit& src) {
 			unit_map_.swap(src.unit_map_);
 			handle_set_.swap(src.handle_set_);
-			hnd_map_.swap(src.hnd_map_);
 			current_path_.swap(src.current_path_);
 			stack_path_.swap(src.stack_path_);
 		}
@@ -591,7 +564,6 @@ namespace utils {
 		tree_unit& operator = (const tree_unit& src) {
 			unit_map_ = src.unit_map_;
 			handle_set_ = src.handle_set_;
-			hnd_map_ = src.hnd_map_;
 			current_path_ = src.current_path_;
 			stack_path_ = src.stack_path_;
 			return *this;

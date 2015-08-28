@@ -44,7 +44,7 @@ namespace vfs {
 			@param[in]	base	ベース・パス
 		*/
 		//-----------------------------------------------------------------//
-		files(const std::string& base) : tree_unit_(), finfos_(), fio_(base) { }
+		files(const std::string& base) : tree_unit_(), finfos_(), fio_(finfos_, base) { }
 
 
 		//-----------------------------------------------------------------//
@@ -54,14 +54,25 @@ namespace vfs {
 		*/
 		//-----------------------------------------------------------------//
 		void start(bool read = false) {
+			tree_unit_.clear();
 			finfo fi;
 			finfos_.clear();
 			finfos_.push_back(fi);
+			mkdir("/");
+			cd("/");
 
 			// ディレクトリー情報を読み込み
 			if(read) {
-//				auto path = base_;
-//				path += hex_to_string_(0);
+				fio_.read_dir(finfos_);
+				for(auto fi : finfos_) {
+					uint32_t hnd = 0;
+					if(fi.path_.empty()) continue;
+					else if(fi.path_.back() == '/') {
+						fi.handle_ = tree_unit_.make_directory(fi.path_);
+					} else {
+						fi.handle_ = tree_unit_.install(fi.path_);
+					}
+				}
 			}
 		}
 
@@ -145,14 +156,22 @@ namespace vfs {
 			if(opm == vfs::open_mode::write) {
 				hnd = tree_unit_.install(path);
 				resize_infos_(hnd);
-				if(finfos_[hnd].open_mode_ != vfs::open_mode::none) return 0;
-				finfos_[hnd].handle_ = hnd;
-				finfos_[hnd].open_mode_ = opm;
+				finfo& fi = finfos_[hnd];
+				if(fi.open_mode_ != vfs::open_mode::none) return 0;
+				fi.path_ = path;
+				fi.handle_ = hnd;
+				fi.open_mode_ = opm;
+				fi.fsize_ = 0;
+				fi.create_cash();
+				fi.cpos_ = 0;
+				fi.fpos_ = 0;
+				fi.blocks_.clear();
 			} else if(opm == open_mode::read) {
 				hnd = tree_unit_.find(path);
 				if(hnd == 0) return 0;
-				if(finfos_[hnd].open_mode_ != vfs::open_mode::none) return 0;
-				finfos_[hnd].open_mode_ = opm;
+				finfo& fi = finfos_[hnd];
+				if(fi.open_mode_ != vfs::open_mode::none) return 0;
+				fi.open_mode_ = opm;
 			}
 			return hnd;
 		}
@@ -214,6 +233,7 @@ namespace vfs {
 				if(fi.open_mode_ == open_mode::write) {
 					fio_.write_cash(fi, true);
 					fi.fsize_ = fi.fpos_;
+					fi.destroy_cash();
 				} else if(fi.open_mode_ == open_mode::read) {
 					
 				}
@@ -246,8 +266,7 @@ namespace vfs {
 		*/
 		//-----------------------------------------------------------------//
 		void final() {
-//			auto path = base_;
-//			path += hex_to_string_(0);
+			fio_.write_dir(finfos_);
 		}
 
 
@@ -262,7 +281,9 @@ namespace vfs {
 			for(auto fi : finfos_) {
 				if(fi.handle_ == 0) continue;
 
-				auto path = tree_unit_.find(fi.handle_);
+				const std::string& path = fi.path_;
+				if(path.empty()) continue;
+
 				if(path.back() == '/') std::cout << 'd';
 				else std::cout << '-';
 				std::cout << ' ';
