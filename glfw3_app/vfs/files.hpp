@@ -28,14 +28,37 @@ namespace vfs {
 		utils::tree_unit	tree_unit_;
 		finfos				finfos_;
 
+		fio		fio_;
+
 		void resize_infos_(uint32_t n) {
-			finfo fi;
-			while(n >= finfos_.size()) {
-				finfos_.push_back(fi);
-			}
+			finfos_.resize(n + 1);
 		}
 
-		fio		fio_;
+
+		void remove_(uint32_t hnd) {
+			std::unordered_set<uint16_t> rm_list;
+			if(finfos_[hnd].blocks_.empty()) {  // directory
+				finfos_[hnd].reset();
+				return;
+			} else {
+				for(const finfo::block& bk : finfos_[hnd].blocks_) {
+					rm_list.insert(bk.fileno_);
+				}
+			}
+
+			for(finfo& fi : finfos_) {
+				if(fi.handle_ == hnd) continue;
+				for(const finfo::block& bk : fi.blocks_) {
+					rm_list.erase(bk.fileno_);
+				}
+			}
+
+			finfos_[hnd].reset();
+
+			for(uint16_t h : rm_list) {
+				fio_.remove_file(h);
+			}
+		}
 
 	public:
 		//-----------------------------------------------------------------//
@@ -55,16 +78,15 @@ namespace vfs {
 		//-----------------------------------------------------------------//
 		void start(bool read = false) {
 			tree_unit_.clear();
-			finfo fi;
 			finfos_.clear();
-			finfos_.push_back(fi);
+			finfo fi;
 			mkdir("/");
 			cd("/");
 
 			// ディレクトリー情報を読み込み
 			if(read) {
 				fio_.read_dir(finfos_);
-				for(auto fi : finfos_) {
+				for(auto& fi : finfos_) {
 					uint32_t hnd = 0;
 					if(fi.path_.empty()) continue;
 					else if(fi.path_.back() == '/') {
@@ -123,6 +145,7 @@ namespace vfs {
 			auto hnd = tree_unit_.make_directory(path);
 			resize_infos_(hnd);
 			finfos_[hnd].handle_ = hnd;
+			finfos_[hnd].path_ = tree_unit_.create_full_path(path);
 			return hnd;
 		}
 
@@ -137,7 +160,7 @@ namespace vfs {
 		uint32_t rmdir(const std::string& path) {
 			auto hnds = tree_unit_.remove_directory(path);
 			for(auto hnd : hnds) {
-				finfos_[hnd].handle_ = 0;
+				remove_(hnd);
 			}
 			return hnds.size();
 		}
@@ -158,7 +181,7 @@ namespace vfs {
 				resize_infos_(hnd);
 				finfo& fi = finfos_[hnd];
 				if(fi.open_mode_ != vfs::open_mode::none) return 0;
-				fi.path_ = path;
+				fi.path_ = tree_unit_.create_full_path(path);
 				fi.handle_ = hnd;
 				fi.open_mode_ = opm;
 				fi.fsize_ = 0;
@@ -172,6 +195,9 @@ namespace vfs {
 				finfo& fi = finfos_[hnd];
 				if(fi.open_mode_ != vfs::open_mode::none) return 0;
 				fi.open_mode_ = opm;
+				fi.create_cash();
+				fi.cpos_ = 0;
+				fi.fpos_ = 0;
 			}
 			return hnd;
 		}
@@ -188,33 +214,105 @@ namespace vfs {
 		//-----------------------------------------------------------------//
 		int write(uint32_t hnd, const void* src, uint32_t size) {
 			int ret = -1;
+			if(src == nullptr) return ret;
 			if(hnd < finfos_.size() && finfos_[hnd].handle_ == hnd) {
 				finfo& fi = finfos_[hnd];
 				if(fi.open_mode_ != vfs::open_mode::write) {
 					return ret;
 				}
 
-				if(src == nullptr) return 0;
+				ret = 0;
+				while(size > 0) {
+					uint32_t cs;
+					if(size >= (fi.cash_.size() - fi.cpos_)) {
+						cs = fi.cash_.size() - fi.cpos_;
+					} else {
+						cs = size;
+					}
+					std::memcpy(&fi.cash_[fi.cpos_], src, cs);
+					fi.cpos_ += cs;
+					fi.fpos_ += cs;
+					size -= cs;
+					ret += static_cast<int>(cs);
+					if(fi.cpos_ >= fi.cash_.size()) {
+						fio_.write_cash(fi, false);
+					}
+				}
+			}
+			return ret;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ファイルへの読み込み
+			@param[in]	hnd	ファイル・ハンドル
+			@param[in]	dst	ディストネーション・ポインター
+			@param[in]	size	サイズ
+			@return 読み込んだバイト数
+		*/
+		//-----------------------------------------------------------------//
+		int read(uint32_t hnd, void* dst, uint32_t size) {
+			int ret = -1;
+			if(dst == nullptr) return ret;
+			if(hnd < finfos_.size() && finfos_[hnd].handle_ == hnd) {
+				finfo& fi = finfos_[hnd];
+				if(fi.open_mode_ != vfs::open_mode::read) {
+					return ret;
+				}
 
 				ret = 0;
 				while(size > 0) {
-					uint32_t cs = fi.cash_.size() - fi.cpos_;
-					if(size <= cs) {
-						std::memcpy(&fi.cash_[fi.cpos_], src, size);
-						fi.cpos_ += size;
-						fi.fpos_ += size;
-						ret += static_cast<int>(size);
-						size = 0;
-					} else {
-						std::memcpy(&fi.cash_[fi.cpos_], src, cs);
-						fio_.write_cash(fi, false);
-						fi.cpos_ = 0;
-						fi.fpos_ += cs;
-						size -= cs;
-						ret += static_cast<int>(cs);
+					if(fi.cpos_ == 0) {
+						fio_.read_cash(fi);
+					}
+					if(fi.fpos_ >= fi.fsize_) break;
+					if(fi.cpos_ > 0) {
+						uint32_t cps;
+						if(size < fi.cpos_) cps = size;
+						else cps = fi.cpos_;
+						std::memcpy(dst, &fi.cash_[fi.fpos_ % fi.cash_.size()], cps);
+						fi.cpos_ -= cps;
+						fi.fpos_ += cps;
+						size -= cps;
+						ret += static_cast<int>(cps);
 					}
 				}
-//				std::cout << "Write: " << ret << std::endl;
+			}
+			return ret;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ファイルポインターの移動
+			@param[in]	hnd	ファイル・ハンドル
+			@param[in]	offset	オフセット
+			@param[in]	mode	シーク・モード
+			@return 移動した位置（-1の場合エラー）
+		*/
+		//-----------------------------------------------------------------//
+		int seek(uint32_t hnd, uint32_t offset, seek_mode mode) {
+			int ret = -1;
+			if(hnd < finfos_.size() && finfos_[hnd].handle_ == hnd) {
+				finfo& fi = finfos_[hnd];
+				if(fi.open_mode_ != vfs::open_mode::read) {
+					return ret;
+				}
+
+				uint32_t pos = 0;
+				if(mode == seek_mode::set) {
+					pos = offset;
+				} else if(mode == seek_mode::cur) {
+					pos = fi.fpos_ + offset;
+				} else if(mode == seek_mode::end) {
+					if(offset > fi.fsize_) pos = 0;
+					else pos = fi.fsize_ - offset;
+				} else {
+					return ret;
+				}
+				if(pos > fi.fsize_) pos = fi.fsize_;
+				fi.fpos_ = pos;
 			}
 			return ret;
 		}
@@ -235,7 +333,7 @@ namespace vfs {
 					fi.fsize_ = fi.fpos_;
 					fi.destroy_cash();
 				} else if(fi.open_mode_ == open_mode::read) {
-					
+					fi.destroy_cash();
 				}
 				fi.open_mode_ = open_mode::none;
 				return true;
@@ -254,7 +352,7 @@ namespace vfs {
 		uint32_t remove(const std::string& path) {
 			auto hnds = tree_unit_.erase(path);
 			for(auto hnd : hnds) {
-				finfos_[hnd].handle_ = 0;
+				remove_(hnd);
 			}
 			return hnds.size();
 		}
@@ -276,9 +374,9 @@ namespace vfs {
 			@brief	ファイルリストを表示
 		*/
 		//-----------------------------------------------------------------//
-		void list() {
+		void list() const {
 			int n = 0;
-			for(auto fi : finfos_) {
+			for(const auto& fi : finfos_) {
 				if(fi.handle_ == 0) continue;
 
 				const std::string& path = fi.path_;
@@ -293,7 +391,12 @@ namespace vfs {
 				else std::cout << 'X';
 				std::cout << ' ';
 				std::cout << boost::format("%6d ") % static_cast<unsigned int>(fi.fsize_);
-				std::cout << path << std::endl;
+				std::cout << path << " idx, ofs, bks ";
+				for(const auto& bk : fi.blocks_) {
+					std::cout << static_cast<int>(bk.fileno_ + 1) << ", " << static_cast<int>(bk.offset_) << ", " <<
+						static_cast<int>(bk.blocks_) << " : ";
+				}
+				std::cout << std::endl;
 				++n;
 			}
 			std::cout << "Total files: " << n << std::endl;
