@@ -40,14 +40,35 @@ static std::string make_ascii_(uint32_t lines)
 	return a;
 }
 
-// #define READ_DIR
+#define READ_DIR
+
+vfs::files fs("VFS");
+
+static void read_text_(const std::string& path)
+{
+	auto h = fs.open(path, vfs::open_mode::read);
+	while(1) {
+		char data[101];
+		data[0] = 0;
+		int n = fs.read(h, data, 100);
+//		std::cout << n << std::endl;
+		if(n > 0) {
+			data[n] = 0;
+			std::cout << data << std::endl;
+		} else {
+			break;
+		}
+	}
+	fs.close(h);
+}
 
 int main(int argc, char** argv)
 {
-	vfs::files fs("VFS");
-
 #ifdef READ_DIR
 	fs.start(true);
+
+	read_text_("readme.txt");
+
 	fs.list();
 	return 0;
 #else
@@ -87,7 +108,6 @@ int main(int argc, char** argv)
 	fs.rmdir("asd");
 
 	fs.list();
-
 	{
 		auto h = fs.open("readme.txt", vfs::open_mode::write);
 		auto data = make_ascii_(50);
@@ -95,22 +115,11 @@ int main(int argc, char** argv)
 		fs.close(h);
 	}
 
+	fs.list();
+
 	// read file
 	if(1) {
-		auto h = fs.open("readme.txt", vfs::open_mode::read);
-		while(1) {
-			char data[101];
-			data[0] = 0;
-			int n = fs.read(h, data, 100);
-//			std::cout << n << std::endl;
-			if(n > 0) {
-				data[n] = 0;
-				std::cout << data << std::endl;
-			} else {
-				break;
-			}
-		}
-		fs.close(h);
+		read_text_("readme.txt");
 	}
 
 	fs.list();

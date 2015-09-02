@@ -12,9 +12,7 @@
 #include "tree_unit.hpp"
 #include "fio.hpp"
 
-#ifdef WIN32
-#include <boost/format.hpp>
-#endif
+#include <iomanip>
 
 namespace vfs {
 
@@ -31,13 +29,15 @@ namespace vfs {
 		fio		fio_;
 
 		void resize_infos_(uint32_t n) {
-			finfos_.resize(n + 1);
+			if(n >= finfos_.size()) {
+				finfos_.resize(n + 1);
+			}
 		}
 
 
 		void remove_(uint32_t hnd) {
 			std::unordered_set<uint16_t> rm_list;
-			if(finfos_[hnd].blocks_.empty()) {  // directory
+			if(finfos_[hnd].path_.back() == '/') { // directory
 				finfos_[hnd].reset();
 				return;
 			} else {
@@ -77,25 +77,31 @@ namespace vfs {
 		*/
 		//-----------------------------------------------------------------//
 		void start(bool read = false) {
+			fio_.init();
+
 			tree_unit_.clear();
 			finfos_.clear();
-			finfo fi;
-			mkdir("/");
-			cd("/");
 
 			// ディレクトリー情報を読み込み
 			if(read) {
-				fio_.read_dir(finfos_);
-				for(auto& fi : finfos_) {
-					uint32_t hnd = 0;
+				finfos fos;
+				fio_.read_dir(fos);
+				resize_infos_(fos.size());
+				for(const auto& fi : fos) {
 					if(fi.path_.empty()) continue;
-					else if(fi.path_.back() == '/') {
-						fi.handle_ = tree_unit_.make_directory(fi.path_);
+					finfo f;
+					f = fi;
+					if(fi.path_.back() == '/') {
+						f.handle_ = tree_unit_.make_directory(fi.path_);
 					} else {
-						fi.handle_ = tree_unit_.install(fi.path_);
+						f.handle_ = tree_unit_.install(fi.path_);
 					}
+					finfos_[f.handle_] = f;
 				}
+			} else {
+				mkdir("/");
 			}
+			cd("/");
 		}
 
 
@@ -143,9 +149,12 @@ namespace vfs {
 		//-----------------------------------------------------------------//
 		uint32_t mkdir(const std::string& path) {
 			auto hnd = tree_unit_.make_directory(path);
-			resize_infos_(hnd);
-			finfos_[hnd].handle_ = hnd;
-			finfos_[hnd].path_ = tree_unit_.create_full_path(path);
+			if(hnd) {
+				resize_infos_(hnd);
+				finfos_[hnd].handle_ = hnd;
+				finfos_[hnd].path_ = tree_unit_.create_full_path(path);
+				if(finfos_[hnd].path_.back() != '/') finfos_[hnd].path_ += '/';
+			}
 			return hnd;
 		}
 
@@ -178,6 +187,7 @@ namespace vfs {
 			uint32_t hnd = 0;
 			if(opm == vfs::open_mode::write) {
 				hnd = tree_unit_.install(path);
+				if(hnd == 0) return 0;
 				resize_infos_(hnd);
 				finfo& fi = finfos_[hnd];
 				if(fi.open_mode_ != vfs::open_mode::none) return 0;
@@ -224,17 +234,17 @@ namespace vfs {
 				ret = 0;
 				while(size > 0) {
 					uint32_t cs;
-					if(size >= (fi.cash_.size() - fi.cpos_)) {
-						cs = fi.cash_.size() - fi.cpos_;
+					if(size >= (fi.cash_size() - fi.cpos_)) {
+						cs = fi.cash_size() - fi.cpos_;
 					} else {
 						cs = size;
 					}
-					std::memcpy(&fi.cash_[fi.cpos_], src, cs);
+					std::memcpy(fi.cash_ptr(fi.cpos_), src, cs);
 					fi.cpos_ += cs;
 					fi.fpos_ += cs;
 					size -= cs;
 					ret += static_cast<int>(cs);
-					if(fi.cpos_ >= fi.cash_.size()) {
+					if(fi.cpos_ >= fi.cash_size()) {
 						fio_.write_cash(fi, false);
 					}
 				}
@@ -264,14 +274,16 @@ namespace vfs {
 				ret = 0;
 				while(size > 0) {
 					if(fi.cpos_ == 0) {
-						fio_.read_cash(fi);
+						if(!fio_.read_cash(fi)) {
+							return -1;
+						}
 					}
 					if(fi.fpos_ >= fi.fsize_) break;
 					if(fi.cpos_ > 0) {
 						uint32_t cps;
 						if(size < fi.cpos_) cps = size;
 						else cps = fi.cpos_;
-						std::memcpy(dst, &fi.cash_[fi.fpos_ % fi.cash_.size()], cps);
+						std::memcpy(dst, fi.cash_ptr(fi.fpos_ % fi.cash_size()), cps);
 						fi.cpos_ -= cps;
 						fi.fpos_ += cps;
 						size -= cps;
@@ -368,13 +380,13 @@ namespace vfs {
 		}
 
 
-#ifdef WIN32
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	ファイルリストを表示
 		*/
 		//-----------------------------------------------------------------//
 		void list() const {
+			int fnmx = 14;  // file name max
 			int n = 0;
 			for(const auto& fi : finfos_) {
 				if(fi.handle_ == 0) continue;
@@ -382,16 +394,18 @@ namespace vfs {
 				const std::string& path = fi.path_;
 				if(path.empty()) continue;
 
-				if(path.back() == '/') std::cout << 'd';
+				if(is_dir(path)) std::cout << 'd';
 				else std::cout << '-';
 				std::cout << ' ';
 				if(fi.open_mode_ == open_mode::none) std::cout << 'N';
 				else if(fi.open_mode_ == open_mode::read) std::cout << 'R';
 				else if(fi.open_mode_ == open_mode::write) std::cout << 'W';
 				else std::cout << 'X';
-				std::cout << ' ';
-				std::cout << boost::format("%6d ") % static_cast<unsigned int>(fi.fsize_);
-				std::cout << path << " idx, ofs, bks ";
+				std::cout << " (";
+				std::cout << std::setw(3) << static_cast<unsigned int>(fi.handle_) << ") ";
+
+				std::cout << std::setw(9) << static_cast<unsigned int>(fi.fsize_) << ' ';
+				std::cout << std::setw(fnmx) << std::left << path << std::right << " idx, ofs, bks ";
 				for(const auto& bk : fi.blocks_) {
 					std::cout << static_cast<int>(bk.fileno_ + 1) << ", " << static_cast<int>(bk.offset_) << ", " <<
 						static_cast<int>(bk.blocks_) << " : ";
@@ -402,6 +416,5 @@ namespace vfs {
 			std::cout << "Total files: " << n << std::endl;
 			std::cout << std::endl;
 		}
-#endif
 	};
 }
