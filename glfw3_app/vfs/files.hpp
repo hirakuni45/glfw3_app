@@ -12,7 +12,13 @@
 #include "tree_unit.hpp"
 #include "fio.hpp"
 
+#ifndef NDEBUG
+#define DEBUG_FILES_
+#endif
+
+#ifdef DEBUG_FILES_
 #include <iomanip>
+#endif
 
 namespace vfs {
 
@@ -177,6 +183,66 @@ namespace vfs {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	ファイルを削除する
+			@param[in]	path	パス
+			@return 成功なら「０」以外
+		*/
+		//-----------------------------------------------------------------//
+		uint32_t remove(const std::string& path) {
+			auto hnds = tree_unit_.erase(path);
+			for(auto hnd : hnds) {
+				remove_(hnd);
+			}
+			return hnds.size();
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ファイルサイズを取得
+			@param[in]	path	パス
+			@return 「-1」なら失敗
+		*/
+		//-----------------------------------------------------------------//
+		int file_size(const std::string& path) {
+			if(path.empty()) return -1;
+			return fio_.file_size(path);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ファイルをコピー
+			@param[in]	src	ソース・パス
+			@param[in]	dst	ディストネーション・パス
+			@param[in]	ovw	オーバーライトの場合「true」
+			@return 失敗なら「false」
+		*/
+		//-----------------------------------------------------------------//
+		bool copy(const std::string& src, const std::string& dst, bool ovw) {
+			int srchnd = open(src, open_mode::read);
+			if(srchnd <= 0) return false;
+			if(ovw) {
+				remove(dst);
+			}
+			int dsthnd = open(dst, open_mode::write);
+			if(dsthnd <= 0) return false;
+
+			std::array<uint8_t, 512> buffer;
+			int rl = 0;
+			do {
+				rl = read(srchnd, &buffer[0], buffer.size());
+				write(dsthnd, &buffer[0], rl);
+			} while(rl > 0) ;
+			close(dsthnd);
+			close(srchnd);
+
+			return true;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	ファイルをオープンしてハンドルを返す
 			@param[in]	path	パス
 			@param[in]	opm		オープン・モード
@@ -332,6 +398,45 @@ namespace vfs {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	ファイル位置を取得
+			@param[in]	hnd	ファイル・ハンドル
+			@return 成功なら「正」の値
+		*/
+		//-----------------------------------------------------------------//
+		int tell(uint32_t hnd) const {
+			int ret = -1;
+			if(hnd < finfos_.size() && finfos_[hnd].handle_ == hnd) {
+				const finfo& fi = finfos_[hnd];
+				if(fi.open_mode_ != vfs::open_mode::none) {
+					ret = static_cast<int>(fi.fpos_);
+				}
+			}
+			return ret;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ファイルの終端を検査
+			@param[in]	hnd	ファイル・ハンドル
+			@return 成功なら「正」の値
+		*/
+		//-----------------------------------------------------------------//
+		int eof(uint32_t hnd) const {
+			int ret = -1;
+			if(hnd < finfos_.size() && finfos_[hnd].handle_ == hnd) {
+				const finfo& fi = finfos_[hnd];
+				if(fi.open_mode_ != vfs::open_mode::none) {
+					if(fi.fpos_ == fi.fsize_) ret = 1;
+					else ret = 0;
+				}				
+			}
+			return ret;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	ファイルをクローズする
 			@param[in]	hnd	ファイル・ハンドル
 			@return 成功なら「true」を返す
@@ -346,27 +451,13 @@ namespace vfs {
 					fi.destroy_cash();
 				} else if(fi.open_mode_ == open_mode::read) {
 					fi.destroy_cash();
+				} else {
+					return false;
 				}
 				fi.open_mode_ = open_mode::none;
 				return true;
 			}
 			return false;
-		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	ファイルを削除する
-			@param[in]	path	パス
-			@return 成功なら「０」以外
-		*/
-		//-----------------------------------------------------------------//
-		uint32_t remove(const std::string& path) {
-			auto hnds = tree_unit_.erase(path);
-			for(auto hnd : hnds) {
-				remove_(hnd);
-			}
-			return hnds.size();
 		}
 
 
@@ -385,7 +476,8 @@ namespace vfs {
 			@brief	ファイルリストを表示
 		*/
 		//-----------------------------------------------------------------//
-		void list() const {
+		void ls() const {
+#ifdef DEBUG_FILES_
 			int fnmx = 14;  // file name max
 			int n = 0;
 			for(const auto& fi : finfos_) {
@@ -415,6 +507,7 @@ namespace vfs {
 			}
 			std::cout << "Total files: " << n << std::endl;
 			std::cout << std::endl;
+#endif
 		}
 	};
 }

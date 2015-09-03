@@ -192,7 +192,9 @@ namespace vfs {
 			// アプリケーションユーティリティライブラリの初期化処理を行う
 			auto ret = sceAppUtilInit(&initParam_, &bootParam_);
 			if(ret != SCE_OK) {
+#ifndef NDEBUG
 				std::cout << "ERROR sceAppUtilInit: " << std::hex << ret << std::dec << std::endl;
+#endif
 			}
 		}
 
@@ -230,7 +232,9 @@ namespace vfs {
 
 					SceInt32 res = sceAppUtilSaveDataDataRemove(&dataSlot, &removeData, 1, NULL);
 					if (res != SCE_OK) {
+#ifndef NDEBUG
 						std::cout << "ERROR: sceAppUtilSaveDataDataRemove: " << std::hex << res << std::dec << std::endl;
+#endif
 					}
 				}
 			}
@@ -260,7 +264,9 @@ namespace vfs {
 			SceSize requiredSizeKiB;
 			SceInt32 res = sceAppUtilSaveDataDataSave(&saveSlot, &saveData, 1, NULL, &requiredSizeKiB);
 			if (res != SCE_OK) {
+#ifndef NDEBUG
 				std::cout << "ERROR: sceAppUtilSaveDataDataSave: " << std::hex << res << std::dec << std::endl;
+#endif
 			}
 		}
 
@@ -314,7 +320,9 @@ namespace vfs {
 
 			SceInt32 res = sceAppUtilSaveDataDataRemove(&dataSlot, &removeData, 1, NULL);
 			if (res != SCE_OK) {
+#ifndef NDEBUG
 				std::cout << "ERROR: sceAppUtilSaveDataDataRemove: " << std::hex << res << std::dec << std::endl;
+#endif
 			} else {
 ///				std::cout << "Remove save data: '" << path << "'" << std::endl;
 			}

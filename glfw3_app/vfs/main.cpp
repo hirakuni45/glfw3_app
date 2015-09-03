@@ -64,16 +64,7 @@ static void read_text_(const std::string& path)
 
 int main(int argc, char** argv)
 {
-#ifdef READ_DIR
 	fs.start(true);
-
-	read_text_("readme.txt");
-
-	fs.list();
-	return 0;
-#else
-	fs.start();
-#endif
 
 	fs.mkdir("qwe");
 	fs.mkdir("asd");
@@ -98,16 +89,16 @@ int main(int argc, char** argv)
 		fs.close(h);
 	}
 
-	fs.list();
+	fs.ls();
 
 	fs.remove("asdx");
 
-	fs.list();
+	fs.ls();
 
 	fs.cd("/");
 	fs.rmdir("asd");
 
-	fs.list();
+	fs.ls();
 	{
 		auto h = fs.open("readme.txt", vfs::open_mode::write);
 		auto data = make_ascii_(50);
@@ -115,14 +106,14 @@ int main(int argc, char** argv)
 		fs.close(h);
 	}
 
-	fs.list();
+	fs.ls();
 
 	// read file
 	if(1) {
 		read_text_("readme.txt");
 	}
 
-	fs.list();
+	fs.ls();
 
 	// ディレクトリー情報セーブ
 	fs.final();
