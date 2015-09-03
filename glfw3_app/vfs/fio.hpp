@@ -20,9 +20,11 @@
 #include <vector>
 #include "finfo.hpp"
 
+#ifdef __psp2__
 extern "C" {
 	unsigned int	sceLibcHeapSize	= 1*1024*1024;
 };
+#endif
 
 namespace vfs {
 
@@ -38,9 +40,10 @@ namespace vfs {
 		std::string	base_;
 
 		struct fidx {
+			open_mode	opm_;
 			uint32_t	pos_;
 			uint32_t	hnd_;
-			fidx() : pos_(0), hnd_(0) { }
+			fidx() : opm_(open_mode::none), pos_(0), hnd_(0) { }
 			void reset() {
 				pos_ = 0;
 				hnd_ = 0;
@@ -152,10 +155,10 @@ namespace vfs {
 
 		void read_dir_(const std::string& path, finfos& fis) {
 			FILE* fp = fopen(path.c_str(), "rb");
-			fseek(fp, 0, SEEK_END);
-			int fs = ftell(fp);
-			fseek(fp, 0, SEEK_SET);
 			if(fp != nullptr) {
+				fseek(fp, 0, SEEK_END);
+				int fs = ftell(fp);
+				fseek(fp, 0, SEEK_SET);
 				while(fs > 0) {
 					char buff[256];
 					fread(buff, 256, 1, fp);
@@ -444,11 +447,14 @@ namespace vfs {
 				finfo::block& bk = fi.blocks_.back();
 				uint32_t idx = bk.fileno_;
 				fidx& fx = fidxes_[idx];
-				if(fx.hnd_ == fi.handle_) {
+				if(fx.opm_ == open_mode::write && fx.hnd_ == fi.handle_) {
 					write_(idx, fi, close);
 					uint32_t org = bk.offset_ * finfo::file_align_size_;
 					bk.blocks_ = (fx.pos_ - org) / finfo::file_align_size_;
 					fi.cpos_ = 0;
+					if(close || fx.pos_ >= finfo::file_limit_size_) {
+						fx.opm_ = open_mode::none;
+					}
 //					std::cout << "Append block: " << static_cast<int>(idx) << std::endl;
 					return;
 				}
@@ -458,9 +464,14 @@ namespace vfs {
 			for(auto& fx : fidxes_) {
 				if(fx.pos_ >= finfo::file_limit_size_) ;
 				else {
-					if((finfo::file_limit_size_ - fx.pos_) > fi.cpos_) {
+					if(fx.opm_ == open_mode::none && (finfo::file_limit_size_ - fx.pos_) > fi.cpos_) {
 						uint32_t pos = fx.pos_;
-						write_(idx, fi, close);		
+						write_(idx, fi, close);
+						if(close || fx.pos_ >= finfo::file_limit_size_) {
+							fx.opm_ = open_mode::none;
+						} else {
+							fx.opm_ = open_mode::write;
+						}
 						finfo::block bk;
 						bk.fileno_ = idx;
 						bk.offset_ = pos / finfo::file_align_size_;
@@ -475,12 +486,15 @@ namespace vfs {
 
 			{ // 新規ブロック
 				idx = fidxes_.size();
-				fidx fx;
-				fidxes_.push_back(fx);
+				fidx f;
+				fidxes_.push_back(f);
+				fidx& fx = fidxes_.back();
 				finfo::block bk;
 				uint32_t pos = fx.pos_;
 				bk.offset_ = fx.pos_ / finfo::file_align_size_;
 				write_(idx, fi, close);
+				if(close) fx.opm_ = open_mode::none;
+				else fx.opm_ = open_mode::write;
 				bk.fileno_ = idx;
 				bk.blocks_ = (fx.pos_ - pos) / finfo::file_align_size_;
 				fi.blocks_.push_back(bk);
@@ -501,10 +515,24 @@ namespace vfs {
 				uint32_t top = bk.offset_ * finfo::file_align_size_;
 				uint32_t end = top + bk.blocks_ * finfo::file_align_size_;
 				if(top <= fi.fpos_ && fi.fpos_ < end) {
+					fidxes_[bk.fileno_].opm_ = open_mode::read;
 					return read_(bk.fileno_, fi);
 				}
 			}
 			return false;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	読み込み終了
+			@param[in]	fi		ファイル情報
+		*/
+		//-----------------------------------------------------------------//
+		void read_close(finfo& fi) {
+			for(const finfo::block& bk : fi.blocks_) {
+				fidxes_[bk.fileno_].opm_ = open_mode::none;
+			}
 		}
 
 
@@ -529,6 +557,17 @@ namespace vfs {
 		void read_dir(finfos& fis) {
 			auto path = block_name_(0);
 			read_dir_(path, fis);
+
+			// update dir index tables
+			for(const auto& fi : fis) {
+				for(const auto& bk : fi.blocks_) {
+					uint32_t pos = (bk.offset_ + bk.blocks_) * finfo::file_align_size_;
+					if(fidxes_.size() <= bk.fileno_) fidxes_.resize(bk.fileno_ + 1);
+					if(fidxes_[bk.fileno_].pos_ < pos) {
+						fidxes_[bk.fileno_].pos_ = pos;
+					}
+				}
+			}
 		}
 
 	};

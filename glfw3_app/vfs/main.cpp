@@ -115,6 +115,11 @@ int main(int argc, char** argv)
 
 	fs.ls();
 
+	fs.mkdir("tmp");
+	fs.copy("readme.txt", "tmp/readme.txt");
+
+	fs.ls();
+
 	// ディレクトリー情報セーブ
 	fs.final();
 }

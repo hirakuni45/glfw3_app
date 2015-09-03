@@ -16,6 +16,8 @@
 #define DEBUG_FILES_
 #endif
 
+#define DEBUG_FILES_
+
 #ifdef DEBUG_FILES_
 #include <iomanip>
 #endif
@@ -89,22 +91,25 @@ namespace vfs {
 			finfos_.clear();
 
 			// ディレクトリー情報を読み込み
+			finfos fos;
 			if(read) {
-				finfos fos;
 				fio_.read_dir(fos);
-				resize_infos_(fos.size());
-				for(const auto& fi : fos) {
-					if(fi.path_.empty()) continue;
-					finfo f;
-					f = fi;
-					if(fi.path_.back() == '/') {
-						f.handle_ = tree_unit_.make_directory(fi.path_);
-					} else {
-						f.handle_ = tree_unit_.install(fi.path_);
+				if(!fos.empty()) {
+					resize_infos_(fos.size());
+					for(const auto& fi : fos) {
+						if(fi.path_.empty()) continue;
+						finfo f;
+						f = fi;
+						if(fi.path_.back() == '/') {
+							f.handle_ = tree_unit_.make_directory(fi.path_);
+						} else {
+							f.handle_ = tree_unit_.install(fi.path_);
+						}
+						finfos_[f.handle_] = f;
 					}
-					finfos_[f.handle_] = f;
 				}
-			} else {
+			}
+			if(fos.empty()) {
 				mkdir("/");
 			}
 			cd("/");
@@ -219,7 +224,7 @@ namespace vfs {
 			@return 失敗なら「false」
 		*/
 		//-----------------------------------------------------------------//
-		bool copy(const std::string& src, const std::string& dst, bool ovw) {
+		bool copy(const std::string& src, const std::string& dst, bool ovw = false) {
 			int srchnd = open(src, open_mode::read);
 			if(srchnd <= 0) return false;
 			if(ovw) {
@@ -450,6 +455,7 @@ namespace vfs {
 					fi.fsize_ = fi.fpos_;
 					fi.destroy_cash();
 				} else if(fi.open_mode_ == open_mode::read) {
+					fio_.read_close(fi);
 					fi.destroy_cash();
 				} else {
 					return false;
