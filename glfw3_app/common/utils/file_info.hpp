@@ -144,7 +144,7 @@ namespace utils {
 	inline file_infos create_file_list(const std::string& root) {
 		file_infos dst;
 		create_file_list(root, dst);
-		return std::move(dst);
+		return dst;
 	}
 
 

@@ -6,8 +6,8 @@
 */
 //=====================================================================//
 #include <string>
-#include <boost/foreach.hpp>
 #include <vector>
+#include <boost/foreach.hpp>
 #include "utils/mtx.hpp"
 
 namespace utils {
@@ -155,7 +155,7 @@ namespace utils {
 				dst += ch;
 			}
 		}
-		return std::move(dst);
+		return dst;
 	}
 
 
@@ -205,7 +205,7 @@ namespace utils {
 	inline wstring utf8_to_utf16(const std::string& src) noexcept {
 		wstring dst;
 		utf8_to_utf16(src, dst);
-		return std::move(dst);
+		return dst;
 	}
 
 
@@ -230,7 +230,7 @@ namespace utils {
 	inline lstring utf8_to_utf32(const std::string& src) noexcept {
 		lstring dst;
 		utf8_to_utf32(src, dst);
-		return std::move(dst);
+		return dst;
 	}
 
 
@@ -255,7 +255,7 @@ namespace utils {
 	inline std::string utf16_to_utf8(const wstring& src) noexcept {
 		std::string dst;
 		utf16_to_utf8(src, dst);
-		return std::move(dst);
+		return dst;
 	}
 
 
@@ -285,7 +285,7 @@ namespace utils {
 	inline lstring utf16_to_utf32(const wstring& src) noexcept {
 		lstring dst;
 		utf16_to_utf32(src, dst);
-		return std::move(dst);
+		return dst;
 	}
 
 
@@ -310,7 +310,7 @@ namespace utils {
 	inline std::string utf32_to_utf8(const lstring& src) noexcept {
 		std::string dst;
 		utf32_to_utf8(src, dst);
-		return std::move(dst);
+		return dst;
 	}
 
 
@@ -335,7 +335,7 @@ namespace utils {
 	inline std::string sjis_to_utf8(const std::string& src) noexcept {
 		std::string dst;
 		sjis_to_utf8(src, dst);
-		return std::move(dst);
+		return dst;
 	}
 
 
@@ -360,7 +360,7 @@ namespace utils {
 	inline wstring sjis_to_utf16(const std::string& src) noexcept {
 		wstring dst;
 		sjis_to_utf16(src, dst);
-		return std::move(dst);
+		return dst;
 	}
 
 
@@ -385,7 +385,7 @@ namespace utils {
 	inline std::string utf8_to_sjis(const std::string& src) noexcept {
 		std::string dst;
 		utf8_to_sjis(src, dst);
-		return std::move(dst);
+		return dst;
 	}
 
 
@@ -411,7 +411,7 @@ namespace utils {
 	inline std::string utf16_to_sjis(const wstring& src) noexcept {
 		std::string dst;
 		utf16_to_sjis(src, dst);
-		return std::move(dst);
+		return dst;
 	}
 
 
@@ -429,7 +429,7 @@ namespace utils {
 			utf16_to_utf8(ws, tmp);
 			dst.push_back(tmp);
 		}
-		return std::move(dst);
+		return dst;
 	}
 
 
@@ -447,7 +447,7 @@ namespace utils {
 			utf8_to_utf16(s, tmp);
 			dst.push_back(tmp);
 		}
-		return std::move(dst);
+		return dst;
 	}
 
 
@@ -465,7 +465,7 @@ namespace utils {
 			dst += ws;
 			if(crlf) dst += '\n';
 		}
-		return std::move(dst);
+		return dst;
 	}
 
 
@@ -483,7 +483,7 @@ namespace utils {
 			dst += s;
 			if(crlf) dst += '\n';
 		}
-		return std::move(dst);
+		return dst;
 	}
 
 
@@ -544,7 +544,7 @@ namespace utils {
 		if(!word.empty()) {
 			dst.push_back(word);
 		}
-		return std::move(dst);
+		return dst;
 	}
 
 	inline strings split_text(const std::string& src, const std::string& list, int limit = 0) noexcept {
@@ -701,7 +701,7 @@ namespace utils {
 		} else {
 			dst += fn;
 		}
-		return std::move(dst);
+		return dst;
 	}
 
 
@@ -726,7 +726,7 @@ namespace utils {
 				s = p;
 			}
 		}
-		return std::move(s);
+		return s;
 	}
 
 	inline std::string get_file_ext(const std::string& src) {
@@ -769,7 +769,7 @@ namespace utils {
 	inline std::string get_file_path(const std::string& src) {
 		std::string dst;
 		get_file_path(src, dst);
-		return std::move(dst);
+		return dst;
 	}
 
 
@@ -802,7 +802,7 @@ namespace utils {
 	inline std::string strip_last_of_delimita_path(const std::string& src) {
 		std::string dst;
 		strip_last_of_delimita_path(src, dst);
-		return std::move(dst);
+		return dst;
 	}
 
 
