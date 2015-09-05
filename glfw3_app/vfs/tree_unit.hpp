@@ -52,7 +52,7 @@ namespace utils {
 			void list_all() const {
 				std::cout << '(' << static_cast<unsigned int>(id_) << ") ";
 				std::cout << static_cast<unsigned int>(childs_.size()) << ' ';
-				for(auto s : childs_) {
+				for(const auto& s : childs_) {
 					std::cout << s << ", ";
 				}
 			}
@@ -141,7 +141,7 @@ namespace utils {
 			if(fpath.back() == '/') {  // is directory
 				// erase sub directories
 				unit_t::childs chs = it->second.get_childs();
-				for(auto s : chs) {
+				for(const auto& s : chs) {
 //					std::cout << "Loop: " << (fpath + s) << std::endl;
 					auto hnd = erase_(fpath + s, hnds);
 					hnds.push_back(hnd);
@@ -461,7 +461,7 @@ namespace utils {
 					const typename unit_t::childs& ch = it->second.get_childs();
 					list.resize(ch.size());
 					list.clear();
-					for(auto s : ch) {
+					for(const auto& s : ch) {
 						auto path = create_full_path(s);
 						if(!path.empty()) {
 							it = unit_map_.find(path);

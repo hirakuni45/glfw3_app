@@ -4,7 +4,7 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include "utils/string_utils.hpp"
+#include "string_utils.hpp"
 // #include <boost/format.hpp>
 // #include <boost/lexical_cast.hpp>
 // #include "utils/sjis_utf16.hpp"
@@ -225,7 +225,7 @@ namespace utils {
 	{
 		char back = 0;
 		std::string dst;
-		BOOST_FOREACH(char ch, src) {
+		for(auto ch : src) {
 			if(ch == org_ch) {
 				if(back != 0 && back != cnv_ch) ch = cnv_ch;
 			}
@@ -237,7 +237,7 @@ namespace utils {
 		return std::move(dst);
 	}
 
-
+#if 0
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	拡張子フィルター
@@ -267,5 +267,5 @@ namespace utils {
 		}
 		return std::move(dst);
 	}
-
+#endif
 }

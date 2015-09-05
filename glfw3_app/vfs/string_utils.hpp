@@ -5,6 +5,7 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
+#include <stdint.h>
 #include <string>
 #include <vector>
 #include <algorithm>
