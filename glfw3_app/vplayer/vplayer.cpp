@@ -8,6 +8,8 @@
 #include "vplayer.hpp"
 #include "core/glcore.hpp"
 
+void video_decode_example(const char *outfilename, const char *filename);
+
 namespace app {
 
 	//-----------------------------------------------------------------//
@@ -45,6 +47,8 @@ namespace app {
 		sys::preference& pre = director_.at().preference_;
 		if(load_ctx_) load_ctx_->load(pre);
 		if(tools_frame_) tools_frame_->load(pre, false, false);
+
+		video_decode_example("test.bin", "test.mp4");
 	}
 
 

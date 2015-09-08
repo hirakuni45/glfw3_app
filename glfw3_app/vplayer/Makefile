@@ -22,6 +22,7 @@ CSOURCES	=	minizip/ioapi.c \
 
 PSOURCES	=	main.cpp \
 				vplayer.cpp \
+				decoder.cpp \
 				core/glcore.cpp \
 				core/device.cpp \
 				core/ftimg.cpp \
@@ -84,6 +85,8 @@ OPTLIBS		=	opengl32 glfw3 glew32 \
 				png turbojpeg jpeg openjp2 \
 				freetype \
 				mad faad mp4ff tag \
+				avdevice avformat avfilter avcodec \
+				swresample swscale avutil \
 				z OpenAL32
 else
 LOCAL_PATH	=	/usr/local
@@ -92,7 +95,9 @@ OPTLIBS		=	glfw3 GLEW \
 				png turbojpeg openjp2 \
 				freetype \
 				mad faad mp4ff tag \
-				z
+				avdevice avformat avfilter avcodec \
+				swresample swscale avutil \
+				z 
 endif
 
 INC_SYS		=	$(LOCAL_PATH)/include \
@@ -204,13 +209,13 @@ $(ICON_OBJ): $(ICON_RC)
 
 $(BUILD)/%.d : %.c
 	mkdir -p $(dir $@); \
-	$(CC) -MM -DDEPEND_ESCAPE $(COPT) $(CFLAGS) $(CINCS) $< \
+	$(CCMM) -MM -DDEPEND_ESCAPE $(COPT) $(CFLAGS) $(CINCS) $< \
 	| sed 's/$(notdir $*)\.o:/$(subst /,\/,$(patsubst %.d,%.o,$@) $@):/' > $@ ; \
 	[ -s $@ ] || rm -f $@
 
 $(BUILD)/%.d : %.cpp
 	mkdir -p $(dir $@); \
-	$(CP) -MM -DDEPEND_ESCAPE $(POPT) $(PFLAGS) $(PINCS) $< \
+	$(CPMM) -MM -DDEPEND_ESCAPE $(POPT) $(PFLAGS) $(PINCS) $< \
 	| sed 's/$(notdir $*)\.o:/$(subst /,\/,$(patsubst %.d,%.o,$@) $@):/' > $@ ; \
 	[ -s $@ ] || rm -f $@
 
