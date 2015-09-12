@@ -12,6 +12,7 @@ extern "C" {
 	#include <libavformat/avformat.h>
 	#include <libswscale/swscale.h>
 };
+#include "utils/vtx.hpp"
 
 namespace av {
 
@@ -28,11 +29,10 @@ namespace av {
 		AVFrame* 			frame_;
 		AVFrame* 			image_;
 		unsigned char*		buffer_;
-		int					w_;
-		int					h_;
+		vtx::ipos			size_;
 		struct SwsContext*	sws_ctx_;
 		uint32_t			count_;
-		int					state_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -41,8 +41,18 @@ namespace av {
 		//-----------------------------------------------------------------//
 		decoder() : path_(), format_ctx_(nullptr), codec_ctx_(nullptr),
 					frame_(nullptr), image_(nullptr), buffer_(nullptr),
-					w_(0), h_(0), sws_ctx_(nullptr),
-					count_(0), state_(0) { }
+					size_(0), sws_ctx_(nullptr),
+					count_(0) { }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	デストラクター
+		*/
+		//-----------------------------------------------------------------//
+		~decoder() {
+			close();
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -63,8 +73,8 @@ namespace av {
 		*/
 		//-----------------------------------------------------------------//
 		void info() {
-			av_dump_format(format_ctx_, 0, path_.c_str(), 0);
-			fflush(stderr);
+			av_dump_format(format_ctx_, 0, path_.c_str(), 1);
+//			fflush(stderr);
 		}
 
 
@@ -112,15 +122,15 @@ namespace av {
 			// イメージの確保
 			image_ = avcodec_alloc_frame();
 
-			w_ = codec_ctx_->width;
-			h_ = codec_ctx_->height;
+			size_.x = codec_ctx_->width;
+			size_.y = codec_ctx_->height;
 			// イメージ用バッファの確保
-			unsigned char* buffer = (unsigned char *)av_malloc(avpicture_get_size(PIX_FMT_RGB24, w_, h_));
+			buffer_ = (unsigned char *)av_malloc(avpicture_get_size(PIX_FMT_RGB24, size_.x, size_.y));
 			// バッファとフレームを関連付ける
-			avpicture_fill((AVPicture*)image_, buffer_, PIX_FMT_RGB24, w_, h_);
+			avpicture_fill((AVPicture*)image_, buffer_, PIX_FMT_RGB24, size_.x, size_.y);
 
 			// スケーリング用コンテキストの取得
-			sws_ctx_ = sws_getContext(w_, h_, codec_ctx_->pix_fmt, w_, h_,
+			sws_ctx_ = sws_getContext(size_.x, size_.y, codec_ctx_->pix_fmt, size_.x, size_.y,
 				PIX_FMT_RGB24, SWS_FAST_BILINEAR, NULL, NULL, NULL);
 
 			count_ = 0;
@@ -140,24 +150,33 @@ namespace av {
 
 			// フレーム読み込みループ
 			AVPacket packet;
-			if(av_read_frame(format_ctx_, &packet) < 0) {
-				return true;
+			while(av_read_frame(format_ctx_, &packet) >= 0) {
+
+				// デコード
+				int state;
+				avcodec_decode_video2(codec_ctx_, frame_, &state, &packet);
+
+				// 各フレーム、デコード完了
+				if(state) {
+					// フレームを切り出し
+//					int bsize = w_ * h_ * 4;
+					sws_scale(sws_ctx_, (const uint8_t **)frame_->data, frame_->linesize, 0,
+						codec_ctx_->height, image_->data, image_->linesize);
+					++count_;
+					return false;
+				}
 			}
-
-			// デコード
-			avcodec_decode_video2(codec_ctx_, frame_, &state_, &packet);
-
-			// 各フレーム、デコード完了
-			if(state_) {
-				// フレームを切り出し
-//				int bsize = w_ * h_ * 4;
-				sws_scale(sws_ctx_, (const uint8_t **)frame_->data, frame_->linesize, 0,
-					codec_ctx_->height, image_->data, image_->linesize);
-				++count_;
-			}
-
-			return false;
+			return true;
 		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	フレームサイズを取得
+			@return フレームサイズ
+		*/
+		//-----------------------------------------------------------------//
+		const vtx::ipos& get_frame_size() const { return size_; }
 
 
 		//-----------------------------------------------------------------//
@@ -168,8 +187,7 @@ namespace av {
 		//-----------------------------------------------------------------//
 		const unsigned char* get_frame() const {
 			if(format_ctx_ == nullptr || codec_ctx_ == nullptr) return nullptr;
-			if(state_) return buffer_;
-			else return nullptr;
+			return buffer_;
 		}
 
 
