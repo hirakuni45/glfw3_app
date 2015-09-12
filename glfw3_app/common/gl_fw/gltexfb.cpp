@@ -32,10 +32,12 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	texfb::error::type texfb::initialize(int width, int height, int depth)
 	{
-		int tw, th;
+		int tw = width;
+		int th = height;
 
 		// テクスチャーのサイズは、２のｎ乗サイズにする(OpenGL 1.1準拠)
 		// ※最大５１２ピクセル
+#if 0
 		if(width <= 64) tw = 64;
 		else if(width <= 128) tw = 128;
 		else if(width <= 256) tw = 256;
@@ -51,7 +53,7 @@ namespace gl {
 		else {
 			return error::ERROR_HEIGHT_OVER;
 		}
-		
+#endif	
 		if(depth == 4) {
 			tex_depth_ = 4;
 		} else if(depth == 8) {
@@ -184,22 +186,25 @@ namespace gl {
 		@param[in]	alpha	24 -> 32 ビットフォーマット変換時のアルファ値
 	*/
 	//-----------------------------------------------------------------//
-	void texfb::rendering(image::type srct, const char* img, int alpha)
+	void texfb::rendering(image::type srct, const void* img, int alpha)
 	{
 		if(img == 0) return;
 
 		// GL_RGB 又は、GL_RGBA への変換（必要な場合）
-		char* dst = 0;
+		uint8_t* dst = 0;
+		GLuint src_type = GL_RGBA;
 		if(tex_depth_ == 4) {
 		} else if(tex_depth_ == 8) {
 		} else if(tex_depth_ == 16) {		// RGBA4
 		} else if(tex_depth_ == 24) {		// RGB8
+			src_type = GL_RGB;
 			if(srct == image::GRAY) {
-				dst = new char[disp_size_.x * disp_size_.y * 3];
+				dst = new uint8_t[disp_size_.x * disp_size_.y * 3];
+				const uint8_t* im = static_cast<const uint8_t*>(img);
 				for(int y = 0; y < disp_size_.y; ++y) {
-					char* p = &dst[y * disp_size_.x * 3];
+					uint8_t* p = &dst[y * disp_size_.x * 3];
 					for(int x = 0; x < disp_size_.x; ++x) {
-						char g = *img++;
+						char g = *im++;
 						*p++ = g;
 						*p++ = g;
 						*p++ = g;
@@ -208,35 +213,38 @@ namespace gl {
 			} else if(srct == image::RGB) {
 				// 変換の必要無し
 			} else if(srct == image::RGBA) {
-				dst = new char[disp_size_.x * disp_size_.y * 3];
+				dst = new uint8_t[disp_size_.x * disp_size_.y * 3];
+				const uint8_t* im = static_cast<const uint8_t*>(img);
 				for(int y = 0; y < disp_size_.y; ++y) {
-					char* p = &dst[y * disp_size_.x * 3];
+					uint8_t* p = &dst[y * disp_size_.x * 3];
 					for(int x = 0; x < disp_size_.x; ++x) {
-						*p++ = *img++;
-						*p++ = *img++;
-						*p++ = *img++;
-						img++;
+						*p++ = *im++;
+						*p++ = *im++;
+						*p++ = *im++;
+						im++;
 					}
 				}
 			} else if(srct == image::BGR) {
-				dst = new char[disp_size_.x * disp_size_.y * 3];
+				dst = new uint8_t[disp_size_.x * disp_size_.y * 3];
+				const uint8_t* im = static_cast<const uint8_t*>(img);
 				for(int y = 0; y < disp_size_.y; ++y) {
-					char* p = &dst[y * disp_size_.x * 3];
+					uint8_t* p = &dst[y * disp_size_.x * 3];
 					for(int x = 0; x < disp_size_.x; ++x) {
-						p[2] = *img++;
-						p[1] = *img++;
-						p[0] = *img++;
+						p[2] = *im++;
+						p[1] = *im++;
+						p[0] = *im++;
 						p += 3;
 					}
 				}
 			}
 		} else if(tex_depth_ == 32) {		// RGBA8
 			if(srct == image::GRAY) {
-				dst = new char[disp_size_.x * disp_size_.y * 4];
+				dst = new uint8_t[disp_size_.x * disp_size_.y * 4];
+				const uint8_t* im = static_cast<const uint8_t*>(img);
 				for(int y = 0; y < disp_size_.y; ++y) {
-					char* p = &dst[y * disp_size_.x * 4];
+					uint8_t* p = &dst[y * disp_size_.x * 4];
 					for(int x = 0; x < disp_size_.x; ++x) {
-						char g = *img++;
+						char g = *im++;
 						*p++ = g;
 						*p++ = g;
 						*p++ = g;
@@ -244,34 +252,36 @@ namespace gl {
 					}
 				}
 			} else if(srct == image::RGB) {
-				dst = new char[disp_size_.x * disp_size_.y * 4];
+				dst = new uint8_t[disp_size_.x * disp_size_.y * 4];
+				const uint8_t* im = static_cast<const uint8_t*>(img);
 				for(int y = 0; y < disp_size_.y; ++y) {
-					char* p = &dst[y * disp_size_.x * 4];
+					uint8_t* p = &dst[y * disp_size_.x * 4];
 					for(int x = 0; x < disp_size_.x; ++x) {
-						*p++ = *img++;
-						*p++ = *img++;
-						*p++ = *img++;
+						*p++ = *im++;
+						*p++ = *im++;
+						*p++ = *im++;
 						*p++ = alpha;
 					}
 				}
 			} else if(srct == image::RGBA) {
 				// 変換不要
 			} else if(srct == image::BGR) {
-				dst = new char[disp_size_.x * disp_size_.y * 4];
+				dst = new uint8_t[disp_size_.x * disp_size_.y * 4];
+				const uint8_t* im = static_cast<const uint8_t*>(img);
 				for(int y = 0; y < disp_size_.y; ++y) {
-					char* p = &dst[y * disp_size_.x * 4];
+					uint8_t* p = &dst[y * disp_size_.x * 4];
 					for(int x = 0; x < disp_size_.x; ++x) {
 						p[3] = alpha;
-						p[2] = *img++;
-						p[1] = *img++;
-						p[0] = *img++;
+						p[2] = *im++;
+						p[1] = *im++;
+						p[0] = *im++;
 						p += 4;
 					}
 				}
 			}
 		}
 
-		const char* src;
+		const void* src;
 		if(dst) {
 			src = dst;
 		} else {
@@ -283,7 +293,7 @@ namespace gl {
 
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 			glTexSubImage2D(GL_TEXTURE_2D, 0,
-				disp_start_.x, disp_start_.y, disp_size_.x, disp_size_.y, GL_RGBA, GL_UNSIGNED_BYTE, src);
+				disp_start_.x, disp_start_.y, disp_size_.x, disp_size_.y, src_type, GL_UNSIGNED_BYTE, src);
 		}
 
 		if(dst) delete[] dst;
