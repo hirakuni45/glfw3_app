@@ -14,6 +14,8 @@
 #include "widgets/widget_filer.hpp"
 #include "widgets/widget_frame.hpp"
 #include "widgets/widget_terminal.hpp"
+#include "av/av_decoder.hpp"
+#include "gl_fw/gltexfb.hpp"
 
 namespace app {
 
@@ -31,6 +33,11 @@ namespace app {
 		
 		gui::widget_filer*		load_ctx_;
 
+		av::decoder				decoder_;
+		bool					decode_open_;
+
+		gl::texfb				texfb_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -40,7 +47,8 @@ namespace app {
 		vplayer(utils::director<core>& d) :
 			director_(d),
 			tools_frame_(nullptr), open_file_(nullptr),
-			load_ctx_(nullptr)
+			load_ctx_(nullptr),
+			decoder_(), decode_open_(false)
 		{ }
 
 
