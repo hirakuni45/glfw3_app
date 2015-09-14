@@ -225,7 +225,7 @@ strip:
 endif
 
 run:
-	./$(TARGET)
+	./$(TARGET)$(FEXT)
 
 clean:
 	rm -rf $(BUILD) $(TARGET)$(FEXT)
