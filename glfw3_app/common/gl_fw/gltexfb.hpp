@@ -55,7 +55,7 @@ namespace gl {
 				};
 			};
 			tex_page(GLuint fore, GLuint back) : fore_(fore), back_(back) { }
-			tex_page() { }
+			tex_page() : fore_(0), back_(0) { }
 		};
 		tex_page	tex_id_;
 

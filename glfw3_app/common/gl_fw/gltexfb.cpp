@@ -32,6 +32,8 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	texfb::error::type texfb::initialize(int width, int height, int depth)
 	{
+		glDeleteTextures(2, tex_id_.ids_);
+
 		int tw = width;
 		int th = height;
 
