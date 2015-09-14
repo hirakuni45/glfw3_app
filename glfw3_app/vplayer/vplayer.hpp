@@ -33,10 +33,15 @@ namespace app {
 		
 		gui::widget_filer*		load_ctx_;
 
+		gui::widget_frame*		terminal_frame_;
+		gui::widget_terminal*	terminal_core_;
+
 		av::decoder				decoder_;
 		bool					decode_open_;
 
 		gl::texfb				texfb_;
+
+		void output_term_(const std::string& text);
 
 	public:
 		//-----------------------------------------------------------------//
@@ -48,6 +53,7 @@ namespace app {
 			director_(d),
 			tools_frame_(nullptr), open_file_(nullptr),
 			load_ctx_(nullptr),
+			terminal_frame_(nullptr), terminal_core_(nullptr),
 			decoder_(), decode_open_(false)
 		{ }
 

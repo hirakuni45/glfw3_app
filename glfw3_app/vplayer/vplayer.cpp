@@ -7,8 +7,18 @@
 #include <iostream>
 #include "vplayer.hpp"
 #include "core/glcore.hpp"
+#include <boost/format.hpp>
 
 namespace app {
+
+	void vplayer::output_term_(const std::string& text)
+	{
+		if(terminal_core_ == nullptr) return;
+		if(text.empty()) return;
+
+		terminal_core_->output(text);
+	}
+
 
 	//-----------------------------------------------------------------//
 	/*!
@@ -44,12 +54,16 @@ namespace app {
 			wp_.select_file_func_ = [this] (const std::string& path) {
 				if(!decode_open_) {
 					decode_open_ = decoder_.open(path);
-					if(!decode_open_) {
-						std::cerr << "Can't open AV file: " << path << std::endl; 
-					} else {
-						std::cout << path << std::endl;
+					if(decode_open_) {
+						output_term_("File: '" + path + "'\n");
+						auto x = decoder_.get_frame_size().x;
+						auto y = decoder_.get_frame_size().y;
+						output_term_((boost::format("Screen: %d, %d\n") % x % y).str()); 
 ///						decoder_.info();
-						texfb_.initialize(decoder_.get_frame_size().x, decoder_.get_frame_size().y, 24);
+						int depth = 24;
+						texfb_.initialize(x, y, depth);
+					} else {
+						output_term_("Can't open AV file: '" + path + "'\n");
 					}
 				}
 			};
@@ -57,10 +71,26 @@ namespace app {
 			load_ctx_->enable(false);
 		}
 
+
+		{	// ターミナル
+			{
+				widget::param wp(vtx::srect(300, 300, 200, 200));
+				widget_frame::param wp_;
+				wp_.plate_param_.set_caption(20);
+				terminal_frame_ = wd.add_widget<widget_frame>(wp, wp_);
+			}
+			{
+				widget::param wp(vtx::srect(0), terminal_frame_);
+				widget_terminal::param wp_;
+				terminal_core_ = wd.add_widget<widget_terminal>(wp, wp_);
+			}
+		}
+
 		// プリファレンスの取得
 		sys::preference& pre = director_.at().preference_;
 		if(load_ctx_) load_ctx_->load(pre);
 		if(tools_frame_) tools_frame_->load(pre, false, false);
+		if(terminal_frame_) terminal_frame_->load(pre);
 	}
 
 
@@ -133,6 +163,7 @@ namespace app {
 	void vplayer::destroy()
 	{
 		sys::preference& pre = director_.at().preference_;
+		if(terminal_frame_) terminal_frame_->save(pre);
 		if(load_ctx_) load_ctx_->save(pre);
 		if(tools_frame_) tools_frame_->save(pre);
 	}
