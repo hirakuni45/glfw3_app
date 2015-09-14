@@ -48,7 +48,7 @@ namespace app {
 						std::cerr << "Can't open AV file: " << path << std::endl; 
 					} else {
 						std::cout << path << std::endl;
-						decoder_.info();
+///						decoder_.info();
 						texfb_.initialize(decoder_.get_frame_size().x, decoder_.get_frame_size().y, 24);
 					}
 				}

@@ -234,7 +234,18 @@ clean_depend:
 	rm -f $(DEPENDS)
 
 dllname:
+ifeq ($(OS),Windows_NT)
+	objdump -p $(TARGET)$(FEXT) | iconv -f SJIS -t UTF-8 | grep "DLL Name"
+else
 	objdump -p $(TARGET)$(FEXT) | grep "DLL Name"
+endif
+
+runcopy:
+	mkdir -p $(TARGET)
+	cp /mingw64/bin/*.dll $(TARGET)/.
+	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -mwindows -o $(TARGET)$(FEXT)
+	cp $(TARGET)$(FEXT) $(TARGET)/.
+	zip -r $(TARGET).zip $(TARGET)
 
 tarball:
 	tar cfvz $(TARGET)_$(shell date +%Y%m%d%H).tgz \
