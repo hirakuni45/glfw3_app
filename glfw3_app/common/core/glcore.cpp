@@ -251,8 +251,11 @@ namespace gl {
 			utils::get_file_path(tmp, current_path_);
 		} else {
 			char buff[2048];
-			std::string tmp;
-			tmp = getcwd(buff, sizeof(buff));
+#ifdef WIN32
+			std::string tmp = utils::sjis_to_utf8(getcwd(buff, sizeof(buff)));
+#else
+			std::string tmp = getcwd(buff, sizeof(buff));
+#endif
 			current_path_ = utils::convert_delimiter(tmp, '\\', '/');
 ///			std::cout << "Current(getcwd): '" << current_path_ << std::endl;
 		}
