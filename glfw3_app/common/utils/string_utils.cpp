@@ -527,20 +527,20 @@ namespace utils {
 	{
 		std::string dst;
 		if(src.empty()) {
-			return std::move(dst);
+			return dst;
 		}
 		std::string tmp;
 		strip_last_of_delimita_path(src, tmp);
 		std::string::size_type n = tmp.find_last_of('/');
 		if(n == std::string::npos) {
-			return std::move(dst);
+			return dst;
 		}
 		dst = tmp.substr(0, n);
 		// ルートの場合
 		if(dst.find('/') == std::string::npos) {
 			dst += '/';
 		}
-		return std::move(dst);
+		return dst;
 	}
 
 
@@ -567,7 +567,7 @@ namespace utils {
 			strip_last_of_delimita_path(src, tmp);
 			dst = tmp + '/' + add;
 		}
-		return std::move(dst);
+		return dst;
 	}
 
 
@@ -593,7 +593,7 @@ namespace utils {
 		}
 		if(back) dst += back;
 
-		return std::move(dst);
+		return dst;
 	}
 
 
@@ -624,7 +624,7 @@ namespace utils {
 				}
 			}
 		}
-		return std::move(dst);
+		return dst;
 	}
 
 }

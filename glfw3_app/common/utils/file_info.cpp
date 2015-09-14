@@ -197,6 +197,6 @@ namespace utils {
 			}
 			if(add) dst.push_back(f);
 		}
-		return std::move(dst);
+		return dst;
 	}
 }

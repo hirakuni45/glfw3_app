@@ -10,7 +10,6 @@
 #include <string>
 #include <stack>
 #include <map>
-#include <utility>
 #include "utils/vtx.hpp"
 #include "utils/file_io.hpp"
 #include <boost/format.hpp>
@@ -68,7 +67,7 @@ namespace sys {
 				else tmp[i] = 'A' + nib - 10;
 			} while(val != 0) ;
 			std::string s = &tmp[i];
-			return std::move(s);
+			return s;
 		}
 
 		uint32_t hexs_to_uint_(const std::string& s) const {

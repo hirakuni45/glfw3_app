@@ -153,12 +153,12 @@ namespace gui {
 			@return	文書
 		*/
 		//-----------------------------------------------------------------//
-		const std::string get_text() const {
+		std::string get_text() const {
 			std::string s;
 			if(text_) {
 				s = text_->get_local_param().text_param_.get_text();
 			}
-			return std::move(s);
+			return s;
 		}
 
 

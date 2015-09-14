@@ -211,10 +211,10 @@ namespace gui {
 			@return	テキスト
 		*/
 		//-----------------------------------------------------------------//
-		const std::string get_text() const {
+		std::string get_text() const {
 			std::string s;
 			utils::utf32_to_utf8(param_.text_param_.text_, s);
-			return std::move(s);
+			return s;
 		}
 
 

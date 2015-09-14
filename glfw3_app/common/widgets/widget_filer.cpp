@@ -397,7 +397,7 @@ namespace gui {
 		} else {
 			fin = path;
 		}
-		return std::move(fin);
+		return fin;
 	}
 
 
@@ -458,7 +458,7 @@ namespace gui {
 				ss.push_back(fn);
 			}
 		}
-		return std::move(ss);
+		return ss;
 	}
 
 

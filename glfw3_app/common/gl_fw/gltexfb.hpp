@@ -201,7 +201,7 @@ namespace gl {
 			@param[in]	alpha	24 -> 32 ビットフォーマット変換時のアルファ値
 		*/
 		//-----------------------------------------------------------------//
-		void rendering(image::type srct, const char* img, int alpha = 255);
+		void rendering(image::type srct, const void* img, int alpha = 255);
 
 
 		//-----------------------------------------------------------------//
