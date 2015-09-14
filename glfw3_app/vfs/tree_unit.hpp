@@ -212,14 +212,14 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		std::string create_full_path(const std::string& name) const {
 			std::string fpath;
-			if(name.empty()) return std::move(fpath);
+			if(name.empty()) return fpath;
 			if(name[0] == '/') {
-				return std::move(name);
+				return name;
 			}
 			fpath += current_path_;
 			if(fpath.empty() || fpath.back() != '/') fpath += '/';
 			fpath += name;
-			return std::move(fpath);
+			return fpath;
 		}
 
 
@@ -425,6 +425,42 @@ namespace utils {
 			if(fpath.back() != '/') fpath += '/';
 
 			return is_directory(unit_map_.find(fpath));
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	サブ・ディレクトリー・リストを作成する
+			@param[in]	root	起点となるルートパス
+			@param[in]	full	フルパスの場合「true」
+			@return	リスト
+		*/
+		//-----------------------------------------------------------------//
+		utils::strings get_sub_directory(const std::string& root, bool full)
+		{
+			utils::strings list;
+
+			auto fpath = create_full_path(root);
+			if(fpath.empty()) {
+				return list;
+			}
+
+			if(fpath.back() != '/') fpath += '/';
+
+			unit_map_it it = unit_map_.find(fpath);
+			if(it != unit_map_.end()) {
+				const typename unit_t::childs& chs = it->second.get_childs();
+				list.resize(chs.size());
+				list.clear();
+				for(const auto& s : chs) {
+					if(full) {
+						list.push_back(fpath + strip_last_of_delimita_path(s));
+					} else {
+						list.push_back(s);
+					}
+				}
+			}
+			return list;
 		}
 
 

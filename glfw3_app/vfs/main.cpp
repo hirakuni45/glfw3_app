@@ -120,6 +120,27 @@ int main(int argc, char** argv)
 
 	fs.ls();
 
+	{
+		auto h = fs.open("test_1m.bin", vfs::open_mode::write);
+		for(int i = 0; i < 1049; ++i) {
+			auto data = make_bytes_(1000);
+			fs.write(h, &data[0], 1000);
+		}
+		fs.close(h);
+	}
+
+	fs.ls();
+
+	// ディレクトリー・リスト
+	{
+		std::string root = "/tmp";
+		auto list = fs.create_directory_list(root, true);
+		std::cout << "Root: '" << root << "' " << static_cast<unsigned int>(list.size()) << " Files" << std::endl;
+		for(const auto& s : list) {
+			std::cout << s << std::endl;
+		}
+	}
+
 	// ディレクトリー情報セーブ
 	fs.final();
 }

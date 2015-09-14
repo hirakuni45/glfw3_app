@@ -20,12 +20,6 @@
 #include <vector>
 #include "finfo.hpp"
 
-#ifdef __psp2__
-extern "C" {
-	unsigned int	sceLibcHeapSize	= 1*1024*1024;
-};
-#endif
-
 namespace vfs {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -53,12 +47,15 @@ namespace vfs {
 
 		std::string block_name_(uint16_t nmb) {
 			std::string s = base_;
-			for (int i = 0; i < 4; ++i) {
-				uint16_t n = (nmb >> ((4 - i - 1) * 4)) & 15;
-				if (n < 10) s += '0' + n;
-				else s += 'A' + n - 10;
+			char tmp[4];
+			for(int i = 3; i >= 0; --i) {
+				tmp[i] = (nmb % 10) + '0';
+				nmb /= 10;
 			}
-			return std::move(s);
+			for(int i = 0; i < 4; ++i) {
+				s += tmp[i];
+			}
+			return s;
 		}
 
 
@@ -186,7 +183,7 @@ namespace vfs {
 		static constexpr const char* main_title_id_ = "SAVETEST";
 		static constexpr const char*  sub_title_id_ = "TEST";
 
-		void init_() {
+		bool init_() {
 			SceAppUtilInitParam		initParam_;
 			SceAppUtilBootParam		bootParam_;
 			memset(&initParam_, 0, sizeof(SceAppUtilInitParam) );
@@ -198,7 +195,9 @@ namespace vfs {
 #ifndef NDEBUG
 				std::cout << "ERROR sceAppUtilInit: " << std::hex << ret << std::dec << std::endl;
 #endif
+				return false;
 			}
+			return true;
 		}
 
 
@@ -452,22 +451,24 @@ namespace vfs {
 					uint32_t org = bk.offset_ * finfo::file_align_size_;
 					bk.blocks_ = (fx.pos_ - org) / finfo::file_align_size_;
 					fi.cpos_ = 0;
-					if(close || fx.pos_ >= finfo::file_limit_size_) {
+					// 残り容量が、キャッシュサイズ以下なら、追記出来ないので、クローズとする。
+					if(close || (fx.pos_ + finfo::cash_size_) > finfo::file_limit_size_) {
 						fx.opm_ = open_mode::none;
 					}
-//					std::cout << "Append block: " << static_cast<int>(idx) << std::endl;
+//					std::cout << "Append block: " << static_cast<int>(idx) << ", S: " << static_cast<int>(fx.pos_) << std::endl;
 					return;
 				}
 			}
 
 			uint32_t idx = 0;
 			for(auto& fx : fidxes_) {
-				if(fx.pos_ >= finfo::file_limit_size_) ;
-				else {
-					if(fx.opm_ == open_mode::none && (finfo::file_limit_size_ - fx.pos_) > fi.cpos_) {
+				if(fx.pos_ < finfo::file_limit_size_) {
+					uint32_t ms = finfo::file_limit_size_ - fx.pos_;
+					if(fx.opm_ == open_mode::none && ms >= fi.cpos_) {
 						uint32_t pos = fx.pos_;
 						write_(idx, fi, close);
-						if(close || fx.pos_ >= finfo::file_limit_size_) {
+						
+						if(close || (fx.pos_ + finfo::cash_size_) > finfo::file_limit_size_) {
 							fx.opm_ = open_mode::none;
 						} else {
 							fx.opm_ = open_mode::write;

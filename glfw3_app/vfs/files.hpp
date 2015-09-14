@@ -14,9 +14,12 @@
 
 #ifndef NDEBUG
 #define DEBUG_FILES_
-#endif
-
+#else
+#ifndef __psp2__
+// リリース版でも、デバッグ出力
 #define DEBUG_FILES_
+#endif
+#endif
 
 #ifdef DEBUG_FILES_
 #include <iomanip>
@@ -212,6 +215,19 @@ namespace vfs {
 		int file_size(const std::string& path) {
 			if(path.empty()) return -1;
 			return fio_.file_size(path);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ディレクトリーのファイルリストを作成
+			@param[in]	path	ルート・パス
+			@param[in]	full	フル・パスの場合「true」
+			@return ファイルリスト
+		*/
+		//-----------------------------------------------------------------//
+		utils::strings create_directory_list(const std::string& root, bool full) {
+			return tree_unit_.get_sub_directory(root, full);
 		}
 
 

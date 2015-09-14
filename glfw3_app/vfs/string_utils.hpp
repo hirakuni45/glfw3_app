@@ -154,7 +154,7 @@ namespace utils {
 				dst += ch;
 			}
 		}
-		return std::move(dst);
+		return dst;
 	}
 
 
@@ -197,7 +197,7 @@ namespace utils {
 			dst += ws;
 			if(crlf) dst += '\n';
 		}
-		return std::move(dst);
+		return dst;
 	}
 
 
@@ -215,7 +215,7 @@ namespace utils {
 			dst += s;
 			if(crlf) dst += '\n';
 		}
-		return std::move(dst);
+		return dst;
 	}
 
 
@@ -276,7 +276,7 @@ namespace utils {
 		if(!word.empty()) {
 			dst.push_back(word);
 		}
-		return std::move(dst);
+		return dst;
 	}
 
 	inline strings split_text(const std::string& src, const std::string& list, int limit = 0) noexcept {
@@ -394,7 +394,7 @@ namespace utils {
 		} else {
 			dst += fn;
 		}
-		return std::move(dst);
+		return dst;
 	}
 
 
@@ -419,7 +419,7 @@ namespace utils {
 				s = p;
 			}
 		}
-		return std::move(s);
+		return s;
 	}
 
 	inline std::string get_file_ext(const std::string& src) {
@@ -462,7 +462,7 @@ namespace utils {
 	inline std::string get_file_path(const std::string& src) {
 		std::string dst;
 		get_file_path(src, dst);
-		return std::move(dst);
+		return dst;
 	}
 
 
@@ -495,7 +495,7 @@ namespace utils {
 	inline std::string strip_last_of_delimita_path(const std::string& src) {
 		std::string dst;
 		strip_last_of_delimita_path(src, dst);
-		return std::move(dst);
+		return dst;
 	}
 
 
