@@ -40,7 +40,6 @@ namespace utils {
 		cha_t		cha_;
 
 		vtx::spos	size_;
-		vtx::spos	cursor_;
 
 		typedef std::vector<cha_t>	line;
 		typedef std::vector<line>	lines;
@@ -57,7 +56,7 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		terminal() :
 			cha_(' ', img::rgba8(255, 255, 255, 255), img::rgba8(0, 0, 0, 255)),
-			size_(0), cursor_(0),
+			size_(0),
 			line_(), line_pos_(0), line_max_(200), lines_() { }
 
 
@@ -77,7 +76,7 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		const vtx::spos& size() const { return size_; }
 
-
+#if 0
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	リサイズ
@@ -86,7 +85,6 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		void resize(const vtx::spos& size, bool destroy = false) {
-#if 0
 			chaers tmp;
 			if(!destroy) {
 				tmp.swap(chaers_);
@@ -107,10 +105,11 @@ namespace utils {
 			size_ = size;
 			if(cursor_.x >= size_.x) cursor_.x = size_.x - 1;
 			if(cursor_.y >= size_.y) cursor_.y = size_.y - 1;
-#endif
 		}
+#endif
 
 
+#if 0
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	ライン消去
@@ -120,15 +119,15 @@ namespace utils {
 		void clear_line(const vtx::spos& pos) {
 			if(pos.x < 0 || pos.x >= size_.x) return;
 			if(pos.y < 0 || pos.y >= size_.y) return;
-#if 0
+
 			cha_.cha_ = ' ';
 			for(int x = pos.x; x < size_.x; ++x) {
 				chaers_[pos.y * size_.x + x] = cha_;
 			}
-#endif
 		}
+#endif
 
-
+#if 0
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	領域消去
@@ -141,14 +140,13 @@ namespace utils {
 			if(rect.end_x() >= size_.x) return;
 			if(rect.end_y() >= size_.y) return;
 			cha_.cha_ = ' ';
-#if 0
 			for(int y = rect.org.y; y < rect.end_y(); ++y) {
 				for(int x = rect.org.x; x < rect.end_x(); ++x) {
 					chaers_[y * size_.x + x] = cha_;
 				}
 			}
-#endif
 		}
+#endif
 
 
 		//-----------------------------------------------------------------//
@@ -156,23 +154,24 @@ namespace utils {
 			@brief	消去
 		*/
 		//-----------------------------------------------------------------//
-		void clear() { clear(vtx::srect(vtx::spos(0), size_)); }
+		void clear() {
+			
+		}
 
 
+#if 0
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	スクロール
 		*/
 		//-----------------------------------------------------------------//
 		void scroll() {
-#if 0
 			for(int y = 1; y < size_.y; ++y) {
 				for(int x = 0; x < size_.x; ++x) {
 					chaers_[(y - 1) * size_.x + x] = chaers_[y * size_.x + x];
 				}
 			}
 			clear_line(vtx::spos(0, size_.y - 1));
-#endif
 		}
 
 
@@ -188,6 +187,7 @@ namespace utils {
 				scroll();
 			}
 		}
+#endif
 
 
 		//-----------------------------------------------------------------//
@@ -202,6 +202,7 @@ namespace utils {
 					lines_.push_back(line_);
 					line_.clear();
 				}
+				line_pos_ = lines_.size() - 1;
 			} else {
 				line_.emplace_back(cha);
 			}
@@ -228,9 +229,15 @@ namespace utils {
 			@return カーソル位置
 		*/
 		//-----------------------------------------------------------------//
-		const vtx::spos& cursor() const { return cursor_; }
+		vtx::spos cursor() const {
+			vtx::spos pos(0);
+			if(!line_.empty()) pos.x = line_.size() - 1;
+			if(!lines_.empty()) pos.y = lines_.size() - 1;
+			return pos;
+		}
 
 
+#if 0
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	カーソル位置を設定
@@ -243,6 +250,7 @@ namespace utils {
 			cursor_ = pos;
 			return true;
 		}
+#endif
 
 
 		//-----------------------------------------------------------------//

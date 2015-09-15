@@ -1,7 +1,7 @@
 #pragma once
 //=====================================================================//
 /*!	@file
-	@brief	FFmpeg Library/decoder クラス（ヘッダー）
+	@brief	FFmpeg Library/decoder クラス
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
@@ -13,6 +13,8 @@ extern "C" {
 	#include <libswscale/swscale.h>
 };
 #include "utils/vtx.hpp"
+#include "snd_io/i_audio.hpp"
+#include "snd_io/pcm.hpp"
 
 namespace av {
 
@@ -27,6 +29,7 @@ namespace av {
 		AVFormatContext*	format_ctx_;
 		AVCodecContext*		codec_ctx_;
 		AVFrame* 			frame_;
+		AVFrame* 			audio_;
 		AVFrame* 			image_;
 		unsigned char*		buffer_;
 		vtx::ipos			size_;
@@ -40,7 +43,7 @@ namespace av {
 		*/
 		//-----------------------------------------------------------------//
 		decoder() : path_(), format_ctx_(nullptr), codec_ctx_(nullptr),
-					frame_(nullptr), image_(nullptr), buffer_(nullptr),
+					frame_(nullptr), audio_(nullptr), image_(nullptr), buffer_(nullptr),
 					size_(0), sws_ctx_(nullptr),
 					count_(0) { }
 
@@ -119,6 +122,8 @@ namespace av {
 
 			// フレームの確保
 			frame_ = avcodec_alloc_frame();
+			// オーディオの確保
+			audio_ = avcodec_alloc_frame();
 			// イメージの確保
 			image_ = avcodec_alloc_frame();
 
@@ -135,6 +140,8 @@ namespace av {
 
 			count_ = 0;
 
+			std::cout << (int)codec_ctx_->sample_rate << std::endl << std::flush;			
+
 			return true;
 		}
 
@@ -145,19 +152,62 @@ namespace av {
 			@return フレーム終端なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool update() {
+		bool update(al::sound& snd) {
 			if(format_ctx_ == nullptr || codec_ctx_ == nullptr) return true;
 
 			// フレーム読み込みループ
 			AVPacket packet;
 			while(av_read_frame(format_ctx_, &packet) >= 0) {
 
-				// デコード
-				int state;
-				avcodec_decode_video2(codec_ctx_, frame_, &state, &packet);
+				// デコード・オーディオ
+				int astate;
+				avcodec_decode_audio4(codec_ctx_, audio_, &astate, &packet);
+				if(astate) {
+					int ds = av_get_bytes_per_sample(codec_ctx_->sample_fmt);
+					std::cout << ds << std::endl << std::flush;
+					al::audio aif;
+					if(codec_ctx_->channels == 1) {
+						if(ds == 1) aif = al::audio(new al::audio_mno8);
+						else if(ds == 2) aif = al::audio(new al::audio_mno16);
+					} else if(codec_ctx_->channels == 2) {
+						if(ds == 1) aif = al::audio(new al::audio_sto8);
+						else if(ds == 2) aif = al::audio(new al::audio_sto16);
+					}
+					if(aif) {
+						aif->create(codec_ctx_->sample_rate, audio_->nb_samples);
+						for(uint32_t i = 0; i < audio_->nb_samples; ++i) {
+							if(codec_ctx_->channels == 1) {
+								if(ds == 1) {
+									const al::s8* m = (const al::s8*)audio_->data[0];
+									al::pcm8_m w(m[i]);
+									aif->put(i, w);
+								} else if(ds == 2) {
+									const al::s16* m = (const al::s16*)audio_->data[0];
+									al::pcm16_m w(m[i]);
+									aif->put(i, w);
+								}
+							} else if(codec_ctx_->channels == 2) {
+								if(ds == 1) {
+									const al::s8* l = (const al::s8*)audio_->data[0];
+									const al::s8* r = (const al::s8*)audio_->data[1];
+									al::pcm8_s w(l[i], r[i]);
+									aif->put(i, w);
+								} else if(ds == 2) {
+									const al::s16* l = (const al::s16*)audio_->data[0];
+									const al::s16* r = (const al::s16*)audio_->data[1];
+									al::pcm16_s w(l[i], r[i]);
+									aif->put(i, w);
+								}
+							}
+						}
+						snd.queue_audio(aif);
+					}
+				}
 
-				// 各フレーム、デコード完了
-				if(state) {
+				// デコード・ビデオ
+				int vstate;
+				avcodec_decode_video2(codec_ctx_, frame_, &vstate, &packet);
+				if(vstate) {
 					// フレームを切り出し
 //					int bsize = w_ * h_ * 4;
 					sws_scale(sws_ctx_, (const uint8_t **)frame_->data, frame_->linesize, 0,
@@ -213,6 +263,9 @@ namespace av {
 
 			av_free(image_);
 			image_ = nullptr;
+
+			av_free(audio_);
+			audio_ = nullptr;
 
 			av_free(frame_);
 			frame_ = nullptr;

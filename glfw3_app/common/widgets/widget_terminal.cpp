@@ -114,10 +114,12 @@ namespace gui {
 					if(sr.size != get_rect().size) resize = true;
 					at_rect() = sr;
 					if(resize) {
+#if 0
 						terminal_.resize(
 							vtx::spos(sr.size.x / param_.font_width_,
 									  sr.size.y / param_.height_)
 							);
+#endif
 					}
 				}
 			}

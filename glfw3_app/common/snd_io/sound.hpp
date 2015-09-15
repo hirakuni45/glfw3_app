@@ -149,6 +149,8 @@ namespace al {
 
 		wave_gen_func			wave_gen_func_;
 
+		audio_io::slot_handle	audio_slot_;
+
 		bool request_sub_(int slot, al::audio_io::wave_handle wh, bool loop);
 
 	public:
@@ -159,7 +161,9 @@ namespace al {
 		//-----------------------------------------------------------------//
 		sound() : slot_max_(0), stream_fph_cnt_(0),
 				  stream_slot_(0),
-				  tag_serial_(0), tag_thread_(false), wave_gen_func_() {
+				  tag_serial_(0), tag_thread_(false), wave_gen_func_(),
+				  audio_slot_(0)
+		{
 			ses_.push_back(0);
 		}
 
@@ -314,6 +318,15 @@ namespace al {
 		 */
 		//-----------------------------------------------------------------//
 		void destroy_se_all();
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	オーディオスロットにキューイング
+			@param[in]	aif	オーディオインターフェース
+		 */
+		//-----------------------------------------------------------------//
+		void queue_audio(const audio aif);
 
 
 		//-----------------------------------------------------------------//
