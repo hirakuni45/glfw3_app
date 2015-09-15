@@ -30,23 +30,24 @@ namespace utils {
 			img::rgba8	fc_;
 			img::rgba8	bc_;
 
-			cha_t() { }
-			cha_t(uint32_t cha, const img::rgba8& fc, const img::rgba8& bc) :
+			cha_t(uint32_t cha = 0,
+				  const img::rgba8& fc = img::rgba8(255, 255, 255, 255),
+				  const img::rgba8& bc = img::rgba8(  0,   0,   0, 255)) :
 				cha_(cha), fc_(fc), bc_(bc) { }
 		};
 
 	private:
 		cha_t		cha_;
 
-		typedef std::vector<cha_t>	chaers;
-		chaers		chaers_;
-
 		vtx::spos	size_;
 		vtx::spos	cursor_;
 
-		utils::lstring	current_;
+		typedef std::vector<cha_t>	line;
+		typedef std::vector<line>	lines;
+		line		line_;
+		uint32_t	line_pos_;
 		uint32_t	line_max_;
-		utils::lstrings	lines_;
+		lines		lines_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -56,9 +57,8 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		terminal() :
 			cha_(' ', img::rgba8(255, 255, 255, 255), img::rgba8(0, 0, 0, 255)),
-			chaers_(),
 			size_(0), cursor_(0),
-			current_(), line_max_(200), lines_() { }
+			line_(), line_pos_(0), line_max_(200), lines_() { }
 
 
 		//-----------------------------------------------------------------//
@@ -86,6 +86,7 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		void resize(const vtx::spos& size, bool destroy = false) {
+#if 0
 			chaers tmp;
 			if(!destroy) {
 				tmp.swap(chaers_);
@@ -106,6 +107,7 @@ namespace utils {
 			size_ = size;
 			if(cursor_.x >= size_.x) cursor_.x = size_.x - 1;
 			if(cursor_.y >= size_.y) cursor_.y = size_.y - 1;
+#endif
 		}
 
 
@@ -118,11 +120,12 @@ namespace utils {
 		void clear_line(const vtx::spos& pos) {
 			if(pos.x < 0 || pos.x >= size_.x) return;
 			if(pos.y < 0 || pos.y >= size_.y) return;
-
+#if 0
 			cha_.cha_ = ' ';
 			for(int x = pos.x; x < size_.x; ++x) {
 				chaers_[pos.y * size_.x + x] = cha_;
 			}
+#endif
 		}
 
 
@@ -138,11 +141,13 @@ namespace utils {
 			if(rect.end_x() >= size_.x) return;
 			if(rect.end_y() >= size_.y) return;
 			cha_.cha_ = ' ';
+#if 0
 			for(int y = rect.org.y; y < rect.end_y(); ++y) {
 				for(int x = rect.org.x; x < rect.end_x(); ++x) {
 					chaers_[y * size_.x + x] = cha_;
 				}
 			}
+#endif
 		}
 
 
@@ -160,12 +165,14 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		void scroll() {
+#if 0
 			for(int y = 1; y < size_.y; ++y) {
 				for(int x = 0; x < size_.x; ++x) {
 					chaers_[(y - 1) * size_.x + x] = chaers_[y * size_.x + x];
 				}
 			}
 			clear_line(vtx::spos(0, size_.y - 1));
+#endif
 		}
 
 
@@ -190,42 +197,14 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		void output(uint32_t cha) {
-
 			if(cha == '\n') {
-				
-			} else {
-				current_ += cha;
-			}
-#if 0
-			if(chaers_.empty()) return;
-			if(cha < ' ') {
-				if(cha == '\n') {
-					clear_line(cursor_);
-					cursor_.x = 0;
-					line_feed();
-				} else if(cha == 0x08) {
-					--cursor_.x;
-					if(cursor_.x < 0) {
-						cursor_.x = size_.x - 1;
-						--cursor_.y;
-						if(cursor_.y < 0) {
-							cursor_.x = 0;
-							cursor_.y = 0;
-						}
-					}
-				} else if(cha == 0x3f) {
-
+				if(lines_.size() < line_max_) {
+					lines_.push_back(line_);
+					line_.clear();
 				}
-				return;
+			} else {
+				line_.emplace_back(cha);
 			}
-			cha_.cha_ = cha;
-			chaers_[cursor_.y * size_.x + cursor_.x] = cha_;
-			++cursor_.x;
-			if(cursor_.x >= size_.x) {
-				cursor_.x = 0;
-				line_feed();
-			}
-#endif
 		}
 
 
@@ -236,7 +215,8 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		void output(const std::string& str) {
-			BOOST_FOREACH(char ch, str) {
+			utils::lstring ls = utils::utf8_to_utf32(str);
+			for(auto ch : ls) {
 				output(ch);
 			}
 		}
@@ -275,7 +255,8 @@ namespace utils {
 				static cha_t zero(0, img::rgba8(0, 0), img::rgba8(0, 0)); 
 				return zero;
 			}
-			return chaers_[pos.y * size_.x + pos.x];
+///			return chaers_[pos.y * size_.x + pos.x];
+			return cha_;
 		}
 	};
 }
