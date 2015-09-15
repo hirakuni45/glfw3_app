@@ -118,7 +118,7 @@ namespace app {
 		if(decode_open_) {
 			static int f_ = 0;
 			if(f_ & 1) {
-				bool f = decoder_.update();
+				bool f = decoder_.update(director_.at().sound_);
 				if(f) {
 					std::cout << "Frames: " << static_cast<unsigned int>(decoder_.get_frame_no()) << std::endl;
 					decoder_.close();
