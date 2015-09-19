@@ -292,8 +292,6 @@ namespace al {
 
 		stream_slot_ = audio_io_.create_slot(0);
 
-		audio_slot_ = audio_io_.create_slot(0);
-
 		destroy_se_all();
 
 		stream_start_ = false;
@@ -486,12 +484,11 @@ namespace al {
 		@param[in]	aif	オーディオインターフェース
 	 */
 	//-----------------------------------------------------------------//
-	void sound::queue_audio(const audio aif)
+	void sound::queue_stream(const audio aif)
 	{
-		audio_io::wave_handle h = audio_io_.status_stream(audio_slot_);
+		audio_io::wave_handle h = audio_io_.status_stream(stream_slot_);
 		if(h) {
-			audio_io_.set_gain(audio_slot_, 1.0f);
-			audio_io_.queue_stream(audio_slot_, h, aif);
+			audio_io_.queue_stream(stream_slot_, h, aif);
 		}
 	}
 
@@ -650,8 +647,6 @@ namespace al {
 			pthread_mutex_destroy(&tag_info_.sync_);
 			tag_thread_ = false;
 		}
-
-		audio_io_.destroy_slot(audio_slot_);
 
 		stop_stream();
 		audio_io_.destroy_slot(stream_slot_);

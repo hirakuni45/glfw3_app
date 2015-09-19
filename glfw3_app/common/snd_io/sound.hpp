@@ -149,8 +149,6 @@ namespace al {
 
 		wave_gen_func			wave_gen_func_;
 
-		audio_io::slot_handle	audio_slot_;
-
 		bool request_sub_(int slot, al::audio_io::wave_handle wh, bool loop);
 
 	public:
@@ -161,8 +159,7 @@ namespace al {
 		//-----------------------------------------------------------------//
 		sound() : slot_max_(0), stream_fph_cnt_(0),
 				  stream_slot_(0),
-				  tag_serial_(0), tag_thread_(false), wave_gen_func_(),
-				  audio_slot_(0)
+				  tag_serial_(0), tag_thread_(false), wave_gen_func_()
 		{
 			ses_.push_back(0);
 		}
@@ -322,15 +319,6 @@ namespace al {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	オーディオスロットにキューイング
-			@param[in]	aif	オーディオインターフェース
-		 */
-		//-----------------------------------------------------------------//
-		void queue_audio(const audio aif);
-
-
-		//-----------------------------------------------------------------//
-		/*!
 			@brief	ゲインを設定する。
 			@param[in]	slot	発音スロット
 			@param[in]	gain	ゲイン
@@ -382,6 +370,15 @@ namespace al {
 		 */
 		//-----------------------------------------------------------------//
 		void set_gain_stream(float gain) { audio_io_.set_gain(stream_slot_, gain); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ストリームにキューイング（ダイレクト）
+			@param[in]	aif	オーディオインターフェース
+		 */
+		//-----------------------------------------------------------------//
+		void queue_stream(const audio aif);
 
 
 		//-----------------------------------------------------------------//
