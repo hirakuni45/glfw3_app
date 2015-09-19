@@ -55,11 +55,11 @@ namespace app {
 				if(!decode_open_) {
 					decode_open_ = decoder_.open(path);
 					if(decode_open_) {
+						video_time_ = 0.0;
 						output_term_("File: '" + path + "'\n");
 						auto x = decoder_.get_frame_size().x;
 						auto y = decoder_.get_frame_size().y;
-						output_term_((boost::format("Screen: %d, %d\n") % x % y).str()); 
-///						decoder_.info();
+						output_term_((boost::format("Screen: %d, %d\n") % x % y).str());
 						int depth = 24;
 						texfb_.initialize(x, y, depth);
 					} else {
@@ -116,22 +116,30 @@ namespace app {
 
 		// AV デコーダー更新
 		if(decode_open_) {
-			static int f_ = 0;
-			if(f_ & 1) {
-				bool f = decoder_.update(director_.at().sound_);
-				if(f) {
-					std::cout << "Frames: " << static_cast<unsigned int>(decoder_.get_frame_no()) << std::endl;
-					decoder_.close();
-					decode_open_ = false;
-				} else {
-					const void* img = decoder_.get_frame();
+			bool f = decoder_.update();
+			if(f) {
+				std::cout << "Frames: " << static_cast<unsigned int>(decoder_.get_frame_no()) << std::endl;
+				decoder_.close();
+				decode_open_ = false;
+			} else {
+				double vt = decoder_.get_video_time();
+				if(vt < video_time_) {
+					const void* img = decoder_.get_image();
 					if(img) {
 						texfb_.rendering(gl::texfb::image::RGB, img);
 						texfb_.flip();
+
+						double at = decoder_.get_audio_time();
+						if(at > (15.0 / 60.0)) {
+							for(uint32_t i = 0; i < decoder_.get_audio_num(); ++i) {
+								al::audio ai = decoder_.get_audio();
+								director_.at().sound_.queue_stream(ai);
+							}
+						}
 					}
 				}
+				video_time_ += 1.0 / 60.0;
 			}
-			++f_;
 		}
 
 		wd.update();

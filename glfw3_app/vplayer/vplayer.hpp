@@ -36,6 +36,7 @@ namespace app {
 		gui::widget_frame*		terminal_frame_;
 		gui::widget_terminal*	terminal_core_;
 
+		double					video_time_;
 		av::decoder				decoder_;
 		bool					decode_open_;
 
@@ -54,7 +55,7 @@ namespace app {
 			tools_frame_(nullptr), open_file_(nullptr),
 			load_ctx_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
-			decoder_(), decode_open_(false)
+			video_time_(0.0), decoder_(), decode_open_(false)
 		{ }
 
 
