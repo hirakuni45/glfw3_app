@@ -6,6 +6,7 @@
 */
 //=====================================================================//
 #include <string>
+#include <deque>
 extern "C" {
 	#include <libavcodec/avcodec.h>
 	#include <libavfilter/avfilter.h>
@@ -15,7 +16,6 @@ extern "C" {
 #include "utils/vtx.hpp"
 #include "snd_io/i_audio.hpp"
 #include "snd_io/pcm.hpp"
-#include "utils/fifo.hpp"
 
 namespace av {
 
@@ -27,15 +27,14 @@ namespace av {
 	class decoder {
 
 	public:
+		typedef std::deque<al::audio>  audio_deque;
+
+	private:
 		struct fb_t {
 			AVFrame* 	image_;
 			uint8_t*	buff_;
 			fb_t() : image_(nullptr), buff_(nullptr) { }
 		};
-
-	private:
-		static const int fb_buff_size_ = 4;
-		static const int au_buff_size_ = 32;
 
 		std::string			path_;
 		AVFormatContext*	format_ctx_;
@@ -43,12 +42,10 @@ namespace av {
 		AVCodecContext*		audio_ctx_;
 		int					video_idx_;
 		int					audio_idx_;
-		AVPacket			packet_;
 		AVFrame* 			frame_;
-		fb_t				fb_buff_[fb_buff_size_];
-		uint32_t			fb_pos_;
-		utils::fifo<fb_t, fb_buff_size_>		fb_;
-		utils::fifo<al::audio, au_buff_size_>	au_;
+		fb_t				fb_[2];
+		uint32_t			fb_put_;
+		uint32_t			fb_get_;
 		vtx::ipos			size_;
 		SwsContext*			sws_ctx_;
 		uint32_t			vcount_;
@@ -56,6 +53,7 @@ namespace av {
 		double				fps_;
 		double				video_sum_;
 		double				audio_sum_;
+		audio_deque			audio_deque_;
 
 		bool				init_;
 
@@ -90,7 +88,56 @@ namespace av {
 			al::audio aif = al::audio(new al::audio_sto16);
 			if(aif) {
 				aif->create(audio_ctx_->sample_rate, frame_->nb_samples);
-				for(uint32_t i = 0; i < frame_->nb_samples; ++i) {
+				typedef std::function<void (al::audio aif, int idx, const void* right, const void* left) > 
+					fill_func;
+				fill_func func;
+				if(audio_ctx_->sample_fmt == AV_SAMPLE_FMT_FLTP
+				|| audio_ctx_->sample_fmt == AV_SAMPLE_FMT_FLT) {
+					func = [this] (al::audio aif, int idx, const void* right, const void* left) {
+						const float* r = static_cast<const float*>(right);
+						int ir = static_cast<int>(r[idx] * 32767.0f);
+						if(ir < -32768) ir = -32768;
+						else if(ir > 32767) ir = 32767;
+						int il = ir;
+						if(left) {
+							const float* l = static_cast<const float*>(left);
+							il = static_cast<int>(l[idx] * 32767.0f);
+							if(il < -32768) il = -32768;
+							else if(il > 32767) il = 32767;
+						}
+						al::pcm16_s w(il, ir);
+						aif->put(idx, w);
+					};
+				} else if(audio_ctx_->sample_fmt == AV_SAMPLE_FMT_S16P
+						|| audio_ctx_->sample_fmt == AV_SAMPLE_FMT_S16) {
+					func = [this] (al::audio aif, int idx, const void* left, const void* right) {
+						const int16_t* r = static_cast<const int16_t*>(right);
+						int16_t ir = r[idx];
+						int16_t il = ir;
+						if(left) {
+							const int16_t* l = static_cast<const int16_t*>(left);
+							il = l[idx];
+						}
+						al::pcm16_s w(il, ir);
+						aif->put(idx, w);
+					};
+				}
+				if(func) {
+					if(audio_ctx_->channels == 1) {
+						for(uint32_t i = 0; i < frame_->nb_samples; ++i) {
+							func(aif, i, frame_->extended_data[0], nullptr);
+						}
+					} else {
+						for(uint32_t i = 0; i < frame_->nb_samples; ++i) {
+							func(aif, i, frame_->extended_data[0], frame_->extended_data[1]);
+						}
+					}
+				}
+			}
+			return aif;
+		}
+
+#if 0
 					if(audio_ctx_->channels == 1) {
 						if(ds == 1) {
 							const al::s8* m = (const al::s8*)frame_->extended_data[0];
@@ -109,15 +156,17 @@ namespace av {
 						} else if(ds == 4) {
 							const float* r = (const float*)frame_->extended_data[0];
 							const float* l = (const float*)frame_->extended_data[1];
-							al::pcm16_s w(static_cast<short>(l[i] * 32767.0f),
-										  static_cast<short>(r[i] * 32767.0f));
+							int il = static_cast<int>(l[i] * 32767.0f);
+							if(il < -32768) il = -32768;
+							else if(il > 32767) il = 32767;
+							int ir = static_cast<int>(r[i] * 32767.0f);
+							if(ir < -32768) ir = -32768;
+							else if(ir > 32767) ir = 32767;
+							al::pcm16_s w(il, ir);
 							aif->put(i, w);
 						}
 					}
-				}
-			}
-			return aif;
-		}
+#endif
 
 	public:
 		//-----------------------------------------------------------------//
@@ -129,7 +178,7 @@ namespace av {
 					video_ctx_(nullptr), audio_ctx_(nullptr),
 					video_idx_(-1), audio_idx_(-1),
 					frame_(nullptr),
-					fb_pos_(0),
+					fb_(), fb_put_(0), fb_get_(0),
 					size_(0), sws_ctx_(nullptr),
 					vcount_(0), acount_(0),
 					fps_(0.0), video_sum_(0.0), audio_sum_(0.0),
@@ -228,24 +277,20 @@ namespace av {
 				size_.x = video_ctx_->width;
 				size_.y = video_ctx_->height;
 
-				// イメージ格納バッファの確保
-				fb_.clear();
-				for(int i = 0; i < fb_buff_size_; ++i) {
-					fb_t& fb = fb_buff_[i];
-					fb.image_ = avcodec_alloc_frame();
+				for(int i = 0; i < 2; ++i) {
+					// イメージ格納バッファの確保
+					fb_[i].image_ = avcodec_alloc_frame();
 					// イメージ用バッファの確保
-					fb.buff_ = (unsigned char *)av_malloc(avpicture_get_size(PIX_FMT_RGB24, size_.x, size_.y));
+					fb_[i].buff_ = (unsigned char *)av_malloc(avpicture_get_size(PIX_FMT_RGB24, size_.x, size_.y));
 					// バッファとフレームを関連付ける
-					avpicture_fill((AVPicture*)fb.image_, fb.buff_, PIX_FMT_RGB24, size_.x, size_.y);
+					avpicture_fill((AVPicture*)fb_[i].image_, fb_[i].buff_, PIX_FMT_RGB24, size_.x, size_.y);
 				}
-
 				// スケーリング用コンテキストの取得
 				sws_ctx_ = sws_getContext(size_.x, size_.y, video_ctx_->pix_fmt, size_.x, size_.y,
 					PIX_FMT_RGB24, SWS_FAST_BILINEAR, NULL, NULL, NULL);
 			}
 
 			if(audio_ctx_ != nullptr) {
-				au_.clear();
 //				std::cout << "Sample rate: " << (int)audio_ctx_->sample_rate << std::endl;
 //				std::cout << "Audio chanel: " << (int)audio_ctx_->channels << std::endl;
 //				std::cout << std::flush;
@@ -257,10 +302,9 @@ namespace av {
 
 			vcount_ = 0;
 			acount_ = 0;
-
-			av_init_packet(&packet_);
-			packet_.data = NULL;
-			packet_.size = 0;
+			fb_put_ = 0;
+			fb_get_ = 0;
+			audio_deque_.clear();
 
 			return true;
 		}
@@ -276,43 +320,47 @@ namespace av {
 			if(format_ctx_ == nullptr || video_ctx_ == nullptr) return true;
  			if(video_idx_ < 0) return true;
 
-			if(fb_.length() >= (fb_buff_size_ - 1)) return false;
-
 			// フレーム読み込みループ
-			while(av_read_frame(format_ctx_, &packet_) >= 0) {
+			AVPacket packet;
+			av_init_packet(&packet);
+			while(av_read_frame(format_ctx_, &packet) >= 0) {
 				// デコード・ビデオ
-				if(packet_.stream_index == video_idx_) {
+				if(packet.stream_index == video_idx_) {
 					int vstate;
-					int ret = avcodec_decode_video2(video_ctx_, frame_, &vstate, &packet_);
+					int ret = avcodec_decode_video2(video_ctx_, frame_, &vstate, &packet);
 					if(ret >= 0 && vstate) {
 						// フレームを切り出し
-						fb_t& fb = fb_buff_[fb_pos_ % fb_buff_size_];
-						++fb_pos_;
+						fb_t& fb = fb_[fb_put_ & 1];
+						++fb_put_;
 						sws_scale(sws_ctx_, (const uint8_t **)frame_->data, frame_->linesize, 0,
 							video_ctx_->height, fb.image_->data, fb.image_->linesize);
-						fb_.put(fb);
 						++vcount_;
 						video_sum_ += 1.0 / fps_;
+						return false;
+//						std::cout << 'V';
 					}
 				}
 
 				// デコード・オーディオ
-				if(packet_.stream_index == audio_idx_) {
+				if(packet.stream_index == audio_idx_) {
 					int astate;
-					int ret = avcodec_decode_audio4(audio_ctx_, frame_, &astate, &packet_);
+					int ret = avcodec_decode_audio4(audio_ctx_, frame_, &astate, &packet);
 					if(ret >= 0 && astate) {
-						al::audio ai = create_audio_();
-						au_.put(ai);
-						++acount_;
-						double at = static_cast<double>(frame_->nb_samples)
-								  / static_cast<double>(audio_ctx_->sample_rate);
-						audio_sum_ += at;
+						if(audio_deque_.size() < 128) { 
+							al::audio ai = create_audio_();
+							audio_deque_.push_back(ai);
+							++acount_;
+							double at = static_cast<double>(frame_->nb_samples)
+									  / static_cast<double>(audio_ctx_->sample_rate);
+							audio_sum_ += at;
+//							std::cout << 'A';
+						}
 					}
 				}
 
-				if(fb_.length() >= (fb_.size() - 1)) {
-//					std::cout << (int)au_.length() << std::endl << std::flush;
-					return false;
+				if((fb_put_ - fb_get_) == 2) {
+///					std::cout << std::endl << std::flush;
+//					return false;
 				}
 			}
 			return true;
@@ -357,56 +405,26 @@ namespace av {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	イメージ数を取得
-			@return イメージ数
-		*/
-		//-----------------------------------------------------------------//
-		uint32_t get_image_num() const {
-			return fb_.length();
-		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
 			@brief	イメージを取得
 			@return RGB24 イメージ
 		*/
 		//-----------------------------------------------------------------//
 		const uint8_t* get_image() {
-			if(format_ctx_ == nullptr || video_ctx_ == nullptr) return nullptr;
-			if(fb_.length()) {
-				const fb_t& fb = fb_.get();
-				return fb.buff_;
-			} else {
-				return nullptr;
-			}
+			if(format_ctx_ == nullptr || video_ctx_ == nullptr || video_idx_ < 0) return nullptr;
+			const uint8_t* p = fb_[fb_get_ & 1].buff_;
+			++fb_get_;
+			return p; 
 		}
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	オーディオ数を取得
-			@return オーディオ数
+			@brief	オーディオ・バッファを参照
+			@return オーディオ・バッファ
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t get_audio_num() const {
-			return au_.length();
-		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	オーディオを取得
-			@return オーディオ・インターフェース
-		*/
-		//-----------------------------------------------------------------//
-		al::audio get_audio() {
-			if(format_ctx_ == nullptr || audio_ctx_ == nullptr) return nullptr;
-			if(au_.length()) {
-				return au_.get();
-			} else {
-				return nullptr;
-			}
+		audio_deque& at_audio() {
+			return audio_deque_;
 		}
 
 
@@ -430,12 +448,11 @@ namespace av {
 			sws_freeContext(sws_ctx_);
 			sws_ctx_ = nullptr;
 
-			for(int i = 0; i < fb_buff_size_; ++i) {
-				fb_t& fb = fb_buff_[i];
-				av_free(fb.image_);
-				fb.image_ = nullptr;
-				av_free(fb.buff_);
-				fb.buff_ = nullptr;
+			for(int i = 0; i < 2; ++i) {
+				av_free(fb_[i].image_);
+				fb_[i].image_ = nullptr;
+				av_free(fb_[i].buff_);
+				fb_[i].buff_ = nullptr;
 			}
 
 			av_free(frame_);
