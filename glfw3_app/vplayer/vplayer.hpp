@@ -10,12 +10,14 @@
 #include "utils/director.hpp"
 #include "widgets/widget.hpp"
 #include "widgets/widget_button.hpp"
+#include "widgets/widget_slider.hpp"
 #include "widgets/widget_dialog.hpp"
 #include "widgets/widget_filer.hpp"
 #include "widgets/widget_frame.hpp"
 #include "widgets/widget_terminal.hpp"
 #include "av/av_decoder.hpp"
 #include "gl_fw/gltexfb.hpp"
+#include "utils/file_io.hpp"
 
 namespace app {
 
@@ -30,13 +32,16 @@ namespace app {
 
 		gui::widget_frame*		tools_frame_;
 		gui::widget_button*		open_file_;
+		gui::widget_slider*		volume_;
 		
 		gui::widget_filer*		load_ctx_;
+
+		gui::widget_dialog*		dialog_;
 
 		gui::widget_frame*		terminal_frame_;
 		gui::widget_terminal*	terminal_core_;
 
-		double					video_time_;
+		double					frame_time_;
 		av::decoder				decoder_;
 		bool					decode_open_;
 
@@ -52,10 +57,11 @@ namespace app {
 		//-----------------------------------------------------------------//
 		vplayer(utils::director<core>& d) :
 			director_(d),
-			tools_frame_(nullptr), open_file_(nullptr),
-			load_ctx_(nullptr),
+			tools_frame_(nullptr),
+			open_file_(nullptr), volume_(nullptr),
+			load_ctx_(nullptr), dialog_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
-			video_time_(0.0), decoder_(), decode_open_(false)
+			frame_time_(0.0), decoder_(), decode_open_(false)
 		{ }
 
 
