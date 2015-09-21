@@ -48,7 +48,7 @@ namespace al {
 			@brief	ストリーム・スレッド・コマンド／構造体
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		struct request {
+		struct request_t {
 			enum class command {
 				NONE,	///< 無効
 				STOP,	///< 停止
@@ -64,7 +64,7 @@ namespace al {
 				uint32_t	seek_pos_;
 				bool		pause_state_;
 			};
-			explicit request(command cmd = command::NONE) : command_(cmd) { }
+			explicit request_t(command cmd = command::NONE) : command_(cmd) { }
 		};
 
 
@@ -79,7 +79,7 @@ namespace al {
 			std::string				root_;
 			std::string				file_;
 
-			utils::fifo<request, 64> request_;
+			utils::fifo<request_t, 64> request_;
 			stream_state::type		state_;
 
 			volatile bool			start_;
@@ -209,7 +209,7 @@ namespace al {
 			@return SE 発音ハンドルを返す
 		 */
 		//-----------------------------------------------------------------//
-		uint32_t load_se(utils::file_io& fin, const std::string& ext = "wav");
+		uint32_t load(utils::file_io& fin, const std::string& ext = "wav");
 
 
 		//-----------------------------------------------------------------//
@@ -219,7 +219,7 @@ namespace al {
 			@return SE 発音ハンドルを返す
 		 */
 		//-----------------------------------------------------------------//
-		uint32_t load_se(const std::string& filename) {
+		uint32_t load(const std::string& filename) {
 			if(filename.empty()) {
 				return 0;
 			}
@@ -228,7 +228,7 @@ namespace al {
 			if(!fin.open(filename, "rb")) {
 				return 0;
 			}
-			uint32_t h = load_se(fin, utils::get_file_ext(filename));
+			uint32_t h = load(fin, utils::get_file_ext(filename));
 			fin.close();
 			return h;
 		}
@@ -243,7 +243,13 @@ namespace al {
 			@return 波形ハンドルを返す。（「０」ならエラー）
 		 */
 		//-----------------------------------------------------------------//
-		audio_io::wave_handle request_se(int slot, const audio aif, bool loop);
+		audio_io::wave_handle request(int slot, const audio aif, bool loop) {
+			audio_io::wave_handle wh = audio_io_.create_wave(aif);
+			if(aif) {
+				request_sub_(slot, wh, loop);
+			}
+			return wh;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -260,49 +266,123 @@ namespace al {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	効果音リクエスト
+			@brief	SE リクエスト
 			@param[in]	slot	発音スロット（-1: auto）
 			@param[in]	se_no	発音番号
 			@param[in]	loop	ループ指定
 			@return 正常なら「true」
 		 */
 		//-----------------------------------------------------------------//
-		bool request_se(int slot, uint32_t se_no, bool loop = false);
+		bool request(int slot, uint32_t se_no, bool loop = false) {
+			bool f = false;
+			if(se_no > 0 && se_no < ses_.size()) {
+				f = request_sub_(slot, ses_[se_no], loop);
+			}
+			return f;
+		}
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	SE 一時停止
+			@brief	再生
 			@param[in]	slot	スロット番号
 			@return 正常なら「true」
 		 */
 		//-----------------------------------------------------------------//
-		bool pause_se(int slot);
+		bool play(int slot) {
+			if(static_cast<size_t>(slot) < slots_.size()) {
+				audio_io::slot_handle sh = slots_[slot];
+				audio_io_.play(sh);
+				return true;
+			} else {
+				return false;
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	SE 停止
+			@brief	一時停止
 			@param[in]	slot	スロット番号
 			@return 正常なら「true」
 		 */
 		//-----------------------------------------------------------------//
-		bool stop_se(int slot);
+		bool pause(int slot) {
+			if(static_cast<size_t>(slot) < slots_.size()) {
+				audio_io::slot_handle sh = slots_[slot];
+				audio_io_.pause(sh);
+				return true;
+			} else {
+				return false;
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	SE ステータス
+			@brief	停止
+			@param[in]	slot	スロット番号
+			@return 正常なら「true」
+		 */
+		//-----------------------------------------------------------------//
+		bool stop(int slot) {
+			if(static_cast<size_t>(slot) < slots_.size()) {
+				audio_io::slot_handle sh = slots_[slot];
+				audio_io_.stop(sh);
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ステータス
 			@param[in]	slot	スロット番号
 			@return 発音中なら「true」
 		 */
 		//-----------------------------------------------------------------//
-		bool status_se(int slot);
+		bool status(int slot) {
+			if(static_cast<size_t>(slot) < slots_.size()) {
+				audio_io::slot_handle sh = slots_[slot];
+				return audio_io_.get_slot_status(sh);
+			} else {
+				return false;
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	波形を廃棄する。
+			@brief	オーディオのスロットを取得（ストリーム）
+			@return オーディオのスロット
+		 */
+		//-----------------------------------------------------------------//
+		audio_io::slot_handle get_audio_slot() const { return stream_slot_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	オーディオをキューイング（ストリーム）
+			@param[in]	aif	オーディオインターフェース
+			@return 「queue」出来たら「true」
+		 */
+		//-----------------------------------------------------------------//
+		bool queue_audio(const audio aif) {
+			audio_io::wave_handle h = audio_io_.status_stream(stream_slot_);
+			if(h) {
+				audio_io_.set_loop(h, false);
+				audio_io_.queue_stream(stream_slot_, h, aif);
+				return true;
+			}
+			return false;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	SE 波形を廃棄する。
 			@param[in]	se_no	SE ハンドル
 		 */
 		//-----------------------------------------------------------------//
@@ -322,9 +402,18 @@ namespace al {
 			@brief	ゲインを設定する。
 			@param[in]	slot	発音スロット
 			@param[in]	gain	ゲイン
+			@return 正常なら「true」
 		 */
 		//-----------------------------------------------------------------//
-		void set_gain(int slot, float gain);
+		bool set_gain(int slot, float gain) {
+			if(static_cast<size_t>(slot) < slots_.size()) {
+				audio_io::slot_handle sh = slots_[slot];
+				audio_io_.set_gain(sh, gain);
+			} else {
+				return false;
+			}
+			return true;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -374,15 +463,6 @@ namespace al {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	ストリームにキューイング（ダイレクト）
-			@param[in]	aif	オーディオインターフェース
-		 */
-		//-----------------------------------------------------------------//
-		void queue_stream(const audio aif);
-
-
-		//-----------------------------------------------------------------//
-		/*!
 			@brief	ストリームを再生する。
 			@param[in]	root	ルートパス
 			@param[in]	file	再生ファイル名（無ければディレクトリーが対象）
@@ -422,7 +502,7 @@ namespace al {
 		//-----------------------------------------------------------------//
 		void pause_stream(bool state = true) {
 			if(stream_start_) {
-				request r(request::command::PAUSE);
+				request_t r(request_t::command::PAUSE);
 				r.pause_state_ = state;
 				sstream_t_.request_.put(r);
 			}
@@ -446,7 +526,7 @@ namespace al {
 		//-----------------------------------------------------------------//
 		void seek_stream(size_t pos) {
 			if(stream_start_) {
-				request r(request::command::SEEK);
+				request_t r(request_t::command::SEEK);
 				r.seek_pos_ = pos;
 				sstream_t_.request_.put(r);
 			}
@@ -460,7 +540,7 @@ namespace al {
 		//-----------------------------------------------------------------//
 		void next_stream() {
 			if(stream_start_) {
-				sstream_t_.request_.put(request(request::command::NEXT));
+				sstream_t_.request_.put(request_t(request_t::command::NEXT));
 			}
 		}
 
@@ -472,7 +552,7 @@ namespace al {
 		//-----------------------------------------------------------------//
 		void replay_stream() {
 			if(stream_start_) {
-				sstream_t_.request_.put(request(request::command::REPLAY));
+				sstream_t_.request_.put(request_t(request_t::command::REPLAY));
 			}
 		}
 
@@ -484,7 +564,7 @@ namespace al {
 		//-----------------------------------------------------------------//
 		void prior_stream() {
 			if(stream_start_) {
-				sstream_t_.request_.put(request(request::command::PRIOR));
+				sstream_t_.request_.put(request_t(request_t::command::PRIOR));
 			}
 		}
 

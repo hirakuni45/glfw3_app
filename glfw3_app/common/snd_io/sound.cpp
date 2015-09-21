@@ -107,24 +107,24 @@ namespace al {
 			bool first_pause = true;
 			while(pos < ainfo.samples) {
 				if(sst.request_.length()) {
-					const sound::request& r = sst.request_.get();
-					if(r.command_ == sound::request::command::NEXT) {
+					const sound::request_t& r = sst.request_.get();
+					if(r.command_ == sound::request_t::command::NEXT) {
 						++i;
 						cmdin = true;
 						break;
-					} else if(r.command_ == sound::request::command::PRIOR) {
+					} else if(r.command_ == sound::request_t::command::PRIOR) {
 						if(i) --i;
 						cmdin = true;
 						break;
-					} else if(r.command_ == sound::request::command::REPLAY) {
+					} else if(r.command_ == sound::request_t::command::REPLAY) {
 						cmdin = true;
 						break;
-					} else if(r.command_ == sound::request::command::STOP) {
+					} else if(r.command_ == sound::request_t::command::STOP) {
 						sst.state_ = sound::stream_state::STOP;
 						exit = true;
 						cmdin = true;
 						break;
-					} else if(r.command_ == sound::request::command::PAUSE) {
+					} else if(r.command_ == sound::request_t::command::PAUSE) {
 						if(pause != r.pause_state_) {
 							pause = r.pause_state_;
 							if(pause) {
@@ -138,7 +138,7 @@ namespace al {
 							}
 							sst.audio_io_->pause_stream(sst.slot_, pause);
 						}
-					} else if(r.command_ == sound::request::command::SEEK) {
+					} else if(r.command_ == sound::request_t::command::SEEK) {
 						pos = r.seek_pos_;
 					}
 				}
@@ -314,7 +314,7 @@ namespace al {
 		@return SE 発音番号を返す
 	 */
 	//-----------------------------------------------------------------//
-	uint32_t sound::load_se(utils::file_io& fin, const std::string& ext)
+	uint32_t sound::load(utils::file_io& fin, const std::string& ext)
 	{
 		if(!snd_files_.load(fin, ext)) {
 			fin.close();
@@ -331,44 +331,6 @@ namespace al {
 			}
 		}
 		return no;
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	効果音リクエスト
-		@param[in]	slot	発音スロット（-1: auto）
-		@param[in]	aif		波形インターフェース
-		@param[in]	loop	ループ指定
-		@return 波形ハンドルを返す。（「０」ならエラー）
-	 */
-	//-----------------------------------------------------------------//
-	audio_io::wave_handle sound::request_se(int slot, const audio aif, bool loop)
-	{
-		audio_io::wave_handle wh = audio_io_.create_wave(aif);
-		if(aif) {
-			request_sub_(slot, wh, loop);
-		}
-		return wh;
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	効果音リクエスト
-		@param[in]	slot	発音スロット（-1: auto）
-		@param[in]	se_no	発音番号
-		@param[in]	loop	ループ指定
-		@return 正常なら「true」
-	 */
-	//-----------------------------------------------------------------//
-	bool sound::request_se(int slot, uint32_t se_no, bool loop)
-	{
-		bool f = false;
-		if(se_no > 0 && se_no < ses_.size()) {
-			f = request_sub_(slot, ses_[se_no], loop);
-		}
-		return f;
 	}
 
 
@@ -407,62 +369,6 @@ namespace al {
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	SE 一時停止
-		@param[in]	slot	スロット番号
-		@return 正常なら「true」
-	 */
-	//-----------------------------------------------------------------//
-	bool sound::pause_se(int slot)
-	{
-		if(static_cast<size_t>(slot) < slots_.size()) {
-			audio_io::slot_handle sh = slots_[slot];
-			audio_io_.pause(sh);
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	SE 停止
-		@param[in]	slot	スロット番号
-		@return 正常なら「true」
-	 */
-	//-----------------------------------------------------------------//
-	bool sound::stop_se(int slot)
-	{
-		if(static_cast<size_t>(slot) < slots_.size()) {
-			audio_io::slot_handle sh = slots_[slot];
-			audio_io_.stop(sh);
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	SE ステータス
-		@param[in]	slot	スロット番号
-		@return 発音中なら「true」
-	 */
-	//-----------------------------------------------------------------//
-	bool sound::status_se(int slot)
-	{
-		if(static_cast<size_t>(slot) < slots_.size()) {
-			audio_io::slot_handle sh = slots_[slot];
-			return audio_io_.get_slot_status(sh);
-		} else {
-			return false;
-		}
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
 		@brief	ロードした全ての SE を廃棄する。
 	 */
 	//-----------------------------------------------------------------//
@@ -475,37 +381,6 @@ namespace al {
 		}
 		ses_.clear();
 		ses_.push_back(0);
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	オーディオスロットにキューイング
-		@param[in]	aif	オーディオインターフェース
-	 */
-	//-----------------------------------------------------------------//
-	void sound::queue_stream(const audio aif)
-	{
-		audio_io::wave_handle h = audio_io_.status_stream(stream_slot_);
-		if(h) {
-			audio_io_.queue_stream(stream_slot_, h, aif);
-		}
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	ゲインを設定する。
-		@param[in]	slot	発音スロット
-		@param[in]	gain	ゲイン
-	 */
-	//-----------------------------------------------------------------//
-	void sound::set_gain(int slot, float gain)
-	{
-		if(slot >= 0 && slot < static_cast<int>(slots_.size())) {
-			audio_io::slot_handle sh = slots_[slot];
-			audio_io_.set_gain(sh, gain);
-		}
 	}
 
 
@@ -560,7 +435,7 @@ namespace al {
 	void sound::stop_stream()
 	{
 		if(stream_start_) {
-			sstream_t_.request_.put(request(request::command::STOP));
+			sstream_t_.request_.put(request_t(request_t::command::STOP));
 			pthread_join(pth_ , nullptr);
 			pthread_mutex_destroy(&sstream_t_.sync_);
 			stream_start_ = false;

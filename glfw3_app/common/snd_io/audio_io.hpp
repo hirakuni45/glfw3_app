@@ -61,7 +61,7 @@ namespace al {
 		*/
 		//-----------------------------------------------------------------//
 		audio_io() : device_(nullptr), context_(nullptr),
-					queue_max_(16), init_(false), destroy_(false) { }
+					queue_max_(32), init_(false), destroy_(false) { }
 
 
 		//-----------------------------------------------------------------//

@@ -6,6 +6,7 @@
 */
 //=====================================================================//
 #include <memory>
+#include <vector>
 #include "utils/file_io.hpp"
 #include "audio.hpp"
 
@@ -109,5 +110,5 @@ namespace al {
 	};
 
 	typedef std::shared_ptr<i_audio>  audio;
-
+	typedef std::vector<audio>  audios;
 }
