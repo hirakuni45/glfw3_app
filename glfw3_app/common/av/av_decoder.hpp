@@ -121,7 +121,25 @@ namespace av {
 						al::pcm16_s w(il, ir);
 						aif->put(idx, w);
 					};
+				} else if(audio_ctx_->sample_fmt == AV_SAMPLE_FMT_U8P
+						|| audio_ctx_->sample_fmt == AV_SAMPLE_FMT_U8) {
+					func = [this] (al::audio aif, int idx, const void* left, const void* right) {
+						const uint8_t* r = static_cast<const uint8_t*>(right);
+						int16_t ir = static_cast<int16_t>(r[idx]);
+						ir |= ir << 8;
+						ir -= 32768;
+						int16_t il = ir;
+						if(left) {
+							const uint8_t* l = static_cast<const uint8_t*>(left);
+							il = static_cast<int16_t>(l[idx]);
+							il |= il << 8;
+							il -= 32768;
+						}
+						al::pcm16_s w(il, ir);
+						aif->put(idx, w);
+					};
 				}
+
 				if(func) {
 					if(audio_ctx_->channels == 1) {
 						for(uint32_t i = 0; i < frame_->nb_samples; ++i) {
@@ -138,34 +156,9 @@ namespace av {
 		}
 
 #if 0
-					if(audio_ctx_->channels == 1) {
-						if(ds == 1) {
-							const al::s8* m = (const al::s8*)frame_->extended_data[0];
-							al::pcm8_m w(m[i]);
-							aif->put(i, w);
-						} else if(ds == 2) {
-							const al::s16* m = (const al::s16*)frame_->extended_data[0];
-							al::pcm16_m w(m[i]);
-							aif->put(i, w);
-						}
-					} else if(audio_ctx_->channels == 2) {
-						if(ds == 2) {
-							const al::s8* s = (const al::s8*)frame_->extended_data[0];
-							al::pcm8_s w(s[i * 2 + 0], s[i * 2 + 1]);
-							aif->put(i, w);
-						} else if(ds == 4) {
-							const float* r = (const float*)frame_->extended_data[0];
-							const float* l = (const float*)frame_->extended_data[1];
-							int il = static_cast<int>(l[i] * 32767.0f);
-							if(il < -32768) il = -32768;
-							else if(il > 32767) il = 32767;
-							int ir = static_cast<int>(r[i] * 32767.0f);
-							if(ir < -32768) ir = -32768;
-							else if(ir > 32767) ir = 32767;
-							al::pcm16_s w(il, ir);
-							aif->put(i, w);
-						}
-					}
+			const al::s8* s = (const al::s8*)frame_->extended_data[0];
+			al::pcm8_s w(s[i * 2 + 0], s[i * 2 + 1]);
+			aif->put(i, w);
 #endif
 
 	public:
