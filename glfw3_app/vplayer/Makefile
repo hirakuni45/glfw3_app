@@ -240,6 +240,11 @@ else
 	objdump -p $(TARGET)$(FEXT) | grep "DLL Name"
 endif
 
+dllcopy:
+	mkdir -p $(TARGET)_dll
+	cp /mingw64/bin/*.dll $(TARGET)_dll/.
+	zip -r $(TARGET)_dll.zip $(TARGET)_dll
+
 runcopy:
 	mkdir -p $(TARGET)
 	cp /mingw64/bin/*.dll $(TARGET)/.

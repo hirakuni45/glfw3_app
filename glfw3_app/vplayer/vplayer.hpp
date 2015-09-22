@@ -11,6 +11,7 @@
 #include "widgets/widget.hpp"
 #include "widgets/widget_button.hpp"
 #include "widgets/widget_slider.hpp"
+#include "widgets/widget_check.hpp"
 #include "widgets/widget_dialog.hpp"
 #include "widgets/widget_filer.hpp"
 #include "widgets/widget_frame.hpp"
@@ -33,6 +34,9 @@ namespace app {
 		gui::widget_frame*		tools_frame_;
 		gui::widget_button*		open_file_;
 		gui::widget_slider*		volume_;
+		gui::widget_button*		play_pause_;
+		gui::widget_button*		stop_;
+		gui::widget_check*		sphere_;
 		
 		gui::widget_filer*		load_ctx_;
 
@@ -44,6 +48,7 @@ namespace app {
 		double					frame_time_;
 		av::decoder				decoder_;
 		bool					decode_open_;
+		bool					decode_pause_;
 
 		gl::texfb				texfb_;
 
@@ -58,10 +63,11 @@ namespace app {
 		vplayer(utils::director<core>& d) :
 			director_(d),
 			tools_frame_(nullptr),
-			open_file_(nullptr), volume_(nullptr),
+			open_file_(nullptr), volume_(nullptr), play_pause_(nullptr), stop_(nullptr),
+			sphere_(nullptr),
 			load_ctx_(nullptr), dialog_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
-			frame_time_(0.0), decoder_(), decode_open_(false)
+			frame_time_(0.0), decoder_(), decode_open_(false), decode_pause_(false)
 		{ }
 
 

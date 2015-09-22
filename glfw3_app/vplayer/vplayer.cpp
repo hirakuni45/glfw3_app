@@ -59,9 +59,45 @@ namespace app {
 			widget_slider::param wp_;
 			wp_.select_func_ = [this] (float value) {
 				auto& s = director_.at().sound_;
-				s.set_gain_stream(value);
+				s.set_gain_audio(value);
 			};
 			volume_ = wd.add_widget<widget_slider>(wp, wp_);
+		}
+
+		{ // Play/Pause ボタン
+			widget::param wp(vtx::srect( 10, 90, 85, 40), tools_frame_);
+			widget_button::param wp_("Play");
+			wp_.select_func_ = [this] () {
+				if(decode_open_) {
+					bool f = director_.at().sound_.status_audio();
+					if(f) {
+						decode_pause_ = true;
+						director_.at().sound_.pause_audio();
+					} else {
+						decode_pause_ = false;
+						director_.at().sound_.play_audio();
+					}
+				}
+			};
+			play_pause_ = wd.add_widget<widget_button>(wp, wp_);
+		}
+
+		{ // Stop ボタン
+			widget::param wp(vtx::srect(100, 90, 85, 40), tools_frame_);
+			widget_button::param wp_("Stop");
+			wp_.select_func_ = [this] () {
+				decoder_.close();
+				decode_open_ = false;
+				decode_pause_ = false;
+				director_.at().sound_.stop_audio();
+			};
+			stop_ = wd.add_widget<widget_button>(wp, wp_);
+		}
+
+		{ // チェックボックスのテスト
+			widget::param wp(vtx::srect(10, 130, 180, 40), tools_frame_);
+			widget_check::param wp_("Shpere map");
+			sphere_ = wd.add_widget<widget_check>(wp, wp_);
 		}
 
 		{ // load ファイラー本体
@@ -71,11 +107,32 @@ namespace app {
 				bool open = decoder_.open(path);
 				if(open) {
 					decode_open_ = true;
+					decode_pause_ = false;
 					frame_time_ = 0.0;
-					output_term_("File: '" + path + "'\n");
+					output_term_("File: " + path + '\n');
 					auto x = decoder_.get_frame_size().x;
 					auto y = decoder_.get_frame_size().y;
-					output_term_((boost::format("Screen: %d, %d\n") % x % y).str());
+					output_term_((boost::format("Frame size: %d, %d\n") % x % y).str());
+					auto fr = decoder_.get_frame_rate();
+					output_term_((boost::format("Frame rate: %2.2f [fps]\n") % fr).str());
+					auto ar = decoder_.get_audio_rate();
+					output_term_((boost::format("Audio sample rate: %d [Hz]\n") % ar).str());
+					auto ac = decoder_.get_audio_chanel();
+					output_term_((boost::format("Audio chanel%s: %d\n") % ((ac > 1) ? "s" : "") % ac).str());
+					auto af = decoder_.get_audio_format();
+					std::string s;
+					if(af == av::decoder::audio_format::none) {
+						s = "none";
+					} else if(af == av::decoder::audio_format::u8) {
+						s = "u8";
+					} else if(af == av::decoder::audio_format::s16) {
+						s = "s16";
+					} else if(af == av::decoder::audio_format::f32) {
+						s = "f32";
+					} else if(af == av::decoder::audio_format::invalid) {
+						s = "invalid";
+					}
+					output_term_("Audio format: " + s + '\n');
 					int depth = 24;
 					texfb_.initialize(x, y, depth);
 				} else {
@@ -83,7 +140,6 @@ namespace app {
 						dialog_->enable();
 						dialog_->set_text("ファイル\n" + path + "\nは開けませんでした。");
 					}
-//					output_term_("Can't open AV file: '" + path + "'\n");
 				}
 			};
 			load_ctx_ = wd.add_widget<widget_filer>(wp, wp_);
@@ -108,6 +164,7 @@ namespace app {
 			{
 				widget::param wp(vtx::srect(0), terminal_frame_);
 				widget_terminal::param wp_;
+				wp_.echo_ = false;
 				terminal_core_ = wd.add_widget<widget_terminal>(wp, wp_);
 			}
 		}
@@ -116,6 +173,7 @@ namespace app {
 		sys::preference& pre = director_.at().preference_;
 		if(tools_frame_) tools_frame_->load(pre, false, false);
 		if(volume_) volume_->load(pre);
+		if(sphere_) sphere_->load(pre);
 		if(load_ctx_) load_ctx_->load(pre);
 		if(terminal_frame_) terminal_frame_->load(pre);
 	}
@@ -133,13 +191,13 @@ namespace app {
 		gui::widget_director& wd = director_.at().widget_director_;
 
 		// AV デコーダー更新
-		if(decode_open_) {
+		if(decode_open_ && !decode_pause_) {
 			frame_time_ += 1.0 / 60.0;
 			double vt = decoder_.get_video_time();
 			if(vt < frame_time_) { 
 				bool f = decoder_.update();
 				if(f) {
-					std::cout << "Frames: " << static_cast<unsigned int>(decoder_.get_frame_no()) << std::endl;
+					output_term_((boost::format("Total: %d Frames\n") % decoder_.get_frame_no()).str());
 					decoder_.close();
 					decode_open_ = false;
 				} else {
@@ -151,7 +209,7 @@ namespace app {
 				}
 			}
 			double at = decoder_.get_audio_time();
-			if(at < frame_time_) {
+//			if(at < frame_time_) {
 				av::decoder::audio_deque& a = decoder_.at_audio();
 				for(int i = 0; i < a.size(); ++i) {
 					al::audio ai = a.front();
@@ -159,7 +217,20 @@ namespace app {
 						a.pop_front();
 					}
 				}
+//			}
+		}
+
+		// ボタンの状態を設定
+		if(play_pause_) {
+			if(decode_pause_) {
+				play_pause_->set_text("Play");
+			} else {
+				play_pause_->set_text("Pause");
 			}
+			play_pause_->set_stall(!decode_open_);
+		}
+		if(stop_) {
+			stop_->set_stall(!decode_open_);
 		}
 
 		wd.update();
@@ -173,10 +244,12 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void vplayer::render()
 	{
-		gl::core& core = gl::core::get_instance();
-		texfb_.setup_matrix(0, 0, core.get_size().x, core.get_size().y);
-		texfb_.set_disp_start(vtx::ipos(0, 0));
-		texfb_.draw();
+		if(decode_open_) {
+			gl::core& core = gl::core::get_instance();
+			texfb_.setup_matrix(0, 0, core.get_size().x, core.get_size().y);
+			texfb_.set_disp_start(vtx::ipos(0, 0));
+			texfb_.draw();
+		}
 
 		director_.at().widget_director_.service();
 		director_.at().widget_director_.render();
@@ -195,5 +268,6 @@ namespace app {
 		if(load_ctx_) load_ctx_->save(pre);
 		if(tools_frame_) tools_frame_->save(pre);
 		if(volume_) volume_->save(pre);
+		if(sphere_) sphere_->save(pre);
 	}
 }
