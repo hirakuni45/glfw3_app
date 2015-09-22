@@ -114,12 +114,7 @@ namespace gui {
 					if(sr.size != get_rect().size) resize = true;
 					at_rect() = sr;
 					if(resize) {
-#if 0
-						terminal_.resize(
-							vtx::spos(sr.size.x / param_.font_width_,
-									  sr.size.y / param_.height_)
-							);
-#endif
+
 					}
 				}
 			}
@@ -187,14 +182,14 @@ namespace gui {
 
 //			tpr.shadow_color_ *= cf.r;
 //			tpr.shadow_color_.alpha_scale(cf.a);
-
 			const img::rgbaf& cf = wd_.get_color();
 			vtx::spos pos;
+			vtx::spos limit(clip_.size.x / param_.font_width_, clip_.size.y / param_.height_);
 			vtx::spos chs(rect.org);
-			for(pos.y = 0; pos.y < terminal_.size().y; ++pos.y) {
-				for(pos.x = 0; pos.x < terminal_.size().x; ++pos.x) {
+			for(pos.y = 0; pos.y < limit.y; ++pos.y) {
+				for(pos.x = 0; pos.x < limit.x; ++pos.x) {
 					const utils::terminal::cha_t& t = terminal_.get_char(pos);
-					img::rgba8 fc  = t.fc_;
+					img::rgba8 fc = t.fc_;
 					fc *= cf.r;
 					fc.alpha_scale(cf.a);
 					fonts.set_fore_color(fc);
@@ -202,15 +197,23 @@ namespace gui {
 					bc *= cf.r;
 					bc.alpha_scale(cf.a);
 					fonts.set_back_color(bc);
-					if(focus_ && pos == terminal_.cursor()) {
+					if(focus_ && pos == terminal_.get_position()) {
 						if((interval_ % 40) < 20) {
 							fonts.swap_color();
 						}
 					}
-					vtx::srect br(chs, vtx::spos(param_.font_width_, param_.height_));
+					if(t.cha_ > 0x7f) {
+						fonts.pop_font_face();
+					}
+					int fw = fonts.get_width(t.cha_);
+					vtx::srect br(chs, vtx::spos(fw, param_.height_));
 					fonts.draw_back(br);
 					chs.x += fonts.draw(chs, t.cha_);
 					fonts.swap_color(false);
+					if(t.cha_ > 0x7f) {
+						fonts.push_font_face();
+						fonts.set_font_type(param_.font_);
+					}
 				}
 				chs.y += param_.height_;
 				chs.x = rect.org.x;
