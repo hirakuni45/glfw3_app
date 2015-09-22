@@ -170,7 +170,7 @@ namespace app {
 ///			tree_core_->set_state(widget::state::POSITION_LOCK);
 			tree_core_->set_state(widget::state::RESIZE_ROOT);
 			tree_core_->set_state(widget::state::MOVE_ROOT, false);
-
+#if 0
 			widget_tree::tree_unit& tu = tree_core_->at_tree_unit();
 			tu.make_directory("/root0");
 			tu.make_directory("/root1");
@@ -203,6 +203,7 @@ namespace app {
 				v.data_ = "ZXCVB";
 				tu.install("sub_B", v);
 			}
+#endif
 
 //			tu.list("/root");
 //			tu.list();
@@ -219,6 +220,7 @@ namespace app {
 				widget::param wp(vtx::srect(0), terminal_frame_);
 				widget_terminal::param wp_;
 				terminal_core_ = wd.add_widget<widget_terminal>(wp, wp_);
+				terminal_core_->output("漢字");
 			}
 		}
 
@@ -299,12 +301,12 @@ namespace app {
 			}
 		}
 
-///		if(terminal_core_) {
-///			static wchar_t ch = ' ';
-///			terminal_core_->output(ch);
-///			++ch;
-///			if(ch >= 0x7f) ch = ' ';
-///		}		
+		if(terminal_core_) {
+//			static wchar_t ch = ' ';
+//			terminal_core_->output(ch);
+//			++ch;
+//			if(ch >= 0x7f) ch = ' ';
+		}		
 
 		wd.update();
 	}
