@@ -27,6 +27,19 @@ namespace av {
 	class decoder {
 
 	public:
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	オーディオ・フォーマット
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		enum class audio_format {
+			none,		///< 無効
+			u8,			///< unsigned 8 bits
+			s16,		///< signed 16 bits
+			f32,		///< float 32 bits
+			invalid		///< 未知のフォーマット
+		};
+
 		typedef std::deque<al::audio>  audio_deque;
 
 	private:
@@ -80,11 +93,6 @@ namespace av {
 
 
 		al::audio create_audio_() {
-			int ds = av_get_bytes_per_sample(audio_ctx_->sample_fmt);
-//			int das = av_samples_get_buffer_size(nullptr, audio_ctx_->channels,
-//						frame_->nb_samples, audio_ctx_->sample_fmt, 1);
-//			std::cout << "Data size: " << das << std::endl << std::flush;
-
 			al::audio aif = al::audio(new al::audio_sto16);
 			if(aif) {
 				aif->create(audio_ctx_->sample_rate, frame_->nb_samples);
@@ -96,14 +104,14 @@ namespace av {
 					func = [this] (al::audio aif, int idx, const void* right, const void* left) {
 						const float* r = static_cast<const float*>(right);
 						int ir = static_cast<int>(r[idx] * 32767.0f);
-						if(ir < -32768) ir = -32768;
-						else if(ir > 32767) ir = 32767;
+						ir = std::max(ir, -32768);
+						ir = std::min(ir,  32767);
 						int il = ir;
 						if(left) {
 							const float* l = static_cast<const float*>(left);
 							il = static_cast<int>(l[idx] * 32767.0f);
-							if(il < -32768) il = -32768;
-							else if(il > 32767) il = 32767;
+							il = std::max(il, -32768);
+							il = std::min(il,  32767);
 						}
 						al::pcm16_s w(il, ir);
 						aif->put(idx, w);
@@ -407,6 +415,53 @@ namespace av {
 			const uint8_t* p = fb_[fb_get_ & 1].buff_;
 			++fb_get_;
 			return p; 
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	オーディオ・フォーマットを取得
+			@return オーディオ・フォーマット
+		*/
+		//-----------------------------------------------------------------//
+		audio_format get_audio_format() const {
+			if(audio_ctx_ == nullptr || audio_idx_ < 0) return audio_format::none;
+			if(audio_ctx_->sample_fmt == AV_SAMPLE_FMT_FLTP
+			|| audio_ctx_->sample_fmt == AV_SAMPLE_FMT_FLT) {
+				return audio_format::f32;
+			} else if(audio_ctx_->sample_fmt == AV_SAMPLE_FMT_S16P
+					|| audio_ctx_->sample_fmt == AV_SAMPLE_FMT_S16) {
+				return audio_format::s16;
+			} else if(audio_ctx_->sample_fmt == AV_SAMPLE_FMT_U8P
+					|| audio_ctx_->sample_fmt == AV_SAMPLE_FMT_U8) {
+				return audio_format::u8;
+			} else {
+				return audio_format::invalid;
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	オーディオ・サンプル・レートを取得
+			@return オーディオ・サンプル・レート
+		*/
+		//-----------------------------------------------------------------//
+		uint32_t get_audio_rate() const {
+			if(audio_ctx_ == nullptr || audio_idx_ < 0) return 0;
+			return audio_ctx_->sample_rate;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	オーディオ・チャネルを取得
+			@return オーディオ・チャネル
+		*/
+		//-----------------------------------------------------------------//
+		uint32_t get_audio_chanel() const {
+			if(audio_ctx_ == nullptr || audio_idx_ < 0) return 0;
+			return audio_ctx_->channels;			
 		}
 
 

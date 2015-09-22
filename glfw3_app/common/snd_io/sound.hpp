@@ -355,28 +355,20 @@ namespace al {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	オーディオのスロットを取得（ストリーム）
-			@return オーディオのスロット
+			@brief	ゲインを設定する。
+			@param[in]	slot	発音スロット
+			@param[in]	gain	ゲイン
+			@return 正常なら「true」
 		 */
 		//-----------------------------------------------------------------//
-		audio_io::slot_handle get_audio_slot() const { return stream_slot_; }
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	オーディオをキューイング（ストリーム）
-			@param[in]	aif	オーディオインターフェース
-			@return 「queue」出来たら「true」
-		 */
-		//-----------------------------------------------------------------//
-		bool queue_audio(const audio aif) {
-			audio_io::wave_handle h = audio_io_.status_stream(stream_slot_);
-			if(h) {
-				audio_io_.set_loop(h, false);
-				audio_io_.queue_stream(stream_slot_, h, aif);
-				return true;
+		bool set_gain(int slot, float gain) {
+			if(static_cast<size_t>(slot) < slots_.size()) {
+				audio_io::slot_handle sh = slots_[slot];
+				audio_io_.set_gain(sh, gain);
+			} else {
+				return false;
 			}
-			return false;
+			return true;
 		}
 
 
@@ -399,20 +391,70 @@ namespace al {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	ゲインを設定する。
-			@param[in]	slot	発音スロット
-			@param[in]	gain	ゲイン
-			@return 正常なら「true」
+			@brief	オーディオをキューイング（ストリーム）
+			@param[in]	aif	オーディオインターフェース
+			@return 「queue」出来たら「true」
 		 */
 		//-----------------------------------------------------------------//
-		bool set_gain(int slot, float gain) {
-			if(static_cast<size_t>(slot) < slots_.size()) {
-				audio_io::slot_handle sh = slots_[slot];
-				audio_io_.set_gain(sh, gain);
-			} else {
-				return false;
+		bool queue_audio(const audio aif) {
+			audio_io::wave_handle h = audio_io_.status_stream(stream_slot_);
+			if(h) {
+				audio_io_.set_loop(h, false);
+				audio_io_.queue_stream(stream_slot_, h, aif);
+				return true;
 			}
-			return true;
+			return false;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	オーディオのゲインを設定
+			@param[in]	gain	ゲイン（0.0 to 1.0）
+		 */
+		//-----------------------------------------------------------------//
+		void set_gain_audio(float gain) { audio_io_.set_gain(stream_slot_, gain); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	再生（ポーズからの再生再開）
+		 */
+		//-----------------------------------------------------------------//
+		void play_audio() {
+			audio_io_.play(stream_slot_);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	一時停止
+		 */
+		//-----------------------------------------------------------------//
+		void pause_audio() {
+			audio_io_.pause(stream_slot_);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	停止
+		 */
+		//-----------------------------------------------------------------//
+		void stop_audio() {
+			audio_io_.stop(stream_slot_);
+			audio_io_.purge_stream(stream_slot_);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ステータス
+			@return 発音中なら「true」
+		 */
+		//-----------------------------------------------------------------//
+		bool status_audio() {
+			return audio_io_.get_slot_status(stream_slot_);
 		}
 
 
