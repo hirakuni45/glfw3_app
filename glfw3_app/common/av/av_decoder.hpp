@@ -76,16 +76,16 @@ namespace av {
 			if(index >= 0) {
 				context = format_ctx_->streams[index]->codec;
 				if(context == nullptr) {
-					std::cerr << "Context: nullptr" << std::endl << std::flush;
+//					std::cerr << "Context: nullptr" << std::endl << std::flush;
 					return nullptr;
 				}
 				AVCodec* codec = avcodec_find_decoder(context->codec_id);
 				if(avcodec_open2(context, codec, NULL) < 0) {
-					std::cerr << "Error 'avcodec_open2()'" << std::endl;
+//					std::cerr << "Error 'avcodec_open2()'" << std::endl;
 					return nullptr;
 				}
 			} else {
-				std::cerr << "Video codec can't find." << std::endl << std::flush;
+//				std::cerr << "Video codec can't find." << std::endl << std::flush;
 				return nullptr;
 			}
 			return context;
@@ -252,21 +252,31 @@ namespace av {
 
 			// Video コーデックの検索と取得
 			video_ctx_ = codec_context_(AVMEDIA_TYPE_VIDEO, video_idx_);
-			if(video_ctx_ == nullptr) {
+
+			// Audio コーデックの検索と取得
+			audio_ctx_ = codec_context_(AVMEDIA_TYPE_AUDIO, audio_idx_);
+
+			// ビデオも、オーディオ無かったらクローズする。
+			if(video_ctx_ == nullptr && audio_ctx_ == nullptr) {
 				close();
 				return false;
 			}
 
-			// Audio コーデックの検索と取得
-			audio_ctx_ = codec_context_(AVMEDIA_TYPE_AUDIO, audio_idx_);
-			if(audio_ctx_ == nullptr) {
-				close();
-				return false;
-			}
 //			std::cout << "Video idx: " << video_idx_ << std::endl << std::flush;
 //			std::cout << "Audio idx: " << audio_idx_ << std::endl << std::flush;
 			fps_ = av_q2d(format_ctx_->streams[video_idx_]->avg_frame_rate);
 //			std::cout << "FPS: " << fps << std::endl;
+
+			if(0) {
+				AVStream* avs = format_ctx_->streams[video_idx_];
+				double d = avs->start_time * av_q2d(avs->time_base);
+				std::cout << "Video st: " << d << std::endl;
+			}
+			if(0) {
+				AVStream* avs = format_ctx_->streams[audio_idx_];
+				double d = avs->start_time * av_q2d(avs->time_base);
+				std::cout << "Audio st: " << d << std::endl;
+			}
 
 			// ログ・レベルの設定
 			av_log_set_level(1);
@@ -290,6 +300,8 @@ namespace av {
 				sws_ctx_ = sws_getContext(size_.x, size_.y, video_ctx_->pix_fmt, size_.x, size_.y,
 					PIX_FMT_RGB24, SWS_FAST_BILINEAR, NULL, NULL, NULL);
 			}
+
+			// double seconds= (dts - pStream->start_time) * av_q2d(pStream->time_base);
 
 			if(audio_ctx_ != nullptr) {
 //				std::cout << "Sample rate: " << (int)audio_ctx_->sample_rate << std::endl;
@@ -324,7 +336,16 @@ namespace av {
 			// フレーム読み込みループ
 			AVPacket packet;
 			av_init_packet(&packet);
+//static int aa = 0;
+//static bool start = false;
 			while(av_read_frame(format_ctx_, &packet) >= 0) {
+
+//				if(aa > packet.pts) {
+//					start = true;
+//				}
+//				aa = packet.pts;
+//				std::cout << (int)packet.pts << std::endl << std::flush;
+
 				// デコード・ビデオ
 				if(packet.stream_index == video_idx_) {
 					int vstate;
