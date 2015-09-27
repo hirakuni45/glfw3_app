@@ -804,19 +804,36 @@ namespace vtx {
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	vertex2 を正規化するテンプレート
+		@brief	vertex を正規化するテンプレート
 		@param[in]	src	ソース座標列
 		@param[out]	dst	生成座標列
 		@return	失敗した場合に「false」を返す
 	*/
 	//-----------------------------------------------------------------//
-	template <typename T>
-	bool normalize(const T& src, T& dst)
-	{
+	template <class T>
+	bool normalize(const T& src, T& dst) {
 		typename T::value_type a = src.len();
 		if(a < src.get_min()) return false;
 		dst = src / a;
 		return true;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	vertex を正規化するテンプレート
+		@param[in]	src	ソース座標列
+		@return	正規化されたベクトル
+	*/
+	//-----------------------------------------------------------------//
+	template <class T>
+	T normalize(const T& src) {
+		T dst;
+		if(normalize(src, dst)) {
+			return dst;
+		} else {
+			return src;
+		}
 	}
 
 
