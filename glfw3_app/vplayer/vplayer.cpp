@@ -30,6 +30,13 @@ namespace app {
 		// AV Decoder 初期化
 		decoder_.initialize();
 
+		camera_.set_eye(vtx::fvtx(-100.0f, 0.0f, 200.0f));
+		camera_.set_target(vtx::fvtx(0.0f, 0.0f, 200.0f));
+		camera_.set_up(vtx::fvtx(0.0f, 0.0f, 1.0f));
+
+		// 半球ドーム作成
+		surface_.create_dome(vtx::fvtx(500.0f, 500.0f, 500.0f), 64);
+
 		gl::core& core = gl::core::get_instance();
 
 		using namespace gui;
@@ -96,8 +103,8 @@ namespace app {
 
 		{ // チェックボックスのテスト
 			widget::param wp(vtx::srect(10, 130, 180, 40), tools_frame_);
-			widget_check::param wp_("Shpere map");
-			sphere_ = wd.add_widget<widget_check>(wp, wp_);
+			widget_check::param wp_("Dome Map");
+			dome_ = wd.add_widget<widget_check>(wp, wp_);
 		}
 
 		{ // load ファイラー本体
@@ -173,7 +180,7 @@ namespace app {
 		sys::preference& pre = director_.at().preference_;
 		if(tools_frame_) tools_frame_->load(pre, false, false);
 		if(volume_) volume_->load(pre);
-		if(sphere_) sphere_->load(pre);
+		if(dome_) dome_->load(pre);
 		if(load_ctx_) load_ctx_->load(pre);
 		if(terminal_frame_) terminal_frame_->load(pre);
 	}
@@ -233,7 +240,10 @@ namespace app {
 			stop_->set_stall(!decode_open_);
 		}
 
-		wd.update();
+		// GUI が操作されない場合、カメラ操作
+		if(!wd.update()) {
+			camera_.update();
+		}
 	}
 
 
@@ -245,12 +255,31 @@ namespace app {
 	void vplayer::render()
 	{
 		if(decode_open_) {
-			gl::core& core = gl::core::get_instance();
-			texfb_.setup_matrix(0, 0, core.get_size().x, core.get_size().y);
-			texfb_.set_disp_start(vtx::ipos(0, 0));
-			texfb_.draw();
+			if(dome_ != nullptr && dome_->get_check()) {
+				camera_.service();
+
+				glEnable(GL_TEXTURE_2D);
+				glEnable(GL_BLEND);
+				glEnable(GL_DEPTH_TEST);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+				glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+				glBindTexture(GL_TEXTURE_2D, texfb_.get_texture_id());
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				surface_.draw(gl::surface::draw_type::fill);
+//				surface_.draw(gl::surface::draw_type::line);
+			} else {
+				gl::core& core = gl::core::get_instance();
+				texfb_.setup_matrix(0, 0, core.get_size().x, core.get_size().y);
+				texfb_.set_disp_start(vtx::ipos(0, 0));
+				texfb_.draw();
+			}
 		}
 
+		glEnable(GL_TEXTURE_2D);
 		director_.at().widget_director_.service();
 		director_.at().widget_director_.render();
 	}
@@ -268,6 +297,6 @@ namespace app {
 		if(load_ctx_) load_ctx_->save(pre);
 		if(tools_frame_) tools_frame_->save(pre);
 		if(volume_) volume_->save(pre);
-		if(sphere_) sphere_->save(pre);
+		if(dome_) dome_->save(pre);
 	}
 }

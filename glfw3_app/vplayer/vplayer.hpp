@@ -17,8 +17,11 @@
 #include "widgets/widget_frame.hpp"
 #include "widgets/widget_terminal.hpp"
 #include "av/av_decoder.hpp"
-#include "gl_fw/gltexfb.hpp"
 #include "utils/file_io.hpp"
+#include "gl_fw/gltexfb.hpp"
+#include "gl_fw/glcamera.hpp"
+#include "gl_fw/glsurface.hpp"
+
 
 namespace app {
 
@@ -36,7 +39,7 @@ namespace app {
 		gui::widget_slider*		volume_;
 		gui::widget_button*		play_pause_;
 		gui::widget_button*		stop_;
-		gui::widget_check*		sphere_;
+		gui::widget_check*		dome_;
 		
 		gui::widget_filer*		load_ctx_;
 
@@ -52,6 +55,9 @@ namespace app {
 
 		gl::texfb				texfb_;
 
+		gl::camera				camera_;
+		gl::surface				surface_;
+
 		void output_term_(const std::string& text);
 
 	public:
@@ -64,7 +70,7 @@ namespace app {
 			director_(d),
 			tools_frame_(nullptr),
 			open_file_(nullptr), volume_(nullptr), play_pause_(nullptr), stop_(nullptr),
-			sphere_(nullptr),
+			dome_(nullptr),
 			load_ctx_(nullptr), dialog_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
 			frame_time_(0.0), decoder_(), decode_open_(false), decode_pause_(false)
