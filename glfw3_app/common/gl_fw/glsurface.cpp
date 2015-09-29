@@ -8,7 +8,42 @@
 
 namespace gl {
 
-	void surface::make_triangle_dome_() {
+	void surface::create_dome_vertex_(const vtx::fvtx& rad, uint32_t div)
+	{
+		divide_ = div;
+		radius_ = rad;
+
+		uint32_t qd = div / 4;
+		vertices_.resize(div * qd + 1);
+		vertices_.clear();
+
+		float a = 0.0f;
+		float b = 0.0f;
+		float d = vtx::get_pi<float>() * 2.0f / static_cast<float>(div);
+		for(uint32_t j = 0; j <= qd; ++j) {
+			for(uint32_t i = 0; i < div; ++i) {
+				vertex v;
+				v.position.x = std::cos(a) * std::cos(b) * rad.x;
+				v.position.y = std::sin(a) * std::cos(b) * rad.y;
+				v.position.z = std::sin(b) * rad.z;
+				v.normal = vtx::normalize(v.position);
+				vtx::fpos uv(std::cos(a), std::sin(a));
+				uv *= static_cast<float>(qd - j) / static_cast<float>(qd);
+				uv += vtx::fpos(1.0f);
+				v.uv = uv * 0.5f;
+				vertices_.push_back(v);
+				if(j == qd) {
+					break;
+				}
+				a += d;
+			}
+			b += d;
+		}
+	}
+
+
+	void surface::make_triangle_dome_()
+	{
 		uint32_t qdv = divide_ / 4;
 		indices_.clear();
 		for(uint32_t j = 0; j < qdv; ++j) {
@@ -33,6 +68,30 @@ namespace gl {
 	}
 
 
+	void surface::make_triangle_sphere_()
+	{
+	}
+
+
+	void surface::gen_glbuffer_()
+	{
+		destroy_();
+
+		// 頂点バッファの作成
+		glGenBuffers(1, &vertex_id_);
+		glBindBuffer(GL_ARRAY_BUFFER, vertex_id_);
+		glBufferData(GL_ARRAY_BUFFER, vertices_.size() * sizeof(vertex), &vertices_[0], GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+		// インデックス・バッファの作成
+		glGenBuffers(1, &index_id_);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_id_);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_.size() * sizeof(indices::value_type),
+			&indices_[0], GL_STATIC_DRAW);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	}
+
+
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	球の作成
@@ -46,36 +105,15 @@ namespace gl {
 
 		if(div < 8) div = 8;
 
-		divide_ = div;
-		radius_ = rad;
-
-		uint32_t qd = div / 4;
-		vertices_.resize(div * qd + 1);
-		vertices_.clear();
-
-		float a = 0.0f;
-		float b = 0.0f;
-		float d = vtx::get_pi<float>() * 2.0f / static_cast<float>(div);
-		for(uint32_t j = 0; j <= qd; ++j) {
-			for(uint32_t i = 0; i < div; ++i) {
-				vertex v;
-				v.position.x = std::cos(a) * std::cos(b) * rad.x;
-				v.position.y = std::sin(a) * std::cos(b) * rad.y;
-				v.position.z = std::sin(b) * rad.z;
-				v.normal = vtx::normalize(v.position);
-				vtx::fpos uv(std::cos(a), std::sin(a));
-				uv *= static_cast<float>(qd - j) / static_cast<float>(qd);
-				uv += vtx::fpos(1.0f);
-				v.uv = uv * 0.5f;
-				vertices_.push_back(v);
-				if(j == qd) {
-					break;
-				}
-				a += d;
-			}
-			b += d;
+		create_dome_vertex_(rad, div);
+		for(uint32_t i = div; i < vertices_.size(); ++i) {
+			auto v = vertices_[i];
+			v.position.z = -v.position.z;
+			v.normal = vtx::normalize(v.position);
+			vertices_.push_back(v);
 		}
-
+		make_triangle_sphere_();
+		gen_glbuffer_();
 	}
 
 
@@ -92,50 +130,9 @@ namespace gl {
 
 		if(div < 8) div = 8;
 
-		divide_ = div;
-		radius_ = rad;
-
-		uint32_t qd = div / 4;
-		vertices_.resize(div * qd + 1);
-		vertices_.clear();
-
-		float a = 0.0f;
-		float b = 0.0f;
-		float d = vtx::get_pi<float>() * 2.0f / static_cast<float>(div);
-		for(uint32_t j = 0; j <= qd; ++j) {
-			for(uint32_t i = 0; i < div; ++i) {
-				vertex v;
-				v.position.x = std::cos(a) * std::cos(b) * rad.x;
-				v.position.y = std::sin(a) * std::cos(b) * rad.y;
-				v.position.z = std::sin(b) * rad.z;
-				v.normal = vtx::normalize(v.position);
-				vtx::fpos uv(std::cos(a), std::sin(a));
-				uv *= static_cast<float>(qd - j) / static_cast<float>(qd);
-				uv += vtx::fpos(1.0f);
-				v.uv = uv * 0.5f;
-				vertices_.push_back(v);
-				if(j == qd) {
-					break;
-				}
-				a += d;
-			}
-			b += d;
-		}
-
+		create_dome_vertex_(rad, div);
 		make_triangle_dome_();
-
-		// 頂点バッファの作成
-		glGenBuffers(1, &vertex_id_);
-		glBindBuffer(GL_ARRAY_BUFFER, vertex_id_);
-		glBufferData(GL_ARRAY_BUFFER, vertices_.size() * sizeof(vertex), &vertices_[0], GL_STATIC_DRAW);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-		// インデックス・バッファの作成
-		glGenBuffers(1, &index_id_);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_id_);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_.size() * sizeof(indices::value_type),
-			&indices_[0], GL_STATIC_DRAW);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		gen_glbuffer_();
 	}
 
 

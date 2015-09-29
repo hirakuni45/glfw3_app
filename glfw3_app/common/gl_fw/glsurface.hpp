@@ -54,8 +54,12 @@ namespace gl {
 		uint32_t	vertex_id_;
 		uint32_t	index_id_;
 
-		void make_triangle_dome_();
+		bool		sphere_;
 
+		void create_dome_vertex_(const vtx::fvtx& rad, uint32_t div);
+		void make_triangle_dome_();
+		void make_triangle_sphere_();
+		void gen_glbuffer_();
 		void destroy_() {
 			if(vertex_id_) {
 				glDeleteBuffers(1, &vertex_id_);
