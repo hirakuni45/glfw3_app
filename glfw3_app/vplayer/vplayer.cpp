@@ -107,6 +107,26 @@ namespace app {
 			dome_ = wd.add_widget<widget_check>(wp, wp_);
 		}
 
+#if 0
+		if(1) {	// ラジオボタンのテスト
+			widget::param wpr(vtx::srect(20, 20, 130, 130), 0);
+			widget_null::param wpr_;
+			widget* root = wd.add_widget<widget_null>(wpr, wpr_);
+			root->set_state(widget::state::POSITION_LOCK);
+
+			widget::param wp(vtx::srect(0, 0, 130, 30), root);
+			widget_radio::param wp_("Enable");
+			for(int i = 0; i < 3; ++i) {
+				if(i == 2) wp_.check_ = true;
+				widget_radio* w = wd.add_widget<widget_radio>(wp, wp_);
+				w->at_local_param().select_func_ = [this](bool f, int n) {
+					std::cout << "Radio button: " << static_cast<int>(f) << " (" << n << ")" << std::endl;
+				};
+				wp.rect_.org.y += 40;
+			}
+		}
+#endif
+
 		{ // load ファイラー本体
 			widget::param wp(vtx::srect(10, 30, 300, 200));
 			widget_filer::param wp_(core.get_current_path());
