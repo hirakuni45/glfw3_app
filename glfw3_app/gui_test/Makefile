@@ -73,7 +73,8 @@ PSOURCES	=	main.cpp \
 				widgets/widget_tree.cpp \
 				widgets/widget_filer.cpp \
 				widgets/widget_terminal.cpp \
-				widgets/widget_progress.cpp
+				widgets/widget_progress.cpp \
+				widgets/widget_editor.cpp
 
 STDLIBS		=
 
