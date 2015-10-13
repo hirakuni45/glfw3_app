@@ -52,6 +52,18 @@ namespace utils {
 		uint32_t	lines_max_;
 		lines		lines_;
 
+		const vtx::spos next_() const {
+			vtx::spos p = pos_;
+			if(lines_.empty()) {
+				return p;
+			}
+			const line& l = lines_.back();
+			if(!l.empty()) {
+				++p.x;
+			}
+			return p;
+		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -100,8 +112,8 @@ namespace utils {
 				if(lines_.size() < lines_max_) {
 					line l;
 					lines_.push_back(l);
-					pos_.x = 0;
 				}
+				pos_.x = 0;
 				pos_.y = lines_.size() - 1;
 				max_.y = std::max(max_.y, pos_.y);
 			} else {
@@ -140,7 +152,7 @@ namespace utils {
 			@return カーソル位置
 		*/
 		//-----------------------------------------------------------------//
-		const vtx::spos& get_position() const { return pos_; }
+		const vtx::spos get_cursor() const { return next_(); }
 
 
 		//-----------------------------------------------------------------//

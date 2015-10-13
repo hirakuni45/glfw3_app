@@ -1,10 +1,10 @@
 //=====================================================================//
 /*!	@file
-	@brief	GUI Widget ターミナル
+	@brief	GUI Widget エディター
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include "widgets/widget_terminal.hpp"
+#include "widgets/widget_editor.hpp"
 #include "core/glcore.hpp"
 #include "widgets/widget_frame.hpp"
 #include <boost/foreach.hpp>
@@ -18,10 +18,10 @@ namespace gui {
 		@param[in]	wch	文字
 	*/
 	//-----------------------------------------------------------------//
-	void widget_terminal::output(uint32_t wch)
-	{
-		terminal_.output(wch);
-	}
+//	void widget_terminal::output(uint32_t wch)
+//	{
+//		terminal_.output(wch);
+//	}
 
 
 	//-----------------------------------------------------------------//
@@ -30,17 +30,17 @@ namespace gui {
 		@param[in]	text	テキスト
 	*/
 	//-----------------------------------------------------------------//
-	void widget_terminal::output(const std::string& text)
-	{
-		if(text.empty()) return;
+//	void widget_terminal::output(const std::string& text)
+//	{
+//		if(text.empty()) return;
 
-		utils::lstring ls;
-		utils::utf8_to_utf32(text, ls);
+//		utils::lstring ls;
+//		utils::utf8_to_utf32(text, ls);
 
-		BOOST_FOREACH(uint32_t ch, ls) {
-			output(ch);
-		}
-	}
+//		BOOST_FOREACH(uint32_t ch, ls) {
+//			output(ch);
+//		}
+//	}
 
 
 	//-----------------------------------------------------------------//
@@ -48,7 +48,7 @@ namespace gui {
 		@brief	初期化
 	*/
 	//-----------------------------------------------------------------//
-	void widget_terminal::initialize()
+	void widget_editor::initialize()
 	{
 		at_param().state_.set(widget::state::POSITION_LOCK);
 		at_param().state_.set(widget::state::SIZE_LOCK);
@@ -79,7 +79,7 @@ namespace gui {
 		@brief	アップデート
 	*/
 	//-----------------------------------------------------------------//
-	void widget_terminal::update()
+	void widget_editor::update()
 	{
 		if(wd_.get_focus_widget() == this || wd_.get_focus_widget() == wd_.root_widget(this)) {
 			focus_ = true;
@@ -99,15 +99,6 @@ namespace gui {
 						vtx::spos ss(sr.size.x / param_.font_width_,
 									 sr.size.y / param_.height_);
 						ss.x *= param_.font_width_;
-//						if(ss.x < w->get_param().resize_min_.x) {
-//							ss.x = w->get_param().resize_min_.x / param_.font_width_;
-//							ss.x *= param_.font_width_;
-//						}
-						ss.y *= param_.height_;
-//						if(ss.y < w->get_param().resize_min_.y) {
-//							ss.y = w->get_param().resize_min_.y / param_.height_;
-//							ss.y *= param_.height_;
-//						}
 						w->set_draw_area(ss);
 						w->get_draw_area(sr);
 					}
@@ -127,12 +118,12 @@ namespace gui {
 		@brief	サービス
 	*/
 	//-----------------------------------------------------------------//
-	void widget_terminal::service()
+	void widget_editor::service()
 	{
 		if(focus_) {
-			if(param_.echo_) {
+///			if(param_.echo_) {
 				terminal_.output(wd_.at_keyboard().input());
-			}
+///			}
 		}
 	}
 
@@ -142,7 +133,7 @@ namespace gui {
 		@brief	レンダリング
 	*/
 	//-----------------------------------------------------------------//
-	void widget_terminal::render()
+	void widget_editor::render()
 	{
 		using namespace gl;
 		core& core = core::get_instance();
@@ -183,15 +174,12 @@ namespace gui {
 //			tpr.shadow_color_ *= cf.r;
 //			tpr.shadow_color_.alpha_scale(cf.a);
 			const img::rgbaf& cf = wd_.get_color();
+			vtx::spos pos;
 			vtx::spos limit(clip_.size.x / param_.font_width_, clip_.size.y / param_.height_);
 			vtx::spos chs(rect.org);
-			const vtx::spos& max = terminal_.get_max();
-			vtx::spos ofs(0);
-			if((max.y + 1) > limit.y) ofs.y = max.y + 1 - limit.y;
-			vtx::spos pos;
 			for(pos.y = 0; pos.y < limit.y; ++pos.y) {
 				for(pos.x = 0; pos.x < limit.x; ++pos.x) {
-					const utils::terminal::cha_t& t = terminal_.get_char(pos + ofs);
+					const utils::terminal::cha_t& t = terminal_.get_char(pos);
 					img::rgba8 fc = t.fc_;
 					fc *= cf.r;
 					fc.alpha_scale(cf.a);
@@ -200,7 +188,7 @@ namespace gui {
 					bc *= cf.r;
 					bc.alpha_scale(cf.a);
 					fonts.set_back_color(bc);
-					if(focus_ && (pos + ofs) == terminal_.get_cursor()) {
+					if(focus_ && pos == terminal_.get_cursor()) {
 						if((interval_ % 40) < 20) {
 							fonts.swap_color();
 						}
@@ -238,7 +226,7 @@ namespace gui {
 		@return エラーが無い場合「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool widget_terminal::save(sys::preference& pre)
+	bool widget_editor::save(sys::preference& pre)
 	{
 		return false;
 	}
@@ -251,7 +239,7 @@ namespace gui {
 		@return エラーが無い場合「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool widget_terminal::load(const sys::preference& pre)
+	bool widget_editor::load(const sys::preference& pre)
 	{
 		return false;
 	}
