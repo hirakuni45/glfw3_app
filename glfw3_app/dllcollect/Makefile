@@ -1,0 +1,199 @@
+#-----------------------------------------------#
+# Application Binary Build Makefile             #
+#-----------------------------------------------#
+TARGET		=	dllcollect
+
+ifeq ($(OS),Windows_NT)
+FEXT	=	.exe
+ICON_RC		=
+else
+FEXT	=
+ICON_RC		=
+endif
+
+# 'debug' or 'release'
+BUILD		=	release
+
+VPATH		=	../common
+
+CSOURCES	=	minizip/ioapi.c \
+				minizip/unzip.c
+
+PSOURCES	=	main.cpp \
+				utils/file_io.cpp \
+				utils/string_utils.cpp \
+				utils/sjis_utf16.cpp
+
+STDLIBS		=
+
+ifeq ($(OS),Windows_NT)
+LOCAL_PATH	=	/mingw64
+OPTLIBS		=	opengl32 glfw3 glew32 \
+				pthread \
+				png turbojpeg jpeg openjp2 \
+				freetype \
+				mad faad mp4ff tag \
+				z OpenAL32
+else
+LOCAL_PATH	=	/usr/local
+OPTLIBS		=	glfw3 GLEW \
+				pthread \
+				png turbojpeg openjp2 \
+				freetype \
+				mad faad mp4ff tag \
+				z
+endif
+
+INC_SYS		=	$(LOCAL_PATH)/include \
+				$(LOCAL_PATH)/include/freetype2 \
+				$(LOCAL_PATH)/include/openjpeg-2.1 \
+				$(LOCAL_PATH)/include/taglib
+INC_LIB		=
+LIBDIR		=	$(LOCAL_PATH)/lib
+ifeq ($(OS),Windows_NT)
+else
+INC_SYS		+=	$(LOCAL_PATH)/opt/jpeg-turbo/include
+LIBDIR		+=	$(LOCAL_PATH)/opt/jpeg-turbo/lib
+endif
+
+PINC_APP	=	. ../common
+CINC_APP	=	. ../common
+
+INC_S	=	$(addprefix -isystem , $(INC_SYS))
+INC_L	=	$(addprefix -isystem , $(INC_LIB))
+INC_P	=	$(addprefix -I, $(PINC_APP))
+INC_C	=	$(addprefix -I, $(CINC_APP))
+CINCS	=	$(INC_S) $(INC_L) $(INC_C)
+PINCS	=	$(INC_S) $(INC_L) $(INC_P)
+LIBS	=	$(addprefix -L, $(LIBDIR))
+LIBN	=	$(addprefix -l, $(STDLIBS))
+LIBN	+=	$(addprefix -l, $(OPTLIBS))
+
+#
+# Compiler, Linker Options, Resource_compiler
+#
+CP	=	clang++
+CC	=	clang
+LK	=	clang++
+RC	=	windres
+
+POPT	=	-O2 -std=c++14
+COPT	=	-O2
+LOPT	=
+
+PFLAGS	=	-DHAVE_STDINT_H
+CFLAGS	=
+
+ifeq ($(OS),Windows_NT)
+	PFLAGS += -DWIN32 -DBOOST_USE_WINDOWS_H
+	CFLAGS += -DWIN32
+endif
+
+ifeq ($(BUILD),debug)
+	POPT += -g
+	COPT += -g
+	PFLAGS += -DDEBUG
+	CFLAGS += -DDEBUG
+endif
+
+ifeq ($(BUILD),release)
+	PFLAGS += -DNDEBUG
+	CFLAGS += -DNDEBUG
+endif
+
+# 	-static-libgcc -static-libstdc++
+ifeq ($(OS),Windows_NT)
+LFLAGS	=
+else
+LFLAGS	=	-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk \
+-Wl,-search_paths_first -Wl,-headerpad_max_install_names \
+-framework AGL -framework Cocoa -framework OpenGL -framework IOKit -framework CoreFoundation -framework CoreVideo -framework OpenAL
+endif
+
+# -Wuninitialized -Wunused -Werror -Wshadow
+CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
+			-Wformat
+CPWARN	=	-Wall -Werror
+
+OBJECTS	=	$(addprefix $(BUILD)/,$(patsubst %.cpp,%.o,$(PSOURCES))) \
+			$(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(CSOURCES)))
+DEPENDS =   $(patsubst %.o,%.d, $(OBJECTS))
+
+ifdef ICON_RC
+	ICON_OBJ =	$(addprefix $(BUILD)/,$(patsubst %.rc,%.o,$(ICON_RC)))
+endif
+
+.PHONY: all clean
+.SUFFIXES :
+.SUFFIXES : .rc .hpp .h .c .cpp .o
+
+all: $(BUILD) $(TARGET)$(FEXT)
+
+$(TARGET)$(FEXT): $(OBJECTS) $(ICON_OBJ) Makefile
+	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -o $(TARGET)$(FEXT)
+
+$(BUILD)/%.o : %.c
+	mkdir -p $(dir $@); \
+	$(CC) -c $(COPT) $(CFLAGS) $(CINCS) $(CCWARN) -o $@ $<
+
+$(BUILD)/%.o : %.cpp
+	mkdir -p $(dir $@); \
+	$(CP) -c $(POPT) $(PFLAGS) $(PINCS) $(CPWARN) -o $@ $<
+
+$(ICON_OBJ): $(ICON_RC)
+	$(RC) -i $< -o $@
+
+$(BUILD)/%.d : %.c
+	mkdir -p $(dir $@); \
+	$(CC) -MM -DDEPEND_ESCAPE $(COPT) $(CFLAGS) $(CINCS) $< \
+	| sed 's/$(notdir $*)\.o:/$(subst /,\/,$(patsubst %.d,%.o,$@) $@):/' > $@ ; \
+	[ -s $@ ] || rm -f $@
+
+$(BUILD)/%.d : %.cpp
+	mkdir -p $(dir $@); \
+	$(CP) -MM -DDEPEND_ESCAPE $(POPT) $(PFLAGS) $(PINCS) $< \
+	| sed 's/$(notdir $*)\.o:/$(subst /,\/,$(patsubst %.d,%.o,$@) $@):/' > $@ ; \
+	[ -s $@ ] || rm -f $@
+
+ifeq ($(OS),Windows_NT)
+strip:
+	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -mwindows -o $(TARGET)$(FEXT)
+endif
+
+run:
+	./$(TARGET)
+
+clean:
+	rm -rf $(BUILD) $(TARGET)$(FEXT)
+
+clean_depend:
+	rm -f $(DEPENDS)
+
+ifeq ($(OS),Windows_NT)
+dllname:
+	objdump -p $(TARGET)$(FEXT) | grep --text "DLL Name" | sed "s/[ \t]*DLL Name: \(.*\)/\1/"
+
+dllcopy:
+	objdump -p $(TARGET)$(FEXT) | grep --text "DLL Name" | \
+	sed "s/[ \t]*DLL Name: \(.*\)/\/mingw64\/bin\/\1/" > .dllbase
+	cat .dllbase | sed "/KERNEL32.dll/d" | sed "/msvcrt.dll/d" | sed "/OPENGL32.dll/d" | sed "/USER32.dll/d" > .dllbase
+	cat .dllbase | sed "s/\\(.*\\)/objdump -p \\1/" > .dlllist
+	sh .dlllist | grep --text "DLL Name" | \
+	sed "s/[ \t]*DLL Name: \(.*\)/\/mingw64\/bin\/\1/" >> .dllbase
+	cat .dllbase | sed "/KERNEL32.dll/d" | sed "/msvcrt.dll/d" | sed "/OPENGL32.dll/d" | sed "/USER32.dll/d" > .dllbase
+	cat .dllbase | sed "/GDI32.dll/d" | sed "/SHELL32.dll/d" | sed "/WINMM.dll/d" | sed "/ole32.dll/d" > .dllbase
+	cat .dllbase | sed "s/\\(.*\\)/cp \1 dlls\/./" > .dlllist
+	mkdir -p dlls
+	sh .dlllist
+endif
+
+tarball:
+	tar cfvz $(TARGET)_$(shell date +%Y%m%d%H).tgz \
+	*.[hc]pp Makefile ../common/*/*.[hc]pp ../common/*/*.[hc]
+
+bin_zip:
+	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -mwindows -o $(TARGET)$(FEXT)
+	rm -f $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip
+	zip $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip *.exe *.dll
+
+-include $(DEPENDS)
