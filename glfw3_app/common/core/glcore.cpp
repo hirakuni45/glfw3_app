@@ -242,6 +242,8 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	bool core::initialize(const std::string& exec_path)
 	{
+		utils::init_utf16_to_sjis();
+
 ///		std::cout << "Exec path: '" << exec_path << std::endl;
 
 		std::string tmp = utils::convert_delimiter(exec_path, '\\', '/');
@@ -275,8 +277,6 @@ namespace gl {
 		limit_size_ = best_size_  / 2;	///< 最小のサイズはベストの半分とする
 ///		setlocale(LC_CTYPE, "jpn");
 		setlocale(LC_CTYPE, "");
-
-		utils::init_utf16_to_sjis();
 
 		return true;
 	}
