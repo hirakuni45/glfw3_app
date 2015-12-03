@@ -20,23 +20,25 @@ namespace utils {
 
 		utils::strings	buff_;
 
+		bool			cr_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		text_edit() { }
+		text_edit() : buff_(), cr_(false) { }
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	読み込み
+			@brief	全体読み込み
 			@param[in]	file	ファイル名
 			@return 成功なら[true」
 		*/
 		//-----------------------------------------------------------------//
-		bool read(const std::string& file) {
+		bool read_all(const std::string& file) {
 			file_io fin;
 			if(!fin.open(file, "rb")) {
 				return false;
@@ -48,34 +50,37 @@ namespace utils {
 			while(fin.get_line(s)) {
 				buff_.push_back(s);
 			}
+			cr_ = fin.is_cr();
 
 			fin.close();
 			return true;
 		}
 
 
+
+
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	書き込み
+			@brief	全体書き込み
 			@param[in]	file	ファイル名
 			@return 成功なら[true」
 		*/
 		//-----------------------------------------------------------------//
-		bool write(const std::string& file) {
+		bool write_all(const std::string& file) {
 			file_io fout;
 			if(!fout.open(file, "wb")) {
 				return false;
 			}
 
 			for(auto s : buff_) {
-//				fout.put_line(s);
+				if(!fout.put_line(s, cr_)) {
+					break;
+				}
 			}
 
 			fout.close();
 			return true;
 		}
-
-
 	};
 
 }
