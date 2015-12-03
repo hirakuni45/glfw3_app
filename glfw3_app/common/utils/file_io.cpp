@@ -277,7 +277,7 @@ namespace utils {
 
 		char ch;
 		while(get_char(ch) == true) {
-			if(ch == 0x0d) ;
+			if(ch == 0x0d) cr_ = true;
 			else if(ch == 0x0a) {
 				return true;
 			} else {

@@ -156,6 +156,9 @@ namespace utils {
 			if(::strrchr(mode, 'a')) append_mode_ = true;
 			else append_mode_ = false;
 		}
+
+		bool	cr_;
+
 	public:
 
 		//-----------------------------------------------------------------//
@@ -164,8 +167,9 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		file_io() : count_(0), open_(false), file_(false),
-		  fp_(0), w_buff_(0), rbuff_(0), fpos_(0), size_(0),
-		  binary_mode_(true), read_mode_(false), write_mode_(false) { }
+					fp_(0), w_buff_(0), rbuff_(0), fpos_(0), size_(0),
+					binary_mode_(true), read_mode_(false), write_mode_(false),
+					cr_(false) { }
 
 
 		//-----------------------------------------------------------------//
@@ -725,7 +729,7 @@ namespace utils {
 			@return	書き出した数
 		*/
 		//-----------------------------------------------------------------//
-		size_t write(const void* ptr, size_t size) { return write(ptr, 1,size); }
+		size_t write(const void* ptr, size_t size) { return write(ptr, 1, size); }
 
 
 		//-----------------------------------------------------------------//
@@ -784,6 +788,33 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		bool get_line(std::string& buff);
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	改行にCRが含まれるか
+			@return	含まれる場合「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool is_cr() const { return cr_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	1 行書き込み
+			@param[in]	buff	ソース
+			@param[in]	cr		CR/LF の場合「true」
+			@return	エラーなら「false」
+		*/
+		//-----------------------------------------------------------------//
+		bool put_line(const std::string& buff, bool cr = false) {
+			for(auto ch : buff) {
+				if(!put_char(ch)) return false;
+			}
+			if(cr) put_char('\r');
+			put_char('\n');
+			return true;
+		}
 
 
 		//-----------------------------------------------------------------//
