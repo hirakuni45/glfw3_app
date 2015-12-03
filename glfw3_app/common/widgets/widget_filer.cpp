@@ -994,7 +994,11 @@ namespace gui {
 		int err = 0;
 		std::string s;
 		if(pre.get_text(path + "/current_path", s)) {
-			param_.path_ = s;
+			if(utils::probe_file(s, true)) {
+				param_.path_ = s;
+			} else {
+				param_.path_ = "/";
+			}
 			file_infos_.clear();
 			fsc_path_.clear();
 			fsc_.set_path(param_.path_, param_.filter_);
