@@ -128,6 +128,14 @@ CC	=	clang
 LK	=	clang++
 RC	=	windres
 
+ifeq ($(OS),Windows_NT)
+CPMM	=	g++
+CCMM	=	gcc
+else
+CPMM	=	clang++
+CCMM	=	clang
+endif
+
 POPT	=	-O2 -std=c++14
 COPT	=	-O2
 LOPT	=
@@ -196,13 +204,13 @@ $(ICON_OBJ): $(ICON_RC)
 
 $(BUILD)/%.d : %.c
 	mkdir -p $(dir $@); \
-	$(CC) -MM -DDEPEND_ESCAPE $(COPT) $(CFLAGS) $(CINCS) $< \
+	$(CCMM) -MM -DDEPEND_ESCAPE $(COPT) $(CFLAGS) $(CINCS) $< \
 	| sed 's/$(notdir $*)\.o:/$(subst /,\/,$(patsubst %.d,%.o,$@) $@):/' > $@ ; \
 	[ -s $@ ] || rm -f $@
 
 $(BUILD)/%.d : %.cpp
 	mkdir -p $(dir $@); \
-	$(CP) -MM -DDEPEND_ESCAPE $(POPT) $(PFLAGS) $(PINCS) $< \
+	$(CPMM) -MM -DDEPEND_ESCAPE $(POPT) $(PFLAGS) $(PINCS) $< \
 	| sed 's/$(notdir $*)\.o:/$(subst /,\/,$(patsubst %.d,%.o,$@) $@):/' > $@ ; \
 	[ -s $@ ] || rm -f $@
 
@@ -221,7 +229,7 @@ clean_depend:
 	rm -f $(DEPENDS)
 
 dllname:
-	objdump -p $(TARGET)$(FEXT) | grep "DLL Name"
+	objdump -p $(TARGET)$(FEXT) | grep --text "DLL Name"
 
 tarball:
 	tar cfvz $(TARGET)_$(shell date +%Y%m%d%H).tgz \
