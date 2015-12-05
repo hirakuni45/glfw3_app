@@ -8,11 +8,6 @@
 #include <bitset>
 #include "utils/vtx.hpp"
 
-#ifdef WIN32
-// windows で define されているので無効にする。
-#undef DELETE
-#endif
-
 namespace gl {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -34,8 +29,8 @@ namespace gl {
 			vtx::spos	scroll_;
 		public:
 			locator() : scale_(1.0f), cursor_(0), scroll_(0) { }
-			void set_scale(const vtx::fpos& sc) { scale_ = sc; }
-			const vtx::fpos& get_scale() const { return scale_; }
+///			void set_scale(const vtx::fpos& sc) { scale_ = sc; }
+///			const vtx::fpos& get_scale() const { return scale_; }
 			void set_cursor(const vtx::spos& p) { cursor_ = p; }
 			void set_scroll(const vtx::spos& p) { scroll_ = p; }
 			void reset_scroll() { set_scroll(vtx::spos(0)); }

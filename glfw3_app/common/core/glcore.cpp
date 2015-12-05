@@ -202,10 +202,9 @@ namespace gl {
 	static void cursor_callback_(GLFWwindow* window, double x, double y)
 	{
 ///		std::cout << x << ", " << y << std::endl;
-		vtx::fpos pos(static_cast<vtx::spos::value_type>(x),
+		vtx::spos pos(static_cast<vtx::spos::value_type>(x),
 					  static_cast<vtx::spos::value_type>(y));
-		const vtx::fpos& sc = core::locator_.get_scale();
-		core::locator_.set_cursor(pos * sc);
+		core::locator_.set_cursor(pos);
 	}
 
 	static void scroll_callback_(GLFWwindow* window, double x, double y)
@@ -448,9 +447,6 @@ namespace gl {
 			size_.y = y;
 		}
 
-		locator_.set_scale(vtx::fpos(1.0f, 1.0f));
-///		    static_cast<float>(size_.x) / static_cast<float>(rect_.size.x),
-///			static_cast<float>(size_.y) / static_cast<float>(rect_.size.y)));
 		device_.service(bitsets_, locator_);
 		locator_.reset_scroll();
 
