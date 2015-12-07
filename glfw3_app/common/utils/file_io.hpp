@@ -792,6 +792,36 @@ namespace utils {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	1 行読み込み
+			@param[out]	buff	読み込み先
+			@return	ファイルの終端なら「false」
+		*/
+		//-----------------------------------------------------------------//
+		bool get_line(utils::wstring& buff) {
+			std::string tmp;
+			auto f = get_line(tmp);
+			buff = utf8_to_utf16(tmp);
+			return f;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	1 行読み込み
+			@param[out]	buff	読み込み先
+			@return	ファイルの終端なら「false」
+		*/
+		//-----------------------------------------------------------------//
+		bool get_line(utils::lstring& buff) {
+			std::string tmp;
+			auto f = get_line(tmp);
+			buff = utf8_to_utf32(tmp);
+			return f;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	改行にCRが含まれるか
 			@return	含まれる場合「true」
 		*/

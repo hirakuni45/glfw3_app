@@ -17,13 +17,18 @@ namespace utils {
 		@brief	テキスト編集クラス
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	struct text_edit {
-		typedef std::function<void (uint32_t, const std::string&)> loop_func;
-		typedef std::function<bool (const std::string&, std::string)> conversion_func;
+	template <typename T>
+	class basic_text_edit {
+	public:
+		typedef std::basic_string<T> value_type;
+		typedef std::vector<value_type> buffer_type;
+		typedef std::function<void (uint32_t, const value_type&)> loop_func;
+		typedef std::function<bool (uint32_t, const value_type&, value_type&)> conversion_func;
 
-		utils::strings	buff_;
+	private:
+		buffer_type	buffer_;
 
-		bool			cr_;
+		bool		cr_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -31,7 +36,7 @@ namespace utils {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		text_edit() : buff_(), cr_(false) { }
+		basic_text_edit() : buffer_(), cr_(false) { }
 
 
 		//-----------------------------------------------------------------//
@@ -42,10 +47,10 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		bool load(file_io& fin) {
-			buff_.clear();
-			std::string s;
+			buffer_.clear();
+			value_type s;
 			while(fin.get_line(s)) {
-				buff_.push_back(s);
+				buffer_.emplace_back(s);
 				s.clear();
 			}
 			cr_ = fin.is_cr();
@@ -77,7 +82,7 @@ namespace utils {
 			@return 行数
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t get_lines() const { return buff_.size(); }
+		uint32_t get_lines() const { return buffer_.size(); }
 
 
 		//-----------------------------------------------------------------//
@@ -88,10 +93,10 @@ namespace utils {
 			@return 成功なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool insert_lines(uint32_t pos, const utils::strings& lines) {
+		bool insert_lines(uint32_t pos, const buffer_type& lines) {
 			for(auto line : lines) {
-				if(pos < buff_.size()) {
-					buff_.insert(buff_.cbegin() + pos, line);
+				if(pos < buffer_.size()) {
+					buffer_.insert(buffer_.cbegin() + pos, line);
 				} else {
 					return false;
 				}
@@ -109,9 +114,9 @@ namespace utils {
 			@return 成功なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool insert_line(uint32_t pos, const std::string& line) {
-			if(pos < buff_.size()) {
-				buff_.insert(buff_.cbegin() + pos, line);
+		bool insert_line(uint32_t pos, const value_type& line) {
+			if(pos < buffer_.size()) {
+				buffer_.insert(buffer_.cbegin() + pos, line);
 				return true;
 			} else {
 				return false;
@@ -129,8 +134,8 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		bool delete_lines(uint32_t pos, uint32_t len) {
 			uint32_t last = pos + len;
-			if(pos < buff_.size() && last < buff_.size()) {
-				buff_.erase(buff_.cbegin() + pos, buff_.cbegin() + last);
+			if(pos < buffer_.size() && last < buffer_.size()) {
+				buffer_.erase(buffer_.cbegin() + pos, buffer_.cbegin() + last);
 				return true;
 			} else {
 				return false;
@@ -159,7 +164,7 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		void loop(loop_func func) const {
 			uint32_t pos = 0;
-			for(const auto s : buff_) {
+			for(const auto s : buffer_) {
 				func(pos, s);
 				++pos;
 			}
@@ -174,15 +179,15 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		uint32_t conversion(conversion_func func) {
-			uint32_t n = 0;
-			for(auto it = buff_.begin(); it != buff_.end(); ++it) {
-				std::string tmp;
-				if(func(*it, tmp)) {
+			uint32_t pos = 0;
+			for(auto it = buffer_.begin(); it != buffer_.end(); ++it) {
+				value_type tmp;
+				if(func(pos, *it, tmp)) {
 					*it = tmp;
-					++n;
+					++pos;
 				}
 			}
-			return n;
+			return pos;
 		}
 
 
@@ -194,7 +199,7 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		bool save(file_io& fout) {
-			for(auto s : buff_) {
+			for(auto s : buffer_) {
 				if(!fout.put_line(s, cr_)) {
 					break;
 				}
@@ -227,7 +232,7 @@ namespace utils {
 			@return テキスト・バッファ
 		*/
 		//-----------------------------------------------------------------//
-		const utils::strings& get() const { return buff_; }
+		const buffer_type& get() const { return buffer_; }
 
 
 		//-----------------------------------------------------------------//
@@ -236,7 +241,7 @@ namespace utils {
 			@return テキスト・バッファ
 		*/
 		//-----------------------------------------------------------------//
-		utils::strings& at() { return buff_; }
+		buffer_type& at() { return buffer_; }
 
 
 		//-----------------------------------------------------------------//
@@ -245,8 +250,8 @@ namespace utils {
 			@param[in]	ted	ソース
 		*/
 		//-----------------------------------------------------------------//
-		void swap(text_edit& ted) {
-			buff_.swap(ted.buff_);
+		void swap(basic_text_edit<T>& ted) {
+			buffer_.swap(ted.buffer_);
 			std::swap(cr_, ted.cr_);
 		}
 
@@ -258,10 +263,14 @@ namespace utils {
 			@return 自分を返す
 		*/
 		//-----------------------------------------------------------------//
-		text_edit& operator = (const text_edit& ted) {
-			buff_ = ted.buff_;
+		basic_text_edit<T>& operator = (const basic_text_edit<T>& ted) {
+			buffer_ = ted.buffer_;
 			cr_ = ted.cr_;
 			return *this;
 		}
 	};
+
+	typedef basic_text_edit<char> text_edit;
+	typedef basic_text_edit<uint16_t> text_editw;
+	typedef basic_text_edit<uint32_t> text_editl;
 }
