@@ -17,9 +17,9 @@ namespace gl {
 		@param[in]	poss	位置情報
 	*/
 	//-----------------------------------------------------------------//
-	void device::service(const bitsets& bits, const locator& poss)
+	void device::service(const bits_t& bits, const locator& poss)
 	{
-		bitsets b = bits;
+		bits_t b = bits;
 		int joy = 0;
 		if(glfwJoystickPresent(joy) == GL_TRUE) {
 			int count;
@@ -36,13 +36,13 @@ namespace gl {
 			const unsigned char* bl = glfwGetJoystickButtons(joy, &count);
 			if(count > 16) count = 16;
 			for(int i = 0; i < count; ++i) {
-				if(bl[i] != 0) b.set(key::GAME_0 + i);
+				if(bl[i] != 0) b.set(static_cast<key>(static_cast<int>(key::GAME_0) + i));
 			}
 		}
 
-		b[key::STATE_CAPS_LOCK] = level_.test(key::STATE_CAPS_LOCK);
-		b[key::STATE_SCROLL_LOCK] = level_.test(key::STATE_SCROLL_LOCK);
-		b[key::STATE_NUM_LOCK] = level_.test(key::STATE_NUM_LOCK);
+		b.set(key::STATE_CAPS_LOCK, level_.test(key::STATE_CAPS_LOCK));
+		b.set(key::STATE_SCROLL_LOCK, level_.test(key::STATE_SCROLL_LOCK));
+			  b.set(key::STATE_NUM_LOCK, level_.test(key::STATE_NUM_LOCK));
 
 		positive_ =  b & ~level_;
 		negative_ = ~b &  level_;

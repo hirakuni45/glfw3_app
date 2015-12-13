@@ -20,7 +20,7 @@ namespace gl {
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
-		  @brief	locator クラス
+			@brief	locator クラス
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		class locator {
@@ -44,7 +44,13 @@ namespace gl {
 			}
 		};
 
-		enum class  key {
+
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	key type
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		enum class key {
 			MOUSE_LEFT,			///< mouse button left
 			MOUSE_MIDDLE,		///< mouse button middle
 			MOUSE_RIGHT,		///< mouse button right
@@ -210,12 +216,36 @@ namespace gl {
 			count_
 		};
 
-		typedef std::bitset<static_cast<int>(key::count_)>	bitsets;
+
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	bits クラス
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		class bits_t {
+			typedef std::bitset<static_cast<int>(key::count_)> value_type;
+			value_type value_;
+		public:
+			void set(key k, bool f = true) { value_.set(static_cast<size_t>(k), f); }
+			void reset(key k) { value_.reset(static_cast<size_t>(k)); }
+			bool test(key k) const { return value_.test(static_cast<size_t>(k)); }
+			void flip(key k) { value_.flip(static_cast<size_t>(k)); }
+			bits_t operator ~ () const {
+				bits_t b;
+				b.value_ = ~value_;
+				return b;
+			}
+			bits_t operator & (const bits_t& t) {
+				bits_t b;
+				b.value_ = value_ & t.value_;
+				return b;
+			}
+		};
 
 	private:
-		bitsets	level_;
-		bitsets	positive_;
-		bitsets	negative_;
+		bits_t	level_;
+		bits_t	positive_;
+		bits_t	negative_;
 
 		locator	locator_;
 
@@ -231,10 +261,10 @@ namespace gl {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	レベルの取得
-			@return bitsets クラスの参照
+			@return bits クラスの参照
 		*/
 		//-----------------------------------------------------------------//
-		const bitsets& get_level() const { return level_; } 
+		const bits_t& get_level() const { return level_; } 
 
 
 		//-----------------------------------------------------------------//
@@ -244,7 +274,7 @@ namespace gl {
 			@return 値
 		*/
 		//-----------------------------------------------------------------//
-		bool get_level(key t) const { return level_[static_cast<int>(t)]; }
+		bool get_level(key t) const { return level_.test(t); }
 
 
 		//-----------------------------------------------------------------//
@@ -253,7 +283,7 @@ namespace gl {
 			@return bitsets クラスの参照
 		*/
 		//-----------------------------------------------------------------//
-		const bitsets& get_positive() const { return positive_; }
+		const bits_t& get_positive() const { return positive_; }
 
 
 		//-----------------------------------------------------------------//
@@ -263,7 +293,7 @@ namespace gl {
 			@return 値
 		*/
 		//-----------------------------------------------------------------//
-		bool get_positive(key t) const { return positive_[static_cast<int>(t)]; }
+		bool get_positive(key t) const { return positive_.test(t); }
 
 
 		//-----------------------------------------------------------------//
@@ -272,7 +302,7 @@ namespace gl {
 			@return bitsets クラスの参照
 		*/
 		//-----------------------------------------------------------------//
-		const bitsets& get_negative() const { return negative_; }
+		const bits_t& get_negative() const { return negative_; }
 
 
 		//-----------------------------------------------------------------//
@@ -282,7 +312,7 @@ namespace gl {
 			@return 値
 		*/
 		//-----------------------------------------------------------------//
-		bool get_negative(key t) const { return negative_[static_cast<int>(t)]; }
+		bool get_negative(key t) const { return negative_.test(t); }
 
 
 		//-----------------------------------------------------------------//
@@ -302,7 +332,7 @@ namespace gl {
 			@param[in]	poss	位置情報
 		*/
 		//-----------------------------------------------------------------//
-		void service(const bitsets& bits, const locator& poss);
+		void service(const bits_t& bits, const locator& poss);
 
 	};
 }

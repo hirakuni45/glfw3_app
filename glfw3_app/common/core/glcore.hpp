@@ -26,7 +26,7 @@ namespace gl {
 		friend struct utils::singleton_policy<core>;
 
 	public:
-		static device::bitsets	bitsets_;
+		static device::bits_t	bits_;
 		static device::locator	locator_;
 
 	private:

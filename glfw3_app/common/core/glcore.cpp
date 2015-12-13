@@ -72,7 +72,7 @@ namespace gl {
 #undef DELETE
 #endif
 
-	device::bitsets core::bitsets_;
+	device::bits_t core::bits_;
 
 	static void key_callback_(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
@@ -84,7 +84,7 @@ namespace gl {
 			return;
 		}
 
-		int ofs = -1;
+		auto ofs = device::key::count_;
 		switch(key) {
 		case GLFW_KEY_SPACE:         ofs = device::key::SPACE;         break;
 		case GLFW_KEY_APOSTROPHE:    ofs = device::key::APOSTROPHE;    break;
@@ -137,32 +137,36 @@ namespace gl {
 		case GLFW_KEY_MENU:          ofs = device::key::MENU;          break;
 		default:
 			if(GLFW_KEY_A <= key && key <= GLFW_KEY_Z) {
-				ofs = key - GLFW_KEY_A + device::key::A;
+				auto d = key - GLFW_KEY_A;
+				ofs = static_cast<device::key>(d + static_cast<int>(device::key::A));
 			} else if(GLFW_KEY_0 <= key && key <= GLFW_KEY_9) {
-				ofs = key - GLFW_KEY_0 + device::key::_0;
+				auto d = key - GLFW_KEY_0;
+				ofs = static_cast<device::key>(d + static_cast<int>(device::key::_0));
 			} else if(GLFW_KEY_F1 <= key && key <= GLFW_KEY_F25) {
-				ofs = key - GLFW_KEY_F1 + device::key::F1;
+				auto d = key - GLFW_KEY_F1;
+				ofs = static_cast<device::key>(d + static_cast<int>(device::key::F1));
 			} else if(GLFW_KEY_KP_0 <= key && key <= GLFW_KEY_KP_9) {
-				ofs = key - GLFW_KEY_KP_0 + device::key::KP_0;
+				auto d = key - GLFW_KEY_KP_0;
+				ofs = static_cast<device::key>(d + static_cast<int>(device::key::KP_0));
 			}
 			break;
 		}
-		if(ofs >= 0) {
-			core::bitsets_[ofs] = kv;
+		if(ofs != device::key::count_) {
+			core::bits_.set(ofs, kv);
 		}
 
 //		if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 //			glfwSetWindowShouldClose(window, GL_TRUE);
 //		}
 
-		if(mods & GLFW_MOD_SHIFT) core::bitsets_[device::key::SHIFT] = true;
-		else core::bitsets_[device::key::SHIFT] = false;
-		if(mods & GLFW_MOD_CONTROL) core::bitsets_[device::key::CONTROL] = true;
-		else core::bitsets_[device::key::CONTROL] = false;
-		if(mods & GLFW_MOD_ALT) core::bitsets_[device::key::ALT] = true;
-		else core::bitsets_[device::key::ALT] = false;
-		if(mods & GLFW_MOD_SUPER) core::bitsets_[device::key::SUPER] = true;
-		else core::bitsets_[device::key::SUPER] = false;
+		if(mods & GLFW_MOD_SHIFT) core::bits_.set(device::key::SHIFT);
+		else core::bits_.reset(device::key::SHIFT);
+		if(mods & GLFW_MOD_CONTROL) core::bits_.set(device::key::CONTROL);
+		else core::bits_.reset(device::key::CONTROL);
+		if(mods & GLFW_MOD_ALT) core::bits_.set(device::key::ALT);
+		else core::bits_.reset(device::key::ALT);
+		if(mods & GLFW_MOD_SUPER) core::bits_.set(device::key::SUPER);
+		else core::bits_.reset(device::key::SUPER);
 	}
 
 
@@ -172,7 +176,7 @@ namespace gl {
 		if(action == GLFW_PRESS) v = true;
 		else if(action == GLFW_RELEASE) v = false;
 
-		int ofs = -1;
+		device::key ofs = device::key::count_;
 		if(button == GLFW_MOUSE_BUTTON_LEFT) {
 			ofs = device::key::MOUSE_LEFT;
 		} else if(button == GLFW_MOUSE_BUTTON_MIDDLE) {
@@ -180,9 +184,9 @@ namespace gl {
 		} else if(button == GLFW_MOUSE_BUTTON_RIGHT) {
 			ofs = device::key::MOUSE_RIGHT;
 		}
-		if(ofs >= 0) {
+		if(ofs != device::key::count_) {
 ///			std::cout << "Mouse: " << ofs << std::endl;
-			core::bitsets_[ofs] = v;
+			core::bits_.set(ofs, v);
 		}
 	}
 
@@ -194,7 +198,7 @@ namespace gl {
 		else {
 			return;
 		}
-		core::bitsets_[device::key::MOUSE_FOCUS] = v;
+		core::bits_.set(device::key::MOUSE_FOCUS, v);
 	}
 
 	device::locator core::locator_;
@@ -447,7 +451,7 @@ namespace gl {
 			size_.y = y;
 		}
 
-		device_.service(bitsets_, locator_);
+		device_.service(bits_, locator_);
 		locator_.reset_scroll();
 
         /* Poll for and process events */
