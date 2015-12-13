@@ -19,7 +19,7 @@ namespace app {
 
 		gui::widget_frame*		terminal_frame_;
 		gui::widget_terminal*	terminal_core_;
-		
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
