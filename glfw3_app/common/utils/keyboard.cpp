@@ -11,7 +11,7 @@
 namespace sys {
 
 	struct key_t {
-		gl::device::key::type	key_type;
+		gl::device::key	key_type;
 		char	normal_code;
 		char	shift_code;
 	};
