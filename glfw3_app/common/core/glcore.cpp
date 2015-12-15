@@ -6,6 +6,8 @@
 //=====================================================================//
 #ifdef WIN32
 #include <windows.h>
+// windows で define されているので無効にする。
+// #undef DELETE
 #endif
 #include <iostream>
 #include <thread>
@@ -67,9 +69,6 @@ namespace gl {
 		QueryPerformanceFrequency(&tc);
 		return static_cast<double>(tc.QuadPart);
 	}
-
-// windows で define されているので無効にする。
-#undef DELETE
 #endif
 
 	device::bits_t core::bits_;
@@ -105,7 +104,7 @@ namespace gl {
 		case GLFW_KEY_TAB:           ofs = device::key::TAB;           break;
 		case GLFW_KEY_BACKSPACE:     ofs = device::key::BACKSPACE;     break;
 		case GLFW_KEY_INSERT:        ofs = device::key::INSERT;        break;
-		case GLFW_KEY_DELETE:        ofs = device::key::DELETE;        break;
+		case GLFW_KEY_DELETE:        ofs = device::key::DEL;           break;
 		case GLFW_KEY_RIGHT:         ofs = device::key::RIGHT;         break;
 		case GLFW_KEY_LEFT:          ofs = device::key::LEFT;          break;
 		case GLFW_KEY_DOWN:          ofs = device::key::DOWN;          break;
@@ -358,13 +357,13 @@ namespace gl {
 			int n = GetKeyboardType(0);
 			if(n == 7) keyboard_jp_ = true;
 			if(GetKeyState(VK_CAPITAL)) {
-				bitsets_.set(device::key::CAPS_LOCK);
+				bits_.set(device::key::CAPS_LOCK);
 			}
 			if(GetKeyState(VK_SCROLL)) {
-				bitsets_.set(device::key::SCROLL_LOCK);
+				bits_.set(device::key::SCROLL_LOCK);
 			}
 			if(GetKeyState(VK_NUMLOCK)) {
-				bitsets_.set(device::key::NUM_LOCK);
+				bits_.set(device::key::NUM_LOCK);
 			}
 #endif
 		}

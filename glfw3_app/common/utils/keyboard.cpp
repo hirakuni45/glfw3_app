@@ -32,7 +32,7 @@ namespace sys {
 		{ gl::device::key::MINUS,         '-', '_' },
 		{ gl::device::key::EQUAL,         '=', '+' },
 		{ gl::device::key::BACKSPACE,     0x08, 0x08 },
-		{ gl::device::key::DELETE,        0x3f, 0x3f },
+		{ gl::device::key::DEL,           0x3f, 0x3f },
 		{ gl::device::key::TAB,           0x09, 0x09 },
 		{ gl::device::key::Q,             'Q', 'q' },
 		{ gl::device::key::W,             'W', 'w' },
@@ -95,7 +95,7 @@ namespace sys {
 		{ gl::device::key::MINUS,         '-', '=' },
 		{ gl::device::key::EQUAL,         ';', '+' },
 		{ gl::device::key::BACKSPACE,     0x08, 0x08 },
-		{ gl::device::key::DELETE,        0x3f, 0x3f },
+		{ gl::device::key::DEL,           0x3f, 0x3f },
 
 		{ gl::device::key::TAB,           0x09, 0x09 },
 		{ gl::device::key::Q,             'Q', 'q' },
