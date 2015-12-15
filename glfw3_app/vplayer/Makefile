@@ -89,7 +89,7 @@ OPTLIBS		=	opengl32 glu32 glfw3 glew32 \
 				mad faad mp4ff tag \
 				avdevice avformat avfilter avcodec \
 				swresample swscale avutil \
-				z OpenAL32
+				z openal
 else
 LOCAL_PATH	=	/usr/local
 OPTLIBS		=	glfw3 GLEW \

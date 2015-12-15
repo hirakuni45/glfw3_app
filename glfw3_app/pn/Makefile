@@ -88,7 +88,7 @@ OPTLIBS		=	opengl32 glu32 glfw3 glew32 \
 				png turbojpeg jpeg openjp2 \
 				freetype \
 				mad faad mp4ff tag \
-				z OpenAL32
+				z openal
 else
 LOCAL_PATH	=	/usr/local
 OPTLIBS		=	glfw3 GLEW \
@@ -131,6 +131,14 @@ CP	=	clang++
 CC	=	clang
 LK	=	clang++
 RC	=	windres
+
+ifeq ($(OS),Windows_NT)
+CPMM	=	g++
+CCMM	=	gcc
+else
+CPMM	=	clang++
+CCMM	=	clang
+endif
 
 POPT	=	-O2 -std=c++14
 COPT	=	-O2
@@ -200,13 +208,13 @@ $(ICON_OBJ): $(ICON_RC)
 
 $(BUILD)/%.d : %.c
 	mkdir -p $(dir $@); \
-	$(CC) -MM -DDEPEND_ESCAPE $(COPT) $(CFLAGS) $(CINCS) $< \
+	$(CCMM) -MM -DDEPEND_ESCAPE $(COPT) $(CFLAGS) $(CINCS) $< \
 	| sed 's/$(notdir $*)\.o:/$(subst /,\/,$(patsubst %.d,%.o,$@) $@):/' > $@ ; \
 	[ -s $@ ] || rm -f $@
 
 $(BUILD)/%.d : %.cpp
 	mkdir -p $(dir $@); \
-	$(CP) -MM -DDEPEND_ESCAPE $(POPT) $(PFLAGS) $(PINCS) $< \
+	$(CPMM) -MM -DDEPEND_ESCAPE $(POPT) $(PFLAGS) $(PINCS) $< \
 	| sed 's/$(notdir $*)\.o:/$(subst /,\/,$(patsubst %.d,%.o,$@) $@):/' > $@ ; \
 	[ -s $@ ] || rm -f $@
 
