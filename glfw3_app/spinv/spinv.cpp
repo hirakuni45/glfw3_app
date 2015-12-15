@@ -54,7 +54,7 @@ namespace app {
 							zip.get_file(h, &wav[0]);
 							utils::file_io fin;
 							if(fin.open(&wav[0], wn)) {
-								se_id_[i] = sound.load_se(fin, "wav");
+								se_id_[i] = sound.load(fin, "wav");
 								fin.close();
 							}
 						} else {
@@ -197,7 +197,7 @@ namespace app {
 
 		al::sound& sound = director_.at().sound_;
 		if(dev.get_positive(gl::device::key::A)) {
-			sound.request_se(0, se_id_[8]);
+			sound.request(0, se_id_[8]);
 		}
 
 		// sound request
@@ -218,15 +218,15 @@ namespace app {
 
 			for(int i = 1; i < 9; ++i) {
 				if(se_id_[i] && (bits & mask[i])) {
-					sound.request_se(i, se_id_[i]);
+					sound.request(i, se_id_[i]);
 				}
 			}
 			if(bits & InvadersMachine::SoundUfo) {
-				if(!sound.status_se(0)) {
-					sound.request_se(0, se_id_[0], true);
+				if(!sound.status(0)) {
+					sound.request(0, se_id_[0], true);
 				}
 			} else {
-				sound.stop_se(0);
+				sound.stop(0);
 			}
 		}
 
