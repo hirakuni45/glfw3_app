@@ -19,9 +19,9 @@ namespace gl {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class camera {
 
-		device::key::type	translate_key_;
-		device::key::type	rotate_key_;
-		device::key::type	zoom_key_;
+		device::key	translate_key_;
+		device::key	rotate_key_;
+		device::key	zoom_key_;
 
 		vtx::spos	mouse_pos_;
 		vtx::spos	mouse_left_first_pos_;
