@@ -42,7 +42,7 @@ int main(int argc, char** argv)
 
 	gl::core& core = gl::core::get_instance();
 
-	if(!core.initialize(argv[0])) {
+	if(!core.initialize(argc, argv)) {
 		std::cerr << "glcore initialize error." << std::endl;
 ///		fgetc(stdin);
 		return -1;

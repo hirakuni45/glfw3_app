@@ -199,6 +199,17 @@ namespace app {
 		if(scale_2x_) scale_2x_->load(pre);
 		if(scale_3x_) scale_3x_->load(pre);
 		if(info_) info_->load(pre);
+
+		// コマンドラインの取得
+		{
+			auto cmds = core.get_command_path();
+			for(auto s : cmds) {
+				if(utils::probe_file(s)) {
+					start_path_ = s;
+					break;
+				}
+			}
+		}
 	}
 
 
@@ -260,6 +271,13 @@ namespace app {
 		}
 
 		std::string imfn;
+		// アプリ起動コマンドラインより取得のパス
+		if(!start_path_.empty()) {
+			imfn = start_path_;
+			start_path_.clear();
+		}
+
+		// D&D 取得のパス
 		int id = core.get_recv_files_id();
 		if(dd_id_ != id) {
 			dd_id_ = id;

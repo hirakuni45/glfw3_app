@@ -71,6 +71,8 @@ namespace app {
 
 		bool			save_dialog_;
 
+		std::string		start_path_;
+
 		void create_new_image_(const vtx::spos& size);
 		void image_info_(const std::string& file, const img::i_img* img);
 
