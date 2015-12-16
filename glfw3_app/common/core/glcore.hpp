@@ -32,6 +32,7 @@ namespace gl {
 	private:
 		std::string		current_path_;
 		std::string		exec_path_;
+		utils::strings	command_path_;
 
 		device			device_;
 
@@ -116,11 +117,12 @@ namespace gl {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	初期化プロセス
-			@param[in]	cmd_path	コマンドパス
+			@param[in]	argc	起動パラメーター数
+			@param[in]	argv	起動パラメーター
 			@return 正常終了したら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool initialize(const std::string& cmd_path);
+		bool initialize(int argc, char** argv);
 
 
 		//-----------------------------------------------------------------//
@@ -166,6 +168,15 @@ namespace gl {
 		*/
 		//-----------------------------------------------------------------//
 		const vtx::srect& get_rect() const { return rect_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	コマンド・パスの取得
+			@return	コマンド・パス
+		*/
+		//-----------------------------------------------------------------//
+		const utils::strings& get_command_path() const { return command_path_; }
 
 
 		//-----------------------------------------------------------------//

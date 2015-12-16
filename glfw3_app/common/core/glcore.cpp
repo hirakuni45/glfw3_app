@@ -238,14 +238,17 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	初期化プロセス
-		@param[in]	exec_path	コマンドパス
+		@param[in]	argc	起動パラメーター数
+		@param[in]	argv	起動パラメーター
 		@return 正常終了したら「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool core::initialize(const std::string& exec_path)
+	bool core::initialize(int argc, char** argv)
 	{
 		utils::init_utf16_to_sjis();
 
+		std::string exec_path;
+		if(argc > 0) exec_path = argv[0];
 ///		std::cout << "Exec path: '" << exec_path << std::endl;
 
 		std::string tmp = utils::convert_delimiter(exec_path, '\\', '/');
@@ -267,6 +270,17 @@ namespace gl {
 
 ///		std::cout << "Current: '" << current_path_ << std::endl;
 ///		std::cout << "Exec:    '" << exec_path_ << std::endl;
+
+		for(int i = 1; i < argc; ++i) {
+			std::string tmp;
+#ifdef WIN32
+			std::string s = utils::sjis_to_utf8(argv[i]);
+			tmp = utils::convert_delimiter(s, '\\', '/');
+#else
+			tmp = argv[i];
+#endif
+			command_path_.push_back(tmp);
+		}
 
 	    if (!glfwInit()) {
 			return false;
