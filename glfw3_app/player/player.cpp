@@ -98,7 +98,7 @@ namespace app {
 		std::string fp = core.get_current_path();
 		fp += "/res/seg12.ttf";
 		if(!fonts.install_font_type(fp, "led")) {
-			std::cerr << "Can't install system TTF font: '" << fp << "'" << std::endl;
+			std::cerr << "Can't install player's TTF font: '" << fp << "'" << std::endl;
 		}
 		fonts.set_spaceing(6);
 		fonts.set_font_type(cf);
