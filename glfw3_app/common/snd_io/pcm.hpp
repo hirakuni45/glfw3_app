@@ -125,8 +125,14 @@ namespace al {
 		//-----------------------------------------------------------------//
 		bool read(utils::file_io& fin) {
 			size_t s = waves_.size();
-			if(fin.read(&waves_[0], zero_.size(), s) != s) return false;
-			else return true;
+			if(zero_.bits() == 24) {
+				for(size_t i = 0; i < s; ++i) {
+					if(fin.read(&waves_[i], zero_.size()) != zero_.size()) return false;
+				}
+			} else {
+				if(fin.read(&waves_[0], zero_.size(), s) != s) return false;
+			}
+			return true;
 		}
 
 
@@ -139,8 +145,14 @@ namespace al {
 		//-----------------------------------------------------------------//
 		bool write(utils::file_io& fout) {
 			size_t s = waves_.size();
-			if(fout.write(&waves_[0], zero_.size(), s) != s) return false;
-			else return true;
+			if(zero_.bits() == 24) {
+				for(auto w : waves_) {
+					if(fout.write(&w, zero_.size()) != zero_.size()) return false;
+				}
+			} else {
+				if(fout.write(&waves_[0], zero_.size(), s) != s) return false;
+			}
+			return true;
 		}
 
 

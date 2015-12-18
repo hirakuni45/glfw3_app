@@ -70,8 +70,22 @@ namespace al {
 			}
 			break;
 		case audio_format::PCM24_MONO:
+			dst = dynamic_cast<i_audio*>(new audio_mno24);
+			dst->create(src->get_rate(), src->get_samples());
+			for(size_t i = 0; i < src->get_samples(); ++i) {
+				pcm24_m v;
+				src->get(i, v);
+				dst->put(i, v);
+			}
 			break;
 		case audio_format::PCM24_STEREO:
+			dst = dynamic_cast<i_audio*>(new audio_sto24);
+			dst->create(src->get_rate(), src->get_samples());
+			for(size_t i = 0; i < src->get_samples(); ++i) {
+				pcm24_s v;
+				src->get(i, v);
+				dst->put(i, v);
+			}
 			break;
 		case audio_format::PCM32_MONO:
 			dst = dynamic_cast<i_audio*>(new audio_mno32);

@@ -102,14 +102,6 @@ namespace al {
 		ALsizei num = aif->get_samples();
 		ALenum format;
 		switch(aif->get_type()) {
-		case audio_format::PCM16_MONO:
-			format = AL_FORMAT_MONO16;
-			num *= 2;
-			break;
-		case audio_format::PCM16_STEREO:
-			format = AL_FORMAT_STEREO16;
-			num *= 4;
-			break;
 		case audio_format::PCM8_MONO:
 			format = AL_FORMAT_MONO8;
 			num *= 1;
@@ -118,6 +110,22 @@ namespace al {
 			format = AL_FORMAT_STEREO8;
 			num *= 2;
 			break;
+		case audio_format::PCM16_MONO:
+			format = AL_FORMAT_MONO16;
+			num *= 2;
+			break;
+		case audio_format::PCM16_STEREO:
+			format = AL_FORMAT_STEREO16;
+			num *= 4;
+			break;
+		case audio_format::PCM24_MONO:
+			format = AL_FORMAT_MONO_FLOAT32;
+			num *= 4;
+			break;
+		case audio_format::PCM24_STEREO:
+			format = AL_FORMAT_STEREO_FLOAT32;
+			num *= 8;
+			break;			
 		default:
 			return false;
 			break;

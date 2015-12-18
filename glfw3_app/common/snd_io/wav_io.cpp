@@ -13,21 +13,23 @@ namespace al {
 
 	using namespace utils;
 
-#define WAVE_FORMAT_1M08 1
-#define WAVE_FORMAT_1S08 2
-#define WAVE_FORMAT_1M16 4
-#define WAVE_FORMAT_1S16 8
-#define WAVE_FORMAT_2M08 16
-#define WAVE_FORMAT_2S08 32
-#define WAVE_FORMAT_2M16 64
-#define WAVE_FORMAT_2S16 128
-#define WAVE_FORMAT_4M08 256
-#define WAVE_FORMAT_4S08 512
-#define WAVE_FORMAT_4M16 1024
-#define WAVE_FORMAT_4S16 2048
+	enum {
+		WAVE_FORMAT_1M08 = 1,
+		WAVE_FORMAT_1S08 = 2,
+		WAVE_FORMAT_1M16 = 4,
+		WAVE_FORMAT_1S16 = 8,
+		WAVE_FORMAT_2M08 = 16,
+		WAVE_FORMAT_2S08 = 32,
+		WAVE_FORMAT_2M16 = 64,
+		WAVE_FORMAT_2S16 = 128,
+		WAVE_FORMAT_4M08 = 256,
+		WAVE_FORMAT_4S08 = 512,
+		WAVE_FORMAT_4M16 = 1024,
+		WAVE_FORMAT_4S16 = 2048,
+	};
 
-#define WAVE_FORMAT_PCM 1
-#define WAVE_FORMAT_EXTENSIBLE 0xFFFE
+	static const uint16_t WAVE_FORMAT_PCM = 0x0001;
+	static const uint16_t WAVE_FORMAT_EXTENSIBLE = 0xFFFE;
 
 	struct WAVEFILEHEADER {
 		char	   	szRIFF[4];
@@ -62,6 +64,9 @@ namespace al {
 	//-----------------------------------------------------------------//
 	bool wav_io::parse_header_(file_io& fin)
 	{
+		tag_.clear();
+		tag_.title_ = utils::get_file_base(fin.get_path());
+
 		type_ = wf_null;
 		memset(&ext_, 0, sizeof(wave_format_extensible));
 		data_size_ = 0;
@@ -102,6 +107,7 @@ namespace al {
 				data_offset_ = fin.tell();
 				break;
 			} else {
+
 			}
 			riff_num_++;
 			if(ofs) {
@@ -222,12 +228,16 @@ namespace al {
 					info.type = audio_format::PCM8_MONO;
 				} else if(ext_.format.bits_per_sample == 16) {
 					info.type = audio_format::PCM16_MONO;
+				} else if(ext_.format.bits_per_sample == 24) {
+					info.type = audio_format::PCM24_MONO;
 				}
 			} else if(ext_.format.channels == 2) {
 				if(ext_.format.bits_per_sample == 8) {
 					info.type = audio_format::PCM8_STEREO;
 				} else if(ext_.format.bits_per_sample == 16) {
 					info.type = audio_format::PCM16_STEREO;
+				} else if(ext_.format.bits_per_sample == 24) {
+					info.type = audio_format::PCM24_STEREO;
 				}
 			}
 			info.samples     = data_size_ / ext_.format.block_align;
@@ -276,14 +286,22 @@ namespace al {
 					aif = audio(new audio_mno8);
 				} else if(ext_.format.bits_per_sample == 16) {
 					aif = audio(new audio_mno16);
+				} else if(ext_.format.bits_per_sample == 24) {
+					aif = audio(new audio_mno24);
 				} else {
+					std::cerr << "Can't decode bit length: " << static_cast<int>(ext_.format.bits_per_sample) << std::endl;
+					return false;
 				}
 			} else if(ext_.format.channels == 2) {	// stereo
 				if(ext_.format.bits_per_sample == 8) {
 					aif = audio(new audio_sto8);
 				} else if(ext_.format.bits_per_sample == 16) {
 					aif = audio(new audio_sto16);
+				} else if(ext_.format.bits_per_sample == 24) {
+					aif = audio(new audio_sto24);
 				} else {
+					std::cerr << "Can't decode bit length: " << static_cast<int>(ext_.format.bits_per_sample) << std::endl;
+					return false;					
 				}
 			} else {
 			}
@@ -326,6 +344,9 @@ namespace al {
 				} else if(inf.bits == 16) {
 					stream_ = audio(new audio_mno16);
 					stream_blocks_ = 2;
+				} else if(inf.bits == 24) {
+					stream_ = audio(new audio_mno24);
+					stream_blocks_ = 3;
 				}
 			} else if(inf.chanels == 2) {
 				if(inf.bits == 8) {
@@ -334,6 +355,9 @@ namespace al {
 				} else if(inf.bits == 16) {
 					stream_ = audio(new audio_sto16);
 					stream_blocks_ = 4;
+				} else if(inf.bits == 16) {
+					stream_ = audio(new audio_sto24);
+					stream_blocks_ = 6;
 				}
 			}
 
@@ -368,8 +392,14 @@ namespace al {
 			return 0;
 		}
 
-		size_t n = fin.read(stream_->at_wave(), 1, samples * stream_blocks_);
-
+		size_t n = 0;
+		if(stream_blocks_ == 3 || stream_blocks_ == 6) {
+			for(size_t i = 0; i < samples; ++i) {
+				n += fin.read(stream_->at_wave(i), stream_blocks_);
+			}
+		} else {
+			n = fin.read(stream_->at_wave(), 1, samples * stream_blocks_);
+		}
 		return n / stream_blocks_;
 	}
 
