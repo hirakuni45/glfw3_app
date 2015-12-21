@@ -103,6 +103,18 @@ namespace utils {
 	bool remove_file(const std::string& fn);
 
 
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	ファイルをコピー
+		@param[in]	src	ソース・ファイル名（コピー元）
+		@param[in]	dst	デスティネーション・ファイル名（コピー先）
+		@param[in]	dup	コピー先ファイルを上書きする場合「true」
+		@return 成功なら「true」
+	*/
+	//-----------------------------------------------------------------//
+	bool copy_file(const std::string& src, const std::string& dst, bool dup = false);
+
+
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
 		@brief	ファイル入出力・クラス
