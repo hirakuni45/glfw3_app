@@ -664,24 +664,24 @@ namespace utils {
 	*/
 	//-----------------------------------------------------------------//
 	template <class T>
-	inline const typename T::value_type* get_file_nameT(const T& src) {
-		if(src.empty()) return nullptr;
+	inline T get_file_nameT(const T& src) {
+		if(src.empty()) return T();
 		const typename T::value_type* p = string_strrchr(src, '/');
 		if(p != nullptr) {
 			++p;
-			return p;
+			return T(p);
 		} else {
 			const typename T::value_type* p = string_strrchr(src, ':');
 			if(p != nullptr) {
 				++p;
-				return p;
+				return T(p);
 			}
 		}
-		return src.c_str();
+		return src;
 	}
-	inline const char* get_file_name(const std::string& src) { return get_file_nameT(src); }
-	inline const wstring::value_type* get_file_name(const wstring& src) { return get_file_nameT(src); }
-	inline const lstring::value_type* get_file_name(const lstring& src) { return get_file_nameT(src); }
+	inline std::string get_file_name(const std::string& src) { return get_file_nameT(src); }
+	inline wstring get_file_name(const wstring& src) { return get_file_nameT(src); }
+	inline lstring get_file_name(const lstring& src) { return get_file_nameT(src); }
 
 
 	//-----------------------------------------------------------------//

@@ -389,11 +389,11 @@ namespace gui {
 			if(utils::get_file_path(path, root)) {
 				if(param_.path_ != root) return fin;
 			}
-			const char* p = utils::get_file_name(path);
-			if(p == 0) {
+			auto s = utils::get_file_name(path);
+			if(s.empty()) {
 				return fin;
 			}
-			fin = p;
+			fin = s;
 		} else {
 			fin = path;
 		}
