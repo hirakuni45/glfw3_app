@@ -75,8 +75,7 @@ namespace mdf {
 	{
 		initialize_();
 
-		current_path_.clear();
-		utils::get_file_path(fio.get_path(), current_path_);
+		current_path_ = utils::get_file_path(fio.get_path());
 
 		destroy_();
 
@@ -129,7 +128,9 @@ namespace mdf {
 			for(uint32_t i = 0; i < num; ++i) {
 				std::string s;
 				if(!get_text_(fio, s, reading_info_.text_encode_type)) return false;
-				utils::code_conv(s, '\\', '/',  textures_[i]);
+				std::string path;
+				utils::code_conv(s, '\\', '/', path);
+				textures_[i] = path;
 			}
 		}
 
