@@ -25,8 +25,7 @@ namespace app {
 	{
 		al::sound& sound = director_.at().sound_;
 
-		std::string path;
-		utils::get_file_path(file, path);
+		auto path = utils::get_file_path(file);
 		if(!sound.play_stream(path, utils::get_file_name(file))) {
 			std::string s = "Can't open input file:  " + path + '/' + file;
 			if(error_dialog_) {
@@ -231,8 +230,7 @@ namespace app {
 			pre.get_integer(remain_pos_path_, pos);
 			std::string file;
 			pre.get_text(remain_file_path_, file);
-			std::string path;
-			utils::get_file_path(file, path);
+			auto path = utils::get_file_path(file);
 			int type;
 			pre.get_integer(remain_type_path_, type);
 			al::sound::stream_state::type t = static_cast<al::sound::stream_state::type>(type);
