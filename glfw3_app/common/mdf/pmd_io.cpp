@@ -373,8 +373,7 @@ namespace mdf {
 	{
 		initialize_();
 
-		current_path_.clear();
-		utils::get_file_path(fio.get_path(), current_path_);
+		current_path_ = utils::get_file_path(fio.get_path());
 
 		destroy_();
 

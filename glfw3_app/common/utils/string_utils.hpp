@@ -692,16 +692,8 @@ namespace utils {
 	*/
 	//-----------------------------------------------------------------//
 	inline std::string get_file_base(const std::string& src) {
-		std::string fn = get_file_name(src);
-		// ピリオドがあるか？
-		std::string::size_type pos = fn.find_last_of('.');
-		std::string dst;
-		if(pos != std::string::npos) {
-			dst += fn.substr(0, pos);
-		} else {
-			dst += fn;
-		}
-		return dst;
+		auto tmp = get_file_name(src);
+		return tmp.substr(0, tmp.find_last_of('.'));
 	}
 
 
@@ -744,51 +736,11 @@ namespace utils {
 	/*!
 		@brief	ファイル・パスを取得
 		@param[in]	src	フルパス文字列
-		@param[out]	dst ファイルパス
-		@return 取得できたら「true」
-	*/
-	//-----------------------------------------------------------------//
-	inline bool get_file_path(const std::string& src, std::string& dst) {
-		const char* p = strrchr(src.c_str(), '/');
-		if(p) {
-			dst.append(src.c_str(), p - src.c_str());
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	ファイル・パスを取得
-		@param[in]	src	フルパス文字列
 		@return	ファイルパス
 	*/
 	//-----------------------------------------------------------------//
 	inline std::string get_file_path(const std::string& src) {
-		std::string dst;
-		get_file_path(src, dst);
-		return dst;
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	文字列終端が「/」なら取り除く
-		@param[in]	src	ソースパス
-		@param[out]	dst	出力パス
-		@return 取り除いたら「true」
-	*/
-	//-----------------------------------------------------------------//
-	inline bool strip_last_of_delimita_path(const std::string& src, std::string& dst) {
-		if(src.size() > 0 && src[src.size() - 1] == '/') {
-			dst = src.substr(0, src.size() - 1);
-			return true;
-		} else {
-			dst = src;
-			return false;
-		}
+		return src.substr(0, src.find_last_of('/'));
 	}
 
 
@@ -801,7 +753,11 @@ namespace utils {
 	//-----------------------------------------------------------------//
 	inline std::string strip_last_of_delimita_path(const std::string& src) {
 		std::string dst;
-		strip_last_of_delimita_path(src, dst);
+		if(!src.empty() && src[src.size() - 1] == '/') {
+			dst = src.substr(0, src.size() - 1);
+		} else {
+			dst = src;
+		}
 		return dst;
 	}
 

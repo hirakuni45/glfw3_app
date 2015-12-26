@@ -529,8 +529,7 @@ namespace utils {
 		if(src.empty()) {
 			return dst;
 		}
-		std::string tmp;
-		strip_last_of_delimita_path(src, tmp);
+		auto tmp = strip_last_of_delimita_path(src);
 		std::string::size_type n = tmp.find_last_of('/');
 		if(n == std::string::npos) {
 			return dst;
@@ -563,8 +562,7 @@ namespace utils {
 				return std::string();
 			}
 		} else {
-			std::string tmp;
-			strip_last_of_delimita_path(src, tmp);
+			auto tmp = strip_last_of_delimita_path(src);
 			dst = tmp + '/' + add;
 		}
 		return dst;

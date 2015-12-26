@@ -255,7 +255,7 @@ namespace gl {
 		std::string base = utils::get_file_base(tmp);
 
 		if(!tmp.empty() && tmp[0] == '/') {
-			utils::get_file_path(tmp, current_path_);
+			current_path_ = utils::get_file_path(tmp);
 		} else {
 			char buff[2048];
 #ifdef WIN32

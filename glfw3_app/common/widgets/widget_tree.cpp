@@ -150,8 +150,7 @@ namespace gui {
 			if(n > 1) {
 				std::string path = it->first;
 				for(uint32_t i = 1; i < n; ++i) {
-					std::string p;
-					utils::get_file_path(path, p);
+					auto p = utils::get_file_path(path);
 					tree_unit::optional_const_ref opt = tree_unit_.get(p);
 					if(opt) {
 						widget_check* w = (*opt).w_;

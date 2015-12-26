@@ -105,8 +105,8 @@ namespace utils {
 				std::pair<unit_map_it, bool> ret = unit_map_.insert(unit_pair(p, u));
 				if(ret.second) {
 					++serial_id_;
-					std::string prev;
-					if(utils::get_file_path(p, prev)) {
+					auto prev = utils::get_file_path(p);
+					if(p != prev) {
 						unit_map_it it = unit_map_.find(prev);
 						if(it != unit_map_.end()) {
 							unit_t& t = it->second;

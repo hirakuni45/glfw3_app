@@ -104,8 +104,7 @@ namespace gui {
 				if(filename == "..") {
 
 				} else if(filename.back() == '/') {  // for make directory
-					std::string path;
-					utils::strip_last_of_delimita_path(filename, path);
+					auto path = utils::strip_last_of_delimita_path(filename);
 					utils::create_directory(utils::append_path(param_.path_, path));
 					center_update_ = true;
 				} else {
@@ -335,12 +334,10 @@ namespace gui {
 
 	widget_filer::widget_file_copt widget_filer::scan_item_(const std::string& fn) const
 	{
-		std::string path;
-		utils::strip_last_of_delimita_path(fn, path);
+		auto path = utils::strip_last_of_delimita_path(fn);
 
 		BOOST_FOREACH(const widget_file& wf, center_) {
-			std::string t;
-			utils::strip_last_of_delimita_path(wf.name->get_text(), t);
+			auto t = utils::strip_last_of_delimita_path(wf.name->get_text());
 			if(wf.name && t == path) {
 				return widget_file_copt(wf);
 			}
@@ -385,9 +382,9 @@ namespace gui {
 	{
 		std::string fin;
 		if(utils::probe_full_path(path)) {
-			std::string root;
-			if(utils::get_file_path(path, root)) {
-				if(param_.path_ != root) return fin;
+			auto root = utils::get_file_path(path);
+			if(param_.path_ != root) {
+				return fin;
 			}
 			auto s = utils::get_file_name(path);
 			if(s.empty()) {
@@ -417,7 +414,7 @@ namespace gui {
 				param_.path_ = n;
 			} else {
 				ap = utils::append_path(param_.path_, n);
-				utils::strip_last_of_delimita_path(ap, param_.path_);
+				param_.path_ = utils::strip_last_of_delimita_path(ap);
 			}
 			file_infos_.clear();
 			fsc_path_.clear();
