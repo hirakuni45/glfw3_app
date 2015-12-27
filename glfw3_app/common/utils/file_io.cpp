@@ -310,24 +310,25 @@ namespace utils {
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	1 行読み込み
-		@param[out]	buff	読み込み先
-		@return	ファイルの終端なら「false」
+		@return	読み込んだ行
 	*/
 	//-----------------------------------------------------------------//
-	bool file_io::get_line(std::string& buff)
+	std::string file_io::get_line()
 	{
-		if(open_ == false) return false;
+		std::string tmp;
+		if(!open_) return tmp;
 
 		char ch;
 		while(get_char(ch) == true) {
-			if(ch == 0x0d) cr_ = true;
-			else if(ch == 0x0a) {
-				return true;
+			if(ch == 0x0d) {
+				cr_ = true;
+			} else if(ch == 0x0a) {
+				break;
 			} else {
-				buff.append(1, ch);
+				tmp += ch;
 			}
 		}
-		return false;
+		return tmp;
 	}
 
 

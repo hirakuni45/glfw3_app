@@ -243,8 +243,8 @@ namespace sys {
 		}
 
 		uint32_t err = 0;
-		string s;
-		while(inp.get_line(s) == true) {
+		while(!inp.eof()) {
+			auto s = inp.get_line();
 			if(s.empty()) continue;
 			if(s[0] == '#') ;  // コメント行は無視
 			else {
@@ -259,7 +259,6 @@ namespace sys {
 					}
 				}
 			}
-			s.clear();
 		}
 		inp.close();
 

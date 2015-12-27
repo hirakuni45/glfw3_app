@@ -48,10 +48,8 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		bool load(file_io& fin) {
 			buffer_.clear();
-			value_type s;
-			while(fin.get_line(s)) {
-				buffer_.emplace_back(s);
-				s.clear();
+			while(!fin.eof()) {
+				buffer_.emplace_back(fin.get_line());
 			}
 			cr_ = fin.is_cr();
 			return true;
