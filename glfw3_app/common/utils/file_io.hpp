@@ -626,7 +626,7 @@ namespace utils {
 		size_t put(const std::string& text) {
 			if(text.empty()) return 0;
 			size_t n = 0;
-			BOOST_FOREACH(char ch, text) {
+			for(auto ch : text) {
 				if(!put_char(ch)) {
 					return n;
 				}

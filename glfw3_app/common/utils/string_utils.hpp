@@ -7,7 +7,6 @@
 //=====================================================================//
 #include <string>
 #include <vector>
-#include <boost/foreach.hpp>
 #include "utils/mtx.hpp"
 
 namespace utils {
@@ -148,7 +147,7 @@ namespace utils {
 	template <class T>
 	T to_lower_text(const T& src) {
 		T dst;
-		BOOST_FOREACH(typename T::value_type ch, src) {
+		for(auto ch : src) {
 			if(ch >= 'A' && ch <= 'Z') {
 				dst += (ch + 0x20);
 			} else {
@@ -268,7 +267,7 @@ namespace utils {
 	*/
 	//-----------------------------------------------------------------//
 	inline bool utf16_to_utf32(const wstring& src, lstring& dst) noexcept {
-		BOOST_FOREACH(uint16_t ch, src) {
+		for(auto ch : src) {
 			dst += ch;
 		}
 		return true;
@@ -424,9 +423,8 @@ namespace utils {
 	//-----------------------------------------------------------------//
 	inline strings strings_to_strings(const wstrings& src) noexcept {
 		strings dst;
-		BOOST_FOREACH(const wstring& ws, src) {
-			std::string tmp;
-			utf16_to_utf8(ws, tmp);
+		for(const auto& ws : src) {
+			auto tmp = utf16_to_utf8(ws);
 			dst.push_back(tmp);
 		}
 		return dst;
@@ -442,9 +440,8 @@ namespace utils {
 	//-----------------------------------------------------------------//
 	inline wstrings strings_to_strings(const strings& src) noexcept {
 		wstrings dst;
-		BOOST_FOREACH(const std::string& s, src) {
-			wstring tmp;
-			utf8_to_utf16(s, tmp);
+		for(const auto& s : src) {
+			auto tmp = utf8_to_utf16(s);
 			dst.push_back(tmp);
 		}
 		return dst;
@@ -461,7 +458,7 @@ namespace utils {
 	//-----------------------------------------------------------------//
 	inline wstring strings_to_string(const wstrings& src, bool crlf) noexcept {
 		wstring dst;
-		BOOST_FOREACH(const wstring& ws, src) {
+		for(const auto& ws : src) {
 			dst += ws;
 			if(crlf) dst += '\n';
 		}
@@ -479,7 +476,7 @@ namespace utils {
 	//-----------------------------------------------------------------//
 	inline std::string strings_to_string(const strings& src, bool crlf) noexcept {
 		std::string dst;
-		BOOST_FOREACH(const std::string& s, src) {
+		for(const auto& s : src) {
 			dst += s;
 			if(crlf) dst += '\n';
 		}
@@ -499,11 +496,11 @@ namespace utils {
 	template <class T, class M>
 	int strip_char(const T& src, const M& list, T& out) {
 		int n = 0;
-		BOOST_FOREACH(typename T::value_type c, src) {
-			if(string_strchr(list, static_cast<typename M::value_type>(c))) {
+		for(auto ch : src) {
+			if(string_strchr(list, static_cast<typename M::value_type>(ch))) {
 				++n;
 			} else {
-				out += c;
+				out += ch;
 			}
 		}
 		return n;
@@ -527,7 +524,7 @@ namespace utils {
 		SS dst;
 		bool tab_back = true;
 		typename SS::value_type word;
-		BOOST_FOREACH(typename SS::value_type::value_type ch, src) {
+		for(auto ch : src) {
 			bool tab = false;
 			if(limit <= 0 || static_cast<int>(dst.size()) < (limit - 1)) {
 				if(string_strchr(list, ch)) {
@@ -571,9 +568,9 @@ namespace utils {
 	template <class ST, class DT>
 	int code_conv(const ST& src, typename ST::value_type a, typename ST::value_type b, DT& dst) {
 		int n = 0;
-		BOOST_FOREACH(typename ST::value_type c, src) {
-			if(c == a) { c = b; n++; }
-			dst += static_cast<typename DT::value_type>(c);
+		for(auto ch : src) {
+			if(ch == a) { ch = b; n++; }
+			dst += static_cast<typename DT::value_type>(ch);
 		}
 		return n;
 	}
@@ -594,7 +591,7 @@ namespace utils {
 		int n = 0;
 		uint32_t tsz = tbl.size();
 		if(tsz & 1) --tsz;
-		BOOST_FOREACH(typename STR::value_type ch, src) {
+		for(auto ch : src) {
 			for(uint32_t i = 0; i < tsz; i += 2) {
 				if(ch == tbl[i]) {
 					ch = tbl[i + 1];
@@ -811,15 +808,15 @@ namespace utils {
 	/*!
 		@brief	マッチする文字をカウントする
 		@param[in]	s	文字列
-		@param[in]	ch	カウントする文字
+		@param[in]	cha	カウントする文字
 		@return 数
 	*/
 	//-----------------------------------------------------------------//
 	template <class T>
-	inline uint32_t count_char(const T& src, typename T::value_type ch) noexcept {
+	inline uint32_t count_char(const T& src, typename T::value_type cha) noexcept {
 		uint32_t cnt = 0;
-		BOOST_FOREACH(typename T::value_type c, src) {
-			if(c == ch) ++cnt;
+		for(auto ch : src) {
+			if(ch == cha) ++cnt;
 		}
 		return cnt;
 	}
