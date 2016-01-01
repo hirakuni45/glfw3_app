@@ -400,7 +400,11 @@ namespace gui {
 		// ターミナル用フォントのインストール
 		fonts.push_font_face();
 		{
+#ifdef __APPLE__
+			std::string ff = "~/Library/Fonts/Inconsolata.otf";
+#else
 			std::string ff = "Inconsolata.otf";
+#endif
 			if(!fonts.install_font_type(ff, "Inconsolata")) {
 				std::cerr << boost::format("Can't find font file: '%s'") % ff << std::endl; 
 			}
