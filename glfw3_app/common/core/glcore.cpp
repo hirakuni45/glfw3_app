@@ -30,7 +30,7 @@ namespace gl {
 
 #ifdef __APPLE__
 	static const char* root_font_path_ = "/System/Library/Fonts";
-	static const char* default_font_file_ = "ヒラギノ角ゴ ProN W3.otf";
+	static const char* default_font_file_ = "ヒラギノ角ゴシック W3.ttc";
 #endif
 
 #ifdef WIN32
