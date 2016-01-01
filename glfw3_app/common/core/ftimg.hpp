@@ -49,6 +49,7 @@ namespace img {
 
 	private:
 		std::string	root_path_;
+		std::string	home_path_;
 
 		FT_Library	library_;
 
@@ -92,7 +93,7 @@ namespace img {
 			@brief	コンストラクター
 		 */
 		//-----------------------------------------------------------------//
-		ftimg() : root_path_(), library_(),
+		ftimg() : library_(),
 				  face_map_(), current_face_(face_map_.end()),
 				  matrix_(), metrics_(), gray_(), antialias_(false) { }
 
@@ -121,7 +122,6 @@ namespace img {
 		 */
 		//-----------------------------------------------------------------//
 		bool initialize(const std::string& root) {
-
 			root_path_ = root;
 			if(!root_path_.empty()) {
 				if(root_path_.back() != '/') root_path_ += '/';
@@ -133,6 +133,13 @@ namespace img {
 			} else {
 				std::cerr << "Warrning: fontfile root path to empty." << std::endl;
 				return false;
+			}
+
+			// make home path
+			auto p = getenv("HOME");
+			if(p != nullptr) {
+				home_path_ = p;
+				home_path_ += '/';
 			}
 
 			FT_Error error = FT_Init_FreeType(&library_);
