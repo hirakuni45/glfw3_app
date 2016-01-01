@@ -118,6 +118,7 @@ namespace al {
 			format = AL_FORMAT_STEREO16;
 			num *= 4;
 			break;
+#if 0
 		case audio_format::PCM24_MONO:
 			format = AL_FORMAT_MONO_FLOAT32;
 			num *= 4;
@@ -125,7 +126,8 @@ namespace al {
 		case audio_format::PCM24_STEREO:
 			format = AL_FORMAT_STEREO_FLOAT32;
 			num *= 8;
-			break;			
+			break;
+#endif
 		default:
 			return false;
 			break;
