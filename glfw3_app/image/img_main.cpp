@@ -230,7 +230,7 @@ namespace app {
 				img->create(vtx::spos(960, 720), true);
 				img->fill(img::rgba8(0, 0, 0, 0));
 				src_image_ = img::shared_img(img);
-				term_->output("Ld");
+				term_->output("New\n");
 				image_info_("new image", src_image_.get());
 				image_offset_.set(0.0f);
 				frame_->at_local_param().text_param_.set_text("new image");
@@ -308,7 +308,7 @@ namespace app {
 				dialog_->enable();
 			} else {
 				src_image_ = imf.get_image();
-				term_->output("Ld");
+				term_->output("Ld: " + load_ctx_->get_file() + "\n");
 				image_info_(load_ctx_->get_file(), src_image_.get());
 				image_offset_.set(0.0f);
 				frame_->at_local_param().text_param_.set_text(imfn);
