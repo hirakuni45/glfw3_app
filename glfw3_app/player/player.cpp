@@ -63,7 +63,7 @@ namespace app {
 		using namespace gui;
 		widget_director& wd = director_.at().widget_director_;
 
-		widget::param wp(vtx::srect(vtx::spos(0), size), 0);
+		widget::param wp(vtx::irect(vtx::ipos(0), size), 0);
 		widget_label::param wp_(text);
 		wp_.color_param_ = widget_director::default_slider_color_;
 		wp_.color_param_select_ = widget_director::default_slider_color_;
@@ -110,7 +110,7 @@ namespace app {
 		widget_director& wd = director_.at().widget_director_;
 
 		{	// ファイラーリソースの生成
-			widget::param wp(vtx::srect(10, 10, 500, 350));
+			widget::param wp(vtx::irect(10, 10, 500, 350));
 			widget_filer::param wp_(core.get_current_path(), sound.get_file_exts());
 			filer_ = wd.add_widget<widget_filer>(wp, wp_);
 			filer_->enable(false);
@@ -157,7 +157,7 @@ namespace app {
 		total_time_  = create_text_pad_(vtx::spos(16 * 3, lw), "00:00", "led", false);
 		remain_time_ = create_text_pad_(vtx::spos(16 * 3, lw), "00:00", "led", false);
 		{
-			widget::param wp(vtx::srect(10, 10, 500, 16), 0);
+			widget::param wp(vtx::irect(10, 10, 500, 16), 0);
 			widget_slider::param wp_;
 			if(wd.at_img_files().load(curp + "/res/seek_handle.png")) {
 				wp_.hand_image_ = wd.at_img_files().get_image().get();
@@ -173,7 +173,7 @@ namespace app {
 		other_pad_  = create_text_pad_(vtx::spos(16 * 3, lw), "");
 
 		{
-			widget::param wp(vtx::srect(20, 500, 200, 20), 0);
+			widget::param wp(vtx::irect(20, 500, 200, 20), 0);
 			widget_slider::param wp_;
 			if(wd.at_img_files().load(curp + "/res/slider_handle.png")) {
 				wp_.hand_image_ = wd.at_img_files().get_image().get();
@@ -186,7 +186,7 @@ namespace app {
 			};
 		}
 		{
-			widget::param wp(vtx::srect(0, 0, 0, 0), 0);
+			widget::param wp(vtx::irect(0, 0, 0, 0), 0);
 			widget_image::param wp_;
 			if(wd.at_img_files().load(curp + "/res/piano.png")) {
 				wp_.image_ = wd.at_img_files().get_image().get();
@@ -198,7 +198,7 @@ namespace app {
    			vol_max_img_ = wd.add_widget<widget_image>(wp, wp_);
 		}
 		{
-			widget::param wp(vtx::srect(0, 0, 120, 30), 0);
+			widget::param wp(vtx::irect(0, 0, 120, 30), 0);
 			widget_check::param wp_("Resume");
 			resume_play_ = wd.add_widget<widget_check>(wp, wp_);
 		}
@@ -208,7 +208,7 @@ namespace app {
 			const vtx::spos& scs = core.get_rect().size;
 			short w = 450;
 			short h = 150;
-			widget::param wp(vtx::srect((scs.x - w) / 2, (scs.y - h) / 2, w, h));
+			widget::param wp(vtx::irect((scs.x - w) / 2, (scs.y - h) / 2, w, h));
 			widget_dialog::param wp_;
    			wp_.style_ = widget_dialog::param::style::OK;
 			error_dialog_ = wd.add_widget<widget_dialog>(wp, wp_);

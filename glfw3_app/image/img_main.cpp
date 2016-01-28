@@ -69,13 +69,13 @@ namespace app {
 		widget_director& wd = director_.at().widget_director_;
 
 		{ // 画像ファイル表示用フレーム
-			widget::param wp(vtx::srect(30, 30, 256, 256));
+			widget::param wp(vtx::irect(30, 30, 256, 256));
 			widget_frame::param wp_;
 			wp_.plate_param_.set_caption(30);
 			frame_ = wd.add_widget<widget_frame>(wp, wp_);
 		}
 		{ // 画像ファイル表示イメージ
-			widget::param wp(vtx::srect(0, 0, 256, 256), frame_);
+			widget::param wp(vtx::irect(0, 0, 256, 256), frame_);
 			widget_image::param wp_;
 			image_ = wd.add_widget<widget_image>(wp, wp_);
 			image_->set_state(widget::state::CLIP_PARENTS);
@@ -85,63 +85,63 @@ namespace app {
 		}
 
 		{ // 機能ツールパレット
-			widget::param wp(vtx::srect(10, 10, 130, 350));
+			widget::param wp(vtx::irect(10, 10, 130, 350));
 			widget_frame::param wp_;
 			tools_ = wd.add_widget<widget_frame>(wp, wp_);
 			tools_->set_state(widget::state::SIZE_LOCK);
 		}
 		{ // 新規作成ボタン
-			widget::param wp(vtx::srect(10, 10+50*0, 100, 40), tools_);
+			widget::param wp(vtx::irect(10, 10+50*0, 100, 40), tools_);
 			widget_button::param wp_("new");
 			new_ = wd.add_widget<widget_button>(wp, wp_);
 		}
 		{ // ロード起動ボタン
-			widget::param wp(vtx::srect(10, 10+50*1, 100, 40), tools_);
+			widget::param wp(vtx::irect(10, 10+50*1, 100, 40), tools_);
 			widget_button::param wp_("load");
 			load_ = wd.add_widget<widget_button>(wp, wp_);
 		}
 		{ // セーブ起動ボタン
-			widget::param wp(vtx::srect(10, 10+50*2, 100, 40), tools_);
+			widget::param wp(vtx::irect(10, 10+50*2, 100, 40), tools_);
 			widget_button::param wp_("save");
 			save_ = wd.add_widget<widget_button>(wp, wp_);
 		}
 		short ofs = 160;
 		{ // スケール FIT
-			widget::param wp(vtx::srect(10, ofs+30*0, 90, 30), tools_);
+			widget::param wp(vtx::irect(10, ofs+30*0, 90, 30), tools_);
 			widget_radio::param wp_("fit");
 			wp_.check_ = true;
 			scale_fit_ = wd.add_widget<widget_radio>(wp, wp_);
 		}
 		{ // スケール 1X
-			widget::param wp(vtx::srect(10, ofs+30*1, 90, 30), tools_);
+			widget::param wp(vtx::irect(10, ofs+30*1, 90, 30), tools_);
 			widget_radio::param wp_("1x");
 			scale_1x_ = wd.add_widget<widget_radio>(wp, wp_);
 		}
 		{ // スケール 2X
-			widget::param wp(vtx::srect(10, ofs+30*2, 90, 30), tools_);
+			widget::param wp(vtx::irect(10, ofs+30*2, 90, 30), tools_);
 			widget_radio::param wp_("2x");
 			scale_2x_ = wd.add_widget<widget_radio>(wp, wp_);
 		}
 		{ // スケール 3X
-			widget::param wp(vtx::srect(10, ofs+30*3, 90, 30), tools_);
+			widget::param wp(vtx::irect(10, ofs+30*3, 90, 30), tools_);
 			widget_radio::param wp_("3x");
 			scale_3x_ = wd.add_widget<widget_radio>(wp, wp_);
 		}
 		{ // スケーラーボタン
-			widget::param wp(vtx::srect(10, ofs+30*4+10, 100, 40), tools_);
+			widget::param wp(vtx::irect(10, ofs+30*4+10, 100, 40), tools_);
 			widget_button::param wp_("scale");
 			scale_ = wd.add_widget<widget_button>(wp, wp_);
 		}
 
 		{ // ターミナル
 			{
-				widget::param wp(vtx::srect(10, 320, 9*14-8, 18*16+28));
+				widget::param wp(vtx::irect(10, 320, 9*14-8, 18*16+28));
 				widget_frame::param wp_;
 				wp_.plate_param_.set_caption(20);
 				info_ = wd.add_widget<widget_frame>(wp, wp_);
 			}
 			{
-				widget::param wp(vtx::srect(0), info_);
+				widget::param wp(vtx::irect(0), info_);
 				widget_terminal::param wp_;
 				wp_.echo_ = false;
 				term_ = wd.add_widget<widget_terminal>(wp, wp_);
@@ -149,38 +149,38 @@ namespace app {
 		}
 
 		{ // load ファイラー本体
-			widget::param wp(vtx::srect(10, 30, 300, 200));
+			widget::param wp(vtx::irect(10, 30, 300, 200));
 			widget_filer::param wp_(core.get_current_path());
 			load_ctx_ = wd.add_widget<widget_filer>(wp, wp_);
 			load_ctx_->enable(false);
 		}
 		{ // save ファイラー本体
-			widget::param wp(vtx::srect(10, 30, 300, 200));
+			widget::param wp(vtx::irect(10, 30, 300, 200));
 			widget_filer::param wp_(core.get_current_path());
 			wp_.new_file_ = true;
 			save_ctx_ = wd.add_widget<widget_filer>(wp, wp_);
 			save_ctx_->enable(false);
 		}
 		{ // ダイアログ
-			widget::param wp(vtx::srect(10, 30, 450, 200));
+			widget::param wp(vtx::irect(10, 30, 450, 200));
 			widget_dialog::param wp_;
 			dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
 			dialog_->enable(false);
 		}
 		{ // ダイアログ(cancel/ok)
-			widget::param wp(vtx::srect(10, 30, 450, 200));
+			widget::param wp(vtx::irect(10, 30, 450, 200));
 			widget_dialog::param wp_(widget_dialog::param::style::CANCEL_OK);
 			dialog_yes_no_ = wd.add_widget<widget_dialog>(wp, wp_);
 			dialog_yes_no_->enable(false);
 		}
 		{ // ダイアログ(scale)
-			widget::param wp(vtx::srect(10, 30, 450, 200));
+			widget::param wp(vtx::irect(10, 30, 450, 200));
 			widget_dialog::param wp_(widget_dialog::param::style::CANCEL_OK);
 			dialog_scale_ = wd.add_widget<widget_dialog>(wp, wp_);
 			dialog_scale_->enable(false);
 		}
 		{ // ダイアログ(new)
-			widget::param wp(vtx::srect(10, 30, 450, 200));
+			widget::param wp(vtx::irect(10, 30, 450, 200));
 			widget_dialog::param wp_(widget_dialog::param::style::CANCEL_OK);
 			dialog_new_ = wd.add_widget<widget_dialog>(wp, wp_);
 			dialog_new_->enable(false);

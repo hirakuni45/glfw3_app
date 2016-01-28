@@ -26,12 +26,12 @@ namespace app {
 		widget_director& wd = director_.at().widget_director_;
 
 		if(1) {	// ラジオボタンのテスト
-			widget::param wpr(vtx::srect(20, 20, 130, 130), 0);
+			widget::param wpr(vtx::irect(20, 20, 130, 130), 0);
 			widget_null::param wpr_;
 			widget* root = wd.add_widget<widget_null>(wpr, wpr_);
 			root->set_state(widget::state::POSITION_LOCK);
 
-			widget::param wp(vtx::srect(0, 0, 130, 30), root);
+			widget::param wp(vtx::irect(0, 0, 130, 30), root);
 			widget_radio::param wp_("Enable");
 			for(int i = 0; i < 3; ++i) {
 				if(i == 2) wp_.check_ = true;
@@ -44,7 +44,7 @@ namespace app {
 		}
 
 		if(1) {	// イメージのテスト
-			widget::param wp(vtx::srect(400, 20, 500, 250));
+			widget::param wp(vtx::irect(400, 20, 500, 250));
 			img::paint pa;
 			pa.set_fore_color(img::rgba8(0, 255, 0));
 			pa.create(vtx::spos(500, 250), true);
@@ -62,7 +62,7 @@ namespace app {
 		}
 
 		if(1) {	// テキストのテスト
-			widget::param wp(vtx::srect(40, 50, 200, 250), image_);
+			widget::param wp(vtx::irect(40, 50, 200, 250), image_);
 			widget_text::param wp_;
 			wp_.text_param_.set_text("日本の美しい漢字\n吉野家qwertyuiop\nxcvbnm"
 				);
@@ -71,7 +71,7 @@ namespace app {
 		}
 
 		if(1) { // ダイアログのテスト
-			widget::param wp(vtx::srect(300, 300, 300, 200));
+			widget::param wp(vtx::irect(300, 300, 300, 200));
 			widget_dialog::param wp_;
 			wp_.style_ = widget_dialog::param::style::CANCEL_OK;
 			dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
@@ -79,7 +79,7 @@ namespace app {
 		}
 
 		if(1) { // ボタンのテスト（ファイラー開始ボタン）
-			widget::param wp(vtx::srect(30, 150, 100, 40));
+			widget::param wp(vtx::irect(30, 150, 100, 40));
 			widget_button::param wp_("Filer");
 			filer_open_ = wd.add_widget<widget_button>(wp, wp_);
 			filer_open_->at_local_param().text_param_.set_alias("ファイラー");
@@ -87,19 +87,19 @@ namespace app {
 		}
 
 		if(1) { // ボタンのテスト（メニュー開始ボタン）
-			widget::param wp(vtx::srect(30, 200, 100, 40));
+			widget::param wp(vtx::irect(30, 200, 100, 40));
 			widget_button::param wp_("Menu");
 			menu_open_ = wd.add_widget<widget_button>(wp, wp_);
 		}
 
 		if(1) { // ボタンのテスト（ダイアログ開始ボタン）
-			widget::param wp(vtx::srect(30, 250, 100, 40));
+			widget::param wp(vtx::irect(30, 250, 100, 40));
 			widget_button::param wp_("Daialog");
 			dialog_open_ = wd.add_widget<widget_button>(wp, wp_);
 		}
 
 		if(1) { // ラベルのテスト
-			widget::param wp(vtx::srect(30, 300, 150, 40));
+			widget::param wp(vtx::irect(30, 300, 150, 40));
 			widget_label::param wp_("Asdfg", false);
 			label_ = wd.add_widget<widget_label>(wp, wp_);
 			label_->at_local_param().select_func_ = [this](const std::string& t) {
@@ -108,7 +108,7 @@ namespace app {
 		}
 
 		if(1) {	// チェックボックスのテスト
-			widget::param wp(vtx::srect(20, 350, 150, 40));
+			widget::param wp(vtx::irect(20, 350, 150, 40));
 			widget_check::param wp_("Disable-g");
 			check_ = wd.add_widget<widget_check>(wp, wp_);
 			check_->at_local_param().select_func_ = [this](bool f) {
@@ -117,7 +117,7 @@ namespace app {
 		}
 
 		if(1) { // リストのテスト
-			widget::param wp(vtx::srect(30, 400, 150, 40), 0);
+			widget::param wp(vtx::irect(30, 400, 150, 40), 0);
 			widget_list::param wp_("List Box");
 			wp_.text_list_.push_back("abc");
 			wp_.text_list_.push_back("1234");
@@ -126,13 +126,13 @@ namespace app {
 		}
 
 		if(1) { // スライダーのテスト
-			widget::param wp(vtx::srect(30, 450, 180, 20));
+			widget::param wp(vtx::irect(30, 450, 180, 20));
 			widget_slider::param wp_;
 			slider_ = wd.add_widget<widget_slider>(wp, wp_);
 		}
 
 		if(1) { // メニューのテスト
-			widget::param wp(vtx::srect(10, 10, 180, 30));
+			widget::param wp(vtx::irect(10, 10, 180, 30));
 			widget_menu::param wp_;
 //			wp_.round_ = false;
 			wp_.text_list_.push_back("First");
@@ -143,13 +143,13 @@ namespace app {
 		}
 
 		if(1) { // フレームのテスト
-			widget::param wp(vtx::srect(200, 20, 100, 80));
+			widget::param wp(vtx::irect(200, 20, 100, 80));
 			widget_frame::param wp_;
 			frame_ = wd.add_widget<widget_frame>(wp, wp_);
 		}
 
 		if(1) {	// ファイラーのテスト
-			widget::param wp(vtx::srect(10, 30, 300, 200));
+			widget::param wp(vtx::irect(10, 30, 300, 200));
 			widget_filer::param wp_(core.get_current_path(), "", true);
 			filer_ = wd.add_widget<widget_filer>(wp, wp_);
 			filer_->enable(false);
@@ -157,13 +157,13 @@ namespace app {
 
 		if(1) {	// ツリーのテスト
 			{
-				widget::param wp(vtx::srect(400, 500, 200, 200));
+				widget::param wp(vtx::irect(400, 500, 200, 200));
 				widget_frame::param wp_;
 				wp_.plate_param_.set_caption(30);
 				tree_frame_ = wd.add_widget<widget_frame>(wp, wp_);
 			}
 
-			widget::param wp(vtx::srect(0), tree_frame_);
+			widget::param wp(vtx::irect(0), tree_frame_);
 			widget_tree::param wp_;
 			tree_core_ = wd.add_widget<widget_tree>(wp, wp_);
 			tree_core_->set_state(widget::state::CLIP_PARENTS);
@@ -211,13 +211,13 @@ namespace app {
 
 		if(1) {	// ターミナルのテスト
 			{
-				widget::param wp(vtx::srect(700, 500, 200, 200));
+				widget::param wp(vtx::irect(700, 500, 200, 200));
 				widget_frame::param wp_;
 				wp_.plate_param_.set_caption(30);
 				terminal_frame_ = wd.add_widget<widget_frame>(wp, wp_);
 			}
 			{
-				widget::param wp(vtx::srect(0), terminal_frame_);
+				widget::param wp(vtx::irect(0), terminal_frame_);
 				widget_terminal::param wp_;
 				terminal_core_ = wd.add_widget<widget_terminal>(wp, wp_);
 				terminal_core_->output("漢字");
