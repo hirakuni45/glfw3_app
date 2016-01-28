@@ -93,10 +93,10 @@ namespace gui {
 				widget_frame* w = static_cast<widget_frame*>(at_param().parents_);
 				if(w) {
 					bool resize = false;
-					vtx::srect sr;
+					vtx::irect sr;
 					w->get_draw_area(sr);
 					if(param_.auto_fit_) {
-						vtx::spos ss(sr.size.x / param_.font_width_,
+						vtx::ipos ss(sr.size.x / param_.font_width_,
 									 sr.size.y / param_.height_);
 						ss.x *= param_.font_width_;
 //						if(ss.x < w->get_param().resize_min_.x) {
@@ -156,7 +156,7 @@ namespace gui {
 
 			glPushMatrix();
 
-			vtx::srect rect;
+			vtx::irect rect;
 			if(wp.state_[widget::state::CLIP_PARENTS]) {
 				rect.org  = wp.rpos_;
 				rect.size = wp.rect_.size;
@@ -169,7 +169,7 @@ namespace gui {
 			fonts.set_font_type(param_.font_);
 			fonts.set_font_size(param_.font_height_);
 
-			vtx::srect clip_ = wp.clip_;
+			vtx::irect clip_ = wp.clip_;
 
 			int sx = vsz.x / siz.x;
 			int sy = vsz.y / siz.y;
@@ -209,7 +209,7 @@ namespace gui {
 						fonts.pop_font_face();
 					}
 					int fw = fonts.get_width(t.cha_);
-					vtx::srect br(chs, vtx::spos(fw, param_.height_));
+					vtx::irect br(chs, vtx::ipos(fw, param_.height_));
 					fonts.draw_back(br);
 					chs.x += fonts.draw(chs, t.cha_);
 					fonts.swap_color(false);

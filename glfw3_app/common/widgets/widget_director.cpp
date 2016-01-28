@@ -106,7 +106,7 @@ namespace gui {
 
 	void clip_widgets_(widgets& ws, bool check_mark = false)
 	{
-		BOOST_FOREACH(widget* w, ws) {
+		for(auto w : ws) {
 			if(check_mark) {
 				if(w->get_mark()) continue;
 				w->set_mark();
@@ -121,7 +121,7 @@ namespace gui {
 		root->set_mark();
 		widgets ws;
 		parents_widget(root, ws);
-		BOOST_FOREACH(widget* w, ws) {
+		for(auto w : ws) {
 			w->set_mark();
 		}
 	}
@@ -138,7 +138,7 @@ namespace gui {
 		if(root->get_state(widget::state::SELECT_CHILDS)) {
 			widgets ws;
 			parents_widget(root, ws);
-			BOOST_FOREACH(widget* w, ws) {
+			for(auto w : ws) {
 				if(w->get_state(widget::state::SELECT_PARENTS)) {
 					w->set_state(widget::state::SELECT, false);
 					w->set_state(widget::state::FOCUS, false);
@@ -532,6 +532,11 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	bool widget_director::update()
 	{
+//		static uint32_t widget_num_ = 0;
+//		if(widgets_.size() != widget_num_) {
+//			widget_num_ = widgets_.size();
+//			std::cout << "Widget num: " << widget_num_ << std::endl;
+//		}
 		{  // ダイアログがある場合の優先順位とストール処理
 			reset_mark();
 			widgets ws;
@@ -549,7 +554,7 @@ namespace gui {
 			} else {
 				BOOST_FOREACH(widget* w, widgets_) {
 					if(!w->get_mark()) {
-						w->set_state(widget::state::SYSTEM_STALL); 
+						w->set_state(widget::state::SYSTEM_STALL);
 					}
 				}
 			}
@@ -646,14 +651,14 @@ namespace gui {
 					bool caption = false;
 					if(w->type() == get_type_id<widget_frame>()) {
 						widget_frame* wf = static_cast<widget_frame*>(w);
-						vtx::srect r = w->get_param().clip_;
+						auto r = w->get_param().clip_;
 						r.size.y = wf->get_local_param().plate_param_.caption_width_;
 						if(r.is_focus(msp)) {
 							caption = true;
 						}
 					}
 					if(!caption) {
-						vtx::srect r = w->get_param().clip_;
+						auto r = w->get_param().clip_;
 						r.org  += 8;
 						r.size -= 16;
 						if(!r.is_focus(msp)) {
@@ -764,6 +769,7 @@ namespace gui {
 
 		// フォーカス、セレクトの動的な状態は常に作成
 		BOOST_FOREACH(widget* w, widgets_) {
+			if(!w->get_state(widget::state::ENABLE)) continue;
 			bool f;
 			f = w->get_state(widget::state::DRAG);
 			w->set_state(widget::state::BEFORE_DRAG, f);
@@ -880,6 +886,7 @@ namespace gui {
 		del_mark_.clear();
 		widgets ws = widgets_;
 		BOOST_FOREACH(widget* w, ws) {
+///			if(!w->get_state(widget::state::ENABLE)) continue;
 			if(del_mark_.find(w) != del_mark_.end()) continue;
 			if(w->get_state(widget::state::SERVICE)) {
 				w->service();
@@ -926,6 +933,7 @@ namespace gui {
 		// フォントは基本、バックカラーを描画しない
 		core.at_fonts().enable_back_color(false);
 
+		uint32_t rn = 0;
 		BOOST_FOREACH(widget* w, widgets_) {
 			const widget::param& pa = w->get_param();
 			if(!pa.state_[widget::state::ENABLE]) continue;
@@ -935,7 +943,7 @@ namespace gui {
 			}
 
 			mobj_.setup_matrix(size.x, size.y);
-			vtx::spos pos(0);
+			vtx::ipos pos(0);
 			final_position(w, pos);
 			float x = static_cast<float>(pos.x);
 			float y = static_cast<float>(pos.y);
@@ -987,6 +995,11 @@ namespace gui {
 			set_TSC();
 
 			w->render();
+			++rn;
+		}
+		if(render_num_ < rn) {
+			render_num_ = rn;
+///			std::cout << "Render peak num: " << rn << std::endl;
 		}
 	}
 

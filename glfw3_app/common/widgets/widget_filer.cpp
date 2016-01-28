@@ -6,7 +6,6 @@
 //=====================================================================//
 #include "widgets/widget_utils.hpp"
 #include "widgets/widget_filer.hpp"
-#include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
 #include <utility>
@@ -19,7 +18,7 @@ namespace gui {
 	static const float speed_gain = 0.95f;
 	static const float speed_move = 38.0f;	/// 横スクロールの初期速度
 
-	void widget_filer::create_file_(widget_file& wf, const vtx::srect& rect, short ofs, const std::string& str)
+	void widget_filer::create_file_(widget_file& wf, const vtx::irect& rect, int ofs, const std::string& str)
 	{
 		{
 			widget::param wp(rect, files_);
@@ -35,7 +34,7 @@ namespace gui {
 		short fns = rect.size.x * 2 / 3;
 		short ats = rect.size.x - fns - 2;
 		{
-			vtx::srect r;
+			vtx::irect r;
 			r.org.set(0);
 			r.size.set(fns, param_.label_height_);
 			widget::param wp(r, wf.base);
@@ -52,7 +51,7 @@ namespace gui {
 			wf.name->set_state(widget::state::MOVE_STALL, false);
 		}
 		{
-			vtx::srect r;
+			vtx::irect r;
 			r.org.set(fns + 2, 0);
 			r.size.set(ats, param_.label_height_);
 			widget::param wp(r, wf.base);
@@ -71,10 +70,13 @@ namespace gui {
 	}
 
 
-	void widget_filer::create_files_(widget_files& wfs, short ofs)
+	void widget_filer::create_files_(widget_files& wfs, int ofs)
 	{
+		wfs.resize(file_infos_.size() + drv_.get_num() + (param_.new_file_ ? 1 : 0));
+		wfs.clear();
+
 		// ラベルを新規に作成
-		vtx::srect rect;
+		vtx::irect rect;
 		rect.org.set(ofs, 0);
 		rect.size.x = get_rect().size.x - (param_.plate_param_.frame_width_ * 2);
 		rect.size.y = param_.label_height_;
@@ -122,7 +124,7 @@ namespace gui {
 			rect.org.y += param_.label_height_;
 		}
 
-		BOOST_FOREACH(const utils::file_info& fi, file_infos_) {
+		for(const auto& fi : file_infos_) {
 			std::string fn = fi.get_name();
 			if(fn == ".") continue;
 
@@ -185,7 +187,7 @@ namespace gui {
 
 	void widget_filer::un_selected_(widget_files& wfs)
 	{
-		BOOST_FOREACH(widget_file& wf, wfs) {
+		for(auto& wf : wfs) {
 			wf.name->set_state(widget::state::SELECTED, false);
 			wf.info->set_state(widget::state::SELECTED, false);
 		}
@@ -277,7 +279,7 @@ namespace gui {
 	void widget_filer::destroy_files_(widget_files& wfs)
 	{
 		// ラベル郡を破棄
-		BOOST_FOREACH(const widget_file& wf, wfs) {
+		for(const auto& wf : wfs) {
 			wd_.del_widget(wf.info);
 			wd_.del_widget(wf.name);
 			wd_.del_widget(wf.base);
@@ -336,7 +338,7 @@ namespace gui {
 	{
 		auto path = utils::strip_last_of_delimita_path(fn);
 
-		BOOST_FOREACH(const widget_file& wf, center_) {
+		for(const auto& wf : center_) {
 			auto t = utils::strip_last_of_delimita_path(wf.name->get_text());
 			if(wf.name && t == path) {
 				return widget_file_copt(wf);
@@ -350,7 +352,7 @@ namespace gui {
 	{
 		auto fn = utils::strip_last_of_delimita_path(path);
 		uint32_t n = 0;
-		BOOST_FOREACH(const widget_file& wf, center_) {
+		for(const auto& wf : center_) {
 			auto t = utils::strip_last_of_delimita_path(wf.name->get_text());
 			if(wf.name && !t.empty() && t == fn) {
 				// センターリング
@@ -492,7 +494,7 @@ namespace gui {
 		// info ボタン
 		{
 			gl::mobj::handle hnd = wd_.get_share_image().right_box_;
-			vtx::srect r;
+			vtx::irect r;
 			r.size = wd_.at_mobj().get_size(hnd);
 			short space = 4;
 			r.org.x = get_rect().size.x - r.size.x - frame_width - space;
@@ -506,8 +508,8 @@ namespace gui {
 		// main null frame
 		{
 			short fw = 4;
-			vtx::srect r(vtx::spos(frame_width, frame_width + param_.path_height_),
-				vtx::spos(get_rect().size.x - 8,
+			vtx::irect r(vtx::ipos(frame_width, frame_width + param_.path_height_),
+				vtx::ipos(get_rect().size.x - 8,
 					get_rect().size.y - param_.path_height_ - fw * 2 - fw));
 			widget::param wp(r, this);
 			wp.state_.reset(widget::state::RENDER_ENABLE);
@@ -520,7 +522,7 @@ namespace gui {
 
 		// files null frame
 		{
-			vtx::srect r(vtx::spos(0), get_rect().size);
+			vtx::irect r(vtx::ipos(0), get_rect().size);
 			widget::param wp(r, main_);
 			wp.state_.reset(widget::state::RENDER_ENABLE);
 			widget_null::param wp_;
@@ -609,6 +611,10 @@ namespace gui {
 		if(fsc_wait_ && fsc_.probe()) {
 			fsc_path_ = fsc_.get_path();
 			file_infos_ = fsc_.get();
+///			std::cout << "File infos: " << static_cast<unsigned int>(file_infos_.size()) << std::endl;
+///			for(auto i : file_infos_) {
+///				std::cout << i.get_name() << std::endl;
+///			}
 			fsc_wait_ = false;
 
 			if(center_.empty()) {
@@ -644,7 +650,7 @@ namespace gui {
 		if(param_.acc_focus_ && acc_key_ && !center_.empty()) {
 			if(acc_key_ >= ' ') {
 				utils::strings ss;
-				BOOST_FOREACH(const widget_file& wf, center_) {
+				for(const auto& wf : center_) {
 					char ch = wf.name->get_text()[0];
 					if(ch >= 'a' && ch <= 'z') ch -= 0x20;
 					if(ch == acc_key_) {
@@ -658,7 +664,7 @@ namespace gui {
 			} else if(acc_key_ == 0x1b) { // ESC
 				enable(false);
 			} else if(acc_key_ == '\r') { // Enter (CR)
-				BOOST_FOREACH(const widget_file& wf, center_) {
+				for(const auto& wf : center_) {
 					if(wf.name->get_text() == focus_path_) {
 						select_path_(focus_path_);
 						break;
@@ -670,7 +676,7 @@ namespace gui {
 					focus_(focus_path_);
 				} else {
 					uint32_t n = 0;
-					BOOST_FOREACH(const widget_file& wf, center_) {
+					for(const auto& wf : center_) {
 						if(wf.name->get_text() == focus_path_) {
 							break;
 						}
@@ -690,7 +696,7 @@ namespace gui {
 		// フレームのサイズを、仮想ウィジェットに反映
 		{
 			short fw = param_.plate_param_.frame_width_;
-			const vtx::spos& size = get_rect().size;
+			const vtx::ipos& size = get_rect().size;
 			short bw = size.x - fw * 2;
 			main_->at_rect().size.x = bw;
 			main_->at_rect().size.y = size.y - param_.path_height_ - fw * 2;
@@ -818,7 +824,7 @@ namespace gui {
 							position_.y = 0.0f;
 						}
 					} else {
-						const vtx::spos& scr = wd_.get_scroll();
+						const vtx::ipos& scr = wd_.get_scroll();
 						if(files_->get_focus() && scr.y != 0) {
 							position_.y += scr.y * param_.label_height_;
 							if(position_.y < d) {

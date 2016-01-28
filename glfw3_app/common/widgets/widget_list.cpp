@@ -45,7 +45,7 @@ namespace gui {
 		select_objh_ = wd_.share_add(t);
 
 		{
-			widget::param wp(vtx::srect(0, 0,
+			widget::param wp(vtx::irect(0, 0,
 				get_rect().size.x, get_rect().size.y * param_.text_list_.size()), this);
 			widget_null::param wp_;
 			frame_ = wd_.add_widget<widget_null>(wp, wp_);
@@ -54,7 +54,7 @@ namespace gui {
 		}
 
 		{
-			widget::param wp(vtx::srect(vtx::spos(0), get_rect().size), frame_);
+			widget::param wp(vtx::irect(vtx::ipos(0), get_rect().size), frame_);
 			widget_label::param wp_;
 			wp_.plate_param_ = param_.plate_param_;
 			wp_.color_param_ = param_.color_param_select_;

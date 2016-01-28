@@ -34,7 +34,7 @@ namespace gui {
 		vtx::spos btn_size(btn_width, btn_height);
 		short y = size.y - space_height - btn_height;
 		if(param_.style_ == param::style::OK) {
-			widget::param wp(vtx::srect(vtx::spos(
+			widget::param wp(vtx::irect(vtx::ipos(
 				(size.x - fw - btn_width) / 2, y),
 				btn_size), this);
 			widget_button::param wp_("OK");
@@ -42,13 +42,13 @@ namespace gui {
 		} else if(param_.style_ == param::style::CANCEL_OK) {
 			short ofs = (size.x - fw * 2 - btn_width * 2) / 3;
 			{
-				widget::param wp(vtx::srect(vtx::spos(fw + ofs, y),
+				widget::param wp(vtx::irect(vtx::ipos(fw + ofs, y),
 				btn_size), this);
 				widget_button::param wp_("Cancel");
 				cancel_ = wd_.add_widget<widget_button>(wp, wp_);
 			}
 			{
-				widget::param wp(vtx::srect(vtx::spos(fw + ofs + btn_width + ofs, y),
+				widget::param wp(vtx::irect(vtx::ipos(fw + ofs + btn_width + ofs, y),
 				btn_size), this);
 				widget_button::param wp_("OK");
 				ok_ = wd_.add_widget<widget_button>(wp, wp_);

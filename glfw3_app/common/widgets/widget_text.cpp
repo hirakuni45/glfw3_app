@@ -47,11 +47,11 @@ namespace gui {
 		const vtx::spos& vsz = core.get_size();
 		const widget::param& wp = get_param();
 
-		if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) { 
+		if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) {
 
 			glPushMatrix();
 
-			vtx::srect rect;
+			vtx::irect rect;
 			if(wp.state_[widget::state::CLIP_PARENTS]) {
 				rect.org  = wp.rpos_;
 				rect.size = wp.rect_.size;

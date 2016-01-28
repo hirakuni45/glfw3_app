@@ -22,10 +22,10 @@ namespace gui {
 		@param[out]	pa		ペイントクラス
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	void create_image_base(const img::i_img* image, const vtx::spos& size, img::paint& pa)
+	void create_image_base(const img::i_img* image, const vtx::ipos& size, img::paint& pa)
 	{
-		vtx::spos s;
-		vtx::spos o;
+		vtx::ipos s;
+		vtx::ipos o;
 		if(size.x <= 0) {
 			o.x = 0;
 			s.x = image->get_size().x;
@@ -51,7 +51,7 @@ namespace gui {
 		if(pp.round_style_ == widget::plate_param::round_style::ALL) {
 			return;
 		} else {
-			const vtx::spos& size = pa.get_size();
+			const vtx::ipos& size = pa.get_size();
 			img::paint npa;
 			npa.create(size, pa.test_alpha());
 			npa.fill(img::rgba8(0, 0));
@@ -91,7 +91,7 @@ namespace gui {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	void create_round_frame(img::paint& pa, const widget::plate_param& pp,
-		const widget::color_param& cp, const vtx::spos& size)
+		const widget::color_param& cp, const vtx::ipos& size)
 	{
 		pa.create(size, true);
 		pa.fill(img::rgba8(0, 0));
@@ -127,7 +127,7 @@ namespace gui {
 		@param[out]	pos		位置を受け取る参照
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	void final_position(const widget* root, vtx::spos& pos)
+	void final_position(const widget* root, vtx::ipos& pos)
 	{
 		pos.set(0);
 		while(root != 0) {
@@ -147,10 +147,10 @@ namespace gui {
 		@return クリップ内なら「true」
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	bool final_clip(widget* root, vtx::spos& org, vtx::srect& rect)
+	bool final_clip(widget* root, vtx::ipos& org, vtx::irect& rect)
 	{
 		widgets ws;
-		vtx::srect sr(vtx::spos(0), root->get_rect().size);
+		vtx::irect sr(vtx::ipos(0), root->get_rect().size);
 		while(root != 0) {
 			sr.org += root->get_rect().org;
 			ws.push_back(root);
@@ -158,11 +158,11 @@ namespace gui {
 		}
 
 		widgets_cit cit = ws.end();
-		vtx::spos psum(0);
-		vtx::spos top = sr.org;
+		vtx::ipos psum(0);
+		vtx::ipos top = sr.org;
 		while(cit != ws.begin()) {
 			--cit;
-			vtx::srect r = (*cit)->get_rect();
+			vtx::irect r = (*cit)->get_rect();
 			r.org += psum;
 			psum = r.org;
 			if(!sr.clip(r)) {
@@ -186,13 +186,13 @@ namespace gui {
 		@param[in]	ofs		描画オフセット
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	void draw_mobj(widget_director& wd, gl::mobj::handle h, const vtx::srect& clip, const vtx::spos& ofs)
+	void draw_mobj(widget_director& wd, gl::mobj::handle h, const vtx::irect& clip, const vtx::ipos& ofs)
 	{
 		using namespace gl;
 		core& core = core::get_instance();
 
-		const vtx::spos& vsz = core.get_size();
-		const vtx::spos& siz = core.get_rect().size;
+		const vtx::ipos& vsz = core.get_size();
+		const vtx::ipos& siz = core.get_rect().size;
 
 		int sx = vsz.x / siz.x;
 		int sy = vsz.y / siz.y;
@@ -211,7 +211,7 @@ namespace gui {
 		@param[in]	clip	描画エリア
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	void draw_text(const widget::text_param& tp, const vtx::srect& rect, const vtx::srect& clip)
+	void draw_text(const widget::text_param& tp, const vtx::irect& rect, const vtx::irect& clip)
 	{
 		gl::core& core = gl::core::get_instance();
 
@@ -223,13 +223,13 @@ namespace gui {
 		}
 		if(ls.empty()) return;
 
-		const vtx::spos& vsz = core.get_size();
-		const vtx::spos& siz = core.get_rect().size;
+		const vtx::ipos& vsz = core.get_size();
+		const vtx::ipos& siz = core.get_rect().size;
 
 		gl::fonts& fonts = core.at_fonts();
 
-		vtx::srect clip_ = clip;
-		vtx::srect rect_ = rect;
+		vtx::irect clip_ = clip;
+		vtx::irect rect_ = rect;
 
 		if(!tp.font_.empty()) {
 			fonts.push_font_face();
@@ -244,8 +244,8 @@ namespace gui {
 		fonts.setup_matrix(clip_.size.x, clip_.size.y);
 
 		fonts.enable_proportional(tp.proportional_);
-		vtx::spos pos;
-		const vtx::spos& fsize = fonts.get_size(ls);
+		vtx::ipos pos;
+		const auto& fsize = fonts.get_size(ls);
 		vtx::placement tpl = tp.placement_;
 		if(fsize.x > clip_.size.x) {
 			tpl.hpt = vtx::placement::holizontal::LEFT;
@@ -259,7 +259,7 @@ namespace gui {
 
 		pos += tp.offset_;
 		if(tp.shadow_offset_.x != 0 || tp.shadow_offset_.y != 0) {
-			vtx::spos p = pos + tp.shadow_offset_;
+			vtx::ipos p = pos + tp.shadow_offset_;
 			fonts.set_fore_color(tp.shadow_color_);
 			fonts.draw(p, ls, clx);
 		}
@@ -287,13 +287,13 @@ namespace gui {
 	{
 		gl::core& core = gl::core::get_instance();
 
-		const vtx::spos& vsz = core.get_size();
+		const vtx::ipos& vsz = core.get_size();
 
 		gl::fonts& fonts = core.at_fonts();
 
 		if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) {
 			glPushMatrix();
-			vtx::srect rect;
+			vtx::irect rect;
 			if(wp.state_[widget::state::CLIP_PARENTS]) {
 				draw_mobj(wd, oh, wp.clip_);
 				rect.org  = wp.rpos_;
@@ -312,7 +312,7 @@ namespace gui {
 				tmp.shadow_color_ *= cf.r;
 				tmp.shadow_color_.alpha_scale(cf.a);
 
-				vtx::srect clip = wp.clip_;
+				vtx::irect clip = wp.clip_;
 				rect.size.x -= pp.frame_width_ * 2;
 				rect.size.y -= pp.frame_width_ * 2;
 				clip.org.x += pp.frame_width_;
@@ -342,7 +342,7 @@ namespace gui {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	gl::mobj::handle frame_init(widget_director& wd, widget::param& wp, const widget::plate_param& pp, const widget::color_param& cp)
 	{
-		vtx::spos size;
+		vtx::ipos size;
 		if(pp.resizeble_) {
 //			vtx::spos rsz = pp.grid_ * 3;
 //			if(wp.rect_.size.x >= rsz.x) size.x = rsz.x;
@@ -371,14 +371,14 @@ namespace gui {
 		@param[in]	ofs	描画オフセット
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	void render_clipped_mobj(gl::mobj& mo, gl::mobj::handle moh, const vtx::srect& clip,
-		const vtx::spos& ofs)
+	void render_clipped_mobj(gl::mobj& mo, gl::mobj::handle moh, const vtx::irect& clip,
+		const vtx::ipos& ofs)
 	{
 		using namespace gl;
 		core& core = core::get_instance();
 
-		const vtx::spos& vsz = core.get_size();
-		const vtx::spos& siz = core.get_rect().size;
+		const vtx::ipos& vsz = core.get_size();
+		const vtx::ipos& siz = core.get_rect().size;
 
 		if(clip.size.x > 0 && clip.size.y > 0) {
 			glPushMatrix();
@@ -457,15 +457,15 @@ namespace gui {
 
 		using namespace gl;
 		core& core = core::get_instance();
-		const vtx::spos& vsz = core.get_size();
+		const vtx::ipos& vsz = core.get_size();
 
 		glPushMatrix();
-		vtx::srect rect;
+		vtx::irect rect;
 		short fw = pp.frame_width_;
 		rect.org.set(0);
 		rect.size.set(bp.rect_.size.x - fw * 2, pp.caption_width_);
 
-		vtx::srect clip = bp.clip_;
+		vtx::irect clip = bp.clip_;
 		clip.org.x += fw;
 		clip.org.y += fw;
 		clip.size.x -= fw * 2;

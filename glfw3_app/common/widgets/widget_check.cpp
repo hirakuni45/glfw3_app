@@ -73,9 +73,9 @@ namespace gui {
 
 			glPushMatrix();
 
-			vtx::srect rect;
+			vtx::irect rect;
 			const vtx::spos& mosz = wd_.at_mobj().get_size(h);
-			vtx::spos ofs(0, (wp.rect_.size.y - mosz.y) / 2);
+			vtx::ipos ofs(0, (wp.rect_.size.y - mosz.y) / 2);
 			if(wp.state_[widget::state::CLIP_PARENTS]) {
 				if(param_.draw_box_) draw_mobj(wd_, h, wp.clip_, ofs + wp.rpos_);
 				rect.org  = wp.rpos_;

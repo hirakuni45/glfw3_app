@@ -129,7 +129,7 @@ namespace gui {
 		std::string	file_;
 
 		struct file_t {
-			vtx::spos	position_;
+			vtx::ipos	position_;
 			uint32_t	select_pos_;
 			file_t() : position_(0), select_pos_(0) { }
 		};
@@ -152,8 +152,8 @@ namespace gui {
 		bool		back_directory_;
 		bool		center_update_;
 
-		void create_file_(widget_file& wf, const vtx::srect& rect, short ofs, const std::string& str);
-		void create_files_(widget_files& wfs, short ofs);
+		void create_file_(widget_file& wf, const vtx::irect& rect, int ofs, const std::string& str);
+		void create_files_(widget_files& wfs, int ofs);
 		widget_files_cit scan_select_in_file_(widget_files& wfs) const;
 		widget_files_cit scan_select_file_(widget_files& wfs) const;
 		widget_files_cit scan_selected_file_(widget_files& wfs) const;

@@ -76,7 +76,7 @@ namespace gui {
 		tree_unit::unit_map_it	select_it_;
 
 		struct root_t {
-			vtx::spos			pos;
+			vtx::ipos			pos;
 			gl::mobj::handle	h;
 		};
 		std::vector<root_t>	roots_;

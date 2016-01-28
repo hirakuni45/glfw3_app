@@ -36,7 +36,7 @@ namespace gui {
 				};
 			};
 			style::type		style_;		///< ダイアログ・スタイル
-			vtx::srect		text_area_;	///< テキスト表示エリア
+			vtx::irect		text_area_;	///< テキスト表示エリア
 
 			bool			return_ok_;
 			bool			return_cancel_;
@@ -44,7 +44,7 @@ namespace gui {
 			param(style::type t = style::OK) : plate_param_(),
 				color_param_(widget_director::default_dialog_color_),
 				style_(t),
-				text_area_(vtx::spos(8), vtx::spos(0)),
+				text_area_(vtx::ipos(8), vtx::ipos(0)),
 				return_ok_(false), return_cancel_(false)
 			{ }
 		};

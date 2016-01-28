@@ -87,7 +87,7 @@ namespace gui {
 			short	round_radius_;		///< ラウンド半径
 			short	frame_width_;		///< フレーム幅
 			short	caption_width_;		///< キャプション幅
-			vtx::spos	grid_;			///< リサイズ・グリッド
+			vtx::ipos	grid_;			///< リサイズ・グリッド
 			bool	resizeble_;			///< リサイズが可能な場合
 			plate_param() : round_style_(round_style::ALL),
 				round_radius_(8), frame_width_(4), caption_width_(0),
@@ -138,9 +138,9 @@ namespace gui {
 
 			img::rgba8		fore_color_;	///< テキスト色
 			img::rgba8		shadow_color_;	///< 影色
-			vtx::spos		shadow_offset_;	///< 影の相対位置
+			vtx::ipos		shadow_offset_;	///< 影の相対位置
 			vtx::placement	placement_;		///< 配置方法
-			vtx::spos		offset_;		///< 描画オフセット（シフト表示用）
+			vtx::ipos		offset_;		///< 描画オフセット（シフト表示用）
 
 			int				cursor_;		///< カーソル位置反転表示（エリアスは無効になる）
 
@@ -330,25 +330,25 @@ namespace gui {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
-			vtx::srect			rect_;			///< 領域
-			vtx::srect			clip_;			///< クリップ領域
-			vtx::spos			rpos_;			///< レンダリング開始
-			vtx::spos			move_org_;		///< 移動基準位置
-			vtx::spos			move_pos_;		///< 移動位置
-			vtx::spos			resize_sign_;	///< リサイズ符号
-			vtx::spos			resize_min_;	///< リサイズ最小サイズ
-			vtx::spos			resize_org_;	///< リサイズ基準位置
-			vtx::spos			resize_pos_;	///< リサイズ位置
-			vtx::spos			resize_ref_;	///< リサイズ基準サイズ
-			vtx::spos			speed_;			///< 速度
-			vtx::spos			in_point_;		///< 内包ポイント
+			vtx::irect			rect_;			///< 領域
+			vtx::irect			clip_;			///< クリップ領域
+			vtx::ipos			rpos_;			///< レンダリング開始
+			vtx::ipos			move_org_;		///< 移動基準位置
+			vtx::ipos			move_pos_;		///< 移動位置
+			vtx::ipos			resize_sign_;	///< リサイズ符号
+			vtx::ipos			resize_min_;	///< リサイズ最小サイズ
+			vtx::ipos			resize_org_;	///< リサイズ基準位置
+			vtx::ipos			resize_pos_;	///< リサイズ位置
+			vtx::ipos			resize_ref_;	///< リサイズ基準サイズ
+			vtx::ipos			speed_;			///< 速度
+			vtx::ipos			in_point_;		///< 内包ポイント
 			uint32_t			hold_frame_;	///< ホールド・フレーム
 			uint32_t			holded_frame_;	///< ホールドしてたフレーム
 			widget*				parents_;		///< 親ウィジェット
 			action_types		action_;		///< アクション
 			state_types			state_;			///< 状態制御
 
-			param(const vtx::srect& r = vtx::srect(0), widget* parents = 0) :
+			param(const vtx::irect& r = vtx::irect(0), widget* parents = 0) :
 				rect_(r), clip_(r), rpos_(r.org),
 				move_org_(0), move_pos_(0),
 				resize_sign_(0), resize_min_(16 * 3), resize_org_(0), resize_pos_(0), resize_ref_(0),
@@ -419,7 +419,7 @@ namespace gui {
 			@return 領域の参照
 		*/
 		//-----------------------------------------------------------------//
-		const vtx::srect& get_rect() const { return param_.rect_; }
+		const vtx::irect& get_rect() const { return param_.rect_; }
 
 
 		//-----------------------------------------------------------------//
@@ -428,7 +428,7 @@ namespace gui {
 			@return 領域の参照
 		*/
 		//-----------------------------------------------------------------//
-		vtx::srect& at_rect() { return param_.rect_; }
+		vtx::irect& at_rect() { return param_.rect_; }
 
 
 		//-----------------------------------------------------------------//
@@ -702,7 +702,7 @@ namespace gui {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct share_t {
-		vtx::spos	size_;
+		vtx::ipos	size_;
 		widget::color_param	color_param_;
 		widget::plate_param	plate_param_;
 		share_t() : size_(0), color_param_(), plate_param_() { }

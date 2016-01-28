@@ -83,11 +83,11 @@ namespace gui {
 		widget*					focus_widget_;
 
 		float					msp_length_;
-		vtx::spos				msp_speed_;
-		vtx::spos				position_positive_;
-		vtx::spos				position_level_;
-		vtx::spos				position_negative_;
-		vtx::spos				scroll_;
+		vtx::ipos				msp_speed_;
+		vtx::ipos				position_positive_;
+		vtx::ipos				position_level_;
+		vtx::ipos				position_negative_;
+		vtx::ipos				scroll_;
 
 		share_img				share_img_;
 
@@ -98,6 +98,8 @@ namespace gui {
 		utils::strings			error_list_;
 
 		float					unselect_length_;
+
+		uint32_t				render_num_ = 0;
 
 		void message_widget_(widget* w, const std::string& s);
 		void parents_widget_mark_(widget* root);
@@ -274,7 +276,7 @@ namespace gui {
 			@return スクロール
 		*/
 		//-----------------------------------------------------------------//
-		const vtx::spos& get_scroll() const { return scroll_; }
+		const vtx::ipos& get_scroll() const { return scroll_; }
 
 
 		//-----------------------------------------------------------------//

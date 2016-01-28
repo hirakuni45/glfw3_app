@@ -14,7 +14,7 @@ namespace gui {
 
 	void widget_tree::create_()
 	{
-		vtx::srect r;
+		vtx::irect r;
 		r.org.set(0);
 		r.size.x = get_rect().size.x;
 		r.size.y = param_.height_;

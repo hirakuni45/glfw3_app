@@ -21,7 +21,7 @@ namespace gui {
 		at_param().state_.set(widget::state::SIZE_LOCK);
 		at_param().state_.set(widget::state::ENABLE, false);
 
-		widget::param wp(vtx::srect(vtx::spos(0), get_rect().size), this);
+		widget::param wp(vtx::irect(vtx::spos(0), get_rect().size), this);
 		widget_label::param wp_;
 		wp_.plate_param_ = param_.plate_param_;
 		wp_.color_param_ = param_.color_param_select_;

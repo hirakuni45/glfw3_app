@@ -119,7 +119,7 @@ namespace gui {
 			@param[in]	size	描画領域
 		*/
 		//-----------------------------------------------------------------//
-		void set_draw_area(const vtx::spos& size) {
+		void set_draw_area(const vtx::ipos& size) {
 			short ofs = param_.plate_param_.frame_width_;
 			at_rect().size.x = size.x + ofs * 2;
 			at_rect().size.y = size.y + ofs * 2 + param_.plate_param_.caption_width_;
@@ -132,7 +132,7 @@ namespace gui {
 			@param[out]	area	描画領域の参照
 		*/
 		//-----------------------------------------------------------------//
-		void get_draw_area(vtx::srect& area) const {
+		void get_draw_area(vtx::irect& area) const {
 			short ofs = param_.plate_param_.frame_width_;
 			area.org.set(ofs, ofs + param_.plate_param_.caption_width_);
 			area.size.x = get_rect().size.x - ofs * 2;

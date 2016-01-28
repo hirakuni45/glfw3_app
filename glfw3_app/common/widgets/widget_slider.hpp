@@ -57,9 +57,9 @@ namespace gui {
 		param				param_;
 
 		float				ref_position_;
-		vtx::spos			ref_point_;
+		vtx::ipos			ref_point_;
 
-		vtx::spos			handle_offset_;
+		vtx::ipos			handle_offset_;
 
 		gl::mobj::handle	base_h_;	///< ベース
 		gl::mobj::handle	hand_h_;	///< ハンドル

@@ -21,7 +21,7 @@ namespace gui {
 		@param[out]	pa		ペイントクラス
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	void create_image_base(const img::i_img* image, const vtx::spos& size, img::paint& pa);
+	void create_image_base(const img::i_img* image, const vtx::ipos& size, img::paint& pa);
 
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -34,7 +34,7 @@ namespace gui {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	void create_round_frame(img::paint& pa, const widget::plate_param& pp,
-		const widget::color_param& cp, const vtx::spos& size);
+		const widget::color_param& cp, const vtx::ipos& size);
 
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -49,7 +49,7 @@ namespace gui {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	template <class WIDGET>
 	WIDGET* create_image(widget_director& wd, const std::string& file,
-		const vtx::srect& rect = vtx::srect(0), widget* parents = 0) {
+		const vtx::irect& rect = vtx::irect(0), widget* parents = 0) {
 		using namespace gui;
 
 		WIDGET* w;
@@ -90,7 +90,7 @@ namespace gui {
 		@param[out]	pos		位置を受け取る参照
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	void final_position(const widget* root, vtx::spos& pos);
+	void final_position(const widget* root, vtx::ipos& pos);
 
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -102,7 +102,7 @@ namespace gui {
 		@return クリップ内なら「true」
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	bool final_clip(widget* root, vtx::spos& org, vtx::srect& rect);
+	bool final_clip(widget* root, vtx::ipos& org, vtx::irect& rect);
 
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -114,7 +114,7 @@ namespace gui {
 		@param[in]	ofs		描画オフセット
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	void draw_mobj(widget_director& wd, gl::mobj::handle h, const vtx::srect& clip, const vtx::spos& ofs = vtx::spos(0));
+	void draw_mobj(widget_director& wd, gl::mobj::handle h, const vtx::irect& clip, const vtx::ipos& ofs = vtx::ipos(0));
 
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -125,7 +125,7 @@ namespace gui {
 		@param[in]	clip	描画エリア
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	void draw_text(const widget::text_param& tp, const vtx::srect& rect, const vtx::srect& clip);
+	void draw_text(const widget::text_param& tp, const vtx::irect& rect, const vtx::irect& clip);
 
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -163,8 +163,8 @@ namespace gui {
 		@param[in]	ofs	描画オフセット
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	void render_clipped_mobj(gl::mobj& mo, gl::mobj::handle moh, const vtx::srect& clip,
-		const vtx::spos& ofs);
+	void render_clipped_mobj(gl::mobj& mo, gl::mobj::handle moh, const vtx::irect& clip,
+		const vtx::ipos& ofs);
 
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
