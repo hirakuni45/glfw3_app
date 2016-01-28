@@ -134,7 +134,7 @@ namespace gl {
 		bool	ccw_;
 		bool	swap_color_;
 
-		vtx::srect	clip_;
+		vtx::irect	clip_;
 
 		bool allocate_font_texture_(int width, int height, tex_map& tmap);
 
@@ -332,7 +332,7 @@ namespace gl {
 			@param[in]	rect	開始位置、大きさ
 		*/
 		//-----------------------------------------------------------------//
-		void setup_matrix_with_clip(const vtx::srect& rect);
+		void setup_matrix_with_clip(const vtx::irect& rect);
 
 
 		//-----------------------------------------------------------------//
@@ -403,7 +403,7 @@ namespace gl {
 			@param[in]	clip	クリップ領域
 		*/
 		//-----------------------------------------------------------------//
-		void set_clip(vtx::srect& clip) { clip_ = clip; }
+		void set_clip(vtx::irect& clip) { clip_ = clip; }
 
 
 		//-----------------------------------------------------------------//
@@ -412,7 +412,7 @@ namespace gl {
 			@param[in]	org	開始位置
 		*/
 		//-----------------------------------------------------------------//
-		void set_clip_org(const vtx::spos& org) { clip_.org = org; }
+		void set_clip_org(const vtx::ipos& org) { clip_.org = org; }
 
 
 		//-----------------------------------------------------------------//
@@ -421,7 +421,7 @@ namespace gl {
 			@param[in]	size	サイズ
 		*/
 		//-----------------------------------------------------------------//
-		void set_clip_size(const vtx::spos& size) { clip_.size = size; }
+		void set_clip_size(const vtx::ipos& size) { clip_.size = size; }
 
 
 		//-----------------------------------------------------------------//
@@ -509,7 +509,7 @@ namespace gl {
 			@return	フォントの幅を返す。
 		 */
 		//-----------------------------------------------------------------//
-		int draw(const vtx::spos& pos, uint32_t code, bool inv = false);
+		int draw(const vtx::ipos& pos, uint32_t code, bool inv = false);
 
 
 		//-----------------------------------------------------------------//
@@ -522,7 +522,7 @@ namespace gl {
 			@return	描画幅を返す（複数行の場合、最大値）
 		 */
 		//-----------------------------------------------------------------//
-		int draw(const vtx::spos& pos, const std::string& text, short limit = 0, short cursor = -1) {
+		int draw(const vtx::ipos& pos, const std::string& text, int limit = 0, int cursor = -1) {
 			utils::lstring ls;
 			utils::utf8_to_utf32(text, ls);
 			return draw(pos, ls, limit, cursor);
@@ -538,7 +538,7 @@ namespace gl {
 			@return	描画幅を返す（複数行の場合、最大値）
 		 */
 		//-----------------------------------------------------------------//
-		int draw(const vtx::spos& pos, const utils::wstring& text, short limit = 0, short cursor = -1) {
+		int draw(const vtx::ipos& pos, const utils::wstring& text, int limit = 0, int cursor = -1) {
 			utils::lstring ls;
 			utils::utf16_to_utf32(text, ls);
 			return draw(pos, ls, limit, cursor);
@@ -555,7 +555,7 @@ namespace gl {
 			@return	描画幅を返す（複数行の場合、最大値）
 		 */
 		//-----------------------------------------------------------------//
-		int draw(const vtx::spos& pos, const utils::lstring& text, short limit = 0, short cursor = -1);
+		int draw(const vtx::ipos& pos, const utils::lstring& text, int limit = 0, int cursor = -1);
 
 
 		//-----------------------------------------------------------------//
@@ -642,7 +642,7 @@ namespace gl {
 			@return	大きさを返す
 		 */
 		//-----------------------------------------------------------------//
-		vtx::spos get_size(const std::string& s) {
+		vtx::ipos get_size(const std::string& s) {
 			utils::lstring ls;
 			utils::utf8_to_utf32(s, ls);
 			return get_size(ls);
@@ -656,7 +656,7 @@ namespace gl {
 			@return	大きさを返す
 		 */
 		//-----------------------------------------------------------------//
-		vtx::spos get_size(const utils::wstring& s) {
+		vtx::ipos get_size(const utils::wstring& s) {
 			utils::lstring ls;
 			utils::utf16_to_utf32(s, ls);
 			return get_size(ls);
@@ -670,7 +670,7 @@ namespace gl {
 			@return	大きさを返す
 		 */
 		//-----------------------------------------------------------------//
-		vtx::spos get_size(const utils::lstring& s);
+		vtx::ipos get_size(const utils::lstring& s);
 
 
 		//-----------------------------------------------------------------//
@@ -680,10 +680,10 @@ namespace gl {
 			@return	大きさを返す
 		 */
 		//-----------------------------------------------------------------//
-		vtx::spos get_size(const utils::wstrings& wss) {
-			vtx::spos size(0, 0);
+		vtx::ipos get_size(const utils::wstrings& wss) {
+			vtx::ipos size(0, 0);
 			BOOST_FOREACH(const utils::wstring& ws, wss) {
-				vtx::spos s = get_size(ws);
+				vtx::ipos s = get_size(ws);
 				size += s;
 			}
 			return size;
@@ -696,7 +696,7 @@ namespace gl {
 			@param[in]	rect	描画位置と大きさ
 		 */
 		//-----------------------------------------------------------------//
-		void draw_back(const vtx::srect& rect);
+		void draw_back(const vtx::irect& rect);
 
 
 		//-----------------------------------------------------------------//

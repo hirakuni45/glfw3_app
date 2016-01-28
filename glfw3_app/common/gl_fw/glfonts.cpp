@@ -375,7 +375,7 @@ namespace gl {
 		@return	描画に成功したらフォントの幅を返す。
 	 */
 	//-----------------------------------------------------------------//
-	int fonts::draw(const vtx::spos& pos, uint32_t code, bool inv)
+	int fonts::draw(const vtx::ipos& pos, uint32_t code, bool inv)
 	{
 		fcode_map::const_iterator cit = find_font_code(code);
 		if(cit == face_->fcode_map_.end()) {
@@ -384,8 +384,8 @@ namespace gl {
 		}
 		const tex_map& tmap = cit->second;
 
-		short x  = pos.x;
-		short y  = pos.y;
+		auto x  = pos.x;
+		auto y  = pos.y;
 		// 半角文字で、等幅表示の場合、中心に描画
 		if(face_->info_.center && !face_->info_.proportional && code >= 0x20 && code < 0x7f) {
 			if(tmap.w < face_->info_.size) {
@@ -393,27 +393,27 @@ namespace gl {
 			}
 		}
 
-		short ox = 0;
-		short oy = 0;
+		int ox = 0;
+		int oy = 0;
 
-		const vtx::srect& clip = clip_;
+		const vtx::irect& clip = clip_;
 //		if(clip.size.x < 0) { clip.org.x -= clip.org.x;                       clip.w = -clip.w; }
 //		if(clip.size.y < 0) { clip.org.y -= clip.org.y - m_face->m_info.size; clip.h = -clip.h; }
 
-		short	xt = x;
-		short	xe = x + tmap.w;
-		short	clip_xe = clip.org.x + clip.size.x;
+		int xt = x;
+		int xe = x + tmap.w;
+		int clip_xe = clip.org.x + clip.size.x;
 		if(xe < clip.org.x) return font_width_(code, tmap.w, tmap.h);	// clip out!
 		else if(clip_xe <= xt) return font_width_(code, tmap.w, tmap.h);	// clip out!
 
-		short	yt = y;
-		short	ye = y + tmap.h;
-		short	clip_ye = clip.org.y + clip.size.y;
+		int yt = y;
+		int ye = y + tmap.h;
+		int clip_ye = clip.org.y + clip.size.y;
 		if(ye < clip.org.y) return font_width_(code, tmap.w, tmap.h);	// clip out!
 		else if(clip_ye <= yt) return font_width_(code, tmap.w, tmap.h);	// clip out!
 
-		short	ut = 0;
-		short	ue = tmap.w;
+		int ut = 0;
+		int ue = tmap.w;
 		if(xt < clip.org.x && clip.org.x <= xe) {
 			ut = clip.org.x - xt;
 			xt = clip.org.x;
@@ -423,8 +423,8 @@ namespace gl {
 			xe = clip_xe;
 		}
 
-		short	vt = 0;
-		short	ve = tmap.h;
+		int vt = 0;
+		int ve = tmap.h;
 		if(yt < clip.org.y && clip.org.y <= ye) {
 			vt = clip.org.y - yt;
 			yt = clip.org.y;
@@ -472,7 +472,7 @@ namespace gl {
 			} else {
 				bc = back_color_;
 			}
-			short i = face_->info_.spaceing;
+			int i = face_->info_.spaceing;
 			if(ccw_) {
 				vertex_[0].x = ox + xt;     vertex_[0].y = oy + yt;
 				vertex_[1].x = ox + xt;     vertex_[1].y = oy + ye;
@@ -534,12 +534,12 @@ namespace gl {
 		@return	描画幅を返す（複数行の場合、最大値）
 	 */
 	//-----------------------------------------------------------------//
-	int fonts::draw(const vtx::spos& pos, const utils::lstring& text, short limit, short cursor)
+	int fonts::draw(const vtx::ipos& pos, const utils::lstring& text, int limit, int cursor)
 	{
-		short x = pos.x;
-		short y = pos.y;
-		short xx = x;
-		short n = 0;
+		int x = pos.x;
+		int y = pos.y;
+		int xx = x;
+		int n = 0;
 		BOOST_FOREACH(uint32_t code, text) {
 			if(code < 32) {
 				if(code == '\n') {
@@ -548,13 +548,13 @@ namespace gl {
 				}
 			} else {
 				if(limit) {
-					short w = get_width(code);
+					int w = get_width(code);
 					if((x + w) >= limit) {
 						x = pos.x;
 						y += face_->info_.size;
 					}
 				}
-				x += draw(vtx::spos(x, y), code, n == cursor);
+				x += draw(vtx::ipos(x, y), code, n == cursor);
 				if(x > xx) xx = x;
 			}
 			++n;
@@ -613,10 +613,10 @@ namespace gl {
 		@return	大きさを返す
 	 */
 	//-----------------------------------------------------------------//
-	vtx::spos fonts::get_size(const utils::lstring& s)
+	vtx::ipos fonts::get_size(const utils::lstring& s)
 	{
-		vtx::spos size(0, 0);
-		vtx::spos tmp(0, face_->info_.size);
+		vtx::ipos size(0, 0);
+		vtx::ipos tmp(0, face_->info_.size);
 		BOOST_FOREACH(uint32_t ch, s) {
 			if(ch >= 0x20) {
 				tmp.x += get_width(ch);
@@ -641,7 +641,7 @@ namespace gl {
 		@param[in]	rect	描画位置と大きさ
 	 */
 	//-----------------------------------------------------------------//
-	void fonts::draw_back(const vtx::srect& rect)
+	void fonts::draw_back(const vtx::irect& rect)
 	{
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(2, GL_SHORT, 0, vertex_);
