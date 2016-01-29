@@ -7,7 +7,6 @@
 #include <iostream>
 #include <cstdio>
 #include <map>
-#include <boost/foreach.hpp>
 #include <boost/format.hpp>
 #include "core/glcore.hpp"
 #include "gl_fw/gl_info.hpp"
@@ -171,7 +170,7 @@ namespace gui {
 
 		widgets ws;
 		parents_widget(root, ws);
-		BOOST_FOREACH(widget* w, ws) {
+		for(auto w : ws) {
 			w->at_param().state_[widget::state::ENABLE] = flag;
 		}
 	}
@@ -188,7 +187,7 @@ namespace gui {
 		if(w == nullptr) return false;
 
 		widgets ws;
-		BOOST_FOREACH(widget* ww, widgets_) {
+		for(auto ww : widgets_) {
 			if(ww != w) {
 				ws.push_back(ww);
 			}
@@ -219,7 +218,7 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_director::parents_widget(widget* pw, widgets& ws)
 	{
-		BOOST_FOREACH(widget* w, widgets_) {
+		for(auto w : widgets_) {
 			if(w->get_param().parents_ == pw) {
 				ws.push_back(w);
 				parents_widget(w, ws);
@@ -256,7 +255,7 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	void widget_director::reset_mark()
 	{
-		BOOST_FOREACH(widget* w, widgets_) {
+		for(auto w : widgets_) {
 			w->set_mark(false);
 		}
 	}
@@ -276,16 +275,16 @@ namespace gui {
 		widgets ws;
 		ws.push_back(w);
 		parents_widget(w, ws);
-		BOOST_FOREACH(widget* cw, ws) {
+		for(auto cw : ws) {
 			cw->set_mark();
 		}
 		widgets wss;
-		BOOST_FOREACH(widget* cw, widgets_) {
+		for(auto cw : widgets_) {
 			if(!cw->get_mark()) {
 				wss.push_back(cw);
 			}
 		}
-		BOOST_FOREACH(widget* cw, ws) {
+		for(auto cw : ws) {
 			wss.push_back(cw);
 		}
 		widgets_ = wss;
@@ -532,15 +531,10 @@ namespace gui {
 	//-----------------------------------------------------------------//
 	bool widget_director::update()
 	{
-//		static uint32_t widget_num_ = 0;
-//		if(widgets_.size() != widget_num_) {
-//			widget_num_ = widgets_.size();
-//			std::cout << "Widget num: " << widget_num_ << std::endl;
-//		}
 		{  // ダイアログがある場合の優先順位とストール処理
 			reset_mark();
 			widgets ws;
-			BOOST_FOREACH(widget* w, widgets_) {
+			for(auto w : widgets_) {
 				if(!w->get_state(widget::state::ENABLE)) continue;
 				if(w->type() == get_type_id<widget_dialog>()) {
 					parents_widget_mark_(w);
@@ -548,17 +542,17 @@ namespace gui {
 				}
 			}
 			if(ws.empty()) {
-				BOOST_FOREACH(widget* w, widgets_) {
+				for(auto w : widgets_) {
 					w->set_state(widget::state::SYSTEM_STALL, false);
 				}
 			} else {
-				BOOST_FOREACH(widget* w, widgets_) {
+				for(auto w : widgets_) {
 					if(!w->get_mark()) {
 						w->set_state(widget::state::SYSTEM_STALL);
 					}
 				}
 			}
-			BOOST_FOREACH(widget* w, ws) {
+			for(auto w : ws) {
 				top_widget(w);
 			}
 		}
@@ -625,7 +619,7 @@ namespace gui {
 		// フォーカス、選択、を決定
 		bool resize_trigger = false;
 		bool select_trigger = false;
-		BOOST_FOREACH(widget* w, widgets_) {
+		for(auto w : widgets_) {
 			if(!w->get_state(widget::state::ENABLE) ||
 			  w->get_state(widget::state::STALL) ||
 			  w->get_state(widget::state::SYSTEM_STALL)) {
@@ -752,7 +746,7 @@ namespace gui {
 		if(select_widget_ && select_widget_->get_state(widget::state::FOCUS_CHILDS)) {
 			widgets ws;
 			parents_widget(select_widget_, ws);
-			BOOST_FOREACH(widget* w, ws) {
+			for(auto w : ws) {
 				if(!w->get_state(widget::state::FOCUS_ENABLE)) continue;
 				w->set_state(widget::state::FOCUS);
 			}
@@ -768,7 +762,7 @@ namespace gui {
 		}
 
 		// フォーカス、セレクトの動的な状態は常に作成
-		BOOST_FOREACH(widget* w, widgets_) {
+		for(auto w : widgets_) {
 			if(!w->get_state(widget::state::ENABLE)) continue;
 			bool f;
 			f = w->get_state(widget::state::DRAG);
@@ -858,7 +852,7 @@ namespace gui {
 		{
 			del_mark_.clear();
 			widgets ws = widgets_;
-			BOOST_FOREACH(widget* w, ws) {
+			for(auto w : ws) {
 				if(del_mark_.find(w) != del_mark_.end()) continue;
 				if(!w->get_state(widget::state::ENABLE)) continue;
 				if(w->get_state(widget::state::STALL)) continue;
@@ -885,7 +879,7 @@ namespace gui {
 
 		del_mark_.clear();
 		widgets ws = widgets_;
-		BOOST_FOREACH(widget* w, ws) {
+		for(auto w : ws) {
 ///			if(!w->get_state(widget::state::ENABLE)) continue;
 			if(del_mark_.find(w) != del_mark_.end()) continue;
 			if(w->get_state(widget::state::SERVICE)) {
@@ -910,7 +904,7 @@ namespace gui {
 
 		// クリップ領域を全てアップデート
 		reset_mark();
-		BOOST_FOREACH(widget* w, widgets_) {
+		for(auto w : widgets_) {
 			if(!w->get_state(widget::state::ENABLE)) {
 				w->set_mark();
 				continue;
@@ -934,7 +928,7 @@ namespace gui {
 		core.at_fonts().enable_back_color(false);
 
 		uint32_t rn = 0;
-		BOOST_FOREACH(widget* w, widgets_) {
+		for(auto w : widgets_) {
 			const widget::param& pa = w->get_param();
 			if(!pa.state_[widget::state::ENABLE]) continue;
 			if(!pa.state_[widget::state::RENDER_ENABLE]) continue;
@@ -1013,16 +1007,16 @@ namespace gui {
 	{
 		// ハイブリッドから消去
 		widgets hyws;
-		BOOST_FOREACH(widget* w, widgets_) {
+		for(auto w : widgets_) {
 			if(w->hybrid()) {
 				hyws.push_back(w);
 			}
 		}
-		BOOST_FOREACH(widget* w, hyws) {
+		for(auto w : hyws) {
 			del_widget(w);
 		}
 
-		BOOST_FOREACH(widget* w, widgets_) {
+		for(auto w : widgets_) {
 			delete w;
 		}
 
@@ -1040,7 +1034,7 @@ namespace gui {
 	{
 		static int id = 0;
 		bool f = false;
-		BOOST_FOREACH(widget* w, widgets_) {
+		for(auto w : widgets_) {
 			if(!w->get_state(widget::state::ENABLE)) continue;
 
 			if(w->get_focus_in()) {
@@ -1078,14 +1072,14 @@ namespace gui {
 	{
 		std::map<uint32_t, widget*> tbl;
 		typedef std::pair<uint32_t, widget*> tbl_p;
-		BOOST_FOREACH(widget* ww, widgets_) {
+		for(auto ww : widgets_) {
 			if(w->type() == ww->type()) {
 				tbl.insert(tbl_p(ww->get_serial(), ww));
 			}
 		}
 
 		int n = 0;
-		BOOST_FOREACH(const tbl_p& t, tbl) {
+		for(const auto& t : tbl) {
 			if(t.second == w) break;
 			++n;
 		}

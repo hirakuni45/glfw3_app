@@ -68,6 +68,7 @@ namespace gui {
 		common_parts			common_parts_;
 		uint32_t				serial_;
 		widgets					widgets_;
+		widgets					ci_widgets_;
 
 		vtx::fvtx	   			position_;
 		float					scale_;
