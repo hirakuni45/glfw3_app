@@ -119,6 +119,7 @@ namespace app {
 			};
 		}
 
+		// ファイラー起動ボタン（ファイル選択）
 		const std::string& curp = core.get_current_path();
 		file_btn_  = gui::create_image<widget_button>(wd, curp + "/res/select.png");
 		file_btn_->at_local_param().select_func_ = [this]() {
