@@ -357,11 +357,14 @@ namespace gl {
 			bool (*p)(int) = (bool (*)(int)) glfwGetProcAddress("wglSwapIntervalEXT");
 			if(p) {
 				(*p)(1);
+				soft_sync_ = false;
 //				std::cout << "wglSwapIntervalEXT: OK" << std::endl;
 			} else {
+				soft_sync_ = true;
 //				std::cout << "wglSwapIntervalEXT: NO" << std::endl;
 			}
 	    } else {
+			soft_sync_ = true;
 //			std::cout << "WGL_EXT_swap_control: NO" << std::endl;
 		}
 		glfwSwapInterval(1);
@@ -487,19 +490,20 @@ namespace gl {
 	{
 #ifdef WIN32
 		// ソフト同期
-		double cpuz = get_cpu_clock_() / 1e6;
-		if(cpu_ghz_ < cpuz) cpu_ghz_ = cpuz;
-		if(cpu_ghz_ > 0.0) {
-			double ref = machine_cycle_;
-			machine_cycle_ = rdtsc_();
-			double wa = (machine_cycle_ - ref) / (cpu_ghz_ * 1e6);
-			double ft = 1.0 / 60.0;
-			if(ft > wa) {
-				useconds_t usec = static_cast<useconds_t>((ft - wa) * 1e6);
-				usleep(usec);
+		if(soft_sync_) {
+			double cpuz = get_cpu_clock_() / 1e6;
+			if(cpu_ghz_ < cpuz) cpu_ghz_ = cpuz;
+			if(cpu_ghz_ > 0.0) {
+				double ref = machine_cycle_;
+				machine_cycle_ = rdtsc_();
+				double wa = (machine_cycle_ - ref) / (cpu_ghz_ * 1e6);
+				double ft = 1.0 / 60.0;
+				if(ft > wa) {
+					useconds_t usec = static_cast<useconds_t>((ft - wa) * 1e6);
+					usleep(usec);
+				}
+				frame_time_ = wa;
 			}
-
-			frame_time_ = wa;
 		}
 		frame_count_++;
 #if 0

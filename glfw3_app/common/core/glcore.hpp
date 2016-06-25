@@ -60,7 +60,7 @@ namespace gl {
 		double		machine_cycle_;
 		double		cpu_ghz_;
 		bool		cpu_spd_enable_;
-		bool		swap_ctrl_;
+		bool		soft_sync_;
 
 		bool		exit_signal_;
 		bool		full_screen_;
@@ -99,7 +99,7 @@ namespace gl {
 #endif
 				 frame_count_(0), frame_time_(0.0),
 				 machine_cycle_(0.0), cpu_ghz_(0.0),
-				 cpu_spd_enable_(false), swap_ctrl_(false),
+				 cpu_spd_enable_(false), soft_sync_(false),
 				 exit_signal_(false), full_screen_(false), keyboard_jp_(false) { }
 
 		core(const core& rhs);
