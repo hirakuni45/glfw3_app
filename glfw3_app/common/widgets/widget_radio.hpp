@@ -39,7 +39,7 @@ namespace gui {
 				vtx::placement::vertical::CENTER)),
 				gray_text_gain_(0.65f), disable_gray_text_(true),
 				check_(false),
-				select_func_() { }
+				select_func_(nullptr) { }
 		};
 
 	private:
@@ -169,7 +169,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void service() {
 			if(back_state_ != obj_state_) {
-				if(param_.select_func_) param_.select_func_(obj_state_, no_);
+				if(param_.select_func_ != nullptr) param_.select_func_(obj_state_, no_);
 				back_state_ = obj_state_;
 			}
 		}

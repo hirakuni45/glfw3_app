@@ -93,7 +93,7 @@ namespace gui {
 			}
 			++select_id_;
 			wd_.enable(this, false, true);
-			if(param_.select_func_) param_.select_func_(param_.select_text_);
+			if(param_.select_func_ != nullptr) param_.select_func_(param_.select_text_);
 		} else {
 			const vtx::spos& scr = wd_.get_scroll();
 			if(get_focus() && scr.y != 0) {

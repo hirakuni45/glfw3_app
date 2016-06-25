@@ -62,7 +62,7 @@ namespace gui {
 				read_only_(ro), text_in_(false), text_in_pos_(0), text_in_limit_(0),
 				shift_param_(),
 				menu_enable_(false),
-				select_func_()
+				select_func_(nullptr)
 				{ }
 		};
 

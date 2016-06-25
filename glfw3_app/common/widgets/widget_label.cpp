@@ -136,7 +136,7 @@ namespace gui {
 				}
 				// 入力完了、ファンクション呼び出し
 				if(text_in && !param_.text_in_) {
-					if(param_.select_func_) param_.select_func_(param_.text_param_.get_text());
+					if(param_.select_func_ != nullptr) param_.select_func_(param_.text_param_.get_text());
 				}
 			}
 

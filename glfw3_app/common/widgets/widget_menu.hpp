@@ -49,7 +49,7 @@ namespace gui {
 				vtx::placement::vertical::CENTER)),
 				color_param_select_(widget_director::default_list_color_select_),
 				text_list_(), round_(true), select_text_(), select_pos_(0),
-				select_func_()
+				select_func_(nullptr)
 			{ }
 		};
 

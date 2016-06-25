@@ -53,7 +53,7 @@ namespace gui {
 				vtx::placement(vtx::placement::holizontal::LEFT,
 				vtx::placement::vertical::CENTER)),
 				gray_text_gain_(0.65f), disable_gray_text_(true), draw_box_(true),
-				check_(check), select_func_()
+				check_(check), select_func_(nullptr)
 				{ }
 		};
 
@@ -173,7 +173,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void service() {
 			if(check_ != param_.check_) {
-				if(param_.select_func_) param_.select_func_(param_.check_);
+				if(param_.select_func_ != nullptr) param_.select_func_(param_.check_);
 				check_ = param_.check_;
 			}
 		}

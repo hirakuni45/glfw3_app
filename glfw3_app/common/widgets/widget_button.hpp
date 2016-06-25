@@ -39,7 +39,7 @@ namespace gui {
 				plate_param_(), color_param_(widget_director::default_button_color_),
 				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255)),
 				image_(0), handle_(0), id_(0),
-				select_func_()
+				select_func_(nullptr)
 				{ }
 		};
 
@@ -135,7 +135,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void service() override {
 			if(get_selected()) {
-				if(param_.select_func_) param_.select_func_();
+				if(param_.select_func_ != nullptr) param_.select_func_();
 			}
 		}
 

@@ -132,7 +132,7 @@ namespace gui {
 			if(selected) {
 				param_.open_ = false;
 				wd_.enable(frame_, param_.open_, true);
-				if(param_.select_func_) {
+				if(param_.select_func_ != nullptr) {
 					param_.select_func_(param_.text_param_.get_text(), param_.select_pos_);
 				}
 			} else {

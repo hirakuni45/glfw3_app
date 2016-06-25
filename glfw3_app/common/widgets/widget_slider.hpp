@@ -47,7 +47,7 @@ namespace gui {
 				slider_param_(),
 				base_image_(0), hand_image_(0), hand_ctrl_(true),
 				scroll_ctrl_(true), scroll_gain_(0.01f),
-				select_fin_(false), select_func_()
+				select_fin_(false), select_func_(nullptr)
 				{ }
 		};
 
@@ -191,7 +191,7 @@ namespace gui {
 					f = true;
 				}
 				if(f) {
-					if(param_.select_func_) param_.select_func_(param_.slider_param_.position_);
+					if(param_.select_func_ != nullptr) param_.select_func_(param_.slider_param_.position_);
 					position_ = param_.slider_param_.position_;
 				}
 			}

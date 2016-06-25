@@ -54,7 +54,7 @@ namespace gui {
 				text_list_(),
 				select_pos_(0), drop_box_(true),
 				open_before_(false), open_(false),
-				select_func_()
+				select_func_(nullptr)
 			{ }
 		};
 

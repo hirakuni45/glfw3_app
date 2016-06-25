@@ -61,7 +61,7 @@ namespace gui {
 				path_height_(32), label_height_(32),
 				every_top_(true), acc_focus_(true),
 				new_file_(new_file),
-				select_file_func_()
+				select_file_func_(nullptr)
 			{ }
 		};
 
