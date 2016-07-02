@@ -9,6 +9,7 @@
 #include <vector>
 #include <functional>
 #include "utils/file_io.hpp"
+#include <iostream>
 
 namespace utils {
 
@@ -28,7 +29,7 @@ namespace utils {
 	private:
 		buffer_type	buffer_;
 
-		bool		cr_;
+		bool		cr_ = false;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -36,7 +37,7 @@ namespace utils {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		basic_text_edit() : buffer_(), cr_(false) { }
+		basic_text_edit() { }
 
 
 		//-----------------------------------------------------------------//
@@ -85,13 +86,40 @@ namespace utils {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	複数行を挿入
-			@param[in]	pos	削除する位置（０から始まる）
-			@param[in]	lines	挿入する行
+			@brief	行を挿入
+			@param[in]	line	挿入する行
+			@param[in]	pos	挿入する位置（０から始まる）
 			@return 成功なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool insert_lines(uint32_t pos, const buffer_type& lines) {
+		bool insert(const value_type& line, int32_t pos = -1) {
+			if(pos < 0) {
+				buffer_.push_back(line);
+				return true;
+			} else if(pos < buffer_.size()) {
+				buffer_.insert(buffer_.begin() + pos, line);
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+
+#if 0
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	複数行を挿入
+			@param[in]	lines	挿入する行
+			@param[in]	pos	削除する位置（０から始まる）
+			@return 成功なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool insert_lines(const buffer_type& lines, int32_t pos = -1) {
+			if(pos < 0) {
+				// buffer_.
+				return true;
+			}
+
 			for(auto line : lines) {
 				if(pos < buffer_.size()) {
 					buffer_.insert(buffer_.cbegin() + pos, line);
@@ -102,24 +130,7 @@ namespace utils {
 			}
 			return true;
 		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	行を挿入
-			@param[in]	pos	削除する位置（０から始まる）
-			@param[in]	line	挿入する行
-			@return 成功なら「true」
-		*/
-		//-----------------------------------------------------------------//
-		bool insert_line(uint32_t pos, const value_type& line) {
-			if(pos < buffer_.size()) {
-				buffer_.insert(buffer_.cbegin() + pos, line);
-				return true;
-			} else {
-				return false;
-			}
-		}
+#endif
 
 
 		//-----------------------------------------------------------------//
@@ -264,6 +275,19 @@ namespace utils {
 		basic_text_edit<T>& operator = (const basic_text_edit<T>& ted) {
 			buffer_ = ted.buffer_;
 			cr_ = ted.cr_;
+			return *this;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	+= オペレーター（最後尾に追加）
+			@param[in]	line	文字列
+			@return 自分を返す
+		*/
+		//-----------------------------------------------------------------//
+		basic_text_edit<T>& operator += (const value_type& line) {
+			buffer_.push_back(line);
 			return *this;
 		}
 	};
