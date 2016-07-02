@@ -31,11 +31,28 @@ namespace utils {
 			std::string	name;		///< レジスター名
 		};
 
+
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	ビット定義
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		struct bit_t {
+			std::string	base;		///< ベースクラス
+			std::string	pos;		///< 位置
+			std::string	name;		///< ビット名
+			std::string	comment;	///< コメント
+			bit_t(const std::string& b, const std::string& p, const std::string& n, const std::string& c = "") :
+				base(b), pos(p), name(n), comment(c) { }
+		};
+		typedef std::vector<bit_t>	bits_type;
+
 	private:
 
 		utils::text_edit	edit_;
 
 		bool	start_ = false;
+		bool	end_ = false;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -52,7 +69,7 @@ namespace utils {
 			@param[in]	タイトル
 		*/
 		//-----------------------------------------------------------------//
-		void start(const std::string& title)
+		void start(const std::string& title, const std::string& title_2nd, const std::string& title_3rd, const std::string& author)
 		{
 			if(start_) return;
 			start_ = true;
@@ -62,26 +79,35 @@ namespace utils {
 			edit_ += "//=====================================================================//";
 			edit_ += "/*!	@file";
 			edit_ += (boost::format("	@brief	%1%@n") % title).str();
-			edit_ += "	Copyright 2016 Kunihito Hiramatsu";
-			edit_ += "	@author	平松邦仁 (hira@rvf-rc45.net)";
+			if(!title_2nd.empty()) {
+				edit_ += (boost::format("			%1% @n") % title_2nd).str();
+			}
+			if(!title_3rd.empty()) {
+				edit_ += (boost::format("			%1% @n") % title_3rd).str();
+			}
+			if(!author.empty()) {
+				edit_ += (boost::format("	@author	%1%") % author).str();
+			}		
 			edit_ += "*/";
 			edit_ += "//=====================================================================//";
 
 			edit_ += "#include \"common/io_utils.hpp\"";
+			edit_ += "";
 			edit_ += "namespace device {";
-			edit_ += "\n";
 		}
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	構築
-			@param[in]	def	定義
+			@brief	レジスター定義追加
+			@param[in]	reg		レジスター定義
+			@param[in]	bits	ビット定義郡
 		*/
 		//-----------------------------------------------------------------//
-		void add(const reg_t& reg)
+		void add(const reg_t& reg, const bits_type& bits)
 		{
-			edit_ += "/// @brief レジスタ定義";
+			edit_ += "";
+			edit_ += (boost::format("	/// @brief %1% レジスタ定義") % reg.name).str();
 			edit_ += (boost::format("	typedef %1%<%2%> %3%_io;") % reg.base % reg.address % reg.local).str();
 
 			edit_ += "	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//";
@@ -91,19 +117,36 @@ namespace utils {
 			edit_ += "	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//";
 			edit_ += (boost::format("	struct %1%_t : public %2%_io {")
 						% reg.local % reg.local).str();
-			edit_ += "		using pinsr_io::operator =;";
-			edit_ += "		using pinsr_io::operator ();";
-			edit_ += "		using pinsr_io::operator |=;";
-			edit_ += "		using pinsr_io::operator &=;";
-			edit_ += "\n";
+			edit_ += (boost::format("		using %1%_io::operator =;") % reg.local).str();
+			edit_ += (boost::format("		using %1%_io::operator ();") % reg.local).str();
+			edit_ += (boost::format("		using %1%_io::operator |=;") % reg.local).str();
+			edit_ += (boost::format("		using %1%_io::operator &=;") % reg.local).str();
 
+			for(const auto& t : bits) {
+   
+				auto s = (boost::format("		%1%<%2%_io, %3%> %4%;")
+					% t.base % reg.local % t.pos % t.name).str();
+				if(!t.comment.empty()) {
+					s += "	///< " + t.comment;
+				}
+				edit_ += s;
+			}
 
 			edit_ += "	};";
 			edit_ += (boost::format("	static %1%_t %2%;") % reg.local % reg.name).str();
-#if 0
-		bit_t<pinsr_io, 6> TRJIOSEL;  /// TRJIO 入力信号選択（0: 外部 TRJIO端子から、1: VCOUT1 から内部入力） 
-		bit_t<pinsr_io, 7> IOINSEL;   /// 端子レベル強制読み出し（0: 禁止 PDi レジスタ制御、1: 許可）
-#endif
+			edit_ += "";
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	終了
+		*/
+		//-----------------------------------------------------------------//
+		void end()
+		{
+			if(end_) return;
+			end_ = true;
 			edit_ += "}";
 		}
 
@@ -117,10 +160,9 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		bool save(const std::string& filename)
 		{
+			end();
 			return edit_.save(filename);
 		}
-
-
 	};
 }
 

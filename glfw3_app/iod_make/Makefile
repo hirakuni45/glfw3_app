@@ -1,7 +1,7 @@
 #-----------------------------------------------#
 # Application Binary Build Makefile             #
 #-----------------------------------------------#
-TARGET		=	iod_cnv
+TARGET		=	iod_make
 
 ifeq ($(OS),Windows_NT)
 FEXT	=	.exe
@@ -165,7 +165,7 @@ strip:
 endif
 
 run:
-	./$(TARGET)
+	./$(TARGET) test.hpp
 
 clean:
 	rm -rf $(BUILD) $(TARGET)$(FEXT)
