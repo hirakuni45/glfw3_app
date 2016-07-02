@@ -820,4 +820,22 @@ namespace utils {
 		}
 		return cnt;
 	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	文字列の回数追加
+		@param[in]	ref	基準文字列
+		@param[in]	cnt	追加回数
+		@return 生成文字列
+	*/
+	//-----------------------------------------------------------------//
+	inline std::string add_string(const std::string& ref, uint32_t cnt) {
+		std::string str;
+		for(uint32_t i = 0; i < cnt; ++i) {
+			str += ref;
+		}
+		return str;
+	}
+
 }
