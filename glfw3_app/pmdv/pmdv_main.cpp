@@ -76,13 +76,13 @@ namespace app {
 		widget_director& wd = director_.at().widget_director_;
 
 		{	// ファイラー・リソース
-			widget::param wp(vtx::srect(30, 30, 300, 200));
+			widget::param wp(vtx::irect(30, 30, 300, 200));
 			widget_filer::param wp_(core.get_current_path());
 			filer_ = wd.add_widget<widget_filer>(wp, wp_);
 			filer_->enable(false);
 		}
 		{	// ツールパレット
-			widget::param wp(vtx::srect(20, 20, 150, 350));
+			widget::param wp(vtx::irect(20, 20, 150, 350));
 			widget_frame::param wp_;
 			wp_.plate_param_.set_caption(12);
 			tools_ = wd.add_widget<widget_frame>(wp, wp_);
@@ -90,51 +90,51 @@ namespace app {
 		}
 		short h = 12 + 10;
 		{	// ファイラー起動ボタン
-			widget::param wp(vtx::srect(10, h, 100, 36), tools_);
+			widget::param wp(vtx::irect(10, h, 100, 36), tools_);
 			h += 40;
 			widget_button::param wp_("開く");
 			fopen_ = wd.add_widget<widget_button>(wp, wp_);
 		}
 		{	// Grid、On/Off
-			widget::param wp(vtx::srect(10, h, 150, 30), tools_);
+			widget::param wp(vtx::irect(10, h, 150, 30), tools_);
 			h += 30;
 			widget_check::param wp_("Grid", true);
 			grid_ = wd.add_widget<widget_check>(wp, wp_);
 		}
 		{	// ボディー、On/Off
-			widget::param wp(vtx::srect(10, h, 150, 30), tools_);
+			widget::param wp(vtx::irect(10, h, 150, 30), tools_);
 			h += 30;
 			widget_check::param wp_("Body");
 			body_ = wd.add_widget<widget_check>(wp, wp_);
 			body_->set_check();
 		}
 		{	// ボーン、On/Off
-			widget::param wp(vtx::srect(10, h, 150, 30), tools_);
+			widget::param wp(vtx::irect(10, h, 150, 30), tools_);
 			h += 30;
 			widget_check::param wp_("Bone");
 			bone_ = wd.add_widget<widget_check>(wp, wp_);
 		}
 
 		{	// ツリー
-			widget::param wp(vtx::srect(20, 400, 200, 200));
+			widget::param wp(vtx::irect(20, 400, 200, 200));
 			widget_frame::param wp_;
 			wp_.plate_param_.set_caption(12);
 			tree_frame_ = wd.add_widget<widget_frame>(wp, wp_);
 		}
 		{
-			widget::param wp(vtx::srect(0), tree_frame_);
+			widget::param wp(vtx::irect(0), tree_frame_);
 			widget_tree::param wp_;
 			tree_ = wd.add_widget<widget_tree>(wp, wp_);
 		}
 
 		{	// ターミナル
-			widget::param wp(vtx::srect(100, 400, 200, 200));
+			widget::param wp(vtx::irect(100, 400, 200, 200));
 			widget_frame::param wp_;
 			wp_.plate_param_.set_caption(12);
 			terminal_frame_ = wd.add_widget<widget_frame>(wp, wp_);
 		}
 		{
-			widget::param wp(vtx::srect(0), terminal_frame_);
+			widget::param wp(vtx::irect(0), terminal_frame_);
 			widget_terminal::param wp_;
 			terminal_ = wd.add_widget<widget_terminal>(wp, wp_);
 		}
