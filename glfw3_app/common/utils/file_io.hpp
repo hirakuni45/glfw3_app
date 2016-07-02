@@ -644,7 +644,7 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		size_t put(const char* text) {
-			if(text == 0) {
+			if(text == nullptr) {
 				return 0;
 			}
 			char ch;
