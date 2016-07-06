@@ -37,8 +37,8 @@ int main(int argc, char** argv)
 		std::string s = argv[i];
 		if(!s.empty() && s[0] == '-') {
 		}
-		out_file = in_file;
-		in_file = s;
+		in_file = out_file;
+		out_file = s;
 	}
 
 	if(in_file.empty() || out_file.empty()) {
