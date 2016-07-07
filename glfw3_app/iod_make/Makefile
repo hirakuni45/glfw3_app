@@ -109,7 +109,7 @@ endif
 ifeq ($(OS),Windows_NT)
 LFLAGS	=
 else
-LFLAGS	=	-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk \
+LFLAGS	=	-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk \
 -Wl,-search_paths_first -Wl,-headerpad_max_install_names \
 -framework AGL -framework Cocoa -framework OpenGL -framework IOKit -framework CoreFoundation -framework CoreVideo -framework OpenAL
 endif
