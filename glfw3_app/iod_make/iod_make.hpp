@@ -23,7 +23,7 @@ namespace utils {
 			@brief	レジスター定義
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		struct reg_t { 
+		struct reg_t {
 	  		std::string	title;		///< レジスタータイトル
 			std::string	base;		///< レジスターベースクラス
 			std::string	address;	///< レジスターアドレス

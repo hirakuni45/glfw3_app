@@ -165,7 +165,7 @@ strip:
 endif
 
 run:
-	./$(TARGET) test.hpp
+	./$(TARGET) test.cnf test.hpp
 
 clean:
 	rm -rf $(BUILD) $(TARGET)$(FEXT)

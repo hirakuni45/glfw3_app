@@ -8,11 +8,42 @@
 #include <boost/format.hpp>
 #include "iod_make.hpp"
 
+namespace {
+
+	const std::string version_("0.01b");
+
+
+	void title_(const std::string& cmd)
+	{
+		using namespace std;
+
+		std::string c = utils::get_file_base(cmd);
+
+		cout << "I/O Device Template Class Maker Version " << version_ << endl;
+		cout << "Copyright (C) 2016, Hiramatsu Kunihito (hira@rvf-rc45.net)" << endl;
+		cout << "usage:" << endl;
+		cout << c << "[options] [config_file] [out_file]" << endl;
+		cout << endl;
+//		cout << "Options :" << endl;
+//		cout << "" << endl;
+	}
+}
+
 int main(int argc, char** argv)
 {
+	std::string in_file;
 	std::string out_file;
 	for(int i = 1; i < argc; ++i) {
-		out_file = argv[i];
+		std::string s = argv[i];
+		if(!s.empty() && s[0] == '-') {
+		}
+		in_file = out_file;
+		out_file = s;
+	}
+
+	if(in_file.empty() || out_file.empty()) {
+		title_(argv[0]);
+		return 0;
 	}
 
 	using namespace utils;
@@ -35,8 +66,6 @@ int main(int argc, char** argv)
 		iod_make::bits_type bits;
 		bits.emplace_back("bit_t", "6", "TRJIOSEL",
 			"TRJIO 入力信号選択（0: 外部 TRJIO端子から、1: VCOUT1 から内部入力）");
-			
-//		bit_t<pinsr_io, 7> IOINSEL;   /// 端子レベル強制読み出し（0: 禁止 PDi レジスタ制御、1: 許可）
 		iod.add(reg, bits);
 	}
 
