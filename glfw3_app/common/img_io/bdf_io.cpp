@@ -108,9 +108,10 @@ namespace img {
 		}
 
 		bool retcode = true;
-		std::string line;
 		map_max_ = 0;
-		while(fin.get_line(line) == true) {
+		while(!fin.eof()) {
+			auto line = fin.get_line();
+			if(line.empty()) break;
 			utils::strings ss = utils::split_text(line, " ");
 			if(ss.size() == 5) {
 				if(ss[0] == "FONTBOUNDINGBOX") {
@@ -207,7 +208,6 @@ namespace img {
 					}
 				}
 			}
-			line.clear();
 		}
 		fin.close();
 // std::cout << "Linear limit: " << lin_limit_ << std::endl;
