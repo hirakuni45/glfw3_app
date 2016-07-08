@@ -110,7 +110,7 @@ namespace app {
 			gl::core& core = gl::core::get_instance();
 			vtx::spos size(500, 100);
 			vtx::spos pos = (core.get_rect().size - size) / 2;
-            widget::param wp(vtx::srect(pos, size));
+            widget::param wp(vtx::irect(pos, size));
             widget_dialog::param wp_;
             wp_.style_ = widget_dialog::param::style::OK;
             widget_dialog* d = wd.add_widget<widget_dialog>(wp, wp_);
