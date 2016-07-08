@@ -43,14 +43,14 @@ namespace app {
 		widget_director& wd = director_.at().widget_director_;
 
 		{ // ツールパレット
-			widget::param wp(vtx::srect(10, 10, 200, 350));
+			widget::param wp(vtx::irect(10, 10, 200, 350));
 			widget_frame::param wp_;
 			tools_frame_ = wd.add_widget<widget_frame>(wp, wp_);
 			tools_frame_->set_state(widget::state::SIZE_LOCK);
 		}
 
 		{ // オープンファイルボタン
-			widget::param wp(vtx::srect(10, 10, 180, 40), tools_frame_);
+			widget::param wp(vtx::irect(10, 10, 180, 40), tools_frame_);
 			widget_button::param wp_("load");
 			wp_.select_func_ = [this] () {
 				if(load_ctx_) {
@@ -62,7 +62,7 @@ namespace app {
 		}
 
 		{ // ボリューム・スライダー
-			widget::param wp(vtx::srect(10, 60, 180, 20), tools_frame_);
+			widget::param wp(vtx::irect(10, 60, 180, 20), tools_frame_);
 			widget_slider::param wp_;
 			wp_.select_func_ = [this] (float value) {
 				auto& s = director_.at().sound_;
@@ -72,7 +72,7 @@ namespace app {
 		}
 
 		{ // Play/Pause ボタン
-			widget::param wp(vtx::srect( 10, 90, 85, 40), tools_frame_);
+			widget::param wp(vtx::irect( 10, 90, 85, 40), tools_frame_);
 			widget_button::param wp_("Play");
 			wp_.select_func_ = [this] () {
 				if(decode_open_) {
@@ -90,7 +90,7 @@ namespace app {
 		}
 
 		{ // Stop ボタン
-			widget::param wp(vtx::srect(100, 90, 85, 40), tools_frame_);
+			widget::param wp(vtx::irect(100, 90, 85, 40), tools_frame_);
 			widget_button::param wp_("Stop");
 			wp_.select_func_ = [this] () {
 				decoder_.close();
@@ -102,19 +102,19 @@ namespace app {
 		}
 
 		{ // チェックボックスのテスト
-			widget::param wp(vtx::srect(10, 130, 180, 40), tools_frame_);
+			widget::param wp(vtx::irect(10, 130, 180, 40), tools_frame_);
 			widget_check::param wp_("Dome Map");
 			dome_ = wd.add_widget<widget_check>(wp, wp_);
 		}
 
 #if 0
 		if(1) {	// ラジオボタンのテスト
-			widget::param wpr(vtx::srect(20, 20, 130, 130), 0);
+			widget::param wpr(vtx::irect(20, 20, 130, 130), 0);
 			widget_null::param wpr_;
 			widget* root = wd.add_widget<widget_null>(wpr, wpr_);
 			root->set_state(widget::state::POSITION_LOCK);
 
-			widget::param wp(vtx::srect(0, 0, 130, 30), root);
+			widget::param wp(vtx::irect(0, 0, 130, 30), root);
 			widget_radio::param wp_("Enable");
 			for(int i = 0; i < 3; ++i) {
 				if(i == 2) wp_.check_ = true;
@@ -128,7 +128,7 @@ namespace app {
 #endif
 
 		{ // load ファイラー本体
-			widget::param wp(vtx::srect(10, 30, 300, 200));
+			widget::param wp(vtx::irect(10, 30, 300, 200));
 			widget_filer::param wp_(core.get_current_path());
 			wp_.select_file_func_ = [this] (const std::string& path) {
 				bool open = decoder_.open(path);
@@ -174,7 +174,7 @@ namespace app {
 		}
 
 		{  // ダイアログ本体
-			widget::param wp(vtx::srect(300, 300, 400, 200));
+			widget::param wp(vtx::irect(300, 300, 400, 200));
 			widget_dialog::param wp_;
 //			wp_.style_ = widget_dialog::param::style::CANCEL_OK;
 			dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
@@ -183,13 +183,13 @@ namespace app {
 
 		{	// ターミナル
 			{
-				widget::param wp(vtx::srect(300, 300, 200, 200));
+				widget::param wp(vtx::irect(300, 300, 200, 200));
 				widget_frame::param wp_;
 				wp_.plate_param_.set_caption(20);
 				terminal_frame_ = wd.add_widget<widget_frame>(wp, wp_);
 			}
 			{
-				widget::param wp(vtx::srect(0), terminal_frame_);
+				widget::param wp(vtx::irect(0), terminal_frame_);
 				widget_terminal::param wp_;
 				wp_.echo_ = false;
 				terminal_core_ = wd.add_widget<widget_terminal>(wp, wp_);
