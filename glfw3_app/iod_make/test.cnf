@@ -25,3 +25,8 @@ class {
 		.bit_class_end
 	}
 }
+
+# クロック動作モード制御レジスタ
+# FFFA0H
+# CMC  EXCLK  OSCSEL  EXCLKS OSCSELS 0  AMPHS1 AMPHS0  AMPH
+# CMC : EXCLK,  OSCSEL,  EXCLKS, OSCSELS, 0,  AMPHS1, AMPHS0,  AMPH,
