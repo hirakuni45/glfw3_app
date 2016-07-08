@@ -282,7 +282,7 @@ namespace av {
 			av_log_set_level(1);
 
 			// フレームの確保
-			frame_ = avcodec_alloc_frame();
+			frame_ = av_frame_alloc();
 
 			if(video_ctx_ != nullptr) {
 				size_.x = video_ctx_->width;
@@ -290,15 +290,15 @@ namespace av {
 
 				for(int i = 0; i < 2; ++i) {
 					// イメージ格納バッファの確保
-					fb_[i].image_ = avcodec_alloc_frame();
+					fb_[i].image_ = av_frame_alloc();
 					// イメージ用バッファの確保
-					fb_[i].buff_ = (unsigned char *)av_malloc(avpicture_get_size(PIX_FMT_RGB24, size_.x, size_.y));
+					fb_[i].buff_ = (unsigned char *)av_malloc(avpicture_get_size(AV_PIX_FMT_RGB24, size_.x, size_.y));
 					// バッファとフレームを関連付ける
-					avpicture_fill((AVPicture*)fb_[i].image_, fb_[i].buff_, PIX_FMT_RGB24, size_.x, size_.y);
+					avpicture_fill((AVPicture*)fb_[i].image_, fb_[i].buff_, AV_PIX_FMT_RGB24, size_.x, size_.y);
 				}
 				// スケーリング用コンテキストの取得
 				sws_ctx_ = sws_getContext(size_.x, size_.y, video_ctx_->pix_fmt, size_.x, size_.y,
-					PIX_FMT_RGB24, SWS_FAST_BILINEAR, NULL, NULL, NULL);
+					AV_PIX_FMT_RGB24, SWS_FAST_BILINEAR, NULL, NULL, NULL);
 			}
 
 			// double seconds= (dts - pStream->start_time) * av_q2d(pStream->time_base);
