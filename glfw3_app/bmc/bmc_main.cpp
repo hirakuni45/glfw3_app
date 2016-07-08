@@ -25,14 +25,14 @@ namespace app {
 		widget_director& wd = director_.at().widget_director_;
 
 		{ // 画像ファイル表示用フレーム
-			widget::param wp(vtx::srect(30, 30, 256, 256));
+			widget::param wp(vtx::irect(30, 30, 256, 256));
 			widget_frame::param wp_;
 			wp_.plate_param_.set_caption(30);
 			wp_.text_param_.set_text("元画像");
 			src_frame_ = wd.add_widget<widget_frame>(wp, wp_);
 		}
 		{ // 画像ファイル表示イメージ
-			widget::param wp(vtx::srect(0, 0, 256, 256), src_frame_);
+			widget::param wp(vtx::irect(0, 0, 256, 256), src_frame_);
 			widget_image::param wp_;
 			wp_.linear_ = false;
 			src_image_ = wd.add_widget<widget_image>(wp, wp_);
@@ -42,14 +42,14 @@ namespace app {
 		}
 
 		{ // 画像ファイル表示用フレーム
-			widget::param wp(vtx::srect(60, 60, 256, 256));
+			widget::param wp(vtx::irect(60, 60, 256, 256));
 			widget_frame::param wp_;
 			wp_.plate_param_.set_caption(30);
 			wp_.text_param_.set_text("変換後");
 			dst_frame_ = wd.add_widget<widget_frame>(wp, wp_);
 		}
 		{ // 画像ファイル表示イメージ
-			widget::param wp(vtx::srect(0, 0, 256, 256), dst_frame_);
+			widget::param wp(vtx::irect(0, 0, 256, 256), dst_frame_);
 			widget_image::param wp_;
 			wp_.linear_ = false;
 			dst_image_ = wd.add_widget<widget_image>(wp, wp_);
@@ -60,17 +60,17 @@ namespace app {
 
 
 		{ // 機能ツールパレット
-			widget::param wp(vtx::srect(10, 10, 150, 300));
+			widget::param wp(vtx::irect(10, 10, 150, 300));
 			widget_frame::param wp_;
 			tools_ = wd.add_widget<widget_frame>(wp, wp_);
 		}
 		{ // スケール
-			widget::param wp(vtx::srect(10, 10, 130, 40), tools_);
+			widget::param wp(vtx::irect(10, 10, 130, 40), tools_);
 			widget_check::param wp_("scale");
 			scale_ = wd.add_widget<widget_check>(wp, wp_);
 		}
 		{ // BDF page list
-			widget::param wp(vtx::srect(10, 60, 100, 40), tools_);
+			widget::param wp(vtx::irect(10, 60, 100, 40), tools_);
 			widget_list::param wp_("0");
 			const bmc_core& bmc = *director_.at().bmc_;
 			for(uint32_t i = 0; i < bmc.get_bdf_pages(); ++i) {
@@ -81,20 +81,20 @@ namespace app {
 			bdf_page_ = wd.add_widget<widget_list>(wp, wp_);
 		}
 		{ // ファイラー起動ボタン
-//			widget::param wp(vtx::srect(5, 5, 100, 40), tools_);
+//			widget::param wp(vtx::irect(5, 5, 100, 40), tools_);
 //			widget_button::param wp_("file");
 //			open_ = wd.add_widget<widget_button>(wp, wp_);
 		}
 
 
 		{ // ファイラー本体
-			widget::param wp(vtx::srect(10, 30, 300, 200));
+			widget::param wp(vtx::irect(10, 30, 300, 200));
 			widget_filer::param wp_(core.get_current_path());
 			filer_ = wd.add_widget<widget_filer>(wp, wp_);
 			filer_->enable(false);
 		}
 		{ // ダイアログ
-			widget::param wp(vtx::srect(10, 30, 450, 200));
+			widget::param wp(vtx::irect(10, 30, 450, 200));
 			widget_dialog::param wp_;
 			dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
 			dialog_->enable(false);
