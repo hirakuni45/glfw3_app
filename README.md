@@ -22,10 +22,10 @@ GLFW3 application (player)
 
 ###必要なライブラリー（パッケージ名）
 
-・mingw-w64-x86_64-clang / clang
-・mingw-w64-x86_64-glfw / glfw  　　
+・mingw-w64-x86_64-clang / clang   
+・mingw-w64-x86_64-glfw / glfw   
 ・mingw-w64-x86_64-openal / openal  
-・mingw-w64-x86_64-freetype / freetype2  
+・mingw-w64-x86_64-freetype / freetype  
 ・mingw-w64-x86_64-glew / glew  
 ・mingw-w64-x86_64-libjpeg-turbo / libjpeg-turbo  
 ・mingw-w64-x86_64-openjpeg2 / openjpeg  
