@@ -34,9 +34,13 @@ int main(int argc, char** argv)
 {
 	std::string in_file;
 	std::string out_file;
+	bool verbose = false;
 	for(int i = 1; i < argc; ++i) {
 		std::string s = argv[i];
 		if(!s.empty() && s[0] == '-') {
+			if(s == "-v" || s == "--verbose") {
+				verbose = true;
+			}
 		}
 		in_file = out_file;
 		out_file = s;
@@ -49,6 +53,19 @@ int main(int argc, char** argv)
 
 	using namespace utils;
 
+	def_in dfi(verbose);
+	if(!dfi.load(in_file)) {
+		std::cerr << "Error: analize input file: '" << in_file << "'" << std::endl;
+		return -1;
+	}
+
+	if(!dfi.analize()) {
+		std::cerr << "Error: define file analize: " << dfi.get_analize_error() << std::endl;
+		return -1;
+	}
+
+
+	return 0;
 	iod_make iod;
 
 	iod.start("RL78/G13 グループ・ポート・レジスター定義",

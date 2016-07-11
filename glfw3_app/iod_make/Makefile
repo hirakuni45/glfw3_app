@@ -165,7 +165,7 @@ strip:
 endif
 
 run:
-	./$(TARGET) test.cnf test.hpp
+	./$(TARGET) -v rl78_g13.def test.hpp
 
 clean:
 	rm -rf $(BUILD) $(TARGET)$(FEXT)
