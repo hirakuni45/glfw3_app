@@ -7,6 +7,7 @@
 #include <iostream>
 #include <boost/format.hpp>
 #include "iod_make.hpp"
+#include "def_in.hpp"
 
 namespace {
 
