@@ -248,7 +248,7 @@ namespace sys {
 			if(s.empty()) continue;
 			if(s[0] == '#') ;  // コメント行は無視
 			else {
-				utils::strings ss = utils::split_text(s, " \t", 3);
+				utils::strings ss = utils::split_text(s, " \t", "", 3);
 				if(ss.size() == 3) {
 					int n;
 					if(utils::string_to_int(ss[1], n)) {
