@@ -60,7 +60,7 @@ int main(int argc, char** argv)
 	}
 
 	if(!dfi.analize()) {
-		std::cerr << "Error: define file analize: " << dfi.get_analize_error() << std::endl;
+		std::cerr << "Error: define file analize: " << dfi.get_last_error() << std::endl;
 		return -1;
 	}
 
