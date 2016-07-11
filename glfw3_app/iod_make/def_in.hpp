@@ -36,9 +36,11 @@ namespace utils {
 		};
 
 		bool				verbose_;
+		std::string			last_error_;
 		utils::text_edit	te_;
 		analize_type		analize_type_ = analize_type::none;
-		std::string			last_error_;
+		std::string			class_;
+		utils::strings		body_;
 
 		std::string make_error_(uint32_t pos, const std::string& line) {
 			auto ret = (boost::format("(%u)%s") % pos % line).str();
@@ -89,9 +91,13 @@ namespace utils {
  		{
 			last_error_.clear();
 
+			class_.clear();
+			body_.clear();
+
 			analize_type_ = analize_type::first;
 			te_.loop([this](uint32_t pos, const std::string& line) {
-				if(!line.empty() && line[0] == '#') return;
+				if(line.empty()) return;
+				if(line[0] == '#') return;
 
 				if(analize_type_ == analize_type::none |
 				   analize_type_ == analize_type::error) return;
@@ -99,6 +105,15 @@ namespace utils {
 				auto ss = utils::split_text(line, " \t", "\"'");
 				if(ss.empty()) return;
 
+
+
+
+			} );
+
+			return analize_type_ != analize_type::error;
+		}
+
+#if 0
 				switch(analize_type_) {
 				case analize_type::first:
 					if(ss[0] == "base") {
@@ -124,10 +139,7 @@ namespace utils {
 				default:
 					break;
 				}
-			} );
-
-			return analize_type_ != analize_type::error;
-		}
+#endif
 
 
 		//-----------------------------------------------------------------//
