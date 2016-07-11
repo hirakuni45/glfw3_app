@@ -543,14 +543,11 @@ namespace utils {
 				if(!inhc.empty()) {
 					if(word.empty() && inhc.find(ch) != std::string::npos) {
 						ihc = ch;
-						ch = 0;
 					} else if(ch == ihc) {
-						ch = 0;
+						ihc = 0;
 					}
 				}
-				if(ch != 0) {
-					word += ch;
-				}
+				word += ch;
 			}
 			tab_back = tab;
 		}
