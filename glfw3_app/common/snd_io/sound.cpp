@@ -163,8 +163,11 @@ namespace al {
 				}
 				// デコードのパフォーマンス的には１６ミリ秒程度のインターバルで
 				// 間に合うよう調整されているので、余裕を考えて、その２倍を設定する。
+#ifdef __APPLE__
+				usleep(5000);	// 5ms くらいの時間待ち
+#else
 				usleep(8000);	// 8ms くらいの時間待ち
-
+#endif
 			}
 			sst.audio_io_->purge_stream(sst.slot_);
 			sst.pos_ = sst.len_;
