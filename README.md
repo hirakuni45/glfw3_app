@@ -1,14 +1,14 @@
 glfw3_app
 =========
 
-GLFW3 application (player)
+GLFW application
 
 ## glfw_app の概要
 
-・glfw3 ライブラリーを使って動作するアプリケーションと、OpenGL ベースの GUI フレームワークとユーティリティー類です。  
+・glfw ライブラリーを使って動作するアプリケーションと、OpenGL ベースの GUI フレームワークとユーティリティー類です。  
 ・img_io は画像ファイルの入出力や、画像の操作を網羅するモジュールです。  
 ・snd_io は音楽ファイルの入出力や、OpenAL を使った音の再生を行うモジュールです。  
-・各種ユーティリティーは、文字列の変換、二次元、三次元、四次元ベクトル、行列を扱う数学クラスなどがあります。  
+・utils は、文字列の操作、二次元、三次元、四次元ベクトル、行列を扱う数学クラスなどがあります。  
 
 ###開発環境（OS-X）
 
@@ -16,7 +16,7 @@ GLFW3 application (player)
 
 ###開発環境（Windows）
 
-・MSYS2、mingw64 環境で開発を行います。  
+・msys2、mingw64 環境で開発を行います。  
 ・pacman で必要なパッケージをインストールして下さい。  
 ・pacman -S 「パッケージ名」
 
@@ -37,7 +37,7 @@ GLFW3 application (player)
 
 ###各ディレクトリーの構成
 
-・common  --->  各フレームワーク、ラッパー
+・common  --->  フレームワーク、ラッパー
 
 ####便利ツール
 
@@ -55,3 +55,7 @@ GLFW3 application (player)
 ・pmdv  --->  MMD プレイヤー
 ・effv  --->  effekseer プレイヤー
 
+---
+License
+
+MIT
