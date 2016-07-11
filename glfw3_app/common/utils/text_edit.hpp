@@ -167,13 +167,13 @@ namespace utils {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	全体ループ
+			@brief	全体ループ（読み出し専用）
 			@param[in]	func	ループ関数
 		*/
 		//-----------------------------------------------------------------//
 		void loop(loop_func func) const {
 			uint32_t pos = 0;
-			for(const auto s : buffer_) {
+			for(const auto& s : buffer_) {
 				func(pos, s);
 				++pos;
 			}

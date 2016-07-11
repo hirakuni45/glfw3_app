@@ -511,31 +511,47 @@ namespace utils {
 	/*!
 		@brief	キャラクター・リスト中のコードで分割する
 		@param[in]	src		入力文字列
-		@param[in]	list	分割にするキャラクター列
+		@param[in]	list	分割するキャラクター列
+		@param[in]	inhc	分割を無効にするキャラクター列
 		@param[in]	limit	分割する最大数を設定する場合正の値
 		@return	文字列リスト
 	*/
 	//-----------------------------------------------------------------//
 	template <class SS>
 	SS split_textT(const typename SS::value_type& src,
-					const typename SS::value_type& list,
-					int limit = 0) noexcept
+				   const typename SS::value_type& list,
+				   const typename SS::value_type& inhc,
+				   int limit = 0) noexcept
 	{
 		SS dst;
 		bool tab_back = true;
 		typename SS::value_type word;
+		typename SS::value_type::value_type ihc = 0;
 		for(auto ch : src) {
 			bool tab = false;
 			if(limit <= 0 || static_cast<int>(dst.size()) < (limit - 1)) {
-				if(string_strchr(list, ch)) {
+				if(ihc == 0 && list.find(ch) != std::string::npos) {
 					tab = true;
 				}
 			}
 			if(tab_back && !tab && !word.empty()) {
 				dst.push_back(word);
 				word.clear();
+				ihc = 0;
 			}
-			if(!tab) word += ch;
+			if(!tab) {
+				if(!inhc.empty()) {
+					if(word.empty() && inhc.find(ch) != std::string::npos) {
+						ihc = ch;
+						ch = 0;
+					} else if(ch == ihc) {
+						ch = 0;
+					}
+				}
+				if(ch != 0) {
+					word += ch;
+				}
+			}
 			tab_back = tab;
 		}
 		if(!word.empty()) {
@@ -544,14 +560,17 @@ namespace utils {
 		return dst;
 	}
 
-	inline strings split_text(const std::string& src, const std::string& list, int limit = 0) noexcept {
-		return split_textT<strings>(src, list, limit);
+	inline strings split_text(const std::string& src, const std::string& list, const std::string& inhc = "",
+		int limit = 0) noexcept {
+		return split_textT<strings>(src, list, inhc, limit);
 	}
-	inline wstrings split_text(const wstring& src, const wstring& list, int limit = 0) noexcept {
-		return split_textT<wstrings>(src, list, limit);
+	inline wstrings split_text(const wstring& src, const wstring& list, const wstring& inhc = wstring(),
+		int limit = 0) noexcept {
+		return split_textT<wstrings>(src, list, inhc, limit);
 	}
-	inline lstrings split_text(const lstring& src, const lstring& list, int limit = 0) noexcept {
-		return split_textT<lstrings>(src, list, limit);
+	inline lstrings split_text(const lstring& src, const lstring& list, const lstring& inhc = lstring(),
+		int limit = 0) noexcept {
+		return split_textT<lstrings>(src, list, inhc, limit);
 	}
 
 
