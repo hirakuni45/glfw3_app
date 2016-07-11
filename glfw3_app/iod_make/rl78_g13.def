@@ -1,0 +1,30 @@
+#
+# RL78/G13 I/O Device Maker 定義
+#
+base {
+	.title	"RL78/G13 グループ・ポート・レジスター定義",
+			"Copyright 2016 Kunihito Hiramatsu"
+	.author	"平松邦仁 (hira@rvf-rc45.net)"
+}
+
+#---------------------------------------------------------------
+
+class {
+
+	.title		"クロック動作モード制御レジスタ(CMC)",
+				"リセット時：00H"
+	.base		"rw8"
+	.address	"0xFFFA0"
+	.name 		"CMC"
+}
+
+# CMC : 7: EXCLK,   高速システム・クロック端子の動作モード
+#       6: OSCSEL,  高速システム・クロック端子の動作モード
+#       5: EXCLKS,  サブシステム・クロック端子の動作モード
+#       4: OSCSELS, サブシステム・クロック端子の動作モード
+#       3: -
+#       2: AMPHS1,  XT1発振回路の発振モード選択
+#       1: AMPHS0,  XT1発振回路の発振モード選択
+#       0: AMPH,    X1クロック発振周波数の制御
+
+
