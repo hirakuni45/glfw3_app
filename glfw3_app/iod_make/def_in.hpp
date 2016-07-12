@@ -33,24 +33,56 @@ namespace utils {
 			first,
 			base_in,
 			base_main,
+			class_in,
+			class_main,
 		};
 
 		bool				verbose_;
 		std::string			last_error_;
 		utils::text_edit	te_;
 		analize_type		analize_type_ = analize_type::none;
-		std::string			class_;
-		utils::strings		body_;
 
 		std::string make_error_(uint32_t pos, const std::string& line) {
 			auto ret = (boost::format("(%u)%s") % pos % line).str();
 			return ret;
 		}
 
-		void analize_base_(const std::string& line, const utils::strings& ss) {
-			if(ss.empty()) return;
-
-			std::cout << ss[0] << std::endl;
+		std::string analize_(const utils::strings& ss) {
+			std::string err;
+			for(const auto& s : ss) {
+				switch(analize_type_) {
+				case analize_type::first:
+					if(s == "base") {
+						analize_type_ = analize_type::base_in;
+					} else if(s == "class") {
+						analize_type_ = analize_type::class_in;
+					} else {
+						err = (boost::format(", invalid error: '%s'") % ss[0]).str();
+					}
+					break;
+				case analize_type::base_in:
+				case analize_type::class_in:
+					if(s == "{") {
+						analize_type_ = static_cast<analize_type>(
+							static_cast<int>(analize_type_) + 1);
+					}
+					break;
+				case analize_type::base_main:
+				case analize_type::class_main:
+					if(s == "}") {
+						analize_type_ = analize_type::first;
+					} else {
+						if(analize_type_ == analize_type::base_main) {
+							std::cout << s << std::endl;
+						}
+					}
+					break;
+				default:
+					break;
+				}
+				if(!err.empty()) break;
+			}
+			return err;
 		}
 
 	public:
@@ -91,9 +123,6 @@ namespace utils {
  		{
 			last_error_.clear();
 
-			class_.clear();
-			body_.clear();
-
 			analize_type_ = analize_type::first;
 			te_.loop([this](uint32_t pos, const std::string& line) {
 				if(line.empty()) return;
@@ -104,42 +133,22 @@ namespace utils {
 
 				auto ss = utils::split_text(line, " \t", "\"'");
 				if(ss.empty()) return;
-
-
-
-
+///				for(const auto& s : ss) {
+///					std::cout << s << std::endl;
+///				}
+				auto ret = analize_(ss);
+				if(!ret.empty()) {
+					last_error_ = make_error_(pos, line);
+					last_error_ += ret;
+					analize_type_ = analize_type::error;
+		   			if(verbose_) {
+		   				std::cerr << last_error_ << std::endl;
+		   			}
+				}
 			} );
 
 			return analize_type_ != analize_type::error;
 		}
-
-#if 0
-				switch(analize_type_) {
-				case analize_type::first:
-					if(ss[0] == "base") {
-						analize_type_ = analize_type::base_in;
-					} else {
-						last_error_ = make_error_(pos, line);
-						last_error_ += (boost::format(", error: '%s'") % ss[0]).str();
-						if(verbose_) {
-							std::cerr << last_error_ << std::endl;
-						}
-						analize_type_ = analize_type::error;
-					}
-					break;
-				case analize_type::base_in:
-					if(ss[0] == "{") analize_type_ = analize_type::base_main;
-					break;
-				case analize_type::base_main:
-					if(ss[0] == "}") analize_type_ = analize_type::first;
-					else {
-						analize_base_(line, ss);
-					}
-					break;
-				default:
-					break;
-				}
-#endif
 
 
 		//-----------------------------------------------------------------//
