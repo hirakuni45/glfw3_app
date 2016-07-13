@@ -88,13 +88,13 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void player::initialize()
 	{
-		gl::core& core = gl::core::get_instance();
+		auto& core = gl::core::get_instance();
 
 		mobj_.initialize();
 
-		gl::fonts& fonts = core.at_fonts();
-		std::string cf = fonts.get_font_type();
-		std::string fp = core.get_current_path();
+		auto& fonts = core.at_fonts();
+		auto cf = fonts.get_font_type();
+		auto fp = core.get_current_path();
 		fp += "/res/seg12.ttf";
 		if(!fonts.install_font_type(fp, "led")) {
 			std::cerr << "Can't install player's TTF font: '" << fp << "'" << std::endl;
@@ -103,7 +103,7 @@ namespace app {
 		fonts.set_font_type(cf);
 
 		// サウンド・デコーダーの拡張子設定
-		al::sound& sound = director_.at().sound_;
+		auto& sound = director_.at().sound_;
 		tag_serial_ = sound.get_tag_stream().serial_;
 
 		using namespace gui;
@@ -126,7 +126,7 @@ namespace app {
 			bool f = filer_->get_state(gui::widget::state::ENABLE);
 			filer_->enable(!f);
 			if(!f) {
-				al::sound& sound = director_.at().sound_;
+				auto& sound = director_.at().sound_;
 				filer_->focus_file(sound.get_file_stream());
 				files_step_ = 0;
 				files_.clear();
@@ -206,7 +206,7 @@ namespace app {
 
 		// エラー用ダイアログリソースの生成
 		{
-			const vtx::spos& scs = core.get_rect().size;
+			const auto& scs = core.get_rect().size;
 			short w = 450;
 			short h = 150;
 			widget::param wp(vtx::irect((scs.x - w) / 2, (scs.y - h) / 2, w, h));
@@ -224,7 +224,7 @@ namespace app {
 		}
 
 		// プリファレンスの取得
-		sys::preference& pre = director_.at().preference_;
+		auto& pre = director_.at().preference_;
 		pre.get_boolean(resume_path_, resume_play_->at_local_param().check_);
 		if(resume_play_->at_local_param().check_) {
 			int pos = 0;
@@ -331,7 +331,7 @@ namespace app {
 		// ボタンの状態を設定
 		wd.enable(play_btn_, false);
 		wd.enable(pause_btn_, false);
-		al::sound& sound = director_.at().sound_;
+		auto& sound = director_.at().sound_;
 		std::string state;
 		if(sound.get_state_stream() == al::sound::stream_state::STALL) {
 			wd.enable(play_btn_);
@@ -550,8 +550,8 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void player::render()
 	{
-		gl::core& core = gl::core::get_instance();
-		const vtx::spos& siz = core.get_rect().size;
+		auto& core = gl::core::get_instance();
+		const auto& siz = core.get_rect().size;
 
 		if(jacket_) {			
 			mobj_.setup_matrix(siz.x, siz.y);
@@ -578,10 +578,10 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void player::destroy()
 	{
-		sys::preference& pre = director_.at().preference_;
+		auto& pre = director_.at().preference_;
 
 		// remain time
-		al::sound& sound = director_.at().sound_;
+		auto& sound = director_.at().sound_;
 		int po = 0;
 		std::string fn;
 		if(sound.get_state_stream() == al::sound::stream_state::PLAY ||
