@@ -427,7 +427,9 @@ namespace gui {
 			file_ = utils::append_path(param_.path_, n);
 			++select_file_id_;
 			enable(false);
-			if(param_.select_file_func_) param_.select_file_func_(file_);
+			if(param_.select_file_func_ != nullptr) {
+				param_.select_file_func_(file_);
+			}
 		}
 	}
 
