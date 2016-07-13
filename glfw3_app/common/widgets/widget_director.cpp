@@ -623,8 +623,13 @@ namespace gui {
 			if(!w->get_state(widget::state::ENABLE) ||
 			  w->get_state(widget::state::STALL) ||
 			  w->get_state(widget::state::SYSTEM_STALL)) {
+				w->set_state(widget::state::BEFORE_FOCUS, false);
 				w->set_state(widget::state::FOCUS, false);
+				w->set_state(widget::state::IS_FOCUS, false);
+				w->set_state(widget::state::BEFORE_SELECT, false);
 				w->set_state(widget::state::SELECT, false);
+				w->set_state(widget::state::IS_SELECT, false);
+				w->set_state(widget::state::SELECTED, false);
 				continue;
 			}
 
