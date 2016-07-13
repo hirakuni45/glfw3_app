@@ -428,7 +428,7 @@ namespace utils {
 		};
 
 		lstring s;
-		int n = code_conv(src, tbl, s);
+		int n = code_convs(src, tbl, s);
 
 		lstring spc = { ' ' };
 		lstrings ss = split_text(s, spc);

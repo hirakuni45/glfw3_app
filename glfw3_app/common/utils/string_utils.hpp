@@ -509,6 +509,21 @@ namespace utils {
 
 	//-----------------------------------------------------------------//
 	/*!
+		@brief	キャラクター・リストのコードを取り除く
+		@param[in]	src		入力文字列
+		@param[in]	list	取り除くキャラクター列
+		@return 取り除かれた文字列
+	*/
+	//-----------------------------------------------------------------//
+	inline std::string strip_char(const std::string& src, const std::string& list) {
+		std::string ans;
+		strip_char(src, list, ans);
+		return ans;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
 		@brief	キャラクター・リスト中のコードで分割する
 		@param[in]	src		入力文字列
 		@param[in]	list	分割するキャラクター列
@@ -596,14 +611,58 @@ namespace utils {
 	/*!
 		@brief	文字列中の文字コードを変換
 		@param[in]	src ソース文字列
+		@param[in]	a   変換前のコード
+		@param[in]	b   変換後のコード
+		@return 変換後の文字列
+	*/
+	//-----------------------------------------------------------------//
+	inline std::string code_conv(const std::string& src, char a, char b) {
+		std::string dst;
+		code_conv(src, a, b, dst);
+	    return dst;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	文字列中の文字コードを変換
+		@param[in]	src ソース文字列
+		@param[in]	a   変換前のコード
+		@param[in]	b   変換後のコード
+		@return 変換後の文字列
+	*/
+	//-----------------------------------------------------------------//
+	inline std::string code_conv(const std::string& src, const std::string& a, const std::string& b) {
+		if(a.empty() || b.empty()) return src;
+		if(src.empty() || src.size() < a.size()) return "";
+  
+ 		std::string ans;
+		std::string::size_type pos = 0;
+		do {
+			auto n = src.find(a, pos);
+			if(n != std::string::npos) {
+				ans += b;
+				n += a.size();
+			}
+			ans += src.substr(pos, n - pos);
+			pos = n;
+		} while(pos != std::string::npos) ;
+		return ans;
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	文字列中の文字コードを変換
+		@param[in]	src ソース文字列
 		@param[in]	tbl 変換表（変換前、返還後と交互に並べる）@n
-					※「返還後」コードとして０を指定すると、バッファから除外される。
+					※「返還後」コードとして０を指定すると、削除される。
 		@param[out]	dst 変換後の文字列
 		@return 変換された数
 	*/
 	//-----------------------------------------------------------------//
 	template <class STR>
-	int code_conv(const STR& src, const STR& tbl, STR& dst) {
+	int code_convs(const STR& src, const STR& tbl, STR& dst) {
 		int n = 0;
 		uint32_t tsz = tbl.size();
 		if(tsz & 1) --tsz;
