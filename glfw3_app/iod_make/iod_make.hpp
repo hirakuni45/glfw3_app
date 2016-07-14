@@ -8,6 +8,7 @@
 #include <boost/format.hpp>
 #include "utils/string_utils.hpp"
 #include "utils/text_edit.hpp"
+#include "def_st.hpp"
 
 namespace utils {
 
@@ -65,11 +66,11 @@ namespace utils {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	タイトル構築
-			@param[in]	タイトル
+			@brief	ベース構築
+			@param[in]	base	ベース設定
 		*/
 		//-----------------------------------------------------------------//
-		void start(const std::string& title, const std::string& title_2nd, const std::string& title_3rd, const std::string& author)
+		void start(const base_t& base)
 		{
 			if(start_) return;
 			start_ = true;
@@ -78,22 +79,41 @@ namespace utils {
 
 			edit_ += "//=====================================================================//";
 			edit_ += "/*!	@file";
-			edit_ += (boost::format("	@brief	%1%@n") % title).str();
-			if(!title_2nd.empty()) {
-				edit_ += (boost::format("			%1% @n") % title_2nd).str();
+			{
+				auto ss = base.get(base_t::type::title);
+				if(!ss.empty()) {
+					edit_ += (boost::format("	@brief	%1% @n") % ss[0]).str();
+					for(uint32_t i = 1; i < ss.size(); ++i) {
+						edit_ += (boost::format("			%1%") % ss[i]).str();
+						if(i != (ss.size() - 1)) edit_ += " @";
+					}
+				}
 			}
-			if(!title_3rd.empty()) {
-				edit_ += (boost::format("			%1% @n") % title_3rd).str();
-			}
-			if(!author.empty()) {
-				edit_ += (boost::format("	@author	%1%") % author).str();
+			{
+				auto ss = base.get(base_t::type::author);
+				if(!ss.empty()) {
+					edit_ += (boost::format("	@author	%1%") % ss[0]).str();
+				}
 			}		
 			edit_ += "*/";
 			edit_ += "//=====================================================================//";
 
-			edit_ += "#include \"common/io_utils.hpp\"";
+			{
+				auto ss = base.get(base_t::type::file);
+				if(!ss.empty()) {
+					std::string path = ss[0];
+					edit_ += "#include \"" + path + '"';
+				}
+			}
+
 			edit_ += "";
-			edit_ += "namespace device {";
+			{
+				auto ss = base.get(base_t::type::space);
+				std::string dev;
+				if(ss.empty()) dev = "device";
+				else dev = ss[0];
+				edit_ += "namespace " + dev + " {";
+			}
 		}
 
 

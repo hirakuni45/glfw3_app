@@ -5,24 +5,59 @@ base {
 	.title	"RL78/G13 グループ・ポート・レジスター定義",
 			"Copyright 2016 Kunihito Hiramatsu"
 	.author	"平松邦仁 (hira@rvf-rc45.net)"
+	.file	"common/io_utils.hpp"
+	.space	"device"
 }
 
 #---------------------------------------------------------------
 
-class {
+reg {
 
 	.title		"クロック動作モード制御レジスタ(CMC)",
 				"リセット時：00H"
 	.base		"rw8"
 	.address	"0xFFFA0"
 	.name 		"CMC"
-}
 
-# CMC : 7: EXCLK,   高速システム・クロック端子の動作モード
-#       6: OSCSEL,  高速システム・クロック端子の動作モード
-#       5: EXCLKS,  サブシステム・クロック端子の動作モード
-#       4: OSCSELS, サブシステム・クロック端子の動作モード
-#       3: -
-#       2: AMPHS1,  XT1発振回路の発振モード選択
-#       1: AMPHS0,  XT1発振回路の発振モード選択
-#       0: AMPH,    X1クロック発振周波数の制御
+	bit {
+		.title	高速システム・クロック端子の動作モード
+		.def	7, 1
+		.name	EXCLK
+	}
+
+	bit {
+		.title	高速システム・クロック端子の動作モード
+		.def	6, 1
+		.name	OSCSEL
+	}
+
+	bit {
+		.title	サブシステム・クロック端子の動作モード
+		.def	5, 1
+		.name	EXCLKS
+	}
+
+	bit {
+		.title	サブシステム・クロック端子の動作モード
+		.def	4, 1
+		.name	OSCSELS
+	}
+
+	bit {
+		.title	XT1発振回路の発振モード選択
+		.def	2, 1
+		.name	AMPHS1
+	}
+
+	bit {
+		.title	XT1発振回路の発振モード選択
+		.def	1, 1
+		.name	AMPHS0	
+	}
+
+	bit {
+		.title	X1クロック発振周波数の制御
+		.def	0, 1
+		.name	AMPH	
+	}
+}

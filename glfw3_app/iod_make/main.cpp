@@ -55,23 +55,20 @@ int main(int argc, char** argv)
 
 	def_in dfi(verbose);
 	if(!dfi.load(in_file)) {
-		std::cerr << "Error: analize input file: '" << in_file << "'" << std::endl;
+		std::cerr << "Error: load file: '" << in_file << "'" << std::endl;
 		return -1;
 	}
 
 	if(!dfi.analize()) {
-		std::cerr << "Error: define file analize: " << dfi.get_last_error() << std::endl;
+		std::cerr << "Error: analize input file: " << dfi.get_last_error() << std::endl;
 		return -1;
 	}
 
-
-	return 0;
 	iod_make iod;
+	iod.start(dfi.get_base());
 
-	iod.start("RL78/G13 グループ・ポート・レジスター定義",
-			  "Copyright 2016 Kunihito Hiramatsu",
-			  "",
-			  "平松邦仁 (hira@rvf-rc45.net)");
+//	iod.add(dfi.get_reg());
+#if 0
 	{
 		iod_make::reg_t reg;
 
@@ -86,7 +83,7 @@ int main(int argc, char** argv)
 			"TRJIO 入力信号選択（0: 外部 TRJIO端子から、1: VCOUT1 から内部入力）");
 		iod.add(reg, bits);
 	}
-
+#endif
 
 	if(!out_file.empty()) {
 		if(!iod.save(out_file)) {
