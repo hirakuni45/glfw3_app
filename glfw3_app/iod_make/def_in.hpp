@@ -8,6 +8,7 @@
 #include <boost/format.hpp>
 #include "utils/string_utils.hpp"
 #include "utils/text_edit.hpp"
+#include "def_st.hpp"
 
 namespace utils {
 
@@ -27,53 +28,66 @@ namespace utils {
 
 	private:
 
-		enum class analize_type {
+		enum class main_type {
 			none,
 			error,
 			first,
 			base_in,
-			base_main,
+			base_core,
 			class_in,
-			class_main,
+			class_core,
 		};
 
 		bool				verbose_;
 		std::string			last_error_;
 		utils::text_edit	te_;
-		analize_type		analize_type_ = analize_type::none;
+		main_type			main_type_ = main_type::none;
+		base_t				base_;
+		class_t				class_;
+
 
 		std::string make_error_(uint32_t pos, const std::string& line) {
 			auto ret = (boost::format("(%u)%s") % pos % line).str();
 			return ret;
 		}
 
-		std::string analize_(const utils::strings& ss) {
+
+		std::string analize_main_(const utils::strings& ss) {
 			std::string err;
 			for(const auto& s : ss) {
-				switch(analize_type_) {
-				case analize_type::first:
+				switch(main_type_) {
+				case main_type::first:
 					if(s == "base") {
-						analize_type_ = analize_type::base_in;
+						main_type_ = main_type::base_in;
 					} else if(s == "class") {
-						analize_type_ = analize_type::class_in;
+						main_type_ = main_type::class_in;
 					} else {
-						err = (boost::format(", invalid error: '%s'") % ss[0]).str();
+						err = (boost::format(", invalid #main: '%s'") % s).str();
+						main_type_ = main_type::error;
 					}
 					break;
-				case analize_type::base_in:
-				case analize_type::class_in:
+				case main_type::base_in:
+				case main_type::class_in:
 					if(s == "{") {
-						analize_type_ = static_cast<analize_type>(
-							static_cast<int>(analize_type_) + 1);
+						main_type_ = static_cast<main_type>(static_cast<int>(main_type_) + 1);
+
 					}
 					break;
-				case analize_type::base_main:
-				case analize_type::class_main:
+				case main_type::base_core:
+				case main_type::class_core:
 					if(s == "}") {
-						analize_type_ = analize_type::first;
+						main_type_ = main_type::first;
 					} else {
-						if(analize_type_ == analize_type::base_main) {
-							std::cout << s << std::endl;
+						if(main_type_ == main_type::base_core) {
+							auto e = base_.analize(s);
+							if(!e.empty()) {
+								err = ", " + e;
+							}
+						} else if(main_type_ == main_type::class_core) {
+							auto e = class_.analize(s);
+							if(!e.empty()) {
+								err = ", " + e;
+							}
 						}
 					}
 					break;
@@ -123,31 +137,33 @@ namespace utils {
  		{
 			last_error_.clear();
 
-			analize_type_ = analize_type::first;
+			main_type_ = main_type::first;
 			te_.loop([this](uint32_t pos, const std::string& line) {
 				if(line.empty()) return;
 				if(line[0] == '#') return;
 
-				if(analize_type_ == analize_type::none |
-				   analize_type_ == analize_type::error) return;
+				if(main_type_ == main_type::none |
+				   main_type_ == main_type::error) return;
+
 
 				auto ss = utils::split_text(line, " \t", "\"'");
 				if(ss.empty()) return;
-///				for(const auto& s : ss) {
-///					std::cout << s << std::endl;
-///				}
-				auto ret = analize_(ss);
+				auto ret = analize_main_(ss);
 				if(!ret.empty()) {
 					last_error_ = make_error_(pos, line);
 					last_error_ += ret;
-					analize_type_ = analize_type::error;
+					main_type_ = main_type::error;
 		   			if(verbose_) {
 		   				std::cerr << last_error_ << std::endl;
 		   			}
 				}
 			} );
 
-			return analize_type_ != analize_type::error;
+
+			base_.list();
+
+
+			return main_type_ != main_type::error;
 		}
 
 
