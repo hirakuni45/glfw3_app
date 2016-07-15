@@ -19,35 +19,6 @@ namespace utils {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct iod_make {
 
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		/*!
-			@brief	レジスター定義
-		*/
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		struct reg_t {
-	  		std::string	title;		///< レジスタータイトル
-			std::string	base;		///< レジスターベースクラス
-			std::string	address;	///< レジスターアドレス
-			std::string	local;		///< レジスターローカル名
-			std::string	name;		///< レジスター名
-		};
-
-
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		/*!
-			@brief	ビット定義
-		*/
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		struct bit_t {
-			std::string	base;		///< ベースクラス
-			std::string	pos;		///< 位置
-			std::string	name;		///< ビット名
-			std::string	comment;	///< コメント
-			bit_t(const std::string& b, const std::string& p, const std::string& n, const std::string& c = "") :
-				base(b), pos(p), name(n), comment(c) { }
-		};
-		typedef std::vector<bit_t>	bits_type;
-
 	private:
 
 		utils::text_edit	edit_;
@@ -120,41 +91,100 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	レジスター定義追加
-			@param[in]	reg		レジスター定義
-			@param[in]	bits	ビット定義郡
+			@param[in]	t	クラス定義
+			@return エラーなら「false」
 		*/
 		//-----------------------------------------------------------------//
-		void add(const reg_t& reg, const bits_type& bits)
+		bool add(const class_t& t)
 		{
+	  		const auto& title = t.reg_.get(reg_t::type::title);
+			if(title.empty()) return false;
+			const auto& base = t.reg_.get(reg_t::type::base);
+			if(base.empty()) return false;
+			const auto& address = t.reg_.get(reg_t::type::address);
+			if(address.empty()) return false;
+			const auto& name = t.reg_.get(reg_t::type::name);
+			if(name.empty()) return false;
+
+			std::string	local = to_lower_text(name[0]);
+			std::string bit_base;
+			bool read = false;
+			bool write = false;
+			if(base[0].find("rw") != std::string::npos) {
+				read = true; write = true;
+				local += "_rw";
+				bit_base = "bit_rw_t";
+			}
+			else if(base[0].find("ro") != std::string::npos) {
+				read = true;
+				local += "_ro";
+				bit_base = "bit_ro_t";
+			}
+			else if(base[0].find("wo") != std::string::npos) {
+				write = true;
+				local += "_wo";
+				bit_base = "bit_wo_t";
+			}
+
 			edit_ += "";
-			edit_ += (boost::format("	/// @brief %1% レジスタ定義") % reg.name).str();
-			edit_ += (boost::format("	typedef %1%<%2%> %3%_io;") % reg.base % reg.address % reg.local).str();
+			edit_ += (boost::format("	/// @brief %1% レジスタ定義") % name[0]).str();
+			edit_ += (boost::format("	typedef %1%<%2%> %3%;") % base[0] % address[0] % local).str();
 
 			edit_ += "	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//";
 			edit_ += "	/*!";
-			edit_ += (boost::format("		@brief	%1% %2%") % reg.title % reg.name).str();
+			{
+				edit_ += (boost::format("		@brief	%1% @n") % title[0]).str();
+				for(uint32_t i = 1; i < title.size(); ++i) {
+					edit_ += (boost::format("				%1%") % title[i]).str();
+					if(i != (title.size() - 1)) edit_ += " @";
+				}
+			}
 			edit_ += "	*/";
 			edit_ += "	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//";
-			edit_ += (boost::format("	struct %1%_t : public %2%_io {")
-						% reg.local % reg.local).str();
-			edit_ += (boost::format("		using %1%_io::operator =;") % reg.local).str();
-			edit_ += (boost::format("		using %1%_io::operator ();") % reg.local).str();
-			edit_ += (boost::format("		using %1%_io::operator |=;") % reg.local).str();
-			edit_ += (boost::format("		using %1%_io::operator &=;") % reg.local).str();
+			edit_ += (boost::format("	struct %1%_t : public %2% {") % local % local).str();
 
-			for(const auto& t : bits) {
-   
-				auto s = (boost::format("		%1%<%2%_io, %3%> %4%;")
-					% t.base % reg.local % t.pos % t.name).str();
-				if(!t.comment.empty()) {
-					s += "	///< " + t.comment;
+			if(write) {
+				edit_ += (boost::format("		using %1%::operator =;") % local).str();
+			}
+			if(read) {
+				edit_ += (boost::format("		using %1%::operator ();") % local).str();
+			}
+			if(read && write) {
+				edit_ += (boost::format("		using %1%::operator |=;") % local).str();
+				edit_ += (boost::format("		using %1%::operator &=;") % local).str();
+			}
+
+			if(!t.bits_.empty()) {
+				edit_ += "";
+			}
+			// ビット位置定義
+			for(const auto& b : t.bits_) {
+
+				const auto& title = b.get(bit_t::type::title);
+				const auto& def = b.get(bit_t::type::def);
+				if(def.empty()) return false;
+				const auto& name = b.get(bit_t::type::name);
+				if(name.empty()) return false;
+
+				std::string pos = def[0];
+				if(def.size() > 1 && def[1] != "1") {
+					pos += ", ";
+					pos += def[1];
+				}
+
+				auto s = (boost::format("		%1%<%2%, %3%> %4%;")
+					% bit_base % local % pos % name[0]).str();
+				if(!title.empty()) {
+					s += "	///< " + title[0];
 				}
 				edit_ += s;
 			}
 
 			edit_ += "	};";
-			edit_ += (boost::format("	static %1%_t %2%;") % reg.local % reg.name).str();
+			edit_ += (boost::format("	static %1%_t %2%;") % local % name[0]).str();
 			edit_ += "";
+
+			return true;
 		}
 
 

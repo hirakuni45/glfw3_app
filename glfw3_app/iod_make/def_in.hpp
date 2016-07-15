@@ -18,15 +18,6 @@ namespace utils {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class def_in {
-	public:
-		struct class_t {
-			reg_t	reg_;
-			typedef std::vector<bit_t> bits;
-			bits	bits_;
-		};
-		typedef std::vector<class_t> classies;
-
-	private:
 
 		enum class main_type {
 			none,

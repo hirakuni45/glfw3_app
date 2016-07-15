@@ -318,4 +318,16 @@ namespace utils {
 		void list() const { analize_.list("bit"); }
 	};
 
+
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief	クラス構造体
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	struct class_t {
+		reg_t	reg_;
+		typedef std::vector<bit_t> bits;
+		bits	bits_;
+	};
+	typedef std::vector<class_t> classies;
 }

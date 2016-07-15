@@ -67,23 +67,9 @@ int main(int argc, char** argv)
 	iod_make iod;
 	iod.start(dfi.get_base());
 
-//	iod.add(dfi.get_reg());
-#if 0
-	{
-		iod_make::reg_t reg;
-
-		reg.title   = "ポート制御レジスター";
-		reg.base    = "io8";
-		reg.address = "0xff0001";
-		reg.local   = "inpdir";
-		reg.name    = "INPDIR";
-
-		iod_make::bits_type bits;
-		bits.emplace_back("bit_t", "6", "TRJIOSEL",
-			"TRJIO 入力信号選択（0: 外部 TRJIO端子から、1: VCOUT1 から内部入力）");
-		iod.add(reg, bits);
+	for(const auto& t : dfi.get_classies()) {
+		iod.add(t);
 	}
-#endif
 
 	if(!out_file.empty()) {
 		if(!iod.save(out_file)) {

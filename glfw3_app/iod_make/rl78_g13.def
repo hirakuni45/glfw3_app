@@ -15,48 +15,54 @@ reg {
 
 	.title		"クロック動作モード制御レジスタ(CMC)",
 				"リセット時：00H"
-	.base		"rw8"
+	.base		"rw8_t"
 	.address	"0xFFFA0"
 	.name 		"CMC"
 
 	bit {
-		.title	高速システム・クロック端子の動作モード
+		.title	"高速システム・クロック端子の動作モード"
 		.def	7, 1
 		.name	EXCLK
 	}
 
 	bit {
-		.title	高速システム・クロック端子の動作モード
+		.title	"高速システム・クロック端子の動作モード"
 		.def	6, 1
 		.name	OSCSEL
 	}
 
 	bit {
-		.title	サブシステム・クロック端子の動作モード
+		.title	"サブシステム・クロック端子の動作モード"
 		.def	5, 1
 		.name	EXCLKS
 	}
 
 	bit {
-		.title	サブシステム・クロック端子の動作モード
+		.title	"サブシステム・クロック端子の動作モード"
 		.def	4, 1
 		.name	OSCSELS
 	}
 
 	bit {
-		.title	XT1発振回路の発振モード選択
+		.title	"XT1発振回路の発振モード選択 (0)"
 		.def	2, 1
 		.name	AMPHS1
 	}
 
 	bit {
-		.title	XT1発振回路の発振モード選択
+		.title	"XT1発振回路の発振モード選択 (1)"
 		.def	1, 1
 		.name	AMPHS0	
 	}
 
 	bit {
-		.title	X1クロック発振周波数の制御
+		.title	"XT1発振回路の発振モード選択"
+		.def	2, 2
+		.name	AMPHS	
+	}
+
+	bit {
+		.title	"X1クロック発振周波数の制御"
 		.def	0, 1
 		.name	AMPH	
 	}
