@@ -34,8 +34,7 @@ namespace gui {
 	{
 		if(text.empty()) return;
 
-		utils::lstring ls;
-		utils::utf8_to_utf32(text, ls);
+		auto ls = utils::utf8_to_utf32(text);
 
 		BOOST_FOREACH(uint32_t ch, ls) {
 			output(ch);
@@ -205,15 +204,17 @@ namespace gui {
 							fonts.swap_color();
 						}
 					}
-					if(t.cha_ > 0x7f) {
+					auto cha = t.cha_;
+					if(cha < 0x20) cha = 0x20;  // 制御コードは「スペース」として扱う
+					if(cha > 0x7f) {
 						fonts.pop_font_face();
 					}
-					int fw = fonts.get_width(t.cha_);
+					int fw = fonts.get_width(cha);
 					vtx::irect br(chs, vtx::ipos(fw, param_.height_));
 					fonts.draw_back(br);
-					chs.x += fonts.draw(chs, t.cha_);
+					chs.x += fonts.draw(chs, cha);
 					fonts.swap_color(false);
-					if(t.cha_ > 0x7f) {
+					if(cha > 0x7f) {
 						fonts.push_font_face();
 						fonts.set_font_type(param_.font_);
 					}
