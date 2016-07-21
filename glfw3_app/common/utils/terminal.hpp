@@ -52,18 +52,6 @@ namespace utils {
 		uint32_t	lines_max_;
 		lines		lines_;
 
-		const vtx::spos next_() const {
-			vtx::spos p = pos_;
-			if(lines_.empty()) {
-				return p;
-			}
-			const line& l = lines_.back();
-			if(!l.empty()) {
-				++p.x;
-			}
-			return p;
-		}
-
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -73,7 +61,7 @@ namespace utils {
 		terminal() :
 			cha_(' ', img::rgba8(255, 255, 255, 255), img::rgba8(0, 0, 0, 255)),
 			crlf_('\n'),
-			max_(0), pos_(0),
+			max_(80, 25), pos_(0),
 			line_max_(500), lines_max_(200), lines_()
 		{ }
 
@@ -92,7 +80,7 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		void clear() {
-			max_.set(0);
+			max_.set(80, 25);
 			pos_.set(0);
 			lines_.clear();
 		}
@@ -116,6 +104,10 @@ namespace utils {
 				pos_.x = 0;
 				pos_.y = lines_.size() - 1;
 				max_.y = std::max(max_.y, pos_.y);
+			} else if(cha < 0x20) {  // コントロール・コード
+				if(cha == 0x08) {  // バック・スペース
+					if(pos_.x > 0) --pos_.x;
+				}
 			} else {
 				if(lines_.empty()) {
 					line l;
@@ -125,9 +117,14 @@ namespace utils {
 				if(l.size() >= line_max_) {
 					output(crlf_);
 				}
-				pos_.x = l.size();
-				max_.x = std::max(max_.x, pos_.x);
-				l.emplace_back(cha);
+
+				if(pos_.x < l.size()) {
+					l[pos_.x] = cha;
+				} else {
+					l.emplace_back(cha);
+					pos_.x = l.size();
+					// if(pos_.x 
+				}
 			}
 		}
 
@@ -139,8 +136,9 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		void output(const std::string& str) {
-			utils::lstring ls = utils::utf8_to_utf32(str);
+			auto ls = utils::utf8_to_utf32(str);
 			for(auto ch : ls) {
+				if(ch == '\r' && ch != crlf_) ch = crlf_;
 				output(ch);
 			}
 		}
@@ -152,7 +150,7 @@ namespace utils {
 			@return カーソル位置
 		*/
 		//-----------------------------------------------------------------//
-		const vtx::spos get_cursor() const { return next_(); }
+		const vtx::spos get_cursor() const { return pos_; }
 
 
 		//-----------------------------------------------------------------//
