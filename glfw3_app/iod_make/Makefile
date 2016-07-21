@@ -164,8 +164,8 @@ strip:
 	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -mwindows -o $(TARGET)$(FEXT)
 endif
 
-run:
-	./$(TARGET) -v rl78_g13.def test.hpp
+system:
+	./$(TARGET) -v system.def system.hpp
 
 clean:
 	rm -rf $(BUILD) $(TARGET)$(FEXT)

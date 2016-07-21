@@ -57,7 +57,7 @@ reg {
 
 	bit {
 		.title	"XT1発振回路の発振モード選択"
-		.def	2, 2
+		.def	2, 1
 		.name	AMPHS	
 	}
 
