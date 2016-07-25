@@ -45,12 +45,30 @@ namespace utils {
 
 		uint32_t	crlf_;
 
-		vtx::spos	max_;
-		vtx::spos	pos_;
+		vtx::ipos	max_;
+		vtx::ipos	pos_;
 
 		uint32_t	line_max_;
 		uint32_t	lines_max_;
 		lines		lines_;
+
+		void add_pos_y_(int dy) {
+			pos_.y += dy;
+			if(pos_.y < 0) pos_.y = 0;
+			else if(pos_.y >= max_.y) {
+				pos_.y = max_.y - 1;
+				lines_.size()
+			}
+		}
+
+		void add_pos_x_(int dx) {
+			pos_.x += dx;
+			if(pos_.x < 0) pos_.x = 0;
+			else if(pos_.x >= max_.x) {
+				pos_.x = 0;
+				add_pos_y_(1);
+			}
+		}
 
 	public:
 		//-----------------------------------------------------------------//
@@ -88,6 +106,16 @@ namespace utils {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	リサイズ
+			@param[in] new_size 新規サイズ（０より小さい値の場合は、そのまま）
+		*/
+		//-----------------------------------------------------------------//
+		void resize(const vtx::ipos& new_size) {			
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	文字出力
 			@param[in]	cha	文字
 		*/
@@ -106,7 +134,7 @@ namespace utils {
 				max_.y = std::max(max_.y, pos_.y);
 			} else if(cha < 0x20) {  // コントロール・コード
 				if(cha == 0x08) {  // バック・スペース
-					if(pos_.x > 0) --pos_.x;
+					add_pos_x_(-1);
 				}
 			} else {
 				if(lines_.empty()) {
@@ -122,9 +150,8 @@ namespace utils {
 					l[pos_.x] = cha;
 				} else {
 					l.emplace_back(cha);
-					pos_.x = l.size();
-					// if(pos_.x 
 				}
+				add_pos_x_(1);
 			}
 		}
 
@@ -150,7 +177,7 @@ namespace utils {
 			@return カーソル位置
 		*/
 		//-----------------------------------------------------------------//
-		const vtx::spos get_cursor() const { return pos_; }
+		const vtx::ipos get_cursor() const { return pos_; }
 
 
 		//-----------------------------------------------------------------//
@@ -159,9 +186,10 @@ namespace utils {
 			@return 最大幅、高さ
 		*/
 		//-----------------------------------------------------------------//
-		const vtx::spos& get_max() const { return max_; }
+		const vtx::ipos& get_max() const { return max_; }
 
 
+#if 0
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	キャラクターを取得
@@ -169,12 +197,13 @@ namespace utils {
 			@return キャラクターを参照で返す
 		*/
 		//-----------------------------------------------------------------//
-		const cha_t& get_char(const vtx::spos& pos) const {
+		const cha_t& get_char(const vtx::ipos& pos) const {
 			if(pos.x < 0 || pos.y < 0) return cha_;
 			if(pos.y >= lines_.size()) return cha_;
 			const line& ln = lines_[pos.y];
 			if(pos.x >= ln.size()) return cha_; 
 			return ln[pos.x];
 		}
+#endif
 	};
 }
