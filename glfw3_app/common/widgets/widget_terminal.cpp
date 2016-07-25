@@ -186,7 +186,7 @@ namespace gui {
 			vtx::spos chs(rect.org);
 			const vtx::spos& max = terminal_.get_max();
 			vtx::spos ofs(0);
-			if((max.y + 1) > limit.y) ofs.y = max.y + 1 - limit.y;
+			/// if((max.y + 1) > limit.y) ofs.y = max.y + 1 - limit.y;
 			vtx::spos pos;
 			for(pos.y = 0; pos.y < limit.y; ++pos.y) {
 				for(pos.x = 0; pos.x < limit.x; ++pos.x) {
@@ -205,7 +205,7 @@ namespace gui {
 						}
 					}
 					auto cha = t.cha_;
-					if(cha < 0x20) cha = 0x20;  // 制御コードは「スペース」として扱う
+					if(cha < 0x20) cha = 0x3F;  // 制御コードは DEL-char として扱う
 					if(cha > 0x7f) {
 						fonts.pop_font_face();
 					}
