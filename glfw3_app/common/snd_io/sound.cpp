@@ -169,7 +169,7 @@ namespace al {
 				usleep(8000);	// 8ms くらいの時間待ち
 #endif
 			}
-			sst.audio_io_->purge_stream(sst.slot_);
+			/// sst.audio_io_->purge_stream(sst.slot_);
 			sst.pos_ = sst.len_;
 			sdf.close_stream();
 			fin.close();
