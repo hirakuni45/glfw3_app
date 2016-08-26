@@ -103,6 +103,7 @@ namespace al {
 			sst.etime_ = t;
 			size_t pos = 0;
 			bool cmdin = false;
+			bool purge = false;
 			sst.state_ = sound::stream_state::PLAY;
 			bool first_pause = true;
 			while(pos < ainfo.samples) {
@@ -111,18 +112,22 @@ namespace al {
 					if(r.command_ == sound::request_t::command::NEXT) {
 						++i;
 						cmdin = true;
+						purge = true;
 						break;
 					} else if(r.command_ == sound::request_t::command::PRIOR) {
 						if(i) --i;
 						cmdin = true;
+						purge = true;
 						break;
 					} else if(r.command_ == sound::request_t::command::REPLAY) {
 						cmdin = true;
+						purge = true;
 						break;
 					} else if(r.command_ == sound::request_t::command::STOP) {
 						sst.state_ = sound::stream_state::STOP;
 						exit = true;
 						cmdin = true;
+						purge = true;
 						break;
 					} else if(r.command_ == sound::request_t::command::PAUSE) {
 						if(pause != r.pause_state_) {
@@ -169,7 +174,7 @@ namespace al {
 				usleep(8000);	// 8ms くらいの時間待ち
 #endif
 			}
-			/// sst.audio_io_->purge_stream(sst.slot_);
+			if(purge) sst.audio_io_->purge_stream(sst.slot_);
 			sst.pos_ = sst.len_;
 			sdf.close_stream();
 			fin.close();
