@@ -333,29 +333,6 @@ namespace al {
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	ストリームを浄化する
-		@param[in]	ssh	ストリーム・スロット・ハンドル
-	*/
-	//-----------------------------------------------------------------//
-	void audio_io::purge_stream(slot_handle ssh)
-	{
-		if(ssh) {
-			alSourceStop(ssh);
-
-			// キューイングされたバッファを取り除く～
-			ALint n;
-			do {
-				ALuint bh;
-				alSourceUnqueueBuffers(ssh, 1, &bh);
-				alDeleteBuffers(1, &bh);
-				alGetSourcei(ssh, AL_BUFFERS_QUEUED, &n);
-			} while(n != 0) ;
-		}
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
 		@brief	ストリーム再生の空きバッファを返す。
 		@param[in]	ssh	ストリーム・スロット・ハンドル
 		@return 有効な、バッファがあれば、そのハンドルを返す。（「０」なら無効）
