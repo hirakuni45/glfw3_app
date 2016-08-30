@@ -175,6 +175,10 @@ namespace al {
 #endif
 			}
 			if(purge) sst.audio_io_->purge_stream(sst.slot_);
+			else {
+				sst.audio_io_->sync_stream(sst.slot_);
+				sst.audio_io_->purge_stream(sst.slot_);
+			}
 			sst.pos_ = sst.len_;
 			sdf.close_stream();
 			fin.close();

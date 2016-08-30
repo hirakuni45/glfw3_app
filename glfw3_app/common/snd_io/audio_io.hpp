@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include <unistd.h>
 
 #ifdef __APPLE__
 #include <OpenAL/al.h>
@@ -258,7 +259,42 @@ namespace al {
 			@param[in]	ssh	ストリーム・スロット・ハンドル
 		*/
 		//-----------------------------------------------------------------//
-		void purge_stream(slot_handle ssh);
+		void purge_stream(slot_handle ssh)
+		{
+			if(ssh) {
+				alSourceStop(ssh);
+
+				// キューイングされたバッファを取り除く～
+				ALint n;
+				do {
+					ALuint bh;
+					alSourceUnqueueBuffers(ssh, 1, &bh);
+					alDeleteBuffers(1, &bh);
+					alGetSourcei(ssh, AL_BUFFERS_QUEUED, &n);
+				} while(n != 0) ;
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ストリームのバッファが消費されるまで同期する
+			@param[in]	ssh	ストリーム・スロット・ハンドル
+		*/
+		//-----------------------------------------------------------------//
+		void sync_stream(slot_handle ssh)
+		{
+			if(ssh) {
+				ALint n;
+				alGetSourcei(ssh, AL_BUFFERS_QUEUED, &n);
+				if(n == 0) return;
+				ALint num;
+				do {
+					alGetSourcei(ssh, AL_BUFFERS_PROCESSED, &num);	// キューバッファ利用完了数を取得
+					usleep(5000);
+				} while(num < n) ;
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
