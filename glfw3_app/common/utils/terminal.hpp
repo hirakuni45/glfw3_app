@@ -43,45 +43,26 @@ namespace utils {
 	private:
 		cha_t		cha_;
 
-		uint32_t	crlf_;
+		lines		lines_;
+		uint32_t	max_;
 
-		vtx::ipos	max_;
 		vtx::ipos	pos_;
 
-		uint32_t	line_max_;
-		uint32_t	lines_max_;
-		lines		lines_;
+		cha_t		tmp_;
 
-		void add_pos_y_(int dy) {
-			pos_.y += dy;
-			if(pos_.y < 0) pos_.y = 0;
-			else if(pos_.y >= max_.y) {
-				pos_.y = max_.y - 1;
-				lines_.size()
-			}
-		}
-
-		void add_pos_x_(int dx) {
-			pos_.x += dx;
-			if(pos_.x < 0) pos_.x = 0;
-			else if(pos_.x >= max_.x) {
-				pos_.x = 0;
-				add_pos_y_(1);
-			}
-		}
+		bool		cre_;
 
 	public:
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	コンストラクター
+			@param[in]	max	最大ライン数
 		*/
 		//-----------------------------------------------------------------//
-		terminal() :
-			cha_(' ', img::rgba8(255, 255, 255, 255), img::rgba8(0, 0, 0, 255)),
-			crlf_('\n'),
-			max_(80, 25), pos_(0),
-			line_max_(500), lines_max_(200), lines_()
-		{ }
+		terminal(uint32_t max = 150) : cha_(), lines_(), max_(max), pos_(0), tmp_(' '), cre_(true) {
+			line l;
+			lines_.push_back(l);
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -98,19 +79,10 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		void clear() {
-			max_.set(80, 25);
-			pos_.set(0);
 			lines_.clear();
-		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	リサイズ
-			@param[in] new_size 新規サイズ（０より小さい値の場合は、そのまま）
-		*/
-		//-----------------------------------------------------------------//
-		void resize(const vtx::ipos& new_size) {			
+			line l;
+			lines_.push_back(l);
+			pos_.set(0);
 		}
 
 
@@ -120,39 +92,21 @@ namespace utils {
 			@param[in]	cha	文字
 		*/
 		//-----------------------------------------------------------------//
-		void output(uint32_t cha) {
-			if(cha == crlf_) {
-				if(lines_.size() >= lines_max_) {
+		void output(uint32_t cha) { 
+			if(cha == '\n' || (cre_ && cha == '\r')) {
+				if(lines_.size() >= max_) {
 					lines_.pop_front();
 				}
-				if(lines_.size() < lines_max_) {
-					line l;
-					lines_.push_back(l);
-				}
+				line l;
+				lines_.push_back(l);
 				pos_.x = 0;
-				pos_.y = lines_.size() - 1;
-				max_.y = std::max(max_.y, pos_.y);
-			} else if(cha < 0x20) {  // コントロール・コード
-				if(cha == 0x08) {  // バック・スペース
-					add_pos_x_(-1);
-				}
 			} else {
-				if(lines_.empty()) {
-					line l;
-					lines_.push_back(l);
-				}
 				line& l = lines_.back();
-				if(l.size() >= line_max_) {
-					output(crlf_);
-				}
-
-				if(pos_.x < l.size()) {
-					l[pos_.x] = cha;
-				} else {
-					l.emplace_back(cha);
-				}
-				add_pos_x_(1);
+				cha_.cha_ = cha;
+				l.push_back(cha_);
+				pos_.x = l.size();
 			}
+			pos_.y = lines_.size() - 1;
 		}
 
 
@@ -164,9 +118,8 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		void output(const std::string& str) {
 			auto ls = utils::utf8_to_utf32(str);
-			for(auto ch : ls) {
-				if(ch == '\r' && ch != crlf_) ch = crlf_;
-				output(ch);
+			for(auto lch : ls) {
+				output(lch);
 			}
 		}
 
@@ -177,33 +130,40 @@ namespace utils {
 			@return カーソル位置
 		*/
 		//-----------------------------------------------------------------//
-		const vtx::ipos get_cursor() const { return pos_; }
+		const vtx::ipos& get_cursor() const { return pos_; }
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	最大幅、高さを取得
-			@return 最大幅、高さ
+			@brief	ライン数を取得
+			@return ライン数
 		*/
 		//-----------------------------------------------------------------//
-		const vtx::ipos& get_max() const { return max_; }
+		uint32_t get_line_num() const { return lines_.size(); }
 
 
-#if 0
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	キャラクターを取得
-			@param[in]	pos	位置
-			@return キャラクターを参照で返す
+			@brief	ラインを取得
+			@param[in]	pos	ライン位置
+			@return ライン
+		*/
+		//-----------------------------------------------------------------//
+		const line& get_line(uint32_t pos) const { return lines_[pos]; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	キャラクター・コンテナを取得
+			@param[in]	pos	キャラクター位置
+			@return キャラクター
 		*/
 		//-----------------------------------------------------------------//
 		const cha_t& get_char(const vtx::ipos& pos) const {
-			if(pos.x < 0 || pos.y < 0) return cha_;
-			if(pos.y >= lines_.size()) return cha_;
-			const line& ln = lines_[pos.y];
-			if(pos.x >= ln.size()) return cha_; 
-			return ln[pos.x];
-		}
-#endif
+			if(pos.y >= lines_.size()) return tmp_;
+			const auto& l = lines_[pos.y];
+			if(pos.x >= l.size()) return tmp_;
+			return l[pos.x]; 
+		}		
 	};
 }
