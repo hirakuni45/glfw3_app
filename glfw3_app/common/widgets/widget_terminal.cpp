@@ -179,15 +179,16 @@ namespace gui {
 			fonts.enable_center(false);
 			fonts.enable_proportional(false);
 
-//			tpr.shadow_color_ *= cf.r;
-//			tpr.shadow_color_.alpha_scale(cf.a);
 			const img::rgbaf& cf = wd_.get_color();
 			vtx::ipos limit(clip_.size.x / param_.font_width_, clip_.size.y / param_.height_);
 			vtx::ipos chs(rect.org);
+			auto ln = terminal_.get_line_num();
+			vtx::ipos ofs(0);
+			if(ln > limit.y) ofs.y = ln - limit.y;
 			vtx::ipos pos;
 			for(pos.y = 0; pos.y < limit.y; ++pos.y) {
 				for(pos.x = 0; pos.x < limit.x; ++pos.x) {
-					const auto& t = terminal_.get_char(pos);
+					const auto& t = terminal_.get_char(pos + ofs);
 					img::rgba8 fc = t.fc_;
 					fc *= cf.r;
 					fc.alpha_scale(cf.a);
@@ -196,7 +197,7 @@ namespace gui {
 					bc *= cf.r;
 					bc.alpha_scale(cf.a);
 					fonts.set_back_color(bc);
-					if(focus_ && pos == terminal_.get_cursor()) {
+					if(focus_ && (pos + ofs) == terminal_.get_cursor()) {
 						if((interval_ % 40) < 20) {
 							fonts.swap_color();
 						}
