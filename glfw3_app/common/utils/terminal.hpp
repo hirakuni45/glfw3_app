@@ -88,6 +88,16 @@ namespace utils {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	ライン・クリア
+		*/
+		//-----------------------------------------------------------------//
+		void clear_line(bool all = true) {
+			line& l = lines_.back();
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	文字出力
 			@param[in]	cha	文字
 		*/
@@ -100,13 +110,24 @@ namespace utils {
 				line l;
 				lines_.push_back(l);
 				pos_.x = 0;
+				++pos_.y;
+			} else if(cha == 0x08) {
+				if(pos_.x > 0) --pos_.x;
+//				else {
+//					pos_.x = 0;
+//					if(pos_.y > 0) --pos_.y;
+//				}
 			} else {
-				line& l = lines_.back();
+				line& l = lines_[pos_.y];
 				cha_.cha_ = cha;
-				l.push_back(cha_);
-				pos_.x = l.size();
+				if(pos_.x < l.size()) {
+					l[pos_.x] = cha_;
+					++pos_.x;
+				} else {
+					l.push_back(cha_);
+					pos_.x = l.size();
+				}
 			}
-			pos_.y = lines_.size() - 1;
 		}
 
 
