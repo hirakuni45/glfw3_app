@@ -179,7 +179,7 @@ namespace gui {
 			vtx::ipos chs(rect.org);
 			for(pos.y = 0; pos.y < limit.y; ++pos.y) {
 				for(pos.x = 0; pos.x < limit.x; ++pos.x) {
-					const utils::terminal::cha_t& t = terminal_.get_char(pos);
+					const auto& t = terminal_.get_char(pos);
 					img::rgba8 fc = t.fc_;
 					fc *= cf.r;
 					fc.alpha_scale(cf.a);
