@@ -49,9 +49,9 @@ GLFW application
 
 ・gui_test  --->  GUI 描画、操作、テスト用   
 ・player  --->  音楽再生プレイヤー   
+![player アプリ](player.png)
 ・image  --->  画像ビューアー   
 ・vplayer  --->  動画再生プレイヤー(ffmpeg)   
-(https://github.com/hirakuni45/glfw3_app/blob/master/player.png)
 ---
 ・spinv  --->  スペースインベーダーエミュレーター（ ROM イメージ別途要）   
 ・pmdv  --->  MMD プレイヤー   
