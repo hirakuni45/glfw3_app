@@ -55,11 +55,12 @@ GLFW application
 ・player  --->  音楽再生プレイヤー   
 ![player アプリ](player.png)   
 ・image  --->  画像ビューアー   
+![image アプリ](image.png)        
 ・vplayer  --->  動画再生プレイヤー(ffmpeg)   
 ・spinv  --->  スペースインベーダーエミュレーター（ROM イメージ別途必要）   
 ![spinv アプリ](spinv.png)   
 ・pmdv  --->  MMD プレイヤー 
-![omdv アプリ](pmdv.png)     
+![pmdv アプリ](pmdv.png)     
 ・effv  --->  effekseer プレイヤー   
 
 ---
