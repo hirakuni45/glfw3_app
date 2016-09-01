@@ -283,6 +283,9 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		bool analize(const char* text) {
+
+			error_.clear();
+
 			if(text == nullptr) {
 				error_.set(error::fatal);
 				return false;
