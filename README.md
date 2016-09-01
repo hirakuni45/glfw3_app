@@ -41,19 +41,20 @@ GLFW application
 
 ####便利ツール
 
-・dllcollect  --->  DLL 収集プログラム
-・bmc  --->  ビットマップ変換
-・iod_make  --->  組み込みマイコン向け、I/O デバイスクラステンプレート生成サポート
+・dllcollect  --->  DLL 収集プログラム   
+・bmc  --->  ビットマップ変換   
+・iod_make  --->  組み込みマイコン向け、I/O デバイスクラステンプレート生成サポート   
 
 ####アプリケーション
 
-・gui_test  --->  GUI 描画、操作、テスト用
-・player  --->  音楽再生プレイヤー
-・image  --->  画像ビューアー
-・vplayer  --->  動画再生プレイヤー
-・spinv  --->  スペースインベーダーエミュレーター（ ROM イメージ別途要）
-・pmdv  --->  MMD プレイヤー
-・effv  --->  effekseer プレイヤー
+・gui_test  --->  GUI 描画、操作、テスト用   
+・player  --->  音楽再生プレイヤー   
+・image  --->  画像ビューアー   
+・vplayer  --->  動画再生プレイヤー(ffmpeg)   
+・spinv  --->  スペースインベーダーエミュレーター（ ROM イメージ別途要）   
+・pmdv  --->  MMD プレイヤー   
+・effv  --->  effekseer プレイヤー   
+
 
 ---
 License
