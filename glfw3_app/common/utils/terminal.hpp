@@ -113,7 +113,8 @@ namespace utils {
 			@param[in]	cha	文字
 		*/
 		//-----------------------------------------------------------------//
-		void output(uint32_t cha) { 
+		void output(uint32_t cha) {
+			cha_.cha_ = cha;
 			if(cha == '\n' || (cre_ && cha == '\r')) {
 				if(lines_.size() >= max_) {
 					lines_.pop_front();
@@ -132,7 +133,6 @@ namespace utils {
 //				}
 			} else {
 				line& l = lines_[pos_.y];
-				cha_.cha_ = cha;
 				if(pos_.x < l.size()) {
 					l[pos_.x] = cha_;
 					++pos_.x;
@@ -192,7 +192,31 @@ namespace utils {
 			@return ラスト・ライン
 		*/
 		//-----------------------------------------------------------------//
-		const line& get_last() const { return last_; }
+		const line& get_last_line() const { return last_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ラスト・テキストを取得
+			@return ラスト・テキスト
+		*/
+		//-----------------------------------------------------------------//
+		std::string get_last_text() const {
+			lstring ls;
+			for(auto ch : last_) {
+				ls += ch.cha_;
+			}
+			return utf32_to_utf8(ls);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ラスト・キャラクターを取得
+			@return ラスト・キャラクター
+		*/
+		//-----------------------------------------------------------------//
+		const cha_t& get_last_char() const { return cha_; }
 
 
 		//-----------------------------------------------------------------//
