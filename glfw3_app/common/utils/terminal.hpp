@@ -52,6 +52,8 @@ namespace utils {
 
 		bool		cre_;
 
+		line		last_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -59,7 +61,9 @@ namespace utils {
 			@param[in]	max	最大ライン数
 		*/
 		//-----------------------------------------------------------------//
-		terminal(uint32_t max = 150) : cha_(), lines_(), max_(max), pos_(0), tmp_(' '), cre_(true) {
+		terminal(uint32_t max = 150) : cha_(), lines_(), max_(max), pos_(0), tmp_(' '),
+			cre_(true), last_()
+		{
 			line l;
 			lines_.push_back(l);
 		}
@@ -83,6 +87,7 @@ namespace utils {
 			line l;
 			lines_.push_back(l);
 			pos_.set(0);
+			last_.clear();
 		}
 
 
@@ -92,7 +97,13 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		void clear_line(bool all = true) {
-			line& l = lines_.back();
+			line& l = lines_[pos_.y];
+			if(all) l.clear();
+			else {
+				if(pos_.x < l.size()) {
+					l.resize(pos_.x);
+				}
+			}
 		}
 
 
@@ -106,11 +117,13 @@ namespace utils {
 			if(cha == '\n' || (cre_ && cha == '\r')) {
 				if(lines_.size() >= max_) {
 					lines_.pop_front();
+				} else {
+					++pos_.y;
 				}
+				last_ = lines_.back();
 				line l;
 				lines_.push_back(l);
 				pos_.x = 0;
-				++pos_.y;
 			} else if(cha == 0x08) {
 				if(pos_.x > 0) --pos_.x;
 //				else {
@@ -171,6 +184,15 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		const line& get_line(uint32_t pos) const { return lines_[pos]; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ラスト・ラインを取得
+			@return ラスト・ライン
+		*/
+		//-----------------------------------------------------------------//
+		const line& get_last() const { return last_; }
 
 
 		//-----------------------------------------------------------------//
