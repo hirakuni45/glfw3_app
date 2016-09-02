@@ -39,21 +39,29 @@ GLFW application
 
 ・common  --->  フレームワーク、ラッパー
 
-####便利ツール
+###コンパイル方法
+・各ディレクトリーに移動後、「make」を行なう。   
+・従属規則は自動で生成される。   
 
-・dllcollect  --->  DLL 収集プログラム
-・bmc  --->  ビットマップ変換
-・iod_make  --->  組み込みマイコン向け、I/O デバイスクラステンプレート生成サポート
+####便利ツール   
 
-####アプリケーション
+・dllcollect  --->  DLL 収集プログラム   
+・bmc  --->  ビットマップ変換   
+・iod_make  --->  組み込みマイコン向け、I/O デバイスクラステンプレート生成サポート   
 
-・gui_test  --->  GUI 描画、操作、テスト用
-・player  --->  音楽再生プレイヤー
-・image  --->  画像ビューアー
-・vplayer  --->  動画再生プレイヤー
-・spinv  --->  スペースインベーダーエミュレーター（ ROM イメージ別途要）
-・pmdv  --->  MMD プレイヤー
-・effv  --->  effekseer プレイヤー
+####アプリケーション   
+
+・gui_test  --->  GUI 描画、操作、テスト用   
+・player  --->  音楽再生プレイヤー   
+![player アプリ](player.png)   
+・image  --->  画像ビューアー   
+![image アプリ](image.png)        
+・vplayer  --->  動画再生プレイヤー(ffmpeg)   
+・spinv  --->  スペースインベーダーエミュレーター（ROM イメージ別途必要）   
+![spinv アプリ](spinv.png)   
+・pmdv  --->  MMD プレイヤー 
+![pmdv アプリ](pmdv.png)     
+・effv  --->  effekseer プレイヤー   
 
 ---
 License
