@@ -8,6 +8,8 @@
 #include "core/glcore.hpp"
 #include "basic_gui.hpp"
 
+#include "utils/basic_arith.hpp"
+
 namespace app {
 
 	//-----------------------------------------------------------------//
@@ -32,7 +34,6 @@ namespace app {
 			widget::param wp(vtx::irect(0), terminal_frame_);
 			widget_terminal::param wp_;
 			terminal_core_ = wd.add_widget<widget_terminal>(wp, wp_);
-///			terminal_core_->output("漢字");
 		}
 
 		// プリファレンスの取得
@@ -72,11 +73,18 @@ namespace app {
 		}
 #endif
 
-		if(terminal_core_) {
-//			static wchar_t ch = ' ';
-//			terminal_core_->output(ch);
-//			++ch;
-//			if(ch >= 0x7f) ch = ' ';
+		if(terminal_core_ != nullptr) {
+			const auto& ch = terminal_core_->at_terminal().get_last_char();
+			if(ch.cha_ != last_ && ch.cha_ == '\r') {
+				auto t = terminal_core_->at_terminal().get_last_text();
+				utils::basic_arith<uint32_t> arith;
+				/// std::cout << t << std::endl;
+				if(!arith.analize(t.c_str())) {
+					std::cout << "Error: " << std::endl;
+				}
+				std::cout << static_cast<int32_t>(arith()) << std::endl;
+			}
+			last_ = ch.cha_;
 		}		
 
 		wd.update();
