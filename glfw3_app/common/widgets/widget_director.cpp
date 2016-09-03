@@ -644,7 +644,6 @@ namespace gui {
 
 			if(left.pos) {  // LEFT 選択、移動、エッジリサイズ
 				focus_widget_ = w;
-				
 				if(w->get_state(widget::state::RESIZE_EDGE_ENABLE)) {
 					// キャプションを握った場合はリサイズしない（現状キャプションがあるのは、「frame」のみ）
 					bool caption = false;
@@ -795,23 +794,9 @@ namespace gui {
 
 		bool touch = false;
 
-		// 移動時
-		if(move_widget_ && left.lvl) {
-			if(msp_length_) {
-				move_widget_->set_state(widget::state::DRAG);
-			}
-			if(move_widget_->get_state(widget::state::MOVE_TOP)) {
-				top_widget(move_widget_);
-			}
-			vtx::spos d = msp - position_positive_;
-			move_widget_->at_param().move_pos_ = move_widget_->get_param().move_org_ + d;
-			move_widget_->at_rect().org = move_widget_->get_param().move_pos_;
-			touch = true;
-		}
-
 		// リサイズ処理
 		// 移動がある場合、リサイズしない
-		if(!touch && (resize_l_widget_ || resize_r_widget_)) {
+		if(resize_l_widget_ || resize_r_widget_) {
 			widget* rw = nullptr;
 			if(left.lvl && resize_l_widget_) rw = resize_l_widget_;
 			if(right.lvl && resize_r_widget_) rw = resize_r_widget_;
@@ -846,6 +831,20 @@ namespace gui {
 				rw->at_rect().size = newsize;
 				touch = true;
 			}
+		}
+
+		// 移動時
+		if(!touch && move_widget_ && left.lvl) {
+			if(msp_length_) {
+				move_widget_->set_state(widget::state::DRAG);
+			}
+			if(move_widget_->get_state(widget::state::MOVE_TOP)) {
+				top_widget(move_widget_);
+			}
+			vtx::spos d = msp - position_positive_;
+			move_widget_->at_param().move_pos_ = move_widget_->get_param().move_org_ + d;
+			move_widget_->at_rect().org = move_widget_->get_param().move_pos_;
+			touch = true;
 		}
 
 		// 最上位を更新
