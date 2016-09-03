@@ -14,6 +14,23 @@
 
 namespace utils {
 
+	template <typename VTYPE>
+	struct basic_symbol {
+		bool insert(const char* name, VTYPE v) {
+			return false;
+		}
+
+		bool find(const char* name) const {
+			return false;
+		}
+
+		VTYPE get(const char* name) const {
+			VTYPE v = 0;
+			return v;
+		}
+	};
+
+
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
 		@brief	Arithmetic クラス
@@ -21,7 +38,7 @@ namespace utils {
 		@param[in]	SYMBOL	シンボルクラス
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	template <typename VTYPE>
+	template <typename VTYPE, class SYMBOL = basic_symbol<VTYPE> >
 	struct basic_arith {
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -43,6 +60,8 @@ namespace utils {
 		typedef bitset<uint16_t, error> error_t;
 
 	private:
+
+		SYMBOL			symbol_;
 
 		const char*		tx_;
 		char			ch_;
