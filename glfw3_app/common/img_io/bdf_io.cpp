@@ -56,10 +56,10 @@ namespace img {
 	}
 
 
-	static unsigned int mirror_(unsigned int bits, int count)
+	static uint32_t mirror_(uint32_t bits, int count)
 	{
-		unsigned int v = 0;
-		unsigned int m = 1 << (count - 1);
+		uint32_t v = 0;
+		uint32_t m = 1 << (count - 1);
 		for(int i = 0; i < count; ++i) {
 			if(bits & 1) {
 				v |= m;
