@@ -22,7 +22,7 @@ namespace app {
 		int w = src_image_->get_size().x;
 		int h = src_image_->get_size().y;
 
-		prn_image_.create(vtx::spos(w, h), true);
+		prn_image_.create(vtx::ipos(w, h), true);
 
 		int task = 0;
 		if(pn_menu_) {
@@ -31,7 +31,7 @@ namespace app {
 		if(task == 0) {
 			for(int y = 0; y < h; ++y) {
 				for(int x = 0; x < w; ++x) {
-					prn_image_.put_pixel(vtx::spos(x, y), img::rgba8(0, 0, 0, 0));
+					prn_image_.put_pixel(vtx::ipos(x, y), img::rgba8(0, 0, 0, 0));
 				}
 			}
 		} else if(task == 1 || task == 2) {
@@ -51,7 +51,7 @@ namespace app {
 						n *= 0.5f;
 					}
 					uint8_t gray = static_cast<uint8_t>(n * 255);
-					prn_image_.put_pixel(vtx::spos(x, y), img::rgba8(gray, gray, gray, gray ^ 255));
+					prn_image_.put_pixel(vtx::ipos(x, y), img::rgba8(gray, gray, gray, gray ^ 255));
 				}
 			}
 		}
@@ -63,7 +63,7 @@ namespace app {
 		mobj_.initialize();
 		bld_image_ = img::shared_img(img::copy_image(src_image_.get()));
 		img::img_rgba8* img = static_cast<img::img_rgba8*>(bld_image_.get());
-		img->blend(vtx::spos(0), prn_image_, vtx::srect(vtx::spos(0), prn_image_.get_size()));
+		img->blend(vtx::ipos(0), prn_image_, vtx::srect(vtx::ipos(0), prn_image_.get_size()));
 		img_handle_ = mobj_.install(img);
 		image_->at_local_param().mobj_ = mobj_;
 		image_->at_local_param().mobj_handle_ = img_handle_;
@@ -119,14 +119,14 @@ namespace app {
 		widget_director& wd = director_.at().widget_director_;
 
 		{ // 画像ファイル表示用フレーム
-			widget::param wp(vtx::srect(30, 30, 256, 256));
+			widget::param wp(vtx::irect(30, 30, 256, 256));
 			widget_frame::param wp_;
 			wp_.plate_param_.set_caption(30);
 			frame_ = wd.add_widget<widget_frame>(wp, wp_);
 		}
 
 		{ // 画像ファイル表示イメージ
-			widget::param wp(vtx::srect(0, 0, 256, 256), frame_);
+			widget::param wp(vtx::irect(0, 0, 256, 256), frame_);
 			widget_image::param wp_;
 			image_ = wd.add_widget<widget_image>(wp, wp_);
 			image_->set_state(widget::state::CLIP_PARENTS);
@@ -136,13 +136,13 @@ namespace app {
 		}
 
 		{ // 機能ツールパレット
-			widget::param wp(vtx::srect(10, 10, 150, 430));
+			widget::param wp(vtx::irect(10, 10, 150, 430));
 			widget_frame::param wp_;
 			tools_ = wd.add_widget<widget_frame>(wp, wp_);
 			tools_->set_state(widget::state::SIZE_LOCK);
 		}
 		{ // octave スライダー
-			widget::param wp(vtx::srect(10, 10+30*0, 130, 20), tools_);
+			widget::param wp(vtx::irect(10, 10+30*0, 130, 20), tools_);
 			widget_slider::param wp_;
 			wp_.slider_param_.grid_ = 1.0f / 7.0f;
 			wp_.select_func_ = [this](float pos) {
@@ -153,7 +153,7 @@ namespace app {
 			octave_ = wd.add_widget<widget_slider>(wp, wp_);
 		}
 		{ // frequency スライダー
-			widget::param wp(vtx::srect(10, 10+30*1, 130, 20), tools_);
+			widget::param wp(vtx::irect(10, 10+30*1, 130, 20), tools_);
 			widget_slider::param wp_;
 			wp_.slider_param_.grid_ = 1.0f / 15.0f;
 			wp_.select_func_ = [this](float pos){
@@ -163,7 +163,7 @@ namespace app {
 			frequency_ = wd.add_widget<widget_slider>(wp, wp_);
 		}
 		{ // gain スライダー
-			widget::param wp(vtx::srect(10, 10+30*2, 130, 20), tools_);
+			widget::param wp(vtx::irect(10, 10+30*2, 130, 20), tools_);
 			widget_slider::param wp_;
 			wp_.slider_param_.grid_ = 1.0f / 20.0f;
 			wp_.select_func_ = [this](float pos){
@@ -173,7 +173,7 @@ namespace app {
 			gain_ = wd.add_widget<widget_slider>(wp, wp_);
 		}
 		{ // リスト
-			widget::param wp(vtx::srect(10, 10+30*3, 130, 40), tools_);
+			widget::param wp(vtx::irect(10, 10+30*3, 130, 40), tools_);
 			widget_list::param wp_;
 			wp_.text_list_.push_back("None");
 			wp_.text_list_.push_back("Smoke");
@@ -186,7 +186,7 @@ namespace app {
 
 		short ofs = 150;
 		{ // ロードボタン
-			widget::param wp(vtx::srect(10, ofs+50*0, 100, 40), tools_);
+			widget::param wp(vtx::irect(10, ofs+50*0, 100, 40), tools_);
 			widget_button::param wp_("load");
 			load_ = wd.add_widget<widget_button>(wp, wp_);
 			load_->at_local_param().select_func_ = [this]() {
@@ -198,7 +198,7 @@ namespace app {
 		}
 
 		{ // セーブボタン
-			widget::param wp(vtx::srect(10, ofs+50*1, 100, 40), tools_);
+			widget::param wp(vtx::irect(10, ofs+50*1, 100, 40), tools_);
 			widget_button::param wp_("save");
 			save_ = wd.add_widget<widget_button>(wp, wp_);
 			save_->at_local_param().select_func_ = [this]() {
@@ -211,41 +211,41 @@ namespace app {
 		ofs += 100;
 
 		{ // スケール FIT
-			widget::param wp(vtx::srect(10, ofs+30*0, 90, 30), tools_);
+			widget::param wp(vtx::irect(10, ofs+30*0, 90, 30), tools_);
 			widget_radio::param wp_("fit");
 			wp_.check_ = true;
 			scale_fit_ = wd.add_widget<widget_radio>(wp, wp_);
 		}
 		{ // スケール 1X
-			widget::param wp(vtx::srect(10, ofs+30*1, 90, 30), tools_);
+			widget::param wp(vtx::irect(10, ofs+30*1, 90, 30), tools_);
 			widget_radio::param wp_("1x");
 			scale_1x_ = wd.add_widget<widget_radio>(wp, wp_);
 		}
 		{ // スケール 2X
-			widget::param wp(vtx::srect(10, ofs+30*2, 90, 30), tools_);
+			widget::param wp(vtx::irect(10, ofs+30*2, 90, 30), tools_);
 			widget_radio::param wp_("2x");
 			scale_2x_ = wd.add_widget<widget_radio>(wp, wp_);
 		}
 		{ // スケール 3X
-			widget::param wp(vtx::srect(10, ofs+30*3, 90, 30), tools_);
+			widget::param wp(vtx::irect(10, ofs+30*3, 90, 30), tools_);
 			widget_radio::param wp_("3x");
 			scale_3x_ = wd.add_widget<widget_radio>(wp, wp_);
 		}
 		{ // スケーラーボタン
-			widget::param wp(vtx::srect(10, ofs+30*4+10, 100, 40), tools_);
+			widget::param wp(vtx::irect(10, ofs+30*4+10, 100, 40), tools_);
 			widget_button::param wp_("scale");
 			scale_ = wd.add_widget<widget_button>(wp, wp_);
 		}
 
 		{ // ターミナル
 			{
-				widget::param wp(vtx::srect(10, 320, 9*14-8, 18*16+28));
+				widget::param wp(vtx::irect(10, 320, 9*14-8, 18*16+28));
 				widget_frame::param wp_;
 				wp_.plate_param_.set_caption(20);
 				info_ = wd.add_widget<widget_frame>(wp, wp_);
 			}
 			{
-				widget::param wp(vtx::srect(0), info_);
+				widget::param wp(vtx::irect(0), info_);
 				widget_terminal::param wp_;
 				wp_.echo_ = false;
 				term_ = wd.add_widget<widget_terminal>(wp, wp_);
@@ -253,33 +253,33 @@ namespace app {
 		}
 
 		{ // load ファイラー本体
-			widget::param wp(vtx::srect(10, 30, 300, 200));
+			widget::param wp(vtx::irect(10, 30, 300, 200));
 			widget_filer::param wp_(core.get_current_path());
 			load_ctx_ = wd.add_widget<widget_filer>(wp, wp_);
 			load_ctx_->enable(false);
 		}
 
 		{ // save ファイラー本体
-			widget::param wp(vtx::srect(10, 30, 300, 200));
+			widget::param wp(vtx::irect(10, 30, 300, 200));
 			widget_filer::param wp_(core.get_current_path(), "", true);
 			save_ctx_ = wd.add_widget<widget_filer>(wp, wp_);
 			save_ctx_->enable(false);
 		}
 
 		{ // ダイアログ
-			widget::param wp(vtx::srect(10, 30, 450, 200));
+			widget::param wp(vtx::irect(10, 30, 450, 200));
 			widget_dialog::param wp_;
 			dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
 			dialog_->enable(false);
 		}
 		{ // ダイアログ(cancel/ok)
-			widget::param wp(vtx::srect(10, 30, 450, 200));
+			widget::param wp(vtx::irect(10, 30, 450, 200));
 			widget_dialog::param wp_(widget_dialog::param::style::CANCEL_OK);
 			dialog_yes_no_ = wd.add_widget<widget_dialog>(wp, wp_);
 			dialog_yes_no_->enable(false);
 		}
 		{ // ダイアログ(scale)
-			widget::param wp(vtx::srect(10, 30, 450, 200));
+			widget::param wp(vtx::irect(10, 30, 450, 200));
 			widget_dialog::param wp_(widget_dialog::param::style::CANCEL_OK);
 			dialog_scale_ = wd.add_widget<widget_dialog>(wp, wp_);
 			dialog_scale_->enable(false);
@@ -393,7 +393,7 @@ namespace app {
 					image_offset_ = image_->get_local_param().offset_;
 				}
 				if(image_->get_select()) {
-					vtx::spos d = image_->get_param().move_pos_ - image_->get_param().move_org_;
+					vtx::ipos d = image_->get_param().move_pos_ - image_->get_param().move_org_;
 					image_->at_local_param().offset_ = image_offset_ + d / s;
 				}
 			}
