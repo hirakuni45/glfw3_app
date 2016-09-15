@@ -354,7 +354,11 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		bool set_value(const char* name, VTYPE value) {
-			return symbol_.insert(name, value);
+			if(symbol_.find(name)) {
+				return symbol_.set(name, 0, value);
+			} else {
+				return symbol_.insert(name, value);
+			}
 		}
 
 
