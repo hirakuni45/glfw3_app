@@ -82,7 +82,9 @@ namespace app {
 				if(!arith.analize(t.c_str())) {
 					std::cout << "Error: " << std::endl;
 				}
-				std::cout << static_cast<int32_t>(arith()) << std::endl;
+				terminal_core_->at_terminal().output(
+					(boost::format("%d\n") % arith()).str()
+				);
 			}
 			last_ = ch.cha_;
 		}		

@@ -23,7 +23,7 @@
 #include "widgets/widget_terminal.hpp"
 #include "widgets/widget_progress.hpp"
 
-#include "utils/basic.hpp"
+// #include "utils/basic.hpp"
 
 namespace app {
 
