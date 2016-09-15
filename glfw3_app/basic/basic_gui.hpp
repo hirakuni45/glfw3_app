@@ -23,6 +23,8 @@
 #include "widgets/widget_terminal.hpp"
 #include "widgets/widget_progress.hpp"
 
+#include "utils/basic.hpp"
+
 namespace app {
 
 	class basic_gui : public utils::i_scene {
@@ -32,13 +34,16 @@ namespace app {
 		gui::widget_frame*		terminal_frame_ = nullptr;
 		gui::widget_terminal*	terminal_core_ = nullptr;
 
+		vtx::ipos	cursor_;
+		uint32_t	last_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		basic_gui(utils::director<core>& d) : director_(d) { }
+		basic_gui(utils::director<core>& d) : director_(d), cursor_(0), last_(0) { }
 
 
 		//-----------------------------------------------------------------//

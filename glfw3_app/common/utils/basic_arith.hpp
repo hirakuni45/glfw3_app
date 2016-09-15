@@ -14,6 +14,68 @@
 
 namespace utils {
 
+	template <typename VTYPE, uint16_t NUM>
+	class basic_symbol {
+
+		const char* table_[NUM];
+		VTYPE	value_[NUM];
+
+		uint16_t find_(const char* name, uint8_t n) const {
+			for(uint16_t i = 0; i < NUM; ++i) {
+				if(n != 0) {
+					if(std::strcmp(name, table_[i]) == 0) return i;
+				} else {
+					if(std::strncmp(name, table_[i], n) == 0) return i;
+				}
+			}
+			return NUM;
+		}
+	public:
+		basic_symbol() {
+			for(uint16_t i = 0; i < NUM; ++i) {
+				table_[i] = nullptr;
+			}
+		}
+
+		bool insert(const char* name, VTYPE v) {
+			for(uint16_t i = 0; i < NUM; ++i) {
+				if(table_[i] == nullptr) {
+					table_[i] = name;
+					value_[i] = v;
+					return true;
+				}
+			}
+			return false;
+		}
+
+		bool erase(const char* name, uint8_t n = 0) {
+			auto i = find_(name, n);
+			if(i >= NUM) return false;
+			table_[i] = nullptr;
+			return true;
+		}
+
+		bool find(const char* name, uint8_t n = 0) const {
+			return find_(name, n) < NUM;
+		}
+
+		bool set(const char*name, uint8_t n, VTYPE value) {
+			auto i = find_(name, n);
+			if(i >= NUM) return false;
+			value_[i] = value;
+			return true;
+		}
+
+		VTYPE get(const char* name, uint8_t n = 0) const {
+			auto i = find_(name, n);
+			if(i >= NUM) {
+				return 0;
+			}
+			return value_[i];
+		}
+	};
+
+
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
 		@brief	Arithmetic クラス
@@ -21,7 +83,7 @@ namespace utils {
 		@param[in]	SYMBOL	シンボルクラス
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	template <typename VTYPE>
+	template <typename VTYPE, class SYMBOL = basic_symbol<VTYPE, 16> >
 	struct basic_arith {
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -44,6 +106,8 @@ namespace utils {
 
 	private:
 
+		SYMBOL			symbol_;
+
 		const char*		tx_;
 		char			ch_;
 
@@ -51,11 +115,13 @@ namespace utils {
 
 		VTYPE		value_;
 
+
 		void skip_space_() {
 			while(ch_ == ' ' || ch_ == '\t') {
 				ch_ = *tx_++;
 			}
 		}
+
 
 		VTYPE number_() {
 			bool inv = false;
@@ -85,54 +151,58 @@ namespace utils {
 			} else {
 				skip_space_();
 
-//				if(ch_ >= 'A' && ch_ <= 'Z') symbol = true;
-//				else if(ch_ >= 'a' && ch_ <= 'z') symbol = true;
-//				else if(ch_ == '_' || ch_ == '?') symbol = true;
-
-				while(ch_ != 0) {
-					if(ch_ == '+') break;
-					else if(ch_ == '-') break;
-					else if(ch_ == '*') break;
-					else if(ch_ == '/') break;
-					else if(ch_ == '&') break;
-					else if(ch_ == '^') break;
-					else if(ch_ == '|') break;
-					else if(ch_ == '%') break;
-					else if(ch_ == ')') break;
-					else if(ch_ == '<') break;
-					else if(ch_ == '>') break;
-					else if(ch_ == '!') break;
-					else if(ch_ == '~') break;
-					else if(ch_ == '.') {
-						if(point) {
-							error_.set(error::fatal);
-							break;
-						} else {
-							point = true;
-						}
-					} else if(ch_ >= '0' && ch_ <= '9') {
-						if(point) {
-							fp *= 10;
-							fp += ch_ - '0';
-							fs *= 10;
-						} else {
-							v *= 10;
-							v += ch_ - '0';
-						}
-					} 
-					ch_ = *tx_++;
-				}
-
-#if 0
-				if(symbol) {
-					symbol_map_cit cit = symbol_.find(sym);
-					if(cit != symbol_.end()) {
-						v = (*cit).second;
-					} else {
+				if((ch_ >= 'A' && ch_ <= 'Z') || (ch_ >= 'a' && ch_ <= 'z')) {
+					const char* src = tx_ - 1;			
+					while(ch_ != 0) {
+						ch_ = *tx_++;
+						if((ch_ >= 'A' && ch_ <= 'Z') || (ch_ >= 'a' && ch_ <= 'z')) ;
+						else if(ch_ >= '0' && ch_ <= '9') ;
+						else if(ch_ == '_') ;
+						else break;
+					}
+					if(!symbol_.find(src, tx_ - src)) {
 						error_.set(error::symbol_fatal);
+						return 0;
+					}
+					v = symbol_.get(src, tx_ - src);
+				} else {
+					while(ch_ != 0) {
+						if(ch_ == '+') break;
+						else if(ch_ == '-') break;
+						else if(ch_ == '*') break;
+						else if(ch_ == '/') break;
+						else if(ch_ == '&') break;
+						else if(ch_ == '^') break;
+						else if(ch_ == '|') break;
+						else if(ch_ == '%') break;
+						else if(ch_ == ')') break;
+						else if(ch_ == '<') break;
+						else if(ch_ == '>') break;
+						else if(ch_ == '!') break;
+						else if(ch_ == '~') break;
+						else if(ch_ == '.') {
+							if(point) {
+								error_.set(error::fatal);
+								break;
+							} else {
+								point = true;
+							}
+						} else if(ch_ >= '0' && ch_ <= '9') {
+							if(point) {
+								fp *= 10;
+								fp += ch_ - '0';
+								fs *= 10;
+							} else {
+								v *= 10;
+								v += ch_ - '0';
+							}
+						} else {
+							error_.set(error::number_fatal);
+							return 0;
+						}
+						ch_ = *tx_++;
 					}
 				}
-#endif
 			}
 
 			if(inv) { v = -v; }
@@ -273,6 +343,19 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		basic_arith() : tx_(nullptr), ch_(0), error_(), value_(0) { }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	シンボルの設定
+			@param[in]	name シンボル名
+			@param[in]	value 値
+			@return 成功なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool set_value(const char* name, VTYPE value) {
+			return symbol_.insert(name, value);
+		}
 
 
 		//-----------------------------------------------------------------//
