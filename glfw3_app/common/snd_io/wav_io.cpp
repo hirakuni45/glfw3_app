@@ -73,22 +73,22 @@ namespace al {
 		data_offset_ = 0;
 		riff_num_ = 0;
 
+		size_t ofs = fin.tell();
 		WAVEFILEHEADER wh;
-		if(fin.read(&wh, 1, sizeof(WAVEFILEHEADER)) != sizeof(WAVEFILEHEADER)) {
+		if(fin.read(&wh, 1, sizeof(wh)) != sizeof(wh)) {
 			return false;
 		}
-
 		if(strncmp(wh.szRIFF, "RIFF", 4) == 0 && strncmp(wh.szWAVE, "WAVE", 4) == 0) ;
 		else {
 			return false;
 		}
+		ofs += sizeof(wh);
 
 		RIFFCHUNK rc;
-		while(fin.read(&rc, 1, sizeof(RIFFCHUNK)) == sizeof(RIFFCHUNK)) {
-			size_t ofs = rc.ulChunkSize;
+		while(fin.read(&rc, 1, sizeof(rc)) == sizeof(rc)) {
+			ofs += sizeof(rc);
 			if(strncmp(rc.szChunkName, "fmt ", 4) == 0) {
 				if(rc.ulChunkSize <= sizeof(WAVEFMT)) {
-					ofs = 0;
 					WAVEFMT wf;
 					if(fin.read(&wf, 1, rc.ulChunkSize) != rc.ulChunkSize) {
 						return false;
@@ -106,14 +106,42 @@ namespace al {
 				data_size_ = rc.ulChunkSize;
 				data_offset_ = fin.tell();
 				break;
-			} else {
-
+			} else if(strncmp(rc.szChunkName, "LIST", 4) == 0) {
+				uint32_t sz = rc.ulChunkSize;
+				char key[4];
+				if(fin.read(&key, 1, sizeof(key)) != sizeof(key)) {
+					return false;
+				}
+				if(strncmp(key, "INFO", 4) == 0) {
+					sz -= 4;
+					while(sz > 0) {
+						RIFFCHUNK tag;
+						if(fin.read(&tag, 1, sizeof(tag)) != sizeof(tag)) {
+							return false;
+						}
+						sz -= sizeof(tag);
+						std::string t;
+						uint32_t n = tag.ulChunkSize;
+						if(n & 1) ++n;
+						if(fin.get(t, n, 0) != n) {
+							return false;
+						}
+						if(strncmp(tag.szChunkName, "IART", 4) == 0) tag_.artist_ = t;
+						else if(strncmp(tag.szChunkName, "INAM", 4) == 0) tag_.title_ = t;
+						else if(strncmp(tag.szChunkName, "IPRD", 4) == 0) tag_.album_ = t;
+						else if(strncmp(tag.szChunkName, "ICRD", 4) == 0) tag_.date_ = t;
+						else if(strncmp(tag.szChunkName, "IPRT", 4) == 0) tag_.track_ = t;
+						else {
+// std::cout << tag.szChunkName[0] << tag.szChunkName[1] << tag.szChunkName[2] << tag.szChunkName[3];
+// std::cout << ": " << t << std::endl;
+						}
+						sz -= n;
+					}
+				}
 			}
 			riff_num_++;
-			if(ofs) {
-				if(ofs & 1) ofs++;
-				fin.seek(ofs, file_io::seek::cur);
-			}
+			ofs += rc.ulChunkSize;
+			fin.seek(ofs, file_io::seek::set);
 		}
 
 		if(data_size_ > 0 && data_offset_ != 0 && ((type_ == wf_ex) || (type_ == wf_ext))) {
@@ -384,7 +412,7 @@ namespace al {
 	{
 		if(stream_ == 0) return 0;
 
-		if(fin.get_file_size() <= (data_offset_ + offset * stream_blocks_)) {
+		if(data_size_ <= (offset * stream_blocks_)) {
 			return 0;
 		}
 
@@ -392,13 +420,15 @@ namespace al {
 			return 0;
 		}
 
+		uint32_t nsmp = data_size_ - (offset * stream_blocks_);
+		if(nsmp >= samples) nsmp = samples;
 		size_t n = 0;
-		if(stream_blocks_ == 3 || stream_blocks_ == 6) {
-			for(size_t i = 0; i < samples; ++i) {
+		if(stream_blocks_ == 3 || stream_blocks_ == 6) {  // 24 bits codec
+			for(size_t i = 0; i < nsmp; ++i) {
 				n += fin.read(stream_->at_wave(i), stream_blocks_);
 			}
 		} else {
-			n = fin.read(stream_->at_wave(), 1, samples * stream_blocks_);
+			n = fin.read(stream_->at_wave(), 1, nsmp * stream_blocks_);
 		}
 		return n / stream_blocks_;
 	}
