@@ -35,6 +35,11 @@ GLFW application
 ・mingw-w64-x86_64-taglib / taglib  
 ・mingw-w64-x86_64-ffmpeg / ffmpeg  
 
+###全体のソース・コード取得
+```
+   git clone git@github.com:hirakuni45/glfw3_app.git
+```
+
 ###各ディレクトリーの構成
 
 ・common  --->  フレームワーク、ラッパー
@@ -45,7 +50,7 @@ GLFW application
 
 ####便利ツール   
 
-・dllcollect  --->  DLL 収集プログラム   
+・dllcollect  --->  mingw64 DLL 収集プログラム   
 ・bmc  --->  ビットマップ変換   
 ・iod_make  --->  組み込みマイコン向け、I/O デバイスクラステンプレート生成サポート   
 
