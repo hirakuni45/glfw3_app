@@ -51,6 +51,11 @@ GLFW application
 ####便利ツール   
 
 ・dllcollect  --->  mingw64 DLL 収集プログラム   
+```
+   dllcollect 「実行ファイル」 
+```
+実行ファイルに必要な、DLL を「dlls」ディレクトリーに全てコピーする。   
+   
 ・bmc  --->  ビットマップ変換   
 ・iod_make  --->  組み込みマイコン向け、I/O デバイスクラステンプレート生成サポート   
 
@@ -59,13 +64,17 @@ GLFW application
 ・gui_test  --->  GUI 描画、操作、テスト用   
 ・player  --->  音楽再生プレイヤー   
 ![player アプリ](player.png)   
+   
 ・image  --->  画像ビューアー   
 ![image アプリ](image.png)        
+   
 ・vplayer  --->  動画再生プレイヤー(ffmpeg)   
 ・spinv  --->  スペースインベーダーエミュレーター（ROM イメージ別途必要）   
 ![spinv アプリ](spinv.png)   
+   
 ・pmdv  --->  MMD プレイヤー 
 ![pmdv アプリ](pmdv.png)     
+   
 ・effv  --->  effekseer プレイヤー   
 
 ---
