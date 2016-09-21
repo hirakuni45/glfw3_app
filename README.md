@@ -23,6 +23,7 @@ GLFW application
 ###必要なライブラリー（パッケージ名）
 
 ・mingw-w64-x86_64-clang / clang   
+・mingw-w64-x86_64-boost / boost   
 ・mingw-w64-x86_64-glfw / glfw   
 ・mingw-w64-x86_64-openal / openal  
 ・mingw-w64-x86_64-freetype / freetype  
@@ -34,6 +35,7 @@ GLFW application
 ・mingw-w64-x86_64-libmad / libmad  
 ・mingw-w64-x86_64-taglib / taglib  
 ・mingw-w64-x86_64-ffmpeg / ffmpeg  
+・mingw-w64-x86_64-bullet / bullet   
 
 ###全体のソース・コード取得
 ```
