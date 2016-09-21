@@ -108,7 +108,6 @@ namespace al {
 			} else if(strncmp(rc.szChunkName, "data", 4) == 0) {
 				data_size_ = rc.ulChunkSize;
 				data_offset_ = fin.tell();
-				break;
 			} else if(strncmp(rc.szChunkName, "LIST", 4) == 0) {
 				uint32_t sz = rc.ulChunkSize;
 				char key[4];
@@ -126,11 +125,14 @@ namespace al {
 						std::string t;
 						uint32_t n = tag.ulChunkSize;
 						if(n & 1) ++n;
-						if(fin.get(t, n, 0) != n) {
-							return false;
+						if(n > 0) {
+							if(fin.get(t, n, 0) != n) {
+								return false;
+							}
 						}
-						// UTF-8 のはずなのに SJIS の場合を想定した変換
-						{
+						// 「RIFFINFO_」の定型文字列ならスキップ
+						if(strncmp(t.c_str(), "RIFFINFO_", 9) == 0) ;
+						else if(!t.empty()) {  // UTF-8 のはずなのに SJIS の場合を想定した変換
 							utils::wstring ws;
 							uint16_t wc = 0;
 							uint16_t sjis = 0;
@@ -155,16 +157,10 @@ namespace al {
 								}
 							}
 							if(sjis > 0) t = utils::utf16_to_utf8(ws);
-						}
-						if(strncmp(tag.szChunkName, "IART", 4) == 0) tag_.artist_ = t;
-						else if(strncmp(tag.szChunkName, "INAM", 4) == 0) tag_.title_ = t;
-						else if(strncmp(tag.szChunkName, "IPRD", 4) == 0) tag_.album_ = t;
-						else if(strncmp(tag.szChunkName, "ICRD", 4) == 0) tag_.date_ = t;
-						else if(strncmp(tag.szChunkName, "IPRT", 4) == 0) tag_.track_ = t;
-						else {
 #if 0
 std::cout << tag.szChunkName[0] << tag.szChunkName[1] << tag.szChunkName[2] << tag.szChunkName[3];
 std::cout << ": " << t << std::endl;
+#if 0
 for(auto ch : t) {
 	std::cout << boost::format("%02X, ") % (static_cast<uint32_t>(ch) & 0xff);
 }
@@ -175,6 +171,14 @@ for(auto code : ls) {
 }
 std::cout << std::endl;
 #endif
+#endif
+							if(strncmp(tag.szChunkName, "IART", 4) == 0) tag_.artist_ = t;
+							else if(strncmp(tag.szChunkName, "INAM", 4) == 0) tag_.title_ = t;
+							else if(strncmp(tag.szChunkName, "IPRD", 4) == 0) tag_.album_ = t;
+							else if(strncmp(tag.szChunkName, "ICRD", 4) == 0) tag_.date_ = t;
+							else if(strncmp(tag.szChunkName, "IPRT", 4) == 0) tag_.track_ = t;
+							else {
+							}
 						}
 						sz -= n;
 					}
@@ -462,6 +466,7 @@ std::cout << std::endl;
 		}
 
 		uint32_t nsmp = data_size_ - (offset * stream_blocks_);
+		nsmp /= stream_blocks_;
 		if(nsmp >= samples) nsmp = samples;
 		size_t n = 0;
 		if(stream_blocks_ == 3 || stream_blocks_ == 6) {  // 24 bits codec
