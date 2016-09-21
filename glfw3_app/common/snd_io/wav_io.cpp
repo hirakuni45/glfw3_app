@@ -6,6 +6,9 @@
 //=====================================================================//
 #include "wav_io.hpp"
 #include "pcm.hpp"
+#include "utils/sjis_utf16.hpp"
+
+#include <boost/format.hpp>
 
 namespace al {
 
@@ -13,23 +16,23 @@ namespace al {
 
 	using namespace utils;
 
-	enum {
-		WAVE_FORMAT_1M08 = 1,
-		WAVE_FORMAT_1S08 = 2,
-		WAVE_FORMAT_1M16 = 4,
-		WAVE_FORMAT_1S16 = 8,
-		WAVE_FORMAT_2M08 = 16,
-		WAVE_FORMAT_2S08 = 32,
-		WAVE_FORMAT_2M16 = 64,
-		WAVE_FORMAT_2S16 = 128,
-		WAVE_FORMAT_4M08 = 256,
-		WAVE_FORMAT_4S08 = 512,
-		WAVE_FORMAT_4M16 = 1024,
-		WAVE_FORMAT_4S16 = 2048,
-	};
+	enum class WAVE_FORMAT : uint16_t {
+		_1M08 = 1,
+		_1S08 = 2,
+		_1M16 = 4,
+		_1S16 = 8,
+		_2M08 = 16,
+		_2S08 = 32,
+		_2M16 = 64,
+		_2S16 = 128,
+		_4M08 = 256,
+		_4S08 = 512,
+		_4M16 = 1024,
+		_4S16 = 2048,
 
-	static const uint16_t WAVE_FORMAT_PCM = 0x0001;
-	static const uint16_t WAVE_FORMAT_EXTENSIBLE = 0xFFFE;
+		PCM = 0x0001,
+		EXTENSIBLE = 0xFFFE,
+	};
 
 	struct WAVEFILEHEADER {
 		char	   	szRIFF[4];
@@ -94,10 +97,10 @@ namespace al {
 						return false;
 					}
 					// Determine if this is a WAVEFORMATEX or WAVEFORMATEXTENSIBLE wave file
-					if(wf.usFormatTag == WAVE_FORMAT_PCM) {
+					if(static_cast<WAVE_FORMAT>(wf.usFormatTag) == WAVE_FORMAT::PCM) {
 						type_ = wf_ex;
 						memcpy(&ext_.format, &wf, sizeof(wave_format_ex));
-					} else if(wf.usFormatTag == WAVE_FORMAT_EXTENSIBLE) {
+					} else if(static_cast<WAVE_FORMAT>(wf.usFormatTag) == WAVE_FORMAT::EXTENSIBLE) {
 						type_ = wf_ext;
 						memcpy(&ext_, &wf, sizeof(wave_format_extensible));
 					}
@@ -126,14 +129,52 @@ namespace al {
 						if(fin.get(t, n, 0) != n) {
 							return false;
 						}
+						// UTF-8 のはずなのに SJIS の場合を想定した変換
+						{
+							utils::wstring ws;
+							uint16_t wc = 0;
+							uint16_t sjis = 0;
+							for(auto c : utils::utf8_to_utf16(t)) {
+								if(wc) {
+									if(0x40 <= c && c <= 0x7e) {
+										wc <<= 8;
+										wc |= c;
+										ws += utils::sjis_to_utf16(wc);
+										++sjis;
+									} else if(0x80 <= c && c <= 0xfc) {
+										wc <<= 8;
+										wc |= c;
+										ws += utils::sjis_to_utf16(wc);
+										++sjis;
+									}
+									wc = 0;
+								} else {
+									if(0x81 <= c && c <= 0x9f) wc = c;
+									else if(0xe0 <= c && c <= 0xfc) wc = c;
+									else ws += c;
+								}
+							}
+							if(sjis > 0) t = utils::utf16_to_utf8(ws);
+						}
 						if(strncmp(tag.szChunkName, "IART", 4) == 0) tag_.artist_ = t;
 						else if(strncmp(tag.szChunkName, "INAM", 4) == 0) tag_.title_ = t;
 						else if(strncmp(tag.szChunkName, "IPRD", 4) == 0) tag_.album_ = t;
 						else if(strncmp(tag.szChunkName, "ICRD", 4) == 0) tag_.date_ = t;
 						else if(strncmp(tag.szChunkName, "IPRT", 4) == 0) tag_.track_ = t;
 						else {
-// std::cout << tag.szChunkName[0] << tag.szChunkName[1] << tag.szChunkName[2] << tag.szChunkName[3];
-// std::cout << ": " << t << std::endl;
+#if 0
+std::cout << tag.szChunkName[0] << tag.szChunkName[1] << tag.szChunkName[2] << tag.szChunkName[3];
+std::cout << ": " << t << std::endl;
+for(auto ch : t) {
+	std::cout << boost::format("%02X, ") % (static_cast<uint32_t>(ch) & 0xff);
+}
+std::cout << std::endl;
+auto ls = utils::utf8_to_utf32(t);
+for(auto code : ls) {
+	std::cout << boost::format("%08X, ") % static_cast<uint32_t>(code);
+}
+std::cout << std::endl;
+#endif
 						}
 						sz -= n;
 					}
@@ -197,7 +238,7 @@ namespace al {
 		}
 
 		wave_format_ex ex;
-		ex.format_tag        = WAVE_FORMAT_PCM;
+		ex.format_tag        = static_cast<uint16_t>(WAVE_FORMAT::PCM);
 		ex.channels          = src->get_chanel();
 		ex.samples_per_sec   = rate;
 		ex.avg_bytes_per_sec = rate * align;
