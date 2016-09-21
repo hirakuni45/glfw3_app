@@ -37,8 +37,7 @@ static bool scan_dll_(const std::string& base, const std::string& path, dll_set&
 	}
 
 	while(!fin.eof()) {
-		std::string l;
-		fin.get_line(l);
+		std::string l = fin.get_line();
 		std::string key("DLL Name: ");
 		size_t pos = l.find(key);
 		if(pos != std::string::npos) {
