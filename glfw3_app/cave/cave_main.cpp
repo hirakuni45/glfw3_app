@@ -27,13 +27,13 @@ namespace app {
 
 		{	// ターミナルのテスト
 			{
-				widget::param wp(vtx::srect(10, 10, 200, 200));
+				widget::param wp(vtx::irect(10, 10, 200, 200));
 				widget_frame::param wp_;
 				wp_.plate_param_.set_caption(30);
 				terminal_frame_ = wd.add_widget<widget_frame>(wp, wp_);
 			}
 			{
-				widget::param wp(vtx::srect(0), terminal_frame_);
+				widget::param wp(vtx::irect(0), terminal_frame_);
 				widget_terminal::param wp_;
 				terminal_core_ = wd.add_widget<widget_terminal>(wp, wp_);
 			}
