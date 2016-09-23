@@ -37,6 +37,15 @@ GLFW application
 ・mingw-w64-x86_64-ffmpeg / ffmpeg  
 ・mingw-w64-x86_64-bullet / bullet   
 
+
+###フォントのインストール
+
+GUI フレームワークでは、「Inconsolata」の OTF フォントを使っています。   
+ダウンロードして、インストールして下さい。
+   
+<a href="http://levien.com/type/myfonts/inconsolata.html" target="_blank">Inconsolata OTF font</a>   
+   
+
 ###全体のソース・コード取得
 ```
    git clone git@github.com:hirakuni45/glfw3_app.git
