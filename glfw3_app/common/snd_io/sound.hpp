@@ -159,7 +159,7 @@ namespace al {
 		//-----------------------------------------------------------------//
 		sound() : slot_max_(0), stream_fph_cnt_(0),
 				  stream_slot_(0),
-				  tag_serial_(0), tag_thread_(false), wave_gen_func_()
+				  tag_serial_(0), tag_thread_(false), wave_gen_func_(nullptr)
 		{
 			ses_.push_back(0);
 		}
