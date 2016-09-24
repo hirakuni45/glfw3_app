@@ -10,6 +10,24 @@
 
 #include "utils/basic_arith.hpp"
 
+static std::function< void(char) > output_ch_;
+static std::function< void(const char*) > output_puts_;
+
+extern "C" {
+
+	void sci_putch(char ch)
+	{
+		output_ch_(ch);
+	}
+
+	void sci_puts(const char* str)
+	{
+		output_puts_(str);
+	}
+
+};
+
+
 namespace app {
 
 	//-----------------------------------------------------------------//
@@ -44,6 +62,18 @@ namespace app {
 		if(terminal_frame_) {
 			terminal_frame_->load(pre);
 		}
+
+		output_ch_ = [this](char ch) {
+			if(terminal_core_ != nullptr) {
+				terminal_core_->at_terminal().output(static_cast<uint32_t>(ch));
+			}
+		};
+
+		output_puts_ = [this](const char* str) {
+			if(terminal_core_ != nullptr) {
+				terminal_core_->at_terminal().output(str);
+			}
+		};
 	}
 
 
@@ -77,6 +107,10 @@ namespace app {
 			const auto& ch = terminal_core_->at_terminal().get_last_char();
 			if(ch.cha_ != last_ && ch.cha_ == '\r') {
 				auto t = terminal_core_->at_terminal().get_last_text();
+
+				basic_.service(t.c_str());
+
+#if 0
 				utils::basic_arith<uint32_t> arith;
 				/// std::cout << t << std::endl;
 				if(!arith.analize(t.c_str())) {
@@ -85,6 +119,7 @@ namespace app {
 				terminal_core_->at_terminal().output(
 					(boost::format("%d\n") % arith()).str()
 				);
+#endif
 			}
 			last_ = ch.cha_;
 		}		

@@ -23,7 +23,7 @@
 #include "widgets/widget_terminal.hpp"
 #include "widgets/widget_progress.hpp"
 
-// #include "utils/basic.hpp"
+#include "basic.hpp"
 
 namespace app {
 
@@ -36,6 +36,8 @@ namespace app {
 
 		vtx::ipos	cursor_;
 		uint32_t	last_;
+
+		interpreter::basic<uint32_t>	basic_;
 
 	public:
 		//-----------------------------------------------------------------//
