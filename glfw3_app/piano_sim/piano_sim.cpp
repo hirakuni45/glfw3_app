@@ -23,6 +23,13 @@ namespace app {
 		widget_director& wd = director_.at().widget_director_;
 
 
+		{ // ボタン
+			widget::param wp(vtx::irect(30, 30, 100, 40));
+			widget_button::param wp_("Ring");
+			test_ring_ = wd.add_widget<widget_button>(wp, wp_);
+		}
+
+
 		{	// ターミナル
 			{
 				widget::param wp(vtx::irect(10, 10, 200, 200));
@@ -55,6 +62,10 @@ namespace app {
 	void piano_sim::update()
 	{
 		gui::widget_director& wd = director_.at().widget_director_;
+
+
+//		auto& sound = director_.at().sound_;
+//		audio_io::wave_handle request_pw(int slot, audio_format aform, const wave_gen_func& func);
 
 
 

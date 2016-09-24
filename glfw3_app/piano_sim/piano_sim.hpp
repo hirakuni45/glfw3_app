@@ -8,6 +8,7 @@
 #include "utils/i_scene.hpp"
 #include "utils/director.hpp"
 #include "widgets/widget.hpp"
+#include "widgets/widget_button.hpp"
 #include "widgets/widget_frame.hpp"
 #include "widgets/widget_terminal.hpp"
 
@@ -16,6 +17,8 @@ namespace app {
 	class piano_sim : public utils::i_scene {
 
 		utils::director<core>&	director_;
+
+		gui::widget_button*		test_ring_;
 
 		gui::widget_frame*		terminal_frame_;
 		gui::widget_terminal*	terminal_core_;
