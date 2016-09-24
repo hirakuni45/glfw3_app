@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <deque>
+#include <functional>
 #include "img_io/img.hpp"
 #include "utils/vtx.hpp"
 #include "utils/string_utils.hpp"
@@ -40,6 +41,8 @@ namespace utils {
 		typedef std::vector<cha_t>	line;
 		typedef std::deque<line>	lines;
 
+		typedef std::function< void (uint32_t ch) > output_func;
+
 	private:
 		cha_t		cha_;
 
@@ -54,6 +57,8 @@ namespace utils {
 
 		line		last_;
 
+		output_func	output_func_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -62,7 +67,7 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		terminal(uint32_t max = 150) : cha_(), lines_(), max_(max), pos_(0), tmp_(' '),
-			cre_(true), last_()
+			cre_(true), last_(), output_func_(nullptr)
 		{
 			line l;
 			lines_.push_back(l);
@@ -109,11 +114,25 @@ namespace utils {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	文字出力関数設定
+			@param[in]	func	関数
+		*/
+		//-----------------------------------------------------------------//
+		void set_output_func(output_func func) {
+			output_func_ = func;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	文字出力
 			@param[in]	cha	文字
 		*/
 		//-----------------------------------------------------------------//
 		void output(uint32_t cha) {
+
+			if(output_func_ != nullptr) output_func_(cha);
+
 			cha_.cha_ = cha;
 			if(cha == '\n' || (cre_ && cha == '\r')) {
 				if(lines_.size() >= max_) {
