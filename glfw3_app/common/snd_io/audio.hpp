@@ -11,9 +11,9 @@
 
 namespace al {
 
-	typedef char	s8;
-	typedef short	s16;
-	typedef long	s32;
+	typedef int8_t	s8;
+	typedef int16_t	s16;
+	typedef int32_t	s32;
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
@@ -40,12 +40,12 @@ namespace al {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct audio_info {
 		audio_format	type;			///< オーディオ・タイプ
-		size_t			samples;		///< サンプル数
-		int				chanels;		///< チャンネル数
-		int				bits;			///< チャネル辺りの量子化ビット数
-		int				frequency;		///< サンプリング周波数[Hz]
-		int				block_align;	///< ブロック辺りのバイト数
-		size_t			header_size;	///< インフォメーション・ヘッダーのサイズ
+		uint32_t		samples;		///< サンプル数
+		uint32_t		chanels;		///< チャンネル数
+		uint32_t		bits;			///< チャネル辺りの量子化ビット数
+		uint32_t		frequency;		///< サンプリング周波数[Hz]
+		uint32_t		block_align;	///< ブロック辺りのバイト数
+		uint32_t		header_size;	///< インフォメーション・ヘッダーのサイズ
 
 		//-----------------------------------------------------------------//
 		/*!
@@ -64,7 +64,7 @@ namespace al {
 			@return 正常なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool sample_to_time(size_t spos, time_t& t) {
+		bool sample_to_time(uint32_t spos, time_t& t) {
 			if(frequency <= 0) return false;
 			t = spos / frequency;
 			return true;
