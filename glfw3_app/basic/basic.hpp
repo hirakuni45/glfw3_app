@@ -126,17 +126,56 @@ namespace interpreter {
 		}
 
 		enum class OPR {
-			NONE,
 			REM,
+			GOTO,
+			GOSUB,
+			RETURN,
+			FOR,
+			TO,
+			STEP,
+			NEXT,
+			IF,
+			STOP,
+
+			NONE_
 		};
 
-		OPR scan_opr_(const str_t& param) {
-			if(std::strncmp("rem", param.str, param.len) == 0) {
-				return OPR::REM;
-			}
+		static const char* opr_key_[];
 
-			return OPR::NONE;
+		OPR scan_opr_(const str_t& param) {
+			for(uint8_t i = 0; i < static_cast<uint8_t>(OPR::NONE_); ++i) { 
+				if(std::strncmp(opr_key_[i], param.str, param.len) == 0) {
+					return static_cast<OPR>(i);
+				}
+			}
+			return OPR::NONE_;
 		}
+
+#if 0
+	"OK",
+	"Devision by zero",
+	"Overflow",
+	"Subscript out of range",
+	"Icode buffer full",
+	"List full",
+	"GOSUB too many nested",
+	"RETURN stack underflow",
+	"FOR too many nested",
+	"NEXT without FOR",
+	"NEXT without counter",
+	"NEXT mismatch FOR",
+	"FOR without variable",
+	"FOR without TO",
+	"LET without variable",
+	"IF without condition",
+	"Undefined line number",
+	"\'(\' or \')\' expected",
+	"\'=\' expected",
+	"Illegal command",
+	"Syntax error",
+	"Internal error",
+	"Abort by [ESC]"
+#endif
 
 
 	public:
@@ -164,7 +203,6 @@ namespace interpreter {
 				str_t w;
 				if(get_word_(p, w)) {
 					auto opr = scan_opr_(w);
-
 					switch(opr) {
 					case OPR::REM:
 						p += w.len;
@@ -172,7 +210,7 @@ namespace interpreter {
 						get_word_(p, w);
 						
 						break;
-					case OPR::NONE:
+					case OPR::NONE_:
 					default:
 
 						break;
@@ -320,4 +358,24 @@ namespace interpreter {
 			}
 		}
 	};
+
+	// テンプレート内「static」の実体
+	template <typename VAL, class BUFF>
+	const char* basic<VAL, BUFF>::opr_key_[] = {
+		"rem",
+		"goto", "gosub", "return",
+		"for", "to", "step", "next",
+		"if", "stop",
+	};
+
+#if 0
+	"IF", "REM", "STOP",
+	"INPUT", "PRINT", "LET",
+	",", ";",
+	"-", "+", "*", "/", "(", ")",
+	">=", "#", ">", "=", "<=", "<",
+	 "@", "RND", "ABS", "SIZE",
+	"LIST", "RUN", "NEW", "SYSTEM"
+#endif
+
 }
