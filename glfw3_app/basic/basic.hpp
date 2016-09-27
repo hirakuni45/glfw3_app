@@ -44,24 +44,12 @@ namespace interpreter {
 
 		struct str_t {
 			const char* str;
-			uint8_t	len;
+			uint8_t		len;
+			str_t() : str(nullptr), len(0) { }
 		};
 
-		static uint8_t count_word_(const char* p) {
-			char bc = ' ';
-			uint8_t n = 0;
-			while(1) {
-				auto ch = *p++;
-				if(ch == 0) break;
-				if(bc == ' ' && ch != ' ') {
-					++n;
-				}
-				bc = ch;
-			}
-			return n;
-		}
 
-		static bool get_word_(const char* p, str_t& out) {
+		static void get_word_(const char* p, str_t& out) {
 			char bc = ' ';
 			out.str = nullptr;
 			out.len = 0;
@@ -69,24 +57,28 @@ namespace interpreter {
 				auto ch = *p;
 				if(bc == ' ' && ch != ' ') {
 					out.str = p;
+					if(ch == 0) return;
 				}
 				if(bc != ' ' && (ch == ' ' || ch == 0)) {
 					out.len = p - out.str;
-					return true;
+					return;
 				}
 				++p;
 				bc = ch;
 			}
-			return false;
 		}
 
 
-		static bool get_dec_(const str_t& no, VAL& val) {
+		static bool get_dec_(const str_t& no, bool sign, VAL& val) {
 			const char* p = no.str;
 			val = 0;
+			bool inv = false;
 			for(uint8_t n = 0; n < no.len; ++n) {
 				auto ch = *p++;
-				if(ch >= '0' && ch <= '9') {
+				if(sign) {
+					if(ch == '-') { inv = true; sign = false; }
+					else if(ch == '+') { sign = false; }
+				} else if(ch >= '0' && ch <= '9') {
 					val *= 10;
 					val += ch - '0';
 				} else {
@@ -94,6 +86,7 @@ namespace interpreter {
 					return false;
 				}
 			}
+			if(inv) val = -val;
 			return true;
 		}
 
@@ -135,14 +128,21 @@ namespace interpreter {
 			STEP,
 			NEXT,
 			IF,
+			THEN,
 			STOP,
 
-			NONE_
+			NONE_,
+			str0_,	///< 文字列[0]
+			str1_,	///< 文字列[1]
+			str2_,	///< 文字列[2]
+			ndec_,	///< 符号なし整数
+			sdec_,	///< 符号つき整数
+			cmp_,	///< 比較
 		};
 
 		static const char* opr_key_[];
 
-		OPR scan_opr_(const str_t& param) {
+		static OPR scan_opr_(const str_t& param) {
 			for(uint8_t i = 0; i < static_cast<uint8_t>(OPR::NONE_); ++i) { 
 				if(std::strncmp(opr_key_[i], param.str, param.len) == 0) {
 					return static_cast<OPR>(i);
@@ -150,6 +150,60 @@ namespace interpreter {
 			}
 			return OPR::NONE_;
 		}
+
+		struct parse_ret {
+			uint16_t	match_;
+			VAL			dec_;
+			str_t		str_[3];
+			void reset() {
+				match_ = 0;
+				dec_ = 0;
+			}
+		};
+
+		class parse {
+			parse_ret&	ret_;
+			const char* command_;
+		public:
+			parse(parse_ret& ret, const char* command) : ret_(ret), command_(command) { ret_.reset(); }
+
+			parse& operator % (OPR opr) {
+				if(command_[0] == 0) return *this;
+
+				str_t w;
+				get_word_(command_, w);
+				if(w.len == 0) return *this;
+
+				ret_.match_ <<= 1;
+				if(opr == OPR::ndec_) {
+					VAL val;
+					if(get_dec_(w, false, val)) {
+						ret_.dec_ = val;
+						ret_.match_ |= 1;
+					}
+				} else if(opr == OPR::sdec_) {
+					VAL val;
+					if(get_dec_(w, true, val)) {
+						ret_.dec_ = val;
+						ret_.match_ |= 1;
+					}
+				} else if(opr == OPR::str0_) {
+					ret_.str_[0] = w;
+					ret_.match_ |= 1;
+				} else if(opr == OPR::str1_) {
+					ret_.str_[1] = w;
+					ret_.match_ |= 1;
+				} else if(opr == OPR::str2_) {
+					ret_.str_[2] = w;
+					ret_.match_ |= 1;
+				} else if(opr == scan_opr_(w)) {
+					ret_.match_ |= 1;
+				}
+				command_ = w.str + w.len;
+
+				return *this;
+			}
+		};
 
 #if 0
 	"OK",
@@ -177,6 +231,57 @@ namespace interpreter {
 	"Abort by [ESC]"
 #endif
 
+		bool put_opr_(OPR opr) {
+			uint8_t v = static_cast<uint8_t>(opr);
+			return buff_.add_front(&v, 1);
+		}
+
+		void output_str_(const str_t& t) {
+			const char* p = t.str;
+			for(uint8_t i = 0; i < t.len; ++i) {
+				utils::format("%c") % *p;
+				++p;
+			}
+		}
+
+		bool put_str_(const str_t& t) {
+			uint8_t n = t.len;
+			if(!buff_.add_front(&n, 1)) {
+				return false;
+			}
+			return buff_.add_front(t.str, t.len);
+		}
+
+		bool put_block_(VAL idx, uint8_t len) {
+			if(len > buff_.get_free()) {
+				return false;
+			}
+			buff_.add_front(&idx, sizeof(VAL));
+			buff_.add_front(&len, 1);
+			return true;	
+		}
+
+
+		void list_sub_(uint16_t pos) {
+			OPR opr = static_cast<OPR>(buff_.get8(pos));
+			++pos;
+			switch(opr) {
+			case OPR::REM:
+				{
+					str_t t;
+					t.len = buff_.get8(pos);
+					++pos;
+					t.str = static_cast<const char*>(buff_.get(pos));
+					utils::format("rem ");
+					output_str_(t);
+					pos += t.len;
+				}
+				break;
+			default:
+				break;
+			}
+			utils::format("\n");
+		}
 
 	public:
 		//-----------------------------------------------------------------//
@@ -190,36 +295,81 @@ namespace interpreter {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	デコード
+			@param[in]	idx		行番号
 			@param[in]	line	ライン
-			@param[in]	pos		中間コードの出力先
 			@return エラーなら「false」
 		*/
 		//-----------------------------------------------------------------//
-		bool decode(const str_t& line, uint16_t pos)
+		bool decode(VAL idx, const str_t& line)
 		{
-			auto n = count_word_(line.str);
-			const char* p = line.str;
-			while(n > 0) {
-				str_t w;
-				if(get_word_(p, w)) {
-					auto opr = scan_opr_(w);
-					switch(opr) {
-					case OPR::REM:
-						p += w.len;
-						--n;
-						get_word_(p, w);
-						
-						break;
-					case OPR::NONE_:
-					default:
+			parse_ret ret;
 
-						break;
-					}
+			// rem
+			parse(ret, line.str) % OPR::REM % OPR::str0_;
+			if(ret.match_ == 0b11) {
+				if(!put_block_(idx, 2 + ret.str_[0].len)) {
+					return false;
 				}
-				p += w.len;
-				--n;
+				put_opr_(OPR::REM);
+				put_str_(ret.str_[0]);
+				return true;
 			}
-			return true;
+
+			// goto
+			parse(ret, line.str) % OPR::GOTO % OPR::ndec_;
+			if(ret.match_ == 0b11) {
+				utils::format("GOTO: %d\n") % ret.dec_;
+				return true;
+			}
+
+			// gosub
+			parse(ret, line.str) % OPR::GOSUB % OPR::ndec_;
+			if(ret.match_ == 0b11) {
+				utils::format("GOSUB: %d\n") % ret.dec_;
+				return true;
+			}
+
+			// stop
+			parse(ret, line.str) % OPR::STOP;
+			if(ret.match_ == 0b1) {
+				utils::format("STOP\n");
+				return true;
+			}
+
+			// return
+			parse(ret, line.str) % OPR::RETURN;
+			if(ret.match_ == 0b1) {
+				utils::format("RETURN\n");
+				return true;
+			}
+
+			// if a = V then CMD
+			parse(ret, line.str) % OPR::IF % OPR::str0_ % OPR::cmp_ % OPR::str1_ % OPR::THEN % OPR::str2_;
+			if(ret.match_ == 0b111111) {
+				utils::format("IF\n");
+				return true;
+			}
+
+#if 0
+			// for $ = n to m step l 
+			parse(ret, line.str)
+				% OPR::FOR % OPR::str_ % OPR::EQ % OPR::dec_ % OPR::TO % OPR::dec_ % OPR::STEP % OPR::dec_;
+			if(ret.match_ == 0b11) {
+				utils::format("GOSUB: %d\n") % ret.dec_;
+				return true;
+			}
+
+			// next
+			parse(ret, line.str) % OPR::NEXT;
+			if(ret.match_ == 0b1) {
+				utils::format("NEXT\n");
+				return true;
+			}
+#endif
+
+			utils::format("Return code: %04X\n") % static_cast<uint16_t>(ret.match_);
+
+			return false;
 		}
 
 
@@ -234,13 +384,14 @@ namespace interpreter {
 		bool insert(const str_t& index, const str_t& param)
 		{
 			VAL v;
-			if(!get_dec_(index, v)) {
+			if(!get_dec_(index, false, v)) {
 				utils::format("Syntax error: %s\n") % index.str;
 				return false;
 			}
+
 			auto t = find_index_(v);
 			if(t.len == 0) {  // 行番号が見つからない場合（新規）
-				if(!decode(param, buff_.get_front_size())) {
+				if(!decode(v, param)) {
 					utils::format("Syntax error: %s\n") % param.str;
 					return false;
 				}
@@ -281,13 +432,11 @@ namespace interpreter {
 			while(pos < buff_.get_front_size()) {
 				auto idx = get_(pos);
 				pos += sizeof(VAL);
-				uint8_t len = buff_.get8(pos);
-				++pos;
 				utils::format("%d ") % idx;
-
-				dump_(pos, len);
-
-				pos += len;
+				uint8_t bkn = buff_.get8(pos);
+				++pos;
+				list_sub_(pos);
+				pos += bkn;
 			}
 			utils::format("\n");
 			return true;
@@ -330,14 +479,9 @@ namespace interpreter {
 		{
 			if(line == nullptr) return;
 
-			auto cn = count_word_(line);
-			if(cn == 0) return;
-
 			str_t cmd;
-			if(!get_word_(line, cmd)) {
-				utils::format("Command error: %s\n") % line;
-				return;
-			}
+			get_word_(line, cmd);
+			if(cmd.len == 0) return;
 
 			str_t param;
 			param.str = cmd.str + cmd.len;
@@ -365,11 +509,10 @@ namespace interpreter {
 		"rem",
 		"goto", "gosub", "return",
 		"for", "to", "step", "next",
-		"if", "stop",
+		"if", "then", "stop",
 	};
 
 #if 0
-	"IF", "REM", "STOP",
 	"INPUT", "PRINT", "LET",
 	",", ";",
 	"-", "+", "*", "/", "(", ")",
