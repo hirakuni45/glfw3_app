@@ -7,9 +7,18 @@ ifeq ($(OS),Windows_NT)
 FEXT	=	.exe
 ICON_RC		=
 #	icon.rc
+SYSTEM := WIN
 else
+  UNAME := $(shell uname -s)
+  ifeq ($(UNAME),Linux)
+    SYSTEM := LINUX
+  endif
+  ifeq ($(UNAME),Darwin)
+    SYSTEM := OSX
+	OSX_VER := $(shell sw_vers -productVersion | sed 's/^\([0-9]*.[0-9]*\).[0-9]*/\1/')
+  endif
 FEXT	=
-ICON_RC		=
+ICON_RC	=
 endif
 
 # 'debug' or 'release'
@@ -161,12 +170,13 @@ ifeq ($(BUILD),release)
 endif
 
 # 	-static-libgcc -static-libstdc++
-ifeq ($(OS),Windows_NT)
+ifeq ($(SYSTEM),WIN)
 LFLAGS	=
-else
-LFLAGS	=	-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk \
--Wl,-search_paths_first -Wl,-headerpad_max_install_names \
--framework AGL -framework Cocoa -framework OpenGL -framework IOKit -framework CoreFoundation -framework CoreVideo -framework OpenAL
+endif
+ifeq ($(SYSTEM),OSX)
+LFLAGS	=	-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX$(OSX_VER).sdk \
+			-Wl,-search_paths_first -Wl,-headerpad_max_install_names \
+			-framework AGL -framework Cocoa -framework OpenGL -framework IOKit -framework CoreFoundation -framework CoreVideo -framework OpenAL
 endif
 
 # -Wuninitialized -Wunused -Werror -Wshadow
