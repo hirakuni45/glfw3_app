@@ -5,7 +5,7 @@ TARGET		=	cave
 
 ifeq ($(OS),Windows_NT)
 FEXT	=	.exe
-ICON_RC		=
+ICON_RC	=
 #	icon.rc
 SYSTEM := WIN
 else
@@ -86,7 +86,7 @@ PSOURCES	=	main.cpp \
 
 STDLIBS		=
 
-ifeq ($(OS),Windows_NT)
+ifeq ($(SYSTEM),WIN)
 LOCAL_PATH	=	/mingw64
 OPTLIBS		=	opengl32 glfw3 glew32 \
 				pthread \
@@ -110,8 +110,7 @@ INC_SYS		=	$(LOCAL_PATH)/include \
 				$(LOCAL_PATH)/include/taglib
 INC_LIB		=
 LIBDIR		=	$(LOCAL_PATH)/lib
-ifeq ($(OS),Windows_NT)
-else
+ifeq ($(SYSTEM),OSX)
 INC_SYS		+=	$(LOCAL_PATH)/opt/jpeg-turbo/include
 LIBDIR		+=	$(LOCAL_PATH)/opt/jpeg-turbo/lib
 endif
@@ -137,7 +136,7 @@ CC	=	clang
 LK	=	clang++
 RC	=	windres
 
-ifeq ($(OS),Windows_NT)
+ifeq ($(SYSTEM),WIN)
 CPMM	=	g++
 CCMM	=	gcc
 else
@@ -152,7 +151,7 @@ LOPT	=
 PFLAGS	=	-DHAVE_STDINT_H
 CFLAGS	=
 
-ifeq ($(OS),Windows_NT)
+ifeq ($(SYSTEM),WIN)
 	PFLAGS += -DWIN32 -DBOOST_USE_WINDOWS_H
 	CFLAGS += -DWIN32
 endif
@@ -225,7 +224,7 @@ $(BUILD)/%.d : %.cpp
 	| sed 's/$(notdir $*)\.o:/$(subst /,\/,$(patsubst %.d,%.o,$@) $@):/' > $@ ; \
 	[ -s $@ ] || rm -f $@
 
-ifeq ($(OS),Windows_NT)
+ifeq ($(SYSTEM),WIN)
 strip:
 	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -mwindows -o $(TARGET)$(FEXT)
 endif
