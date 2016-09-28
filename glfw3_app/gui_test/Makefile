@@ -5,8 +5,7 @@ TARGET		=	gui_test
 
 ifeq ($(OS),Windows_NT)
 FEXT	=	.exe
-ICON_RC		=
-#	icon.rc
+ICON_RC =
 SYSTEM := WIN
 else
   UNAME := $(shell uname -s)
@@ -18,7 +17,7 @@ else
 	OSX_VER := $(shell sw_vers -productVersion | sed 's/^\([0-9]*.[0-9]*\).[0-9]*/\1/')
   endif
 FEXT	=
-ICON_RC	=
+ICON_RC =
 endif
 
 # 'debug' or 'release'
