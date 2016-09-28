@@ -5,9 +5,9 @@ TARGET		=	bmc
 
 ifeq ($(OS),Windows_NT)
 FEXT	=	.exe
-ICON_RC		=
-#	icon.rc
+ICON_RC		=	icon.rc
 else
+OSX_VER = MacOSX10.11.sdk
 FEXT	=
 ICON_RC		=
 endif
@@ -164,7 +164,7 @@ endif
 ifeq ($(OS),Windows_NT)
 LFLAGS	=
 else
-LFLAGS	=	-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk \
+LFLAGS	=	-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/$(OSX_VER) \
 -Wl,-search_paths_first -Wl,-headerpad_max_install_names \
 -framework AGL -framework Cocoa -framework OpenGL -framework IOKit -framework CoreFoundation -framework CoreVideo -framework OpenAL
 endif
