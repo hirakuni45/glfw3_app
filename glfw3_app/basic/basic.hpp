@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <cstring>
 #include "buff.hpp"
+#include "stack.hpp"
 #include "format.hpp"
 
 namespace interpreter {
@@ -22,6 +23,11 @@ namespace interpreter {
 	template <typename VAL, class BUFF = utils::buff<1024> >
 	class basic
 	{
+	public:
+		typedef bool (*save_func)(const char*, const BUFF&);
+		typedef bool (*load_func)(const char*, BUFF&);
+
+	private:
 		// バッファの構造：
 		// n: VAL のタイプにより（１、２、４）
 		// ------
@@ -29,6 +35,9 @@ namespace interpreter {
 		// +n:   行のサイズ（１）最大２５６バイト
 		// +n+1: 
 		BUFF	buff_;
+
+		save_func	save_func_;
+		load_func	load_func_;
 
 		struct adr_t {
 			uint16_t	pos;
@@ -91,23 +100,22 @@ namespace interpreter {
 		}
 
 
-		adr_t find_index_(VAL index) {
-			typename BUFF::index_type i = 0;
+		adr_t find_index_(uint16_t index) {
+			uint16_t pos = 0;
 			adr_t t;
 			t.len = 0;
-			while(i < buff_.get_front_size()) {
-				auto n = get_(i);
-				i += sizeof(VAL);
+			while(pos < buff_.get_front_size()) {
+				uint16_t n = buff_.get16(pos);
+				uint16_t len = 2 + 1 + buff_.get8(pos + 2);
 				if(n == index) {
-					t.pos = i + 1;
-					t.len = buff_.get8(i);
+					t.pos = pos;
+					t.len = len;
 					break;
 				}
-				i += buff_.get8(i) + 1;
+				pos += len;
 			}
 			return t;
 		}
-
 
 		void dump_(uint16_t pos, uint16_t len) {
 			while(len > 0) {
@@ -236,12 +244,8 @@ namespace interpreter {
 			return buff_.add_front(&v, 1);
 		}
 
-		void output_str_(const str_t& t) {
-			const char* p = t.str;
-			for(uint8_t i = 0; i < t.len; ++i) {
-				utils::format("%c") % *p;
-				++p;
-			}
+		bool put_16_(uint16_t val) {
+			return buff_.add_front(&val, 2);
 		}
 
 		bool put_str_(const str_t& t) {
@@ -252,29 +256,42 @@ namespace interpreter {
 			return buff_.add_front(t.str, t.len);
 		}
 
-		bool put_block_(VAL idx, uint8_t len) {
+		bool put_block_(uint16_t idx, uint8_t len) {
 			if(len > buff_.get_free()) {
 				return false;
 			}
-			buff_.add_front(&idx, sizeof(VAL));
+			buff_.add_front(&idx, sizeof(idx));
 			buff_.add_front(&len, 1);
 			return true;	
 		}
 
+		void output_str_(const str_t& t) {
+			const char* p = t.str;
+			for(uint8_t i = 0; i < t.len; ++i) {
+				utils::format("%c") % *p;
+				++p;
+			}
+		}
 
 		void list_sub_(uint16_t pos) {
-			OPR opr = static_cast<OPR>(buff_.get8(pos));
+			auto opr = buff_.get8(pos);
 			++pos;
-			switch(opr) {
+			utils::format("%s ") % opr_key_[opr];
+			switch(static_cast<OPR>(opr)) {
 			case OPR::REM:
 				{
 					str_t t;
 					t.len = buff_.get8(pos);
 					++pos;
 					t.str = static_cast<const char*>(buff_.get(pos));
-					utils::format("rem ");
 					output_str_(t);
 					pos += t.len;
+				}
+				break;
+			case OPR::GOTO:
+			case OPR::GOSUB:
+				{
+					utils::format("%d") % buff_.get16(pos);
 				}
 				break;
 			default:
@@ -287,9 +304,11 @@ namespace interpreter {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	コンストラクター
+			@param[in]	svf	SAVE 関数
+			@param[in]	ldf	LOAD 関数
 		*/
 		//-----------------------------------------------------------------//
-		basic() { }
+		basic(save_func svf = nullptr, load_func ldf = nullptr) : save_func_(svf), load_func_(ldf) { }
 
 
 		//-----------------------------------------------------------------//
@@ -318,28 +337,56 @@ namespace interpreter {
 			// goto
 			parse(ret, line.str) % OPR::GOTO % OPR::ndec_;
 			if(ret.match_ == 0b11) {
-				utils::format("GOTO: %d\n") % ret.dec_;
+				if(!put_block_(idx, 3)) {
+					return false;
+				}
+				VAL val;
+				if(!get_dec_(ret.str_[0], false, val)) {
+					return false;
+				}
+				if(val == 0 && val > 65535) {
+					return false;
+				}
+				put_opr_(OPR::GOTO);
+				put_16_(val);
 				return true;
 			}
 
 			// gosub
 			parse(ret, line.str) % OPR::GOSUB % OPR::ndec_;
 			if(ret.match_ == 0b11) {
-				utils::format("GOSUB: %d\n") % ret.dec_;
+				if(!put_block_(idx, 3)) {
+					return false;
+				}
+				VAL val;
+				if(!get_dec_(ret.str_[0], false, val)) {
+					return false;
+				}
+				if(val == 0 && val > 65535) {
+					return false;
+				}
+				put_opr_(OPR::GOSUB);
+				put_16_(val);
 				return true;
 			}
 
 			// stop
 			parse(ret, line.str) % OPR::STOP;
 			if(ret.match_ == 0b1) {
-				utils::format("STOP\n");
+				if(!put_block_(idx, 1)) {
+					return false;
+				}
+				put_opr_(OPR::STOP);
 				return true;
 			}
 
 			// return
 			parse(ret, line.str) % OPR::RETURN;
 			if(ret.match_ == 0b1) {
-				utils::format("RETURN\n");
+				if(!put_block_(idx, 1)) {
+					return false;
+				}
+				put_opr_(OPR::RETURN);
 				return true;
 			}
 
@@ -375,6 +422,44 @@ namespace interpreter {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	マイクロコードのリナンバー
+			@param[in]	org	開始位置
+			@param[in]	ofs	オフセット
+		*/
+		//-----------------------------------------------------------------//
+		void renumber(uint16_t org, uint16_t ofs)
+		{
+			uint16_t pos = 0;
+			while(pos < buff_.get_front_size()) {
+
+				pos += 2 + 1 + buff_.get8(pos + 2);
+			}
+		} 
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	指定の行を消す
+			@param[in]	idx	行番号
+			@return エラーなら「false」
+		*/
+		//-----------------------------------------------------------------//
+		bool remove(uint16_t idx)
+		{
+			auto t = find_index_(idx);
+			if(t.len == 0) return false;
+
+			buff_.move(t.pos + t.len, t.pos, t.len);
+			buff_.pop_front(t.len);
+
+			renumber(t.pos, t.len);
+
+			return true;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	インサート（プログラム入力）
 			@param[in]	index	行番号
 			@param[in]	param	パラメーター
@@ -383,22 +468,28 @@ namespace interpreter {
 		//-----------------------------------------------------------------//
 		bool insert(const str_t& index, const str_t& param)
 		{
-			VAL v;
-			if(!get_dec_(index, false, v)) {
+			VAL idx;
+			if(!get_dec_(index, false, idx)) {
 				utils::format("Syntax error: %s\n") % index.str;
 				return false;
 			}
 
-			auto t = find_index_(v);
-			if(t.len == 0) {  // 行番号が見つからない場合（新規）
-				if(!decode(v, param)) {
-					utils::format("Syntax error: %s\n") % param.str;
-					return false;
-				}
-			} else {
-
-
+			if(idx == 0 || idx > 65535) {
+				utils::format("Overflow: %s\n") % index.str;
+				return false;
 			}
+
+			remove(idx);
+			if(param.len == 0) {
+				return true;
+			}
+
+			if(!decode(idx, param)) {
+				utils::format("Syntax error: %s\n") % param.str;
+				return false;
+			}
+
+//			renumber(t.pos, t.len);
 
 			return true;
 		}
@@ -430,8 +521,8 @@ namespace interpreter {
 		{
 			typename BUFF::index_type pos = 0;
 			while(pos < buff_.get_front_size()) {
-				auto idx = get_(pos);
-				pos += sizeof(VAL);
+				auto idx = buff_.get16(pos);
+				pos += 2;
 				utils::format("%d ") % idx;
 				uint8_t bkn = buff_.get8(pos);
 				++pos;
@@ -471,6 +562,40 @@ namespace interpreter {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	SAVE
+			@param[in]	param	パラメーター
+		*/
+		//-----------------------------------------------------------------//
+		bool cmd_save(const str_t& param) const
+		{
+			if(save_func_ == nullptr) return false;
+			if(param.len == 0) {
+				utils::format("Illegal command\n");
+				return false;
+			}
+			return save_func_(param.str, buff_);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	LOAD
+			@param[in]	param	パラメーター
+		*/
+		//-----------------------------------------------------------------//
+		bool cmd_load(const str_t& param)
+		{
+			if(load_func_ == nullptr) return false;
+			if(param.len == 0) {
+				utils::format("Illegal command\n");
+				return false;
+			}
+			return load_func_(param.str, buff_);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	サービス
 			@param[in]	line	行
 		*/
@@ -497,6 +622,10 @@ namespace interpreter {
 				cmd_run(param);
 			} else if(std::strncmp("new", cmd.str, cmd.len) == 0) {
 				cmd_new(param);
+			} else if(save_func_ != nullptr && std::strncmp("save", cmd.str, cmd.len) == 0) {
+				cmd_save(param);
+			} else if(load_func_ != nullptr && std::strncmp("load", cmd.str, cmd.len) == 0) {
+				cmd_load(param);
 			} else {
 				utils::format("Syntax error: %s\n") % cmd.str;
 			}
