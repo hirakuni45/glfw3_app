@@ -5,8 +5,7 @@ TARGET		=	basic
 
 ifeq ($(OS),Windows_NT)
 FEXT	=	.exe
-ICON_RC		=
-#	icon.rc
+ICON_RC =
 SYSTEM := WIN
 else
   UNAME := $(shell uname -s)
@@ -18,7 +17,7 @@ else
 	OSX_VER := $(shell sw_vers -productVersion | sed 's/^\([0-9]*.[0-9]*\).[0-9]*/\1/')
   endif
 FEXT	=
-ICON_RC	=
+ICON_RC =
 endif
 
 # 'debug' or 'release'
@@ -111,7 +110,6 @@ INC_SYS		=	$(LOCAL_PATH)/include \
 				$(LOCAL_PATH)/include/taglib
 INC_LIB		=
 LIBDIR		=	$(LOCAL_PATH)/lib
-
 ifeq ($(SYSTEM),OSX)
 INC_SYS		+=	$(LOCAL_PATH)/opt/jpeg-turbo/include
 LIBDIR		+=	$(LOCAL_PATH)/opt/jpeg-turbo/lib
@@ -141,8 +139,7 @@ RC	=	windres
 ifeq ($(SYSTEM),WIN)
 CPMM	=	g++
 CCMM	=	gcc
-endif
-ifeq ($(SYSTEM),OSX)
+else
 CPMM	=	clang++
 CCMM	=	clang
 endif
@@ -184,7 +181,7 @@ endif
 # -Wuninitialized -Wunused -Werror -Wshadow
 CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
 			-Wformat
-CPWARN	=	-Wall -Werror -Wno-unused-private-field -Wno-unused-variable
+CPWARN	=	-Wall -Werror
 
 OBJECTS	=	$(addprefix $(BUILD)/,$(patsubst %.cpp,%.o,$(PSOURCES))) \
 			$(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(CSOURCES)))
@@ -241,7 +238,7 @@ clean_depend:
 	rm -f $(DEPENDS)
 
 dllname:
-	objdump -p $(TARGET)$(FEXT) | grep "DLL Name"
+	objdump -p $(TARGET)$(FEXT) | grep --text "DLL Name"
 
 tarball:
 	tar cfvz $(TARGET)_$(shell date +%Y%m%d%H).tgz \
