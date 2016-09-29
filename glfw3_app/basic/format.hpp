@@ -575,7 +575,9 @@ namespace utils {
 			return *this;
 		}
 
-#ifndef WIN32
+#if defined WIN32
+#elif defined __APPLE__
+#else
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  オペレーター「%」（int）
@@ -614,7 +616,9 @@ namespace utils {
 			return *this;
 		}
 
-#ifndef WIN32
+#if defined WIN32
+#elif defined __APPLE__
+#else
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  オペレーター「%」（unsigned int）
