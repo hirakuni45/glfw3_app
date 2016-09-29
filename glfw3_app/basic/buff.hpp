@@ -92,52 +92,50 @@ namespace utils {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	フロントへ追加
+			@brief	設定
 			@param[in]	src	ブロックの先頭
 			@param[in]	len	長さ
-			@return 成功なら「true」
+			@param[in]	dst	コピー先
 		*/
 		//-----------------------------------------------------------------//
-		bool add_front(const void* src, uint16_t len) {
-			if((front_ + len) > back_) {
-				return false;
-			}
-			std::memcpy(&buff_[front_], src, len);
-			front_ += len;
-			return true;
+		void set(const void* src, uint16_t len, uint16_t dst) {
+			std::memcpy(&buff_[dst], src, len);
 		}
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	フロントを切り詰める
-			@param[in]	len	長さ
-			@return 成功なら「true」
+			@brief	設定（１バイト）
+			@param[in]	val	値
+			@param[in]	dst	コピー先
 		*/
 		//-----------------------------------------------------------------//
-		bool pop_front(uint16_t len) {
-			if(len > front_) {
-				return false;
-			}
-			front_ -= len;
-			return true;
+		void set1(uint8_t val, uint16_t dst) {
+			buff_[dst] = val;
 		}
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	バックへ追加
-			@param[in]	src	ブロックの先頭
-			@param[in]	len	長さ
-			@return 成功なら「true」
+			@brief	設定（２バイト）
+			@param[in]	val	値
+			@param[in]	dst	コピー先
 		*/
 		//-----------------------------------------------------------------//
-		bool add_back(const void* src, uint16_t len) {
-			if((back_ - len) < front_) {
-				return false;
-			}
-			std::memcpy(&buff_[back_ - len], src, len);
-			return true;
+		void set2(uint16_t val, uint16_t dst) {
+			buff_[dst] = val & 0xff;
+			buff_[dst + 1] = val >> 8;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	フロントをリサイズ
+			@param[in]	len	長さ
+		*/
+		//-----------------------------------------------------------------//
+		void resize_front(uint16_t len) {
+			front_ = len;
 		}
 
 
@@ -147,19 +145,10 @@ namespace utils {
 			@param[in]	src	データの移動元
 			@param[in]	dst	データの移動先
 			@param[in]	len	長さ
-			@return 成功なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool move(uint16_t src, uint16_t dst, uint16_t len) {
-			if(src < front_ && (src + len) < back_) {
-				std::memmove(&buff_[dst], &buff_[src], len);
-				return true;
-			} else if(back_ < src && front_ <= (back_ - len)) {
-				std::memmove(&buff_[dst], &buff_[src], len);
-				return true;
-			} else {
-				return false;
-			}
+		void move(uint16_t src, uint16_t dst, uint16_t len) {
+			std::memmove(&buff_[dst], &buff_[src], len);
 		}
 
 
@@ -177,42 +166,26 @@ namespace utils {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	8 bits 値を取得
+			@brief	値を取得（１バイト）
 			@param[in]	pos	バッファの位置
 			@return 値
 		*/
 		//-----------------------------------------------------------------//
-		uint8_t get8(uint16_t pos) const {
+		uint8_t get1(uint16_t pos) const {
 			return buff_[pos];
 		}
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	16 bits 値を取得
+			@brief	値を取得（２バイト）
 			@param[in]	pos	バッファの位置
 			@return 値
 		*/
 		//-----------------------------------------------------------------//
-		uint16_t get16(uint16_t pos) const {
+		uint16_t get2(uint16_t pos) const {
 			uint16_t v = buff_[pos];
 			v |= static_cast<uint16_t>(buff_[pos + 1]) << 8;
-			return v;
-		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	32 bits 値を取得
-			@param[in]	pos	バッファの位置
-			@return 値
-		*/
-		//-----------------------------------------------------------------//
-		uint32_t get32(uint16_t pos) const {
-			uint32_t v = buff_[pos];
-			v |= static_cast<uint32_t>(buff_[pos + 1]) << 8;
-			v |= static_cast<uint32_t>(buff_[pos + 2]) << 16;
-			v |= static_cast<uint32_t>(buff_[pos + 3]) << 24;
 			return v;
 		}
 	};

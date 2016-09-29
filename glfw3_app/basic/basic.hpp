@@ -11,6 +11,8 @@
 #include "stack.hpp"
 #include "format.hpp"
 
+#include <boost/format.hpp>
+
 namespace interpreter {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -38,18 +40,6 @@ namespace interpreter {
 
 		save_func	save_func_;
 		load_func	load_func_;
-
-		struct adr_t {
-			uint16_t	pos;
-			uint8_t		len;
-		};
-
-		VAL get_(uint16_t pos) const {
-			if(sizeof(VAL) == 1) return buff_.get8(pos);
-			else if(sizeof(VAL) == 2) return buff_.get16(pos);
-			else if(sizeof(VAL) == 4) return buff_.get32(pos);
-			else return 0;
-		}
 
 		struct str_t {
 			const char* str;
@@ -100,23 +90,40 @@ namespace interpreter {
 		}
 
 
-		adr_t find_index_(uint16_t index) {
-			uint16_t pos = 0;
-			adr_t t;
-			t.len = 0;
+		bool find_index_(uint16_t index, uint16_t& pos) {
+			pos = 0;
 			while(pos < buff_.get_front_size()) {
-				uint16_t n = buff_.get16(pos);
-				uint16_t len = 2 + 1 + buff_.get8(pos + 2);
-				if(n == index) {
-					t.pos = pos;
-					t.len = len;
-					break;
+				uint16_t idx = buff_.get2(pos);
+				if(idx == index) {
+					return true;
+				}
+				pos += buff_.get1(pos + 2);
+				pos += 3;
+			}
+			return false;
+		}
+
+
+		uint16_t scan_index_(uint16_t index) {
+			uint16_t pos = 0;
+			while(pos < buff_.get_front_size()) {
+				uint16_t org = buff_.get2(pos);
+				uint16_t len = buff_.get1(pos + 2);
+				len += 3;
+				uint16_t end = 65535;
+				if((pos + len) < buff_.get_front_size()) {
+					end = buff_.get2(pos + len);
+				}
+				if(index <= org) break;
+				if(org < index && index <= end) { 
+					return pos + len;
 				}
 				pos += len;
 			}
-			return t;
+			return pos;
 		}
 
+#if 0
 		void dump_(uint16_t pos, uint16_t len) {
 			while(len > 0) {
 				auto v = buff_.get8(pos);
@@ -125,8 +132,9 @@ namespace interpreter {
 				--len;
 			}
 		}
+#endif
 
-		enum class OPR {
+		enum class OPR : uint8_t {
 			REM,
 			GOTO,
 			GOSUB,
@@ -238,31 +246,10 @@ namespace interpreter {
 	"Internal error",
 	"Abort by [ESC]"
 #endif
-
-		bool put_opr_(OPR opr) {
-			uint8_t v = static_cast<uint8_t>(opr);
-			return buff_.add_front(&v, 1);
-		}
-
-		bool put_16_(uint16_t val) {
-			return buff_.add_front(&val, 2);
-		}
-
-		bool put_str_(const str_t& t) {
-			uint8_t n = t.len;
-			if(!buff_.add_front(&n, 1)) {
-				return false;
-			}
-			return buff_.add_front(t.str, t.len);
-		}
-
-		bool put_block_(uint16_t idx, uint8_t len) {
-			if(len > buff_.get_free()) {
-				return false;
-			}
-			buff_.add_front(&idx, sizeof(idx));
-			buff_.add_front(&len, 1);
-			return true;	
+		void put_block_(uint16_t idx, uint8_t len, OPR opr, uint16_t dst) {
+			buff_.set2(idx, dst);
+			buff_.set1(len, dst + 2);
+			buff_.set1(static_cast<uint8_t>(opr), dst + 3);
 		}
 
 		void output_str_(const str_t& t) {
@@ -274,14 +261,14 @@ namespace interpreter {
 		}
 
 		void list_sub_(uint16_t pos) {
-			auto opr = buff_.get8(pos);
+			auto opr = buff_.get1(pos);
 			++pos;
 			utils::format("%s ") % opr_key_[opr];
 			switch(static_cast<OPR>(opr)) {
 			case OPR::REM:
 				{
 					str_t t;
-					t.len = buff_.get8(pos);
+					t.len = buff_.get1(pos);
 					++pos;
 					t.str = static_cast<const char*>(buff_.get(pos));
 					output_str_(t);
@@ -291,7 +278,7 @@ namespace interpreter {
 			case OPR::GOTO:
 			case OPR::GOSUB:
 				{
-					utils::format("%d") % buff_.get16(pos);
+					utils::format("%d") % buff_.get2(pos);
 				}
 				break;
 			default:
@@ -314,28 +301,39 @@ namespace interpreter {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	デコード
-			@param[in]	idx		行番号
-			@param[in]	line	ライン
+			@param[in]	idx	行番号
+			@param[in]	src	スクリプト・ソース
 			@return エラーなら「false」
 		*/
 		//-----------------------------------------------------------------//
-		bool decode(VAL idx, const str_t& line)
+		bool decode(uint16_t idx, const str_t& src)
 		{
+			// デコード位置を取得
+			auto ins = scan_index_(idx);
+
 			parse_ret ret;
 
 			// rem
-			parse(ret, line.str) % OPR::REM % OPR::str0_;
+			parse(ret, src.str) % OPR::REM % OPR::str0_;
 			if(ret.match_ == 0b11) {
-				if(!put_block_(idx, 2 + ret.str_[0].len)) {
+				uint16_t tlen = 2 + 1 + 1 + 1 + ret.str_[0].len;
+				if(tlen > buff_.get_free()) {
+					utils::format("Memory empty: %d\n") % tlen;
 					return false;
 				}
-				put_opr_(OPR::REM);
-				put_str_(ret.str_[0]);
+				if(ins < buff_.get_front_size()) {
+					buff_.move(ins, ins + tlen, buff_.get_front_size() - ins);
+				}
+				put_block_(idx, tlen - 3, OPR::REM, ins);
+				buff_.set1(ret.str_[0].len, ins + 4);
+				buff_.set(ret.str_[0].str, ret.str_[0].len, ins + 5);
+				buff_.resize_front(buff_.get_front_size() + tlen);
 				return true;
 			}
 
+#if 0
 			// goto
-			parse(ret, line.str) % OPR::GOTO % OPR::ndec_;
+			parse(ret, src.str) % OPR::GOTO % OPR::ndec_;
 			if(ret.match_ == 0b11) {
 				if(!put_block_(idx, 3)) {
 					return false;
@@ -353,7 +351,7 @@ namespace interpreter {
 			}
 
 			// gosub
-			parse(ret, line.str) % OPR::GOSUB % OPR::ndec_;
+			parse(ret, src.str) % OPR::GOSUB % OPR::ndec_;
 			if(ret.match_ == 0b11) {
 				if(!put_block_(idx, 3)) {
 					return false;
@@ -371,7 +369,7 @@ namespace interpreter {
 			}
 
 			// stop
-			parse(ret, line.str) % OPR::STOP;
+			parse(ret, src.str) % OPR::STOP;
 			if(ret.match_ == 0b1) {
 				if(!put_block_(idx, 1)) {
 					return false;
@@ -381,7 +379,7 @@ namespace interpreter {
 			}
 
 			// return
-			parse(ret, line.str) % OPR::RETURN;
+			parse(ret, src.str) % OPR::RETURN;
 			if(ret.match_ == 0b1) {
 				if(!put_block_(idx, 1)) {
 					return false;
@@ -389,9 +387,10 @@ namespace interpreter {
 				put_opr_(OPR::RETURN);
 				return true;
 			}
+#endif
 
 			// if a = V then CMD
-			parse(ret, line.str) % OPR::IF % OPR::str0_ % OPR::cmp_ % OPR::str1_ % OPR::THEN % OPR::str2_;
+			parse(ret, src.str) % OPR::IF % OPR::str0_ % OPR::cmp_ % OPR::str1_ % OPR::THEN % OPR::str2_;
 			if(ret.match_ == 0b111111) {
 				utils::format("IF\n");
 				return true;
@@ -399,7 +398,7 @@ namespace interpreter {
 
 #if 0
 			// for $ = n to m step l 
-			parse(ret, line.str)
+			parse(ret, src.str)
 				% OPR::FOR % OPR::str_ % OPR::EQ % OPR::dec_ % OPR::TO % OPR::dec_ % OPR::STEP % OPR::dec_;
 			if(ret.match_ == 0b11) {
 				utils::format("GOSUB: %d\n") % ret.dec_;
@@ -407,7 +406,7 @@ namespace interpreter {
 			}
 
 			// next
-			parse(ret, line.str) % OPR::NEXT;
+			parse(ret, src.str) % OPR::NEXT;
 			if(ret.match_ == 0b1) {
 				utils::format("NEXT\n");
 				return true;
@@ -432,7 +431,7 @@ namespace interpreter {
 			uint16_t pos = 0;
 			while(pos < buff_.get_front_size()) {
 
-				pos += 2 + 1 + buff_.get8(pos + 2);
+				pos += 2 + 1 + buff_.get1(pos + 2);
 			}
 		} 
 
@@ -446,13 +445,16 @@ namespace interpreter {
 		//-----------------------------------------------------------------//
 		bool remove(uint16_t idx)
 		{
-			auto t = find_index_(idx);
-			if(t.len == 0) return false;
+			uint16_t pos;
+			if(!find_index_(idx, pos)) {
+				return false;
+			}
+			uint16_t len = buff_.get1(pos + 2);
+			len += 3;
+			buff_.move(pos + len, pos, buff_.get_front_size() - len);
+			buff_.resize_front(buff_.get_front_size() - len);
 
-			buff_.move(t.pos + t.len, t.pos, t.len);
-			buff_.pop_front(t.len);
-
-			renumber(t.pos, t.len);
+			renumber(pos, buff_.get_front_size() - len);
 
 			return true;
 		}
@@ -479,13 +481,11 @@ namespace interpreter {
 				return false;
 			}
 
-			remove(idx);
-			if(param.len == 0) {
+			if(remove(idx)) {
 				return true;
 			}
 
 			if(!decode(idx, param)) {
-				utils::format("Syntax error: %s\n") % param.str;
 				return false;
 			}
 
@@ -519,12 +519,11 @@ namespace interpreter {
 		//-----------------------------------------------------------------//
 		bool cmd_list(const str_t& param)
 		{
-			typename BUFF::index_type pos = 0;
+			uint16_t pos = 0;
 			while(pos < buff_.get_front_size()) {
-				auto idx = buff_.get16(pos);
+				utils::format("%d ") % buff_.get2(pos);
 				pos += 2;
-				utils::format("%d ") % idx;
-				uint8_t bkn = buff_.get8(pos);
+				uint8_t bkn = buff_.get1(pos);
 				++pos;
 				list_sub_(pos);
 				pos += bkn;
