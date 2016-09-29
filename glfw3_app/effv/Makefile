@@ -5,11 +5,19 @@ TARGET		=	effv
 
 ifeq ($(OS),Windows_NT)
 FEXT	=	.exe
-ICON_RC		=
-#	icon.rc
+ICON_RC =
+SYSTEM := WIN
 else
+  UNAME := $(shell uname -s)
+  ifeq ($(UNAME),Linux)
+    SYSTEM := LINUX
+  endif
+  ifeq ($(UNAME),Darwin)
+    SYSTEM := OSX
+	OSX_VER := $(shell sw_vers -productVersion | sed 's/^\([0-9]*.[0-9]*\).[0-9]*/\1/')
+  endif
 FEXT	=
-ICON_RC		=
+ICON_RC =
 endif
 
 # 'debug' or 'release'
@@ -128,7 +136,7 @@ PSOURCES	=	main.cpp \
 
 STDLIBS		=
 
-ifeq ($(OS),Windows_NT)
+ifeq ($(SYSTEM),WIN)
 LOCAL_PATH	=	/mingw64
 OPTLIBS		=	opengl32 glu32 glfw3 glew32 \
 				pthread \
@@ -152,8 +160,7 @@ INC_SYS		=	$(LOCAL_PATH)/include \
 				$(LOCAL_PATH)/include/taglib
 INC_LIB		=
 LIBDIR		=	$(LOCAL_PATH)/lib
-ifeq ($(OS),Windows_NT)
-else
+ifeq ($(SYSTEM),OSX)
 INC_SYS		+=	$(LOCAL_PATH)/opt/jpeg-turbo/include
 LIBDIR		+=	$(LOCAL_PATH)/opt/jpeg-turbo/lib
 endif
@@ -179,7 +186,7 @@ CC	=	clang
 LK	=	clang++
 RC	=	windres
 
-ifeq ($(OS),Windows_NT)
+ifeq ($(SYSTEM),WIN)
 CPMM	=	g++
 CCMM	=	gcc
 else
@@ -194,7 +201,7 @@ LOPT	=
 PFLAGS	=	-DHAVE_STDINT_H
 CFLAGS	=
 
-ifeq ($(OS),Windows_NT)
+ifeq ($(SYSTEM),WIN)
 	PFLAGS += -DWIN32 -DBOOST_USE_WINDOWS_H
 	CFLAGS += -DWIN32
 endif
@@ -212,12 +219,13 @@ ifeq ($(BUILD),release)
 endif
 
 # 	-static-libgcc -static-libstdc++
-ifeq ($(OS),Windows_NT)
+ifeq ($(SYSTEM),WIN)
 LFLAGS	=
-else
-LFLAGS	=	-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk \
--Wl,-search_paths_first -Wl,-headerpad_max_install_names \
--framework AGL -framework Cocoa -framework OpenGL -framework IOKit -framework CoreFoundation -framework CoreVideo -framework OpenAL
+endif
+ifeq ($(SYSTEM),OSX)
+LFLAGS	=	-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX$(OSX_VER).sdk \
+			-Wl,-search_paths_first -Wl,-headerpad_max_install_names \
+			-framework AGL -framework Cocoa -framework OpenGL -framework IOKit -framework CoreFoundation -framework CoreVideo -framework OpenAL
 endif
 
 # -Wuninitialized -Wunused -Werror -Wshadow
@@ -266,7 +274,7 @@ $(BUILD)/%.d : %.cpp
 	| sed 's/$(notdir $*)\.o:/$(subst /,\/,$(patsubst %.d,%.o,$@) $@):/' > $@ ; \
 	[ -s $@ ] || rm -f $@
 
-ifeq ($(OS),Windows_NT)
+ifeq ($(SYSTEM),WIN)
 strip:
 	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -mwindows -o $(TARGET)$(FEXT)
 endif
