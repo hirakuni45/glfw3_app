@@ -11,7 +11,7 @@
 #include "stack.hpp"
 #include "format.hpp"
 
-#include <boost/format.hpp>
+// #include <boost/format.hpp>
 
 namespace interpreter {
 
@@ -246,10 +246,13 @@ namespace interpreter {
 	"Internal error",
 	"Abort by [ESC]"
 #endif
-		void put_block_(uint16_t idx, uint8_t len, OPR opr, uint16_t dst) {
+		void put_block_(uint16_t idx, uint8_t len, uint16_t dst) {
 			buff_.set2(idx, dst);
 			buff_.set1(len, dst + 2);
-			buff_.set1(static_cast<uint8_t>(opr), dst + 3);
+		}
+
+		void put_opr_(OPR opr, uint16_t dst) {
+			buff_.set1(static_cast<uint8_t>(opr), dst);
 		}
 
 		void output_str_(const str_t& t) {
@@ -287,6 +290,30 @@ namespace interpreter {
 			utils::format("\n");
 		}
 
+		bool size_check_move_(uint16_t ins, uint16_t tlen) {
+		   	if(tlen > buff_.get_free()) {
+		   		utils::format("Memory empty: %d\n") % tlen;
+		   		return false;
+		   	}
+		   	if(ins < buff_.get_front_size()) {
+		   		buff_.move(ins, ins + tlen, buff_.get_front_size() - ins);
+		   	}
+			return true;
+		}
+
+		uint16_t get_index_(const parse_ret& ret) {
+		   	VAL val;
+		   	if(!get_dec_(ret.str_[0], false, val)) {
+				utils::format("Syntax error: %s\n") % ret.str_[0].str;
+		   		return 0;
+		   	}
+		   	if(val == 0 && val > 65535) {
+				utils::format("Overflow: %d\n") % val; 
+		   		return 0;
+		   	}
+			return val;
+		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -317,77 +344,64 @@ namespace interpreter {
 			parse(ret, src.str) % OPR::REM % OPR::str0_;
 			if(ret.match_ == 0b11) {
 				uint16_t tlen = 2 + 1 + 1 + 1 + ret.str_[0].len;
-				if(tlen > buff_.get_free()) {
-					utils::format("Memory empty: %d\n") % tlen;
-					return false;
-				}
-				if(ins < buff_.get_front_size()) {
-					buff_.move(ins, ins + tlen, buff_.get_front_size() - ins);
-				}
-				put_block_(idx, tlen - 3, OPR::REM, ins);
+				if(!size_check_move_(ins, tlen)) return false;
+				put_block_(idx, tlen - 3, ins);
+				put_opr_(OPR::REM, ins + 3);
 				buff_.set1(ret.str_[0].len, ins + 4);
 				buff_.set(ret.str_[0].str, ret.str_[0].len, ins + 5);
 				buff_.resize_front(buff_.get_front_size() + tlen);
 				return true;
 			}
 
-#if 0
 			// goto
 			parse(ret, src.str) % OPR::GOTO % OPR::ndec_;
 			if(ret.match_ == 0b11) {
-				if(!put_block_(idx, 3)) {
-					return false;
-				}
-				VAL val;
-				if(!get_dec_(ret.str_[0], false, val)) {
-					return false;
-				}
-				if(val == 0 && val > 65535) {
-					return false;
-				}
-				put_opr_(OPR::GOTO);
-				put_16_(val);
+				auto adr = get_index_(ret);
+				if(adr == 0) return false;
+				uint16_t tlen = 2 + 1 + 1 + 2;
+				if(!size_check_move_(ins, tlen)) return false;
+				put_block_(idx, tlen - 3, ins);
+				put_opr_(OPR::GOTO, ins + 3);
+				buff_.set2(adr, ins + 4);
+				buff_.resize_front(buff_.get_front_size() + tlen);
 				return true;
 			}
 
 			// gosub
 			parse(ret, src.str) % OPR::GOSUB % OPR::ndec_;
 			if(ret.match_ == 0b11) {
-				if(!put_block_(idx, 3)) {
-					return false;
-				}
-				VAL val;
-				if(!get_dec_(ret.str_[0], false, val)) {
-					return false;
-				}
-				if(val == 0 && val > 65535) {
-					return false;
-				}
-				put_opr_(OPR::GOSUB);
-				put_16_(val);
+				auto adr = get_index_(ret);
+				if(adr == 0) return false;
+				uint16_t tlen = 2 + 1 + 1 + 2;
+				if(!size_check_move_(ins, tlen)) return false;
+				put_block_(idx, tlen - 3, ins);
+				put_opr_(OPR::GOSUB, ins + 3);
+				buff_.set2(adr, ins + 4);
+				buff_.resize_front(buff_.get_front_size() + tlen);
 				return true;
 			}
 
 			// stop
 			parse(ret, src.str) % OPR::STOP;
 			if(ret.match_ == 0b1) {
-				if(!put_block_(idx, 1)) {
-					return false;
-				}
-				put_opr_(OPR::STOP);
+				uint16_t tlen = 2 + 1 + 1;
+				if(!size_check_move_(ins, tlen)) return false;
+				put_block_(idx, tlen - 3, ins);
+				put_opr_(OPR::STOP, ins + 3);
+				buff_.resize_front(buff_.get_front_size() + tlen);
 				return true;
 			}
 
 			// return
 			parse(ret, src.str) % OPR::RETURN;
 			if(ret.match_ == 0b1) {
-				if(!put_block_(idx, 1)) {
-					return false;
-				}
-				put_opr_(OPR::RETURN);
+				uint16_t tlen = 2 + 1 + 1;
+				if(!size_check_move_(ins, tlen)) return false;
+				put_block_(idx, tlen - 3, ins);
+				put_opr_(OPR::RETURN, ins + 3);
+				buff_.resize_front(buff_.get_front_size() + tlen);
 				return true;
 			}
-#endif
 
 			// if a = V then CMD
 			parse(ret, src.str) % OPR::IF % OPR::str0_ % OPR::cmp_ % OPR::str1_ % OPR::THEN % OPR::str2_;
