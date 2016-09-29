@@ -177,10 +177,11 @@ endif
 # 	-static-libgcc -static-libstdc++
 ifeq ($(SYSTEM),WIN)
 LFLAGS	=
-else
-LFLAGS	=	-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk \
--Wl,-search_paths_first -Wl,-headerpad_max_install_names \
--framework AGL -framework Cocoa -framework OpenGL -framework IOKit -framework CoreFoundation -framework CoreVideo -framework OpenAL
+endif
+ifeq ($(SYSTEM),OSX)
+LFLAGS	=	-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX$(OSX_VER).sdk \
+			-Wl,-search_paths_first -Wl,-headerpad_max_install_names \
+			-framework AGL -framework Cocoa -framework OpenGL -framework IOKit -framework CoreFoundation -framework CoreVideo -framework OpenAL
 endif
 
 # -Wuninitialized -Wunused -Werror -Wshadow
@@ -244,7 +245,7 @@ clean_depend:
 	rm -f $(DEPENDS)
 
 dllname:
-ifeq ($(OS),Windows_NT)
+ifeq ($(SYSTEM),WIN)
 	objdump -p $(TARGET)$(FEXT) | iconv -f SJIS -t UTF-8 | grep "DLL Name"
 else
 	objdump -p $(TARGET)$(FEXT) | grep "DLL Name"
