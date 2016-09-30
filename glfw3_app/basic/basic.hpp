@@ -49,9 +49,10 @@ namespace interpreter {
 
 
 		static void get_word_(const char* p, str_t& out) {
-			char bc = ' ';
 			out.str = nullptr;
 			out.len = 0;
+			if(p == nullptr) return;
+			char bc = ' ';
 			while(1) {
 				auto ch = *p;
 				if(bc == ' ' && ch != ' ') {
@@ -74,14 +75,14 @@ namespace interpreter {
 			bool inv = false;
 			for(uint8_t n = 0; n < no.len; ++n) {
 				auto ch = *p++;
-				if(sign) {
+				if(ch == 0) break;
+				else if(sign) {
 					if(ch == '-') { inv = true; sign = false; }
 					else if(ch == '+') { sign = false; }
 				} else if(ch >= '0' && ch <= '9') {
 					val *= 10;
 					val += ch - '0';
 				} else {
-					utils::format("'%c'\n") % ch;
 					return false;
 				}
 			}
@@ -138,14 +139,16 @@ namespace interpreter {
 			REM,
 			GOTO,
 			GOSUB,
+			STOP,
 			RETURN,
+			PRINT,
+			INPUT,
 			FOR,
 			TO,
 			STEP,
 			NEXT,
 			IF,
 			THEN,
-			STOP,
 
 			NONE_,
 			str0_,	///< 文字列[0]
@@ -171,9 +174,11 @@ namespace interpreter {
 			uint16_t	match_;
 			VAL			dec_;
 			str_t		str_[3];
+			const char* last_;
 			void reset() {
 				match_ = 0;
 				dec_ = 0;
+				last_ = nullptr;
 			}
 		};
 
@@ -216,10 +221,21 @@ namespace interpreter {
 					ret_.match_ |= 1;
 				}
 				command_ = w.str + w.len;
+				ret_.last_ = command_;
 
 				return *this;
 			}
 		};
+
+		void output_str_(const str_t& t, char ch) {
+			if(ch != 0) utils::format("%c") % ch;
+			const char* p = t.str;
+			for(uint8_t i = 0; i < t.len; ++i) {
+				utils::format("%c") % *p;
+				++p;
+			}
+			if(ch != 0) utils::format("%c") % ch;
+		}
 
 #if 0
 	"OK",
@@ -255,26 +271,21 @@ namespace interpreter {
 			buff_.set1(static_cast<uint8_t>(opr), dst);
 		}
 
-		void output_str_(const str_t& t) {
-			const char* p = t.str;
-			for(uint8_t i = 0; i < t.len; ++i) {
-				utils::format("%c") % *p;
-				++p;
-			}
-		}
-
 		void list_sub_(uint16_t pos) {
 			auto opr = buff_.get1(pos);
 			++pos;
 			utils::format("%s ") % opr_key_[opr];
+			char ch = 0;
 			switch(static_cast<OPR>(opr)) {
+			case OPR::PRINT:
+				ch = '"';
 			case OPR::REM:
 				{
 					str_t t;
 					t.len = buff_.get1(pos);
 					++pos;
 					t.str = static_cast<const char*>(buff_.get(pos));
-					output_str_(t);
+					output_str_(t, ch);
 					pos += t.len;
 				}
 				break;
@@ -303,8 +314,11 @@ namespace interpreter {
 
 		uint16_t get_index_(const parse_ret& ret) {
 		   	VAL val;
-		   	if(!get_dec_(ret.str_[0], false, val)) {
-				utils::format("Syntax error: %s\n") % ret.str_[0].str;
+			str_t t;
+			t.str = ret.str_[0].str;
+			t.len = std::strlen(ret.str_[0].str);
+		   	if(!get_dec_(t, false, val)) {
+				utils::format("Syntax error: %s\n") % t.str;
 		   		return 0;
 		   	}
 		   	if(val == 0 && val > 65535) {
@@ -312,6 +326,29 @@ namespace interpreter {
 		   		return 0;
 		   	}
 			return val;
+		}
+
+		str_t get_string_(const parse_ret& ret) {
+			const char* p = ret.str_[0].str;
+			str_t t;
+			t.str = nullptr;
+			t.len = 0;
+			if(p == nullptr) return t;
+			if(p[0] != '"') return t;
+			uint16_t l = std::strlen(p);
+			if(p[l - 1] != '"') return t;
+			t.str = p + 1;
+			t.len = l - 2;
+			return t;
+		}
+
+		bool last_check_(const parse_ret& ret) {
+			str_t t;
+			get_word_(ret.last_, t);
+			if(t.len == 0) return true;
+
+			utils::format("Syntax error: %s\n") % t.str;
+			return false;			
 		}
 
 	public:
@@ -343,12 +380,13 @@ namespace interpreter {
 			// rem
 			parse(ret, src.str) % OPR::REM % OPR::str0_;
 			if(ret.match_ == 0b11) {
-				uint16_t tlen = 2 + 1 + 1 + 1 + ret.str_[0].len;
+				uint8_t slen = std::strlen(ret.str_[0].str);
+				uint16_t tlen = 2 + 1 + 1 + 1 + slen;
 				if(!size_check_move_(ins, tlen)) return false;
 				put_block_(idx, tlen - 3, ins);
 				put_opr_(OPR::REM, ins + 3);
-				buff_.set1(ret.str_[0].len, ins + 4);
-				buff_.set(ret.str_[0].str, ret.str_[0].len, ins + 5);
+				buff_.set1(slen, ins + 4);
+				buff_.set(ret.str_[0].str, slen, ins + 5);
 				buff_.resize_front(buff_.get_front_size() + tlen);
 				return true;
 			}
@@ -384,6 +422,7 @@ namespace interpreter {
 			// stop
 			parse(ret, src.str) % OPR::STOP;
 			if(ret.match_ == 0b1) {
+				if(!last_check_(ret)) return false;
 				uint16_t tlen = 2 + 1 + 1;
 				if(!size_check_move_(ins, tlen)) return false;
 				put_block_(idx, tlen - 3, ins);
@@ -395,6 +434,7 @@ namespace interpreter {
 			// return
 			parse(ret, src.str) % OPR::RETURN;
 			if(ret.match_ == 0b1) {
+				if(!last_check_(ret)) return false;
 				uint16_t tlen = 2 + 1 + 1;
 				if(!size_check_move_(ins, tlen)) return false;
 				put_block_(idx, tlen - 3, ins);
@@ -403,6 +443,32 @@ namespace interpreter {
 				return true;
 			}
 
+			// print
+			parse(ret, src.str) % OPR::PRINT % OPR::str0_;
+			if(ret.match_ == 0b11) {
+				str_t s = get_string_(ret);
+				if(s.len == 0) {
+					utils::format("String error: %s\n") % ret.str_[0].str;
+					return false;
+				}
+				uint16_t tlen = 2 + 1 + 1 + 1 + s.len;
+				if(!size_check_move_(ins, tlen)) return false;
+				put_block_(idx, tlen - 3, ins);
+				put_opr_(OPR::PRINT, ins + 3);
+				buff_.set1(s.len, ins + 4);
+				buff_.set(s.str, s.len, ins + 5);
+				buff_.resize_front(buff_.get_front_size() + tlen);
+				return true;
+			}
+
+			// input
+			parse(ret, src.str) % OPR::INPUT % OPR::str0_;
+			if(ret.match_ == 0b11) {
+
+				return true;
+			}
+
+#if 0
 			// if a = V then CMD
 			parse(ret, src.str) % OPR::IF % OPR::str0_ % OPR::cmp_ % OPR::str1_ % OPR::THEN % OPR::str2_;
 			if(ret.match_ == 0b111111) {
@@ -410,7 +476,6 @@ namespace interpreter {
 				return true;
 			}
 
-#if 0
 			// for $ = n to m step l 
 			parse(ret, src.str)
 				% OPR::FOR % OPR::str_ % OPR::EQ % OPR::dec_ % OPR::TO % OPR::dec_ % OPR::STEP % OPR::dec_;
@@ -427,8 +492,7 @@ namespace interpreter {
 			}
 #endif
 
-			utils::format("Return code: %04X\n") % static_cast<uint16_t>(ret.match_);
-
+			utils::format("Syntax error: %s\n") % src.str;
 			return false;
 		}
 
@@ -495,7 +559,8 @@ namespace interpreter {
 				return false;
 			}
 
-			if(remove(idx)) {
+			remove(idx);
+			if(param.str == nullptr || param.len == 0) {
 				return true;
 			}
 
@@ -519,7 +584,8 @@ namespace interpreter {
 		bool cmd_info(const str_t& param)
 		{
 			utils::format("Free space: %d bytes\n") % buff_.get_free();
-//			utils::format("Variable: 
+			utils::format("Code size:  %d bytes\n") % buff_.get_front_size();
+			utils::format("Label size: %d bytes\n") % buff_.get_back_size();
 			utils::format("\n");
 			return true;
 		}
@@ -649,13 +715,14 @@ namespace interpreter {
 	template <typename VAL, class BUFF>
 	const char* basic<VAL, BUFF>::opr_key_[] = {
 		"rem",
-		"goto", "gosub", "return",
+		"goto", "gosub", "stop", "return",
+		"print", "input",
 		"for", "to", "step", "next",
-		"if", "then", "stop",
+		"if", "then",
 	};
 
 #if 0
-	"INPUT", "PRINT", "LET",
+	"LET",
 	",", ";",
 	"-", "+", "*", "/", "(", ")",
 	">=", "#", ">", "=", "<=", "<",
