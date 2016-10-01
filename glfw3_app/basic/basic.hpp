@@ -10,6 +10,7 @@
 #include "buff.hpp"
 #include "stack.hpp"
 #include "format.hpp"
+#include "basic_arith.hpp"
 
 // #include <boost/format.hpp>
 
@@ -41,6 +42,8 @@ namespace interpreter {
 		save_func	save_func_;
 		load_func	load_func_;
 
+		utils::basic_arith<VAL> arith_;
+
 		struct str_t {
 			const char* str;
 			uint8_t		len;
@@ -68,6 +71,23 @@ namespace interpreter {
 			}
 		}
 
+		static const char* get_symbol_(const char* p, str_t& out) {
+			get_word_(p, out);
+			if(out.len == 0) return nullptr;
+
+			auto ch = out.str[0];
+			if((ch >= 'a' && ch <= 'z') || ( ch >= 'A' && ch <= 'Z')) ;
+			else {
+				return nullptr;
+			}
+
+			const char* eqp = std::strchr(out.str, '=');
+			if(eqp == nullptr) return nullptr;
+			const char* spc = std::strchr(out.str, ' ');
+			if(spc != nullptr) out.len = spc - out.str;
+			else out.len = eqp - out.str;
+			return eqp;
+		}
 
 		static bool get_dec_(const str_t& no, bool sign, VAL& val) {
 			const char* p = no.str;
@@ -274,27 +294,42 @@ namespace interpreter {
 		void list_sub_(uint16_t pos) {
 			auto opr = buff_.get1(pos);
 			++pos;
-			utils::format("%s ") % opr_key_[opr];
-			char ch = 0;
+			if(opr < static_cast<uint8_t>(OPR::NONE_)) {
+				utils::format("%s ") % opr_key_[opr];
+			} else {
+				utils::format("(%02X) ") % static_cast<int>(opr);
+			}
 			switch(static_cast<OPR>(opr)) {
-			case OPR::PRINT:
-				ch = '"';
 			case OPR::REM:
 				{
 					str_t t;
 					t.len = buff_.get1(pos);
 					++pos;
 					t.str = static_cast<const char*>(buff_.get(pos));
-					output_str_(t, ch);
+					output_str_(t, 0);
 					pos += t.len;
 				}
 				break;
+
 			case OPR::GOTO:
 			case OPR::GOSUB:
 				{
 					utils::format("%d") % buff_.get2(pos);
+					pos += 4;
 				}
 				break;
+
+			case OPR::PRINT:
+				{
+					str_t t;
+					t.len = buff_.get1(pos);
+					++pos;
+					t.str = static_cast<const char*>(buff_.get(pos));
+					output_str_(t, '"');
+					pos += t.len;
+				}
+				break;
+
 			default:
 				break;
 			}
@@ -396,11 +431,12 @@ namespace interpreter {
 			if(ret.match_ == 0b11) {
 				auto adr = get_index_(ret);
 				if(adr == 0) return false;
-				uint16_t tlen = 2 + 1 + 1 + 2;
+				uint16_t tlen = 2 + 1 + 1 + 2 + 2;
 				if(!size_check_move_(ins, tlen)) return false;
 				put_block_(idx, tlen - 3, ins);
 				put_opr_(OPR::GOTO, ins + 3);
 				buff_.set2(adr, ins + 4);
+				buff_.set2(0, ins + 6);  // optimize dummy
 				buff_.resize_front(buff_.get_front_size() + tlen);
 				return true;
 			}
@@ -410,11 +446,12 @@ namespace interpreter {
 			if(ret.match_ == 0b11) {
 				auto adr = get_index_(ret);
 				if(adr == 0) return false;
-				uint16_t tlen = 2 + 1 + 1 + 2;
+				uint16_t tlen = 2 + 1 + 1 + 2 + 2;
 				if(!size_check_move_(ins, tlen)) return false;
 				put_block_(idx, tlen - 3, ins);
 				put_opr_(OPR::GOSUB, ins + 3);
 				buff_.set2(adr, ins + 4);
+				buff_.set2(0, ins + 6);  // optimize dummy
 				buff_.resize_front(buff_.get_front_size() + tlen);
 				return true;
 			}
@@ -492,26 +529,24 @@ namespace interpreter {
 			}
 #endif
 
+			// 変数への値の代入
+			str_t sym;
+			auto eqp = get_symbol_(src.str, sym);
+			if(eqp != nullptr) {
+				str_t t;
+				get_word_(eqp + 1, t);
+				if(t.len > 0) {
+
+					utils::format("Symbol: ");
+					output_str_(sym, '\'');
+					utils::format(" : '%s'\n") % t.str;
+					return true;
+				}
+			}
+
 			utils::format("Syntax error: %s\n") % src.str;
 			return false;
 		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	マイクロコードのリナンバー
-			@param[in]	org	開始位置
-			@param[in]	ofs	オフセット
-		*/
-		//-----------------------------------------------------------------//
-		void renumber(uint16_t org, uint16_t ofs)
-		{
-			uint16_t pos = 0;
-			while(pos < buff_.get_front_size()) {
-
-				pos += 2 + 1 + buff_.get1(pos + 2);
-			}
-		} 
 
 
 		//-----------------------------------------------------------------//
@@ -531,8 +566,6 @@ namespace interpreter {
 			len += 3;
 			buff_.move(pos + len, pos, buff_.get_front_size() - len);
 			buff_.resize_front(buff_.get_front_size() - len);
-
-			renumber(pos, buff_.get_front_size() - len);
 
 			return true;
 		}
@@ -567,8 +600,6 @@ namespace interpreter {
 			if(!decode(idx, param)) {
 				return false;
 			}
-
-//			renumber(t.pos, t.len);
 
 			return true;
 		}
@@ -615,12 +646,35 @@ namespace interpreter {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	OPTIMIZE（最適化）
+			@param[in]	param	パラメーター
+		*/
+		//-----------------------------------------------------------------//
+		bool cmd_optimize(const str_t& param)
+		{
+			uint16_t pos = 0;
+			while(pos < buff_.get_front_size()) {
+				auto idx = buff_.get2(pos);
+				pos += 2;
+				uint8_t bkn = buff_.get1(pos);
+				++pos;
+
+				pos += bkn;
+			}
+			return true;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	RUN
 			@param[in]	param	パラメーター
 		*/
 		//-----------------------------------------------------------------//
 		bool cmd_run(const str_t& param)
 		{
+			cmd_optimize(param);
+
 			return true;
 		}
 
@@ -634,7 +688,7 @@ namespace interpreter {
 		bool cmd_new(const str_t& param)
 		{
 			buff_.clear();
-			utils::format("\n");
+			utils::format("Ok\n\n");
 			return true;
 		}
 
@@ -652,7 +706,10 @@ namespace interpreter {
 				utils::format("Illegal command\n");
 				return false;
 			}
-			return save_func_(param.str, buff_);
+			auto f = save_func_(param.str, buff_);
+			if(f) utils::format("Ok\n\n");
+			else utils::format("Save error: '%s'\n\n") % param.str;
+			return f;
 		}
 
 
@@ -669,7 +726,10 @@ namespace interpreter {
 				utils::format("Illegal command\n");
 				return false;
 			}
-			return load_func_(param.str, buff_);
+			auto f = load_func_(param.str, buff_);
+			if(f) utils::format("Ok\n\n");
+			else utils::format("Load error: '%s'\n\n") % param.str;
+			return f;
 		}
 
 
@@ -705,6 +765,8 @@ namespace interpreter {
 				cmd_save(param);
 			} else if(load_func_ != nullptr && std::strncmp("load", cmd.str, cmd.len) == 0) {
 				cmd_load(param);
+			} else if(std::strncmp("optimize", cmd.str, cmd.len) == 0) {
+				cmd_optimize(param);
 			} else {
 				utils::format("Syntax error: %s\n") % cmd.str;
 			}
