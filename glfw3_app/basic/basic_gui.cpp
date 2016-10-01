@@ -8,8 +8,6 @@
 #include "core/glcore.hpp"
 #include "basic_gui.hpp"
 
-#include "utils/basic_arith.hpp"
-
 static std::function< void(char) > output_ch_;
 static std::function< void(const char*) > output_puts_;
 
