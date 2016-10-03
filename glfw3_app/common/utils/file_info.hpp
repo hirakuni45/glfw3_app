@@ -117,6 +117,16 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		bool is_drive() const { return drive_; }
 
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	sort 用オペレーター
+			@return 文字列の比較
+		*/
+		//-----------------------------------------------------------------//
+		bool operator < (const file_info& right) const {
+			return name_ < right.name_;
+		}
 	};
 
 	typedef std::vector<file_info>					file_infos;
