@@ -401,6 +401,8 @@ namespace gui {
 		{
 #ifdef __APPLE__
 			std::string ff = "~/Library/Fonts/Inconsolata.otf";
+#elif __linux__
+			std::string ff = "inconsolata/Inconsolata.otf";
 #else
 			std::string ff = "Inconsolata.otf";
 #endif

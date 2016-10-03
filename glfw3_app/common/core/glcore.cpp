@@ -37,6 +37,12 @@ namespace gl {
 	static const char* root_font_path_ = "c:/WINDOWS/Fonts";
 	static const char* default_font_file_ = "MSGOTHIC.TTC";
 #endif
+
+#ifdef __linux__
+	static const char* root_font_path_ = "/usr/share/fonts/truetype";
+	static const char* default_font_file_ = "fonts-japanese-gothic.ttf";
+#endif
+
 	static const char* default_font_face_ = "gothic";
 
 #ifdef WIN32
