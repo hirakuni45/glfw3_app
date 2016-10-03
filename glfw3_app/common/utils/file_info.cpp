@@ -9,6 +9,7 @@
 #include <boost/foreach.hpp>
 #include <boost/format.hpp>
 #include <iostream>
+#include <algorithm>
 
 namespace utils {
 
@@ -88,18 +89,15 @@ namespace utils {
 				fn += '/';
 				fn += ent->d_name;
 				if(stat(fn.c_str(), &st) == 0) {
-///					std::cout << fn << std::endl;
-#ifdef __PPU__
-					bool d = false;
-					if(st.st_mode & CELL_FS_S_IFDIR) d = true;
-#else
 					bool d = S_ISDIR(st.st_mode);
-#endif
 					file_info info(ent->d_name, d, st.st_size, st.st_mtime, st.st_mode);
 					list.push_back(info);
 				}
 			}
 			closedir(dir);
+#endif
+#ifdef __linux__
+			std::sort(list.begin(), list.end());
 #endif
 			return true;
 		} else {
