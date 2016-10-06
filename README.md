@@ -20,35 +20,46 @@ GLFW application
 ・pacman で必要なパッケージをインストールして下さい。  
 ・pacman -S 「パッケージ名」
 
-###必要なライブラリー（パッケージ名）
+###必要なライブラリー（パッケージ名：Windows / OS-X / Ubuntu-64）
 
-・mingw-w64-x86_64-clang / clang   
-・mingw-w64-x86_64-boost / boost   
-・mingw-w64-x86_64-glfw / glfw   
-・mingw-w64-x86_64-openal / openal  
-・mingw-w64-x86_64-freetype / freetype  
-・mingw-w64-x86_64-glew / glew  
-・mingw-w64-x86_64-libjpeg-turbo / libjpeg-turbo  
-・mingw-w64-x86_64-openjpeg2 / openjpeg  
-・mingw-w64-x86_64-libpng / libpng  
-・mingw-w64-x86_64-faad2 / faad2  
-・mingw-w64-x86_64-libmad / libmad  
-・mingw-w64-x86_64-taglib / taglib  
+・mingw-w64-x86_64-clang / clang / clang   
+・mingw-w64-x86_64-boost / boost / libboost-dev   
+・mingw-w64-x86_64-glfw / glfw / libglfw3-dev   
+・mingw-w64-x86_64-openal / openal / libopenal-dev   
+・mingw-w64-x86_64-libpng / libpng / libpng12-dev   
+・mingw-w64-x86_64-freetype / freetype / libfreetype6-dev  
+・mingw-w64-x86_64-glew / glew / libglew-dev  
+・mingw-w64-x86_64-libjpeg-turbo / libjpeg-turbo / libjpeg-turbo8-dev  
+・mingw-w64-x86_64-openjpeg2 / openjpeg / libopenjp2-7-dev   
+・mingw-w64-x86_64-faad2 / faad2 /    
+・mingw-w64-x86_64-libmad / libmad / libmad0-dev   
+・mingw-w64-x86_64-taglib / taglib / libtaglib
 ・mingw-w64-x86_64-ffmpeg / ffmpeg  
 ・mingw-w64-x86_64-bullet / bullet   
+
+※ ubuntu-ja-16.04-desktop-amd64 の場合、libpng12-dev と libfreetype6-dev の
+組み合わせが必要でした。
+※ ubuntu-ja-16.04-desktop-amd64 の場合、/usr/include/openjpeg.h のシンボリック
+リンクが、openjpeg-1.5 のものなので、openjpeg-2.1 に張りなおしました。
+```
+   cd /usr/include
+   sudo ln -s -f openjpeg-2.1/openjpeg.h openjpeg.h
+```
 
 
 ###フォントのインストール
 
 GUI フレームワークでは、「Inconsolata」の OTF フォントを使っています。   
 ダウンロードして、インストールして下さい。
+
+
    
 <a href="http://levien.com/type/myfonts/inconsolata.html" target="_blank">Inconsolata OTF font</a>   
    
 
 ###全体のソース・コード取得
 ```
-   git clone git@github.com:hirakuni45/glfw3_app.git
+   git clone git://github.com/hirakuni45/glfw3_app.git
 ```
 
 ###各ディレクトリーの構成
