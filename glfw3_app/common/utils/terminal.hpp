@@ -13,6 +13,8 @@
 #include "utils/vtx.hpp"
 #include "utils/string_utils.hpp"
 
+#include <iostream>
+
 namespace utils {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -58,6 +60,20 @@ namespace utils {
 		line		last_;
 
 		output_func	output_func_;
+
+		void nl_() {
+			if(lines_.size() >= max_) {
+				lines_.pop_front();
+			} else {
+				++pos_.y;
+			}
+			last_ = lines_.back();
+			line l;
+			lines_.push_back(l);
+		}
+
+		void bl_() {  // back line
+		}
 
 	public:
 		//-----------------------------------------------------------------//
@@ -134,31 +150,44 @@ namespace utils {
 			if(output_func_ != nullptr) output_func_(cha);
 
 			cha_.cha_ = cha;
-			if(cha == '\n' || (cre_ && cha == '\r')) {
-				if(lines_.size() >= max_) {
-					lines_.pop_front();
-				} else {
-					++pos_.y;
-				}
-				last_ = lines_.back();
-				line l;
-				lines_.push_back(l);
+			switch(cha) {
+			case '\r':
+				if(!cre_) break; 
+			case '\n':
+				nl_();
 				pos_.x = 0;
-			} else if(cha == 0x08) {
+				break;
+			case 0x08:  // Back Space
 				if(pos_.x > 0) --pos_.x;
-//				else {
-//					pos_.x = 0;
-//					if(pos_.y > 0) --pos_.y;
-//				}
-			} else {
-				line& l = lines_[pos_.y];
-				if(pos_.x < l.size()) {
-					l[pos_.x] = cha_;
-					++pos_.x;
-				} else {
-					l.push_back(cha_);
-					pos_.x = l.size();
+				break;
+			case 0x11:  // Right
+				{
+//					line& l = lines_[pos_.y];
 				}
+				break;
+			case 0x12:  // Left
+				if(pos_.x > 0) --pos_.x;
+				break;
+			case 0x13:  // Down
+				nl_();
+				break;
+			case 0x14:  // Up
+
+				break;
+			default:
+				if(cha < 0x20) {
+//				std::cout << boost::format("%02X") % cha << std::endl << std::flush;
+				} else {
+					line& l = lines_[pos_.y];
+					if(pos_.x < l.size()) {
+						l[pos_.x] = cha_;
+						++pos_.x;
+					} else {
+						l.push_back(cha_);
+						pos_.x = l.size();
+					}
+				}
+				break;
 			}
 		}
 
