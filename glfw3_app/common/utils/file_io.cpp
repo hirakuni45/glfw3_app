@@ -27,6 +27,31 @@ namespace utils {
 
 	//-----------------------------------------------------------------//
 	/*!
+		@brief	システム・ファイル・パスに変換
+		@param[in]	path	ファイル名
+		@return システムに依存したファイルパス
+	*/
+	//-----------------------------------------------------------------//
+	std::string system_path(const std::string& path)
+	{
+#ifdef WIN32
+		auto ws = utils::utf8_to_utf16(path);
+		auto l = WideCharToMultiByte(CP_ACP, 0, (LPCWSTR)ws.c_str(), ws.size(), NULL, 0, NULL, NULL);
+		if(l <= 0) {
+			return std::string();
+		}
+		char buff[l + 1];
+		WideCharToMultiByte(CP_ACP, 0, (LPCWSTR)ws.c_str(), ws.size(), buff, l, NULL, NULL);
+		buff[l] = 0;
+		return std::string(buff);
+#else
+		return path;
+#endif
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
 		@brief	UTF-32 対応のファイルオープン
 		@param[in]	fn	ファイル名
 		@param[in]	md	オープンモード
