@@ -84,12 +84,7 @@ void get_metrics(uint32_t code)
 		}
 
 		FT_Face face;
-#ifdef WIN32
-		auto sjis = utils::utf8_to_sjis(path);
-		FT_Error error = FT_New_Face(library_, sjis.c_str(), 0, &face);
-#else
-		FT_Error error = FT_New_Face(library_, path.c_str(), 0, &face);
-#endif
+		FT_Error error = FT_New_Face(library_, utils::system_path(path).c_str(), 0, &face);
 		if(error) {
 			cerr << "ftimg install error: '" << path << "'" << endl;
 			current_face_ = face_map_.end();
