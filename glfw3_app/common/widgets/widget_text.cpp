@@ -6,6 +6,7 @@
 //=====================================================================//
 #include "core/glcore.hpp"
 #include "widgets/widget_text.hpp"
+#include "widgets/widget_frame.hpp"
 #include "widgets/widget_utils.hpp"
 
 namespace gui {
@@ -49,12 +50,24 @@ namespace gui {
 
 		if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) {
 
+			auto clip = wp.clip_;
 			glPushMatrix();
 
 			vtx::irect rect;
 			if(wp.state_[widget::state::CLIP_PARENTS]) {
-				rect.org  = wp.rpos_;
-				rect.size = wp.rect_.size;
+				vtx::ipos o(0);
+				vtx::ipos w(0);
+				widget_frame* par = static_cast<widget_frame*>(wp.parents_);
+				if(par != nullptr && par->type() == get_type_id<widget_frame>()) {
+					const auto& plate = par->get_local_param().plate_param_; 
+					o.x = plate.frame_width_;
+					o.y = plate.frame_width_ + plate.caption_width_;
+					w.x = plate.frame_width_ * 2;
+					w.y = o.y + plate.frame_width_ + 4;
+					clip.size.y -= plate.frame_width_;
+				}
+				rect.org  = wp.rpos_ + o;
+				rect.size = wp.rect_.size - w;
 			} else {
 				rect.org.set(0);
 				rect.size = wp.rect_.size;
@@ -66,7 +79,7 @@ namespace gui {
 			tpr.fore_color_.alpha_scale(cf.a);
 			tpr.shadow_color_ *= cf.r;
 			tpr.shadow_color_.alpha_scale(cf.a);
-			draw_text(tpr, rect, wp.clip_);
+			draw_text(tpr, rect, clip);
 
 			core.at_fonts().restore_matrix();
 
