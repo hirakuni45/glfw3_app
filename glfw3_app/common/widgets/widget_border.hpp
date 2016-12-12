@@ -5,8 +5,10 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
+#include "gl_fw/glutils.hpp"
 #include "widgets/widget_director.hpp"
 #include "widgets/widget_utils.hpp"
+#include "widgets/widget_frame.hpp"
 #include <boost/optional.hpp>
 
 namespace gui {
