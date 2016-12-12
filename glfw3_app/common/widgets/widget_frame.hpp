@@ -179,20 +179,17 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(sys::preference& pre);
+		bool save(sys::preference& pre)
+		{
+			std::string path;
+			path += '/';
+			path += wd_.create_widget_name(this);
 
+			int err = 0;
+			if(!pre.put_position(path + "/locate",  vtx::ipos(get_rect().org))) ++err;
+			if(!pre.put_position(path + "/size", vtx::ipos(get_rect().size))) ++err;
 
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	状態のロード
-			@param[in]	pre	プリファレンス参照
-			@param[in]	w_ena	幅を無視する場合「false」
-			@param[in]	h_ena	縦を無視する場合「false」
-			@return エラーが無い場合「true」
-		*/
-		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre) {
-			return load(pre, true, true);
+			return err == 0;
 		}
 
 
@@ -205,7 +202,41 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre, bool w_ena, bool h_ena);
+		bool load(const sys::preference& pre, bool w_ena, bool h_ena)
+		{
+			std::string path;
+			path += '/';
+			path += wd_.create_widget_name(this);
+
+			int err = 0;
+			vtx::ipos p;
+			if(pre.get_position(path + "/locate", p)) {
+				at_rect().org = p;
+			} else {
+				++err;
+			}
+			if(pre.get_position(path + "/size", p)) {
+				if(w_ena) at_rect().size.x = p.x;
+				if(h_ena) at_rect().size.y = p.y;
+			} else {
+				++err;
+			}
+
+			return err == 0;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	状態のロード
+			@param[in]	pre	プリファレンス参照
+			@return エラーが無い場合「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool load(const sys::preference& pre)
+		{
+			return load(pre, true, true);
+		}
 	};
 
 }
