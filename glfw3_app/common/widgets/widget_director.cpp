@@ -32,6 +32,7 @@ namespace gui {
 	using namespace gl;
 
 	widget::color_param widget_director::default_frame_color_;
+	widget::color_param widget_director::default_border_color_;
 	widget::color_param widget_director::default_button_color_;
 	widget::color_param widget_director::default_label_color_;
 	widget::color_param widget_director::default_label_color_select_;
@@ -310,11 +311,16 @@ namespace gui {
 
 		fc.set( 72, 193, 241);
 		bc = fc * 0.7f;
+		default_border_color_ = widget::color_param(fc, bc);
+
+		fc.set( 72, 193, 241);
+		bc = fc * 0.7f;
 		default_button_color_ = widget::color_param(fc, bc);
 
 		fc.set( 48, 193, 241);
 		bc = fc * 0.7f;
 		default_label_color_ = widget::color_param(fc, bc);
+
 		fc.set(118, 223, 231);
 		bc = fc * 0.7f;
 		default_label_color_select_ = widget::color_param(fc, bc);

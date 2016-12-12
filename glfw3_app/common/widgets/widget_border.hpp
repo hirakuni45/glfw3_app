@@ -1,7 +1,8 @@
 #pragma once
 //=====================================================================//
 /*!	@file
-	@brief	GUI Widget Border クラス（ヘッダー）
+	@brief	GUI Widget Border クラス @n
+			水平、又は垂直の「境界線」を描画する
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
@@ -9,7 +10,6 @@
 #include "widgets/widget_director.hpp"
 #include "widgets/widget_utils.hpp"
 #include "widgets/widget_frame.hpp"
-#include <boost/optional.hpp>
 
 namespace gui {
 
@@ -22,28 +22,40 @@ namespace gui {
 
 		typedef widget_border value_type;
 
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	widget_border パラメーター
 		*/
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
-			const img::i_img*		image_;		///< 画像を使う場合
-			gl::mobj::handle	mobj_handle_;	///< モーション・オブジェクトのハンドル
-			boost::optional<gl::mobj&>	mobj_;	///< モーションオブジェクトの参照
-			vtx::fpos	offset_;				///< 描画オフセット
-			vtx::fpos	scale_;					///< 描画スケール
-			bool	linear_;					///< リニアフィルター
-			param(const img::i_img* image = 0) : image_(image),
-				mobj_handle_(0), offset_(0.0f), scale_(1.0f), linear_(true) { }
+
+			//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+			/*!
+				@brief	ボーダー・タイプ
+			*/
+			//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+			enum class type {
+				holizontal,   ///< 水平線
+				vertical      ///< 垂直線
+			}; 
+
+			type	type_;	///< 描画タイプ
+
+			int		pos_;	///< 位置
+			int		size_;	///< サイズ
+			int		width_;	///< ボーダーの幅
+			int		ofs_;	///< オフセット
+
+			widget::color_param	color_;
+
+			param(type t) : type_(t), pos_(0), size_(0), width_(4), ofs_(0),
+				color_(widget_director::default_border_color_) { }
 		};
 
 	private:
 		widget_director&	wd_;
 
 		param				param_;
-
-		gl::mobj::handle	objh_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -52,7 +64,7 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_border(widget_director& wd, const widget::param& bp, const param& p) :
-			widget(bp), wd_(wd), param_(p), objh_(0) { }
+			widget(bp), wd_(wd), param_(p) { }
 
 
 		//-----------------------------------------------------------------//
@@ -120,35 +132,17 @@ namespace gui {
 			at_param().state_.set(widget::state::MOVE_ROOT);
 			at_param().state_.set(widget::state::AREA_ROOT);
 
-			using namespace img;
-
-			if(param_.image_) {
-				paint pa;
-				const vtx::spos& size = get_rect().size;
-
-				vtx::spos s;
-				vtx::spos o;
-				if(size.x <= 0) {
-					o.x = 0;
-					s.x = param_.image_->get_size().x;
-				} else {
-					o.x = (size.x - param_.image_->get_size().x) / 2;
-					s.x = size.x;
-				}
-				if(size.y <= 0) {
-					o.y = 0;
-					s.y = param_.image_->get_size().y;
-				} else {
-					o.y = (size.y - param_.image_->get_size().y) / 2;
-					s.y = size.y;
-				}
-				at_rect().size = s;
-				pa.create(s, true);
-				pa.fill(img::rgba8(0, 0));
-
-				img::copy_to_rgba8(param_.image_, vtx::srect(vtx::spos(0), s), pa, o);
-
-				objh_ = wd_.at_mobj().install(&pa);
+			const widget::param& wp = get_param();
+			if(param_.type_ == param::type::holizontal) {
+				param_.ofs_ = wp.rect_.org.x;
+				param_.pos_ = wp.rect_.org.y;
+				param_.size_  = wp.rect_.size.x;
+				param_.width_ = wp.rect_.size.y;
+			} else if(param_.type_ == param::type::vertical) {
+				param_.pos_ = wp.rect_.org.x;
+				param_.ofs_ = wp.rect_.org.y;
+				param_.width_ = wp.rect_.size.x;
+				param_.size_  = wp.rect_.size.y;
 			}
 		}
 
@@ -183,30 +177,36 @@ namespace gui {
 			const widget::param& wp = get_param();
 
 			glPushMatrix();
-			if(objh_) {
-				if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) {
-					vtx::srect rect;
-					if(wp.state_[widget::state::CLIP_PARENTS]) {
-						draw_mobj(wd_, objh_, wp.clip_);
-					} else {
-						wd_.at_mobj().draw(objh_, gl::mobj::attribute::normal, vtx::spos(0));
-					}
-				}
-			} else if(param_.mobj_ && param_.mobj_handle_) {
-				mobj& mo = *param_.mobj_;
-				if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) {
-					if(wp.state_[widget::state::CLIP_PARENTS]) {
-						int sx = vsz.x / siz.x;
-						int sy = vsz.y / siz.y;
-						glViewport(wp.clip_.org.x * sx,
-								   vsz.y - wp.clip_.org.y * sy - wp.clip_.size.y * sy,
-							wp.clip_.size.x * sx, wp.clip_.size.y * sy);
-							mo.setup_matrix(wp.clip_.size.x, wp.clip_.size.y);
-					}
-					glScale(param_.scale_);
-					mo.draw(param_.mobj_handle_, gl::mobj::attribute::normal, param_.offset_, param_.linear_);
-				}
+
+			glDisable(GL_TEXTURE_2D);
+
+			int sx = vsz.x / siz.x;
+			int sy = vsz.y / siz.y;
+			glViewport(wp.clip_.org.x * sx, vsz.y - wp.clip_.org.y * sy - wp.clip_.size.y * sy,
+				wp.clip_.size.x * sx, wp.clip_.size.y * sy);
+			wd_.at_mobj().setup_matrix(wp.clip_.size.x, wp.clip_.size.y);
+
+			vtx::srect rect;
+			vtx::spos ofs(0);
+			if(param_.type_ == param::type::holizontal) {
+				rect.org.x = param_.ofs_;
+				rect.org.y = param_.pos_;
+				rect.size.x = param_.size_ <= 0 ? (siz.x - param_.ofs_) : wp.rect_.size.x;
+				rect.size.y = param_.width_ / 2;
+				ofs.y = param_.width_ / 2;
+			} else if(param_.type_ == param::type::vertical) {
+				rect.org.x = param_.pos_;
+				rect.org.y = param_.ofs_;
+				rect.size.x = param_.width_ / 2;
+				rect.size.y = param_.size_ <= 0 ? (siz.y - param_.ofs_) : wp.rect_.size.y;
+				ofs.x = param_.width_ / 2;
 			}
+			gl::glColor(param_.color_.fore_color_);
+			gl::draw_filled_rectangle(rect);
+			rect.org += ofs;
+			gl::glColor(param_.color_.back_color_);
+			gl::draw_filled_rectangle(rect);
+
 			glPopMatrix();
 
 			glViewport(0, 0, vsz.x, vsz.y);
@@ -246,5 +246,4 @@ namespace gui {
 			return true;
 		}
 	};
-
 }
