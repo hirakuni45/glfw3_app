@@ -9,6 +9,7 @@
 #include "utils/director.hpp"
 #include "widgets/widget.hpp"
 #include "widgets/widget_frame.hpp"
+#include "widgets/widget_text.hpp"
 #include "widgets/widget_border.hpp"
 #include "widgets/widget_terminal.hpp"
 
@@ -71,19 +72,29 @@ namespace app {
 				wp_.plate_param_.set_caption(12);
 				project_ = wd.add_widget<widget_frame>(wp, wp_);
 			}
-
-			{   // ボーダーＨ
-				widget::param wp(vtx::irect(0, 50, 0, 2), project_);
-				widget_border::param wp_(widget_border::param::type::holizontal);
-				wd.add_widget<widget_border>(wp, wp_);
-			}
-
 			{   // ボーダーＶ
-				widget::param wp(vtx::irect(50, 0, 2, 0), project_);
+				widget::param wp(vtx::irect(30, 0, 2, 0), project_);
 				widget_border::param wp_(widget_border::param::type::vertical);
 				wd.add_widget<widget_border>(wp, wp_);
 			}
 
+			{   // ボーダーＨ
+				for(int i = 0; i < 23; ++i) {
+					{
+						widget::param wp(vtx::irect(0, 40 * (i + 1), 0, 2), project_);
+						widget_border::param wp_(widget_border::param::type::holizontal);
+						wd.add_widget<widget_border>(wp, wp_);
+					}
+					{
+						widget::param wp(vtx::irect(0, 40 * i + 10, 30, 40), project_);
+						wp.state_.set(widget::state::CLIP_PARENTS);
+						widget_text::param wp_;
+						wp_.text_param_.set_text(std::to_string(i));
+//						wp_.text_param_.placement_.vpt = vtx::placement::vertical::CENTER;
+						wd.add_widget<widget_text>(wp, wp_);
+					}
+				}
+			}
 
 			{	// ターミナルのテスト
 				{
