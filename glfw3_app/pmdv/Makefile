@@ -70,7 +70,6 @@ PSOURCES	=	main.cpp \
 				widgets/widget.cpp \
 				widgets/widget_director.cpp \
 				widgets/widget_utils.cpp \
-				widgets/widget_image.cpp \
 				widgets/widget_text.cpp \
 				widgets/widget_frame.cpp \
 				widgets/widget_button.cpp \
