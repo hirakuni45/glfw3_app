@@ -36,6 +36,7 @@ PSOURCES	=	main.cpp \
 				gl_fw/glfonts.cpp \
 				gl_fw/glmobj.cpp \
 				gl_fw/gltexfb.cpp \
+				gl_fw/glutils.cpp \
 				gl_fw/glterminal.cpp \
 				utils/vtx.cpp \
 				utils/vmath.cpp \
@@ -68,7 +69,6 @@ PSOURCES	=	main.cpp \
 				widgets/widget_director.cpp \
 				widgets/widget_utils.cpp \
 				widgets/widget_text.cpp \
-				widgets/widget_frame.cpp \
 				widgets/widget_button.cpp \
 				widgets/widget_label.cpp \
 				widgets/widget_slider.cpp \
