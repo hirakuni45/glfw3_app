@@ -177,7 +177,6 @@ namespace gui {
 			const widget::param& wp = get_param();
 
 			glPushMatrix();
-
 			glDisable(GL_TEXTURE_2D);
 
 			int sx = vsz.x / siz.x;
@@ -191,14 +190,14 @@ namespace gui {
 			if(param_.type_ == param::type::holizontal) {
 				rect.org.x = param_.ofs_;
 				rect.org.y = param_.pos_;
-				rect.size.x = param_.size_ <= 0 ? (siz.x - param_.ofs_) : wp.rect_.size.x;
+				rect.size.x = param_.size_ <= 0 ? (wp.rect_.size.x - param_.ofs_) : (param_.size_ - param_.ofs_); 
 				rect.size.y = param_.width_ / 2;
 				ofs.y = param_.width_ / 2;
 			} else if(param_.type_ == param::type::vertical) {
 				rect.org.x = param_.pos_;
 				rect.org.y = param_.ofs_;
 				rect.size.x = param_.width_ / 2;
-				rect.size.y = param_.size_ <= 0 ? (siz.y - param_.ofs_) : wp.rect_.size.y;
+				rect.size.y = param_.size_ <= 0 ? (wp.rect_.size.y - param_.ofs_) : (param_.size_ - param_.ofs_);
 				ofs.x = param_.width_ / 2;
 			}
 			gl::glColor(param_.color_.fore_color_);
