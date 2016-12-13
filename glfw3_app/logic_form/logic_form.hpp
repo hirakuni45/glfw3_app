@@ -12,6 +12,7 @@
 #include "widgets/widget_text.hpp"
 #include "widgets/widget_border.hpp"
 #include "widgets/widget_terminal.hpp"
+#include "widgets/widget_view.hpp"
 
 namespace app {
 
@@ -22,9 +23,30 @@ namespace app {
 		gui::widget_frame*		tools_;
 
 		gui::widget_frame*		project_;
+		gui::widget_view*		view_;
 
 		gui::widget_frame*		terminal_frame_;
 		gui::widget_terminal*	terminal_core_;
+
+
+		static void render_view_(const vtx::spos& size)
+		{
+			glDisable(GL_TEXTURE_2D);
+
+			vtx::srect rect(30, 0, 2, size.y);
+			gui::draw_border(rect);
+
+			rect.org.x = 0;
+			rect.size.x = size.x;
+			rect.size.y = 2;
+			for(int i = 0; i < 24; ++i) {
+				if(i > 0) {
+					rect.org.y = i * 40;
+					gui::draw_border(rect);
+				}
+			}
+		}
+
 
 	public:
 		//-----------------------------------------------------------------//
@@ -33,7 +55,7 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		logic_form(utils::director<core>& d) : director_(d),
-			tools_(nullptr), project_(nullptr),
+			tools_(nullptr), project_(nullptr), view_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr)
 		{ }
 
@@ -72,6 +94,15 @@ namespace app {
 				wp_.plate_param_.set_caption(12);
 				project_ = wd.add_widget<widget_frame>(wp, wp_);
 			}
+			{   // ビュー
+				widget::param wp(vtx::irect(0, 0, 500, 100), project_);
+				wp.state_.set(widget::state::CLIP_PARENTS);
+				widget_view::param wp_;
+				wp_.render_func_ = render_view_;
+				view_ = wd.add_widget<widget_view>(wp, wp_);
+			}
+
+#if 0
 			{   // ボーダーＶ
 				widget::param wp(vtx::irect(30, 0, 2, 0), project_);
 				widget_border::param wp_(widget_border::param::type::vertical);
@@ -95,6 +126,7 @@ namespace app {
 					}
 				}
 			}
+#endif
 
 			{	// ターミナルのテスト
 				{
@@ -136,8 +168,6 @@ namespace app {
 		void update()
 		{
 			gui::widget_director& wd = director_.at().widget_director_;
-
-
 
 			wd.update();
 		}
