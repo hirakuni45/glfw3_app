@@ -29,22 +29,34 @@ namespace app {
 		gui::widget_terminal*	terminal_core_;
 
 
-		static void render_view_(const vtx::spos& size)
+		static void render_view_(const vtx::irect& clip)
 		{
 			glDisable(GL_TEXTURE_2D);
-
-			vtx::srect rect(30, 0, 2, size.y);
+			vtx::srect rect(30, 0, 2, clip.size.y);
 			gui::draw_border(rect);
 
+			gui::widget::text_param tp("A", img::rgba8(255, 255), img::rgba8(0, 255),
+				vtx::placement(vtx::placement::holizontal::LEFT, vtx::placement::vertical::TOP));
+
 			rect.org.x = 0;
-			rect.size.x = size.x;
+			rect.size.x = clip.size.x;
 			rect.size.y = 2;
 			for(int i = 0; i < 24; ++i) {
+				glDisable(GL_TEXTURE_2D);
 				if(i > 0) {
-					rect.org.y = i * 40;
+					rect.org.y = i * 30;
 					gui::draw_border(rect);
 				}
 			}
+
+			gl::core& core = gl::core::get_instance();
+			gl::fonts& fonts = core.at_fonts();
+			for(int i = 0; i < 24; ++i) {
+				vtx::irect tr(0, i * 30 + 3, 30, 30);
+				tp.set_text(std::to_string(i));
+				gui::draw_text(tp, tr, clip);
+			}
+			fonts.restore_matrix();
 		}
 
 
@@ -75,8 +87,6 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void initialize()
 		{
-	//		gl::core& core = gl::core::get_instance();
-
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
@@ -94,7 +104,7 @@ namespace app {
 				wp_.plate_param_.set_caption(12);
 				project_ = wd.add_widget<widget_frame>(wp, wp_);
 			}
-			{   // ビュー
+			{   // 描画ビュー
 				widget::param wp(vtx::irect(0, 0, 500, 100), project_);
 				wp.state_.set(widget::state::CLIP_PARENTS);
 				widget_view::param wp_;
@@ -102,31 +112,6 @@ namespace app {
 				view_ = wd.add_widget<widget_view>(wp, wp_);
 			}
 
-#if 0
-			{   // ボーダーＶ
-				widget::param wp(vtx::irect(30, 0, 2, 0), project_);
-				widget_border::param wp_(widget_border::param::type::vertical);
-				wd.add_widget<widget_border>(wp, wp_);
-			}
-
-			{   // ボーダーＨ
-				for(int i = 0; i < 23; ++i) {
-					{
-						widget::param wp(vtx::irect(0, 40 * (i + 1), 0, 2), project_);
-						widget_border::param wp_(widget_border::param::type::holizontal);
-						wd.add_widget<widget_border>(wp, wp_);
-					}
-					{
-						widget::param wp(vtx::irect(0, 40 * i + 10, 30, 40), project_);
-						wp.state_.set(widget::state::CLIP_PARENTS);
-						widget_text::param wp_;
-						wp_.text_param_.set_text(std::to_string(i));
-//						wp_.text_param_.placement_.vpt = vtx::placement::vertical::CENTER;
-						wd.add_widget<widget_text>(wp, wp_);
-					}
-				}
-			}
-#endif
 
 			{	// ターミナルのテスト
 				{
@@ -141,7 +126,6 @@ namespace app {
 					terminal_core_ = wd.add_widget<widget_terminal>(wp, wp_);
 				}
 			}
-
 
 			// プリファレンスの取得
 			sys::preference& pre = director_.at().preference_;
