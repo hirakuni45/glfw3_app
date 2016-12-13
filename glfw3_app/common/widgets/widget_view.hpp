@@ -23,7 +23,7 @@ namespace gui {
 		typedef widget_view value_type;
 
 		typedef std::function< void() > update_func_type;
-		typedef std::function< void(const vtx::spos& size) > render_func_type;
+		typedef std::function< void(const vtx::irect& clip) > render_func_type;
 		typedef std::function< void() > service_func_type;
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -160,7 +160,7 @@ namespace gui {
 				wp.clip_.size.x * sx, wp.clip_.size.y * sy);
 			wd_.at_mobj().setup_matrix(wp.clip_.size.x, wp.clip_.size.y);
 
-			if(param_.render_func_ != nullptr) param_.render_func_(wp.clip_.size);
+			if(param_.render_func_ != nullptr) param_.render_func_(wp.clip_);
 			
 			glPopMatrix();
 			glViewport(0, 0, vsz.x, vsz.y);
