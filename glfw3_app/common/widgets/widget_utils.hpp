@@ -10,6 +10,7 @@
 #include "widgets/widget_director.hpp"
 #include "utils/vmath.hpp"
 #include "utils/string_utils.hpp"
+#include "gl_fw/glutils.hpp"
 
 namespace gui {
 
@@ -187,5 +188,14 @@ namespace gui {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	void shift_text_render(const widget::param& bp, const widget::text_param& tp, const widget::plate_param& pp);
+
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief	ボーダーの描画
+		@param[in]	rect   	描画位置とサイズ
+		@param[in]	color	描画カラー
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	void draw_border(const vtx::srect& rect, const widget::color_param& color = widget_director::default_border_color_);
 
 }

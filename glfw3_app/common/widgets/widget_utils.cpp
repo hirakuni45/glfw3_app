@@ -485,4 +485,30 @@ namespace gui {
 		glViewport(0, 0, vsz.x, vsz.y);
 	}
 
+
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief	ボーダーの描画
+		@param[in]	rect   	描画位置とサイズ
+		@param[in]	color	描画カラー
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	void draw_border(const vtx::srect& rect, const widget::color_param& color)
+	{
+		vtx::srect r = rect;
+		vtx::spos o(0);
+		if(r.size.x >= r.size.y) {  // Holizontal
+			r.size.y /= 2;
+			o.y = r.size.y;
+		} else {  // Vertical
+			r.size.x /= 2;
+			o.x = r.size.x;
+		}
+
+		gl::glColor(color.fore_color_);
+		gl::draw_filled_rectangle(r);
+		r.org += o;
+		gl::glColor(color.back_color_);
+		gl::draw_filled_rectangle(r);
+	}
 }
