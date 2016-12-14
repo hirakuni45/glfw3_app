@@ -1,6 +1,7 @@
 //=====================================================================//
 /*! @file
-	@brief  Logic クラス
+	@brief  Logic クラス @n
+			※最大３２チャネルのロジックレベル操作クラス
 	@author 平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
@@ -59,16 +60,16 @@ namespace app {
 		/*!
 			@brief  ロジック・レベル設定
 			@param[in]	wpos	波形位置
-			@param[in]	bpos	ビット位置（０～３１）
+			@param[in]	ch	チャネル（０～３１）
 			@param[in]	value	値
 		*/
 		//-------------------------------------------------------------//
-		void set_logic(uint32_t wpos, uint32_t bpos, bool value = true)
+		void set_logic(uint32_t wpos, uint32_t ch, bool value = true)
 		{
 			if(wpos >= level_.size()) return;
 
-			if(value) level_[wpos] |= (1 << bpos);
-			else level_[wpos] &= ~(1 << bpos);
+			if(value) level_[wpos] |= (1 << ch);
+			else level_[wpos] &= ~(1 << ch);
 		}
 
 
@@ -76,35 +77,35 @@ namespace app {
 		/*!
 			@brief  ロジック・レベルの取得
 			@param[in]	wpos	波形位置
-			@param[in]	bpos	ビット位置（０～３１）
+			@param[in]	ch		チャネル（０～３１）
 			@return レベル
 		*/
 		//-------------------------------------------------------------//
-		bool get_logic(uint32_t wpos, uint32_t bpos) const
+		bool get_logic(uint32_t wpos, uint32_t ch) const
 		{
 			if(wpos >= level_.size()) return 0;  // 範囲外は「０」
 
-			return level_[wpos] & (1 << bpos);
+			return level_[wpos] & (1 << ch);
 		}
 
 
 		//-------------------------------------------------------------//
 		/*!
 			@brief  クロック信号の生成
-			@param[in]	bpos	ビット位置（０～３１）
-			@param[in]	udu		デューティー分子（１）
-			@param[in]	ddu		デューティー分母（２）
-			@param[in]	ph		フェーズ（分子初期値）
+			@param[in]	ch	チャネル（０～３１）
+			@param[in]	udu	デューティー分子（１）
+			@param[in]	ddu	デューティー分母（２）
+			@param[in]	ph	フェーズ（分子初期値）
 		*/
 		//-------------------------------------------------------------//
-		void build_clock(uint32_t bpos, uint32_t udu = 1, uint32_t ddu = 2, uint32_t ph = 0)
+		void build_clock(uint32_t ch, uint32_t udu = 1, uint32_t ddu = 2, uint32_t ph = 0)
 		{
 			uint32_t sum = ph;
 			uint8_t v = 0;
 			for(uint32_t i = 0; i < level_.size(); ++i) {
 				sum += udu;
 				v = sum <= udu ? 0 : 1;
-				set_logic(i, bpos, (v & 1));
+				set_logic(i, ch, (v & 1));
 				if(sum >= ddu) {
 					sum -= ddu;
 				}
