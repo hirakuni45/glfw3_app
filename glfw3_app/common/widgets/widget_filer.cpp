@@ -509,7 +509,7 @@ namespace gui {
 
 		// main null frame
 		{
-			short fw = 4;
+			int fw = 4;
 			vtx::irect r(vtx::ipos(frame_width, frame_width + param_.path_height_),
 				vtx::ipos(get_rect().size.x - 8,
 					get_rect().size.y - param_.path_height_ - fw * 2 - fw));
