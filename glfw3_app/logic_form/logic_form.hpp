@@ -15,6 +15,7 @@
 #include "widgets/widget_button.hpp"
 #include "widgets/widget_terminal.hpp"
 #include "widgets/widget_filer.hpp"
+#include "widgets/widget_utils.hpp"
 #include "logic.hpp"
 
 namespace app {
@@ -44,8 +45,12 @@ namespace app {
 			vtx::ipos				view_org_;
 			vtx::ipos				view_offset_;
 
+			gui::spring_damper		sd_x_;
+			gui::spring_damper		sd_y_;
+
 			project_t() : base_(nullptr), main_(nullptr), tool_(nullptr), view_(nullptr),
-				view_org_(0), view_offset_(0)
+				view_org_(0), view_offset_(0),
+				sd_x_(), sd_y_()
 				{ }
 
 			void load(sys::preference& pre) {
@@ -139,24 +144,46 @@ namespace app {
 		}
 
 
-		void update_view_()
+		void update_view_(project_t& t)
 		{
 			using namespace gui;
 
-			auto wn = project_.view_;
+			auto wn = t.view_;
 			wn->at_rect().org.y  += logic_tool_height_;
 			wn->at_rect().size.y -= logic_tool_height_;
 
+#if 0
 			if(wn->get_select_in()) {
-				project_.view_org_ = project_.view_offset_;
+				t.view_org_ = t.view_offset_;
 			}
 			if(wn->get_select()) {
 				auto d = wn->get_param().move_pos_ - wn->get_param().move_org_;
-				project_.view_offset_ = project_.view_org_ + d;
-				project_.view_offset_.y = 0;
+				t.view_offset_ = t.view_org_ + d;
+//				t.view_offset_.y = 0;
 			} else {
-				project_.view_offset_.y = 0;
+//				t.view_offset_.y = 0;
 			}
+#endif
+		}
+
+
+		void service_view_(project_t& t)
+		{
+			auto w = t.view_;
+			auto sel_in = w->get_select_in();
+			auto sel = w->get_select();
+			vtx::ipos scr(0);
+			vtx::ipos limit;
+			limit.x = t.logic_.size() * logic_step_;
+			limit.y = w->get_rect().size.y - logic_tool_height_;
+			vtx::ipos d(0);
+			if(sel) {
+				d = w->get_param().move_pos_ - w->get_param().move_org_;
+			}
+			t.sd_x_.update(sel_in, sel, scr.x, limit.x, d.x);
+			t.view_offset_.x = t.sd_x_.get_position();
+			t.sd_y_.update(sel_in, sel, scr.y, limit.y, d.y);
+			t.view_offset_.y = t.sd_y_.get_position();
 		}
 
 
@@ -165,6 +192,7 @@ namespace app {
 		{
 			glDisable(GL_TEXTURE_2D);
 			vtx::srect rect(pin_n_, 0, 2, pin_h_ * 24);
+			rect.org.y += t.view_offset_.y;
 			gui::draw_border(rect);
 
 			rect.org.x = 0;
@@ -172,7 +200,7 @@ namespace app {
 			rect.size.y = 2;
 			gui::draw_border(rect);
 			for(int i = 0; i < 24; ++i) {
-				rect.org.y = (i + 1) * pin_h_;
+				rect.org.y = (i + 1) * pin_h_ + t.view_offset_.y;
 				gui::draw_border(rect);
 				draw_logic_(t, vtx::irect(pin_n_ + 2, i * pin_h_, clip.size.x - pin_n_, logic_lvl_), i);
 			}
@@ -184,6 +212,7 @@ namespace app {
 			gl::fonts& fonts = core.at_fonts();
 			for(int i = 0; i < 24; ++i) {
 				vtx::irect tr(0, i * pin_h_ + 3, pin_n_, pin_h_);
+				tr.org.y += t.view_offset_.y;
 				tp.set_text(std::to_string(i));
 				gui::draw_text(tp, tr, clip);
 			}
@@ -234,16 +263,20 @@ namespace app {
 				wp.state_.set(widget::state::CLIP_PARENTS);
 				widget_view::param wp_;
 				wp_.update_func_ = [this]() {
-					update_view_();
+					update_view_(project_);
 				};
 				wp_.render_func_ = [this](const vtx::irect& clip) {
 					render_view_(project_, clip);
+				};
+				wp_.service_func_ = [this]() {
+					service_view_(project_);
 				};
 				t.view_ = wd.add_widget<widget_view>(wp, wp_);
 				t.view_->set_state(widget::state::CLIP_PARENTS);
 				t.view_->set_state(widget::state::RESIZE_ROOT);
 				t.view_->set_state(widget::state::MOVE_ROOT, false);
 				t.view_->set_state(widget::state::POSITION_LOCK, false);
+				t.view_->set_state(widget::state::SERVICE);
 			}
 		}
 
