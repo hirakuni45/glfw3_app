@@ -40,7 +40,7 @@ namespace app {
 
 		//-------------------------------------------------------------//
 		/*!
-			@brief  波形バッファを生成
+			@brief  波形ストレージを生成
 			@param[in]	length	長さ
 		*/
 		//-------------------------------------------------------------//
@@ -48,6 +48,14 @@ namespace app {
 		{
 			level_.resize(length);
 		}
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief  ストレージをクリア
+		*/
+		//-------------------------------------------------------------//
+		void clear() { level_.clear(); }
 
 
 		//-------------------------------------------------------------//
@@ -132,15 +140,33 @@ namespace app {
 		/*!
 			@brief  ノイズの生成
 			@param[in]	ch	チャネル（０～３１）
-			@param[in]	len	長さ（０の場合、最大サイズ）
 			@param[in]	org	開始位置
+			@param[in]	len	長さ（０の場合、最大サイズ）
 		*/
 		//-------------------------------------------------------------//
-		void build_noise(uint32_t ch, uint32_t len = 0, uint32_t org = 0)
+		void build_noise(uint32_t ch, uint32_t org = 0, uint32_t len = 0)
 		{
 			if(len == 0) len = size();
 			for(uint32_t i = org; i < (org + len); ++i) {
 				set_logic(i, ch, noise_() & 1);
+			}
+		}
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief  埋める
+			@param[in]	ch	チャネル（０～３１）
+			@param[in]	lvl	値
+			@param[in]	org	開始位置
+			@param[in]	len	長さ（０の場合、最大サイズ）
+		*/
+		//-------------------------------------------------------------//
+		void fill(uint32_t ch, bool lvl, uint32_t org, uint32_t len = 0) 
+		{
+			if(len == 0) len = size();
+			for(uint32_t i = org; i < (org + len); ++i) {
+				set_logic(i, ch, lvl);
 			}
 		}
 
