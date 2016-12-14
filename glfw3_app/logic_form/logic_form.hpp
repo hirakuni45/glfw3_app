@@ -28,25 +28,24 @@ namespace app {
 
 		utils::director<core>&	director_;
 
-		gui::widget_frame*		tools_;
+		gui::widget_frame*		menu_;
 		gui::widget_button*		load_;
 		gui::widget_button*		save_;
 
 		// プロジェクト管理
 		struct project_t {
 			gui::widget_frame*		base_;	// プロジェクト全体フレーム
-			gui::widget*			main_;	// 内装描画領域
+			gui::widget_null*		main_;	// 内装描画領域
+			gui::widget_null*		tool_;	// ツール関係
 			gui::widget_view*		view_;
 
 			logic					logic_;
 
-			uint32_t				logic_org_;
-
 			vtx::ipos				view_org_;
 			vtx::ipos				view_offset_;
 
-			project_t() : base_(nullptr), main_(nullptr), view_(nullptr),
-				logic_org_(0), view_org_(0), view_offset_(0)
+			project_t() : base_(nullptr), main_(nullptr), tool_(nullptr), view_(nullptr),
+				view_org_(0), view_offset_(0)
 				{ }
 
 			void load(sys::preference& pre) {
@@ -82,12 +81,19 @@ namespace app {
 		{
 			vtx::sposs list;
 			int lv = rect.org.y + logic_ofs_ + t.view_offset_.y;
-			vtx::ipos p(rect.org.x + t.view_offset_.x, lv);
 			for(uint32_t i = 0; i < t.logic_.size(); ++i) {
-				auto l = t.logic_.get_logic(t.logic_org_ + i, bitpos);
+				auto l = t.logic_.get_logic(i, bitpos);
+				vtx::ipos p;
+				p.x = rect.org.x + t.view_offset_.x + (logic_step_ * i);
 				p.y = lv - static_cast<int>(l) * logic_lvl_;
+				if((p.x + logic_step_) < rect.org.x) continue;
+				int step = logic_step_;
+				if(p.x < rect.org.x) {
+					step -= rect.org.x - p.x;
+					p.x = rect.org.x;
+				}
 				list.emplace_back(p.x, p.y);
-				p.x += logic_step_;
+				p.x += step;
 				list.emplace_back(p.x, p.y);
 				if(p.x > rect.end_x()) break;
 			}
@@ -97,6 +103,62 @@ namespace app {
 				gl::draw_line_strip(list);
 			}
 		}
+
+
+		void update_main_()
+		{
+			using namespace gui;
+
+			auto wn = project_.main_;
+			if(wn == nullptr) return;
+
+			if(wn->get_param().parents_) {
+				if(wn->get_param().parents_->type() == get_type_id<widget_frame>()) {
+					widget_frame* w = static_cast<widget_frame*>(wn->at_param().parents_);
+					wn->at_rect() = w->get_draw_area();
+				}
+			}
+		}
+
+
+		void update_tool_()
+		{
+			using namespace gui;
+
+			auto wn = project_.tool_;
+			if(wn == nullptr) return;
+
+			if(wn->get_param().parents_) {
+				if(wn->get_param().parents_->type() == get_type_id<widget_frame>()) {
+					widget_frame* w = static_cast<widget_frame*>(wn->at_param().parents_);
+					auto r = w->get_draw_area();
+					r.size.y = logic_tool_height_;
+					wn->at_rect() = r;
+				}
+			}
+		}
+
+
+		void update_view_()
+		{
+			using namespace gui;
+
+			auto wn = project_.view_;
+			wn->at_rect().org.y  += logic_tool_height_;
+			wn->at_rect().size.y -= logic_tool_height_;
+
+			if(wn->get_select_in()) {
+				project_.view_org_ = project_.view_offset_;
+			}
+			if(wn->get_select()) {
+				auto d = wn->get_param().move_pos_ - wn->get_param().move_org_;
+				project_.view_offset_ = project_.view_org_ + d;
+				project_.view_offset_.y = 0;
+			} else {
+				project_.view_offset_.y = 0;
+			}
+		}
+
 
 		// プロジェクトの描画
 		void render_view_(project_t& t, const vtx::irect& clip)
@@ -108,6 +170,7 @@ namespace app {
 			rect.org.x = 0;
 			rect.size.x = clip.size.x;
 			rect.size.y = 2;
+			gui::draw_border(rect);
 			for(int i = 0; i < 24; ++i) {
 				rect.org.y = (i + 1) * pin_h_;
 				gui::draw_border(rect);
@@ -128,55 +191,51 @@ namespace app {
 		}
 
 
-		void main_update_()
-		{
-			using namespace gui;
-			auto wn = project_.main_;
-			if(wn == nullptr) return;
-
-			if(wn->get_param().parents_) {
-				if(wn->get_param().parents_->type() == get_type_id<widget_frame>()) {
-					widget_frame* w = static_cast<widget_frame*>(wn->at_param().parents_);
-					auto r = w->get_draw_area();
-					r.org.y  += logic_tool_height_;
-					r.size.y -= logic_tool_height_;
-					wn->at_rect() = r;
-				}
-			}
-		}
-
-
 		void create_project_(project_t& t, int w, int h)
 		{
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
-			{	// プロジェクト・フレーム
+			{   // プロジェクト・フレーム
 				widget::param wp(vtx::irect(20, 50, w, h));
 				widget_frame::param wp_;
 				wp_.plate_param_.set_caption(12);
 				t.base_ = wd.add_widget<widget_frame>(wp, wp_);
 			}
-			{
-//				int fw = 4;
-//				vtx::irect r(vtx::ipos(frame_width, frame_width + param_.path_height_),
-//					vtx::ipos(get_rect().size.x - 8,
-//						get_rect().size.y - param_.path_height_ - fw * 2 - fw));
+
+			{   // メイン
 				widget::param wp(vtx::irect(0, 0, w, h), t.base_);
 				wp.state_.reset(widget::state::RENDER_ENABLE);
 				widget_null::param wp_;
 				wp_.update_func_ = [this]() {
-					main_update_();
+					update_main_();
 				};
 				t.main_ = wd.add_widget<widget_null>(wp, wp_);
 				t.main_->set_state(widget::state::POSITION_LOCK);
 				t.main_->set_state(widget::state::SIZE_LOCK);
 				t.main_->set_state(widget::state::RESIZE_ROOT);
 			}
+
+			{   // ツール  
+				widget::param wp(vtx::irect(0, 0, w, h), t.base_);
+				wp.state_.reset(widget::state::RENDER_ENABLE);
+				widget_null::param wp_;
+				wp_.update_func_ = [this]() {
+					update_tool_();
+				};
+				t.tool_ = wd.add_widget<widget_null>(wp, wp_);
+				t.tool_->set_state(widget::state::POSITION_LOCK);
+				t.tool_->set_state(widget::state::SIZE_LOCK);
+				t.tool_->set_state(widget::state::RESIZE_ROOT);
+			}
+
 			{   // 描画ビュー
 				widget::param wp(vtx::irect(0, 0, 500, 100), t.main_);
 				wp.state_.set(widget::state::CLIP_PARENTS);
 				widget_view::param wp_;
+				wp_.update_func_ = [this]() {
+					update_view_();
+				};
 				wp_.render_func_ = [this](const vtx::irect& clip) {
 					render_view_(project_, clip);
 				};
@@ -195,7 +254,7 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		logic_form(utils::director<core>& d) : director_(d),
-			tools_(nullptr), load_(nullptr), save_(nullptr),
+			menu_(nullptr), load_(nullptr), save_(nullptr),
 			project_(),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
 			load_ctx_(nullptr), save_ctx_(nullptr)
@@ -221,20 +280,20 @@ namespace app {
 			widget_director& wd = director_.at().widget_director_;
 			gl::core& core = gl::core::get_instance();
 
-			{	// ツールパレット
+			{	// メニューパレット
 				widget::param wp(vtx::irect(20, 20, 200, 300));
 				widget_frame::param wp_;
 				wp_.plate_param_.set_caption(12);
-				tools_ = wd.add_widget<widget_frame>(wp, wp_);
-				tools_->set_state(gui::widget::state::SIZE_LOCK);
+				menu_ = wd.add_widget<widget_frame>(wp, wp_);
+				menu_->set_state(gui::widget::state::SIZE_LOCK);
 			}
 			{ // ロード起動ボタン
-				widget::param wp(vtx::irect(10, 20+40*0, 80, 30), tools_);
+				widget::param wp(vtx::irect(10, 20+40*0, 80, 30), menu_);
 				widget_button::param wp_("load");
 				load_ = wd.add_widget<widget_button>(wp, wp_);
 			}
 			{ // セーブ起動ボタン
-				widget::param wp(vtx::irect(10, 20+40*1, 80, 30), tools_);
+				widget::param wp(vtx::irect(10, 20+40*1, 80, 30), menu_);
 				widget_button::param wp_("save");
 				save_ = wd.add_widget<widget_button>(wp, wp_);
 			}
@@ -272,8 +331,8 @@ namespace app {
 			// プリファレンスの取得
 			sys::preference& pre = director_.at().preference_;
 
-			if(tools_ != nullptr) {
-				tools_->load(pre, false, false);
+			if(menu_ != nullptr) {
+				menu_->load(pre, false, false);
 			}
 
 			project_.load(pre);
@@ -302,17 +361,6 @@ namespace app {
 		{
 			gui::widget_director& wd = director_.at().widget_director_;
 
-#if 0
-			if(view_ != nullptr) {
-				if(view_->get_select_in()) {
-					view_org_ = view_offset_;
-				}
-				if(view_->get_select()) {
-					auto d = view_->get_param().move_pos_ - view_->get_param().move_org_;
-					view_offset_ = view_org_ + d;
-				}
-			}
-#endif
 			if(load_ != nullptr) {
 				if(load_->get_selected()) {
 					if(load_ctx_) {
@@ -367,8 +415,8 @@ namespace app {
 
 			project_.save(pre);
 
-			if(tools_ != nullptr) {
-				tools_->save(pre);
+			if(menu_ != nullptr) {
+				menu_->save(pre);
 			}
 		}
 
