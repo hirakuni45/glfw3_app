@@ -15,7 +15,7 @@ namespace app {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class logic {
 
-		std::vector<uint32_t>	value_;
+		std::vector<uint32_t>	level_;
 
 	public:
 		//-------------------------------------------------------------//
@@ -34,5 +34,104 @@ namespace app {
 		~logic() { }
 
 
+		//-------------------------------------------------------------//
+		/*!
+			@brief  波形バッファを生成
+			@param[in]	length	長さ
+		*/
+		//-------------------------------------------------------------//
+		void create(uint32_t length)
+		{
+			level_.resize(length);
+		}
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief  サイズの取得
+			@return サイズ
+		*/
+		//-------------------------------------------------------------//
+		uint32_t size() const { return level_.size(); }
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief  ロジック・レベル設定
+			@param[in]	wpos	波形位置
+			@param[in]	bpos	ビット位置（０～３１）
+			@param[in]	value	値
+		*/
+		//-------------------------------------------------------------//
+		void set_logic(uint32_t wpos, uint32_t bpos, bool value = true)
+		{
+			if(wpos >= level_.size()) return;
+
+			if(value) level_[wpos] |= (1 << bpos);
+			else level_[wpos] &= ~(1 << bpos);
+		}
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief  ロジック・レベルの取得
+			@param[in]	wpos	波形位置
+			@param[in]	bpos	ビット位置（０～３１）
+			@return レベル
+		*/
+		//-------------------------------------------------------------//
+		bool get_logic(uint32_t wpos, uint32_t bpos) const
+		{
+			if(wpos >= level_.size()) return 0;  // 範囲外は「０」
+
+			return level_[wpos] & (1 << bpos);
+		}
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief  クロック信号の生成
+			@param[in]	bpos	ビット位置（０～３１）
+			@param[in]	udu		デューティー分子（１）
+			@param[in]	ddu		デューティー分母（２）
+			@param[in]	ph		フェーズ（分子初期値）
+		*/
+		//-------------------------------------------------------------//
+		void build_clock(uint32_t bpos, uint32_t udu = 1, uint32_t ddu = 2, uint32_t ph = 0)
+		{
+			uint32_t sum = ph;
+			uint8_t v = 0;
+			for(uint32_t i = 0; i < level_.size(); ++i) {
+				sum += udu;
+				v = sum <= udu ? 0 : 1;
+				set_logic(i, bpos, (v & 1));
+				if(sum >= ddu) {
+					sum -= ddu;
+				}
+			}
+		}
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief  波形の取得
+			@param[in]	wpos	波形位置
+			@return 波形
+		*/
+		//-------------------------------------------------------------//
+		uint32_t get(uint32_t wpos) const {
+			if(wpos >= level_.size()) return 0;
+			return level_[wpos];
+		}
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief  参照
+			@param[in]	pos	参照位置
+			@return 現物
+		*/
+		//-------------------------------------------------------------//
+		uint32_t& at(uint32_t pos) { return level_[pos]; }
 	};
 }

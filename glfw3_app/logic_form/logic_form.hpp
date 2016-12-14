@@ -40,19 +40,21 @@ namespace app {
 		static const int logic_lvl_  = 20;
 		static const int logic_step_ = 20;
 
-		void render_logic_(const vtx::irect& rect, int bitpos)
+		uint32_t		logic_org_;
+
+		void draw_logic_(const vtx::irect& rect, int bitpos)
 		{
 			vtx::sposs list;
-//			vtx::ipos p
-			
-			list.emplace_back(rect.org.x,   rect.org.y + logic_ofs_);
-			list.emplace_back(rect.end_x(), rect.org.y + logic_ofs_);
-
-//			bool back = 0;
-//			for(auto v : logic_val_) {
-//				if(v & (1 << bitpos)) {
-//				}
-//			}
+			int lv = rect.org.y + logic_ofs_;
+			vtx::ipos p(rect.org.x, lv);
+			for(uint32_t i = 0; i < logic_.size(); ++i) {
+				auto l = logic_.get_logic(logic_org_ + i, bitpos);
+				p.y = lv - static_cast<int>(l) * logic_lvl_;
+				list.emplace_back(p.x, p.y);
+				p.x += logic_step_;
+				list.emplace_back(p.x, p.y);
+				if(p.x > rect.end_x()) break;
+			}
 
 			if(list.size() > 2) {
 				gl::glColor(img::rgba8(255, 255));
@@ -73,7 +75,7 @@ namespace app {
 			for(int i = 0; i < 24; ++i) {
 				rect.org.y = (i + 1) * pin_h_;
 				gui::draw_border(rect);
-				render_logic_(vtx::irect(pin_n_, i * pin_h_, clip.size.x - pin_n_, pin_h_), i);
+				draw_logic_(vtx::irect(pin_n_, i * pin_h_, clip.size.x - pin_n_, logic_lvl_), i);
 			}
 
 			gui::widget::text_param tp("", img::rgba8(255, 255), img::rgba8(0, 255),
@@ -98,7 +100,7 @@ namespace app {
 		logic_form(utils::director<core>& d) : director_(d),
 			tools_(nullptr), project_(nullptr), view_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
-			view_offset_(0)
+			view_offset_(0), logic_org_(0)
 		{ }
 
 
@@ -173,6 +175,11 @@ namespace app {
 			if(terminal_frame_ != nullptr) {
 				terminal_frame_->load(pre);
 			}
+
+			// デバッグ
+			logic_.create(2048);
+			logic_.build_clock(0, 1, 3);
+//			logic_.build_clock(0);
 		}
 
 
