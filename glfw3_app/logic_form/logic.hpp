@@ -6,6 +6,7 @@
 */
 //=====================================================================//
 #include <vector>
+#include <random>
 
 namespace app {
 
@@ -17,6 +18,8 @@ namespace app {
 	class logic {
 
 		std::vector<uint32_t>	level_;
+
+		std::mt19937	noise_;
 
 	public:
 		//-------------------------------------------------------------//
@@ -109,6 +112,35 @@ namespace app {
 				if(sum >= ddu) {
 					sum -= ddu;
 				}
+			}
+		}
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief  ノイズ生成シード設定
+			@param[in]	seed	シード
+		*/
+		//-------------------------------------------------------------//
+		void set_noise_seed(uint32_t seed)
+		{
+			noise_.seed(seed);
+		}
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief  ノイズの生成
+			@param[in]	ch	チャネル（０～３１）
+			@param[in]	len	長さ（０の場合、最大サイズ）
+			@param[in]	org	開始位置
+		*/
+		//-------------------------------------------------------------//
+		void build_noise(uint32_t ch, uint32_t len = 0, uint32_t org = 0)
+		{
+			if(len == 0) len = size();
+			for(uint32_t i = org; i < (org + len); ++i) {
+				set_logic(i, ch, noise_() & 1);
 			}
 		}
 
