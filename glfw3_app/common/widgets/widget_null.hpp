@@ -21,12 +21,17 @@ namespace gui {
 
 		typedef widget_null value_type;
 
+		typedef std::function< void () > update_func_type;
+
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	widget_null パラメーター
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
+
+			update_func_type	update_func_;
+
 			param() { }
 		};
 
@@ -59,7 +64,7 @@ namespace gui {
 			@brief	型を取得
 		*/
 		//-----------------------------------------------------------------//
-		type_id type() const { return get_type_id<value_type>(); }
+		type_id type() const override { return get_type_id<value_type>(); }
 
 
 		//-----------------------------------------------------------------//
@@ -68,7 +73,7 @@ namespace gui {
 			@return widget 型の基本名称
 		*/
 		//-----------------------------------------------------------------//
-		const char* type_name() const { return "null"; }
+		const char* type_name() const override { return "null"; }
 
 
 		//-----------------------------------------------------------------//
@@ -77,7 +82,7 @@ namespace gui {
 			@return ハイブリッド・ウィジェットの場合「true」を返す。
 		*/
 		//-----------------------------------------------------------------//
-		bool hybrid() const { return false; }
+		bool hybrid() const override { return false; }
 
 
 		//-----------------------------------------------------------------//
@@ -85,7 +90,7 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() {
+		void initialize() override {
 			set_state(widget::state::RENDER_ENABLE, false);
 		}
 
@@ -95,7 +100,9 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() { }
+		void update() override {
+			if(param_.update_func_ != nullptr) param_.update_func_();
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -103,7 +110,7 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() { }
+		void service() override { }
 
 
 		//-----------------------------------------------------------------//
@@ -111,7 +118,7 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render() { }
+		void render() override { }
 
 
 		//-----------------------------------------------------------------//
@@ -121,7 +128,7 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(sys::preference& pre) { return true; }
+		bool save(sys::preference& pre) override { return true; }
 
 
 		//-----------------------------------------------------------------//
@@ -131,7 +138,7 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre) { return true; }
+		bool load(const sys::preference& pre) override { return true; }
 	};
 #ifdef __clang__
 #pragma clang diagnostic pop

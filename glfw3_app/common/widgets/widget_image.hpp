@@ -161,9 +161,10 @@ namespace gui {
 		void update() override
 		{
 			if(get_param().parents_ && get_state(widget::state::AREA_ROOT)) {
-				if(get_param().parents_->type() == get_type_id<widget_frame>()) {
+				if(get_param().parents_->type() == get_type_id<widget_frame>() ||
+				   get_param().parents_->type() == get_type_id<widget_null>()) {
 					widget_frame* w = static_cast<widget_frame*>(at_param().parents_);
-					w->get_draw_area(at_rect());
+					at_rect() = w->get_draw_area();
 				}
 			}
 		}
