@@ -198,4 +198,113 @@ namespace gui {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	void draw_border(const vtx::srect& rect, const widget::color_param& color = widget_director::default_border_color_);
 
+
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief	スプリング・ダンパー・クラス
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	class spring_damper {
+
+		float	position_;
+		float	offset_;
+		float	speed_;
+
+	public:
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	コンストラクター
+		*/
+		//-----------------------------------------------------------------//
+		spring_damper() : position_(0.0f), offset_(0.0f), speed_(0.0f) { }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	位置の設定
+			@param[in]	pos	位置
+		*/
+		//-----------------------------------------------------------------//
+		void set_position(float pos) { position_ = pos; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	位置の取得
+			@return 位置
+		*/
+		//-----------------------------------------------------------------//
+		float get_position() const { return position_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	アップデート
+			@param[in]	select_in	選択開始 (get_select_in)
+			@param[in]	select		選択 (get_select)
+			@param[in]	scr			スクロール制御量
+			@param[in]	limit		リミット
+			@param[in]	drag_len	ドラッグ長
+		*/
+		//-----------------------------------------------------------------//
+		void update(bool select_in, bool select, int32_t scr, int32_t limit, int32_t drag_len)
+		{
+			int32_t pos = 0;
+
+			if(select_in) {
+				speed_ = 0.0f;
+				offset_ = position_;
+			}
+			float damping = 0.85f;
+			float slip_gain = 0.5f;
+			auto d = limit - pos;
+			if(select) {
+				position_ = offset_ + static_cast<float>(drag_len);
+				if(d < 0) {
+					if(position_ < d) {
+						position_ -= d;
+						position_ *= slip_gain;
+						position_ += d;
+					} else if(position_ > 0) {
+						position_ *= slip_gain;
+					}
+				} else {
+					position_ *= slip_gain;
+				}
+			} else {
+				if(d < 0) {
+					if(position_ < d) {
+						position_ -= d;
+						position_ *= damping;
+						position_ += d;
+						speed_ = 0.0f;
+						if(position_ > (d - 0.5f)) {
+							position_ = d;
+						}
+					} else if(position_ > 0.0f) {
+						position_ *= damping;
+						speed_ = 0.0f;
+						if(position_ < 0.5f) {
+							position_ = 0.0f;
+						}
+					} else {
+						if(scr != 0) {
+							position_ += scr;
+							if(position_ < d) {
+								position_ = d;
+							} else if(position_ > 0.0f) {
+								position_ = 0.0f;
+							}
+						}
+					}
+				} else {
+					position_ *= damping;
+					if(-0.5f < position_ && position_ < 0.5f) {
+						position_ = 0.0f;
+						speed_ = 0.0f;
+					}
+				}
+			}
+		}
+	};
 }
