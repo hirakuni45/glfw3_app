@@ -92,8 +92,7 @@ namespace gui {
 				widget_frame* w = static_cast<widget_frame*>(at_param().parents_);
 				if(w) {
 					bool resize = false;
-					vtx::irect sr;
-					w->get_draw_area(sr);
+					vtx::irect sr = w->get_draw_area();
 					if(param_.auto_fit_) {
 						vtx::ipos ss(sr.size.x / param_.font_width_,
 									 sr.size.y / param_.height_);
@@ -108,7 +107,7 @@ namespace gui {
 //							ss.y *= param_.height_;
 //						}
 						w->set_draw_area(ss);
-						w->get_draw_area(sr);
+						sr = w->get_draw_area();
 					}
 					if(sr.size != get_rect().size) resize = true;
 					at_rect() = sr;

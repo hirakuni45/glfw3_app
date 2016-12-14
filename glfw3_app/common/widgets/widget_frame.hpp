@@ -137,11 +137,13 @@ namespace gui {
 			@param[out]	area	描画領域の参照
 		*/
 		//-----------------------------------------------------------------//
-		void get_draw_area(vtx::irect& area) const {
+		vtx::irect get_draw_area() const {
+			vtx::irect area;
 			short ofs = param_.plate_param_.frame_width_;
 			area.org.set(ofs, ofs + param_.plate_param_.caption_width_);
 			area.size.x = get_rect().size.x - ofs * 2;
 			area.size.y = get_rect().size.y - ofs * 2 - param_.plate_param_.caption_width_;
+			return area;
 		}
 
 
