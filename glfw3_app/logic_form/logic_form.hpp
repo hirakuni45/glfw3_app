@@ -94,7 +94,7 @@ namespace app {
 			vtx::sposs list;
 			int lv = rect.org.y + logic_ofs_ + t.view_offset_.y;
 			for(uint32_t i = 0; i < t.logic_.size(); ++i) {
-				auto l = t.logic_.get_logic(i, bitpos);
+				auto l = t.logic_.get_logic(bitpos, i);
 				vtx::ipos p;
 				p.x = rect.org.x + t.view_offset_.x + (logic_step_ * i);
 				p.y = lv - static_cast<int>(l) * logic_lvl_;

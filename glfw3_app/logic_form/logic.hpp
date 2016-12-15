@@ -71,12 +71,12 @@ namespace tools {
 		//-------------------------------------------------------------//
 		/*!
 			@brief  ロジック・レベルの取得
-			@param[in]	wpos	波形位置
 			@param[in]	ch		チャネル（０～３１）
+			@param[in]	wpos	波形位置
 			@return レベル
 		*/
 		//-------------------------------------------------------------//
-		bool get_logic(uint32_t wpos, uint32_t ch) const
+		bool get_logic(uint32_t ch, uint32_t wpos) const
 		{
 			if(wpos >= level_.size()) return 0;  // 範囲外は「０」
 
@@ -87,12 +87,12 @@ namespace tools {
 		//-------------------------------------------------------------//
 		/*!
 			@brief  ロジック・レベル設定
-			@param[in]	wpos	波形位置
 			@param[in]	ch	チャネル（０～３１）
+			@param[in]	wpos	波形位置
 			@param[in]	value	値
 		*/
 		//-------------------------------------------------------------//
-		void set_logic(uint32_t wpos, uint32_t ch, bool value = true)
+		void set_logic(uint32_t ch, uint32_t wpos, bool value = true)
 		{
 			if(wpos >= level_.size()) return;
 
@@ -104,12 +104,12 @@ namespace tools {
 		//-------------------------------------------------------------//
 		/*!
 			@brief  ロジック・レベルの反転
-			@param[in]	wpos	波形位置
 			@param[in]	ch		チャネル（０～３１）
+			@param[in]	wpos	波形位置
 			@return 反転後のレベル
 		*/
 		//-------------------------------------------------------------//
-		bool flip_logic(uint32_t wpos, uint32_t ch)
+		bool flip_logic(uint32_t ch, uint32_t wpos) 
 		{
 			if(wpos >= level_.size()) return 0;  // 範囲外は「０」
 
@@ -138,7 +138,7 @@ namespace tools {
 			for(uint32_t i = org; i < (org + len); ++i) {
 				bool lvl = (cnt % lim) < lc ? 0 : 1;
 				if(inv) lvl = !lvl;
-				set_logic(i, ch, lvl);
+				set_logic(ch, i, lvl);
 				++cnt;
 			}
 		}
@@ -168,7 +168,7 @@ namespace tools {
 		{
 			if(len == 0) len = size() - org;
 			for(uint32_t i = org; i < (org + len); ++i) {
-				set_logic(i, ch, noise_() & 1);
+				set_logic(ch, i, noise_() & 1);
 			}
 		}
 
@@ -186,7 +186,7 @@ namespace tools {
 		{
 			if(len == 0) len = size() - org;
 			for(uint32_t i = org; i < (org + len); ++i) {
-				set_logic(i, ch, lvl);
+				set_logic(ch, i, lvl);
 			}
 		}
 
@@ -223,8 +223,8 @@ namespace tools {
 			if(len == 0) len = size() - org;
 
 			for(uint32_t i = org; i < (org + len); ++i) {
-				auto lvl = get_logic(i, src);
-				set_logic(i, dst, lvl);
+				auto lvl = get_logic(src, i);
+				set_logic(dst, i, lvl);
 			}
 		}
 
