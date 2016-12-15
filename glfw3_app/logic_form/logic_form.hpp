@@ -18,6 +18,8 @@
 #include "widgets/widget_utils.hpp"
 #include "logic.hpp"
 
+// #include <boost/format.hpp>
+
 namespace app {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -151,39 +153,26 @@ namespace app {
 			auto wn = t.view_;
 			wn->at_rect().org.y  += logic_tool_height_;
 			wn->at_rect().size.y -= logic_tool_height_;
-
-#if 0
-			if(wn->get_select_in()) {
-				t.view_org_ = t.view_offset_;
-			}
-			if(wn->get_select()) {
-				auto d = wn->get_param().move_pos_ - wn->get_param().move_org_;
-				t.view_offset_ = t.view_org_ + d;
-//				t.view_offset_.y = 0;
-			} else {
-//				t.view_offset_.y = 0;
-			}
-#endif
 		}
 
 
 		void service_view_(project_t& t)
 		{
 			auto w = t.view_;
-			auto sel_in = w->get_select_in();
+			auto in = w->get_select_in();
 			auto sel = w->get_select();
 			vtx::ipos scr(0);
 			vtx::ipos limit;
-			limit.x = t.logic_.size() * logic_step_;
-			limit.y = w->get_rect().size.y - logic_tool_height_;
+			auto r = t.base_->get_draw_area();
+			r.size.y -= logic_tool_height_;
+			limit.x = r.size.x - pin_n_ - (t.logic_.size() * logic_step_);
+			limit.y = r.size.y - (pin_h_ * 24 + 2);
 			vtx::ipos d(0);
 			if(sel) {
 				d = w->get_param().move_pos_ - w->get_param().move_org_;
 			}
-			t.sd_x_.update(sel_in, sel, scr.x, limit.x, d.x);
-			t.view_offset_.x = t.sd_x_.get_position();
-			t.sd_y_.update(sel_in, sel, scr.y, limit.y, d.y);
-			t.view_offset_.y = t.sd_y_.get_position();
+			t.view_offset_.x = t.sd_x_.update(in, sel, t.view_offset_.x, scr.x, limit.x, d.x);
+			t.view_offset_.y = t.sd_y_.update(in, sel, t.view_offset_.y, scr.y, limit.y, d.y);
 		}
 
 
@@ -280,6 +269,12 @@ namespace app {
 			}
 		}
 
+		// ターミナル、行入力
+		void term_enter_(const utils::lstring& text) {
+			auto s = utils::utf32_to_utf8(text);
+///			std::cout << s << std::endl;
+		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -343,6 +338,9 @@ namespace app {
 				{
 					widget::param wp(vtx::irect(0), terminal_frame_);
 					widget_terminal::param wp_;
+					wp_.enter_func_ = [this](const utils::lstring& text) {
+						term_enter_(text);
+					};
 					terminal_core_ = wd.add_widget<widget_terminal>(wp, wp_);
 				}
 			}
@@ -377,7 +375,8 @@ namespace app {
 			if(save_ctx_ != nullptr) save_ctx_->load(pre);
 
 			// デバッグ
-			project_.logic_.create(2048);
+//			project_.logic_.create(2048);
+			project_.logic_.create(100);
 			project_.logic_.build_clock(0, 1, 3);
 //			project_.logic_.build_clock(0);
 			project_.logic_.build_noise(1);
