@@ -276,6 +276,7 @@ namespace app {
 		// ターミナル、行入力
 		void term_enter_(const utils::lstring& text) {
 			auto s = utils::utf32_to_utf8(text);
+			project_.logic_edit_.command(s);
 ///			std::cout << s << std::endl;
 		}
 
@@ -347,6 +348,12 @@ namespace app {
 					};
 					terminal_core_ = wd.add_widget<widget_terminal>(wp, wp_);
 				}
+
+				// ロジック編集クラスの出力先の設定
+				project_.logic_edit_.set_output([this](const std::string& s) {
+					terminal_core_->output(s);
+				}
+				);
 			}
 
 			{ // load ファイラー本体
