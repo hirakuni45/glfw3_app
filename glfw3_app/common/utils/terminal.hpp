@@ -245,16 +245,27 @@ namespace utils {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	ラスト・テキストを取得 (UTF-32）
+			@return ラスト・テキスト
+		*/
+		//-----------------------------------------------------------------//
+		lstring get_last_text32() const {
+			lstring ls;
+			for(auto ch : last_) {
+				ls += ch.cha_;
+			}
+			return ls;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	ラスト・テキストを取得
 			@return ラスト・テキスト
 		*/
 		//-----------------------------------------------------------------//
 		std::string get_last_text() const {
-			lstring ls;
-			for(auto ch : last_) {
-				ls += ch.cha_;
-			}
-			return utf32_to_utf8(ls);
+			return utf32_to_utf8(get_last_text32());
 		}
 
 
