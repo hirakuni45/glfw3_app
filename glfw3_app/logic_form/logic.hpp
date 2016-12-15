@@ -69,6 +69,22 @@ namespace app {
 
 		//-------------------------------------------------------------//
 		/*!
+			@brief  ロジック・レベルの取得
+			@param[in]	wpos	波形位置
+			@param[in]	ch		チャネル（０～３１）
+			@return レベル
+		*/
+		//-------------------------------------------------------------//
+		bool get_logic(uint32_t wpos, uint32_t ch) const
+		{
+			if(wpos >= level_.size()) return 0;  // 範囲外は「０」
+
+			return level_[wpos] & (1 << ch);
+		}
+
+
+		//-------------------------------------------------------------//
+		/*!
 			@brief  ロジック・レベル設定
 			@param[in]	wpos	波形位置
 			@param[in]	ch	チャネル（０～３１）
@@ -86,16 +102,17 @@ namespace app {
 
 		//-------------------------------------------------------------//
 		/*!
-			@brief  ロジック・レベルの取得
+			@brief  ロジック・レベルの反転
 			@param[in]	wpos	波形位置
 			@param[in]	ch		チャネル（０～３１）
-			@return レベル
+			@return 反転後のレベル
 		*/
 		//-------------------------------------------------------------//
-		bool get_logic(uint32_t wpos, uint32_t ch) const
+		bool flip_logic(uint32_t wpos, uint32_t ch)
 		{
 			if(wpos >= level_.size()) return 0;  // 範囲外は「０」
 
+			level_[wpos] ^= (1 << ch);
 			return level_[wpos] & (1 << ch);
 		}
 
@@ -146,7 +163,7 @@ namespace app {
 		//-------------------------------------------------------------//
 		void build_noise(uint32_t ch, uint32_t org = 0, uint32_t len = 0)
 		{
-			if(len == 0) len = size();
+			if(len == 0) len = size() - org;
 			for(uint32_t i = org; i < (org + len); ++i) {
 				set_logic(i, ch, noise_() & 1);
 			}
@@ -162,11 +179,30 @@ namespace app {
 			@param[in]	len	長さ（０の場合、最大サイズ）
 		*/
 		//-------------------------------------------------------------//
-		void fill(uint32_t ch, bool lvl, uint32_t org, uint32_t len = 0) 
+		void fill(uint32_t ch, bool lvl, uint32_t org, uint32_t len = 0)
 		{
-			if(len == 0) len = size();
+			if(len == 0) len = size() - org;
 			for(uint32_t i = org; i < (org + len); ++i) {
 				set_logic(i, ch, lvl);
+			}
+		}
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief  反転
+			@param[in]	ch	チャネル（０～３１）
+			@param[in]	lvl	値
+			@param[in]	org	開始位置
+			@param[in]	len	長さ（０の場合、最大サイズ）
+		*/
+		//-------------------------------------------------------------//
+		void flip(uint32_t ch, bool lvl, uint32_t org, uint32_t len = 1)
+		{
+			if(len == 0) len = size() - org;
+
+			for(uint32_t i = org; i < (org + len); ++i) {
+				flip_logic(i, ch);
 			}
 		}
 
