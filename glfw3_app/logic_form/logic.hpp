@@ -193,17 +193,36 @@ namespace tools {
 		/*!
 			@brief  反転
 			@param[in]	ch	チャネル（０～３１）
-			@param[in]	lvl	値
 			@param[in]	org	開始位置
 			@param[in]	len	長さ（０の場合、最大サイズ）
 		*/
 		//-------------------------------------------------------------//
-		void flip(uint32_t ch, bool lvl, uint32_t org, uint32_t len = 1)
+		void flip(uint32_t ch, uint32_t org, uint32_t len = 1)
 		{
 			if(len == 0) len = size() - org;
 
 			for(uint32_t i = org; i < (org + len); ++i) {
 				flip_logic(i, ch);
+			}
+		}
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief  コピー
+			@param[in]	src	ソース・チャネル（０～３１）
+			@param[in]	dst	コピー先チャネル（０～３１）
+			@param[in]	org	開始位置
+			@param[in]	len	長さ（０の場合、最大サイズ）
+		*/
+		//-------------------------------------------------------------//
+		void copy(uint32_t src, uint32_t dst, uint32_t org, uint32_t len = 0)
+		{
+			if(len == 0) len = size() - org;
+
+			for(uint32_t i = org; i < (org + len); ++i) {
+				auto lvl = get_logic(i, src);
+				set_logic(i, dst, lvl);
 			}
 		}
 
