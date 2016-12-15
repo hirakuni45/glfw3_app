@@ -723,8 +723,8 @@ namespace gui {
 			files_->at_rect().size.y = bh * param_.label_height_;
 		}
 
-		short base_size = main_->get_rect().size.y;
-		short d = base_size - center_.size() * param_.label_height_;
+		int base_size = main_->get_rect().size.y;
+		int d = base_size - center_.size() * param_.label_height_;
 
 		// ドラッグアクションで、一つ前に戻る
 		if(back_directory_ && files_->get_select_out()) {
