@@ -8,6 +8,8 @@
 //=====================================================================//
 #include <vector>
 #include <random>
+#include <boost/format.hpp>
+#include "utils/file_io.hpp"
 
 namespace tools {
 
@@ -212,13 +214,27 @@ namespace tools {
 		//-------------------------------------------------------------//
 		/*!
 			@brief  コピー
+			@param[in]	ch	チャネル（０～３１）
+			@param[in]	src	コピー元
+			@param[in]	dst	コピー先
+			@param[in]	len	長さ
+		*/
+		//-------------------------------------------------------------//
+		void copy(uint32_t ch, uint32_t org, uint32_t len)
+		{
+		}
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief  チャネル間コピー
 			@param[in]	src	ソース・チャネル（０～３１）
 			@param[in]	dst	コピー先チャネル（０～３１）
 			@param[in]	org	開始位置
 			@param[in]	len	長さ（０の場合、最大サイズ）
 		*/
 		//-------------------------------------------------------------//
-		void copy(uint32_t src, uint32_t dst, uint32_t org, uint32_t len = 0)
+		void copy_chanel(uint32_t src, uint32_t dst, uint32_t org, uint32_t len = 0)
 		{
 			if(len == 0) len = size() - org;
 
@@ -226,6 +242,48 @@ namespace tools {
 				auto lvl = get_logic(src, i);
 				set_logic(dst, i, lvl);
 			}
+		}
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief  標準フォーマットでセーブ
+			@param[in]	name	ファイル名
+			@return エラー無ければ「true」
+		*/
+		//-------------------------------------------------------------//
+		bool save(const std::string& name)
+		{
+			if(level_.empty()) return false;
+
+			utils::file_io fio;
+			if(!fio.open(name, "wb")) {
+				return false;
+			}
+
+			for(auto v : level_) {
+				auto s = (boost::format("%08X\n") % v).str();
+				fio.put(s);
+			}
+
+			fio.close();
+
+			return true;
+		}
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief  標準フォーマットでロード
+			@param[in]	name	ファイル名
+			@return エラー無ければ「true」
+		*/
+		//-------------------------------------------------------------//
+		bool load(const std::string& name)
+		{
+
+
+			return true;
 		}
 
 
