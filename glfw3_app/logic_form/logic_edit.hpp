@@ -29,6 +29,11 @@ namespace tools {
 
 		bool cur_ch_(const utils::strings& ss)
 		{
+			if(ss[0] == "help") {
+				output("Current Chanel: [chanel-no]\n");
+				return true;
+			}
+
 			if(ss.size() != 2) return false;
 
 			return true;
@@ -36,21 +41,38 @@ namespace tools {
 
 		bool clock_(const utils::strings& ss)
 		{
+			if(ss[0] == "help") {
+				output("Clock Build: start length\n");
+				return true;
+			}
+
 			return true;
 		}
 
 		bool fill_(const utils::strings& ss)
 		{
+			if(ss[0] == "help") {
+				return true;
+			}
+
 			return true;
 		}
 
 		bool flip_(const utils::strings& ss)
 		{
+			if(ss[0] == "help") {
+				return true;
+			}
+
 			return true;
 		}
 
 		bool copy_(const utils::strings& ss)
 		{
+			if(ss[0] == "help") {
+				return true;
+			}
+
 			return true;
 		}
 
@@ -98,14 +120,26 @@ namespace tools {
 			auto cmd = ss[0];
 
 			bool ret = false;
-///			if(cmd == "help" || cmd == "?") ret = help_(ss);
+			if(cmd == "help") {
+				if(ss.size() == 1) {
+					ss[0] = "help";
+					cur_ch_(ss);
+					clock_(ss);
+					fill_(ss);
+					flip_(ss);
+					copy_(ss);
+				} else if(ss.size() == 2) {
+					cmd = ss[1];
+				}
+			}
+
 			if(cmd == "ch") ret = cur_ch_(ss);
 			else if(cmd == "clock") ret = clock_(ss);
 			else if(cmd == "fill") ret = fill_(ss);
 			else if(cmd == "flip") ret = flip_(ss);
 			else if(cmd == "copy") ret = copy_(ss);
 			else {  // error
-				output("Command error: " + ss[0] + "\n");
+				output("Command error: " + line + "\n");
 			}
 
 			return ret;
