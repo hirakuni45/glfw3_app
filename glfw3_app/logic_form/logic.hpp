@@ -9,6 +9,7 @@
 #include <vector>
 #include <random>
 #include <boost/format.hpp>
+#include <boost/dynamic_bitset.hpp>
 #include "utils/file_io.hpp"
 
 namespace tools {
@@ -222,6 +223,21 @@ namespace tools {
 		//-------------------------------------------------------------//
 		void copy(uint32_t ch, uint32_t org, uint32_t len)
 		{
+			if(len == 0 || size() <= org) return;
+
+			if(size() < (org + len)) { len = size() - org; }
+
+			boost::dynamic_bitset<> bs(len);
+			uint32_t idx = 0;
+			for(uint32_t i = org; i < (org + len); ++i) {
+				bs[idx] = get_logic(ch, i);
+				++idx;
+			}
+			idx = 0;
+			for(uint32_t i = org; i < (org + len); ++i) {
+				set_logic(ch, i, bs[idx]);
+				++idx;
+			}
 		}
 
 
