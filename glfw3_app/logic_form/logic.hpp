@@ -122,22 +122,24 @@ namespace tools {
 		/*!
 			@brief  クロック信号の生成
 			@param[in]	ch	チャネル（０～３１）
-			@param[in]	udu	デューティー分子（１）
-			@param[in]	ddu	デューティー分母（２）
-			@param[in]	ph	フェーズ（分子初期値）
+			@param[in]	org	開始位置
+			@param[in]	len	長さ（０の場合、最大サイズ）
+			@param[in]	lc	"0" カウント
+			@param[in]	hc	"1" カウント
+			@param[in]	inv	反転の場合「true」
 		*/
 		//-------------------------------------------------------------//
-		void build_clock(uint32_t ch, uint32_t udu = 1, uint32_t ddu = 2, uint32_t ph = 0)
+		void build_clock(uint32_t ch, uint32_t org = 0, uint32_t len = 0, uint32_t lc = 1, uint32_t hc = 1, bool inv = false)
 		{
-			uint32_t sum = ph;
-			uint8_t v = 0;
-			for(uint32_t i = 0; i < level_.size(); ++i) {
-				sum += udu;
-				v = sum <= udu ? 0 : 1;
-				set_logic(i, ch, (v & 1));
-				if(sum >= ddu) {
-					sum -= ddu;
-				}
+			if(len == 0) len = size() - org;
+
+			uint32_t lim = lc + hc;
+			uint32_t cnt = 0;
+			for(uint32_t i = org; i < (org + len); ++i) {
+				bool lvl = (cnt % lim) < lc ? 0 : 1;
+				if(inv) lvl = !lvl;
+				set_logic(i, ch, lvl);
+				++cnt;
 			}
 		}
 
