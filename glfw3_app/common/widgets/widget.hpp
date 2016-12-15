@@ -22,7 +22,7 @@ namespace gui {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	namespace any_detail {
-		template<class value_yype> struct dummy_ { static char p; };
+		template<class value_type> struct dummy_ { static char p; };
 		template<class value_type> char dummy_<value_type>::p;
 	}
 	typedef void* type_id;
