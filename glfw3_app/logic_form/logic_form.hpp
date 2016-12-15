@@ -1,3 +1,4 @@
+#pragma once
 //=====================================================================//
 /*! @file
 	@brief  Logic FORM クラス
@@ -17,6 +18,7 @@
 #include "widgets/widget_filer.hpp"
 #include "widgets/widget_utils.hpp"
 #include "logic.hpp"
+#include "logic_edit.hpp"
 
 // #include <boost/format.hpp>
 
@@ -42,7 +44,8 @@ namespace app {
 			gui::widget_null*		tool_;	// ツール関係
 			gui::widget_view*		view_;
 
-			logic					logic_;
+			tools::logic			logic_;
+			tools::logic_edit		logic_edit_;
 
 			vtx::ipos				view_org_;
 			vtx::ipos				view_offset_;
@@ -51,6 +54,7 @@ namespace app {
 			gui::spring_damper		sd_y_;
 
 			project_t() : base_(nullptr), main_(nullptr), tool_(nullptr), view_(nullptr),
+				logic_(), logic_edit_(logic_),
 				view_org_(0), view_offset_(0),
 				sd_x_(), sd_y_()
 				{ }
