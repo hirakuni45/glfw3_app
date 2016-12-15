@@ -11,37 +11,6 @@
 
 namespace gui {
 
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	１文字出力
-		@param[in]	wch	文字
-	*/
-	//-----------------------------------------------------------------//
-	void widget_terminal::output(uint32_t wch)
-	{
-		terminal_.output(wch);
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	テキストの出力
-		@param[in]	text	テキスト
-	*/
-	//-----------------------------------------------------------------//
-	void widget_terminal::output(const std::string& text)
-	{
-		if(text.empty()) return;
-
-		auto ls = utils::utf8_to_utf32(text);
-
-		BOOST_FOREACH(uint32_t ch, ls) {
-			output(ch);
-		}
-	}
-
-
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	初期化
@@ -129,7 +98,15 @@ namespace gui {
 	{
 		if(focus_) {
 			if(param_.echo_) {
-				terminal_.output(wd_.at_keyboard().input());
+				auto s = wd_.at_keyboard().input();
+				terminal_.output(s);
+				if(!s.empty()) {
+					auto ch = terminal_.get_last_char();
+					if(param_.input_func_ != nullptr) param_.input_func_(ch);
+					if(param_.enter_func_ != nullptr && ch == 0x0D) {
+						param_.enter_func_(terminal_.get_last_text32());
+					}
+				}
 			}
 		}
 	}

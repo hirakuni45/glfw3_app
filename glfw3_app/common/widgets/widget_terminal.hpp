@@ -19,6 +19,9 @@ namespace gui {
 
 		typedef widget_terminal value_type;
 
+		typedef std::function< void(uint32_t ch) > input_func_type;
+		typedef std::function< void(const utils::lstring& line) > enter_func_type;
+
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	widget_terminal パラメーター
@@ -32,6 +35,9 @@ namespace gui {
 
 			bool			echo_;			///< キー入力とエコー
 			bool			auto_fit_;	   	///< 等幅フォントに対するフレームの最適化
+
+			input_func_type input_func_;	///< １文字入力毎に呼ぶ関数
+			enter_func_type enter_func_;	///< 「Enter」時に呼ぶ関数
 
 			param() : font_("Inconsolata"), font_width_(0), font_height_(18), height_(18),
 				echo_(true), auto_fit_(true) { }
@@ -70,7 +76,7 @@ namespace gui {
 			@brief	型を取得
 		*/
 		//-----------------------------------------------------------------//
-		type_id type() const { return get_type_id<value_type>(); }
+		type_id type() const override { return get_type_id<value_type>(); }
 
 
 		//-----------------------------------------------------------------//
@@ -79,7 +85,7 @@ namespace gui {
 			@return widget 型の基本名称
 		*/
 		//-----------------------------------------------------------------//
-		const char* type_name() const { return "terminal"; }
+		const char* type_name() const override { return "terminal"; }
 
 
 		//-----------------------------------------------------------------//
@@ -88,7 +94,7 @@ namespace gui {
 			@return ハイブリッド・ウィジェットの場合「true」を返す。
 		*/
 		//-----------------------------------------------------------------//
-		bool hybrid() const { return false; }
+		bool hybrid() const override { return false; }
 
 
 		//-----------------------------------------------------------------//
@@ -124,7 +130,9 @@ namespace gui {
 			@param[in]	wch	文字
 		*/
 		//-----------------------------------------------------------------//
-		void output(uint32_t wch);
+		void output(uint32_t wch) {
+			terminal_.output(wch);
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -133,7 +141,14 @@ namespace gui {
 			@param[in]	text	テキスト
 		*/
 		//-----------------------------------------------------------------//
-		void output(const std::string& text);
+		void output(const std::string& text) {
+			if(text.empty()) return;
+
+			auto ls = utils::utf8_to_utf32(text);
+			for(auto ch : ls) {
+				output(ch);
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -141,7 +156,7 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize();
+		void initialize() override;
 
 
 		//-----------------------------------------------------------------//
@@ -149,7 +164,7 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update();
+		void update() override;
 
 
 		//-----------------------------------------------------------------//
@@ -157,7 +172,7 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service();
+		void service() override;
 
 
 		//-----------------------------------------------------------------//
@@ -165,7 +180,7 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render();
+		void render() override;
 
 
 		//-----------------------------------------------------------------//
@@ -175,7 +190,7 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(sys::preference& pre);
+		bool save(sys::preference& pre) override;
 
 
 		//-----------------------------------------------------------------//
@@ -185,6 +200,6 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre);
+		bool load(const sys::preference& pre) override;
 	};
 }
