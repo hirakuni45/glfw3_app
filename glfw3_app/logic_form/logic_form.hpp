@@ -19,6 +19,7 @@
 #include "widgets/widget_utils.hpp"
 #include "logic.hpp"
 #include "logic_edit.hpp"
+#include "ch4_file.hpp"
 
 // #include <boost/format.hpp>
 
@@ -388,7 +389,7 @@ namespace app {
 			// デバッグ
 //			project_.logic_.create(2048);
 			project_.logic_.create(100);
-			project_.logic_.build_clock(0, 1, 3);
+			project_.logic_.build_clock(0, 0, 0, 1, 2);
 //			project_.logic_.build_clock(0);
 			project_.logic_.build_noise(1);
 			project_.logic_.build_noise(2);
