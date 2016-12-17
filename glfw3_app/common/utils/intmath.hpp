@@ -5,9 +5,7 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include <string>
-#include <bitset>
-#include <boost/unordered_map.hpp>
+#include <cstdint>
 
 namespace utils {
 
@@ -20,6 +18,7 @@ namespace utils {
 
 		// 円周率(3.141592654 * 2^30)
 		static const uint32_t pai_ = 0xC90FDAA2;
+		static const uint32_t pai_shift_ = 30;
 
 		uint32_t rand_base_a_;
 		uint32_t rand_base_b_;
@@ -113,7 +112,7 @@ namespace utils {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	M 系列乱数を発生させる多項式ジェネレーター（32ビット）
+			@brief	M 系列乱数を発生させる多項式ジェネレーター（32ビット）@n
 					※全て「１」を与えるとロックする
 			@param[in]	in	入力値（-1 は構造上ロックするので設定禁止）
 			@param[in]	ta	タップのビットを立てる
@@ -173,33 +172,33 @@ static short randTapTables[] = {
 			return rand_seed_;
 		}
 
-//		static const uint32_t SINCOS_SHIFT = 14;
-//		static const uint32_t ANGLE_SIZE = 1024;
-
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	sin テーブルの生成 @n
+			@brief	1/4 周期の sin テーブルの生成 @n
 					X' = X * COS(s) - Y * SIN(s) @n
 					Y' = X * SIN(s) + Y * COS(s) @n
 					※角度「s」が十分小さい場合、以下のように近似できる。@n
 					COS(s) ≒ 1 @n
 					SIN(s) ≒ s @n
 					X' = X   - Y・s @n
-					Y' = X'・s - Y  @n
+					Y' = X'・s + Y  @n
 					上記の原理を使って、三角関数テーブルを作成する
-			@param[out]	p	テーブルを受け取る配列
-			@param[in]	count	テーブルの大きさ
+			@param[out]	tbl	テーブルを受け取る配列
+			@param[in]	shi	テーブル長に対するシフト数（２＾ｎ）
+			@param[in]	len	腕の長さ（COS(0)に対する値）
 		 */
 		//-----------------------------------------------------------------//
-		void create_sin_tbl(int16_t* p, int count)
+		static void build_sin_tables(int16_t* tbl, uint16_t shi, int16_t len = 0x4000)
 		{
-			int64_t x = 0x0000000040000000;
-			int64_t y = 0x0000000000000000;
-			for(int i = 0; i < count; ++i) {
-				*p++ = y >> 48;
-				x -=  (static_cast<int64_t>(pai_) * y) >> 9;
-				y  = ((static_cast<int64_t>(pai_) * x) >> 9) - y;
+			int16_t gain = 16;  // 精度を確保する為の下駄
+			int64_t x = len << gain;  // cos(0) の値
+			int64_t y = 0;    // sin(0) の値
+			for(uint16_t i = 0; i < (1 << shi); ++i) {
+				*tbl++ = y >> gain;   // pai_ のビット位置補正
+				// 全周は、２・πなので＋１
+				x -= (static_cast<int64_t>(pai_) * y) >> (pai_shift_ + shi + 1);
+				y += (static_cast<int64_t>(pai_) * x) >> (pai_shift_ + shi + 1);
 			}
 		}
 
