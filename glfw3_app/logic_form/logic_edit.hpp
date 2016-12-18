@@ -320,6 +320,7 @@ namespace tools {
 
 			bool ret = false;
 			if(cmd == "help") {
+				ret = true;;
 				if(ss.size() == 1) {
 					ss[0] = "help";
 					cur_ch_(ss);
