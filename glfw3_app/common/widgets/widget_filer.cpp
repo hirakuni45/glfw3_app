@@ -113,6 +113,9 @@ namespace gui {
 					file_ = utils::append_path(param_.path_, filename);
 					++select_file_id_;
 					enable(false);
+					if(param_.select_file_func_ != nullptr) {
+						param_.select_file_func_(file_);
+					}
 				}
 			};
 
