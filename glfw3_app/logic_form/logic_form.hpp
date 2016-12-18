@@ -17,9 +17,12 @@
 #include "widgets/widget_terminal.hpp"
 #include "widgets/widget_filer.hpp"
 #include "widgets/widget_utils.hpp"
+#include "widgets/spring_damper.hpp"
 #include "logic.hpp"
 #include "logic_edit.hpp"
 #include "ch4_file.hpp"
+
+#include "utils/intmath.hpp"
 
 // #include <boost/format.hpp>
 
