@@ -66,6 +66,14 @@ namespace gui {
 				}
 			} else {
 				position_ += scr;
+				if(position_ > 0.0f) {
+					position_ = 0.0f;
+					speed_ = 0.0f;
+				} else if(position_ < lim) {
+					position_ = lim;
+					speed_ = 0.0f;
+				}
+
 				position_ += speed_;
 				speed_ *= speed_gain_;
 				if(-0.5f < speed_ && speed_ < 0.5f) speed_ = 0.0f; 
