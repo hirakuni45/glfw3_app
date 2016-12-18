@@ -16,6 +16,11 @@ namespace gui {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class spring_damper {
 
+		static constexpr float slip_gain_  = 0.5f;
+		static constexpr float damping_    = 0.85f;
+		static constexpr float speed_gain_ = 0.95f;	 ///< 速度の減衰
+		static constexpr float acc_gain_   = 0.15f;  ///< ドラッグを離した時の加速度ゲイン
+
 		float	position_;
 		float	offset_;
 		float	speed_;
@@ -43,58 +48,41 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		int32_t update(bool select_in, bool select, int32_t pos, int32_t scr, int32_t limit, int32_t drag)
 		{
-			if(select_in) {
+			if(select_in) {  // 選択開始時
 				speed_ = 0.0f;
 				offset_ = static_cast<float>(pos);
 			}
-			float damping = 0.85f;
-			float slip_gain = 0.5f;
-			float d = static_cast<float>(limit - pos);
-			if(select) {
-				position_ = offset_ + static_cast<float>(drag);
-				if(d < 0.0f) {
-					if(position_ < d) {
-						position_ -= d;
-						position_ *= slip_gain;
-						position_ += d;
-					} else if(position_ > 0.0f) {
-						position_ *= slip_gain;
-					}
-				} else {
-					position_ *= slip_gain;
+			float lim = static_cast<float>(limit);
+			if(select) {  // 選択中の挙動
+				speed_ = static_cast<float>(drag);
+				position_ = offset_ + speed_;
+				speed_ *= acc_gain_;  // 加速度の調整
+				if(position_ > 0.0f) {
+					position_ *= slip_gain_;
+				} else if(position_ < lim) {
+					position_ -= lim;
+					position_ *= slip_gain_;
+					position_ += lim;
 				}
 			} else {
-				if(d < 0.0f) {
-					if(position_ < d) {
-						position_ -= d;
-						position_ *= damping;
-						position_ += d;
-						speed_ = 0.0f;
-///						if(position_ >= limit) {
-							position_ = limit;
-///						}
-					} else if(position_ >= 0.0f) {
-						position_ *= damping;
-						speed_ = 0.0f;
-						if(position_ < 0.5f) {
-							position_ = 0.0f;
-						}
-					} else {
-						if(scr != 0) {
-							position_ += static_cast<float>(scr);
-							if(position_ < d) {
-								position_ = d;
-							} else if(position_ > 0.0f) {
-								position_ = 0.0f;
-							}
-						}
+				position_ += speed_;
+				speed_ *= speed_gain_;
+				if(-0.5f < speed_ && speed_ < 0.5f) speed_ = 0.0f; 
+
+				if(position_ > 0.0f) {
+					speed_ = 0.0f;
+					position_ *= damping_;
+					if(position_ < 1.0f) {
+						position_ = 0.0f;
 					}
-				} else {
-///					position_ *= damping;
-///					if(-0.5f < position_ && position_ < 0.5f) {
-///						position_ = 0.0f;
-///						speed_ = 0.0f;
-///					}
+				} else if(position_ < lim) {
+					speed_ = 0.0f;
+					position_ -= lim;
+					position_ *= damping_;
+					position_ += lim;
+					if(position_ > (lim - 1.0f)) {
+						position_ = lim;
+					}
 				}
 			}
 			return static_cast<int32_t>(position_);
