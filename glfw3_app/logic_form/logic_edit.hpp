@@ -32,11 +32,29 @@ namespace tools {
 		static const uint32_t ch_limit_ = 24;		///< チャネルの最大値
 		static const uint32_t pos_limit_ = 2046;	///< 波形位置の最大値
 
+		// 10進、又は１６進数の変換、「-1」はエラー
+		int32_t get_value_(const std::string& s)
+		{
+			if(s.find("0x") == 0 || s.find("0X") == 0) {
+				try {
+					return std::stoi(s, nullptr, 16);
+				} catch(const std::invalid_argument& er) {
+					return -1;
+				}
+			}
+			try {
+				return std::stoi(s);
+			} catch(const std::invalid_argument& er) {
+				return -1;
+			}
+		}
+
+
 		int32_t get_dec_(uint32_t idx, const utils::strings& ss)
 		{
 			int32_t val = -1;
 			if(idx < ss.size() && ss.size() >= (idx + 1)) {
-				val = std::stoi(ss[idx]);
+				val = get_value_(ss[idx]);
 				if(val >= 0 && val < pos_limit_) {
 				} else {
 					val = -1;
@@ -50,7 +68,7 @@ namespace tools {
 		bool cur_ch_(const utils::strings& ss)
 		{
 			if(ss[0] == "help") {
-				output("Current Chanel: [chanel-no]\n");
+				output("chanel [chanel-no]\n");
 				return true;
 			}
 
@@ -59,7 +77,7 @@ namespace tools {
 				bus_enable_ = false;
 				return true;
 			} else if(ss.size() == 2) {
-				auto n = std::stoi(ss[1]);
+				auto n = get_value_(ss[1]);
 				if(n >= 0 && n < ch_limit_) {
 					ch_ = n;
 					bus_enable_ = false;
@@ -75,7 +93,7 @@ namespace tools {
 		bool cur_bus_(const utils::strings& ss)
 		{
 			if(ss[0] == "help") {
-				output("Current Bus Config: [chanel-no] ... (LSB ... MSB)\n");
+				output("bus [chanel-no] ... (LSB ... MSB)\n");
 				return true;
 			}
 
@@ -91,7 +109,7 @@ namespace tools {
 			} else {
 				bus_.clear();
 				for(uint32_t i = 1; i < ss.size(); ++i) {
-					auto ch = std::stoi(ss[i]);
+					auto ch = get_value_(ss[i]);
 					if(ch >= 0 && ch < ch_limit_) {
 						bus_.push_back(ch);
 					} else {
@@ -110,7 +128,7 @@ namespace tools {
 		bool set_(const utils::strings& ss)
 		{
 			if(ss[0] == "help") {
-				output("Set value: position [level = 1]\n");
+				output("set [level = 1]\n");
 				return true;
 			}
 
@@ -124,7 +142,7 @@ namespace tools {
 				limit = (1 << bus_.size()) - 1;
 			}
 			if(ss.size() >= 3) {
-				lvl = std::stoi(ss[2]);
+				lvl = get_value_(ss[2]);
 				if(lvl >= 0 && lvl <= limit) {
 				} else {
 					return false;
@@ -148,7 +166,7 @@ namespace tools {
 		bool clock_(const utils::strings& ss)
 		{
 			if(ss[0] == "help") {
-				output("Build Clock: start-position length [low-count=1] [high-count=1]\n");
+				output("clock start-position length [low-count=1] [high-count=1]\n");
 				return true;
 			}
 
@@ -160,7 +178,7 @@ namespace tools {
 
 			int32_t lc = 1;
 			if(ss.size() >= 4) {
-				lc = std::stoi(ss[3]);
+				lc = get_value_(ss[3]);
 				if(lc >= 0) {
 				} else {
 					return false;
@@ -169,7 +187,7 @@ namespace tools {
 
 			int32_t hc = 1;
 			if(ss.size() >= 5) {
-				hc = std::stoi(ss[4]);
+				hc = get_value_(ss[4]);
 				if(hc >= 0) {
 				} else {
 					return false;
@@ -186,7 +204,7 @@ namespace tools {
 		bool fill_(const utils::strings& ss)
 		{
 			if(ss[0] == "help") {
-				output("Fill logic level: start-position length [level=1]\n");
+				output("fill start-position length [level=1]\n");
 				return true;
 			}
 
@@ -196,16 +214,28 @@ namespace tools {
 			auto len = get_dec_(2, ss);
 			if(len < 0) return false;
 
-			int32_t lvl = 1;
+			int lvl = 1;
+			int limit = 1;
+			if(bus_enable_) {
+				lvl = limit = (1 << bus_.size()) - 1;
+			}
 			if(ss.size() >= 4) {
-				lvl = std::stoi(ss[3]);
-				if(lvl >= 0 && lvl <= 1) {
+				lvl = get_value_(ss[3]);
+				if(lvl >= 0 && lvl <= limit) {
 				} else {
 					return false;
 				}
 			}
 
-			logic_.fill(ch_, pos, len, lvl);
+			if(bus_enable_) {
+				uint32_t idx = 0;
+				for(auto ch : bus_) {
+					logic_.fill(ch, pos, (lvl >> idx) & 1);
+					++idx;
+				}
+			} else {
+				logic_.fill(ch_, pos, len, lvl & 1);
+			}
 
 			return true;
 		}
@@ -214,7 +244,7 @@ namespace tools {
 		bool flip_(const utils::strings& ss)
 		{
 			if(ss[0] == "help") {
-				output("Flip logic level: start-position length\n");
+				output("flip start-position length\n");
 				return true;
 			}
 
@@ -224,7 +254,13 @@ namespace tools {
 			auto len = get_dec_(2, ss);
 			if(len < 0) return false;
 
-			logic_.flip(ch_, pos, len);
+			if(bus_enable_) {
+				for(auto ch : bus_) {
+					logic_.flip(ch, pos, len);
+				}
+			} else {
+				logic_.flip(ch_, pos, len);
+			}
 
 			return true;
 		}
@@ -234,7 +270,7 @@ namespace tools {
 		bool copy_(const utils::strings& ss)
 		{
 			if(ss[0] == "help") {
-				output("Copy logic level: src-position length dst-position\n");
+				output("copy src-position length dst-position\n");
 				return true;
 			}
 
@@ -249,6 +285,8 @@ namespace tools {
 
 
 
+
+
 			return true;
 		}
 
@@ -257,9 +295,11 @@ namespace tools {
 		bool copy_chanel_(const utils::strings& ss)
 		{
 			if(ss[0] == "help") {
-				output("Copy chanel: dst-chanel [src-position] [src-length]\n");
+				output("copy-chanel dst-chanel [src-position] [src-length]\n");
 				return true;
 			}
+
+			if(bus_enable_) return false;  // バスモードの場合は、エラー
 
 			auto dst_ch = get_dec_(1, ss);
 			if(dst_ch < 0) return false;
@@ -321,8 +361,8 @@ namespace tools {
 			bool ret = false;
 			if(cmd == "help") {
 				ret = true;;
+				ss[0] = "help";
 				if(ss.size() == 1) {
-					ss[0] = "help";
 					cur_ch_(ss);
 					cur_bus_(ss);
 					set_(ss);
@@ -343,7 +383,7 @@ namespace tools {
 			else if(cmd == "fill") ret = fill_(ss);
 			else if(cmd == "flip") ret = flip_(ss);
 			else if(cmd == "copy") ret = copy_(ss);
-			else if(cmd == "copy_chanel") ret = copy_chanel_(ss);
+			else if(cmd == "copy-chanel") ret = copy_chanel_(ss);
 
 			if(!ret) {  // error
 				output("Command error: " + line + "\n");

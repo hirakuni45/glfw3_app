@@ -169,7 +169,11 @@ namespace app {
 			auto w = t.view_;
 			auto in = w->get_select_in();
 			auto sel = w->get_select();
-			vtx::ipos scr(0);
+			using namespace gui;
+			widget_director& wd = director_.at().widget_director_;
+			vtx::ipos scr = wd.get_scroll();
+			scr.x *= logic_step_ >> 1;
+			scr.y *= pin_h_ >> 1;
 			vtx::ipos limit;
 			auto r = t.base_->get_draw_area();
 			r.size.y -= logic_tool_height_;
