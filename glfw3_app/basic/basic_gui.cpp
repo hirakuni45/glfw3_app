@@ -102,8 +102,8 @@ namespace app {
 #endif
 
 		if(terminal_core_ != nullptr) {
-			const auto& ch = terminal_core_->at_terminal().get_last_char();
-			if(ch.cha_ != last_ && ch.cha_ == '\r') {
+			const auto ch = terminal_core_->at_terminal().get_last_char();
+			if(ch != last_ && ch == '\r') {
 				auto t = terminal_core_->at_terminal().get_last_text();
 
 				basic_.service(t.c_str());
@@ -119,7 +119,7 @@ namespace app {
 				);
 #endif
 			}
-			last_ = ch.cha_;
+			last_ = ch;
 		}		
 
 		wd.update();
