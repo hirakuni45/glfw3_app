@@ -390,6 +390,8 @@ namespace tools {
 						} else {
 							return false;
 						}				
+					} else {
+						return false;
 					}
 					break;
 				case decode_func::ch:
@@ -402,6 +404,8 @@ namespace tools {
 						} else {
 							return false;
 						}
+					} else {
+						return false;
 					}
 					break;
 				case decode_func::stream:
