@@ -16,6 +16,7 @@
 #include "widgets/widget_button.hpp"
 #include "widgets/widget_terminal.hpp"
 #include "widgets/widget_filer.hpp"
+#include "widgets/widget_dialog.hpp"
 #include "widgets/widget_utils.hpp"
 #include "widgets/spring_damper.hpp"
 #include "logic.hpp"
@@ -40,6 +41,8 @@ namespace app {
 		gui::widget_frame*		menu_;
 		gui::widget_button*		load_;
 		gui::widget_button*		save_;
+		gui::widget_button*		export_;
+		bool					export_on_;
 
 		// プロジェクト管理
 		struct project_t {
@@ -83,6 +86,8 @@ namespace app {
 
 		gui::widget_filer*		load_ctx_;
 		gui::widget_filer*		save_ctx_;
+
+		gui::widget_dialog*		dialog_;
 
 		static const int pin_n_ = 30;
 		static const int pin_w_ = 30;
@@ -171,9 +176,12 @@ namespace app {
 			auto sel = w->get_select();
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
-			vtx::ipos scr = wd.get_scroll();
-			scr.x *= logic_step_ >> 1;
-			scr.y *= pin_h_ >> 1;
+			vtx::ipos scr(0);
+			if(w->get_focus() && wd.root_widget(wd.get_top_widget()) == project_.base_) {
+				scr = wd.get_scroll();
+				scr.x *= logic_step_ >> 1;
+				scr.y *= pin_h_ >> 1;
+			}
 			vtx::ipos limit;
 			auto r = t.base_->get_draw_area();
 			r.size.y -= logic_tool_height_;
@@ -295,10 +303,11 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		logic_form(utils::director<core>& d) : director_(d),
-			menu_(nullptr), load_(nullptr), save_(nullptr),
+			menu_(nullptr), load_(nullptr), save_(nullptr), export_(nullptr), export_on_(false),
 			project_(),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
-			load_ctx_(nullptr), save_ctx_(nullptr)
+			load_ctx_(nullptr), save_ctx_(nullptr),
+			dialog_(nullptr)
 		{ }
 
 
@@ -322,22 +331,54 @@ namespace app {
 			gl::core& core = gl::core::get_instance();
 
 			{	// メニューパレット
-				widget::param wp(vtx::irect(20, 20, 200, 300));
+				widget::param wp(vtx::irect(20, 20, 110, 300));
 				widget_frame::param wp_;
 				wp_.plate_param_.set_caption(12);
 				menu_ = wd.add_widget<widget_frame>(wp, wp_);
 				menu_->set_state(gui::widget::state::SIZE_LOCK);
 			}
 			{ // ロード起動ボタン
-				widget::param wp(vtx::irect(10, 20+40*0, 80, 30), menu_);
+				widget::param wp(vtx::irect(10, 20+40*0, 90, 30), menu_);
 				widget_button::param wp_("load");
+				wp_.select_func_ = [this]() {
+					if(load_ctx_) {
+						bool f = load_ctx_->get_state(gui::widget::state::ENABLE);
+						load_ctx_->enable(!f);
+						save_->set_stall(!f);
+						export_->set_stall(!f);
+					}
+				};
 				load_ = wd.add_widget<widget_button>(wp, wp_);
 			}
 			{ // セーブ起動ボタン
-				widget::param wp(vtx::irect(10, 20+40*1, 80, 30), menu_);
+				widget::param wp(vtx::irect(10, 20+40*1, 90, 30), menu_);
 				widget_button::param wp_("save");
+				wp_.select_func_ = [this]() {
+					if(save_ctx_) {
+						export_on_ = false;
+						bool f = save_ctx_->get_state(gui::widget::state::ENABLE);
+						save_ctx_->enable(!f);
+						load_->set_stall(!f);
+						export_->set_stall(!f);
+					}
+				};
 				save_ = wd.add_widget<widget_button>(wp, wp_);
 			}
+			{ // エキスポート起動ボタン
+				widget::param wp(vtx::irect(10, 20+40*2, 90, 30), menu_);
+				widget_button::param wp_("export");
+				wp_.select_func_ = [this]() {
+					if(save_ctx_) {
+						export_on_ = true;
+						bool f = save_ctx_->get_state(gui::widget::state::ENABLE);
+						save_ctx_->enable(!f);
+						load_->set_stall(!f);
+						save_->set_stall(!f);
+					}
+				};
+				export_ = wd.add_widget<widget_button>(wp, wp_);
+			}
+
 
 			create_project_(project_, 200, 100);
 
@@ -368,8 +409,13 @@ namespace app {
 				widget::param wp(vtx::irect(10, 30, 300, 200));
 				widget_filer::param wp_(core.get_current_path());
 				wp_.select_file_func_ = [this](const std::string& path) {
-					project_.logic_.load(path);
+					bool f = project_.logic_.load(path);
 					save_->set_stall(false);
+					export_->set_stall(false);
+					if(!f) {  // load error
+						dialog_->set_text("Load error:\n" + path);
+						dialog_->enable();
+					}
 				};
 				load_ctx_ = wd.add_widget<widget_filer>(wp, wp_);
 				load_ctx_->enable(false);
@@ -378,12 +424,30 @@ namespace app {
 				widget::param wp(vtx::irect(10, 30, 300, 200));
 				widget_filer::param wp_(core.get_current_path());
 				wp_.select_file_func_ = [this](const std::string& path) {
-					project_.logic_.save(path);
+					bool f = false;
+					if(export_on_) {
+
+					} else {
+						f = project_.logic_.save(path);
+					}
 					load_->set_stall(false);
+					export_->set_stall(false);
+					if(!f) {  // save error
+						dialog_->set_text("Save/Export error:\n" + path);
+						dialog_->enable();
+					}
 				};
 				wp_.new_file_ = true;
 				save_ctx_ = wd.add_widget<widget_filer>(wp, wp_);
 				save_ctx_->enable(false);
+			}
+
+			{ // ダイアログ
+				widget::param wp(vtx::irect(100, 100, 400, 150));
+				widget_dialog::param wp_;
+				wp_.style_ = widget_dialog::param::style::OK;
+				dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
+				dialog_->enable(false);
 			}
 
 			// プリファレンスの取得
@@ -403,11 +467,11 @@ namespace app {
 
 			// デバッグ
 //			project_.logic_.create(2048);
-			project_.logic_.create(100);
-			project_.logic_.build_clock(0, 0, 0, 1, 2);
+///			project_.logic_.create(100);
+///			project_.logic_.build_clock(0, 0, 0, 1, 2);
 //			project_.logic_.build_clock(0);
-			project_.logic_.build_noise(1);
-			project_.logic_.build_noise(2);
+///			project_.logic_.build_noise(1);
+///			project_.logic_.build_noise(2);
 		}
 
 
@@ -419,27 +483,6 @@ namespace app {
 		void update()
 		{
 			gui::widget_director& wd = director_.at().widget_director_;
-
-			if(load_ != nullptr) {
-				if(load_->get_selected()) {
-					if(load_ctx_) {
-						bool f = load_ctx_->get_state(gui::widget::state::ENABLE);
-						load_ctx_->enable(!f);
-						save_->set_stall(!f);
-					}
-				}
-			}
-
-			if(save_ != nullptr) {
-				if(save_->get_selected()) {
-					if(save_ctx_) {
-						bool f = save_ctx_->get_state(gui::widget::state::ENABLE);
-						save_ctx_->enable(!f);
-						load_->set_stall(!f);
-					}
-				}
-			}
-
 			wd.update();
 		}
 
