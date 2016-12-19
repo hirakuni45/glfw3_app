@@ -10,6 +10,7 @@
 #include <random>
 #include <boost/format.hpp>
 #include <boost/dynamic_bitset.hpp>
+#include <boost/optional.hpp>
 #include "utils/file_io.hpp"
 
 namespace tools {
@@ -24,6 +25,17 @@ namespace tools {
 		std::vector<uint32_t>	level_;
 
 		std::mt19937	noise_;
+
+		// 10進変換
+		typedef boost::optional<int32_t> decimal;
+		decimal get_decimal_(const std::string& s)
+		{
+			try {
+				return decimal(std::stoi(s));
+			} catch(const std::invalid_argument& er) {
+				return decimal();
+			}
+		}
 
 	public:
 		//-------------------------------------------------------------//
@@ -101,6 +113,22 @@ namespace tools {
 
 			if(value) level_[wpos] |= (1 << ch);
 			else level_[wpos] &= ~(1 << ch);
+		}
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief  １のビットを数える
+			@param[in]	ch		チャネル（０～３１）
+			@return 数
+		*/
+		//-------------------------------------------------------------//
+		uint32_t count1(uint32_t ch) const {
+			uint32_t n = 0;
+			for(uint32_t i = 0; i < size(); ++i) {
+				if(get_logic(ch, i)) ++n;
+			}
+			return n;
 		}
 
 
@@ -263,13 +291,41 @@ namespace tools {
 
 		//-------------------------------------------------------------//
 		/*!
-			@brief  標準フォーマットでセーブ
+			@brief  チャネルのセーブ
+			@param[in]	name	ファイル名
+			@return エラー無ければ「true」
+		*/
+		//-------------------------------------------------------------//
+		bool save(utils::file_io& fio, uint32_t ch)
+		{
+			fio.put((boost::format("# CH %d\n") % ch).str());
+			fio.put("CH:" + std::to_string(ch) + "\n");
+			uint32_t cn = 0;
+			for(uint32_t i = 0; i < size(); ++i) {
+				auto l = get_logic(ch, i);
+				if(l) fio.put_char('1'); else fio.put_char('0');
+				++cn;
+				if(cn >= 64) {
+					cn = 0;
+					fio.put_char('\n');
+				}
+			}
+			fio.put(";\n");
+			return !fio.error();
+		}
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief  セーブ
 			@param[in]	name	ファイル名
 			@return エラー無ければ「true」
 		*/
 		//-------------------------------------------------------------//
 		bool save(const std::string& name)
 		{
+//			std::cout << name << std::endl;
+
 			if(level_.empty()) return false;
 
 			utils::file_io fio;
@@ -277,9 +333,15 @@ namespace tools {
 				return false;
 			}
 
-			for(auto v : level_) {
-				auto s = (boost::format("%08X\n") % v).str();
-				fio.put(s);
+			fio.put((boost::format("# Logic stream %d\n") % size()).str());
+			fio.put("NUM:" + std::to_string(size()) + "\n\n");			
+
+			for(uint32_t ch = 0; ch < 32; ++ch) {
+				if(count1(ch) == 0) continue;
+				if(!save(fio, ch)) {
+					fio.close();
+					return false;
+				}
 			}
 
 			fio.close();
@@ -290,14 +352,78 @@ namespace tools {
 
 		//-------------------------------------------------------------//
 		/*!
-			@brief  標準フォーマットでロード
+			@brief  ロード
 			@param[in]	name	ファイル名
 			@return エラー無ければ「true」
 		*/
 		//-------------------------------------------------------------//
 		bool load(const std::string& name)
 		{
+			utils::file_io fio;
+			if(!fio.open(name, "rb")) {
+				return false;
+			}
 
+			clear();
+
+			uint32_t lno = 1;
+			enum class decode_func {
+				none,
+				num,
+				ch,
+				stream
+			};
+			decode_func func = decode_func::num;
+			uint32_t cch = 0;
+			uint32_t pos = 0;
+			while(!fio.eof()) {
+				auto s = fio.get_line();
+				if(s.empty()) continue;
+				if(s[0] == '#') continue;
+				switch(func) {
+				case decode_func::num:
+					if(s.find("NUM:") != std::string::npos) {
+						auto num = get_decimal_(&s[4]);
+						if(num) {
+							create(*num);
+							func = decode_func::ch;
+						} else {
+							return false;
+						}				
+					}
+					break;
+				case decode_func::ch:
+					if(s.find("CH:") != std::string::npos) {
+						auto ch = get_decimal_(&s[3]);
+						if(ch) {
+							cch = *ch;
+							pos = 0;
+							func = decode_func::stream;
+						} else {
+							return false;
+						}
+					}
+					break;
+				case decode_func::stream:
+					for(auto c : s) {
+						if(c == '0') set_logic(cch, pos, false);
+						else if(c == '1') set_logic(cch, pos, true);
+						else if(c ==';') {
+							func = decode_func::ch;
+						} else {
+							return false;
+						}
+						++pos;
+					}
+					break;
+				default:
+					break;
+				}
+
+				++lno;
+			}
+
+			fio.close();
 
 			return true;
 		}

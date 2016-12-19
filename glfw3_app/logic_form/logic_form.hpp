@@ -367,12 +367,20 @@ namespace app {
 			{ // load ファイラー本体
 				widget::param wp(vtx::irect(10, 30, 300, 200));
 				widget_filer::param wp_(core.get_current_path());
+				wp_.select_file_func_ = [this](const std::string& path) {
+					project_.logic_.load(path);
+					save_->set_stall(false);
+				};
 				load_ctx_ = wd.add_widget<widget_filer>(wp, wp_);
 				load_ctx_->enable(false);
 			}
 			{ // save ファイラー本体
 				widget::param wp(vtx::irect(10, 30, 300, 200));
 				widget_filer::param wp_(core.get_current_path());
+				wp_.select_file_func_ = [this](const std::string& path) {
+					project_.logic_.save(path);
+					load_->set_stall(false);
+				};
 				wp_.new_file_ = true;
 				save_ctx_ = wd.add_widget<widget_filer>(wp, wp_);
 				save_ctx_->enable(false);
