@@ -151,34 +151,6 @@ namespace gui {
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	ウィジェットの許可、不許可
-		@param[in]	root	ウィジェット
-		@param[in]	flag	不許可なら「false」
-		@param[in]	child	子も不許可にする場合「true」
-	*/
-	//-----------------------------------------------------------------//
-	void widget_director::enable(widget* root, bool flag, bool child)
-	{
-		if(root == 0) return;
-
-		if(!root->get_param().state_[widget::state::ENABLE] && flag) {
-			set_focus_widget(root);
-		}
-		root->at_param().state_[widget::state::ENABLE] = flag;
-		if(!child) {
-			return;
-		}
-
-		widgets ws;
-		parents_widget(root, ws);
-		for(auto w : ws) {
-			w->at_param().state_[widget::state::ENABLE] = flag;
-		}
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
 		@brief	ウィジェットの削除
 		@param[in]	w	ウィジェット
 	*/

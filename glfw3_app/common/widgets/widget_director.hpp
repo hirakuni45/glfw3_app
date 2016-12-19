@@ -187,7 +187,49 @@ namespace gui {
 			@param[in]	child	子も不許可にする場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		void enable(widget* root, bool flag = true, bool child = false);
+		void enable(widget* root, bool flag = true, bool child = false)
+		{
+			if(root == nullptr) return;
+
+			if(!root->get_param().state_[widget::state::ENABLE] && flag) {
+				set_focus_widget(root);
+			}
+			root->at_param().state_[widget::state::ENABLE] = flag;
+			if(!child) {
+				return;
+			}
+
+			widgets ws;
+			parents_widget(root, ws);
+			for(auto w : ws) {
+				w->at_param().state_[widget::state::ENABLE] = flag;
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ウィジェットのストール設定
+			@param[in]	root	ウィジェット
+			@param[in]	flag	不許可なら「false」
+			@param[in]	child	子も不許可にする場合「true」
+		*/
+		//-----------------------------------------------------------------//
+		void stall(widget* root, bool flag = true, bool child = false)
+		{
+			if(root == nullptr) return;
+
+			root->set_stall(flag);
+			if(!child) {
+				return;
+			}
+
+			widgets ws;
+			parents_widget(root, ws);
+			for(auto w : ws) {
+				w->set_stall(flag);
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
