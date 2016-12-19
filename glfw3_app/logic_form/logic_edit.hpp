@@ -124,6 +124,37 @@ namespace tools {
 		}
 
 
+		// クリア
+		bool clear_(const utils::strings& ss)
+		{
+			if(ss[0] == "help") {
+				output("clear\n");
+				return true;
+			}
+
+			logic_.clear();
+
+			return true;
+		}
+
+
+		// クリエイト
+		bool create_(const utils::strings& ss)
+		{
+			if(ss[0] == "help") {
+				output("create size\n");
+				return true;
+			}
+
+			auto size = get_dec_(1, ss);
+			if(size < 0 || size > 2046) return false;
+
+			logic_.create(size);
+
+			return true;
+		}
+
+
 		// 値設定
 		bool set_(const utils::strings& ss)
 		{
@@ -365,6 +396,8 @@ namespace tools {
 				if(ss.size() == 1) {
 					cur_ch_(ss);
 					cur_bus_(ss);
+					clear_(ss);
+					create_(ss);
 					set_(ss);
 					clock_(ss);
 					fill_(ss);
@@ -378,6 +411,8 @@ namespace tools {
 
 			if(cmd == "ch") ret = cur_ch_(ss);
 			else if(cmd == "bus") ret = cur_bus_(ss);
+			else if(cmd == "clear") ret = clear_(ss);
+			else if(cmd == "create") ret = create_(ss);
 			else if(cmd == "set") ret = set_(ss);
 			else if(cmd == "clock") ret = clock_(ss);
 			else if(cmd == "fill") ret = fill_(ss);
