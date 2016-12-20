@@ -64,6 +64,27 @@ namespace tools {
 		}
 
 
+		// ステータス
+		bool status_(const utils::strings& ss)
+		{
+			if(ss[0] == "help") {
+				output("status\n");
+				return true;
+			}
+
+			output("Size: " + std::to_string(logic_.size()) + "\n");
+
+			for(uint32_t i = 0; i < 24; ++i) {
+				auto n = logic_.count1(i);
+				if(n == 0) continue;
+				output("CH" + std::to_string(i) + ": "
+					+ std::to_string(n) + "/" + std::to_string(logic_.size()) + "\n");
+			}
+
+			return true;
+		}
+
+
 		// カレント・チャネル
 		bool cur_ch_(const utils::strings& ss)
 		{
@@ -394,6 +415,7 @@ namespace tools {
 				ret = true;;
 				ss[0] = "help";
 				if(ss.size() == 1) {
+					status_(ss);
 					cur_ch_(ss);
 					cur_bus_(ss);
 					clear_(ss);
@@ -409,7 +431,8 @@ namespace tools {
 				}
 			}
 
-			if(cmd == "ch") ret = cur_ch_(ss);
+			if(cmd == "status") ret = status_(ss);
+			else if(cmd == "ch") ret = cur_ch_(ss);
 			else if(cmd == "bus") ret = cur_bus_(ss);
 			else if(cmd == "clear") ret = clear_(ss);
 			else if(cmd == "create") ret = create_(ss);
