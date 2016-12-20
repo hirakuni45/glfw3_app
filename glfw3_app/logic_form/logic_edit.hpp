@@ -50,10 +50,24 @@ namespace tools {
 		}
 
 
-		int32_t get_dec_(uint32_t idx, const utils::strings& ss)
+		int32_t get_pos_(uint32_t idx, const utils::strings& ss)
 		{
 			int32_t val = -1;
-			if(idx < ss.size() && ss.size() >= (idx + 1)) {
+			if(idx < ss.size()) {
+				val = get_value_(ss[idx]);
+				if(val >= 0 && val < pos_limit_) {
+				} else {
+					val = -1;
+				}				
+			}
+			return val;
+		}
+
+
+		int32_t get_len_(uint32_t idx, const utils::strings& ss)
+		{
+			int32_t val = -1;
+			if(idx < ss.size()) {
 				val = get_value_(ss[idx]);
 				if(val >= 0 && val < pos_limit_) {
 				} else {
@@ -167,8 +181,8 @@ namespace tools {
 				return true;
 			}
 
-			auto size = get_dec_(1, ss);
-			if(size < 0 || size > 2046) return false;
+			auto size = get_pos_(1, ss);
+			if(size < 0) return false;
 
 			logic_.create(size);
 
@@ -176,16 +190,30 @@ namespace tools {
 		}
 
 
+		void set_value_(uint32_t pos, uint32_t value)
+		{
+			if(bus_enable_) {
+				uint32_t idx = 0;
+				for(auto ch : bus_) {
+					logic_.set_logic(ch, pos, (value >> idx) & 1);
+					++idx;
+				}
+			} else {
+				logic_.set_logic(ch_, pos, value);
+			}
+		}
+
+
 		// 値設定
 		bool set_(const utils::strings& ss)
 		{
 			if(ss[0] == "help") {
-				output("set [Value = 1]\n");
+				output("set [Value] ...\n");
 				return true;
 			}
 
-			auto pos = get_dec_(1, ss);
-			if(pos < 0) return false;
+			auto pos = get_pos_(1, ss);
+			if(pos < 0 || pos >= logic_.size()) return false;
 
 			int lvl = 1;
 			int limit = 1;
@@ -193,22 +221,39 @@ namespace tools {
 				lvl = 0;
 				limit = (1 << bus_.size()) - 1;
 			}
-			if(ss.size() >= 3) {
-				lvl = get_value_(ss[2]);
-				if(lvl >= 0 && lvl <= limit) {
-				} else {
-					return false;
-				}
+
+			if(ss.size() <= 2) {
+				set_value_(pos, lvl);
+				return true;
 			}
 
-			if(bus_enable_) {
-				uint32_t idx = 0;
-				for(auto ch : bus_) {
-					logic_.set_logic(ch, pos, (lvl >> idx) & 1);
-					++idx;
+			for(uint32_t i = 2; i < ss.size(); ++i) {
+				auto s = ss[i];
+				if(s.front() == '"' && s.back() == '"') {
+					if(bus_enable_) {
+						return false;
+					}
+					for(auto ch : s) {
+						if(ch == '0') {
+							logic_.set_logic(ch_, pos, 0);
+							++pos;
+						} else if(ch == '1') {
+							logic_.set_logic(ch_, pos, 1);
+							++pos;
+						} else if(ch == '"') {
+						} else {
+							return false;
+						}
+					}
+				} else {
+					int32_t lvl = get_value_(s);
+					if(lvl >= 0 && lvl <= limit) {
+					} else {
+						return false;
+					}
+					set_value_(pos, lvl);
+					++pos;
 				}
-			} else {
-				logic_.set_logic(ch_, pos, lvl & 1);
 			}
 			return true;
 		}
@@ -222,10 +267,10 @@ namespace tools {
 				return true;
 			}
 
-			auto pos = get_dec_(1, ss);
+			auto pos = get_pos_(1, ss);
 			if(pos < 0) return false;
 
-			auto len = get_dec_(2, ss);
+			auto len = get_len_(2, ss);
 			if(len < 0) return false;
 
 			int32_t lc = 1;
@@ -260,10 +305,10 @@ namespace tools {
 				return true;
 			}
 
-			auto pos = get_dec_(1, ss);
+			auto pos = get_pos_(1, ss);
 			if(pos < 0) return false;
 
-			auto len = get_dec_(2, ss);
+			auto len = get_len_(2, ss);
 			if(len < 0) return false;
 
 			int lvl = 1;
@@ -300,10 +345,10 @@ namespace tools {
 				return true;
 			}
 
-			auto pos = get_dec_(1, ss);
+			auto pos = get_pos_(1, ss);
 			if(pos < 0) return false;
 
-			auto len = get_dec_(2, ss);
+			auto len = get_len_(2, ss);
 			if(len < 0) return false;
 
 			if(bus_enable_) {
@@ -326,13 +371,13 @@ namespace tools {
 				return true;
 			}
 
-			auto src = get_dec_(1, ss);
+			auto src = get_pos_(1, ss);
 			if(src < 0 || src >= logic_.size()) return false;
 
-			auto len = get_dec_(2, ss);
+			auto len = get_len_(2, ss);
 			if(len < 0) return false;
 
-			auto dst = get_dec_(3, ss);
+			auto dst = get_pos_(3, ss);
 			if(dst < 0 && dst >= logic_.size()) return false;
 
 			if(bus_enable_) {
@@ -359,13 +404,13 @@ namespace tools {
 
 			if(bus_enable_) return false;  // バスモードの場合は、エラー
 
-			auto dst_ch = get_dec_(1, ss);
-			if(dst_ch < 0) return false;
+			auto dst_ch = get_pos_(1, ss);
+			if(dst_ch < 0 || dst_ch >= 24) return false;
 
-			auto src_pos = get_dec_(2, ss);
+			auto src_pos = get_pos_(2, ss);
 			if(src_pos < 0) return false;
 
-			auto src_len = get_dec_(3, ss);
+			auto src_len = get_len_(3, ss);
 			if(src_len < 0) return false;
 
 			logic_.copy_chanel(ch_, dst_ch, src_pos, src_len);
