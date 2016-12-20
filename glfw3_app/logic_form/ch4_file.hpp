@@ -52,11 +52,17 @@ namespace tools {
 			fio.put(utils::utf8_to_sjis("test,0,1,0,1,φ1,test device\r\n"));
 
 			fio.put("#PinInformation#\r\n");
-			fio.put("4\r\n");
-			fio.put("DATA00,1,,,,,\r\n");
-			fio.put("DATA01,2,,,,,\r\n");
-			fio.put("DATA02,3,,,,,\r\n");
-			fio.put("DATA03,4,,,,,\r\n");
+			uint32_t cnt = 0;
+			for(uint32_t ch = 0; ch < 24; ++ch) {
+				if(logic_.count1(ch)) ++cnt;
+			}
+			fio.put(std::to_string(cnt) + "\r\n");
+			for(uint32_t ch = 0; ch < 24; ++ch) {
+				if(logic_.count1(ch)) {
+					auto s = (boost::format("DATA%02d,%d,,,,,\r\n") % ch % (ch + 1)).str();
+					fio.put(s);
+				}
+			}
 
 			fio.put("#CommandInformation#\r\n");
 			fio.put("1\r\n");
