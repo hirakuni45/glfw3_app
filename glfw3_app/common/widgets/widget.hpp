@@ -340,7 +340,7 @@ namespace gui {
 			vtx::ipos			resize_org_;	///< リサイズ基準位置
 			vtx::ipos			resize_pos_;	///< リサイズ位置
 			vtx::ipos			resize_ref_;	///< リサイズ基準サイズ
-			vtx::ipos			speed_;			///< 速度
+			vtx::ipos			speed_;			///< 慣性速度
 			vtx::ipos			in_point_;		///< 内包ポイント
 			uint32_t			hold_frame_;	///< ホールド・フレーム
 			uint32_t			holded_frame_;	///< ホールドしてたフレーム
