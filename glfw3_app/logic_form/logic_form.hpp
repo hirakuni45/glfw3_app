@@ -61,12 +61,13 @@ namespace app {
 			gui::spring_damper		sd_y_;
 
 			vtx::ipos				sel_pos_;
+			bool					sel_in_;
 
 			project_t() : base_(nullptr), main_(nullptr), tool_(nullptr), view_(nullptr),
 				logic_(), logic_edit_(logic_),
 				view_org_(0), view_offset_(0),
 				sd_x_(), sd_y_(),
-				sel_pos_(0)
+				sel_pos_(0), sel_in_(false)
 				{ }
 
 			void load(sys::preference& pre) {
@@ -175,18 +176,31 @@ namespace app {
 			if(project_.logic_.size() > 0) {
 				if(w->get_select_in()) {
 					project_.sel_pos_ = wd.get_positive_pos() - w->get_param().clip_.org;
+					project_.sel_in_ = true;
+				}
+
+				if(w->get_focus() && w->get_select()) {
+					auto p = wd.get_level_pos() - w->get_param().clip_.org;
+					auto d = p - project_.sel_pos_;
+					if((d.x * d.x + d.y * d.y) > 25) {
+						project_.sel_in_ = false;
+					}
 				}
 
 				if(w->get_focus() && w->get_select_out()) {
 					auto np = wd.get_negative_pos() - w->get_param().clip_.org;
 					auto d = np - project_.sel_pos_;
-					if(std::abs(d.x) <= 5 && std::abs(d.y) <= 5) { 
+					if((d.x * d.x + d.y * d.y) < 25) {
 /// std::cout << "Select out: " << project_.sel_pos_.x << ", " << project_.sel_pos_.y << std::endl;
 						uint32_t pos = (project_.sel_pos_.x - t.view_offset_.x - pin_n_) / logic_step_;
 						uint32_t ch = (project_.sel_pos_.y - t.view_offset_.y) / pin_h_;
 /// std::cout << "Select CH: " << ch << ", POS: " << pos << std::endl;
 						project_.logic_.flip_logic(ch, pos);
+						project_.sel_in_ = false;
 					}
+				}
+				if(!w->get_focus()) {
+					project_.sel_in_ = false;
 				}
 			}
 		}
@@ -232,6 +246,20 @@ namespace app {
 			rect.size.x = clip.size.x;
 			rect.size.y = 2;
 			gui::draw_border(rect);
+
+			if(t.sel_in_) {
+				uint32_t pos = (project_.sel_pos_.x - t.view_offset_.x - pin_n_) / logic_step_;
+				uint32_t ch = (project_.sel_pos_.y - t.view_offset_.y) / pin_h_;
+
+				pos *= logic_step_;
+				pos += t.view_offset_.x;
+				ch *= pin_h_;
+				ch += t.view_offset_.y;
+				vtx::srect r(pin_n_ + pos, ch, logic_step_, pin_h_);
+				img::rgba8( 55 / 2, 157 / 2, 235 / 2, 255);
+				gl::draw_filled_rectangle(r);
+			}
+
 			for(int i = 0; i < 24; ++i) {
 				rect.org.y = (i + 1) * pin_h_ + t.view_offset_.y;
 				gui::draw_border(rect);
