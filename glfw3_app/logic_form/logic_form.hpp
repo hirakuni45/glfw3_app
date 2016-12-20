@@ -88,6 +88,7 @@ namespace app {
 		gui::widget_filer*		save_ctx_;
 
 		gui::widget_dialog*		dialog_;
+		gui::widget_dialog*		dialog_yn_;
 
 		static const int pin_n_ = 30;
 		static const int pin_w_ = 30;
@@ -177,7 +178,8 @@ namespace app {
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 			vtx::ipos scr(0);
-			if(w->get_focus() && wd.root_widget(wd.get_top_widget()) == project_.base_) {
+			auto top = wd.get_top_widget();
+			if(w->get_focus() && (wd.root_widget(top) == project_.base_)) {
 				scr = wd.get_scroll();
 				scr.x *= logic_step_ >> 1;
 				scr.y *= pin_h_ >> 1;
@@ -255,7 +257,7 @@ namespace app {
 			}
 
 			{   // ツール  
-				widget::param wp(vtx::irect(0, 0, w, h), t.base_);
+				widget::param wp(vtx::irect(0, 0, w, logic_tool_height_), t.base_);
 				wp.state_.reset(widget::state::RENDER_ENABLE);
 				widget_null::param wp_;
 				wp_.update_func_ = [this]() {
@@ -268,7 +270,7 @@ namespace app {
 			}
 
 			{   // 描画ビュー
-				widget::param wp(vtx::irect(0, 0, 500, 100), t.main_);
+				widget::param wp(vtx::irect(0, logic_tool_height_, 500, 100), t.main_);
 				wp.state_.set(widget::state::CLIP_PARENTS);
 				widget_view::param wp_;
 				wp_.update_func_ = [this]() {
@@ -307,7 +309,7 @@ namespace app {
 			project_(),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
 			load_ctx_(nullptr), save_ctx_(nullptr),
-			dialog_(nullptr)
+			dialog_(nullptr), dialog_yn_(nullptr)
 		{ }
 
 
@@ -433,8 +435,10 @@ namespace app {
 							newpath += ".csv";
 						}
 						tools::ch4_file ch4(project_.logic_);
+
 						f = ch4.save(newpath);
 					} else {
+
 						f = project_.logic_.save(newpath);
 					}
 					load_->set_stall(false);
@@ -456,12 +460,20 @@ namespace app {
 				save_ctx_->enable(false);
 			}
 
-			{ // ダイアログ
+			{ // ダイアログ(OK)
 				widget::param wp(vtx::irect(100, 100, 500, 150));
 				widget_dialog::param wp_;
 				wp_.style_ = widget_dialog::param::style::OK;
 				dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
 				dialog_->enable(false);
+			}
+
+			{ // ダイアログ(OK/Cancel)
+				widget::param wp(vtx::irect(110, 110, 500, 150));
+				widget_dialog::param wp_;
+				wp_.style_ = widget_dialog::param::style::CANCEL_OK;
+				dialog_yn_ = wd.add_widget<widget_dialog>(wp, wp_);
+				dialog_yn_->enable(false);
 			}
 
 			// プリファレンスの取得
