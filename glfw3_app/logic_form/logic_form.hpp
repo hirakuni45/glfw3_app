@@ -94,6 +94,8 @@ namespace app {
 		gui::widget_dialog*		dialog_;
 		gui::widget_dialog*		dialog_yn_;
 
+		int						drop_file_id_;
+
 		static const int pin_n_ = 30;
 		static const int pin_w_ = 30;
 		static const int pin_h_ = 30;
@@ -179,10 +181,13 @@ namespace app {
 					project_.sel_in_ = true;
 				}
 
+				// 選択解除長さ
+				int32_t sh = 4 * 4;
+
 				if(w->get_focus() && w->get_select()) {
 					auto p = wd.get_level_pos() - w->get_param().clip_.org;
 					auto d = p - project_.sel_pos_;
-					if((d.x * d.x + d.y * d.y) > 25) {
+					if((d.x * d.x + d.y * d.y) > sh) {
 						project_.sel_in_ = false;
 					}
 				}
@@ -190,7 +195,7 @@ namespace app {
 				if(w->get_focus() && w->get_select_out()) {
 					auto np = wd.get_negative_pos() - w->get_param().clip_.org;
 					auto d = np - project_.sel_pos_;
-					if((d.x * d.x + d.y * d.y) < 25) {
+					if((d.x * d.x + d.y * d.y) < sh) {
 /// std::cout << "Select out: " << project_.sel_pos_.x << ", " << project_.sel_pos_.y << std::endl;
 						uint32_t pos = (project_.sel_pos_.x - t.view_offset_.x - pin_n_) / logic_step_;
 						uint32_t ch = (project_.sel_pos_.y - t.view_offset_.y) / pin_h_;
@@ -360,7 +365,8 @@ namespace app {
 			project_(),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
 			load_ctx_(nullptr), save_ctx_(nullptr),
-			dialog_(nullptr), dialog_yn_(nullptr)
+			dialog_(nullptr), dialog_yn_(nullptr),
+			drop_file_id_(-1)
 		{ }
 
 
@@ -560,6 +566,21 @@ namespace app {
 		void update()
 		{
 			gui::widget_director& wd = director_.at().widget_director_;
+
+			// Drag & Drop されたファイル
+			gl::core& core = gl::core::get_instance();
+			int id = core.get_recv_files_id();
+			if(drop_file_id_ != id) {
+				drop_file_id_ = id;
+				const utils::strings& ss = core.get_recv_files_path();
+				if(!ss.empty()) {
+					std::string path = ss[0];
+					if(load_ctx_ != nullptr && load_ctx_->get_local_param().select_file_func_ != nullptr) {
+						load_ctx_->get_local_param().select_file_func_(path);
+					}
+				}
+			}
+
 			wd.update();
 		}
 
