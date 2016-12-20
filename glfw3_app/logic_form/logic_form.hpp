@@ -60,10 +60,13 @@ namespace app {
 			gui::spring_damper		sd_x_;
 			gui::spring_damper		sd_y_;
 
+			vtx::ipos				sel_pos_;
+
 			project_t() : base_(nullptr), main_(nullptr), tool_(nullptr), view_(nullptr),
 				logic_(), logic_edit_(logic_),
 				view_org_(0), view_offset_(0),
-				sd_x_(), sd_y_()
+				sd_x_(), sd_y_(),
+				sel_pos_(0)
 				{ }
 
 			void load(sys::preference& pre) {
@@ -163,10 +166,29 @@ namespace app {
 		void update_view_(project_t& t)
 		{
 			using namespace gui;
+			widget_director& wd = director_.at().widget_director_;
 
-			auto wn = t.view_;
-			wn->at_rect().org.y  += logic_tool_height_;
-			wn->at_rect().size.y -= logic_tool_height_;
+			auto w = t.view_;
+			w->at_rect().org.y  += logic_tool_height_;
+			w->at_rect().size.y -= logic_tool_height_;
+
+			if(project_.logic_.size() > 0) {
+				if(w->get_select_in()) {
+					project_.sel_pos_ = wd.get_positive_pos() - w->get_param().clip_.org;
+				}
+
+				if(w->get_focus() && w->get_select_out()) {
+					auto np = wd.get_negative_pos() - w->get_param().clip_.org;
+					auto d = np - project_.sel_pos_;
+					if(std::abs(d.x) <= 5 && std::abs(d.y) <= 5) { 
+/// std::cout << "Select out: " << project_.sel_pos_.x << ", " << project_.sel_pos_.y << std::endl;
+						uint32_t pos = (project_.sel_pos_.x - t.view_offset_.x - pin_n_) / logic_step_;
+						uint32_t ch = (project_.sel_pos_.y - t.view_offset_.y) / pin_h_;
+/// std::cout << "Select CH: " << ch << ", POS: " << pos << std::endl;
+						project_.logic_.flip_logic(ch, pos);
+					}
+				}
+			}
 		}
 
 
@@ -231,6 +253,7 @@ namespace app {
 		}
 
 
+		// プロジェクト・リソースの作成
 		void create_project_(project_t& t, int w, int h)
 		{
 			using namespace gui;
