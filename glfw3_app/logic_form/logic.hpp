@@ -26,6 +26,8 @@ namespace tools {
 
 		std::mt19937	noise_;
 
+		std::string		error_;
+
 		// 10進変換
 		typedef boost::optional<int32_t> decimal;
 		decimal get_decimal_(const std::string& s)
@@ -33,6 +35,7 @@ namespace tools {
 			try {
 				return decimal(std::stoi(s));
 			} catch(const std::invalid_argument& er) {
+				error_ = "Invalid argument";
 				return decimal();
 			}
 		}
@@ -330,6 +333,7 @@ namespace tools {
 
 			utils::file_io fio;
 			if(!fio.open(name, "wb")) {
+				error_ = "Can't open output file";
 				return false;
 			}
 
@@ -361,6 +365,7 @@ namespace tools {
 		{
 			utils::file_io fio;
 			if(!fio.open(name, "rb")) {
+				error_ = "Can't open input file";
 				return false;
 			}
 
@@ -388,9 +393,11 @@ namespace tools {
 							create(*num);
 							func = decode_func::ch;
 						} else {
+							error_ = "Illegal 'NUM:' number"; 
 							return false;
 						}				
 					} else {
+						error_ = "Illegal file"; 
 						return false;
 					}
 					break;
@@ -402,9 +409,11 @@ namespace tools {
 							pos = 0;
 							func = decode_func::stream;
 						} else {
+							error_ = "Illegal 'CH:' number"; 
 							return false;
 						}
 					} else {
+						error_ = "Illegal file"; 
 						return false;
 					}
 					break;
@@ -415,6 +424,9 @@ namespace tools {
 						else if(c ==';') {
 							func = decode_func::ch;
 						} else {
+							error_ = "Illegal bits field: '";
+							error_ += c;
+							error_ += '\'';
 							return false;
 						}
 						++pos;
@@ -431,6 +443,15 @@ namespace tools {
 
 			return true;
 		}
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief  エラーの取得
+			@return エラー
+		*/
+		//-------------------------------------------------------------//
+		const std::string& get_error() const { return error_; }
 
 
 		//-------------------------------------------------------------//
