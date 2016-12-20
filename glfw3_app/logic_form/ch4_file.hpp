@@ -43,10 +43,34 @@ namespace tools {
 				return false;
 			}
 
+			fio.put("##START##\r\n");
+
+			fio.put("#HeaderInformation#\r\n");
+			fio.put("1,1\r\n");
+
+			fio.put("#DeviceInformation#\r\n");
+			fio.put(utils::utf8_to_sjis("test,0,1,0,1,φ1,test device\r\n"));
+
+			fio.put("#PinInformation#\r\n");
+			fio.put("4\r\n");
+			fio.put("DATA00,1,,,,,\r\n");
+			fio.put("DATA01,2,,,,,\r\n");
+			fio.put("DATA02,3,,,,,\r\n");
+			fio.put("DATA03,4,,,,,\r\n");
+
+			fio.put("#CommandInformation#\r\n");
+			fio.put("1\r\n");
+			fio.put("DIRC,Direct data\r\n");
+
+			fio.put("#CommandInstruction#\r\n");
+			fio.put(std::to_string(logic_.size()) + "\r\n");
+
+			//HW出力,1,C,0,0,1,DEC,1,1,0,0,1,0xAA55AA,0,
 			for(uint32_t i = 0; i < logic_.size(); ++i) {
 				auto bits = logic_.get(i);
 				auto s = (boost::format("%06X") % bits).str();
-				fio.put("0x" + s + "\n");
+				auto sjis = utils::utf8_to_sjis("HW出力,1,C,0,0,1,DEC,1,1,0,0,1,0x" + s + ",0,\r\n");
+				fio.put(sjis);
 			}
 
 			fio.close();
