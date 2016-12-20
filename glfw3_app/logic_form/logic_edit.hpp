@@ -89,7 +89,7 @@ namespace tools {
 		bool cur_ch_(const utils::strings& ss)
 		{
 			if(ss[0] == "help") {
-				output("chanel [chanel-no]\n");
+				output("ch [Chanel-No]\n");
 				return true;
 			}
 
@@ -114,7 +114,7 @@ namespace tools {
 		bool cur_bus_(const utils::strings& ss)
 		{
 			if(ss[0] == "help") {
-				output("bus [chanel-no] ... (LSB ... MSB)\n");
+				output("bus [Chanel-No] ... (LSB ... MSB)\n");
 				return true;
 			}
 
@@ -163,7 +163,7 @@ namespace tools {
 		bool create_(const utils::strings& ss)
 		{
 			if(ss[0] == "help") {
-				output("create size\n");
+				output("create Size\n");
 				return true;
 			}
 
@@ -180,7 +180,7 @@ namespace tools {
 		bool set_(const utils::strings& ss)
 		{
 			if(ss[0] == "help") {
-				output("set [level = 1]\n");
+				output("set [Value = 1]\n");
 				return true;
 			}
 
@@ -218,7 +218,7 @@ namespace tools {
 		bool clock_(const utils::strings& ss)
 		{
 			if(ss[0] == "help") {
-				output("clock start-position length [low-count=1] [high-count=1]\n");
+				output("clock Start-Position Length [Low-Count=1] [High-Count=1]\n");
 				return true;
 			}
 
@@ -256,7 +256,7 @@ namespace tools {
 		bool fill_(const utils::strings& ss)
 		{
 			if(ss[0] == "help") {
-				output("fill start-position length [level=1]\n");
+				output("fill Start-Position Length [Value=1]\n");
 				return true;
 			}
 
@@ -296,7 +296,7 @@ namespace tools {
 		bool flip_(const utils::strings& ss)
 		{
 			if(ss[0] == "help") {
-				output("flip start-position length\n");
+				output("flip Start-Position Length\n");
 				return true;
 			}
 
@@ -322,22 +322,28 @@ namespace tools {
 		bool copy_(const utils::strings& ss)
 		{
 			if(ss[0] == "help") {
-				output("copy src-position length dst-position\n");
+				output("copy Src-Position Copy-Length Dst-Position\n");
 				return true;
 			}
 
 			auto src = get_dec_(1, ss);
-			if(src < 0) return false;
+			if(src < 0 || src >= logic_.size()) return false;
 
 			auto len = get_dec_(2, ss);
 			if(len < 0) return false;
 
 			auto dst = get_dec_(3, ss);
-			if(dst < 0) return false;
+			if(dst < 0 && dst >= logic_.size()) return false;
 
-
-
-
+			if(bus_enable_) {
+				uint32_t idx = 0;
+				for(auto ch : bus_) {
+					logic_.copy(ch, src, len, dst);
+					++idx;
+				}
+			} else {
+				logic_.copy(ch_, src, len, dst);
+			}
 
 			return true;
 		}
@@ -347,7 +353,7 @@ namespace tools {
 		bool copy_chanel_(const utils::strings& ss)
 		{
 			if(ss[0] == "help") {
-				output("copy-chanel dst-chanel [src-position] [src-length]\n");
+				output("copy-chanel Dst-Chanel [Src-Position] [Src-Length]\n");
 				return true;
 			}
 

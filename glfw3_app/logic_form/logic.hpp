@@ -252,7 +252,7 @@ namespace tools {
 			@param[in]	len	長さ
 		*/
 		//-------------------------------------------------------------//
-		void copy(uint32_t ch, uint32_t org, uint32_t len)
+		void copy(uint32_t ch, uint32_t org, uint32_t len, uint32_t dst)
 		{
 			if(len == 0 || size() <= org) return;
 
@@ -265,7 +265,7 @@ namespace tools {
 				++idx;
 			}
 			idx = 0;
-			for(uint32_t i = org; i < (org + len); ++i) {
+			for(uint32_t i = dst; i < (dst + len); ++i) {
 				set_logic(ch, i, bs[idx]);
 				++idx;
 			}
