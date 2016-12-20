@@ -238,7 +238,7 @@ namespace tools {
 			if(len == 0) len = size() - org;
 
 			for(uint32_t i = org; i < (org + len); ++i) {
-				flip_logic(i, ch);
+				flip_logic(ch, i);
 			}
 		}
 
