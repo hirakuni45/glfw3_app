@@ -20,6 +20,8 @@ namespace gui {
 
 		typedef widget_dialog value_type;
 
+		typedef std::function< void (bool ok) > select_func_type;
+
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	widget_dialog パラメーター
@@ -40,6 +42,8 @@ namespace gui {
 
 			bool			return_ok_;
 			bool			return_cancel_;
+
+			select_func_type	select_func_;
 
 			param(style::type t = style::OK) : plate_param_(),
 				color_param_(widget_director::default_dialog_color_),
