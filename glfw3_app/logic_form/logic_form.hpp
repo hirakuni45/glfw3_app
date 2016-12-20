@@ -424,16 +424,30 @@ namespace app {
 				widget::param wp(vtx::irect(10, 30, 300, 200));
 				widget_filer::param wp_(core.get_current_path());
 				wp_.select_file_func_ = [this](const std::string& path) {
+					std::string newpath = path;
 					bool f = false;
 					if(export_on_) {
-
+						auto ext = utils::get_file_ext(newpath);
+						if(ext.empty() || ext != ".csv") {
+							newpath = utils::get_file_base(path);
+							newpath += ".csv";
+						}
+						tools::ch4_file ch4(project_.logic_);
+						f = ch4.save(newpath);
 					} else {
-						f = project_.logic_.save(path);
+						f = project_.logic_.save(newpath);
 					}
 					load_->set_stall(false);
+					save_->set_stall(false);
 					export_->set_stall(false);
 					if(!f) {  // save error
-						dialog_->set_text("Save/Export error:\n" + path);
+						std::string err;
+						if(export_on_) {
+							err = "Export error: ";
+						} else {
+							err = "Save error:";
+						}
+						dialog_->set_text(err + project_.logic_.get_error() + "\n" + newpath);
 						dialog_->enable();
 					}
 				};
@@ -443,7 +457,7 @@ namespace app {
 			}
 
 			{ // ダイアログ
-				widget::param wp(vtx::irect(100, 100, 400, 150));
+				widget::param wp(vtx::irect(100, 100, 500, 150));
 				widget_dialog::param wp_;
 				wp_.style_ = widget_dialog::param::style::OK;
 				dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
