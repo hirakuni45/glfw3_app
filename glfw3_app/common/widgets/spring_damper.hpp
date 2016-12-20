@@ -56,15 +56,17 @@ namespace gui {
 			if(select) {  // 選択中の挙動
 				speed_ = static_cast<float>(drag);
 				position_ = offset_ + speed_;
-speed_ = 0.0f;
-///				speed_ *= acc_gain_;  // 加速度の調整
+				speed_ *= acc_gain_;  // 加速度の調整
 				if(position_ > 0.0f) {
 					position_ *= slip_gain_;
 					speed_ = 0.0f;
-				} else if(position_ < lim) {
+				} else if(lim < 0.0f && position_ < lim) {
 					position_ -= lim;
 					position_ *= slip_gain_;
 					position_ += lim;
+					speed_ = 0.0f;
+				} else if(position_ < 0.0f) {
+					position_ *= slip_gain_;
 					speed_ = 0.0f;
 				}
 			} else {
@@ -89,13 +91,19 @@ speed_ = 0.0f;
 					if(position_ < 1.0f) {
 						position_ = 0.0f;
 					}
-				} else if(position_ < lim) {
+				} else if(lim < 0.0f && position_ < lim) {
 					speed_ = 0.0f;
 					position_ -= lim;
 					position_ *= damping_;
 					position_ += lim;
 					if(position_ > (lim - 1.0f)) {
 						position_ = lim;
+					}
+				} else if(position_ < 0.0f) {
+					speed_ = 0.0f;
+					position_ *= damping_;
+					if(position_ > -1.0f) {
+						position_ = 0.0f;
 					}
 				}
 			}
