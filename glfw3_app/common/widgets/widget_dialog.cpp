@@ -85,10 +85,12 @@ namespace gui {
 			param_.return_ok_     = false;
 			param_.return_cancel_ = true;
 			close = true;
+
 		}
 
 		if(close) {
 			enable(false);
+			if(param_.select_func_ != nullptr) param_.select_func_(param_.return_ok_);
 		}
 	}
 
