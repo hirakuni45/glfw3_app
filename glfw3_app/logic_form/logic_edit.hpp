@@ -407,11 +407,15 @@ namespace tools {
 			auto dst_ch = get_pos_(1, ss);
 			if(dst_ch < 0 || dst_ch >= 24) return false;
 
-			auto src_pos = get_pos_(2, ss);
-			if(src_pos < 0) return false;
+			int32_t src_pos = 0;
+			int32_t src_len = logic_.size();
+			if(ss.size() >= 4) {
+				src_pos = get_pos_(2, ss);
+				if(src_pos < 0) return false;
 
-			auto src_len = get_len_(3, ss);
-			if(src_len < 0) return false;
+				src_len = get_len_(3, ss);
+				if(src_len < 0) return false;
+			}
 
 			logic_.copy_chanel(ch_, dst_ch, src_pos, src_len);
 
@@ -499,6 +503,36 @@ namespace tools {
 			}
 
 			return ret;
+		}
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief  ファイル実行
+			@param[in]	name	ファイル名
+			@return エラー無ければ「true」
+		*/
+		//-------------------------------------------------------------//
+		bool injection(const std::string& name)
+		{
+			utils::file_io fio;
+			if(!fio.open(name, "rb")) {
+				output("Can't open script file: " + name); 
+				return false;
+			}
+
+			uint32_t lno = 1;
+			while(!fio.eof()) {
+				auto s = fio.get_line();
+				if(s.empty()) continue;
+				if(s.front() == '#') continue;
+				if(!command(s)) {
+					return false;
+				}
+				++lno;
+			}
+
+			return true;
 		}
 
 	};
