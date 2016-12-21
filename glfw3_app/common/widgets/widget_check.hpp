@@ -93,7 +93,7 @@ namespace gui {
 			@brief	型を取得
 		*/
 		//-----------------------------------------------------------------//
-		type_id type() const { return get_type_id<value_type>(); }
+		type_id type() const override { return get_type_id<value_type>(); }
 
 
 		//-----------------------------------------------------------------//
@@ -102,7 +102,7 @@ namespace gui {
 			@return widget 型の基本名称
 		*/
 		//-----------------------------------------------------------------//
-		const char* type_name() const { return "check"; }
+		const char* type_name() const override { return "check"; }
 
 
 		//-----------------------------------------------------------------//
@@ -111,7 +111,7 @@ namespace gui {
 			@return ハイブリッド・ウィジェットの場合「true」を返す。
 		*/
 		//-----------------------------------------------------------------//
-		bool hybrid() const { return false; }
+		bool hybrid() const override { return false; }
 
 
 		//-----------------------------------------------------------------//
@@ -155,7 +155,7 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize();
+		void initialize() override;
 
 
 		//-----------------------------------------------------------------//
@@ -163,7 +163,7 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update();
+		void update() override;
 
 
 		//-----------------------------------------------------------------//
@@ -171,7 +171,7 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() {
+		void service() override {
 			if(check_ != param_.check_) {
 				if(param_.select_func_ != nullptr) param_.select_func_(param_.check_);
 				check_ = param_.check_;
@@ -184,7 +184,7 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render();
+		void render() override;
 
 
 		//-----------------------------------------------------------------//
@@ -194,7 +194,7 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(sys::preference& pre);
+		bool save(sys::preference& pre) override;
 
 
 		//-----------------------------------------------------------------//
@@ -204,6 +204,6 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre);
+		bool load(const sys::preference& pre) override;
 	};
 }
