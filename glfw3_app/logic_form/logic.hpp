@@ -384,7 +384,7 @@ namespace tools {
 			while(!fio.eof()) {
 				auto s = fio.get_line();
 				if(s.empty()) continue;
-				if(s[0] == '#') continue;
+				if(s.front() == '#') continue;
 				switch(func) {
 				case decode_func::num:
 					if(s.find("NUM:") != std::string::npos) {
