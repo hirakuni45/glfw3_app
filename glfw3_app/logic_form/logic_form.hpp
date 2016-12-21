@@ -14,6 +14,7 @@
 #include "widgets/widget_view.hpp"
 #include "widgets/widget_text.hpp"
 #include "widgets/widget_button.hpp"
+#include "widgets/widget_check.hpp"
 #include "widgets/widget_terminal.hpp"
 #include "widgets/widget_filer.hpp"
 #include "widgets/widget_dialog.hpp"
@@ -45,6 +46,7 @@ namespace app {
 		bool					export_on_;
 		gui::widget_button*		script_;
 		bool					script_on_;
+		gui::widget_check*		edit_;
 
 		// プロジェクト管理
 		struct project_t {
@@ -177,7 +179,7 @@ namespace app {
 			w->at_rect().org.y  += logic_tool_height_;
 			w->at_rect().size.y -= logic_tool_height_;
 
-			if(project_.logic_.size() > 0) {
+			if(edit_ != nullptr && edit_->get_check() && project_.logic_.size() > 0) {
 				if(w->get_select_in()) {
 					project_.sel_pos_ = wd.get_positive_pos() - w->get_param().clip_.org;
 					project_.sel_in_ = true;
@@ -364,7 +366,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		logic_form(utils::director<core>& d) : director_(d),
 			menu_(nullptr), load_(nullptr), save_(nullptr),
-			export_(nullptr), export_on_(false), script_(nullptr), script_on_(false),
+			export_(nullptr), export_on_(false), script_(nullptr), script_on_(false), edit_(nullptr),
 			project_(),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
 			load_ctx_(nullptr), save_ctx_(nullptr),
@@ -459,7 +461,13 @@ namespace app {
 				};
 				script_ = wd.add_widget<widget_button>(wp, wp_);
 			}
-
+			{	// エディット許可
+				widget::param wp(vtx::irect(10, 20+40*4, 90, 30), menu_);
+				widget_check::param wp_("Edit");
+///				wp_.select_func_ = [this](bool f) {
+///				};
+				edit_ = wd.add_widget<widget_check>(wp, wp_);
+			}
 
 			create_project_(project_, 200, 100);
 
@@ -579,6 +587,8 @@ namespace app {
 			if(load_ctx_ != nullptr) load_ctx_->load(pre);
 			if(save_ctx_ != nullptr) save_ctx_->load(pre);
 
+			if(edit_ != nullptr) edit_->load(pre);
+
 			// デバッグ
 //			project_.logic_.create(2048);
 ///			project_.logic_.create(100);
@@ -636,6 +646,8 @@ namespace app {
 		void destroy()
 		{
 			sys::preference& pre = director_.at().preference_;
+
+			if(edit_ != nullptr) edit_->save(pre);
 
 			if(load_ctx_ != nullptr) load_ctx_->save(pre);
 			if(save_ctx_ != nullptr) save_ctx_->save(pre);
