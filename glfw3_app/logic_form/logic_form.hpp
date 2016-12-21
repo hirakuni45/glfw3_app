@@ -43,6 +43,8 @@ namespace app {
 		gui::widget_button*		save_;
 		gui::widget_button*		export_;
 		bool					export_on_;
+		gui::widget_button*		script_;
+		bool					script_on_;
 
 		// プロジェクト管理
 		struct project_t {
@@ -361,7 +363,8 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		logic_form(utils::director<core>& d) : director_(d),
-			menu_(nullptr), load_(nullptr), save_(nullptr), export_(nullptr), export_on_(false),
+			menu_(nullptr), load_(nullptr), save_(nullptr),
+			export_(nullptr), export_on_(false), script_(nullptr), script_on_(false),
 			project_(),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
 			load_ctx_(nullptr), save_ctx_(nullptr),
@@ -401,10 +404,12 @@ namespace app {
 				widget_button::param wp_("load");
 				wp_.select_func_ = [this]() {
 					if(load_ctx_) {
+						script_on_ = false;
 						bool f = load_ctx_->get_state(gui::widget::state::ENABLE);
 						load_ctx_->enable(!f);
 						save_->set_stall(!f);
 						export_->set_stall(!f);
+						script_->set_stall(!f);
 					}
 				};
 				load_ = wd.add_widget<widget_button>(wp, wp_);
@@ -419,6 +424,7 @@ namespace app {
 						save_ctx_->enable(!f);
 						load_->set_stall(!f);
 						export_->set_stall(!f);
+						script_->set_stall(!f);
 					}
 				};
 				save_ = wd.add_widget<widget_button>(wp, wp_);
@@ -433,9 +439,25 @@ namespace app {
 						save_ctx_->enable(!f);
 						load_->set_stall(!f);
 						save_->set_stall(!f);
+						script_->set_stall(!f);
 					}
 				};
 				export_ = wd.add_widget<widget_button>(wp, wp_);
+			}
+			{ // スクリプト起動ボタン
+				widget::param wp(vtx::irect(10, 20+40*3, 90, 30), menu_);
+				widget_button::param wp_("script");
+				wp_.select_func_ = [this]() {
+					if(load_ctx_) {
+						script_on_ = true;
+						bool f = load_ctx_->get_state(gui::widget::state::ENABLE);
+						load_ctx_->enable(!f);
+						load_->set_stall(!f);
+						save_->set_stall(!f);
+						export_->set_stall(!f);
+					}
+				};
+				script_ = wd.add_widget<widget_button>(wp, wp_);
 			}
 
 
@@ -468,11 +490,19 @@ namespace app {
 				widget::param wp(vtx::irect(10, 30, 300, 200));
 				widget_filer::param wp_(core.get_current_path());
 				wp_.select_file_func_ = [this](const std::string& path) {
-					bool f = project_.logic_.load(path);
+					bool f = false;
+					if(script_on_) {
+						f = project_.logic_edit_.injection(path);
+					} else {
+						f = project_.logic_.load(path);
+					}
+					load_->set_stall(false);
 					save_->set_stall(false);
 					export_->set_stall(false);
+					script_->set_stall(false);
 					if(!f) {  // load error
-						dialog_->set_text("Load error:\n" + path);
+						if(script_on_) dialog_->set_text("Script error:\n" + path);
+						else dialog_->set_text("Load error:\n" + path);
 						dialog_->enable();
 					}
 				};
@@ -501,6 +531,7 @@ namespace app {
 					load_->set_stall(false);
 					save_->set_stall(false);
 					export_->set_stall(false);
+					script_->set_stall(false);
 					if(!f) {  // save error
 						std::string err;
 						if(export_on_) {
