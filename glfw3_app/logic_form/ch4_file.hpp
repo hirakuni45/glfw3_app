@@ -71,11 +71,13 @@ namespace tools {
 			fio.put("#CommandInstruction#\r\n");
 			fio.put(std::to_string(logic_.size()) + "\r\n");
 
-			//HW出力,1,C,0,0,1,DEC,1,1,0,0,1,0xAA55AA,0,
 			for(uint32_t i = 0; i < logic_.size(); ++i) {
-				auto bits = logic_.get(i);
+				auto bits = logic_.get(i).value_;
+
+				//HW出力,1,C,0,0,1,DEC,1,1,0,0,1,0xAA55AA,0,
 				auto s = (boost::format("%06X") % bits).str();
 				auto sjis = utils::utf8_to_sjis("HW出力,1,C,0,0,1,DEC,1,1,0,0,1,0x" + s + ",0,\r\n");
+
 				fio.put(sjis);
 			}
 

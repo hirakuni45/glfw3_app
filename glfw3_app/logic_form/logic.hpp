@@ -22,7 +22,47 @@ namespace tools {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class logic {
 
-		std::vector<uint32_t>	level_;
+	public:
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief  アトリビュート
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		enum class attr {
+			const_data,		///< 定数出力
+			argument_data,	///< 引数出力
+			chip_data,		///< Chip 出力
+			hw_data,		///< ハード出力
+		};
+
+
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief  オプション構造体
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		struct option_t {
+			attr		attr_;	///< アトリビュート種類
+			uint32_t	para_;	///< パラメーター
+			uint32_t	idx_;	///< 引数のインデックス（０～１５）
+			bool		hex_;	///< 引数が１６進の場合「true」、１０進なら「false」
+			option_t() : attr_(attr::hw_data), para_(0), idx_(0), hex_(false) { }
+		};
+
+
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief  ロジック・レベル構造体
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		struct level_t {
+			uint32_t	value_;
+			option_t	option_;
+			level_t() : value_(0), option_() { }
+		};
+
+	private:
+		std::vector<level_t>	level_;
 
 		std::mt19937	noise_;
 
@@ -94,11 +134,11 @@ namespace tools {
 			@return レベル
 		*/
 		//-------------------------------------------------------------//
-		bool get_logic(uint32_t ch, uint32_t wpos) const
+		bool get_logic(uint32_t ch, uint32_t pos) const
 		{
-			if(wpos >= level_.size()) return 0;  // 範囲外は「０」
+			if(pos >= level_.size()) return 0;  // 範囲外は「０」
 
-			return level_[wpos] & (1 << ch);
+			return level_[pos].value_ & (1 << ch);
 		}
 
 
@@ -106,16 +146,32 @@ namespace tools {
 		/*!
 			@brief  ロジック・レベル設定
 			@param[in]	ch	チャネル（０～３１）
-			@param[in]	wpos	波形位置
-			@param[in]	value	値
+			@param[in]	pos	位置
+			@param[in]	val	値
 		*/
 		//-------------------------------------------------------------//
-		void set_logic(uint32_t ch, uint32_t wpos, bool value = true)
+		void set_logic(uint32_t ch, uint32_t pos, bool val = true)
 		{
-			if(wpos >= level_.size()) return;
+			if(pos >= level_.size()) return;
 
-			if(value) level_[wpos] |= (1 << ch);
-			else level_[wpos] &= ~(1 << ch);
+			if(val) level_[pos].value_ |= (1 << ch);
+			else level_[pos].value_ &= ~(1 << ch);
+		}
+
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief  オプション設定
+			@param[in]	pos	位置
+			@param[in]	opt	オプション
+		*/
+		//-------------------------------------------------------------//
+		void set_option(uint32_t pos, const option_t& opt)
+		{
+			if(pos >= level_.size()) return;
+
+			level_[pos].option_ = opt;
 		}
 
 
@@ -147,8 +203,8 @@ namespace tools {
 		{
 			if(wpos >= level_.size()) return 0;  // 範囲外は「０」
 
-			level_[wpos] ^= (1 << ch);
-			return level_[wpos] & (1 << ch);
+			level_[wpos].value_ ^= (1 << ch);
+			return level_[wpos].value_ & (1 << ch);
 		}
 
 
@@ -457,14 +513,11 @@ namespace tools {
 		//-------------------------------------------------------------//
 		/*!
 			@brief  波形の取得
-			@param[in]	wpos	波形位置
+			@param[in]	pos	位置
 			@return 波形
 		*/
 		//-------------------------------------------------------------//
-		uint32_t get(uint32_t wpos) const {
-			if(wpos >= level_.size()) return 0;
-			return level_[wpos];
-		}
+		const level_t& get(uint32_t pos) const { return level_[pos]; }
 
 
 		//-------------------------------------------------------------//
@@ -474,6 +527,6 @@ namespace tools {
 			@return 現物
 		*/
 		//-------------------------------------------------------------//
-		uint32_t& at(uint32_t pos) { return level_[pos]; }
+		level_t& at(uint32_t pos) { return level_[pos]; }
 	};
 }

@@ -15,6 +15,7 @@
 #include "widgets/widget_text.hpp"
 #include "widgets/widget_button.hpp"
 #include "widgets/widget_check.hpp"
+#include "widgets/widget_label.hpp"
 #include "widgets/widget_terminal.hpp"
 #include "widgets/widget_filer.hpp"
 #include "widgets/widget_dialog.hpp"
@@ -91,6 +92,9 @@ namespace app {
 
 		gui::widget_frame*		terminal_frame_;
 		gui::widget_terminal*	terminal_core_;
+
+		gui::widget_frame*		argv_frame_;
+		std::vector<gui::widget_label*>	argv_param_;
 
 		gui::widget_filer*		load_ctx_;
 		gui::widget_filer*		save_ctx_;
@@ -179,7 +183,7 @@ namespace app {
 			w->at_rect().org.y  += logic_tool_height_;
 			w->at_rect().size.y -= logic_tool_height_;
 
-			if(edit_ != nullptr && edit_->get_check() && project_.logic_.size() > 0) {
+			if(project_.logic_.size() > 0) {
 				if(w->get_select_in()) {
 					project_.sel_pos_ = wd.get_positive_pos() - w->get_param().clip_.org;
 					project_.sel_in_ = true;
@@ -200,11 +204,13 @@ namespace app {
 					auto np = wd.get_negative_pos() - w->get_param().clip_.org;
 					auto d = np - project_.sel_pos_;
 					if((d.x * d.x + d.y * d.y) < sh) {
+						if(edit_ != nullptr && edit_->get_check()) {
 /// std::cout << "Select out: " << project_.sel_pos_.x << ", " << project_.sel_pos_.y << std::endl;
-						uint32_t pos = (project_.sel_pos_.x - t.view_offset_.x - pin_n_) / logic_step_;
-						uint32_t ch = (project_.sel_pos_.y - t.view_offset_.y) / pin_h_;
+							uint32_t pos = (project_.sel_pos_.x - t.view_offset_.x - pin_n_) / logic_step_;
+							uint32_t ch = (project_.sel_pos_.y - t.view_offset_.y) / pin_h_;
 /// std::cout << "Select CH: " << ch << ", POS: " << pos << std::endl;
-						project_.logic_.flip_logic(ch, pos);
+							project_.logic_.flip_logic(ch, pos);
+						}
 						project_.sel_in_ = false;
 					}
 				}
@@ -258,15 +264,20 @@ namespace app {
 
 			if(t.sel_in_) {
 				uint32_t pos = (project_.sel_pos_.x - t.view_offset_.x - pin_n_) / logic_step_;
-				uint32_t ch = (project_.sel_pos_.y - t.view_offset_.y) / pin_h_;
-
 				pos *= logic_step_;
 				pos += t.view_offset_.x;
-				ch *= pin_h_;
-				ch += t.view_offset_.y;
-				vtx::srect r(pin_n_ + pos, ch, logic_step_, pin_h_);
-				img::rgba8( 55 / 2, 157 / 2, 235 / 2, 255);
-				gl::draw_filled_rectangle(r);
+				if(edit_ != nullptr && !edit_->get_check()) {
+					vtx::srect r(pin_n_ + pos, 0, logic_step_, clip.size.y);
+					img::rgba8( 55 / 2, 157 / 2, 235 / 2, 255);
+					gl::draw_filled_rectangle(r);
+				} else {
+					uint32_t ch = (project_.sel_pos_.y - t.view_offset_.y) / pin_h_;
+					ch *= pin_h_;
+					ch += t.view_offset_.y;
+					vtx::srect r(pin_n_ + pos, ch, logic_step_, pin_h_);
+					img::rgba8( 55 / 2, 157 / 2, 235 / 2, 255);
+					gl::draw_filled_rectangle(r);
+				}
 			}
 
 			for(int i = 0; i < 24; ++i) {
@@ -369,6 +380,7 @@ namespace app {
 			export_(nullptr), export_on_(false), script_(nullptr), script_on_(false), edit_(nullptr),
 			project_(),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
+			argv_frame_(nullptr), argv_param_(),
 			load_ctx_(nullptr), save_ctx_(nullptr),
 			dialog_(nullptr), dialog_yn_(nullptr),
 			drop_file_id_(-1)
@@ -494,6 +506,25 @@ namespace app {
 				);
 			}
 
+			{	// 引数テーブル
+				{
+					widget::param wp(vtx::irect(200, 200, 120 * 4 + 40, 50 * 4 + 12 + 40));
+					widget_frame::param wp_;
+					wp_.plate_param_.set_caption(12);
+					argv_frame_ = wd.add_widget<widget_frame>(wp, wp_);
+					argv_frame_->set_state(gui::widget::state::SIZE_LOCK);
+				}
+				{ // 引数１～１６
+					for(uint32_t i = 0; i < 16; ++i ) {
+						int xofs = (i % 4) * 120;
+						int yofs = (i / 4) * 50;
+						widget::param wp(vtx::irect(20 + xofs, 12 + 20 + yofs, 90, 30), argv_frame_);
+						widget_label::param wp_("0", false);
+						argv_param_.push_back(wd.add_widget<widget_label>(wp, wp_));
+					}
+				}
+			}
+
 			{ // load ファイラー本体
 				widget::param wp(vtx::irect(10, 30, 300, 200));
 				widget_filer::param wp_(core.get_current_path());
@@ -584,6 +615,11 @@ namespace app {
 			if(terminal_frame_ != nullptr) {
 				terminal_frame_->load(pre);
 			}
+
+			if(argv_frame_ != nullptr) {
+				argv_frame_->load(pre);
+			}
+
 			if(load_ctx_ != nullptr) load_ctx_->load(pre);
 			if(save_ctx_ != nullptr) save_ctx_->load(pre);
 
@@ -651,6 +687,10 @@ namespace app {
 
 			if(load_ctx_ != nullptr) load_ctx_->save(pre);
 			if(save_ctx_ != nullptr) save_ctx_->save(pre);
+
+			if(argv_frame_ != nullptr) {
+				argv_frame_->save(pre);
+			}
 
 			if(terminal_frame_ != nullptr) {
 				terminal_frame_->save(pre);

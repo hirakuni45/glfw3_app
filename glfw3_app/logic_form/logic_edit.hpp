@@ -25,7 +25,8 @@ namespace tools {
 
 		output_func_type	output_;
 
-		uint32_t	ch_;  // カレント・チャネル
+		logic::option_t	opt_;	// カレント・オプション
+		uint32_t		ch_;    // カレント・チャネル
 		std::vector<uint32_t>	bus_;	// バス
 		bool		bus_enable_;
 
@@ -78,6 +79,38 @@ namespace tools {
 		}
 
 
+		void output_option_(const logic::option_t& o)
+		{
+			bool para = false;
+			switch(o.attr_) {
+			case logic::attr::const_data:
+				output("CONST");
+				break;
+			case logic::attr::argument_data:
+				output("ARGUMENT: ");
+				para = true;
+				break;
+			case logic::attr::chip_data:
+				output("CHIP: ");
+				para = true;
+				break;
+			case logic::attr::hw_data:
+				output("HW");
+				break;
+			default:
+				output("Illegual attr");
+				break;
+			}
+			if(para) {
+				output(std::to_string(o.para_));
+				if(o.hex_) output(", HEX");
+				else output(", DEC");
+				output(", " + std::to_string(o.idx_));
+			}
+			output("\n");
+		}
+
+
 		// ステータス
 		bool status_(const utils::strings& ss)
 		{
@@ -124,7 +157,7 @@ namespace tools {
 		}
 
 
-		// バス定義
+		// カレント・バス
 		bool cur_bus_(const utils::strings& ss)
 		{
 			if(ss[0] == "help") {
@@ -156,6 +189,58 @@ namespace tools {
 			}
 
 			return false;
+		}
+
+
+		// カレント・オプション
+		bool cur_option_(const utils::strings& ss)
+		{
+			if(ss[0] == "help") {
+				output("option [Type(const,arg,chip,hw) Para ArgType(dec,hex) ArgIdx(1-16)]\n");
+				return true;
+			}
+
+			if(ss.size() == 1) {
+				output_option_(opt_);
+				return true;
+			}
+
+			logic::option_t opt;
+
+			uint32_t argc = 0; 
+			if(ss[1] == "const") opt.attr_ = logic::attr::const_data;
+			else if(ss[1] == "arg") { opt.attr_ = logic::attr::argument_data; argc = 5; }
+			else if(ss[1] == "chip") { opt.attr_ = logic::attr::chip_data; argc = 5; }
+			else if(ss[1] == "hw") opt.attr_ = logic::attr::hw_data;
+			else {
+				return false;
+			}
+
+			if(argc == 0) return true;
+
+			if(ss.size() < argc) {
+				return false;
+			}
+
+			opt.para_ = get_value_(ss[2]);
+			if(opt.para_ >= 1 && opt.para_ <= 16) {
+			} else {
+				return false;
+			}
+
+			if(ss[3] == "dec") opt.hex_ = false;
+			else if(ss[3] == "hex") opt.hex_ = true;
+			else return false;
+
+			opt.idx_ = get_value_(ss[4]);
+			if(opt.idx_ >= 1 && opt.idx_ <= 16) {
+			} else {
+				return false;
+			}
+
+			opt_ = opt;
+
+			return true;
 		}
 
 
@@ -201,6 +286,23 @@ namespace tools {
 			} else {
 				logic_.set_logic(ch_, pos, value);
 			}
+			logic_.set_option(pos, opt_);
+		}
+
+
+		uint32_t get_value_(uint32_t pos)
+		{
+			uint32_t val = 0;
+			if(bus_enable_) {
+				uint32_t idx = 0;
+				for(auto ch : bus_) {
+					val |= logic_.get_logic(ch, pos) << idx;
+					++idx;
+				}
+			} else {
+				val = logic_.get_logic(ch_, pos);
+			}
+			return val;
 		}
 
 
@@ -208,7 +310,7 @@ namespace tools {
 		bool set_(const utils::strings& ss)
 		{
 			if(ss[0] == "help") {
-				output("set [Value] ...\n");
+				output("set Position [Value] ...\n");
 				return true;
 			}
 
@@ -235,10 +337,10 @@ namespace tools {
 					}
 					for(auto ch : s) {
 						if(ch == '0') {
-							logic_.set_logic(ch_, pos, 0);
+							set_value_(pos, 0);
 							++pos;
 						} else if(ch == '1') {
-							logic_.set_logic(ch_, pos, 1);
+							set_value_(pos, 1);
 							++pos;
 						} else if(ch == '"') {
 						} else {
@@ -255,6 +357,33 @@ namespace tools {
 					++pos;
 				}
 			}
+			return true;
+		}
+
+
+		// 値取得
+		bool get_(const utils::strings& ss)
+		{
+			if(ss[0] == "help") {
+				output("get Position\n");
+				return true;
+			}
+
+			auto pos = get_pos_(1, ss);
+			if(pos < 0 || pos >= logic_.size()) return false;
+
+			auto v = get_value_(pos);
+			if(bus_enable_) {
+				output((boost::format("0x%X") % v).str());
+			} else {
+				output((boost::format("%d") % v).str());
+			}
+
+			const auto& l = logic_.get(pos);
+			const auto& o = l.option_;
+			output_(" ");
+			output_option_(o);
+
 			return true;
 		}
 
@@ -428,7 +557,7 @@ namespace tools {
 			@brief  コンストラクター
 		*/
 		//-------------------------------------------------------------//
-		logic_edit(logic& lg) : logic_(lg), ch_(0), bus_(), bus_enable_(false) { }
+		logic_edit(logic& lg) : logic_(lg), opt_(), ch_(0), bus_(), bus_enable_(false) { }
 
 
 		//-------------------------------------------------------------//
@@ -473,9 +602,11 @@ namespace tools {
 					status_(ss);
 					cur_ch_(ss);
 					cur_bus_(ss);
+					cur_option_(ss);
 					clear_(ss);
 					create_(ss);
 					set_(ss);
+					get_(ss);
 					clock_(ss);
 					fill_(ss);
 					flip_(ss);
@@ -489,9 +620,11 @@ namespace tools {
 			if(cmd == "status") ret = status_(ss);
 			else if(cmd == "ch") ret = cur_ch_(ss);
 			else if(cmd == "bus") ret = cur_bus_(ss);
+			else if(cmd == "option") ret = cur_option_(ss);
 			else if(cmd == "clear") ret = clear_(ss);
 			else if(cmd == "create") ret = create_(ss);
 			else if(cmd == "set") ret = set_(ss);
+			else if(cmd == "get") ret = get_(ss);
 			else if(cmd == "clock") ret = clock_(ss);
 			else if(cmd == "fill") ret = fill_(ss);
 			else if(cmd == "flip") ret = flip_(ss);
