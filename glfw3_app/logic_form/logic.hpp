@@ -159,6 +159,22 @@ namespace tools {
 		}
 
 
+		//-------------------------------------------------------------//
+		/*!
+			@brief  オプション取得
+			@param[in]	pos	位置
+			@param[in]	opt	オプション
+		*/
+		//-------------------------------------------------------------//
+		const option_t& get_option(uint32_t pos)
+		{
+			if(pos >= level_.size()) {
+				static option_t opt;
+				return opt;
+			}
+			return level_[pos].option_;
+		}
+
 
 		//-------------------------------------------------------------//
 		/*!
@@ -357,7 +373,7 @@ namespace tools {
 		//-------------------------------------------------------------//
 		bool save(utils::file_io& fio, uint32_t ch)
 		{
-			fio.put((boost::format("# CH %d\n") % ch).str());
+			fio.put((boost::format("# Chanel %d\n") % ch).str());
 			fio.put("CH:" + std::to_string(ch) + "\n");
 			uint32_t cn = 0;
 			for(uint32_t i = 0; i < size(); ++i) {
@@ -396,6 +412,36 @@ namespace tools {
 			fio.put((boost::format("# Logic stream %d\n") % size()).str());
 			fio.put("NUM:" + std::to_string(size()) + "\n\n");			
 
+			// オプション・セーブ
+			fio.put("# Option\n");
+			for(uint32_t i = 0; i < size(); ++i) {
+				auto o = get_option(i);
+				switch(o.attr_) {
+				case attr::const_data:
+					fio.put("OPT:\nATTR:CONST\n");
+					break;
+				case attr::argument_data:
+					fio.put("OPT:\nATTR:ARG\n");
+					fio.put("PARA:" + std::to_string(o.para_) + "\n");
+					fio.put("HEX:" + std::to_string(o.hex_) + "\n");
+					fio.put("IDX:" + std::to_string(o.idx_) + "\n");
+					break;
+				case attr::chip_data:
+					fio.put("OPT:\nATTR:CHIP\n");
+					fio.put("PARA:" + std::to_string(o.para_) + "\n");
+					fio.put("HEX:" + std::to_string(o.hex_) + "\n");
+					fio.put("IDX:" + std::to_string(o.idx_) + "\n");
+					break;
+				case attr::hw_data:
+					fio.put("OPT:\nATTR:HW\n");
+					break;
+				default:
+					error_ = "Option attribute";
+					return false;
+				}
+				fio.put(";\n");
+			}
+
 			for(uint32_t ch = 0; ch < 32; ++ch) {
 				if(count1(ch) == 0) continue;
 				if(!save(fio, ch)) {
@@ -431,12 +477,15 @@ namespace tools {
 			enum class decode_func {
 				none,
 				num,
-				ch,
+				opr,
+				opt,
 				stream
 			};
 			decode_func func = decode_func::num;
 			uint32_t cch = 0;
 			uint32_t pos = 0;
+			option_t opt;
+			uint32_t optidx = 0;
 			while(!fio.eof()) {
 				auto s = fio.get_line();
 				if(s.empty()) continue;
@@ -447,7 +496,7 @@ namespace tools {
 						auto num = get_decimal_(&s[4]);
 						if(num) {
 							create(*num);
-							func = decode_func::ch;
+							func = decode_func::opr;
 						} else {
 							error_ = "Illegal 'NUM:' number"; 
 							return false;
@@ -457,7 +506,7 @@ namespace tools {
 						return false;
 					}
 					break;
-				case decode_func::ch:
+				case decode_func::opr:
 					if(s.find("CH:") != std::string::npos) {
 						auto ch = get_decimal_(&s[3]);
 						if(ch) {
@@ -468,9 +517,59 @@ namespace tools {
 							error_ = "Illegal 'CH:' number"; 
 							return false;
 						}
+					} else if(s == "OPT:") {
+						func = decode_func::opt;
 					} else {
 						error_ = "Illegal file"; 
 						return false;
+					}
+					break;
+				case decode_func::opt:
+					if(s.find("ATTR:") != std::string::npos) {
+						auto key = s.substr(5);
+						if(key == "CONST") {
+							opt.attr_ = attr::const_data;
+						} else if(key == "ARG") {
+							opt.attr_ = attr::argument_data;
+						} else if(key == "CHIP") {
+							opt.attr_ = attr::chip_data;
+						} else if(key == "HW") {
+							opt.attr_ = attr::hw_data;
+						} else {
+							error_ = "Option Attribute";
+							return false;
+						}
+					} else if(s.find("PARA:") != std::string::npos) {
+						auto n = get_decimal_(&s[5]);
+						if(n) {
+							opt.para_ = *n;
+						} else {
+							error_ = "Option Para";
+							return false;
+						}
+					} else if(s.find("HEX:") != std::string::npos) {
+						auto n = get_decimal_(&s[4]);
+						if(n) {
+							opt.hex_ = *n;
+						} else {
+							error_ = "Option Para";
+							return false;
+						}
+					} else if(s.find("IDX:") != std::string::npos) {
+						auto n = get_decimal_(&s[4]);
+						if(n) {
+							opt.idx_ = *n;
+						} else {
+							error_ = "Option Para";
+							return false;
+						}
+					} else if(s == ";") {
+						set_option(optidx, opt);
+						++optidx;
+						func = decode_func::opr;
+					} else {
+						error_ = "Illegal Option";
+						return false; 
 					}
 					break;
 				case decode_func::stream:
@@ -478,7 +577,7 @@ namespace tools {
 						if(c == '0') set_logic(cch, pos, false);
 						else if(c == '1') set_logic(cch, pos, true);
 						else if(c ==';') {
-							func = decode_func::ch;
+							func = decode_func::opr;
 						} else {
 							error_ = "Illegal bits field: '";
 							error_ += c;
