@@ -34,6 +34,8 @@ GLFW application
  - ※複数回、コンソールを開きなおす必要がある。
 
 ```
+   pacman -S gcc
+   pacman -S make
    pacman -S mingw-w64-x86_64-gcc
    pacman -S mingw-w64-x86_64-clang
    pacman -S mingw-w64-x86_64-boost   
