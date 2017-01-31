@@ -36,6 +36,7 @@ GLFW application
 ```
    pacman -S gcc
    pacman -S make
+   pacman -S git
    pacman -S mingw-w64-x86_64-gcc
    pacman -S mingw-w64-x86_64-clang
    pacman -S mingw-w64-x86_64-boost   
