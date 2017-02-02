@@ -45,6 +45,9 @@ namespace gl {
 		vtx::spos		size_;
 		vtx::srect		rect_;
 
+		vtx::spos		psize_;
+		vtx::fpos		dpi_;
+
 		int				recv_files_id_;
 		utils::strings	recv_files_path_;
 
@@ -91,7 +94,7 @@ namespace gl {
 		*/
 		//-----------------------------------------------------------------//
 		core() : window_(0),
-				 best_size_(0), limit_size_(0), size_(0), rect_(0),
+				 best_size_(0), limit_size_(0), size_(0), rect_(0), psize_(0), dpi_(0),
 				 recv_files_id_(0), recv_files_path_(),
 				 title_(),
 #ifdef __APPLE__
@@ -159,6 +162,24 @@ namespace gl {
 		*/
 		//-----------------------------------------------------------------//
 		const vtx::spos& get_size() const { return size_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	スクリーンの物理サイズを返す（ｍｍ）
+			@return	スクリーンの物理サイズ
+		*/
+		//-----------------------------------------------------------------//
+		const vtx::spos& get_physical_size() const { return psize_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	DPI を返す
+			@return	DPI
+		*/
+		//-----------------------------------------------------------------//
+		const vtx::fpos& get_dpi() const { return dpi_; }
 
 
 		//-----------------------------------------------------------------//

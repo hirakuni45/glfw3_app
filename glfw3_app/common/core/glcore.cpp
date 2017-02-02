@@ -297,6 +297,17 @@ namespace gl {
 		best_size_.x  = vm->width;
 		best_size_.y  = vm->height;
 		limit_size_ = best_size_  / 2;	///< 最小のサイズはベストの半分とする
+
+		// 物理サイズを取得（単位 [mm]）
+		int widthMM, heightMM;
+		glfwGetMonitorPhysicalSize(monitor, &widthMM, &heightMM);
+		psize_.x = widthMM;
+		psize_.y = heightMM;
+
+		// DPI
+		dpi_.x = static_cast<float>(vm->width)  / (static_cast<float>(widthMM)  / 25.4f);
+		dpi_.y = static_cast<float>(vm->height) / (static_cast<float>(heightMM) / 25.4f);
+
 ///		setlocale(LC_CTYPE, "jpn");
 		setlocale(LC_CTYPE, "");
 
