@@ -26,8 +26,12 @@
 #ifndef  _MEMGUARD_H_
 #define  _MEMGUARD_H_
 
+#if 0
 #ifdef strdup
 #undef strdup
+#endif
+#else
+#include <string.h>
 #endif
 
 #ifdef NOFRENDO_DEBUG
@@ -52,7 +56,6 @@ extern void _my_free(void **data);
 extern char *_my_strdup(const char *string);
 
 #endif /* !NOFRENDO_DEBUG */
-
 
 extern void mem_cleanup(void);
 extern void mem_checkblocks(void);

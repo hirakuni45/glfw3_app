@@ -26,8 +26,8 @@
 #ifndef _NES_MMC_H_
 #define _NES_MMC_H_
 
-#include <libsnss.h>
-#include <nes_apu.h>
+#include "libsnss.h"
+#include "nes_apu.h"
 
 #define  MMC_LASTBANK      -1
 
