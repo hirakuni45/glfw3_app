@@ -162,7 +162,7 @@ void mmc_bankrom(int size, uint32 address, int bank)
 /* Check to see if this mapper is supported */
 bool mmc_peek(int map_num)
 {
-   mapintf_t **map_ptr = mappers;
+   const mapintf_t **map_ptr = mappers;
 
    while (NULL != *map_ptr)
    {
@@ -230,7 +230,7 @@ void mmc_destroy(mmc_t **nes_mmc)
 mmc_t *mmc_create(rominfo_t *rominfo)
 {
    mmc_t *temp;
-   mapintf_t **map_ptr;
+   const mapintf_t **map_ptr;
   
    for (map_ptr = mappers; (*map_ptr)->number != rominfo->mapper_number; map_ptr++)
    {

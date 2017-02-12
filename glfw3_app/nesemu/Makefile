@@ -23,7 +23,7 @@ endif
 # 'debug' or 'release'
 BUILD		=	release
 
-VPATH		=	../common ./emu
+VPATH		=	../common emu
 
 CSOURCES	=	minizip/ioapi.c \
 				minizip/unzip.c \
@@ -48,7 +48,6 @@ CSOURCES	=	minizip/ioapi.c \
 				./emu/nes/nes_rom.c \
 				./emu/nes/nesinput.c \
 				./emu/nes/nesstate.c \
-				./emu/nes/mmclist.c \
 				./emu/sndhrdw/fds_snd.c \
 				./emu/sndhrdw/mmc5_snd.c \
 				./emu/sndhrdw/nes_apu.c \
@@ -96,6 +95,7 @@ CSOURCES	=	minizip/ioapi.c \
 				./emu/libsnss/libsnss.c
 
 PSOURCES	=	main.cpp \
+				osd.cpp \
 				core/glcore.cpp \
 				core/device.cpp \
 				core/ftimg.cpp \
@@ -181,7 +181,7 @@ INC_SYS		+=	$(LOCAL_PATH)/opt/jpeg-turbo/include
 LIBDIR		+=	$(LOCAL_PATH)/opt/jpeg-turbo/lib
 endif
 
-PINC_APP	=	. ../common
+PINC_APP	=	. ../common ./emu
 CINC_APP	=	. ../common ./emu ./emu/cpu ./emu/nes ./emu/mappers ./emu/sndhrdw ./emu/libsnss
 
 INC_S	=	$(addprefix -isystem , $(INC_SYS))

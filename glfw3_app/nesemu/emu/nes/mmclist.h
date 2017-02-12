@@ -28,7 +28,7 @@
 
 #include "nes_mmc.h"
 
-extern mapintf_t *mappers[];
+extern const mapintf_t *mappers[];
 
 #endif /* !_MMCLIST_H_ */
 
