@@ -36,11 +36,13 @@ namespace app {
 
 		static const int nes_width_  = 256;
 		static const int nes_height_ = 240;
+		static const int audio_len_ = 44100 / 60 * 2;
 
 		nes_t*	nes_;
 
-		uint8_t		sound_[1024];
+		uint8_t		sound_[audio_len_];
 		al::audio	audio_;
+		uint32_t	frame_;
 
 		uint8_t	fb_[nes_width_ * nes_height_ * 4];
 
@@ -122,7 +124,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		nesemu(utils::director<core>& d) : director_(d),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
-			nes_(nullptr), rom_active_(false)
+			nes_(nullptr), frame_(0), rom_active_(false)
 		{ }
 
 
@@ -168,7 +170,7 @@ namespace app {
 			input_register(&inp_[1]);
 
 			audio_ = al::create_audio(al::audio_format::PCM8_MONO);
-			audio_->create(44100, 44100 / 60);
+			audio_->create(44100, audio_len_);
 
 //			auto path = core.get_current_path();
 
@@ -211,11 +213,10 @@ namespace app {
 				nes_emulate(1);
 
 				// copy sound
-				{
-					int len = 44100 / 60;
-					apu_process(sound_, len);
+				if(frame_ & 1) {
+					apu_process(sound_, audio_len_);
 					al::sound& sound = director_.at().sound_;
-					for(int i = 0; i < len; ++i) {
+					for(int i = 0; i < audio_len_; ++i) {
 						al::pcm8_m w(sound_[i]);
 						audio_->put(i, w);
 					}
@@ -242,6 +243,8 @@ namespace app {
 				}
 
 			}
+
+			++frame_;
 
 			texfb_.flip();
 
