@@ -22,23 +22,17 @@
 ** NES hardware related routines
 ** $Id: nes.c,v 1.2 2001/04/27 14:37:11 neil Exp $
 */
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <noftypes.h>
-#include "nes6502.h"
-#include <log.h>
-#include <osd.h>
-#include <gui.h>
-#include <nes.h>
-#include <nes_apu.h>
-#include <nes_ppu.h>
-#include <nes_rom.h>
-#include <nes_mmc.h>
-#include <vid_drv.h>
-#include <nofrendo.h>
 
+#include "nes6502.h"
+#include "log.h"
+#include "nes.h"
+#include "nes_apu.h"
+#include "nes_ppu.h"
+#include "nes_rom.h"
+#include "nes_mmc.h"
 
 #define  NES_CLOCK_DIVIDER    12
 //#define  NES_MASTER_CLOCK     21477272.727272727272
@@ -332,72 +326,21 @@ static void nes_renderframe(bool draw_flag)
    nes.scanline = 0;
 }
 
-static void system_video(bool draw)
+void nes_emulate(int frames)
 {
-   /* TODO: hack */
-   if (false == draw)
-   {
-      gui_frame(false);
-      return;
-   }
+	nes.scanline_cycles = 0;
+	nes.fiq_cycles = (int) NES_FIQ_PERIOD;
 
-   /* blit the NES screen to our video surface */
-   vid_blit(nes.vidbuf, 0, (NES_SCREEN_HEIGHT - NES_VISIBLE_HEIGHT) / 2,
-            0, 0, NES_SCREEN_WIDTH, NES_VISIBLE_HEIGHT);
-
-   /* overlay our GUI on top of it */
-   gui_frame(true);
-
-   /* blit to screen */
-   vid_flush();
-
-   /* grab input */
-   osd_getinput();
-}
-
-/* main emulation loop */
-void nes_emulate(void)
-{
-   int last_ticks, frames_to_render;
-
-   osd_setsound(nes.apu->process);
-
-   last_ticks = nofrendo_ticks;
-   frames_to_render = 0;
-   nes.scanline_cycles = 0;
-   nes.fiq_cycles = (int) NES_FIQ_PERIOD;
-
-   while (false == nes.poweroff)
-   {
-      if (nofrendo_ticks != last_ticks)
-      {
-         int tick_diff = nofrendo_ticks - last_ticks;
-
-         frames_to_render += tick_diff;
-         gui_tick(tick_diff);
-         last_ticks = nofrendo_ticks;
-      }
-
-      if (true == nes.pause)
-      {
-         /* TODO: dim the screen, and pause/silence the apu */
-         system_video(true);
-         frames_to_render = 0;
-      }
-      else if (frames_to_render > 1)
-      {
-         frames_to_render--;
-         nes_renderframe(false);
-         system_video(false);
-      }
-      else if ((1 == frames_to_render && true == nes.autoframeskip)
-               || false == nes.autoframeskip)
-      {
-         frames_to_render = 0;
-         nes_renderframe(true);
-         system_video(true);
-      }
-   }
+	if(frames != 0) {
+		while(frames > 0) {
+			if(frames == 1) {
+				nes_renderframe(true);
+			} else {
+				nes_renderframe(false);
+			}
+			--frames;
+		}
+	}
 }
 
 static void mem_trash(uint8 *buffer, int length)
@@ -424,29 +367,25 @@ void nes_reset(int reset_type)
    nes6502_reset();
 
    nes.scanline = 241;
-
-   gui_sendmsg(GUI_GREEN, "NES %s", 
-               (HARD_RESET == reset_type) ? "powered on" : "reset");
 }
 
-void nes_destroy(nes_t **machine)
+void nes_destroy(nes_t *machine)
 {
-   if (*machine)
+   if (machine != NULL)
    {
-      rom_free(&(*machine)->rominfo);
-      mmc_destroy(&(*machine)->mmc);
-      ppu_destroy(&(*machine)->ppu);
-      apu_destroy(&(*machine)->apu);
-      bmp_destroy(&(*machine)->vidbuf);
-      if ((*machine)->cpu)
+      rom_free(&machine->rominfo);
+      mmc_destroy(&machine->mmc);
+      ppu_destroy(&machine->ppu);
+      apu_destroy(&machine->apu);
+      bmp_destroy(&machine->vidbuf);
+      if (machine->cpu != NULL)
       {
-         if ((*machine)->cpu->mem_page[0])
-            free((*machine)->cpu->mem_page[0]);
-         free((*machine)->cpu);
+         if (machine->cpu->mem_page[0])
+            free(machine->cpu->mem_page[0]);
+         free(machine->cpu);
       }
 
-      free(*machine);
-      *machine = NULL;
+      free(machine);
    }
 }
 
@@ -496,7 +435,7 @@ int nes_insertcart(const char *filename, nes_t *machine)
    return 0;
 
 _fail:
-   nes_destroy(&machine);
+   nes_destroy(machine);
    return -1;
 }
 
@@ -505,7 +444,7 @@ _fail:
 nes_t *nes_create(void)
 {
    nes_t *machine;
-   sndinfo_t osd_sound;
+///   sndinfo_t osd_sound;
    int i;
 
    machine = malloc(sizeof(nes_t));
@@ -542,8 +481,8 @@ nes_t *nes_create(void)
    machine->cpu->write_handler = machine->writehandler;
 
    /* apu */
-   osd_getsoundinfo(&osd_sound);
-   machine->apu = apu_create(0, osd_sound.sample_rate, NES_REFRESH_RATE, osd_sound.bps);
+//   osd_getsoundinfo(&osd_sound);
+   machine->apu = apu_create(0, 22050, NES_REFRESH_RATE, 8);
 
    if (NULL == machine->apu)
       goto _fail;
@@ -563,7 +502,7 @@ nes_t *nes_create(void)
    return machine;
 
 _fail:
-   nes_destroy(&machine);
+   nes_destroy(machine);
    return NULL;
 }
 

@@ -1,3 +1,4 @@
+#pragma once
 /*
 ** Nofrendo (c) 1998-2000 Matthew Conte (matt@conte.com)
 **
@@ -22,17 +23,13 @@
 ** NES hardware related definitions / prototypes
 ** $Id: nes.h,v 1.2 2001/04/27 14:37:11 neil Exp $
 */
+#include "bitmap.h"
 
-#ifndef _NES_H_
-#define _NES_H_
-
-#include <noftypes.h>
-#include <nes_apu.h>
-#include <nes_mmc.h>
-#include <nes_ppu.h>
-#include <nes_rom.h>
+#include "nes_apu.h"
+#include "nes_mmc.h"
+#include "nes_ppu.h"
+#include "nes_rom.h"
 #include "nes6502.h"
-#include <bitmap.h>
 
 /* Visible (NTSC) screen height */
 #ifndef NES_VISIBLE_HEIGHT
@@ -99,20 +96,18 @@ extern void nes_getcontext(nes_t *machine);
 extern void nes_setcontext(nes_t *machine);
 
 extern nes_t *nes_create(void);
-extern void nes_destroy(nes_t **machine);
+extern void nes_destroy(nes_t *machine);
 extern int nes_insertcart(const char *filename, nes_t *machine);
 
 extern void nes_setfiq(uint8 state);
 extern void nes_nmi(void);
 extern void nes_irq(void);
-extern void nes_emulate(void);
+extern void nes_emulate(int frame);
 
 extern void nes_reset(int reset_type);
 
 extern void nes_poweroff(void);
 extern void nes_togglepause(void);
-
-#endif /* _NES_H_ */
 
 /*
 ** $Log: nes.h,v $

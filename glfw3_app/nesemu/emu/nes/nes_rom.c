@@ -27,17 +27,12 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <noftypes.h>
-#include <nes_rom.h>
-#include <intro.h>
-#include <nes_mmc.h>
-#include <nes_ppu.h>
-#include <nes.h>
-#include <gui.h>
-#include <log.h>
-#include <osd.h>
 
-extern char *osd_getromdata();
+#include "nes_rom.h"
+#include "nes_mmc.h"
+#include "nes_ppu.h"
+#include "nes.h"
+#include "log.h"
 
 /* Max length for displayed filename */
 #define  ROM_DISP_MAXLEN   20
@@ -93,7 +88,7 @@ static void rom_savesram(rominfo_t *rominfo)
    if (rominfo->flags & ROM_FLAG_BATTERY)
    {
       strncpy(fn, rominfo->filename, PATH_MAX);
-      osd_newextension(fn, ".sav");
+      str_swapext(fn, ".sav");
 
       fp = fopen(fn, "wb");
       if (NULL != fp)
@@ -116,7 +111,7 @@ static void rom_loadsram(rominfo_t *rominfo)
    if (rominfo->flags & ROM_FLAG_BATTERY)
    {
       strncpy(fn, rominfo->filename, PATH_MAX);
-      osd_newextension(fn, ".sav");
+      str_swapext(fn, ".sav");
 
       fp = fopen(fn, "rb");
       if (NULL != fp)
@@ -135,7 +130,7 @@ static int rom_allocsram(rominfo_t *rominfo)
    rominfo->sram = malloc(SRAM_BANK_LENGTH * rominfo->sram_banks);
    if (NULL == rominfo->sram)
    {
-      gui_sendmsg(GUI_RED, "Could not allocate space for battery RAM");
+///      gui_sendmsg(GUI_RED, "Could not allocate space for battery RAM");
       return -1;
    }
 
@@ -199,7 +194,7 @@ static int rom_loadrom(unsigned char **rom, rominfo_t *rominfo)
       rominfo->vram = malloc(VRAM_LENGTH);
       if (NULL == rominfo->vram)
       {
-         gui_sendmsg(GUI_RED, "Could not allocate space for VRAM");
+///         gui_sendmsg(GUI_RED, "Could not allocate space for VRAM");
          return -1;
       }
       memset(rominfo->vram, 0, VRAM_LENGTH);
@@ -219,7 +214,7 @@ static void rom_checkforpal(rominfo_t *rominfo)
    ASSERT(rominfo);
 
    strncpy(filename, rominfo->filename, PATH_MAX);
-   osd_newextension(filename, ".pal");
+   str_swapext(filename, ".pal");
 
    fp = fopen(filename, "rb");
    if (NULL == fp)
@@ -250,7 +245,7 @@ static FILE *rom_findrom(const char *filename, rominfo_t *rominfo)
       return NULL;
 
    /* Make a copy of the name so we can extend it */
-   osd_fullname(rominfo->filename, filename);
+///   osd_fullname(rominfo->filename, filename);
 
    fp = _fopen(rominfo->filename, "rb");
    if (NULL == fp)
@@ -342,7 +337,7 @@ static int rom_getheader(unsigned char **rom, rominfo_t *rominfo)
 
    if (memcmp(head.ines_magic, ROM_INES_MAGIC, 4))
    {
-      gui_sendmsg(GUI_RED, "%s is not a valid ROM image", rominfo->filename);
+///      gui_sendmsg(GUI_RED, "%s is not a valid ROM image", rominfo->filename);
       return -1;
    }
 
@@ -402,8 +397,8 @@ char *rom_getinfo(rominfo_t *rominfo)
 
    /* Look to see if we were given a path along with filename */
    /* TODO: strip extensions */
-   if (strrchr(rominfo->filename, PATH_SEP))
-      strncpy(romname, strrchr(rominfo->filename, PATH_SEP) + 1, PATH_MAX);
+   if (strrchr(rominfo->filename, '/'))
+      strncpy(romname, strrchr(rominfo->filename, '/') + 1, PATH_MAX);
    else
       strncpy(romname, rominfo->filename, PATH_MAX);
 
@@ -438,7 +433,28 @@ char *rom_getinfo(rominfo_t *rominfo)
 /* Load a ROM image into memory */
 rominfo_t *rom_load(const char *filename)
 {
-   unsigned char *rom=(unsigned char*)osd_getromdata();
+	FILE *fp = fopen(filename, "rb");
+	if(fp == NULL) {
+		printf("Can't open ROM file: %s\n", filename);
+		return NULL;
+	}
+
+	fseek(fp, 0, SEEK_END);
+	long sz = ftell( fp );
+ 	unsigned char *rom = (unsigned char *)malloc(sz);
+
+	fseek(fp, 0, SEEK_SET);
+
+	if(fread(rom, 1, sz, fp) != sz) {
+		free(rom);
+		fclose(fp);
+		printf("Read error ROM file: %s (%ld)\n", filename, sz);
+		return NULL;
+	}
+
+	fclose(fp);
+//	printf("LOAD ROM: %s (%d)\n", filename, sz);
+
    rominfo_t *rominfo;
 
    rominfo = malloc(sizeof(rominfo_t));
@@ -454,7 +470,7 @@ rominfo_t *rom_load(const char *filename)
    /* Make sure we really support the mapper */
    if (false == mmc_peek(rominfo->mapper_number))
    {
-      gui_sendmsg(GUI_RED, "Mapper %d not yet implemented", rominfo->mapper_number);
+///      gui_sendmsg(GUI_RED, "Mapper %d not yet implemented", rominfo->mapper_number);
       goto _fail;
    }
 
@@ -475,7 +491,7 @@ rominfo_t *rom_load(const char *filename)
    /* See if there's a palette we can load up */
 //   rom_checkforpal(rominfo);
 
-   gui_sendmsg(GUI_GREEN, "ROM loaded: %s", rom_getinfo(rominfo));
+///   gui_sendmsg(GUI_GREEN, "ROM loaded: %s", rom_getinfo(rominfo));
 
    return rominfo;
 
@@ -489,7 +505,7 @@ void rom_free(rominfo_t **rominfo)
 {
    if (NULL == *rominfo)
    {
-      gui_sendmsg(GUI_GREEN, "ROM not loaded");
+///      gui_sendmsg(GUI_GREEN, "ROM not loaded");
       return;
    }
 
@@ -514,7 +530,7 @@ void rom_free(rominfo_t **rominfo)
 
    free(*rominfo);
 
-   gui_sendmsg(GUI_GREEN, "ROM freed");
+///   gui_sendmsg(GUI_GREEN, "ROM freed");
 }
 
 /*

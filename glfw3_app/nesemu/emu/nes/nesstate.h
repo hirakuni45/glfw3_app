@@ -1,3 +1,4 @@
+#pragma once
 /*
 ** Nofrendo (c) 1998-2000 Matthew Conte (matt@conte.com)
 **
@@ -22,17 +23,11 @@
 ** state saving header
 ** $Id: nesstate.h,v 1.2 2001/04/27 14:37:11 neil Exp $
 */
-
-#ifndef _NESSTATE_H_
-#define _NESSTATE_H_
-
-#include <nes.h>
+#include "nes.h"
 
 extern void state_setslot(int slot);
 extern int state_load();
 extern int state_save();
-
-#endif /* _NESSTATE_H_ */
 
 /*
 ** $Log: nesstate.h,v $

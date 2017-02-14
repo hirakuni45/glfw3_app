@@ -22,16 +22,15 @@
 ** NES Memory Management Controller (mapper) emulation
 ** $Id: nes_mmc.c,v 1.2 2001/04/27 14:37:11 neil Exp $
 */
-
 #include <string.h>
-#include <noftypes.h>
+
 #include "nes6502.h"
-#include <nes_mmc.h>
-#include <nes_ppu.h>
-#include <libsnss.h>
-#include <log.h>
-#include <mmclist.h>
-#include <nes_rom.h>
+#include "nes_mmc.h"
+#include "nes_ppu.h"
+#include "libsnss.h"
+#include "log.h"
+#include "mmclist.h"
+#include "nes_rom.h"
 
 #define  MMC_8KROM         (mmc.cart->rom_banks * 2)
 #define  MMC_16KROM        (mmc.cart->rom_banks)

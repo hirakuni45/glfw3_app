@@ -25,19 +25,14 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <noftypes.h>
-#include <nes_ppu.h>
-#include <nes.h>
-#include <gui.h>
+
+#include "nes_ppu.h"
+#include "nes.h"
 #include "nes6502.h"
-#include <log.h>
-#include <nes_mmc.h>
-
-#include <bitmap.h>
-#include <vid_drv.h>
-#include <nes_pal.h>
-#include <nesinput.h>
-
+#include "log.h"
+#include "nes_mmc.h"
+#include "nesinput.h"
+#include "nes_pal.h"
 
 /* PPU access */
 #define  PPU_MEM(x)           ppu.page[(x) >> 10][(x)]
@@ -527,6 +522,7 @@ void ppu_write(uint32 address, uint8 value)
 ** Note that we set it up 3 times so that we flip bits on the primary
 ** NES buffer for priorities
 */
+#if 0
 static void ppu_buildpalette(ppu_t *src_ppu, rgb_t *pal)
 {
    int i;
@@ -541,14 +537,8 @@ static void ppu_buildpalette(ppu_t *src_ppu, rgb_t *pal)
       src_ppu->curpal[i].b = src_ppu->curpal[i + 64].b
                            = src_ppu->curpal[i + 128].b = pal[i].b;
    }
-
-   for (i = 0; i < GUI_TOTALCOLORS; i++)
-   {
-      src_ppu->curpal[i + 192].r = gui_pal[i].r;
-      src_ppu->curpal[i + 192].g = gui_pal[i].g;
-      src_ppu->curpal[i + 192].b = gui_pal[i].b;
-   }
 }
+#endif
 
 /* build the emulator specific palette based on a 64-entry palette
 ** input palette can be either nes_palette or a 64-entry RGB palette
@@ -556,8 +546,8 @@ static void ppu_buildpalette(ppu_t *src_ppu, rgb_t *pal)
 */
 void ppu_setpal(ppu_t *src_ppu, rgb_t *pal)
 {
-   ppu_buildpalette(src_ppu, pal);
-   vid_setpalette(src_ppu->curpal);
+///   ppu_buildpalette(src_ppu, pal);
+///   vid_setpalette(src_ppu->curpal);
 }
 
 void ppu_setdefaultpal(ppu_t *src_ppu)
@@ -1113,6 +1103,7 @@ bool ppu_checkzapperhit(bitmap_t *bmp, int x, int y)
 }
 */
 
+#if 0
 /*************************************************/
 /* TODO: all this stuff should go somewhere else */
 /*************************************************/
@@ -1160,7 +1151,7 @@ INLINE void draw_deadsprite(bitmap_t *bmp, int x, int y, int height)
       vid += bmp->pitch;
    }
 }
-
+#endif
 
 /* Stuff for the OAM viewer */
 static void draw_sprite(bitmap_t *bmp, int x, int y, uint8 tile_num, uint8 attrib)
@@ -1213,12 +1204,12 @@ void ppu_dumpoam(bitmap_t *bmp, int x_loc, int y_loc)
       else
          y_pos = ((sprite & 0xF0) >> 1) + (sprite >> 4) + y_loc;
 
-      draw_box(bmp, x_pos, y_pos, height);
+///      draw_box(bmp, x_pos, y_pos, height);
 
       if (spr_ptr->y_loc && spr_ptr->y_loc < 240)
          draw_sprite(bmp, x_pos + 1, y_pos + 1, spr_ptr->tile, spr_ptr->atr);
-      else
-         draw_deadsprite(bmp, x_pos + 1, y_pos + 1, height);
+///      else
+///         draw_deadsprite(bmp, x_pos + 1, y_pos + 1, height);
 
       spr_ptr++;
    }

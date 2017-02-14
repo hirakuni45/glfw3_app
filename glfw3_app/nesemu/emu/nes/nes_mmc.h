@@ -1,3 +1,4 @@
+#pragma once
 /*
 ** Nofrendo (c) 1998-2000 Matthew Conte (matt@conte.com)
 **
@@ -22,10 +23,7 @@
 ** NES Memory Management Controller (mapper) defines / prototypes
 ** $Id: nes_mmc.h,v 1.2 2001/04/27 14:37:11 neil Exp $
 */
-
-#ifndef _NES_MMC_H_
-#define _NES_MMC_H_
-
+#include "bitmap.h"
 #include "libsnss.h"
 #include "nes_apu.h"
 
@@ -81,8 +79,6 @@ extern void mmc_setcontext(mmc_t *src_mmc);
 extern bool mmc_peek(int map_num);
 
 extern void mmc_reset(void);
-
-#endif /* _NES_MMC_H_ */
 
 /*
 ** $Log: nes_mmc.h,v $

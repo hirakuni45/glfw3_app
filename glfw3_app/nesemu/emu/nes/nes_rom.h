@@ -1,3 +1,4 @@
+#pragma once
 /*
 ** Nofrendo (c) 1998-2000 Matthew Conte (matt@conte.com)
 **
@@ -22,12 +23,8 @@
 ** NES ROM loading/saving related defines / prototypes
 ** $Id: nes_rom.h,v 1.2 2001/04/27 14:37:11 neil Exp $
 */
-
-#ifndef _NES_ROM_H_
-#define _NES_ROM_H_
-
 #include <unistd.h>
-#include <osd.h>
+#include "nes_std.h"
 
 typedef enum
 {
@@ -65,9 +62,6 @@ extern int rom_checkmagic(const char *filename);
 extern rominfo_t *rom_load(const char *filename);
 extern void rom_free(rominfo_t **rominfo);
 extern char *rom_getinfo(rominfo_t *rominfo);
-
-
-#endif /* _NES_ROM_H_ */
 
 /*
 ** $Log: nes_rom.h,v $

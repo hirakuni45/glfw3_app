@@ -1,3 +1,4 @@
+#pragma once
 /*
 ** Nofrendo (c) 1998-2000 Matthew Conte (matt@conte.com)
 **
@@ -22,11 +23,8 @@
 ** NES Picture Processing Unit (PPU) emulation header file
 ** $Id: nes_ppu.h,v 1.2 2001/04/27 14:37:11 neil Exp $
 */
-
-#ifndef _NES_PPU_H_
-#define _NES_PPU_H_
-
-#include <bitmap.h>
+#include "bitmap.h"
+#include "nes_std.h"
 
 /* PPU register defines */
 #define  PPU_CTRL0            0x2000
@@ -105,7 +103,7 @@ typedef struct ppu_s
    ppuvromswitch_t vromswitch;
 
    /* copy of our current palette */
-   rgb_t curpal[256];
+///   rgb_t curpal[256];
 
    bool vram_accessible;
 
@@ -148,15 +146,13 @@ extern uint8 ppu_readhigh(uint32 address);
 extern void ppu_writehigh(uint32 address, uint8 value);
 
 /* rendering */
-extern void ppu_setpal(ppu_t *src_ppu, rgb_t *pal);
+/// extern void ppu_setpal(ppu_t *src_ppu, rgb_t *pal);
 extern void ppu_setdefaultpal(ppu_t *src_ppu);
 
 /* bleh */
-extern void ppu_dumppattern(bitmap_t *bmp, int table_num, int x_loc, int y_loc, int col);
-extern void ppu_dumpoam(bitmap_t *bmp, int x_loc, int y_loc);
-extern void ppu_displaysprites(bool display);
-
-#endif /* _NES_PPU_H_ */
+/// extern void ppu_dumppattern(bitmap_t *bmp, int table_num, int x_loc, int y_loc, int col);
+/// extern void ppu_dumpoam(bitmap_t *bmp, int x_loc, int y_loc);
+/// extern void ppu_displaysprites(bool display);
 
 /*
 ** $Log: nes_ppu.h,v $

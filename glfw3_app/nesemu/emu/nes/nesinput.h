@@ -1,3 +1,4 @@
+#pragma once
 /*
 ** Nofrendo (c) 1998-2000 Matthew Conte (matt@conte.com)
 **
@@ -22,9 +23,7 @@
 ** Platform independent input definitions
 ** $Id: nesinput.h,v 1.1.1.1 2001/04/27 07:03:54 neil Exp $
 */
-
-#ifndef _NESINPUT_H_
-#define _NESINPUT_H_
+#include "nes_std.h"
 
 /* NES control pad bitmasks */
 #define  INP_PAD_A         0x01
@@ -81,8 +80,6 @@ extern uint8 input_get(int type);
 extern void input_register(nesinput_t *input);
 extern void input_event(nesinput_t *input, int state, int value);
 extern void input_strobe(void);
-
-#endif /* _NESINPUT_H_ */
 
 /*
 ** $Log: nesinput.h,v $

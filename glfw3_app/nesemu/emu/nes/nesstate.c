@@ -22,16 +22,13 @@
 ** state saving/loading
 ** $Id: nesstate.c,v 1.2 2001/04/27 14:37:11 neil Exp $
 */
-
 #include <stdio.h>
 #include <string.h>
-#include <noftypes.h>
-#include <nesstate.h>
-#include <gui.h>
-#include <nes.h>
-#include <log.h>
-#include <osd.h>
-#include <libsnss.h>
+
+#include "nesstate.h"
+#include "nes.h"
+#include "log.h"
+#include "libsnss.h"
 #include "nes6502.h"
 
 #define  FIRST_STATE_SLOT  0
@@ -47,7 +44,7 @@ void state_setslot(int slot)
        && slot <= LAST_STATE_SLOT)
    {
       state_slot = slot;
-      gui_sendmsg(GUI_WHITE, "State slot set to %d", slot);
+///      gui_sendmsg(GUI_WHITE, "State slot set to %d", slot);
    }
 }
 
@@ -353,7 +350,7 @@ int state_save(void)
    
    ASSERT(state_slot >= FIRST_STATE_SLOT && state_slot <= LAST_STATE_SLOT);
    sprintf(ext, ".ss%d", state_slot);
-   osd_newextension(fn, ext);
+   str_swapext(fn, ext);
 
    /* open our state file for writing */
    status = SNSS_OpenFile(&snssFile, fn, SNSS_OPEN_WRITE);
@@ -401,11 +398,11 @@ int state_save(void)
    if (SNSS_OK != status)
       goto _error;
 
-   gui_sendmsg(GUI_GREEN, "State %d saved", state_slot);
+///   gui_sendmsg(GUI_GREEN, "State %d saved", state_slot);
    return 0;
 
 _error:
-   gui_sendmsg(GUI_RED, "error: %s", SNSS_GetErrorString(status));
+///   gui_sendmsg(GUI_RED, "error: %s", SNSS_GetErrorString(status));
    SNSS_CloseFile(&snssFile);
    return -1;
 }
@@ -428,7 +425,7 @@ int state_load(void)
 
    ASSERT(state_slot >= FIRST_STATE_SLOT && state_slot <= LAST_STATE_SLOT);
    sprintf(ext, ".ss%d", state_slot);
-   osd_newextension(fn, ext);
+   str_swapext(fn, ext);
    
    /* open our file for writing */
    status = SNSS_OpenFile(&snssFile, fn, SNSS_OPEN_READ);
@@ -484,12 +481,12 @@ int state_load(void)
    if (SNSS_OK != status)
       goto _error;
 
-   gui_sendmsg(GUI_GREEN, "State %d restored", state_slot);
+///   gui_sendmsg(GUI_GREEN, "State %d restored", state_slot);
 
    return 0;
 
 _error:
-   gui_sendmsg(GUI_RED, "error: %s", SNSS_GetErrorString(status));
+///   gui_sendmsg(GUI_RED, "error: %s", SNSS_GetErrorString(status));
    SNSS_CloseFile(&snssFile);
    return -1;
 }

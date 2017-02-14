@@ -1,3 +1,4 @@
+#pragma once
 /*
 ** Nofrendo (c) 1998-2000 Matthew Conte (matt@conte.com)
 **
@@ -22,9 +23,7 @@
 ** NES palette definition
 ** $Id: nes_pal.h,v 1.1.1.1 2001/04/27 07:03:54 neil Exp $
 */
-
-#ifndef _NESPAL_H_
-#define _NESPAL_H_
+#include "bitmap.h"
 
 extern rgb_t nes_palette[];
 extern rgb_t shady_palette[];
@@ -37,7 +36,7 @@ extern void pal_inchue(void);
 extern void pal_dectint(void);
 extern void pal_inctint(void);
 
-#endif /* _NESPAL_H_ */
+extern const rgb_t* get_palette();
 
 /*
 ** $Log: nes_pal.h,v $
