@@ -236,7 +236,7 @@ extern void apu_getcontext(apu_t *dest_apu);
 
 extern void apu_setparams(double base_freq, int sample_rate, int refresh_rate, int sample_bits);
 extern apu_t *apu_create(double base_freq, int sample_rate, int refresh_rate, int sample_bits);
-extern void apu_destroy(apu_t **apu);
+extern void apu_destroy(apu_t *apu);
 
 extern void apu_process(void *buffer, int num_samples);
 extern void apu_reset(void);

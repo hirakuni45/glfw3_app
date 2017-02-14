@@ -1027,14 +1027,13 @@ apu_t *apu_create(double base_freq, int sample_rate, int refresh_rate, int sampl
    return temp_apu;
 }
 
-void apu_destroy(apu_t **src_apu)
+void apu_destroy(apu_t *src_apu)
 {
-   if (*src_apu)
+   if (src_apu != NULL)
    {
-      if ((*src_apu)->ext && NULL != (*src_apu)->ext->shutdown)
-         (*src_apu)->ext->shutdown();
-      free(*src_apu);
-      *src_apu = NULL;
+      if (src_apu->ext && NULL != src_apu->ext->shutdown)
+         src_apu->ext->shutdown();
+      free(src_apu);
    }
 }
 
