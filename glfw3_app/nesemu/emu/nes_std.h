@@ -13,13 +13,10 @@
 
 #ifdef __GNUC__
 #define  INLINE      static inline
-#define  ZERO_LENGTH 0
 #elif defined(WIN32)
 #define  INLINE      static __inline
-#define  ZERO_LENGTH 0
 #else /* crapintosh? */
 #define  INLINE      static
-#define  ZERO_LENGTH 1
 #endif
 
 /* quell stupid compiler warnings */
