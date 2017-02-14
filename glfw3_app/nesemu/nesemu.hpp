@@ -11,6 +11,7 @@
 #include "widgets/widget.hpp"
 #include "widgets/widget_frame.hpp"
 #include "widgets/widget_terminal.hpp"
+#include "widgets/widget_filer.hpp"
 #include "gl_fw/gltexfb.hpp"
 #include "snd_io/pcm.hpp"
 
@@ -29,6 +30,8 @@ namespace app {
 		gui::widget_frame*		terminal_frame_;
 		gui::widget_terminal*	terminal_core_;
 
+		gui::widget_filer*		filer_;
+
 		gl::texfb			texfb_;
 
 		static const int nes_width_  = 256;
@@ -42,6 +45,8 @@ namespace app {
 		uint8_t	fb_[nes_width_ * nes_height_ * 4];
 
 		nesinput_t	inp_[2];
+
+		bool	rom_active_;
 
 		void pad_()
 		{
@@ -117,7 +122,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		nesemu(utils::director<core>& d) : director_(d),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
-			nes_(nullptr)
+			nes_(nullptr), rom_active_(false)
 		{ }
 
 
@@ -138,6 +143,18 @@ namespace app {
 		{
 	   		gl::core& core = gl::core::get_instance();
 
+			using namespace gui;
+
+			widget_director& wd = director_.at().widget_director_;
+			widget::param wp(vtx::irect(10, 10, 200, 200));
+			widget_filer::param wp_(core.get_current_path(), "", true);
+			wp_.select_file_func_ = [this](const std::string& fn) {
+				nes_insertcart(fn.c_str(), nes_);
+				rom_active_ = true;
+			};
+			filer_ = wd.add_widget<widget_filer>(wp, wp_);
+			filer_->enable(false);
+
 			texfb_.initialize(nes_width_, nes_height_, 32);
 
 			nes_ = nes_create();
@@ -153,13 +170,22 @@ namespace app {
 			audio_ = al::create_audio(al::audio_format::PCM8_MONO);
 			audio_->create(44100, 44100 / 60);
 
-			auto path = core.get_current_path();
+//			auto path = core.get_current_path();
 
 //			path += "/GALAXIAN.NES";
-			path += "/Zombie.nes";
+//			path += "/Zombie.nes";
 //			path += "/DRAGONQ1.NES";
+//			path += "/DRAGONW2.NES";
+//			path += "/SOLSTICE.NES";
+//			path += "/GRADIUS.NES";
 
-			nes_insertcart(path.c_str(), nes_);
+//			nes_insertcart(path.c_str(), nes_);
+
+			// プリファレンスの取得
+			sys::preference& pre = director_.at().preference_;
+			if(filer_) {
+				filer_->load(pre);
+			}
 		}
 
 
@@ -170,19 +196,22 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void update()
 		{
-//	   		gl::core& core = gl::core::get_instance();
-//			const gl::device& dev = core.get_device();
+	   		gl::core& core = gl::core::get_instance();
+			const gl::device& dev = core.get_device();
+
+			if(dev.get_positive(gl::device::key::ENTER)) {
+				filer_->enable(!filer_->get_enable());
+			}
+
         	gui::widget_director& wd = director_.at().widget_director_;
 
-			if(nes_ != nullptr) {
+			if(nes_ != nullptr && rom_active_) {
 				pad_();
 
 				nes_emulate(1);
 
 				// copy sound
 				{
-//					apu_t* a = nes_->apu;
-//					int n = a->sample_rate / a->refresh_rate;
 					int len = 44100 / 60;
 					apu_process(sound_, len);
 					al::sound& sound = director_.at().sound_;
@@ -196,21 +225,23 @@ namespace app {
 				// copy video
 				bitmap_t* v = nes_->vidbuf;
 				const rgb_t* lut = get_palette();
-				for(int h = 0; h < nes_height_; ++h) {
-					const uint8_t* src = &v->data[h * v->pitch];
-					uint8_t* dst = &fb_[h * nes_width_ * 4];
-					for(int w = 0; w < nes_width_; ++w) {
-						auto idx = *src++;
-						idx &= 63;
-						*dst++ = lut[idx].r;  // R
-						*dst++ = lut[idx].g;  // G
-						*dst++ = lut[idx].b;  // B
-						*dst++ = 255;  // alpha
+				if(v != nullptr && lut != nullptr) {
+					for(int h = 0; h < nes_height_; ++h) {
+						const uint8_t* src = &v->data[h * v->pitch];
+						uint8_t* dst = &fb_[h * nes_width_ * 4];
+						for(int w = 0; w < nes_width_; ++w) {
+							auto idx = *src++;
+							idx &= 63;
+							*dst++ = lut[idx].r;  // R
+							*dst++ = lut[idx].g;  // G
+							*dst++ = lut[idx].b;  // B
+							*dst++ = 255;  // alpha
+						}
 					}
+					texfb_.rendering(gl::texfb::image::RGBA, (const char*)&fb_[0]);
 				}
-
-				texfb_.rendering(gl::texfb::image::RGBA, (const char*)&fb_[0]);
 			}
+
 			texfb_.flip();
 
 			wd.update();
@@ -259,6 +290,11 @@ namespace app {
 		void destroy()
 		{
 			nes_destroy(nes_);
+
+			sys::preference& pre = director_.at().preference_;
+			if(filer_) {
+				filer_->save(pre);
+			}
 		}
 
 	};
