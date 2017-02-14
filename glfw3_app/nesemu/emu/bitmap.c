@@ -95,14 +95,13 @@ bitmap_t *bmp_createhw(uint8 *addr, int width, int height, int pitch)
 }
 
 /* Deallocate space for a bitmap structure */
-void bmp_destroy(bitmap_t **bitmap)
+void bmp_destroy(bitmap_t *bitmap)
 {
-   if (*bitmap)
+   if (bitmap != NULL)
    {
-      if ((*bitmap)->data && false == (*bitmap)->hardware)
-         free((*bitmap)->data);
-      free(*bitmap);
-      *bitmap = NULL;
+      if (bitmap->data && false == bitmap->hardware)
+         free(bitmap->data);
+      free(bitmap);
    }
 }
 

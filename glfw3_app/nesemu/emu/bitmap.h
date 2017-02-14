@@ -48,7 +48,7 @@ typedef struct bitmap_s
 extern void bmp_clear(const bitmap_t *bitmap, uint8 color);
 extern bitmap_t *bmp_create(int width, int height, int overdraw);
 extern bitmap_t *bmp_createhw(uint8 *addr, int width, int height, int pitch);
-extern void bmp_destroy(bitmap_t **bitmap);
+extern void bmp_destroy(bitmap_t *bitmap);
 
 /*
 ** $Log: bitmap.h,v $
