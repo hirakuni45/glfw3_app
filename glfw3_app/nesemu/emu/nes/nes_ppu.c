@@ -997,7 +997,7 @@ bool ppu_enabled(void)
 
 static void ppu_renderscanline(bitmap_t *bmp, int scanline, bool draw_flag)
 {
-   uint8 *buf = bmp->line[scanline];
+   uint8 *buf = &bmp->data[scanline * bmp->pitch];
 
    /* start scanline - transfer ppu latch into vaddr */
    if (ppu.bg_on || ppu.obj_on)
@@ -1014,13 +1014,14 @@ static void ppu_renderscanline(bitmap_t *bmp, int scanline, bool draw_flag)
    }
 
    if (draw_flag)
-      ppu_renderbg(buf);
+	   ppu_renderbg(buf);
 
    /* TODO: fetch obj data 1 scanline before */
-   if (true == ppu.drawsprites && true == draw_flag)
-      ppu_renderoam(buf, scanline);
-   else
+   if (true == ppu.drawsprites && true == draw_flag) {
+	   ppu_renderoam(buf, scanline);
+   } else {
       ppu_fakeoam(scanline);
+   }
 }
 
 
@@ -1156,7 +1157,7 @@ static void draw_sprite(bitmap_t *bmp, int x, int y, uint8 tile_num, uint8 attri
    int col_high, vram_adr;
    uint8 *vid, *data_ptr;
 
-   vid = bmp->line[y] + x;
+   vid = &bmp->data[y * bmp->pitch] + x;
 
    /* Get upper two bits of color */
    col_high = ((attrib & 3) << 2);
@@ -1225,7 +1226,7 @@ void ppu_dumppattern(bitmap_t *bmp, int table_num, int x_loc, int y_loc, int col
    for (y_tile = 0; y_tile < 16; y_tile++)
    {
       /* Get our pointer to the bitmap */
-      bmp_ptr = bmp->line[y_loc] + x_loc;
+      bmp_ptr = bmp->data[y_loc * bmp->pitch] + x_loc;
 
       for (x_tile = 0; x_tile < 16; x_tile++)
       {
