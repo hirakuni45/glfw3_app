@@ -106,7 +106,7 @@ namespace app {
    		 		inp_[0].data |= INP_PAD_UP;
 			}
 			if(dev.get_level(gl::device::key::GAME_UP)) {
-   		 		inp_[0].data |= INP_PAD_RIGHT;
+   		 		inp_[0].data |= INP_PAD_UP;
 			}
 			if(dev.get_level(gl::device::key::DOWN)) {
    		 		inp_[0].data |= INP_PAD_DOWN;
