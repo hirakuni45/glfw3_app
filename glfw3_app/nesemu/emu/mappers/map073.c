@@ -25,11 +25,10 @@
 **
 */
 
-#include <noftypes.h>
-#include <nes_mmc.h>
-#include <nes.h>
-#include <libsnss.h>
-#include <log.h>
+#include "nes_mmc.h"
+#include "nes.h"
+#include "libsnss.h"
+#include "log.h"
 
 static struct
 {

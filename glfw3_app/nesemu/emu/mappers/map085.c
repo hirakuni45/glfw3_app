@@ -23,10 +23,9 @@
 ** $Id: map085.c,v 1.3 2001/05/06 01:42:03 neil Exp $
 */
 
-#include <noftypes.h>
-#include <nes_mmc.h>
-#include <nes.h>
-#include <log.h>
+#include "nes_mmc.h"
+#include "nes.h"
+#include "log.h"
 
 static struct
 {

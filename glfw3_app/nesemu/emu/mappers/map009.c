@@ -24,10 +24,10 @@
 */
 
 #include <string.h>
-#include <noftypes.h>
-#include <nes_mmc.h>
-#include <nes_ppu.h>
-#include <libsnss.h>
+
+#include "nes_mmc.h"
+#include "nes_ppu.h"
+#include "libsnss.h"
 
 static uint8 latch[2];
 static uint8 regs[4];

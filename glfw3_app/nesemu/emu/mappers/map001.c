@@ -24,9 +24,9 @@
 */
 
 #include <string.h>
-#include <noftypes.h>
-#include <nes_mmc.h>
-#include <nes_ppu.h>
+
+#include "nes_mmc.h"
+#include "nes_ppu.h"
 
 /* TODO: WRAM enable ala Mark Knibbs:
    ==================================

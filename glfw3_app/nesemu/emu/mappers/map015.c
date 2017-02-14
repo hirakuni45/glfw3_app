@@ -23,9 +23,8 @@
 ** $Id: map015.c,v 1.2 2001/04/27 14:37:11 neil Exp $
 */
 
-#include <noftypes.h>
-#include <nes_mmc.h>
-#include <nes_ppu.h>
+#include "nes_mmc.h"
+#include "nes_ppu.h"
 
 /* mapper 15: Contra 100-in-1 */
 static void map15_write(uint32 address, uint8 value)
