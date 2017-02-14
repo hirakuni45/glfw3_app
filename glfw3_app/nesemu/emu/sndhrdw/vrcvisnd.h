@@ -1,3 +1,4 @@
+#pragma once
 /*
 ** Nofrendo (c) 1998-2000 Matthew Conte (matt@conte.com)
 **
@@ -22,15 +23,9 @@
 ** VRCVI (Konami MMC) sound hardware emulation header
 ** $Id: vrcvisnd.h,v 1.2 2001/04/27 14:37:11 neil Exp $
 */
-
-#ifndef _VRCVISND_H_
-#define _VRCVISND_H_
-
-#include <nes_apu.h>
+#include "nes_apu.h"
 
 extern apuext_t vrcvi_ext;
-
-#endif /* _VRCVISND_H_ */
 
 /*
 ** $Log: vrcvisnd.h,v $

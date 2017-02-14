@@ -1,3 +1,4 @@
+#pragma once
 /*
 ** Nofrendo (c) 1998-2000 Matthew Conte (matt@conte.com)
 **
@@ -22,10 +23,7 @@
 ** NES APU emulation header file
 ** $Id: nes_apu.h,v 1.1 2001/04/27 12:54:40 neil Exp $
 */
-
-#ifndef _NES_APU_H_
-#define _NES_APU_H_
-
+#include "nes_std.h"
 
 /* define this for realtime generated noise */
 #define  REALTIME_NOISE
@@ -65,46 +63,46 @@
  
 typedef struct rectangle_s
 {
-   uint8 regs[4];
+   uint8_t regs[4];
 
    bool enabled;
    
    float accum;
-   int32 freq;
-   int32 output_vol;
+   int32_t freq;
+   int32_t output_vol;
    bool fixed_envelope;
    bool holdnote;
-   uint8 volume;
+   uint8_t volume;
 
-   int32 sweep_phase;
-   int32 sweep_delay;
+   int32_t sweep_phase;
+   int32_t sweep_delay;
    bool sweep_on;
-   uint8 sweep_shifts;
-   uint8 sweep_length;
+   uint8_t sweep_shifts;
+   uint8_t sweep_length;
    bool sweep_inc;
 
    /* this may not be necessary in the future */
-   int32 freq_limit;
-   int32 env_phase;
-   int32 env_delay;
-   uint8 env_vol;
+   int32_t freq_limit;
+   int32_t env_phase;
+   int32_t env_delay;
+   uint8_t env_vol;
 
    int vbl_length;
-   uint8 adder;
+   uint8_t adder;
    int duty_flip;
 } rectangle_t;
 
 typedef struct triangle_s
 {
-   uint8 regs[3];
+   uint8_t regs[3];
 
    bool enabled;
 
    float accum;
-   int32 freq;
-   int32 output_vol;
+   int32_t freq;
+   int32_t output_vol;
 
-   uint8 adder;
+   uint8_t adder;
 
    bool holdnote;
    bool counter_started;
@@ -118,26 +116,26 @@ typedef struct triangle_s
 
 typedef struct noise_s
 {
-   uint8 regs[3];
+   uint8_t regs[3];
 
    bool enabled;
 
    float accum;
-   int32 freq;
-   int32 output_vol;
+   int32_t freq;
+   int32_t output_vol;
 
-   int32 env_phase;
-   int32 env_delay;
-   uint8 env_vol;
+   int32_t env_phase;
+   int32_t env_delay;
+   uint8_t env_vol;
    bool fixed_envelope;
    bool holdnote;
 
-   uint8 volume;
+   uint8_t volume;
 
    int vbl_length;
 
 #ifdef REALTIME_NOISE
-   uint8 xor_tap;
+   uint8_t xor_tap;
 #else
    bool short_sample;
    int cur_pos;
@@ -146,20 +144,20 @@ typedef struct noise_s
 
 typedef struct dmc_s
 {
-   uint8 regs[4];
+   uint8_t regs[4];
 
    /* bodge for timestamp queue */
    bool enabled;
    
    float accum;
-   int32 freq;
-   int32 output_vol;
+   int32_t freq;
+   int32_t output_vol;
 
-   uint32 address;
-   uint32 cached_addr;
+   uint32_t address;
+   uint32_t cached_addr;
    int dma_length;
    int cached_dmalength;
-   uint8 cur_byte;
+   uint8_t cur_byte;
 
    bool looping;
    bool irq_gen;
@@ -176,14 +174,14 @@ enum
 
 typedef struct
 {
-   uint32 min_range, max_range;
-   uint8 (*read_func)(uint32 address);
+   uint32_t min_range, max_range;
+   uint8_t (*read_func)(uint32_t address);
 } apu_memread;
 
 typedef struct
 {
-   uint32 min_range, max_range;
-   void (*write_func)(uint32 address, uint8 value);
+   uint32_t min_range, max_range;
+   void (*write_func)(uint32_t address, uint8_t value);
 } apu_memwrite;
 
 /* external sound chip stuff */
@@ -192,7 +190,7 @@ typedef struct apuext_s
    int   (*init)(void);
    void  (*shutdown)(void);
    void  (*reset)(void);
-   int32 (*process)(void);
+   int32_t (*process)(void);
    apu_memread *mem_read;
    apu_memwrite *mem_write;
 } apuext_t;
@@ -204,12 +202,12 @@ typedef struct apu_s
    triangle_t triangle;
    noise_t noise;
    dmc_t dmc;
-   uint8 enable_reg;
+   uint8_t enable_reg;
 
    void *buffer; /* pointer to output buffer */
    int num_samples;
 
-   uint8 mix_enable;
+   uint8_t mix_enable;
    int filter_type;
 
    double base_freq;
@@ -221,7 +219,7 @@ typedef struct apu_s
 
    void (*process)(void *buffer, int num_samples);
    void (*irq_callback)(void);
-   uint8 (*irqclear_callback)(void);
+   uint8_t (*irqclear_callback)(void);
 
    /* external sound chip */
    apuext_t *ext;
@@ -247,15 +245,13 @@ extern void apu_setext(apu_t *apu, apuext_t *ext);
 extern void apu_setfilter(int filter_type);
 extern void apu_setchan(int chan, bool enabled);
 
-extern uint8 apu_read(uint32 address);
-extern void apu_write(uint32 address, uint8 value);
+extern uint8_t apu_read(uint32_t address);
+extern void apu_write(uint32_t address, uint8_t value);
 
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
-#endif /* _NES_APU_H_ */
 
 /*
 ** $Log: nes_apu.h,v $

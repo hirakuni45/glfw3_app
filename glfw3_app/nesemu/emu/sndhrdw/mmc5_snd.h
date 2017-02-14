@@ -1,3 +1,4 @@
+#pragma once
 /*
 ** Nofrendo (c) 1998-2000 Matthew Conte (matt@conte.com)
 **
@@ -22,15 +23,9 @@
 ** Nintendo MMC5 sound emulation header
 ** $Id: mmc5_snd.h,v 1.2 2001/04/27 14:37:11 neil Exp $
 */
-
-#ifndef _MMC5_SND_H_
-#define _MMC5_SND_H_
-
-#include <nes_apu.h>
+#include "nes_apu.h"
 
 extern apuext_t mmc5_ext;
-
-#endif /* !_MMC5_SND_H_ */
 
 /*
 ** $Log: mmc5_snd.h,v $
