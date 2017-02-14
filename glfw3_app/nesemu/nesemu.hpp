@@ -35,7 +35,7 @@ namespace app {
 		gl::texfb			texfb_;
 
 		static const int nes_width_  = 256;
-		static const int nes_height_ = 224;
+		static const int nes_height_ = 240;
 
 		nes_t*	nes_;
 
@@ -240,6 +240,7 @@ namespace app {
 					}
 					texfb_.rendering(gl::texfb::image::RGBA, (const char*)&fb_[0]);
 				}
+
 			}
 
 			texfb_.flip();
