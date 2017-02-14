@@ -25,19 +25,12 @@ BUILD		=	release
 
 VPATH		=	../common emu
 
+# 				./emu/nofrendo.c
+
 CSOURCES	=	minizip/ioapi.c \
 				minizip/unzip.c \
-				./emu/bitmap.c \
-				./emu/event.c \
-				./emu/gui_elem.c \
 				./emu/log.c \
-				./emu/nofrendo.c \
-				./emu/vid_drv.c \
-				./emu/config.c \
-				./emu/gui.c \
-				./emu/intro.c \
-				./emu/memguard.c \
-				./emu/pcx.c \
+				./emu/bitmap.c \
 				./emu/cpu/nes6502.c \
 				./emu/cpu/dis6502.c \
 				./emu/nes/mmclist.c \
@@ -95,7 +88,6 @@ CSOURCES	=	minizip/ioapi.c \
 				./emu/libsnss/libsnss.c
 
 PSOURCES	=	main.cpp \
-				osd.cpp \
 				core/glcore.cpp \
 				core/device.cpp \
 				core/ftimg.cpp \
@@ -181,7 +173,7 @@ INC_SYS		+=	$(LOCAL_PATH)/opt/jpeg-turbo/include
 LIBDIR		+=	$(LOCAL_PATH)/opt/jpeg-turbo/lib
 endif
 
-PINC_APP	=	. ../common ./emu
+PINC_APP	=	. ../common ./emu ./emu/cpu ./emu/nes ./emu/mappers ./emu/sndhrdw ./emu/libsnss
 CINC_APP	=	. ../common ./emu ./emu/cpu ./emu/nes ./emu/mappers ./emu/sndhrdw ./emu/libsnss
 
 INC_S	=	$(addprefix -isystem , $(INC_SYS))
