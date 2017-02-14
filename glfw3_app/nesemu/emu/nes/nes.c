@@ -482,7 +482,7 @@ nes_t *nes_create(void)
 
    /* apu */
 //   osd_getsoundinfo(&osd_sound);
-   machine->apu = apu_create(0, 22050, NES_REFRESH_RATE, 8);
+   machine->apu = apu_create(0, 44100, NES_REFRESH_RATE, 8);
 
    if (NULL == machine->apu)
       goto _fail;

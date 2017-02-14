@@ -12,9 +12,11 @@
 #include "widgets/widget_frame.hpp"
 #include "widgets/widget_terminal.hpp"
 #include "gl_fw/gltexfb.hpp"
+#include "snd_io/pcm.hpp"
 
 extern "C" {
 	#include "nes.h"
+	#include "nesinput.h"
 	extern const rgb_t* get_palette();
 };
 
@@ -34,7 +36,78 @@ namespace app {
 
 		nes_t*	nes_;
 
+		uint8_t		sound_[1024];
+		al::audio	audio_;
+
 		uint8_t	fb_[nes_width_ * nes_height_ * 4];
+
+		nesinput_t	inp_[2];
+
+		void pad_()
+		{
+	   		gl::core& core = gl::core::get_instance();
+
+			const gl::device& dev = core.get_device();
+
+			inp_[0].data = 0;
+			inp_[1].data = 0;
+
+			// A
+			if(dev.get_level(gl::device::key::Z)) {
+				inp_[0].data |= INP_PAD_A;
+			}
+			if(dev.get_level(gl::device::key::GAME_0)) {
+				inp_[0].data |= INP_PAD_A;
+			}
+
+			// B
+			if(dev.get_level(gl::device::key::X)) {
+				inp_[0].data |= INP_PAD_B;
+			}
+			if(dev.get_level(gl::device::key::GAME_1)) {
+				inp_[0].data |= INP_PAD_B;
+			}
+
+			// SELECT
+			if(dev.get_level(gl::device::key::_1)) {
+				inp_[0].data |= INP_PAD_SELECT;
+			}
+			if(dev.get_level(gl::device::key::GAME_2)) {
+				inp_[0].data |= INP_PAD_SELECT;
+			}
+			// START
+			if(dev.get_level(gl::device::key::_2)) {
+				inp_[0].data |= INP_PAD_START;
+			}
+			if(dev.get_level(gl::device::key::GAME_3)) {
+				inp_[0].data |= INP_PAD_START;
+			}
+
+			if(dev.get_level(gl::device::key::LEFT)) {
+   		 		inp_[0].data |= INP_PAD_LEFT;
+			}
+			if(dev.get_level(gl::device::key::GAME_LEFT)) {
+   		 		inp_[0].data |= INP_PAD_LEFT;
+			}
+			if(dev.get_level(gl::device::key::RIGHT)) {
+   		 		inp_[0].data |= INP_PAD_RIGHT;
+			}
+			if(dev.get_level(gl::device::key::GAME_RIGHT)) {
+   		 		inp_[0].data |= INP_PAD_RIGHT;
+			}
+			if(dev.get_level(gl::device::key::UP)) {
+   		 		inp_[0].data |= INP_PAD_UP;
+			}
+			if(dev.get_level(gl::device::key::GAME_UP)) {
+   		 		inp_[0].data |= INP_PAD_RIGHT;
+			}
+			if(dev.get_level(gl::device::key::DOWN)) {
+   		 		inp_[0].data |= INP_PAD_DOWN;
+			}
+			if(dev.get_level(gl::device::key::GAME_DOWN)) {
+   		 		inp_[0].data |= INP_PAD_DOWN;
+			}
+		}
 
 	public:
 		//-----------------------------------------------------------------//
@@ -69,9 +142,22 @@ namespace app {
 
 			nes_ = nes_create();
 
+			// regist input
+			inp_[0].type = INP_JOYPAD0;
+			inp_[0].data = 0;
+			input_register(&inp_[0]);
+			inp_[1].type = INP_JOYPAD1;
+			inp_[1].data = 0;
+			input_register(&inp_[1]);
+
+			audio_ = al::create_audio(al::audio_format::PCM8_MONO);
+			audio_->create(44100, 44100 / 60);
+
 			auto path = core.get_current_path();
 
-			path += "/GALAXIAN.NES";
+//			path += "/GALAXIAN.NES";
+			path += "/Zombie.nes";
+//			path += "/DRAGONQ1.NES";
 
 			nes_insertcart(path.c_str(), nes_);
 		}
@@ -89,8 +175,25 @@ namespace app {
         	gui::widget_director& wd = director_.at().widget_director_;
 
 			if(nes_ != nullptr) {
+				pad_();
+
 				nes_emulate(1);
 
+				// copy sound
+				{
+//					apu_t* a = nes_->apu;
+//					int n = a->sample_rate / a->refresh_rate;
+					int len = 44100 / 60;
+					apu_process(sound_, len);
+					al::sound& sound = director_.at().sound_;
+					for(int i = 0; i < len; ++i) {
+						al::pcm8_m w(sound_[i]);
+						audio_->put(i, w);
+					}
+					sound.queue_audio(audio_);
+				}
+
+				// copy video
 				bitmap_t* v = nes_->vidbuf;
 				const rgb_t* lut = get_palette();
 				for(int h = 0; h < nes_height_; ++h) {
@@ -155,7 +258,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void destroy()
 		{
-//			nes_destroy(nes_);
+			nes_destroy(nes_);
 		}
 
 	};
