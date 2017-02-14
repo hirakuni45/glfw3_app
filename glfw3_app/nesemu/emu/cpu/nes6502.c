@@ -24,7 +24,6 @@
 */
 
 
-#include "noftypes.h"
 #include "cpu/nes6502.h"
 #include "cpu/dis6502.h"
 

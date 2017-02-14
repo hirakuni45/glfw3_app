@@ -1,3 +1,4 @@
+#pragma once
 /*
 ** Nofrendo (c) 1998-2000 Matthew Conte (matt@conte.com)
 **
@@ -26,10 +27,7 @@
 /* NOTE: 16-bit addresses avoided like the plague: use 32-bit values
 **       wherever humanly possible
 */
-#ifndef _NES6502_H_
-#define _NES6502_H_
-
-#include <noftypes.h>
+#include "nes_std.h"
 
 /* Define this to enable decimal mode in ADC / SBC (not needed in NES) */
 /*#define  NES6502_DECIMAL*/
@@ -116,8 +114,6 @@ extern void nes6502_getcontext(nes6502_context *cpu);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
-#endif /* _NES6502_H_ */
 
 /*
 ** $Log: nes6502.h,v $
