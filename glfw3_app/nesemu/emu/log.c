@@ -26,9 +26,19 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
-#include <noftypes.h>
-#include <log.h>
+#include <string.h>
 
+#include "log.h"
+
+void str_swapext(char *text, const char *ext)
+{
+	char* p = strrchr(text, '.');
+	if(p == NULL) {
+		strcat(text, ext);
+	} else {
+		strcpy(p, ext);
+	}
+}
 
 //static FILE *errorlog = NULL;
 static int (*log_func)(const char *string) = NULL;
@@ -47,9 +57,9 @@ int log_init(void)
 void log_shutdown(void)
 {
    /* Snoop around for unallocated blocks */
-   mem_checkblocks();
-   mem_checkleaks();
-   mem_cleanup();
+//   mem_checkblocks();
+//   mem_checkleaks();
+//   mem_cleanup();
 
 //   if (NULL != errorlog)
 //      fclose(errorlog);

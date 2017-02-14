@@ -26,7 +26,9 @@
 #ifndef _LOG_H_
 #define _LOG_H_
 
-#include <stdio.h>
+#include "nes_std.h"
+
+extern void str_swapext(char *text, const char *ext);
 
 extern int log_init(void);
 extern void log_shutdown(void);

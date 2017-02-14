@@ -1,3 +1,4 @@
+#pragma once
 /*
 ** Nofrendo (c) 1998-2000 Matthew Conte (matt@conte.com)
 **
@@ -22,11 +23,7 @@
 ** Bitmap object defines / prototypes
 ** $Id: bitmap.h,v 1.2 2001/04/27 14:37:11 neil Exp $
 */
-
-#ifndef _BITMAP_H_
-#define _BITMAP_H_
-
-#include <noftypes.h>
+#include "nes_std.h"
 
 /* a bitmap rectangle */
 typedef struct rect_s
@@ -52,8 +49,6 @@ extern void bmp_clear(const bitmap_t *bitmap, uint8 color);
 extern bitmap_t *bmp_create(int width, int height, int overdraw);
 extern bitmap_t *bmp_createhw(uint8 *addr, int width, int height, int pitch);
 extern void bmp_destroy(bitmap_t **bitmap);
-
-#endif /* _BITMAP_H_ */
 
 /*
 ** $Log: bitmap.h,v $
