@@ -143,13 +143,9 @@ ppu_t *ppu_create(void)
    return temp;
 }
 
-void ppu_destroy(ppu_t **src_ppu)
+void ppu_destroy(ppu_t *src_ppu)
 {
-   if (*src_ppu)
-   {
-      free(*src_ppu);
-      *src_ppu = NULL;
-   }
+	free(src_ppu);
 }
 
 void ppu_setpage(int size, int page_num, uint8 *location)

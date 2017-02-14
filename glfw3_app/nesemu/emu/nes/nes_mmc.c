@@ -220,10 +220,9 @@ void mmc_reset(void)
 }
 
 
-void mmc_destroy(mmc_t **nes_mmc)
+void mmc_destroy(mmc_t *nes_mmc)
 {
-   if (*nes_mmc)
-      free(*nes_mmc);
+	free(nes_mmc);
 }
 
 mmc_t *mmc_create(rominfo_t *rominfo)

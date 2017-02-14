@@ -371,22 +371,22 @@ void nes_reset(int reset_type)
 
 void nes_destroy(nes_t *machine)
 {
-   if (machine != NULL)
-   {
-      rom_free(&machine->rominfo);
-      mmc_destroy(&machine->mmc);
-      ppu_destroy(&machine->ppu);
-      apu_destroy(&machine->apu);
-      bmp_destroy(&machine->vidbuf);
-      if (machine->cpu != NULL)
-      {
-         if (machine->cpu->mem_page[0])
-            free(machine->cpu->mem_page[0]);
-         free(machine->cpu);
-      }
-
-      free(machine);
-   }
+	if (machine != NULL)
+	{
+		rom_free(machine->rominfo);
+		mmc_destroy(machine->mmc);
+		ppu_destroy(machine->ppu);
+		apu_destroy(machine->apu);
+		bmp_destroy(machine->vidbuf);
+		if (machine->cpu != NULL)
+		{
+			if (machine->cpu->mem_page[0] != NULL) {
+				free(machine->cpu->mem_page[0]);
+			}
+			free(machine->cpu);
+		}
+		free(machine);
+	}
 }
 
 void nes_poweroff(void)

@@ -102,9 +102,6 @@ typedef struct ppu_s
    ppulatchfunc_t latchfunc;
    ppuvromswitch_t vromswitch;
 
-   /* copy of our current palette */
-///   rgb_t curpal[256];
-
    bool vram_accessible;
 
    bool vram_present;
@@ -137,7 +134,7 @@ extern void ppu_endscanline(int scanline);
 extern void ppu_checknmi();
 
 extern ppu_t *ppu_create(void);
-extern void ppu_destroy(ppu_t **ppu);
+extern void ppu_destroy(ppu_t *ppu);
 
 /* IO */
 extern uint8 ppu_read(uint32 address);

@@ -39,8 +39,10 @@ typedef enum
 
 typedef struct rominfo_s
 {
+	uint8_t* romfile;
    /* pointers to ROM and VROM */
-   uint8 *rom, *vrom;
+   uint8 *rom;
+   uint8 *vrom;
 
    /* pointers to SRAM and VRAM */
    uint8 *sram, *vram;
@@ -60,7 +62,7 @@ typedef struct rominfo_s
 
 extern int rom_checkmagic(const char *filename);
 extern rominfo_t *rom_load(const char *filename);
-extern void rom_free(rominfo_t **rominfo);
+extern void rom_free(rominfo_t *rominfo);
 extern char *rom_getinfo(rominfo_t *rominfo);
 
 /*

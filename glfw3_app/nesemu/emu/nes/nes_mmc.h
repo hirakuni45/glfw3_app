@@ -60,7 +60,7 @@ typedef struct mapintf_s
 #include <nes_rom.h>
 typedef struct mmc_s
 {
-   mapintf_t *intf;
+   const mapintf_t *intf;
    rominfo_t *cart;  /* link it back to the cart */
 } mmc_t;
 
@@ -71,7 +71,7 @@ extern void mmc_bankrom(int size, uint32 address, int bank);
 
 /* Prototypes */
 extern mmc_t *mmc_create(rominfo_t *rominfo);
-extern void mmc_destroy(mmc_t **nes_mmc);
+extern void mmc_destroy(mmc_t *nes_mmc);
 
 extern void mmc_getcontext(mmc_t *dest_mmc);
 extern void mmc_setcontext(mmc_t *src_mmc);
