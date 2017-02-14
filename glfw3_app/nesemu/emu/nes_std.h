@@ -4,6 +4,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifndef PATH_MAX
+#define PATH_MAX 256
+#endif
+
 /* Define this if running on little-endian (x86) systems */
 #define  HOST_LITTLE_ENDIAN
 
