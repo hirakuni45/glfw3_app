@@ -1,11 +1,13 @@
 #pragma once
 //=====================================================================//
 /*!	@file
-	@brief	GUI widget_check クラス（ヘッダー）
+	@brief	GUI widget_check クラス @n
+			Copyright 2017 Kunihito Hiramatsu
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
 #include "widgets/widget_director.hpp"
+#include "widgets/widget_utils.hpp"
 
 namespace gui {
 
@@ -155,7 +157,21 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() override;
+		void initialize() override {
+			// ボタンは標準的に固定
+			at_param().state_.set(widget::state::SERVICE);
+			at_param().state_.set(widget::state::POSITION_LOCK);
+			at_param().state_.set(widget::state::SIZE_LOCK);
+			at_param().state_.set(widget::state::MOVE_STALL);
+
+			if(param_.type_ == style::CHECKED) {
+				dis_h_ = wd_.get_share_image().un_check_;
+				ena_h_ = wd_.get_share_image().to_check_;
+			} else if(param_.type_ == style::MINUS_PLUS) {
+				dis_h_ = wd_.get_share_image().minus_box_;
+				ena_h_ = wd_.get_share_image().plus_box_;
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -163,7 +179,16 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() override;
+		void update() override {
+			if(get_select()) {
+				obj_state_ = !param_.check_;
+			} else if(get_selected()) {
+				param_.check_ = !param_.check_;
+				obj_state_ = param_.check_;
+			} else {
+				obj_state_ = param_.check_;
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -184,7 +209,55 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render() override;
+		void render() override {
+			using namespace gl;
+			core& core = core::get_instance();
+
+			const vtx::spos& vsz = core.get_size();
+			const widget::param& wp = get_param();
+
+			if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) { 
+				gl::mobj::handle h;
+				if(obj_state_) h = ena_h_;
+				else h = dis_h_;
+
+				glPushMatrix();
+
+				vtx::irect rect;
+				const vtx::spos& mosz = wd_.at_mobj().get_size(h);
+				vtx::ipos ofs(0, (wp.rect_.size.y - mosz.y) / 2);
+				if(wp.state_[widget::state::CLIP_PARENTS]) {
+					if(param_.draw_box_) draw_mobj(wd_, h, wp.clip_, ofs + wp.rpos_);
+					rect.org  = wp.rpos_;
+					rect.size = wp.rect_.size;
+				} else {
+					if(param_.draw_box_) wd_.at_mobj().draw(h, gl::mobj::attribute::normal, ofs);
+					rect.org.set(0);
+					rect.size = wp.rect_.size;
+				}
+
+				rect.org.x += mosz.x + 4;
+				img::rgba8 fc = param_.text_param_.fore_color_;
+				if(param_.disable_gray_text_ && !obj_state_) {
+					param_.text_param_.fore_color_ *= param_.gray_text_gain_;
+				}
+				widget::text_param tmp = param_.text_param_;
+				const img::rgbaf& cf = wd_.get_color();
+				tmp.fore_color_ *= cf.r;
+				tmp.fore_color_.alpha_scale(cf.a);
+				tmp.shadow_color_ *= cf.r;
+				tmp.shadow_color_.alpha_scale(cf.a);
+
+				draw_text(tmp, rect, wp.clip_);
+
+				core.at_fonts().restore_matrix();
+
+				param_.text_param_.fore_color_ = fc;
+
+				glPopMatrix();
+				glViewport(0, 0, vsz.x, vsz.y);
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -194,7 +267,15 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(sys::preference& pre) override;
+		bool save(sys::preference& pre) override {
+			std::string path;
+			path += '/';
+			path += wd_.create_widget_name(this);
+
+			int err = 0;
+			if(!pre.put_boolean(path + "/state", param_.check_)) ++err;
+			return err == 0;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -204,6 +285,15 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre) override;
+		bool load(const sys::preference& pre) override {
+			std::string path;
+			path += '/';
+			path += wd_.create_widget_name(this);
+
+			int err = 0;
+			if(!pre.get_boolean(path + "/state", param_.check_)) ++err;
+			check_ = param_.check_;
+			return err == 0;
+		}
 	};
 }
