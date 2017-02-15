@@ -66,6 +66,8 @@ namespace app {
 
 		nesinput_t	inp_[2];
 
+		int		nes_pause_;
+
 		void pad_()
 		{
 	   		gl::core& core = gl::core::get_instance();
@@ -140,7 +142,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		nesemu(utils::director<core>& d) : director_(d),
 			terminal_frame_(nullptr), terminal_core_(nullptr), terminal_(false),
-			nes_(nullptr), rom_active_(false)
+			nes_(nullptr), rom_active_(false), nes_pause_(0)
 		{ }
 
 
@@ -245,6 +247,10 @@ namespace app {
 			if(dev.get_negative(gl::device::key::F5)) {
 				terminal_ = !terminal_;
 				terminal_frame_->enable(terminal_);
+			}
+			if(dev.get_positive(gl::device::key::ESCAPE)) {
+				nes_pause_ ^= 1;
+				// nes_pause(nes_pause_);
 			}
 
         	gui::widget_director& wd = director_.at().widget_director_;
