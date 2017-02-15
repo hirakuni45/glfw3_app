@@ -13,7 +13,7 @@ typedef app::nesemu start_app;
 static const char* window_key_ = { "application/window" };
 static const char* app_title_ = { "nesemu" };
 static const vtx::spos start_pos_(10, 40);
-static const vtx::spos start_size_(256, 240);
+static const vtx::spos start_size_(512, 480);
 static const vtx::spos limit_size_(256, 240);
 
 int main(int argc, char** argv)

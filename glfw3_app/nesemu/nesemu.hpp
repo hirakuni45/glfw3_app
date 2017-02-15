@@ -24,6 +24,7 @@
 #include "widgets/widget_frame.hpp"
 #include "widgets/widget_terminal.hpp"
 #include "widgets/widget_filer.hpp"
+#include "widgets/widget_dialog.hpp"
 #include "gl_fw/gltexfb.hpp"
 #include "snd_io/pcm.hpp"
 #include "utils/fifo.hpp"
@@ -45,6 +46,8 @@ namespace app {
 		bool					terminal_;
 
 		gui::widget_filer*		filer_;
+
+		gui::widget_dialog*		dialog_;
 
 		gl::texfb			texfb_;
 
@@ -142,6 +145,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		nesemu(utils::director<core>& d) : director_(d),
 			terminal_frame_(nullptr), terminal_core_(nullptr), terminal_(false),
+			dialog_(nullptr),
 			nes_(nullptr), rom_active_(false), nes_pause_(0)
 		{ }
 
@@ -187,11 +191,20 @@ namespace app {
 					if(nes_insertcart(fn.c_str(), nes_) == 0) {
 						rom_active_ = true;
 					} else {
-						// 
+						dialog_->enable();
+						dialog_->set_text("NES file false:\n'" + fn + "'");
 					}
 				};
 				filer_ = wd.add_widget<widget_filer>(wp, wp_);
 				filer_->enable(false);
+			}
+
+			{   // Daialog
+				widget::param wp(vtx::irect(50, 50, 300, 150));
+				widget_dialog::param wp_;
+				wp_.style_ = widget_dialog::param::style::OK;
+				dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
+				dialog_->enable(false);
 			}
 
 			texfb_.initialize(nes_width_, nes_height_, 32);
