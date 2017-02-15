@@ -1226,7 +1226,7 @@ void ppu_dumppattern(bitmap_t *bmp, int table_num, int x_loc, int y_loc, int col
    for (y_tile = 0; y_tile < 16; y_tile++)
    {
       /* Get our pointer to the bitmap */
-      bmp_ptr = bmp->data[y_loc * bmp->pitch] + x_loc;
+      bmp_ptr = &bmp->data[y_loc * bmp->pitch] + x_loc;
 
       for (x_tile = 0; x_tile < 16; x_tile++)
       {

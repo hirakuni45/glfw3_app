@@ -157,51 +157,47 @@ static uint8_t *rom_loadtrainer(uint8_t *rom, rominfo_t *rominfo)
 
 static uint8_t *rom_loadrom(uint8_t *rom, rominfo_t *rominfo)
 {
-   ASSERT(rom);
-   ASSERT(rominfo);
+	ASSERT(rom);
+	ASSERT(rominfo);
 
-   /* Allocate ROM space, and load it up! */
+	/* Allocate ROM space, and load it up! */
 /*
-   rominfo->rom = malloc((rominfo->rom_banks * ROM_BANK_LENGTH));
-   if (NULL == rominfo->rom)
-   {
-      gui_sendmsg(GUI_RED, "Could not allocate space for ROM image");
-      return -1;
-   }
-   _fread(rominfo->rom, ROM_BANK_LENGTH, rominfo->rom_banks, fp);
+	rominfo->rom = malloc((rominfo->rom_banks * ROM_BANK_LENGTH));
+	if (NULL == rominfo->rom)
+	{
+		gui_sendmsg(GUI_RED, "Could not allocate space for ROM image");
+		return -1;
+	}
+	_fread(rominfo->rom, ROM_BANK_LENGTH, rominfo->rom_banks, fp);
 */
-   rominfo->rom = rom;
-   rom += ROM_BANK_LENGTH * rominfo->rom_banks;
+	rominfo->rom = rom;
+	rom += ROM_BANK_LENGTH * rominfo->rom_banks;
 
-
-   /* If there's VROM, allocate and stuff it in */
-   if (rominfo->vrom_banks)
-   {
+	/* If there's VROM, allocate and stuff it in */
+	if (rominfo->vrom_banks)
+	{
 /*
-      rominfo->vrom = malloc((rominfo->vrom_banks * VROM_BANK_LENGTH));
-      if (NULL == rominfo->vrom)
-      {
-         gui_sendmsg(GUI_RED, "Could not allocate space for VROM");
-         return -1;
-      }
-      _fread(rominfo->vrom, VROM_BANK_LENGTH, rominfo->vrom_banks, fp);
+		rominfo->vrom = malloc((rominfo->vrom_banks * VROM_BANK_LENGTH));
+		if (NULL == rominfo->vrom)
+		{
+			gui_sendmsg(GUI_RED, "Could not allocate space for VROM");
+			return -1;
+		}
+		_fread(rominfo->vrom, VROM_BANK_LENGTH, rominfo->vrom_banks, fp);
 */
-      rominfo->vrom = rom;
-      rom += VROM_BANK_LENGTH * rominfo->vrom_banks;
+		rominfo->vrom = rom;
+		rom += VROM_BANK_LENGTH * rominfo->vrom_banks;
+	} else {
+		rominfo->vram = malloc(VRAM_LENGTH);
+		if (NULL == rominfo->vram)
+		{
+			log_printf("Could not allocate space for VRAM");
+			return NULL;
+		}
+		memset(rominfo->vram, 0, VRAM_LENGTH);
+	}
 
-   }
-   else
-   {
-      rominfo->vram = malloc(VRAM_LENGTH);
-      if (NULL == rominfo->vram)
-      {
-///         gui_sendmsg(GUI_RED, "Could not allocate space for VRAM");
-         return -1;
-      }
-      memset(rominfo->vram, 0, VRAM_LENGTH);
-   }
-
-   return rom;
+	return rom;
 }
 
 #if 0
