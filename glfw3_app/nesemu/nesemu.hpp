@@ -49,19 +49,22 @@ namespace app {
 
 		static const int nes_width_  = 256;
 		static const int nes_height_ = 240;
-		static const int audio_len_ = 44100 / 60 * 2;
+		static const int sample_rate_ = 44100;
+		static const int audio_len_ = sample_rate_ / 60;
+		static const int audio_page_ = 8;
 
 		nes_t*	nes_;
 
-		uint8_t		sound_[audio_len_];
+		bool	rom_active_;
+
+		int16_t		sound_[audio_len_ * audio_page_];
 		al::audio	audio_;
-		uint32_t	frame_;
+		int			audio_put_;
+		int			audio_get_;
 
 		uint8_t	fb_[nes_width_ * nes_height_ * 4];
 
 		nesinput_t	inp_[2];
-
-		bool	rom_active_;
 
 		void pad_()
 		{
@@ -137,7 +140,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		nesemu(utils::director<core>& d) : director_(d),
 			terminal_frame_(nullptr), terminal_core_(nullptr), terminal_(false),
-			nes_(nullptr), frame_(0), rom_active_(false)
+			nes_(nullptr), rom_active_(false), audio_put_(0), audio_get_(0)
 		{ }
 
 
@@ -191,7 +194,7 @@ namespace app {
 
 			texfb_.initialize(nes_width_, nes_height_, 32);
 
-			nes_ = nes_create();
+			nes_ = nes_create(sample_rate_, 16);
 
 			// regist input
 			inp_[0].type = INP_JOYPAD0;
@@ -201,8 +204,8 @@ namespace app {
 			inp_[1].data = 0;
 			input_register(&inp_[1]);
 
-			audio_ = al::create_audio(al::audio_format::PCM8_MONO);
-			audio_->create(44100, audio_len_);
+			audio_ = al::create_audio(al::audio_format::PCM16_MONO);
+			audio_->create(sample_rate_, audio_len_);
 
 //			auto path = core.get_current_path();
 
@@ -252,14 +255,25 @@ namespace app {
 				nes_emulate(1);
 
 				// copy sound
-				if(frame_ & 1) {
-					apu_process(sound_, audio_len_);
+				apu_process(&sound_[audio_len_ * audio_put_], audio_len_);
+				++audio_put_;
+				if(audio_put_ >= audio_page_) audio_put_ = 0;
+
+				int l = audio_put_ - audio_get_;
+				if(l < 0) l += audio_page_;
+				if(l >= 4 && audio_) {
 					al::sound& sound = director_.at().sound_;
-					for(int i = 0; i < audio_len_; ++i) {
-						al::pcm8_m w(sound_[i]);
-						audio_->put(i, w);
+					for(int i = 0; i < 2; ++i) {
+						const int16_t* src = &sound_[audio_get_ * audio_len_];
+						for(int i = 0; i < audio_len_; ++i) {
+							al::pcm16_m w(*src);
+							++src;
+							audio_->put(i, w);
+						}
+						sound.queue_audio(audio_);
+						audio_get_ += 1;
+						if(audio_get_ >= audio_page_) audio_get_ -= audio_page_;
 					}
-					sound.queue_audio(audio_);
 				}
 
 				// copy video
@@ -282,8 +296,6 @@ namespace app {
 				}
 
 			}
-
-			++frame_;
 
 			texfb_.flip();
 
