@@ -1,7 +1,19 @@
 #pragma once
 //=====================================================================//
 /*! @file
-	@brief  NES Emulator クラス
+	@brief  NES Emulator クラス @n
+			操作説明： @n
+			「１」： SELECT @n
+			「２」： START @n
+			「Ｚ」： A-BUTTON @n
+			「Ｘ」： B-BUTTON @n
+			「↑」： UP-DIR @n
+			「↓」： DOWN-DIR @n
+			「→」： RIGHT-DIR @n
+			「←」： LEFT-DIR @n
+			「F1」： Filer @n
+			「F4」： Log Terminal @n
+			Copyright 2017 Kunihito Hiramatsu
 	@author 平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
@@ -29,6 +41,7 @@ namespace app {
 
 		gui::widget_frame*		terminal_frame_;
 		gui::widget_terminal*	terminal_core_;
+		bool					terminal_;
 
 		gui::widget_filer*		filer_;
 
@@ -123,7 +136,7 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		nesemu(utils::director<core>& d) : director_(d),
-			terminal_frame_(nullptr), terminal_core_(nullptr),
+			terminal_frame_(nullptr), terminal_core_(nullptr), terminal_(false),
 			nes_(nullptr), frame_(0), rom_active_(false)
 		{ }
 
@@ -146,16 +159,32 @@ namespace app {
 	   		gl::core& core = gl::core::get_instance();
 
 			using namespace gui;
-
 			widget_director& wd = director_.at().widget_director_;
-			widget::param wp(vtx::irect(10, 10, 200, 200));
-			widget_filer::param wp_(core.get_current_path(), "", true);
-			wp_.select_file_func_ = [this](const std::string& fn) {
-				nes_insertcart(fn.c_str(), nes_);
-				rom_active_ = true;
-			};
-			filer_ = wd.add_widget<widget_filer>(wp, wp_);
-			filer_->enable(false);
+			{  	// ターミナル
+				{
+					widget::param wp(vtx::irect(10, 10, 200, 200));
+					widget_frame::param wp_;
+					wp_.plate_param_.set_caption(15);
+					terminal_frame_ = wd.add_widget<widget_frame>(wp, wp_);
+					terminal_frame_->enable(terminal_);
+				}
+				{
+					widget::param wp(vtx::irect(0), terminal_frame_);
+					widget_terminal::param wp_;
+					terminal_core_ = wd.add_widget<widget_terminal>(wp, wp_);
+				}			
+			}
+
+			{  	// ファイラー
+				widget::param wp(vtx::irect(10, 10, 200, 200));
+				widget_filer::param wp_(core.get_current_path(), "", true);
+				wp_.select_file_func_ = [this](const std::string& fn) {
+					nes_insertcart(fn.c_str(), nes_);
+					rom_active_ = true;
+				};
+				filer_ = wd.add_widget<widget_filer>(wp, wp_);
+				filer_->enable(false);
+			}
 
 			texfb_.initialize(nes_width_, nes_height_, 32);
 
@@ -188,6 +217,9 @@ namespace app {
 			if(filer_) {
 				filer_->load(pre);
 			}
+			if(terminal_frame_) {
+				terminal_frame_->load(pre);
+			}
 		}
 
 
@@ -201,8 +233,12 @@ namespace app {
 	   		gl::core& core = gl::core::get_instance();
 			const gl::device& dev = core.get_device();
 
-			if(dev.get_positive(gl::device::key::ENTER)) {
+			if(dev.get_negative(gl::device::key::F1)) {
 				filer_->enable(!filer_->get_enable());
+			}
+			if(dev.get_negative(gl::device::key::F5)) {
+				terminal_ = !terminal_;
+				terminal_frame_->enable(terminal_);
 			}
 
         	gui::widget_director& wd = director_.at().widget_director_;
@@ -298,6 +334,9 @@ namespace app {
 			sys::preference& pre = director_.at().preference_;
 			if(filer_) {
 				filer_->save(pre);
+			}
+			if(terminal_frame_) {
+				terminal_frame_->save(pre);
 			}
 		}
 
