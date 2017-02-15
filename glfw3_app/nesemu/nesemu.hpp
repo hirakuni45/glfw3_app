@@ -179,8 +179,11 @@ namespace app {
 				widget::param wp(vtx::irect(10, 10, 200, 200));
 				widget_filer::param wp_(core.get_current_path(), "", true);
 				wp_.select_file_func_ = [this](const std::string& fn) {
-					nes_insertcart(fn.c_str(), nes_);
-					rom_active_ = true;
+					if(nes_insertcart(fn.c_str(), nes_) == 0) {
+						rom_active_ = true;
+					} else {
+						// 
+					}
 				};
 				filer_ = wd.add_widget<widget_filer>(wp, wp_);
 				filer_->enable(false);
