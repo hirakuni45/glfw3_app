@@ -88,7 +88,7 @@ static void rom_savesram(rominfo_t *rominfo)
    if (rominfo->flags & ROM_FLAG_BATTERY)
    {
       strncpy(fn, rominfo->filename, PATH_MAX);
-      str_swapext(fn, ".sav");
+      str_setext(fn, ".sav");
 
       fp = fopen(fn, "wb");
       if (NULL != fp)
@@ -111,7 +111,7 @@ static void rom_loadsram(rominfo_t *rominfo)
    if (rominfo->flags & ROM_FLAG_BATTERY)
    {
       strncpy(fn, rominfo->filename, PATH_MAX);
-      str_swapext(fn, ".sav");
+      str_setext(fn, ".sav");
 
       fp = fopen(fn, "rb");
       if (NULL != fp)
@@ -212,7 +212,7 @@ static void rom_checkforpal(rominfo_t *rominfo)
    ASSERT(rominfo);
 
    strncpy(filename, rominfo->filename, PATH_MAX);
-   str_swapext(filename, ".pal");
+   str_setext(filename, ".pal");
 
    fp = fopen(filename, "rb");
    if (NULL == fp)
@@ -461,6 +461,7 @@ rominfo_t *rom_load(const char *filename)
 	memset(rominfo, 0, sizeof(rominfo_t));
 
 	rominfo->romfile = rom;
+	strncpy(rominfo->filename, filename, PATH_MAX);
 
    /* Get the header and stick it into rominfo struct */
 	{

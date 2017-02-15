@@ -350,7 +350,7 @@ int state_save(void)
    
    ASSERT(state_slot >= FIRST_STATE_SLOT && state_slot <= LAST_STATE_SLOT);
    sprintf(ext, ".ss%d", state_slot);
-   str_swapext(fn, ext);
+   str_setext(fn, ext);
 
    /* open our state file for writing */
    status = SNSS_OpenFile(&snssFile, fn, SNSS_OPEN_WRITE);
@@ -425,7 +425,7 @@ int state_load(void)
 
    ASSERT(state_slot >= FIRST_STATE_SLOT && state_slot <= LAST_STATE_SLOT);
    sprintf(ext, ".ss%d", state_slot);
-   str_swapext(fn, ext);
+   str_setext(fn, ext);
    
    /* open our file for writing */
    status = SNSS_OpenFile(&snssFile, fn, SNSS_OPEN_READ);
