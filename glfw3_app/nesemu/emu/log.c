@@ -30,7 +30,8 @@
 
 #include "log.h"
 
-void str_swapext(char *text, const char *ext)
+// 拡張子の付け替え
+void str_setext(char *text, const char *ext)
 {
 	char* p = strrchr(text, '.');
 	if(p == NULL) {

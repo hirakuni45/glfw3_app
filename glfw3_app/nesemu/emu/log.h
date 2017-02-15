@@ -1,3 +1,4 @@
+#pragma once
 /*
 ** Nofrendo (c) 1998-2000 Matthew Conte (matt@conte.com)
 **
@@ -22,13 +23,9 @@
 ** Error logging header file
 ** $Id: log.h,v 1.1.1.1 2001/04/27 07:03:54 neil Exp $
 */
-
-#ifndef _LOG_H_
-#define _LOG_H_
-
 #include "nes_std.h"
 
-extern void str_swapext(char *text, const char *ext);
+extern void str_setext(char *text, const char *ext);
 
 extern int log_init(void);
 extern void log_shutdown(void);
@@ -36,8 +33,6 @@ extern int log_print(const char *string);
 extern int log_printf(const char *format, ...);
 extern void log_chain_logfunc(int (*logfunc)(const char *string));
 extern void log_assert(int expr, int line, const char *file, char *msg);
-
-#endif /* _LOG_H_ */
 
 /*
 ** $Log: log.h,v $
