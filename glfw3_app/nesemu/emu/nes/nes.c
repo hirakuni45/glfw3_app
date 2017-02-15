@@ -440,7 +440,7 @@ _fail:
 
 
 /* Initialize NES CPU, hardware, etc. */
-nes_t *nes_create(void)
+nes_t *nes_create(int sample_rate, int sample_bits)
 {
    nes_t *machine;
    int i;
@@ -479,8 +479,8 @@ nes_t *nes_create(void)
    machine->cpu->write_handler = machine->writehandler;
 
    /* apu */
-//   osd_getsoundinfo(&osd_sound);
-   machine->apu = apu_create(0, 44100, NES_REFRESH_RATE, 8);
+//   machine->apu = apu_create(0, 44100, NES_REFRESH_RATE, 16);
+   machine->apu = apu_create(0, sample_rate, NES_REFRESH_RATE, sample_bits);
 
    if (NULL == machine->apu)
       goto _fail;

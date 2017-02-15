@@ -95,7 +95,7 @@ extern nes_t *nes_getcontextptr(void);
 extern void nes_getcontext(nes_t *machine);
 extern void nes_setcontext(nes_t *machine);
 
-extern nes_t *nes_create(void);
+extern nes_t *nes_create(int sample_rate, int sample_bits);
 extern void nes_destroy(nes_t *machine);
 extern int nes_insertcart(const char *filename, nes_t *machine);
 
