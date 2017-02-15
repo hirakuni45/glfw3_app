@@ -1,3 +1,4 @@
+#pragma once
 /**************************************************************************/
 /*
       libsnss.h
@@ -8,10 +9,6 @@
       $Id: libsnss.h,v 1.1 2001/04/27 12:54:40 neil Exp $
 */
 /**************************************************************************/
-
-#ifndef _LIBSNSS_H_
-#define _LIBSNSS_H_
-
 #include <stdio.h>
 
 /**************************************************************************/
@@ -350,8 +347,6 @@ const char *SNSS_GetErrorString (SNSS_RETURN_CODE code);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
-#endif /* _LIBSNSS_H_ */ 
 
 /*
 ** $Log: libsnss.h,v $
