@@ -327,6 +327,8 @@ static void nes_renderframe(bool draw_flag)
 
 void nes_emulate(int frames)
 {
+	if(nes.pause) return;
+
 	nes.scanline_cycles = 0;
 	nes.fiq_cycles = (int) NES_FIQ_PERIOD;
 
@@ -393,9 +395,10 @@ void nes_poweroff(void)
    nes.poweroff = true;
 }
 
-void nes_togglepause(void)
+void nes_pause(int enable)
 {
-   nes.pause ^= true;
+	if(enable) nes.pause = true;
+	else nes.pause = false;
 }
 
 /* insert a cart into the NES */
