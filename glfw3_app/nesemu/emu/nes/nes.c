@@ -443,7 +443,6 @@ _fail:
 nes_t *nes_create(void)
 {
    nes_t *machine;
-///   sndinfo_t osd_sound;
    int i;
 
    machine = malloc(sizeof(nes_t));
