@@ -349,7 +349,7 @@ namespace gui {
 			action_types		action_;		///< アクション
 			state_types			state_;			///< 状態制御
 
-			param(const vtx::irect& r = vtx::irect(0), widget* parents = 0) :
+			param(const vtx::irect& r = vtx::irect(0), widget* parents = nullptr) :
 				rect_(r), clip_(r), rpos_(r.org),
 				move_org_(0), move_pos_(0),
 				resize_sign_(0), resize_min_(16 * 3), resize_org_(0), resize_pos_(0), resize_ref_(0),
