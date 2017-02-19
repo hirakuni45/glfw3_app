@@ -173,6 +173,9 @@ namespace gui {
 			T* w = new T(*this, bp, tp);
 			w->initialize();
 			w->set_serial(serial_);
+			if(bp.parents_ != nullptr) {  // 親の状態を反映
+				w->set_state(widget::state::ENABLE, bp.parents_->get_state(widget::state::ENABLE));
+			}
 			++serial_;
 			widgets_.push_back(w);
 			return w;
