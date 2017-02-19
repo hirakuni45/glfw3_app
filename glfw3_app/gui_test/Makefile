@@ -70,7 +70,6 @@ PSOURCES	=	main.cpp \
 				widgets/widget_text.cpp \
 				widgets/widget_label.cpp \
 				widgets/widget_slider.cpp \
-				widgets/widget_list.cpp \
 				widgets/widget_radio.cpp \
 				widgets/widget_menu.cpp \
 				widgets/widget_dialog.cpp \
