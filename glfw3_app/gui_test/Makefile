@@ -68,10 +68,8 @@ PSOURCES	=	main.cpp \
 				widgets/widget_director.cpp \
 				widgets/widget_utils.cpp \
 				widgets/widget_text.cpp \
-				widgets/widget_label.cpp \
 				widgets/widget_slider.cpp \
 				widgets/widget_radio.cpp \
-				widgets/widget_menu.cpp \
 				widgets/widget_dialog.cpp \
 				widgets/widget_tree.cpp \
 				widgets/widget_filer.cpp \
