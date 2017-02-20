@@ -11,11 +11,11 @@
 #include "ModelLoader.h"
 #include "SoundLoader.h"
 
-#include "effekseer/core/Renderer/SpriteRenderer.h"
-#include "effekseer/core/Renderer/RibbonRenderer.h"
-#include "effekseer/core/Renderer/RingRenderer.h"
-#include "effekseer/core/Renderer/ModelRenderer.h"
-#include "effekseer/core/Renderer/TrackRenderer.h"
+#include "effekseer/core/renderer/SpriteRenderer.h"
+#include "effekseer/core/renderer/RibbonRenderer.h"
+#include "effekseer/core/renderer/RingRenderer.h"
+#include "effekseer/core/renderer/ModelRenderer.h"
+#include "effekseer/core/renderer/TrackRenderer.h"
 
 //----------------------------------------------------------------------------------
 //

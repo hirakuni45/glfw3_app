@@ -18,7 +18,7 @@
 #include "gl_fw/glcamera.hpp"
 #include "gl_fw/gllight.hpp"
 
-#include "effekseer/gl/renderer.h"
+#include "effekseer/gl/Renderer.h"
 
 namespace app {
 
