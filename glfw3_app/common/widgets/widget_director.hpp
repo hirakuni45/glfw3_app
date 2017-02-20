@@ -174,7 +174,9 @@ namespace gui {
 			w->initialize();
 			w->set_serial(serial_);
 			if(bp.parents_ != nullptr) {  // 親の状態を反映
-				w->set_state(widget::state::ENABLE, bp.parents_->get_state(widget::state::ENABLE));
+				if(!root_widget(w)->get_state(widget::state::ENABLE)) {
+					w->set_state(widget::state::ENABLE, false);
+				}
 			}
 			++serial_;
 			widgets_.push_back(w);
