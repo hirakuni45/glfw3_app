@@ -25,9 +25,12 @@
 #include "widgets/widget_terminal.hpp"
 #include "widgets/widget_filer.hpp"
 #include "widgets/widget_dialog.hpp"
+#include "widgets/widget_list.hpp"
 #include "gl_fw/gltexfb.hpp"
 #include "snd_io/pcm.hpp"
 #include "utils/fifo.hpp"
+#include "tools.hpp"
+#include "nsfplay.hpp"
 
 extern "C" {
 	#include "nes.h"
@@ -37,6 +40,11 @@ extern "C" {
 
 namespace app {
 
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief	nesemu シーン・クラス
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class nesemu : public utils::i_scene {
 
 		utils::director<core>&	director_;
@@ -46,6 +54,9 @@ namespace app {
 		bool					terminal_;
 
 		gui::widget_filer*		filer_;
+
+		gui::widget_frame*		menu_frame_;
+		bool					menu_;
 
 		gui::widget_dialog*		dialog_;
 
@@ -70,6 +81,10 @@ namespace app {
 		nesinput_t	inp_[2];
 
 		int		nes_pause_;
+
+		emu::tools		tools_;
+
+		emu::nsfplay	nsfplay_;
 
 		void pad_()
 		{
@@ -145,7 +160,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		nesemu(utils::director<core>& d) : director_(d),
 			terminal_frame_(nullptr), terminal_core_(nullptr), terminal_(false),
-			dialog_(nullptr),
+			menu_frame_(nullptr), menu_(false), dialog_(nullptr),
 			nes_(nullptr), rom_active_(false), nes_pause_(0)
 		{ }
 
@@ -188,7 +203,9 @@ namespace app {
 				widget::param wp(vtx::irect(10, 10, 200, 200));
 				widget_filer::param wp_(core.get_current_path(), "");
 				wp_.select_file_func_ = [this](const std::string& fn) {
-					if(nes_insertcart(fn.c_str(), nes_) == 0) {
+					if(nsfplay_.open(fn)) {
+
+					} else if(nes_insertcart(fn.c_str(), nes_) == 0) {
 						rom_active_ = true;
 					} else {
 						dialog_->enable();
@@ -199,8 +216,34 @@ namespace app {
 				filer_->enable(false);
 			}
 
+			{
+				{   // メニュー
+					widget::param wp(vtx::irect(20, 20, 200, 200));
+					widget_frame::param wp_;
+					wp_.plate_param_.set_caption(15);
+					menu_frame_ = wd.add_widget<widget_frame>(wp, wp_);
+					menu_frame_->enable(false);
+					menu_frame_->at_param().state_.set(widget::state::SIZE_LOCK);
+				}
+				if(1) {   // リスト
+					widget::param wp(vtx::irect(10, 35, 60, 30), menu_frame_);
+					widget_list::param wp_("Slot");
+					wp_.text_list_.push_back("0");
+					wp_.text_list_.push_back("1");
+					wp_.text_list_.push_back("2");
+					wp_.text_list_.push_back("3");
+					wp_.text_list_.push_back("4");
+					wp_.text_list_.push_back("5");
+					wp_.text_list_.push_back("6");
+					wp_.text_list_.push_back("7");
+					wp_.text_list_.push_back("8");
+					wp_.text_list_.push_back("9");
+					wd.add_widget<widget_list>(wp, wp_);
+				}
+			}
+
 			{   // Daialog
-				widget::param wp(vtx::irect(50, 50, 300, 150));
+				widget::param wp(vtx::irect(70, 70, 300, 150));
 				widget_dialog::param wp_;
 				wp_.style_ = widget_dialog::param::style::OK;
 				dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
@@ -222,24 +265,16 @@ namespace app {
 			audio_ = al::create_audio(al::audio_format::PCM16_MONO);
 			audio_->create(sample_rate_, audio_queue_);
 
-//			auto path = core.get_current_path();
-
-//			path += "/GALAXIAN.NES";
-//			path += "/Zombie.nes";
-//			path += "/DRAGONQ1.NES";
-//			path += "/DRAGONW2.NES";
-//			path += "/SOLSTICE.NES";
-//			path += "/GRADIUS.NES";
-
-//			nes_insertcart(path.c_str(), nes_);
-
 			// プリファレンスの取得
 			sys::preference& pre = director_.at().preference_;
-			if(filer_) {
+			if(filer_ != nullptr) {
 				filer_->load(pre);
 			}
-			if(terminal_frame_) {
+			if(terminal_frame_ != nullptr) {
 				terminal_frame_->load(pre);
+			}
+			if(menu_frame_ != nullptr) {
+				menu_frame_->load(pre);
 			}
 		}
 
@@ -264,6 +299,10 @@ namespace app {
 			if(dev.get_positive(gl::device::key::ESCAPE)) {
 				nes_pause_ ^= 1;
 				// nes_pause(nes_pause_);
+			}
+			if(dev.get_positive(gl::device::key::SPACE)) {
+				menu_ = !menu_;
+				menu_frame_->enable(menu_);
 			}
 
         	gui::widget_director& wd = director_.at().widget_director_;
@@ -360,11 +399,14 @@ namespace app {
 			nes_destroy(nes_);
 
 			sys::preference& pre = director_.at().preference_;
-			if(filer_) {
+			if(filer_ != nullptr) {
 				filer_->save(pre);
 			}
-			if(terminal_frame_) {
+			if(terminal_frame_ != nullptr) {
 				terminal_frame_->save(pre);
+			}
+			if(menu_frame_ != nullptr) {
+				menu_frame_->save(pre);
 			}
 		}
 
