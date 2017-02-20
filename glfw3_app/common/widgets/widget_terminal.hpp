@@ -41,7 +41,7 @@ namespace gui {
 			input_func_type input_func_;	///< １文字入力毎に呼ぶ関数
 			enter_func_type enter_func_;	///< 「Enter」時に呼ぶ関数
 
-			param() : font_("Inconsolata"), font_width_(0), font_height_(18), height_(18),
+			param() : font_("Inconsolata"), font_width_(0), font_height_(18), height_(20),
 				echo_(true), auto_fit_(true) { }
 		};
 
