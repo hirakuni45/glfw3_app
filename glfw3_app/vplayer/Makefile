@@ -67,22 +67,11 @@ PSOURCES	=	main.cpp \
 				snd_io/snd_files.cpp \
 				snd_io/sound.cpp \
 				widgets/common_parts.cpp \
-				widgets/widget.cpp \
 				widgets/widget_director.cpp \
 				widgets/widget_utils.cpp \
-				widgets/widget_text.cpp \
-				widgets/widget_button.cpp \
-				widgets/widget_label.cpp \
-				widgets/widget_slider.cpp \
-				widgets/widget_list.cpp \
-				widgets/widget_check.cpp \
-				widgets/widget_radio.cpp \
-				widgets/widget_menu.cpp \
 				widgets/widget_dialog.cpp \
 				widgets/widget_tree.cpp \
-				widgets/widget_filer.cpp \
-				widgets/widget_terminal.cpp \
-				widgets/widget_progress.cpp
+				widgets/widget_filer.cpp
 
 STDLIBS		=
 
