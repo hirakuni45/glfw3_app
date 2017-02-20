@@ -30,7 +30,7 @@ namespace gui {
 		@brief	アップデート
 	*/
 	//-----------------------------------------------------------------//
-	void widget_text::update()
+ 	void widget_text::update()
 	{
 	}
 
