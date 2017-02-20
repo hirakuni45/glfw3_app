@@ -1,11 +1,14 @@
 #pragma once
 //=====================================================================//
 /*!	@file
-	@brief	GUI widget_radio クラス（ヘッダー）
+	@brief	GUI widget_radio クラス @n
+			Copyright 2017 Kunihito Hiramatsu
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
+#include "core/glcore.hpp"
 #include "widgets/widget_director.hpp"
+#include "widgets/widget_utils.hpp"
 
 namespace gui {
 
@@ -81,7 +84,7 @@ namespace gui {
 			@brief	型を取得
 		*/
 		//-----------------------------------------------------------------//
-		type_id type() const { return get_type_id<value_type>(); }
+		type_id type() const override { return get_type_id<value_type>(); }
 
 
 		//-----------------------------------------------------------------//
@@ -90,7 +93,7 @@ namespace gui {
 			@return widget 型の基本名称
 		*/
 		//-----------------------------------------------------------------//
-		const char* type_name() const { return "radio"; }
+		const char* type_name() const override { return "radio"; }
 
 
 		//-----------------------------------------------------------------//
@@ -99,7 +102,7 @@ namespace gui {
 			@return ハイブリッド・ウィジェットの場合「true」を返す。
 		*/
 		//-----------------------------------------------------------------//
-		bool hybrid() const { return false; }
+		bool hybrid() const override { return false; }
 
 
 		//-----------------------------------------------------------------//
@@ -143,7 +146,16 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize();
+		void initialize() override {
+			// ボタンは標準的に固定
+			at_param().state_.set(widget::state::SERVICE);
+			at_param().state_.set(widget::state::POSITION_LOCK);
+			at_param().state_.set(widget::state::SIZE_LOCK);
+			at_param().state_.set(widget::state::MOVE_STALL);
+
+			dis_h_ = wd_.get_share_image().un_radio_;
+			ena_h_ = wd_.get_share_image().to_radio_;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -151,15 +163,38 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update();
+		void update() override {
+			bool f = param_.check_;
+			if(get_select()) {
+				obj_state_ = true;
+			} else if(get_selected()) {
+				param_.check_ = true;
+				obj_state_ = param_.check_;
+			} else {
+				obj_state_ = param_.check_;
+			}
 
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	レンダリング
-		*/
-		//-----------------------------------------------------------------//
-		void render();
+			// グループの自動更新
+			if(!f && param_.check_) {
+				widgets ws;
+				wd_.parents_widget(get_param().parents_, ws);
+				int i = 0;
+				no_ = -1;
+				for(widget* w : ws) {
+					if(w->type() == get_type_id<widget_radio>()) {
+						if(w != this) {
+							widget_radio* wl = dynamic_cast<widget_radio*>(w);
+							if(wl) {
+								wl->at_local_param().check_ = false;
+							}
+						} else {
+							no_ = i;
+						}
+					}
+					++i;
+				}
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -167,10 +202,65 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() {
+		void service() override {
 			if(back_state_ != obj_state_) {
 				if(param_.select_func_ != nullptr) param_.select_func_(obj_state_, no_);
 				back_state_ = obj_state_;
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	レンダリング
+		*/
+		//-----------------------------------------------------------------//
+		void render() override {
+			using namespace gl;
+			core& core = core::get_instance();
+
+			const vtx::spos& vsz = core.get_size();
+			const widget::param& wp = get_param();
+
+			if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) { 
+				gl::mobj::handle h;
+				if(obj_state_) h = ena_h_;
+				else h = dis_h_;
+
+				glPushMatrix();
+
+				vtx::irect rect;
+				const vtx::spos& mosz = wd_.at_mobj().get_size(h);
+				vtx::ipos ofs(0, (wp.rect_.size.y - mosz.y) / 2);
+				if(wp.state_[widget::state::CLIP_PARENTS]) {
+					draw_mobj(wd_, h, wp.clip_, ofs + wp.rpos_);
+					rect.org  = wp.rpos_;
+					rect.size = wp.rect_.size;
+				} else {
+					wd_.at_mobj().draw(h, gl::mobj::attribute::normal, ofs);
+					rect.org.set(0);
+					rect.size = wp.rect_.size;
+				}
+
+				rect.org.x += mosz.x + 4;
+				img::rgba8 fc = param_.text_param_.fore_color_;
+				if(param_.disable_gray_text_ && !obj_state_) {
+					param_.text_param_.fore_color_ *= param_.gray_text_gain_;
+				}
+				widget::text_param tmp = param_.text_param_;
+				const img::rgbaf& cf = wd_.get_color();
+				tmp.fore_color_ *= cf.r;
+				tmp.fore_color_.alpha_scale(cf.a);
+				tmp.shadow_color_ *= cf.r;
+				tmp.shadow_color_.alpha_scale(cf.a);
+				draw_text(tmp, rect, wp.clip_);
+
+				core.at_fonts().restore_matrix();
+
+				param_.text_param_.fore_color_ = fc;
+
+				glPopMatrix();
+				glViewport(0, 0, vsz.x, vsz.y);
 			}
 		}
 
@@ -182,7 +272,15 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(sys::preference& pre);
+		bool save(sys::preference& pre) override {
+			std::string path;
+			path += '/';
+			path += wd_.create_widget_name(this);
+
+			int err = 0;
+			if(!pre.put_boolean(path + "/state", param_.check_)) ++err;
+			return err == 0;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -192,7 +290,15 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre);
+		bool load(const sys::preference& pre) override {
+			std::string path;
+			path += '/';
+			path += wd_.create_widget_name(this);
+
+			int err = 0;
+			if(!pre.get_boolean(path + "/state", param_.check_)) ++err;
+			return err == 0;
+		}
 	};
 
 }
