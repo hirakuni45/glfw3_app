@@ -131,6 +131,21 @@ namespace app {
 			slider_ = wd.add_widget<widget_slider>(wp, wp_);
 		}
 
+		if(1) { // スピンボックスのテスト
+			widget::param wp(vtx::irect(30, 500, 100, 40));
+			widget_spinbox::param wp_;
+			wp_.text_list_.push_back("0");
+			wp_.text_list_.push_back("1");
+			wp_.text_list_.push_back("2");
+			wp_.text_list_.push_back("3");
+			wp_.text_list_.push_back("4");
+			wp_.text_list_.push_back("5");
+			spinbox_ = wd.add_widget<widget_spinbox>(wp, wp_);
+			spinbox_->at_local_param().select_func_ = [this](const std::string& st, int pos){
+				std::cout << "SpinBox select: '" << st << "', (" << pos << ")" << std::endl;
+			};
+		}
+
 		if(1) { // メニューのテスト
 			widget::param wp(vtx::irect(10, 10, 180, 30));
 			widget_menu::param wp_;

@@ -22,6 +22,7 @@
 #include "widgets/widget_image.hpp"
 #include "widgets/widget_terminal.hpp"
 #include "widgets/widget_progress.hpp"
+#include "widgets/widget_spinbox.hpp"
 
 namespace app {
 
@@ -44,6 +45,7 @@ namespace app {
 		gui::widget_filer*		filer_;
 		gui::widget_frame*		terminal_frame_;
 		gui::widget_terminal*	terminal_core_;
+		gui::widget_spinbox*	spinbox_;
 
 		uint32_t	filer_id_;
 		uint32_t	menu_id_;
@@ -62,6 +64,7 @@ namespace app {
 			tree_frame_(0), tree_core_(0),
 			filer_(0),
 			terminal_frame_(0), terminal_core_(0),
+			spinbox_(nullptr),
 			filer_id_(0), menu_id_(0)
 		{ }
 
