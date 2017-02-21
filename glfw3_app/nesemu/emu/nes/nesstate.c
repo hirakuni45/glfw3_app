@@ -482,7 +482,6 @@ int state_load(void)
       goto _error;
 
 ///   gui_sendmsg(GUI_GREEN, "State %d restored", state_slot);
-
    return 0;
 
 _error:
