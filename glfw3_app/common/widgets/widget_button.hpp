@@ -166,6 +166,7 @@ namespace gui {
 		void update() override {
 			if(get_selected()) {
 				++param_.id_;
+				if(param_.select_func_ != nullptr) param_.select_func_();
 			}
 		}
 
@@ -175,11 +176,7 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override {
-			if(get_selected()) {
-				if(param_.select_func_ != nullptr) param_.select_func_();
-			}
-		}
+		void service() override { }
 
 
 		//-----------------------------------------------------------------//
