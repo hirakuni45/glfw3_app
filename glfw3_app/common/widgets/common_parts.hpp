@@ -62,8 +62,5 @@ namespace gui {
 			}
 			return h;
 		}
-
 	};
-
-
 }

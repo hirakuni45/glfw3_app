@@ -43,6 +43,7 @@ namespace gui {
 	widget::color_param widget_director::default_list_color_select_;
 	widget::color_param widget_director::default_menu_color_;
 	widget::color_param widget_director::default_menu_color_select_;
+	widget::color_param widget_director::default_spinbox_color_;
 	widget::color_param widget_director::default_dialog_color_;
 	widget::color_param widget_director::default_filer_color_;
 	widget::color_param widget_director::default_tree_color_;
@@ -323,6 +324,10 @@ namespace gui {
 		bc = fc * 0.7f;
 		default_menu_color_select_ = widget::color_param(fc, bc);
 
+		fc.set( 72, 193, 241);
+		bc = fc * 0.7f;
+		default_spinbox_color_ = widget::color_param(fc, bc);
+
 		fc.set(235, 157,  95);
 		bc = fc * 0.7f;
 		default_dialog_color_ = widget::color_param(fc, bc);
@@ -370,6 +375,13 @@ namespace gui {
 		ir.left_bottom = 150; ir.center_bottom = 150; ir.right_bottom = 150;
 		default_list_color_select_.inten_rect_  = ir;
 		default_list_color_select_.ir_enable_ = true;
+
+		// スピンボックスの頂点輝度設定
+		ir.left_top    = 200; ir.center_top    = 255; ir.right_top    = 200;
+		ir.left_center = 255; ir.center_center = 255; ir.right_center = 255;
+		ir.left_bottom = 180; ir.center_bottom = 255; ir.right_bottom = 180;
+		default_spinbox_color_.inten_rect_ = ir;
+		default_spinbox_color_.ir_enable_ = true;
 
 		core& core = core::get_instance();
 		fonts& fonts = core.at_fonts();
@@ -420,7 +432,7 @@ namespace gui {
 //			pa.fill_rect(8, 8, 8, 8);
 //			share_img_.to_check_ = mobj_.install(&pa);
 
-			// 「ー」でチェックされた見た目
+			// 「－」でチェックされた見た目
 			pa = fr;
 			pa.swap_color();
 			pa.fill_rect(6, 10, 12, 4);
