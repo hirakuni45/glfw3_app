@@ -189,7 +189,7 @@ namespace app {
 			widget::param wp(vtx::irect(10, ofs+50*0, 100, 40), tools_);
 			widget_button::param wp_("load");
 			load_ = wd.add_widget<widget_button>(wp, wp_);
-			load_->at_local_param().select_func_ = [this]() {
+			load_->at_local_param().select_func_ = [this](int id) {
 				if(load_ctx_) {
 					bool f = load_ctx_->get_state(gui::widget::state::ENABLE);
 					load_ctx_->enable(!f);
@@ -201,7 +201,7 @@ namespace app {
 			widget::param wp(vtx::irect(10, ofs+50*1, 100, 40), tools_);
 			widget_button::param wp_("save");
 			save_ = wd.add_widget<widget_button>(wp, wp_);
-			save_->at_local_param().select_func_ = [this]() {
+			save_->at_local_param().select_func_ = [this](int id) {
 				if(save_ctx_) {
 					bool f = save_ctx_->get_state(gui::widget::state::ENABLE);
 					save_ctx_->enable(!f);

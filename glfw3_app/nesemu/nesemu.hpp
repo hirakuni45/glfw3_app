@@ -26,6 +26,7 @@
 #include "widgets/widget_filer.hpp"
 #include "widgets/widget_dialog.hpp"
 #include "widgets/widget_list.hpp"
+#include "widgets/widget_button.hpp"
 #include "gl_fw/gltexfb.hpp"
 #include "snd_io/pcm.hpp"
 #include "utils/fifo.hpp"
@@ -35,6 +36,7 @@
 extern "C" {
 	#include "nes.h"
 	#include "nesinput.h"
+	#include "nesstate.h"
 	extern const rgb_t* get_palette();
 };
 
@@ -57,6 +59,10 @@ namespace app {
 
 		gui::widget_frame*		menu_frame_;
 		bool					menu_;
+		gui::widget_list*		state_slot_;
+		gui::widget_button*		state_save_;
+		gui::widget_button*		state_load_;
+		gui::widget_button*		nes_reset_;
 
 		gui::widget_dialog*		dialog_;
 
@@ -160,7 +166,9 @@ namespace app {
 		//-----------------------------------------------------------------//
 		nesemu(utils::director<core>& d) : director_(d),
 			terminal_frame_(nullptr), terminal_core_(nullptr), terminal_(false),
-			menu_frame_(nullptr), menu_(false), dialog_(nullptr),
+			menu_frame_(nullptr), menu_(false),
+			state_slot_(nullptr), state_save_(nullptr), state_load_(nullptr), nes_reset_(nullptr),
+			dialog_(nullptr),
 			nes_(nullptr), rom_active_(false), nes_pause_(0)
 		{ }
 
@@ -238,7 +246,40 @@ namespace app {
 					wp_.text_list_.push_back("7");
 					wp_.text_list_.push_back("8");
 					wp_.text_list_.push_back("9");
-					wd.add_widget<widget_list>(wp, wp_);
+					state_slot_ = wd.add_widget<widget_list>(wp, wp_);
+				}
+				{ // ステート・セーブ
+					widget::param wp(vtx::irect(80, 35+40*0, 100, 30), menu_frame_);
+					widget_button::param wp_("Save");
+					state_save_ = wd.add_widget<widget_button>(wp, wp_);
+					state_save_->at_local_param().select_func_ = [this](int id) {
+						state_setslot(0);
+						if(state_save() != 0) {
+							dialog_->set_text("Save state error");
+							dialog_->enable();
+						}
+					};
+
+				}
+				{ // ステート・ロード
+					widget::param wp(vtx::irect(80, 35+40*1, 100, 30), menu_frame_);
+					widget_button::param wp_("Load");
+					state_load_ = wd.add_widget<widget_button>(wp, wp_);
+					state_load_->at_local_param().select_func_ = [this](int id) {
+						state_setslot(0);
+						if(state_load() != 0) {
+							dialog_->set_text("Load state error");
+							dialog_->enable();
+						}
+					};
+				}
+				{ // NES リセット
+					widget::param wp(vtx::irect(80, 35+40*2, 100, 30), menu_frame_);
+					widget_button::param wp_("Reset");
+					nes_reset_ = wd.add_widget<widget_button>(wp, wp_);
+					nes_reset_->at_local_param().select_func_ = [this](int id) {
+						nes_reset(HARD_RESET);
+					};
 				}
 			}
 

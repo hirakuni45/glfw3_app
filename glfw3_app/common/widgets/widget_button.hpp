@@ -20,7 +20,7 @@ namespace gui {
 
 		typedef widget_button value_type;
 
-		typedef std::function< void() > select_func_type;
+		typedef std::function< void(int) > select_func_type;
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
@@ -166,7 +166,7 @@ namespace gui {
 		void update() override {
 			if(get_selected()) {
 				++param_.id_;
-				if(param_.select_func_ != nullptr) param_.select_func_();
+				if(param_.select_func_ != nullptr) param_.select_func_(param_.id_);
 			}
 		}
 

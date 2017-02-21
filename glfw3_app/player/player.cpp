@@ -122,7 +122,7 @@ namespace app {
 		// ファイラー起動ボタン（ファイル選択）
 		const std::string& curp = core.get_current_path();
 		file_btn_  = gui::create_image<widget_button>(wd, curp + "/res/select.png");
-		file_btn_->at_local_param().select_func_ = [this]() {
+		file_btn_->at_local_param().select_func_ = [this](int id) {
 			bool f = filer_->get_state(gui::widget::state::ENABLE);
 			filer_->enable(!f);
 			if(!f) {
@@ -138,7 +138,7 @@ namespace app {
 		pause_btn_ = gui::create_image<widget_button>(wd, curp + "/res/pause.png");
 
 		rew_btn_   = gui::create_image<widget_button>(wd, curp + "/res/rew.png");
-		rew_btn_->at_local_param().select_func_ = [this]() {
+		rew_btn_->at_local_param().select_func_ = [this](int id) {
 			al::sound& sound = director_.at().sound_;
 			// 開始５秒以降なら、曲の先頭に～
 			if(sound.get_time_stream() < seek_change_time_) {
@@ -149,7 +149,7 @@ namespace app {
 		};
 
 		ff_btn_    = gui::create_image<widget_button>(wd, curp + "/res/ff.png");
-		ff_btn_->at_local_param().select_func_ = [this]() {
+		ff_btn_->at_local_param().select_func_ = [this](int id) {
 			al::sound& sound = director_.at().sound_;
 			sound.next_stream();
 		};

@@ -416,7 +416,7 @@ namespace app {
 			{ // ロード起動ボタン
 				widget::param wp(vtx::irect(10, 20+40*0, 90, 30), menu_);
 				widget_button::param wp_("load");
-				wp_.select_func_ = [this]() {
+				wp_.select_func_ = [this](int id) {
 					if(load_ctx_) {
 						script_on_ = false;
 						bool f = load_ctx_->get_state(gui::widget::state::ENABLE);
@@ -431,7 +431,7 @@ namespace app {
 			{ // セーブ起動ボタン
 				widget::param wp(vtx::irect(10, 20+40*1, 90, 30), menu_);
 				widget_button::param wp_("save");
-				wp_.select_func_ = [this]() {
+				wp_.select_func_ = [this](int id) {
 					if(save_ctx_) {
 						export_on_ = false;
 						bool f = save_ctx_->get_state(gui::widget::state::ENABLE);
@@ -446,7 +446,7 @@ namespace app {
 			{ // エキスポート起動ボタン
 				widget::param wp(vtx::irect(10, 20+40*2, 90, 30), menu_);
 				widget_button::param wp_("export");
-				wp_.select_func_ = [this]() {
+				wp_.select_func_ = [this](int id) {
 					if(save_ctx_) {
 						export_on_ = true;
 						bool f = save_ctx_->get_state(gui::widget::state::ENABLE);
@@ -461,7 +461,7 @@ namespace app {
 			{ // スクリプト起動ボタン
 				widget::param wp(vtx::irect(10, 20+40*3, 90, 30), menu_);
 				widget_button::param wp_("script");
-				wp_.select_func_ = [this]() {
+				wp_.select_func_ = [this](int id) {
 					if(load_ctx_) {
 						script_on_ = true;
 						bool f = load_ctx_->get_state(gui::widget::state::ENABLE);

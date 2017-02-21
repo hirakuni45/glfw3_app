@@ -52,7 +52,7 @@ namespace app {
 		{ // オープンファイルボタン
 			widget::param wp(vtx::irect(10, 10, 180, 40), tools_frame_);
 			widget_button::param wp_("load");
-			wp_.select_func_ = [this] () {
+			wp_.select_func_ = [this] (int id) {
 				if(load_ctx_) {
 					bool f = load_ctx_->get_state(gui::widget::state::ENABLE);
 					load_ctx_->enable(!f);
@@ -74,7 +74,7 @@ namespace app {
 		{ // Play/Pause ボタン
 			widget::param wp(vtx::irect( 10, 90, 85, 40), tools_frame_);
 			widget_button::param wp_("Play");
-			wp_.select_func_ = [this] () {
+			wp_.select_func_ = [this] (int id) {
 				if(decode_open_) {
 					bool f = director_.at().sound_.status_audio();
 					if(f) {
@@ -92,7 +92,7 @@ namespace app {
 		{ // Stop ボタン
 			widget::param wp(vtx::irect(100, 90, 85, 40), tools_frame_);
 			widget_button::param wp_("Stop");
-			wp_.select_func_ = [this] () {
+			wp_.select_func_ = [this] (int id) {
 				decoder_.close();
 				decode_open_ = false;
 				decode_pause_ = false;
