@@ -25,7 +25,7 @@
 #include "widgets/widget_terminal.hpp"
 #include "widgets/widget_filer.hpp"
 #include "widgets/widget_dialog.hpp"
-#include "widgets/widget_list.hpp"
+#include "widgets/widget_spinbox.hpp"
 #include "widgets/widget_button.hpp"
 #include "gl_fw/gltexfb.hpp"
 #include "snd_io/pcm.hpp"
@@ -59,7 +59,7 @@ namespace app {
 
 		gui::widget_frame*		menu_frame_;
 		bool					menu_;
-		gui::widget_list*		state_slot_;
+		gui::widget_spinbox*	state_slot_;
 		gui::widget_button*		state_save_;
 		gui::widget_button*		state_load_;
 		gui::widget_button*		nes_reset_;
@@ -226,16 +226,16 @@ namespace app {
 
 			{
 				{   // メニュー
-					widget::param wp(vtx::irect(20, 20, 200, 200));
+					widget::param wp(vtx::irect(20, 20, 220, 180));
 					widget_frame::param wp_;
 					wp_.plate_param_.set_caption(15);
 					menu_frame_ = wd.add_widget<widget_frame>(wp, wp_);
 					menu_frame_->enable(false);
 					menu_frame_->at_param().state_.set(widget::state::SIZE_LOCK);
 				}
-				if(1) {   // リスト
-					widget::param wp(vtx::irect(10, 35, 60, 30), menu_frame_);
-					widget_list::param wp_("Slot");
+				{   // スピン・ボックス
+					widget::param wp(vtx::irect(10, 35, 90, 30), menu_frame_);
+					widget_spinbox::param wp_;
 					wp_.text_list_.push_back("0");
 					wp_.text_list_.push_back("1");
 					wp_.text_list_.push_back("2");
@@ -246,10 +246,10 @@ namespace app {
 					wp_.text_list_.push_back("7");
 					wp_.text_list_.push_back("8");
 					wp_.text_list_.push_back("9");
-					state_slot_ = wd.add_widget<widget_list>(wp, wp_);
+					state_slot_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				}
 				{ // ステート・セーブ
-					widget::param wp(vtx::irect(80, 35+40*0, 100, 30), menu_frame_);
+					widget::param wp(vtx::irect(110, 35+40*0, 100, 30), menu_frame_);
 					widget_button::param wp_("Save");
 					state_save_ = wd.add_widget<widget_button>(wp, wp_);
 					state_save_->at_local_param().select_func_ = [this](int id) {
@@ -262,7 +262,7 @@ namespace app {
 
 				}
 				{ // ステート・ロード
-					widget::param wp(vtx::irect(80, 35+40*1, 100, 30), menu_frame_);
+					widget::param wp(vtx::irect(110, 35+40*1, 100, 30), menu_frame_);
 					widget_button::param wp_("Load");
 					state_load_ = wd.add_widget<widget_button>(wp, wp_);
 					state_load_->at_local_param().select_func_ = [this](int id) {
@@ -274,7 +274,7 @@ namespace app {
 					};
 				}
 				{ // NES リセット
-					widget::param wp(vtx::irect(80, 35+40*2, 100, 30), menu_frame_);
+					widget::param wp(vtx::irect(110, 35+40*2, 100, 30), menu_frame_);
 					widget_button::param wp_("Reset");
 					nes_reset_ = wd.add_widget<widget_button>(wp, wp_);
 					nes_reset_->at_local_param().select_func_ = [this](int id) {
@@ -312,7 +312,7 @@ namespace app {
 				filer_->load(pre);
 			}
 			if(terminal_frame_ != nullptr) {
-				terminal_frame_->load(pre);
+				terminal_frame_->load(pre, false, false);
 			}
 			if(menu_frame_ != nullptr) {
 				menu_frame_->load(pre);
