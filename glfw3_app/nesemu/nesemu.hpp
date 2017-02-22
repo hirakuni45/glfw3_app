@@ -27,6 +27,7 @@
 #include "widgets/widget_dialog.hpp"
 #include "widgets/widget_spinbox.hpp"
 #include "widgets/widget_button.hpp"
+#include "widgets/widget_slider.hpp"
 #include "gl_fw/gltexfb.hpp"
 #include "snd_io/pcm.hpp"
 #include "utils/fifo.hpp"
@@ -63,6 +64,7 @@ namespace app {
 		gui::widget_button*		state_save_;
 		gui::widget_button*		state_load_;
 		gui::widget_button*		nes_reset_;
+		gui::widget_slider*		volume_;
 
 		gui::widget_dialog*		dialog_;
 
@@ -168,6 +170,7 @@ namespace app {
 			terminal_frame_(nullptr), terminal_core_(nullptr), terminal_(false),
 			menu_frame_(nullptr), menu_(false),
 			state_slot_(nullptr), state_save_(nullptr), state_load_(nullptr), nes_reset_(nullptr),
+			volume_(nullptr),
 			dialog_(nullptr),
 			nes_(nullptr), rom_active_(false), nes_pause_(0)
 		{ }
@@ -226,7 +229,7 @@ namespace app {
 
 			{
 				{   // メニュー
-					widget::param wp(vtx::irect(20, 20, 210, 170));
+					widget::param wp(vtx::irect(20, 20, 210, 200));
 					widget_frame::param wp_;
 					wp_.plate_param_.set_caption(15);
 					menu_frame_ = wd.add_widget<widget_frame>(wp, wp_);
@@ -281,6 +284,11 @@ namespace app {
 						nes_reset(HARD_RESET);
 					};
 				}
+				{   // ボリューム
+					widget::param wp(vtx::irect(10, 35+40*3, 190, 20), menu_frame_);
+					widget_slider::param wp_;
+					volume_ = wd.add_widget<widget_slider>(wp, wp_);
+				}
 			}
 
 			{   // Daialog
@@ -316,6 +324,9 @@ namespace app {
 			}
 			if(menu_frame_ != nullptr) {
 				menu_frame_->load(pre, false, false);
+			}
+			if(volume_ != nullptr) {
+				volume_->load(pre);
 			}
 		}
 
@@ -388,6 +399,12 @@ namespace app {
 					texfb_.rendering(gl::texfb::image::RGBA, (const char*)&fb_[0]);
 				}
 
+				// ストリームのゲイン(volume)を設定
+				if(volume_ != nullptr) {
+					auto vol = volume_->get_slider_param().position_;
+					al::sound& sound = director_.at().sound_;
+					sound.set_gain_stream(vol);
+				}
 			}
 
 			texfb_.flip();
@@ -448,6 +465,9 @@ namespace app {
 			}
 			if(menu_frame_ != nullptr) {
 				menu_frame_->save(pre);
+			}
+			if(volume_ != nullptr) {
+				volume_->save(pre);
 			}
 		}
 
