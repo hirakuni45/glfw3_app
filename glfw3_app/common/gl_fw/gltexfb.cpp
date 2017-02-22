@@ -119,6 +119,8 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	void texfb::setup_matrix(int x, int y, int w, int h, float zn, float zf)
 	{
+		glMatrixMode(GL_TEXTURE);
+		glLoadIdentity();
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
 		glOrthof(static_cast<float>(x), static_cast<float>(w),
