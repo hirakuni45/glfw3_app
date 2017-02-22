@@ -1,7 +1,8 @@
 #pragma once
 //=====================================================================//
 /*!	@file
-	@brief	GUI widget_dialog クラス（ヘッダー）
+	@brief	GUI widget_dialog クラス（ヘッダー）@n
+			Copyright 2017 Kunihito Hiramatsu
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
