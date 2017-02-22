@@ -126,17 +126,17 @@ static void rom_loadsram(rominfo_t *rominfo)
 /* Allocate space for SRAM */
 static int rom_allocsram(rominfo_t *rominfo)
 {
-   /* Load up SRAM */
-   rominfo->sram = malloc(SRAM_BANK_LENGTH * rominfo->sram_banks);
-   if (NULL == rominfo->sram)
-   {
-///      gui_sendmsg(GUI_RED, "Could not allocate space for battery RAM");
-      return -1;
-   }
+	/* Load up SRAM */
+	rominfo->sram = malloc(SRAM_BANK_LENGTH * rominfo->sram_banks);
+	if (NULL == rominfo->sram)
+	{
+		log_printf("Could not allocate space for battery RAM");
+		return -1;
+	}
 
-   /* make damn sure SRAM is clear */
-   memset(rominfo->sram, 0, SRAM_BANK_LENGTH * rominfo->sram_banks);
-   return 0;
+	/* make damn sure SRAM is clear */
+	memset(rominfo->sram, 0, SRAM_BANK_LENGTH * rominfo->sram_banks);
+	return 0;
 }
 
 /* If there's a trainer, load it in at $7000 */
@@ -200,39 +200,40 @@ static uint8_t *rom_loadrom(uint8_t *rom, rominfo_t *rominfo)
 	return rom;
 }
 
-#if 0
+
 /* If we've got a VS. system game, load in the palette, as well */
 static void rom_checkforpal(rominfo_t *rominfo)
 {
-   FILE *fp;
-   rgb_t vs_pal[64];
-   char filename[PATH_MAX + 1];
-   int i;
+	FILE *fp;
+	rgb_t vs_pal[64];
+	char filename[PATH_MAX + 1];
+	int i;
 
-   ASSERT(rominfo);
+	ASSERT(rominfo);
 
-   strncpy(filename, rominfo->filename, PATH_MAX);
-   str_setext(filename, ".pal");
+	strncpy(filename, rominfo->filename, PATH_MAX);
+	str_setext(filename, ".pal");
 
-   fp = fopen(filename, "rb");
-   if (NULL == fp)
-      return; /* no palette found  */
+	fp = fopen(filename, "rb");
+	if (NULL == fp)
+		return; /* no palette found  */
 
-   for (i = 0; i < 64; i++)
-   {
-      vs_pal[i].r = fgetc(fp);
-      vs_pal[i].g = fgetc(fp);
-      vs_pal[i].b = fgetc(fp);
-   }
+	for (i = 0; i < 64; i++)
+	{
+		vs_pal[i].r = fgetc(fp);
+		vs_pal[i].g = fgetc(fp);
+		vs_pal[i].b = fgetc(fp);
+	}
 
-   fclose(fp);
-   /* TODO: this should really be a *SYSTEM* flag */
-   rominfo->flags |= ROM_FLAG_VERSUS;
-   /* TODO: bad, BAD idea, calling nes_getcontextptr... */
-   ppu_setpal(nes_getcontextptr()->ppu, vs_pal);
-   log_printf("Game specific palette found -- assuming VS. UniSystem\n");
+	fclose(fp);
+
+	/* TODO: this should really be a *SYSTEM* flag */
+	rominfo->flags |= ROM_FLAG_VERSUS;
+	/* TODO: bad, BAD idea, calling nes_getcontextptr... */
+	ppu_setpal(nes_getcontextptr()->ppu, vs_pal);
+	log_printf("Game specific palette found -- assuming VS. UniSystem\n");
 }
-#endif
+
 
 static FILE *rom_findrom(const char *filename, rominfo_t *rominfo)
 {
@@ -500,15 +501,15 @@ rominfo_t *rom_load(const char *filename)
 
 	rom_loadsram(rominfo);
 
-   /* See if there's a palette we can load up */
-//   rom_checkforpal(rominfo);
-///   gui_sendmsg(GUI_GREEN, "ROM loaded: %s", rom_getinfo(rominfo));
+	/* See if there's a palette we can load up */
+	rom_checkforpal(rominfo);
+	log_printf("ROM loaded: %s", rom_getinfo(rominfo));
 
-   return rominfo;
+	return rominfo;
 
 _fail:
-   rom_free(rominfo);
-   return NULL;
+	rom_free(rominfo);
+	return NULL;
 }
 
 /* Free a ROM */

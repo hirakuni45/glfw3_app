@@ -42,10 +42,10 @@ void state_setslot(int slot)
    /* Don't send a message if we're already at that slot */
    if (state_slot != slot && slot >= FIRST_STATE_SLOT
        && slot <= LAST_STATE_SLOT)
-   {
-      state_slot = slot;
-///      gui_sendmsg(GUI_WHITE, "State slot set to %d", slot);
-   }
+	{
+		state_slot = slot;
+		log_printf("State slot set to %d", slot);
+	}
 }
 
 static int save_baseblock(nes_t *state, SNSS_FILE *snssFile)
@@ -398,13 +398,13 @@ int state_save(void)
    if (SNSS_OK != status)
       goto _error;
 
-///   gui_sendmsg(GUI_GREEN, "State %d saved", state_slot);
-   return 0;
+	log_printf("State %d saved", state_slot);
+	return 0;
 
 _error:
-///   gui_sendmsg(GUI_RED, "error: %s", SNSS_GetErrorString(status));
-   SNSS_CloseFile(&snssFile);
-   return -1;
+	log_printf("error: %s", SNSS_GetErrorString(status));
+	SNSS_CloseFile(&snssFile);
+	return -1;
 }
 
 int state_load(void)
@@ -481,13 +481,13 @@ int state_load(void)
    if (SNSS_OK != status)
       goto _error;
 
-///   gui_sendmsg(GUI_GREEN, "State %d restored", state_slot);
-   return 0;
+	log_printf("State %d restored", state_slot);
+	return 0;
 
 _error:
-///   gui_sendmsg(GUI_RED, "error: %s", SNSS_GetErrorString(status));
-   SNSS_CloseFile(&snssFile);
-   return -1;
+	log_printf("error: %s", SNSS_GetErrorString(status));
+	SNSS_CloseFile(&snssFile);
+	return -1;
 }
 
 /*
