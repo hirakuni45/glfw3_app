@@ -45,7 +45,8 @@ void str_setext(char *text, const char *ext)
 static int (*log_func)(const char *string) = NULL;
 
 /* first up: debug versions of calls */
-#ifdef NOFRENDO_DEBUG
+#define DEBUG_
+#ifdef DEBUG_
 int log_init(void)
 {
 //   errorlog = fopen("errorlog.txt", "wt");

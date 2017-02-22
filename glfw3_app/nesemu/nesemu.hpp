@@ -36,6 +36,7 @@
 #include "nsfplay.hpp"
 
 extern "C" {
+	#include "log.h"
 	#include "nes.h"
 	#include "nesinput.h"
 	#include "nesstate.h"
@@ -316,6 +317,7 @@ namespace app {
 
 			texfb_.initialize(nes_width_, nes_height_, 32);
 
+			log_init();
 			nes_ = nes_create(sample_rate_, 16);
 
 			// regist input
