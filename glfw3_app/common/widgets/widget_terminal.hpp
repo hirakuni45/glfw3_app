@@ -7,6 +7,7 @@
 */
 //=====================================================================//
 #include "widgets/widget_director.hpp"
+#include "widgets/widget_frame.hpp"
 #include "utils/terminal.hpp"
 #include "core/glcore.hpp"
 
