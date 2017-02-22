@@ -6,8 +6,7 @@
 	@author 平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include "utils/format.hpp"
-#include "utils/input.hpp"
+#include "widgets/widget_terminal.hpp"
 
 namespace emu {
 
@@ -18,6 +17,7 @@ namespace emu {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class tools {
 
+		static gui::widget_terminal*	terminal_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -28,6 +28,23 @@ namespace emu {
 		tools() { }
 
 
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  ターミナル・コンテキストを設定
+			@param[in]	term	ターミナル・コンテキスト
+		*/
+		//-----------------------------------------------------------------//
+		static void set_terminal(gui::widget_terminal* t) { terminal_ = t; }
 
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  出力
+		*/
+		//-----------------------------------------------------------------//
+		static void put(const char* text) {
+			if(terminal_ == nullptr) return;
+			terminal_->output(text);
+		}
 	};
 }

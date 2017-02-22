@@ -31,6 +31,7 @@
 #include "gl_fw/gltexfb.hpp"
 #include "snd_io/pcm.hpp"
 #include "utils/fifo.hpp"
+#include "utils/input.hpp"
 #include "tools.hpp"
 #include "nsfplay.hpp"
 
@@ -160,6 +161,18 @@ namespace app {
 			}
 		}
 
+		int get_state_no_() const {
+			if(state_slot_ == nullptr) {
+				return -1;
+			}
+			int n;
+			if((utils::input("%d", state_slot_->get_select_text().c_str()) % n).status()) {
+				return n;
+			} else {
+				return -1;
+			}
+		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -207,7 +220,9 @@ namespace app {
 					widget::param wp(vtx::irect(0), terminal_frame_);
 					widget_terminal::param wp_;
 					terminal_core_ = wd.add_widget<widget_terminal>(wp, wp_);
-				}			
+
+					emu::tools::set_terminal(terminal_core_);
+				}
 			}
 
 			{  	// ファイラー
@@ -256,7 +271,7 @@ namespace app {
 					widget_button::param wp_("Save");
 					state_save_ = wd.add_widget<widget_button>(wp, wp_);
 					state_save_->at_local_param().select_func_ = [this](int id) {
-						state_setslot(0);
+						state_setslot(get_state_no_());
 						if(state_save() != 0) {
 							dialog_->set_text("Save state error");
 							dialog_->enable();
@@ -269,7 +284,7 @@ namespace app {
 					widget_button::param wp_("Load");
 					state_load_ = wd.add_widget<widget_button>(wp, wp_);
 					state_load_->at_local_param().select_func_ = [this](int id) {
-						state_setslot(0);
+						state_setslot(get_state_no_());
 						if(state_load() != 0) {
 							dialog_->set_text("Load state error");
 							dialog_->enable();

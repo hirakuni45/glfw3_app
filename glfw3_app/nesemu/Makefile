@@ -88,6 +88,7 @@ CSOURCES	=	minizip/ioapi.c \
 				./emu/libsnss/libsnss.c
 
 PSOURCES	=	main.cpp \
+				tools.cpp \
 				core/glcore.cpp \
 				core/device.cpp \
 				core/ftimg.cpp \
