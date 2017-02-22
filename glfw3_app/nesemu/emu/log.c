@@ -52,6 +52,8 @@ int log_init(void)
 //   if (NULL == errorlog)
 //      return (-1);
 
+	log_func = emu_log;
+
    return 0;
 }
 
