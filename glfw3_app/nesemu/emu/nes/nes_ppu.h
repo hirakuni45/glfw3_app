@@ -113,8 +113,7 @@ typedef struct ppu_s
 extern void ppu_setlatchfunc(ppulatchfunc_t func);
 extern void ppu_setvromswitch(ppuvromswitch_t func);
 
-extern void ppu_getcontext(ppu_t *dest_ppu);
-extern void ppu_setcontext(ppu_t *src_ppu);
+extern ppu_t *ppu_getcontext(void);
 
 /* Mirroring */
 /* TODO: this is only used bloody once */
@@ -133,8 +132,8 @@ extern void ppu_scanline(bitmap_t *bmp, int scanline, bool draw_flag);
 extern void ppu_endscanline(int scanline);
 extern void ppu_checknmi();
 
-extern ppu_t *ppu_create(void);
-extern void ppu_destroy(ppu_t *ppu);
+extern int ppu_create(void);
+extern void ppu_destroy(void);
 
 /* IO */
 extern uint8 ppu_read(uint32 address);
@@ -143,8 +142,8 @@ extern uint8 ppu_readhigh(uint32 address);
 extern void ppu_writehigh(uint32 address, uint8 value);
 
 /* rendering */
-/// extern void ppu_setpal(ppu_t *src_ppu, rgb_t *pal);
-extern void ppu_setdefaultpal(ppu_t *src_ppu);
+extern void ppu_setpal(rgb_t *pal);
+extern void ppu_setdefaultpal(void);
 
 /* bleh */
 /// extern void ppu_dumppattern(bitmap_t *bmp, int table_num, int x_loc, int y_loc, int col);

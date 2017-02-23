@@ -229,8 +229,8 @@ static void rom_checkforpal(rominfo_t *rominfo)
 
 	/* TODO: this should really be a *SYSTEM* flag */
 	rominfo->flags |= ROM_FLAG_VERSUS;
-	/* TODO: bad, BAD idea, calling nes_getcontextptr... */
-	ppu_setpal(nes_getcontext()->ppu, vs_pal);
+
+	ppu_setpal(vs_pal);
 	log_printf("Game specific palette found -- assuming VS. UniSystem\n");
 }
 
@@ -524,7 +524,7 @@ void rom_free(rominfo_t *rominfo)
    if (rominfo->flags & ROM_FLAG_VERSUS)
    {
       /* TODO: bad idea calling nes_getcontextptr... */
-      ppu_setdefaultpal(nes_getcontext()->ppu);
+      ppu_setdefaultpal();
       log_printf("Default NES palette restored\n");
    }
 

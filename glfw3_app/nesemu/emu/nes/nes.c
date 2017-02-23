@@ -349,7 +349,7 @@ void nes_destroy(void)
 {
 	rom_free(nes_.rominfo);
 	mmc_destroy(nes_.mmc);
-	ppu_destroy(nes_.ppu);
+///	ppu_destroy();
 	apu_destroy(nes_.apu);
 	bmp_destroy(nes_.vidbuf);
 	if (nes_.cpu != NULL)
@@ -403,7 +403,7 @@ int nes_insertcart(const char *filename)
 	build_address_handlers_();
 
 	apu_setcontext(nes_.apu);
-	ppu_setcontext(nes_.ppu);
+///	ppu_setcontext(nes_.ppu);
 	nes6502_setcontext(nes_.cpu);
 	mmc_setcontext(nes_.mmc);
 
@@ -459,9 +459,8 @@ int nes_create(int sample_rate, int sample_bits)
 	nes_.apu->irqclear_callback = nes_clearfiq;
 
 	/* ppu */
-	nes_.ppu = ppu_create();
-	if (NULL == nes_.ppu)
-		goto _fail;
+	ppu_create();
+	nes_.ppu = ppu_getcontext();
 
 	nes_.poweroff = false;
 	nes_.pause = false;

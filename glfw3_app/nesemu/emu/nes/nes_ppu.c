@@ -50,12 +50,12 @@
 /* the NES PPU */
 static ppu_t ppu;
 
-
 void ppu_displaysprites(bool display)
 {
    ppu.drawsprites = display;
 }
 
+#if 0
 void ppu_setcontext(ppu_t *src_ppu)
 {
    int nametab[4];
@@ -84,9 +84,14 @@ void ppu_setcontext(ppu_t *src_ppu)
    ppu.page[14] = ppu.page[10] - 0x1000;
    ppu.page[15] = ppu.page[11] - 0x1000;
 }
+#endif
 
-void ppu_getcontext(ppu_t *dest_ppu)
+ppu_t *ppu_getcontext(void)
 {
+	return &ppu;
+}
+
+#if 0
    int nametab[4];
    
    ASSERT(dest_ppu);
@@ -114,39 +119,48 @@ void ppu_getcontext(ppu_t *dest_ppu)
    dest_ppu->page[14] = dest_ppu->page[10] - 0x1000;
    dest_ppu->page[15] = dest_ppu->page[11] - 0x1000;
 }
+#endif
 
-ppu_t *ppu_create(void)
+int ppu_create(void)
 {
    static bool pal_generated = false;
-   ppu_t *temp;
 
-   temp = malloc(sizeof(ppu_t));
-   if (NULL == temp)
-      return NULL;
+   memset(&ppu, 0, sizeof(ppu_t));
 
-   memset(temp, 0, sizeof(ppu_t));
+	ppu.latchfunc = NULL;
+	ppu.vromswitch = NULL;
+	ppu.vram_present = false;
+	ppu.drawsprites = true;
 
-   temp->latchfunc = NULL;
-   temp->vromswitch = NULL;
-   temp->vram_present = false;
-   temp->drawsprites = true;
+	/* TODO: probably a better way to do this... */
+	if (false == pal_generated)
+	{
+		pal_generate();
+		pal_generated = true;
+	}
 
-   /* TODO: probably a better way to do this... */
-   if (false == pal_generated)
-   {
-      pal_generate();
-      pal_generated = true;
-   }
+	ppu_setdefaultpal();
 
-   ppu_setdefaultpal(temp);
+#if 0
+	int nametab[4];
+	nametab[0] = (ppu.page[8]  - ppu.nametab + 0x2000) >> 10;
+	nametab[1] = (ppu.page[9]  - ppu.nametab + 0x2400) >> 10;
+	nametab[2] = (ppu.page[10] - ppu.nametab + 0x2800) >> 10;
+	nametab[3] = (ppu.page[11] - ppu.nametab + 0x2C00) >> 10;
 
-   return temp;
+	ppu.page[8]  = ppu.nametab + (nametab[0] << 10) - 0x2000;
+	ppu.page[9]  = ppu.nametab + (nametab[1] << 10) - 0x2400;
+	ppu.page[10] = ppu.nametab + (nametab[2] << 10) - 0x2800;
+	ppu.page[11] = ppu.nametab + (nametab[3] << 10) - 0x2C00;
+	ppu.page[12] = ppu.page[8] - 0x1000;
+	ppu.page[13] = ppu.page[9] - 0x1000;
+	ppu.page[14] = ppu.page[10] - 0x1000;
+	ppu.page[15] = ppu.page[11] - 0x1000;
+#endif
+
+	return 0;
 }
 
-void ppu_destroy(ppu_t *src_ppu)
-{
-	free(src_ppu);
-}
 
 void ppu_setpage(int size, int page_num, uint8 *location)
 {
@@ -518,37 +532,37 @@ void ppu_write(uint32 address, uint8 value)
 ** Note that we set it up 3 times so that we flip bits on the primary
 ** NES buffer for priorities
 */
-#if 0
-static void ppu_buildpalette(ppu_t *src_ppu, rgb_t *pal)
+static void ppu_buildpalette(rgb_t *pal)
 {
+#if 0
    int i;
 
    /* Set it up 3 times, for sprite priority/BG transparency trickery */
    for (i = 0; i < 64; i++)
    {
-      src_ppu->curpal[i].r = src_ppu->curpal[i + 64].r 
-                           = src_ppu->curpal[i + 128].r = pal[i].r;
-      src_ppu->curpal[i].g = src_ppu->curpal[i + 64].g
-                           = src_ppu->curpal[i + 128].g = pal[i].g;
-      src_ppu->curpal[i].b = src_ppu->curpal[i + 64].b
-                           = src_ppu->curpal[i + 128].b = pal[i].b;
+      ppu.curpal[i].r = ppu.curpal[i + 64].r 
+                           = ppu.curpal[i + 128].r = pal[i].r;
+      ppu.curpal[i].g = ppu.curpal[i + 64].g
+                           = ppu.curpal[i + 128].g = pal[i].g;
+      ppu.curpal[i].b = ppu.curpal[i + 64].b
+                           = ppu.curpal[i + 128].b = pal[i].b;
    }
-}
 #endif
+}
 
 /* build the emulator specific palette based on a 64-entry palette
 ** input palette can be either nes_palette or a 64-entry RGB palette
 ** read in from disk (i.e. for VS games)
 */
-void ppu_setpal(ppu_t *src_ppu, rgb_t *pal)
+void ppu_setpal(rgb_t *pal)
 {
-///   ppu_buildpalette(src_ppu, pal);
-///   vid_setpalette(src_ppu->curpal);
+	/// ppu_buildpalette(pal);
+	/// vid_setpalette(src_ppu->curpal);
 }
 
-void ppu_setdefaultpal(ppu_t *src_ppu)
+void ppu_setdefaultpal(void)
 {
-   ppu_setpal(src_ppu, nes_palette);
+   ppu_setpal(nes_palette);
 }
 
 void ppu_setlatchfunc(ppulatchfunc_t func)

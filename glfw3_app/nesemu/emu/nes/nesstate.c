@@ -55,7 +55,7 @@ static int save_baseblock(nes_t *state, SNSS_FILE *snssFile)
    ASSERT(state);
 
    nes6502_getcontext(state->cpu);
-   ppu_getcontext(state->ppu);
+///   ppu_getcontext(state->ppu);
 
    snssFile->baseBlock.regA = state->cpu->a_reg;
    snssFile->baseBlock.regX = state->cpu->x_reg;
@@ -223,7 +223,7 @@ static void load_baseblock(nes_t *state, SNSS_FILE *snssFile)
    ASSERT(state);
 
    nes6502_getcontext(state->cpu);
-   ppu_getcontext(state->ppu);
+///   ppu_getcontext(state->ppu);
 
    state->cpu->a_reg = snssFile->baseBlock.regA;
    state->cpu->x_reg = snssFile->baseBlock.regX;
@@ -259,7 +259,7 @@ static void load_baseblock(nes_t *state, SNSS_FILE *snssFile)
    state->ppu->strikeflag = false;
 
    nes6502_setcontext(state->cpu);
-   ppu_setcontext(state->ppu);
+///   ppu_setcontext(state->ppu);
 
    ppu_write(PPU_CTRL0, state->ppu->ctrl0);
    ppu_write(PPU_CTRL1, state->ppu->ctrl1);
