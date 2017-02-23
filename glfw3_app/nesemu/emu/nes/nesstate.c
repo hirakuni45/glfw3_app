@@ -342,7 +342,7 @@ int state_save(void)
    nes_t *machine;
 
    /* get the pointer to our NES machine context */
-   machine = nes_getcontextptr();
+   machine = nes_getcontext();
    ASSERT(machine);
    
    /* build our filename using the image's name and the slot number */
@@ -417,7 +417,7 @@ int state_load(void)
    nes_t *machine;
 
    /* get our machine's context pointer */
-   machine = nes_getcontextptr();
+   machine = nes_getcontext();
    ASSERT(machine);
 
    /* build the state name using the ROM's name and the slot number */
