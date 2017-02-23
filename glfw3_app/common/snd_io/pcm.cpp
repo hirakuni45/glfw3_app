@@ -1,11 +1,11 @@
 //=====================================================================//
 /*!	@file
-	@brief	PCM 波形を扱うクラス（ヘッダー）
+	@brief	PCM 波形を扱うクラス @n
+			Copyright 2017 Kunihito Hiramatsu
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
 #include "pcm.hpp"
-#include <boost/foreach.hpp>
 
 namespace al {
 

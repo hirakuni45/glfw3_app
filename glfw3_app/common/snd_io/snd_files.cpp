@@ -1,6 +1,7 @@
 //=====================================================================//
 /*!	@file
-	@brief	各種サウンドファイル統合的に扱う
+	@brief	各種サウンドファイル統合的に扱う @n
+			Copyright 2017 Kunihito Hiramatsu
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
@@ -8,7 +9,6 @@
 #include "wav_io.hpp"
 #include "mp3_io.hpp"
 #include "aac_io.hpp"
-#include <boost/foreach.hpp>
 
 namespace al {
 
@@ -18,7 +18,7 @@ namespace al {
 	static bool check_file_exts_(const std::string& exts, const std::string& ext)
 	{
 		utils::strings ss = utils::split_text(exts, ",");
-		BOOST_FOREACH(std::string& s, ss) {
+		for(const std::string& s : ss) {
 			if(utils::no_capital_strcmp(ext, s) == 0) {
 				return true;
 			}
@@ -32,7 +32,7 @@ namespace al {
 		if(sio) {
 			sio->initialize();
 			utils::strings ss = utils::split_text(exts, ",");
-			BOOST_FOREACH(std::string& s, ss) {
+			for(const std::string& s : ss) {
 				if(check_file_exts_(sio->get_file_ext(), s)) {
 					snd_file sd;
 					sd.sio = sio;

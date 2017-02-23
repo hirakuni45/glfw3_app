@@ -1,12 +1,12 @@
 #pragma once
 //=====================================================================//
 /*!	@file
-	@brief	PCM 波形を扱うクラス（ヘッダー）
+	@brief	PCM 波形を扱うクラス（ヘッダー）@n
+			Copyright 2017 Kunihito Hiramatsu
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
 #include <vector>
-#include <boost/foreach.hpp>
 #include "i_audio.hpp"
 #include "utils/file_io.hpp"
 
@@ -60,7 +60,7 @@ namespace al {
 			@param[in]	w	PCM データ
 		*/
 		//-----------------------------------------------------------------//
-		void fill(const T& w) { BOOST_FOREACH(T& v, waves_) { v = w; } }
+		void fill(const T& w) { for(T& v : waves_) { v = w; } }
 
 
 		//-----------------------------------------------------------------//
@@ -68,7 +68,7 @@ namespace al {
 			@brief	バッファを「０」クリアする
 		*/
 		//-----------------------------------------------------------------//
-		void zero() { BOOST_FOREACH(T& v, waves_) { v = zero_; } }
+		void zero() { for(T& v : waves_) { v = zero_; } }
 
 
 		//-----------------------------------------------------------------//

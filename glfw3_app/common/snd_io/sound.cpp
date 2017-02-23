@@ -1,13 +1,13 @@
 //=====================================================================//
 /*!	@file
-	@brief	効果音、BGM クラス
+	@brief	効果音、BGM クラス @n
+			Copyright 2017 Kunihito Hiramatsu
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
 #include "sound.hpp"
 #include <ctime>
 #include <unistd.h>
-#include <boost/foreach.hpp>
 #include "pcm.hpp"
 #include "utils/file_info.hpp"
 
@@ -386,7 +386,7 @@ namespace al {
 	//-----------------------------------------------------------------//
 	void sound::destroy_se_all()
 	{
-		BOOST_FOREACH(ses::value_type h, ses_) {
+		for(ses::value_type h : ses_) {
 			if(h) {
 				audio_io_.destroy_wave(h);
 			}

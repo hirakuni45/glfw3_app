@@ -1,13 +1,13 @@
 //=====================================================================//
 /*!	@file
-	@brief	MP3 ファイルを扱うクラス
+	@brief	MP3 ファイルを扱うクラス @n
+			Copyright 2017 Kunihito Hiramatsu
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
 #include "mp3_io.hpp"
 #include "pcm.hpp"
 #include "img_io/img_utils.hpp"
-#include <boost/foreach.hpp>
 #include <boost/format.hpp>
 
 #include <iostream>
@@ -443,7 +443,7 @@ namespace al {
 			tmp = s.toCString(true);
 		}
 		std::string out;
-		BOOST_FOREACH(char ch, tmp) {
+		for(char ch : tmp) {
 			if(ch < 0x20 && ch >= 0) ;
 			else out += ch; 
 		}
