@@ -302,7 +302,7 @@ namespace app {
 				}
 				{   // ボリューム
 					widget::param wp(vtx::irect(10, 35+40*3, 190, 20), menu_frame_);
-					widget_slider::param wp_;
+					widget_slider::param wp_(0.5f);
 					volume_ = wd.add_widget<widget_slider>(wp, wp_);
 				}
 			}
