@@ -1,6 +1,7 @@
 //=====================================================================//
 /*!	@file
-	@brief	Windows Graphics Library (for GLUT-3.7)
+	@brief	Graphics Library Core (for glfw3) @n
+			Copyright 2017 Kunihito Hiramatsu
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
