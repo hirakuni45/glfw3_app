@@ -85,10 +85,9 @@ typedef struct nes_s
 
 } nes_t;
 
+extern nes_t *nes_getcontext(void);
 
 extern int nes_isourfile(const char *filename);
-
-extern nes_t *nes_getcontext(void);
 
 extern int nes_create(int sample_rate, int sample_bits);
 extern void nes_destroy(void);
