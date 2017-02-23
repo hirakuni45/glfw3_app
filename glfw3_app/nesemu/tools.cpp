@@ -7,7 +7,7 @@
 //=====================================================================//
 #include "tools.hpp"
 
-gui::widget_terminal*	emu::tools::terminal_;
+gui::widget_terminal* emu::tools::terminal_;
 
 extern "C" {
 
@@ -18,3 +18,4 @@ extern "C" {
 	}
 
 };
+
