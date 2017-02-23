@@ -78,8 +78,6 @@ namespace app {
 		static const int audio_len_ = sample_rate_ / 60;
 		static const int audio_queue_ = 1024;
 
-		nes_t*	nes_;
-
 		bool	rom_active_;
 
 		typedef utils::fifo<int16_t, audio_queue_ * 16> fifo;
@@ -186,7 +184,7 @@ namespace app {
 			state_slot_(nullptr), state_save_(nullptr), state_load_(nullptr), nes_reset_(nullptr),
 			volume_(nullptr),
 			dialog_(nullptr),
-			nes_(nullptr), rom_active_(false), nes_pause_(0)
+			rom_active_(false), nes_pause_(0)
 		{ }
 
 
@@ -232,7 +230,7 @@ namespace app {
 				wp_.select_file_func_ = [this](const std::string& fn) {
 					if(nsfplay_.open(fn)) {
 
-					} else if(nes_insertcart(fn.c_str(), nes_) == 0) {
+					} else if(nes_insertcart(fn.c_str()) == 0) {
 						rom_active_ = true;
 					} else {
 						dialog_->enable();
@@ -318,7 +316,7 @@ namespace app {
 			texfb_.initialize(nes_width_, nes_height_, 32);
 
 			log_init();
-			nes_ = nes_create(sample_rate_, 16);
+			nes_create(sample_rate_, 16);
 
 			// regist input
 			inp_[0].type = INP_JOYPAD0;
@@ -376,7 +374,7 @@ namespace app {
 
         	gui::widget_director& wd = director_.at().widget_director_;
 
-			if(nes_ != nullptr && rom_active_) {
+			if(rom_active_) {
 				pad_();
 
 				nes_emulate(1);
@@ -398,7 +396,8 @@ namespace app {
 				}
 
 				// copy video
-				bitmap_t* v = nes_->vidbuf;
+				auto nes = nes_getcontext();
+				bitmap_t* v = nes->vidbuf;
 				const rgb_t* lut = get_palette();
 				if(v != nullptr && lut != nullptr) {
 					for(int h = 0; h < nes_height_; ++h) {
@@ -471,7 +470,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void destroy()
 		{
-			nes_destroy(nes_);
+			nes_destroy();
 
 			sys::preference& pre = director_.at().preference_;
 			if(filer_ != nullptr) {
