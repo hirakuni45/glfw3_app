@@ -348,8 +348,6 @@ void nes_reset(int reset_type)
 void nes_destroy(void)
 {
 	rom_free(nes_.rominfo);
-	mmc_destroy(nes_.mmc);
-///	ppu_destroy();
 	apu_destroy();
 	bmp_destroy(nes_.vidbuf);
 	if (nes_.cpu != NULL)
@@ -390,9 +388,8 @@ int nes_insertcart(const char *filename)
 	}
 
 	/* mapper */
-	nes_.mmc = mmc_create(nes_.rominfo);
-	if (NULL == nes_.mmc)
-		goto _fail;
+	mmc_create(nes_.rominfo);
+	nes_.mmc = mmc_getcontext();
 
 	/* if there's VRAM, let the PPU know */
 	if (NULL != nes_.rominfo->vram) {
@@ -403,10 +400,7 @@ int nes_insertcart(const char *filename)
    
 	build_address_handlers_();
 
-///	apu_setcontext(nes_.apu);
-///	ppu_setcontext(nes_.ppu);
 	nes6502_setcontext(nes_.cpu);
-	mmc_setcontext(nes_.mmc);
 
 	nes_reset(HARD_RESET);
 	return 0;

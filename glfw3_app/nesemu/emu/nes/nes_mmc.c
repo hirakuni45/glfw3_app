@@ -32,13 +32,13 @@
 #include "mmclist.h"
 #include "nes_rom.h"
 
-#define  MMC_8KROM         (mmc.cart->rom_banks * 2)
-#define  MMC_16KROM        (mmc.cart->rom_banks)
-#define  MMC_32KROM        (mmc.cart->rom_banks / 2)
-#define  MMC_8KVROM        (mmc.cart->vrom_banks)
-#define  MMC_4KVROM        (mmc.cart->vrom_banks * 2)
-#define  MMC_2KVROM        (mmc.cart->vrom_banks * 4)
-#define  MMC_1KVROM        (mmc.cart->vrom_banks * 8)
+#define  MMC_8KROM         (mmc_.cart->rom_banks * 2)
+#define  MMC_16KROM        (mmc_.cart->rom_banks)
+#define  MMC_32KROM        (mmc_.cart->rom_banks / 2)
+#define  MMC_8KVROM        (mmc_.cart->vrom_banks)
+#define  MMC_4KVROM        (mmc_.cart->vrom_banks * 2)
+#define  MMC_2KVROM        (mmc_.cart->vrom_banks * 4)
+#define  MMC_1KVROM        (mmc_.cart->vrom_banks * 8)
 
 #define  MMC_LAST8KROM     (MMC_8KROM - 1)
 #define  MMC_LAST16KROM    (MMC_16KROM - 1)
@@ -48,29 +48,22 @@
 #define  MMC_LAST2KVROM    (MMC_2KVROM - 1)
 #define  MMC_LAST1KVROM    (MMC_1KVROM - 1)
 
-static mmc_t mmc;
+static mmc_t mmc_;
 
 rominfo_t *mmc_getinfo(void)
 {
-   return mmc.cart;
+   return mmc_.cart;
 }
 
-void mmc_setcontext(mmc_t *src_mmc)
+mmc_t *mmc_getcontext(void)
 {
-   ASSERT(src_mmc);
-
-   mmc = *src_mmc;
-}
-
-void mmc_getcontext(mmc_t *dest_mmc)
-{
-   *dest_mmc = mmc;
+   return &mmc_;
 }
 
 /* VROM bankswitching */
 void mmc_bankvrom(int size, uint32 address, int bank)
 {
-   if (0 == mmc.cart->vrom_banks)
+   if (0 == mmc_.cart->vrom_banks)
       return;
 
    switch (size)
@@ -78,25 +71,25 @@ void mmc_bankvrom(int size, uint32 address, int bank)
    case 1:
       if (bank == MMC_LASTBANK)
          bank = MMC_LAST1KVROM;
-      ppu_setpage(1, address >> 10, &mmc.cart->vrom[(bank % MMC_1KVROM) << 10] - address);
+      ppu_setpage(1, address >> 10, &mmc_.cart->vrom[(bank % MMC_1KVROM) << 10] - address);
       break;
 
    case 2:
       if (bank == MMC_LASTBANK)
          bank = MMC_LAST2KVROM;
-      ppu_setpage(2, address >> 10, &mmc.cart->vrom[(bank % MMC_2KVROM) << 11] - address);
+      ppu_setpage(2, address >> 10, &mmc_.cart->vrom[(bank % MMC_2KVROM) << 11] - address);
       break;
 
    case 4:
       if (bank == MMC_LASTBANK)
          bank = MMC_LAST4KVROM;
-      ppu_setpage(4, address >> 10, &mmc.cart->vrom[(bank % MMC_4KVROM) << 12] - address);
+      ppu_setpage(4, address >> 10, &mmc_.cart->vrom[(bank % MMC_4KVROM) << 12] - address);
       break;
 
    case 8:
       if (bank == MMC_LASTBANK)
          bank = MMC_LAST8KVROM;
-      ppu_setpage(8, 0, &mmc.cart->vrom[(bank % MMC_8KVROM) << 13]);
+      ppu_setpage(8, 0, &mmc_.cart->vrom[(bank % MMC_8KVROM) << 13]);
       break;
 
    default:
@@ -118,7 +111,7 @@ void mmc_bankrom(int size, uint32 address, int bank)
          bank = MMC_LAST8KROM;
       {
          int page = address >> NES6502_BANKSHIFT;
-         mmc_cpu.mem_page[page] = &mmc.cart->rom[(bank % MMC_8KROM) << 13];
+         mmc_cpu.mem_page[page] = &mmc_.cart->rom[(bank % MMC_8KROM) << 13];
          mmc_cpu.mem_page[page + 1] = mmc_cpu.mem_page[page] + 0x1000;
       }
 
@@ -129,7 +122,7 @@ void mmc_bankrom(int size, uint32 address, int bank)
          bank = MMC_LAST16KROM;
       {
          int page = address >> NES6502_BANKSHIFT;
-         mmc_cpu.mem_page[page] = &mmc.cart->rom[(bank % MMC_16KROM) << 14];
+         mmc_cpu.mem_page[page] = &mmc_.cart->rom[(bank % MMC_16KROM) << 14];
          mmc_cpu.mem_page[page + 1] = mmc_cpu.mem_page[page] + 0x1000;
          mmc_cpu.mem_page[page + 2] = mmc_cpu.mem_page[page] + 0x2000;
          mmc_cpu.mem_page[page + 3] = mmc_cpu.mem_page[page] + 0x3000;
@@ -140,7 +133,7 @@ void mmc_bankrom(int size, uint32 address, int bank)
       if (bank == MMC_LASTBANK)
          bank = MMC_LAST32KROM;
 
-      mmc_cpu.mem_page[8] = &mmc.cart->rom[(bank % MMC_32KROM) << 15];
+      mmc_cpu.mem_page[8] = &mmc_.cart->rom[(bank % MMC_32KROM) << 15];
       mmc_cpu.mem_page[9] = mmc_cpu.mem_page[8] + 0x1000;
       mmc_cpu.mem_page[10] = mmc_cpu.mem_page[8] + 0x2000;
       mmc_cpu.mem_page[11] = mmc_cpu.mem_page[8] + 0x3000;
@@ -175,20 +168,20 @@ bool mmc_peek(int map_num)
 
 static void mmc_setpages(void)
 {
-   log_printf("setting up mapper %d\n", mmc.intf->number);
+   log_printf("setting up mapper %d\n", mmc_.intf->number);
 
    /* Switch ROM into CPU space, set VROM/VRAM (done for ALL ROMs) */
    mmc_bankrom(16, 0x8000, 0);
    mmc_bankrom(16, 0xC000, MMC_LASTBANK);
    mmc_bankvrom(8, 0x0000, 0);
 
-   if (mmc.cart->flags & ROM_FLAG_FOURSCREEN)
+   if (mmc_.cart->flags & ROM_FLAG_FOURSCREEN)
    {
       ppu_mirror(0, 1, 2, 3);
    }
    else
    {
-      if (MIRROR_VERT == mmc.cart->mirror)
+      if (MIRROR_VERT == mmc_.cart->mirror)
          ppu_mirror(0, 1, 0, 1);
       else
          ppu_mirror(0, 0, 1, 1);
@@ -196,11 +189,11 @@ static void mmc_setpages(void)
 
    /* if we have no VROM, switch in VRAM */
    /* TODO: fix this hack implementation */
-   if (0 == mmc.cart->vrom_banks)
+   if (0 == mmc_.cart->vrom_banks)
    {
-      ASSERT(mmc.cart->vram);
+      ASSERT(mmc_.cart->vram);
 
-      ppu_setpage(8, 0, mmc.cart->vram);
+      ppu_setpage(8, 0, mmc_.cart->vram);
       ppu_mirrorhipages();
    }
 }
@@ -213,48 +206,36 @@ void mmc_reset(void)
    ppu_setlatchfunc(NULL);
    ppu_setvromswitch(NULL);
 
-   if (mmc.intf->init)
-      mmc.intf->init();
+   if (mmc_.intf->init)
+      mmc_.intf->init();
 
    log_printf("reset memory mapper\n");
 }
 
 
-void mmc_destroy(mmc_t *nes_mmc)
+int mmc_create(rominfo_t *rominfo)
 {
-	free(nes_mmc);
-}
-
-mmc_t *mmc_create(rominfo_t *rominfo)
-{
-   mmc_t *temp;
    const mapintf_t **map_ptr;
   
    for (map_ptr = mappers; (*map_ptr)->number != rominfo->mapper_number; map_ptr++)
    {
       if (NULL == *map_ptr)
-         return NULL; /* Should *never* happen */
+         return -1; /* Should *never* happen */
    }
 
-   temp = malloc(sizeof(mmc_t));
-   if (NULL == temp)
-      return NULL;
+   memset(&mmc_, 0, sizeof(mmc_t));
 
-   memset(temp, 0, sizeof(mmc_t));
-
-   temp->intf = *map_ptr;
-   temp->cart = rominfo;
-
-   mmc_setcontext(temp);
+   mmc_.intf = *map_ptr;
+   mmc_.cart = rominfo;
 
    log_printf("created memory mapper: %s\n", (*map_ptr)->name);
 
-   return temp;
+   return 0;
 }
 
 
 /*
-** $Log: nes_mmc.c,v $
+** $Log: nes_mmc_.c,v $
 ** Revision 1.2  2001/04/27 14:37:11  neil
 ** wheeee
 **

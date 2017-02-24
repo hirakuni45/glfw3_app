@@ -182,10 +182,8 @@ static int save_soundblock(nes_t *state, SNSS_FILE *snssFile)
 
 static int save_mapperblock(nes_t *state, SNSS_FILE *snssFile)
 {
-   int i;
-   ASSERT(state);
-
-   mmc_getcontext(state->mmc);
+	int i;
+	ASSERT(state);
 
    /* TODO: filthy hack in snss standard */
    /* We don't need to write mapper state for mapper 0 */
@@ -305,11 +303,9 @@ static void load_soundblock(nes_t *state, SNSS_FILE *snssFile)
 /* TODO: magic numbers galore */
 static void load_mapperblock(nes_t *state, SNSS_FILE *snssFile)
 {
-   int i;
+	int i;
    
-   ASSERT(state);
-
-   mmc_getcontext(state->mmc);
+	ASSERT(state);
 
    for (i = 0; i < 4; i++)
       mmc_bankrom(8, 0x8000 + (i * 0x2000), snssFile->mapperBlock.prgPages[i]);
@@ -329,8 +325,6 @@ static void load_mapperblock(nes_t *state, SNSS_FILE *snssFile)
 
    if (state->mmc->intf->set_state)
       state->mmc->intf->set_state(&snssFile->mapperBlock);
-
-   mmc_setcontext(state->mmc);
 }
 
 
