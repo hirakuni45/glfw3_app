@@ -55,37 +55,6 @@ void ppu_displaysprites(bool display)
    ppu.drawsprites = display;
 }
 
-#if 0
-void ppu_setcontext(ppu_t *src_ppu)
-{
-   int nametab[4];
-   ASSERT(src_ppu);
-   ppu = *src_ppu;
-
-   /* we can't just copy contexts here, because more than likely,
-   ** the top 8 pages of the ppu are pointing to internal PPU memory,
-   ** which means we need to recalculate the page pointers.
-   ** TODO: we can either get rid of the page pointing in the code,
-   ** or add more robust checks to make sure that pages 8-15 are
-   ** definitely pointing to internal PPU RAM, not just something
-   ** that some crazy mapper paged in.
-   */
-   nametab[0] = (src_ppu->page[8] - src_ppu->nametab + 0x2000) >> 10;
-   nametab[1] = (src_ppu->page[9] - src_ppu->nametab + 0x2400) >> 10;
-   nametab[2] = (src_ppu->page[10] - src_ppu->nametab + 0x2800) >> 10;
-   nametab[3] = (src_ppu->page[11] - src_ppu->nametab + 0x2C00) >> 10;
-
-   ppu.page[8] = ppu.nametab + (nametab[0] << 10) - 0x2000;
-   ppu.page[9] = ppu.nametab + (nametab[1] << 10) - 0x2400;
-   ppu.page[10] = ppu.nametab + (nametab[2] << 10) - 0x2800;
-   ppu.page[11] = ppu.nametab + (nametab[3] << 10) - 0x2C00;
-   ppu.page[12] = ppu.page[8] - 0x1000;
-   ppu.page[13] = ppu.page[9] - 0x1000;
-   ppu.page[14] = ppu.page[10] - 0x1000;
-   ppu.page[15] = ppu.page[11] - 0x1000;
-}
-#endif
-
 ppu_t *ppu_getcontext(void)
 {
 	return &ppu;

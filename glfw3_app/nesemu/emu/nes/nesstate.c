@@ -257,7 +257,6 @@ static void load_baseblock(nes_t *state, SNSS_FILE *snssFile)
    state->ppu->strikeflag = false;
 
    nes6502_setcontext(state->cpu);
-///   ppu_setcontext(state->ppu);
 
    ppu_write(PPU_CTRL0, state->ppu->ctrl0);
    ppu_write(PPU_CTRL1, state->ppu->ctrl1);
