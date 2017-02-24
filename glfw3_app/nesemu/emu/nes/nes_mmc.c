@@ -144,7 +144,6 @@ void mmc_bankrom(int size, uint32 address, int bank)
 		log_printf("invalid ROM bank size %d\n", size);
 		break;
 	}
-	nes6502_setup_page();
 }
 
 /* Check to see if this mapper is supported */
