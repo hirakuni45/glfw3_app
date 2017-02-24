@@ -54,9 +54,6 @@ static int save_baseblock(nes_t *state, SNSS_FILE *snssFile)
 
    ASSERT(state);
 
-   nes6502_getcontext(state->cpu);
-///   ppu_getcontext(state->ppu);
-
    snssFile->baseBlock.regA = state->cpu->a_reg;
    snssFile->baseBlock.regX = state->cpu->x_reg;
    snssFile->baseBlock.regY = state->cpu->y_reg;
@@ -190,8 +187,6 @@ static int save_mapperblock(nes_t *state, SNSS_FILE *snssFile)
    if (0 == state->mmc->intf->number)
       return -1;
 
-   nes6502_getcontext(state->cpu);
-
    /* TODO: snss spec should be updated, using 4kB ROM pages.. */
    for (i = 0; i < 4; i++)
       snssFile->mapperBlock.prgPages[i] = (state->cpu->mem_page[(i + 4) * 2] - state->rominfo->rom) >> 13;
@@ -219,9 +214,6 @@ static void load_baseblock(nes_t *state, SNSS_FILE *snssFile)
    int i;
    
    ASSERT(state);
-
-   nes6502_getcontext(state->cpu);
-///   ppu_getcontext(state->ppu);
 
    state->cpu->a_reg = snssFile->baseBlock.regA;
    state->cpu->x_reg = snssFile->baseBlock.regX;
@@ -255,8 +247,6 @@ static void load_baseblock(nes_t *state, SNSS_FILE *snssFile)
    /* do some extra handling */
    state->ppu->flipflop = 0;
    state->ppu->strikeflag = false;
-
-   nes6502_setcontext(state->cpu);
 
    ppu_write(PPU_CTRL0, state->ppu->ctrl0);
    ppu_write(PPU_CTRL1, state->ppu->ctrl1);

@@ -23,7 +23,7 @@
 ** $Id: nes6502.c,v 1.2 2001/04/27 14:37:11 neil Exp $
 */
 
-
+#include <string.h>
 #include "cpu/nes6502.h"
 #include "cpu/dis6502.h"
 
@@ -1133,7 +1133,8 @@
 static nes6502_context cpu;
 static int remaining_cycles = 0; /* so we can release timeslice */
 /* memory region pointers */
-static uint8 *ram = NULL, *stack = NULL;
+static uint8 *ram = NULL;
+static uint8 *stack = NULL;
 static uint8 null_page[NES6502_BANKSIZE];
 
 
@@ -1256,41 +1257,31 @@ static void mem_writebyte(uint32 address, uint8 value)
    bank_writebyte(address, value);
 }
 
-/* set the current context */
-void nes6502_setcontext(nes6502_context *context)
+void nes6502_init(void)
 {
-   int loop;
+	memset(&null_page, 0, sizeof(null_page));
+	memset(&cpu, 0, sizeof(nes6502_context));
 
-   ASSERT(context);
+	nes6502_setup_page();
+}
 
-   cpu = *context;
-
-   /* set dead page for all pages not pointed at anything */
-   for (loop = 0; loop < NES6502_NUMBANKS; loop++)
-   {
-      if (NULL == cpu.mem_page[loop])
-         cpu.mem_page[loop] = null_page;
-   }
-
-   ram = cpu.mem_page[0];  /* quick zero-page/RAM references */
-   stack = ram + STACK_OFFSET;
+void nes6502_setup_page(void)
+{
+	int loop;
+	/* set dead page for all pages not pointed at anything */
+	for (loop = 0; loop < NES6502_NUMBANKS; loop++)
+	{
+		if (NULL == cpu.mem_page[loop])
+			cpu.mem_page[loop] = null_page;
+	}
+	ram = cpu.mem_page[0];  /* quick zero-page/RAM references */
+	stack = ram + STACK_OFFSET;
 }
 
 /* get the current context */
-void nes6502_getcontext(nes6502_context *context)
+nes6502_context *nes6502_getcontext(void)
 {
-   int loop;
-
-   ASSERT(context);
-
-   *context = cpu;
-
-   /* reset dead pages to null */
-   for (loop = 0; loop < NES6502_NUMBANKS; loop++)
-   {
-      if (null_page == context->mem_page[loop])
-         context->mem_page[loop] = NULL;
-   }
+	return &cpu;
 }
 
 /* DMA a byte of data from ROM */

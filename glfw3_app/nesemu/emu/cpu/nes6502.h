@@ -98,6 +98,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 /* Functions which govern the 6502's execution */
+extern void nes6502_init(void);
+extern void nes6502_setup_page(void);
 extern void nes6502_reset(void);
 extern int nes6502_execute(int total_cycles);
 extern void nes6502_nmi(void);
@@ -108,8 +110,7 @@ extern void nes6502_burn(int cycles);
 extern void nes6502_release(void);
 
 /* Context get/set */
-extern void nes6502_setcontext(nes6502_context *cpu);
-extern void nes6502_getcontext(nes6502_context *cpu);
+extern nes6502_context *nes6502_getcontext(void);
 
 #ifdef __cplusplus
 }

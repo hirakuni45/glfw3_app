@@ -355,7 +355,6 @@ void nes_destroy(void)
 		if (nes_.cpu->mem_page[0] != NULL) {
 			free(nes_.cpu->mem_page[0]);
 		}
-		free(nes_.cpu);
 	}
 }
 
@@ -373,8 +372,6 @@ void nes_pause(int enable)
 /* insert a cart into the NES */
 int nes_insertcart(const char *filename)
 {
-	nes6502_setcontext(nes_.cpu);
-
 	/* rom file */
 	nes_.rominfo = rom_load(filename);
 	if (NULL == nes_.rominfo)
@@ -400,7 +397,7 @@ int nes_insertcart(const char *filename)
    
 	build_address_handlers_();
 
-	nes6502_setcontext(nes_.cpu);
+	nes6502_setup_page();
 
 	nes_reset(HARD_RESET);
 	return 0;
@@ -425,11 +422,8 @@ int nes_create(int sample_rate, int sample_bits)
 	nes_.autoframeskip = true;
 
 	/* cpu */
-	nes_.cpu = malloc(sizeof(nes6502_context));
-	if (NULL == nes_.cpu)
-		goto _fail;
-
-	memset(nes_.cpu, 0, sizeof(nes6502_context));
+	nes6502_init();
+	nes_.cpu = nes6502_getcontext();
    
 	/* allocate 2kB RAM */
 	nes_.cpu->mem_page[0] = malloc(NES_RAMSIZE);
@@ -440,15 +434,12 @@ int nes_create(int sample_rate, int sample_bits)
 	for (i = 1; i < NES6502_NUMBANKS; i++)
 		nes_.cpu->mem_page[i] = NULL;
 
-	nes_.cpu->read_handler = nes_.readhandler;
+	nes_.cpu->read_handler  = nes_.readhandler;
 	nes_.cpu->write_handler = nes_.writehandler;
 
 	// apu
 	apu_create(0, sample_rate, NES_REFRESH_RATE, sample_bits);
 	nes_.apu = apu_getcontext();
-
-	if (NULL == nes_.apu)
-		goto _fail;
 
 	/* set the IRQ routines */
 	nes_.apu->irq_callback = nes_irq;

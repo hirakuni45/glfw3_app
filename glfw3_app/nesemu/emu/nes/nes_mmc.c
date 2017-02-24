@@ -100,55 +100,51 @@ void mmc_bankvrom(int size, uint32 address, int bank)
 /* ROM bankswitching */
 void mmc_bankrom(int size, uint32 address, int bank)
 {
-   nes6502_context mmc_cpu;
+	nes6502_context* cpu = nes6502_getcontext(); 
 
-   nes6502_getcontext(&mmc_cpu); 
+	switch (size)
+	{
+	case 8:
+		if (bank == MMC_LASTBANK)
+			bank = MMC_LAST8KROM;
+		{
+			int page = address >> NES6502_BANKSHIFT;
+			cpu->mem_page[page] = &mmc_.cart->rom[(bank % MMC_8KROM) << 13];
+			cpu->mem_page[page + 1] = cpu->mem_page[page] + 0x1000;
+		}
+		break;
 
-   switch (size)
-   {
-   case 8:
-      if (bank == MMC_LASTBANK)
-         bank = MMC_LAST8KROM;
-      {
-         int page = address >> NES6502_BANKSHIFT;
-         mmc_cpu.mem_page[page] = &mmc_.cart->rom[(bank % MMC_8KROM) << 13];
-         mmc_cpu.mem_page[page + 1] = mmc_cpu.mem_page[page] + 0x1000;
-      }
+	case 16:
+		if (bank == MMC_LASTBANK)
+			bank = MMC_LAST16KROM;
+		{
+			int page = address >> NES6502_BANKSHIFT;
+			cpu->mem_page[page] = &mmc_.cart->rom[(bank % MMC_16KROM) << 14];
+			cpu->mem_page[page + 1] = cpu->mem_page[page] + 0x1000;
+			cpu->mem_page[page + 2] = cpu->mem_page[page] + 0x2000;
+			cpu->mem_page[page + 3] = cpu->mem_page[page] + 0x3000;
+		}
+		break;
 
-      break;
+	case 32:
+		if (bank == MMC_LASTBANK)
+			bank = MMC_LAST32KROM;
 
-   case 16:
-      if (bank == MMC_LASTBANK)
-         bank = MMC_LAST16KROM;
-      {
-         int page = address >> NES6502_BANKSHIFT;
-         mmc_cpu.mem_page[page] = &mmc_.cart->rom[(bank % MMC_16KROM) << 14];
-         mmc_cpu.mem_page[page + 1] = mmc_cpu.mem_page[page] + 0x1000;
-         mmc_cpu.mem_page[page + 2] = mmc_cpu.mem_page[page] + 0x2000;
-         mmc_cpu.mem_page[page + 3] = mmc_cpu.mem_page[page] + 0x3000;
-      }
-      break;
+		cpu->mem_page[8] = &mmc_.cart->rom[(bank % MMC_32KROM) << 15];
+		cpu->mem_page[9] = cpu->mem_page[8] + 0x1000;
+		cpu->mem_page[10] = cpu->mem_page[8] + 0x2000;
+		cpu->mem_page[11] = cpu->mem_page[8] + 0x3000;
+		cpu->mem_page[12] = cpu->mem_page[8] + 0x4000;
+		cpu->mem_page[13] = cpu->mem_page[8] + 0x5000;
+		cpu->mem_page[14] = cpu->mem_page[8] + 0x6000;
+		cpu->mem_page[15] = cpu->mem_page[8] + 0x7000;
+		break;
 
-   case 32:
-      if (bank == MMC_LASTBANK)
-         bank = MMC_LAST32KROM;
-
-      mmc_cpu.mem_page[8] = &mmc_.cart->rom[(bank % MMC_32KROM) << 15];
-      mmc_cpu.mem_page[9] = mmc_cpu.mem_page[8] + 0x1000;
-      mmc_cpu.mem_page[10] = mmc_cpu.mem_page[8] + 0x2000;
-      mmc_cpu.mem_page[11] = mmc_cpu.mem_page[8] + 0x3000;
-      mmc_cpu.mem_page[12] = mmc_cpu.mem_page[8] + 0x4000;
-      mmc_cpu.mem_page[13] = mmc_cpu.mem_page[8] + 0x5000;
-      mmc_cpu.mem_page[14] = mmc_cpu.mem_page[8] + 0x6000;
-      mmc_cpu.mem_page[15] = mmc_cpu.mem_page[8] + 0x7000;
-      break;
-
-   default:
-      log_printf("invalid ROM bank size %d\n", size);
-      break;
-   }
-
-   nes6502_setcontext(&mmc_cpu);
+	default:
+		log_printf("invalid ROM bank size %d\n", size);
+		break;
+	}
+	nes6502_setup_page();
 }
 
 /* Check to see if this mapper is supported */
