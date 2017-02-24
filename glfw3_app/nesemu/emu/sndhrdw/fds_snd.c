@@ -47,11 +47,9 @@ static void fds_write(uint32 address, uint8 value)
 /* reset state of vrcvi sound channels */
 static void fds_reset(void)
 {
-   apu_t apu;
-
-   apu_getcontext(&apu);
+   apu_t* apu = apu_getcontext();
 //   fds_incsize = apu.cycle_rate;
-   fds_incsize = (int32) (APU_BASEFREQ * 65536.0 / (float) apu.sample_rate);
+   fds_incsize = (int32) (APU_BASEFREQ * 65536.0 / (float) apu->sample_rate);
 }
 
 static apu_memwrite fds_memwrite[] =

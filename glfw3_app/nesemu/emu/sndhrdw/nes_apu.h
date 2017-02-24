@@ -231,17 +231,16 @@ extern "C" {
 #endif /* __cplusplus */
 
 /* Function prototypes */
-extern void apu_setcontext(apu_t *src_apu);
-extern void apu_getcontext(apu_t *dest_apu);
+extern apu_t *apu_getcontext(void);
 
 extern void apu_setparams(double base_freq, int sample_rate, int refresh_rate, int sample_bits);
-extern apu_t *apu_create(double base_freq, int sample_rate, int refresh_rate, int sample_bits);
-extern void apu_destroy(apu_t *apu);
+extern int apu_create(double base_freq, int sample_rate, int refresh_rate, int sample_bits);
+extern void apu_destroy(void);
 
 extern void apu_process(void *buffer, int num_samples);
 extern void apu_reset(void);
 
-extern void apu_setext(apu_t *apu, apuext_t *ext);
+extern void apu_setext(apuext_t *ext);
 extern void apu_setfilter(int filter_type);
 extern void apu_setchan(int chan, bool enabled);
 

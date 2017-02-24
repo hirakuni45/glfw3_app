@@ -321,13 +321,11 @@ static void mmc5_write(uint32 address, uint8 value)
 /* reset state of vrcvi sound channels */
 static void mmc5_reset(void)
 {
-   int i;
-   apu_t apu;
+	int i;
 
-
-   /* get the phase period from the apu */
-   apu_getcontext(&apu);
-   mmc5.incsize = apu.cycle_rate;
+	/* get the phase period from the apu */
+   apu_t *apu = apu_getcontext();
+   mmc5.incsize = apu->cycle_rate;
 
    for (i = 0x5000; i < 0x5008; i++)
       mmc5_write(i, 0);
@@ -339,10 +337,9 @@ static void mmc5_reset(void)
 static int mmc5_init(void)
 {
    int i, num_samples;
-   apu_t apu;
+   apu_t *apu = apu_getcontext();
 
-   apu_getcontext(&apu);
-   num_samples = apu.num_samples;
+   num_samples = apu->num_samples;
 
    /* lut used for enveloping and frequency sweeps */
    for (i = 0; i < 16; i++)

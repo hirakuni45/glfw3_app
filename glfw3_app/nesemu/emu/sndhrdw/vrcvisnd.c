@@ -181,20 +181,19 @@ static void vrcvi_write(uint32 address, uint8 value)
 /* reset state of vrcvi sound channels */
 static void vrcvi_reset(void)
 {
-   int i;
-   apu_t apu;
+	int i;
 
-   /* get the phase period from the apu */
-   apu_getcontext(&apu);
-   vrcvi.incsize = apu.cycle_rate;
+	/* get the phase period from the apu */
+	apu_t *apu = apu_getcontext();
+	vrcvi.incsize = apu->cycle_rate;
 
-   /* preload regs */
-   for (i = 0; i < 3; i++)
-   {
-      vrcvi_write(0x9000 + i, 0);
-      vrcvi_write(0xA000 + i, 0);
-      vrcvi_write(0xB000 + i, 0);
-   }
+	/* preload regs */
+	for (i = 0; i < 3; i++)
+	{
+		vrcvi_write(0x9000 + i, 0);
+		vrcvi_write(0xA000 + i, 0);
+		vrcvi_write(0xB000 + i, 0);
+	}
 }
 
 static apu_memwrite vrcvi_memwrite[] =

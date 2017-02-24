@@ -350,7 +350,7 @@ void nes_destroy(void)
 	rom_free(nes_.rominfo);
 	mmc_destroy(nes_.mmc);
 ///	ppu_destroy();
-	apu_destroy(nes_.apu);
+	apu_destroy();
 	bmp_destroy(nes_.vidbuf);
 	if (nes_.cpu != NULL)
 	{
@@ -395,14 +395,15 @@ int nes_insertcart(const char *filename)
 		goto _fail;
 
 	/* if there's VRAM, let the PPU know */
-	if (NULL != nes_.rominfo->vram)
-		nes_.ppu->vram_present = true;
-   
-	apu_setext(nes_.apu, nes_.mmc->intf->sound_ext);
+	if (NULL != nes_.rominfo->vram) {
+		ppu_getcontext()->vram_present = true;
+	}
+
+	apu_setext(nes_.mmc->intf->sound_ext);
    
 	build_address_handlers_();
 
-	apu_setcontext(nes_.apu);
+///	apu_setcontext(nes_.apu);
 ///	ppu_setcontext(nes_.ppu);
 	nes6502_setcontext(nes_.cpu);
 	mmc_setcontext(nes_.mmc);
@@ -448,8 +449,9 @@ int nes_create(int sample_rate, int sample_bits)
 	nes_.cpu->read_handler = nes_.readhandler;
 	nes_.cpu->write_handler = nes_.writehandler;
 
-	/* apu */
-	nes_.apu = apu_create(0, sample_rate, NES_REFRESH_RATE, sample_bits);
+	// apu
+	apu_create(0, sample_rate, NES_REFRESH_RATE, sample_bits);
+	nes_.apu = apu_getcontext();
 
 	if (NULL == nes_.apu)
 		goto _fail;

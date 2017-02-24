@@ -149,7 +149,7 @@ static int save_soundblock(nes_t *state, SNSS_FILE *snssFile)
 {
    ASSERT(state);
 
-   apu_getcontext(state->apu);
+///   apu_getcontext(state->apu);
 
    /* rect 0 */
    snssFile->soundBlock.soundRegisters[0x00] = state->apu->rectangle[0].regs[0];
