@@ -44,7 +44,7 @@ static bitmap_t *_make_bitmap(uint8 *data_addr, bool hw, int width,
       return NULL;
 
    /* Make sure to add in space for line pointers */
-   bitmap = malloc(sizeof(bitmap_t) + (sizeof(uint8 *) * height));
+   bitmap = malloc(sizeof(bitmap_t));
    if (NULL == bitmap)
       return NULL;
 
