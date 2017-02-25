@@ -39,7 +39,7 @@ typedef enum
 
 #include "log.h"
 
-#ifdef NDEBUG
+#ifndef NDEBUG
 
 #define  ASSERT(expr)      log_assert((int) (expr), __LINE__, __FILE__, NULL)
 #define  ASSERT_MSG(msg)   log_assert(false, __LINE__, __FILE__, (msg))
