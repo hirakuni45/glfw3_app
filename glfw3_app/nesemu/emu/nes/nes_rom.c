@@ -520,14 +520,6 @@ void rom_free(rominfo_t *rominfo)
       return;
    }
 
-   /* Restore palette if we loaded in a VS jobber */
-   if (rominfo->flags & ROM_FLAG_VERSUS)
-   {
-      /* TODO: bad idea calling nes_getcontextptr... */
-      ppu_setdefaultpal();
-      log_printf("Default NES palette restored\n");
-   }
-
 	rom_savesram(rominfo);
 
 	free(rominfo->sram);
