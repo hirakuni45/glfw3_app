@@ -135,16 +135,14 @@ void log_chain_logfunc(int (*func)(const char *string))
 
 void log_assert(int expr, int line, const char *file, char *msg)
 {
-   if (expr)
-      return;
+	if (expr) return;
 
-   if (NULL != msg)
-      log_printf("ASSERT: line %d of %s, %s\n", line, file, msg);
-   else
-      log_printf("ASSERT: line %d of %s\n", line, file);
+	if (NULL != msg)
+		log_printf("ASSERT: line %d of %s, %s\n", line, file, msg);
+	else
+		log_printf("ASSERT: line %d of %s\n", line, file);
 
-///   asm("break.n 1");
-   exit(-1);
+	exit(-1);
 }
 
 
