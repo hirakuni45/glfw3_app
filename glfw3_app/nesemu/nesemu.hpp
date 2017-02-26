@@ -33,15 +33,14 @@
 #include "utils/fifo.hpp"
 #include "utils/input.hpp"
 #include "tools.hpp"
-#include "nsfplay.hpp"
 
-extern "C" {
-	#include "log.h"
-	#include "nes.h"
-	#include "nesinput.h"
-	#include "nesstate.h"
-	extern const rgb_t* get_palette();
-};
+#include "emu/log.h"
+#include "emu/nes/nes.h"
+#include "emu/nes/nesinput.h"
+#include "emu/nes/nesstate.h"
+#include "emu/nes/nes_pal.h"
+
+#include "emu/nsf/nsfplay.hpp"
 
 namespace app {
 

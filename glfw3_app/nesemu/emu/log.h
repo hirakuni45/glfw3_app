@@ -25,6 +25,10 @@
 */
 #include "nes_std.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 extern void str_setext(char *text, const char *ext);
 
 extern int log_init(void);
@@ -33,6 +37,10 @@ extern int log_print(const char *string);
 extern int log_printf(const char *format, ...);
 extern void log_chain_logfunc(int (*logfunc)(const char *string));
 extern void log_assert(int expr, int line, const char *file, char *msg);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 /*
 ** $Log: log.h,v $
