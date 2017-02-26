@@ -76,10 +76,18 @@ typedef struct nesinput_s
 
 #define  MAX_CONTROLLERS   32
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 extern uint8 input_get(int type);
 extern void input_register(nesinput_t *input);
 extern void input_event(nesinput_t *input, int state, int value);
 extern void input_strobe(void);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 /*
 ** $Log: nesinput.h,v $

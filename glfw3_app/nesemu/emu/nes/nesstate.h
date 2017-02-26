@@ -25,9 +25,17 @@
 */
 #include "nes.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 extern void state_setslot(int slot);
 extern int state_load();
 extern int state_save();
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 /*
 ** $Log: nesstate.h,v $

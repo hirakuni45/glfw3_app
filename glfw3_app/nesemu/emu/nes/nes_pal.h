@@ -28,6 +28,10 @@
 extern rgb_t nes_palette[];
 extern rgb_t shady_palette[];
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 extern void pal_generate(void);
 
 /* TODO: these are temporary hacks */
@@ -37,6 +41,10 @@ extern void pal_dectint(void);
 extern void pal_inctint(void);
 
 extern const rgb_t* get_palette();
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 /*
 ** $Log: nes_pal.h,v $

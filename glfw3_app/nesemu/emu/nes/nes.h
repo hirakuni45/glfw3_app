@@ -85,6 +85,10 @@ typedef struct nes_s
 
 } nes_t;
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 extern nes_t *nes_getcontext(void);
 
 extern int nes_isourfile(const char *filename);
@@ -102,6 +106,10 @@ extern void nes_reset(int reset_type);
 
 extern void nes_poweroff(void);
 extern void nes_pause(int enable);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 /*
 ** $Log: nes.h,v $
