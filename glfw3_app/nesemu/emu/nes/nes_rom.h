@@ -39,24 +39,23 @@ typedef enum
 
 typedef struct rominfo_s
 {
-	uint8_t* romfile;
-   /* pointers to ROM and VROM */
-   uint8 *rom;
-   uint8 *vrom;
+	uint8_t *rom;
+	uint8_t *vrom;
 
-   /* pointers to SRAM and VRAM */
-   uint8 *sram, *vram;
+	/* pointers to SRAM and VRAM */
+	uint8_t *sram;
+	uint8_t *vram;
 
-   /* number of banks */
-   int rom_banks, vrom_banks;
-   int sram_banks, vram_banks;
+	/* number of banks */
+	int rom_banks, vrom_banks;
+	int sram_banks, vram_banks;
 
-   int mapper_number;
-   mirror_t mirror;
+	int mapper_number;
+	mirror_t mirror;
 
-   uint8 flags;
+	uint8 flags;
 
-   char filename[PATH_MAX + 1];
+	char filename[PATH_MAX + 1];
 } rominfo_t;
 
 

@@ -34,8 +34,6 @@ extern int log_printf(const char *format, ...);
 extern void log_chain_logfunc(int (*logfunc)(const char *string));
 extern void log_assert(int expr, int line, const char *file, char *msg);
 
-extern int emu_log(const char* text);
-
 /*
 ** $Log: log.h,v $
 ** Revision 1.1.1.1  2001/04/27 07:03:54  neil

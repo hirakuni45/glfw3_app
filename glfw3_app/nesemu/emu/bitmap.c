@@ -24,68 +24,59 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "bitmap.h"
 
-void bmp_clear(const bitmap_t *bitmap, uint8 color)
+void bmp_clear(const bitmap_t *bitmap, uint8_t color)
 {
-   memset(bitmap->data, color, bitmap->pitch * bitmap->height);
+	memset(bitmap->data, color, bitmap->pitch * bitmap->height);
 }
 
-static bitmap_t *_make_bitmap(uint8 *data_addr, bool hw, int width, 
-                              int height, int pitch, int overdraw)
+static bitmap_t *_make_bitmap(uint8_t *data_addr, int width, int height, int pitch, int overdraw)
 {
-   bitmap_t *bitmap;
-   int i;
+	/* quick safety check */
+	if(NULL == data_addr) {
+		return NULL;
+	}
 
-   /* quick safety check */
-   if (NULL == data_addr)
-      return NULL;
+	/* Make sure to add in space for line pointers */
+	bitmap_t *bitmap = (bitmap_t *)malloc(sizeof(bitmap_t));
+	if(NULL == bitmap) {
+		return NULL;
+	}
 
-   /* Make sure to add in space for line pointers */
-   bitmap = malloc(sizeof(bitmap_t));
-   if (NULL == bitmap)
-      return NULL;
+	bitmap->height = height;
+	bitmap->width = width;
+	bitmap->data = data_addr;
+	bitmap->pitch = pitch + (overdraw * 2);
 
-   bitmap->hardware = hw;
-   bitmap->height = height;
-   bitmap->width = width;
-   bitmap->data = data_addr;
-   bitmap->pitch = pitch + (overdraw * 2);
-
-   return bitmap;
+	return bitmap;
 }
 
 /* Allocate and initialize a bitmap structure */
 bitmap_t *bmp_create(int width, int height, int overdraw)
 {
-   uint8 *addr;
-   int pitch;
+	uint8_t *addr;
+	int pitch;
 
-   pitch = width + (overdraw * 2); /* left and right */
-   addr = malloc((pitch * height) + 3); /* add max 32-bit aligned adjustment */
-   if (NULL == addr)
-      return NULL;
+	pitch = width + (overdraw * 2); /* left and right */
+	addr = malloc((pitch * height) + 3); /* add max 32-bit aligned adjustment */
+	if(NULL == addr) {
+		return NULL;
+	}
 
-   return _make_bitmap(addr, false, width, height, width, overdraw);
-}
-
-/* allocate and initialize a hardware bitmap */
-bitmap_t *bmp_createhw(uint8 *addr, int width, int height, int pitch)
-{
-   return _make_bitmap(addr, true, width, height, pitch, 0); /* zero overdraw */
+	return _make_bitmap(addr, width, height, width, overdraw);
 }
 
 /* Deallocate space for a bitmap structure */
 void bmp_destroy(bitmap_t *bitmap)
 {
-   if (bitmap != NULL)
-   {
-      if (bitmap->data && false == bitmap->hardware)
-         free(bitmap->data);
-      free(bitmap);
-   }
+	if(bitmap != NULL) {
+		free(bitmap->data);
+		free(bitmap);
+	}
 }
 
 /*

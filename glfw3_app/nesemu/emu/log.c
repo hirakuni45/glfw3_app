@@ -30,6 +30,8 @@
 
 #include "log.h"
 
+extern int emu_log(const char* text);
+
 // 拡張子の付け替え
 void str_setext(char *text, const char *ext)
 {

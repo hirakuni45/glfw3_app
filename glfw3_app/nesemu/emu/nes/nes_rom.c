@@ -140,64 +140,56 @@ static int rom_allocsram(rominfo_t *rominfo)
 }
 
 /* If there's a trainer, load it in at $7000 */
-static uint8_t *rom_loadtrainer(uint8_t *rom, rominfo_t *rominfo)
+static const uint8_t *rom_loadtrainer(const uint8_t *rom, rominfo_t *rominfo)
 {
-   ASSERT(rom);
-   ASSERT(rominfo);
+	ASSERT(rom);
+	ASSERT(rominfo);
 
-   if (rominfo->flags & ROM_FLAG_TRAINER)
-   {
-//      fread(rominfo->sram + TRAINER_OFFSET, TRAINER_LENGTH, 1, fp);
-      memcpy(rominfo->sram + TRAINER_OFFSET, rom, TRAINER_LENGTH);
-      rom += TRAINER_LENGTH;
-      log_printf("Read in trainer at $7000\n");
-   }
-   return rom;
+	if(rominfo->flags & ROM_FLAG_TRAINER) {
+//		fread(rominfo->sram + TRAINER_OFFSET, TRAINER_LENGTH, 1, fp);
+		memcpy(rominfo->sram + TRAINER_OFFSET, rom, TRAINER_LENGTH);
+		rom += TRAINER_LENGTH;
+		log_printf("Read in trainer at $7000\n");
+	}
+	return rom;
 }
 
-static uint8_t *rom_loadrom(uint8_t *rom, rominfo_t *rominfo)
+static int rom_loadrom(const uint8_t *rom, rominfo_t *rominfo)
 {
 	ASSERT(rom);
 	ASSERT(rominfo);
 
 	/* Allocate ROM space, and load it up! */
-/*
-	rominfo->rom = malloc((rominfo->rom_banks * ROM_BANK_LENGTH));
+	rominfo->rom = malloc(rominfo->rom_banks * ROM_BANK_LENGTH);
 	if (NULL == rominfo->rom)
 	{
-		gui_sendmsg(GUI_RED, "Could not allocate space for ROM image");
+		log_printf("Could not allocate space for ROM image");
 		return -1;
 	}
-	_fread(rominfo->rom, ROM_BANK_LENGTH, rominfo->rom_banks, fp);
-*/
-	rominfo->rom = rom;
+///	_fread(rominfo->rom, ROM_BANK_LENGTH, rominfo->rom_banks, fp);
+	memcpy(rominfo->rom, rom, rominfo->rom_banks * ROM_BANK_LENGTH);
 	rom += ROM_BANK_LENGTH * rominfo->rom_banks;
 
 	/* If there's VROM, allocate and stuff it in */
-	if (rominfo->vrom_banks)
-	{
-/*
-		rominfo->vrom = malloc((rominfo->vrom_banks * VROM_BANK_LENGTH));
+	if(rominfo->vrom_banks) {
+		rominfo->vrom = malloc(rominfo->vrom_banks * VROM_BANK_LENGTH);
 		if (NULL == rominfo->vrom)
 		{
-			gui_sendmsg(GUI_RED, "Could not allocate space for VROM");
+			log_printf("Could not allocate space for VROM");
 			return -1;
 		}
-		_fread(rominfo->vrom, VROM_BANK_LENGTH, rominfo->vrom_banks, fp);
-*/
-		rominfo->vrom = rom;
-		rom += VROM_BANK_LENGTH * rominfo->vrom_banks;
+///		_fread(rominfo->vrom, VROM_BANK_LENGTH, rominfo->vrom_banks, fp);
+		memcpy(rominfo->vrom, rom, rominfo->vrom_banks * VROM_BANK_LENGTH);
 	} else {
 		rominfo->vram = malloc(VRAM_LENGTH);
-		if (NULL == rominfo->vram)
-		{
+		if(NULL == rominfo->vram) {
 			log_printf("Could not allocate space for VRAM");
-			return NULL;
+			return -1;
 		}
 		memset(rominfo->vram, 0, VRAM_LENGTH);
 	}
 
-	return rom;
+	return 0;
 }
 
 
@@ -318,73 +310,69 @@ int rom_checkmagic(const char *filename)
    return -1;
 }
 
-static uint8_t* rom_getheader(uint8_t *rom, rominfo_t *rominfo)
+static const uint8_t* rom_getheader(const uint8_t *rom, rominfo_t *rominfo)
 {
-#define  RESERVED_LENGTH   8
-   inesheader_t head;
-   uint8 reserved[RESERVED_LENGTH];
-   bool header_dirty;
+	static const int RESERVED_LENGTH = 8;
+	inesheader_t head;
+	uint8 reserved[RESERVED_LENGTH];
+	bool header_dirty;
 
-   ASSERT(rom);
-   ASSERT(rominfo);
+	ASSERT(rom);
+	ASSERT(rominfo);
 
-   /* Read in the header */
-	log_printf("Head: (%x %x %x %x)\n", rom[0], rom[1], rom[2], rom[3]);
+	/* Read in the header */
+///	log_printf("Head: (%x %x %x %x)\n", rom[0], rom[1], rom[2], rom[3]);
 	memcpy(&head, rom, sizeof(head));
 	rom += sizeof(head);
 
-   if (memcmp(head.ines_magic, ROM_INES_MAGIC, 4))
-   {
-	  log_printf("%s is not a valid ROM image", rominfo->filename);
-      return NULL;
-   }
+	if (memcmp(head.ines_magic, ROM_INES_MAGIC, 4))
+	{
+		log_printf("%s is not a valid ROM image", rominfo->filename);
+		return NULL;
+	}
 
-   rominfo->rom_banks = head.rom_banks;
-   rominfo->vrom_banks = head.vrom_banks;
-   /* iNES assumptions */
-   rominfo->sram_banks = 8; /* 1kB banks, so 8KB */
-   rominfo->vram_banks = 1; /* 8kB banks, so 8KB */
-   rominfo->mirror = (head.rom_type & ROM_MIRRORTYPE) ? MIRROR_VERT : MIRROR_HORIZ;
-   rominfo->flags = 0;
-   if (head.rom_type & ROM_BATTERY)
-      rominfo->flags |= ROM_FLAG_BATTERY;
-   if (head.rom_type & ROM_TRAINER)
-      rominfo->flags |= ROM_FLAG_TRAINER;
-   if (head.rom_type & ROM_FOURSCREEN)
-      rominfo->flags |= ROM_FLAG_FOURSCREEN;
-   /* TODO: fourscreen a mirroring type? */
-   rominfo->mapper_number = head.rom_type >> 4;
+	rominfo->rom_banks = head.rom_banks;
+	rominfo->vrom_banks = head.vrom_banks;
+	/* iNES assumptions */
+	rominfo->sram_banks = 8; /* 1kB banks, so 8KB */
+	rominfo->vram_banks = 1; /* 8kB banks, so 8KB */
+	rominfo->mirror = (head.rom_type & ROM_MIRRORTYPE) ? MIRROR_VERT : MIRROR_HORIZ;
+	rominfo->flags = 0;
+	if (head.rom_type & ROM_BATTERY)
+		rominfo->flags |= ROM_FLAG_BATTERY;
+	if (head.rom_type & ROM_TRAINER)
+		rominfo->flags |= ROM_FLAG_TRAINER;
+	if (head.rom_type & ROM_FOURSCREEN)
+		rominfo->flags |= ROM_FLAG_FOURSCREEN;
+	/* TODO: fourscreen a mirroring type? */
+	rominfo->mapper_number = head.rom_type >> 4;
 
-   /* Do a compare - see if we've got a clean extended header */
-   memset(reserved, 0, RESERVED_LENGTH);
-   if (0 == memcmp(head.reserved, reserved, RESERVED_LENGTH))
-   {
-      /* We were clean */
-      header_dirty = false;
-      rominfo->mapper_number |= (head.mapper_hinybble & 0xF0);
-   }
-   else
-   {
-      header_dirty = true;
+	/* Do a compare - see if we've got a clean extended header */
+	memset(reserved, 0, RESERVED_LENGTH);
+	if (0 == memcmp(head.reserved, reserved, RESERVED_LENGTH)) {
+		/* We were clean */
+		header_dirty = false;
+		rominfo->mapper_number |= (head.mapper_hinybble & 0xF0);
+	} else {
+		header_dirty = true;
 
-      /* @!?#@! DiskDude. */
-      if (('D' == head.mapper_hinybble) && (0 == memcmp(head.reserved, "iskDude!", 8)))
-         log_printf("`DiskDude!' found in ROM header, ignoring high mapper nybble\n");
-      else
-      {
-         log_printf("ROM header dirty, possible problem\n");
-         rominfo->mapper_number |= (head.mapper_hinybble & 0xF0);
-      }
+		/* @!?#@! DiskDude. */
+		if (('D' == head.mapper_hinybble) && (0 == memcmp(head.reserved, "iskDude!", 8))) {
+			log_printf("`DiskDude!' found in ROM header, ignoring high mapper nybble\n");
+		} else {
+			log_printf("ROM header dirty, possible problem\n");
+			rominfo->mapper_number |= (head.mapper_hinybble & 0xF0);
+		}
 
-      rom_adddirty(rominfo->filename);
-   }
+		rom_adddirty(rominfo->filename);
+	}
 
-   /* TODO: this is an ugly hack, but necessary, I guess */
-   /* Check for VS unisystem mapper */
-   if (99 == rominfo->mapper_number)
-      rominfo->flags |= ROM_FLAG_VERSUS;
+	/* TODO: this is an ugly hack, but necessary, I guess */
+	/* Check for VS unisystem mapper */
+	if (99 == rominfo->mapper_number)
+		rominfo->flags |= ROM_FLAG_VERSUS;
 
-   return rom;
+	return rom;
 }
 
 /* Build the info string for ROM display */
@@ -453,50 +441,45 @@ rominfo_t *rom_load(const char *filename)
 	fclose(fp);
 //	printf("LOAD ROM: %s (%d)\n", filename, sz);
 
-   rominfo_t *rominfo;
+	rominfo_t *rominfo;
 
-   rominfo = malloc(sizeof(rominfo_t));
-   if (NULL == rominfo)
-      return NULL;
-
+	rominfo = malloc(sizeof(rominfo_t));
+	if(NULL == rominfo) {
+		return NULL;
+	}
 	memset(rominfo, 0, sizeof(rominfo_t));
 
-	rominfo->romfile = rom;
 	strncpy(rominfo->filename, filename, PATH_MAX);
 
-   /* Get the header and stick it into rominfo struct */
+	/* Get the header and stick it into rominfo struct */
+	const uint8_t *bin = rom;
 	{
-		uint8_t* p = rom_getheader(rom, rominfo);
-		if(p == NULL) {
+		bin = rom_getheader(bin, rominfo);
+		if(bin == NULL) {
    	 	goto _fail;
 		}
-		rom = p;
 	}
 
-   /* Make sure we really support the mapper */
-   if (false == mmc_peek(rominfo->mapper_number))
-   {
-      log_printf("Mapper %d not yet implemented", rominfo->mapper_number);
-      goto _fail;
-   }
-
-   /* iNES format doesn't tell us if we need SRAM, so
-   ** we have to always allocate it -- bleh!
-   ** UNIF, TAKE ME AWAY!  AAAAAAAAAA!!!
-   */
-   if (rom_allocsram(rominfo))
-      goto _fail;
-
-	{
-		rom = rom_loadtrainer(rom, rominfo);
+	/* Make sure we really support the mapper */
+	if(false == mmc_peek(rominfo->mapper_number)) {
+		log_printf("Mapper %d not yet implemented", rominfo->mapper_number);
+		goto _fail;
 	}
 
+	/* iNES format doesn't tell us if we need SRAM, so
+	** we have to always allocate it -- bleh!
+	** UNIF, TAKE ME AWAY!  AAAAAAAAAA!!!
+	*/
+	if(rom_allocsram(rominfo)) {
+		goto _fail;
+	}
+	
+	bin = rom_loadtrainer(bin, rominfo);
 	{
-		uint8_t* p = rom_loadrom(rom, rominfo);
-		if (p == NULL) {
+		int ret = rom_loadrom(bin, rominfo);
+		if (ret != 0) {
       		goto _fail;
 		}
-		rom = p;
 	}
 
 	rom_loadsram(rominfo);
@@ -505,9 +488,12 @@ rominfo_t *rom_load(const char *filename)
 	rom_checkforpal(rominfo);
 	log_printf("ROM loaded: %s", rom_getinfo(rominfo));
 
+	free(rom);
+
 	return rominfo;
 
 _fail:
+	free(rom);
 	rom_free(rominfo);
 	return NULL;
 }
@@ -515,16 +501,16 @@ _fail:
 /* Free a ROM */
 void rom_free(rominfo_t *rominfo)
 {
-   if (NULL == rominfo)
-   {
-      return;
-   }
+	if (NULL == rominfo) {
+		return;
+	}
 
 	rom_savesram(rominfo);
 
+	free(rominfo->rom);
 	free(rominfo->sram);
 	free(rominfo->vram);
-	free(rominfo->romfile);
+	free(rominfo->vrom);
 
 	free(rominfo);
 }
