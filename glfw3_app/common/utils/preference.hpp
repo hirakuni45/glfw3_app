@@ -3,7 +3,8 @@
 /*!	@file
 	@brief	プリファレンス・クラス（ヘッダー）@n
 			・アプリケーションの状態を記録する（Maybe レジストリー）@n
-			・テキストファイルとして記録されるので汎用性が高い
+			・テキストファイルとして記録されるので汎用性が高い @n
+			Copyright 2017 Kunihito Hiramatsu
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
@@ -13,7 +14,6 @@
 #include "utils/vtx.hpp"
 #include "utils/file_io.hpp"
 #include <boost/format.hpp>
-#include <boost/foreach.hpp>
 
 namespace sys {
 
@@ -72,7 +72,7 @@ namespace sys {
 
 		uint32_t hexs_to_uint_(const std::string& s) const {
 			uint32_t v = 0;
-			BOOST_FOREACH(char ch, s) {
+			for(char ch : s) {
 				v <<= 4;
 				if(ch >= '0' && ch <= '9') v |= (ch - '0');
 				else if(ch >= 'A' && ch <= 'F') v |= (ch - 'A') + 10;
@@ -373,6 +373,7 @@ namespace sys {
 					const uint32_t iv = hexs_to_uint_(vt.value_);
 					const float* p = reinterpret_cast<const float*>(&iv);
 					v = *p;
+					return true;
 				}
 			}
 			return false;

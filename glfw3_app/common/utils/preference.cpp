@@ -1,6 +1,7 @@
 //=====================================================================//
 /*!	@file
-	@brief	プリファレンス・クラス
+	@brief	プリファレンス・クラス @n
+			Copyright 2017 Kunihito Hiramatsu
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
@@ -106,7 +107,7 @@ namespace sys {
 	//-----------------------------------------------------------------//
 	void preference::create_current_list(utils::strings& ss)
 	{
-		BOOST_FOREACH(const item_map::value_type& t, map_) {
+		for(const item_map::value_type& t : map_) {
 			const string& s = t.first;
 			if(utils::string_strncmp(s, path_, path_.size()) == 0) {
 				ss.push_back(s);
