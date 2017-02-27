@@ -47,7 +47,7 @@ namespace gui {
 			param(float pos = 0.0f, slider_param::direction::type dir = slider_param::direction::HOLIZONTAL) :
 				plate_param_(),
 				color_param_(widget_director::default_slider_color_),
-				slider_param_(),
+				slider_param_(pos, dir),
 				base_image_(0), hand_image_(0), hand_ctrl_(true),
 				scroll_ctrl_(true), scroll_gain_(0.01f),
 				select_fin_(false), select_func_(nullptr)
