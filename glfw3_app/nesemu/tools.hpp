@@ -48,5 +48,7 @@ namespace emu {
 			if(terminal_ == nullptr) return;
 			terminal_->output(text);
 		}
+
+
 	};
 }

@@ -77,7 +77,8 @@ namespace app {
 		static const int audio_len_ = sample_rate_ / 60;
 		static const int audio_queue_ = 1024;
 
-		bool	rom_active_;
+		bool	nes_play_;
+		bool	nsf_play_;
 
 		typedef utils::fifo<int16_t, audio_queue_ * 16> fifo;
 		fifo		fifo_;
@@ -183,7 +184,7 @@ namespace app {
 			state_slot_(nullptr), state_save_(nullptr), state_load_(nullptr), nes_reset_(nullptr),
 			volume_(nullptr),
 			dialog_(nullptr),
-			rom_active_(false), nes_pause_(0)
+			nes_play_(false), nsf_play_(false), nes_pause_(0)
 		{ }
 
 
@@ -228,9 +229,11 @@ namespace app {
 				widget_filer::param wp_(core.get_current_path(), "");
 				wp_.select_file_func_ = [this](const std::string& fn) {
 					if(nsfplay_.open(fn)) {
-
+						nsf_play_ = true;
+						nes_play_ = false;
 					} else if(nes_insertcart(fn.c_str()) == 0) {
-						rom_active_ = true;
+						nes_play_ = true;
+						nsf_play_ = false;
 					} else {
 						dialog_->enable();
 						dialog_->set_text("NES file false:\n'" + fn + "'");
@@ -373,10 +376,16 @@ namespace app {
 
         	gui::widget_director& wd = director_.at().widget_director_;
 
-			if(rom_active_) {
-				pad_();
+			if(nes_play_ || nsf_play_) {
 
-				nes_emulate(1);
+				if(nes_play_) {
+					pad_();
+					nes_emulate(1);
+				}
+
+				if(nsf_play_) {
+
+				}
 
 				// copy sound
 				int16_t tmp[audio_len_];
@@ -395,23 +404,26 @@ namespace app {
 				}
 
 				// copy video
-				auto nes = nes_getcontext();
-				bitmap_t* v = nes->vidbuf;
-				const rgb_t* lut = get_palette();
-				if(v != nullptr && lut != nullptr) {
-					for(int h = 0; h < nes_height_; ++h) {
-						const uint8_t* src = &v->data[h * v->pitch];
-						uint8_t* dst = &fb_[h * nes_width_ * 4];
-						for(int w = 0; w < nes_width_; ++w) {
-							auto idx = *src++;
-							idx &= 63;
-							*dst++ = lut[idx].r;  // R
-							*dst++ = lut[idx].g;  // G
-							*dst++ = lut[idx].b;  // B
-							*dst++ = 255;  // alpha
+				if(nes_play_) {
+					auto nes = nes_getcontext();
+					bitmap_t* v = nes->vidbuf;
+					const rgb_t* lut = get_palette();
+					if(v != nullptr && lut != nullptr) {
+						for(int h = 0; h < nes_height_; ++h) {
+							const uint8_t* src = &v->data[h * v->pitch];
+							uint8_t* dst = &fb_[h * nes_width_ * 4];
+							for(int w = 0; w < nes_width_; ++w) {
+								auto idx = *src++;
+								idx &= 63;
+								*dst++ = lut[idx].r;  // R
+								*dst++ = lut[idx].g;  // G
+								*dst++ = lut[idx].b;  // B
+								*dst++ = 255;  // alpha
+							}
 						}
+						texfb_.rendering(gl::texfb::image::RGBA, (const char*)&fb_[0]);
 					}
-					texfb_.rendering(gl::texfb::image::RGBA, (const char*)&fb_[0]);
+					texfb_.flip();
 				}
 
 				// ストリームのゲイン(volume)を設定
@@ -421,8 +433,6 @@ namespace app {
 					sound.set_gain_stream(vol);
 				}
 			}
-
-			texfb_.flip();
 
 			wd.update();
 		}
