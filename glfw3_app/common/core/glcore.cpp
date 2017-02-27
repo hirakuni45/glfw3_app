@@ -207,13 +207,14 @@ namespace gl {
 		core::bits_.set(device::key::MOUSE_FOCUS, v);
 	}
 
+	float locator_scale_;
 	device::locator core::locator_;
 
 	static void cursor_callback_(GLFWwindow* window, double x, double y)
 	{
 ///		std::cout << x << ", " << y << std::endl;
-		vtx::spos pos(static_cast<vtx::spos::value_type>(x),
-					  static_cast<vtx::spos::value_type>(y));
+		vtx::spos pos(static_cast<vtx::spos::value_type>(x / locator_scale_),
+					  static_cast<vtx::spos::value_type>(y / locator_scale_));
 		core::locator_.set_cursor(pos);
 	}
 
@@ -309,6 +310,21 @@ namespace gl {
 		dpi_.x = static_cast<float>(vm->width)  / (static_cast<float>(widthMM)  / 25.4f);
 		dpi_.y = static_cast<float>(vm->height) / (static_cast<float>(heightMM) / 25.4f);
 
+		auto dpi = dpi_.x;
+		float ref_dpi = 120.0f;
+		if(dpi < dpi_.y) dpi = dpi_.y;
+		if(dpi > (ref_dpi * 1.25f)) {
+			scaled_ = true;
+			scale_ = dpi / ref_dpi;
+			locator_scale_ = scale_;
+		} else {
+			scaled_ = false;
+			scale_ = 1.0f;
+			locator_scale_ = 1.0f;
+		}
+
+///		std::cout << dpi_.x << ", " << dpi_.y << std::endl;
+
 ///		setlocale(LC_CTYPE, "jpn");
 		setlocale(LC_CTYPE, "");
 
@@ -330,10 +346,14 @@ namespace gl {
 		rect_ = rect;
 		limit_size_ = rect_.size / 3;
 
-		window_ = glfwCreateWindow(rect_.size.x, rect_.size.y, title.c_str(), NULL, NULL);
-		if(!window_) {
-			std::cerr << "glcore setup false: 'glfwCreateWindow'" << std::endl;
-			return false;
+		{
+			int x = static_cast<float>(rect_.size.x) * scale_;
+			int y = static_cast<float>(rect_.size.x) * scale_;
+			window_ = glfwCreateWindow(x, y, title.c_str(), NULL, NULL);
+			if(!window_) {
+				std::cerr << "glcore setup false: 'glfwCreateWindow'" << std::endl;
+				return false;
+			}
 		}
 
 		glfwSetKeyCallback(window_, key_callback_);
@@ -451,11 +471,13 @@ namespace gl {
 	//-----------------------------------------------------------------//
 	void core::service()
 	{
-		if(window_ == 0) return;
+		if(window_ == nullptr) return;
 
 		{
 			int x, y;
 			glfwGetWindowSize(window_, &x, &y);
+			x = static_cast<float>(x) / scale_;
+			y = static_cast<float>(y) / scale_;
 			bool toset = false;
 			if(x < limit_size_.x) {
 				x = limit_size_.x;
@@ -465,7 +487,11 @@ namespace gl {
 				y = limit_size_.y;
 				toset = true;
 			}
-			if(toset) glfwSetWindowSize(window_, x, y);
+			if(toset) {
+				x = static_cast<float>(x) * scale_;
+				y = static_cast<float>(y) * scale_;
+				glfwSetWindowSize(window_, x, y);
+			}
 		}
 
 		{
@@ -476,8 +502,8 @@ namespace gl {
 			rect_.org.y = y;
 
 			glfwGetWindowSize(window_, &x, &y);
-			rect_.size.x = x;
-			rect_.size.y = y;
+			rect_.size.x = static_cast<float>(x) / scale_;
+			rect_.size.y = static_cast<float>(y) / scale_;
 
 			// フレームバッファサイズとwindowのサイズは異なる
 			glfwGetFramebufferSize(window_, &x, &y);

@@ -63,6 +63,9 @@ namespace gl {
 		double		frame_time_;
 		double		machine_cycle_;
 		double		cpu_ghz_;
+
+		float		scale_;
+
 		bool		cpu_spd_enable_;
 		bool		soft_sync_;
 
@@ -70,6 +73,8 @@ namespace gl {
 		bool		full_screen_;
 
 		bool		keyboard_jp_;
+
+		bool		scaled_;
 
 #ifdef __APPLE__
 		static uint32_t wait_sync_task_(uint32_t in) {
@@ -103,8 +108,10 @@ namespace gl {
 #endif
 				 frame_count_(0), frame_time_(0.0),
 				 machine_cycle_(0.0), cpu_ghz_(0.0),
+				 scale_(1.0f),
 				 cpu_spd_enable_(false), soft_sync_(false),
-				 exit_signal_(false), full_screen_(false), keyboard_jp_(false) { }
+				 exit_signal_(false), full_screen_(false), keyboard_jp_(false),
+				 scaled_(false) { }
 
 		core(const core& rhs);
 		core& operator = (const core& rhs);
