@@ -384,8 +384,8 @@ namespace gl {
 		}
 		const tex_map& tmap = cit->second;
 
-		auto x  = pos.x;
-		auto y  = pos.y;
+		auto x = pos.x;
+		auto y = pos.y;
 		// 半角文字で、等幅表示の場合、中心に描画
 		if(face_->info_.center && !face_->info_.proportional && code >= 0x20 && code < 0x7f) {
 			if(tmap.w < face_->info_.size) {
