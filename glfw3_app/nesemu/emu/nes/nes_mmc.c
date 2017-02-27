@@ -210,22 +210,20 @@ void mmc_reset(void)
 
 int mmc_create(rominfo_t *rominfo)
 {
-   const mapintf_t **map_ptr;
+	const mapintf_t **map_ptr;
   
-   for (map_ptr = mappers; (*map_ptr)->number != rominfo->mapper_number; map_ptr++)
-   {
-      if (NULL == *map_ptr)
-         return -1; /* Should *never* happen */
-   }
+	for(map_ptr = mappers; (*map_ptr)->number != rominfo->mapper_number; map_ptr++) {
+		if(NULL == *map_ptr) return -1; /* Should *never* happen */
+	}
 
-   memset(&mmc_, 0, sizeof(mmc_t));
+	memset(&mmc_, 0, sizeof(mmc_t));
 
-   mmc_.intf = *map_ptr;
-   mmc_.cart = rominfo;
+	mmc_.intf = *map_ptr;
+	mmc_.cart = rominfo;
 
-   log_printf("created memory mapper: %s\n", (*map_ptr)->name);
+	log_printf("created memory mapper: %s\n", (*map_ptr)->name);
 
-   return 0;
+	return 0;
 }
 
 

@@ -149,7 +149,7 @@ extern void ppu_setpal(rgb_t *pal);
 extern void ppu_setdefaultpal(void);
 
 #ifdef __cplusplus
-{
+}
 #endif /* __cplusplus */
 
 /*
