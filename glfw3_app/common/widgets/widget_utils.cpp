@@ -193,10 +193,12 @@ namespace gui {
 		core& core = core::get_instance();
 
 		const vtx::ipos& vsz = core.get_size();
-		const vtx::ipos& siz = core.get_rect().size;
+///		const vtx::ipos& siz = core.get_rect().size;
 
-		int sx = vsz.x / siz.x;
-		int sy = vsz.y / siz.y;
+///		int sx = vsz.x / siz.x;
+///		int sy = vsz.y / siz.y;
+		float sx = core.get_dpi_scale();
+		float sy = core.get_dpi_scale();
 		glViewport(clip.org.x * sx, vsz.y - clip.org.y * sy - clip.size.y * sy, clip.size.x *sx, clip.size.y * sy);
 		wd.at_mobj().setup_matrix(clip.size.x, clip.size.y);
 
@@ -225,7 +227,7 @@ namespace gui {
 		if(ls.empty()) return;
 
 		const vtx::ipos& vsz = core.get_size();
-		const vtx::ipos& siz = core.get_rect().size;
+//		const vtx::ipos& siz = core.get_rect().size;
 
 		gl::fonts& fonts = core.at_fonts();
 
@@ -238,19 +240,21 @@ namespace gui {
 			fonts.set_font_size(tp.font_size_);
 		}
 
-		int sx = vsz.x / siz.x;
-		int sy = vsz.y / siz.y;
+//		float sx = vsz.x / siz.x;
+//		float sy = vsz.y / siz.y;
+		float sx = core.get_dpi_scale();
+		float sy = core.get_dpi_scale();
 		glViewport(clip_.org.x * sx, vsz.y - clip_.org.y * sy - clip_.size.y * sy,
 			clip_.size.x * sx, clip_.size.y * sy);
 		fonts.setup_matrix(clip_.size.x, clip_.size.y);
 
 		fonts.enable_proportional(tp.proportional_);
-		vtx::ipos pos;
 		const auto& fsize = fonts.get_size(ls);
 		vtx::placement tpl = tp.placement_;
 		if(fsize.x > clip_.size.x) {
 			tpl.hpt = vtx::placement::holizontal::LEFT;
 		}
+		vtx::ipos pos;
 		vtx::create_placement(rect_, fsize, tpl, pos);
 
 		short clx = 0;

@@ -263,7 +263,7 @@ namespace gui {
 			using namespace gl;
 			core& core = core::get_instance();
 			const vtx::spos& vsz = core.get_size();
-			const vtx::spos& siz = core.get_rect().size;
+//			const vtx::spos& siz = core.get_rect().size;
 			gl::fonts& fonts = core.at_fonts();
 
 			const widget::param& wp = get_param();
@@ -287,8 +287,10 @@ namespace gui {
 
 				vtx::irect clip_ = wp.clip_;
 
-				int sx = vsz.x / siz.x;
-				int sy = vsz.y / siz.y;
+//				float sx = vsz.x / siz.x;
+				float sx = core.get_dpi_scale();
+//				float sy = vsz.y / siz.y;
+				float sy = core.get_dpi_scale();
 				glViewport(clip_.org.x * sx, vsz.y - clip_.org.y * sy - clip_.size.y * sy,
 					clip_.size.x * sx, clip_.size.y * sy);
 				fonts.setup_matrix(clip_.size.x, clip_.size.y);
