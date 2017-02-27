@@ -348,7 +348,7 @@ namespace gl {
 
 		{
 			int x = static_cast<float>(rect_.size.x) * scale_;
-			int y = static_cast<float>(rect_.size.x) * scale_;
+			int y = static_cast<float>(rect_.size.y) * scale_;
 			window_ = glfwCreateWindow(x, y, title.c_str(), NULL, NULL);
 			if(!window_) {
 				std::cerr << "glcore setup false: 'glfwCreateWindow'" << std::endl;
@@ -476,20 +476,16 @@ namespace gl {
 		{
 			int x, y;
 			glfwGetWindowSize(window_, &x, &y);
-			x = static_cast<float>(x) / scale_;
-			y = static_cast<float>(y) / scale_;
 			bool toset = false;
-			if(x < limit_size_.x) {
-				x = limit_size_.x;
+			if(x < (limit_size_.x * scale_)) {
+				x = limit_size_.x * scale_;
 				toset = true;
 			}
-			if(y < limit_size_.y) {
-				y = limit_size_.y;
+			if(y < (limit_size_.y * scale_)) {
+				y = limit_size_.y * scale_;
 				toset = true;
 			}
 			if(toset) {
-				x = static_cast<float>(x) * scale_;
-				y = static_cast<float>(y) * scale_;
 				glfwSetWindowSize(window_, x, y);
 			}
 		}
