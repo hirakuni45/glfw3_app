@@ -64,6 +64,10 @@ typedef struct mmc_s
    rominfo_t *cart;  /* link it back to the cart */
 } mmc_t;
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 extern rominfo_t *mmc_getinfo(void);
 
 extern void mmc_bankvrom(int size, uint32 address, int bank);
@@ -77,6 +81,10 @@ extern mmc_t *mmc_getcontext(void);
 extern bool mmc_peek(int map_num);
 
 extern void mmc_reset(void);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 /*
 ** $Log: nes_mmc.h,v $

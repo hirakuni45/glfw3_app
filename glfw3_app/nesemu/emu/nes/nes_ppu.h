@@ -108,6 +108,9 @@ typedef struct ppu_s
    bool drawsprites;
 } ppu_t;
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 /* TODO: should use this pointers */
 extern void ppu_setlatchfunc(ppulatchfunc_t func);
@@ -145,10 +148,9 @@ extern void ppu_writehigh(uint32 address, uint8 value);
 extern void ppu_setpal(rgb_t *pal);
 extern void ppu_setdefaultpal(void);
 
-/* bleh */
-/// extern void ppu_dumppattern(bitmap_t *bmp, int table_num, int x_loc, int y_loc, int col);
-/// extern void ppu_dumpoam(bitmap_t *bmp, int x_loc, int y_loc);
-/// extern void ppu_displaysprites(bool display);
+#ifdef __cplusplus
+{
+#endif /* __cplusplus */
 
 /*
 ** $Log: nes_ppu.h,v $

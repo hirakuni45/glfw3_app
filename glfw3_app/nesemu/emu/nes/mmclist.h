@@ -1,3 +1,4 @@
+#pragma once
 /*
 ** Nofrendo (c) 1998-2000 Matthew Conte (matt@conte.com)
 **
@@ -22,15 +23,9 @@
 ** list of all mapper interfaces
 ** $Id: mmclist.h,v 1.2 2001/04/27 14:37:11 neil Exp $
 */
-
-#ifndef _MMCLIST_H_
-#define _MMCLIST_H_
-
 #include "nes_mmc.h"
 
 extern const mapintf_t *mappers[];
-
-#endif /* !_MMCLIST_H_ */
 
 /*
 ** $Log: mmclist.h,v $

@@ -58,11 +58,18 @@ typedef struct rominfo_s
 	char filename[PATH_MAX + 1];
 } rominfo_t;
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 extern int rom_checkmagic(const char *filename);
 extern rominfo_t *rom_load(const char *filename);
 extern void rom_free(rominfo_t *rominfo);
 extern char *rom_getinfo(rominfo_t *rominfo);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 /*
 ** $Log: nes_rom.h,v $
