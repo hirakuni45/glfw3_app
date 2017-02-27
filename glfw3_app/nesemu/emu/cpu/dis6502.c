@@ -28,8 +28,6 @@
 #include "nes6502.h"
 #include "dis6502.h"
 
-#ifdef NES6502_DEBUG
-
 /* addressing modes */
 enum 
 { 
@@ -51,7 +49,7 @@ enum
 /* keep a filthy local copy of PC to
 ** reduce the amount of parameter passing
 */
-static uint32 pc_reg;
+static uint32_t pc_reg;
 
 /* if we ever overrun this buffer, something will
 ** have gone very wrong anyway...
@@ -59,12 +57,12 @@ static uint32 pc_reg;
 static char disasm_buf[256];
 
 
-static uint8 dis_op8(void)
+static uint8_t dis_op8(void)
 {
    return (nes6502_getbyte(pc_reg + 1));
 }
 
-static uint16 dis_op16(void)
+static uint16_t dis_op16(void)
 {
    return (nes6502_getbyte(pc_reg + 1) + (nes6502_getbyte(pc_reg + 2) << 8));
 }
@@ -128,7 +126,7 @@ static int dis_show_relative(char *buf)
 {
    int target;
 
-   target = (int8) dis_op8();
+   target = (int8_t) dis_op8();
    target += (pc_reg + 2);
    return sprintf(buf, " %04X   ", target);
 }
@@ -192,7 +190,7 @@ static int dis_show_op(char *buf, char *opstr, int optype)
    return (int) (dest - buf);
 }
 
-char *nes6502_disasm(uint32 PC, uint8 P, uint8 A, uint8 X, uint8 Y, uint8 S)
+const char *nes6502_disasm(uint32_t PC, uint8_t P, uint8_t A, uint8_t X, uint8_t Y, uint8_t S)
 {
    char *buf = disasm_buf;
    char *op;
@@ -491,8 +489,6 @@ char *nes6502_disasm(uint32 PC, uint8 P, uint8 A, uint8 X, uint8 Y, uint8 S)
 
    return disasm_buf;
 }
-
-#endif /* NES6502_DEBUG */
 
 /*
 ** $Log: dis6502.c,v $
