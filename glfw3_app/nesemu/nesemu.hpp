@@ -75,14 +75,9 @@ namespace app {
 		static const int nes_height_ = 240;
 		static const int sample_rate_ = 44100;
 		static const int audio_len_ = sample_rate_ / 60;
-		static const int audio_queue_ = 1024;
 
 		bool	nes_play_;
 		bool	nsf_play_;
-
-		typedef utils::fifo<int16_t, audio_queue_ * 16> fifo;
-		fifo		fifo_;
-		al::audio	audio_;
 
 		uint8_t	fb_[nes_width_ * nes_height_ * 4];
 
@@ -328,9 +323,6 @@ namespace app {
 			inp_[1].data = 0;
 			input_register(&inp_[1]);
 
-			audio_ = al::create_audio(al::audio_format::PCM16_MONO);
-			audio_->create(sample_rate_, audio_queue_);
-
 			// プリファレンスの取得
 			sys::preference& pre = director_.at().preference_;
 			if(filer_ != nullptr) {
@@ -388,20 +380,10 @@ namespace app {
 				}
 
 				// copy sound
-				int16_t tmp[audio_len_];
-				apu_process(tmp, audio_len_);
-				for(int i = 0; i < audio_len_; ++i) {
-					fifo_.put(tmp[i]);
-				}
-
-				if(fifo_.length() >= (audio_queue_ * 2) && audio_) {
-					al::sound& sound = director_.at().sound_;
-					for(int i = 0; i < audio_queue_; ++i) {
-						al::pcm16_m w(fifo_.get());
-						audio_->put(i, w);
-					}
-					sound.queue_audio(audio_);
-				}
+				al::sound::waves16 tmp;
+				tmp.resize(audio_len_);
+				apu_process(&tmp[0], audio_len_);
+				director_.at().sound_.queue_audio(tmp);
 
 				// copy video
 				if(nes_play_) {
