@@ -311,7 +311,7 @@ namespace gl {
 		dpi_.y = static_cast<float>(vm->height) / (static_cast<float>(heightMM) / 25.4f);
 
 		auto dpi = dpi_.x;
-		float ref_dpi = 120.0f;
+		float ref_dpi = 150.0f;
 		if(dpi < dpi_.y) dpi = dpi_.y;
 		if(dpi > (ref_dpi * 1.25f)) {
 			scaled_ = true;
