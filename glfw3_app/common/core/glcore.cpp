@@ -213,8 +213,13 @@ namespace gl {
 	static void cursor_callback_(GLFWwindow* window, double x, double y)
 	{
 ///		std::cout << x << ", " << y << std::endl;
+#ifdef WIN32
 		vtx::spos pos(static_cast<vtx::spos::value_type>(x / locator_scale_),
 					  static_cast<vtx::spos::value_type>(y / locator_scale_));
+#else
+		vtx::spos pos(static_cast<vtx::spos::value_type>(x),
+					  static_cast<vtx::spos::value_type>(y));
+#endif
 		core::locator_.set_cursor(pos);
 	}
 
@@ -310,6 +315,7 @@ namespace gl {
 		dpi_.x = static_cast<float>(vm->width)  / (static_cast<float>(widthMM)  / 25.4f);
 		dpi_.y = static_cast<float>(vm->height) / (static_cast<float>(heightMM) / 25.4f);
 
+#ifdef WIN32
 		auto dpi = dpi_.x;
 		float ref_dpi = 150.0f;
 		if(dpi < dpi_.y) dpi = dpi_.y;
@@ -322,6 +328,7 @@ namespace gl {
 			scale_ = 1.0f;
 			locator_scale_ = 1.0f;
 		}
+#endif
 
 ///		std::cout << dpi_.x << ", " << dpi_.y << std::endl;
 
@@ -347,8 +354,13 @@ namespace gl {
 		limit_size_ = rect_.size / 3;
 
 		{
+#ifdef WIN32
 			int x = static_cast<float>(rect_.size.x) * scale_;
 			int y = static_cast<float>(rect_.size.y) * scale_;
+#else
+			int x = rect_.size.x;
+			int y = rect_.size.y;
+#endif
 			window_ = glfwCreateWindow(x, y, title.c_str(), NULL, NULL);
 			if(!window_) {
 				std::cerr << "glcore setup false: 'glfwCreateWindow'" << std::endl;
@@ -425,6 +437,7 @@ namespace gl {
 
 #ifdef __APPLE__
 		start_sync_();
+		scale_ = static_cast<float>(get_size().x) / static_cast<float>(get_rect().size.x);
 #endif
 
 		return true;
@@ -477,12 +490,17 @@ namespace gl {
 			int x, y;
 			glfwGetWindowSize(window_, &x, &y);
 			bool toset = false;
-			if(x < (limit_size_.x * scale_)) {
-				x = limit_size_.x * scale_;
+#ifdef WIN32
+			float scale = scale_;
+#else
+			float scale = 1.0f;
+#endif
+			if(x < (limit_size_.x * scale)) {
+				x = limit_size_.x * scale;
 				toset = true;
 			}
-			if(y < (limit_size_.y * scale_)) {
-				y = limit_size_.y * scale_;
+			if(y < (limit_size_.y * scale)) {
+				y = limit_size_.y * scale;
 				toset = true;
 			}
 			if(toset) {
@@ -498,9 +516,13 @@ namespace gl {
 			rect_.org.y = y;
 
 			glfwGetWindowSize(window_, &x, &y);
+#ifdef WIN32
 			rect_.size.x = static_cast<float>(x) / scale_;
 			rect_.size.y = static_cast<float>(y) / scale_;
-
+#else
+			rect_.size.x = x;
+			rect_.size.y = y;
+#endif
 			// フレームバッファサイズとwindowのサイズは異なる
 			glfwGetFramebufferSize(window_, &x, &y);
 			size_.x = x;
