@@ -9,11 +9,12 @@
 #include <vector>
 #include <string>
 #include <memory>
-#include <functional>
+#include <vector>
 #include <pthread.h>
 #include "snd_io/audio_io.hpp"
 #include "snd_io/snd_files.hpp"
 #include "snd_io/tag.hpp"
+#include "snd_io/pcm.hpp"
 #include "utils/fifo.hpp"
 #include "utils/string_utils.hpp"
 
@@ -26,8 +27,7 @@ namespace al {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class sound {
 	public:
-		typedef std::function<void (i_audio*)>	wave_gen_func;
-
+		typedef std::vector<int16_t>	waves16;
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
@@ -119,6 +119,29 @@ namespace al {
 		};
 
 
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	queue 構造体
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		struct queue_t {
+			audio_io*				audio_io_;
+			audio_io::slot_handle	slot_;
+
+			utils::fifo<int16_t, 512 * 16>	wave_;
+
+			pthread_mutex_t			sync_;
+
+			volatile uint32_t		frame_;
+			volatile bool			start_;
+			volatile bool			exit_;
+			volatile bool			finsh_;
+
+			queue_t() : audio_io_(0), slot_(0),
+						frame_(0), start_(false), exit_(false), finsh_(false) { }
+		};
+
+
 	private:
 		al::audio_io	audio_io_;
 
@@ -148,9 +171,13 @@ namespace al {
 		bool					tag_thread_;
 		tag						tag_;
 
-		wave_gen_func			wave_gen_func_;
+		queue_t			queue_t_;
+		bool			queue_start_;
+		pthread_t		queue_pth_;
 
 		bool request_sub_(int slot, al::audio_io::wave_handle wh, bool loop);
+		static void* stream_task_(void* entry);
+		static void* queue_task_(void* entry);
 
 	public:
 		//-----------------------------------------------------------------//
@@ -159,8 +186,9 @@ namespace al {
 		*/
 		//-----------------------------------------------------------------//
 		sound() : slot_max_(0), stream_fph_cnt_(0),
-				  stream_slot_(0),
-				  tag_serial_(0), tag_thread_(false), wave_gen_func_(nullptr)
+				  stream_slot_(0), stream_start_(false),
+				  tag_thread_(false),
+				  queue_start_(false)
 		{
 			ses_.push_back(0);
 		}
@@ -251,18 +279,6 @@ namespace al {
 			}
 			return wh;
 		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	動的波形リクエスト
-			@param[in]	slot	発音スロット（-1: auto）
-			@param[in]	aform	オーディオ形式
-			@param[in]	func	発音生成関数
-			@return 波形ハンドルを返す。（「０」ならエラー）
-		 */
-		//-----------------------------------------------------------------//
-		audio_io::wave_handle request_pw(int slot, audio_format aform, const wave_gen_func& func);
 
 
 		//-----------------------------------------------------------------//
@@ -392,24 +408,6 @@ namespace al {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	オーディオをキューイング（ストリーム）
-			@param[in]	aif	オーディオインターフェース
-			@return 「queue」出来たら「true」
-		 */
-		//-----------------------------------------------------------------//
-		bool queue_audio(const audio aif) {
-			audio_io::wave_handle h = audio_io_.status_stream(stream_slot_);
-			if(h) {
-				audio_io_.set_loop(h, false);
-				audio_io_.queue_stream(stream_slot_, h, aif);
-				return true;
-			}
-			return false;
-		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
 			@brief	オーディオのゲインを設定
 			@param[in]	gain	ゲイン（0.0 to 1.0）
 		 */
@@ -512,7 +510,74 @@ namespace al {
 			@return 正常なら「true」
 		 */
 		//-----------------------------------------------------------------//
-		bool play_stream(const std::string& root, const std::string& file = "");
+		bool play_stream(const std::string& root, const std::string& file = "") {
+			if(file.empty()) return false;
+
+			stop_stream();
+
+			stream_tag_.clear();
+
+			stream_start_ = true;
+			sstream_t_.audio_io_ = &audio_io_;
+			sstream_t_.slot_ = stream_slot_;
+			sstream_t_.root_ = root;
+			sstream_t_.file_ = file;
+			sstream_t_.start_ = false;
+
+			sstream_t_.request_.clear();
+
+			sstream_t_.finsh_ = false;
+
+			sstream_t_.pos_ = 0;
+			sstream_t_.len_ = 0;
+			sstream_t_.time_  = 0;
+			sstream_t_.etime_ = 0;
+			sstream_t_.open_err_   = 0;
+
+///			pthread_attr_init(&attr_);
+///			pthread_attr_setdetachstate(&attr_, PTHREAD_CREATE_DETACHED);
+
+			pthread_mutex_init(&sstream_t_.sync_, nullptr);
+			pthread_create(&pth_, nullptr, stream_task_, &sstream_t_);
+
+			return true;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	オーディオをキューイング（ストリーム）
+			@param[in]	waves	wave-block
+			@return 「queue」出来たら「true」
+		 */
+		//-----------------------------------------------------------------//
+		bool queue_audio(const waves16& waves)
+		{
+			if(waves.empty()) return false;
+
+			if(!queue_start_) {
+
+				queue_start_ = true;
+
+				queue_t_.audio_io_ = &audio_io_;
+				queue_t_.slot_ = stream_slot_;
+				queue_t_.exit_ = false;
+
+				pthread_mutex_init(&queue_t_.sync_, nullptr);
+				pthread_create(&queue_pth_, nullptr, queue_task_, &queue_t_);
+			}
+
+			if((queue_t_.wave_.size() - queue_t_.wave_.length()) > waves.size()) {
+				pthread_mutex_lock(&queue_t_.sync_);
+				for(auto w : waves) {
+					queue_t_.wave_.put(w);
+				}
+				pthread_mutex_unlock(&queue_t_.sync_);
+				return true;
+			} else {
+				return false;
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -617,7 +682,18 @@ namespace al {
 			@brief	ストリーム再生を停止
 		 */
 		//-----------------------------------------------------------------//
-		void stop_stream();
+		void stop_stream() {
+			if(stream_start_) {
+				sstream_t_.request_.put(request_t(request_t::command::STOP));
+				pthread_join(pth_ , nullptr);
+				pthread_mutex_destroy(&sstream_t_.sync_);
+				stream_start_ = false;
+				sstream_t_.state_ = stream_state::STOP;
+				sstream_t_.time_ = 0;
+				sstream_t_.etime_ = 0;
+				stream_fph_.clear();
+			}
+		}
 
 
 		//-----------------------------------------------------------------//

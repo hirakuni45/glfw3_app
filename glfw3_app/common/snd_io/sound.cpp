@@ -196,7 +196,7 @@ namespace al {
 		@return 常に NULL を返す。
 	 */
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	static void* stream_task_(void* entry)
+	void* sound::stream_task_(void* entry)
 	{
 		sound::sstream_t& sst = *(static_cast<sound::sstream_t*>(entry));
 
@@ -210,6 +210,59 @@ namespace al {
 
 		sst.start_ = false;
 		sst.finsh_ = true;
+
+		return nullptr;
+	}
+
+
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief	Queue 再生を行うタスク
+		@param[in]	entry	queue_t 構造体のポインター
+		@return 常に NULL を返す。
+	 */
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	void* sound::queue_task_(void* entry)
+	{
+		sound::queue_t& qt = *(static_cast<sound::queue_t*>(entry));
+
+		qt.start_ = true;
+
+		static const uint32_t pcm_size = 512;
+		audio aif[2];
+		aif[0] = al::create_audio(al::audio_format::PCM16_MONO);
+		aif[0]->create(44100, pcm_size);
+		aif[1] = al::create_audio(al::audio_format::PCM16_MONO);
+		aif[1]->create(44100, pcm_size);
+		uint32_t page = 0;
+
+		while(!qt.exit_) {
+			if(qt.wave_.length() >= pcm_size) {
+				pthread_mutex_lock(&qt.sync_);
+				for(uint32_t i = 0; i < pcm_size; ++i) {
+					al::pcm16_m w(qt.wave_.get());
+					aif[page & 1]->put(i, w);
+				}
+				pthread_mutex_unlock(&qt.sync_);
+
+				audio_io::wave_handle h = qt.audio_io_->status_stream(qt.slot_);
+				if(h) {
+					qt.audio_io_->set_loop(h, false);
+					qt.audio_io_->queue_stream(qt.slot_, h, aif[page & 1]);
+					++page;
+				}
+
+				++qt.frame_;
+			}
+#ifdef __APPLE__
+			usleep(5000);	// 5ms くらいの時間待ち
+#else
+			usleep(8000);	// 8ms くらいの時間待ち
+#endif
+		}
+
+		qt.start_ = false;
+		qt.finsh_ = true;
 
 		return nullptr;
 	}
@@ -348,39 +401,6 @@ namespace al {
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	動的波形リクエスト
-		@param[in]	slot	発音スロット（-1: auto）
-		@param[in]	aform	オーディオ形式
-		@param[in]	func	発音生成関数
-		@return 波形ハンドルを返す。（「０」ならエラー）
-	 */
-	//-----------------------------------------------------------------//
-	audio_io::wave_handle sound::request_pw(int slot, audio_format aform, const wave_gen_func& func)
-	{
-		wave_gen_func_ = func;
-#if 0
-		audio aif;
-		if(ainfo.chanels == 1) {
-			aif = audio(new audio_mno16);
-		} else if(ainfo.chanels == 2) {
-			aif = audio(new audio_sto16);
-		}
-		aif->create(ainfo.frequency, len);
-		aif->zero();
-
-		audio_io::wave_handle wh = audio_io_.create_wave(aif);
-		if(aif) {
-			bool loop = false;
-			request_sub_(slot, wh, loop);
-		}
-		return wh;
-#endif
-		return 0;
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
 		@brief	ロードした全ての SE を廃棄する。
 	 */
 	//-----------------------------------------------------------------//
@@ -393,69 +413,6 @@ namespace al {
 		}
 		ses_.clear();
 		ses_.push_back(0);
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	ストリームを再生する。
-		@param[in]	root	ルートパス
-		@param[in]	file	再生ファイル名（無ければディレクトリーが対象）
-		@return 正常なら「true」
-	 */
-	//-----------------------------------------------------------------//
-	bool sound::play_stream(const std::string& root, const std::string& file)
-	{
-		if(file.empty()) return false;
-
-		stop_stream();
-
-		stream_tag_.clear();
-
-		stream_start_ = true;
-		sstream_t_.audio_io_ = &audio_io_;
-		sstream_t_.slot_ = stream_slot_;
-		sstream_t_.root_ = root;
-		sstream_t_.file_ = file;
-		sstream_t_.start_ = false;
-
-		sstream_t_.request_.clear();
-
-		sstream_t_.finsh_ = false;
-
-		sstream_t_.pos_ = 0;
-		sstream_t_.len_ = 0;
-		sstream_t_.time_  = 0;
-		sstream_t_.etime_ = 0;
-		sstream_t_.open_err_   = 0;
-
-///		pthread_attr_init(&attr_);
-///		pthread_attr_setdetachstate(&attr_, PTHREAD_CREATE_DETACHED);
-
-		pthread_mutex_init(&sstream_t_.sync_, nullptr);
-		pthread_create(&pth_, nullptr, stream_task_, &sstream_t_);
-
-		return true;
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	ストリーム再生を停止
-	 */
-	//-----------------------------------------------------------------//
-	void sound::stop_stream()
-	{
-		if(stream_start_) {
-			sstream_t_.request_.put(request_t(request_t::command::STOP));
-			pthread_join(pth_ , nullptr);
-			pthread_mutex_destroy(&sstream_t_.sync_);
-			stream_start_ = false;
-			sstream_t_.state_ = stream_state::STOP;
-			sstream_t_.time_ = 0;
-			sstream_t_.etime_ = 0;
-			stream_fph_.clear();
-		}
 	}
 
 
@@ -528,6 +485,12 @@ namespace al {
 	//-----------------------------------------------------------------//
 	void sound::destroy()
 	{
+		if(queue_start_) {
+			queue_t_.exit_ = true;
+ 			pthread_join(queue_pth_ , nullptr);
+			pthread_mutex_destroy(&queue_t_.sync_);
+		}
+
 		if(tag_thread_) {
 			tag_info_.loop_ = false;
 			pthread_join(tag_pth_ , nullptr);
