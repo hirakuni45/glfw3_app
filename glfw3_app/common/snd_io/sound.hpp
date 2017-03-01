@@ -128,7 +128,7 @@ namespace al {
 			audio_io*				audio_io_;
 			audio_io::slot_handle	slot_;
 
-			utils::fifo<int16_t, 512 * 16>	wave_;
+			utils::fifo<int16_t, 512 * 8>	wave_;
 
 			pthread_mutex_t			sync_;
 
@@ -567,6 +567,10 @@ namespace al {
 				pthread_create(&queue_pth_, nullptr, queue_task_, &queue_t_);
 			}
 
+//			if(queue_t_.wave_.length() == 0) {
+//				std::cout << "no waves..." << std::endl;
+//			}
+
 			if((queue_t_.wave_.size() - queue_t_.wave_.length()) > waves.size()) {
 				pthread_mutex_lock(&queue_t_.sync_);
 				for(auto w : waves) {
@@ -575,8 +579,20 @@ namespace al {
 				pthread_mutex_unlock(&queue_t_.sync_);
 				return true;
 			} else {
+				std::cout << "full..." << std::endl;
 				return false;
 			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	オーディオ・キューイングの波形長さを取得
+			@return 波形長さ
+		 */
+		//-----------------------------------------------------------------//
+		uint32_t get_queue_audio_length() const {
+			return queue_t_.wave_.length();
 		}
 
 

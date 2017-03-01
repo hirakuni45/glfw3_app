@@ -229,12 +229,9 @@ namespace al {
 		qt.start_ = true;
 
 		static const uint32_t pcm_size = 512;
-		audio aif[2];
-		aif[0] = al::create_audio(al::audio_format::PCM16_MONO);
-		aif[0]->create(44100, pcm_size);
-		aif[1] = al::create_audio(al::audio_format::PCM16_MONO);
-		aif[1]->create(44100, pcm_size);
-		uint32_t page = 0;
+		audio aif;
+		aif = al::create_audio(al::audio_format::PCM16_STEREO);
+		aif->create(44100, pcm_size);
 
 		while(!qt.exit_) {
 			if(qt.wave_.length() >= pcm_size) {
@@ -243,14 +240,14 @@ namespace al {
 				if(h) {
 					pthread_mutex_lock(&qt.sync_);
 					for(uint32_t i = 0; i < pcm_size; ++i) {
-						al::pcm16_m w(qt.wave_.get());
-						aif[page & 1]->put(i, w);
+						auto a = qt.wave_.get();
+						al::pcm16_s w(a, a);
+						aif->put(i, w);
 					}
 					pthread_mutex_unlock(&qt.sync_);
 
 					qt.audio_io_->set_loop(h, false);
-					qt.audio_io_->queue_stream(qt.slot_, h, aif[page & 1]);
-					++page;
+					qt.audio_io_->queue_stream(qt.slot_, h, aif);
 				}
 
 				++qt.frame_;
