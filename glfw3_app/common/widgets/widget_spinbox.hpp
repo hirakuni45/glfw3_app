@@ -20,7 +20,21 @@ namespace gui {
 
 		typedef widget_spinbox value_type;
 
-		typedef std::function< void(const std::string& st, int pos) > select_func_type;
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	widget_spinbox ステート
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		enum class state {
+			initial,///< 初期化
+			inc,	///< インクリメント
+			select,	///< セレクト
+			dec		///< デクリメント
+		};
+
+
+		typedef std::function< std::string (state st, int before, int newpos) > select_func_type;
+
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
@@ -35,18 +49,18 @@ namespace gui {
 			gl::mobj::handle	handle_;	///< モーションオブジェクトを使う場合
 			uint32_t			id_;		///< セレクト ID （押された回数）
 
-			select_func_type	select_func_;	///< セレクト関数
-			utils::strings		text_list_;		///< テキスト・リスト
-			std::string			select_text_;	///< 選択テキスト
-			int					select_pos_;	///< 選択位置
+			select_func_type	select_func_;	///< 選択関数
 
-			param() :
+			int					min_pos_;	///< 最低位置
+			int					sel_pos_;	///< 選択位置
+			int					max_pos_;	///< 最大位置
+
+			param(int min = 0, int sel = 0, int max = 0) :
 				plate_param_(), color_param_(widget_director::default_spinbox_color_),
 				text_param_("", img::rgba8(255, 255), img::rgba8(0, 255)),
 				image_(0), handle_(0), id_(0),
-				select_func_(nullptr),
-				text_list_(),
-				select_text_(), select_pos_(0)
+				select_func_(),
+				min_pos_(min), sel_pos_(sel), max_pos_(max)
 				{ }
 		};
 
@@ -59,6 +73,8 @@ namespace gui {
 		gl::mobj::handle	up_objh_;
 		gl::mobj::handle	dn_objh_;
 
+		bool	initial_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -66,7 +82,8 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_spinbox(widget_director& wd, const widget::param& bp, const param& p) :
-			widget(bp), wd_(wd), param_(p), objh_(0), up_objh_(0), dn_objh_(0) { }
+			widget(bp), wd_(wd), param_(p), objh_(0), up_objh_(0), dn_objh_(0),
+		    initial_(false) { }
 
 
 		//-----------------------------------------------------------------//
@@ -123,38 +140,20 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	リストを設定
-			@param[in]	ss	リスト
-		*/
-		//-----------------------------------------------------------------//
-		void set_list(const utils::strings& ss) {
-			param_.text_list_ = ss;
-		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	リストを参照
-			@return リスト
-		*/
-		//-----------------------------------------------------------------//
-		utils::strings& at_list() { return param_.text_list_; }
-
-
-		//-----------------------------------------------------------------//
-		/*!
 			@brief	選択テキストの取得
+			@return 選択テキスト
 		*/
 		//-----------------------------------------------------------------//
-		const std::string& get_select_text() const { return param_.select_text_; }
+		std::string get_select_text() const { return param_.text_param_.get_text(); }
 
 
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	選択位置の取得
+			@return 選択位置
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t get_select_pos() const { return param_.select_pos_; }
+		uint32_t get_select_pos() const { return param_.sel_pos_; }
 
 
 		//-----------------------------------------------------------------//
@@ -206,31 +205,36 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		void update() override {
-			bool select = false;
+			if(!initial_ && param_.select_func_ != nullptr) {
+				initial_ = true;
+				auto t = param_.select_func_(state::initial, param_.sel_pos_, param_.sel_pos_);
+				if(!t.empty()) {
+					param_.text_param_.set_text(t);
+				}
+			}
+
 			if(get_selected()) {
 				++param_.id_;
 
 				auto x = get_param().in_point_.x;
 				auto xs = get_rect().size.x;
-				if(param_.text_list_.size() > 0) {
-					if(x < (xs / 3)) {  // up
-						param_.select_pos_++;
-						if(param_.select_pos_ >= param_.text_list_.size()) {
-							param_.select_pos_ = param_.text_list_.size() - 1;
-						}
-					} else if(x >= (xs * 2 / 3)) {  // down
-						param_.select_pos_--;
-						if(param_.select_pos_ < 0) param_.select_pos_ = 0;
+				int before = param_.sel_pos_;
+				state st = state::select;
+				if(x < (xs / 3)) {  // inc
+					++param_.sel_pos_;
+					if(param_.sel_pos_ > param_.max_pos_) param_.sel_pos_ = param_.max_pos_;
+					st = state::inc;
+				} else if(x >= (xs * 2 / 3)) {  // dec
+					--param_.sel_pos_;
+					if(param_.sel_pos_ < param_.min_pos_) param_.sel_pos_ = param_.min_pos_;
+					st = state::dec;
+				}
+				if(param_.select_func_ != nullptr) {
+					auto t = param_.select_func_(st, before, param_.sel_pos_);
+					if(!t.empty()) {
+						param_.text_param_.set_text(t);
 					}
 				}
-				select = true;
-			}
-			if(param_.text_list_.size() > 0) {
-				param_.select_text_ = param_.text_list_[param_.select_pos_];
-				param_.text_param_.set_text(param_.select_text_);
-			}
-			if(select && param_.select_func_ != nullptr) {
-				param_.select_func_(param_.select_text_, param_.select_pos_);
 			}
 		}
 
@@ -292,7 +296,7 @@ namespace gui {
 			path += wd_.create_widget_name(this);
 
 			int err = 0;
-			if(!pre.put_integer(path + "/selector", param_.select_pos_)) ++err;
+			if(!pre.put_integer(path + "/selector", param_.sel_pos_)) ++err;
 			return err == 0;
 		}
 
@@ -310,7 +314,7 @@ namespace gui {
 			path += wd_.create_widget_name(this);
 
 			int err = 0;
-			if(!pre.get_integer(path + "/selector", param_.select_pos_)) ++err;
+			if(!pre.get_integer(path + "/selector", param_.sel_pos_)) ++err;
 			return err == 0;
 		}
 	};
