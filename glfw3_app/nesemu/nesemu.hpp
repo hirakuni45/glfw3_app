@@ -380,10 +380,17 @@ namespace app {
 				}
 
 				// copy sound
+				al::sound& sound = director_.at().sound_;
+				uint32_t len = audio_len_;
+				if(sound.get_queue_audio_length() >= 1024) {
+					len -= sound.get_queue_audio_length() - 1024;
+				} else if(sound.get_queue_audio_length() < 512) {
+					len += 512 - sound.get_queue_audio_length();
+				}
 				al::sound::waves16 tmp;
-				tmp.resize(audio_len_);
-				apu_process(&tmp[0], audio_len_);
-				director_.at().sound_.queue_audio(tmp);
+				tmp.resize(len);
+				apu_process(&tmp[0], len);
+				sound.queue_audio(tmp);
 
 				// copy video
 				if(nes_play_) {
