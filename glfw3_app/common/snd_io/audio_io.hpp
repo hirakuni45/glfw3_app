@@ -30,6 +30,8 @@
 
 #include "utils/file_io.hpp"
 #include "i_audio.hpp"
+#include <iostream>
+#include <boost/format.hpp>
 
 namespace al {
 
@@ -87,7 +89,11 @@ namespace al {
 			@brief	コンテキストの情報を表示（OpenAL）
 		*/
 		//-----------------------------------------------------------------//
-		void context_info() const;
+		void context_info() const {
+			std::cout << boost::format("OpenAL vendor string: %s\n") % alGetString(AL_VENDOR);
+			std::cout << boost::format("OpenAL renderer string: %s\n") % alGetString(AL_RENDERER);
+			std::cout << boost::format("OpenAL version string: %s\n") % alGetString(AL_VERSION);
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -105,7 +111,20 @@ namespace al {
 			@return	波形・ハンドルを返す
 		*/
 		//-----------------------------------------------------------------//
-		wave_handle create_wave(const audio aif);
+		wave_handle create_wave(const audio aif)
+		{
+			if(aif == 0) return 0;
+
+			wave_handle wh;
+			alGenBuffers(1, &wh);
+			set_buffer_(wh, aif);
+
+			if(wh == AL_NONE) {
+///				ALenum alerror = alGetError();
+				return 0;
+			}
+			return wh;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -114,17 +133,26 @@ namespace al {
 			@param[in]	wh	波形ハンドル
 		*/
 		//-----------------------------------------------------------------//
-		void destroy_wave(wave_handle wh);
+		void destroy_wave(wave_handle wh) {
+			alDeleteBuffers(1, &wh);
+		}
 
 
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	スロット（ソース）を作成する。
-			@param[in]	h	波形・ハンドル
+			@param[in]	wh	波形・ハンドル
 			@return スロット・ハンドルを返す。
 		*/
 		//-----------------------------------------------------------------//
-		slot_handle create_slot(wave_handle h);
+		slot_handle create_slot(wave_handle wh) {
+			slot_handle sh;
+			alGenSources(1, &sh);
+			if(wh) {
+				alSourcei(sh, AL_BUFFER, wh);
+			}
+			return sh;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -231,7 +259,14 @@ namespace al {
 			@return	「true」なら演奏中
 		*/
 		//-----------------------------------------------------------------//
-		bool get_slot_status(slot_handle sh) const;
+		bool get_slot_status(slot_handle sh) const {
+			if(sh == 0) {
+				return false;
+			}
+			ALint status;
+			alGetSourcei(sh, AL_SOURCE_STATE, &status);
+			return status == AL_PLAYING;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -240,7 +275,9 @@ namespace al {
 			@param[in]	h	スロット・ハンドル
 		*/
 		//-----------------------------------------------------------------//
-		void destroy_slot(slot_handle h);
+		void destroy_slot(slot_handle h) {
+			alDeleteSources(1, &h);
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -251,7 +288,14 @@ namespace al {
 			@return	成功したら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool set_wave(slot_handle sh, wave_handle wh);
+		bool set_wave(slot_handle sh, wave_handle wh) {
+			if(sh != 0 && wh != 0) {
+				alSourcei(sh, AL_BUFFER, wh);
+//				std::cout << boost::format("set_wave: slot: %d, wave: %d\n") % sh % wh;
+				return true;
+			}
+			return false;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -305,7 +349,26 @@ namespace al {
 			@return 有効な、バッファがあれば、そのハンドルを返す。（「０」なら無効）
 		*/
 		//-----------------------------------------------------------------//
-		wave_handle status_stream(slot_handle ssh);
+		wave_handle status_stream(slot_handle ssh) {
+			ALint state;
+			alGetSourcei(ssh, AL_SOURCE_STATE, &state);
+			if(state == AL_PAUSED) {
+				return 0;
+			}
+			ALint n;
+			wave_handle bh;
+			alGetSourcei(ssh, AL_BUFFERS_QUEUED, &n);	// キューバッファを最大数まで作成
+			if(n < queue_max_) {
+				alGenBuffers(1, &bh);
+			} else {   // キューバッファ利用完了数を取得
+				alGetSourcei(ssh, AL_BUFFERS_PROCESSED, &n);
+				if(n == 0) {
+					return 0;	// キューバッファが空いていない場合。
+				}
+				alSourceUnqueueBuffers(ssh, 1, &bh);	// キューバッファ再利用のハンドルを取得
+			}
+			return bh;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -317,7 +380,20 @@ namespace al {
 							※常に、同じ構成を与える必要がある。
 		*/
 		//-----------------------------------------------------------------//
-		void queue_stream(slot_handle ssh, wave_handle bh, const audio aif);
+		void queue_stream(slot_handle ssh, wave_handle bh, const audio aif) {
+			if(ssh == 0 || bh == 0 || aif == 0) return;
+
+			set_buffer_(bh, aif);
+			alSourceQueueBuffers(ssh, 1, &bh);
+
+			// ストリーム・ソースを「PLAY」
+			ALint state;
+			alGetSourcei(ssh, AL_SOURCE_STATE, &state);
+			if(state == AL_PAUSED) ;
+			else if(state != AL_PLAYING) {
+				alSourcePlay(ssh);
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -327,7 +403,17 @@ namespace al {
 			@param[in]	ena	「false」ならポーズ解除
 		*/
 		//-----------------------------------------------------------------//
-		void pause_stream(slot_handle ssh, bool ena = true);
+		void pause_stream(slot_handle ssh, bool ena = true) {
+			if(ssh == 0) return;
+
+			if(ena) {
+//				std::cout << "Stream: Pause enable\n";
+				alSourcePause(ssh);
+			} else {
+//				std::cout << "Stream: Pause disable\n";
+				alSourcePlay(ssh);
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
