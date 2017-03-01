@@ -129,6 +129,7 @@ namespace al {
 			audio_io::slot_handle	slot_;
 
 			utils::fifo<int16_t, 512 * 8>	wave_;
+			utils::fifo<audio, 32>			audio_;
 
 			pthread_mutex_t			sync_;
 
@@ -179,6 +180,21 @@ namespace al {
 		static void* stream_task_(void* entry);
 		static void* queue_task_(void* entry);
 
+		void queue_setup_()
+		{
+			if(!queue_start_) {
+
+				queue_start_ = true;
+
+				queue_t_.audio_io_ = &audio_io_;
+				queue_t_.slot_ = stream_slot_;
+				queue_t_.exit_ = false;
+
+				pthread_mutex_init(&queue_t_.sync_, nullptr);
+				pthread_create(&queue_pth_, nullptr, queue_task_, &queue_t_);
+			}
+		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -187,7 +203,7 @@ namespace al {
 		//-----------------------------------------------------------------//
 		sound() : slot_max_(0), stream_fph_cnt_(0),
 				  stream_slot_(0), stream_start_(false),
-				  tag_thread_(false),
+				  tag_serial_(0), tag_thread_(false),
 				  queue_start_(false)
 		{
 			ses_.push_back(0);
@@ -547,6 +563,31 @@ namespace al {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	オーディオをキューイング（ストリーム）
+			@param[in]	aif	オーディオ・インターフェース
+			@return 「queue」出来たら「true」
+		 */
+		//-----------------------------------------------------------------//
+		bool queue_audio(audio& aif)
+		{
+			if(aif == nullptr) return false;
+
+			queue_setup_();
+
+			bool f = false;
+			if(queue_t_.audio_.length() < (queue_t_.audio_.size() - 1)) {
+				pthread_mutex_lock(&queue_t_.sync_);
+				queue_t_.audio_.put(aif);
+				pthread_mutex_unlock(&queue_t_.sync_);
+				f = true;
+			}
+
+			return f;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	オーディオをキューイング（ストリーム）
 			@param[in]	waves	wave-block
 			@return 「queue」出来たら「true」
 		 */
@@ -555,17 +596,7 @@ namespace al {
 		{
 			if(waves.empty()) return false;
 
-			if(!queue_start_) {
-
-				queue_start_ = true;
-
-				queue_t_.audio_io_ = &audio_io_;
-				queue_t_.slot_ = stream_slot_;
-				queue_t_.exit_ = false;
-
-				pthread_mutex_init(&queue_t_.sync_, nullptr);
-				pthread_create(&queue_pth_, nullptr, queue_task_, &queue_t_);
-			}
+			queue_setup_();
 
 //			if(queue_t_.wave_.length() == 0) {
 //				std::cout << "no waves..." << std::endl;
@@ -579,7 +610,7 @@ namespace al {
 				pthread_mutex_unlock(&queue_t_.sync_);
 				return true;
 			} else {
-				std::cout << "full..." << std::endl;
+//				std::cout << "full..." << std::endl;
 				return false;
 			}
 		}

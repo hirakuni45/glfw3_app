@@ -249,7 +249,19 @@ namespace al {
 					qt.audio_io_->set_loop(h, false);
 					qt.audio_io_->queue_stream(qt.slot_, h, aif);
 				}
+				++qt.frame_;
+			}
+			if(qt.audio_.length() > 0) {
+				audio_io::wave_handle h = qt.audio_io_->status_stream(qt.slot_);
+				if(h) {
+					audio aif;
+					pthread_mutex_lock(&qt.sync_);
+					aif = qt.audio_.get();
+					pthread_mutex_unlock(&qt.sync_);
 
+					qt.audio_io_->set_loop(h, false);
+					qt.audio_io_->queue_stream(qt.slot_, h, aif);
+				}
 				++qt.frame_;
 			}
 #ifdef __APPLE__
