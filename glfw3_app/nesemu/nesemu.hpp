@@ -249,17 +249,10 @@ namespace app {
 				}
 				{   // スピン・ボックス
 					widget::param wp(vtx::irect(10, 35, 90, 30), menu_frame_);
-					widget_spinbox::param wp_;
-					wp_.text_list_.push_back("0");
-					wp_.text_list_.push_back("1");
-					wp_.text_list_.push_back("2");
-					wp_.text_list_.push_back("3");
-					wp_.text_list_.push_back("4");
-					wp_.text_list_.push_back("5");
-					wp_.text_list_.push_back("6");
-					wp_.text_list_.push_back("7");
-					wp_.text_list_.push_back("8");
-					wp_.text_list_.push_back("9");
+					widget_spinbox::param wp_(0, 0, 9);
+					wp_.select_func_ = [this] (widget_spinbox::state st, int before, int newpos) {
+						return (boost::format("%d") % newpos).str();
+					};
 					state_slot_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				}
 				{ // ステート・セーブ
