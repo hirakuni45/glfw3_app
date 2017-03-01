@@ -133,16 +133,16 @@ namespace app {
 
 		if(1) { // スピンボックスのテスト
 			widget::param wp(vtx::irect(30, 500, 100, 40));
-			widget_spinbox::param wp_;
-			wp_.text_list_.push_back("0");
-			wp_.text_list_.push_back("1");
-			wp_.text_list_.push_back("2");
-			wp_.text_list_.push_back("3");
-			wp_.text_list_.push_back("4");
-			wp_.text_list_.push_back("5");
+			widget_spinbox::param wp_(1, 3, 5);
 			spinbox_ = wd.add_widget<widget_spinbox>(wp, wp_);
-			spinbox_->at_local_param().select_func_ = [this](const std::string& st, int pos){
-				std::cout << "SpinBox select: '" << st << "', (" << pos << ")" << std::endl;
+			spinbox_->at_local_param().select_func_ = [this](widget_spinbox::state st, int before, int newpos) {
+				std::cout << "SpinBox ";
+				if(st == widget_spinbox::state::initial) std::cout << "initial";
+				else if(st == widget_spinbox::state::inc) std::cout << "inc";
+				else if(st == widget_spinbox::state::dec) std::cout << "dec";
+				else std::cout << "select";
+				std::cout << ": " << newpos << std::endl;
+				return (boost::format("%d") % newpos).str();
 			};
 		}
 
