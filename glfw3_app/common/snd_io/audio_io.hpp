@@ -65,7 +65,7 @@ namespace al {
 		*/
 		//-----------------------------------------------------------------//
 		audio_io() : device_(nullptr), context_(nullptr),
-					queue_max_(32), init_(false), destroy_(false) { }
+					queue_max_(0), init_(false), destroy_(false) { }
 
 
 		//-----------------------------------------------------------------//
@@ -79,9 +79,10 @@ namespace al {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	初期化
+			@param[in]	qmax	キューバッファの最大数（通常６４）
 		*/
 		//-----------------------------------------------------------------//
-		void initialize();
+		void initialize(int qmax = 64);
 
 
 		//-----------------------------------------------------------------//
@@ -90,9 +91,9 @@ namespace al {
 		*/
 		//-----------------------------------------------------------------//
 		void context_info() const {
-			std::cout << boost::format("OpenAL vendor string: %s\n") % alGetString(AL_VENDOR);
-			std::cout << boost::format("OpenAL renderer string: %s\n") % alGetString(AL_RENDERER);
-			std::cout << boost::format("OpenAL version string: %s\n") % alGetString(AL_VERSION);
+			std::cout << boost::format("vendor string: %s\n") % alGetString(AL_VENDOR);
+			std::cout << boost::format("renderer string: %s\n") % alGetString(AL_RENDERER);
+			std::cout << boost::format("version string: %s\n") % alGetString(AL_VERSION);
 		}
 
 
@@ -349,23 +350,38 @@ namespace al {
 			@return 有効な、バッファがあれば、そのハンドルを返す。（「０」なら無効）
 		*/
 		//-----------------------------------------------------------------//
-		wave_handle status_stream(slot_handle ssh) {
+		wave_handle status_stream(slot_handle ssh)
+		{
 			ALint state;
 			alGetSourcei(ssh, AL_SOURCE_STATE, &state);
 			if(state == AL_PAUSED) {
 				return 0;
 			}
+			wave_handle bh = 0;
 			ALint n;
-			wave_handle bh;
-			alGetSourcei(ssh, AL_BUFFERS_QUEUED, &n);	// キューバッファを最大数まで作成
-			if(n < queue_max_) {
+			static ALint qn = 0;
+			alGetSourcei(ssh, AL_BUFFERS_QUEUED, &n);
+			if(qn != n) {
+				qn = n;
+///				std::cout << "Queue buffer: " << qn << std::endl;
+			}
+			if(n == 0) {
 				alGenBuffers(1, &bh);
-			} else {   // キューバッファ利用完了数を取得
+			} else {
 				alGetSourcei(ssh, AL_BUFFERS_PROCESSED, &n);
-				if(n == 0) {
-					return 0;	// キューバッファが空いていない場合。
+				if(n != 0) {
+					alSourceUnqueueBuffers(ssh, 1, &bh);
+///					std::cout << "Unqueue" << std::endl;
+				} else {
+					alGetSourcei(ssh, AL_BUFFERS_QUEUED, &n);
+					if(n < queue_max_) {
+						alGenBuffers(1, &bh);
+					} else {
+						static uint32_t cnt = 0;
+///						std::cout << "No handle: " << cnt << std::endl;
+						++cnt;
+					}
 				}
-				alSourceUnqueueBuffers(ssh, 1, &bh);	// キューバッファ再利用のハンドルを取得
 			}
 			return bh;
 		}

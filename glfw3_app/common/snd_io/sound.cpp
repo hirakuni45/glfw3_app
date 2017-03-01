@@ -238,15 +238,16 @@ namespace al {
 
 		while(!qt.exit_) {
 			if(qt.wave_.length() >= pcm_size) {
-				pthread_mutex_lock(&qt.sync_);
-				for(uint32_t i = 0; i < pcm_size; ++i) {
-					al::pcm16_m w(qt.wave_.get());
-					aif[page & 1]->put(i, w);
-				}
-				pthread_mutex_unlock(&qt.sync_);
 
 				audio_io::wave_handle h = qt.audio_io_->status_stream(qt.slot_);
 				if(h) {
+					pthread_mutex_lock(&qt.sync_);
+					for(uint32_t i = 0; i < pcm_size; ++i) {
+						al::pcm16_m w(qt.wave_.get());
+						aif[page & 1]->put(i, w);
+					}
+					pthread_mutex_unlock(&qt.sync_);
+
 					qt.audio_io_->set_loop(h, false);
 					qt.audio_io_->queue_stream(qt.slot_, h, aif[page & 1]);
 					++page;
@@ -255,9 +256,9 @@ namespace al {
 				++qt.frame_;
 			}
 #ifdef __APPLE__
-			usleep(5000);	// 5ms くらいの時間待ち
+			usleep(4000);	// 4ms くらいの時間待ち
 #else
-			usleep(8000);	// 8ms くらいの時間待ち
+			usleep(5000);	// 5ms くらいの時間待ち
 #endif
 		}
 

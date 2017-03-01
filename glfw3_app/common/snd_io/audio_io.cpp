@@ -139,10 +139,13 @@ namespace al {
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	初期化
+		@param[in]	qmax	キューバッファの最大数（通常６４）
 	*/
 	//-----------------------------------------------------------------//
-	void audio_io::initialize()
+	void audio_io::initialize(int qmax)
 	{
+		queue_max_ = qmax;
+
 		if(init_) return;
 
 		device_ = alcOpenDevice(nullptr);
