@@ -170,7 +170,7 @@ namespace gui {
 				utils::utf8_to_utf32(text, text_);
 			}
 
-			const std::string get_text() const {
+			std::string get_text() const {
 				std::string s;
 				utils::utf32_to_utf8(text_, s);
 				return s;
