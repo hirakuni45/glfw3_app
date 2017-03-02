@@ -128,11 +128,22 @@ namespace app {
 		if(1) { // スライダーのテスト
 			widget::param wp(vtx::irect(30, 450, 180, 20));
 			widget_slider::param wp_;
+			wp_.select_func_ = [this] (float lvl) {
+				if(progress_ != nullptr) {
+					progress_->set_ratio(lvl);
+				}
+			};
 			slider_ = wd.add_widget<widget_slider>(wp, wp_);
 		}
 
+		if(1) { // progress のテスト
+			widget::param wp(vtx::irect(30, 500, 180, 20));
+			widget_progress::param wp_(0.5f);
+			progress_ = wd.add_widget<widget_progress>(wp, wp_);
+		}
+
 		if(1) { // スピンボックスのテスト
-			widget::param wp(vtx::irect(30, 500, 100, 40));
+			widget::param wp(vtx::irect(30, 550, 100, 40));
 			widget_spinbox::param wp_(1, 3, 5);
 			spinbox_ = wd.add_widget<widget_spinbox>(wp, wp_);
 			spinbox_->at_local_param().select_func_ = [this](widget_spinbox::state st, int before, int newpos) {

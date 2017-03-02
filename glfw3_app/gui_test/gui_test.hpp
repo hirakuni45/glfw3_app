@@ -13,6 +13,7 @@
 #include "widgets/widget_check.hpp"
 #include "widgets/widget_radio.hpp"
 #include "widgets/widget_slider.hpp"
+#include "widgets/widget_progress.hpp"
 #include "widgets/widget_menu.hpp"
 #include "widgets/widget_list.hpp"
 #include "widgets/widget_dialog.hpp"
@@ -35,6 +36,7 @@ namespace app {
 		gui::widget_button*		menu_open_;
 		gui::widget_check*		check_;
 		gui::widget_slider*		slider_;
+		gui::widget_progress*	progress_;
 		gui::widget_dialog*		dialog_;
 		gui::widget_image*		image_;
 		gui::widget_label*		label_;
