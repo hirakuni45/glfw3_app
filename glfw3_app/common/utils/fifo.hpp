@@ -1,7 +1,8 @@
 #pragma once
 //=====================================================================//
 /*!	@file
-  @brief	FIFO (first in first out)
+  @brief	FIFO (first in first out) @n
+			Copyright 2017 Kunihito Hiramatsu
   @author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//

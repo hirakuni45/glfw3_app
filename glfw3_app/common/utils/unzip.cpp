@@ -1,7 +1,8 @@
 //=====================================================================//
 /*!	@file
-	@brief	unzip クラス（ヘッダー）@n
-			zlib minizip/unzip.c を利用
+	@brief	unzip クラス @n
+			zlib minizip/unzip.c を利用 @n
+			Copyright 2017 Kunihito Hiramatsu
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//

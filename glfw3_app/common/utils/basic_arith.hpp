@@ -3,7 +3,8 @@
 /*!	@file
 	@brief	Arithmetic テンプレート @n
 			※テキストの数式を展開して、計算結果を得る。@n
-			演算式解析
+			演算式解析 @n
+			Copyright 2017 Kunihito Hiramatsu
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
