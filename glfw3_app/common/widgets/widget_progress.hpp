@@ -31,16 +31,16 @@ namespace gui {
 			widget::plate_param		plate_param_;	///< プレートパラメーター
 			widget::color_param		color_param_;	///< カラーパラメーター
 
-			float					position_;
+			float					ratio_;
 
 			const img::i_img*		base_image_;	///< ベース画像を使う場合
-//			const img::i_img*		hand_image_;	///< ハンドル画像を使う場合
+			const img::i_img*		hand_image_;	///< ハンドル画像を使う場合
 
-			param(float pos = 0.0f) :
+			param(float ratio = 0.0f) :
 				plate_param_(),
 				color_param_(widget_director::default_progress_color_),
-				position_(0.0f),
-				base_image_(nullptr)
+				ratio_(ratio),
+				base_image_(nullptr), hand_image_(nullptr)
 				{ }
 		};
 
@@ -50,9 +50,7 @@ namespace gui {
 		param				param_;
 
 		gl::mobj::handle	base_h_;	///< ベース
-//		gl::mobj::handle	hand_h_;	///< ハンドル
-
-		float               position_;
+		gl::mobj::handle	hand_h_;	///< ハンドル
 
 	public:
 		//-----------------------------------------------------------------//
@@ -62,7 +60,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_progress(widget_director& wd, const widget::param& wp, const param& p) :
 			widget(wp), wd_(wd), param_(p),
-			base_h_(0), position_(p.position_)
+			base_h_(0), hand_h_(0)
 		{ }
 
 
@@ -120,6 +118,15 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	ratio set
+			@param[in]	ratio	ratio
+		*/
+		//-----------------------------------------------------------------//
+		void set_ratio(float ratio) { param_.ratio_ = ratio; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
@@ -146,21 +153,19 @@ namespace gui {
 				}
 			}
 
-
-#if 0
-			const slider_param& sp = param_.slider_param_;
+///			const slider_param& sp = param_.slider_param_;
 			if(param_.hand_image_) {
 				const vtx::spos& size = param_.hand_image_->get_size();
 				create_image_base(param_.hand_image_, size, pa);
 			} else {
 				short wf = param_.plate_param_.frame_width_;
-				if(sp.direction_ == slider_param::direction::HOLIZONTAL) {
-					size.x = (size.x - wf * 2) * param_.slider_param_.handle_ratio_;
+///				if(sp.direction_ == slider_param::direction::HOLIZONTAL) {
+					size.x = (size.x - wf * 2);  // param_.slider_param_.handle_ratio_;
 					size.y -= wf * 2;
-				} else if(sp.direction_ == slider_param::direction::VERTICAL) {
-					size.x -= wf * 2;
-					size.y = (size.y - wf * 2) * param_.slider_param_.handle_ratio_;
-				}
+///				} else if(sp.direction_ == slider_param::direction::VERTICAL) {
+///					size.x -= wf * 2;
+///					size.y = (size.y - wf * 2) * param_.slider_param_.handle_ratio_;
+///				}
 				plate_param pp = param_.plate_param_;
 				pp.round_radius_ -= param_.plate_param_.frame_width_;
 				pp.frame_width_ = 0;
@@ -170,14 +175,12 @@ namespace gui {
 				create_round_frame(pa, pp, cp, size);
 				pa.set_fore_color(cp.fore_color_);
 				pa.alpha_blend();
-				if(sp.direction_ == slider_param::direction::HOLIZONTAL) {
+///				if(sp.direction_ == slider_param::direction::HOLIZONTAL) {
 					pa.line(size.x / 2, 3, size.x / 2, size.y - 3 * 2);
-				} else if(sp.direction_ == slider_param::direction::VERTICAL) {
-
-				}
+///				} else if(sp.direction_ == slider_param::direction::VERTICAL) {
+///				}
 			}
 			hand_h_ = wd_.at_mobj().install(&pa);
-#endif
 		}
 
 
@@ -186,98 +189,7 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() override {
-#if 0
-			const slider_param& sp = param_.slider_param_;
-			short fw = param_.plate_param_.frame_width_;
-			if(sp.direction_ == slider_param::direction::HOLIZONTAL) {
-				handle_offset_.x = param_.plate_param_.frame_width_;
-				short ofs = wd_.at_mobj().get_size(hand_h_).y - wd_.at_mobj().get_size(base_h_).y;
-				handle_offset_.y = -ofs / 2;
-			} else if(sp.direction_ == slider_param::direction::VERTICAL) {
-				short ofs = wd_.at_mobj().get_size(hand_h_).x - wd_.at_mobj().get_size(base_h_).x;
-				handle_offset_.x = -ofs / 2;
-				handle_offset_.y = param_.plate_param_.frame_width_;
-			}
-
-			if(get_focus() && param_.hand_ctrl_) {
-				if(get_select()) {
-					if(get_select_in()) {
-						ref_position_ = sp.position_;
-						ref_point_ = get_param().in_point_;
-					}
-					const vtx::spos size = get_rect().size;
-					float ratio = 0.0f;
-					vtx::spos ref = get_param().in_point_ - ref_point_;
-					if(sp.direction_ == slider_param::direction::HOLIZONTAL) {
-						short sz = size.x - fw * 2;
-						short ofs;
-						if(param_.hand_image_) {
-							ofs = wd_.at_mobj().get_size(hand_h_).x;
-						} else {
-							ofs = sz * sp.handle_ratio_;
-						}
-						ratio = static_cast<float>(ref.x) / static_cast<float>(sz - ofs);
-					} else if(sp.direction_ == slider_param::direction::VERTICAL) {
-						short sz = size.y - fw * 2;
-						short ofs;
-						if(param_.hand_image_) {
-							ofs = wd_.at_mobj().get_size(hand_h_).y;
-						} else {
-							ofs = sz * sp.handle_ratio_;
-						}
-						ratio = static_cast<float>(ref.y) / static_cast<float>(sz - ofs);
-					}
-					ratio += ref_position_;
-					if(ratio < 0.0f) ratio = 0.0f;
-					else if(ratio > 1.0f) ratio = 1.0f;
-					if(sp.grid_ > 0.0f) {
-						short step = ratio / (sp.grid_ * 0.5f);
-						ratio = ((step + 1) / 2) * sp.grid_;
-					}
-					param_.slider_param_.position_ = ratio;
-				} else if(param_.scroll_ctrl_) {
-					const vtx::spos& scr = wd_.get_scroll();
-					float ratio = param_.slider_param_.position_;
-					if(scr.y != 0) {
-						if(sp.direction_ == slider_param::direction::HOLIZONTAL) {
-							ratio += static_cast<float>(scr.y) * -param_.scroll_gain_;
-						} else if(sp.direction_ == slider_param::direction::VERTICAL) {
-							ratio += static_cast<float>(scr.y) *  param_.scroll_gain_;
-						}
-						if(ratio < 0.0f) ratio = 0.0f;
-						else if(ratio > 1.0f) ratio = 1.0f;
-						if(sp.grid_ > 0.0f) {
-							short step = ratio / (sp.grid_ * 0.5f);
-							ratio = ((step + 1) / 2) * sp.grid_;
-						}
-						param_.slider_param_.position_ = ratio;
-					}
-				}
-			}
-
-			const vtx::spos& size = get_rect().size;
-			if(sp.direction_ == slider_param::direction::HOLIZONTAL) {
-				short sz = size.x - fw * 2;
-				short ofs;
-				if(param_.hand_image_) {
-					ofs = wd_.at_mobj().get_size(hand_h_).x;
-				} else {
-					ofs = sz * sp.handle_ratio_;
-				}
-				handle_offset_.x = fw + sp.position_ * (sz - ofs);
-			} else if(sp.direction_ == slider_param::direction::VERTICAL) {
-				short sz = size.y - fw * 2;
-				short ofs;
-				if(param_.hand_image_) {
-					ofs = wd_.at_mobj().get_size(hand_h_).y;
-				} else {
-					ofs = sz * sp.handle_ratio_;
-				}
-				handle_offset_.y = fw + sp.position_ * (sz - ofs);
-			}
-#endif
-		}
+		void update() override { }
 
 
 		//-----------------------------------------------------------------//
@@ -285,24 +197,7 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override {
-#if 0
-			if(position_ != param_.slider_param_.position_) {
-				bool f = false;
-				if(param_.select_fin_) {
-					if(get_select_out()) {
-						f = true;
-					}
-				} else {
-					f = true;
-				}
-				if(f) {
-					if(param_.select_func_) param_.select_func_(param_.slider_param_.position_);
-					position_ = param_.slider_param_.position_;
-				}
-			}
-#endif
-		}
+		void service() override { }
 
 
 		//-----------------------------------------------------------------//
@@ -313,13 +208,13 @@ namespace gui {
 		void render() override {
 			if(base_h_ == 0) return;
 
-//			using namespace gl;
-//			core& core = core::get_instance();
+			using namespace gl;
+			core& core = core::get_instance();
 
 			if(param_.plate_param_.resizeble_) {
 				wd_.at_mobj().resize(base_h_, get_param().rect_.size);
 			}
-#if 0
+
 			const vtx::spos& vsz = core.get_size();
 
 			const widget::param& wp = get_param();
@@ -333,11 +228,14 @@ namespace gui {
 					wd_.at_mobj().draw(base_h_, gl::mobj::attribute::normal, vtx::spos(0));
 				}
 
-				wd_.at_mobj().draw(hand_h_, gl::mobj::attribute::normal, handle_offset_);
+//				if(param_.ratio_ > 0.01f) {
+					auto fw = param_.plate_param_.frame_width_;
+					glScalef(param_.ratio_, 1.0f, 1.0f);
+					wd_.at_mobj().draw(hand_h_, gl::mobj::attribute::normal, vtx::spos(fw));
+//				}
 				glPopMatrix();
 				glViewport(0, 0, vsz.x, vsz.y);
 			}
-#endif
 		}
 
 
@@ -354,7 +252,7 @@ namespace gui {
 			path += wd_.create_widget_name(this);
 
 			int err = 0;
-			if(!pre.put_real(path + "/level", param_.position_)) ++err;
+			if(!pre.put_real(path + "/ratio", param_.ratio_)) ++err;
 			return err == 0;
 		}
 
@@ -372,7 +270,7 @@ namespace gui {
 			path += wd_.create_widget_name(this);
 
 			int err = 0;
-			if(!pre.get_real(path + "/level", param_.position_)) ++err;
+			if(!pre.get_real(path + "/ratio", param_.ratio_)) ++err;
 			return err == 0;
 		}
 	};
