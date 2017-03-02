@@ -30,7 +30,6 @@ CSOURCES	=	minizip/ioapi.c \
 				minizip/unzip.c
 
 PSOURCES	=	main.cpp \
-				logger_main.cpp \
 				core/glcore.cpp \
 				core/device.cpp \
 				core/ftimg.cpp \
