@@ -29,7 +29,6 @@ CSOURCES	=	minizip/ioapi.c \
 				minizip/unzip.c
 
 PSOURCES	=	main.cpp \
-				piano_sim.cpp \
 				core/glcore.cpp \
 				core/device.cpp \
 				core/ftimg.cpp \
