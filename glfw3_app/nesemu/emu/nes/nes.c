@@ -267,38 +267,38 @@ static void nes_renderframe(bool draw_flag)
 	const mapintf_t *mapintf = nes_.mmc->intf;
 	int in_vblank = 0;
 
-   while (262 != nes_.scanline)
-   {
-      ppu_scanline(nes_.vidbuf, nes_.scanline, draw_flag);
+	while(262 != nes_.scanline) {
+		ppu_scanline(nes_.vidbuf, nes_.scanline, draw_flag);
 
-      if (241 == nes_.scanline)
-      {
-         /* 7-9 cycle delay between when VINT flag goes up and NMI is taken */
-         elapsed_cycles = nes6502_execute(7);
-         nes_.scanline_cycles -= elapsed_cycles;
-         nes_checkfiq(elapsed_cycles);
+		if(241 == nes_.scanline) {
+			/* 7-9 cycle delay between when VINT flag goes up and NMI is taken */
+			elapsed_cycles = nes6502_execute(7);
+			nes_.scanline_cycles -= elapsed_cycles;
+			nes_checkfiq(elapsed_cycles);
 
-         ppu_checknmi();
+			ppu_checknmi();
 
-         if (mapintf->vblank)
-            mapintf->vblank();
-         in_vblank = 1;
-      } 
+			if(mapintf->vblank) {
+				mapintf->vblank();
+			}
+			in_vblank = 1;
+		} 
 
-      if (mapintf->hblank)
-         mapintf->hblank(in_vblank);
+		if(mapintf->hblank) {
+			mapintf->hblank(in_vblank);
+		}
 
-      nes_.scanline_cycles += (float) NES_SCANLINE_CYCLES;
-      elapsed_cycles = nes6502_execute((int) nes_.scanline_cycles);
-      nes_.scanline_cycles -= (float) elapsed_cycles;
-      nes_checkfiq(elapsed_cycles);
+		nes_.scanline_cycles += (float) NES_SCANLINE_CYCLES;
+		elapsed_cycles = nes6502_execute((int) nes_.scanline_cycles);
+		nes_.scanline_cycles -= (float) elapsed_cycles;
+		nes_checkfiq(elapsed_cycles);
 
-      ppu_endscanline(nes_.scanline);
-      nes_.scanline++;
-   }
-
-   nes_.scanline = 0;
+		ppu_endscanline(nes_.scanline);
+		nes_.scanline++;
+	}
+	nes_.scanline = 0;
 }
+
 
 void nes_emulate(int frames)
 {
@@ -409,8 +409,9 @@ int nes_create(int sample_rate, int sample_bits)
 	/* bitmap */
 	/* 8 pixel overdraw */
 	nes_.vidbuf = bmp_create(NES_SCREEN_WIDTH, NES_SCREEN_HEIGHT, 8);
-	if (NULL == nes_.vidbuf)
+	if(NULL == nes_.vidbuf) {
 		goto _fail;
+	}
 
 	nes_.autoframeskip = true;
 
