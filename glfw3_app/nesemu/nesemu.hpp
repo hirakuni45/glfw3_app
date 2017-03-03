@@ -76,14 +76,15 @@ namespace app {
 		static const int sample_rate_ = 44100;
 		static const int audio_len_ = sample_rate_ / 60;
 
-		bool	nes_play_;
-		bool	nsf_play_;
+		std::string		nes_file_;
+		bool			nes_play_;
+		bool			nsf_play_;
 
-		uint8_t	fb_[nes_width_ * nes_height_ * 4];
+		uint8_t			fb_[nes_width_ * nes_height_ * 4];
 
-		nesinput_t	inp_[2];
+		nesinput_t		inp_[2];
 
-		int		nes_pause_;
+		int				nes_pause_;
 
 		emu::tools		tools_;
 
@@ -224,12 +225,17 @@ namespace app {
 				widget_filer::param wp_(core.get_current_path(), "");
 				wp_.select_file_func_ = [this](const std::string& fn) {
 					if(nsfplay_.open(fn)) {
+						nes_file_ = "";
 						nsf_play_ = true;
 						nes_play_ = false;
 					} else if(nes_insertcart(fn.c_str()) == 0) {
+						nes_file_ = fn;
 						nes_play_ = true;
 						nsf_play_ = false;
 					} else {
+						nes_file_ = "";
+						nes_play_ = false;
+						nsf_play_ = false;
 						dialog_->enable();
 						dialog_->set_text("NES file false:\n'" + fn + "'");
 					}
@@ -276,7 +282,10 @@ namespace app {
 					state_load_ = wd.add_widget<widget_button>(wp, wp_);
 					state_load_->at_local_param().select_func_ = [this](int id) {
 						state_setslot(get_state_no_());
-						if(state_load() != 0) {
+						if(!nes_play_) {
+							dialog_->set_text("Load state error: 'NES file not load'");
+							dialog_->enable();
+						} else if(state_load() != 0) {
 							dialog_->set_text("Load state error");
 							dialog_->enable();
 						}
