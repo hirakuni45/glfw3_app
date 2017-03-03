@@ -350,11 +350,8 @@ void nes_destroy(void)
 	rom_free(nes_.rominfo);
 	apu_destroy();
 	bmp_destroy(nes_.vidbuf);
-	if (nes_.cpu != NULL)
-	{
-		if (nes_.cpu->mem_page[0] != NULL) {
-			free(nes_.cpu->mem_page[0]);
-		}
+	if(nes_.cpu != NULL) {
+		free(nes_.cpu->mem_page[0]);
 	}
 }
 
@@ -374,12 +371,12 @@ int nes_insertcart(const char *filename)
 {
 	/* rom file */
 	nes_.rominfo = rom_load(filename);
-	if (NULL == nes_.rominfo)
-		goto _fail;
+	if(NULL == nes_.rominfo) {
+		return -1;
+	}
 
 	/* map cart's SRAM to CPU $6000-$7FFF */
-	if (nes_.rominfo->sram)
-	{
+	if(nes_.rominfo->sram) {
 		nes_.cpu->mem_page[6] = nes_.rominfo->sram;
 		nes_.cpu->mem_page[7] = nes_.rominfo->sram + 0x1000;
 	}
@@ -401,10 +398,6 @@ int nes_insertcart(const char *filename)
 
 	nes_reset(HARD_RESET);
 	return 0;
-
-_fail:
-	nes_destroy();
-	return -1;
 }
 
 /* Initialize NES CPU, hardware, etc. */
