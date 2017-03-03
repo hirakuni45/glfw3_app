@@ -118,8 +118,8 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	ratio set
-			@param[in]	ratio	ratio
+			@brief	レシオ（進捗率）の設定
+			@param[in]	ratio	レシオ（進捗率）
 		*/
 		//-----------------------------------------------------------------//
 		void set_ratio(float ratio) { param_.ratio_ = ratio; }
