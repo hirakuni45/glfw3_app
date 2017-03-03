@@ -228,11 +228,10 @@ namespace gui {
 					wd_.at_mobj().draw(base_h_, gl::mobj::attribute::normal, vtx::spos(0));
 				}
 
-//				if(param_.ratio_ > 0.01f) {
-					auto fw = param_.plate_param_.frame_width_;
-					glScalef(param_.ratio_, 1.0f, 1.0f);
-					wd_.at_mobj().draw(hand_h_, gl::mobj::attribute::normal, vtx::spos(fw));
-//				}
+				auto fw = param_.plate_param_.frame_width_;
+				glTranslatei(fw, fw, 0);
+				glScalef(param_.ratio_, 1.0f, 1.0f);
+				wd_.at_mobj().draw(hand_h_, gl::mobj::attribute::normal, vtx::spos(0));
 				glPopMatrix();
 				glViewport(0, 0, vsz.x, vsz.y);
 			}
