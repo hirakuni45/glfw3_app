@@ -153,19 +153,13 @@ namespace gui {
 				}
 			}
 
-///			const slider_param& sp = param_.slider_param_;
 			if(param_.hand_image_) {
 				const vtx::spos& size = param_.hand_image_->get_size();
 				create_image_base(param_.hand_image_, size, pa);
 			} else {
 				short wf = param_.plate_param_.frame_width_;
-///				if(sp.direction_ == slider_param::direction::HOLIZONTAL) {
-					size.x = (size.x - wf * 2);  // param_.slider_param_.handle_ratio_;
-					size.y -= wf * 2;
-///				} else if(sp.direction_ == slider_param::direction::VERTICAL) {
-///					size.x -= wf * 2;
-///					size.y = (size.y - wf * 2) * param_.slider_param_.handle_ratio_;
-///				}
+				size.x -= wf * 2;
+				size.y -= wf * 2;
 				plate_param pp = param_.plate_param_;
 				pp.round_radius_ -= param_.plate_param_.frame_width_;
 				pp.frame_width_ = 0;
@@ -173,12 +167,6 @@ namespace gui {
 				cp.swap_color();
 				cp.back_color_ *= 0.75f;
 				create_round_frame(pa, pp, cp, size);
-				pa.set_fore_color(cp.fore_color_);
-				pa.alpha_blend();
-///				if(sp.direction_ == slider_param::direction::HOLIZONTAL) {
-					pa.line(size.x / 2, 3, size.x / 2, size.y - 3 * 2);
-///				} else if(sp.direction_ == slider_param::direction::VERTICAL) {
-///				}
 			}
 			hand_h_ = wd_.at_mobj().install(&pa);
 		}

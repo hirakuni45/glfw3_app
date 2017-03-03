@@ -243,7 +243,8 @@ namespace gui {
 				pa.set_fore_color(cp.fore_color_);
 				pa.alpha_blend();
 				if(sp.direction_ == slider_param::direction::HOLIZONTAL) {
-					pa.line(size.x / 2, 3, size.x / 2, size.y - 3 * 2);
+///					pa.line(size.x / 2, 3, size.x / 2, size.y - 3 * 2);
+					pa.fill_rect(size.x / 2 - 2, 3, 4, size.y - 3 * 2, true);
 				} else if(sp.direction_ == slider_param::direction::VERTICAL) {
 
 				}
