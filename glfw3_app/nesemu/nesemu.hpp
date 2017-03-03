@@ -264,6 +264,8 @@ namespace app {
 						if(state_save() != 0) {
 							dialog_->set_text("Save state error");
 							dialog_->enable();
+						} else {
+							if(filer_ != nullptr) filer_->rescan_center();
 						}
 					};
 
