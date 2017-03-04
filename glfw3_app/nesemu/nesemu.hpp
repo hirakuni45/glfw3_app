@@ -474,6 +474,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void destroy()
 		{
+			emu::tools::set_terminal(nullptr);
 			nes_destroy();
 
 			sys::preference& pre = director_.at().preference_;
