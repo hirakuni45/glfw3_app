@@ -8,6 +8,7 @@
 //=====================================================================//
 #include <cstdint>
 #include <cstdio>
+#include <functional>
 
 namespace cpu {
 
@@ -34,15 +35,28 @@ namespace cpu {
 			ind_y
 		};
 
+		static const uint8_t N_FLAG = 0x80;
+		static const uint8_t V_FLAG = 0x40;
+		static const uint8_t R_FLAG = 0x20;   // Reserved, always 1
+		static const uint8_t B_FLAG = 0x10;
+		static const uint8_t D_FLAG = 0x08;
+		static const uint8_t I_FLAG = 0x04;
+		static const uint8_t Z_FLAG = 0x02;
+		static const uint8_t C_FLAG = 0x01;
+
 		uint32_t	pc_reg_;
+
+		typedef std::function< uint8_t (uint32_t) > getbyte_type;
+		getbyte_type	getbyte_;
+
 		char		text_[256];
 
 		uint8_t dis_op8_() const {
-			return (nes6502_getbyte(pc_reg_ + 1));
+			return (getbyte_(pc_reg_ + 1));
 		}
 
 		uint16_t dis_op16_() const {
-			return (nes6502_getbyte(pc_reg + 1) + (nes6502_getbyte(pc_reg + 2) << 8));
+			return (getbyte_(pc_reg_ + 1) + (getbyte_(pc_reg_ + 2) << 8));
 		}
 
 		int dis_show_ind_(char* buf) const {
@@ -97,7 +111,7 @@ namespace cpu {
 		}
 
 		int dis_show_code_(char* buf, adrmode optype) const {
-			char *dest = buf + sprintf(buf, "%02X ", nes6502_getbyte(pc_reg_));
+			char *dest = buf + sprintf(buf, "%02X ", getbyte_(pc_reg_));
 
 			switch(optype) {
 			case adrmode::imp:
@@ -112,20 +126,20 @@ namespace cpu {
 			case adrmode::zero_y:
 			case adrmode::ind_y:
 			case adrmode::ind_x:
-				dest += sprintf(dest, "%02X    ", nes6502_getbyte(pc_reg_ + 1));
+				dest += sprintf(dest, "%02X    ", getbyte_(pc_reg_ + 1));
 				break;
 
 			case adrmode::abs:
 			case adrmode::abs_x:
 			case adrmode::abs_y:
 			case adrmode::ind:
-				dest += sprintf(dest, "%02X %02X ", nes6502_getbyte(pc_reg + 1), nes6502_getbyte(pc_reg + 2));
+				dest += sprintf(dest, "%02X %02X ", getbyte_(pc_reg_ + 1), getbyte_(pc_reg_ + 2));
 				break;
 			}
 			return dest - buf;
 		}
 
-		int dis_show_op_(char* buf, char* opstr, adrmode optype) const {
+		int dis_show_op_(char* buf, const char* opstr, adrmode optype) const {
 			char *dest = buf;
    
 			dest += dis_show_code_(dest, optype);
@@ -155,7 +169,7 @@ namespace cpu {
 			@brief	コンストラクター
 		*/
 		//-------------------------------------------------------------//
-		dis6502() { }
+		dis6502() : pc_reg_(0) { }
 
 
 		//-------------------------------------------------------------//
@@ -166,14 +180,14 @@ namespace cpu {
 		const char* disasm(uint32_t PC, uint8_t P, uint8_t A, uint8_t X, uint8_t Y, uint8_t S)
 		{
 			char* buf = text_;
-			char* op;
+			const char* op;
 			adrmode type;
 
 			pc_reg_ = PC;
 
 			buf += sprintf(buf, "%04X: ", pc_reg_);
 
-			switch (nes6502_getbyte_(pc_reg_)) {
+			switch (getbyte_(pc_reg_)) {
 			case 0x00: op = "brk"; type = adrmode::imp;    break;
 			case 0x01: op = "ora"; type = adrmode::ind_x;  break;
 			case 0x02: op = "jam"; type = adrmode::imp;    break;
@@ -459,7 +473,34 @@ namespace cpu {
 				(P & C_FLAG) ? 'C' : '.',
 				A, X, Y, S);
 
+			uint32_t step = 0;
+			switch(type) {
+			case adrmode::imp:    step = 1; break;
+			case adrmode::acc:    step = 1; break;
+			case adrmode::rel:    step = 2; break;
+			case adrmode::imm:    step = 2; break;
+			case adrmode::abs:    step = 3; break;
+			case adrmode::abs_x:  step = 3; break;
+			case adrmode::abs_y:  step = 3; break;
+			case adrmode::zero:   step = 2; break;
+			case adrmode::zero_x: step = 2; break;
+			case adrmode::zero_y: step = 2; break;
+			case adrmode::ind:    step = 3; break;
+			case adrmode::ind_x:  step = 2; break;
+			case adrmode::ind_y:  step = 2; break;
+			}
+			pc_reg_ += step;
+
 			return text_;
 		}
-	];
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief	PC の取得
+			@return PC
+		*/
+		//-------------------------------------------------------------//
+		uint32_t get_pc() const { return pc_reg_; }
+	};
 }
