@@ -9,6 +9,7 @@
 #include "widgets/widget_terminal.hpp"
 
 //#include "emu/nes/nes.hpp"
+#include "emu/cpu/dis6502.hpp"
 
 namespace emu {
 
