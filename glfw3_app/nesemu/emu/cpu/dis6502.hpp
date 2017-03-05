@@ -519,6 +519,27 @@ namespace cpu {
 
 		//-------------------------------------------------------------//
 		/*!
+			@brief	ダンプ
+			@param[in]	adr	アドレス
+			@param[in]	len	長さ
+		*/
+		//-------------------------------------------------------------//
+		const char* dump(uint32_t adr, uint32_t len = 1)
+		{
+			char* dst = text_;
+			dst += sprintf(dst, "%04X:", adr);
+			while(len > 0) {
+				int d = getbyte_(adr);
+				dst += sprintf(dst, " %02X", d);
+				++adr;
+				--len;
+			}
+			return text_;
+		}
+
+
+		//-------------------------------------------------------------//
+		/*!
 			@brief	PC の取得
 			@return PC
 		*/

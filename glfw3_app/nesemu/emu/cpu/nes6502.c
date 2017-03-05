@@ -25,7 +25,6 @@
 
 #include <string.h>
 #include "cpu/nes6502.h"
-#include "cpu/dis6502.h"
 
 //#define  NES6502_DISASM
 
