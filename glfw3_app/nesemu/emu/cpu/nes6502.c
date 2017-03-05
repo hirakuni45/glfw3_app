@@ -29,6 +29,8 @@
 
 //#define  NES6502_DISASM
 
+#define  HOST_LITTLE_ENDIAN
+
 #ifdef __GNUC__
 #define  NES6502_JUMPTABLE
 #endif /* __GNUC__ */
@@ -45,7 +47,7 @@
 */
 #define PAGE_CROSS_CHECK(addr, reg) \
 { \
-   if ((reg) > (uint8) (addr)) \
+   if ((reg) > (uint8_t) (addr)) \
       ADD_CYCLES(1); \
 }
 
@@ -228,7 +230,7 @@
 
 
 /* Stack push/pull */
-#define  PUSH(value)             stack[S--] = (uint8) (value)
+#define  PUSH(value)             stack[S--] = (uint8_t) (value)
 #define  PULL()                  stack[++S]
 
 
@@ -278,10 +280,10 @@
    if (condition) \
    { \
       IMMEDIATE_BYTE(btemp); \
-      if (((int8) btemp + (PC & 0x00FF)) & 0x100) \
+      if (((int8_t) btemp + (PC & 0x00FF)) & 0x100) \
          ADD_CYCLES(1); \
       ADD_CYCLES(3); \
-      PC += (int8) btemp; \
+      PC += (int8_t) btemp; \
    } \
    else \
    { \
@@ -345,14 +347,14 @@
       { \
          c_flag = 0; \
       } \
-      A = (uint8) temp; \
+      A = (uint8_t) temp; \
    } \
    else \
    { \
       temp = A + data + c_flag; \
       c_flag = (temp >> 8) & 1; \
       v_flag = ((~(A ^ data)) & (A ^ temp) & 0x80); \
-      A = (uint8) temp; \
+      A = (uint8_t) temp; \
       SET_NZ_FLAGS(A); \
    }\
    ADD_CYCLES(cycles); \
@@ -364,7 +366,7 @@
    temp = A + data + c_flag; \
    c_flag = (temp >> 8) & 1; \
    v_flag = ((~(A ^ data)) & (A ^ temp) & 0x80); \
-   A = (uint8) temp; \
+   A = (uint8_t) temp; \
    SET_NZ_FLAGS(A); \
    ADD_CYCLES(cycles); \
 }
@@ -419,7 +421,7 @@
       { \
          c_flag = 0; \
       } \
-      A = (uint8) temp; \
+      A = (uint8_t) temp; \
    } \
    else \
    { \
@@ -570,7 +572,7 @@
 { \
    temp = (reg) - (value); \
    c_flag = ((temp & 0x100) >> 8) ^ 1; \
-   SET_NZ_FLAGS((uint8) temp); \
+   SET_NZ_FLAGS((uint8_t) temp); \
 }
 
 #define CMP(cycles, read_func) \
@@ -683,7 +685,7 @@
 #define JAM() \
 { \
    PC--; \
-   cpu.jammed = true; \
+   cpu.jammed = 1; \
    cpu.int_pending = 0; \
    ADD_CYCLES(2); \
 }
@@ -925,7 +927,7 @@
    temp = A - data - (c_flag ^ 1); \
    if (d_flag) \
    { \
-      uint8 al, ah; \
+      uint8_t al, ah; \
       al = (A & 0x0F) - (data & 0x0F) - (c_flag ^ 1); \
       ah = (A >> 4) - (data >> 4); \
       if (al & 0x10) \
@@ -950,7 +952,7 @@
    { \
       v_flag = (A ^ temp) & (A ^ data) & 0x80; \
       c_flag = ((temp & 0x100) >> 8) ^ 1; \
-      A = (uint8) temp; \
+      A = (uint8_t) temp; \
       SET_NZ_FLAGS(A & 0xFF); \
    } \
    ADD_CYCLES(cycles); \
@@ -962,7 +964,7 @@
    temp = A - data - (c_flag ^ 1); \
    v_flag = (A ^ data) & (A ^ temp) & 0x80; \
    c_flag = ((temp >> 8) & 1) ^ 1; \
-   A = (uint8) temp; \
+   A = (uint8_t) temp; \
    SET_NZ_FLAGS(A); \
    ADD_CYCLES(cycles); \
 }
@@ -1001,7 +1003,7 @@
 #define SHA(cycles, read_func, write_func, addr) \
 { \
    read_func(addr); \
-   data = A & X & ((uint8) ((addr >> 8) + 1)); \
+   data = A & X & ((uint8_t) ((addr >> 8) + 1)); \
    write_func(addr, data); \
    ADD_CYCLES(cycles); \
 }
@@ -1011,7 +1013,7 @@
 { \
    read_func(addr); \
    S = A & X; \
-   data = S & ((uint8) ((addr >> 8) + 1)); \
+   data = S & ((uint8_t) ((addr >> 8) + 1)); \
    write_func(addr, data); \
    ADD_CYCLES(cycles); \
 }
@@ -1020,7 +1022,7 @@
 #define SHX(cycles, read_func, write_func, addr) \
 { \
    read_func(addr); \
-   data = X & ((uint8) ((addr >> 8) + 1)); \
+   data = X & ((uint8_t) ((addr >> 8) + 1)); \
    write_func(addr, data); \
    ADD_CYCLES(cycles); \
 }
@@ -1029,7 +1031,7 @@
 #define SHY(cycles, read_func, write_func, addr) \
 { \
    read_func(addr); \
-   data = Y & ((uint8) ((addr >> 8 ) + 1)); \
+   data = Y & ((uint8_t) ((addr >> 8 ) + 1)); \
    write_func(addr, data); \
    ADD_CYCLES(cycles); \
 }
@@ -1133,9 +1135,9 @@
 static nes6502_context cpu;
 static int remaining_cycles = 0; /* so we can release timeslice */
 /* memory region pointers */
-static uint8 *ram = NULL;
-static uint8 *stack = NULL;
-static uint8 null_page[NES6502_BANKSIZE];
+static uint8_t *ram = NULL;
+static uint8_t *stack = NULL;
+static uint8_t null_page[NES6502_BANKSIZE];
 
 
 /*
@@ -1143,64 +1145,64 @@ static uint8 null_page[NES6502_BANKSIZE];
 */
 
 #define  ZP_READBYTE(addr)          ram[(addr)]
-#define  ZP_WRITEBYTE(addr, value)  ram[(addr)] = (uint8) (value)
+#define  ZP_WRITEBYTE(addr, value)  ram[(addr)] = (uint8_t) (value)
 
 #ifdef HOST_LITTLE_ENDIAN
 
 /* NOTE: following two functions will fail on architectures
 ** which do not support byte alignment
 */
-INLINE uint32 zp_readword(register uint8 address)
+static inline uint32_t zp_readword(uint8_t address)
 {
-   return (uint32) (*(uint16 *)(ram + address));
+   return (uint32_t) (*(uint16_t *)(ram + address));
 }
 
-INLINE uint32 bank_readword(register uint32 address)
+static inline uint32_t bank_readword(uint32_t address)
 {
    /* technically, this should fail if the address is $xFFF, but
    ** any code that does this would be suspect anyway, as it would
    ** be fetching a word across page boundaries, which only would
    ** make sense if the banks were physically consecutive.
    */
-   return (uint32) (*(uint16 *)(cpu.mem_page[address >> NES6502_BANKSHIFT] + (address & NES6502_BANKMASK)));
+   return (uint32_t) (*(uint16_t *)(cpu.mem_page[address >> NES6502_BANKSHIFT] + (address & NES6502_BANKMASK)));
 }
 
 #else /* !HOST_LITTLE_ENDIAN */
 
-INLINE uint32 zp_readword(register uint8 address)
+static inline uint32_t zp_readword(uint8_t address)
 {
 #ifdef TARGET_CPU_PPC
    return __lhbrx(ram, address);
 #else /* !TARGET_CPU_PPC */
-   uint32 x = (uint32) *(uint16 *)(ram + address);
+   uint32_t x = (uint32_t) *(uint16_t *)(ram + address);
    return (x << 8) | (x >> 8);
 #endif /* !TARGET_CPU_PPC */
 }
 
-INLINE uint32 bank_readword(register uint32 address)
+static inline uint32_t bank_readword(uint32_t address)
 {
 #ifdef TARGET_CPU_PPC
    return __lhbrx(cpu.mem_page[address >> NES6502_BANKSHIFT], address & NES6502_BANKMASK);
 #else /* !TARGET_CPU_PPC */
-   uint32 x = (uint32) *(uint16 *)(cpu.mem_page[address >> NES6502_BANKSHIFT] + (address & NES6502_BANKMASK));
+   uint32_t x = (uint32_t) *(uint16_t *)(cpu.mem_page[address >> NES6502_BANKSHIFT] + (address & NES6502_BANKMASK));
    return (x << 8) | (x >> 8);
 #endif /* !TARGET_CPU_PPC */
 }
 
 #endif /* !HOST_LITTLE_ENDIAN */
 
-INLINE uint8 bank_readbyte(register uint32 address)
+static inline uint8_t bank_readbyte(uint32_t address)
 {
    return cpu.mem_page[address >> NES6502_BANKSHIFT][address & NES6502_BANKMASK];
 }
 
-INLINE void bank_writebyte(register uint32 address, register uint8 value)
+static inline void bank_writebyte(uint32_t address, uint8_t value)
 {
    cpu.mem_page[address >> NES6502_BANKSHIFT][address & NES6502_BANKMASK] = value;
 }
 
 /* read a byte of 6502 memory */
-static uint8 mem_readbyte(uint32 address)
+static uint8_t mem_readbyte(uint32_t address)
 {
    nes6502_memread *mr;
 
@@ -1230,7 +1232,7 @@ static uint8 mem_readbyte(uint32 address)
 }
 
 /* write a byte of data to 6502 memory */
-static void mem_writebyte(uint32 address, uint8 value)
+static void mem_writebyte(uint32_t address, uint8_t value)
 {
    nes6502_memwrite *mw;
 
@@ -1285,15 +1287,15 @@ nes6502_context *nes6502_getcontext(void)
 }
 
 /* DMA a byte of data from ROM */
-uint8 nes6502_getbyte(uint32 address)
+uint8_t nes6502_getbyte(uint32_t address)
 {
    return bank_readbyte(address);
 }
 
 /* get number of elapsed cycles */
-uint32 nes6502_getcycles(bool reset_flag)
+uint32_t nes6502_getcycles(int reset_flag)
 {
-   uint32 cycles = cpu.total_cycles;
+   uint32_t cycles = cpu.total_cycles;
 
    if (reset_flag)
       cpu.total_cycles = 0;
@@ -1358,17 +1360,17 @@ int nes6502_execute(int timeslice_cycles)
 {
    int old_cycles = cpu.total_cycles;
 
-   uint32 temp, addr; /* for macros */
-   uint8 btemp, baddr; /* for macros */
-   uint8 data;
+   uint32_t temp, addr; /* for macros */
+   uint8_t btemp, baddr; /* for macros */
+   uint8_t data;
 
    /* flags */
-   uint8 n_flag, v_flag, b_flag;
-   uint8 d_flag, i_flag, z_flag, c_flag;
+   uint8_t n_flag, v_flag, b_flag;
+   uint8_t d_flag, i_flag, z_flag, c_flag;
 
    /* local copies of regs */
-   uint32 PC;
-   uint8 A, X, Y, S;
+   uint32_t PC;
+   uint8_t A, X, Y, S;
 
 #ifdef NES6502_JUMPTABLE
    
@@ -2399,22 +2401,22 @@ void nes6502_reset(void)
    cpu.int_latency = 0;                      /* No latent interrupts */
    cpu.pc_reg = bank_readword(RESET_VECTOR); /* Fetch reset vector */
    cpu.burn_cycles = RESET_CYCLES;
-   cpu.jammed = false;
+   cpu.jammed = 0;
 }
 
 /* following macro is used for below 2 functions */
 #define  DECLARE_LOCAL_REGS \
-   uint32 PC; \
-   uint8 A, X, Y, S; \
-   uint8 n_flag, v_flag, b_flag; \
-   uint8 d_flag, i_flag, z_flag, c_flag;
+   uint32_t PC; \
+   uint8_t A, X, Y, S; \
+   uint8_t n_flag, v_flag, b_flag; \
+   uint8_t d_flag, i_flag, z_flag, c_flag;
 
 /* Non-maskable interrupt */
 void nes6502_nmi(void)
 {
    DECLARE_LOCAL_REGS
 
-   if (false == cpu.jammed)
+   if (0 == cpu.jammed)
    {
       GET_GLOBAL_REGS();
       NMI_PROC();
@@ -2428,7 +2430,7 @@ void nes6502_irq(void)
 {
    DECLARE_LOCAL_REGS
 
-   if (false == cpu.jammed)
+   if (0 == cpu.jammed)
    {
       GET_GLOBAL_REGS();
       if (0 == i_flag)

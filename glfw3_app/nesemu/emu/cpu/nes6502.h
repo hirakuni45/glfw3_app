@@ -27,7 +27,7 @@
 /* NOTE: 16-bit addresses avoided like the plague: use 32-bit values
 **       wherever humanly possible
 */
-#include "nes_std.h"
+#include <stdint.h>
 
 /* Define this to enable decimal mode in ADC / SBC (not needed in NES) */
 /*#define  NES6502_DECIMAL*/
@@ -64,33 +64,33 @@
 
 typedef struct
 {
-   uint32 min_range, max_range;
-   uint8 (*read_func)(uint32 address);
+   uint32_t min_range, max_range;
+   uint8_t (*read_func)(uint32_t address);
 } nes6502_memread;
 
 typedef struct
 {
-   uint32 min_range, max_range;
-   void (*write_func)(uint32 address, uint8 value);
+   uint32_t min_range, max_range;
+   void (*write_func)(uint32_t address, uint8_t value);
 } nes6502_memwrite;
 
 typedef struct
 {
-   uint8 *mem_page[NES6502_NUMBANKS];  /* memory page pointers */
+   uint8_t *mem_page[NES6502_NUMBANKS];  /* memory page pointers */
 
    nes6502_memread *read_handler;
    nes6502_memwrite *write_handler;
 
-   uint32 pc_reg;
-   uint8 a_reg, p_reg;
-   uint8 x_reg, y_reg;
-   uint8 s_reg;
+   uint32_t pc_reg;
+   uint8_t a_reg, p_reg;
+   uint8_t x_reg, y_reg;
+   uint8_t s_reg;
 
-   uint8 jammed;  /* is processor jammed? */
+   uint8_t jammed;  /* is processor jammed? */
    
-   uint8 int_pending, int_latency;
+   uint8_t int_pending, int_latency;
 
-   int32 total_cycles, burn_cycles;
+   int32_t total_cycles, burn_cycles;
 } nes6502_context;
 
 #ifdef __cplusplus
@@ -104,8 +104,8 @@ extern void nes6502_reset(void);
 extern int nes6502_execute(int total_cycles);
 extern void nes6502_nmi(void);
 extern void nes6502_irq(void);
-extern uint8 nes6502_getbyte(uint32 address);
-extern uint32 nes6502_getcycles(bool reset_flag);
+extern uint8_t nes6502_getbyte(uint32_t address);
+extern uint32_t nes6502_getcycles(int reset_flag);
 extern void nes6502_burn(int cycles);
 extern void nes6502_release(void);
 
