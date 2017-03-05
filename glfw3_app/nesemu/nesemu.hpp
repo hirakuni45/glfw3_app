@@ -214,6 +214,10 @@ namespace app {
 				{
 					widget::param wp(vtx::irect(0), terminal_frame_);
 					widget_terminal::param wp_;
+					wp_.enter_func_ = [this] (const utils::lstring& inp) {
+						auto s = utils::utf32_to_utf8(inp);
+						tools_.command(s);
+					};
 					terminal_core_ = wd.add_widget<widget_terminal>(wp, wp_);
 
 					emu::tools::set_terminal(terminal_core_);
@@ -228,16 +232,19 @@ namespace app {
 						nes_file_ = "";
 						nsf_play_ = true;
 						nes_play_ = false;
+						tools_.enable(false);
 					} else if(nes_insertcart(fn.c_str()) == 0) {
 						nes_file_ = fn;
 						nes_play_ = true;
 						nsf_play_ = false;
+						tools_.enable();
 					} else {
 						nes_file_ = "";
 						nes_play_ = false;
 						nsf_play_ = false;
 						dialog_->enable();
 						dialog_->set_text("NES file false:\n'" + fn + "'");
+						tools_.enable(false);
 					}
 				};
 				filer_ = wd.add_widget<widget_filer>(wp, wp_);
@@ -326,6 +333,9 @@ namespace app {
 			inp_[1].type = INP_JOYPAD1;
 			inp_[1].data = 0;
 			input_register(&inp_[1]);
+
+			// ツール・セット初期化
+			tools_.init();
 
 			// プリファレンスの取得
 			sys::preference& pre = director_.at().preference_;
@@ -428,6 +438,8 @@ namespace app {
 					sound.set_gain_stream(vol);
 				}
 			}
+
+			tools_.service();
 
 			wd.update();
 		}
