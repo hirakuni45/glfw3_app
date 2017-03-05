@@ -375,7 +375,7 @@ namespace app {
 				nes_pause_ ^= 1;
 				// nes_pause(nes_pause_);
 			}
-			if(dev.get_positive(gl::device::key::SPACE)) {
+			if(dev.get_positive(gl::device::key::F2)) {
 				menu_ = !menu_;
 				menu_frame_->enable(menu_);
 			}
@@ -385,7 +385,9 @@ namespace app {
 			if(nes_play_ || nsf_play_) {
 
 				if(nes_play_) {
-					pad_();
+					if(!terminal_ && !menu_) { 
+						pad_();
+					}
 					nes_emulate(1);
 				}
 

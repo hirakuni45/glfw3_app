@@ -25,8 +25,20 @@ namespace emu {
 
 		cpu::dis6502	dis_;
 
-		uint32_t	address_;
+		uint16_t	disasm_org_;
+		uint16_t	dump_org_;
+
+		uint16_t	adr_;
+		uint16_t 	ncnt_;
+
 		bool		enable_;
+
+		void dump_() {
+			if(ncnt_ > 0) { dump_org_ = adr_; adr_ = 0; ncnt_ = 0; }
+			std::string list = dis_.dump(dump_org_);
+			terminal_->output(list + "\n"); 
+			++dump_org_;
+		}
 
 	public:
 		//-----------------------------------------------------------------//
@@ -34,7 +46,7 @@ namespace emu {
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		tools() : address_(0), enable_(false) { }
+		tools() : disasm_org_(0), dump_org_(0), adr_(0), ncnt_(0), enable_(false) { }
 
 
 		//-----------------------------------------------------------------//
@@ -87,8 +99,6 @@ namespace emu {
 		//-----------------------------------------------------------------//
 		void command(const std::string& cmd)
 		{
-			if(cmd.empty()) return;
-
 			if(cmd == "state") {
 				if(enable_) {
 					terminal_->output("ROM active\n");
@@ -98,33 +108,44 @@ namespace emu {
 				return;
 			}
 
-//			std::cout << cmd << std::endl;
-			bool err = false;
+			if(!enable_) return;
+
+			adr_ = 0;
+			ncnt_ = 0;
+			bool dump = true;
 			for(char ch : cmd) {
-				if(ch >= '0' && ch <= '9') {
-					address_ <<= 4;
-					address_ += ch - '0';
+				if(ch == ' ') {
+					dump_();
+				} else if(ch >= '0' && ch <= '9') {
+					adr_ <<= 4;
+					adr_ += ch - '0';
+					++ncnt_;
 				} else if(ch >= 'A' && ch <= 'F') {
-					address_ <<= 4;
-					address_ += ch - 'A' + 10;
+					adr_ <<= 4;
+					adr_ += ch - 'A' + 10;
+					++ncnt_;
 				} else if(ch >= 'a' && ch <= 'f') {
-					address_ <<= 4;
-					address_ += ch - 'a' + 10;
+					adr_ <<= 4;
+					adr_ += ch - 'a' + 10;
+					++ncnt_;
 				} else {
 					if(ch == 'l' || ch == 'L') {
+						if(ncnt_ > 0) { disasm_org_ = adr_; adr_ = 0; ncnt_ = 0; }
 						for(int i = 0; i < 16; ++i) {
-							std::string list = dis_.disasm(address_ & 0xffff);
+							std::string list = dis_.disasm(disasm_org_);
 							terminal_->output(list + "\n"); 
-							address_ = dis_.get_pc();
+							disasm_org_ = dis_.get_pc();
 						}
 					} else {
-						err = true;
+						std::string s;
+						s = "Command error: '";
+						terminal_->output(s + ch + "'\n"); 
 					}
+					dump = false;
 				}
 			}
-
-			if(err) {
-				terminal_->output("Command error: '" + cmd + "'\n"); 
+			if(dump) {
+				dump_();
 			}
 		}
 

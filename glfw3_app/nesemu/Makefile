@@ -32,7 +32,6 @@ CSOURCES	=	minizip/ioapi.c \
 				./emu/log.c \
 				./emu/bitmap.c \
 				./emu/cpu/nes6502.c \
-				./emu/cpu/dis6502.c \
 				./emu/nes/mmclist.c \
 				./emu/nes/nes.c \
 				./emu/nes/nes_mmc.c \
