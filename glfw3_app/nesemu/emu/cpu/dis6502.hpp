@@ -12,13 +12,22 @@
 
 namespace cpu {
 
-	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
 		@brief	6502 dis asm class
 	*/
-	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class dis6502 {
 
+	public:
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	バイト取得関数型
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		typedef std::function< uint8_t (uint32_t) > getbyte_type;
+
+	private:
 		enum class adrmode {
 			imp,
 			acc,
@@ -35,18 +44,19 @@ namespace cpu {
 			ind_y
 		};
 
-		static const uint8_t N_FLAG = 0x80;
-		static const uint8_t V_FLAG = 0x40;
-		static const uint8_t R_FLAG = 0x20;   // Reserved, always 1
-		static const uint8_t B_FLAG = 0x10;
-		static const uint8_t D_FLAG = 0x08;
-		static const uint8_t I_FLAG = 0x04;
-		static const uint8_t Z_FLAG = 0x02;
-		static const uint8_t C_FLAG = 0x01;
+		struct flags {
+			static const uint8_t N = 0x80;
+			static const uint8_t V = 0x40;
+			static const uint8_t R = 0x20;   // Reserved, always 1
+			static const uint8_t B = 0x10;
+			static const uint8_t D = 0x08;
+			static const uint8_t I = 0x04;
+			static const uint8_t Z = 0x02;
+			static const uint8_t C = 0x01;
+		};
 
 		uint32_t	pc_reg_;
 
-		typedef std::function< uint8_t (uint32_t) > getbyte_type;
 		getbyte_type	getbyte_;
 
 		char		text_[256];
@@ -174,10 +184,20 @@ namespace cpu {
 
 		//-------------------------------------------------------------//
 		/*!
-			@brief	逆アセンブル
+			@brief	バイト取得関数への参照
+			@return	バイト取得関数
 		*/
 		//-------------------------------------------------------------//
-		const char* disasm(uint32_t PC, uint8_t P, uint8_t A, uint8_t X, uint8_t Y, uint8_t S)
+		getbyte_type& at_getbyte() { return getbyte_; }
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief	逆アセンブル
+			@param[in]	PC	開始アドレス
+		*/
+		//-------------------------------------------------------------//
+		const char* disasm(uint32_t PC)
 		{
 			char* buf = text_;
 			const char* op;
@@ -463,15 +483,17 @@ namespace cpu {
 
 			buf += dis_show_op_(buf, op, type);
 
+#if 0
 			buf += sprintf(buf, "%c%c1%c%c%c%c%c %02X %02X %02X %02X\n",
-				(P & N_FLAG) ? 'N' : '.',
-				(P & V_FLAG) ? 'V' : '.',
-				(P & B_FLAG) ? 'B' : '.',
-				(P & D_FLAG) ? 'D' : '.',
-				(P & I_FLAG) ? 'I' : '.',
-				(P & Z_FLAG) ? 'Z' : '.',
-				(P & C_FLAG) ? 'C' : '.',
+				(P & flags::N) ? 'N' : '.',
+				(P & flags::V) ? 'V' : '.',
+				(P & flags::B) ? 'B' : '.',
+				(P & flags::D) ? 'D' : '.',
+				(P & flags::I) ? 'I' : '.',
+				(P & flags::Z) ? 'Z' : '.',
+				(P & flags::C) ? 'C' : '.',
 				A, X, Y, S);
+#endif
 
 			uint32_t step = 0;
 			switch(type) {
@@ -501,6 +523,15 @@ namespace cpu {
 			@return PC
 		*/
 		//-------------------------------------------------------------//
-		uint32_t get_pc() const { return pc_reg_; }
+		uint32_t get_pc() const { return pc_reg_ & 0xffff; }
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief	アセンブルリスト取得
+			@return アセンブルリスト
+		*/
+		//-------------------------------------------------------------//
+		const char* get_list() const { return text_; }
 	};
 }
