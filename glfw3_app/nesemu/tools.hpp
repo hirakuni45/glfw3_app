@@ -11,6 +11,7 @@
 #include "emu/cpu/nes6502.h"
 
 #include "emu/cpu/dis6502.hpp"
+#include "emu/cpu/nes6502.hpp"
 
 namespace emu {
 
