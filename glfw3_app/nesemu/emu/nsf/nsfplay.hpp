@@ -78,7 +78,7 @@ namespace emu {
 		rominfo_t			rominfo_;
 		mmc_t*				mmc_;
 
-		uint8_t		nes_ram_[0x800];
+		uint8_t				nes_ram_[0x800];
 
 		std::vector<uint8_t>	code_;
 
