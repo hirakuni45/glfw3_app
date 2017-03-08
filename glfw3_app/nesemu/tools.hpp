@@ -28,17 +28,27 @@ namespace emu {
 
 		uint16_t	disasm_org_;
 		uint16_t	dump_org_;
+		uint16_t	write_org_;
 
-		uint16_t	adr_;
+		uint16_t	hex_;
 		uint16_t 	ncnt_;
 
 		bool		enable_;
 
 		void dump_() {
-			if(ncnt_ > 0) { dump_org_ = adr_; adr_ = 0; ncnt_ = 0; }
+			if(ncnt_ > 0) { dump_org_ = hex_; hex_ = 0; ncnt_ = 0; }
 			std::string list = dis_.dump(dump_org_);
 			terminal_->output(list + "\n"); 
 			++dump_org_;
+		}
+
+		void write_() {
+			if(ncnt_ > 0) {
+				dis_.write_byte(write_org_, hex_);
+				++write_org_;
+				ncnt_ = 0;
+				hex_ = 0;
+			}
 		}
 
 	public:
@@ -47,7 +57,8 @@ namespace emu {
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		tools() : disasm_org_(0), dump_org_(0), adr_(0), ncnt_(0), enable_(false) { }
+		tools() : disasm_org_(0), dump_org_(0), write_org_(0),
+				  hex_(0), ncnt_(0), enable_(false) { }
 
 
 		//-----------------------------------------------------------------//
@@ -80,6 +91,7 @@ namespace emu {
 		void init()
 		{
 			dis_.at_getbyte() = nes6502_getbyte;
+			dis_.at_putbyte() = nes6502_putbyte;
 		}
 
 
@@ -111,27 +123,41 @@ namespace emu {
 
 			if(!enable_) return;
 
-			adr_ = 0;
+			std::string tmp = cmd;
+			tmp += ';';
+
+			hex_ = 0;
 			ncnt_ = 0;
 			bool dump = true;
-			for(char ch : cmd) {
-				if(ch == ' ') {
-					dump_();
+			bool write = false;
+			for(char ch : tmp) {
+				if(ch == ' ' || ch == ';') {
+					if(write) {
+						write_();
+					} else {
+						dump_();
+					}
+				} else if(ch == ':') {
+					write_org_ = hex_;
+					hex_ = 0;
+					ncnt_ = 0;
+					write = true;
 				} else if(ch >= '0' && ch <= '9') {
-					adr_ <<= 4;
-					adr_ += ch - '0';
+					hex_ <<= 4;
+					hex_ += ch - '0';
 					++ncnt_;
 				} else if(ch >= 'A' && ch <= 'F') {
-					adr_ <<= 4;
-					adr_ += ch - 'A' + 10;
+					hex_ <<= 4;
+					hex_ += ch - 'A' + 10;
 					++ncnt_;
 				} else if(ch >= 'a' && ch <= 'f') {
-					adr_ <<= 4;
-					adr_ += ch - 'a' + 10;
+					hex_ <<= 4;
+					hex_ += ch - 'a' + 10;
 					++ncnt_;
 				} else {
+					write = false;
 					if(ch == 'l' || ch == 'L') {
-						if(ncnt_ > 0) { disasm_org_ = adr_; adr_ = 0; ncnt_ = 0; }
+						if(ncnt_ > 0) { disasm_org_ = hex_; hex_ = 0; ncnt_ = 0; }
 						for(int i = 0; i < 16; ++i) {
 							std::string list = dis_.disasm(disasm_org_);
 							terminal_->output(list + "\n"); 
@@ -144,9 +170,6 @@ namespace emu {
 					}
 					dump = false;
 				}
-			}
-			if(dump) {
-				dump_();
 			}
 		}
 
