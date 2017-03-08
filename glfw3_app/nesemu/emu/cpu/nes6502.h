@@ -105,6 +105,7 @@ extern int nes6502_execute(int total_cycles);
 extern void nes6502_nmi(void);
 extern void nes6502_irq(void);
 extern uint8_t nes6502_getbyte(uint32_t address);
+extern void nes6502_putbyte(uint32_t address, uint8_t value);
 extern uint32_t nes6502_getcycles(int reset_flag);
 extern void nes6502_burn(int cycles);
 extern void nes6502_release(void);

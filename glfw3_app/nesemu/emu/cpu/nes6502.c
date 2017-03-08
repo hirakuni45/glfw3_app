@@ -1291,6 +1291,11 @@ uint8_t nes6502_getbyte(uint32_t address)
    return bank_readbyte(address);
 }
 
+void nes6502_putbyte(uint32_t address, uint8_t value)
+{
+	mem_writebyte(address, value);
+}
+
 /* get number of elapsed cycles */
 uint32_t nes6502_getcycles(int reset_flag)
 {
