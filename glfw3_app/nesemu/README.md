@@ -9,7 +9,7 @@ NES Emulator application
    
 #### 操作方法
 
-F1:  ファイラーの On/Off
+F1:  ファイラーの On/Off   
 F2:  制御盤（ステートの切り替え、セーブ、ロード、マスターボリューム）   
 F5:  ログ表示と簡単なデバッグ機構
   Status: status
