@@ -12,10 +12,10 @@ NES Emulator application
 F1:  ファイラーの On/Off   
 F2:  制御盤（ステートの切り替え、セーブ、ロード、マスターボリューム）   
 F5:  ログ表示と簡単なデバッグ機構
-  Status: status
-  disasm: xxxxL
-  read:   xxxx
-  write:  xxxx:yy zz ...
+  Status: status   
+  disasm: xxxxL   
+  read:   xxxx   
+  write:  xxxx:yy zz ...   
    
 1:   SELECT   
 2:   START   
