@@ -7,6 +7,7 @@
 */
 //=====================================================================//
 #include "widgets/widget_terminal.hpp"
+#include "utils/format.hpp"
 
 #include "emu/cpu/nes6502.h"
 
@@ -35,11 +36,18 @@ namespace emu {
 
 		bool		enable_;
 
-		void dump_() {
+		void dump_(uint16_t len = 1) {
 			if(ncnt_ > 0) { dump_org_ = hex_; hex_ = 0; ncnt_ = 0; }
-			std::string list = dis_.dump(dump_org_);
-			terminal_->output(list + "\n"); 
-			++dump_org_;
+			char buff[256];
+			utils::format("%04X- ", buff, sizeof(buff)) % dump_org_;
+			terminal_->output(buff);
+			while(len > 0) {
+				uint32_t d = dis_.read_byte(dump_org_);
+				utils::format("%02X\n", buff, sizeof(buff)) % d;
+				terminal_->output(buff);
+				++dump_org_;
+				--len;
+			}
 		}
 
 		void write_() {
@@ -155,7 +163,6 @@ namespace emu {
 					hex_ += ch - 'a' + 10;
 					++ncnt_;
 				} else {
-					write = false;
 					if(ch == 'l' || ch == 'L') {
 						if(ncnt_ > 0) { disasm_org_ = hex_; hex_ = 0; ncnt_ = 0; }
 						for(int i = 0; i < 16; ++i) {
@@ -168,6 +175,7 @@ namespace emu {
 						s = "Command error: '";
 						terminal_->output(s + ch + "'\n"); 
 					}
+					write = false;
 					dump = false;
 				}
 			}

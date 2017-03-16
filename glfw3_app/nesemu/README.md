@@ -27,6 +27,8 @@ X:   B
 →:  Dir Right   
 ←:  Dir Left   
    
+※ USB 接続のジョイパッドなど   
+   
 ---
 License
 
