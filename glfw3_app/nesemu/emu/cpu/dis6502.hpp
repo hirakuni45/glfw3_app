@@ -223,7 +223,7 @@ namespace cpu {
 
 			pc_reg_ = PC;
 
-			buf += sprintf(buf, "%04X: ", pc_reg_);
+			buf += sprintf(buf, "%04X- ", pc_reg_);
 
 			switch (getbyte_(pc_reg_)) {
 			case 0x00: op = "brk"; type = adrmode::imp;    break;
@@ -537,28 +537,19 @@ namespace cpu {
 
 		//-------------------------------------------------------------//
 		/*!
-			@brief	ダンプ
+			@brief	リード・バイト
 			@param[in]	adr	アドレス
-			@param[in]	len	長さ
+			@return リード・バイト
 		*/
 		//-------------------------------------------------------------//
-		const char* dump(uint32_t adr, uint32_t len = 1)
-		{
-			char* dst = text_;
-			dst += sprintf(dst, "%04X:", adr);
-			while(len > 0) {
-				int d = getbyte_(adr);
-				dst += sprintf(dst, " %02X", d);
-				++adr;
-				--len;
-			}
-			return text_;
+		uint8_t read_byte(uint32_t adr) {
+			return getbyte_(adr);
 		}
 
 
 		//-------------------------------------------------------------//
 		/*!
-			@brief	バイト書き込み
+			@brief	ライト・バイト
 			@param[in]	adr	アドレス
 			@param[in]	dat	データ
 		*/
