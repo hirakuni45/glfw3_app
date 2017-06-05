@@ -459,10 +459,12 @@ namespace app {
 		}
 
 		// ファイラーが有効で、マウス操作が無い状態が５秒続いたら、
+		// ※スクロール・ダイアルの操作
 		// 演奏ファイルパスへフォーカスする
    		if(filer_->get_state(gui::widget::state::ENABLE)) {
 			const vtx::spos& msp = core.get_device().get_locator().get_cursor();
-			if(msp == mouse_pos_) {
+			const vtx::spos& scr = core.get_device().get_locator().get_scroll();
+			if(msp == mouse_pos_ && scr == mouse_scr_) {
 				++filer_count_;
 				if(filer_count_ >= (60 * 5)) {
 					filer_->focus_file(sound.get_file_stream());
@@ -470,6 +472,7 @@ namespace app {
 			} else {
 				filer_count_ = 0;
 				mouse_pos_ = msp;
+				mouse_scr_ = scr;
 			}
 
 			// ファイルのタグ情報をファイラーのエイリアスに設定
