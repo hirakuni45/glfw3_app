@@ -440,35 +440,6 @@ namespace gui {
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	ファイル・リストを取得
-		@param[in]	dir	ディレクトリーを含める場合「true」
-		@return ファイル・リスト
-	*/
-	//-----------------------------------------------------------------//
-	utils::strings widget_filer::get_file_list(bool dir) const
-	{
-		utils::strings ss;
-		const widget_files& wfs = center_;
-		for(widget_files_cit cit = wfs.begin(); cit != wfs.end(); ++cit) {
-			const widget_file& wf = *cit;
-			if(wf.size == 0 && wf.time == 0 && wf.mode == 0) continue;
-			const std::string& fp = wf.name->get_text();
-			if(fp == "..") continue;
-			std::string fn = utils::append_path(param_.path_, fp);
-			if(dir) {
-				fn += '/';
-				ss.push_back(fn);
-			} else {
-				if(wf.dir) continue;
-				ss.push_back(fn);
-			}
-		}
-		return ss;
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
 		@brief	初期化
 	*/
 	//-----------------------------------------------------------------//
@@ -781,13 +752,16 @@ namespace gui {
 			}
 			if(d < 0) {
 				if(position_.y < d) {
+/// std::cout << "slip+" << std::endl;
 					position_.y -= d;
 					position_.y *= slip_gain;
 					position_.y += d;
 				} else if(position_.y > 0) {
+/// std::cout << "slip-" << std::endl;
 					position_.y *= slip_gain;
 				}
 			} else {
+/// std::cout << "slip+-" << std::endl;
 				position_.y *= slip_gain;
 			}
 		} else {
@@ -849,11 +823,10 @@ namespace gui {
 				}
 			}
 		}
-		{
-			files_->at_rect().org = position_;
-			if(left_.size() > 0) {
-				files_->at_rect().org.x -= main_->get_rect().size.x;
-			}
+
+		files_->at_rect().org = position_;
+		if(left_.size() > 0) {
+			files_->at_rect().org.x -= main_->get_rect().size.x;
 		}
 
 		// path 文字列を設定
@@ -894,150 +867,5 @@ namespace gui {
 				select_path_(wf.name->get_text());
 			}
 		}
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	レンダリング
-	*/
-	//-----------------------------------------------------------------//
-	void widget_filer::render()
-	{
-		if(objh_ == 0) return;
-
-		wd_.at_mobj().resize(objh_, get_param().rect_.size);
-		glEnable(GL_TEXTURE_2D);
-		wd_.at_mobj().draw(objh_, gl::mobj::attribute::normal, vtx::spos(0));
-
-		shift_text_render(get_param(), param_.text_param_, param_.plate_param_);
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	ファイルをフォーカスする
-		@param[in]	path	選択するファイルパス
-		@return 該当するファイルが無い場合「false」
-	*/
-	//-----------------------------------------------------------------//
-	bool widget_filer::focus_file(const std::string& path)
-	{
-		focus_path_ = make_path_(path);
-		return focus_(focus_path_);
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	代替テキスト（エリアス）を設定
-		@param[in]	path	選択するファイルパス
-		@param[in]	alias	代替テキスト
-	*/
-	//-----------------------------------------------------------------//
-	void widget_filer::set_alias(const std::string& path, const std::string& alias)
-	{
-		widget_file_copt wfo = scan_item_(path);
-		if(wfo) {
-			const widget_file& wf = *wfo;
-			if(wf.name) {
-				wf.name->set_alias(alias);
-			}
-		}
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	代替テキスト（エリアス）を有効、無効
-		@param[in]	path	選択するファイルパス
-		@param[in]	ena		無効にする場合「false」
-	*/
-	//-----------------------------------------------------------------//
-	void widget_filer::enable_alias(const std::string& path, bool ena)
-	{
-		widget_file_copt wfo = scan_item_(path);
-		if(wfo) {
-			const widget_file& wf = *wfo;
-			if(wf.name) {
-				wf.name->enable_alias(ena);
-			}
-		}
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	状態のセーブ
-		@param[in]	pre	プリファレンス参照
-		@return エラーが無い場合「true」
-	*/
-	//-----------------------------------------------------------------//
-	bool widget_filer::save(sys::preference& pre)
-	{
-		std::string path;
-		path += '/';
-		path += wd_.create_widget_name(this);
-		int err = 0;
-		if(!pre.put_text(path + "/current_path", param_.path_)) ++err;
-		if(!pre.put_position(path + "/locate", vtx::ipos(get_rect().org))) ++err;
-		if(!pre.put_position(path + "/size", vtx::ipos(get_rect().size))) ++err;
-///		if(!pre.put_integer(key_info_, info_state_) ++err;
-		return err == 0;
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	状態のロード
-		@param[in]	pre	プリファレンス参照
-		@return エラーが無い場合「true」
-	*/
-	//-----------------------------------------------------------------//
-	bool widget_filer::load(const sys::preference& pre)
-	{
-		std::string path;
-		path += '/';
-		path += wd_.create_widget_name(this);
-
-		int err = 0;
-		std::string s;
-		if(pre.get_text(path + "/current_path", s)) {
-			if(utils::probe_file(s, true)) {
-				param_.path_ = s;
-			} else {
-				param_.path_ = "/";
-			}
-			file_infos_.clear();
-			fsc_path_.clear();
-			fsc_.set_path(param_.path_, param_.filter_);
-			fsc_wait_ = true;
-			destroy_files_(left_);
-			destroy_files_(center_);
-			destroy_files_(right_);
-		} else {
-			++err;
-		}
-
-		vtx::ipos p;
-		if(pre.get_position(path + "/locate", p)) {
-			at_rect().org = p;
-		} else {
-			++err;
-		}
-		if(pre.get_position(path + "/size", p)) {
-			at_rect().size = p;
-		} else {
-			++err;
-		}
-#if 0
-		int i;
-		if(pre.get_integer(key_info_, i)) {
-			info_state_ = static_cast<info_state::type>(i);
-		} else {
-			++err;
-		}
-#endif
-		return err == 0;
 	}
 }

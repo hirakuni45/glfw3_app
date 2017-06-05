@@ -293,7 +293,16 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render() override;
+		void render() override
+		{
+			if(objh_ == 0) return;
+
+			wd_.at_mobj().resize(objh_, get_param().rect_.size);
+			glEnable(GL_TEXTURE_2D);
+			wd_.at_mobj().draw(objh_, gl::mobj::attribute::normal, vtx::spos(0));
+
+			shift_text_render(get_param(), param_.text_param_, param_.plate_param_);
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -303,7 +312,18 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(sys::preference& pre) override;
+		bool save(sys::preference& pre) override
+		{
+			std::string path;
+			path += '/';
+			path += wd_.create_widget_name(this);
+			int err = 0;
+			if(!pre.put_text(path + "/current_path", param_.path_)) ++err;
+			if(!pre.put_position(path + "/locate", vtx::ipos(get_rect().org))) ++err;
+			if(!pre.put_position(path + "/size", vtx::ipos(get_rect().size))) ++err;
+///			if(!pre.put_integer(key_info_, info_state_) ++err;
+			return err == 0;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -313,7 +333,52 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre) override;
+		bool load(const sys::preference& pre) override
+		{
+			std::string path;
+			path += '/';
+			path += wd_.create_widget_name(this);
+
+			int err = 0;
+			std::string s;
+			if(pre.get_text(path + "/current_path", s)) {
+				if(utils::probe_file(s, true)) {
+					param_.path_ = s;
+				} else {
+					param_.path_ = "/";
+				}
+				file_infos_.clear();
+				fsc_path_.clear();
+				fsc_.set_path(param_.path_, param_.filter_);
+				fsc_wait_ = true;
+				destroy_files_(left_);
+				destroy_files_(center_);
+				destroy_files_(right_);
+			} else {
+				++err;
+			}
+
+			vtx::ipos p;
+			if(pre.get_position(path + "/locate", p)) {
+				at_rect().org = p;
+			} else {
+				++err;
+			}
+			if(pre.get_position(path + "/size", p)) {
+				at_rect().size = p;
+			} else {
+				++err;
+			}
+#if 0
+			int i;
+			if(pre.get_integer(key_info_, i)) {
+				info_state_ = static_cast<info_state::type>(i);
+			} else {
+				++err;
+			}
+#endif
+			return err == 0;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -350,7 +415,26 @@ namespace gui {
 			@return ファイル・リスト
 		*/
 		//-----------------------------------------------------------------//
-		utils::strings get_file_list(bool dir = false) const;
+		utils::strings get_file_list(bool dir = false) const
+		{
+			utils::strings ss;
+			const widget_files& wfs = center_;
+			for(widget_files_cit cit = wfs.begin(); cit != wfs.end(); ++cit) {
+				const widget_file& wf = *cit;
+				if(wf.size == 0 && wf.time == 0 && wf.mode == 0) continue;
+				const std::string& fp = wf.name->get_text();
+				if(fp == "..") continue;
+				std::string fn = utils::append_path(param_.path_, fp);
+				if(dir) {
+					fn += '/';
+					ss.push_back(fn);
+				} else {
+					if(wf.dir) continue;
+					ss.push_back(fn);
+				}
+			}
+			return ss;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -360,7 +444,11 @@ namespace gui {
 			@return 該当するファイルが無い場合「false」
 		*/
 		//-----------------------------------------------------------------//
-		bool focus_file(const std::string& path);
+		bool focus_file(const std::string& path)
+		{
+			focus_path_ = make_path_(path);
+			return focus_(focus_path_);
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -370,7 +458,16 @@ namespace gui {
 			@param[in]	alias	代替テキスト
 		*/
 		//-----------------------------------------------------------------//
-		void set_alias(const std::string& path, const std::string& alias);
+		void set_alias(const std::string& path, const std::string& alias)
+		{
+			widget_file_copt wfo = scan_item_(path);
+			if(wfo) {
+				const widget_file& wf = *wfo;
+				if(wf.name) {
+					wf.name->set_alias(alias);
+				}
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -380,7 +477,16 @@ namespace gui {
 			@param[in]	ena		無効にする場合「false」
 		*/
 		//-----------------------------------------------------------------//
-		void enable_alias(const std::string& path, bool ena = true);
+		void enable_alias(const std::string& path, bool ena = true)
+		{
+			widget_file_copt wfo = scan_item_(path);
+			if(wfo) {
+				const widget_file& wf = *wfo;
+				if(wf.name) {
+					wf.name->enable_alias(ena);
+				}
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
