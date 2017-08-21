@@ -398,13 +398,10 @@ namespace app {
 				// copy sound emulation
 				al::sound& sound = director_.at().sound_;
 				uint32_t len = audio_len_;
-#if 0
-				if(sound.get_queue_audio_length() >= 1024) {
-					len -= sound.get_queue_audio_length() - 1024;
-				} else if(sound.get_queue_audio_length() < 512) {
-					len += 512 - sound.get_queue_audio_length();
+				uint32_t mod = 16;
+				if(sound.get_queue_audio_length() < mod) {
+					len += mod;
 				}
-#endif
 				al::sound::waves16 tmp;
 				tmp.resize(len);
 				apu_process(&tmp[0], len);
