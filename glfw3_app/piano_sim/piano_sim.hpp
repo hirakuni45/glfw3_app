@@ -161,77 +161,26 @@ namespace app {
 			const std::string& curp = core.get_current_path();
 			vtx::irect r(x, 400, 0, 0);
 			widget_button* wb;
-
-			wb = gui::create_image<widget_button>(wd, curp + "/res/piano_key_c.png", r);  // C
-			wb->at_param().action_.set(widget::action::SELECT_SCALE, false);
-			wb->at_param().action_.set(widget::action::SELECT_HIGHLIGHT);
-			piano_keys_[0 + o] = wb;
-
-			r.org.x = x + 24;
-			wb = gui::create_image<widget_button>(wd, curp + "/res/piano_key_d.png", r);  // D
-			wb->at_param().action_.set(widget::action::SELECT_SCALE, false);
-			wb->at_param().action_.set(widget::action::SELECT_HIGHLIGHT);
-			piano_keys_[2 + o] = wb;
-
-			r.org.x = x + 14;
-			wb = gui::create_image<widget_button>(wd, curp + "/res/piano_key_cs.png", r); // C#
-			wb->at_param().action_.set(widget::action::SELECT_SCALE, false);
-			wb->at_param().action_.set(widget::action::SELECT_HIGHLIGHT);
-			piano_keys_[1 + o] = wb;
-
-			r.org.x = x + 24 + 24 + 1;
-			wb = gui::create_image<widget_button>(wd, curp + "/res/piano_key_e.png", r);  // E
-			wb->at_param().action_.set(widget::action::SELECT_SCALE, false);
-			wb->at_param().action_.set(widget::action::SELECT_HIGHLIGHT);
-			piano_keys_[4 + o] = wb;
-
-			r.org.x = x + 43;
-			wb = gui::create_image<widget_button>(wd, curp + "/res/piano_key_cs.png", r);  // D#
-			wb->at_param().action_.set(widget::action::SELECT_SCALE, false);
-			wb->at_param().action_.set(widget::action::SELECT_HIGHLIGHT);
-			piano_keys_[3 + o] = wb;
-
-			r.org.x = x + 48 + 24 + 1;
-			wb = gui::create_image<widget_button>(wd, curp + "/res/piano_key_f.png", r);  // F
-			wb->at_param().action_.set(widget::action::SELECT_SCALE, false);
-			wb->at_param().action_.set(widget::action::SELECT_HIGHLIGHT);
-			piano_keys_[5 + o] = wb;
-
-			r.org.x = x + 48 + 24 + 1 + 24 + 1;
-			wb = gui::create_image<widget_button>(wd, curp + "/res/piano_key_g.png", r);  // G
-			wb->at_param().action_.set(widget::action::SELECT_SCALE, false);
-			wb->at_param().action_.set(widget::action::SELECT_HIGHLIGHT);
-			piano_keys_[7 + o] = wb;
-
-			r.org.x = x + 85;
-			wb = gui::create_image<widget_button>(wd, curp + "/res/piano_key_cs.png", r);  // F#
-			wb->at_param().action_.set(widget::action::SELECT_SCALE, false);
-			wb->at_param().action_.set(widget::action::SELECT_HIGHLIGHT);
-			piano_keys_[6 + o] = wb;
-
-			r.org.x = x + 122;
-			wb = gui::create_image<widget_button>(wd, curp + "/res/piano_key_a.png", r);  // A
-			wb->at_param().action_.set(widget::action::SELECT_SCALE, false);
-			wb->at_param().action_.set(widget::action::SELECT_HIGHLIGHT);
-			piano_keys_[9 + o] = wb;
-
-			r.org.x = x + 114;
-			wb = gui::create_image<widget_button>(wd, curp + "/res/piano_key_cs.png", r);  // G#
-			wb->at_param().action_.set(widget::action::SELECT_SCALE, false);
-			wb->at_param().action_.set(widget::action::SELECT_HIGHLIGHT);
-			piano_keys_[8 + o] = wb;
-
-			r.org.x = x + 146;
-			wb = gui::create_image<widget_button>(wd, curp + "/res/piano_key_a.png", r);  // B
-			wb->at_param().action_.set(widget::action::SELECT_SCALE, false);
-			wb->at_param().action_.set(widget::action::SELECT_HIGHLIGHT);
-			piano_keys_[11 + o] = wb;
-
-			r.org.x = x + 140;
-			wb = gui::create_image<widget_button>(wd, curp + "/res/piano_key_cs.png", r);  // A#
-			wb->at_param().action_.set(widget::action::SELECT_SCALE, false);
-			wb->at_param().action_.set(widget::action::SELECT_HIGHLIGHT);
-			piano_keys_[10 + o] = wb;
+			static const int idx[] = {
+				0, 2, 1, 4, 3, 5, 7, 6, 9, 8, 11, 10
+			};
+			static const int tbl[] = {
+				0, 24, 14, 49, 43, 48 + 24 + 1, 48 + 24 + 1 + 24 + 1, 85, 122, 114, 146, 140
+			};
+			static const char* path[] = {
+				"c", "d", "cs", "e", "cs", "f", "g", "cs", "a", "cs", "a", "cs", 
+			};
+			for(int i = 0; i < 12; ++i) {
+				r.org.x = x + tbl[i];
+				std::string s;
+				s = "/res/piano_key_";
+				s += path[i];
+				s += ".png";
+				wb = gui::create_image<widget_button>(wd, curp + s, r);
+				wb->at_param().action_.set(widget::action::SELECT_SCALE, false);
+				wb->at_param().action_.set(widget::action::SELECT_HIGHLIGHT);
+				piano_keys_[idx[i] + o] = wb;
+			}
 		}
 
 	public:
@@ -330,9 +279,11 @@ namespace app {
 			if(terminal_frame_) {
 				terminal_frame_->load(pre);
 			}
+			for(int i = 0; i < 8; ++i) {
+				if(overtone_[i] == nullptr) continue;
+				overtone_[i]->load(pre);
+			}
 
-
-			// １２平均音階テーブルの作成
 			float a = 27.5f;
 			for(int i = 0; i < 12; ++i) {
 				abc_[i] = a * 2.0f * 3.14159265f / static_cast<float>(sample_rate);
@@ -417,6 +368,11 @@ namespace app {
 		void destroy()
 		{
 			sys::preference& pre = director_.at().preference_;
+
+			for(int i = 0; i < 8; ++i) {
+				if(overtone_[i] == nullptr) continue;
+				overtone_[i]->save(pre);
+			}
 
 			if(terminal_frame_) {
 				terminal_frame_->save(pre);
