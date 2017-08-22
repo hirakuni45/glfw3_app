@@ -1,9 +1,11 @@
 #pragma once
 //=====================================================================//
 /*! @file
-	@brief  main ヘッダー @n
-			Copyright 2017 Kunihito Hiramatsu
-	@author 平松邦仁 (hira@rvf-rc45.net)
+	@brief  main ヘッダー
+    @author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/RX/blob/master/LICENSE
 */
 //=====================================================================//
 #include "snd_io/sound.hpp"

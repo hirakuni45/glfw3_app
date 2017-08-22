@@ -1,8 +1,10 @@
 //=====================================================================//
 /*! @file
-	@brief  Piano SIM クラス @n
-			Copyright 2017 Kunihito Hiramatsu
-	@author 平松邦仁 (hira@rvf-rc45.net)
+	@brief  Piano SIM クラス
+    @author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/RX/blob/master/LICENSE
 */
 //=====================================================================//
 #include "main.hpp"
@@ -12,10 +14,13 @@
 #include "widgets/widget_button.hpp"
 #include "widgets/widget_frame.hpp"
 #include "widgets/widget_terminal.hpp"
+#include "piano.hpp"
 
 namespace app {
 
 	class piano_sim : public utils::i_scene {
+
+		static const uint32_t sample_rate = 44100;
 
 		utils::director<core>&	director_;
 
@@ -24,13 +29,78 @@ namespace app {
 		gui::widget_frame*		terminal_frame_;
 		gui::widget_terminal*	terminal_core_;
 
-		float		angle_[8];
-		float		gain_;
-		float		frq_;
-		float		env_;
+
+
+		class piano_t {
+
+			const float	*abc_;
+
+			float	frq_;
+			float	angle_[8];
+
+			al::sound::waves16 reb_;
+			al::sound::waves16 wav_;
+
+			uint32_t	reb_smp_;
+
+		public:
+			piano_t(const float* abc) : abc_(abc), frq_(0.0f), angle_{ 0.0f },
+				reb_(), wav_(),
+				reb_smp_(0) { }
+
+
+			void set_reverb(float rt)
+			{
+				reb_smp_ = static_cast<float>(sample_rate) * rt;
+				reb_.resize((sample_rate / 60) + reb_smp_);
+			}
+
+
+			void reset()
+			{
+				frq_ = 0.0f;
+				for(int i = 0; i < 8; ++i) angle_[i] = 0.0f;
+			}
+
+
+			void set_key(uint32_t idx)
+			{
+				float oct = static_cast<float>(1 << (idx / 12));
+				frq_ = abc_[idx % 12] * oct;
+			}
+
+
+			void render(uint32_t len, float gain)
+			{
+				static const float sqlvt[] = {
+///					1.0f, 0.6f, 0.7f, 0.6f, 0.68f, 0.68f, 0.55f, 0.55f 
+					1.0f, 0.72f, 0.55f, 0.49f, 0.73f, 0.52f, 0.2f, 0.15f 
+				};
+
+				wav_.resize(len);
+				for(int i = 0; i < len; ++i) {
+					float l = 0.0f;
+					for(int j = 0; j < 8; ++j) {
+						l += sinf(angle_[j]) * sqlvt[j];
+						angle_[j] += frq_ * static_cast<float>(j + 1);
+					}
+
+					l *= gain;
+					wav_[i] = static_cast<int16_t>(l * 10000.0f);
+				}
+			}
+
+			const al::sound::waves16& get_wav() const { return wav_; }
+		};
+
+
 
 		float		abc_[12];
+		float		gain_;
 
+		piano_t		piano_;
+
+		float		env_;
 		uint32_t	idx_;
 
 		bool		key_[13];
@@ -63,8 +133,9 @@ namespace app {
 		//-----------------------------------------------------------------//
 		piano_sim(utils::director<core>& d) : director_(d),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
-			angle_{ 0.0f }, gain_(0.0f), frq_(0.0f), env_(0.0f),
-			abc_{ 0.0f }, idx_(0), key_{ false } { }
+			abc_{ 0.0f }, gain_(0.0f),
+			piano_(abc_), env_(0.0f),
+			idx_(0), key_{ false } { }
 
 
 		//-----------------------------------------------------------------//
@@ -117,10 +188,10 @@ namespace app {
 			}
 
 
-			// １２平均音階の作成
+			// １２平均音階テーブルの作成
 			float a = 27.5f;
 			for(int i = 0; i < 12; ++i) {
-				abc_[i] = a;
+				abc_[i] = a * 2.0f * 3.14159265f / static_cast<float>(sample_rate);
 				a *= 1.059463094f;
 			}
 		}
@@ -138,23 +209,15 @@ namespace app {
 			keys_();
 
 			al::sound& sound = director_.at().sound_;
-#if 0
-			if(sound.get_queue_audio_length() >= 1024) {
-				len -= sound.get_queue_audio_length() - 1024;
-			} else if(sound.get_queue_audio_length() < 512) {
-				len += 512 - sound.get_queue_audio_length();
-			}
-#endif
 
 			// Envelope
 			if(test_ring_ != nullptr) {
 				if(test_ring_->get_select_in()) {
 					gain_ = 1.0f;
 					env_ = 0.965f;
-					for(int i = 0; i < 8; ++i) angle_[i] = 0.0f;
+					piano_.reset();
 					
 				}
-
 				if(test_ring_->get_select_out()) {
 					++idx_;
 				}
@@ -162,38 +225,20 @@ namespace app {
 			gain_ *= env_;
 
 			// 44100 16 stereo
-			al::sound::waves16 tmp;
-			tmp.resize(735);
-
+			uint32_t len = (44100 / 60);
+			uint32_t mod = 16;
+			if(sound.get_queue_audio_length() < mod) {
+				len += mod;
+			}
 
 			static const uint32_t mus[] = {
 				39, 41, 43, 44, 46, 48, 50, 51,
-				50, 48, 46, 44, 43, 41, 39,
+				51, 50, 48, 46, 44, 43, 41, 39,
 			};
+			piano_.set_key(mus[idx_]);
+			piano_.render(len, gain_);
 
-			uint32_t idx = mus[idx_];
-			float oct = static_cast<float>(1 << (idx / 12));
-			frq_ = abc_[idx % 12] * oct * 2.0f * 3.14159265f / 44100.0f;
-
-			static const float sqlvt[8] = {
-				1.0f, 0.6f, 0.7f, 0.6f, 0.68f, 0.68f, 0.55f, 0.55f 
-			};
-			static const float octave[8] = {
-				1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f
-			};
-
-			for(int i = 0; i < 735; ++i) {
-				float l = 0.0f;
-				for(int j = 0; j < 8; ++j) {
-					l += sinf(angle_[j]) * sqlvt[j];
-					angle_[j] += frq_ * octave[j];
-				}
-
-				l *= gain_;
-				tmp[i] = static_cast<int16_t>(l * 8000.0f);
-			}
-
-			sound.queue_audio(tmp);
+			sound.queue_audio(piano_.get_wav());
 
 			float vol = 0.75f;
 			sound.set_gain_stream(vol);
