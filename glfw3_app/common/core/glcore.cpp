@@ -1,8 +1,10 @@
 //=====================================================================//
 /*!	@file
-	@brief	Graphics Library Core (for glfw3) @n
-			Copyright 2017 Kunihito Hiramatsu
-	@author	平松邦仁 (hira@rvf-rc45.net)
+	@brief	Graphics Library Core (for glfw3) 
+    @author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
 //=====================================================================//
 #ifdef WIN32
