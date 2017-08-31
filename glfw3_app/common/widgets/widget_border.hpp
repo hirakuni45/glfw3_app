@@ -2,9 +2,11 @@
 //=====================================================================//
 /*!	@file
 	@brief	GUI Widget Border クラス @n
-			水平、又は垂直の「境界線」を描画する @n
-			Copyright 2017 Kunihito Hiramatsu
-	@author	平松邦仁 (hira@rvf-rc45.net)
+			水平、又は垂直の「境界線」を描画する
+    @author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
 //=====================================================================//
 #include "gl_fw/glutils.hpp"

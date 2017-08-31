@@ -2,7 +2,10 @@
 //=====================================================================//
 /*!	@file
 	@brief	GUI Widget Image クラス（ヘッダー）
-	@author	平松邦仁 (hira@rvf-rc45.net)
+    @author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
 //=====================================================================//
 #include "gl_fw/glutils.hpp"
