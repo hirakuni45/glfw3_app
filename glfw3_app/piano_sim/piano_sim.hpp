@@ -19,6 +19,8 @@
 #include "widgets/widget_terminal.hpp"
 #include "piano.hpp"
 
+#include "snd_io/midi_io.hpp"
+
 #include "utils/format.hpp"
 
 namespace app {
@@ -26,13 +28,14 @@ namespace app {
 	class piano_sim : public utils::i_scene {
 
 		static const uint32_t sample_rate = 44100;
+		static const uint32_t key_octave = 6;
 
 		utils::director<core>&	director_;
 
 		gui::widget_button*		files_;
 		gui::widget_filer*		filer_;
 		
-		gui::widget_button*		piano_keys_[48];
+		gui::widget_button*		piano_keys_[12 * key_octave];
 
 		gui::widget_slider*		overtone_[8];
 
@@ -67,8 +70,13 @@ namespace app {
 #endif
 		bool		key_[13];
 
-		typedef utils::piano<44100, 8> PIANO;
+		typedef utils::piano<sample_rate, 8> PIANO;
 		PIANO		piano_;
+
+
+		uint32_t	midi_num_;
+		snd::midi_io	midi_in_;
+
 
 		void keys_()
 		{
@@ -133,7 +141,7 @@ namespace app {
 			files_(nullptr), filer_(nullptr), piano_keys_{ nullptr },
 			overtone_{ nullptr },
 			terminal_frame_(nullptr), terminal_core_(nullptr),
-			key_{ false } { }
+			key_{ false }, midi_num_(0) { }
 
 
 		//-----------------------------------------------------------------//
@@ -199,10 +207,9 @@ namespace app {
 
 
 			{ // 鍵盤
-				init_piano_keyb_(10 + 170 * 0, 12 * 0);
-				init_piano_keyb_(10 + 170 * 1, 12 * 1);
-				init_piano_keyb_(10 + 170 * 2, 12 * 2);
-				init_piano_keyb_(10 + 170 * 3, 12 * 3);
+				for(int i = 0; i < key_octave; ++i) {
+					init_piano_keyb_(10 + 170 * i, 12 * i);
+				}
 			}
 
 
@@ -234,6 +241,9 @@ namespace app {
 				if(overtone_[i] == nullptr) continue;
 				overtone_[i]->load(pre);
 			}
+
+			// MIDI in の開始
+			midi_in_.start(1);
 		}
 
 
@@ -246,26 +256,43 @@ namespace app {
 		{
 			gui::widget_director& wd = director_.at().widget_director_;
 
-///			keys_();
-
-			for(int i = 0; i < 48; ++i) {
-				if(piano_keys_[i]->get_select_in()) {
-					piano_.ring(i + 9, 1.0f);
-//					utils::format("%d\n") % i;
+			if(0) {
+				uint32_t num = snd::midi_io::get_device_num();
+				if(midi_num_ != num) {
+					midi_num_ = num;
+					snd::midi_io::list_device();
 				}
 			}
 
+///			keys_();
+
+			for(int i = 0; i < 12 * key_octave; ++i) {
+				if(piano_keys_[i]->get_select_in()) {
+					piano_.ring(i);
+///					utils::format("%d\n") % i;
+				}
+			}
+
+			{
+				auto& fifo = midi_in_.at_midi_in();
+				while(fifo.length() > 0) {
+					const auto& t = fifo.get_at();
+					utils::format("N: %d, V: %d\n")
+						% static_cast<uint32_t>(t.note) % static_cast<uint32_t>(t.velocity);
+					fifo.get_go();
+				}
+			}
 
 			al::sound& sound = director_.at().sound_;
 
-			// 44100 16 stereo
-			uint32_t len = (44100 / 60);
+			// サンプルレートに対応するバッファ長
+			uint32_t wlen = (sample_rate / 60);
 			uint32_t mod = 16;
 			if(sound.get_queue_audio_length() < mod) {
-				len += mod;
+				wlen += mod;
 			}
 
-			piano_.service(len, 1.0f);
+			piano_.service(wlen, 1.0f);
 			sound.queue_audio(piano_.get_wav());
 
 			float vol = 1.0f;
