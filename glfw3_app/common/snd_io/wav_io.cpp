@@ -1,8 +1,10 @@
 //=====================================================================//
 /*!	@file
-	@brief	WAV 音声ファイルを扱うクラス @n
-			Copyright 2017 Kunihito Hiramatsu
-	@author	平松邦仁 (hira@rvf-rc45.net)
+	@brief	WAV 音声ファイルを扱うクラス
+    @author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
 //=====================================================================//
 #include "wav_io.hpp"
