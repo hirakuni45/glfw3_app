@@ -40,7 +40,7 @@ namespace gui {
 			const img::i_img*		hand_image_;	///< ハンドル画像を使う場合
 
 			bool					hand_ctrl_;		///< ハンドル・コントロール
-			bool					scroll_ctrl_;	///< スクロール・コントロール
+			bool					scroll_ctrl_;	///< スクロール・コントロール（マウスのダイアル）
 			float					scroll_gain_;	///< スクロール・ゲイン
 
 			bool					select_fin_;	///< 選択が完了した場合に呼び出す
@@ -263,7 +263,8 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() override {
+		void update() override
+		{
 			update_offset_();
 
 			const slider_param& sp = param_.slider_param_;
