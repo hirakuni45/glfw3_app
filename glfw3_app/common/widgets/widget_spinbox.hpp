@@ -31,7 +31,8 @@ namespace gui {
 			initial,///< 初期化
 			inc,	///< インクリメント
 			select,	///< セレクト
-			dec		///< デクリメント
+			dec,	///< デクリメント
+			none	///< 何もしない
 		};
 
 
@@ -57,12 +58,15 @@ namespace gui {
 			int					sel_pos_;	///< 選択位置
 			int					max_pos_;	///< 最大位置
 
+			bool				scroll_ctrl_;	///< スクロール・コントロール（マウスのダイアル）
+
 			param(int min = 0, int sel = 0, int max = 0) :
 				plate_param_(), color_param_(widget_director::default_spinbox_color_),
 				text_param_("", img::rgba8(255, 255), img::rgba8(0, 255)),
 				image_(0), handle_(0), id_(0),
 				select_func_(),
-				min_pos_(min), sel_pos_(sel), max_pos_(max)
+				min_pos_(min), sel_pos_(sel), max_pos_(max),
+				scroll_ctrl_(true)
 				{ }
 		};
 
@@ -207,7 +211,8 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() override {
+		void update() override
+		{
 			if(!initial_ && param_.select_func_ != nullptr) {
 				initial_ = true;
 				auto t = param_.select_func_(state::initial, param_.sel_pos_, param_.sel_pos_);
@@ -216,19 +221,38 @@ namespace gui {
 				}
 			}
 
+			state st = state::none;
+			int d = 0;
 			if(get_selected()) {
-				++param_.id_;
-
 				auto x = get_param().in_point_.x;
 				auto xs = get_rect().size.x;
-				int before = param_.sel_pos_;
-				state st = state::select;
 				if(x < (xs / 3)) {  // inc
-					++param_.sel_pos_;
-					if(param_.sel_pos_ > param_.max_pos_) param_.sel_pos_ = param_.max_pos_;
+					d = 1;
 					st = state::inc;
 				} else if(x >= (xs * 2 / 3)) {  // dec
-					--param_.sel_pos_;
+					d = -1;
+					st = state::dec;
+				} else {
+					st = state::select;
+				}
+			} else if(get_focus() && param_.scroll_ctrl_) {
+				const vtx::spos& scr = wd_.get_scroll();
+				if(scr.y != 0) {
+					d = -scr.y;
+					if(d > 0) st = state::inc;
+					else if(d < 0) st = state::dec;
+				}
+			}
+
+			if(st != state::none) {
+				int before = param_.sel_pos_;
+				++param_.id_;
+				if(d > 0) {
+					param_.sel_pos_ += d;
+					if(param_.sel_pos_ > param_.max_pos_) param_.sel_pos_ = param_.max_pos_;
+					st = state::inc;
+				} else if(d < 0) {
+					param_.sel_pos_ += d;
 					if(param_.sel_pos_ < param_.min_pos_) param_.sel_pos_ = param_.min_pos_;
 					st = state::dec;
 				}
