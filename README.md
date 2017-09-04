@@ -14,7 +14,7 @@ GLFW application
 ・widgets GUI フレームワークなど
 ・av ffmpeg API 関係の C++ ラッパー
    
-###開発環境（Windows）
+### 開発環境（Windows）
    
  - Windows では、事前に MSYS2 環境をインストールしておきます。
  - MSYS2 には、msys2、mingw32、mingw64 と３つの異なった環境がありますが、mingw64 で行います。 
@@ -54,7 +54,7 @@ GLFW application
    pacman -S mingw-w64-x86_64-bullet
 ```
    
-###開発環境（OS-X）
+### 開発環境（OS-X）
 
 ・macports をインストール、各種ライブラリーをインストールして下さい。  
    
@@ -75,14 +75,14 @@ GLFW application
    sudo port install bullet
 ```
    
-###開発環境（Ubuntu）
+### 開発環境（Ubuntu）
 
 Linux 環境は、複数あるので、ここでは「Ubuntu 16.04 LTS」環境の場合を書いておきます。
 ```
    sudo apt-get install xxx
 ```
    
-###フォントのインストール
+### フォントのインストール
 
 GUI フレームワークでは、「Inconsolata」の OTF フォントを使っています。   
 ダウンロードして、インストールして下さい。
@@ -94,16 +94,16 @@ Linux 環境では、apt−get 等でインストールできます。
    sudo apt-get install fonts-inconsolata
 ```
    
-###全体のソース・コード取得
+### 全体のソース・コード取得
 ```
    git clone git://github.com/hirakuni45/glfw3_app.git
 ```
 
-###コンパイル方法
+### コンパイル方法
 ・各ディレクトリーに移動後、「make」を行なう。   
 ・従属規則は自動で生成される。   
 
-####便利ツール   
+#### 便利ツール   
 
 ・dllcollect  --->  mingw64 DLL 収集プログラム   
 ```
@@ -114,7 +114,7 @@ Linux 環境では、apt−get 等でインストールできます。
 ・bmc  --->  ビットマップ変換   
 ・iod_make  --->  組み込みマイコン向け、I/O デバイスクラステンプレート生成サポート   
 
-####アプリケーション   
+#### アプリケーション   
 
 ・gui_test  --->  GUI 描画、操作、テスト用   
 ・player  --->  音楽再生プレイヤー   
