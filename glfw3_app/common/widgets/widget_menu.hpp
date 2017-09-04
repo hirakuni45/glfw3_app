@@ -22,7 +22,7 @@ namespace gui {
 
 		typedef widget_menu value_type;
 
-		typedef std::function<void (const std::string&)> select_func_type;
+		typedef std::function<void (const std::string& select_text, uint32_t select_pos)> select_func_type;
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
@@ -37,6 +37,7 @@ namespace gui {
 
 			utils::strings	text_list_;	///< テキスト・リスト
 
+			uint32_t	list_limit_;	///< 最大表示数（「０」の場合最大数）
 			bool		round_;			///< 角をラウンドしない場合「false」
 
 			std::string	select_text_;	///< 選択位置のテキスト
@@ -51,7 +52,7 @@ namespace gui {
 				vtx::placement(vtx::placement::holizontal::LEFT,
 				vtx::placement::vertical::CENTER)),
 				color_param_select_(widget_director::default_list_color_select_),
-				text_list_(), round_(true), select_text_(), select_pos_(0),
+				text_list_(), list_limit_(0), round_(true), select_text_(), select_pos_(0),
 				select_func_(nullptr)
 			{ }
 		};
@@ -63,12 +64,46 @@ namespace gui {
 
 		widget_labels		list_;
 
+		int32_t				select_pos_;
 		uint32_t			select_id_;
 
-		void destroy_() {
+		void build_list_()
+		{
+			widget::param wp(vtx::irect(vtx::spos(0), get_rect().size), this);
+			widget_label::param wp_;
+			wp_.plate_param_ = param_.plate_param_;
+			wp_.color_param_ = param_.color_param_select_;
+			wp_.plate_param_.frame_width_ = 0;
+			int n = 0;
+			for(const std::string& s : param_.text_list_) {
+				wp_.text_param_.set_text(s);
+				if(n == 0 && param_.round_) {
+					wp_.plate_param_.round_radius_ = param_.plate_param_.round_radius_;
+					wp_.plate_param_.round_style_
+						= widget::plate_param::round_style::TOP;
+				} else if(n == (param_.text_list_.size() - 1) && param_.round_) {
+					wp_.plate_param_.round_radius_ = param_.plate_param_.round_radius_;
+					wp_.plate_param_.round_style_
+						= widget::plate_param::round_style::BOTTOM;
+				} else {
+					wp_.plate_param_.round_radius_ = 0;
+					wp_.plate_param_.round_style_
+						= widget::plate_param::round_style::ALL;
+				}
+				widget_label* w = wd_.add_widget<widget_label>(wp, wp_);
+				w->set_state(widget::state::ENABLE, false);
+				list_.push_back(w);
+				wp.rect_.org.y += get_rect().size.y;
+				++n;
+			}
+		}
+
+		void destroy_()
+		{
 			for(widget_label* w : list_) {
 				wd_.del_widget(w);
 			}
+			list_.clear();
 		}
 
 	public:
@@ -79,7 +114,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_menu(widget_director& wd, const widget::param& wp, const param& p) :
 			widget(wp), wd_(wd), param_(p),
-			list_(), select_id_(0)
+			list_(), select_pos_(-1), select_id_(0)
 		{ }
 
 
@@ -146,7 +181,9 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	選択 ID の取得
+			@brief	選択 ID の取得 @n
+					選択される毎に＋１される
+			@return 選択 ID
 		*/
 		//-----------------------------------------------------------------//
 		uint32_t get_select_id() const { return select_id_; }
@@ -155,6 +192,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	選択テキストの取得
+			@return 選択テキスト
 		*/
 		//-----------------------------------------------------------------//
 		const std::string& get_select_text() const { return param_.select_text_; }
@@ -163,6 +201,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	選択位置の取得
+			@return 選択位置
 		*/
 		//-----------------------------------------------------------------//
 		uint32_t get_select_pos() const { return param_.select_pos_; }
@@ -170,43 +209,34 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	メニューの再構築 @n
+					※「text_list_」を作り直してから呼ぶ事で、以前のリスト @n
+					が廃棄され、新規リストになる。
+		*/
+		//-----------------------------------------------------------------//
+		void build()
+		{
+			destroy_();
+			build_list_();
+			param_.select_text_.clear();
+			param_.select_pos_ = 0;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() override {
+		void initialize() override
+		{
 			// 標準的に固定、リサイズ不可
 			at_param().state_.set(widget::state::SERVICE);
 			at_param().state_.set(widget::state::POSITION_LOCK);
 			at_param().state_.set(widget::state::SIZE_LOCK);
 			at_param().state_.set(widget::state::ENABLE, false);
 
-			widget::param wp(vtx::irect(vtx::spos(0), get_rect().size), this);
-			widget_label::param wp_;
-			wp_.plate_param_ = param_.plate_param_;
-			wp_.color_param_ = param_.color_param_select_;
-			wp_.plate_param_.frame_width_ = 0;
-			int n = 0;
-			for(const std::string& s : param_.text_list_) {
-				wp_.text_param_.set_text(s);
-				if(n == 0 && param_.round_) {
-					wp_.plate_param_.round_radius_ = param_.plate_param_.round_radius_;
-					wp_.plate_param_.round_style_
-						= widget::plate_param::round_style::TOP;
-				} else if(n == (param_.text_list_.size() - 1) && param_.round_) {
-					wp_.plate_param_.round_radius_ = param_.plate_param_.round_radius_;
-					wp_.plate_param_.round_style_
-						= widget::plate_param::round_style::BOTTOM;
-				} else {
-					wp_.plate_param_.round_radius_ = 0;
-					wp_.plate_param_.round_style_
-						= widget::plate_param::round_style::ALL;
-				}
-				widget_label* w = wd_.add_widget<widget_label>(wp, wp_);
-				w->set_state(widget::state::ENABLE, false);
-				list_.push_back(w);
-				wp.rect_.org.y += get_rect().size.y;
-				++n;
-			}
+			build_list_();
 		}
 
 
@@ -221,45 +251,31 @@ namespace gui {
 				return;
 			}
 
-
-
-
-		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	サービス
-		*/
-		//-----------------------------------------------------------------//
-		void service() override
-		{
-			if(!get_state(widget::state::ENABLE) || list_.empty()) {
-				return;
-			}
-
 			wd_.top_widget(this);
 
 			uint32_t n = 0;
-			bool selected = false;
 			for(widget_label* w : list_) {
 				if(w->get_select()) {
 					param_.select_pos_ = n;
-					at_local_param().text_param_.text_
-						= w->get_local_param().text_param_.text_;
+					at_local_param().text_param_.text_ = w->get_local_param().text_param_.text_;
+					w->set_action(widget::action::SELECT_HIGHLIGHT);
 				} else if(w->get_selected()) {
-					selected = true;
+					select_pos_ = param_.select_pos_;
+					if(select_pos_ < list_.size()) {
+						param_.select_text_ = list_[select_pos_]->get_local_param().text_param_.get_text();
+					}
+					++select_id_;
+				} else {
+					w->set_action(widget::action::SELECT_HIGHLIGHT, false);
 				}
 				++n;
 			}
-			if(selected) {
-				if(param_.select_pos_ < list_.size()) {
-					param_.select_text_ = list_[param_.select_pos_]->get_local_param().text_param_.get_text();
-				}
-				++select_id_;
-				wd_.enable(this, false, true);
-				if(param_.select_func_ != nullptr) param_.select_func_(param_.select_text_);
-			} else {
+
+			// list_limit_ は実装中
+			// ・list_limit_ は、表示するラベルの制限を行う
+			// ・スクロール・ダイアルで、リストのスクロールを行う
+#if 0
+			if(select_pos_ < 0) {
 				const vtx::spos& scr = wd_.get_scroll();
 				if(get_focus() && scr.y != 0) {
 					int pos = param_.select_pos_;
@@ -271,15 +287,24 @@ namespace gui {
 					}
 					param_.select_pos_ = pos;
 				}
-				uint32_t n = 0;
-				for(widget_label* w : list_) {
-					if(n == param_.select_pos_) {
-						w->set_action(widget::action::SELECT_HIGHLIGHT);
-					} else {
-						w->set_action(widget::action::SELECT_HIGHLIGHT, false);
-					}
-					++n;
+			}
+#endif
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	サービス
+		*/
+		//-----------------------------------------------------------------//
+		void service() override
+		{
+			if(select_pos_ >= 0 && static_cast<uint32_t>(select_pos_) < list_.size()) {
+				wd_.enable(this, false, true);
+				if(param_.select_func_ != nullptr) {
+					param_.select_func_(param_.select_text_, param_.select_pos_);
 				}
+				select_pos_ = -1;
 			}
 		}
 
@@ -299,9 +324,7 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(sys::preference& pre) override {
-			return true;
-		}
+		bool save(sys::preference& pre) override { return true; }
 
 
 		//-----------------------------------------------------------------//
@@ -311,8 +334,6 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre) override {
-			return true;
-		}
+		bool load(const sys::preference& pre) override { return true; }
 	};
 }
