@@ -188,7 +188,7 @@ namespace app {
 				pmx_io_.render_setup();
 				pmx_enable_ = true;
 				std::string info;
-				pmd_io_.get_info(info);
+				pmx_io_.get_info(info);
 				terminal_->output(info);
 			}
 		}
