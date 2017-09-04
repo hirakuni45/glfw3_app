@@ -41,6 +41,7 @@ namespace gui {
 			int			select_pos_;	///< テキスト・リストの選択位置
 
 			bool		drop_box_;		///< ドロップ・ボックスの表示
+			bool		scroll_ctrl_;	///< スクロール・コントロール（マウスのダイアル）
 
 			bool		open_before_;
 			bool		open_;
@@ -55,7 +56,7 @@ namespace gui {
 				vtx::placement::vertical::CENTER)),
 				color_param_select_(widget_director::default_list_color_select_),
 				text_list_(),
-				select_pos_(0), drop_box_(true),
+				select_pos_(0), drop_box_(true), scroll_ctrl_(true),
 				open_before_(false), open_(false),
 				select_func_(nullptr)
 			{ }
@@ -72,12 +73,17 @@ namespace gui {
 		widget_null*		frame_;
 		widget_labels		list_;
 
-		void destroy_() {
+		void destroy_list_() {
 			for(widget_label* w : list_) {
 				wd_.del_widget(w);
 			}
+		}
+
+		void destroy_() {
+			destroy_list_();
 			wd_.del_widget(frame_);
 		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -140,6 +146,64 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		param& at_local_param() { return param_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	選択位置を取得
+			@return 選択位置（負の値なら、非選択）
+		*/
+		//-----------------------------------------------------------------//
+		int get_select_pos() const { return param_.select_pos_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	選択位置のテキストを取得
+			@return 選択位置のテキスト
+		*/
+		//-----------------------------------------------------------------//
+		std::string get_select_text() const { return param_.text_param_.get_text(); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	リスト・リソースの更新
+		*/
+		//-----------------------------------------------------------------//
+		void update_list()
+		{
+			destroy_list_();
+			list_.clear();
+
+			widget::param wp(vtx::irect(vtx::ipos(0), get_rect().size), frame_);
+			widget_label::param wp_;
+			wp_.plate_param_ = param_.plate_param_;
+			wp_.color_param_ = param_.color_param_select_;
+			wp_.plate_param_.frame_width_ = 0;
+			int n = 0;
+			for(const std::string& s : param_.text_list_) {
+				wp_.text_param_.set_text(s);
+				if(n == 0) {
+					wp_.plate_param_.round_radius_ = param_.plate_param_.round_radius_;
+					wp_.plate_param_.round_style_
+						= widget::plate_param::round_style::TOP;
+				} else if(n == (param_.text_list_.size() - 1)) {
+					wp_.plate_param_.round_radius_ = param_.plate_param_.round_radius_;
+					wp_.plate_param_.round_style_
+						= widget::plate_param::round_style::BOTTOM;
+				} else {
+					wp_.plate_param_.round_radius_ = 0;
+					wp_.plate_param_.round_style_
+						= widget::plate_param::round_style::ALL;
+				}
+				widget_label* w = wd_.add_widget<widget_label>(wp, wp_);
+				w->set_state(widget::state::ENABLE, false);
+				list_.push_back(w);
+				wp.rect_.org.y += get_rect().size.y;
+				++n;
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -220,7 +284,14 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() override {
+		void update() override
+		{
+			if(!get_state(widget::state::ENABLE)) {
+				return;
+			}
+
+
+
 			if(param_.select_pos_ < list_.size()) {
 				widget_label* w = list_[param_.select_pos_];
 				param_.text_param_.text_ = w->get_local_param().text_param_.text_;
@@ -233,7 +304,8 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override {
+		void service() override
+		{
 			if(!get_state(widget::state::ENABLE)) {
 				return;
 			}

@@ -215,7 +215,16 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() override { }
+		void update() override
+		{
+			if(!get_state(widget::state::ENABLE) || list_.empty()) {
+				return;
+			}
+
+
+
+
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -223,7 +232,8 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override {
+		void service() override
+		{
 			if(!get_state(widget::state::ENABLE) || list_.empty()) {
 				return;
 			}
