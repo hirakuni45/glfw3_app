@@ -181,7 +181,8 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() override {
+		void update() override
+		{
 			if(get_select()) {
 				obj_state_ = !param_.check_;
 			} else if(get_selected()) {

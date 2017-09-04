@@ -54,6 +54,8 @@ namespace gui {
 
 		gl::mobj::handle	objh_;
 
+		uint32_t			id_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -61,7 +63,7 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_button(widget_director& wd, const widget::param& bp, const param& p) :
-			widget(bp), wd_(wd), param_(p), objh_(0) { }
+			widget(bp), wd_(wd), param_(p), objh_(0), id_(0) { }
 
 
 		//-----------------------------------------------------------------//
@@ -168,7 +170,6 @@ namespace gui {
 		void update() override {
 			if(get_selected()) {
 				++param_.id_;
-				if(param_.select_func_ != nullptr) param_.select_func_(param_.id_);
 			}
 		}
 
@@ -178,7 +179,12 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override { }
+		void service() override {
+			if(id_ != param_.id_) {
+				if(param_.select_func_ != nullptr) param_.select_func_(param_.id_);
+				id_ = param_.id_;
+			}
+		}
 
 
 		//-----------------------------------------------------------------//

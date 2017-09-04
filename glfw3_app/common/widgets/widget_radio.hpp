@@ -165,7 +165,8 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() override {
+		void update() override
+		{
 			bool f = param_.check_;
 			if(get_select()) {
 				obj_state_ = true;
