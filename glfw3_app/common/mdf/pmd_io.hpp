@@ -16,6 +16,7 @@
 #include "utils/quat.hpp"
 #include "utils/file_io.hpp"
 #include "mdf/surface.hpp"
+#include <boost/format.hpp>
 
 namespace mdf {
 

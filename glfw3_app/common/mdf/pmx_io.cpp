@@ -107,9 +107,9 @@ namespace mdf {
 			uint32_t num;
 			if(!fio.get(num)) return false;
 ///			std::cout << "Vertex: " << num << std::endl;
-			vertexes_.resize(num);
+			vertices_.resize(num);
 			for(uint32_t i = 0; i < num; ++i) {
-				if(!vertexes_[i].get(fio, reading_info_)) return false;
+				if(!vertices_[i].get(fio, reading_info_)) return false;
 			}
 		}
 
@@ -193,12 +193,12 @@ namespace mdf {
 	//-----------------------------------------------------------------//
 	void pmx_io::render_setup()
 	{
-		if(vertexes_.empty()) return;
+		if(vertices_.empty()) return;
 		if(faces_.empty()) return;
 
 		{	// 頂点バッファの作成
 			std::vector<vbo_t> vbos;
-			vbos.resize(vertexes_.size());
+			vbos.resize(vertices_.size());
 			uint32_t i = 0;
 			BOOST_FOREACH(pmx_vertex& v, vertices_) {
 				vbo_t& vbo = vbos[i];
@@ -279,7 +279,7 @@ namespace mdf {
 	//-----------------------------------------------------------------//
 	void pmx_io::render_surface()
 	{
-		if(vertexes_.empty()) return;
+		if(vertices_.empty()) return;
 		if(faces_.empty()) return;
 
 		glMatrixMode(GL_TEXTURE);
