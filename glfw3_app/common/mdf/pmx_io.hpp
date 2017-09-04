@@ -271,7 +271,7 @@ namespace mdf {
 			pmx_vertex() : weight_(0) { }
 			~pmx_vertex() { delete weight_; }
 		};
-		typedef std::vector<pmx_vertex>	pmx_vertexes;
+		typedef std::vector<pmx_vertex>	pmx_vertices;
 
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -517,7 +517,7 @@ namespace mdf {
 	private:
 
 		model_info		model_info_;
-		pmx_vertexes	vertexes_;
+		pmx_vertices	vertices_;
 		utils::dim		faces_;
 		utils::strings	textures_;
 		pmx_materials	materials_;
@@ -582,6 +582,20 @@ namespace mdf {
 		*/
 		//-----------------------------------------------------------------//
 		bool probe(utils::file_io& fio);
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	PMD ファイル情報の取得
+			@param[out]	info	PMD ファイル情報
+		*/
+		//-----------------------------------------------------------------//
+		void get_info(std::string& info) const
+		{
+			info += (boost::format("Version: %1.3f\n") % version_).str();
+			info += (boost::format("Vertices: %d\n") % vertices_.size()).str();
+			info += (boost::format("Face: %d\n") % faces_.size()).str();
+		}
 
 
 		//-----------------------------------------------------------------//

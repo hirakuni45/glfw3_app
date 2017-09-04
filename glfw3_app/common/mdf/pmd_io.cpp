@@ -338,20 +338,6 @@ namespace mdf {
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	PMD ファイル情報の取得
-		@param[in]	info	PMD ファイル情報
-	*/
-	//-----------------------------------------------------------------//
-	void pmd_io::get_info(std::string& info)
-	{
-		info += (boost::format("Version: %1.3f\n") % version_).str();
-		info += (boost::format("Vertices: %d\n") % vertices_.size()).str();
-		info += (boost::format("Face: %d\n") % face_indices_.size()).str();
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
 		@brief	ファイルが有効か検査
 		@return 有効なら「true」
 	*/

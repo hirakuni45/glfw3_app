@@ -200,7 +200,7 @@ namespace mdf {
 			std::vector<vbo_t> vbos;
 			vbos.resize(vertexes_.size());
 			uint32_t i = 0;
-			BOOST_FOREACH(pmx_vertex& v, vertexes_) {
+			BOOST_FOREACH(pmx_vertex& v, vertices_) {
 				vbo_t& vbo = vbos[i];
 				vbo.uv = v.uv_;
 				vbo.n = v.normal_;			

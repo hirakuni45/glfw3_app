@@ -366,10 +366,15 @@ namespace mdf {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	PMD ファイル情報の取得
-			@param[in]	info	PMD ファイル情報
+			@param[out]	info	PMD ファイル情報
 		*/
 		//-----------------------------------------------------------------//
-		void get_info(std::string& info);
+		void get_info(std::string& info) const
+		{
+			info += (boost::format("Version: %1.3f\n") % version_).str();
+			info += (boost::format("Vertices: %d\n") % vertices_.size()).str();
+			info += (boost::format("Face: %d\n") % face_indices_.size()).str();
+		}
 
 
 		//-----------------------------------------------------------------//
