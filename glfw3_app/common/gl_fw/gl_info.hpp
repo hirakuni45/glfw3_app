@@ -2,7 +2,10 @@
 //=====================================================================//
 /*!	@file
 	@brief	OpenGL/ES 依存を吸収する為のヘッダー
-	@author	平松邦仁 (hira@rvf-rc45.net)
+    @author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
 //=====================================================================//
 #define GLEW_STATIC
