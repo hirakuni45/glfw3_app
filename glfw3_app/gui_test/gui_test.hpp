@@ -34,6 +34,8 @@ namespace app {
 		gui::widget_button*		dialog_open_;
 		gui::widget_button*		filer_open_;
 		gui::widget_button*		menu_open_;
+		gui::widget_button*		menu_ins_;
+		gui::widget_button*		menu_era_;
 		gui::widget_check*		check_;
 		gui::widget_slider*		slider_;
 		gui::widget_progress*	progress_;
@@ -51,6 +53,7 @@ namespace app {
 
 		uint32_t	filer_id_;
 		uint32_t	menu_id_;
+		int			menu_ins_cnt_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -59,15 +62,16 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		gui_test(utils::director<core>& d) : director_(d),
-			dialog_open_(0), filer_open_(0), menu_open_(0),
-			check_(0),
-			slider_(0),
-			dialog_(0), image_(0), label_(0), frame_(0), menu_(0),
-			tree_frame_(0), tree_core_(0),
-			filer_(0),
-			terminal_frame_(0), terminal_core_(0),
+			dialog_open_(nullptr), filer_open_(nullptr),
+			menu_open_(nullptr), menu_ins_(nullptr), menu_era_(nullptr),
+			check_(nullptr),
+			slider_(nullptr),
+			dialog_(nullptr), image_(nullptr), label_(nullptr), frame_(nullptr), menu_(nullptr),
+			tree_frame_(nullptr), tree_core_(nullptr),
+			filer_(nullptr),
+			terminal_frame_(nullptr), terminal_core_(nullptr),
 			spinbox_(nullptr),
-			filer_id_(0), menu_id_(0)
+			filer_id_(0), menu_id_(0), menu_ins_cnt_(0)
 		{ }
 
 

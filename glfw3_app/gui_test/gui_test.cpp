@@ -92,6 +92,18 @@ namespace app {
 			menu_open_ = wd.add_widget<widget_button>(wp, wp_);
 		}
 
+		if(1) { // ボタンのテスト（メニュー挿入ボタン）
+			widget::param wp(vtx::irect(160, 200, 100, 40));
+			widget_button::param wp_("Insert");
+			menu_ins_ = wd.add_widget<widget_button>(wp, wp_);
+		}
+
+		if(1) { // ボタンのテスト（メニュー削除ボタン）
+			widget::param wp(vtx::irect(290, 200, 100, 40));
+			widget_button::param wp_("Erase");
+			menu_era_ = wd.add_widget<widget_button>(wp, wp_);
+		}
+
 		if(1) { // ボタンのテスト（ダイアログ開始ボタン）
 			widget::param wp(vtx::irect(30, 250, 100, 40));
 			widget_button::param wp_("Daialog");
@@ -313,17 +325,28 @@ namespace app {
 				if(menu_) {
 					menu_->enable(!menu_->get_state(gui::widget::state::ENABLE));
 					if(menu_->get_state(gui::widget::state::ENABLE)) {
-//						menu_->at_rect().org = 
 					}
-
 				}
 			}
 		}
+		if(menu_ins_) {
+			if(menu_ins_->get_selected() && menu_ != nullptr) {
+				++menu_ins_cnt_;
+				menu_->insert((boost::format("Ins-%d") % menu_ins_cnt_).str(), 4);
+			}
+		}
+		if(menu_era_) {
+			if(menu_era_->get_selected() && menu_ != nullptr) {
+				menu_->erase(3);
+			}
+		}
+
 		// メニューが選択された！
 		if(menu_) {
 			if(menu_id_ != menu_->get_select_id()) {
 				menu_id_ = menu_->get_select_id();
-				std::cout << "Menu: " << menu_->get_select_text() << std::endl;
+				utils::format("Menu: '%s', (%d)\n")
+					% menu_->get_select_text().c_str() % menu_->get_select_pos();
 			}
 		}
 
