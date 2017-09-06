@@ -83,6 +83,30 @@ namespace gui {
 		gl::mobj::handle	objh_;
 		gl::mobj::handle	select_objh_;
 
+
+		void build_obj_()
+		{
+			vtx::spos size;
+			if(param_.plate_param_.resizeble_) {
+				vtx::spos rsz = param_.plate_param_.grid_ * 3;
+				if(get_param().rect_.size.x >= rsz.x) size.x = rsz.x;
+				else size.x = get_param().rect_.size.x;
+				if(get_param().rect_.size.y >= rsz.y) size.y = rsz.y;
+				else size.y = get_param().rect_.size.y;
+			} else {
+				size = get_param().rect_.size;
+			}
+
+			share_t t;
+			t.size_ = size;
+			t.color_param_ = param_.color_param_;
+			t.plate_param_ = param_.plate_param_;
+			objh_ = wd_.share_add(t);
+
+			t.color_param_ = param_.color_param_select_;
+			select_objh_ = wd_.share_add(t);
+		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -212,37 +236,29 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() override {
+		void initialize() override
+		{
 			// 標準的に固定
 			at_param().state_.set(widget::state::POSITION_LOCK);
 			at_param().state_.set(widget::state::SIZE_LOCK);
 			at_param().state_.set(widget::state::SERVICE);
 			at_param().state_.set(widget::state::MOVE_STALL);
 
-			vtx::spos size;
-			if(param_.plate_param_.resizeble_) {
-				vtx::spos rsz = param_.plate_param_.grid_ * 3;
-				if(get_param().rect_.size.x >= rsz.x) size.x = rsz.x;
-				else size.x = get_param().rect_.size.x;
-				if(get_param().rect_.size.y >= rsz.y) size.y = rsz.y;
-				else size.y = get_param().rect_.size.y;
-			} else {
-				size = get_param().rect_.size;
-			}
+			build_obj_();
 
 			if(!param_.read_only_) {
 				param_.text_in_pos_ = param_.text_param_.text_.size();
 			}
-
-			share_t t;
-			t.size_ = size;
-			t.color_param_ = param_.color_param_;
-			t.plate_param_ = param_.plate_param_;
-			objh_ = wd_.share_add(t);
-
-			t.color_param_ = param_.color_param_select_;
-			select_objh_ = wd_.share_add(t);
 		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	プレートの再構築 @n
+					※プレート・オブジェクトを再構築する
+		*/
+		//-----------------------------------------------------------------//
+		void build_plate() { build_obj_(); }
 
 
 		//-----------------------------------------------------------------//
@@ -268,7 +284,8 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override {
+		void service() override
+		{
 			if(get_select_in()) {
 				if(!param_.read_only_) {
 					param_.text_in_ = true;
