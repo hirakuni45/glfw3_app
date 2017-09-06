@@ -1,7 +1,10 @@
 #pragma once
 //=====================================================================//
 /*!	@file
-	@brief	GUI widget_menu クラス
+	@brief	GUI widget_menu クラス @n
+			※メニューの文字列リストは、操作性を考慮して二重に持っている。@n
+			※あまりに巨大なメニューには向いていない。@n
+			※メニューは単なるテキストの集合なので、同じ文字列が許容される。
     @author 平松邦仁 (hira@rvf-rc45.net)
 	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
 				Released under the MIT license @n
@@ -10,17 +13,21 @@
 //=====================================================================//
 #include "widgets/widget_director.hpp"
 #include "widgets/widget_label.hpp"
+#include "utils/format.hpp"
 
 namespace gui {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
-		@brief	GUI widget_menu クラス
+		@brief	GUI widget_menu クラス @n
+				※widget_label を並べた、ハイブリッド・モデル
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct widget_menu : public widget {
 
 		typedef widget_menu value_type;
+
+		typedef utils::strings strings;
 
 		typedef std::function<void (const std::string& select_text, uint32_t select_pos)> select_func_type;
 
@@ -35,7 +42,7 @@ namespace gui {
 			text_param	text_param_;	///< テキスト描画のパラメーター
 			color_param	color_param_select_;	///< 選択時カラー・パラメーター
 
-			utils::strings	text_list_;	///< テキスト・リスト
+			strings		text_list_;	///< テキスト・リスト
 
 			uint32_t	list_limit_;	///< 最大表示数（「０」の場合最大数）
 			bool		round_;			///< 角をラウンドしない場合「false」
@@ -67,6 +74,28 @@ namespace gui {
 		int32_t				select_pos_;
 		uint32_t			select_id_;
 
+
+		widget_label* build_menu_(uint32_t pos, const widget::param& wp, widget_label::param& wp_, bool mono)
+		{
+			if(pos == 0 && param_.round_) {
+				wp_.plate_param_.round_radius_ = param_.plate_param_.round_radius_;
+				if(mono) {
+					wp_.plate_param_.round_style_ = widget::plate_param::round_style::ALL;
+				} else {
+					wp_.plate_param_.round_style_ = widget::plate_param::round_style::TOP;
+				}
+			} else if(pos == (param_.text_list_.size() - 1) && param_.round_) {
+				wp_.plate_param_.round_radius_ = param_.plate_param_.round_radius_;
+				wp_.plate_param_.round_style_ = widget::plate_param::round_style::BOTTOM;
+			} else {
+				wp_.plate_param_.round_radius_ = 0;
+				wp_.plate_param_.round_style_ = widget::plate_param::round_style::ALL;
+			}
+			widget_label* w = wd_.add_widget<widget_label>(wp, wp_);
+			return w;
+		}
+
+
 		void build_list_()
 		{
 			widget::param wp(vtx::irect(vtx::spos(0), get_rect().size), this);
@@ -75,23 +104,10 @@ namespace gui {
 			wp_.color_param_ = param_.color_param_select_;
 			wp_.plate_param_.frame_width_ = 0;
 			int n = 0;
+			bool mono = param_.text_list_.size() == 1 ? true : false; 
 			for(const std::string& s : param_.text_list_) {
 				wp_.text_param_.set_text(s);
-				if(n == 0 && param_.round_) {
-					wp_.plate_param_.round_radius_ = param_.plate_param_.round_radius_;
-					wp_.plate_param_.round_style_
-						= widget::plate_param::round_style::TOP;
-				} else if(n == (param_.text_list_.size() - 1) && param_.round_) {
-					wp_.plate_param_.round_radius_ = param_.plate_param_.round_radius_;
-					wp_.plate_param_.round_style_
-						= widget::plate_param::round_style::BOTTOM;
-				} else {
-					wp_.plate_param_.round_radius_ = 0;
-					wp_.plate_param_.round_style_
-						= widget::plate_param::round_style::ALL;
-				}
-				widget_label* w = wd_.add_widget<widget_label>(wp, wp_);
-				w->set_state(widget::state::ENABLE, false);
+				widget_label* w = build_menu_(n, wp, wp_, mono);
 				list_.push_back(w);
 				wp.rect_.org.y += get_rect().size.y;
 				++n;
@@ -181,6 +197,146 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	文字列リストの参照（ＲＯ）
+			@return 文字列リスト
+		*/
+		//-----------------------------------------------------------------//
+		const strings& get_list() const { return param_.text_list_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	文字列リストの参照
+			@return 文字列リスト
+		*/
+		//-----------------------------------------------------------------//
+		strings& at_list() { return param_.text_list_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	メニューのサイズを取得
+			@return メニューのサイズ
+		*/
+		//-----------------------------------------------------------------//
+		uint32_t size() const { return param_.text_list_.size(); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	メニューの全クリア
+		*/
+		//-----------------------------------------------------------------//
+		void clear() {
+			param_.text_list_.clear();
+			destroy_();
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	メニューの消去
+			@param[in]	pos	消去位置
+			@return 成功したら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool erase(uint32_t pos)
+		{
+			if(pos >= list_.size()) return false;
+
+			int h = get_rect().size.y;
+			param_.text_list_.erase(param_.text_list_.begin() + pos);
+			wd_.del_widget(list_[pos]);
+			list_.erase(list_.begin() + pos);
+
+			for(uint32_t n = pos; n < list_.size(); ++n) {
+				list_[n]->at_rect().org.y -= h;
+			}
+
+			// プレートのスタイルを変更
+			if(param_.round_ && !list_.empty()) {
+				if(list_.size() == 1) {
+					widget_label* w = list_[0];
+					w->at_local_param().plate_param_.round_radius_ = param_.plate_param_.round_radius_;
+					w->at_local_param().plate_param_.round_style_ = widget::plate_param::round_style::ALL;
+					w->build_plate();
+				} else if(pos == 0) {
+					widget_label* w = list_[0];
+					w->at_local_param().plate_param_.round_radius_ = param_.plate_param_.round_radius_;
+					w->at_local_param().plate_param_.round_style_ = widget::plate_param::round_style::TOP;
+					w->build_plate();
+				} else {
+					widget_label* w = list_[list_.size() - 1];
+					w->at_local_param().plate_param_.round_radius_ = param_.plate_param_.round_radius_;
+					w->at_local_param().plate_param_.round_style_ = widget::plate_param::round_style::BOTTOM;
+					w->build_plate();
+				}
+			}
+
+			return true;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	メニューへテキストを挿入
+			@param[in]	text	テキスト
+			@param[in]	pos		位置
+			@return 挿入できたら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool insert(const std::string& text, uint32_t pos)
+		{
+			if(pos > list_.size()) return false;
+
+			param_.text_list_.insert(param_.text_list_.begin() + pos, text);
+
+			int h = get_rect().size.y;
+			widget::param wp(vtx::irect(vtx::spos(0, pos * h), get_rect().size), this);
+			widget_label::param wp_;
+			wp_.plate_param_ = param_.plate_param_;
+			wp_.color_param_ = param_.color_param_select_;
+			wp_.plate_param_.frame_width_ = 0;
+			wp_.text_param_.set_text(text);
+
+			widget_label* w = build_menu_(pos, wp, wp_, false);
+
+			list_.insert(list_.begin() + pos, w);
+			++pos;
+			for(uint32_t n = pos; n < list_.size(); ++n) {
+				list_[n]->at_rect().org.y += h;
+			}
+
+			if(param_.round_) {
+				if(pos == 1 && list_.size() > 1) {
+					widget_label* w = list_[pos];
+					w->at_local_param().plate_param_.round_radius_ = 0;
+					w->at_local_param().plate_param_.round_style_ = widget::plate_param::round_style::ALL;
+					w->build_plate();
+				} else if(pos == list_.size()) {
+					widget_label* w = list_[pos - 2];
+					w->at_local_param().plate_param_.round_radius_ = 0;
+					w->at_local_param().plate_param_.round_style_ = widget::plate_param::round_style::ALL;
+					w->build_plate();
+				}
+			}
+
+			return true;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	メニューの最後尾へ追加
+			@param[in]	text	テキスト
+			@return 挿入できたら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool push_back(const std::string& text) { return insert(text, list_.size()); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	選択 ID の取得 @n
 					選択される毎に＋１される
 			@return 選択 ID
@@ -230,7 +386,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void initialize() override
 		{
-			// 標準的に固定、リサイズ不可
+			// 標準的に固定、リサイズ不可、サービス呼び出し
 			at_param().state_.set(widget::state::SERVICE);
 			at_param().state_.set(widget::state::POSITION_LOCK);
 			at_param().state_.set(widget::state::SIZE_LOCK);
