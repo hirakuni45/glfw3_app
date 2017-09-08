@@ -2,6 +2,8 @@
 //=====================================================================//
 /*!	@file
 	@brief	GUI widget_menu クラス @n
+			・リソース作成時、「高さ」が、メニュー一つの高さに相当する。@n
+			・リソース作成後、「高さ」は、メニュー全体の高さに更新される。@n
 			※メニューの文字列リストは、操作性を考慮して二重に持っている。@n
 			※あまりに巨大なメニューには向いていない。@n
 			※メニューは単なるテキストの集合なので、同じ文字列が許容される。
@@ -42,12 +44,12 @@ namespace gui {
 			text_param	text_param_;	///< テキスト描画のパラメーター
 			color_param	color_param_select_;	///< 選択時カラー・パラメーター
 
-			strings		text_list_;	///< テキスト・リスト
+			strings		text_list_;		///< テキスト・リスト
 
-			uint32_t	list_limit_;	///< 最大表示数（「０」の場合最大数）
+			uint32_t	base_height_;	///< メニュー部品、基本の高さ
 			bool		round_;			///< 角をラウンドしない場合「false」
 
-			std::string	select_text_;	///< 選択位置のテキスト
+			std::string	select_text_;	///< 選択位置のテキスト（コピー）
 			uint32_t	select_pos_;	///< テキスト・リストの選択位置
 
 			select_func_type	select_func_;	///< セレクト関数
@@ -59,7 +61,7 @@ namespace gui {
 				vtx::placement(vtx::placement::holizontal::LEFT,
 				vtx::placement::vertical::CENTER)),
 				color_param_select_(widget_director::default_list_color_select_),
-				text_list_(), list_limit_(0), round_(true), select_text_(), select_pos_(0),
+				text_list_(), base_height_(0), round_(true), select_text_(), select_pos_(0),
 				select_func_(nullptr)
 			{ }
 		};
@@ -98,7 +100,7 @@ namespace gui {
 
 		void build_list_()
 		{
-			widget::param wp(vtx::irect(vtx::spos(0), get_rect().size), this);
+			widget::param wp(vtx::irect(vtx::ipos(0), vtx::ipos(get_rect().size.x, param_.base_height_)), this);
 			widget_label::param wp_;
 			wp_.plate_param_ = param_.plate_param_;
 			wp_.color_param_ = param_.color_param_select_;
@@ -244,7 +246,7 @@ namespace gui {
 		{
 			if(pos >= list_.size()) return false;
 
-			int h = get_rect().size.y;
+			int h = param_.base_height_;
 			param_.text_list_.erase(param_.text_list_.begin() + pos);
 			wd_.del_widget(list_[pos]);
 			list_.erase(list_.begin() + pos);
@@ -273,6 +275,8 @@ namespace gui {
 				}
 			}
 
+			at_rect().size.y = list_.size() * param_.base_height_;
+
 			return true;
 		}
 
@@ -291,8 +295,8 @@ namespace gui {
 
 			param_.text_list_.insert(param_.text_list_.begin() + pos, text);
 
-			int h = get_rect().size.y;
-			widget::param wp(vtx::irect(vtx::spos(0, pos * h), get_rect().size), this);
+			int h = param_.base_height_;
+			widget::param wp(vtx::irect(vtx::ipos(0, pos * h), vtx::ipos(get_rect().size.x, h)), this);
 			widget_label::param wp_;
 			wp_.plate_param_ = param_.plate_param_;
 			wp_.color_param_ = param_.color_param_select_;
@@ -320,6 +324,8 @@ namespace gui {
 					w->build_plate();
 				}
 			}
+
+			at_rect().size.y = list_.size() * param_.base_height_;
 
 			return true;
 		}
@@ -392,7 +398,11 @@ namespace gui {
 			at_param().state_.set(widget::state::SIZE_LOCK);
 			at_param().state_.set(widget::state::ENABLE, false);
 
+			param_.base_height_ = get_rect().size.y;
+
 			build_list_();
+
+			at_rect().size.y = list_.size() * param_.base_height_;
 		}
 
 
