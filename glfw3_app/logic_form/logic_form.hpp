@@ -590,7 +590,7 @@ namespace app {
 			{ // ダイアログ(OK)
 				widget::param wp(vtx::irect(100, 100, 500, 150));
 				widget_dialog::param wp_;
-				wp_.style_ = widget_dialog::param::style::OK;
+				wp_.style_ = widget_dialog::style::OK;
 				dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
 				dialog_->enable(false);
 			}
@@ -598,7 +598,7 @@ namespace app {
 			{ // ダイアログ(OK/Cancel)
 				widget::param wp(vtx::irect(110, 110, 500, 150));
 				widget_dialog::param wp_;
-				wp_.style_ = widget_dialog::param::style::CANCEL_OK;
+				wp_.style_ = widget_dialog::style::CANCEL_OK;
 				dialog_yn_ = wd.add_widget<widget_dialog>(wp, wp_);
 				dialog_yn_->enable(false);
 			}

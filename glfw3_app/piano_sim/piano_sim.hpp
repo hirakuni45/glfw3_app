@@ -1,7 +1,7 @@
 #pragma once
 //=====================================================================//
 /*! @file
-	@brief  Piano SIM クラス
+	@brief  Piano SIM クラス（アプリケーションＧＵＩ）
     @author 平松邦仁 (hira@rvf-rc45.net)
 	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
 				Released under the MIT license @n
@@ -15,6 +15,7 @@
 #include "widgets/widget_button.hpp"
 #include "widgets/widget_filer.hpp"
 #include "widgets/widget_slider.hpp"
+#include "widgets/widget_list.hpp"
 #include "widgets/widget_frame.hpp"
 #include "widgets/widget_terminal.hpp"
 #include "piano.hpp"
@@ -34,6 +35,8 @@ namespace app {
 
 		gui::widget_button*		files_;
 		gui::widget_filer*		filer_;
+
+		gui::widget_list*		midi_list_;
 		
 		gui::widget_button*		piano_keys_[12 * key_octave];
 
@@ -131,6 +134,28 @@ namespace app {
 			}
 		}
 
+
+		void update_midi_input_()
+		{
+			uint32_t num = snd::midi_io::get_device_num();
+			if(midi_num_ != num) {
+				midi_num_ = num;
+				std::string tmp = midi_list_->get_select_text();
+				midi_list_->at_local_param().text_list_.clear();
+				for(int32_t i = 0; i < num; ++i) {
+					auto s = snd::midi_io::get_device_name(i);
+// utils::format("%s\n") % s.c_str();
+					midi_list_->at_local_param().text_list_.push_back(s);
+				}
+				midi_list_->update_list();
+
+				// MIDI in の開始
+				if(tmp != midi_list_->get_select_text() || !midi_in_.probe()) {
+					midi_in_.start(midi_list_->get_select_text());
+				}
+			}
+		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -138,7 +163,8 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		piano_sim(utils::director<core>& d) : director_(d),
-			files_(nullptr), filer_(nullptr), piano_keys_{ nullptr },
+			files_(nullptr), filer_(nullptr), midi_list_(nullptr),
+			piano_keys_{ nullptr },
 			overtone_{ nullptr },
 			terminal_frame_(nullptr), terminal_core_(nullptr),
 			key_{ false }, midi_num_(0) { }
@@ -192,9 +218,17 @@ namespace app {
 				};
 			}
 
+
+			{  // MIDI input 選択
+				widget::param wp(vtx::irect(10, 70, 250, 40), 0);
+				widget_list::param wp_("MIDI Input");
+				midi_list_ = wd.add_widget<widget_list>(wp, wp_);
+			}
+
+
 			{  // 倍音スライダー
 				for(int i = 0; i < 8; ++i) {
-					widget::param wp(vtx::irect(30, 100 + 30 * i, 180, 20));
+					widget::param wp(vtx::irect(30, 130 + 30 * i, 180, 20));
 					widget_slider::param wp_;
 //					wp_.select_func_ = [this] (float lvl) {
 //						if(progress_ != nullptr) {
@@ -230,6 +264,10 @@ namespace app {
 			// プリファレンスの取得
 			sys::preference& pre = director_.at().preference_;
 
+			if(midi_list_ != nullptr) {
+				midi_list_->load(pre);
+			}
+
 			if(filer_ != nullptr) {
 				filer_->load(pre);
 			}
@@ -237,13 +275,11 @@ namespace app {
 			if(terminal_frame_ != nullptr) {
 				terminal_frame_->load(pre);
 			}
+
 			for(int i = 0; i < 8; ++i) {
 				if(overtone_[i] == nullptr) continue;
 				overtone_[i]->load(pre);
 			}
-
-			// MIDI in の開始
-			midi_in_.start(1);
 		}
 
 
@@ -256,13 +292,7 @@ namespace app {
 		{
 			gui::widget_director& wd = director_.at().widget_director_;
 
-			if(0) {
-				uint32_t num = snd::midi_io::get_device_num();
-				if(midi_num_ != num) {
-					midi_num_ = num;
-					snd::midi_io::list_device();
-				}
-			}
+			update_midi_input_();
 
 ///			keys_();
 
@@ -334,6 +364,10 @@ namespace app {
 
 			if(filer_ != nullptr) {
 				filer_->save(pre);
+			}
+
+			if(midi_list_ != nullptr) {
+				midi_list_->save(pre);
 			}
 		}
 	};
