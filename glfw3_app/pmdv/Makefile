@@ -69,7 +69,6 @@ PSOURCES	=	main.cpp \
 				widgets/common_parts.cpp \
 				widgets/widget_director.cpp \
 				widgets/widget_utils.cpp \
-				widgets/widget_dialog.cpp \
 				widgets/widget_tree.cpp \
 				widgets/widget_filer.cpp \
 				widgets/widget_editor.cpp \
