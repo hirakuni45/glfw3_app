@@ -68,6 +68,10 @@ glfw3_app/common/widgets
    
 ・スライダー（水平、又は、垂直、移動）   
    
+### widget_progress.hpp
+   
+・プログレスバー（進捗度ゲージ）   
+   
 ### widget_border.hpp
    
 ・水平線、又は、垂直線を描画する。   
