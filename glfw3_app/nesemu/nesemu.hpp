@@ -316,7 +316,7 @@ namespace app {
 			{   // Daialog
 				widget::param wp(vtx::irect(70, 70, 300, 150));
 				widget_dialog::param wp_;
-				wp_.style_ = widget_dialog::param::style::OK;
+				wp_.style_ = widget_dialog::style::OK;
 				dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
 				dialog_->enable(false);
 			}

@@ -112,7 +112,7 @@ namespace app {
 			vtx::spos pos = (core.get_rect().size - size) / 2;
             widget::param wp(vtx::irect(pos, size));
             widget_dialog::param wp_;
-            wp_.style_ = widget_dialog::param::style::OK;
+            wp_.style_ = widget_dialog::style::OK;
             widget_dialog* d = wd.add_widget<widget_dialog>(wp, wp_);
             d->set_text(errstr);
 		} else {

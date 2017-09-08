@@ -274,13 +274,13 @@ namespace app {
 		}
 		{ // ダイアログ(cancel/ok)
 			widget::param wp(vtx::irect(10, 30, 450, 200));
-			widget_dialog::param wp_(widget_dialog::param::style::CANCEL_OK);
+			widget_dialog::param wp_(widget_dialog::style::CANCEL_OK);
 			dialog_yes_no_ = wd.add_widget<widget_dialog>(wp, wp_);
 			dialog_yes_no_->enable(false);
 		}
 		{ // ダイアログ(scale)
 			widget::param wp(vtx::irect(10, 30, 450, 200));
-			widget_dialog::param wp_(widget_dialog::param::style::CANCEL_OK);
+			widget_dialog::param wp_(widget_dialog::style::CANCEL_OK);
 			dialog_scale_ = wd.add_widget<widget_dialog>(wp, wp_);
 			dialog_scale_->enable(false);
 		}
