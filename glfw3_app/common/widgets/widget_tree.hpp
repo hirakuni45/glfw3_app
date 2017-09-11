@@ -156,7 +156,7 @@ namespace gui {
 			@brief	型を取得
 		*/
 		//-----------------------------------------------------------------//
-		type_id type() const { return get_type_id<value_type>(); }
+		type_id type() const override { return get_type_id<value_type>(); }
 
 
 		//-----------------------------------------------------------------//
@@ -165,7 +165,7 @@ namespace gui {
 			@return widget 型の基本名称
 		*/
 		//-----------------------------------------------------------------//
-		const char* type_name() const { return "tree"; }
+		const char* type_name() const override { return "tree"; }
 
 
 		//-----------------------------------------------------------------//
@@ -174,7 +174,7 @@ namespace gui {
 			@return ハイブリッド・ウィジェットの場合「true」を返す。
 		*/
 		//-----------------------------------------------------------------//
-		bool hybrid() const { return true; }
+		bool hybrid() const override { return true; }
 
 
 		//-----------------------------------------------------------------//
