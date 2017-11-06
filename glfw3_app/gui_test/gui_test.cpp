@@ -73,7 +73,7 @@ namespace app {
 		if(1) { // ダイアログのテスト
 			widget::param wp(vtx::irect(300, 300, 300, 200));
 			widget_dialog::param wp_;
-			wp_.style_ = widget_dialog::param::style::CANCEL_OK;
+			wp_.style_ = widget_dialog::style::CANCEL_OK;
 			dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
 			dialog_->set_text("ああああ\nうううう\nいいいい\n漢字\n日本");
 		}
@@ -130,10 +130,11 @@ namespace app {
 
 		if(1) { // リストのテスト
 			widget::param wp(vtx::irect(30, 400, 150, 40), 0);
-			widget_list::param wp_("List Box");
-			wp_.text_list_.push_back("abc");
-			wp_.text_list_.push_back("1234");
-			wp_.text_list_.push_back("qwert");
+			widget_list::param wp_("3rd");
+			wp_.text_list_.push_back("1st");
+			wp_.text_list_.push_back("2nd");
+			wp_.text_list_.push_back("3rd");
+			wp_.text_list_.push_back("4th");
 			wd.add_widget<widget_list>(wp, wp_);
 		}
 
@@ -177,6 +178,9 @@ namespace app {
 			wp_.text_list_.push_back("Second");
 			wp_.text_list_.push_back("Third");
 			wp_.text_list_.push_back("Force");
+			wp_.select_func_ = [this](const std::string& text, uint32_t pos) {
+				utils::format("Menu Selected: '%s', (%d)\n") % text.c_str() % pos;
+			};
 			menu_ = wd.add_widget<widget_menu>(wp, wp_);
 		}
 
@@ -342,6 +346,7 @@ namespace app {
 		}
 
 		// メニューが選択された！
+#if 0
 		if(menu_) {
 			if(menu_id_ != menu_->get_select_id()) {
 				menu_id_ = menu_->get_select_id();
@@ -349,6 +354,7 @@ namespace app {
 					% menu_->get_select_text().c_str() % menu_->get_select_pos();
 			}
 		}
+#endif
 
 		if(terminal_core_) {
 //			static wchar_t ch = ' ';
