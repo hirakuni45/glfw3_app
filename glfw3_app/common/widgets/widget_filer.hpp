@@ -18,6 +18,7 @@
 #include "widgets/widget_null.hpp"
 #include "widgets/widget_label.hpp"
 #include "widgets/widget_button.hpp"
+#include "widgets/spring_damper.hpp"
 
 namespace gui {
 
