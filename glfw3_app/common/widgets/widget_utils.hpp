@@ -200,4 +200,13 @@ namespace gui {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	void draw_border(const vtx::srect& rect, const widget::color_param& color = widget_director::default_border_color_);
+
+
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief	プラットフォーム依存、ファイル選択
+		@return 正常選択された場合「true」
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	bool get_open_file_name();
 }
