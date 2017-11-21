@@ -80,7 +80,7 @@ OPTLIBS		=	opengl32 glfw3 glew32 \
 				png turbojpeg jpeg openjp2 \
 				freetype \
 				mad faad mp4ff tag \
-				z openal
+				z openal ncftp
 else
 LOCAL_PATH	=	/usr/local
 OPTLIBS		=	glfw3 GLEW \
@@ -95,8 +95,9 @@ INC_SYS		=	$(LOCAL_PATH)/include \
 				$(LOCAL_PATH)/include/freetype2 \
 				$(LOCAL_PATH)/include/openjpeg-2.1 \
 				$(LOCAL_PATH)/include/taglib
-INC_LIB		=
-LIBDIR		=	$(LOCAL_PATH)/lib
+INC_LIB		=	libncftp
+LIBDIR		=	$(LOCAL_PATH)/lib \
+				libncftp
 
 ifeq ($(SYSTEM),OSX)
 INC_SYS		+=	$(LOCAL_PATH)/opt/jpeg-turbo/include
