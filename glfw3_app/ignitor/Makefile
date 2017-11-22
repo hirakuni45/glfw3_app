@@ -76,6 +76,8 @@ STDLIBS		=
 ifeq ($(SYSTEM),WIN)
 LOCAL_PATH	=	/mingw64
 OPTLIBS		=	opengl32 glfw3 glew32 \
+				comdlg32 \
+				boost_system-mt ws2_32 \
 				pthread \
 				png turbojpeg jpeg openjp2 \
 				freetype \
@@ -103,8 +105,8 @@ INC_SYS		+=	$(LOCAL_PATH)/opt/jpeg-turbo/include
 LIBDIR		+=	$(LOCAL_PATH)/opt/jpeg-turbo/lib
 endif
 
-PINC_APP	=	. ../common ./emu ./emu/cpu ./emu/nes ./emu/mappers ./emu/sndhrdw ./emu/libsnss
-CINC_APP	=	. ../common ./emu ./emu/cpu ./emu/nes ./emu/mappers ./emu/sndhrdw ./emu/libsnss
+PINC_APP	=	. ../common
+CINC_APP	=	. ../common
 
 INC_S	=	$(addprefix -isystem , $(INC_SYS))
 INC_L	=	$(addprefix -isystem , $(INC_LIB))
@@ -141,7 +143,7 @@ PFLAGS	=	-DHAVE_STDINT_H
 CFLAGS	=
 
 ifeq ($(SYSTEM),WIN)
-	PFLAGS += -DWIN32 -DBOOST_USE_WINDOWS_H
+	PFLAGS += -DWIN32 -DBOOST_USE_WINDOWS_H -DWIN32_LEAN_AND_MEAN
 	CFLAGS += -DWIN32
 endif
 
