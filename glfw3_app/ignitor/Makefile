@@ -86,6 +86,7 @@ OPTLIBS		=	opengl32 glfw3 glew32 \
 else
 LOCAL_PATH	=	/usr/local
 OPTLIBS		=	glfw3 GLEW \
+				boost_system-mt \
 				pthread \
 				png turbojpeg openjp2 \
 				freetype \
