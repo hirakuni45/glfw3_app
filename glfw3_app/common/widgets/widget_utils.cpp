@@ -521,6 +521,7 @@ namespace gui {
 	}
 
 
+#if 0
 #ifdef WIN32
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
@@ -554,5 +555,6 @@ namespace gui {
 			return false;
 		}
 	}
+#endif
 #endif
 }

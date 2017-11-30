@@ -208,5 +208,5 @@ namespace gui {
 		@return 正常選択された場合「true」
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	bool get_open_file_name();
+//	bool get_open_file_name();
 }
