@@ -44,8 +44,10 @@ namespace app {
 		gui::widget_terminal*	terminal_core_;
 
 
+		asio::io_service		io_service_;
 		net::ign_client			client_;
 
+		bool					start_client_;
 
 		// ターミナル、行入力
 		void term_enter_(const utils::lstring& text) {
@@ -63,8 +65,11 @@ namespace app {
 		ignitor(utils::director<core>& d) : director_(d),
 			menu_(nullptr), load_(nullptr), load_ctx_(nullptr),
 			wave_(nullptr),
-			terminal_frame_(nullptr), terminal_core_(nullptr)
-		{ }
+			terminal_frame_(nullptr), terminal_core_(nullptr),
+			io_service_(),
+			client_(io_service_), start_client_(false)
+		{
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -174,10 +179,6 @@ namespace app {
 ///			if(save_ctx_ != nullptr) save_ctx_->load(pre);
 
 ///			if(edit_ != nullptr) edit_->load(pre);
-
-
-
-			client_.start();
 		}
 
 
@@ -188,6 +189,13 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void update()
 		{
+			if(start_client_) {
+				client_.service();
+			} else {
+				client_.start();				
+				start_client_ = true;
+			}
+
 			gui::widget_director& wd = director_.at().widget_director_;
 #if 0
 			// Drag & Drop されたファイル
