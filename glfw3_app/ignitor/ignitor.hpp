@@ -21,6 +21,7 @@
 #include "widgets/widget_utils.hpp"
 
 #include "ign_client.hpp"
+#include "ign_server.hpp"
 
 namespace app {
 
@@ -46,6 +47,7 @@ namespace app {
 
 		asio::io_service		io_service_;
 		net::ign_client			client_;
+		net::ign_server			server_;
 
 		bool					start_client_;
 
@@ -67,7 +69,9 @@ namespace app {
 			wave_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
 			io_service_(),
-			client_(io_service_), start_client_(false)
+			client_(io_service_),
+			server_(io_service_),
+			start_client_(false)
 		{
 		}
 
@@ -179,6 +183,9 @@ namespace app {
 ///			if(save_ctx_ != nullptr) save_ctx_->load(pre);
 
 ///			if(edit_ != nullptr) edit_->load(pre);
+
+			// テスト・サーバー起動
+			server_.start();
 		}
 
 
@@ -195,6 +202,8 @@ namespace app {
 				client_.start();				
 				start_client_ = true;
 			}
+			server_.service();
+			io_service_.run();
 
 			gui::widget_director& wd = director_.at().widget_director_;
 #if 0

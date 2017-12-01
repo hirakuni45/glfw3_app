@@ -9,13 +9,13 @@
 */
 //=====================================================================//
 #include <iostream>
-#define ASIO_STANDALONE
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
-#include <boost/asio/detail/winsock_init.hpp>
 
 #include "utils/format.hpp"
+#include "utils/string_utils.hpp"
 
+// #include <boost/asio/detail/winsock_init.hpp>
 // boost::asio::detail::winsock_init<>::manual manual_winsock_init
 // __attribute__ ((init_priority (101)));
 
@@ -33,9 +33,10 @@ namespace net {
 		asio::io_service&	io_service_;
 		ip::tcp::socket		socket_;
 
+		bool				connect_;
+
 		asio::streambuf		send_;
 		asio::streambuf		recv_;
-
 
 		void send_end_(const boost::system::error_code& error)
 		{
@@ -75,8 +76,11 @@ namespace net {
 		void on_connect_(const boost::system::error_code& error)
     	{
         	if(error) {
-            	std::cout << "connect failed : " << error.message() << std::endl;
+				const std::string& in = error.message();
+				auto out = utils::sjis_to_utf8(in);
+            	std::cout << "connect failed: " << out << std::endl;
         	} else {
+				connect_ = true;
 				std::cout << "connected" << std::endl;
 			}
 		}
@@ -87,13 +91,18 @@ namespace net {
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		ign_client(asio::io_service& ios) : io_service_(ios), socket_(ios) {
-//			::WSAStartup(MAKEWORD(2, 0), &dat_);
+		ign_client(asio::io_service& ios) : io_service_(ios), socket_(ios), connect_(false)
+		{
 		}
 
 
-		~ign_client() {
-//			::WSACleanup();
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  デストラクター
+		*/
+		//-----------------------------------------------------------------//
+		~ign_client()
+		{
 		}
 
 
@@ -104,13 +113,12 @@ namespace net {
 		//-----------------------------------------------------------------//
 		void start()
 		{
-			try {
-				socket_.async_connect(ip::tcp::endpoint(ip::address::from_string("127.0.0.1"), 31400),
-				boost::bind(&ign_client::on_connect_, this, asio::placeholders::error));
-				std::cout << "Connection..." << std::endl;
-			} catch(std::exception& e) {
-				std::cout << e.what() << std::endl;
-			}
+			connect_ = false;
+			socket_.async_connect(ip::tcp::endpoint(ip::address::from_string("127.0.0.1"), 31400),
+				boost::bind(&ign_client::on_connect_, this, asio::placeholders::error));			connect_ = false;
+//			socket_.connect(ip::tcp::endpoint(ip::address::from_string("127.0.0.1"), 31400));
+
+			std::cout << "Connection start..." << std::endl;
 		}
 
 
@@ -121,17 +129,19 @@ namespace net {
 		//-----------------------------------------------------------------//
 		void service()
 		{
-//			io_service_.reset();
-			static uint32_t cnt = 0;
-			if(cnt >= 60) {
-				async_send_();
-				cnt = 0;
+
+
+			if(connect_) {
+//				io_service_.reset();
+				static uint32_t cnt = 0;
+				if(cnt >= 60) {
+					async_send_();
+					cnt = 0;
+				}
+				++cnt;
+
+				async_recv_();
 			}
-			++cnt;
-
-			async_recv_();
-
-			io_service_.run();
 		}
 	};
 }
