@@ -18,6 +18,10 @@
 #include "img_io/img_files.hpp"
 #include "utils/keyboard.hpp"
 
+extern "C" {
+	void widget_term_write(int fd, char ch);
+};
+
 namespace gui {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
