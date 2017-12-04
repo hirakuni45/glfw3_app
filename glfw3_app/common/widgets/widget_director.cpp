@@ -30,17 +30,6 @@
 #include "widgets/widget_filer.hpp"
 #include "widgets/widget_terminal.hpp"
 
-extern "C" {
-
-	void widget_term_write(int fd, char ch)
-	{
-//		using namespace gui;
-//		widget_director& wd = director_.at().widget_director_;
-		
-	}
-
-};
-
 namespace gui {
 
 	using namespace gl;

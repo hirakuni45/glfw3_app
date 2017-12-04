@@ -14,6 +14,7 @@
 #include "utils/vmath.hpp"
 #include "utils/string_utils.hpp"
 #include "gl_fw/glutils.hpp"
+#include "utils/format.hpp"
 
 namespace gui {
 
@@ -217,11 +218,39 @@ namespace gui {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class term_chaout {
-	public:
-		term_chaout() { } 
+		static widget*	output_;
 
-		void operator() (char ch) {
-			widget_term_write(1, ch);
-		}
+		std::string		buff_;
+
+		char*		out_;
+		uint16_t	len_;
+		uint16_t	pos_;
+
+	public:
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	コンストラクター
+		*/
+		//-----------------------------------------------------------------//
+		term_chaout(char* out = nullptr, uint16_t len = 0) : out_(out), len_(len), pos_(0) { } 
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ターミナル出力の設定
+		*/
+		//-----------------------------------------------------------------//
+		static void set_output(widget* w) { output_ = w; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	format 出力、標準オペレーターの実装
+			@param[in]	ch	出力キャラクター
+		*/
+		//-----------------------------------------------------------------//
+		void operator() (char ch);
 	};
+
+	typedef utils::basic_format<term_chaout> tformat;
 }
