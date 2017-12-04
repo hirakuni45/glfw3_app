@@ -252,5 +252,5 @@ namespace gui {
 		void operator() (char ch);
 	};
 
-	typedef utils::basic_format<term_chaout> tformat;
+	typedef utils::basic_format<term_chaout> format;
 }

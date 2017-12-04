@@ -137,7 +137,7 @@ namespace net {
 				if(cnt >= 60) {
 					async_send_();
 					cnt = 0;
-					gui::tformat("Send...\n");
+					gui::format("Send...\n");
 				}
 				++cnt;
 
