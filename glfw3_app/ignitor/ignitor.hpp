@@ -153,6 +153,7 @@ namespace app {
 						term_enter_(text);
 					};
 					terminal_core_ = wd.add_widget<widget_terminal>(wp, wp_);
+					term_chaout::set_output(terminal_core_);
 				}
 
 				// ロジック編集クラスの出力先の設定
