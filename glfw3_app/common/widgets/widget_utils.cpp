@@ -15,6 +15,7 @@
 #include "widget_utils.hpp"
 #include "widget_button.hpp"
 #include "widget_label.hpp"
+#include "widget_terminal.hpp"
 
 namespace gui {
 
@@ -518,6 +519,27 @@ namespace gui {
 		r.org += o;
 		gl::glColor(color.back_color_);
 		gl::draw_filled_rectangle(r);
+	}
+
+
+	widget* term_chaout::output_ = nullptr;
+
+	void term_chaout::operator() (char ch)
+	{
+		if(output_ != nullptr && output_->type() == get_type_id<widget_terminal>()) {
+
+			buff_ += ch;
+
+			widget_terminal* term = static_cast<widget_terminal*>(output_);
+
+			if(ch == '\n' || ch == 0) {
+				term->output(buff_);
+				buff_.clear();
+			} else if(buff_.size() >= 64) {
+				term->output(buff_);
+				buff_.clear();
+			}
+		}
 	}
 
 
