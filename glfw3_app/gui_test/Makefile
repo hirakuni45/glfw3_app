@@ -29,7 +29,6 @@ CSOURCES	=	minizip/ioapi.c \
 				minizip/unzip.c
 
 PSOURCES	=	main.cpp \
-				gui_test.cpp \
 				core/glcore.cpp \
 				core/device.cpp \
 				core/ftimg.cpp \
@@ -45,7 +44,6 @@ PSOURCES	=	main.cpp \
 				utils/file_io.cpp \
 				utils/file_info.cpp \
 				utils/files.cpp \
-				utils/preference.cpp \
 				utils/keyboard.cpp \
 				img_io/paint.cpp \
 				img_io/bmp_io.cpp \
