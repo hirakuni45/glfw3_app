@@ -18,10 +18,12 @@
 #include "widgets/widget_button.hpp"
 #include "widgets/widget_filer.hpp"
 #include "widgets/widget_terminal.hpp"
+#include "widgets/widget_view.hpp"
 #include "widgets/widget_utils.hpp"
 
 #include "ign_client.hpp"
 #include "ign_server.hpp"
+#include "render_waves.hpp"
 
 namespace app {
 
@@ -44,6 +46,8 @@ namespace app {
 		gui::widget_frame*		terminal_frame_;
 		gui::widget_terminal*	terminal_core_;
 
+		gui::widget_frame*		view_frame_;
+		gui::widget_view*		view_core_;
 
 		asio::io_service		io_service_;
 		net::ign_client			client_;
@@ -51,11 +55,33 @@ namespace app {
 
 		bool					start_client_;
 
+		typedef view::render_waves<uint16_t, 65536 * 4> WAVES;
+		WAVES					waves_;
+
 		// ターミナル、行入力
 		void term_enter_(const utils::lstring& text) {
 			auto s = utils::utf32_to_utf8(text);
 //			project_.logic_edit_.command(s);
 ///			std::cout << s << std::endl;
+		}
+
+		// 波形描画
+		void update_view_()
+		{
+		}
+
+
+		void render_view_(const vtx::irect& clip)
+		{
+			glDisable(GL_TEXTURE_2D);
+
+			gl::glColor(img::rgba8(255, 255));
+			waves_.render(clip.size.x);
+		}
+
+
+		void service_view_()
+		{
 		}
 
 	public:
@@ -68,6 +94,7 @@ namespace app {
 			menu_(nullptr), load_(nullptr), load_ctx_(nullptr),
 			wave_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
+			view_frame_(nullptr), view_core_(nullptr),
 			io_service_(),
 			client_(io_service_),
 			server_(io_service_),
@@ -163,6 +190,30 @@ namespace app {
 //				);
 			}
 
+			{	// 波形ビュー
+				{
+					widget::param wp(vtx::irect(40, 150, 200, 200));
+					widget_frame::param wp_;
+					wp_.plate_param_.set_caption(12);
+					view_frame_ = wd.add_widget<widget_frame>(wp, wp_);
+				}
+				{
+					widget::param wp(vtx::irect(0), view_frame_);
+					widget_view::param wp_;
+					wp_.update_func_ = [this]() {
+						update_view_();
+					};
+					wp_.render_func_ = [this](const vtx::irect& clip) {
+						render_view_(clip);
+					};
+					wp_.service_func_ = [this]() {
+						service_view_();
+					};
+					view_core_ = wd.add_widget<widget_view>(wp, wp_);
+				}
+			}
+
+
 			// プリファレンスのロード
 			sys::preference& pre = director_.at().preference_;
 
@@ -176,6 +227,10 @@ namespace app {
 				terminal_frame_->load(pre);
 			}
 
+			if(view_frame_ != nullptr) {
+				view_frame_->load(pre);
+			}
+
 //			if(argv_frame_ != nullptr) {
 //				argv_frame_->load(pre);
 //			}
@@ -187,6 +242,10 @@ namespace app {
 
 			// テスト・サーバー起動
 			server_.start();
+
+			// テスト波形生成
+			waves_.create_waves(0.5, 5.0 * 10e-6);
+			waves_.create_sin(1000);
 		}
 
 
@@ -255,6 +314,10 @@ namespace app {
 //			if(argv_frame_ != nullptr) {
 //				argv_frame_->save(pre);
 //			}
+
+			if(view_frame_ != nullptr) {
+				view_frame_->save(pre);
+			}
 
 			if(terminal_frame_ != nullptr) {
 				terminal_frame_->save(pre);
