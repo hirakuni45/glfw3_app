@@ -25,6 +25,7 @@
 #include "widgets/widget_terminal.hpp"
 #include "widgets/widget_progress.hpp"
 #include "widgets/widget_spinbox.hpp"
+#include "widgets/widget_view.hpp"
 
 namespace app {
 
@@ -43,18 +44,43 @@ namespace app {
 		gui::widget_dialog*		dialog_;
 		gui::widget_image*		image_;
 		gui::widget_label*		label_;
+
 		gui::widget_frame*		frame_;
+
 		gui::widget_menu*		menu_;
+
 		gui::widget_frame*		tree_frame_;
 		gui::widget_tree*		tree_core_;
+
 		gui::widget_filer*		filer_;
+
 		gui::widget_frame*		terminal_frame_;
 		gui::widget_terminal*	terminal_core_;
+
 		gui::widget_spinbox*	spinbox_;
+
+		gui::widget_frame*		view_frame_;
+		gui::widget_view*		view_core_;
 
 		uint32_t	filer_id_;
 		uint32_t	menu_id_;
 		int			menu_ins_cnt_;
+
+
+		void view_update_()
+		{
+
+		}
+
+		void view_render_(const vtx::irect& clip)
+		{
+			glDisable(GL_TEXTURE_2D);
+
+			gl::glColor(img::rgba8(255, 255));
+//			gl::draw_line(vtx::spos(clip.org.x, clip.org.y), vtx::spos(clip.size.x, clip.size.y));
+			gl::draw_line(vtx::spos(0, 0), vtx::spos(100, 100));
+		}
+
 
 	public:
 		//-----------------------------------------------------------------//
@@ -77,6 +103,7 @@ namespace app {
 			filer_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
 			spinbox_(nullptr),
+			view_frame_(nullptr), view_core_(nullptr),
 			filer_id_(0), menu_id_(0), menu_ins_cnt_(0)
 		{ }
 
@@ -263,6 +290,7 @@ namespace app {
 			if(1) { // フレームのテスト
 				widget::param wp(vtx::irect(200, 20, 100, 80));
 				widget_frame::param wp_;
+				wp_.plate_param_.set_caption(12);
 				frame_ = wd.add_widget<widget_frame>(wp, wp_);
 			}
 
@@ -342,28 +370,51 @@ namespace app {
 				}
 			}
 
+			if(1) {
+				{
+					widget::param wp(vtx::irect(200, 300, 300, 300));
+					widget_frame::param wp_;
+					wp_.plate_param_.set_caption(15);
+					view_frame_ = wd.add_widget<widget_frame>(wp, wp_);
+				}
+				{
+					widget::param wp(vtx::irect(0), view_frame_);
+					widget_view::param wp_;
+					wp_.update_func_ = [this]() {
+						view_update_();
+					};
+					wp_.render_func_ = [this](const vtx::irect& clip) {
+						view_render_(clip);
+					};
+					view_core_ = wd.add_widget<widget_view>(wp, wp_);
+				}
+			}
+
 			// プリファレンスの取得
 			sys::preference& pre = director_.at().preference_;
-			if(filer_) {
+			if(filer_ != nullptr) {
 				filer_->load(pre);
 			}
-			if(label_) {
+			if(label_ != nullptr) {
 				label_->load(pre);
 			}
-			if(slider_) {
+			if(slider_ != nullptr) {
 				slider_->load(pre);
 			}
-			if(check_) {
+			if(check_ != nullptr) {
 				check_->load(pre);
 			}
-			if(frame_) {
+			if(frame_ != nullptr) {
 				frame_->load(pre);
 			}
-			if(tree_frame_) {
+			if(tree_frame_ != nullptr) {
 				tree_frame_->load(pre);
 			}
-			if(terminal_frame_) {
+			if(terminal_frame_ != nullptr) {
 				terminal_frame_->load(pre);
+			}
+			if(view_frame_ != nullptr) {
+				view_frame_->load(pre);
 			}
 		}
 
@@ -463,25 +514,28 @@ namespace app {
 		void destroy() override
 		{
 			sys::preference& pre = director_.at().preference_;
-			if(filer_) {
+			if(filer_ != nullptr) {
 				filer_->save(pre);
 			}
-			if(terminal_frame_) {
+			if(view_frame_ != nullptr) {
+				view_frame_->save(pre);
+			}
+			if(terminal_frame_ != nullptr) {
 				terminal_frame_->save(pre);
 			}
-			if(tree_frame_) {
+			if(tree_frame_ != nullptr) {
 				tree_frame_->save(pre);
 			}
-			if(check_) {
+			if(check_ != nullptr) {
 				check_->save(pre);
 			}
-			if(slider_) {
+			if(slider_ != nullptr) {
 				slider_->save(pre);
 			}
-			if(label_) {
+			if(label_ != nullptr) {
 				label_->save(pre);
 			}
-			if(frame_) {
+			if(frame_ != nullptr) {
 				frame_->save(pre);
 			}
 		}
