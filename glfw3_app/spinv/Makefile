@@ -50,7 +50,6 @@ PSOURCES	=	main.cpp \
 				utils/file_info.cpp \
 				utils/files.cpp \
 				utils/unzip.cpp \
-				utils/preference.cpp \
 				utils/keyboard.cpp \
 				img_io/paint.cpp \
 				img_io/bmp_io.cpp \
@@ -172,7 +171,7 @@ endif
 # -Wuninitialized -Wunused -Werror -Wshadow
 CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
 			-Wformat
-CPWARN	=	-Wall -Werror
+CPWARN	=	-Wall -Werror -Wno-unused-private-field
 
 OBJECTS	=	$(addprefix $(BUILD)/,$(patsubst %.cpp,%.o,$(PSOURCES))) \
 			$(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(CSOURCES)))
