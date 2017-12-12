@@ -153,19 +153,21 @@ namespace gui {
 			using namespace gl;
 			core& core = core::get_instance();
 			const vtx::spos& vsz = core.get_size();
-			const vtx::spos& siz = core.get_rect().size;
+			float sc = core.get_dpi_scale();
 			const widget::param& wp = get_param();
 
 			glPushMatrix();
 
-			int sx = vsz.x / siz.x;
-			int sy = vsz.y / siz.y;
+			float sx = sc;
+			float sy = sc;
 			glViewport(wp.clip_.org.x * sx, vsz.y - wp.clip_.org.y * sy - wp.clip_.size.y * sy,
-				wp.clip_.size.x * sx, wp.clip_.size.y * sy);
+				wp.clip_.size.x * sx + 1, wp.clip_.size.y * sy + 1);
 			wd_.at_mobj().setup_matrix(wp.clip_.size.x, wp.clip_.size.y);
 
-			if(param_.render_func_ != nullptr) param_.render_func_(wp.clip_);
-			
+			if(param_.render_func_ != nullptr) {
+				param_.render_func_(wp.clip_);
+			}
+
 			glPopMatrix();
 			glViewport(0, 0, vsz.x, vsz.y);
 		}
