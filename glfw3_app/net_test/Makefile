@@ -1,11 +1,11 @@
 #-----------------------------------------------#
 # Application Binary Build Makefile             #
 #-----------------------------------------------#
-TARGET		=	player
+TARGET		=	net_test
 
 ifeq ($(OS),Windows_NT)
-FEXT	=	.exe
-ICON_RC = icon.rc
+FEXT    = .exe
+ICON_RC =
 SYSTEM := WIN
 else
   UNAME := $(shell uname -s)
@@ -16,7 +16,7 @@ else
     SYSTEM := OSX
 	OSX_VER := $(shell sw_vers -productVersion | sed 's/^\([0-9]*.[0-9]*\).[0-9]*/\1/')
   endif
-FEXT	=
+FEXT    =
 ICON_RC =
 endif
 
@@ -28,51 +28,15 @@ VPATH		=	../common
 CSOURCES	=	minizip/ioapi.c \
 				minizip/unzip.c
 
-PSOURCES	=	main.cpp \
-				player.cpp \
-				core/glcore.cpp \
-				core/device.cpp \
-				core/ftimg.cpp \
-				gl_fw/glfonts.cpp \
-				gl_fw/glmobj.cpp \
-				gl_fw/gltexfb.cpp \
-				gl_fw/glutils.cpp \
-				gl_fw/glterminal.cpp \
-				utils/vtx.cpp \
-				utils/vmath.cpp \
-				utils/sjis_utf16.cpp \
-				utils/string_utils.cpp \
-				utils/file_io.cpp \
-				utils/file_info.cpp \
-				utils/files.cpp \
-				utils/keyboard.cpp \
-				img_io/paint.cpp \
-				img_io/bmp_io.cpp \
-				img_io/tga_io.cpp \
-				img_io/dds_io.cpp \
-				img_io/png_io.cpp \
-				img_io/jpeg_io.cpp \
-				img_io/openjpeg_io.cpp \
-				img_io/pvr_io.cpp \
-				img_io/img_files.cpp \
-				img_io/img_utils.cpp \
-				snd_io/audio_io.cpp \
-				snd_io/pcm.cpp \
-				snd_io/wav_io.cpp \
-				snd_io/aac_io.cpp \
-				snd_io/mp3_io.cpp \
-				snd_io/snd_files.cpp \
-				snd_io/sound.cpp \
-				widgets/common_parts.cpp \
-				widgets/widget_director.cpp \
-				widgets/widget_utils.cpp \
-				widgets/widget_filer.cpp
+PSOURCES	=	main.cpp
 
 STDLIBS		=
 
 ifeq ($(SYSTEM),WIN)
 LOCAL_PATH	=	/mingw64
 OPTLIBS		=	opengl32 glfw3 glew32 \
+				comdlg32 \
+				boost_system-mt ws2_32 wsock32 \
 				pthread \
 				png turbojpeg jpeg openjp2 \
 				freetype \
@@ -81,6 +45,7 @@ OPTLIBS		=	opengl32 glfw3 glew32 \
 else
 LOCAL_PATH	=	/usr/local
 OPTLIBS		=	glfw3 GLEW \
+				boost_system-mt \
 				pthread \
 				png turbojpeg openjp2 \
 				freetype \
@@ -154,7 +119,7 @@ endif
 
 # 	-static-libgcc -static-libstdc++
 ifeq ($(SYSTEM),WIN)
-LFLAGS	=
+LFLAGS =
 endif
 ifeq ($(SYSTEM),OSX)
 LFLAGS	=	-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX$(OSX_VER).sdk \
@@ -165,7 +130,7 @@ endif
 # -Wuninitialized -Wunused -Werror -Wshadow
 CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
 			-Wformat
-CPWARN	=	-Wall -Werror -Wno-unused-private-field
+CPWARN	=	-Wall -Werror
 
 OBJECTS	=	$(addprefix $(BUILD)/,$(patsubst %.cpp,%.o,$(PSOURCES))) \
 			$(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(CSOURCES)))
@@ -222,7 +187,7 @@ clean_depend:
 	rm -f $(DEPENDS)
 
 dllname:
-	objdump -p $(TARGET)$(FEXT) | grep --text "DLL Name"
+	objdump -p $(TARGET)$(FEXT) | grep "DLL Name"
 
 tarball:
 	tar cfvz $(TARGET)_$(shell date +%Y%m%d%H).tgz \

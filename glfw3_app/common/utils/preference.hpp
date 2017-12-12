@@ -23,6 +23,7 @@ namespace sys {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct preference {
+
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	プリファレンス値型
@@ -53,9 +54,23 @@ namespace sys {
 		std::string					path_;
 		std::stack<std::string>		stack_path_;
 
-		void get_full_path_(const std::string& name, std::string& out) const;
+		void get_full_path_(const std::string& name, std::string& out) const
+		{
+			if(name.empty()) return;
 
-		const std::string uint_to_hexs_(uint32_t val) const {
+			std::string s;
+			if(name[0] == '/') {
+				s = name;
+			} else {
+				s = path_;
+				s += name;
+			}
+			utils::code_conv(s, ' ', '_', out);
+		}
+
+
+		const std::string uint_to_hexs_(uint32_t val) const
+		{
 			char tmp[9];
 			int i = sizeof(tmp) - 1;
 			tmp[i] = 0;
@@ -90,7 +105,20 @@ namespace sys {
 			@return 追加されれば「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool put_(const std::string& key, const value_t& vt);
+		bool put_(const std::string& key, const value_t& vt)
+		{
+			std::string s;
+			get_full_path_(key, s);
+			item_map::iterator it = map_.find(s);
+			if(it == map_.end()) {
+				item_map::value_type pa(s, vt);
+				item_ret r = map_.insert(pa);
+				return r.second;
+			} else {
+				it->second = vt;
+				return true;
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -101,7 +129,19 @@ namespace sys {
 			@return 取得されれば「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool get_(const std::string& key, value_t& vt) const;
+		bool get_(const std::string& key, value_t& vt) const
+		{
+			std::string s;
+			get_full_path_(key, s);
+			item_map::const_iterator cit = map_.find(s);
+			if(cit == map_.end()) {
+				return false;
+			} else {
+				vt = cit->second;
+				return true;
+			}
+		}
+
 
 	public:
 		//-----------------------------------------------------------------//
@@ -126,7 +166,22 @@ namespace sys {
 			@param[in]	path	パス
 		*/
 		//-----------------------------------------------------------------//
-		void set_current_path(const std::string& path);
+		void set_current_path(const std::string& path)
+		{
+			if(path.empty()) return;
+
+			std::string s;
+			utils::code_conv(path, ' ', '_', s);
+
+			if(s[0] == '/') {
+				path_ = s;
+			} else {
+				path_ += s;
+			}
+			if(path_[path_.size() - 1] != '/') {
+				path_ += '/';
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -160,7 +215,15 @@ namespace sys {
 			@param[in]	ss	キーリストを受け取るコンテナ
 		*/
 		//-----------------------------------------------------------------//
-		void create_current_list(utils::strings& ss);
+		void create_current_list(utils::strings& ss)
+		{
+			for(const item_map::value_type& t : map_) {
+				const std::string& s = t.first;
+				if(utils::string_strncmp(s, path_, path_.size()) == 0) {
+					ss.push_back(s);
+				}
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -170,7 +233,17 @@ namespace sys {
 			@return キーワードがあれば「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool find(const std::string& key) const;
+		bool find(const std::string& key) const
+		{
+			std::string s;
+			get_full_path_(key, s);
+			item_map::const_iterator cit = map_.find(s);
+			if(cit == map_.end()) {
+				return false;
+			} else {
+				return true;
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -180,7 +253,15 @@ namespace sys {
 			@return 消去が成功すれば「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool erase(const std::string& key);
+		bool erase(const std::string& key)
+		{
+			std::string s;
+			get_full_path_(key, s);
+			size_t sz = map_.size();
+			size_t n = map_.erase(s);
+			if(sz == n) return false;
+			else return true;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -190,7 +271,18 @@ namespace sys {
 			@return キーワードのタイプ
 		*/
 		//-----------------------------------------------------------------//
-		vtype get_type(const std::string& key) const;
+		vtype get_type(const std::string& key) const
+		{
+			vtype t = vtype::invalid;
+			std::string s;
+			get_full_path_(key, s);
+			item_map::const_iterator cit = map_.find(s);
+			if(cit != map_.end()) {
+				const value_t& vt = cit->second;
+				t = vt.vtype_;
+			}
+			return t;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -433,7 +525,28 @@ namespace sys {
 			@return エラーが無ければ「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load_rect(const std::string& key, vtx::srect& rect);
+		bool load_rect(const std::string& key, vtx::srect& rect)
+		{
+			vtx::ipos org(-1);
+			if(!get_position(key + "/locate", org)) {
+				return false;
+			}
+			if(org.x < 0 || org.y < 0) {
+				return false;
+			}
+
+			vtx::ipos size(0);
+			if(!get_position(key + "/size", size)) {
+				return false;
+			}
+			if(size.x <= 0 || size.y <= 0) {
+				return false;
+			}
+
+			rect.org = org;
+			rect.size = size;
+			return true;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -443,7 +556,20 @@ namespace sys {
 			@return エラーが無ければ「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save_rect(const std::string& key, const vtx::srect& rect);
+		bool save_rect(const std::string& key, const vtx::srect& rect)
+		{
+			if(rect.org.x < 0 || rect.org.y < 0) {
+				return false;
+			}
+			vtx::ipos org = rect.org;
+			if(rect.size.x <= 0 || rect.size.y <= 0) {
+				return false;
+			}
+			vtx::ipos size = rect.size;
+			put_position(key + "/locate", org);
+			put_position(key + "/size", size);
+			return true;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -453,7 +579,35 @@ namespace sys {
 			@return エラーが無ければ「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const std::string& filename);
+		bool load(const std::string& filename)
+		{
+			utils::file_io inp;
+			if(!inp.open(filename, "rb")) {
+				return false;
+			}
+
+			uint32_t err = 0;
+			while(!inp.eof()) {
+				auto s = inp.get_line();
+				if(s.empty()) continue;
+				if(s[0] == '#') ;  // コメント行は無視
+				else {
+					utils::strings ss = utils::split_text(s, " \t", "", 3);
+					if(ss.size() == 3) {
+						int n;
+						if(utils::string_to_int(ss[1], n)) {
+							value_t vt(static_cast<vtype>(n), ss[2]);
+							put_(ss[0], vt);
+						} else {
+							++err;
+						}
+					}
+				}
+			}
+			inp.close();
+
+			return err == 0;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -463,9 +617,25 @@ namespace sys {
 			@return エラーが無ければ「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(const std::string& filename);
+		bool save(const std::string& filename)
+		{
+			utils::file_io out;
+			if(!out.open(filename, "wb")) {
+				return false;
+			}
 
+			for(item_map::const_iterator cit = map_.begin(); cit != map_.end(); ++cit) {
+				out.put(cit->first);
+				out.put_char(' ');
+				out.put_char(0x30 + static_cast<int>(cit->second.vtype_));
+				out.put_char(' ');
+				out.put(cit->second.value_);
+				out.put_char('\n');
+			}
+			out.close();
+
+			return true;
+		}
 	};
-
 }
 

@@ -7,6 +7,7 @@
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
 //=====================================================================//
+#include <cstring>
 #include "core/glcore.hpp"
 #include "utils/string_utils.hpp"
 #include "img_io/paint.hpp"
@@ -14,6 +15,7 @@
 #include "widget_utils.hpp"
 #include "widget_button.hpp"
 #include "widget_label.hpp"
+#include "widget_terminal.hpp"
 
 namespace gui {
 
@@ -518,4 +520,63 @@ namespace gui {
 		gl::glColor(color.back_color_);
 		gl::draw_filled_rectangle(r);
 	}
+
+
+	widget* term_chaout::output_ = nullptr;
+
+	void term_chaout::operator() (char ch)
+	{
+		if(output_ != nullptr && output_->type() == get_type_id<widget_terminal>()) {
+
+			buff_ += ch;
+
+			widget_terminal* term = static_cast<widget_terminal*>(output_);
+
+			if(ch == '\n' || ch == 0) {
+				term->output(buff_);
+				buff_.clear();
+			} else if(buff_.size() >= 64) {
+				term->output(buff_);
+				buff_.clear();
+			}
+		}
+	}
+
+
+#if 0
+#ifdef WIN32
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief	プラットフォーム依存、ファイル選択
+		@return 正常選択された場合「true」
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	bool get_open_file_name()
+	{
+		static bool init = false;
+		if(!init) {
+//			CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+			init = true;
+		}
+
+		OPENFILENAME ofn;
+		char szFile[MAX_PATH] = "";
+		std::memset(&ofn, sizeof(ofn), 0);
+		ofn.lStructSize = sizeof(OPENFILENAME);
+		ofn.lpstrFilter = "テキストファイル(*.txt)\0*.txt\0"
+						  "すべてのファイル(*.*)\0*.*\0\0";
+		ofn.lpstrFile = szFile;
+		ofn.nMaxFile = MAX_PATH;
+		ofn.Flags = OFN_FILEMUSTEXIST;
+ 
+		if(GetOpenFileName(&ofn) != 0) {
+//			path = szFile;
+			return true;	
+		} else {
+//			path = "";
+			return false;
+		}
+	}
+#endif
+#endif
 }

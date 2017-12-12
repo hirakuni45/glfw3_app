@@ -1,11 +1,12 @@
 #-----------------------------------------------#
 # Application Binary Build Makefile             #
 #-----------------------------------------------#
-TARGET		=	player
+TARGET		=	seeda_peeping_app
 
 ifeq ($(OS),Windows_NT)
 FEXT	=	.exe
-ICON_RC = icon.rc
+# ICON_RC = icon.rc
+ICON_RC =
 SYSTEM := WIN
 else
   UNAME := $(shell uname -s)
@@ -25,11 +26,12 @@ BUILD		=	release
 
 VPATH		=	../common
 
+# 				./emu/nofrendo.c
+
 CSOURCES	=	minizip/ioapi.c \
 				minizip/unzip.c
 
 PSOURCES	=	main.cpp \
-				player.cpp \
 				core/glcore.cpp \
 				core/device.cpp \
 				core/ftimg.cpp \
@@ -45,6 +47,7 @@ PSOURCES	=	main.cpp \
 				utils/file_io.cpp \
 				utils/file_info.cpp \
 				utils/files.cpp \
+				utils/preference.cpp \
 				utils/keyboard.cpp \
 				img_io/paint.cpp \
 				img_io/bmp_io.cpp \
@@ -77,7 +80,7 @@ OPTLIBS		=	opengl32 glfw3 glew32 \
 				png turbojpeg jpeg openjp2 \
 				freetype \
 				mad faad mp4ff tag \
-				z openal
+				z openal ncftp
 else
 LOCAL_PATH	=	/usr/local
 OPTLIBS		=	glfw3 GLEW \
@@ -92,15 +95,17 @@ INC_SYS		=	$(LOCAL_PATH)/include \
 				$(LOCAL_PATH)/include/freetype2 \
 				$(LOCAL_PATH)/include/openjpeg-2.1 \
 				$(LOCAL_PATH)/include/taglib
-INC_LIB		=
-LIBDIR		=	$(LOCAL_PATH)/lib
+INC_LIB		=	libncftp
+LIBDIR		=	$(LOCAL_PATH)/lib \
+				libncftp
+
 ifeq ($(SYSTEM),OSX)
 INC_SYS		+=	$(LOCAL_PATH)/opt/jpeg-turbo/include
 LIBDIR		+=	$(LOCAL_PATH)/opt/jpeg-turbo/lib
 endif
 
-PINC_APP	=	. ../common
-CINC_APP	=	. ../common
+PINC_APP	=	. ../common ./emu ./emu/cpu ./emu/nes ./emu/mappers ./emu/sndhrdw ./emu/libsnss
+CINC_APP	=	. ../common ./emu ./emu/cpu ./emu/nes ./emu/mappers ./emu/sndhrdw ./emu/libsnss
 
 INC_S	=	$(addprefix -isystem , $(INC_SYS))
 INC_L	=	$(addprefix -isystem , $(INC_LIB))
@@ -123,7 +128,8 @@ RC	=	windres
 ifeq ($(SYSTEM),WIN)
 CPMM	=	g++
 CCMM	=	gcc
-else
+endif
+ifeq ($(SYSTEM),OSX)
 CPMM	=	clang++
 CCMM	=	clang
 endif
@@ -222,7 +228,7 @@ clean_depend:
 	rm -f $(DEPENDS)
 
 dllname:
-	objdump -p $(TARGET)$(FEXT) | grep --text "DLL Name"
+	objdump -p $(TARGET)$(FEXT) | grep "DLL Name"
 
 tarball:
 	tar cfvz $(TARGET)_$(shell date +%Y%m%d%H).tgz \

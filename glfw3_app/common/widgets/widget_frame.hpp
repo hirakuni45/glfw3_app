@@ -1,7 +1,9 @@
 #pragma once
 //=====================================================================//
 /*!	@file
-	@brief	GUI widget_frame クラス
+	@brief	GUI widget_frame クラス @n
+			・ベースとなるウィンドウを描画する。 @n
+			・描画領域の管理など
     @author 平松邦仁 (hira@rvf-rc45.net)
 	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
 				Released under the MIT license @n

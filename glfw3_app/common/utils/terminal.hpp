@@ -13,8 +13,8 @@
 #include "img_io/img.hpp"
 #include "utils/vtx.hpp"
 #include "utils/string_utils.hpp"
-
-#include <iostream>
+#include "utils/format.hpp"
+// #include <iostream>
 
 namespace utils {
 

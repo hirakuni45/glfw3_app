@@ -10,7 +10,7 @@
 //=====================================================================//
 #include "widgets/widget_director.hpp"
 #include "widgets/widget_label.hpp"
-#include "widgets/widget_null.hpp"
+#include "widgets/widget_menu.hpp"
 
 namespace gui {
 
@@ -23,7 +23,7 @@ namespace gui {
 
 		typedef widget_list value_type;
 
-		typedef std::function<void (const std::string&, int)> select_func_type;
+		typedef utils::strings strings;
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
@@ -36,17 +36,10 @@ namespace gui {
 			text_param	text_param_;	///< テキスト描画のパラメーター
 			color_param	color_param_select_;	///< 選択時カラー・パラメーター
 
-			utils::strings	text_list_;	///< テキスト・リスト
-
-			int			select_pos_;	///< テキスト・リストの選択位置
+			strings		text_list_;		///< リスト
 
 			bool		drop_box_;		///< ドロップ・ボックスの表示
 			bool		scroll_ctrl_;	///< スクロール・コントロール（マウスのダイアル）
-
-			bool		open_before_;
-			bool		open_;
-
-			select_func_type	select_func_;	///< セレクト関数
 
 			param(const std::string& text = "") :
 				plate_param_(),
@@ -56,9 +49,7 @@ namespace gui {
 				vtx::placement::vertical::CENTER)),
 				color_param_select_(widget_director::default_list_color_select_),
 				text_list_(),
-				select_pos_(0), drop_box_(true), scroll_ctrl_(true),
-				open_before_(false), open_(false),
-				select_func_(nullptr)
+				drop_box_(true), scroll_ctrl_(true)
 			{ }
 		};
 
@@ -70,19 +61,9 @@ namespace gui {
 		gl::mobj::handle	objh_;
 		gl::mobj::handle	select_objh_;
 
-		widget_null*		frame_;
-		widget_labels		list_;
+		widget_menu*		menu_;
 
-		void destroy_list_() {
-			for(widget_label* w : list_) {
-				wd_.del_widget(w);
-			}
-		}
-
-		void destroy_() {
-			destroy_list_();
-			wd_.del_widget(frame_);
-		}
+		uint32_t			id_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -92,7 +73,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_list(widget_director& wd, const widget::param& bp, const param& p) :
 			widget(bp), wd_(wd), param_(p),
-			objh_(0), select_objh_(0), frame_(0), list_()
+			objh_(0), select_objh_(0), menu_(nullptr), id_(0)
 			{ }
 
 
@@ -101,7 +82,7 @@ namespace gui {
 			@brief	デストラクター
 		*/
 		//-----------------------------------------------------------------//
-		virtual ~widget_list() { destroy_(); }
+		virtual ~widget_list() { }
 
 
 		//-----------------------------------------------------------------//
@@ -150,60 +131,11 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	選択位置を取得
-			@return 選択位置（負の値なら、非選択）
+			@brief	メニュー・リソースの取得
+			@return メニュー・リソース
 		*/
 		//-----------------------------------------------------------------//
-		int get_select_pos() const { return param_.select_pos_; }
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	選択位置のテキストを取得
-			@return 選択位置のテキスト
-		*/
-		//-----------------------------------------------------------------//
-		std::string get_select_text() const { return param_.text_param_.get_text(); }
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	リスト・リソースの更新
-		*/
-		//-----------------------------------------------------------------//
-		void update_list()
-		{
-			destroy_list_();
-			list_.clear();
-
-			widget::param wp(vtx::irect(vtx::ipos(0), get_rect().size), frame_);
-			widget_label::param wp_;
-			wp_.plate_param_ = param_.plate_param_;
-			wp_.color_param_ = param_.color_param_select_;
-			wp_.plate_param_.frame_width_ = 0;
-			int n = 0;
-			for(const std::string& s : param_.text_list_) {
-				wp_.text_param_.set_text(s);
-				if(n == 0) {
-					wp_.plate_param_.round_radius_ = param_.plate_param_.round_radius_;
-					wp_.plate_param_.round_style_
-						= widget::plate_param::round_style::TOP;
-				} else if(n == (param_.text_list_.size() - 1)) {
-					wp_.plate_param_.round_radius_ = param_.plate_param_.round_radius_;
-					wp_.plate_param_.round_style_
-						= widget::plate_param::round_style::BOTTOM;
-				} else {
-					wp_.plate_param_.round_radius_ = 0;
-					wp_.plate_param_.round_style_
-						= widget::plate_param::round_style::ALL;
-				}
-				widget_label* w = wd_.add_widget<widget_label>(wp, wp_);
-				w->set_state(widget::state::ENABLE, false);
-				list_.push_back(w);
-				wp.rect_.org.y += get_rect().size.y;
-				++n;
-			}
-		}
+		widget_menu* get_menu() { return menu_; }
 
 
 		//-----------------------------------------------------------------//
@@ -218,7 +150,7 @@ namespace gui {
 			at_param().state_.set(widget::state::SIZE_LOCK);
 			at_param().state_.set(widget::state::MOVE_STALL);
 
-			vtx::spos size;
+			vtx::ipos size;
 			if(param_.plate_param_.resizeble_) {
 				vtx::spos rsz = param_.plate_param_.grid_ * 3;
 				if(get_param().rect_.size.x >= rsz.x) size.x = rsz.x;
@@ -239,42 +171,11 @@ namespace gui {
 			select_objh_ = wd_.share_add(t);
 
 			{
-				widget::param wp(vtx::irect(0, 0,
-					get_rect().size.x, get_rect().size.y * param_.text_list_.size()), this);
-				widget_null::param wp_;
-				frame_ = wd_.add_widget<widget_null>(wp, wp_);
-				frame_->set_state(widget::state::POSITION_LOCK);
-				frame_->set_state(widget::state::ENABLE, false);
-			}
-
-			{
-				widget::param wp(vtx::irect(vtx::ipos(0), get_rect().size), frame_);
-				widget_label::param wp_;
-				wp_.plate_param_ = param_.plate_param_;
-				wp_.color_param_ = param_.color_param_select_;
-				wp_.plate_param_.frame_width_ = 0;
-				int n = 0;
-				for(const std::string& s : param_.text_list_) {
-					wp_.text_param_.set_text(s);
-					if(n == 0) {
-						wp_.plate_param_.round_radius_ = param_.plate_param_.round_radius_;
-						wp_.plate_param_.round_style_
-							= widget::plate_param::round_style::TOP;
-					} else if(n == (param_.text_list_.size() - 1)) {
-						wp_.plate_param_.round_radius_ = param_.plate_param_.round_radius_;
-						wp_.plate_param_.round_style_
-							= widget::plate_param::round_style::BOTTOM;
-					} else {
-						wp_.plate_param_.round_radius_ = 0;
-						wp_.plate_param_.round_style_
-							= widget::plate_param::round_style::ALL;
-					}
-					widget_label* w = wd_.add_widget<widget_label>(wp, wp_);
-					w->set_state(widget::state::ENABLE, false);
-					list_.push_back(w);
-					wp.rect_.org.y += get_rect().size.y;
-					++n;
-				}
+				widget::param wp(vtx::irect(vtx::ipos(0), get_rect().size), this);
+				widget_menu::param wp_;
+				wp_.text_list_ = param_.text_list_;
+				menu_ = wd_.add_widget<widget_menu>(wp, wp_);
+				menu_->enable(false);
 			}
 		}
 
@@ -290,11 +191,14 @@ namespace gui {
 				return;
 			}
 
+			if(get_selected() && !param_.text_list_.empty()) {
+				menu_->enable();
+			}
 
-
-			if(param_.select_pos_ < list_.size()) {
-				widget_label* w = list_[param_.select_pos_];
-				param_.text_param_.text_ = w->get_local_param().text_param_.text_;
+			if(menu_->get_select_id() != id_) {
+				id_ = menu_->get_select_id();
+				param_.text_param_.set_text(menu_->get_select_text());
+				menu_->enable(false);
 			}
 		}
 
@@ -304,61 +208,7 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override
-		{
-			if(!get_state(widget::state::ENABLE)) {
-				return;
-			}
-
-			param_.open_before_ = param_.open_;
-			if(get_selected() && list_.size() > 0) {
-				param_.open_ = true;
-				wd_.enable(frame_, param_.open_, true);
-				wd_.top_widget(frame_);
-			}
-
-			if(param_.open_ && list_.size() > 0) {
-				uint32_t n = 0;
-				bool selected = false;
-				for(widget_label* w : list_) {
-					if(w->get_select()) {
-						param_.select_pos_ = n;
-						param_.text_param_.text_ = w->get_local_param().text_param_.text_;
-					} else if(w->get_selected()) {
-						selected = true;
-					}
-					++n;
-				}
-				if(selected) {
-					param_.open_ = false;
-					wd_.enable(frame_, param_.open_, true);
-					if(param_.select_func_ != nullptr) {
-						param_.select_func_(param_.text_param_.get_text(), param_.select_pos_);
-					}
-				} else {
-					const vtx::spos& scr = wd_.get_scroll();
-					if(frame_->get_focus() && scr.y != 0) {
-						int pos = param_.select_pos_;
-						pos += scr.y;
-						if(pos < 0) {
-							pos = 0;
-						} else if(pos >= static_cast<int>(list_.size())) {
-							pos = list_.size() - 1;
-						}
-						param_.select_pos_ = pos;
-					}
-					int n = 0;
-					for(widget_label* w : list_) {
-						if(n == param_.select_pos_) {
-							w->set_action(widget::action::SELECT_HIGHLIGHT);
-						} else {
-							w->set_action(widget::action::SELECT_HIGHLIGHT, false);
-						}
-						++n;
-					}
-				}
-			}
-		}
+		void service() override { }
 
 
 		//-----------------------------------------------------------------//
@@ -383,12 +233,13 @@ namespace gui {
 
 			render_text(wd_, h, get_param(), param_.text_param_, param_.plate_param_);
 
-			if(!param_.open_ && param_.drop_box_) {
+			if(param_.drop_box_) {
 				wd_.at_mobj().setup_matrix(siz.x, siz.y);
 				wd_.set_TSC();
+
 				// チップの描画
 				gl::mobj::handle h;
-				if((get_rect().org.y + frame_->get_rect().size.y) > siz.y) {
+				if((get_rect().org.y + menu_->get_rect().size.y) > siz.y) {
 					h = wd_.get_share_image().up_box_;
 				} else {
 					h = wd_.get_share_image().down_box_;
@@ -417,7 +268,7 @@ namespace gui {
 			path += wd_.create_widget_name(this);
 
 			int err = 0;
-			if(!pre.put_integer(path + "/selector", param_.select_pos_)) ++err;
+//			if(!pre.put_integer(path + "/selector", param_.select_pos_)) ++err;
 			return err == 0;
 		}
 
@@ -435,7 +286,7 @@ namespace gui {
 			path += wd_.create_widget_name(this);
 
 			int err = 0;
-			if(!pre.get_integer(path + "/selector", param_.select_pos_)) ++err;
+//			if(!pre.get_integer(path + "/selector", param_.select_pos_)) ++err;
 			return err == 0;
 		}
 	};

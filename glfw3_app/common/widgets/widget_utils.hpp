@@ -14,6 +14,7 @@
 #include "utils/vmath.hpp"
 #include "utils/string_utils.hpp"
 #include "gl_fw/glutils.hpp"
+#include "utils/format.hpp"
 
 namespace gui {
 
@@ -200,4 +201,56 @@ namespace gui {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	void draw_border(const vtx::srect& rect, const widget::color_param& color = widget_director::default_border_color_);
+
+
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief	プラットフォーム依存、ファイル選択
+		@return 正常選択された場合「true」
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//	bool get_open_file_name();
+
+
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief  ターミナル出力ファンクタ
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	class term_chaout {
+		static widget*	output_;
+
+		std::string		buff_;
+
+		char*		out_;
+		uint16_t	len_;
+		uint16_t	pos_;
+
+	public:
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	コンストラクター
+		*/
+		//-----------------------------------------------------------------//
+		term_chaout(char* out = nullptr, uint16_t len = 0) : out_(out), len_(len), pos_(0) { } 
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ターミナル出力の設定
+		*/
+		//-----------------------------------------------------------------//
+		static void set_output(widget* w) { output_ = w; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	format 出力、標準オペレーターの実装
+			@param[in]	ch	出力キャラクター
+		*/
+		//-----------------------------------------------------------------//
+		void operator() (char ch);
+	};
+
+	typedef utils::basic_format<term_chaout> format;
 }

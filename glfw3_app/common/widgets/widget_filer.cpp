@@ -748,9 +748,11 @@ namespace gui {
 				get_regist_state_();
 			}
 		} else if(files_->get_state(widget::state::DRAG)) {
-			position_ = files_->get_param().move_pos_;
-			if(left_.size() > 0) {
-				position_.x += main_->get_rect().size.x;
+			if(!files_->get_state(state::BEFORE_DRAG)) {
+				position_ = files_->get_param().move_pos_;
+				if(left_.size() > 0) {
+					position_.x += main_->get_rect().size.x;
+				}
 			}
 			if(d < 0) {
 				if(position_.y < d) {
