@@ -71,7 +71,7 @@ namespace view {
 		{
 			for(uint32_t i = 0; i < units_.size(); ++i) {
 				double t = 1.0 / frq;
-				units_[i] = static_cast<UNIT>(sin(2.0 * vtx::get_pi<double>() * t * i) * 32767.0) + 32768;  
+				units_[i] = 32768 - static_cast<UNIT>(sin(2.0 * vtx::get_pi<double>() * t * i) * 32767.0);  
 			}
 		}
 
@@ -89,7 +89,6 @@ namespace view {
 			for(uint32_t i = 0; i < width; ++i) {
 				list[i] = vtx::spos(i, units_[i] / 256);
 			}
-
 			gl::draw_line_strip(list);
 		}
 	};
