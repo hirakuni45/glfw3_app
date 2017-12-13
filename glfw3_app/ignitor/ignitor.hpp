@@ -23,7 +23,7 @@
 
 #include "ign_client.hpp"
 #include "ign_server.hpp"
-#include "render_waves.hpp"
+#include "gl_fw/render_waves.hpp"
 
 namespace app {
 
@@ -245,7 +245,7 @@ namespace app {
 
 			// テスト波形生成
 			waves_.create_waves(0.5, 5.0 * 10e-6);
-			waves_.create_sin(1000);
+			waves_.create_sin(1000, 5 * 10e-6);
 		}
 
 
