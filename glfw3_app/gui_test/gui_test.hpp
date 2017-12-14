@@ -79,6 +79,7 @@ namespace app {
 			gl::glColor(img::rgba8(255, 255));
 //			gl::draw_line(vtx::spos(clip.org.x, clip.org.y), vtx::spos(clip.size.x, clip.size.y));
 			gl::draw_line(vtx::spos(0, 0), vtx::spos(100, 100));
+			glEnable(GL_TEXTURE_2D);
 		}
 
 
