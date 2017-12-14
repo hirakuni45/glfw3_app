@@ -25,6 +25,8 @@ namespace gui {
 
 		typedef utils::strings strings;
 
+		typedef std::function<void (const std::string& select_text, uint32_t select_pos)> select_func_type;
+
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	widget_button パラメーター
@@ -37,6 +39,8 @@ namespace gui {
 			color_param	color_param_select_;	///< 選択時カラー・パラメーター
 
 			strings		text_list_;		///< リスト
+
+			select_func_type	select_func_;	///< セレクト関数
 
 			bool		drop_box_;		///< ドロップ・ボックスの表示
 			bool		scroll_ctrl_;	///< スクロール・コントロール（マウスのダイアル）
@@ -170,9 +174,10 @@ namespace gui {
 			t.color_param_ = param_.color_param_select_;
 			select_objh_ = wd_.share_add(t);
 
-			{
+			{  // メニューの生成
 				widget::param wp(vtx::irect(vtx::ipos(0), get_rect().size), this);
 				widget_menu::param wp_;
+				wp_.select_func_ = param_.select_func_;
 				wp_.text_list_ = param_.text_list_;
 				menu_ = wd_.add_widget<widget_menu>(wp, wp_);
 				menu_->enable(false);
