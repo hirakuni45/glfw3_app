@@ -490,7 +490,16 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(sys::preference& pre) override { return true; }
+		bool save(sys::preference& pre) override {
+			std::string path;
+			path += '/';
+			path += wd_.create_widget_name(this);
+
+			int err = 0;
+			if(!pre.put_text(path + "/selector", param_.select_text_)) ++err;
+
+			return err == 0;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -500,6 +509,18 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre) override { return true; }
+		bool load(const sys::preference& pre) override {
+			std::string path;
+			path += '/';
+			path += wd_.create_widget_name(this);
+
+			int err = 0;
+			if(!pre.get_text(path + "/selector", param_.select_text_)) {
+				++err;
+			} else {
+
+			}
+			return err == 0;
+		}
 	};
 }
