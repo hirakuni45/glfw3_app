@@ -79,22 +79,25 @@ namespace gui {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct plate_param {
-			struct round_style {
-				enum type {
-					ALL,		///< 全てラウンド
-					TOP,		///< 上側をラウンド
-					BOTTOM,		///< 下側をラウンド
-				};
+
+			enum class round_style : uint16_t {
+				NONE,		///< ラウンド無し
+				ALL,		///< 全てラウンド
+				TOP,		///< 上側をラウンド
+				BOTTOM,		///< 下側をラウンド
 			};
-			round_style::type	round_style_;	///< ラウンド・スタイル
-			short	round_radius_;		///< ラウンド半径
-			short	frame_width_;		///< フレーム幅
-			short	caption_width_;		///< キャプション幅
+
+			round_style	round_style_;	///< ラウンド・スタイル
+			short		round_radius_;		///< ラウンド半径
+			short		frame_width_;		///< フレーム幅
+			short		caption_width_;		///< キャプション幅
 			vtx::ipos	grid_;			///< リサイズ・グリッド
-			bool	resizeble_;			///< リサイズが可能な場合
+			bool		resizeble_;			///< リサイズが可能な場合
+
 			plate_param() : round_style_(round_style::ALL),
 				round_radius_(8), frame_width_(4), caption_width_(0),
-							grid_(16), resizeble_(false) { }
+				grid_(16), resizeble_(false)
+			{ }
 
 			void set_caption(short width) {
 				if(width <= 0) return;
