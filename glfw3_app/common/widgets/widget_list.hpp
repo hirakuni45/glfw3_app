@@ -263,13 +263,11 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		bool save(sys::preference& pre) override {
-			std::string path;
-			path += '/';
-			path += wd_.create_widget_name(this);
-
-			int err = 0;
-//			if(!pre.put_integer(path + "/selector", param_.select_pos_)) ++err;
-			return err == 0;
+			bool ret = false;
+			if(menu_ != nullptr) {
+				ret = menu_->save(pre);
+			}
+			return ret;
 		}
 
 
@@ -281,13 +279,11 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		bool load(const sys::preference& pre) override {
-			std::string path;
-			path += '/';
-			path += wd_.create_widget_name(this);
-
-			int err = 0;
-//			if(!pre.get_integer(path + "/selector", param_.select_pos_)) ++err;
-			return err == 0;
+			bool ret = false;
+			if(menu_ != nullptr) {
+				ret = menu_->load(pre);
+			}
+			return ret;
 		}
 	};
 }
