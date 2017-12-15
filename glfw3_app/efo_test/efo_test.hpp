@@ -71,6 +71,8 @@ namespace app {
 
 			gl::glColor(img::rgba8(255, 255));
 			waves_.render(clip.size.x);
+
+			glEnable(GL_TEXTURE_2D);
 		}
 
 
@@ -103,8 +105,10 @@ namespace app {
 			widget_director& wd = director_.at().widget_director_;
 			gl::core& core = gl::core::get_instance();
 
+			int menu_width  = 130;
+			int menu_height = 300;
 			{	// メニューパレット
-				widget::param wp(vtx::irect(10, 10, 110, 300));
+				widget::param wp(vtx::irect(10, 10, menu_width, menu_height));
 				widget_frame::param wp_;
 				wp_.plate_param_.set_caption(12);
 				menu_ = wd.add_widget<widget_frame>(wp, wp_);
@@ -112,7 +116,7 @@ namespace app {
 			}
 
 			{ // ロード起動ボタン
-				widget::param wp(vtx::irect(10, 20+40*0, 90, 30), menu_);
+				widget::param wp(vtx::irect(10, 20+40*0, menu_width - 20, 30), menu_);
 				widget_button::param wp_("load");
 				wp_.select_func_ = [this](int id) {
 //					gui::get_open_file_name();
@@ -129,9 +133,8 @@ namespace app {
 			}
 
 			{ // DIV select
-				widget::param wp(vtx::irect(10, 20+40*1, 90, 30), menu_);
-				widget_list::param wp_;
-//				wp_.round_ = false;
+				widget::param wp(vtx::irect(10, 20+40*1, menu_width - 20, 30), menu_);
+				widget_list::param wp_("1000 ms");
 				wp_.text_list_.push_back("1000 ms");
 				wp_.text_list_.push_back("500 ms");
 				wp_.text_list_.push_back("250 ms");
@@ -213,7 +216,7 @@ namespace app {
 					view_frame_ = wd.add_widget<widget_frame>(wp, wp_);
 				}
 				{
-					widget::param wp(vtx::irect(0), view_frame_);
+					widget::param wp(vtx::irect(0, 50, 0, 0), view_frame_);
 					widget_view::param wp_;
 					wp_.update_func_ = [this]() {
 						update_view_();
@@ -253,7 +256,7 @@ namespace app {
 			if(load_ctx_ != nullptr) load_ctx_->load(pre);
 ///			if(save_ctx_ != nullptr) save_ctx_->load(pre);
 
-///			if(edit_ != nullptr) edit_->load(pre);
+			if(div_ != nullptr) div_->load(pre);
 
 			// テスト波形生成
 			waves_.create_waves(0.5, 5.0 * 10e-6);
@@ -309,7 +312,7 @@ namespace app {
 		{
 			sys::preference& pre = director_.at().preference_;
 
-///			if(edit_ != nullptr) edit_->save(pre);
+			if(div_ != nullptr) div_->save(pre);
 
 			if(load_ctx_ != nullptr) load_ctx_->save(pre);
 ///			if(save_ctx_ != nullptr) save_ctx_->save(pre);
