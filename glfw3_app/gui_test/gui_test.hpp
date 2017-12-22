@@ -235,10 +235,13 @@ namespace app {
 			if(1) { // リストのテスト
 				widget::param wp(vtx::irect(30, 400, 150, 40), 0);
 				widget_list::param wp_("3rd");
-				wp_.text_list_.push_back("1st");
-				wp_.text_list_.push_back("2nd");
-				wp_.text_list_.push_back("3rd");
-				wp_.text_list_.push_back("4th");
+				wp_.init_list_.push_back("1st");
+				wp_.init_list_.push_back("2nd");
+				wp_.init_list_.push_back("3rd");
+				wp_.init_list_.push_back("4th");
+				wp_.select_func_ = [this](const std::string& text, uint32_t pos) {
+					utils::format("List Selected: '%s', (%d)\n") % text.c_str() % pos;
+				};
 				wd.add_widget<widget_list>(wp, wp_);
 			}
 
@@ -277,11 +280,10 @@ namespace app {
 			if(1) { // メニューのテスト
 				widget::param wp(vtx::irect(10, 10, 180, 30));
 				widget_menu::param wp_;
-//				wp_.round_ = false;
-				wp_.text_list_.push_back("First");
-				wp_.text_list_.push_back("Second");
-				wp_.text_list_.push_back("Third");
-				wp_.text_list_.push_back("Force");
+				wp_.init_list_.push_back("First");
+				wp_.init_list_.push_back("Second");
+				wp_.init_list_.push_back("Third");
+				wp_.init_list_.push_back("Force");
 				wp_.select_func_ = [this](const std::string& text, uint32_t pos) {
 					utils::format("Menu Selected: '%s', (%d)\n") % text.c_str() % pos;
 				};
