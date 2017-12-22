@@ -108,7 +108,8 @@ namespace gui {
 			pa.set_intensity_rect(cp.inten_rect_);
 			short wf = pp.frame_width_;
 			short rd;
-			if(pp.round_radius_ > wf) rd = pp.round_radius_ - wf;
+			if(pp.round_style_ == widget::plate_param::round_style::NONE) rd = 0;
+			else if(pp.round_radius_ > wf) rd = pp.round_radius_ - wf;
 			else rd = 0;
 			pa.set_round(rd);
 			pa.swap_color();
@@ -117,7 +118,10 @@ namespace gui {
 			mix_round_(pa, cp, pp);
 		} else {
 			pa.set_intensity_rect(cp.inten_rect_);
-			pa.set_round(pp.round_radius_);
+			short rd;
+			if(pp.round_style_ == widget::plate_param::round_style::NONE) rd = 0;
+			else rd = pp.round_radius_;
+			pa.set_round(rd);
 			pa.swap_color();
 			pa.fill_rect(cp.ir_enable_);
 			mix_round_(pa, cp, pp);

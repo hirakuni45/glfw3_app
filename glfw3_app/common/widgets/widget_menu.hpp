@@ -50,6 +50,7 @@ namespace gui {
 			uint32_t	base_height_;	///< メニュー部品、基本の高さ
 			bool		round_;			///< 角をラウンドしない場合「false」
 
+			uint32_t	id_;			///< 選択ＩＤ
 			uint32_t	select_pos_;	///< テキスト・リストの選択位置
 
 			select_func_type	select_func_;	///< セレクト関数
@@ -61,7 +62,7 @@ namespace gui {
 				vtx::placement(vtx::placement::holizontal::LEFT,
 				vtx::placement::vertical::CENTER)),
 				color_param_select_(widget_director::default_list_color_select_), init_list_(),
-				base_height_(0), round_(true),
+				base_height_(0), round_(true), id_(0),
 				select_pos_(0),
 				select_func_(nullptr)
 			{ }
@@ -74,7 +75,7 @@ namespace gui {
 
 		widget_labels		list_;
 
-		uint32_t			select_id_;
+		uint32_t			id_;
 
 		widget_label* build_menu_(const widget::param& wp, widget_label::param& wp_, widget::plate_param::round_style sty)
 		{
@@ -92,14 +93,15 @@ namespace gui {
 			wp_.plate_param_ = param_.plate_param_;
 			wp_.color_param_ = param_.color_param_select_;
 			wp_.plate_param_.frame_width_ = 0;
-			int n = 0;
+			list_.clear();
+			uint32_t n = 0;
 			for(const std::string& s : param_.init_list_) {
 				wp_.text_param_.set_text(s);
 				widget::plate_param::round_style sty = widget::plate_param::round_style::NONE;
 				if(param_.init_list_.size() > 1) {
 					if(n == 0) {
 						sty = widget::plate_param::round_style::TOP;
-					} else if((n == (param_.init_list_.size() - 1)) {
+					} else if(n == (param_.init_list_.size() - 1)) {
 						sty = widget::plate_param::round_style::BOTTOM;
 					}
 				}
@@ -108,7 +110,9 @@ namespace gui {
 				wp.rect_.org.y += get_rect().size.y;
 				++n;
 			}
+			param_.select_pos_ = n;  // 無選択
 		}
+
 
 		void destroy_()
 		{
@@ -126,7 +130,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_menu(widget_director& wd, const widget::param& wp, const param& p) :
 			widget(wp), wd_(wd), param_(p),
-			list_(), select_id_(0)
+			list_(), id_(0)
 		{ }
 
 
@@ -215,7 +219,7 @@ namespace gui {
 			@return メニューのサイズ
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t size() const { return param_.text_list_.size(); }
+		uint32_t size() const { return list_.size(); }
 
 
 		//-----------------------------------------------------------------//
@@ -223,8 +227,8 @@ namespace gui {
 			@brief	メニューの全クリア
 		*/
 		//-----------------------------------------------------------------//
-		void clear() {
-			param_.text_list_.clear();
+		void clear()
+		{
 			destroy_();
 		}
 
@@ -241,7 +245,6 @@ namespace gui {
 			if(pos >= list_.size()) return false;
 
 			int h = param_.base_height_;
-			param_.text_list_.erase(param_.text_list_.begin() + pos);
 			wd_.del_widget(list_[pos]);
 			list_.erase(list_.begin() + pos);
 
@@ -287,8 +290,6 @@ namespace gui {
 		{
 			if(pos > list_.size()) return false;
 
-			param_.text_list_.insert(param_.text_list_.begin() + pos, text);
-
 			int h = param_.base_height_;
 			widget::param wp(vtx::irect(vtx::ipos(0, pos * h), vtx::ipos(get_rect().size.x, h)), this);
 			widget_label::param wp_;
@@ -297,7 +298,13 @@ namespace gui {
 			wp_.plate_param_.frame_width_ = 0;
 			wp_.text_param_.set_text(text);
 
-			widget_label* w = build_menu_(pos, wp, wp_, false);
+			widget::plate_param::round_style sty = widget::plate_param::round_style::NONE;
+			if(pos == 0) {
+				sty = widget::plate_param::round_style::TOP;
+			} else if(pos == (list_.size() - 1)) {
+				sty = widget::plate_param::round_style::BOTTOM;
+			}
+			widget_label* w = build_menu_(wp, wp_, sty);
 
 			list_.insert(list_.begin() + pos, w);
 			++pos;
@@ -337,21 +344,11 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	選択 ID の取得 @n
-					選択される毎に＋１される
-			@return 選択 ID
-		*/
-		//-----------------------------------------------------------------//
-		uint32_t get_select_id() const { return select_id_; }
-
-
-		//-----------------------------------------------------------------//
-		/*!
 			@brief	選択テキストの取得
 			@return 選択テキスト
 		*/
 		//-----------------------------------------------------------------//
-///		const std::string& get_select_text() const { return param_.select_text_; }
+		std::string get_select_text() const { return get_local_param().text_param_.get_text(); }
 
 
 		//-----------------------------------------------------------------//
@@ -375,7 +372,6 @@ namespace gui {
 			int pos = 0;
 			for(widget_label* w : list_) {
 				if(w->get_local_param().text_param_.get_text() == text) {
-///					param_.select_text_ = text;
 					param_.select_pos_  = pos;
 					return true;
 				}
@@ -387,17 +383,13 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	メニューの再構築 @n
-					※「text_list_」を作り直してから呼ぶ事で、以前のリスト @n
-					が廃棄され、新規リストになる。
+			@brief	メニューの再構築
 		*/
 		//-----------------------------------------------------------------//
 		void build()
 		{
 			destroy_();
 			build_list_();
-			param_.select_text_.clear();
-			param_.select_pos_ = 0;
 		}
 
 
@@ -443,17 +435,15 @@ namespace gui {
 					w->set_action(widget::action::SELECT_HIGHLIGHT);
 				} else if(w->get_selected()) {
 					if(param_.select_pos_ < list_.size()) {
-						param_.select_text_ = w->get_local_param().text_param_.get_text();
+						++param_.id_;
+						break;
 					}
-					++select_id_;
-
 				} else {
 					w->set_action(widget::action::SELECT_HIGHLIGHT, false);
 				}
 				++n;
 			}
 
-			// list_limit_ は実装中
 			// ・list_limit_ は、表示するラベルの制限を行う
 			// ・スクロール・ダイアルで、リストのスクロールを行う
 #if 0
@@ -481,11 +471,13 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void service() override
 		{
-			if(param_.select_pos_ >= 0 && param_.select_pos_ < list_.size()) {
-				wd_.enable(this, false, true);
+			if(id_ != param_.id_) {
 				if(param_.select_func_ != nullptr) {
-					param_.select_func_(param_.select_text_, param_.select_pos_);
+					param_.select_func_(get_local_param().text_param_.get_text(), param_.select_pos_);
 				}
+				wd_.enable(this, false, true);
+				at_local_param().select_pos_ = list_.size();
+				id_ = param_.id_;
 			}
 		}
 
@@ -512,7 +504,7 @@ namespace gui {
 
 			int err = 0;
 			// 選択テキストをキーにする。
-			if(!pre.put_text(path + "/selector", param_.select_text_)) ++err;
+///			if(!pre.put_text(path + "/selector", param_.select_text_)) ++err;
 
 			return err == 0;
 		}

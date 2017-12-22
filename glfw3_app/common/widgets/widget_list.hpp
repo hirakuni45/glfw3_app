@@ -9,7 +9,6 @@
 */
 //=====================================================================//
 #include "widgets/widget_director.hpp"
-#include "widgets/widget_label.hpp"
 #include "widgets/widget_menu.hpp"
 
 namespace gui {
@@ -29,7 +28,7 @@ namespace gui {
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
-			@brief	widget_button パラメーター
+			@brief	widget_list パラメーター
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
@@ -38,7 +37,7 @@ namespace gui {
 			text_param	text_param_;	///< テキスト描画のパラメーター
 			color_param	color_param_select_;	///< 選択時カラー・パラメーター
 
-			strings		text_list_;		///< リスト
+			strings		init_list_;		///< リスト
 
 			select_func_type	select_func_;	///< セレクト関数
 
@@ -52,7 +51,7 @@ namespace gui {
 				vtx::placement(vtx::placement::holizontal::LEFT,
 				vtx::placement::vertical::CENTER)),
 				color_param_select_(widget_director::default_list_color_select_),
-				text_list_(),
+				init_list_(),
 				drop_box_(true), scroll_ctrl_(true)
 			{ }
 		};
@@ -66,7 +65,6 @@ namespace gui {
 		gl::mobj::handle	select_objh_;
 
 		widget_menu*		menu_;
-
 		uint32_t			id_;
 
 	public:
@@ -177,8 +175,7 @@ namespace gui {
 			{  // メニューの生成
 				widget::param wp(vtx::irect(vtx::ipos(0), get_rect().size), this);
 				widget_menu::param wp_;
-				wp_.select_func_ = param_.select_func_;
-				wp_.text_list_ = param_.text_list_;
+				wp_.init_list_ = param_.init_list_;
 				menu_ = wd_.add_widget<widget_menu>(wp, wp_);
 				menu_->enable(false);
 			}
@@ -196,14 +193,8 @@ namespace gui {
 				return;
 			}
 
-			if(get_selected() && !param_.text_list_.empty()) {
+			if(get_selected()) {
 				menu_->enable();
-			}
-
-			if(menu_->get_select_id() != id_) {
-				id_ = menu_->get_select_id();
-				param_.text_param_.set_text(menu_->get_select_text());
-				menu_->enable(false);
 			}
 		}
 
@@ -213,7 +204,17 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override { }
+		void service() override
+		{
+			if(id_ != menu_->get_local_param().id_) {
+				param_.text_param_.set_text(menu_->get_local_param().text_param_.get_text());
+				if(param_.select_func_ != nullptr) {
+					param_.select_func_(get_local_param().text_param_.get_text(), menu_->get_select_pos());
+				}
+				menu_->enable(false);
+				id_ = menu_->get_local_param().id_;
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
