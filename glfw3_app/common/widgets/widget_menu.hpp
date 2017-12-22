@@ -197,24 +197,6 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	文字列リストの参照（ＲＯ）
-			@return 文字列リスト
-		*/
-		//-----------------------------------------------------------------//
-///		const strings& get_list() const { return param_.text_list_; }
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	文字列リストの参照
-			@return 文字列リスト
-		*/
-		//-----------------------------------------------------------------//
-///		strings& at_list() { return param_.text_list_; }
-
-
-		//-----------------------------------------------------------------//
-		/*!
 			@brief	メニューのサイズを取得
 			@return メニューのサイズ
 		*/
@@ -227,10 +209,7 @@ namespace gui {
 			@brief	メニューの全クリア
 		*/
 		//-----------------------------------------------------------------//
-		void clear()
-		{
-			destroy_();
-		}
+		void clear() { destroy_(); }
 
 
 		//-----------------------------------------------------------------//
@@ -372,12 +351,40 @@ namespace gui {
 			int pos = 0;
 			for(widget_label* w : list_) {
 				if(w->get_local_param().text_param_.get_text() == text) {
-					param_.select_pos_  = pos;
+					param_.text_param_.set_text(text);
+					param_.select_pos_ = pos;
+					if(param_.select_func_ != nullptr) {
+						param_.select_func_(param_.text_param_.get_text(), param_.select_pos_);
+					}
+					param_.select_pos_ = list_.size();
 					return true;
 				}
 				++pos;
 			}
 			return false;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	選択位置の変更
+			@param[in]	pos	選択位置
+			@return 成功の場合「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool select(uint32_t pos)
+		{
+			if(pos < list_.size()) {
+				param_.text_param_.set_text(list_[pos]->get_local_param().text_param_.get_text());
+				param_.select_pos_ = pos;
+				if(param_.select_func_ != nullptr) {
+					param_.select_func_(param_.text_param_.get_text(), param_.select_pos_);
+				}
+				param_.select_pos_ = list_.size();
+				return true;
+			} else {
+				return false;
+			}
 		}
 
 
@@ -503,8 +510,19 @@ namespace gui {
 			path += wd_.create_widget_name(this);
 
 			int err = 0;
-			// 選択テキストをキーにする。
-///			if(!pre.put_text(path + "/selector", param_.select_text_)) ++err;
+
+			// 選択テキストの番号を検索
+			int pos = 0;
+			for(widget_label* w : list_) {
+				if(w->get_local_param().text_param_.get_text() == param_.text_param_.get_text()) {
+					break;
+				}
+				++pos;
+			}
+
+			if(!pre.put_integer(path + "/selector", static_cast<int>(pos))) {
+				++err;
+			}
 
 			return err == 0;
 		}
@@ -524,11 +542,11 @@ namespace gui {
 
 			int err = 0;
 			// 選択テキストをキーにする。
-			std::string text;
-			if(!pre.get_text(path + "/selector", text)) {
+			int pos;
+			if(!pre.get_integer(path + "/selector", pos)) {
 				++err;
 			} else {
-				select(text);
+				param_.text_param_.set_text(list_[pos]->get_local_param().text_param_.get_text());
 			}
 			return err == 0;
 		}
