@@ -75,9 +75,11 @@ namespace app {
 
 		void view_render_(const vtx::irect& clip)
 		{
+			gui::widget_director& wd = director_.at().widget_director_;
+
 			glDisable(GL_TEXTURE_2D);
 
-			gl::glColor(img::rgba8(255, 255));
+			gl::glColor(wd.get_color());
 //			gl::draw_line(vtx::spos(clip.org.x, clip.org.y), vtx::spos(clip.size.x, clip.size.y));
 			gl::draw_line(vtx::spos(0, 0), vtx::spos(100, 100));
 			glEnable(GL_TEXTURE_2D);
