@@ -18,6 +18,7 @@
 #include "widgets/widget_button.hpp"
 #include "widgets/widget_filer.hpp"
 #include "widgets/widget_terminal.hpp"
+#include "widgets/widget_list.hpp"
 #include "widgets/widget_view.hpp"
 #include "widgets/widget_utils.hpp"
 
@@ -38,6 +39,7 @@ namespace app {
 
 		gui::widget_frame*		menu_;
 		gui::widget_button*		load_;
+		gui::widget_list*		div_;
 
 		gui::widget_filer*		load_ctx_;
 
@@ -77,6 +79,8 @@ namespace app {
 
 			gl::glColor(img::rgba8(255, 255));
 			waves_.render(clip.size.x);
+
+			glEnable(GL_TEXTURE_2D);
 		}
 
 
@@ -91,7 +95,7 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		ignitor(utils::director<core>& d) : director_(d),
-			menu_(nullptr), load_(nullptr), load_ctx_(nullptr),
+			menu_(nullptr), load_(nullptr), div_(nullptr), load_ctx_(nullptr),
 			wave_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
 			view_frame_(nullptr), view_core_(nullptr),
@@ -114,8 +118,9 @@ namespace app {
 			widget_director& wd = director_.at().widget_director_;
 			gl::core& core = gl::core::get_instance();
 
+			int menu_width = 130;
 			{	// メニューパレット
-				widget::param wp(vtx::irect(10, 10, 110, 300));
+				widget::param wp(vtx::irect(10, 10, menu_width, 300));
 				widget_frame::param wp_;
 				wp_.plate_param_.set_caption(12);
 				menu_ = wd.add_widget<widget_frame>(wp, wp_);
@@ -123,7 +128,7 @@ namespace app {
 			}
 
 			{ // ロード起動ボタン
-				widget::param wp(vtx::irect(10, 20+40*0, 90, 30), menu_);
+				widget::param wp(vtx::irect(10, 20 + 40 * 0, menu_width - 20, 30), menu_);
 				widget_button::param wp_("load");
 				wp_.select_func_ = [this](int id) {
 //					gui::get_open_file_name();
@@ -165,6 +170,29 @@ namespace app {
 				load_ctx_->enable(false);
 			}
 
+			{ // DIV select
+				widget::param wp(vtx::irect(10, 20 + 40 * 1, menu_width - 20, 30), menu_);
+				widget_list::param wp_("1000 ms");
+				wp_.init_list_.push_back("1000 ms");
+				wp_.init_list_.push_back("500 ms");
+				wp_.init_list_.push_back("250 ms");
+				wp_.init_list_.push_back("100 ms");
+				wp_.init_list_.push_back("50 ms");
+				wp_.init_list_.push_back("10 ms");
+				wp_.init_list_.push_back("5 ms");
+				wp_.init_list_.push_back("1 ms");
+				wp_.init_list_.push_back("500 us");
+				wp_.init_list_.push_back("100 us");
+				wp_.init_list_.push_back("50 us");
+				wp_.init_list_.push_back("25 us");
+				wp_.init_list_.push_back("10 us");
+				wp_.init_list_.push_back("5 us");
+				wp_.init_list_.push_back("1 us");
+//				wp_.select_func_ = [this](const std::string& text, uint32_t pos) {
+//					utils::format("List Selected: '%s', (%d)\n") % text.c_str() % pos;
+//				};
+				div_ = wd.add_widget<widget_list>(wp, wp_);
+			}
 
 			{	// ターミナル
 				{
@@ -239,6 +267,8 @@ namespace app {
 ///			if(save_ctx_ != nullptr) save_ctx_->load(pre);
 
 ///			if(edit_ != nullptr) edit_->load(pre);
+
+			if(div_ != nullptr) div_->load(pre);
 
 			// テスト・サーバー起動
 			server_.start();
@@ -324,6 +354,10 @@ namespace app {
 			}
 
 //			project_.save(pre);
+
+			if(div_ != nullptr) {
+				div_->save(pre);
+			}
 
 			if(menu_ != nullptr) {
 				menu_->save(pre);
