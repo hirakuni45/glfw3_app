@@ -44,6 +44,7 @@ namespace gui {
 
 			select_func_type	select_func_;	///< セレクト関数
 
+			bool		load_func_;		///< プリファレンス・ロード時に「セレクト関数」を実行しない場合 false
 			bool		drop_box_;		///< ドロップ・ボックスの表示
 			bool		scroll_ctrl_;	///< スクロール・コントロール（マウスのダイアル）
 
@@ -55,7 +56,7 @@ namespace gui {
 				vtx::placement::vertical::CENTER)),
 				color_param_select_(widget_director::default_list_color_select_),
 				init_list_(),
-				drop_box_(true), scroll_ctrl_(true)
+				load_func_(true), drop_box_(true), scroll_ctrl_(true)
 			{ }
 		};
 
@@ -205,7 +206,7 @@ namespace gui {
 				return;
 			}
 
-			if(get_selected()) {
+			if(get_selected()) {  // 「ボタン選択」で内包メニューを有効にする。
 				menu_->enable();
 			}
 		}
@@ -219,11 +220,10 @@ namespace gui {
 		void service() override
 		{
 			if(id_ != menu_->get_local_param().id_) {
-				param_.text_param_.set_text(menu_->get_local_param().text_param_.get_text());
+				param_.text_param_.set_text(menu_->get_select_text());
 				if(param_.select_func_ != nullptr) {
-					param_.select_func_(get_local_param().text_param_.get_text(), menu_->get_select_pos());
+					param_.select_func_(param_.text_param_.get_text(), menu_->get_select_pos());
 				}
-				menu_->enable(false);
 				id_ = menu_->get_local_param().id_;
 			}
 		}
@@ -312,6 +312,12 @@ namespace gui {
 				++err;
 			} else {
 				param_.text_param_.set_text(text);
+				if(menu_ != nullptr) {
+					menu_->select(text);
+					if(param_.load_func_ && param_.select_func_ != nullptr) {
+						param_.select_func_(menu_->get_select_text(), menu_->get_select_pos());
+					}
+				}
 			}
 			return err == 0;
 		}

@@ -6,7 +6,7 @@
 			・リソース作成時、「高さ」が、メニュー一つの高さに相当する。@n
 			・リソース作成後、「高さ」は、メニュー全体の高さに更新される。@n
 			※あまりに巨大なメニューには向いていない。@n
-			※メニューは単なるテキストの集合なので、同じ文字列が許容される。
+			※メニューはテキストの集合なので、同じ文字列が許容される。
     @author 平松邦仁 (hira@rvf-rc45.net)
 	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
 				Released under the MIT license @n
@@ -53,6 +53,7 @@ namespace gui {
 			uint32_t	select_pos_;	///< テキスト・リストの選択位置
 
 			select_func_type	select_func_;	///< セレクト関数
+			bool		load_func_;		///<	ロード時、セレクト関数を呼ばない場合 false
 
 			param(const std::string& text = "") :
 				plate_param_(),
@@ -63,7 +64,7 @@ namespace gui {
 				color_param_select_(widget_director::default_list_color_select_), init_list_(),
 				base_height_(0), round_(true), id_(0),
 				select_pos_(0),
-				select_func_(nullptr)
+				select_func_(nullptr), load_func_(true)
 			{ }
 		};
 
@@ -437,7 +438,7 @@ namespace gui {
 			for(widget_label* w : list_) {
 				if(w->get_select()) {					
 					param_.select_pos_ = n;
-					at_local_param().text_param_.text_ = w->get_local_param().text_param_.text_;
+					param_.text_param_.text_ = w->get_local_param().text_param_.text_;
 					w->set_action(widget::action::SELECT_HIGHLIGHT);
 				} else if(w->get_selected()) {
 					if(param_.select_pos_ < list_.size()) {
@@ -479,10 +480,10 @@ namespace gui {
 		{
 			if(id_ != param_.id_) {
 				if(param_.select_func_ != nullptr) {
-					param_.select_func_(get_local_param().text_param_.get_text(), param_.select_pos_);
+					param_.select_func_(param_.text_param_.get_text(), param_.select_pos_);
 				}
 				wd_.enable(this, false, true);
-				at_local_param().select_pos_ = list_.size();
+				param_.select_pos_ = list_.size();
 				id_ = param_.id_;
 			}
 		}
@@ -545,7 +546,12 @@ namespace gui {
 			if(!pre.get_integer(path + "/selector", pos)) {
 				++err;
 			} else {
-				param_.text_param_.set_text(list_[pos]->get_local_param().text_param_.get_text());
+				if(pos < list_.size()) {
+					param_.text_param_.set_text(list_[pos]->get_local_param().text_param_.get_text());
+					if(param_.load_func_ && param_.select_func_ != nullptr) {
+						param_.select_func_(param_.text_param_.get_text(), param_.select_pos_);
+					}
+				}
 			}
 			return err == 0;
 		}
