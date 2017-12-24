@@ -135,21 +135,21 @@ namespace app {
 			{ // DIV select
 				widget::param wp(vtx::irect(10, 20+40*1, menu_width - 20, 30), menu_);
 				widget_list::param wp_("1000 ms");
-				wp_.text_list_.push_back("1000 ms");
-				wp_.text_list_.push_back("500 ms");
-				wp_.text_list_.push_back("250 ms");
-				wp_.text_list_.push_back("100 ms");
-				wp_.text_list_.push_back("50 ms");
-				wp_.text_list_.push_back("10 ms");
-				wp_.text_list_.push_back("5 ms");
-				wp_.text_list_.push_back("1 ms");
-				wp_.text_list_.push_back("500 us");
-				wp_.text_list_.push_back("100 us");
-				wp_.text_list_.push_back("50 us");
-				wp_.text_list_.push_back("25 us");
-				wp_.text_list_.push_back("10 us");
-				wp_.text_list_.push_back("5 us");
-				wp_.text_list_.push_back("1 us");
+				wp_.init_list_.push_back("1000 ms");
+				wp_.init_list_.push_back("500 ms");
+				wp_.init_list_.push_back("250 ms");
+				wp_.init_list_.push_back("100 ms");
+				wp_.init_list_.push_back("50 ms");
+				wp_.init_list_.push_back("10 ms");
+				wp_.init_list_.push_back("5 ms");
+				wp_.init_list_.push_back("1 ms");
+				wp_.init_list_.push_back("500 us");
+				wp_.init_list_.push_back("100 us");
+				wp_.init_list_.push_back("50 us");
+				wp_.init_list_.push_back("25 us");
+				wp_.init_list_.push_back("10 us");
+				wp_.init_list_.push_back("5 us");
+				wp_.init_list_.push_back("1 us");
 //				wp_.select_func_ = [this](const std::string& text, uint32_t pos) {
 //					utils::format("List Selected: '%s', (%d)\n") % text.c_str() % pos;
 //				};
