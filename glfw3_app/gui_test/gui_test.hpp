@@ -48,6 +48,7 @@ namespace app {
 		gui::widget_frame*		frame_;
 
 		gui::widget_menu*		menu_;
+		gui::widget_list*		list_;
 
 		gui::widget_frame*		tree_frame_;
 		gui::widget_tree*		tree_core_;
@@ -100,6 +101,7 @@ namespace app {
 			label_(nullptr),
 			frame_(nullptr),
 			menu_(nullptr),
+			list_(nullptr),
 			tree_frame_(nullptr), tree_core_(nullptr),
 			filer_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
@@ -242,7 +244,7 @@ namespace app {
 				wp_.select_func_ = [this](const std::string& text, uint32_t pos) {
 					utils::format("List Selected: '%s', (%d)\n") % text.c_str() % pos;
 				};
-				wd.add_widget<widget_list>(wp, wp_);
+				list_ = wd.add_widget<widget_list>(wp, wp_);
 			}
 
 			if(1) { // スライダーのテスト
@@ -407,6 +409,9 @@ namespace app {
 			if(check_ != nullptr) {
 				check_->load(pre);
 			}
+			if(list_ != nullptr) {
+				list_->load(pre);
+			}
 			if(frame_ != nullptr) {
 				frame_->load(pre);
 			}
@@ -531,6 +536,9 @@ namespace app {
 			}
 			if(check_ != nullptr) {
 				check_->save(pre);
+			}
+			if(list_ != nullptr) {
+				list_->save(pre);
 			}
 			if(slider_ != nullptr) {
 				slider_->save(pre);
