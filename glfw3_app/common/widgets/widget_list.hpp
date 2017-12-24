@@ -1,7 +1,10 @@
 #pragma once
 //=====================================================================//
 /*!	@file
-	@brief	GUI widget_list クラス
+	@brief	GUI widget_list クラス @n
+			このクラスは、DROP_DOWN 等に相当するクラスで、「widget_menu」@n
+			を内包する。@n
+			メニューの直接操作は、widget_menu のポインター経由で行う。
     @author 平松邦仁 (hira@rvf-rc45.net)
 	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
 				Released under the MIT license @n
@@ -129,6 +132,15 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		param& at_local_param() { return param_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	選択テキストの取得（ボタンの表示テキスト）
+			@return 選択テキスト
+		*/
+		//-----------------------------------------------------------------//
+		std::string get_select_text() const { return param_.text_param_.get_text(); }
 
 
 		//-----------------------------------------------------------------//

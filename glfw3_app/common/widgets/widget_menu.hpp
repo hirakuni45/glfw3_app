@@ -5,7 +5,6 @@
 			・widget_label のリスト（集合） @n
 			・リソース作成時、「高さ」が、メニュー一つの高さに相当する。@n
 			・リソース作成後、「高さ」は、メニュー全体の高さに更新される。@n
-			※メニューの文字列リストは、操作性を考慮して二重に持っている。@n
 			※あまりに巨大なメニューには向いていない。@n
 			※メニューは単なるテキストの集合なので、同じ文字列が許容される。
     @author 平松邦仁 (hira@rvf-rc45.net)
@@ -327,7 +326,7 @@ namespace gui {
 			@return 選択テキスト
 		*/
 		//-----------------------------------------------------------------//
-		std::string get_select_text() const { return get_local_param().text_param_.get_text(); }
+		std::string get_select_text() const { return param_.text_param_.get_text(); }
 
 
 		//-----------------------------------------------------------------//
