@@ -67,10 +67,15 @@ namespace app {
 
 		void render_view_(const vtx::irect& clip)
 		{
+			gui::widget_director& wd = director_.at().widget_director_;
+
 			glDisable(GL_TEXTURE_2D);
 
-			gl::glColor(img::rgba8(255, 255));
-			waves_.render(clip.size.x);
+			gl::glColor(wd.get_color());
+
+			auto pos = div_->get_menu()->get_select_pos();
+//			auto div = div_tbls_[pos];
+			waves_.render(clip.size.x, 65536 * (pos + 1));
 
 			glEnable(GL_TEXTURE_2D);
 		}
@@ -259,8 +264,8 @@ namespace app {
 			if(div_ != nullptr) div_->load(pre);
 
 			// テスト波形生成
-			waves_.create_waves(0.5, 5.0 * 10e-6);
-			waves_.create_sin(10000000, 1 * 10e-3);
+			waves_.create_buffer(0.5, 10e-6);
+			waves_.build_sin(10e3);
 		}
 
 
