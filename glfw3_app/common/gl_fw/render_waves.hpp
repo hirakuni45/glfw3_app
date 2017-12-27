@@ -44,7 +44,7 @@ namespace view {
 			@return 生成した数
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t create_waves(double time, double div)
+		uint32_t create_buffer(double time, double div)
 		{
 			if(div <= 0.0 || time <= 0.0) return 0;
 
@@ -67,11 +67,12 @@ namespace view {
 			@param[in]	frq		周波数 [Hz]
 		*/
 		//-----------------------------------------------------------------//
-		void create_sin(double frq, double div)
+		void build_sin(double frq)
 		{
 			for(uint32_t i = 0; i < units_.size(); ++i) {
-				// double t = 1.0 / frq;
-				units_[i] = 32768 - static_cast<UNIT>(sin(2.0 * vtx::get_pi<double>() / 64 * i) * 32767.0);
+//				double t = 1.0 / frq;
+				double t = 1.0 / 1024.0;
+				units_[i] = 32768 - static_cast<UNIT>(sin(2.0 * vtx::get_pi<double>() * t * i) * 32767.0);
 			}
 		}
 
@@ -79,15 +80,18 @@ namespace view {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  描画
-			@param[in]	width	横幅（ピクセル）
+   			@param[in]	width	描画幅（ピクセル）
+			@param[in]	step	時間軸ステップ（65536を1.0）
 		*/
 		//-----------------------------------------------------------------//
-		void render(uint32_t width)
+		void render(uint32_t width, uint32_t tstep)
 		{
 			vtx::sposs list;
 			list.resize(width);
+			uint32_t t = 0;
 			for(uint32_t i = 0; i < width; ++i) {
-				list[i] = vtx::spos(i, units_[i] / 256);
+				list[i] = vtx::spos(i, units_[t >> 16] / 256);
+				t += tstep;
 			}
 			gl::draw_line_strip(list);
 		}
