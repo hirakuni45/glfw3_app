@@ -356,7 +356,6 @@ namespace gui {
 					if(param_.select_func_ != nullptr) {
 						param_.select_func_(param_.text_param_.get_text(), param_.select_pos_);
 					}
-					param_.select_pos_ = list_.size();
 					return true;
 				}
 				++pos;
@@ -380,7 +379,6 @@ namespace gui {
 				if(param_.select_func_ != nullptr) {
 					param_.select_func_(param_.text_param_.get_text(), param_.select_pos_);
 				}
-				param_.select_pos_ = list_.size();
 				return true;
 			} else {
 				return false;
@@ -483,7 +481,6 @@ namespace gui {
 					param_.select_func_(param_.text_param_.get_text(), param_.select_pos_);
 				}
 				wd_.enable(this, false, true);
-				param_.select_pos_ = list_.size();
 				id_ = param_.id_;
 			}
 		}
