@@ -34,6 +34,40 @@ namespace app {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class ignitor : public utils::i_scene {
+#if 0
+				wp_.init_list_.push_back("1000 ms");
+				wp_.init_list_.push_back("500 ms");
+				wp_.init_list_.push_back("250 ms");
+				wp_.init_list_.push_back("100 ms");
+				wp_.init_list_.push_back("50 ms");
+				wp_.init_list_.push_back("10 ms");
+				wp_.init_list_.push_back("5 ms");
+				wp_.init_list_.push_back("1 ms");
+				wp_.init_list_.push_back("500 us");
+				wp_.init_list_.push_back("100 us");
+				wp_.init_list_.push_back("50 us");
+				wp_.init_list_.push_back("25 us");
+				wp_.init_list_.push_back("10 us");
+				wp_.init_list_.push_back("5 us");
+				wp_.init_list_.push_back("1 us");
+#endif
+		static constexpr double div_tbls_[] = {
+			1000e-3,
+			500e-3,
+			250e-3,
+			100e-3,
+			50e-3,
+			10e-3,
+			5e-3,
+			1e-3,
+			500e-6,
+			100e-6,
+			50e-6,
+			25e-6,
+			10e-6,
+			5e-6,
+			1e-6,
+		};
 
 		utils::director<core>&	director_;
 
@@ -75,10 +109,15 @@ namespace app {
 
 		void render_view_(const vtx::irect& clip)
 		{
+			gui::widget_director& wd = director_.at().widget_director_;
+
 			glDisable(GL_TEXTURE_2D);
 
-			gl::glColor(img::rgba8(255, 255));
-			waves_.render(clip.size.x);
+			gl::glColor(wd.get_color());
+
+			auto pos = div_->get_menu()->get_select_pos();
+//			auto div = div_tbls_[pos];
+			waves_.render(clip.size.x, 65536 * (pos + 1));
 
 			glEnable(GL_TEXTURE_2D);
 		}
@@ -274,8 +313,8 @@ namespace app {
 			server_.start();
 
 			// テスト波形生成
-			waves_.create_waves(0.5, 5.0 * 10e-6);
-			waves_.create_sin(1000, 5 * 10e-6);
+			waves_.create_buffer(0.5, 10e-6);
+			waves_.build_sin(10e3);
 		}
 
 
