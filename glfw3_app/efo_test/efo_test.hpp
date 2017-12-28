@@ -24,6 +24,8 @@
 
 #include "gl_fw/render_waves.hpp"
 
+#include "utils/serial_win32.hpp"
+
 namespace app {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
