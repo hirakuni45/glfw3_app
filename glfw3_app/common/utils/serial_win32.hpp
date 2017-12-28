@@ -8,32 +8,85 @@
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
 //=====================================================================//
+#include <windows.h>
+#include <string>
 
-#if 0
-#include "serial.h"
-#include "rl78.h"
-#include <unistd.h>
-#include <stdio.h>
+namespace device {
 
-extern int verbose_level;
+	class serial_win32 {
 
-port_handle_t serial_open(const char *port)
-{
-    port_handle_t fd;
-    char port_full_name[20];
-    snprintf(port_full_name, sizeof port_full_name - 2u,
-             "\\\\.\\%s", port);
-    if (4 <= verbose_level)
-    {
-        printf("\t\tOpen port: %s\n", port_full_name);
-    }
-    fd = CreateFile(port_full_name,
-                    GENERIC_READ | GENERIC_WRITE,
+		HANDLE		fd_;
+
+		std::string	error_;
+
+	public:
+		serial_win32() : fd_(INVALID_HANDLE_VALUE) { }
+
+
+		bool open(const std::string& port)
+		{
+			std::string full("\\\\.\\");
+			full += port;
+///			snprintf(port_full_name, sizeof port_full_name - 2u, "\\\\.\\%s", port);
+///			if(4 <= verbose_level) {
+///				printf("\t\tOpen port: %s\n", port_full_name);
+///			}
+			fd_ = CreateFile(full.c_str(),
+					GENERIC_READ | GENERIC_WRITE,
                     0,
                     NULL,
                     OPEN_EXISTING,
                     FILE_ATTRIBUTE_NORMAL,
                     0);
+
+			bool ret = false;
+			if(INVALID_HANDLE_VALUE == fd_) {
+				int error_num = GetLastError();
+				char error_string[1024];
+				FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+					NULL,
+					error_num,
+					MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+					error_string,
+					sizeof error_string,
+					NULL);
+///			fprintf(stderr, "Unable to open port: (%i) %s\n", error_num, error_string);
+					error_ = error_string;
+			} else {
+				DCB dcbSerialParams;
+				GetCommState(fd_, &dcbSerialParams);
+				dcbSerialParams.BaudRate = CBR_115200;
+				dcbSerialParams.ByteSize = 8;
+				dcbSerialParams.StopBits = ONESTOPBIT;
+				dcbSerialParams.Parity   = NOPARITY;
+				SetCommState(fd_, &dcbSerialParams);
+
+				COMMTIMEOUTS timeouts;
+				timeouts.ReadIntervalTimeout=50;
+				timeouts.ReadTotalTimeoutConstant=50;
+				timeouts.ReadTotalTimeoutMultiplier=10;
+				timeouts.WriteTotalTimeoutConstant=0;
+				timeouts.WriteTotalTimeoutMultiplier=0;
+				SetCommTimeouts(fd_, &timeouts);
+				FlushFileBuffers(fd_);
+				ret = true;
+			}
+			return ret;
+		}
+
+
+
+	};
+}
+
+
+#if 0
+extern int verbose_level;
+
+port_handle_t serial_open(const char *port)
+{
+    port_handle_t fd;
+
     if (INVALID_HANDLE_VALUE == fd)
     {
         int error_num = GetLastError();
