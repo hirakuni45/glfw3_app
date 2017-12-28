@@ -223,7 +223,7 @@ namespace device {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	ライト
-			@param[in]	src	ソース
+			@param[in]	src	転送元
 			@param[in]	len	長さ（バイト）
 			@return 書き込んだサイズ
 		*/
@@ -256,54 +256,59 @@ namespace device {
 		}
 
 
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	リード
+			@param[out]	dst	転送先
+			@param[in]	len	長さ（バイト）
+			@return 書き込んだサイズ
+		*/
+		//-----------------------------------------------------------------//
+		uint32_t read(void *dst, int len)
+		{
+			int bytes_left = len;
+			DWORD bytes_read;
+			uint8_t* p = reinterpret_cast<uint8_t*>(dst);
+			do {
+				if(0 == ReadFile(fd_, p, bytes_left, &bytes_read, NULL)) {
+///					fprintf(stderr, "Failed to read from port.\n");
+//					last_error_ = 1;
+					return 0;
+				}
+				if(0 == bytes_read) {
+					break;
+				}
+				p += bytes_read;
+				bytes_left -= bytes_read;
+			} while(0 < bytes_left) ;
 
+			uint32_t nbytes = len - bytes_left;
+#if 0
+			if(4 <= verbose_level) {
+				p = dst;
+				unsigned int i;
+				printf("\t\trecv(%u): ", nbytes);
+				for(i = nbytes; 0 < i; --i) {
+					printf("%02X ", *pbuf++);
+				}
+				printf("\n");
+			}
+#endif
+			return nbytes;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	クローズ
+			@return 成功なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool close() {
+//			if(4 <= verbose_level) {
+//				printf("\t\tClose port\n");
+//			}
+			return CloseHandle(fd_) != 0;
+		}
 	};
 }
-
-
-#if 0
-
-int serial_read(port_handle_t fd, void *buf, int len)
-{
-    int bytes_left = len;
-    DWORD bytes_read;
-    unsigned char *pbuf = (unsigned char*)buf;
-    do
-    {
-        if (0 == ReadFile(fd, pbuf, bytes_left, &bytes_read, NULL))
-        {
-            fprintf(stderr, "Failed to read from port.\n");
-            return -1;
-        }
-        if (0 == bytes_read)
-        {
-            break;
-        }
-        pbuf += bytes_read;
-        bytes_left -= bytes_read;
-    }
-    while (0 < bytes_left);
-    const int nbytes = len - bytes_left;
-    if (4 <= verbose_level)
-    {
-        pbuf = buf;
-        unsigned int i;
-        printf("\t\trecv(%u): ", nbytes);
-        for (i = nbytes; 0 < i; --i)
-        {
-            printf("%02X ", *pbuf++);
-        }
-        printf("\n");
-    }
-    return nbytes;
-}
-
-int serial_close(port_handle_t fd)
-{
-    if (4 <= verbose_level)
-    {
-        printf("\t\tClose port\n");
-    }
-    return CloseHandle(fd) != 0 ? 0 : -1;
-}
-#endif
