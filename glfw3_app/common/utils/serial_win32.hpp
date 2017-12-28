@@ -13,16 +13,45 @@
 
 namespace device {
 
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief	シリアル通信クラス（WIN32)
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class serial_win32 {
+	public:
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	パリティー・タイプ
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		enum class PARITY {
+			NONE,	///< パリティー無し
+			EVEN,	///< 偶数パリティー
+			ODD,	///< 奇数パリティー
+		};
 
+	private:
 		HANDLE		fd_;
 
 		std::string	error_;
 
 	public:
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	コンストラクター
+		*/
+		//-----------------------------------------------------------------//
 		serial_win32() : fd_(INVALID_HANDLE_VALUE) { }
 
 
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	オープン
+			@param[in]	port	ポート名
+			@return 成功なら「true」
+		*/
+		//-----------------------------------------------------------------//
 		bool open(const std::string& port)
 		{
 			std::string full("\\\\.\\");
@@ -75,160 +104,164 @@ namespace device {
 		}
 
 
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ボーレートの設定
+			@param[in]	baud	ボーレート
+			@return 成功なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool set_baud(int baud)
+		{
+			DCB dcbSerialParams;
+			GetCommState(fd_, &dcbSerialParams);
+			dcbSerialParams.BaudRate = baud;
+			return SetCommState(fd_, &dcbSerialParams) != 0;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	パリティーの設定
+			@param[in]	parity	パリティー・タイプ
+			@return 成功なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool set_parity(PARITY parity)
+		{
+			DCB dcbSerialParams;
+			GetCommState(fd_, &dcbSerialParams);
+			switch(parity) {
+			case PARITY::EVEN:
+				dcbSerialParams.Parity = EVENPARITY;
+				break;
+			case PARITY::ODD:
+				dcbSerialParams.Parity = ODDPARITY;
+				break;
+			case PARITY::NONE:
+			default:
+				dcbSerialParams.Parity = NOPARITY;
+				break;
+			}
+			return SetCommState(fd_, &dcbSerialParams) != 0;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	DTR の設定（Data Terminal Ready)
+			@param[in]	value	設定値
+			@return 成功なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool set_dtr(bool value)
+		{
+			int command;
+			if(value) {
+				command = SETDTR;
+			} else {
+				command = CLRDTR;
+			}
+			return EscapeCommFunction(fd_, command) != 0;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	RTS の設定（Request To Send)
+			@param[in]	value	設定値
+			@return 成功なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool set_rts(bool value)
+		{
+			int command;
+			if(value) {
+				command = SETRTS;
+			} else {
+				command = CLRRTS;
+			}
+			return EscapeCommFunction(fd_, command) != 0;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	TXD の設定
+			@param[in]	value	設定値
+			@return 成功なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool set_txd(bool value)
+		{
+			int command;
+			if(value) {
+				command = SETBREAK;
+			} else {
+				command = CLRBREAK;
+				
+			}
+			return EscapeCommFunction(fd_, command) != 0;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	フラッシュ
+			@return 成功なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool flush()
+		{
+//			if(4 <= verbose_level) {
+//				printf("\t\tFlush IO buffers\n");
+//			}
+			return PurgeComm(fd_, PURGE_RXCLEAR | PURGE_TXCLEAR) != 0;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ライト
+			@param[in]	src	ソース
+			@param[in]	len	長さ（バイト）
+			@return 書き込んだサイズ
+		*/
+		//-----------------------------------------------------------------//
+		uint32_t write(const void* src, uint32_t len)
+		{
+#if 0
+			if(4 <= verbose_level) {
+				unsigned char *p = (unsigned char*)buf;
+				unsigned int i;
+				printf("\t\tsend(%u): ", len);
+				for(i = len; 0 < i; --i) {
+					printf("%02X ", *p++);
+				}
+				printf("\n");
+			}
+#endif
+			int bytes_left = len;
+			DWORD bytes_written;
+			const uint8_t* p = reinterpret_cast<const uint8_t*>(src);
+			do {
+				if(0 == WriteFile(fd_, p, bytes_left, &bytes_written, NULL)) {
+//					fprintf(stderr, "Failed to write to port.\n");
+					return false;
+				}
+				p += bytes_written;
+				bytes_left -= bytes_written;
+			} while(0 < bytes_left) ;
+			return len - bytes_left;
+		}
+
+
 
 	};
 }
 
 
 #if 0
-extern int verbose_level;
-
-port_handle_t serial_open(const char *port)
-{
-    port_handle_t fd;
-
-    if (INVALID_HANDLE_VALUE == fd)
-    {
-        int error_num = GetLastError();
-        char error_string[1024];
-        FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-                      NULL,
-                      error_num,
-                      MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                      error_string,
-                      sizeof error_string,
-                      NULL);
-        fprintf(stderr, "Unable to open port: (%i) %s\n", error_num, error_string);
-    }
-    else
-    {
-        DCB dcbSerialParams;
-        GetCommState(fd, &dcbSerialParams);
-        dcbSerialParams.BaudRate = CBR_115200;
-        dcbSerialParams.ByteSize = 8;
-        dcbSerialParams.StopBits = TWOSTOPBITS;
-        dcbSerialParams.Parity = NOPARITY;
-        SetCommState(fd, &dcbSerialParams);
-
-        COMMTIMEOUTS timeouts;
-        timeouts.ReadIntervalTimeout=50;
-        timeouts.ReadTotalTimeoutConstant=50;
-        timeouts.ReadTotalTimeoutMultiplier=10;
-        timeouts.WriteTotalTimeoutConstant=0;
-        timeouts.WriteTotalTimeoutMultiplier=0;
-        SetCommTimeouts(fd, &timeouts);
-        FlushFileBuffers(fd);
-    }
-    return fd;
-}
-
-int serial_set_baud(port_handle_t fd, int baud)
-{
-    DCB dcbSerialParams;
-    GetCommState(fd, &dcbSerialParams);
-    dcbSerialParams.BaudRate = baud;
-    return SetCommState(fd, &dcbSerialParams) != 0 ? 0 : -1;
-}
-
-int serial_set_parity(port_handle_t fd, int enable, int odd_parity)
-{
-    DCB dcbSerialParams;
-    GetCommState(fd, &dcbSerialParams);
-    dcbSerialParams.Parity = NOPARITY;
-    if (enable)
-    {
-        if (odd_parity)
-        {
-            dcbSerialParams.Parity = ODDPARITY;
-        }
-        else
-        {
-            dcbSerialParams.Parity = EVENPARITY;
-        }
-    }
-    return SetCommState(fd, &dcbSerialParams) != 0 ? 0 : -1;
-}
-
-int serial_set_dtr(port_handle_t fd, int level)
-{
-    int command;
-    if (level)
-    {
-        command = CLRDTR;
-    }
-    else
-    {
-        command = SETDTR;
-    }
-    return EscapeCommFunction(fd, command) != 0 ? 0 : -1;
-}
-
-int serial_set_rts(port_handle_t fd, int level)
-{
-    int command;
-    if (level)
-    {
-        command = CLRRTS;
-    }
-    else
-    {
-        command = SETRTS;
-    }
-    return EscapeCommFunction(fd, command) != 0 ? 0 : -1;
-}
-
-int serial_set_txd(port_handle_t fd, int level)
-{
-    int command;
-    if (level)
-    {
-        command = CLRBREAK;
-    }
-    else
-    {
-        command = SETBREAK;
-    }
-    return EscapeCommFunction(fd, command) != 0 ? 0 : -1;
-}
-
-int serial_flush(port_handle_t fd)
-{
-    if (4 <= verbose_level)
-    {
-        printf("\t\tFlush IO buffers\n");
-    }
-    return PurgeComm(fd, PURGE_RXCLEAR | PURGE_TXCLEAR) != 0 ? 0 : -1;
-}
-
-int serial_write(port_handle_t fd, const void *buf, int len)
-{
-    if (4 <= verbose_level)
-    {
-        unsigned char *p = (unsigned char*)buf;
-        unsigned int i;
-        printf("\t\tsend(%u): ", len);
-        for (i = len; 0 < i; --i)
-        {
-            printf("%02X ", *p++);
-        }
-        printf("\n");
-    }
-    int bytes_left = len;
-    DWORD bytes_written;
-    unsigned char *pbuf = (unsigned char*)buf;
-    do
-    {
-        if (0 == WriteFile(fd, pbuf, bytes_left, &bytes_written, NULL))
-        {
-            fprintf(stderr, "Failed to write to port.\n");
-            return -1;
-        }
-        pbuf += bytes_written;
-        bytes_left -= bytes_written;
-    }
-    while (0 < bytes_left);
-    return len - bytes_left;
-}
 
 int serial_read(port_handle_t fd, void *buf, int len)
 {
