@@ -70,6 +70,8 @@ PSOURCES	=	main.cpp \
 				widgets/widget_utils.cpp \
 				widgets/widget_filer.cpp
 
+#				img_io/pdf_in.cpp
+
 STDLIBS		=
 
 ifeq ($(SYSTEM),WIN)

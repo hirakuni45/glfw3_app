@@ -22,6 +22,7 @@
 #include "widgets/widget_view.hpp"
 #include "widgets/widget_utils.hpp"
 
+#include "root_menu.hpp"
 #include "ign_client.hpp"
 #include "ign_server.hpp"
 #include "gl_fw/render_waves.hpp"
@@ -70,6 +71,8 @@ namespace app {
 		};
 
 		utils::director<core>&	director_;
+
+		root_menu				root_menu_;
 
 		gui::widget_frame*		menu_;
 		gui::widget_button*		load_;
@@ -134,6 +137,7 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		ignitor(utils::director<core>& d) : director_(d),
+			root_menu_(director_.at().widget_director_),
 			menu_(nullptr), load_(nullptr), div_(nullptr), load_ctx_(nullptr),
 			wave_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
@@ -153,6 +157,9 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void initialize()
 		{
+			root_menu_.initialize();
+
+#if 0
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 			gl::core& core = gl::core::get_instance();
@@ -315,6 +322,7 @@ namespace app {
 			// テスト波形生成
 			waves_.create_buffer(0.5, 10e-6);
 			waves_.build_sin(10e3);
+#endif
 		}
 
 
@@ -325,6 +333,11 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void update()
 		{
+			root_menu_.update();
+
+			gui::widget_director& wd = director_.at().widget_director_;
+
+#if 0
 			if(start_client_) {
 				client_.service();
 			} else {
@@ -334,7 +347,6 @@ namespace app {
 			server_.service();
 			io_service_.run();
 
-			gui::widget_director& wd = director_.at().widget_director_;
 #if 0
 			// Drag & Drop されたファイル
 			gl::core& core = gl::core::get_instance();
@@ -349,6 +361,7 @@ namespace app {
 					}
 				}
 			}
+#endif
 #endif
 			wd.update();
 		}
@@ -373,6 +386,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void destroy()
 		{
+#if 0
 			sys::preference& pre = director_.at().preference_;
 
 ///			if(edit_ != nullptr) edit_->save(pre);
@@ -401,6 +415,7 @@ namespace app {
 			if(menu_ != nullptr) {
 				menu_->save(pre);
 			}
+#endif
 		}
 	};
 }
