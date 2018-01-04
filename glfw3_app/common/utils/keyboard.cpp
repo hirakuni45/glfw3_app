@@ -17,6 +17,19 @@ namespace sys {
 		char	shift_code;
 	};
 
+	static const key_t key_type_tbls_[] = {
+		{ gl::device::key::ESCAPE,        0x1b, 0x1b },
+		{ gl::device::key::BACKSPACE,     0x08, 0x08 },
+		{ gl::device::key::DEL,           0x3f, 0x3f },
+		{ gl::device::key::TAB,           0x09, 0x09 },
+		{ gl::device::key::ENTER,         0x0d, 0x0d },
+		{ gl::device::key::RIGHT,         'Q'-0x40, 'Q'-0x40 },
+		{ gl::device::key::LEFT,          'R'-0x40, 'R'-0x40 },
+		{ gl::device::key::DOWN,          'S'-0x40, 'S'-0x40 },
+		{ gl::device::key::UP,            'T'-0x40, 'T'-0x40 },
+	};
+
+#if 0
 	static const key_t us_key_type_tbls_[] = {
 		{ gl::device::key::ESCAPE,        0x1b, 0x1b },
 		{ gl::device::key::GRAVE_ACCENT,  '`', '~' },
@@ -145,6 +158,7 @@ namespace sys {
 		{ gl::device::key::DOWN,          'S'-0x40, 'S'-0x40 },
 		{ gl::device::key::UP,            'T'-0x40, 'T'-0x40 },
 	};
+#endif
 
 #if 0
 				INSERT    = 260,
@@ -185,8 +199,23 @@ namespace sys {
 		using namespace gl;
 
 		core& core = core::get_instance();
-		const device& dev = core.get_device();
 
+		input_.clear();
+
+		if(!core.get_recv_text().empty()) {
+			input_ += utils::utf32_to_utf8(core.get_recv_text());
+			core.at_recv_text().clear();
+		}
+
+		const device& dev = core.get_device();
+		const key_t* tbl = key_type_tbls_;
+		for(int i = 0; i < (sizeof(key_type_tbls_) / sizeof(key_t)); ++i) {
+			const key_t& t = tbl[i];
+			if(dev.get_positive(t.key_type)) {
+				input_ += t.normal_code;
+			}
+		}
+#if 0
 		input_.clear();
 		bool caps = dev.get_level(device::key::STATE_CAPS_LOCK);
 		const key_t* tbl;
@@ -244,6 +273,6 @@ namespace sys {
 			repeat_cycle_cnt_ = 0;
 			last_char_ = 0;
 		}
+#endif
 	}
-
 }
