@@ -250,6 +250,12 @@ namespace gl {
 	}
 
 
+	static void char_callback_(GLFWwindow* window, unsigned int code)
+	{
+		core::get_instance().at_recv_text() += code;
+	}
+
+
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	初期化プロセス
@@ -441,6 +447,9 @@ namespace gl {
 		start_sync_();
 		scale_ = static_cast<float>(get_size().x) / static_cast<float>(get_rect().size.x);
 #endif
+
+		// 文字を取得するコールバック設定（UTF-32でコードが返る）
+		glfwSetCharCallback(window_, char_callback_);
 
 		return true;
 	}

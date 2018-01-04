@@ -54,6 +54,8 @@ namespace gl {
 		int				recv_files_id_;
 		utils::strings	recv_files_path_;
 
+		utils::lstring	recv_text_;
+
 		std::string		title_;
 
 #ifdef __APPLE__
@@ -253,6 +255,24 @@ namespace gl {
 		*/
 		//-----------------------------------------------------------------//
 		const utils::strings& get_recv_files_path() const { return recv_files_path_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	キーボード文字列の取得
+			@return キーボード文字列
+		*/
+		//-----------------------------------------------------------------//
+		const utils::lstring& get_recv_text() const { return recv_text_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	キーボード文字列の参照
+			@return キーボード文字列
+		*/
+		//-----------------------------------------------------------------//
+		utils::lstring& at_recv_text() { return recv_text_; }
 
 
 		//-----------------------------------------------------------------//
