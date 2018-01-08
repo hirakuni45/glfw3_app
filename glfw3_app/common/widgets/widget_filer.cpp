@@ -546,9 +546,9 @@ namespace gui {
 			acc_key_ = 0;
 			if(param_.new_file_ && wd_.get_focus_widget() == (*cit).base) ;
 			else if(wd_.get_focus_widget() == this || wd_.get_focus_widget() == wd_.root_widget(this)) {
-				const std::string& ins = wd_.get_keyboard().input();
+				const utils::lstring& ins = wd_.get_keyboard().input();
 				if(!ins.empty()) {
-					char ch = ins.back();
+					auto ch = ins.back();
 					if(ch >= 'a' && ch <= 'z') ch -= 0x20;
 					if(ch == 0x1b || ch == '\r' ||
 					   ch == sys::keyboard::ctrl::UP || ch == sys::keyboard::ctrl::DOWN) {
@@ -641,6 +641,9 @@ namespace gui {
 					focus_(focus_path_);
 				}
 			} else if(acc_key_ == 0x1b) { // ESC
+				if(param_.cancel_file_func_ != nullptr) {
+					param_.cancel_file_func_();
+				}
 				enable(false);
 			} else if(acc_key_ == '\r') { // Enter (CR)
 				for(const auto& wf : center_) {

@@ -32,6 +32,7 @@ namespace gui {
 		typedef widget_filer value_type;
 
 		typedef std::function< void (const std::string&) > select_file_func_type;
+		typedef std::function< void (void) > cancel_file_func_type;
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
@@ -56,6 +57,7 @@ namespace gui {
 			bool			new_file_;		///< 新規ファイル作成
 
 			select_file_func_type	select_file_func_;	///< セレクト関数
+			cancel_file_func_type	cancel_file_func_;	///< 選択キャンセル関数
 
 			param(const std::string& path = "", const std::string& filter = "", bool new_file = false) :
 				plate_param_(),
@@ -65,7 +67,7 @@ namespace gui {
 				path_height_(32), label_height_(32),
 				every_top_(true), acc_focus_(true),
 				new_file_(new_file),
-				select_file_func_(nullptr)
+				select_file_func_(nullptr), cancel_file_func_(nullptr)
 			{ }
 		};
 
