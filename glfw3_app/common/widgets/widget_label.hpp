@@ -13,6 +13,8 @@
 #include "core/glcore.hpp"
 #include <utility>
 
+#include "utils/format.hpp"
+
 namespace gui {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -301,8 +303,8 @@ namespace gui {
 			if(focus_) {
 				if(!param_.read_only_ && param_.text_in_) {
 					bool text_in = param_.text_in_;
-					const std::string& ins = wd_.get_keyboard().input();
-					for(char ch : ins) {
+					const utils::lstring& ins = wd_.get_keyboard().input();
+					for(uint32_t ch : ins) {
 						if(param_.text_in_limit_ > 0 && param_.text_in_limit_ <= param_.text_in_pos_) {
 							param_.text_in_ = false;
 							continue;
