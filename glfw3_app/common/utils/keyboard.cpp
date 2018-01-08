@@ -203,7 +203,7 @@ namespace sys {
 		input_.clear();
 
 		if(!core.get_recv_text().empty()) {
-			input_ += utils::utf32_to_utf8(core.get_recv_text());
+			input_ += core.get_recv_text();
 			core.at_recv_text().clear();
 		}
 

@@ -195,13 +195,26 @@ namespace utils {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	文字出力
+			@brief	文字出力（UTF-8)
 			@param[in]	str	文字列
 		*/
 		//-----------------------------------------------------------------//
 		void output(const std::string& str) {
 			auto ls = utils::utf8_to_utf32(str);
 			for(auto lch : ls) {
+				output(lch);
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	文字出力（UTF-32）
+			@param[in]	str	文字列
+		*/
+		//-----------------------------------------------------------------//
+		void output(const utils::lstring& str) {
+			for(auto lch : str) {
 				output(lch);
 			}
 		}

@@ -6,7 +6,7 @@
 	@author	平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include <string>
+#include "utils/string_utils.hpp"
 
 // windows のマクロを廃棄
 #undef DELETE
@@ -40,7 +40,7 @@ namespace sys {
 
 
 	private:
-		std::string	input_;
+		utils::lstring	input_;
 
 		uint32_t	repeat_delay_;
 		uint32_t	repeat_delay_cnt_;
@@ -111,7 +111,7 @@ namespace sys {
 			@return 入力されたキーの値
 		*/
 		//-----------------------------------------------------------------//
-		const std::string& input() const { return input_; }
+		const utils::lstring& input() const { return input_; }
 	};
 
 }
