@@ -206,8 +206,8 @@ namespace utils {
 				}
 			};
 
-			real_t	base;
-			real_t	exp;
+			real_t base;
+			real_t exp;
 			char ch;
 			bool expf = false;
 			while((ch = inp_()) != 0) {
