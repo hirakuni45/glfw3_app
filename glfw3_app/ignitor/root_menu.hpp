@@ -32,7 +32,7 @@ namespace app {
 		gui::widget_director&	wd_;
 
 		gui::widget_button*		new_project_;
-		gui::widget_label*		root_project_;
+		gui::widget_label*		proj_title_;
 
 		gui::widget_button*		load_project_;
 		gui::widget_label*		proj_path_;
@@ -43,6 +43,10 @@ namespace app {
 
 		gui::widget_dialog*		proj_name_dialog_;
 		gui::widget_label*		proj_name_label_;
+
+		gui::widget_dialog*		proj_dialog_;
+
+
 
 		gui::widget_dialog*		setting_dialog_;
 		gui::widget_label*		setting_ip_[4];
@@ -60,7 +64,7 @@ namespace app {
 		void stall_button_(bool f)
 		{
 			new_project_->set_stall(f);
-			root_project_->set_stall(f);
+			proj_title_->set_stall(f);
 			load_project_->set_stall(f);
 			edit_project_->set_stall(f);
 			save_project_->set_stall(f);
@@ -88,12 +92,13 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		root_menu(sys::preference& pre, gui::widget_director& wd) : pre_(pre), wd_(wd),
-			new_project_(nullptr),  root_project_(nullptr),
+			new_project_(nullptr),  proj_title_(nullptr),
 			load_project_(nullptr), proj_path_(nullptr),
 			edit_project_(nullptr),
 			save_project_(nullptr),
 			settings_(nullptr),
 			proj_name_dialog_(nullptr), proj_name_label_(nullptr),
+			proj_dialog_(nullptr),
 			setting_dialog_(nullptr), setting_ip_{ nullptr },
 			proj_load_filer_(nullptr), proj_save_filer_(nullptr),
 			projector_(),
@@ -131,12 +136,12 @@ namespace app {
 				new_project_ = wd_.add_widget<widget_button>(wp, wp_);
 				new_project_->at_local_param().select_func_ = [this](bool f) {
 					proj_name_dialog_->enable();
-					root_name_ = root_project_->get_text();
+					root_name_ = proj_title_->get_text();
 				};
 				{
 					widget::param wp(vtx::irect(ofsx + btw + 50, ofsy + sph * 0 + ((bth - 40) / 2), 200, 40));
 					widget_label::param wp_("");
-					root_project_ = wd_.add_widget<widget_label>(wp, wp_);
+					proj_title_ = wd_.add_widget<widget_label>(wp, wp_);
 				}
 			}
 
@@ -147,7 +152,12 @@ namespace app {
 				load_project_->at_local_param().select_func_ = [this](bool f) {
 					stall_button_(true);
 					proj_load_filer_->enable();
-				}; 
+				};
+				{
+					widget::param wp(vtx::irect(ofsx + btw + 50, ofsy + sph * 1 + ((bth - 40) / 2), 600, 40));
+					widget_label::param wp_("");
+					proj_path_ = wd_.add_widget<widget_label>(wp, wp_);
+				}
 			}
 			{
 				widget::param wp(vtx::irect(ofsx, ofsy + sph * 2, btw, bth));
@@ -165,7 +175,7 @@ namespace app {
 			}
 			{
 				widget::param wp(vtx::irect(ofsx, ofsy + sph * 4, btw, bth));
-				widget_button::param wp_("設定");
+				widget_button::param wp_("コントローラー設定");
 				settings_ = wd_.add_widget<widget_button>(wp, wp_);
 				settings_->at_local_param().select_func_ = [this](bool f) {
 					save_setting_value_();
@@ -182,11 +192,11 @@ namespace app {
 				proj_name_dialog_->enable(false);
 				proj_name_dialog_->at_local_param().select_func_ = [this](bool ok) {
 					if(!ok) {
-						root_project_->set_text(root_name_);
+						proj_title_->set_text(root_name_);
 						return;
 					}
 					projector_.start(proj_name_label_->get_text());
-					root_project_->set_text(proj_name_label_->get_text());
+					proj_title_->set_text(proj_name_label_->get_text());
 				};
 				{
 					widget::param wp(vtx::irect(10, 20, w - 10 * 2, 40), proj_name_dialog_);
@@ -259,7 +269,10 @@ namespace app {
 					proj_load_filer_ = wd_.add_widget<widget_filer>(wp, wp_);
 					proj_load_filer_->enable(false);
 					proj_load_filer_->at_local_param().select_file_func_ = [this](const std::string& path) {
-						projector_.load(path);
+						if(projector_.load(path)) {
+							proj_title_->set_text(projector_.get_title());
+							proj_path_->set_text(path);
+						}
 						stall_button_(false);
 					};
 					proj_load_filer_->at_local_param().cancel_file_func_ = [this](void) {
@@ -346,11 +359,14 @@ namespace app {
 			save_project_ = nullptr;
 			wd_.del_widget(edit_project_);
 			edit_project_ = nullptr;
+
 			wd_.del_widget(load_project_);
 			load_project_ = nullptr;
+			wd_.del_widget(proj_path_);
+			proj_path_ = nullptr;
 
-			wd_.del_widget(root_project_);
-			root_project_ = nullptr;
+			wd_.del_widget(proj_title_);
+			proj_title_ = nullptr;
 			wd_.del_widget(new_project_);
 			new_project_ = nullptr;
 		}

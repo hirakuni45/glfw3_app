@@ -22,7 +22,7 @@ namespace ign {
 
 		bool		status_;
 
-		std::string	name_;
+		std::string	title_;
 
 
 		void write_(utils::file_io& fio, const std::string& key, const std::string& body) {
@@ -35,18 +35,21 @@ namespace ign {
 
 		bool decode_(utils::file_io& fio)
 		{
+			std::string title;
 			while(!fio.eof()) {
 				auto line = fio.get_line();
+				if(line.empty()) continue;
 				auto ss = utils::split_text(line, " ");
 				if(ss.size() < 2) {
 					return false;
 				}
 				if(ss[0] == "title") {
-					name_ = ss[1];
+					title = ss[1];
 				} else {
 					return false;
 				}
 			}
+			start(title);
 			return true;
 		}
 
@@ -70,23 +73,23 @@ namespace ign {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief  プロジェクト名を取得
-			@return	プロジェクト名
+			@brief  プロジェクト・タイトルを取得
+			@return	プロジェクト・タイトル
 		*/
 		//-----------------------------------------------------------------//
-		const std::string& get_name() const { return name_; }
+		const std::string& get_title() const { return title_; }
 
 
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  新規プロジェクトを開始
-			@param[in]	name	プロジェクト名
+			@param[in]	title	プロジェクト名
 		*/
 		//-----------------------------------------------------------------//
-		void start(const std::string& name)
+		void start(const std::string& title)
 		{
-			name_ = name;
-			status_ = name.empty() ? false : true;
+			title_ = title;
+			status_ = title.empty() ? false : true;
 		}
 
 
@@ -121,7 +124,7 @@ namespace ign {
 			utils::file_io fio;
 			auto ret = fio.open(path, "wb");
 			if(ret) {
-				write_(fio, "title", name_);
+				write_(fio, "title", title_);
 
 				fio.close();
 			}			
