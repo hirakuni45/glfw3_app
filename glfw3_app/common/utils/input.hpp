@@ -10,12 +10,15 @@
 			%f ---> 浮動小数点数（float、double） @n
 			%c ---> １文字のキャラクター @n
 			%% ---> '%' のキャラクター
-			Copyright 2017 Kunihito Hiramatsu
     @author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2017, 2018 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
 //=====================================================================//
 #include <type_traits>
 #include <unistd.h>
+#include <cmath>
 
 namespace utils {
 
@@ -172,29 +175,68 @@ namespace utils {
 
 		template<typename T>
 		T real_() {
-			uint32_t a = 0;
-			uint32_t b = 0;
-			uint32_t c = 1;
-			char ch;
-			bool p = false;
-			while((ch = inp_()) != 0) {
-				if(ch >= '0' && ch <= '9') {
+
+			struct real_t {
+				uint32_t	a;
+				uint32_t	b;
+				uint32_t	c;
+				bool		p;
+
+				real_t() : a(0), b(0), c(1), p(false) { }
+
+				void add(uint32_t v) {
 					a *= 10;
-					a += ch - '0';
+					a += v;
 					c *= 10;
-				} else if(ch == '.') {
+				}
+
+				void point() {
 					b = a;
 					a = 0;
 					c = 1;
 					p = true;
+				}
+
+				T get() const {
+					if(p) {
+						return static_cast<T>(b) + static_cast<T>(a) / static_cast<T>(c);
+					} else {
+						return static_cast<T>(a); 
+					}				
+				}
+			};
+
+			real_t	base;
+			real_t	exp;
+			char ch;
+			bool expf = false;
+			while((ch = inp_()) != 0) {
+				if(ch >= '0' && ch <= '9') {
+					if(expf) {
+						exp.add(ch - '0');
+					} else { 
+						base.add(ch - '0');
+					}
+				} else if(ch == '.') {
+					if(expf) {
+						if(exp.p) break;
+						exp.point();
+					} else {
+						if(base.p) break;
+						base.point();
+					}
+				} else if(ch == 'e' || ch == 'E') {
+					if(expf) break;
+					expf = true;
 				} else {
 					break;
 				}
 			}
-			if(p) {
-				return static_cast<T>(b) + static_cast<T>(a) / static_cast<T>(c);
+			
+			if(expf) {
+				return base.get() * pow(static_cast<T>(10), exp.get());
 			} else {
-				return static_cast<T>(a); 
+				return base.get();
 			}
 		}
 
