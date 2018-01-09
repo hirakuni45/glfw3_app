@@ -24,6 +24,32 @@ namespace ign {
 
 		std::string	name_;
 
+
+		void write_(utils::file_io& fio, const std::string& key, const std::string& body) {
+			fio.put(key);
+			fio.put_char(' ');
+			fio.put(body);
+			fio.put_char('\n');
+		}
+
+
+		bool decode_(utils::file_io& fio)
+		{
+			while(!fio.eof()) {
+				auto line = fio.get_line();
+				auto ss = utils::split_text(line, " ");
+				if(ss.size() < 2) {
+					return false;
+				}
+				if(ss[0] == "title") {
+					name_ = ss[1];
+				} else {
+					return false;
+				}
+			}
+			return true;
+		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -76,7 +102,7 @@ namespace ign {
 			utils::file_io fio;
 			auto ret = fio.open(path, "rb");
 			if(ret) {
-
+				ret = decode_(fio);
 				fio.close();
 			}			
 			return ret;
@@ -95,6 +121,7 @@ namespace ign {
 			utils::file_io fio;
 			auto ret = fio.open(path, "wb");
 			if(ret) {
+				write_(fio, "title", name_);
 
 				fio.close();
 			}			

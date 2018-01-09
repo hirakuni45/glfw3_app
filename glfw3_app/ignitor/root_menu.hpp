@@ -15,6 +15,8 @@
 #include "widgets/widget_text.hpp"
 #include "widgets/widget_label.hpp"
 #include "widgets/widget_filer.hpp"
+#include "utils/input.hpp"
+#include "utils/format.hpp"
 #include "projector.hpp"
 
 namespace app {
@@ -33,6 +35,8 @@ namespace app {
 		gui::widget_label*		root_project_;
 
 		gui::widget_button*		load_project_;
+		gui::widget_label*		proj_path_;
+
 		gui::widget_button*		edit_project_;
 		gui::widget_button*		save_project_;
 		gui::widget_button*		settings_;
@@ -41,13 +45,17 @@ namespace app {
 		gui::widget_label*		proj_name_label_;
 
 		gui::widget_dialog*		setting_dialog_;
-
+		gui::widget_label*		setting_ip_[4];
 
 		gui::widget_filer*		proj_load_filer_;
 		gui::widget_filer*		proj_save_filer_;
 
 		ign::projector			projector_;
 
+		std::string				root_name_;
+
+		std::string				ip_str_[4];
+		int						ip_[4];
 
 		void stall_button_(bool f)
 		{
@@ -59,6 +67,20 @@ namespace app {
 			settings_->set_stall(f);
 		}
 
+		void save_setting_value_()
+		{
+			for(int i = 0; i < 4; ++i) {
+				ip_str_[i] = setting_ip_[i]->get_text();
+			}
+		}
+
+		void load_setting_value_()
+		{
+			for(int i = 0; i < 4; ++i) {
+				setting_ip_[i]->set_text(ip_str_[i]);
+			}
+		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -66,15 +88,16 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		root_menu(sys::preference& pre, gui::widget_director& wd) : pre_(pre), wd_(wd),
-			new_project_(nullptr), root_project_(nullptr),
-			load_project_(nullptr),
+			new_project_(nullptr),  root_project_(nullptr),
+			load_project_(nullptr), proj_path_(nullptr),
 			edit_project_(nullptr),
 			save_project_(nullptr),
 			settings_(nullptr),
 			proj_name_dialog_(nullptr), proj_name_label_(nullptr),
-			setting_dialog_(nullptr),
+			setting_dialog_(nullptr), setting_ip_{ nullptr },
 			proj_load_filer_(nullptr), proj_save_filer_(nullptr),
-			projector_()
+			projector_(),
+			ip_{ 0 }
 			{ }
 
 
@@ -108,6 +131,7 @@ namespace app {
 				new_project_ = wd_.add_widget<widget_button>(wp, wp_);
 				new_project_->at_local_param().select_func_ = [this](bool f) {
 					proj_name_dialog_->enable();
+					root_name_ = root_project_->get_text();
 				};
 				{
 					widget::param wp(vtx::irect(ofsx + btw + 50, ofsy + sph * 0 + ((bth - 40) / 2), 200, 40));
@@ -143,7 +167,8 @@ namespace app {
 				widget::param wp(vtx::irect(ofsx, ofsy + sph * 4, btw, bth));
 				widget_button::param wp_("設定");
 				settings_ = wd_.add_widget<widget_button>(wp, wp_);
-				settings_->at_local_param().select_func_ = [this](bool f) { 
+				settings_->at_local_param().select_func_ = [this](bool f) {
+					save_setting_value_();
 					setting_dialog_->enable();
 				};
 			}
@@ -156,12 +181,15 @@ namespace app {
 				proj_name_dialog_ = wd_.add_widget<widget_dialog>(wp, wp_);
 				proj_name_dialog_->enable(false);
 				proj_name_dialog_->at_local_param().select_func_ = [this](bool ok) {
-					if(!ok) return;
+					if(!ok) {
+						root_project_->set_text(root_name_);
+						return;
+					}
 					projector_.start(proj_name_label_->get_text());
 					root_project_->set_text(proj_name_label_->get_text());
 				};
 				{
-					widget::param wp(vtx::irect(10, 20,  w - 10 * 2, 40), proj_name_dialog_);
+					widget::param wp(vtx::irect(10, 20, w - 10 * 2, 40), proj_name_dialog_);
 					widget_text::param wp_("プロジェクト名：");
 					wd_.add_widget<widget_text>(wp, wp_);
 				}
@@ -173,7 +201,7 @@ namespace app {
 			}
 
 			{  // 設定ダイアログ
-				int w = 300;
+				int w = 330;
 				int h = 200;
 				widget::param wp(vtx::irect(100, 100, w, h));
 				widget_dialog::param wp_;
@@ -181,9 +209,46 @@ namespace app {
 				setting_dialog_ = wd_.add_widget<widget_dialog>(wp, wp_);
 				setting_dialog_->enable(false);
 				setting_dialog_->at_local_param().select_func_ = [this](bool ok) {
-					if(!ok) return;
-
+					if(!ok) {
+						load_setting_value_();
+						return;
+					}
+					for(int i = 0; i < 4; ++i) {
+						const std::string& ip = setting_ip_[i]->get_text();
+						int v = 0;
+						if((utils::input("%d", ip.c_str()) % v).status()) {
+							ip_[i] = v;
+						}
+					}
+					utils::format("IP: %d, %d, %d, %d\n") % ip_[0] % ip_[1] % ip_[2] % ip_[3];
 				};
+				{
+					widget::param wp(vtx::irect(10, 20, w - 10 * 2, 40), setting_dialog_);
+					widget_text::param wp_("コントローラーＩＰ：");
+					wd_.add_widget<widget_text>(wp, wp_);
+				}
+				int ipw = 60;  // IP 設定幅
+				int ips = 20;  // IP 設定隙間
+				{
+					widget::param wp(vtx::irect(10 + (ipw + ips) * 0, 70, 60, 40), setting_dialog_);
+					widget_label::param wp_("192", false);
+					setting_ip_[0] = wd_.add_widget<widget_label>(wp, wp_);
+				}
+				{
+					widget::param wp(vtx::irect(10 + (ipw + ips) * 1, 70, 60, 40), setting_dialog_);
+					widget_label::param wp_("168", false);
+					setting_ip_[1] = wd_.add_widget<widget_label>(wp, wp_);
+				}
+				{
+					widget::param wp(vtx::irect(10 + (ipw + ips) * 2, 70, 60, 40), setting_dialog_);
+					widget_label::param wp_("1", false);
+					setting_ip_[2] = wd_.add_widget<widget_label>(wp, wp_);
+				}
+				{
+					widget::param wp(vtx::irect(10 + (ipw + ips) * 3, 70, 60, 40), setting_dialog_);
+					widget_label::param wp_("1", false);
+					setting_ip_[3] = wd_.add_widget<widget_label>(wp, wp_);
+				}
 			}
 
 			{  // プロジェクト・ファイラー
@@ -217,7 +282,14 @@ namespace app {
 			}
 
 			// プリファレンスのロード
+			setting_dialog_->load(pre_);
+			setting_ip_[0]->load(pre_);
+			setting_ip_[1]->load(pre_);
+			setting_ip_[2]->load(pre_);
+			setting_ip_[3]->load(pre_);
+
 			proj_name_dialog_->load(pre_);
+
 			proj_load_filer_->load(pre_);
 			proj_save_filer_->load(pre_);
 		}
@@ -247,7 +319,14 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void destroy()
 		{
+			setting_dialog_->save(pre_);
+			setting_ip_[0]->save(pre_);
+			setting_ip_[1]->save(pre_);
+			setting_ip_[2]->save(pre_);
+			setting_ip_[3]->save(pre_);
+
 			proj_name_dialog_->save(pre_);
+
 			proj_load_filer_->save(pre_);
 			proj_save_filer_->save(pre_);
 
@@ -256,6 +335,8 @@ namespace app {
 			wd_.del_widget(proj_load_filer_);
 			proj_load_filer_ = nullptr;
 
+			wd_.del_widget(setting_dialog_);
+			setting_dialog_ = nullptr;
 			wd_.del_widget(proj_name_dialog_);
 			proj_name_dialog_ = nullptr;
 
