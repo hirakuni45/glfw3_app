@@ -36,9 +36,13 @@ namespace ign {
 		bool decode_(utils::file_io& fio)
 		{
 			std::string title;
+			uint32_t no = 0;
 			while(!fio.eof()) {
+				++no;
 				auto line = fio.get_line();
 				if(line.empty()) continue;
+				if(line[0] == '#') continue;  // comment line
+
 				auto ss = utils::split_text(line, " ");
 				if(ss.size() < 2) {
 					return false;
@@ -49,6 +53,7 @@ namespace ign {
 					return false;
 				}
 			}
+
 			start(title);
 			return true;
 		}

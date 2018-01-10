@@ -28,6 +28,11 @@ namespace app {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class root_menu {
 
+		static const int ofs_x_ = 50;
+		static const int ofs_y_ = 50;
+		static const int btn_w_ = 240;
+		static const int btn_h_ = 80;
+
 		sys::preference&		pre_;
 		gui::widget_director&	wd_;
 
@@ -40,6 +45,8 @@ namespace app {
 		gui::widget_button*		edit_project_;
 		gui::widget_button*		save_project_;
 		gui::widget_button*		settings_;
+
+		gui::widget_button*		run_;
 
 		gui::widget_dialog*		proj_name_dialog_;
 		gui::widget_label*		proj_name_label_;
@@ -61,6 +68,7 @@ namespace app {
 		std::string				ip_str_[4];
 		int						ip_[4];
 
+
 		void stall_button_(bool f)
 		{
 			new_project_->set_stall(f);
@@ -69,7 +77,9 @@ namespace app {
 			edit_project_->set_stall(f);
 			save_project_->set_stall(f);
 			settings_->set_stall(f);
+			run_->set_stall(f);
 		}
+
 
 		void save_setting_value_()
 		{
@@ -78,10 +88,25 @@ namespace app {
 			}
 		}
 
+
 		void load_setting_value_()
 		{
 			for(int i = 0; i < 4; ++i) {
 				setting_ip_[i]->set_text(ip_str_[i]);
+			}
+		}
+
+
+		void update_project_()
+		{
+			if(projector_.status()) {
+				edit_project_->set_stall(false);
+				save_project_->set_stall(false);
+				run_->set_stall(false);
+			} else {
+				edit_project_->set_stall();
+				save_project_->set_stall();
+				run_->set_stall();
 			}
 		}
 
@@ -97,6 +122,7 @@ namespace app {
 			edit_project_(nullptr),
 			save_project_(nullptr),
 			settings_(nullptr),
+			run_(nullptr),
 			proj_name_dialog_(nullptr), proj_name_label_(nullptr),
 			proj_dialog_(nullptr),
 			setting_dialog_(nullptr), setting_ip_{ nullptr },
@@ -124,14 +150,15 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void initialize()
 		{
+			auto& core = gl::core::get_instance();
+			const auto& scs = core.get_rect().size;
+
 			using namespace gui;
-			int ofsx = 50;
-			int ofsy = 50;
-			int btw  = 240;
-			int bth  = 80;
-			int sph = bth + 50;
+
+			int sph = btn_h_ + 50;
+			int scw = scs.x;
 			{
-				widget::param wp(vtx::irect(ofsx, ofsy + sph * 0, btw, bth));
+				widget::param wp(vtx::irect(ofs_x_, ofs_y_ + sph * 0, btn_w_, btn_h_));
 				widget_button::param wp_("新規プロジェクト");
 				new_project_ = wd_.add_widget<widget_button>(wp, wp_);
 				new_project_->at_local_param().select_func_ = [this](bool f) {
@@ -139,14 +166,15 @@ namespace app {
 					root_name_ = proj_title_->get_text();
 				};
 				{
-					widget::param wp(vtx::irect(ofsx + btw + 50, ofsy + sph * 0 + ((bth - 40) / 2), 200, 40));
+					widget::param wp(vtx::irect(ofs_x_ + btn_w_ + 50,
+						ofs_y_ + sph * 0 + ((btn_h_ - 40) / 2), 200, 40));
 					widget_label::param wp_("");
 					proj_title_ = wd_.add_widget<widget_label>(wp, wp_);
 				}
 			}
 
 			{
-				widget::param wp(vtx::irect(ofsx, ofsy + sph * 1, btw, bth));
+				widget::param wp(vtx::irect(ofs_x_, ofs_y_ + sph * 1, btn_w_, btn_h_));
 				widget_button::param wp_("プロジェクト・ロード");
 				load_project_ = wd_.add_widget<widget_button>(wp, wp_);
 				load_project_->at_local_param().select_func_ = [this](bool f) {
@@ -154,18 +182,19 @@ namespace app {
 					proj_load_filer_->enable();
 				};
 				{
-					widget::param wp(vtx::irect(ofsx + btw + 50, ofsy + sph * 1 + ((bth - 40) / 2), 600, 40));
+					widget::param wp(vtx::irect(ofs_x_ + btn_w_ + 50,
+						ofs_y_ + sph * 1 + ((btn_h_ - 40) / 2), 600, 40));
 					widget_label::param wp_("");
 					proj_path_ = wd_.add_widget<widget_label>(wp, wp_);
 				}
 			}
 			{
-				widget::param wp(vtx::irect(ofsx, ofsy + sph * 2, btw, bth));
+				widget::param wp(vtx::irect(ofs_x_, ofs_y_ + sph * 2, btn_w_, btn_h_));
 				widget_button::param wp_("プロジェクト編集");
 				edit_project_ = wd_.add_widget<widget_button>(wp, wp_);
 			}
 			{
-				widget::param wp(vtx::irect(ofsx, ofsy + sph * 3, btw, bth));
+				widget::param wp(vtx::irect(ofs_x_, ofs_y_ + sph * 3, btn_w_, btn_h_));
 				widget_button::param wp_("プロジェクト・セーブ");
 				save_project_ = wd_.add_widget<widget_button>(wp, wp_);
 				save_project_->at_local_param().select_func_ = [this](bool f) {
@@ -174,7 +203,7 @@ namespace app {
 				};
 			}
 			{
-				widget::param wp(vtx::irect(ofsx, ofsy + sph * 4, btw, bth));
+				widget::param wp(vtx::irect(ofs_x_, ofs_y_ + sph * 4, btn_w_, btn_h_));
 				widget_button::param wp_("コントローラー設定");
 				settings_ = wd_.add_widget<widget_button>(wp, wp_);
 				settings_->at_local_param().select_func_ = [this](bool f) {
@@ -182,6 +211,14 @@ namespace app {
 					setting_dialog_->enable();
 				};
 			}
+			{
+				widget::param wp(vtx::irect(scw - btn_w_ - ofs_x_, ofs_y_ + sph * 0, btn_w_, btn_h_));
+				widget_button::param wp_("検査開始");
+				run_ = wd_.add_widget<widget_button>(wp, wp_);
+				run_->at_local_param().select_func_ = [this](bool f) {
+				};
+			}
+
 			{  // プロジェクト名入力ダイアログ
 				int w = 300;
 				int h = 200;
@@ -197,6 +234,7 @@ namespace app {
 					}
 					projector_.start(proj_name_label_->get_text());
 					proj_title_->set_text(proj_name_label_->get_text());
+					update_project_();
 				};
 				{
 					widget::param wp(vtx::irect(10, 20, w - 10 * 2, 40), proj_name_dialog_);
@@ -272,6 +310,7 @@ namespace app {
 						if(projector_.load(path)) {
 							proj_title_->set_text(projector_.get_title());
 							proj_path_->set_text(path);
+							update_project_();
 						}
 						stall_button_(false);
 					};
@@ -305,6 +344,8 @@ namespace app {
 
 			proj_load_filer_->load(pre_);
 			proj_save_filer_->load(pre_);
+
+			update_project_();
 		}
 
 
@@ -315,13 +356,9 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void update()
 		{
-			if(projector_.status()) {
-				edit_project_->set_stall(false);
-				save_project_->set_stall(false);
-			} else {
-				edit_project_->set_stall();
-				save_project_->set_stall();
-			}
+			auto& core = gl::core::get_instance();
+			const auto& scs = core.get_rect().size;
+			run_->at_rect().org.x = scs.x - btn_w_ - ofs_x_;
 		}
 
 
