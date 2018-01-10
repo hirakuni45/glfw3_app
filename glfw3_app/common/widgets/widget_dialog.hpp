@@ -261,7 +261,8 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() override {
+		void update() override
+		{
 			bool close = false;
 			if(ok_ && ok_->get_selected()) {
 				param_.return_ok_     = true;
@@ -294,7 +295,8 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render() override {
+		void render() override
+		{
 			if(objh_ == 0) return;
 
 			wd_.at_mobj().resize(objh_, get_param().rect_.size);
