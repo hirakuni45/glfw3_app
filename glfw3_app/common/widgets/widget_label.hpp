@@ -268,7 +268,8 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() override {
+		void update() override
+		{
 			if(param_.text_in_) return;
 
 			// テキスト入力位置を調整
@@ -288,6 +289,12 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void service() override
 		{
+			if(!get_state(state::ENABLE)) {
+				param_.text_in_ = false;
+				focus_ = false;
+				return;
+			}
+
 			if(get_select_in()) {
 				if(!param_.read_only_) {
 					param_.text_in_ = true;
@@ -387,7 +394,8 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render() override {
+		void render() override
+		{
 			gl::mobj::handle h = objh_;
 			if(get_select() || get_state(widget::state::SELECTED)) {
 				h = select_objh_;
