@@ -203,7 +203,8 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() override {
+		void initialize() override
+		{
 			// 自由な大きさの変更を禁止
 			at_param().state_.set(widget::state::SIZE_LOCK);
 			at_param().state_.set(widget::state::SERVICE);

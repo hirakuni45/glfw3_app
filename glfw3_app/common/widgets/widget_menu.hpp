@@ -476,6 +476,10 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void service() override
 		{
+			if(!get_state(state::ENABLE)) {
+				return;
+			}
+
 			if(id_ != param_.id_) {
 				if(param_.select_func_ != nullptr) {
 					param_.select_func_(param_.text_param_.get_text(), param_.select_pos_);

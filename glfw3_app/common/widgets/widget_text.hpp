@@ -139,7 +139,8 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render() override {
+		void render() override
+		{
 			using namespace gl;
 			core& core = core::get_instance();
 
