@@ -219,6 +219,10 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void service() override
 		{
+			if(!get_state(state::ENABLE)) {
+				return;
+			}
+
 			if(id_ != menu_->get_local_param().id_) {
 				param_.text_param_.set_text(menu_->get_select_text());
 				if(param_.select_func_ != nullptr) {
@@ -234,7 +238,8 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render() override {
+		void render() override
+		{
 			using namespace gl;
 
 			core& core = core::get_instance();

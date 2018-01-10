@@ -199,7 +199,12 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override {
+		void service() override
+		{
+			if(!get_state(state::ENABLE)) {
+				return;
+			}
+
 			if(check_ != param_.check_) {
 				if(param_.select_func_ != nullptr) param_.select_func_(param_.check_);
 				check_ = param_.check_;
@@ -212,7 +217,8 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render() override {
+		void render() override
+		{
 			using namespace gl;
 			core& core = core::get_instance();
 

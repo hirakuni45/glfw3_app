@@ -334,7 +334,12 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override {
+		void service() override
+		{
+			if(!get_state(state::ENABLE)) {
+				return;
+			}
+
 			if(position_ != param_.slider_param_.position_) {
 				bool f = false;
 				if(param_.select_fin_) {
@@ -357,7 +362,8 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render() override {
+		void render() override
+		{
 			if(base_h_ == 0) return;
 
 			using namespace gl;

@@ -123,7 +123,8 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() override {
+		void initialize() override
+		{
 			// ボタンは標準的に固定、サイズ固定、選択時拡大
 			at_param().state_.set(widget::state::SERVICE);
 			at_param().state_.set(widget::state::POSITION_LOCK);
@@ -179,7 +180,12 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override {
+		void service() override
+		{
+			if(!get_state(state::ENABLE)) {
+				return;
+			}
+
 			if(id_ != param_.id_) {
 				if(param_.select_func_ != nullptr) param_.select_func_(param_.id_);
 				id_ = param_.id_;
@@ -192,7 +198,8 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render() override {
+		void render() override
+		{
 			if(objh_ == 0) return;
 
 			if(param_.plate_param_.resizeble_) {
