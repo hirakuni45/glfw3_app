@@ -879,6 +879,7 @@ namespace gui {
 		del_mark_.clear();
 		widgets ws = widgets_;
 		for(auto w : ws) {
+			// サービス処理は、ENABLE に関係なく呼ぶ仕様に変更
 ///			if(!w->get_state(widget::state::ENABLE)) continue;
 			if(del_mark_.find(w) != del_mark_.end()) continue;
 			if(w->get_state(widget::state::SERVICE)) {
