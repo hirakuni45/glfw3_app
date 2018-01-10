@@ -167,7 +167,8 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() override {
+		void initialize() override
+		{
 			// ボタンは標準的に固定、サイズ固定、選択時拡大
 			at_param().state_.set(widget::state::SERVICE);
 			at_param().state_.set(widget::state::POSITION_LOCK);
@@ -279,7 +280,8 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render() override {
+		void render() override
+		{
 			if(objh_ == 0) return;
 
 			using namespace gl;

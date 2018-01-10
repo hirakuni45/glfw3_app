@@ -161,7 +161,8 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() override {
+		void initialize() override
+		{
 			at_param().state_.set(widget::state::POSITION_LOCK);
 			at_param().state_.set(widget::state::SIZE_LOCK);
 			at_param().state_.set(widget::state::RESIZE_H_ENABLE, false);
@@ -191,7 +192,8 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() override {
+		void update() override
+		{
 			if(wd_.get_focus_widget() == this || wd_.get_focus_widget() == wd_.root_widget(this)) {
 				focus_ = true;
 			} else {
@@ -236,7 +238,13 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override {
+		void service() override
+		{
+			if(!get_state(state::ENABLE)) {
+				focus_ = false;
+				return;
+			}
+
 			if(focus_) {
 				if(param_.echo_) {
 					auto s = wd_.at_keyboard().input();
@@ -261,7 +269,8 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render() override {
+		void render() override
+		{
 			using namespace gl;
 			core& core = core::get_instance();
 			const vtx::spos& vsz = core.get_size();
