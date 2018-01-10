@@ -289,7 +289,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void service() override
 		{
-			if(!get_state(state::ENABLE)) {
+			if(!get_state(state::ENABLE)) {  // 不許可になったら、入力をオフラインにする。
 				param_.text_in_ = false;
 				focus_ = false;
 				return;
