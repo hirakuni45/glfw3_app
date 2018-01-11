@@ -30,7 +30,9 @@ namespace gui {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
+
 			text_param	text_param_;
+
 			param(const std::string& text = "") : text_param_(text,
 				img::rgba8(255, 255), img::rgba8(0, 255),
 				vtx::placement(vtx::placement::holizontal::LEFT,
