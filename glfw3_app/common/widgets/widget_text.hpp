@@ -107,10 +107,35 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	テキストを設定
+			@param[in]	text	テキスト
+		*/
+		//-----------------------------------------------------------------//
+		void set_text(const std::string& text) {
+			param_.text_param_.set_text(text);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	テキストを取得
+			@return	テキスト
+		*/
+		//-----------------------------------------------------------------//
+		std::string get_text() const {
+			std::string s;
+			utils::utf32_to_utf8(param_.text_param_.text_, s);
+			return s;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() override {
+		void initialize() override
+		{
 			// 標準的に固定
 			at_param().state_.set(widget::state::POSITION_LOCK);
 			at_param().state_.set(widget::state::SIZE_LOCK);
