@@ -71,6 +71,8 @@ namespace gui {
 		widget_menu*		menu_;
 		uint32_t			id_;
 
+		bool				enable_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -79,7 +81,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_list(widget_director& wd, const widget::param& bp, const param& p) :
 			widget(bp), wd_(wd), param_(p),
-			objh_(0), select_objh_(0), menu_(nullptr), id_(0)
+			objh_(0), select_objh_(0), menu_(nullptr), id_(0), enable_(false)
 			{ }
 
 
@@ -158,7 +160,8 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() override {
+		void initialize() override
+		{
 			// 標準的に固定、リサイズ不可
 			at_param().state_.set(widget::state::SERVICE);
 			at_param().state_.set(widget::state::POSITION_LOCK);
@@ -189,6 +192,9 @@ namespace gui {
 				widget::param wp(vtx::irect(vtx::ipos(0), get_rect().size), this);
 				widget_menu::param wp_;
 				wp_.init_list_ = param_.init_list_;
+				if(!wp_.init_list_.empty()) {
+					param_.text_param_.set_text(wp_.init_list_[0]);
+				}
 				menu_ = wd_.add_widget<widget_menu>(wp, wp_);
 				menu_->enable(false);
 			}
@@ -219,6 +225,13 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void service() override
 		{
+			bool ena = enable_;
+			enable_ = get_state(state::ENABLE);
+
+			if(!ena && enable_) {  // 全体が許可の場合は、メニューをオフラインにする
+				menu_->enable(false);
+			}
+
 			if(!get_state(state::ENABLE)) {
 				return;
 			}
