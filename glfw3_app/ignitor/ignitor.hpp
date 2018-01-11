@@ -137,7 +137,7 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		ignitor(utils::director<core>& d) : director_(d),
-			root_menu_(director_.at().preference_, director_.at().widget_director_),
+			root_menu_(d),
 			menu_(nullptr), load_(nullptr), div_(nullptr), load_ctx_(nullptr),
 			wave_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
