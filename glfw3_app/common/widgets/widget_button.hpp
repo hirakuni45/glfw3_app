@@ -168,7 +168,8 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() override {
+		void update() override
+		{
 			if(get_selected()) {
 				++param_.id_;
 			}
