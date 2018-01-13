@@ -2,9 +2,11 @@
 //=====================================================================//
 /*!	@file
 	@brief	ドライブの情報を得る Windows 依存のクラス、@n
-			他のプラットホームでは、「ドライブ」無しとなる。@n
-			Copyright 2017 Kunihito Hiramatsu
-	@author	平松邦仁 (hira@rvf-rc45.net)
+			他のプラットホームでは、「ドライブ」無しとなる。
+    @author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
 //=====================================================================//
 #ifdef WIN32

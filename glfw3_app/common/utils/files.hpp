@@ -2,9 +2,11 @@
 //=====================================================================//
 /*!	@file
 	@brief	ディレクトリー情報取得クラス（ヘッダー）@n
-			ディレクトリー情報取得をスレッドにて並行して行う @n
-			Copyright 2017 Kunihito Hiramatsu
-	@author	平松邦仁 (hira@rvf-rc45.net)
+			ディレクトリー情報取得をスレッドにて並行して行う
+    @author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
 //=====================================================================//
 #include <iostream>

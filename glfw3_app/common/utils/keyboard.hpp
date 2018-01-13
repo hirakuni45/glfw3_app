@@ -1,9 +1,11 @@
 #pragma once
 //=====================================================================//
 /*!	@file
-	@brief	キーボード入力を扱うクラス（ヘッダー）@n
-			Copyright 2017 Kunihito Hiramatsu
-	@author	平松邦仁 (hira@rvf-rc45.net)
+	@brief	キーボード入力を扱うクラス
+    @author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2017, 2018 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
 //=====================================================================//
 #include "utils/string_utils.hpp"
