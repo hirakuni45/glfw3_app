@@ -297,8 +297,9 @@ namespace gui {
 
 				AREA_ROOT,				///< ルートの描画領域を継承
 
-				MOVE_TOP,				///< 移動時最上位にする。
-				RESIZE_TOP,				///< リサイズ時最上位にする。
+				MOVE_TOP,				///< 移動時、最上位にする。
+				RESIZE_TOP,				///< リサイズ時、最上位にする。
+				ENABLE_TOP,				///< 有効時、最上位にする。
 
 				RESIZE_H_ENABLE,		///< 水平リサイズ許可
 				RESIZE_V_ENABLE,		///< 垂直リサイズ許可

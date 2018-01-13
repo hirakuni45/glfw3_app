@@ -405,10 +405,11 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void initialize() override
 		{
-			// 標準的に固定、リサイズ不可、サービス呼び出し
+			// 標準的に固定、リサイズ不可、サービス呼び出し、有効時最上位
 			at_param().state_.set(widget::state::SERVICE);
 			at_param().state_.set(widget::state::POSITION_LOCK);
 			at_param().state_.set(widget::state::SIZE_LOCK);
+			at_param().state_.set(widget::state::ENABLE_TOP);
 			at_param().state_.set(widget::state::ENABLE, false);
 
 			param_.base_height_ = get_rect().size.y;
@@ -429,8 +430,6 @@ namespace gui {
 			if(!get_state(widget::state::ENABLE) || list_.empty()) {
 				return;
 			}
-
-			wd_.top_widget(this);
 
 			uint32_t n = 0;
 			for(widget_label* w : list_) {

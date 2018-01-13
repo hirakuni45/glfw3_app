@@ -176,7 +176,7 @@ namespace gui {
 		if(resize_l_widget_ == w) resize_l_widget_ = nullptr;
 		if(resize_r_widget_ == w) resize_r_widget_ = nullptr;
 		if(top_widget_ == w) top_widget_ = nullptr;
-		if(focus_widget_ == w) select_widget_ = nullptr;
+		if(focus_widget_ == w) focus_widget_ = nullptr;
 
 		del_mark_.insert(w);
 
@@ -552,6 +552,19 @@ namespace gui {
 			}
 		}
 
+		{  // 有効時、最上位にする場合・・
+			widgets ws;
+			for(auto w : widgets_) {
+				if(!w->get_state(widget::state::ENABLE)) continue;
+				if(w->get_state(widget::state::ENABLE_TOP)) {
+					ws.push_back(w);
+				}
+			}
+			for(auto w : ws) {
+				top_widget(w);
+			}			
+		}
+
 		core& core = core::get_instance();
 		const device& dev = core.get_device();
 
@@ -674,6 +687,7 @@ namespace gui {
 				resize_trigger = true;
 			}
 		}
+
 		if(left.pos && move_widget_) {
 			move_widget_->at_param().move_org_ = move_widget_->get_rect().org;
 		}
