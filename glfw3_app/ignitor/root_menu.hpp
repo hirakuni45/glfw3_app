@@ -17,7 +17,6 @@
 #include "widgets/widget_filer.hpp"
 #include "utils/input.hpp"
 #include "utils/format.hpp"
-#include "projector.hpp"
 #include "inspection.hpp"
 
 namespace app {
@@ -59,8 +58,6 @@ namespace app {
 		gui::widget_filer*		proj_load_filer_;
 		gui::widget_filer*		proj_save_filer_;
 
-		ign::projector			projector_;
-
 		std::string				root_name_;
 
 		std::string				ip_str_[4];
@@ -97,15 +94,14 @@ namespace app {
 
 		void update_project_()
 		{
-			if(projector_.status()) {
-				edit_project_->set_stall(false);
-				save_project_->set_stall(false);
-				run_->set_stall(false);
-				inspection_.set_title(projector_.get_title());
-			} else {
+			if(inspection_.get_title().empty()) {
 				edit_project_->set_stall();
 				save_project_->set_stall();
 				run_->set_stall();
+			} else {
+				edit_project_->set_stall(false);
+				save_project_->set_stall(false);
+				run_->set_stall(false);
 			}
 		}
 
@@ -126,7 +122,6 @@ namespace app {
 			inspection_(d),
 			setting_dialog_(nullptr), setting_ip_{ nullptr },
 			proj_load_filer_(nullptr), proj_save_filer_(nullptr),
-			projector_(),
 			ip_{ 0 }
 			{ }
 
@@ -235,7 +230,7 @@ namespace app {
 						proj_title_->set_text(root_name_);
 						return;
 					}
-					projector_.start(proj_name_label_->get_text());
+					inspection_.set_title(proj_name_label_->get_text());
 					proj_title_->set_text(proj_name_label_->get_text());
 					update_project_();
 				};
@@ -312,8 +307,8 @@ namespace app {
 					proj_load_filer_ = wd.add_widget<widget_filer>(wp, wp_);
 					proj_load_filer_->enable(false);
 					proj_load_filer_->at_local_param().select_file_func_ = [this](const std::string& path) {
-						if(projector_.load(path)) {
-							proj_title_->set_text(projector_.get_title());
+						if(inspection_.load(path)) {
+							proj_title_->set_text(inspection_.get_title());
 							proj_path_->set_text(path);
 							update_project_();
 						}
@@ -329,7 +324,7 @@ namespace app {
 					proj_save_filer_ = wd.add_widget<widget_filer>(wp, wp_);
 					proj_save_filer_->enable(false);
 					proj_save_filer_->at_local_param().select_file_func_ = [this](const std::string& path) {
-						projector_.save(path);
+						inspection_.save(path);
 						stall_button_(false);
 					};
 					proj_save_filer_->at_local_param().cancel_file_func_ = [this](void) {
