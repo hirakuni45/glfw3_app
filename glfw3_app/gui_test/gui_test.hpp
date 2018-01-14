@@ -27,6 +27,8 @@
 #include "widgets/widget_spinbox.hpp"
 #include "widgets/widget_view.hpp"
 
+#include "utils/select_file.hpp"
+
 namespace app {
 
 	class gui_test : public utils::i_scene {
@@ -66,6 +68,9 @@ namespace app {
 		uint32_t	filer_id_;
 		uint32_t	menu_id_;
 		int			menu_ins_cnt_;
+
+
+		utils::select_file		sel_file_;
 
 
 		void view_update_()
@@ -448,11 +453,16 @@ namespace app {
 
 			if(filer_open_) {
 				if(filer_open_->get_selected()) {
-					if(filer_) {
-						filer_->enable(!filer_->get_state(gui::widget::state::ENABLE));
-					}
+					sel_file_.open();
+///					if(filer_) {
+///						filer_->enable(!filer_->get_state(gui::widget::state::ENABLE));
+///					}
 				}
 			}
+			if(sel_file_.state()) {
+				std::cout << sel_file_.get() << std::endl;
+			}
+
 			if(filer_) {
 				if(filer_id_ != filer_->get_select_file_id()) {
 					filer_id_ = filer_->get_select_file_id();
