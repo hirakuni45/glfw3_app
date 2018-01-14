@@ -759,7 +759,7 @@ namespace gui {
 			}
 			if(d < 0) {
 				if(position_.y < d) {
-/// std::cout << "slip+" << std::endl;
+/// std::cout << "slip+: " << d << std::endl;
 					position_.y -= d;
 					position_.y *= slip_gain;
 					position_.y += d;

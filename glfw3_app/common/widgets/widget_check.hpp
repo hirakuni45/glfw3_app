@@ -206,7 +206,9 @@ namespace gui {
 			}
 
 			if(check_ != param_.check_) {
-				if(param_.select_func_ != nullptr) param_.select_func_(param_.check_);
+				if(param_.select_func_ != nullptr) {
+					param_.select_func_(param_.check_);
+				}
 				check_ = param_.check_;
 			}
 		}

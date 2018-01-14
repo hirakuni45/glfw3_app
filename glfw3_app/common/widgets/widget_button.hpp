@@ -188,7 +188,9 @@ namespace gui {
 			}
 
 			if(id_ != param_.id_) {
-				if(param_.select_func_ != nullptr) param_.select_func_(param_.id_);
+				if(param_.select_func_ != nullptr) {
+					param_.select_func_(param_.id_);
+				}
 				id_ = param_.id_;
 			}
 		}
