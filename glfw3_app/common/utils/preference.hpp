@@ -3,9 +3,11 @@
 /*!	@file
 	@brief	プリファレンス・クラス（ヘッダー）@n
 			・アプリケーションの状態を記録する（Maybe レジストリー）@n
-			・テキストファイルとして記録されるので汎用性が高い @n
-			Copyright 2017 Kunihito Hiramatsu
-	@author	平松邦仁 (hira@rvf-rc45.net)
+			・テキストファイルとして記録されるので汎用性が高い
+    @author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
 //=====================================================================//
 #include <string>
