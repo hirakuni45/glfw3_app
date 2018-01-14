@@ -2,6 +2,7 @@
 //=====================================================================//
 /*!	@file
 	@brief	ファイル選択（WIN32) @n
+			※comdlg32.lib をリンクする。
     @author 平松邦仁 (hira@rvf-rc45.net)
 	@copyright	Copyright (C) 2018 Kunihito Hiramatsu @n
 				Released under the MIT license @n
@@ -13,6 +14,7 @@
 #endif
 #include <string>
 #include <pthread.h>
+#include "utils/string_utils.hpp"
 
 namespace utils {
 
@@ -51,8 +53,17 @@ namespace utils {
 			char szFile[ MAX_PATH ] = "";
 			ZeroMemory( &ofn, sizeof( ofn ) );
 			ofn.lStructSize = sizeof( OPENFILENAME );
-			ofn.lpstrFilter = "テキストファイル(*.txt)\0*.txt\0"
-				"すべてのファイル(*.*)\0*.*\0\0";
+
+			std::string filter = utils::utf8_to_sjis("テキストファイル(*.txt)");
+			filter += '\0';
+			filter += utils::utf8_to_sjis("*.txt");
+			filter += '\0';
+			filter += utils::utf8_to_sjis("すべてのファイル(*.*)");
+			filter += '\0';
+			filter += utils::utf8_to_sjis("*.*");
+			filter += '\0';
+			filter += '\0';
+			ofn.lpstrFilter = filter.c_str();
 			ofn.lpstrFile = szFile;
 			ofn.nMaxFile = MAX_PATH;
 			ofn.Flags = OFN_FILEMUSTEXIST;
@@ -123,7 +134,7 @@ namespace utils {
 			std::string path;
 			if(state()) {
 				pthread_mutex_lock(&info_.sync_);
-				path = info_.path_;
+				path = utils::sjis_to_utf8(info_.path_);
 				pthread_mutex_unlock(&info_.sync_);
 				open_ = false;
 			}
