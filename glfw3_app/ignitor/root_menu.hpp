@@ -17,7 +17,10 @@
 #include "widgets/widget_filer.hpp"
 #include "utils/input.hpp"
 #include "utils/format.hpp"
+#include "utils/select_file.hpp"
 #include "inspection.hpp"
+
+#define NATIVE_FILER
 
 namespace app {
 
@@ -54,10 +57,13 @@ namespace app {
 
 		gui::widget_dialog*		setting_dialog_;
 		gui::widget_label*		setting_ip_[4];
-
+#ifdef NATIVE_FILER
+		utils::select_file		proj_load_filer_;
+		utils::select_file		proj_save_filer_;
+#else
 		gui::widget_filer*		proj_load_filer_;
 		gui::widget_filer*		proj_save_filer_;
-
+#endif
 		std::string				root_name_;
 
 		std::string				ip_str_[4];
@@ -69,10 +75,10 @@ namespace app {
 			new_project_->set_stall(f);
 			proj_title_->set_stall(f);
 			load_project_->set_stall(f);
-			edit_project_->set_stall(f);
-			save_project_->set_stall(f);
+//			edit_project_->set_stall(f);
+//			save_project_->set_stall(f);
 			settings_->set_stall(f);
-			run_->set_stall(f);
+//			run_->set_stall(f);
 		}
 
 
@@ -121,7 +127,9 @@ namespace app {
 			proj_name_dialog_(nullptr), proj_name_label_(nullptr),
 			inspection_(d),
 			setting_dialog_(nullptr), setting_ip_{ nullptr },
+#ifndef NATIVE_FILER
 			proj_load_filer_(nullptr), proj_save_filer_(nullptr),
+#endif
 			ip_{ 0 }
 			{ }
 
@@ -174,7 +182,11 @@ namespace app {
 				load_project_ = wd.add_widget<widget_button>(wp, wp_);
 				load_project_->at_local_param().select_func_ = [this](bool f) {
 					stall_button_(true);
+#ifdef NATIVE_FILER
+					proj_load_filer_.open("プロジェクト(*.ipr)\t*.ipr\t");
+#else
 					proj_load_filer_->enable();
+#endif
 				};
 				{
 					widget::param wp(vtx::irect(ofs_x_ + btn_w_ + 50,
@@ -197,7 +209,11 @@ namespace app {
 				save_project_ = wd.add_widget<widget_button>(wp, wp_);
 				save_project_->at_local_param().select_func_ = [this](bool f) {
 					stall_button_(true);
+#ifdef NATIVE_FILER
+					proj_save_filer_.open("プロジェクト(*.ipr)\t*.ipr\t");
+#else
 					proj_save_filer_->enable();
+#endif
 				};
 			}
 			{
@@ -299,6 +315,7 @@ namespace app {
 				}
 			}
 
+#ifndef NATIVE_FILER
 			{  // プロジェクト・ファイラー
 				gl::core& core = gl::core::get_instance();
 				{
@@ -332,6 +349,7 @@ namespace app {
 					};
 				}
 			}
+#endif
 
 			// プリファレンスのロード
 			sys::preference& pre = director_.at().preference_;
@@ -343,10 +361,10 @@ namespace app {
 
 			proj_name_dialog_->load(pre);
 			inspection_.get_dialog()->load(pre);
-
+#ifndef NATIVE_FILER
 			proj_load_filer_->load(pre);
 			proj_save_filer_->load(pre);
-
+#endif
 			update_project_();
 		}
 
@@ -361,6 +379,29 @@ namespace app {
 			auto& core = gl::core::get_instance();
 			const auto& scs = core.get_rect().size;
 			run_->at_rect().org.x = scs.x - btn_w_ - ofs_x_;
+
+#ifdef NATIVE_FILER
+			if(proj_load_filer_.state()) {
+				auto path = proj_load_filer_.get();
+				if(!path.empty()) {
+					if(inspection_.load(path)) {
+						proj_title_->set_text(inspection_.get_title());
+						proj_path_->set_text(path);
+					}
+				} else {
+					inspection_.set_title("");
+				}
+				update_project_();
+				stall_button_(false);
+			}
+			if(proj_save_filer_.state()) {
+				auto path = proj_save_filer_.get();
+				if(!path.empty()) {
+					inspection_.save(path);
+					stall_button_(false);
+				}
+			}
+#endif
 		}
 
 
@@ -384,7 +425,7 @@ namespace app {
 			proj_name_dialog_->save(pre);
 
 			inspection_.get_dialog()->save(pre);
-
+#ifndef NATIVE_FILER
 			proj_load_filer_->save(pre);
 			proj_save_filer_->save(pre);
 
@@ -392,7 +433,7 @@ namespace app {
 			proj_save_filer_ = nullptr;
 			wd.del_widget(proj_load_filer_);
 			proj_load_filer_ = nullptr;
-
+#endif
 			wd.del_widget(setting_dialog_);
 			setting_dialog_ = nullptr;
 			wd.del_widget(proj_name_dialog_);

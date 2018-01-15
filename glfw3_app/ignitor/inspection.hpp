@@ -170,7 +170,6 @@ namespace app {
 				widget_label::param wp_;
 				title_ = wd.add_widget<widget_label>(wp, wp_);
 			}
-
 			{  // 検査規格
 				widget::param wp(vtx::irect(20 + w + 10, 20 + h * 1, 150, 40), dialog_);
 				widget_list::param wp_;
@@ -178,7 +177,6 @@ namespace app {
 				wp_.init_list_.push_back("MIN 値");
 				kikaku_ = wd.add_widget<widget_list>(wp, wp_);
 			}
-
 			{  // 検査方法
 				widget::param wp(vtx::irect(20 + w + 10, 20 + h * 2, 150, 40), dialog_);
 				widget_list::param wp_;
@@ -187,10 +185,7 @@ namespace app {
 				wp_.init_list_.push_back("LCR検査");
 				kensahou_ = wd.add_widget<widget_list>(wp, wp_);
 			}
-
 			{  // 電源設定
-
-
 			}
 			{  // ２次負荷切替設定
 				widget::param wp(vtx::irect(20 + w + 10, 20 + h * 10, 150, 40), dialog_);
@@ -199,7 +194,6 @@ namespace app {
 				wp_.init_list_.push_back("抵抗");
 				fukasel_ = wd.add_widget<widget_list>(wp, wp_); 
 			}
-
 		}
 
 
