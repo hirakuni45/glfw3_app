@@ -10,7 +10,7 @@
 */
 //=====================================================================//
 #ifdef WIN32
-#include <windows.h>
+#include <commdlg.h>
 #endif
 #include <string>
 #include <pthread.h>
@@ -19,25 +19,20 @@
 namespace utils {
 
 	class select_file {
-	public:
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		/*!
-			@brief	情報構造体
-		*/
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+
 		struct info_t {
 
 			volatile uint32_t	id_;
-			volatile bool		exit_;
+			volatile bool		save_;
 
 			pthread_mutex_t		sync_;
 
+			std::string			filter_;
 			std::string			path_;
 
-			info_t() : id_(0), exit_(false) { }
+			info_t() : id_(0), save_(false) { }
 		};
 
-	private:
 		pthread_t		pth_;
 		info_t			info_;
 
@@ -54,10 +49,7 @@ namespace utils {
 			ZeroMemory( &ofn, sizeof( ofn ) );
 			ofn.lStructSize = sizeof( OPENFILENAME );
 
-			std::string filter = utils::utf8_to_sjis("テキストファイル(*.txt)");
-			filter += '\0';
-			filter += utils::utf8_to_sjis("*.txt");
-			filter += '\0';
+			std::string filter = t.filter_;
 			filter += utils::utf8_to_sjis("すべてのファイル(*.*)");
 			filter += '\0';
 			filter += utils::utf8_to_sjis("*.*");
@@ -67,7 +59,12 @@ namespace utils {
 			ofn.lpstrFile = szFile;
 			ofn.nMaxFile = MAX_PATH;
 			ofn.Flags = OFN_FILEMUSTEXIST;
-			bool ret = GetOpenFileName(&ofn) != 0;
+			bool ret = false;
+			if(t.save_) {
+				ret = GetSaveFileName(&ofn) != 0;
+			} else {
+				ret = GetOpenFileName(&ofn) != 0;
+			}
 #else
 			char szFile[256] = { 0 };
 			bool ret = false;
@@ -94,15 +91,24 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	オープン
+			@param[in]	filter	フィルター（"xxxx\tyyyy\t"）
+			@param[in]	save	保存の場合「true」
+			@return 正常なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		void open()
+		bool open(const std::string& filter = "", bool save = false)
 		{
+			if(open_) return false;
+
 			pthread_mutex_init(&info_.sync_, nullptr);
 			id_ = info_.id_;
+			info_.filter_ = utils::code_conv(utf8_to_sjis(filter), '\t', '\0');
 			info_.path_.clear();
+			info_.save_ = save;
 			pthread_create(&pth_, nullptr, task_, &info_);
 			open_ = true;
+
+			return true;
 		}
 
 
@@ -134,7 +140,9 @@ namespace utils {
 			std::string path;
 			if(state()) {
 				pthread_mutex_lock(&info_.sync_);
-				path = utils::sjis_to_utf8(info_.path_);
+				if(!info_.path_.empty()) {
+					path = utils::code_conv(utils::sjis_to_utf8(info_.path_), '\\', '/');
+				}
 				pthread_mutex_unlock(&info_.sync_);
 				open_ = false;
 			}
