@@ -96,6 +96,7 @@ namespace utils {
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		enum class error : uint8_t {
 			none,			///< エラー無し
+			null_form,		///< フォーマットが null
 			cha_sets,		///< 文字セットの不一致
 			partition,		///< 仕切りキャラクターの不一致
 			input_type,		///< 無効な入力タイプ
@@ -383,7 +384,11 @@ namespace utils {
 		basic_input(const char* form, const char* inp = nullptr) noexcept : form_(form), inp_(inp),
 			mode_(mode::NONE), error_(error::none), num_(0)
 		{
-			next_();
+			if(form_ == nullptr) {
+				error_ = error::null_form;
+			} else {
+				next_();
+			}
 		}
 
 
