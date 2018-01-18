@@ -380,6 +380,8 @@ namespace app {
 			const auto& scs = core.get_rect().size;
 			run_->at_rect().org.x = scs.x - btn_w_ - ofs_x_;
 
+			inspection_.update();
+
 #ifdef NATIVE_FILER
 			if(proj_load_filer_.state()) {
 				auto path = proj_load_filer_.get();
