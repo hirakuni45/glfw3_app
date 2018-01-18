@@ -215,6 +215,7 @@ namespace gui {
 			if(get_selected()) {  // 「ボタン選択」で内包メニューを有効にする。
 				menu_->enable();
 			}
+///			menu_->at_rect().org.y = -menu_->get_select_pos() * get_param().rect_.size.y;
 		}
 
 
@@ -332,9 +333,9 @@ namespace gui {
 				param_.text_param_.set_text(text);
 				if(menu_ != nullptr) {
 					menu_->select(text);
-					if(param_.load_func_ && param_.select_func_ != nullptr) {
-						param_.select_func_(menu_->get_select_text(), menu_->get_select_pos());
-					}
+///					if(param_.load_func_ && param_.select_func_ != nullptr) {
+///						param_.select_func_(menu_->get_select_text(), menu_->get_select_pos());
+///					}
 				}
 			}
 			return err == 0;
