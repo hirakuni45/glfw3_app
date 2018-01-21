@@ -3,13 +3,16 @@
 /*!	@file
 	@brief	シリアルＩ／Ｏ（WIN32）
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2018 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
 //=====================================================================//
 #include <windows.h>
+#include <winioctl.h>
+#include <setupapi.h>
 #include <string>
+#include <vector>
 
 namespace device {
 
@@ -20,11 +23,23 @@ namespace device {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class serial_win32 {
 	public:
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	シリアル・ポート名構造体
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		struct name_t {
+			std::string		port;	///< ポート名
+			std::string		info;	///< ポート情報
+		};
+		typedef std::vector<name_t> name_list;
+
+
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	パリティー・タイプ
 		*/
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		enum class PARITY {
 			NONE,	///< パリティー無し
 			EVEN,	///< 偶数パリティー
@@ -43,6 +58,59 @@ namespace device {
 		*/
 		//-----------------------------------------------------------------//
 		serial_win32() : fd_(INVALID_HANDLE_VALUE) { }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ポート・リストを取得
+			@return ポート・リスト
+		*/
+		//-----------------------------------------------------------------//
+		name_list get_list() const
+		{
+			name_list list;
+			// デバイス情報セットを取得
+			HDEVINFO hi = SetupDiGetClassDevs(&GUID_DEVINTERFACE_COMPORT, 0, 0,
+				DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
+			if(hi == 0) {
+				return list;
+			}
+
+			SP_DEVINFO_DATA data = { 0 };
+			data.cbSize = sizeof(data);
+			int idx = 0;
+			while(SetupDiEnumDeviceInfo(hi, idx, &data)) {
+				name_t t;
+				// COM ポート名の取得
+				HKEY key = SetupDiOpenDevRegKey(hi, &data, DICS_FLAG_GLOBAL, 0, DIREG_DEV, KEY_QUERY_VALUE);
+				if(key) {
+					BYTE name[256];
+					DWORD type = 0;
+					DWORD size = sizeof(name);
+					RegQueryValueEx(key, _T("PortName"), NULL, &type, name, &size);
+					t.port = reinterpret_cast<const char*>(name);
+				}
+
+				//	デバイスの情報を取得
+				DWORD dt = 0;
+				PBYTE ptr = nullptr;
+				DWORD size = 0;
+				SetupDiGetDeviceRegistryProperty(hi, &data, SPDRP_DEVICEDESC, &dt, ptr, size, &size);
+				if(size > 0) {
+					ptr = new BYTE[size];
+					SetupDiGetDeviceRegistryProperty(hi, &data, SPDRP_DEVICEDESC, &dt, ptr, size, &size);
+					t.info = reinterpret_cast<const char*>(ptr);
+					delete[] ptr;
+				}
+				++idx;
+				list.push_back(t);
+			}
+
+			// デバイス情報セットを解放
+			SetupDiDestroyDeviceInfoList(hi);
+
+			return list;
+		}
 
 
 		//-----------------------------------------------------------------//
