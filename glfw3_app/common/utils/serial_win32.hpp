@@ -1,7 +1,8 @@
 #pragma once
 //=====================================================================//
 /*!	@file
-	@brief	シリアルＩ／Ｏ（WIN32）
+	@brief	シリアルＩ／Ｏ（WIN32）@n
+			※要ライブラリ： hid setupapi ksguid
     @author 平松邦仁 (hira@rvf-rc45.net)
 	@copyright	Copyright (C) 2018 Kunihito Hiramatsu @n
 				Released under the MIT license @n
