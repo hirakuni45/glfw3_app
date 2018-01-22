@@ -148,6 +148,58 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	選択位置の取得
+			@return 選択位置
+		*/
+		//-----------------------------------------------------------------//
+		uint32_t get_select_pos() const {
+			if(menu_ != nullptr) {
+				return menu_->get_select_pos();
+			} else {
+				return 0;
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	選択位置の変更
+			@param[in]	text	選択テキスト
+			@return 成功の場合「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool select(const std::string& text)
+		{
+			bool ret = false;
+			if(menu_ != nullptr) {
+				ret = menu_->select(text);
+				param_.text_param_.set_text(text);
+			}
+			return ret;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	選択位置の変更
+			@param[in]	pos	選択位置
+			@return 成功の場合「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool select(uint32_t pos)
+		{
+			bool ret = false;
+			if(menu_ != nullptr) {
+				ret = menu_->select(pos);
+std::cout << menu_->get_select_text() << std::endl;
+				param_.text_param_.set_text(menu_->get_select_text());
+			}
+			return ret;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	メニュー・リソースの取得
 			@return メニュー・リソース
 		*/

@@ -93,21 +93,23 @@ namespace gui {
 			wp_.plate_param_ = param_.plate_param_;
 			wp_.color_param_ = param_.color_param_select_;
 			wp_.plate_param_.frame_width_ = 0;
-			list_.clear();
 			uint32_t n = 0;
+			list_.clear();
 			for(const std::string& s : param_.init_list_) {
 				wp_.text_param_.set_text(s);
 				widget::plate_param::round_style sty = widget::plate_param::round_style::NONE;
-				if(param_.init_list_.size() > 1) {
+				if(param_.init_list_.size() == 1) {
+					sty = widget::plate_param::round_style::ALL;
+				} else if(param_.init_list_.size() > 1) {
 					if(n == 0) {
 						sty = widget::plate_param::round_style::TOP;
 					} else if(n == (param_.init_list_.size() - 1)) {
 						sty = widget::plate_param::round_style::BOTTOM;
 					}
 				}
+				wp.rect_.org.y = param_.base_height_ * n;
 				widget_label* w = build_menu_(wp, wp_, sty);
 				list_.push_back(w);
-				wp.rect_.org.y += get_rect().size.y;
 				++n;
 			}
 			param_.select_pos_ = n;  // 無選択
@@ -116,7 +118,7 @@ namespace gui {
 
 		void destroy_()
 		{
-			for(widget_label* w : list_) {
+			for(auto w : list_) {
 				wd_.del_widget(w);
 			}
 			list_.clear();
@@ -389,12 +391,15 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	メニューの再構築
+			@param[in]	list	新メニューリスト
 		*/
 		//-----------------------------------------------------------------//
-		void build()
+		void build(const utils::strings& list)
 		{
+			param_.init_list_ = list;
 			destroy_();
 			build_list_();
+			at_rect().size.y = list_.size() * param_.base_height_;
 		}
 
 
@@ -415,7 +420,6 @@ namespace gui {
 			param_.base_height_ = get_rect().size.y;
 
 			build_list_();
-
 			at_rect().size.y = list_.size() * param_.base_height_;
 		}
 
@@ -429,6 +433,16 @@ namespace gui {
 		{
 			if(!get_state(widget::state::ENABLE) || list_.empty()) {
 				return;
+			}
+
+			if(get_focus()) {
+				const utils::lstring& ins = wd_.get_keyboard().input();
+				for(uint32_t ch : ins) {
+					if(ch == sys::keyboard::ctrl::ESC) {
+						wd_.enable(this, false, true);
+						break;
+					}
+				}
 			}
 
 			uint32_t n = 0;
