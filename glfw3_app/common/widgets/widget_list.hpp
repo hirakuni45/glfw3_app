@@ -191,7 +191,6 @@ namespace gui {
 			bool ret = false;
 			if(menu_ != nullptr) {
 				ret = menu_->select(pos);
-std::cout << menu_->get_select_text() << std::endl;
 				param_.text_param_.set_text(menu_->get_select_text());
 			}
 			return ret;
