@@ -24,6 +24,7 @@ namespace device {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class serial_win32 {
 	public:
+
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	シリアル・ポート名構造体
@@ -38,7 +39,7 @@ namespace device {
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
-			@brief	パリティー・タイプ
+			@brief	パリティー識別子
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		enum class PARITY {
@@ -47,11 +48,24 @@ namespace device {
 			ODD,	///< 奇数パリティー
 		};
 
+
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	フロー制御識別子
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		enum class FLOW {
+			NONE,	///< フロー制御無し
+			HARD,	///< RTS/CTS 信号によるハードウェアー制御
+			SOFT,	///< Xon/Xoff によるソフトウェアー制御 
+		};
+
 	private:
 		HANDLE		fd_;
 
 		std::string	error_;
 
+		name_list	name_list_;
 
 		bool scan_port_(const name_list& list, const std::string& port) const
 		{
@@ -72,18 +86,19 @@ namespace device {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	ポート・リストを取得
-			@return ポート・リスト
+			@brief	ポート・リストを作成
+			@return 成功なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		name_list get_list() const
+		bool create_list()
 		{
-			name_list list;
+			name_list_.clear();
+
 			// デバイス情報セットを取得
 			HDEVINFO hi = SetupDiGetClassDevs(&GUID_DEVINTERFACE_COMPORT, 0, 0,
 				DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
 			if(hi == 0) {
-				return list;
+				return false;
 			}
 
 			SP_DEVINFO_DATA data = { 0 };
@@ -113,29 +128,60 @@ namespace device {
 					delete[] ptr;
 				}
 				++idx;
-				list.push_back(t);
+				name_list_.push_back(t);
 			}
 
 			// デバイス情報セットを解放
 			SetupDiDestroyDeviceInfoList(hi);
 
-			return list;
+			return !name_list_.empty();
 		}
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	ポート・リスト比較
+			@brief	ポート・リストを取得
+			@return ポート・リスト
+		*/
+		//-----------------------------------------------------------------//
+		const name_list& get_list() const { return name_list_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ポート・リスト比較（新規デバイスでリスト更新確認など）
 			@return 同じなら「true」
 		*/
 		//-----------------------------------------------------------------//
 		bool compare(const name_list& list) const
 		{
-			auto l = get_list();
-			for(const auto& t : l) {
-				if(!scan_port_(list, t.port)) return false;
+			if(name_list_.empty()) return false;
+
+			for(const auto& t : list) {
+				if(!scan_port_(name_list_, t.port)) return false;
 			}
 			return true;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ポート情報の取得
+			@param[in]	port	ポート名
+			@return ポート情報
+		*/
+		//-----------------------------------------------------------------//
+		const std::string& get_info(const std::string& port) const
+		{
+			static std::string tmp;
+			if(name_list_.empty()) return tmp;
+
+			for(const auto& t : name_list_) {
+				if(t.port == port) {
+					return t.info;
+				}
+			}
+			return tmp;
 		}
 
 
@@ -173,26 +219,56 @@ namespace device {
 					error_string,
 					sizeof error_string,
 					NULL);
-///			fprintf(stderr, "Unable to open port: (%i) %s\n", error_num, error_string);
+///					std::cout << fd_ << ": " << error_string << std::endl;
 					error_ = error_string;
 			} else {
-				DCB dcbSerialParams;
-				GetCommState(fd_, &dcbSerialParams);
-				dcbSerialParams.BaudRate = CBR_115200;
-				dcbSerialParams.ByteSize = 8;
-				dcbSerialParams.StopBits = ONESTOPBIT;
-				dcbSerialParams.Parity   = NOPARITY;
-				SetCommState(fd_, &dcbSerialParams);
+				DCB dcb;
+				GetCommState(fd_, &dcb);
+				dcb.BaudRate = CBR_115200;
+				dcb.ByteSize = 8;
+				dcb.StopBits = ONESTOPBIT;
+				dcb.Parity   = NOPARITY;
+				dcb.fParity  = FALSE;
+				dcb.fBinary  = TRUE;
+//				dcb.fRtsControl = FALSE;
+				SetCommState(fd_, &dcb);
 
-				COMMTIMEOUTS timeouts;
-				timeouts.ReadIntervalTimeout=50;
-				timeouts.ReadTotalTimeoutConstant=50;
-				timeouts.ReadTotalTimeoutMultiplier=10;
-				timeouts.WriteTotalTimeoutConstant=0;
-				timeouts.WriteTotalTimeoutMultiplier=0;
-				SetCommTimeouts(fd_, &timeouts);
+				COMMTIMEOUTS tos;  // 単位（ミリ秒）
+				tos.ReadIntervalTimeout         = 250;
+				tos.ReadTotalTimeoutConstant    = 250;
+				tos.ReadTotalTimeoutMultiplier  = 200;
+				tos.WriteTotalTimeoutConstant   = 0;
+				tos.WriteTotalTimeoutMultiplier = 0;
+				SetCommTimeouts(fd_, &tos);
 				FlushFileBuffers(fd_);
 				ret = true;
+			}
+			return ret;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	フロー制御の設定
+			@param[in]	type	フロー制御識別子
+			@return 成功なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool set_flow(FLOW type)
+		{
+			bool ret = false;
+			switch(type) {
+			case FLOW::NONE:
+
+				break;
+			case FLOW::HARD:
+
+				break;
+			case FLOW::SOFT:
+
+				break;
+			default:
+				break;
 			}
 			return ret;
 		}
@@ -205,12 +281,12 @@ namespace device {
 			@return 成功なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool set_baud(int baud)
+		bool set_baudrate(int baud)
 		{
-			DCB dcbSerialParams;
-			GetCommState(fd_, &dcbSerialParams);
-			dcbSerialParams.BaudRate = baud;
-			return SetCommState(fd_, &dcbSerialParams) != 0;
+			DCB dcb;
+			GetCommState(fd_, &dcb);
+			dcb.BaudRate = baud;
+			return SetCommState(fd_, &dcb) != 0;
 		}
 
 
@@ -223,21 +299,23 @@ namespace device {
 		//-----------------------------------------------------------------//
 		bool set_parity(PARITY parity)
 		{
-			DCB dcbSerialParams;
-			GetCommState(fd_, &dcbSerialParams);
+			DCB dcb;
+			GetCommState(fd_, &dcb);
 			switch(parity) {
 			case PARITY::EVEN:
-				dcbSerialParams.Parity = EVENPARITY;
+				dcb.Parity = EVENPARITY;
 				break;
 			case PARITY::ODD:
-				dcbSerialParams.Parity = ODDPARITY;
+				dcb.Parity = ODDPARITY;
 				break;
 			case PARITY::NONE:
+				dcb.Parity = NOPARITY;
+				break;
 			default:
-				dcbSerialParams.Parity = NOPARITY;
+				return false;
 				break;
 			}
-			return SetCommState(fd_, &dcbSerialParams) != 0;
+			return SetCommState(fd_, &dcb) != 0;
 		}
 
 
@@ -324,6 +402,7 @@ namespace device {
 		//-----------------------------------------------------------------//
 		uint32_t write(const void* src, uint32_t len)
 		{
+			if(src == nullptr || len == 0) return 0;
 #if 0
 			if(4 <= verbose_level) {
 				unsigned char *p = (unsigned char*)buf;
@@ -360,6 +439,8 @@ namespace device {
 		//-----------------------------------------------------------------//
 		uint32_t read(void *dst, int len)
 		{
+			if(dst == nullptr || len == 0) return 0;
+
 			int bytes_left = len;
 			DWORD bytes_read;
 			uint8_t* p = reinterpret_cast<uint8_t*>(dst);
