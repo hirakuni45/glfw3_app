@@ -52,6 +52,15 @@ namespace device {
 
 		std::string	error_;
 
+
+		bool scan_port_(const name_list& list, const std::string& port) const
+		{
+			for(const auto& t : list) {
+				if(t.port == port) return true;
+			}
+			return false;
+		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -111,6 +120,22 @@ namespace device {
 			SetupDiDestroyDeviceInfoList(hi);
 
 			return list;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ポート・リスト比較
+			@return 同じなら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool compare(const name_list& list) const
+		{
+			auto l = get_list();
+			for(const auto& t : l) {
+				if(!scan_port_(list, t.port)) return false;
+			}
+			return true;
 		}
 
 
