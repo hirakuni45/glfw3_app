@@ -194,12 +194,11 @@ namespace device {
 		//-----------------------------------------------------------------//
 		bool open(const std::string& port)
 		{
+			close();
+
 			std::string full("\\\\.\\");
 			full += port;
-///			snprintf(port_full_name, sizeof port_full_name - 2u, "\\\\.\\%s", port);
-///			if(4 <= verbose_level) {
-///				printf("\t\tOpen port: %s\n", port_full_name);
-///			}
+
 			fd_ = CreateFile(full.c_str(),
 					GENERIC_READ | GENERIC_WRITE,
                     0,
@@ -403,17 +402,7 @@ namespace device {
 		uint32_t write(const void* src, uint32_t len)
 		{
 			if(src == nullptr || len == 0) return 0;
-#if 0
-			if(4 <= verbose_level) {
-				unsigned char *p = (unsigned char*)buf;
-				unsigned int i;
-				printf("\t\tsend(%u): ", len);
-				for(i = len; 0 < i; --i) {
-					printf("%02X ", *p++);
-				}
-				printf("\n");
-			}
-#endif
+
 			int bytes_left = len;
 			DWORD bytes_written;
 			const uint8_t* p = reinterpret_cast<const uint8_t*>(src);
@@ -431,45 +420,27 @@ namespace device {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	リード
+			@brief	リード @n
+					※リード要求より少ない場合がある。
 			@param[out]	dst	転送先
-			@param[in]	len	長さ（バイト）
-			@return 書き込んだサイズ
+			@param[in]	len	リード要求バイト数
+			@return リード・バイト数
 		*/
 		//-----------------------------------------------------------------//
 		uint32_t read(void *dst, int len)
 		{
 			if(dst == nullptr || len == 0) return 0;
 
-			int bytes_left = len;
-			DWORD bytes_read;
+			DWORD errors;
+			COMSTAT stat;
+			ClearCommError(fd_, &errors, &stat);
+			DWORD count = stat.cbInQue;
+			DWORD rb;
 			uint8_t* p = reinterpret_cast<uint8_t*>(dst);
-			do {
-				if(0 == ReadFile(fd_, p, bytes_left, &bytes_read, NULL)) {
-///					fprintf(stderr, "Failed to read from port.\n");
-//					last_error_ = 1;
-					return 0;
-				}
-				if(0 == bytes_read) {
-					break;
-				}
-				p += bytes_read;
-				bytes_left -= bytes_read;
-			} while(0 < bytes_left) ;
-
-			uint32_t nbytes = len - bytes_left;
-#if 0
-			if(4 <= verbose_level) {
-				p = dst;
-				unsigned int i;
-				printf("\t\trecv(%u): ", nbytes);
-				for(i = nbytes; 0 < i; --i) {
-					printf("%02X ", *pbuf++);
-				}
-				printf("\n");
+			if(ReadFile(fd_, p, count, &rb, NULL) == 0) {
+				return 0;
 			}
-#endif
-			return nbytes;
+			return static_cast<uint32_t>(rb);
 		}
 
 
@@ -479,11 +450,14 @@ namespace device {
 			@return 成功なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool close() {
-//			if(4 <= verbose_level) {
-//				printf("\t\tClose port\n");
-//			}
-			return CloseHandle(fd_) != 0;
+		bool close()
+		{
+			bool ret = false;
+			if(fd_ != INVALID_HANDLE_VALUE) {
+				ret = CloseHandle(fd_) != 0;
+				fd_ = INVALID_HANDLE_VALUE;
+			}
+			return ret;
 		}
 	};
 }
