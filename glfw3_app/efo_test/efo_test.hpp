@@ -40,6 +40,8 @@ namespace app {
 		gui::widget_frame*		menu_;
 		gui::widget_button*		load_;
 		gui::widget_list*		div_;
+		gui::widget_list*		ports_;
+		gui::widget_button*		connect_;
 
 		gui::widget_filer*		load_ctx_;
 
@@ -53,6 +55,10 @@ namespace app {
 
 		typedef view::render_waves<uint16_t, 65536 * 4> WAVES;
 		WAVES					waves_;
+
+		typedef device::serial_win32 SERIAL;
+		SERIAL					serial_;
+		SERIAL::name_list		serial_list_;
 
 		// ターミナル、行入力
 		void term_enter_(const utils::lstring& text) {
@@ -161,6 +167,29 @@ namespace app {
 //					utils::format("List Selected: '%s', (%d)\n") % text.c_str() % pos;
 //				};
 				div_ = wd.add_widget<widget_list>(wp, wp_);
+			}
+
+
+			{ // Serial PORT select
+				widget::param wp(vtx::irect(10, 20+40*2, menu_width - 20, 30), menu_);
+				widget_list::param wp_;
+				ports_ = wd.add_widget<widget_list>(wp, wp_);
+			}
+
+			{ // コネクションボタン
+				widget::param wp(vtx::irect(10, 20+40*3, menu_width - 20, 30), menu_);
+				widget_button::param wp_("connect");
+				wp_.select_func_ = [this](int id) {
+					const auto& port = ports_->get_select_text();
+					if(!port.empty()) {
+						if(serial_.open(port)) {
+
+						} else {
+							std::cout << "Can't open serialport as '" << port << "'" << std::endl; 
+						}
+					}
+				};
+				connect_ = wd.add_widget<widget_button>(wp, wp_);
 			}
 
 
@@ -279,6 +308,20 @@ namespace app {
 		void update()
 		{
 			gui::widget_director& wd = director_.at().widget_director_;
+
+			// シリアルポートの更新
+			if(serial_list_.empty() || !serial_.compare(serial_list_)) {
+				serial_.create_list();
+				serial_list_ = serial_.get_list();
+				utils::strings list;
+				for(const auto& t : serial_list_) {
+					list.push_back(t.port);
+					terminal_core_->output(t.port + " (" + t.info + ")\n");					
+				}
+				ports_->get_menu()->build(list);
+				ports_->select(0);
+			}
+
 #if 0
 			// Drag & Drop されたファイル
 			gl::core& core = gl::core::get_instance();

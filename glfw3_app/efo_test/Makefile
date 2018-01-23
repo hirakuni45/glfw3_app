@@ -75,7 +75,7 @@ STDLIBS		=
 ifeq ($(SYSTEM),WIN)
 LOCAL_PATH	=	/mingw64
 OPTLIBS		=	opengl32 glfw3 glew32 \
-				comdlg32 \
+				comdlg32 hid setupapi ksguid \
 				boost_system-mt ws2_32 wsock32 \
 				pthread \
 				png turbojpeg jpeg openjp2 \
@@ -172,7 +172,7 @@ endif
 # -Wuninitialized -Wunused -Werror -Wshadow
 CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
 			-Wformat
-CPWARN	=	-Wall -Werror -Wno-unused-private-field
+CPWARN	=	-Wall -Werror -Wno-unused-private-field -Wno-unused-variable
 
 OBJECTS	=	$(addprefix $(BUILD)/,$(patsubst %.cpp,%.o,$(PSOURCES))) \
 			$(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(CSOURCES)))
