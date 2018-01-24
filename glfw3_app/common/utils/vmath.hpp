@@ -18,18 +18,17 @@ namespace vtx {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct placement {
+
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	水平配置型
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		struct holizontal {
-			enum type {
-				NONE,		///< 無効果
-				LEFT,		///< 左
-				CENTER,		///< 中央
-				RIGHT,		///< 右
-			};
+		enum class holizontal {
+			NONE,		///< 無効果
+			LEFT,		///< 左
+			CENTER,		///< 中央
+			RIGHT,		///< 右
 		};
 
 
@@ -38,20 +37,17 @@ namespace vtx {
 			@brief	垂直配置型
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		struct vertical {
-			enum type {
-				NONE,		///< 無効果
-				TOP,		///< 上
-				CENTER,		///< 中央
-				BOTTOM,		///< 下
-			};
+		enum class vertical {
+			NONE,		///< 無効果
+			TOP,		///< 上
+			CENTER,		///< 中央
+			BOTTOM,		///< 下
 		};
 
 
-		holizontal::type	hpt;
-		vertical::type		vpt;
-		placement(holizontal::type hpt_ = holizontal::NONE,
-				  vertical::type vpt_ = vertical::NONE) : hpt(hpt_), vpt(vpt_) { }
+		holizontal	hpt;
+		vertical	vpt;
+		placement(holizontal hpt_ = holizontal::NONE, vertical vpt_ = vertical::NONE) : hpt(hpt_), vpt(vpt_) { }
 	};
 
 
