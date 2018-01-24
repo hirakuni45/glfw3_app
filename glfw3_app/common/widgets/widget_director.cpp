@@ -552,7 +552,7 @@ namespace gui {
 			}
 		}
 
-		{  // 有効時、最上位にする場合・・
+		{  // 有効時、自動的に最上位にする部品
 			widgets ws;
 			for(auto w : widgets_) {
 				if(!w->get_state(widget::state::ENABLE)) continue;
