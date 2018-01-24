@@ -16,6 +16,7 @@
 #include "widgets/widget_text.hpp"
 #include "widgets/widget_label.hpp"
 #include "widgets/widget_spinbox.hpp"
+#include "widgets/widget_check.hpp"
 #include "widgets/widget_filer.hpp"
 #include "utils/input.hpp"
 #include "utils/format.hpp"
@@ -29,6 +30,15 @@ namespace app {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class inspection {
+
+		// 電圧/電流レンジ選択、時間レンジ選択、トリガー選択、フィルター選択、平均化選択
+		struct oscillo_t {
+			gui::widget_check*	ch_;		///< チャネル有効、無効
+			gui::widget_list*	wave_div_;	///< 振幅軸設定（電圧、電流）
+
+			oscillo_t() : ch_(nullptr), wave_div_(nullptr) { }
+		};
+
 
 		utils::director<core>&	director_;
 
@@ -44,6 +54,11 @@ namespace app {
 		gui::widget_label*		generator_freq_;		///< ジェネレータ設定・周波数（1Hz to 100Hz / 1Hz)
 		gui::widget_label*		generator_volt_;		///< ジェネレータ設定・電圧（0 to 14V / 0.1V）
 		gui::widget_label*		generator_duty_;		///< ジェネレーター設定・Duty（0.1% to 100% / 0.1%）
+
+		gui::widget_list*		oscillo_secdiv_;		///< オシロスコープ設定、時間（周期）
+		gui::widget_list*		oscillo_trg_ch_;		///< オシロスコープ設定、トリガー・チャネル選択
+		gui::widget_list*		oscillo_trg_slope_;		///< オシロスコープ設定、トリガー・スロープ選択
+		oscillo_t				oscillo_[4];			///< オシロスコープ設定
 
 		gui::widget_list*		fukasel_;				///< ２次負荷切替設定
 
@@ -75,6 +90,34 @@ namespace app {
 			return newtext;
 		}
 
+
+		void init_oscillo_(gui::widget_director& wd, int x, int y, const char* ch, oscillo_t& out)
+		{
+			using namespace gui;
+			{
+				widget::param wp(vtx::irect(x, y, 80, 40), dialog_);
+				widget_check::param wp_(ch);
+				out.ch_ = wd.add_widget<widget_check>(wp, wp_);
+//				out.ch_->at_local_param().select_func_
+//					= [this](const std::string& str, uint32_t pos) {
+//				};
+			}
+			{
+				widget::param wp(vtx::irect(80 + 10 + x, y, 120, 40), dialog_);
+				widget_list::param wp_;
+				wp_.init_list_.push_back("-22 dB");
+				wp_.init_list_.push_back("-16 dB");
+				wp_.init_list_.push_back("-10 dB");
+				wp_.init_list_.push_back("- 4 dB");
+				wp_.init_list_.push_back("+ 2 dB");
+				wp_.init_list_.push_back("+ 8 dB");
+				wp_.init_list_.push_back("+14 dB");
+				wp_.init_list_.push_back("+20 dB");
+				out.wave_div_ = wd.add_widget<widget_list>(wp, wp_);
+			}
+
+		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -89,7 +132,7 @@ namespace app {
 			voltage_{ nullptr }, current_{ nullptr }, current_text_(nullptr),
 			generator_mode_(nullptr), generator_type_(nullptr), generator_freq_(nullptr),
 			generator_volt_(nullptr), generator_duty_(nullptr),
-
+			oscillo_secdiv_(nullptr) ,oscillo_trg_ch_(nullptr), oscillo_trg_slope_(nullptr),
 			fukasel_(nullptr),
 
 			cr_measure_freq_(nullptr), cr_measure_volt_(nullptr),
@@ -146,7 +189,7 @@ namespace app {
 			widget_director& wd = director_.at().widget_director_;
 
 			int d_w = 850;
-			int d_h = 600;
+			int d_h = 700;
 			{
 				widget::param wp(vtx::irect(100, 100, d_w, d_h));
 				widget_dialog::param wp_;
@@ -163,7 +206,7 @@ namespace app {
 				"検査規格：",
 				"検査方法：",
 				"ジェネレーター設定：",
-				"オシロスコープ設定：",
+				"オシロスコープ設定：", nullptr, nullptr, nullptr,
 				"測定項目設定：",
 				"ＣＲ設定：",
 				"２次負荷切替設定：",
@@ -172,6 +215,7 @@ namespace app {
 			};
 			for(int i = 0; i < sizeof(tbls) / sizeof(const char*); ++i) {
 				widget::param wp(vtx::irect(20, 20 + h * i, w, h), dialog_);
+				if(tbls[i] == nullptr) continue;
 				widget_text::param wp_(tbls[i]);
 				wp_.text_param_.placement_
 					= vtx::placement(vtx::placement::holizontal::LEFT, vtx::placement::vertical::CENTER);
@@ -345,12 +389,53 @@ namespace app {
 				}
 			}
 
-
+			// オシロスコープ設定
+			// CH選択（1～4、math1～4･･･）
+			// math1=CH1-CH3、math2=CH3-CH2、math3=CH4-CH2、math4=(CH1-CH3)×CH3
+			// 電圧/電流レンジ選択、時間レンジ選択、トリガー選択、フィルター選択、平均化選択
+			{  // 時間軸リスト 10K、20K、50K、100K、200K、500K、1M、2M、5M、10M、20M、50M、100M
+				widget::param wp(vtx::irect(20 + w + 10, 20 + h * 4, 220, 40), dialog_);
+				widget_list::param wp_;
+				wp_.init_list_.push_back("100us ( 10KHz)");
+				wp_.init_list_.push_back(" 50us ( 20KHz)");
+				wp_.init_list_.push_back(" 20us ( 50KHz)");
+				wp_.init_list_.push_back(" 10us (100KHz)");
+				wp_.init_list_.push_back("  5us (200KHz)");
+				wp_.init_list_.push_back("  2us (500KHz)");
+				wp_.init_list_.push_back("  1us (  1MHz)");
+				wp_.init_list_.push_back("500ns (  2MHz)");
+				wp_.init_list_.push_back("200ns (  5MHz)");
+				wp_.init_list_.push_back("100ns ( 10MHz)");
+				wp_.init_list_.push_back(" 50ns ( 20MHz)");
+				wp_.init_list_.push_back(" 20ns ( 50MHz)");
+				wp_.init_list_.push_back(" 10ns (100MHz)");
+				oscillo_secdiv_ = wd.add_widget<widget_list>(wp, wp_);
+			}
+			{  // トリガー・チャネル選択
+				widget::param wp(vtx::irect(20 + w + 250, 20 + h * 4, 100, 40), dialog_);
+				widget_list::param wp_;
+				wp_.init_list_.push_back("CH0");
+				wp_.init_list_.push_back("CH1");
+				wp_.init_list_.push_back("CH2");
+				wp_.init_list_.push_back("CH3");
+				oscillo_trg_ch_ = wd.add_widget<widget_list>(wp, wp_);
+			}
+			{  // トリガー・スロープ選択
+				widget::param wp(vtx::irect(20 + w + 370, 20 + h * 4, 100, 40), dialog_);
+				widget_list::param wp_;
+				wp_.init_list_.push_back("Pos");
+				wp_.init_list_.push_back("Neg");
+				oscillo_trg_slope_ = wd.add_widget<widget_list>(wp, wp_);
+			}
+			init_oscillo_(wd, 20 + w + 10, 20 + h * 5, "CH0", oscillo_[0]);
+			init_oscillo_(wd, 20 + w + 10, 20 + h * 6, "CH1", oscillo_[1]);
+			init_oscillo_(wd, 20 + w + 10, 20 + h * 7, "CH2", oscillo_[2]);
+			init_oscillo_(wd, 20 + w + 10, 20 + h * 8, "CH3", oscillo_[3]);
 
 
 
 			{  // (9) Ｃ／Ｒ選択、周波数設定 (100、1K, 10K)
-				widget::param wp(vtx::irect(20 + w + 10, 20 + h * 6, 120, 40), dialog_);
+				widget::param wp(vtx::irect(20 + w + 10, 20 + h * 9, 120, 40), dialog_);
 				widget_list::param wp_;
 				wp_.init_list_.push_back("100 Hz");
 				wp_.init_list_.push_back("1  KHz");
@@ -358,7 +443,7 @@ namespace app {
 				cr_measure_freq_ = wd.add_widget<widget_list>(wp, wp_); 
 			}
 			{  // (9) Ｃ／Ｒ選択、電圧設定 (50mV, 0.5V, 1V)
-				widget::param wp(vtx::irect(20 + w + 10 + 130, 20 + h * 6, 120, 40), dialog_);
+				widget::param wp(vtx::irect(20 + w + 10 + 130, 20 + h * 9, 120, 40), dialog_);
 				widget_list::param wp_;
 				wp_.init_list_.push_back("50 mV");
 				wp_.init_list_.push_back("0.5 V");
@@ -372,22 +457,20 @@ namespace app {
 			// (7) リレー切替設定： 各リレーＯＮ／ＯＦＦ
 
 			{  // (8) 2次負荷切替設定： イグニションコイル、抵抗（１ｋΩ）
-				widget::param wp(vtx::irect(20 + w + 10, 20 + h * 7, 250, 40), dialog_);
+				widget::param wp(vtx::irect(20 + w + 10, 20 + h * 10, 250, 40), dialog_);
 				widget_list::param wp_;
 				wp_.init_list_.push_back("イグニッションコイル");
 				wp_.init_list_.push_back("抵抗（１ｋΩ）");
 				fukasel_ = wd.add_widget<widget_list>(wp, wp_); 
 			}
 
-			// -(7) オシロスコープ（Ａ／Ｄ変換）設定： ＣＨ選択、電圧/電流レンジ選択、時間レンジ選択、
-			// トリガー選択、フィルター選択、平均化数選択
 			// -(8) 測定項目選択： （ＭＡＸ、ＭＩＮ、ＡＶＥＲＡＧＥ、ＦＡＬＬ時間、等）
 			// （Ｒｔｈ、ＣＨ１×ＣＨ２、Σ（ＣＨ１×ＣＨ２）、等） … 専用項目
 
 
 
 			{  // (10) Wait時間設定： ０～１．０ｓ（レンジ：０．０１ｓ）
-				widget::param wp(vtx::irect(20 + w + 10, 20 + h * 9, 90, 40), dialog_);
+				widget::param wp(vtx::irect(20 + w + 10, 20 + h * 12, 90, 40), dialog_);
 				widget_label::param wp_("0", false);
 				wait_time_ = wd.add_widget<widget_label>(wp, wp_);
 				wait_time_->at_local_param().select_func_ = [this](const std::string& str) {
@@ -428,6 +511,12 @@ namespace app {
 				help_->set_text("0.1 to 100.0 [%], 0.1 [%] / step");
 			} else if(wait_time_->get_focus()) {
 				help_->set_text("0.0 to 1.0 [秒], 0.01 [秒] / step");
+			} else if(oscillo_secdiv_->get_focus()) {
+				help_->set_text("サンプリング周期");
+			} else if(oscillo_trg_ch_->get_focus()) {
+				help_->set_text("トリガー・チャネル");
+			} else if(oscillo_trg_slope_->get_focus()) {
+				help_->set_text("トリガー・スロープ（Pos: 立ち上がり、Neg: 立下り）");
 			} else {
 				help_->set_text("");
 			}
@@ -456,6 +545,9 @@ namespace app {
 			generator_freq_->save(pre);
 			generator_volt_->save(pre);
 			generator_duty_->save(pre);
+			oscillo_secdiv_->save(pre);
+			oscillo_trg_ch_->save(pre);
+			oscillo_trg_slope_->save(pre);
 
 			fukasel_->save(pre);
 
@@ -492,6 +584,9 @@ namespace app {
 				generator_freq_->load(pre);
 				generator_volt_->load(pre);
 				generator_duty_->load(pre);
+				oscillo_secdiv_->load(pre);
+				oscillo_trg_ch_->load(pre);
+				oscillo_trg_slope_->load(pre);
 
 				fukasel_->load(pre);
 
