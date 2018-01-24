@@ -44,6 +44,8 @@ namespace app {
 		gui::widget_slider*		slider_;
 		gui::widget_progress*	progress_;
 		gui::widget_dialog*		dialog_;
+		gui::widget_button*		dialog2_open_;
+		gui::widget_dialog*		dialog2_;
 		gui::widget_image*		image_;
 		gui::widget_label*		label_;
 
@@ -103,7 +105,7 @@ namespace app {
 			menu_open_(nullptr), menu_ins_(nullptr), menu_era_(nullptr),
 			check_(nullptr),
 			slider_(nullptr),
-			dialog_(nullptr),
+			dialog_(nullptr), dialog2_open_(nullptr), dialog2_(nullptr),
 			image_(nullptr),
 			label_(nullptr),
 			frame_(nullptr),
@@ -189,6 +191,21 @@ namespace app {
 				wp_.style_ = widget_dialog::style::CANCEL_OK;
 				dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
 				dialog_->set_text("ああああ\nうううう\nいいいい\n漢字\n日本");
+				{
+					widget::param wp(vtx::irect(30, 20, 150, 40), dialog_);
+					widget_button::param wp_("ダイアログ２");
+					dialog2_open_ = wd.add_widget<widget_button>(wp, wp_);
+					dialog2_open_->at_local_param().select_func_ = [this](int id) {
+						dialog2_->enable();
+					};
+				}
+			}
+			if(1) { // ダイアログ２のテスト
+				widget::param wp(vtx::irect(300, 300, 500, 300));
+				widget_dialog::param wp_;
+				wp_.style_ = widget_dialog::style::CANCEL_OK;
+				dialog2_ = wd.add_widget<widget_dialog>(wp, wp_);
+				dialog2_->enable(false);
 			}
 
 			if(1) { // ボタンのテスト（ファイラー開始ボタン）
