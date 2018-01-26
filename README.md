@@ -20,9 +20,11 @@ GLFW application
  - MSYS2 には、msys2、mingw32、mingw64 と３つの異なった環境がありますが、mingw64 で行います。 
    
  - msys2 のアップグレード
+ - アップグレードの方法がバージョンアップに伴い変更になる場合等あります、詳しくは、MSYS2 の 
+   ホームページを参照の事。
 
 ```sh
-   update-core
+   pacman -Syu
 ```
 
  - コンソールを開きなおす。（コンソールを開きなおすように、メッセージが表示されるはずです）
@@ -37,8 +39,12 @@ GLFW application
    pacman -S gcc
    pacman -S make
    pacman -S git
+   pacman -S tar
+   pacman -S zip
+   pacman -S unzip
    pacman -S mingw-w64-x86_64-gcc
    pacman -S mingw-w64-x86_64-clang
+   pacman -S mingw-w64-x86_64-clang-tools-extra
    pacman -S mingw-w64-x86_64-boost   
    pacman -S mingw-w64-x86_64-glfw
    pacman -S mingw-w64-x86_64-openal
