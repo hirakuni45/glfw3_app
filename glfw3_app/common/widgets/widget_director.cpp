@@ -527,28 +527,28 @@ namespace gui {
 	bool widget_director::update()
 	{
 		{  // ダイアログがある場合の優先順位とストール処理
-			reset_mark();
-			widgets ws;
+			widget* dw = nullptr;
 			for(auto w : widgets_) {
 				if(!w->get_state(widget::state::ENABLE)) continue;
 				if(w->type() == get_type_id<widget_dialog>()) {
-					parents_widget_mark_(w);
-					ws.push_back(w);
+					dw = w;
 				}
 			}
-			if(ws.empty()) {
+			if(dw == nullptr) {
 				for(auto w : widgets_) {
 					w->set_state(widget::state::SYSTEM_STALL, false);
 				}
 			} else {
+				top_widget(dw);
+				reset_mark();
+				parents_widget_mark_(dw);
 				for(auto w : widgets_) {
 					if(!w->get_mark()) {
 						w->set_state(widget::state::SYSTEM_STALL);
+					} else {
+						w->set_state(widget::state::SYSTEM_STALL, false);
 					}
 				}
-			}
-			for(auto w : ws) {
-				top_widget(w);
 			}
 		}
 
