@@ -151,7 +151,7 @@ namespace app {
 				for(int i = 0; i < 3; ++i) {
 					if(i == 2) wp_.check_ = true;
 					widget_radio* w = wd.add_widget<widget_radio>(wp, wp_);
-					w->at_local_param().select_func_ = [this](bool f, int n) {
+					w->at_local_param().select_func_ = [=](bool f, int n) {
 						std::cout << "Radio button: " << static_cast<int>(f) << " (" << n << ")" << std::endl;
 					};
 					wp.rect_.org.y += 40;
@@ -244,7 +244,7 @@ namespace app {
 				widget::param wp(vtx::irect(30, 300, 150, 40));
 				widget_label::param wp_("Asdfg", false);
 				label_ = wd.add_widget<widget_label>(wp, wp_);
-				label_->at_local_param().select_func_ = [this](const std::string& t) {
+				label_->at_local_param().select_func_ = [=](const std::string& t) {
 					std::cout << "Label: " << t << std::endl << std::flush;
 				};
 			}
@@ -253,7 +253,7 @@ namespace app {
 				widget::param wp(vtx::irect(20, 350, 150, 40));
 				widget_check::param wp_("Disable-g");
 				check_ = wd.add_widget<widget_check>(wp, wp_);
-				check_->at_local_param().select_func_ = [this](bool f) {
+				check_->at_local_param().select_func_ = [=](bool f) {
 					std::cout << "Check: " << static_cast<int>(f) << std::endl;
 				};
 			}
@@ -265,7 +265,7 @@ namespace app {
 				wp_.init_list_.push_back("2nd");
 				wp_.init_list_.push_back("3rd");
 				wp_.init_list_.push_back("4th");
-				wp_.select_func_ = [this](const std::string& text, uint32_t pos) {
+				wp_.select_func_ = [=](const std::string& text, uint32_t pos) {
 					utils::format("List Selected: '%s', (%d)\n") % text.c_str() % pos;
 				};
 				list_ = wd.add_widget<widget_list>(wp, wp_);
@@ -274,7 +274,7 @@ namespace app {
 			if(1) { // スライダーのテスト
 				widget::param wp(vtx::irect(30, 450, 180, 20));
 				widget_slider::param wp_;
-				wp_.select_func_ = [this] (float lvl) {
+				wp_.select_func_ = [=] (float lvl) {
 					if(progress_ != nullptr) {
 						progress_->set_ratio(lvl);
 					}
@@ -292,7 +292,7 @@ namespace app {
 				widget::param wp(vtx::irect(30, 550, 100, 40));
 				widget_spinbox::param wp_(1, 3, 5);
 				spinbox_ = wd.add_widget<widget_spinbox>(wp, wp_);
-				spinbox_->at_local_param().select_func_ = [this](widget_spinbox::state st, int before, int newpos) {
+				spinbox_->at_local_param().select_func_ = [=](widget_spinbox::state st, int before, int newpos) {
 					std::cout << "SpinBox ";
 					if(st == widget_spinbox::state::initial) std::cout << "initial";
 					else if(st == widget_spinbox::state::inc) std::cout << "inc";
@@ -310,7 +310,7 @@ namespace app {
 				wp_.init_list_.push_back("Second");
 				wp_.init_list_.push_back("Third");
 				wp_.init_list_.push_back("Force");
-				wp_.select_func_ = [this](const std::string& text, uint32_t pos) {
+				wp_.select_func_ = [=](const std::string& text, uint32_t pos) {
 					utils::format("Menu Selected: '%s', (%d)\n") % text.c_str() % pos;
 				};
 				menu_ = wd.add_widget<widget_menu>(wp, wp_);
@@ -409,10 +409,10 @@ namespace app {
 				{
 					widget::param wp(vtx::irect(0), view_frame_);
 					widget_view::param wp_;
-					wp_.update_func_ = [this]() {
+					wp_.update_func_ = [=]() {
 						view_update_();
 					};
-					wp_.render_func_ = [this](const vtx::irect& clip) {
+					wp_.render_func_ = [=](const vtx::irect& clip) {
 						view_render_(clip);
 					};
 					view_core_ = wd.add_widget<widget_view>(wp, wp_);
