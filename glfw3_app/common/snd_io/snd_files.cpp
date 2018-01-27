@@ -10,7 +10,7 @@
 #include "snd_files.hpp"
 #include "wav_io.hpp"
 #include "mp3_io.hpp"
-#include "aac_io.hpp"
+// #include "aac_io.hpp"
 
 namespace al {
 
@@ -52,7 +52,7 @@ namespace al {
 		exts_ = exts;
 
 		add_sound_fileio_context_(snd_file::snd_io(new wav_io), exts);
-		add_sound_fileio_context_(snd_file::snd_io(new aac_io), exts);
+//		add_sound_fileio_context_(snd_file::snd_io(new aac_io), exts);
 
 		// MP3 はタグが、前、後、にあるのか不明な為、検出が難しい為、最後に調べる。
 		add_sound_fileio_context_(snd_file::snd_io(new mp3_io), exts);

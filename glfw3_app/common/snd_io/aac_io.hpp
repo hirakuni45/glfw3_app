@@ -10,7 +10,8 @@
 //=====================================================================//
 #include <string>
 #include <neaacdec.h>
-#include <mp4ff.h>
+// #include <mp4ff.h>
+#include <faad.h>
 #include "i_snd_io.hpp"
 
 namespace al {
