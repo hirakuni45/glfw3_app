@@ -133,7 +133,7 @@ namespace app {
 				widget_check::param wp_(ch);
 				out.ch_ = wd.add_widget<widget_check>(wp, wp_);
 //				out.ch_->at_local_param().select_func_
-//					= [this](const std::string& str, uint32_t pos) {
+//					= [=](const std::string& str, uint32_t pos) {
 //				};
 			}
 			{
@@ -231,7 +231,7 @@ namespace app {
 				wp_.style_ = widget_dialog::style::OK;
 				dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
 				dialog_->enable(false);
-				dialog_->at_local_param().select_func_ = [this](bool ok) {
+				dialog_->at_local_param().select_func_ = [=](bool ok) {
 				};
 			}
 			int w = 220;
@@ -277,7 +277,7 @@ namespace app {
 				wp_.init_list_.push_back("LCR検査");
 				inspection_method_ = wd.add_widget<widget_list>(wp, wp_);
 				inspection_method_->at_local_param().select_func_
-					= [this](const std::string& str, uint32_t pos) {
+					= [=](const std::string& str, uint32_t pos) {
 					widget_director& wd = director_.at().widget_director_;
 					if(pos == 0) {
 						voltage_[0]->set_stall(false);
@@ -308,7 +308,7 @@ namespace app {
 					widget::param wp(vtx::irect(ofsx + 170, 20 + h * 2, 90, 40), dialog_);
 					widget_label::param wp_("0", false);
 					voltage_[0] = wd.add_widget<widget_label>(wp, wp_);
-					voltage_[0]->at_local_param().select_func_ = [this](const std::string& str) {
+					voltage_[0]->at_local_param().select_func_ = [=](const std::string& str) {
 						voltage_[0]->set_text(limitf_(str, 0.0f, 300.0f, "%2.1f"));
 					};
 				}
@@ -316,7 +316,7 @@ namespace app {
 					widget::param wp(vtx::irect(ofsx + 170, 20 + h * 2, 90, 40), dialog_);
 					widget_label::param wp_("0", false);
 					voltage_[1] = wd.add_widget<widget_label>(wp, wp_);
-					voltage_[1]->at_local_param().select_func_ = [this](const std::string& str) {
+					voltage_[1]->at_local_param().select_func_ = [=](const std::string& str) {
 						voltage_[1]->set_text(limitf_(str, 0.0f, 60.0f, "%2.1f"));
 					};
 				}
@@ -331,7 +331,7 @@ namespace app {
 					widget::param wp(vtx::irect(ofsx + 320, 20 + h * 2, 90, 40), dialog_);
 					widget_label::param wp_("0", false);
 					current_[0] = wd.add_widget<widget_label>(wp, wp_);
-					current_[0]->at_local_param().select_func_ = [this](const std::string& str) {
+					current_[0]->at_local_param().select_func_ = [=](const std::string& str) {
 						current_[0]->set_text(limitf_(str, 0.0f, 100.0f, "%3.2f"));
 					};
 				}
@@ -339,7 +339,7 @@ namespace app {
 					widget::param wp(vtx::irect(ofsx + 320, 20 + h * 2, 90, 40), dialog_);
 					widget_label::param wp_("0", false);
 					current_[1] = wd.add_widget<widget_label>(wp, wp_);
-					current_[1]->at_local_param().select_func_ = [this](const std::string& str) {
+					current_[1]->at_local_param().select_func_ = [=](const std::string& str) {
 						current_[1]->set_text(limitf_(str, 0.0f, 30.0f, "%2.1f"));
 					};
 				}
@@ -361,7 +361,7 @@ namespace app {
 				wp_.init_list_.push_back("三角波");
 ///				wp_.init_list_.push_back("直流");
 				generator_mode_ = wd.add_widget<widget_list>(wp, wp_);
-				generator_mode_->at_local_param().select_func_ = [this](const std::string& str, uint32_t pos) {
+				generator_mode_->at_local_param().select_func_ = [=](const std::string& str, uint32_t pos) {
 					if(pos == 0) {
 						generator_duty_->set_stall(false);
 					} else {
@@ -376,14 +376,14 @@ namespace app {
 				wp_.init_list_.push_back("単発");
 				generator_type_ = wd.add_widget<widget_list>(wp, wp_);
 				generator_type_->at_local_param().select_func_
-					= [this](const std::string& str, uint32_t pos) {
+					= [=](const std::string& str, uint32_t pos) {
 				};
 			}
 			{  // ジェネレータ設定、周波数（1Hz to 100Hz, 1Hz/step)
 				widget::param wp(vtx::irect(ofsx + 240 + 130 * 0, 20 + h * 3, 70, 40), dialog_);
 				widget_label::param wp_("1", false);
 				generator_freq_ = wd.add_widget<widget_label>(wp, wp_);
-				generator_freq_->at_local_param().select_func_ = [this](const std::string& str) {
+				generator_freq_->at_local_param().select_func_ = [=](const std::string& str) {
 					generator_freq_->set_text(limitf_(str, 1.0f, 100.0f, "%1.0f"));
 				};
 				{
@@ -398,7 +398,7 @@ namespace app {
 				widget::param wp(vtx::irect(ofsx + 240 + 120 * 1, 20 + h * 3, 70, 40), dialog_);
 				widget_label::param wp_("0", false);
 				generator_volt_ = wd.add_widget<widget_label>(wp, wp_);
-				generator_volt_->at_local_param().select_func_ = [this](const std::string& str) {
+				generator_volt_->at_local_param().select_func_ = [=](const std::string& str) {
 					generator_volt_->set_text(limitf_(str, 0.0f, 14.0f, "%2.1f"));
 				};
 				{
@@ -413,7 +413,7 @@ namespace app {
 				widget::param wp(vtx::irect(ofsx + 240 + 120 * 2, 20 + h * 3, 70, 40), dialog_);
 				widget_label::param wp_("0.1", false);
 				generator_duty_ = wd.add_widget<widget_label>(wp, wp_);
-				generator_duty_->at_local_param().select_func_ = [this](const std::string& str) {
+				generator_duty_->at_local_param().select_func_ = [=](const std::string& str) {
 					generator_duty_->set_text(limitf_(str, 0.1f, 100.0f, "%2.1f"));
 				};
 				{
@@ -468,7 +468,7 @@ namespace app {
 				widget_spinbox::param wp_(1, 1, 15);
 				oscillo_trg_window_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				oscillo_trg_window_->at_local_param().select_func_
-					= [this](widget_spinbox::state st, int before, int newpos) {
+					= [=](widget_spinbox::state st, int before, int newpos) {
 					return (boost::format("%d") % newpos).str();
 				};
 			}
@@ -476,7 +476,7 @@ namespace app {
 				widget::param wp(vtx::irect(ofsx + 600, 20 + h * 4, 80, 40), dialog_);
 				widget_label::param wp_("1", false);
 				oscillo_trg_level_ = wd.add_widget<widget_label>(wp, wp_);
-				oscillo_trg_level_->at_local_param().select_func_ = [this](const std::string& str) {
+				oscillo_trg_level_->at_local_param().select_func_ = [=](const std::string& str) {
 					oscillo_trg_level_->set_text(limiti_(str, 1, 65534, "%d"));
 				};
 			}
@@ -523,7 +523,7 @@ namespace app {
 				widget::param wp(vtx::irect(ofsx, 20 + h * 11, 150, 40), dialog_);
 				widget_button::param wp_("リレー設定");
 				setup_relay_ = wd.add_widget<widget_button>(wp, wp_);
-				setup_relay_->at_local_param().select_func_ = [this](int n) {
+				setup_relay_->at_local_param().select_func_ = [=](int n) {
 					relay_map_.get_dialog()->enable();
 				};
 			}
@@ -532,7 +532,7 @@ namespace app {
 				widget::param wp(vtx::irect(ofsx, 20 + h * 12, 90, 40), dialog_);
 				widget_label::param wp_("0", false);
 				wait_time_ = wd.add_widget<widget_label>(wp, wp_);
-				wait_time_->at_local_param().select_func_ = [this](const std::string& str) {
+				wait_time_->at_local_param().select_func_ = [=](const std::string& str) {
 					wait_time_->set_text(limitf_(str, 0.0f, 1.0f, "%3.2f"));
 				};
 			}
@@ -557,6 +557,8 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void update()
 		{
+			if(!dialog_->get_state(gui::widget::state::ENABLE)) return;
+
 			if(voltage_[0]->get_focus()) {
 				help_->set_text("0.0 to 300.0 [V], 0.1 [V] / step");
 			} else if(voltage_[1]->get_focus()) {

@@ -13,8 +13,8 @@ typedef app::ignitor start_app;
 static const char* window_key_ = { "application/window" };
 static const char* app_title_ = { "ignitor app" };
 static const vtx::spos start_pos_(10, 40);
-static const vtx::spos start_size_(1400, 800);
-static const vtx::spos limit_size_(1400, 800);
+static const vtx::spos start_size_(1400, 840);
+static const vtx::spos limit_size_(1400, 840);
 
 int main(int argc, char** argv)
 {
