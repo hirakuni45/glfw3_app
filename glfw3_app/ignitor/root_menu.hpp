@@ -18,6 +18,7 @@
 #include "utils/input.hpp"
 #include "utils/format.hpp"
 #include "utils/select_file.hpp"
+#include "project.hpp"
 #include "inspection.hpp"
 
 #define NATIVE_FILER
@@ -46,24 +47,20 @@ namespace app {
 
 		gui::widget_button*		edit_project_;
 		gui::widget_button*		save_project_;
-		gui::widget_button*		cont_settings_;
 		gui::widget_button*		igni_settings_;
+		gui::widget_button*		cont_settings_;
 
 		gui::widget_button*		run_;
 
 		gui::widget_dialog*		proj_name_dialog_;
 		gui::widget_label*		proj_name_label_;
 
+		project					project_;
+
 		inspection				inspection_;
 
 		gui::widget_dialog*		cont_setting_dialog_;
 		gui::widget_label*		cont_setting_ip_[4];
-
-		gui::widget_dialog*		igni_setting_dialog_;
-		gui::widget_label*		igni_setting_pbase_;
-		gui::widget_label*		igni_setting_pext_;
-		gui::widget_label*		igni_setting_pname_[50];
-		gui::widget_text*		igni_setting_help_;
 
 #ifdef NATIVE_FILER
 		utils::select_file		proj_load_filer_;
@@ -80,6 +77,7 @@ namespace app {
 
 		void stall_button_(bool f)
 		{
+return;
 			new_project_->set_stall(f);
 			proj_title_->set_stall(f);
 			load_project_->set_stall(f);
@@ -109,6 +107,7 @@ namespace app {
 
 		void update_project_()
 		{
+return;
 			if(inspection_.get_title().empty()) {
 				edit_project_->set_stall();
 				save_project_->set_stall();
@@ -131,14 +130,11 @@ namespace app {
 			load_project_(nullptr), proj_path_(nullptr),
 			edit_project_(nullptr),
 			save_project_(nullptr),
-			cont_settings_(nullptr), igni_settings_(nullptr),
+			igni_settings_(nullptr), cont_settings_(nullptr),
 			run_(nullptr),
 			proj_name_dialog_(nullptr), proj_name_label_(nullptr),
-			inspection_(d),
+			project_(d), inspection_(d),
 			cont_setting_dialog_(nullptr), cont_setting_ip_{ nullptr },
-			igni_setting_dialog_(nullptr),
-			igni_setting_pbase_(nullptr), igni_setting_pext_(nullptr),
-			igni_setting_pname_{ nullptr }, igni_setting_help_(nullptr),
 
 #ifndef NATIVE_FILER
 			proj_load_filer_(nullptr), proj_save_filer_(nullptr),
@@ -213,7 +209,7 @@ namespace app {
 				widget_button::param wp_("プロジェクト編集");
 				edit_project_ = wd.add_widget<widget_button>(wp, wp_);
 				edit_project_->at_local_param().select_func_ = [=](bool f) {
-					inspection_.get_dialog()->enable();
+					project_.get_dialog()->enable();
 				};
 			}
 			{
@@ -229,21 +225,23 @@ namespace app {
 #endif
 				};
 			}
-			{  // コントローラー設定ボタン
+
+			{  // 単体試験編集ボタン
 				widget::param wp(vtx::irect(ofs_x_, ofs_y_ + sph * 4, btn_w_, btn_h_));
+				widget_button::param wp_("単体試験編集");
+				igni_settings_ = wd.add_widget<widget_button>(wp, wp_);
+				igni_settings_->at_local_param().select_func_ = [=](bool f) {
+					inspection_.get_dialog()->enable();
+				};
+			}
+
+			{  // コントローラー設定ボタン
+				widget::param wp(vtx::irect(ofs_x_, ofs_y_ + sph * 5, btn_w_, btn_h_));
 				widget_button::param wp_("コントローラー設定");
 				cont_settings_ = wd.add_widget<widget_button>(wp, wp_);
 				cont_settings_->at_local_param().select_func_ = [=](bool f) {
 					save_setting_value_();
 					cont_setting_dialog_->enable();
-				};
-			}
-			{  // イグナイター設定ボタン
-				widget::param wp(vtx::irect(ofs_x_, ofs_y_ + sph * 5, btn_w_, btn_h_));
-				widget_button::param wp_("イグナイター設定");
-				igni_settings_ = wd.add_widget<widget_button>(wp, wp_);
-				igni_settings_->at_local_param().select_func_ = [=](bool f) {
-					igni_setting_dialog_->enable();
 				};
 			}
 			{  // 検査開始ボタン
@@ -282,6 +280,8 @@ namespace app {
 					proj_name_label_ = wd.add_widget<widget_label>(wp, wp_);
 				}
 			}
+
+			project_.initialize();
 
 			inspection_.initialize();
 
@@ -333,67 +333,6 @@ namespace app {
 					widget::param wp(vtx::irect(10 + (ipw + ips) * 3, 70, 60, 40), cont_setting_dialog_);
 					widget_label::param wp_("1", false);
 					cont_setting_ip_[3] = wd.add_widget<widget_label>(wp, wp_);
-				}
-			}
-
-			{  // イグナイター設定ダイアログ
-				int w = 1020;
-				int h = 670;
-				widget::param wp(vtx::irect(120, 120, w, h));
-				widget_dialog::param wp_;
-				wp_.style_ = widget_dialog::style::OK;
-				igni_setting_dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
-				igni_setting_dialog_->enable(false);
-				widget_dialog* igniw = igni_setting_dialog_;
-				{  // プロジェクト・ベース名設定
-					{
-						widget::param wp(vtx::irect(20, 20, 100, 40), igniw);
-						widget_text::param wp_("ベース名：");
-						wp_.text_param_.placement_
-							= vtx::placement(vtx::placement::holizontal::LEFT,
-											 vtx::placement::vertical::CENTER);
-						wd.add_widget<widget_text>(wp, wp_);	
-					}
-					widget::param wp(vtx::irect(20 + 100 + 10, 20, 150, 40), igniw);
-					widget_label::param wp_("", false);
-					igni_setting_pbase_ = wd.add_widget<widget_label>(wp, wp_);
-				}
-				{  // プロジェクト・拡張子設定
-					{
-						widget::param wp(vtx::irect(320, 20, 90, 40), igniw);
-						widget_text::param wp_("拡張子：");
-						wp_.text_param_.placement_
-							= vtx::placement(vtx::placement::holizontal::LEFT,
-											 vtx::placement::vertical::CENTER);
-						wd.add_widget<widget_text>(wp, wp_);	
-					}
-					widget::param wp(vtx::irect(320 + 90 + 10, 20, 150, 40), igniw);
-					widget_label::param wp_(".ign", false);
-					igni_setting_pext_ = wd.add_widget<widget_label>(wp, wp_);
-				}
-				for(int i = 0; i < 50; ++i) {
-					int x = (i / 10) * 200;
-					int y = 40 + 10 + (i % 10) * 50;
-					{
-						widget::param wp(vtx::irect(x + 20, y + 20, 50, 40), igniw);
-						std::string no = (boost::format("%d:") % (i + 1)).str();
-						widget_text::param wp_(no);
-						wp_.text_param_.placement_
-							= vtx::placement(vtx::placement::holizontal::LEFT,
-											 vtx::placement::vertical::CENTER);
-						wd.add_widget<widget_text>(wp, wp_);	
-					}
-					widget::param wp(vtx::irect(x + 60, y + 20, 130, 40), igniw);
-					widget_label::param wp_("", false);
-					igni_setting_pname_[i] = wd.add_widget<widget_label>(wp, wp_);
-				}
-				{
-					widget::param wp(vtx::irect(20, h - 100, 200, 40), igniw);
-					widget_text::param wp_;
-					wp_.text_param_.placement_
-						= vtx::placement(vtx::placement::holizontal::LEFT,
-										 vtx::placement::vertical::CENTER);
-					igni_setting_help_ = wd.add_widget<widget_text>(wp, wp_);	
 				}
 			}
 
@@ -464,19 +403,7 @@ namespace app {
 
 			inspection_.update();
 
-			if(igni_setting_dialog_->get_state(gui::widget::state::ENABLE)) {
-				std::string s;
-				for(int i = 0; i < 50; ++i) {
-					if(igni_setting_pname_[i]->get_focus()) {
-						if(igni_setting_pname_[i]->get_text().empty()) continue;
-						s = igni_setting_pbase_->get_text();
-						s += igni_setting_pname_[i]->get_text();
-						s += igni_setting_pext_->get_text();
-						break;
-					}
-				}
-				igni_setting_help_->set_text(s);
-			}
+			project_.update();
 
 #ifdef NATIVE_FILER
 			if(proj_load_filer_.state()) {
