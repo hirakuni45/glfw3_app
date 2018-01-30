@@ -32,6 +32,8 @@ namespace app {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class root_menu {
 
+		static const char* project_ext_ = { "ipr" };
+
 		static const int ofs_x_ = 50;
 		static const int ofs_y_ = 50;
 		static const int btn_w_ = 240;
@@ -108,15 +110,44 @@ return;
 		void update_project_()
 		{
 return;
-			if(inspection_.get_title().empty()) {
+///			if(inspection_.get_title().empty()) {
 				edit_project_->set_stall();
 				save_project_->set_stall();
 				run_->set_stall();
-			} else {
+///			} else {
 				edit_project_->set_stall(false);
 				save_project_->set_stall(false);
 				run_->set_stall(false);
+///			}
+		}
+
+
+		bool save_project_file_(const std::string& path)
+		{
+			sys::preference pre;
+			proj_title_->save(pre);
+			project_.save(pre);
+			auto ph = path;
+			if(!utils::get_file_ext(path)) {
+				ph += project_ext_;
 			}
+			return pre.save(ph);
+		}
+
+
+		bool load_project_file_(const std::string& path)
+		{
+			sys::preference pre;
+			auto ph = path;
+			if(!utils::get_file_ext(path)) {
+				ph += project_ext_;
+			}
+			auto ret = pre.load(ph);
+			if(ret) {
+				proj_title_->load(pre);
+				project_.load(pre);
+			}
+			return ret;
 		}
 
 	public:
@@ -192,7 +223,11 @@ return;
 				load_project_->at_local_param().select_func_ = [=](bool f) {
 					stall_button_(true);
 #ifdef NATIVE_FILER
-					proj_load_filer_.open("プロジェクト(*.ipr)\t*.ipr\t");
+					std::string filter = "プロジェクト(*.";
+					filter += project_ext_;
+					filter += ")\t*.";
+					filter += "\t");
+					proj_load_filer_.open(filter);
 #else
 					proj_load_filer_->enable();
 #endif
@@ -219,7 +254,11 @@ return;
 				save_project_->at_local_param().select_func_ = [=](bool f) {
 					stall_button_(true);
 #ifdef NATIVE_FILER
-					proj_save_filer_.open("プロジェクト(*.ipr)\t*.ipr\t");
+					std::string filter = "プロジェクト(*.";
+					filter += project_ext_;
+					filter += ")\t*.";
+					filter += "\t");
+					proj_save_filer_.open(filter, true);
 #else
 					proj_save_filer_->enable();
 #endif
@@ -265,7 +304,6 @@ return;
 						proj_title_->set_text(root_name_);
 						return;
 					}
-					inspection_.set_title(proj_name_label_->get_text());
 					proj_title_->set_text(proj_name_label_->get_text());
 					update_project_();
 				};
@@ -345,11 +383,12 @@ return;
 					proj_load_filer_ = wd.add_widget<widget_filer>(wp, wp_);
 					proj_load_filer_->enable(false);
 					proj_load_filer_->at_local_param().select_file_func_ = [=](const std::string& path) {
-						if(inspection_.load(path)) {
-							proj_title_->set_text(inspection_.get_title());
-							proj_path_->set_text(path);
-							update_project_();
-						}
+
+///						if(inspection_.load(path)) {
+///							proj_title_->set_text(inspection_.get_title());
+///							proj_path_->set_text(path);
+///							update_project_();
+///						}
 						stall_button_(false);
 					};
 					proj_load_filer_->at_local_param().cancel_file_func_ = [=](void) {
@@ -362,7 +401,7 @@ return;
 					proj_save_filer_ = wd.add_widget<widget_filer>(wp, wp_);
 					proj_save_filer_->enable(false);
 					proj_save_filer_->at_local_param().select_file_func_ = [=](const std::string& path) {
-						inspection_.save(path);
+///						inspection_.save(path);
 						stall_button_(false);
 					};
 					proj_save_filer_->at_local_param().cancel_file_func_ = [=](void) {
@@ -380,8 +419,10 @@ return;
 			cont_setting_ip_[2]->load(pre);
 			cont_setting_ip_[3]->load(pre);
 
-			proj_name_dialog_->load(pre);
-			inspection_.get_dialog()->load(pre);
+			proj_name_dialog_->load(pre);		  // ダイアログの位置復元
+			inspection_.get_dialog()->load(pre);  // ダイアログの位置復元
+			project_.get_dialog()->load(pre);	  // ダイアログの位置復元
+
 #ifndef NATIVE_FILER
 			proj_load_filer_->load(pre);
 			proj_save_filer_->load(pre);
@@ -409,12 +450,11 @@ return;
 			if(proj_load_filer_.state()) {
 				auto path = proj_load_filer_.get();
 				if(!path.empty()) {
-					if(inspection_.load(path)) {
-						proj_title_->set_text(inspection_.get_title());
+					if(load_project_file_(path)) {
 						proj_path_->set_text(path);
+					} else {
+						proj_title_->set_text("");
 					}
-				} else {
-					inspection_.set_title("");
 				}
 				update_project_();
 				stall_button_(false);
@@ -422,7 +462,9 @@ return;
 			if(proj_save_filer_.state()) {
 				auto path = proj_save_filer_.get();
 				if(!path.empty()) {
-					inspection_.save(path);
+					if(!save_project_file_(path)) {
+// load error
+					}
 					stall_button_(false);
 				}
 			}
@@ -447,9 +489,10 @@ return;
 			cont_setting_ip_[2]->save(pre);
 			cont_setting_ip_[3]->save(pre);
 
-			proj_name_dialog_->save(pre);
+			proj_name_dialog_->save(pre);		  // ダイアログの位置セーブ
+			inspection_.get_dialog()->save(pre);  // ダイアログの位置セーブ
+			project_.get_dialog()->save(pre);	  // ダイアログの位置セーブ
 
-			inspection_.get_dialog()->save(pre);
 #ifndef NATIVE_FILER
 			proj_load_filer_->save(pre);
 			proj_save_filer_->save(pre);

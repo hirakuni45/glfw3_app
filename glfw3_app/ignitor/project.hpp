@@ -125,7 +125,7 @@ namespace app {
 					pname_[i] = wd.add_widget<widget_label>(wp, wp_);
 				}
 				{
-					widget::param wp(vtx::irect(20, h - 100, 200, 40), dialog_);
+					widget::param wp(vtx::irect(20, h - 100, w - 20 * 2, 40), dialog_);
 					widget_text::param wp_;
 					wp_.text_param_.placement_
 						= vtx::placement(vtx::placement::holizontal::LEFT,
@@ -151,6 +151,17 @@ namespace app {
 						s = pbase_->get_text();
 						s += pname_[i]->get_text();
 						s += pext_->get_text();
+						if(!s.empty()) {
+							auto& core = gl::core::get_instance();
+							std::string path = core.get_current_path();
+							path += '/';
+							path += s;
+							if(utils::probe_file(path)) {
+								s += " (find !)";
+							} else {
+								s += " (can't find)";
+							}
+						}
 						break;
 					}
 				}
@@ -168,6 +179,17 @@ namespace app {
 		//-----------------------------------------------------------------//
 		bool save(sys::preference& pre)
 		{
+			if(dialog_ == nullptr) return false;
+			if(pbase_ == nullptr) return false;
+			if(pext_ == nullptr) return false;
+
+			dialog_->save(pre);
+			pbase_->save(pre);
+			pext_->save(pre);
+			for(int i = 0; i < 50; ++i) {
+				if(pname_[i] == nullptr) return false;
+				pname_[i]->save(pre);
+			}
 			return true;
 		}
 
@@ -181,6 +203,17 @@ namespace app {
 		//-----------------------------------------------------------------//
 		bool load(sys::preference& pre)
 		{
+			if(dialog_ == nullptr) return false;
+			if(pbase_ == nullptr) return false;
+			if(pext_ == nullptr) return false;
+
+			dialog_->load(pre);
+			pbase_->load(pre);
+			pext_->load(pre);
+			for(int i = 0; i < 50; ++i) {
+				if(pname_[i] == nullptr) return false;
+				pname_[i]->load(pre);
+			}
 			return true;
 		}
 	};
