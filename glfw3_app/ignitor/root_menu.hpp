@@ -32,7 +32,7 @@ namespace app {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class root_menu {
 
-		static const char* project_ext_ = { "ipr" };
+		static constexpr const char* PROJECT_EXT_ = "ipr";
 
 		static const int ofs_x_ = 50;
 		static const int ofs_y_ = 50;
@@ -128,8 +128,8 @@ return;
 			proj_title_->save(pre);
 			project_.save(pre);
 			auto ph = path;
-			if(!utils::get_file_ext(path)) {
-				ph += project_ext_;
+			if(utils::get_file_ext(path).empty()) {
+				ph += PROJECT_EXT_;
 			}
 			return pre.save(ph);
 		}
@@ -139,8 +139,8 @@ return;
 		{
 			sys::preference pre;
 			auto ph = path;
-			if(!utils::get_file_ext(path)) {
-				ph += project_ext_;
+			if(utils::get_file_ext(path).empty()) {
+				ph += PROJECT_EXT_;
 			}
 			auto ret = pre.load(ph);
 			if(ret) {
@@ -224,9 +224,10 @@ return;
 					stall_button_(true);
 #ifdef NATIVE_FILER
 					std::string filter = "プロジェクト(*.";
-					filter += project_ext_;
+					filter += PROJECT_EXT_;
 					filter += ")\t*.";
-					filter += "\t");
+					filter += PROJECT_EXT_;
+					filter += "\t";
 					proj_load_filer_.open(filter);
 #else
 					proj_load_filer_->enable();
@@ -255,9 +256,10 @@ return;
 					stall_button_(true);
 #ifdef NATIVE_FILER
 					std::string filter = "プロジェクト(*.";
-					filter += project_ext_;
+					filter += PROJECT_EXT_;
 					filter += ")\t*.";
-					filter += "\t");
+					filter += PROJECT_EXT_;
+					filter += "\t";
 					proj_save_filer_.open(filter, true);
 #else
 					proj_save_filer_->enable();
@@ -463,7 +465,7 @@ return;
 				auto path = proj_save_filer_.get();
 				if(!path.empty()) {
 					if(!save_project_file_(path)) {
-// load error
+// save error
 					}
 					stall_button_(false);
 				}

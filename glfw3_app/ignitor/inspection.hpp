@@ -10,6 +10,7 @@
 //=====================================================================//
 #include "core/glcore.hpp"
 #include "utils/director.hpp"
+#include "utils/select_file.hpp"
 #include "widgets/widget_dialog.hpp"
 #include "widgets/widget_frame.hpp"
 #include "widgets/widget_button.hpp"
@@ -31,6 +32,8 @@ namespace app {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class inspection {
+
+		static constexpr const char* UNIT_EXT_ = "unt";  ///< 単体検査ファイル、拡張子
 
 		// 電圧/電流レンジ選択、時間レンジ選択、トリガー選択、フィルター選択、平均化選択
 		struct oscillo_t {
@@ -60,7 +63,12 @@ namespace app {
 		utils::director<core>&	director_;
 
 		gui::widget_dialog*		dialog_;
-		gui::widget_label*		title_;					///< 検査項目名
+		gui::widget_label*		unit_name_;				///< 単体試験名
+		gui::widget_button*		load_file_;				///< load file
+		gui::widget_button*		save_file_;				///< save file
+		utils::select_file		unit_load_filer_;
+		utils::select_file		unit_save_filer_;
+
 		gui::widget_list*		inspection_standards_;	///< 検査規格 (Inspection standards)
 		gui::widget_list*		inspection_method_;		///< 検査方法選択
 		gui::widget_label*		voltage_[2];			///< 電源設定（電圧）
@@ -160,7 +168,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		inspection(utils::director<core>& d) : director_(d),
 			dialog_(nullptr),
-			title_(nullptr),
+			unit_name_(nullptr), load_file_(nullptr), save_file_(nullptr),
 			inspection_standards_(nullptr),
 			inspection_method_(nullptr),
 			voltage_{ nullptr }, current_{ nullptr }, current_text_(nullptr),
@@ -213,12 +221,12 @@ namespace app {
 			int w = 220;
 			int h = 45;
 			static const char* tbls[] = {
-				"検査項目名：",
+				"ファイル名：",
 				"検査規格：",
 				"検査方法：",
 				"ジェネレーター設定：",
-				"オシロスコープ設定：", nullptr, nullptr, nullptr,
-				"測定項目設定：",
+				"オシロスコープ設定：", nullptr, nullptr,
+				"測定項目設定：", nullptr,
 				"ＣＲ設定：",
 				"２次負荷切替設定：",
 				"リレー切替設定：",
@@ -233,11 +241,38 @@ namespace app {
 				wd.add_widget<widget_text>(wp, wp_);
 			}
 			int ofsx = w + 20;
-			{  // 検査項目名
+			{  // 単体試験名
 				widget::param wp(vtx::irect(ofsx, 20 + h * 0, 300, 40), dialog_);
-				widget_label::param wp_;
-				title_ = wd.add_widget<widget_label>(wp, wp_);
+				widget_label::param wp_("", false);
+				unit_name_ = wd.add_widget<widget_label>(wp, wp_);
 			}
+			{  // ロード・ファイル
+				widget::param wp(vtx::irect(ofsx + 320, 20 + h * 0, 100, 40), dialog_);
+				widget_button::param wp_("ロード");
+				load_file_ = wd.add_widget<widget_button>(wp, wp_);
+				load_file_->at_local_param().select_func_ = [=](bool f) {
+					std::string filter = "単体テスト(*.";
+					filter += UNIT_EXT_;
+					filter += ")\t*.";
+					filter += UNIT_EXT_;
+					filter += "\t";
+					unit_load_filer_.open(filter);
+				};
+			}
+			{  // ロード・ファイル
+				widget::param wp(vtx::irect(ofsx + 440, 20 + h * 0, 100, 40), dialog_);
+				widget_button::param wp_("セーブ");
+				save_file_ = wd.add_widget<widget_button>(wp, wp_);
+				save_file_->at_local_param().select_func_ = [=](bool f) {
+					std::string filter = "単体テスト(*.";
+					filter += UNIT_EXT_;
+					filter += ")\t*.";
+					filter += UNIT_EXT_;
+					filter += "\t";
+					unit_save_filer_.open(filter, true);
+				};
+			}
+
 			{  // 検査規格
 				widget::param wp(vtx::irect(ofsx, 20 + h * 1, 150, 40), dialog_);
 				widget_list::param wp_;
@@ -535,6 +570,27 @@ namespace app {
 		{
 			if(!dialog_->get_state(gui::widget::state::ENABLE)) return;
 
+			if(unit_load_filer_.state()) {
+				auto path = unit_load_filer_.get();
+				if(!path.empty()) {
+					auto ph = path;
+					if(utils::get_file_ext(path).empty()) {
+						ph += UNIT_EXT_;
+					}
+					load(ph);
+				}
+			}
+			if(unit_save_filer_.state()) {
+				auto path = unit_save_filer_.get();
+				if(!path.empty()) {
+					auto ph = path;
+					if(utils::get_file_ext(path).empty()) {
+						ph += UNIT_EXT_;
+					}
+					save(ph);
+				}
+			}
+
 			if(voltage_[0]->get_focus()) {
 				help_->set_text("0.0 to 300.0 [V], 0.1 [V] / step");
 			} else if(voltage_[1]->get_focus()) {
@@ -579,7 +635,7 @@ namespace app {
 		bool save(const std::string& path)
 		{
 			sys::preference pre;
-			title_->save(pre);
+			unit_name_->save(pre);
 			inspection_standards_->save(pre);
 			inspection_method_->save(pre);
 			voltage_[0]->save(pre);
@@ -626,7 +682,7 @@ namespace app {
 			sys::preference pre;
 			auto ret = pre.load(path);
 			if(ret) {
-				title_->load(pre);
+				unit_name_->load(pre);
 				inspection_standards_->load(pre);
 				inspection_method_->load(pre);
 				voltage_[0]->load(pre);
