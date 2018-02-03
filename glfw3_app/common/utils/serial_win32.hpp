@@ -408,7 +408,7 @@ namespace device {
 			const uint8_t* p = reinterpret_cast<const uint8_t*>(src);
 			do {
 				if(0 == WriteFile(fd_, p, bytes_left, &bytes_written, NULL)) {
-//					fprintf(stderr, "Failed to write to port.\n");
+//					std::cerr << "Failed to write to port." << std::endl;
 					return false;
 				}
 				p += bytes_written;
@@ -434,8 +434,12 @@ namespace device {
 			DWORD errors;
 			COMSTAT stat;
 			ClearCommError(fd_, &errors, &stat);
-			DWORD count = stat.cbInQue;
-			DWORD rb;
+			DWORD count = stat.cbInQue;  // 読み込み可能なバイト数
+			if(count == 0) return 0;
+
+			// 最大読み込みバイト数
+			if(len < count) count = len;
+			DWORD rb = 0;
 			uint8_t* p = reinterpret_cast<uint8_t*>(dst);
 			if(ReadFile(fd_, p, count, &rb, NULL) == 0) {
 				return 0;
