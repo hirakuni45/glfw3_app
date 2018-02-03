@@ -3,7 +3,7 @@
 /*! @file
     @brief  波形描画テンプレート・クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2018 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/RX/blob/master/LICENSE
 */
@@ -49,21 +49,58 @@ namespace view {
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		class info_param {
 		public:
-			img::rgba8	grid_color_;
-			int32_t		grid_step_;
-			bool		grid_enable_;
+			img::rgba8	grid_color_;	///< グリッド・カラー
+			int32_t		grid_step_;		///< グリッド・ステップ
+			uint16_t	grid_stipple_;	///< グリッド・破線パターン
+			bool		grid_enable_;	///< グリッド有効
+
+			img::rgba8	time_color_;	///< 時間軸カラー
+			int32_t		time_org_;		///< 時間軸開始
+			int32_t		time_len_;		///< 時間軸長さ
+			uint16_t	time_stipple_;	///< 時間軸破線パターン
+			bool		time_enable_;	///< 時間軸有効
+//			bool		time_anime_;	///< 時間軸アニメーション
+
+			img::rgba8	volt_color_;	///< 電圧軸カラー
+			int32_t		volt_org_;		///< 電圧軸開始
+			int32_t		volt_len_;		///< 電圧軸長さ
+			uint16_t	volt_stipple_;	///< 電圧軸破線パターン
+			bool		volt_enable_;	///< 電圧軸有効
+//			bool		volt_anime_;	///< 電圧軸アニメーション
 
 		private:
 			vtx::sposs	grid_;
+			vtx::sposs	time_;
+			vtx::sposs	volt_;
+			vtx::ipos	size_;
+
+			uint32_t	count_;
+
+			static void rotate_(uint16_t& bits) {
+				auto mod = bits & 0x8000;
+				bits <<= 1;
+				if(mod) bits |= 1;
+			}
 
 		public:
-			info_param() : grid_color_(img::rgba8(255, 128)), grid_step_(30),
-				grid_enable_(true),
-				grid_()
+			info_param() : grid_color_(img::rgba8(255, 255, 255, 96)), grid_step_(30),
+				grid_stipple_(0b1111000011110000), grid_enable_(true),
+
+				time_color_(img::rgba8(255, 255, 128, 192)),
+				time_org_(0), time_len_(0),
+				time_stipple_(0b1110110011101100), time_enable_(true),
+
+				volt_color_(img::rgba8(128, 255, 128, 192)),
+				volt_org_(0), volt_len_(0),
+				volt_stipple_(0b1110110011101100), volt_enable_(true),
+				grid_(), time_(), volt_(), size_(), count_(0)
 			{ }
 
-			void build_grid(const vtx::ipos& size)
+			void build(const vtx::ipos& size)
 			{
+				if(size == size_) return;
+				size_ = size;
+
 				grid_.clear();
 				for(int h = 0; h < size.x; h += grid_step_) {  // |||
 					grid_.push_back(vtx::spos(h, 0));
@@ -73,17 +110,52 @@ namespace view {
 					grid_.push_back(vtx::spos(0, v));
 					grid_.push_back(vtx::spos(size.x, v));
 				}
+
+				time_.clear();
+				time_.push_back(vtx::spos(0, 0));
+				time_.push_back(vtx::spos(0, size.y));
+
+				volt_.clear();
+				volt_.push_back(vtx::spos(0, 0));
+				volt_.push_back(vtx::spos(size.x, 0));
 			}
 
-			void render_grid()
+			void render()
 			{
-				if(!grid_.empty()) {
-					glEnable(GL_LINE_STIPPLE);
-					glLineStipple(1, 0b1111000011110000);
+				glEnable(GL_LINE_STIPPLE);
+				if(!grid_.empty() && grid_enable_) {
+					glLineStipple(1, grid_stipple_);
 					gl::glColor(grid_color_);
 					gl::draw_lines(grid_);
-					glDisable(GL_LINE_STIPPLE);
 				}
+				if(time_enable_) {
+					glLineStipple(1, time_stipple_);
+					glPushMatrix();
+					gl::glTranslate(time_org_, 0);
+					gl::glColor(time_color_);
+					gl::draw_lines(time_);
+					gl::glTranslate(time_len_, 0);
+					gl::draw_lines(time_);
+					glPopMatrix();
+				}
+				if(volt_enable_) {
+					glLineStipple(1, volt_stipple_);
+					glPushMatrix();
+					gl::glTranslate(0, volt_org_);
+					gl::glColor(volt_color_);
+					gl::draw_lines(volt_);
+					gl::glTranslate(0, volt_len_);
+					gl::draw_lines(volt_);
+					glPopMatrix();
+				}
+				if(count_ > 0) {
+					--count_;
+				} else {
+					rotate_(time_stipple_);
+					rotate_(volt_stipple_);
+					count_ = 3;
+				}
+				glDisable(GL_LINE_STIPPLE);
 			}
 		};
 
@@ -105,13 +177,15 @@ namespace view {
 		ch_t		ch_[CHN];
 		double		div_;
 
+		vtx::ipos	win_size_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		render_waves() : ch_{ }, div_(0.0) { }
+		render_waves() : ch_{ }, div_(0.0), win_size_(0) { }
 
 
 		//-----------------------------------------------------------------//
@@ -145,6 +219,28 @@ namespace view {
 				return p;
 			}
 			return ch_[ch].param_;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  情報パラメーターを取得
+			@return 情報パラメーター
+		*/
+		//-----------------------------------------------------------------//
+		const info_param& get_info() const {
+			return info_;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  情報パラメーターを参照
+			@return 情報パラメーター
+		*/
+		//-----------------------------------------------------------------//
+		info_param& at_info() {
+			return info_;
 		}
 
 
@@ -219,14 +315,13 @@ namespace view {
 		//-----------------------------------------------------------------//
 		void render(const vtx::ipos& size, uint32_t tstep)
 		{
-			bool update_grid = false;
+			bool update_win = win_size_ != size;
+			win_size_ = size;
 			for(uint32_t n = 0; n < CHN; ++n) {
 				ch_t& t = ch_[n];
-				bool update = false;
+				bool update = update_win;
 				if(t.lines_.size() != size.x) {
 					t.lines_.resize(size.x);
-					update = true;
-					update_grid = true;
 				}
 				if(t.tstep_ != tstep) {
 					t.tstep_ = tstep;
@@ -248,10 +343,10 @@ namespace view {
 				gl::draw_line_strip(t.lines_);
 				glPopMatrix();
 			}
-			if(update_grid) {
-				info_.build_grid(size);
-			}
-			info_.render_grid();
+
+			info_.build(size);
+
+			info_.render();
 		}
 	};
 }
