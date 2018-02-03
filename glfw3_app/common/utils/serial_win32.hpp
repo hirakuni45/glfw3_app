@@ -112,7 +112,7 @@ namespace device {
 					BYTE name[256];
 					DWORD type = 0;
 					DWORD size = sizeof(name);
-					RegQueryValueEx(key, _T("PortName"), NULL, &type, name, &size);
+					RegQueryValueExA(key, "PortName", NULL, &type, name, &size);
 					t.port = reinterpret_cast<const char*>(name);
 				}
 
