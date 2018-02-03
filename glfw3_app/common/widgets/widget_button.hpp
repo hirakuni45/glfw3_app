@@ -22,7 +22,7 @@ namespace gui {
 
 		typedef widget_button value_type;
 
-		typedef std::function< void(int) > select_func_type;
+		typedef std::function< void(uint32_t) > select_func_type;
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
@@ -246,7 +246,5 @@ namespace gui {
 		void set_text(const std::string& text) {
 			param_.text_param_.set_text(text);
 		}
-
 	};
-
 }
