@@ -9,6 +9,7 @@
 #include "utils/i_scene.hpp"
 #include "utils/director.hpp"
 #include "widgets/widget.hpp"
+#include "widgets/widget_arrow.hpp"
 #include "widgets/widget_button.hpp"
 #include "widgets/widget_label.hpp"
 #include "widgets/widget_check.hpp"
@@ -67,6 +68,9 @@ namespace app {
 		gui::widget_frame*		view_frame_;
 		gui::widget_view*		view_core_;
 
+		gui::widget_arrow*		arrow_up_;
+		gui::widget_arrow*		arrow_dn_;
+
 		uint32_t	filer_id_;
 		uint32_t	menu_id_;
 		int			menu_ins_cnt_;
@@ -116,6 +120,7 @@ namespace app {
 			terminal_frame_(nullptr), terminal_core_(nullptr),
 			spinbox_(nullptr),
 			view_frame_(nullptr), view_core_(nullptr),
+			arrow_up_(nullptr), arrow_dn_(nullptr),
 			filer_id_(0), menu_id_(0), menu_ins_cnt_(0)
 		{ }
 
@@ -303,6 +308,21 @@ namespace app {
 				};
 			}
 
+			if(1) { // アロー UP のテスト
+				widget::param wp(vtx::irect(30, 600, 0, 0));
+				widget_arrow::param wp_(widget_arrow::direction::up);
+				arrow_up_ = wd.add_widget<widget_arrow>(wp, wp_);
+				arrow_up_->at_local_param().level_func_ = [=](uint32_t level) {
+					std::cout << "Arrow: " << level << std::endl;
+				};
+			}
+			if(1) { // アロー DOWN のテスト
+				widget::param wp(vtx::irect(30, 650, 0, 0));
+				widget_arrow::param wp_(widget_arrow::direction::down);
+				wp_.master_ = arrow_up_;
+				arrow_dn_ = wd.add_widget<widget_arrow>(wp, wp_);
+			}
+
 			if(1) { // メニューのテスト
 				widget::param wp(vtx::irect(10, 10, 180, 30));
 				widget_menu::param wp_;
@@ -315,6 +335,8 @@ namespace app {
 				};
 				menu_ = wd.add_widget<widget_menu>(wp, wp_);
 			}
+
+
 
 			if(1) { // フレームのテスト
 				widget::param wp(vtx::irect(200, 20, 100, 80));
