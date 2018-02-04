@@ -25,7 +25,7 @@
 #include "root_menu.hpp"
 #include "ign_client.hpp"
 #include "ign_server.hpp"
-#include "gl_fw/render_waves.hpp"
+#include "wave_cap.hpp"
 
 namespace app {
 
@@ -35,44 +35,12 @@ namespace app {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class ignitor : public utils::i_scene {
-#if 0
-				wp_.init_list_.push_back("1000 ms");
-				wp_.init_list_.push_back("500 ms");
-				wp_.init_list_.push_back("250 ms");
-				wp_.init_list_.push_back("100 ms");
-				wp_.init_list_.push_back("50 ms");
-				wp_.init_list_.push_back("10 ms");
-				wp_.init_list_.push_back("5 ms");
-				wp_.init_list_.push_back("1 ms");
-				wp_.init_list_.push_back("500 us");
-				wp_.init_list_.push_back("100 us");
-				wp_.init_list_.push_back("50 us");
-				wp_.init_list_.push_back("25 us");
-				wp_.init_list_.push_back("10 us");
-				wp_.init_list_.push_back("5 us");
-				wp_.init_list_.push_back("1 us");
-#endif
-		static constexpr double div_tbls_[] = {
-			1000e-3,
-			500e-3,
-			250e-3,
-			100e-3,
-			50e-3,
-			10e-3,
-			5e-3,
-			1e-3,
-			500e-6,
-			100e-6,
-			50e-6,
-			25e-6,
-			10e-6,
-			5e-6,
-			1e-6,
-		};
 
 		utils::director<core>&	director_;
 
 		root_menu				root_menu_;
+
+		wave_cap				wave_cap_;
 
 		gui::widget_frame*		menu_;
 		gui::widget_button*		load_;
@@ -80,21 +48,13 @@ namespace app {
 
 		gui::widget_filer*		load_ctx_;
 
-		gui::widget_frame*		wave_;
-
 		gui::widget_frame*		terminal_frame_;
 		gui::widget_terminal*	terminal_core_;
-
-		gui::widget_frame*		view_frame_;
-		gui::widget_view*		view_core_;
 
 		asio::io_service		io_service_;
 		net::ign_client			client_;
 ///		net::ign_server			server_;
 		bool					start_client_;
-
-		typedef view::render_waves<uint16_t, 4096, 4> WAVES;
-		WAVES					waves_;
 
 		std::string				ip_;
 
@@ -105,29 +65,6 @@ namespace app {
 ///			std::cout << s << std::endl;
 		}
 
-		// 波形描画
-		void update_view_()
-		{
-		}
-
-
-		void render_view_(const vtx::irect& clip)
-		{
-//			gui::widget_director& wd = director_.at().widget_director_;
-
-			glDisable(GL_TEXTURE_2D);
-
-//			auto pos = div_->get_menu()->get_select_pos();
-			waves_.render(clip.size, 65536);
-
-			glEnable(GL_TEXTURE_2D);
-		}
-
-
-		void service_view_()
-		{
-		}
-
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -136,15 +73,13 @@ namespace app {
 		//-----------------------------------------------------------------//
 		ignitor(utils::director<core>& d) : director_(d),
 			root_menu_(d, client_),
+			wave_cap_(d),
 			menu_(nullptr), load_(nullptr), div_(nullptr), load_ctx_(nullptr),
-			wave_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
-			view_frame_(nullptr), view_core_(nullptr),
 			io_service_(),
 			client_(io_service_),
 ///			server_(io_service_),
 			start_client_(false),
-			waves_(),
 			ip_()
 		{
 		}
@@ -159,8 +94,10 @@ namespace app {
 		{
 			root_menu_.initialize();
 
+			wave_cap_.initialize();
+
 			using namespace gui;
-			widget_director& wd = director_.at().widget_director_;
+//			widget_director& wd = director_.at().widget_director_;
 //			gl::core& core = gl::core::get_instance();
 #if 0
 
@@ -267,32 +204,10 @@ namespace app {
 			}
 #endif
 
-
-			{	// 波形ビュー
-				{
-					widget::param wp(vtx::irect(40, 150, 200, 200));
-					widget_frame::param wp_;
-					wp_.plate_param_.set_caption(12);
-					view_frame_ = wd.add_widget<widget_frame>(wp, wp_);
-				}
-				{
-					widget::param wp(vtx::irect(0), view_frame_);
-					widget_view::param wp_;
-					wp_.update_func_ = [=]() {
-						update_view_();
-					};
-					wp_.render_func_ = [=](const vtx::irect& clip) {
-						render_view_(clip);
-					};
-					wp_.service_func_ = [=]() {
-						service_view_();
-					};
-					view_core_ = wd.add_widget<widget_view>(wp, wp_);
-				}
-			}
+			wave_cap_.load();
 
 			// プリファレンスのロード
-			sys::preference& pre = director_.at().preference_;
+//			sys::preference& pre = director_.at().preference_;
 
 //			if(menu_ != nullptr) {
 //				menu_->load(pre, false, false);
@@ -303,10 +218,6 @@ namespace app {
 //			if(terminal_frame_ != nullptr) {
 //				terminal_frame_->load(pre);
 //			}
-
-			if(view_frame_ != nullptr) {
-				view_frame_->load(pre);
-			}
 
 //			if(argv_frame_ != nullptr) {
 //				argv_frame_->load(pre);
@@ -321,23 +232,6 @@ namespace app {
 
 			// テスト・サーバー起動
 ///			server_.start();
-
-			// テスト波形生成
-///			waves_.create_buffer(0.5, 10e-6);
-
-//			waves_.at_param(0).gain_ = 0.025f;
-//			waves_.at_param(1).gain_ = 0.025f;
-//			waves_.at_param(0).color_ = img::rgba8(255, 128, 255, 255);
-//			waves_.at_param(1).color_ = img::rgba8(128, 255, 255, 255);
-//			waves_.at_param(0).offset_ = 0;
-//			waves_.at_param(1).offset_ = 200;
-
-			waves_.at_info().time_org_ = 50;
-			waves_.at_info().time_len_ = 150;
-
-			waves_.at_info().volt_org_ = 80;
-			waves_.at_info().volt_len_ = 130;
-///			waves_.build_sin(10e3);
 		}
 
 
@@ -405,8 +299,9 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void destroy()
 		{
+			wave_cap_.save();
 
-			sys::preference& pre = director_.at().preference_;
+//			sys::preference& pre = director_.at().preference_;
 
 ///			if(edit_ != nullptr) edit_->save(pre);
 
@@ -416,10 +311,6 @@ namespace app {
 //			if(argv_frame_ != nullptr) {
 //				argv_frame_->save(pre);
 //			}
-
-			if(view_frame_ != nullptr) {
-				view_frame_->save(pre);
-			}
 
 ///			if(terminal_frame_ != nullptr) {
 ///				terminal_frame_->save(pre);
