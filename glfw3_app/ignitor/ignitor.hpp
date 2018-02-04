@@ -90,12 +90,13 @@ namespace app {
 
 		asio::io_service		io_service_;
 		net::ign_client			client_;
-		net::ign_server			server_;
-
+///		net::ign_server			server_;
 		bool					start_client_;
 
-		typedef view::render_waves<uint16_t, 65536 * 4> WAVES;
+		typedef view::render_waves<uint16_t, 4096, 4> WAVES;
 		WAVES					waves_;
+
+		std::string				ip_;
 
 		// ターミナル、行入力
 		void term_enter_(const utils::lstring& text) {
@@ -112,15 +113,12 @@ namespace app {
 
 		void render_view_(const vtx::irect& clip)
 		{
-			gui::widget_director& wd = director_.at().widget_director_;
+//			gui::widget_director& wd = director_.at().widget_director_;
 
 			glDisable(GL_TEXTURE_2D);
 
-			gl::glColor(wd.get_color());
-
-			auto pos = div_->get_menu()->get_select_pos();
-//			auto div = div_tbls_[pos];
-			waves_.render(clip.size.x, 65536 * (pos + 1));
+//			auto pos = div_->get_menu()->get_select_pos();
+			waves_.render(clip.size, 65536);
 
 			glEnable(GL_TEXTURE_2D);
 		}
@@ -137,15 +135,17 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		ignitor(utils::director<core>& d) : director_(d),
-			root_menu_(d),
+			root_menu_(d, client_),
 			menu_(nullptr), load_(nullptr), div_(nullptr), load_ctx_(nullptr),
 			wave_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
 			view_frame_(nullptr), view_core_(nullptr),
 			io_service_(),
 			client_(io_service_),
-			server_(io_service_),
-			start_client_(false)
+///			server_(io_service_),
+			start_client_(false),
+			waves_(),
+			ip_()
 		{
 		}
 
@@ -317,7 +317,7 @@ namespace app {
 			if(div_ != nullptr) div_->load(pre);
 
 			// テスト・サーバー起動
-			server_.start();
+///			server_.start();
 
 			// テスト波形生成
 			waves_.create_buffer(0.5, 10e-6);
@@ -337,16 +337,20 @@ namespace app {
 
 			gui::widget_director& wd = director_.at().widget_director_;
 
-#if 0
 			if(start_client_) {
 				client_.service();
 			} else {
-				client_.start();				
-				start_client_ = true;
+				const std::string& ip = root_menu_.get_target_ip();
+				if(!ip.empty()) {
+					ip_ = ip;
+					client_.start(ip_, 23);
+					start_client_ = true;
+				}
 			}
-			server_.service();
+///			server_.service();
 			io_service_.run();
 
+#if 0
 #if 0
 			// Drag & Drop されたファイル
 			gl::core& core = gl::core::get_instance();

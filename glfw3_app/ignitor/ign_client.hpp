@@ -38,22 +38,21 @@ namespace net {
 		asio::streambuf		send_;
 		asio::streambuf		recv_;
 
+		std::string			ips_;
+
 		void send_end_(const boost::system::error_code& error)
 		{
 			if(send_.size() > 0) {
-				std::cout << "request : " << asio::buffer_cast<const char*>(send_.data()) << std::endl;
+///				std::cout << "request : " << asio::buffer_cast<const char*>(send_.data()) << std::endl;
 				send_.consume(send_.size());
 			}
 		}
 
 
-		void async_send_()
+		void async_send_(const std::string& request)
 		{
-			const std::string request = "asdfg\n";
-
 			std::ostream os(&send_);
 			os << request;
-
 			asio::async_write(socket_, send_.data(), boost::bind(&ign_client::send_end_, this, _1));
 		}
 
@@ -61,7 +60,7 @@ namespace net {
 		void recv_end_(const boost::system::error_code& error)
     	{
 			if(recv_.size() > 0) {
-				std::cout << "response : " << asio::buffer_cast<const char*>(recv_.data()) << std::endl;
+///				std::cout << "response : " << asio::buffer_cast<const char*>(recv_.data()) << std::endl;
 				recv_.consume(recv_.size());
 			}
 		}
@@ -109,16 +108,19 @@ namespace net {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  開始
+			@param[in]	ip		IP アドレス
+			@param[in]	port	ポート番号
 		*/
 		//-----------------------------------------------------------------//
-		void start()
+		void start(const std::string& ip, uint16_t port)
 		{
-			connect_ = false;
-			socket_.async_connect(ip::tcp::endpoint(ip::address::from_string("127.0.0.1"), 31400),
-				boost::bind(&ign_client::on_connect_, this, asio::placeholders::error));			connect_ = false;
+///			connect_ = false;
+			ips_ = "127.0.0.1";
+			if(!ip.empty()) ips_ = ip;
+			socket_.async_connect(ip::tcp::endpoint(ip::address::from_string("192.168.0.8"), port),
+				boost::bind(&ign_client::on_connect_, this, asio::placeholders::error));
 //			socket_.connect(ip::tcp::endpoint(ip::address::from_string("127.0.0.1"), 31400));
-
-			std::cout << "Connection start..." << std::endl;
+///			std::cout << "Connection start..." << std::endl;
 		}
 
 
@@ -129,20 +131,33 @@ namespace net {
 		//-----------------------------------------------------------------//
 		void service()
 		{
-
-
 			if(connect_) {
 //				io_service_.reset();
+#if 0
 				static uint32_t cnt = 0;
 				if(cnt >= 60) {
-					async_send_();
+					async_send_("asdfg\n");
 					cnt = 0;
 					gui::format("Send...\n");
 				}
 				++cnt;
-
+#endif
 				async_recv_();
 			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  送信
+			@param[in]	text	送信文字列
+		*/
+		//-----------------------------------------------------------------//
+		void send(const std::string& text)
+		{
+			if(text.empty()) return;
+
+			async_send_(text);
 		}
 	};
 }

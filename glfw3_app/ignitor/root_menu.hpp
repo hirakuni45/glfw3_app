@@ -18,8 +18,10 @@
 #include "utils/input.hpp"
 #include "utils/format.hpp"
 #include "utils/select_file.hpp"
+
 #include "project.hpp"
 #include "inspection.hpp"
+#include "ign_client.hpp"
 
 #define NATIVE_FILER
 
@@ -40,6 +42,8 @@ namespace app {
 		static const int btn_h_ = 80;
 
 		utils::director<core>&	director_;
+
+		net::ign_client&		client_;
 
 		gui::widget_button*		new_project_;
 		gui::widget_label*		proj_title_;
@@ -63,6 +67,8 @@ namespace app {
 
 		gui::widget_dialog*		cont_setting_dialog_;
 		gui::widget_label*		cont_setting_ip_[4];
+		gui::widget_label*		cont_setting_cmds_;
+		gui::widget_button*		cont_setting_exec_;
 
 #ifdef NATIVE_FILER
 		utils::select_file		proj_load_filer_;
@@ -156,7 +162,8 @@ return;
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		root_menu(utils::director<core>& d) : director_(d),
+		root_menu(utils::director<core>& d, net::ign_client& client) : director_(d),
+			client_(client),
 			new_project_(nullptr),  proj_title_(nullptr),
 			load_project_(nullptr), proj_path_(nullptr),
 			edit_project_(nullptr),
@@ -166,7 +173,7 @@ return;
 			proj_name_dialog_(nullptr), proj_name_label_(nullptr),
 			project_(d), inspection_(d),
 			cont_setting_dialog_(nullptr), cont_setting_ip_{ nullptr },
-
+			cont_setting_cmds_(nullptr), cont_setting_exec_(nullptr),
 #ifndef NATIVE_FILER
 			proj_load_filer_(nullptr), proj_save_filer_(nullptr),
 #endif
@@ -182,6 +189,26 @@ return;
 		~root_menu()
 		{
 			destroy();
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  ターゲット IP アドレスの取得
+			@return	IP アドレス 
+		*/
+		//-----------------------------------------------------------------//
+		const std::string& get_target_ip() const
+		{
+			static std::string ips;
+			ips.clear();
+			for(int i = 0; i < 4; ++i) {
+				if(cont_setting_ip_[i] == nullptr) break;
+				const std::string& ip = cont_setting_ip_[i]->get_text();
+				ips += ip;
+				if(i < 3) ips += ",";
+			}
+			return ips; 
 		}
 
 
@@ -326,8 +353,8 @@ return;
 			inspection_.initialize();
 
 			{  // コントローラー設定ダイアログ
-				int w = 330;
-				int h = 200;
+				int w = 450;
+				int h = 310;
 				widget::param wp(vtx::irect(100, 100, w, h));
 				widget_dialog::param wp_;
 				wp_.style_ = widget_dialog::style::CANCEL_OK;
@@ -347,32 +374,48 @@ return;
 					}
 //					utils::format("IP: %d, %d, %d, %d\n") % ip_[0] % ip_[1] % ip_[2] % ip_[3];
 				};
+				widget_dialog* root = cont_setting_dialog_;
 				{
-					widget::param wp(vtx::irect(10, 20, w - 10 * 2, 40), cont_setting_dialog_);
+					widget::param wp(vtx::irect(10, 20, w - 10 * 2, 40), root);
 					widget_text::param wp_("コントローラーＩＰ：");
 					wd.add_widget<widget_text>(wp, wp_);
 				}
 				int ipw = 60;  // IP 設定幅
 				int ips = 20;  // IP 設定隙間
 				{
-					widget::param wp(vtx::irect(10 + (ipw + ips) * 0, 70, 60, 40), cont_setting_dialog_);
+					widget::param wp(vtx::irect(10 + (ipw + ips) * 0, 70, 60, 40), root);
 					widget_label::param wp_("192", false);
 					cont_setting_ip_[0] = wd.add_widget<widget_label>(wp, wp_);
 				}
 				{
-					widget::param wp(vtx::irect(10 + (ipw + ips) * 1, 70, 60, 40), cont_setting_dialog_);
+					widget::param wp(vtx::irect(10 + (ipw + ips) * 1, 70, 60, 40), root);
 					widget_label::param wp_("168", false);
 					cont_setting_ip_[1] = wd.add_widget<widget_label>(wp, wp_);
 				}
 				{
-					widget::param wp(vtx::irect(10 + (ipw + ips) * 2, 70, 60, 40), cont_setting_dialog_);
+					widget::param wp(vtx::irect(10 + (ipw + ips) * 2, 70, 60, 40), root);
 					widget_label::param wp_("1", false);
 					cont_setting_ip_[2] = wd.add_widget<widget_label>(wp, wp_);
 				}
 				{
-					widget::param wp(vtx::irect(10 + (ipw + ips) * 3, 70, 60, 40), cont_setting_dialog_);
+					widget::param wp(vtx::irect(10 + (ipw + ips) * 3, 70, 60, 40), root);
 					widget_label::param wp_("1", false);
 					cont_setting_ip_[3] = wd.add_widget<widget_label>(wp, wp_);
+				}
+				{  // コントローラー・コマンド
+					widget::param wp(vtx::irect(10, 130, w - 10 * 2, 40), root);
+					widget_label::param wp_("", false);
+					cont_setting_cmds_ = wd.add_widget<widget_label>(wp, wp_);
+				}
+				{  // コントローラー・コマンド実行ボタン
+					widget::param wp(vtx::irect(w - 110, 190, 100, 40), root);
+					widget_button::param wp_("exec");
+					cont_setting_exec_ = wd.add_widget<widget_button>(wp, wp_);
+					cont_setting_exec_->at_local_param().select_func_ = [=](uint32_t id) {
+						auto s = cont_setting_cmds_->get_text();
+						s += '\n';
+						client_.send(s);
+					};
 				}
 			}
 
