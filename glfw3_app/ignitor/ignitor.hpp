@@ -159,10 +159,10 @@ namespace app {
 		{
 			root_menu_.initialize();
 
-#if 0
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
-			gl::core& core = gl::core::get_instance();
+//			gl::core& core = gl::core::get_instance();
+#if 0
 
 			int menu_width = 130;
 			{	// メニューパレット
@@ -239,7 +239,9 @@ namespace app {
 //				};
 				div_ = wd.add_widget<widget_list>(wp, wp_);
 			}
+#endif
 
+#if 0
 			{	// ターミナル
 				{
 					widget::param wp(vtx::irect(20, 100, 100, 200));
@@ -263,6 +265,8 @@ namespace app {
 //				}
 //				);
 			}
+#endif
+
 
 			{	// 波形ビュー
 				{
@@ -274,32 +278,31 @@ namespace app {
 				{
 					widget::param wp(vtx::irect(0), view_frame_);
 					widget_view::param wp_;
-					wp_.update_func_ = [this]() {
+					wp_.update_func_ = [=]() {
 						update_view_();
 					};
-					wp_.render_func_ = [this](const vtx::irect& clip) {
+					wp_.render_func_ = [=](const vtx::irect& clip) {
 						render_view_(clip);
 					};
-					wp_.service_func_ = [this]() {
+					wp_.service_func_ = [=]() {
 						service_view_();
 					};
 					view_core_ = wd.add_widget<widget_view>(wp, wp_);
 				}
 			}
 
-
 			// プリファレンスのロード
 			sys::preference& pre = director_.at().preference_;
 
-			if(menu_ != nullptr) {
-				menu_->load(pre, false, false);
-			}
+//			if(menu_ != nullptr) {
+//				menu_->load(pre, false, false);
+//			}
 
 ///			project_.load(pre);
 
-			if(terminal_frame_ != nullptr) {
-				terminal_frame_->load(pre);
-			}
+//			if(terminal_frame_ != nullptr) {
+//				terminal_frame_->load(pre);
+//			}
 
 			if(view_frame_ != nullptr) {
 				view_frame_->load(pre);
@@ -309,20 +312,32 @@ namespace app {
 //				argv_frame_->load(pre);
 //			}
 
-			if(load_ctx_ != nullptr) load_ctx_->load(pre);
+//			if(load_ctx_ != nullptr) load_ctx_->load(pre);
 ///			if(save_ctx_ != nullptr) save_ctx_->load(pre);
 
 ///			if(edit_ != nullptr) edit_->load(pre);
 
-			if(div_ != nullptr) div_->load(pre);
+//			if(div_ != nullptr) div_->load(pre);
 
 			// テスト・サーバー起動
 ///			server_.start();
 
 			// テスト波形生成
-			waves_.create_buffer(0.5, 10e-6);
-			waves_.build_sin(10e3);
-#endif
+///			waves_.create_buffer(0.5, 10e-6);
+
+//			waves_.at_param(0).gain_ = 0.025f;
+//			waves_.at_param(1).gain_ = 0.025f;
+//			waves_.at_param(0).color_ = img::rgba8(255, 128, 255, 255);
+//			waves_.at_param(1).color_ = img::rgba8(128, 255, 255, 255);
+//			waves_.at_param(0).offset_ = 0;
+//			waves_.at_param(1).offset_ = 200;
+
+			waves_.at_info().time_org_ = 50;
+			waves_.at_info().time_len_ = 150;
+
+			waves_.at_info().volt_org_ = 80;
+			waves_.at_info().volt_len_ = 130;
+///			waves_.build_sin(10e3);
 		}
 
 
@@ -390,12 +405,12 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void destroy()
 		{
-#if 0
+
 			sys::preference& pre = director_.at().preference_;
 
 ///			if(edit_ != nullptr) edit_->save(pre);
 
-			if(load_ctx_ != nullptr) load_ctx_->save(pre);
+///			if(load_ctx_ != nullptr) load_ctx_->save(pre);
 ///			if(save_ctx_ != nullptr) save_ctx_->save(pre);
 
 //			if(argv_frame_ != nullptr) {
@@ -406,20 +421,19 @@ namespace app {
 				view_frame_->save(pre);
 			}
 
-			if(terminal_frame_ != nullptr) {
-				terminal_frame_->save(pre);
-			}
+///			if(terminal_frame_ != nullptr) {
+///				terminal_frame_->save(pre);
+///			}
 
 //			project_.save(pre);
 
-			if(div_ != nullptr) {
-				div_->save(pre);
-			}
+///			if(div_ != nullptr) {
+///				div_->save(pre);
+///			}
 
-			if(menu_ != nullptr) {
-				menu_->save(pre);
-			}
-#endif
+///			if(menu_ != nullptr) {
+///				menu_->save(pre);
+///			}
 		}
 	};
 }
