@@ -320,12 +320,15 @@ namespace view {
 			for(uint32_t n = 0; n < CHN; ++n) {
 				ch_t& t = ch_[n];
 				bool update = update_win;
-				if(t.lines_.size() != size.x) {
-					t.lines_.resize(size.x);
-				}
-				if(t.tstep_ != tstep) {
-					t.tstep_ = tstep;
-					update = true;
+				if(t.units_.empty()) update = false;
+				else {
+					if(t.lines_.size() != size.x) {
+						t.lines_.resize(size.x);
+					}
+					if(t.tstep_ != tstep) {
+						t.tstep_ = tstep;
+						update = true;
+					}
 				}
 				if(update || t.param_.update_) {
 					float gain = t.param_.gain_;
@@ -337,11 +340,13 @@ namespace view {
 					}
 					t.param_.update_ = false;
 				}
-				glPushMatrix();
-				gl::glTranslate(0, t.param_.offset_);
-				gl::glColor(t.param_.color_);
-				gl::draw_line_strip(t.lines_);
-				glPopMatrix();
+				if(!t.lines_.empty()) {
+					glPushMatrix();
+					gl::glTranslate(0, t.param_.offset_);
+					gl::glColor(t.param_.color_);
+					gl::draw_line_strip(t.lines_);
+					glPopMatrix();
+				}
 			}
 
 			info_.build(size);
