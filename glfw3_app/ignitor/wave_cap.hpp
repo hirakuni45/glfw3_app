@@ -8,6 +8,20 @@
 				https://github.com/hirakuni45/RX/blob/master/LICENSE
 */
 //=====================================================================//
+#include "core/glcore.hpp"
+#include "utils/i_scene.hpp"
+#include "utils/director.hpp"
+#include "widgets/widget.hpp"
+#include "widgets/widget_frame.hpp"
+#include "widgets/widget_null.hpp"
+#include "widgets/widget_button.hpp"
+#include "widgets/widget_filer.hpp"
+#include "widgets/widget_terminal.hpp"
+#include "widgets/widget_list.hpp"
+#include "widgets/widget_view.hpp"
+#include "widgets/widget_arrow.hpp"
+#include "widgets/widget_utils.hpp"
+
 #include "gl_fw/render_waves.hpp"
 
 namespace app {
@@ -24,10 +38,22 @@ namespace app {
 		typedef view::render_waves<uint16_t, 4096, 4> WAVES;
 		WAVES					waves_;
 
-		gui::widget_frame*		tools_;
-
 		gui::widget_frame*		frame_;
 		gui::widget_view*		core_;
+
+		gui::widget_frame*		tools_;
+
+		gui::widget_check*		time_;
+		gui::widget_arrow*		time_r_;
+		gui::widget_label*		time_in_;
+		gui::widget_arrow*		time_l_;
+
+		gui::widget_check*		volt_;
+		gui::widget_arrow*		volt_up_;
+		gui::widget_label*		volt_in_;
+		gui::widget_arrow*		volt_dn_;
+
+
 
 #if 0
 				wp_.init_list_.push_back("1000 ms");
@@ -94,7 +120,10 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		wave_cap(utils::director<core>& d) : director_(d),
-			waves_(), tools_(nullptr), frame_(nullptr), core_(nullptr)
+			waves_(), frame_(nullptr), core_(nullptr),
+			tools_(nullptr),
+			time_(nullptr), time_r_(nullptr), time_l_(nullptr),
+			volt_(nullptr), volt_up_(nullptr), volt_dn_(nullptr)
 		{ }
 
 
@@ -108,8 +137,8 @@ namespace app {
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
-			{	// 波形ビュー
-				widget::param wp(vtx::irect(40, 150, 200, 200));
+			{	// 波形フレーム
+				widget::param wp(vtx::irect(40, 150, 400, 400));
 				widget_frame::param wp_;
 				wp_.plate_param_.set_caption(12);
 				frame_ = wd.add_widget<widget_frame>(wp, wp_);
@@ -128,6 +157,40 @@ namespace app {
 				};
 				core_ = wd.add_widget<widget_view>(wp, wp_);
 			}
+
+			int menu_width = 200;
+			{	// 波形ツールフレーム
+				widget::param wp(vtx::irect(100, 100, menu_width, 500));
+				widget_frame::param wp_;
+				wp_.plate_param_.set_caption(12);
+				tools_ = wd.add_widget<widget_frame>(wp, wp_);
+				tools_->set_state(gui::widget::state::SIZE_LOCK);
+			}
+			{  // 時間スケール
+				widget::param wp(vtx::irect(10, 22, 150, 40), tools_);
+				widget_check::param wp_("Time:");
+				time_ = wd.add_widget<widget_check>(wp, wp_);
+				time_->at_local_param().select_func_ = [=](bool f) {
+					waves_.at_info().time_enable_ = f;
+				};
+			}
+
+#if 0
+			if(0) { // 時間スケール
+				widget::param wp(vtx::irect(30, 600, 0, 0));
+				widget_arrow::param wp_(widget_arrow::direction::up);
+				arrow_up_ = wd.add_widget<widget_arrow>(wp, wp_);
+				arrow_up_->at_local_param().level_func_ = [=](uint32_t level) {
+					std::cout << "Arrow: " << level << std::endl;
+				};
+			}
+			if(1) { // アロー DOWN のテスト
+				widget::param wp(vtx::irect(30, 650, 0, 0));
+				widget_arrow::param wp_(widget_arrow::direction::down);
+				wp_.master_ = arrow_up_;
+				arrow_dn_ = wd.add_widget<widget_arrow>(wp, wp_);
+			}
+#endif
 
 			sys::preference& pre = director_.at().preference_;
 			if(frame_ != nullptr) {
@@ -181,6 +244,14 @@ namespace app {
 			if(tools_ != nullptr) {
 				tools_->load(pre);
 			}
+			if(time_ != nullptr) {
+				time_->load(pre);
+				waves_.at_info().time_enable_ = time_->get_check();
+			}
+			if(volt_ != nullptr) {
+				volt_->load(pre);
+				waves_.at_info().volt_enable_ = volt_->get_check();
+			}
 		}
 
 
@@ -198,6 +269,12 @@ namespace app {
 			}
 			if(tools_ != nullptr) {
 				tools_->save(pre);
+			}
+			if(time_ != nullptr) {
+				time_->save(pre);
+			}
+			if(volt_ != nullptr) {
+				volt_->save(pre);
 			}
 		}
 	};

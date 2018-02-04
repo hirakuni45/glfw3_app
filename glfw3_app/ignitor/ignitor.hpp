@@ -42,7 +42,6 @@ namespace app {
 
 		wave_cap				wave_cap_;
 
-		gui::widget_frame*		menu_;
 		gui::widget_button*		load_;
 		gui::widget_list*		div_;
 
@@ -74,7 +73,7 @@ namespace app {
 		ignitor(utils::director<core>& d) : director_(d),
 			root_menu_(d, client_),
 			wave_cap_(d),
-			menu_(nullptr), load_(nullptr), div_(nullptr), load_ctx_(nullptr),
+			load_(nullptr), div_(nullptr), load_ctx_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
 			io_service_(),
 			client_(io_service_),
@@ -100,16 +99,6 @@ namespace app {
 //			widget_director& wd = director_.at().widget_director_;
 //			gl::core& core = gl::core::get_instance();
 #if 0
-
-			int menu_width = 130;
-			{	// メニューパレット
-				widget::param wp(vtx::irect(10, 10, menu_width, 300));
-				widget_frame::param wp_;
-				wp_.plate_param_.set_caption(12);
-				menu_ = wd.add_widget<widget_frame>(wp, wp_);
-				menu_->set_state(gui::widget::state::SIZE_LOCK);
-			}
-
 			{ // ロード起動ボタン
 				widget::param wp(vtx::irect(10, 20 + 40 * 0, menu_width - 20, 30), menu_);
 				widget_button::param wp_("load");
@@ -320,10 +309,6 @@ namespace app {
 
 ///			if(div_ != nullptr) {
 ///				div_->save(pre);
-///			}
-
-///			if(menu_ != nullptr) {
-///				menu_->save(pre);
 ///			}
 		}
 	};
