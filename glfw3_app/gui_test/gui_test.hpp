@@ -295,7 +295,7 @@ namespace app {
 
 			if(1) { // スピンボックスのテスト
 				widget::param wp(vtx::irect(30, 550, 100, 40));
-				widget_spinbox::param wp_(1, 3, 5);
+				widget_spinbox::param wp_(1, 3, 50);
 				spinbox_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				spinbox_->at_local_param().select_func_ = [=](widget_spinbox::state st, int before, int newpos) {
 					std::cout << "SpinBox ";
