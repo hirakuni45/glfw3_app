@@ -98,7 +98,7 @@ endif
 
 INC_SYS		=	$(LOCAL_PATH)/include \
 				$(LOCAL_PATH)/include/freetype2 \
-				$(LOCAL_PATH)/include/openjpeg-2.3 \
+				$(LOCAL_PATH)/include/openjpeg-2.1 \
 				$(LOCAL_PATH)/include/taglib
 INC_LIB		=
 LIBDIR		=	$(LOCAL_PATH)/lib

@@ -117,7 +117,7 @@ namespace net {
 ///			connect_ = false;
 			ips_ = "127.0.0.1";
 			if(!ip.empty()) ips_ = ip;
-			socket_.async_connect(ip::tcp::endpoint(ip::address::from_string("192.168.0.8"), port),
+			socket_.async_connect(ip::tcp::endpoint(ip::address::from_string("192.168.0.20"), port),
 				boost::bind(&ign_client::on_connect_, this, asio::placeholders::error));
 //			socket_.connect(ip::tcp::endpoint(ip::address::from_string("127.0.0.1"), 31400));
 ///			std::cout << "Connection start..." << std::endl;

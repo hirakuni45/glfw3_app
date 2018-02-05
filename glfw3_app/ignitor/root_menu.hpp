@@ -56,6 +56,8 @@ namespace app {
 		gui::widget_button*		igni_settings_;
 		gui::widget_button*		cont_settings_;
 
+		gui::widget_button*		unit_test_;
+
 		gui::widget_button*		run_;
 
 		gui::widget_dialog*		proj_name_dialog_;
@@ -156,6 +158,7 @@ return;
 			return ret;
 		}
 
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -169,9 +172,10 @@ return;
 			edit_project_(nullptr),
 			save_project_(nullptr),
 			igni_settings_(nullptr), cont_settings_(nullptr),
+			unit_test_(nullptr),
 			run_(nullptr),
 			proj_name_dialog_(nullptr), proj_name_label_(nullptr),
-			project_(d), inspection_(d),
+			project_(d), inspection_(d, client),
 			cont_setting_dialog_(nullptr), cont_setting_ip_{ nullptr },
 			cont_setting_cmds_(nullptr), cont_setting_exec_(nullptr),
 #ifndef NATIVE_FILER
@@ -310,6 +314,13 @@ return;
 				cont_settings_->at_local_param().select_func_ = [=](bool f) {
 					save_setting_value_();
 					cont_setting_dialog_->enable();
+				};
+			}
+			{  // UnitTestボタン
+				widget::param wp(vtx::irect(ofs_x_ + 20 + btn_w_, ofs_y_ + sph * 4, btn_w_, btn_h_));
+				widget_button::param wp_("単体試験");
+				unit_test_ = wd.add_widget<widget_button>(wp, wp_);
+				unit_test_->at_local_param().select_func_ = [=](bool f) {
 				};
 			}
 			{  // 検査開始ボタン

@@ -19,6 +19,7 @@
 #include "widgets/widget_terminal.hpp"
 #include "widgets/widget_list.hpp"
 #include "widgets/widget_view.hpp"
+#include "widgets/widget_radio.hpp"
 #include "widgets/widget_arrow.hpp"
 #include "widgets/widget_utils.hpp"
 
@@ -44,6 +45,8 @@ namespace app {
 		gui::widget_frame*		tools_;
 
 		gui::widget_check*		time_;
+		gui::widget_radio*		time_org_;
+		gui::widget_radio*		time_len_;
 		gui::widget_arrow*		time_r_;
 		gui::widget_label*		time_in_;
 		gui::widget_arrow*		time_l_;
@@ -122,7 +125,7 @@ namespace app {
 		wave_cap(utils::director<core>& d) : director_(d),
 			waves_(), frame_(nullptr), core_(nullptr),
 			tools_(nullptr),
-			time_(nullptr), time_r_(nullptr), time_l_(nullptr),
+			time_(nullptr), time_org_(nullptr), time_len_(nullptr), time_r_(nullptr), time_l_(nullptr),
 			volt_(nullptr), volt_up_(nullptr), volt_dn_(nullptr)
 		{ }
 
@@ -174,9 +177,29 @@ namespace app {
 					waves_.at_info().time_enable_ = f;
 				};
 			}
+#if 0
+			{
+				widget::param wpr(vtx::irect(20, 20, 130, 130), 0);
+				widget_null::param wpr_;
+				widget* root = wd.add_widget<widget_null>(wpr, wpr_);
+				root->set_state(widget::state::POSITION_LOCK);
+
+				widget::param wp(vtx::irect(0, 0, 130, 30), root);
+				widget_radio::param wp_("Enable");
+				for(int i = 0; i < 2; ++i) {
+					if(i == 2) wp_.check_ = true;
+					widget_radio* w = wd.add_widget<widget_radio>(wp, wp_);
+					w->at_local_param().select_func_ = [=](bool f, int n) {
+						std::cout << "Radio button: " << static_cast<int>(f) << " (" << n << ")" << std::endl;
+					};
+					wp.rect_.org.y += 40;
+				}
+			}
+#endif
+
 
 #if 0
-			if(0) { // 時間スケール
+			{  // arrow
 				widget::param wp(vtx::irect(30, 600, 0, 0));
 				widget_arrow::param wp_(widget_arrow::direction::up);
 				arrow_up_ = wd.add_widget<widget_arrow>(wp, wp_);

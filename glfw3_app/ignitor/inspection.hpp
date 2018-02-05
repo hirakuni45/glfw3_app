@@ -22,7 +22,9 @@
 #include "utils/input.hpp"
 #include "utils/format.hpp"
 #include "utils/preference.hpp"
+
 #include "relay_map.hpp"
+#include "ign_client.hpp"
 
 namespace app {
 
@@ -32,7 +34,29 @@ namespace app {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class inspection {
+	public:
 
+		struct wgm_t {
+			bool		type;
+			uint16_t   	frq;	///< 7 bits
+			uint16_t	duty;	///< 10 bits
+			uint16_t	volt;	///< 10 bits
+
+			wgm_t() : type(0), frq(0), duty(0), volt(0) { }
+
+			utils::strings build() const
+			{
+				utils::strings ss;
+				ss.push_back((boost::format("wgm WGSP%d\n") % type).str());
+				ss.push_back((boost::format("wgm WGFQ%02X\n") % (frq & 0x7f)).str());
+				ss.push_back((boost::format("wgm WGPW%03X\n") % (duty & 0x3ff)).str());
+				ss.push_back((boost::format("wgm WGPV%03X\n") % (volt & 0x3ff)).str());
+				ss.push_back((boost::format("wgm WGOE1\n")).str());
+				return ss;
+			}
+		};
+
+	private:
 		static constexpr const char* UNIT_EXT_ = "unt";  ///< 単体検査ファイル、拡張子
 
 		// 電圧/電流レンジ選択、時間レンジ選択、トリガー選択、フィルター選択、平均化選択
@@ -61,6 +85,8 @@ namespace app {
 
 
 		utils::director<core>&	director_;
+
+		net::ign_client&		client_;
 
 		gui::widget_dialog*		dialog_;
 		gui::widget_label*		unit_name_;				///< 単体試験名
@@ -94,6 +120,8 @@ namespace app {
 		gui::widget_button*		setup_relay_;			///< リレー切り替え設定ボタン
 		relay_map				relay_map_;
 		gui::widget_label*		wait_time_;				///< Wait時間設定
+
+		gui::widget_button*		exec_;
 
 		gui::widget_text*		help_;					///< HELP
 
@@ -166,7 +194,7 @@ namespace app {
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		inspection(utils::director<core>& d) : director_(d),
+		inspection(utils::director<core>& d, net::ign_client& client) : director_(d), client_(client),
 			dialog_(nullptr),
 			unit_name_(nullptr), load_file_(nullptr), save_file_(nullptr),
 			inspection_standards_(nullptr),
@@ -208,7 +236,7 @@ namespace app {
 			widget_director& wd = director_.at().widget_director_;
 
 			int d_w = 950;
-			int d_h = 700;
+			int d_h = 750;
 			{
 				widget::param wp(vtx::irect(100, 100, d_w, d_h));
 				widget_dialog::param wp_;
@@ -380,6 +408,7 @@ namespace app {
 					}
 				};
 			}
+#if 0
 			{
 				widget::param wp(vtx::irect(ofsx + 120, 20 + h * 3, 100, 40), dialog_);
 				widget_list::param wp_;
@@ -390,6 +419,7 @@ namespace app {
 					= [=](const std::string& str, uint32_t pos) {
 				};
 			}
+#endif
 			{  // ジェネレータ設定、周波数（1Hz to 100Hz, 1Hz/step)
 				widget::param wp(vtx::irect(ofsx + 240 + 130 * 0, 20 + h * 3, 70, 40), dialog_);
 				widget_label::param wp_("1", false);
@@ -547,6 +577,32 @@ namespace app {
 					wait_time_->set_text(limitf_(str, 0.0f, 1.0f, "%3.2f"));
 				};
 			}
+
+			{  // exec button
+				widget::param wp(vtx::irect(ofsx, 20 + h * 13, 150, 40), dialog_);
+				widget_button::param wp_("exec");
+				exec_ = wd.add_widget<widget_button>(wp, wp_);
+				exec_->at_local_param().select_func_ = [=](int n) {
+					wgm_t t;
+					t.type = generator_mode_->get_select_pos() & 1;
+					float v;
+					if((utils::input("%f", generator_freq_->get_text().c_str()) % v).status()) {
+						t.frq = v;
+					}
+					if((utils::input("%f", generator_duty_->get_text().c_str()) % v).status()) {
+						t.duty = v * 10.0f;
+					}
+					if((utils::input("%f", generator_volt_->get_text().c_str()) % v).status()) {
+						t.volt = v / 0.02f;
+					}
+					auto ss = t.build();
+					for(const std::string& s : ss) {
+						client_.send(s);
+// std::cout << s;
+					}
+				};
+			}
+
 
 			{  // help message
 				widget::param wp(vtx::irect(20, d_h - 100, d_w, 40), dialog_);
