@@ -3,7 +3,7 @@
 /*!	@file
 	@brief	GUI widget スピン・ボックス・クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2018 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -59,6 +59,9 @@ namespace gui {
 			int					max_pos_;	///< 最大位置
 
 			bool				scroll_ctrl_;	///< スクロール・コントロール（マウスのダイアル）
+			bool				accel_;			///< ボタンのアクセル・コントロール
+			uint16_t			accel_delay_;	///< アクセルが利くまでの遅延
+			uint16_t			accel_inter_;	///< アクセル時のインターバル（速度）
 
 			param(int min = 0, int sel = 0, int max = 0) :
 				plate_param_(), color_param_(widget_director::default_spinbox_color_),
@@ -66,7 +69,8 @@ namespace gui {
 				image_(0), handle_(0), id_(0),
 				select_func_(),
 				min_pos_(min), sel_pos_(sel), max_pos_(max),
-				scroll_ctrl_(true)
+				scroll_ctrl_(true),
+				accel_(true), accel_delay_(35), accel_inter_(10)
 				{ }
 		};
 
@@ -81,6 +85,26 @@ namespace gui {
 
 		bool	initial_;
 
+		uint16_t	delay_cnt_;
+
+
+		state get_button_state_(int& d) const
+		{
+			state st = state::none;
+			auto x = get_param().in_point_.x;
+			auto xs = get_rect().size.x;
+			if(x < (xs / 3)) {  // inc
+				d = 1;
+				st = state::inc;
+			} else if(x >= (xs * 2 / 3)) {  // dec
+				d = -1;
+				st = state::dec;
+			} else {
+				st = state::select;
+			}
+			return st;
+		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -89,7 +113,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_spinbox(widget_director& wd, const widget::param& bp, const param& p) :
 			widget(bp), wd_(wd), param_(p), objh_(0), up_objh_(0), dn_objh_(0),
-		    initial_(false) { }
+		    initial_(false), delay_cnt_(0) { }
 
 
 		//-----------------------------------------------------------------//
@@ -225,23 +249,31 @@ namespace gui {
 			state st = state::none;
 			int d = 0;
 			if(get_selected()) {
-				auto x = get_param().in_point_.x;
-				auto xs = get_rect().size.x;
-				if(x < (xs / 3)) {  // inc
-					d = 1;
-					st = state::inc;
-				} else if(x >= (xs * 2 / 3)) {  // dec
-					d = -1;
-					st = state::dec;
-				} else {
-					st = state::select;
-				}
+				st = get_button_state_(d);
+				delay_cnt_ = 0;
 			} else if(get_focus() && param_.scroll_ctrl_) {
-				const vtx::spos& scr = wd_.get_scroll();
-				if(scr.y != 0) {
-					d = -scr.y;
-					if(d > 0) st = state::inc;
-					else if(d < 0) st = state::dec;
+				if(get_select()) {
+					st = get_button_state_(d);
+					if(st == state::inc || st == state::dec) {
+						++delay_cnt_;
+						if(delay_cnt_ >= param_.accel_delay_) {
+							if(delay_cnt_ > param_.accel_inter_) {
+								delay_cnt_ -= param_.accel_inter_;
+							} else {
+								delay_cnt_ = 0;
+							}
+						} else {
+							st = state::none;
+						}
+					}
+				} else {
+					delay_cnt_ = 0;
+					const vtx::spos& scr = wd_.get_scroll();
+					if(scr.y != 0) {
+						d = -scr.y;
+						if(d > 0) st = state::inc;
+						else if(d < 0) st = state::dec;
+					}
 				}
 			}
 
