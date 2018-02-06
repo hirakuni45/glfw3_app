@@ -43,7 +43,7 @@ int main(int argc, char** argv)
 	}
 	core.set_limit_size(limit_size_);
 
-	director.at().sound_.initialize(16);
+//	director.at().sound_.initialize(16);
 
 	director.at().widget_director_.initialize();
 
@@ -66,7 +66,7 @@ int main(int argc, char** argv)
 
 		core.flip_frame();
 
-		director.at().sound_.service();
+//		director.at().sound_.service();
 	}
 	// プログラム終了の廃棄
 	director.erase_scene();

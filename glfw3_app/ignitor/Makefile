@@ -58,17 +58,17 @@ PSOURCES	=	main.cpp \
 				img_io/pvr_io.cpp \
 				img_io/img_files.cpp \
 				img_io/img_utils.cpp \
-				snd_io/audio_io.cpp \
-				snd_io/pcm.cpp \
-				snd_io/wav_io.cpp \
-				snd_io/mp3_io.cpp \
-				snd_io/snd_files.cpp \
-				snd_io/sound.cpp \
 				widgets/common_parts.cpp \
 				widgets/widget_director.cpp \
 				widgets/widget_utils.cpp \
 				widgets/widget_filer.cpp
 
+#				snd_io/audio_io.cpp \
+				snd_io/pcm.cpp \
+				snd_io/wav_io.cpp \
+				snd_io/mp3_io.cpp \
+				snd_io/snd_files.cpp \
+				snd_io/sound.cpp
 #				snd_io/aac_io.cpp
 #				img_io/pdf_in.cpp
 
@@ -82,9 +82,9 @@ OPTLIBS		=	opengl32 glfw3 glew32 \
 				pthread \
 				png turbojpeg jpeg openjp2 \
 				freetype \
-				mad faad tag \
-				z openal
+				z
 # mp4ff
+#				mad faad tag openal
 else
 LOCAL_PATH	=	/usr/local
 OPTLIBS		=	glfw3 GLEW \
@@ -98,7 +98,7 @@ endif
 
 INC_SYS		=	$(LOCAL_PATH)/include \
 				$(LOCAL_PATH)/include/freetype2 \
-				$(LOCAL_PATH)/include/openjpeg-2.1 \
+				$(LOCAL_PATH)/include/openjpeg-2.3 \
 				$(LOCAL_PATH)/include/taglib
 INC_LIB		=
 LIBDIR		=	$(LOCAL_PATH)/lib

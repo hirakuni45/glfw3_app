@@ -6,7 +6,7 @@
 	@author 平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include "snd_io/sound.hpp"
+// #include "snd_io/sound.hpp"
 #include "widgets/widget_director.hpp"
 #include "widgets/ui_policy.hpp"
 #include "utils/preference.hpp"
@@ -25,15 +25,16 @@ namespace app {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct core {
 
-		al::sound	sound_;
+//		al::sound	sound_;
 
 		gui::widget_director	widget_director_;
 		gui::ui_policy			ui_policy_;
 
 		sys::preference		preference_;
 
-		core() : sound_()
-			   , widget_director_(), ui_policy_(widget_director_)
+//		core() : sound_()
+		core() :
+			     widget_director_(), ui_policy_(widget_director_)
 			   , preference_() { }
 	};
 }
