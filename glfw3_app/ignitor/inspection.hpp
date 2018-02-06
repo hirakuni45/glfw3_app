@@ -36,25 +36,76 @@ namespace app {
 	class inspection {
 	public:
 
-		struct wgm_t {
-			bool		type;
-			uint16_t   	frq;	///< 7 bits
-			uint16_t	duty;	///< 10 bits
-			uint16_t	volt;	///< 10 bits
+		struct dc2_t {
+			uint16_t	sw;		///< 14 bits
+			bool		ena;	///< 0, 1
+			bool		mode;	///< 0, 1
+			uint32_t	volt;	///< 20 bits
+			uint32_t	curr;	///< 20 bits
 
-			wgm_t() : type(0), frq(0), duty(0), volt(0) { }
+			dc2_t() : sw(0), ena(0), mode(0), volt(0), curr(0) { }
 
 			utils::strings build() const
 			{
 				utils::strings ss;
+				ss.push_back((boost::format("dc2 W2SW%04X\n") % sw).str());
+				ss.push_back((boost::format("dc2 W2MD%d\n") % mode).str());
+				ss.push_back((boost::format("dc2 D2VS%05X\n") % (volt & 0xfffff)).str());
+				ss.push_back((boost::format("dc2 D2IS%05X\n") % (curr & 0xfffff)).str());
+				ss.push_back((boost::format("dc2 D2OE%d\n") % ena).str());
+				return ss;
+			}
+		};
+
+
+		struct wgm_t {
+			uint16_t	sw;		///< 5 bits
+			bool		ena;	///< 0, 1
+			bool		type;	///< 0, 1
+			uint16_t   	frq;	///< 7 bits
+			uint16_t	duty;	///< 10 bits
+			uint16_t	volt;	///< 10 bits
+
+			wgm_t() : ena(0), type(0), frq(0), duty(0), volt(0) { }
+
+			utils::strings build() const
+			{
+				utils::strings ss;
+				ss.push_back((boost::format("wgm WGSW%02X\n") % sw).str());
 				ss.push_back((boost::format("wgm WGSP%d\n") % type).str());
 				ss.push_back((boost::format("wgm WGFQ%02X\n") % (frq & 0x7f)).str());
 				ss.push_back((boost::format("wgm WGPW%03X\n") % (duty & 0x3ff)).str());
 				ss.push_back((boost::format("wgm WGPV%03X\n") % (volt & 0x3ff)).str());
-				ss.push_back((boost::format("wgm WGOE1\n")).str());
+				ss.push_back((boost::format("wgm WGOE%d\n") % ena).str());
 				return ss;
 			}
 		};
+
+
+		struct crm_t {
+			uint16_t	sw;		///< 14 bits
+			bool		ena;	///< 0, 1
+			uint16_t	freq;	///< 0, 1, 2
+			uint16_t	mode;	///< 0, 1
+
+			crm_t() : sw(0), ena(0), freq(0), mode(0) { }
+
+			utils::strings build() const
+			{
+				utils::strings ss;
+				ss.push_back((boost::format("crm CRSW%04X\n") % sw).str());
+				static const char* frqtbl[3] = { "001", "010", "100" };
+				ss.push_back((boost::format("crm CRFQ%s\n") % frqtbl[freq]).str());
+				ss.push_back((boost::format("crm CROE%d\n") % ena).str());
+				if(mode) {
+					ss.push_back((boost::format("crm CRC?1\n")).str());
+				} else {
+					ss.push_back((boost::format("crm CRR?1\n")).str());
+				}
+				return ss;
+			}
+		};
+
 
 	private:
 		static constexpr const char* UNIT_EXT_ = "unt";  ///< 単体検査ファイル、拡張子
@@ -96,32 +147,46 @@ namespace app {
 		utils::select_file		unit_save_filer_;
 
 		gui::widget_list*		inspection_standards_;	///< 検査規格 (Inspection standards)
-		gui::widget_list*		inspection_method_;		///< 検査方法選択
-		gui::widget_label*		voltage_[2];			///< 電源設定（電圧）
-		gui::widget_label*		current_[2];			///< 電源設定（電流）
-		gui::widget_text*		current_text_;			///< 電源設定、電流単位
-		gui::widget_list*		generator_mode_;		///< ジェネレータ設定・モード（矩形波、三角波、直流）
-		gui::widget_list*		generator_type_;		///< ジェネレータ設定・タイプ（連続、単発）
-		gui::widget_label*		generator_freq_;		///< ジェネレータ設定・周波数（1Hz to 100Hz / 1Hz)
-		gui::widget_label*		generator_volt_;		///< ジェネレータ設定・電圧（0 to 14V / 0.1V）
-		gui::widget_label*		generator_duty_;		///< ジェネレーター設定・Duty（0.1% to 100% / 0.1%）
 
+		// DC2 設定
+		gui::widget_check*		dc2_sw_[14];	///< DC2 接続スイッチ
+		gui::widget_check*		dc2_ena_;		///< DC2 有効、無効
+		gui::widget_list*		dc2_mode_;		///< DC2 電流、電圧モード
+		gui::widget_label*		dc2_voltage_;	///< DC2（電圧）
+		gui::widget_label*		dc2_current_;	///< DC2（電流）
+		gui::widget_button*		dc2_exec_;		///< DC2 設定転送
+
+		// WGM 設定
+		gui::widget_check*		gen_sw_[5];	///< ジェネレータ接続スイッチ
+		gui::widget_check*		gen_ena_;	///< ジェネレータ有効、無効
+		gui::widget_list*		gen_mode_;	///< ジェネレータモード（矩形波、三角波、直流）
+		gui::widget_label*		gen_freq_;	///< ジェネレータ設定・周波数（1Hz to 100Hz / 1Hz)
+		gui::widget_label*		gen_volt_;	///< ジェネレータ設定・電圧（0 to 14V / 0.1V）
+		gui::widget_label*		gen_duty_;	///< ジェネレーター設定・Duty（0.1% to 100% / 0.1%）
+		gui::widget_button*		gen_exec_;	///< ジェネレーター設定転送
+
+		// CRM 設定
+		gui::widget_check*		crm_sw_[14];	///< CRM 接続スイッチ
+		gui::widget_check*		crm_ena_;		///< CRM 有効、無効
+		gui::widget_list*		crm_freq_;		///< CRM 周波数（100Hz, 1KHz, 10KHz）
+		gui::widget_list*		crm_mode_;		///< CRM 抵抗測定、容量測定
+		gui::widget_label*		crm_ans_;		///< CRM 測定結果 
+		gui::widget_button*		crm_exec_;		///< CRM 設定転送
+
+#if 0
 		gui::widget_list*		oscillo_secdiv_;		///< オシロスコープ設定、時間（周期）
 		gui::widget_list*		oscillo_trg_ch_;		///< オシロスコープ設定、トリガー・チャネル選択
 		gui::widget_list*		oscillo_trg_slope_;		///< オシロスコープ設定、トリガー・スロープ選択
 		gui::widget_spinbox*	oscillo_trg_window_;	///< オシロスコープ設定、トリガー・ウィンドウ
 		gui::widget_label*		oscillo_trg_level_;		///< オシロスコープ設定、トリガー・レベル
 		oscillo_t				oscillo_[4];			///< オシロスコープ各チャネル設定
+#endif
 
 		gui::widget_list*		fukasel_;				///< ２次負荷切替設定
 
-		gui::widget_list*		cr_measure_freq_;		///< CR メジャー設定、周波数設定 (100, 1K, 10K)
-		gui::widget_list*		cr_measure_volt_;		///< CR メジャー設定、電圧設定 (50mV, 0.5V, 1V)
 		gui::widget_button*		setup_relay_;			///< リレー切り替え設定ボタン
 		relay_map				relay_map_;
 		gui::widget_label*		wait_time_;				///< Wait時間設定
-
-		gui::widget_button*		exec_;
 
 		gui::widget_text*		help_;					///< HELP
 
@@ -188,6 +253,284 @@ namespace app {
 
 		}
 
+
+		void init_sw_(int ofsx, int h, int loc, gui::widget_check* out[], int num)
+		{
+			using namespace gui;
+			widget_director& wd = director_.at().widget_director_;			
+			for(int i = 0; i < num; ++i) {
+				widget::param wp(vtx::irect(ofsx, 20 + h * loc, 40, 40), dialog_);
+				widget_check::param wp_;
+				out[i] = wd.add_widget<widget_check>(wp, wp_);
+				ofsx += 50;
+			}
+		}
+
+
+		void init_dc2_(int d_w, int ofsx, int h, int loc)
+		{
+			using namespace gui;
+			widget_director& wd = director_.at().widget_director_;
+
+			init_sw_(ofsx, h, loc, dc2_sw_, 14);
+			++loc;
+			{
+				widget::param wp(vtx::irect(ofsx, 20 + h * loc, 90, 40), dialog_);
+				widget_check::param wp_("有効");
+				dc2_ena_ = wd.add_widget<widget_check>(wp, wp_);
+			}
+			{
+				widget::param wp(vtx::irect(ofsx + 90, 20 + h * loc, 110, 40), dialog_);
+				widget_list::param wp_;
+				wp_.init_list_.push_back("定電圧");
+				wp_.init_list_.push_back("定電流");
+				dc2_mode_ = wd.add_widget<widget_list>(wp, wp_);
+			}
+			{  // 300V/0.1V, 100mA/0.01mA
+				widget::param wp(vtx::irect(ofsx + 230, 20 + h * loc, 90, 40), dialog_);
+				widget_label::param wp_("0", false);
+				dc2_voltage_ = wd.add_widget<widget_label>(wp, wp_);
+				dc2_voltage_->at_local_param().select_func_ = [=](const std::string& str) {
+					dc2_voltage_->set_text(limitf_(str, 0.0f, 300.0f, "%2.1f"));
+				};
+			}
+			{
+				widget::param wp(vtx::irect(ofsx + 330, 20 + h * loc, 40, 40), dialog_);
+				widget_text::param wp_("V");
+				wp_.text_param_.placement_
+					= vtx::placement(vtx::placement::holizontal::LEFT, vtx::placement::vertical::CENTER);
+				wd.add_widget<widget_text>(wp, wp_);
+			}
+			{  // Max: 100mA / step: 0.01mA
+				widget::param wp(vtx::irect(ofsx + 370, 20 + h * loc, 90, 40), dialog_);
+				widget_label::param wp_("0", false);
+				dc2_current_ = wd.add_widget<widget_label>(wp, wp_);
+				dc2_current_->at_local_param().select_func_ = [=](const std::string& str) {
+					dc2_current_->set_text(limitf_(str, 0.0f, 100.0f, "%3.2f"));
+				};
+			}
+			{
+				widget::param wp(vtx::irect(ofsx + 470, 20 + h * loc, 50, 40), dialog_);
+				widget_text::param wp_("mA");
+				wp_.text_param_.placement_
+					= vtx::placement(vtx::placement::holizontal::LEFT, vtx::placement::vertical::CENTER);
+				wd.add_widget<widget_text>(wp, wp_);
+			}
+			{
+				widget::param wp(vtx::irect(d_w - 50, 20 + h * loc, 30, 30), dialog_);
+				widget_button::param wp_(">");
+				dc2_exec_ = wd.add_widget<widget_button>(wp, wp_);
+				dc2_exec_->at_local_param().select_func_ = [=](int n) {
+					dc2_t t;
+					uint16_t sw = 0;
+					for(int i = 0; i < 14; ++i) {
+						sw <<= 1;
+						if(dc2_sw_[i]->get_check()) sw |= 1;
+					}
+					t.sw = sw;
+					t.ena = dc2_ena_->get_check();
+					t.mode = dc2_mode_->get_select_pos() & 1;
+					float v;
+					if((utils::input("%f", dc2_voltage_->get_text().c_str()) % v).status()) {
+						t.volt = v / 312.5e-6;
+					}
+					if((utils::input("%f", dc2_current_->get_text().c_str()) % v).status()) {
+						t.curr = v / 100e-6;
+					}
+
+					auto ss = t.build();
+					for(const std::string& s : ss) {
+						client_.send(s);
+					}
+				};
+			}
+		}
+
+#if 0
+// DC1
+				{  // [1]動特性検査：  60V/0.1V, 30A/0.1A
+					widget::param wp(vtx::irect(ofsx + 170, 20 + h * 2, 90, 40), dialog_);
+					widget_label::param wp_("0", false);
+					voltage_[1] = wd.add_widget<widget_label>(wp, wp_);
+					voltage_[1]->at_local_param().select_func_ = [=](const std::string& str) {
+						voltage_[1]->set_text(limitf_(str, 0.0f, 60.0f, "%2.1f"));
+					};
+				}
+				{  // Max: 30A / step: 0.1A
+					widget::param wp(vtx::irect(ofsx + 320, 20 + h * 2, 90, 40), dialog_);
+					widget_label::param wp_("0", false);
+					current_[1] = wd.add_widget<widget_label>(wp, wp_);
+					current_[1]->at_local_param().select_func_ = [=](const std::string& str) {
+						current_[1]->set_text(limitf_(str, 0.0f, 30.0f, "%2.1f"));
+					};
+				}
+#endif
+
+
+		void init_gen_(int d_w, int ofsx, int h, int loc)
+		{
+			using namespace gui;
+			widget_director& wd = director_.at().widget_director_;
+
+			init_sw_(ofsx, h, loc, gen_sw_, 5);
+			++loc;
+			// ジェネレーター・モジュール
+			{
+				widget::param wp(vtx::irect(ofsx, 20 + h * loc, 100, 40), dialog_);
+				widget_check::param wp_("有効");
+				gen_ena_ = wd.add_widget<widget_check>(wp, wp_);
+			}
+			{  // (6) ジェネレータ設定： 出力モード選択（矩形波/三角波/直流）
+			   // タイプ（連続、単発）、
+			   // 出力電圧、周波数、ON時間（レンジ：0.01ms）
+				widget::param wp(vtx::irect(ofsx + 90, 20 + h * loc, 110, 40), dialog_);
+				widget_list::param wp_;
+				wp_.init_list_.push_back("矩形波");
+				wp_.init_list_.push_back("三角波");
+				gen_mode_ = wd.add_widget<widget_list>(wp, wp_);
+				gen_mode_->at_local_param().select_func_ = [=](const std::string& str, uint32_t pos) {
+					if(pos == 0) {
+						gen_duty_->set_stall(false);
+					} else {
+						gen_duty_->set_stall();
+					}
+				};
+			}
+			{  // ジェネレータ設定、周波数（1Hz to 100Hz, 1Hz/step)
+				widget::param wp(vtx::irect(ofsx + 230 + 130 * 0, 20 + h * loc, 70, 40), dialog_);
+				widget_label::param wp_("1", false);
+				gen_freq_ = wd.add_widget<widget_label>(wp, wp_);
+				gen_freq_->at_local_param().select_func_ = [=](const std::string& str) {
+					gen_freq_->set_text(limitf_(str, 1.0f, 100.0f, "%1.0f"));
+				};
+				{
+					widget::param wp(vtx::irect(ofsx + 230 + 120 * 0 + 80, 20 + h * loc, 30, 40), dialog_);
+					widget_text::param wp_("Hz");
+					wp_.text_param_.placement_
+						= vtx::placement(vtx::placement::holizontal::LEFT, vtx::placement::vertical::CENTER);
+					wd.add_widget<widget_text>(wp, wp_);
+				}
+			}
+			{  // ジェネレータ設定、電圧（0V to 14V, 0.1V/step)
+				widget::param wp(vtx::irect(ofsx + 230 + 120 * 1, 20 + h * loc, 70, 40), dialog_);
+				widget_label::param wp_("0", false);
+				gen_volt_ = wd.add_widget<widget_label>(wp, wp_);
+				gen_volt_->at_local_param().select_func_ = [=](const std::string& str) {
+					gen_volt_->set_text(limitf_(str, 0.0f, 14.0f, "%2.1f"));
+				};
+				{
+					widget::param wp(vtx::irect(ofsx + 230 + 120 * 1 + 80, 20 + h * loc, 30, 40), dialog_);
+					widget_text::param wp_("V");
+					wp_.text_param_.placement_
+						= vtx::placement(vtx::placement::holizontal::LEFT, vtx::placement::vertical::CENTER);
+					wd.add_widget<widget_text>(wp, wp_);
+				}
+			}
+			{  // ジェネレータ設定、DUTY（0.1% to 100%, 0.1%/step）
+				widget::param wp(vtx::irect(ofsx + 230 + 120 * 2, 20 + h * loc, 70, 40), dialog_);
+				widget_label::param wp_("0.1", false);
+				gen_duty_ = wd.add_widget<widget_label>(wp, wp_);
+				gen_duty_->at_local_param().select_func_ = [=](const std::string& str) {
+					gen_duty_->set_text(limitf_(str, 0.1f, 100.0f, "%2.1f"));
+				};
+				{
+					widget::param wp(vtx::irect(ofsx + 230 + 120 * 2 + 80, 20 + h * loc, 30, 40), dialog_);
+					widget_text::param wp_("%");
+					wp_.text_param_.placement_
+						= vtx::placement(vtx::placement::holizontal::LEFT, vtx::placement::vertical::CENTER);
+					wd.add_widget<widget_text>(wp, wp_);
+				}
+			}
+			{
+				widget::param wp(vtx::irect(d_w - 50, 20 + h * loc, 30, 30), dialog_);
+				widget_button::param wp_(">");
+				gen_exec_ = wd.add_widget<widget_button>(wp, wp_);
+				gen_exec_->at_local_param().select_func_ = [=](int n) {
+					wgm_t t;
+					uint16_t sw = 0;
+					for(int i = 0; i < 5; ++i) {
+						sw <<= 1;
+						if(gen_sw_[i]->get_check()) sw |= 1;
+					}
+					t.sw = sw;
+					t.ena = gen_ena_->get_check();
+					t.type = gen_mode_->get_select_pos() & 1;
+					float v;
+					if((utils::input("%f", gen_freq_->get_text().c_str()) % v).status()) {
+						t.frq = v;
+					}
+					if((utils::input("%f", gen_duty_->get_text().c_str()) % v).status()) {
+						t.duty = v * 10.0f;
+					}
+					if((utils::input("%f", gen_volt_->get_text().c_str()) % v).status()) {
+						t.volt = v / 0.02f;
+					}
+					auto ss = t.build();
+					for(const std::string& s : ss) {
+						client_.send(s);
+					}					
+				};
+			}
+		}
+
+
+		void init_crm_(int d_w, int ofsx, int h, int loc)
+		{
+			using namespace gui;
+			widget_director& wd = director_.at().widget_director_;
+
+			init_sw_(ofsx, h, loc, crm_sw_, 14);
+			++loc;
+			// ＣＲメジャー・モジュール
+			{
+				widget::param wp(vtx::irect(ofsx, 20 + h * loc, 90, 40), dialog_);
+				widget_check::param wp_("有効");
+				crm_ena_ = wd.add_widget<widget_check>(wp, wp_);
+			}
+			{  // 周波数設定 (100、1K, 10K)
+				widget::param wp(vtx::irect(ofsx + 90, 20 + h * loc, 110, 40), dialog_);
+				widget_list::param wp_;
+				wp_.init_list_.push_back("100 Hz");
+				wp_.init_list_.push_back("1  KHz");
+				wp_.init_list_.push_back("10 KHz");
+				crm_freq_ = wd.add_widget<widget_list>(wp, wp_); 
+			}
+			{  // 抵抗値、容量値選択
+				widget::param wp(vtx::irect(ofsx + 220, 20 + h * loc, 110, 40), dialog_);
+				widget_list::param wp_;
+				wp_.init_list_.push_back("抵抗値");
+				wp_.init_list_.push_back("容量値");
+				crm_mode_ = wd.add_widget<widget_list>(wp, wp_); 
+			}
+			{  // 答え
+				widget::param wp(vtx::irect(ofsx + 350, 20 + h * loc, 110, 40), dialog_);
+				widget_label::param wp_("");
+				crm_ans_ = wd.add_widget<widget_label>(wp, wp_);
+			}
+			{  // exec
+				widget::param wp(vtx::irect(d_w - 50, 20 + h * loc, 30, 30), dialog_);
+				widget_button::param wp_(">");
+				crm_exec_ = wd.add_widget<widget_button>(wp, wp_);
+				crm_exec_->at_local_param().select_func_ = [=](int n) {
+					crm_t t;
+					uint16_t sw = 0;
+					for(int i = 0; i < 14; ++i) {
+						sw <<= 1;
+						if(crm_sw_[i]->get_check()) sw |= 1;
+					}
+					t.sw = sw;
+					t.ena = crm_ena_->get_check();
+					t.freq = crm_freq_->get_select_pos();
+					t.mode = crm_mode_->get_select_pos();
+					auto ss = t.build();
+					for(const std::string& s : ss) {
+std::cout << s << std::flush;
+						client_.send(s);
+					}
+				};
+			}
+		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -198,15 +541,22 @@ namespace app {
 			dialog_(nullptr),
 			unit_name_(nullptr), load_file_(nullptr), save_file_(nullptr),
 			inspection_standards_(nullptr),
-			inspection_method_(nullptr),
-			voltage_{ nullptr }, current_{ nullptr }, current_text_(nullptr),
-			generator_mode_(nullptr), generator_type_(nullptr), generator_freq_(nullptr),
-			generator_volt_(nullptr), generator_duty_(nullptr),
-			oscillo_secdiv_(nullptr) ,oscillo_trg_ch_(nullptr), oscillo_trg_slope_(nullptr),
-			oscillo_trg_window_(nullptr), oscillo_trg_level_(nullptr),
+
+			dc2_sw_{ nullptr },
+			dc2_ena_(nullptr), dc2_mode_(nullptr), dc2_voltage_(nullptr), dc2_current_(nullptr),
+			dc2_exec_(nullptr),
+
+			gen_ena_(nullptr), gen_mode_(nullptr), gen_freq_(nullptr),
+			gen_volt_(nullptr), gen_duty_(nullptr), gen_exec_(nullptr),
+
+			crm_sw_{ nullptr },
+			crm_ena_(nullptr), crm_freq_(nullptr), crm_mode_(nullptr),
+			crm_ans_(nullptr), crm_exec_(nullptr),
+
+//			oscillo_secdiv_(nullptr) ,oscillo_trg_ch_(nullptr), oscillo_trg_slope_(nullptr),
+//			oscillo_trg_window_(nullptr), oscillo_trg_level_(nullptr),
 
 			fukasel_(nullptr),
-			cr_measure_freq_(nullptr), cr_measure_volt_(nullptr),
 			setup_relay_(nullptr), relay_map_(d),
 			wait_time_(nullptr),
 			help_(nullptr)
@@ -236,7 +586,7 @@ namespace app {
 			widget_director& wd = director_.at().widget_director_;
 
 			int d_w = 950;
-			int d_h = 750;
+			int d_h = 700;
 			{
 				widget::param wp(vtx::irect(100, 100, d_w, d_h));
 				widget_dialog::param wp_;
@@ -251,11 +601,11 @@ namespace app {
 			static const char* tbls[] = {
 				"ファイル名：",
 				"検査規格：",
-				"検査方法：",
-				"ジェネレーター設定：",
-				"オシロスコープ設定：", nullptr, nullptr,
+				"ＤＣ２設定：", nullptr,
+				"ジェネレーター設定：", nullptr,
+				"ＣＲ測定設定：", nullptr,
 				"測定項目設定：", nullptr,
-				"ＣＲ設定：",
+				"：",
 				"２次負荷切替設定：",
 				"リレー切替設定：",
 				"Wait時間設定："
@@ -308,6 +658,7 @@ namespace app {
 				wp_.init_list_.push_back("MIN 値");
 				inspection_standards_ = wd.add_widget<widget_list>(wp, wp_);
 			}
+#if 0
 			{  // 検査方法
 				widget::param wp(vtx::irect(ofsx, 20 + h * 2, 150, 40), dialog_);
 				widget_list::param wp_;
@@ -343,129 +694,12 @@ namespace app {
 						current_[1]->set_stall();
 					}
 				};
-				{  // [0]静特性検査： 300V/0.1V, 100mA/0.01mA
-					widget::param wp(vtx::irect(ofsx + 170, 20 + h * 2, 90, 40), dialog_);
-					widget_label::param wp_("0", false);
-					voltage_[0] = wd.add_widget<widget_label>(wp, wp_);
-					voltage_[0]->at_local_param().select_func_ = [=](const std::string& str) {
-						voltage_[0]->set_text(limitf_(str, 0.0f, 300.0f, "%2.1f"));
-					};
-				}
-				{  // [1]動特性検査：  60V/0.1V, 30A/0.1A
-					widget::param wp(vtx::irect(ofsx + 170, 20 + h * 2, 90, 40), dialog_);
-					widget_label::param wp_("0", false);
-					voltage_[1] = wd.add_widget<widget_label>(wp, wp_);
-					voltage_[1]->at_local_param().select_func_ = [=](const std::string& str) {
-						voltage_[1]->set_text(limitf_(str, 0.0f, 60.0f, "%2.1f"));
-					};
-				}
-				{
-					widget::param wp(vtx::irect(ofsx + 270, 20 + h * 2, 40, 40), dialog_);
-					widget_text::param wp_("V");
-					wp_.text_param_.placement_
-						= vtx::placement(vtx::placement::holizontal::LEFT, vtx::placement::vertical::CENTER);
-					wd.add_widget<widget_text>(wp, wp_);
-				}
-				{  // Max: 100mA / step: 0.01mA
-					widget::param wp(vtx::irect(ofsx + 320, 20 + h * 2, 90, 40), dialog_);
-					widget_label::param wp_("0", false);
-					current_[0] = wd.add_widget<widget_label>(wp, wp_);
-					current_[0]->at_local_param().select_func_ = [=](const std::string& str) {
-						current_[0]->set_text(limitf_(str, 0.0f, 100.0f, "%3.2f"));
-					};
-				}
-				{  // Max: 30A / step: 0.1A
-					widget::param wp(vtx::irect(ofsx + 320, 20 + h * 2, 90, 40), dialog_);
-					widget_label::param wp_("0", false);
-					current_[1] = wd.add_widget<widget_label>(wp, wp_);
-					current_[1]->at_local_param().select_func_ = [=](const std::string& str) {
-						current_[1]->set_text(limitf_(str, 0.0f, 30.0f, "%2.1f"));
-					};
-				}
-				{
-					widget::param wp(vtx::irect(ofsx + 420, 20 + h * 2, 50, 40), dialog_);
-					widget_text::param wp_("mA");
-					wp_.text_param_.placement_
-						= vtx::placement(vtx::placement::holizontal::LEFT, vtx::placement::vertical::CENTER);
-					current_text_ = wd.add_widget<widget_text>(wp, wp_);
-				}
-			}
-
-			{  // (6) ジェネレータ設定： 出力モード選択（矩形波/三角波/直流）
-			   // タイプ（連続、単発）、
-			   // 出力電圧、周波数、ON時間（レンジ：0.01ms）
-				widget::param wp(vtx::irect(ofsx, 20 + h * 3, 110, 40), dialog_);
-				widget_list::param wp_;
-				wp_.init_list_.push_back("矩形波");
-				wp_.init_list_.push_back("三角波");
-///				wp_.init_list_.push_back("直流");
-				generator_mode_ = wd.add_widget<widget_list>(wp, wp_);
-				generator_mode_->at_local_param().select_func_ = [=](const std::string& str, uint32_t pos) {
-					if(pos == 0) {
-						generator_duty_->set_stall(false);
-					} else {
-						generator_duty_->set_stall();
-					}
-				};
-			}
-#if 0
-			{
-				widget::param wp(vtx::irect(ofsx + 120, 20 + h * 3, 100, 40), dialog_);
-				widget_list::param wp_;
-				wp_.init_list_.push_back("連続");
-				wp_.init_list_.push_back("単発");
-				generator_type_ = wd.add_widget<widget_list>(wp, wp_);
-				generator_type_->at_local_param().select_func_
-					= [=](const std::string& str, uint32_t pos) {
-				};
-			}
 #endif
-			{  // ジェネレータ設定、周波数（1Hz to 100Hz, 1Hz/step)
-				widget::param wp(vtx::irect(ofsx + 240 + 130 * 0, 20 + h * 3, 70, 40), dialog_);
-				widget_label::param wp_("1", false);
-				generator_freq_ = wd.add_widget<widget_label>(wp, wp_);
-				generator_freq_->at_local_param().select_func_ = [=](const std::string& str) {
-					generator_freq_->set_text(limitf_(str, 1.0f, 100.0f, "%1.0f"));
-				};
-				{
-					widget::param wp(vtx::irect(ofsx + 240 + 120 * 0 + 80, 20 + h * 3, 30, 40), dialog_);
-					widget_text::param wp_("Hz");
-					wp_.text_param_.placement_
-						= vtx::placement(vtx::placement::holizontal::LEFT, vtx::placement::vertical::CENTER);
-					wd.add_widget<widget_text>(wp, wp_);
-				}
-			}
-			{  // ジェネレータ設定、電圧（0V to 14V, 0.1V/step)
-				widget::param wp(vtx::irect(ofsx + 240 + 120 * 1, 20 + h * 3, 70, 40), dialog_);
-				widget_label::param wp_("0", false);
-				generator_volt_ = wd.add_widget<widget_label>(wp, wp_);
-				generator_volt_->at_local_param().select_func_ = [=](const std::string& str) {
-					generator_volt_->set_text(limitf_(str, 0.0f, 14.0f, "%2.1f"));
-				};
-				{
-					widget::param wp(vtx::irect(ofsx + 240 + 120 * 1 + 80, 20 + h * 3, 30, 40), dialog_);
-					widget_text::param wp_("V");
-					wp_.text_param_.placement_
-						= vtx::placement(vtx::placement::holizontal::LEFT, vtx::placement::vertical::CENTER);
-					wd.add_widget<widget_text>(wp, wp_);
-				}
-			}
-			{  // ジェネレータ設定、DUTY（0.1% to 100%, 0.1%/step）
-				widget::param wp(vtx::irect(ofsx + 240 + 120 * 2, 20 + h * 3, 70, 40), dialog_);
-				widget_label::param wp_("0.1", false);
-				generator_duty_ = wd.add_widget<widget_label>(wp, wp_);
-				generator_duty_->at_local_param().select_func_ = [=](const std::string& str) {
-					generator_duty_->set_text(limitf_(str, 0.1f, 100.0f, "%2.1f"));
-				};
-				{
-					widget::param wp(vtx::irect(ofsx + 240 + 120 * 2 + 80, 20 + h * 3, 30, 40), dialog_);
-					widget_text::param wp_("%");
-					wp_.text_param_.placement_
-						= vtx::placement(vtx::placement::holizontal::LEFT, vtx::placement::vertical::CENTER);
-					wd.add_widget<widget_text>(wp, wp_);
-				}
-			}
 
+				init_dc2_(d_w, ofsx, h, 2);
+				init_gen_(d_w, ofsx, h, 4);
+				init_crm_(d_w, ofsx, h, 6);
+#if 0
 			// オシロスコープ設定
 			// CH選択（1～4、math1～4･･･）
 			// math1=CH1-CH3、math2=CH3-CH2、math3=CH4-CH2、math4=(CH1-CH3)×CH3
@@ -525,26 +759,10 @@ namespace app {
 			init_oscillo_(wd, ofsx + 290, 20 + h * 5, "CH1", oscillo_[1]);
 			init_oscillo_(wd, ofsx,       20 + h * 6, "CH2", oscillo_[2]);
 			init_oscillo_(wd, ofsx + 290, 20 + h * 6, "CH3", oscillo_[3]);
+#endif
 
 
 
-
-			{  // (9) Ｃ／Ｒ選択、周波数設定 (100、1K, 10K)
-				widget::param wp(vtx::irect(ofsx, 20 + h * 9, 120, 40), dialog_);
-				widget_list::param wp_;
-				wp_.init_list_.push_back("100 Hz");
-				wp_.init_list_.push_back("1  KHz");
-				wp_.init_list_.push_back("10 KHz");
-				cr_measure_freq_ = wd.add_widget<widget_list>(wp, wp_); 
-			}
-			{  // (9) Ｃ／Ｒ選択、電圧設定 (50mV, 0.5V, 1V)
-				widget::param wp(vtx::irect(ofsx + 130, 20 + h * 9, 120, 40), dialog_);
-				widget_list::param wp_;
-				wp_.init_list_.push_back("50 mV");
-				wp_.init_list_.push_back("0.5 V");
-				wp_.init_list_.push_back("1.0 V");
-				cr_measure_volt_ = wd.add_widget<widget_list>(wp, wp_); 
-			}
 
 			//  測定項目設定 ： （MAX、MIN、AVERAGE、FALL時間、等）一般的なオシロスコープにある項目
 			// （RTH、CH1×CH2(math1)etc、Σ（CH1×CH2）etc） … 専用項目
@@ -578,32 +796,6 @@ namespace app {
 				};
 			}
 
-			{  // exec button
-				widget::param wp(vtx::irect(ofsx, 20 + h * 13, 150, 40), dialog_);
-				widget_button::param wp_("exec");
-				exec_ = wd.add_widget<widget_button>(wp, wp_);
-				exec_->at_local_param().select_func_ = [=](int n) {
-					wgm_t t;
-					t.type = generator_mode_->get_select_pos() & 1;
-					float v;
-					if((utils::input("%f", generator_freq_->get_text().c_str()) % v).status()) {
-						t.frq = v;
-					}
-					if((utils::input("%f", generator_duty_->get_text().c_str()) % v).status()) {
-						t.duty = v * 10.0f;
-					}
-					if((utils::input("%f", generator_volt_->get_text().c_str()) % v).status()) {
-						t.volt = v / 0.02f;
-					}
-					auto ss = t.build();
-					for(const std::string& s : ss) {
-						client_.send(s);
-// std::cout << s;
-					}
-				};
-			}
-
-
 			{  // help message
 				widget::param wp(vtx::irect(20, d_h - 100, d_w, 40), dialog_);
 				widget_text::param wp_;
@@ -626,6 +818,22 @@ namespace app {
 		{
 			if(!dialog_->get_state(gui::widget::state::ENABLE)) return;
 
+			if(client_.recv_probe()) {
+				auto s = client_.recv();
+				if(s.find("CRCD") == 0) {
+					auto t = s.substr(4, 4);
+					int v = 0;
+					utils::input("%x", t.c_str()) % v;
+		std::cout << "C: " << v << std::endl;
+				} else if(s.find("CRRD") == 0) {
+					auto t = s.substr(4, 4);
+					int v = 0;
+					utils::input("%x", t.c_str()) % v;
+		std::cout << "R: " << v << std::endl;
+				}
+			}
+
+
 			if(unit_load_filer_.state()) {
 				auto path = unit_load_filer_.get();
 				if(!path.empty()) {
@@ -647,32 +855,36 @@ namespace app {
 				}
 			}
 
-			if(voltage_[0]->get_focus()) {
+			if(dc2_voltage_->get_focus()) {
 				help_->set_text("0.0 to 300.0 [V], 0.1 [V] / step");
-			} else if(voltage_[1]->get_focus()) {
-				help_->set_text("0.0 to 60.0 [V], 0.1 [V] / step");
-			} else if(current_[0]->get_focus()) {
+			} else if(dc2_current_->get_focus()) {
 				help_->set_text("0.0 to 100.0 [mA], 0.01 [mA] / step");
-			} else if(current_[1]->get_focus()) {
-				help_->set_text("0.0 to 30.0 [A], 0.1 [A] / step");
-			} else if(generator_freq_->get_focus()) {
+			} else
+
+//			} else if(current_[1]->get_focus()) {
+//				help_->set_text("0.0 to 30.0 [A], 0.1 [A] / step");
+//			}
+//			} else if(voltage_[1]->get_focus()) {
+//				help_->set_text("0.0 to 60.0 [V], 0.1 [V] / step");
+
+			if(gen_freq_->get_focus()) {
 				help_->set_text("1 to 100 [Hz], 1 [Hz] / step");
-			} else if(generator_volt_->get_focus()) {
+			} else if(gen_volt_->get_focus()) {
 				help_->set_text("0.0 to 14.0 [V], 0.1 [V] / step");
-			} else if(generator_duty_->get_focus()) {
+			} else if(gen_duty_->get_focus()) {
 				help_->set_text("0.1 to 100.0 [%], 0.1 [%] / step");
 			} else if(wait_time_->get_focus()) {
 				help_->set_text("0.0 to 1.0 [秒], 0.01 [秒] / step");
-			} else if(oscillo_secdiv_->get_focus()) {
-				help_->set_text("サンプリング周期");
-			} else if(oscillo_trg_ch_->get_focus()) {
-				help_->set_text("トリガー・チャネル");
-			} else if(oscillo_trg_slope_->get_focus()) {
-				help_->set_text("トリガー・スロープ（Pos: 立ち上がり、Neg: 立下り）");
-			} else if(oscillo_trg_window_->get_focus()) {
-				help_->set_text("トリガー検知窓(幅): 1 to 15");
-			} else if(oscillo_trg_level_->get_focus()) {
-				help_->set_text("トリガーレベル: 1 to 65534");
+//			} else if(oscillo_secdiv_->get_focus()) {
+//				help_->set_text("サンプリング周期");
+//			} else if(oscillo_trg_ch_->get_focus()) {
+//				help_->set_text("トリガー・チャネル");
+//			} else if(oscillo_trg_slope_->get_focus()) {
+//				help_->set_text("トリガー・スロープ（Pos: 立ち上がり、Neg: 立下り）");
+//			} else if(oscillo_trg_window_->get_focus()) {
+//				help_->set_text("トリガー検知窓(幅): 1 to 15");
+//			} else if(oscillo_trg_level_->get_focus()) {
+//				help_->set_text("トリガーレベル: 1 to 65534");
 			} else {
 				help_->set_text("");
 			}
@@ -693,16 +905,18 @@ namespace app {
 			sys::preference pre;
 			unit_name_->save(pre);
 			inspection_standards_->save(pre);
-			inspection_method_->save(pre);
-			voltage_[0]->save(pre);
-			voltage_[1]->save(pre);
-			current_[0]->save(pre);
-			current_[1]->save(pre);
-			generator_mode_->save(pre);
-			generator_type_->save(pre);
-			generator_freq_->save(pre);
-			generator_volt_->save(pre);
-			generator_duty_->save(pre);
+
+			dc2_ena_->save(pre);
+			dc2_mode_->save(pre);
+			dc2_voltage_->save(pre);
+			dc2_current_->save(pre);
+
+			gen_ena_->save(pre);
+			gen_mode_->save(pre);
+			gen_freq_->save(pre);
+			gen_volt_->save(pre);
+			gen_duty_->save(pre);
+#if 0
 			oscillo_secdiv_->save(pre);
 			oscillo_trg_ch_->save(pre);
 			oscillo_trg_slope_->save(pre);
@@ -712,11 +926,8 @@ namespace app {
 			oscillo_[1].save(pre);
 			oscillo_[2].save(pre);
 			oscillo_[3].save(pre);
-
+#endif
 			fukasel_->save(pre);
-
-			cr_measure_freq_->load(pre);
-			cr_measure_volt_->load(pre);
 
 			wait_time_->save(pre);
 
@@ -740,16 +951,19 @@ namespace app {
 			if(ret) {
 				unit_name_->load(pre);
 				inspection_standards_->load(pre);
-				inspection_method_->load(pre);
-				voltage_[0]->load(pre);
-				voltage_[1]->load(pre);
-				current_[0]->load(pre);
-				current_[1]->load(pre);
-				generator_mode_->load(pre);
-				generator_type_->load(pre);
-				generator_freq_->load(pre);
-				generator_volt_->load(pre);
-				generator_duty_->load(pre);
+
+				dc2_ena_->load(pre);
+				dc2_mode_->load(pre);
+				dc2_voltage_->load(pre);
+				dc2_current_->load(pre);
+
+				gen_ena_->load(pre);
+				gen_mode_->load(pre);
+				gen_freq_->load(pre);
+				gen_volt_->load(pre);
+				gen_duty_->load(pre);
+
+#if 0
 				oscillo_secdiv_->load(pre);
 				oscillo_trg_ch_->load(pre);
 				oscillo_trg_slope_->load(pre);
@@ -759,11 +973,9 @@ namespace app {
 				oscillo_[1].load(pre);
 				oscillo_[2].load(pre);
 				oscillo_[3].load(pre);
+#endif
 
 				fukasel_->load(pre);
-
-				cr_measure_freq_->load(pre);
-				cr_measure_volt_->load(pre);
 
 				wait_time_->load(pre);
 

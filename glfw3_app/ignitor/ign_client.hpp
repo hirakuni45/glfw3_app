@@ -11,6 +11,8 @@
 #include <iostream>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
+#include <queue>
+#include <string>
 
 #include "utils/format.hpp"
 #include "utils/string_utils.hpp"
@@ -40,6 +42,9 @@ namespace net {
 
 		std::string			ips_;
 
+		typedef std::queue<std::string> SQUEUE;
+		SQUEUE				rmsg_;
+
 		void send_end_(const boost::system::error_code& error)
 		{
 			if(send_.size() > 0) {
@@ -61,6 +66,8 @@ namespace net {
     	{
 			if(recv_.size() > 0) {
 ///				std::cout << "response : " << asio::buffer_cast<const char*>(recv_.data()) << std::endl;
+				std::string s = asio::buffer_cast<const char*>(recv_.data());
+				rmsg_.push(s);
 				recv_.consume(recv_.size());
 			}
 		}
@@ -158,6 +165,19 @@ namespace net {
 			if(text.empty()) return;
 
 			async_send_(text);
+		}
+
+		// 受信データがあれば「true」
+		bool recv_probe() const { return !rmsg_.empty(); }
+
+
+		std::string recv()
+		{
+			if(rmsg_.empty()) return "";
+
+			auto s = rmsg_.front();
+			rmsg_.pop();
+			return s;
 		}
 	};
 }

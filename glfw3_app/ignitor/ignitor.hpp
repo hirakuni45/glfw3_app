@@ -248,6 +248,8 @@ namespace app {
 ///			server_.service();
 			io_service_.run();
 
+			wave_cap_.update();
+
 #if 0
 #if 0
 			// Drag & Drop されたファイル
