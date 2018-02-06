@@ -22,7 +22,7 @@ namespace sys {
 	static const key_t key_type_tbls_[] = {
 		{ gl::device::key::ESCAPE,        0x1b, 0x1b },
 		{ gl::device::key::BACKSPACE,     0x08, 0x08 },
-		{ gl::device::key::DEL,           0x3f, 0x3f },
+		{ gl::device::key::DEL,           0x7f, 0x7f },
 		{ gl::device::key::TAB,           0x09, 0x09 },
 		{ gl::device::key::ENTER,         0x0d, 0x0d },
 		{ gl::device::key::RIGHT,         'Q'-0x40, 'Q'-0x40 },

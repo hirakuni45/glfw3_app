@@ -36,7 +36,7 @@ namespace sys {
 				DOWN  = 'S' - 0x40,
 				UP    = 'T' - 0x40,
 				ESC   = 0x1b,
-				DELETE = 0x3f,
+				DELETE = 0x7f,
 			};
 		};
 
