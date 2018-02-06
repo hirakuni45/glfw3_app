@@ -20,7 +20,7 @@
 #include "widgets/widget_list.hpp"
 #include "widgets/widget_view.hpp"
 #include "widgets/widget_radio.hpp"
-#include "widgets/widget_arrow.hpp"
+#include "widgets/widget_spinbox.hpp"
 #include "widgets/widget_utils.hpp"
 
 #include "gl_fw/render_waves.hpp"
@@ -45,18 +45,18 @@ namespace app {
 		gui::widget_frame*		tools_;
 
 		gui::widget_check*		time_;
-		gui::widget_radio*		time_org_;
-		gui::widget_radio*		time_len_;
-		gui::widget_arrow*		time_r_;
+		gui::widget_spinbox*   	time_org_;
+		gui::widget_spinbox*   	time_len_;
 		gui::widget_label*		time_in_;
-		gui::widget_arrow*		time_l_;
 
 		gui::widget_check*		volt_;
-		gui::widget_arrow*		volt_up_;
+		gui::widget_spinbox*   	volt_org_;
+		gui::widget_spinbox*	volt_len_;
 		gui::widget_label*		volt_in_;
-		gui::widget_arrow*		volt_dn_;
 
 
+
+		vtx::ipos				size_;
 
 #if 0
 				wp_.init_list_.push_back("1000 ms");
@@ -109,6 +109,8 @@ namespace app {
 			waves_.render(clip.size, 65536);
 
 			glEnable(GL_TEXTURE_2D);
+
+			size_ = clip.size;
 		}
 
 
@@ -125,8 +127,8 @@ namespace app {
 		wave_cap(utils::director<core>& d) : director_(d),
 			waves_(), frame_(nullptr), core_(nullptr),
 			tools_(nullptr),
-			time_(nullptr), time_org_(nullptr), time_len_(nullptr), time_r_(nullptr), time_l_(nullptr),
-			volt_(nullptr), volt_up_(nullptr), volt_dn_(nullptr)
+			time_(nullptr), time_org_(nullptr), time_len_(nullptr), time_in_(nullptr),
+			volt_(nullptr), volt_org_(nullptr), volt_len_(nullptr), volt_in_(nullptr)
 		{ }
 
 
@@ -169,51 +171,37 @@ namespace app {
 				tools_ = wd.add_widget<widget_frame>(wp, wp_);
 				tools_->set_state(gui::widget::state::SIZE_LOCK);
 			}
-			{  // 時間スケール
-				widget::param wp(vtx::irect(10, 22, 150, 40), tools_);
+			{  // 時間メジャー有効、無効
+				widget::param wp(vtx::irect(10, 22 + 50 * 0, 130, 40), tools_);
 				widget_check::param wp_("Time:");
 				time_ = wd.add_widget<widget_check>(wp, wp_);
 				time_->at_local_param().select_func_ = [=](bool f) {
 					waves_.at_info().time_enable_ = f;
 				};
 			}
-#if 0
 			{
-				widget::param wpr(vtx::irect(20, 20, 130, 130), 0);
-				widget_null::param wpr_;
-				widget* root = wd.add_widget<widget_null>(wpr, wpr_);
-				root->set_state(widget::state::POSITION_LOCK);
-
-				widget::param wp(vtx::irect(0, 0, 130, 30), root);
-				widget_radio::param wp_("Enable");
-				for(int i = 0; i < 2; ++i) {
-					if(i == 2) wp_.check_ = true;
-					widget_radio* w = wd.add_widget<widget_radio>(wp, wp_);
-					w->at_local_param().select_func_ = [=](bool f, int n) {
-						std::cout << "Radio button: " << static_cast<int>(f) << " (" << n << ")" << std::endl;
-					};
-					wp.rect_.org.y += 40;
-				}
-			}
-#endif
-
-
-#if 0
-			{  // arrow
-				widget::param wp(vtx::irect(30, 600, 0, 0));
-				widget_arrow::param wp_(widget_arrow::direction::up);
-				arrow_up_ = wd.add_widget<widget_arrow>(wp, wp_);
-				arrow_up_->at_local_param().level_func_ = [=](uint32_t level) {
-					std::cout << "Arrow: " << level << std::endl;
+				widget::param wp(vtx::irect(10, 22 + 50 * 1, 130, 40), tools_);
+				widget_spinbox::param wp_(0, 0, 100);
+				time_org_ = wd.add_widget<widget_spinbox>(wp, wp_);
+				time_org_->at_local_param().select_func_
+					= [=](widget_spinbox::state st, int before, int newpos) {
+					return (boost::format("%d") % newpos).str();
 				};
 			}
-			if(1) { // アロー DOWN のテスト
-				widget::param wp(vtx::irect(30, 650, 0, 0));
-				widget_arrow::param wp_(widget_arrow::direction::down);
-				wp_.master_ = arrow_up_;
-				arrow_dn_ = wd.add_widget<widget_arrow>(wp, wp_);
+			{
+				widget::param wp(vtx::irect(10, 22 + 50 * 2, 130, 40), tools_);
+				widget_spinbox::param wp_(0, 0, 100);
+				time_len_ = wd.add_widget<widget_spinbox>(wp, wp_);
+				time_len_->at_local_param().select_func_
+					= [=](widget_spinbox::state st, int before, int newpos) {
+					return (boost::format("%d") % newpos).str();
+				};
 			}
-#endif
+
+
+
+
+
 
 			sys::preference& pre = director_.at().preference_;
 			if(frame_ != nullptr) {
@@ -233,9 +221,6 @@ namespace app {
 //			waves_.at_param(0).offset_ = 0;
 //			waves_.at_param(1).offset_ = 200;
 
-			waves_.at_info().time_org_ = 50;
-			waves_.at_info().time_len_ = 150;
-
 			waves_.at_info().volt_org_ = 80;
 			waves_.at_info().volt_len_ = 130;
 ///			waves_.build_sin(10e3);
@@ -249,6 +234,13 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void update()
 		{
+			if(frame_ == nullptr) return;
+			if(time_org_ == nullptr) return;
+			if(time_len_ == nullptr) return;
+			time_org_->at_local_param().max_pos_ = size_.x;
+			time_len_->at_local_param().max_pos_ = size_.x;
+			waves_.at_info().time_org_ = time_org_->get_select_pos();
+			waves_.at_info().time_len_ = time_len_->get_select_pos();
 		}
 
 
