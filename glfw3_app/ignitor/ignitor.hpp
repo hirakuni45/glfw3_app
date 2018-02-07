@@ -236,16 +236,19 @@ namespace app {
 			gui::widget_director& wd = director_.at().widget_director_;
 
 			if(start_client_) {
-				client_.service();
+				if(client_.connect()) {
+					client_.service();
+				}
 			} else {
-				const std::string& ip = root_menu_.get_target_ip();
-				if(!ip.empty()) {
+				auto ip = root_menu_.get_target_ip();
+				if(!ip.empty() && ip_ != ip) {
 					ip_ = ip;
 					client_.start(ip_, 23);
 					start_client_ = true;
 				}
 			}
 ///			server_.service();
+
 			io_service_.run();
 
 			wave_cap_.update();

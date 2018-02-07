@@ -68,6 +68,7 @@ namespace app {
 		inspection				inspection_;
 
 		gui::widget_dialog*		cont_setting_dialog_;
+		gui::widget_check*		cont_connect_;
 		gui::widget_label*		cont_setting_ip_[4];
 		gui::widget_label*		cont_setting_cmds_;
 		gui::widget_button*		cont_setting_exec_;
@@ -176,7 +177,8 @@ return;
 			run_(nullptr),
 			proj_name_dialog_(nullptr), proj_name_label_(nullptr),
 			project_(d), inspection_(d, client),
-			cont_setting_dialog_(nullptr), cont_setting_ip_{ nullptr },
+			cont_setting_dialog_(nullptr),
+		   	cont_connect_(nullptr), cont_setting_ip_{ nullptr },
 			cont_setting_cmds_(nullptr), cont_setting_exec_(nullptr),
 #ifndef NATIVE_FILER
 			proj_load_filer_(nullptr), proj_save_filer_(nullptr),
@@ -202,10 +204,13 @@ return;
 			@return	IP アドレス 
 		*/
 		//-----------------------------------------------------------------//
-		const std::string& get_target_ip() const
+		std::string get_target_ip() const
 		{
-			static std::string ips;
+			std::string ips;
 			ips.clear();
+			if(!cont_connect_->get_check()) {
+				return ips;
+			}
 			for(int i = 0; i < 4; ++i) {
 				if(cont_setting_ip_[i] == nullptr) break;
 				const std::string& ip = cont_setting_ip_[i]->get_text();
@@ -391,35 +396,43 @@ return;
 					widget_text::param wp_("コントローラーＩＰ：");
 					wd.add_widget<widget_text>(wp, wp_);
 				}
+				{
+					widget::param wp(vtx::irect(20, 50, 100, 40), root);
+					widget_check::param wp_("接続");
+					cont_connect_ = wd.add_widget<widget_check>(wp, wp_);
+					cont_connect_->at_local_param().select_func_ = [=](bool f) {
+///						client_.start();
+					};
+				}
 				int ipw = 60;  // IP 設定幅
 				int ips = 20;  // IP 設定隙間
 				{
-					widget::param wp(vtx::irect(10 + (ipw + ips) * 0, 70, 60, 40), root);
+					widget::param wp(vtx::irect(110 + (ipw + ips) * 0, 50, 60, 40), root);
 					widget_label::param wp_("192", false);
 					cont_setting_ip_[0] = wd.add_widget<widget_label>(wp, wp_);
 				}
 				{
-					widget::param wp(vtx::irect(10 + (ipw + ips) * 1, 70, 60, 40), root);
+					widget::param wp(vtx::irect(110 + (ipw + ips) * 1, 50, 60, 40), root);
 					widget_label::param wp_("168", false);
 					cont_setting_ip_[1] = wd.add_widget<widget_label>(wp, wp_);
 				}
 				{
-					widget::param wp(vtx::irect(10 + (ipw + ips) * 2, 70, 60, 40), root);
-					widget_label::param wp_("1", false);
+					widget::param wp(vtx::irect(110 + (ipw + ips) * 2, 50, 60, 40), root);
+					widget_label::param wp_("0", false);
 					cont_setting_ip_[2] = wd.add_widget<widget_label>(wp, wp_);
 				}
 				{
-					widget::param wp(vtx::irect(10 + (ipw + ips) * 3, 70, 60, 40), root);
-					widget_label::param wp_("1", false);
+					widget::param wp(vtx::irect(110 + (ipw + ips) * 3, 50, 60, 40), root);
+					widget_label::param wp_("20", false);
 					cont_setting_ip_[3] = wd.add_widget<widget_label>(wp, wp_);
 				}
 				{  // コントローラー・コマンド
-					widget::param wp(vtx::irect(10, 130, w - 10 * 2, 40), root);
+					widget::param wp(vtx::irect(10, 100, w - 10 * 2, 40), root);
 					widget_label::param wp_("", false);
 					cont_setting_cmds_ = wd.add_widget<widget_label>(wp, wp_);
 				}
 				{  // コントローラー・コマンド実行ボタン
-					widget::param wp(vtx::irect(w - 110, 190, 100, 40), root);
+					widget::param wp(vtx::irect(w - 110, 150, 100, 40), root);
 					widget_button::param wp_("exec");
 					cont_setting_exec_ = wd.add_widget<widget_button>(wp, wp_);
 					cont_setting_exec_->at_local_param().select_func_ = [=](uint32_t id) {

@@ -34,6 +34,7 @@ namespace net {
 	class ign_client {
 		asio::io_service&	io_service_;
 		ip::tcp::socket		socket_;
+		asio::deadline_timer connect_timer_;
 
 		bool				connect_;
 
@@ -85,10 +86,19 @@ namespace net {
 				const std::string& in = error.message();
 				auto out = utils::sjis_to_utf8(in);
             	std::cout << "connect failed: " << out << std::endl;
+				socket_.close();
         	} else {
+				connect_timer_.cancel();
 				connect_ = true;
-				std::cout << "connected" << std::endl;
+//				std::cout << "connected" << std::endl;
 			}
+		}
+
+
+		void on_connect_timeout_(const boost::system::error_code& error)
+		{
+			socket_.close();
+			// 接続タイムアウト
 		}
 
 	public:
@@ -97,9 +107,10 @@ namespace net {
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		ign_client(asio::io_service& ios) : io_service_(ios), socket_(ios), connect_(false)
-		{
-		}
+		ign_client(asio::io_service& ios) :
+			io_service_(ios), socket_(ios), connect_timer_(ios),
+			connect_(false)
+		{ }
 
 
 		//-----------------------------------------------------------------//
@@ -114,20 +125,34 @@ namespace net {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief  開始
-			@param[in]	ip		IP アドレス
-			@param[in]	port	ポート番号
+			@brief  接続状態の確認
+			@return 接続なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		void start(const std::string& ip, uint16_t port)
+		bool connect() const { return connect_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  開始
+			@param[in]	ip	IP アドレス
+			@param[in]	pn	ポート番号
+		*/
+		//-----------------------------------------------------------------//
+		void start(const std::string& ip, uint16_t pn)
 		{
-///			connect_ = false;
+			if(connect_) {
+				socket_.close();
+			}
+			connect_ = false;
 			ips_ = "127.0.0.1";
 			if(!ip.empty()) ips_ = ip;
-			socket_.async_connect(ip::tcp::endpoint(ip::address::from_string("192.168.0.20"), port),
-				boost::bind(&ign_client::on_connect_, this, asio::placeholders::error));
-//			socket_.connect(ip::tcp::endpoint(ip::address::from_string("127.0.0.1"), 31400));
-///			std::cout << "Connection start..." << std::endl;
+			socket_.async_connect(ip::tcp::endpoint(ip::address::from_string("192.168.0.20"), pn),
+				boost::bind(&ign_client::on_connect_, this, _1));
+//				boost::bind(&ign_client::on_connect_, this, asio::placeholders::error));
+
+			connect_timer_.expires_from_now(boost::posix_time::seconds(20));
+			connect_timer_.async_wait(boost::bind(&ign_client::on_connect_timeout_, this, _1));
 		}
 
 
@@ -140,15 +165,6 @@ namespace net {
 		{
 			if(connect_) {
 //				io_service_.reset();
-#if 0
-				static uint32_t cnt = 0;
-				if(cnt >= 60) {
-					async_send_("asdfg\n");
-					cnt = 0;
-					gui::format("Send...\n");
-				}
-				++cnt;
-#endif
 				async_recv_();
 			}
 		}
