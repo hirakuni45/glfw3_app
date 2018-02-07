@@ -34,7 +34,7 @@ namespace net {
 	class ign_client {
 		asio::io_service&	io_service_;
 		ip::tcp::socket		socket_;
-		asio::deadline_timer connect_timer_;
+//		asio::deadline_timer connect_timer_;
 
 		bool				connect_;
 
@@ -49,7 +49,7 @@ namespace net {
 		void send_end_(const boost::system::error_code& error)
 		{
 			if(send_.size() > 0) {
-///				std::cout << "request : " << asio::buffer_cast<const char*>(send_.data()) << std::endl;
+//				std::cout << "request : " << asio::buffer_cast<const char*>(send_.data()) << std::endl;
 				send_.consume(send_.size());
 			}
 		}
@@ -88,7 +88,7 @@ namespace net {
             	std::cout << "connect failed: " << out << std::endl;
 				socket_.close();
         	} else {
-				connect_timer_.cancel();
+//				connect_timer_.cancel();
 				connect_ = true;
 //				std::cout << "connected" << std::endl;
 			}
@@ -108,7 +108,7 @@ namespace net {
 		*/
 		//-----------------------------------------------------------------//
 		ign_client(asio::io_service& ios) :
-			io_service_(ios), socket_(ios), connect_timer_(ios),
+			io_service_(ios), socket_(ios), /* connect_timer_(ios), */
 			connect_(false)
 		{ }
 
@@ -145,14 +145,15 @@ namespace net {
 				socket_.close();
 			}
 			connect_ = false;
+
 			ips_ = "127.0.0.1";
 			if(!ip.empty()) ips_ = ip;
 			socket_.async_connect(ip::tcp::endpoint(ip::address::from_string("192.168.0.20"), pn),
 				boost::bind(&ign_client::on_connect_, this, _1));
 //				boost::bind(&ign_client::on_connect_, this, asio::placeholders::error));
 
-			connect_timer_.expires_from_now(boost::posix_time::seconds(20));
-			connect_timer_.async_wait(boost::bind(&ign_client::on_connect_timeout_, this, _1));
+//			connect_timer_.expires_from_now(boost::posix_time::seconds(20));
+//			connect_timer_.async_wait(boost::bind(&ign_client::on_connect_timeout_, this, _1));
 		}
 
 
@@ -164,9 +165,9 @@ namespace net {
 		void service()
 		{
 			if(connect_) {
-//				io_service_.reset();
 				async_recv_();
 			}
+//			io_service_.reset();
 		}
 
 

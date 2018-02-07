@@ -200,6 +200,21 @@ return;
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief  ターゲット接続の取得
+			@return	ターゲット接続
+		*/
+		//-----------------------------------------------------------------//
+		bool get_target_connect() const
+		{
+			if(cont_connect_ == nullptr) {
+				return false;
+			}
+			return cont_connect_->get_check();
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief  ターゲット IP アドレスの取得
 			@return	IP アドレス 
 		*/
@@ -483,6 +498,7 @@ return;
 			// プリファレンスのロード
 			sys::preference& pre = director_.at().preference_;
 			cont_setting_dialog_->load(pre);
+			cont_connect_->load(pre);
 			cont_setting_ip_[0]->load(pre);
 			cont_setting_ip_[1]->load(pre);
 			cont_setting_ip_[2]->load(pre);
@@ -553,6 +569,7 @@ return;
 			sys::preference& pre = director_.at().preference_;
 
 			cont_setting_dialog_->save(pre);
+			cont_connect_->save(pre);
 			cont_setting_ip_[0]->save(pre);
 			cont_setting_ip_[1]->save(pre);
 			cont_setting_ip_[2]->save(pre);

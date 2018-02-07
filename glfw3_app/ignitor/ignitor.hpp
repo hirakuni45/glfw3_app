@@ -52,8 +52,11 @@ namespace app {
 
 		asio::io_service		io_service_;
 		net::ign_client			client_;
-///		net::ign_server			server_;
+		uint32_t				delay_client_;
+		bool					connect_client_;
 		bool					start_client_;
+
+///		net::ign_server			server_;
 
 		std::string				ip_;
 
@@ -77,8 +80,8 @@ namespace app {
 			terminal_frame_(nullptr), terminal_core_(nullptr),
 			io_service_(),
 			client_(io_service_),
+			delay_client_(60), connect_client_(false), start_client_(false),
 ///			server_(io_service_),
-			start_client_(false),
 			ip_()
 		{
 		}
@@ -140,30 +143,6 @@ namespace app {
 				};
 				load_ctx_ = wd.add_widget<widget_filer>(wp, wp_);
 				load_ctx_->enable(false);
-			}
-
-			{ // DIV select
-				widget::param wp(vtx::irect(10, 20 + 40 * 1, menu_width - 20, 30), menu_);
-				widget_list::param wp_("1000 ms");
-				wp_.init_list_.push_back("1000 ms");
-				wp_.init_list_.push_back("500 ms");
-				wp_.init_list_.push_back("250 ms");
-				wp_.init_list_.push_back("100 ms");
-				wp_.init_list_.push_back("50 ms");
-				wp_.init_list_.push_back("10 ms");
-				wp_.init_list_.push_back("5 ms");
-				wp_.init_list_.push_back("1 ms");
-				wp_.init_list_.push_back("500 us");
-				wp_.init_list_.push_back("100 us");
-				wp_.init_list_.push_back("50 us");
-				wp_.init_list_.push_back("25 us");
-				wp_.init_list_.push_back("10 us");
-				wp_.init_list_.push_back("5 us");
-				wp_.init_list_.push_back("1 us");
-//				wp_.select_func_ = [this](const std::string& text, uint32_t pos) {
-//					utils::format("List Selected: '%s', (%d)\n") % text.c_str() % pos;
-//				};
-				div_ = wd.add_widget<widget_list>(wp, wp_);
 			}
 #endif
 
@@ -240,11 +219,21 @@ namespace app {
 					client_.service();
 				}
 			} else {
-				auto ip = root_menu_.get_target_ip();
-				if(!ip.empty() && ip_ != ip) {
-					ip_ = ip;
-					client_.start(ip_, 23);
-					start_client_ = true;
+				bool cn = root_menu_.get_target_connect();
+				if(!connect_client_ && cn) {  // 接続が有効になった
+					connect_client_ = cn;
+					delay_client_ = 60;
+				} 
+				if(delay_client_ > 0) {
+					--delay_client_;
+					if(delay_client_ == 0) {
+						auto ip = root_menu_.get_target_ip();
+						if(!ip.empty() && ip_ != ip) {
+							ip_ = ip;
+							client_.start(ip_, 23);
+							start_client_ = true;
+						}
+					}
 				}
 			}
 ///			server_.service();
