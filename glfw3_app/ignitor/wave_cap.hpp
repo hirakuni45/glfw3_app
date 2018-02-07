@@ -55,6 +55,16 @@ namespace app {
 		gui::widget_label*		volt_in_;
 
 
+#if 0
+		gui::widget_list*		oscillo_secdiv_;		///< オシロスコープ設定、時間（周期）
+		gui::widget_list*		oscillo_trg_ch_;		///< オシロスコープ設定、トリガー・チャネル選択
+		gui::widget_list*		oscillo_trg_slope_;		///< オシロスコープ設定、トリガー・スロープ選択
+		gui::widget_spinbox*	oscillo_trg_window_;	///< オシロスコープ設定、トリガー・ウィンドウ
+		gui::widget_label*		oscillo_trg_level_;		///< オシロスコープ設定、トリガー・レベル
+		oscillo_t				oscillo_[4];			///< オシロスコープ各チャネル設定
+#endif
+
+
 
 		vtx::ipos				size_;
 
@@ -74,6 +84,30 @@ namespace app {
 				wp_.init_list_.push_back("10 us");
 				wp_.init_list_.push_back("5 us");
 				wp_.init_list_.push_back("1 us");
+
+			{ // DIV select
+				widget::param wp(vtx::irect(10, 20 + 40 * 1, menu_width - 20, 30), menu_);
+				widget_list::param wp_("1000 ms");
+				wp_.init_list_.push_back("1000 ms");
+				wp_.init_list_.push_back("500 ms");
+				wp_.init_list_.push_back("250 ms");
+				wp_.init_list_.push_back("100 ms");
+				wp_.init_list_.push_back("50 ms");
+				wp_.init_list_.push_back("10 ms");
+				wp_.init_list_.push_back("5 ms");
+				wp_.init_list_.push_back("1 ms");
+				wp_.init_list_.push_back("500 us");
+				wp_.init_list_.push_back("100 us");
+				wp_.init_list_.push_back("50 us");
+				wp_.init_list_.push_back("25 us");
+				wp_.init_list_.push_back("10 us");
+				wp_.init_list_.push_back("5 us");
+				wp_.init_list_.push_back("1 us");
+//				wp_.select_func_ = [this](const std::string& text, uint32_t pos) {
+//					utils::format("List Selected: '%s', (%d)\n") % text.c_str() % pos;
+//				};
+				div_ = wd.add_widget<widget_list>(wp, wp_);
+			}
 #endif
 		static constexpr double div_tbls_[] = {
 			1000e-3,
@@ -129,6 +163,10 @@ namespace app {
 			tools_(nullptr),
 			time_(nullptr), time_org_(nullptr), time_len_(nullptr), time_in_(nullptr),
 			volt_(nullptr), volt_org_(nullptr), volt_len_(nullptr), volt_in_(nullptr)
+
+//			oscillo_secdiv_(nullptr) ,oscillo_trg_ch_(nullptr), oscillo_trg_slope_(nullptr),
+//			oscillo_trg_window_(nullptr), oscillo_trg_level_(nullptr),
+
 		{ }
 
 
@@ -198,6 +236,68 @@ namespace app {
 				};
 			}
 
+
+#if 0
+			// オシロスコープ設定
+			// CH選択（1～4、math1～4･･･）
+			// math1=CH1-CH3、math2=CH3-CH2、math3=CH4-CH2、math4=(CH1-CH3)×CH3
+			// 電圧/電流レンジ選択、時間レンジ選択、トリガー選択、フィルター選択、平均化選択
+			{  // 時間軸リスト 10K、20K、50K、100K、200K、500K、1M、2M、5M、10M、20M、50M、100M
+				widget::param wp(vtx::irect(ofsx, 20 + h * 4, 220, 40), dialog_);
+				widget_list::param wp_;
+				wp_.init_list_.push_back("100us ( 10KHz)");
+				wp_.init_list_.push_back(" 50us ( 20KHz)");
+				wp_.init_list_.push_back(" 20us ( 50KHz)");
+				wp_.init_list_.push_back(" 10us (100KHz)");
+				wp_.init_list_.push_back("  5us (200KHz)");
+				wp_.init_list_.push_back("  2us (500KHz)");
+				wp_.init_list_.push_back("  1us (  1MHz)");
+				wp_.init_list_.push_back("500ns (  2MHz)");
+				wp_.init_list_.push_back("200ns (  5MHz)");
+				wp_.init_list_.push_back("100ns ( 10MHz)");
+				wp_.init_list_.push_back(" 50ns ( 20MHz)");
+				wp_.init_list_.push_back(" 20ns ( 50MHz)");
+				wp_.init_list_.push_back(" 10ns (100MHz)");
+				oscillo_secdiv_ = wd.add_widget<widget_list>(wp, wp_);
+			}
+			{  // トリガー・チャネル選択
+				widget::param wp(vtx::irect(ofsx + 240, 20 + h * 4, 100, 40), dialog_);
+				widget_list::param wp_;
+				wp_.init_list_.push_back("CH0");
+				wp_.init_list_.push_back("CH1");
+				wp_.init_list_.push_back("CH2");
+				wp_.init_list_.push_back("CH3");
+				oscillo_trg_ch_ = wd.add_widget<widget_list>(wp, wp_);
+			}
+			{  // トリガー・スロープ選択
+				widget::param wp(vtx::irect(ofsx + 360, 20 + h * 4, 100, 40), dialog_);
+				widget_list::param wp_;
+				wp_.init_list_.push_back("Pos");
+				wp_.init_list_.push_back("Neg");
+				oscillo_trg_slope_ = wd.add_widget<widget_list>(wp, wp_);
+			}
+			{  // トリガー・ウィンドウ（１～１５）
+				widget::param wp(vtx::irect(ofsx + 480, 20 + h * 4, 100, 40), dialog_);
+				widget_spinbox::param wp_(1, 1, 15);
+				oscillo_trg_window_ = wd.add_widget<widget_spinbox>(wp, wp_);
+				oscillo_trg_window_->at_local_param().select_func_
+					= [=](widget_spinbox::state st, int before, int newpos) {
+					return (boost::format("%d") % newpos).str();
+				};
+			}
+			{  // トリガーレベル設定
+				widget::param wp(vtx::irect(ofsx + 600, 20 + h * 4, 80, 40), dialog_);
+				widget_label::param wp_("1", false);
+				oscillo_trg_level_ = wd.add_widget<widget_label>(wp, wp_);
+				oscillo_trg_level_->at_local_param().select_func_ = [=](const std::string& str) {
+					oscillo_trg_level_->set_text(limiti_(str, 1, 65534, "%d"));
+				};
+			}
+			init_oscillo_(wd, ofsx,       20 + h * 5, "CH0", oscillo_[0]);
+			init_oscillo_(wd, ofsx + 290, 20 + h * 5, "CH1", oscillo_[1]);
+			init_oscillo_(wd, ofsx,       20 + h * 6, "CH2", oscillo_[2]);
+			init_oscillo_(wd, ofsx + 290, 20 + h * 6, "CH3", oscillo_[3]);
+#endif
 
 
 
