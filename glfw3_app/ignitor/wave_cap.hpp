@@ -25,6 +25,8 @@
 
 #include "gl_fw/render_waves.hpp"
 
+#include "ign_client.hpp"
+
 namespace app {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -35,6 +37,8 @@ namespace app {
 	class wave_cap {
 
 		utils::director<core>&	director_;
+
+		net::ign_client&		client_;
 
 		typedef view::render_waves<uint16_t, 4096, 4> WAVES;
 		WAVES					waves_;
@@ -50,6 +54,7 @@ namespace app {
 		gui::widget_spinbox*	trg_window_;
 		gui::widget_label*		trg_level_;
 		gui::widget_list*		ch_gain_[4];
+		gui::widget_button*		exec_;
 
 		struct mesure_t {
 			gui::widget_check*		ena_;
@@ -171,17 +176,77 @@ namespace app {
 			return newtext;
 		}
 
+
+		std::string build_wdm_()
+		{
+			std::string s;
+			uint32_t cmd;
+			
+			static const uint8_t smtbl[] = {
+				0b01000001,  // 1K
+				0b10000001,  // 2K
+				0b11000001,  // 5K
+				0b01000010,  // 10K
+				0b10000010,  // 20K
+				0b11000010,  // 50K
+				0b01000011,  // 100K
+				0b10000011,  // 200K
+				0b11000011,  // 500K
+				0b01000100,  // 1M
+				0b10000100,  // 2M
+				0b11000100,  // 5M
+				0b01000101,  // 10M
+				0b10000101,  // 20M
+				0b11000101,  // 50M
+				0b01000110,  // 100M
+			};
+			// sampling freq
+			cmd = (0b00010000 << 16) | (smtbl[time_div_->get_select_pos() % 16] << 8);
+			s += (boost::format("wdm %06X\n") % cmd).str();
+			// channel gain
+			for(int i = 0; i < 4; ++i) {
+				cmd = (0b00011000 << 16) | (ch_gain_[i]->get_select_pos() % 4);
+				s += (boost::format("wdm %06X\n") % cmd).str();
+			}
+			{  // trigger channel
+				cmd = (0b00100000 << 16);
+				auto n = trg_ch_->get_select_pos();
+				uint8_t sub = 0;
+				if(n > 0) {
+					sub |= 0x80;
+					cmd |= static_cast<uint32_t>(n % 4) << 14;
+				}
+				if(trg_slope_->get_select_pos()) sub |= 0x40;
+				sub |= trg_window_->get_select_pos() & 15;
+				cmd |= sub;
+				s += (boost::format("wdm %06X\n") % cmd).str();
+			}
+			{ // trigger level
+				cmd = (0b00101000 << 16);
+				int v;
+				if((utils::input("%d", trg_level_->get_text().c_str()) % v).status()) {
+					if(v < 1) v = 1;
+					else if(v > 65534) v = 65534;
+					cmd |= v;
+					s += (boost::format("wdm %06X\n") % cmd).str();
+				}
+			}
+			return s;
+		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		wave_cap(utils::director<core>& d) : director_(d),
+		wave_cap(utils::director<core>& d, net::ign_client& client) : director_(d),
+			client_(client),
 			waves_(), frame_(nullptr), core_(nullptr),
 			tools_(nullptr),
 			time_div_(nullptr), trg_ch_(nullptr), trg_slope_(nullptr),
 			trg_window_(nullptr), trg_level_(nullptr), ch_gain_{ nullptr },
+			exec_(nullptr),
 
 			time_(), volt_()
 		{ }
@@ -218,10 +283,10 @@ namespace app {
 				core_ = wd.add_widget<widget_view>(wp, wp_);
 			}
 
-			int menu_width  = 230;
-			int menu_height = 540;
+			int mw  = 230;
+			int mh = 600;
 			{	// 波形ツールフレーム
-				widget::param wp(vtx::irect(100, 100, menu_width, menu_height));
+				widget::param wp(vtx::irect(100, 100, mw, mh));
 				widget_frame::param wp_;
 				wp_.plate_param_.set_caption(12);
 				tools_ = wd.add_widget<widget_frame>(wp, wp_);
@@ -279,19 +344,36 @@ namespace app {
 					trg_level_->set_text(limiti_(str, 1, 65534, "%d"));
 				};
 			}
-			for(int i = 0; i < 4; ++i) {
-					widget::param wp(vtx::irect(20, 22 + 10, 110, 40), tools_);
-					widget_list::param wp_;
-					wp_.init_list_.push_back("100us");
-					wp_.init_list_.push_back(" 50us");
-					wp_.init_list_.push_back(" 20us");
-					wp_.init_list_.push_back(" 10us");
-
+			{  // exec
+				widget::param wp(vtx::irect(mw - 40, 22 + 110, 30, 30), tools_);
+				widget_button::param wp_(">");
+				exec_ = wd.add_widget<widget_button>(wp, wp_);
+				exec_->at_local_param().select_func_ = [=](int n) {
+					auto s = build_wdm_();
+					client_.send(s);
+				};
 			}
 
+			for(int i = 0; i < 4; ++i) {
+					static const vtx::ipos ofs[4] = {
+						{ 0, 0 }, { 110, 0 }, { 0, 50 }, { 110, 50 }
+					};
+					widget::param wp(vtx::irect(20 + ofs[i].x, 22 + 160 + ofs[i].y,
+						100, 40), tools_);
+					widget_list::param wp_;
+					wp_.init_list_.push_back("-22dB");
+					wp_.init_list_.push_back("-16dB");
+					wp_.init_list_.push_back("-10dB");
+					wp_.init_list_.push_back(" -4dB");
+					wp_.init_list_.push_back("  2dB");
+					wp_.init_list_.push_back("  8dB");
+					wp_.init_list_.push_back(" 14dB");
+					wp_.init_list_.push_back(" 20dB");
+					ch_gain_[i] = wd.add_widget<widget_list>(wp, wp_);
+			}
 
 			init_mesure_(5, "Time", time_);
-			init_mesure_(7, "Volt", volt_);
+			init_mesure_(8, "Volt", volt_);
 
 
 			sys::preference& pre = director_.at().preference_;

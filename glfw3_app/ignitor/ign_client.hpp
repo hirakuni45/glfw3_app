@@ -59,7 +59,8 @@ namespace net {
 		{
 			std::ostream os(&send_);
 			os << request;
-			asio::async_write(socket_, send_.data(), boost::bind(&ign_client::send_end_, this, _1));
+			asio::async_write(socket_, send_.data(),
+				boost::bind(&ign_client::send_end_, this, _1));
 		}
 
 

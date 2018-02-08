@@ -102,15 +102,15 @@ namespace app {
 
 			dc1_t() : sw(0), ena(0), mode(0), volt(0), curr(0) { }
 
-			utils::strings build() const
+			std::string build() const
 			{
-				utils::strings ss;
-				ss.push_back((boost::format("dc1 D1SW%04X\n") % sw).str());
-				ss.push_back((boost::format("dc1 D1MD%d\n") % mode).str());
-				ss.push_back((boost::format("dc1 D1VS%05X\n") % (volt & 0xfffff)).str());
-				ss.push_back((boost::format("dc1 D1IS%05X\n") % (curr & 0xfffff)).str());
-				ss.push_back((boost::format("dc1 D1OE%d\n") % ena).str());
-				return ss;
+				std::string s;
+				s += (boost::format("dc1 D1SW%04X\n") % sw).str();
+				s += (boost::format("dc1 D1MD%d\n") % mode).str();
+				s += (boost::format("dc1 D1VS%05X\n") % (volt & 0xfffff)).str();
+				s += (boost::format("dc1 D1IS%05X\n") % (curr & 0xfffff)).str();
+				s += (boost::format("dc1 D1OE%d\n") % ena).str();
+				return s;
 			}
 		};
 
@@ -124,15 +124,15 @@ namespace app {
 
 			dc2_t() : sw(0), ena(0), mode(0), volt(0), curr(0) { }
 
-			utils::strings build() const
+			std::string build() const
 			{
-				utils::strings ss;
-				ss.push_back((boost::format("dc2 D2SW%04X\n") % sw).str());
-				ss.push_back((boost::format("dc2 D2MD%d\n") % mode).str());
-				ss.push_back((boost::format("dc2 D2VS%05X\n") % (volt & 0xfffff)).str());
-				ss.push_back((boost::format("dc2 D2IS%05X\n") % (curr & 0xfffff)).str());
-				ss.push_back((boost::format("dc2 D2OE%d\n") % ena).str());
-				return ss;
+				std::string s;
+				s += (boost::format("dc2 D2SW%04X\n") % sw).str();
+				s += (boost::format("dc2 D2MD%d\n") % mode).str();
+				s += (boost::format("dc2 D2VS%05X\n") % (volt & 0xfffff)).str();
+				s += (boost::format("dc2 D2IS%05X\n") % (curr & 0xfffff)).str();
+				s += (boost::format("dc2 D2OE%d\n") % ena).str();
+				return s;
 			}
 		};
 
@@ -147,16 +147,16 @@ namespace app {
 
 			wgm_t() : ena(0), type(0), frq(0), duty(0), volt(0) { }
 
-			utils::strings build() const
+			std::string build() const
 			{
-				utils::strings ss;
-				ss.push_back((boost::format("wgm WGSW%02X\n") % sw).str());
-				ss.push_back((boost::format("wgm WGSP%d\n") % type).str());
-				ss.push_back((boost::format("wgm WGFQ%02X\n") % (frq & 0x7f)).str());
-				ss.push_back((boost::format("wgm WGPW%03X\n") % (duty & 0x3ff)).str());
-				ss.push_back((boost::format("wgm WGPV%03X\n") % (volt & 0x3ff)).str());
-				ss.push_back((boost::format("wgm WGOE%d\n") % ena).str());
-				return ss;
+				std::string s;
+				s += (boost::format("wgm WGSW%02X\n") % sw).str();
+				s += (boost::format("wgm WGSP%d\n") % type).str();
+				s += (boost::format("wgm WGFQ%02X\n") % (frq & 0x7f)).str();
+				s += (boost::format("wgm WGPW%03X\n") % (duty & 0x3ff)).str();
+				s += (boost::format("wgm WGPV%03X\n") % (volt & 0x3ff)).str();
+				s += (boost::format("wgm WGOE%d\n") % ena).str();
+				return s;
 			}
 		};
 
@@ -169,19 +169,19 @@ namespace app {
 
 			crm_t() : sw(0), ena(0), freq(0), mode(0) { }
 
-			utils::strings build() const
+			std::string build() const
 			{
-				utils::strings ss;
-				ss.push_back((boost::format("crm CRSW%04X\n") % sw).str());
+				std::string s;
+				s += (boost::format("crm CRSW%04X\n") % sw).str();
 				static const char* frqtbl[3] = { "001", "010", "100" };
-				ss.push_back((boost::format("crm CRFQ%s\n") % frqtbl[freq % 3]).str());
-				ss.push_back((boost::format("crm CROE%d\n") % ena).str());
+				s += (boost::format("crm CRFQ%s\n") % frqtbl[freq % 3]).str();
+				s += (boost::format("crm CROE%d\n") % ena).str();
 				if(mode) {
-					ss.push_back((boost::format("crm CRC?1\n")).str());
+					s += (boost::format("crm CRC?1\n")).str();
 				} else {
-					ss.push_back((boost::format("crm CRR?1\n")).str());
+					s += (boost::format("crm CRR?1\n")).str();
 				}
-				return ss;
+				return s;
 			}
 		};
 
@@ -191,11 +191,11 @@ namespace app {
 
 			icm_t() : sw(0) { }
 
-			utils::strings build() const
+			std::string build() const
 			{
-				utils::strings ss;
-				ss.push_back((boost::format("icm CSW%02X\n") % sw).str());
-				return ss;
+				std::string s;
+				s = (boost::format("icm CSW%02X\n") % sw).str();
+				return s;
 			}
 		};
 
@@ -320,10 +320,7 @@ namespace app {
 					if((utils::input("%f", dc1_current_->get_text().c_str()) % v).status()) {
 						t.curr = v / 31.25e-6;
 					}
-					auto ss = t.build();
-					for(const std::string& s : ss) {
-						client_.send(s);
-					}
+					client_.send(t.build());
 				};
 			}
 		}
@@ -400,10 +397,7 @@ namespace app {
 						t.curr = v / 100e-6;
 					}
 
-					auto ss = t.build();
-					for(const std::string& s : ss) {
-						client_.send(s);
-					}
+					client_.send(t.build());
 				};
 			}
 		}
@@ -511,10 +505,8 @@ namespace app {
 					if((utils::input("%f", gen_volt_->get_text().c_str()) % v).status()) {
 						t.volt = v / 0.02f;
 					}
-					auto ss = t.build();
-					for(const std::string& s : ss) {
-						client_.send(s);
-					}					
+
+					client_.send(t.build());
 				};
 			}
 		}
@@ -575,10 +567,8 @@ namespace app {
 					t.ena = crm_ena_->get_check();
 					t.freq = crm_freq_->get_select_pos();
 					t.mode = crm_mode_->get_select_pos();
-					auto ss = t.build();
-					for(const std::string& s : ss) {
-						client_.send(s);
-					}
+
+					client_.send(t.build());
 				};
 			}
 		}
@@ -602,10 +592,8 @@ namespace app {
 						if(icm_sw_[i]->get_check()) sw |= 1;
 					}
 					t.sw = sw;
-					auto ss = t.build();
-					for(const std::string& s : ss) {
-						client_.send(s);
-					}
+
+					client_.send(t.build());
 				};
 			}
 		}
