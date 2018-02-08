@@ -92,7 +92,6 @@ namespace app {
 
 		gui::widget_text*		help_;			///< HELP
 
-
 		struct dc1_t {
 			uint16_t	sw;		///< 5 bits
 			bool		ena;	///< 0, 1
@@ -809,30 +808,33 @@ namespace app {
 			if(!dialog_->get_state(gui::widget::state::ENABLE)) return;
 
 			// モジュールから受け取ったパラメーターをＧＵＩに反映
-			if(client_.recv_probe()) {
-				auto s = client_.recv();
-				if(s.find("CRCD") == 0) {
-					auto t = s.substr(4, 4);
-					int v = 0;
-					utils::input("%x", t.c_str()) % v;
-					if(v >= 1000) {
-						float a = static_cast<float>(v) / 10000;
-						crm_ans_->set_text((boost::format("%6.5f") % a).str());
-						crm_anst_->set_text("uF");
-					} else {
-						float a = static_cast<float>(v) / 10;
-						crm_ans_->set_text((boost::format("%5.4f") % a).str());
-						crm_anst_->set_text("pF");
-					}
-				} else if(s.find("CRRD") == 0) {
-					auto t = s.substr(4, 4);
-					int v = 0;
-					utils::input("%x", t.c_str()) % v;
-					float a = static_cast<float>(v) / 1000;
+			{ // CRCD
+				uint32_t v = client_.get_crcd();
+				if(v >= 1000) {
+					float a = static_cast<float>(v) / 10000;
+					crm_ans_->set_text((boost::format("%6.5f") % a).str());
+					crm_anst_->set_text("uF");
+				} else {
+					float a = static_cast<float>(v) / 10;
 					crm_ans_->set_text((boost::format("%5.4f") % a).str());
-					crm_anst_->set_text("mΩ");
+					crm_anst_->set_text("pF");
 				}
 			}
+			{ // CRRD
+				uint32_t v = client_.get_crrd();
+				float a = static_cast<float>(v) / 1000;
+				crm_ans_->set_text((boost::format("%5.4f") % a).str());
+				crm_anst_->set_text("mΩ");
+			}
+
+#if 0
+				} else if(s.find("WDMW") == 0) {  // WDM 波形
+std::cout << s << std::flush;
+#if 0
+				}
+#endif
+			}
+#endif
 
 
 			if(unit_load_filer_.state()) {
