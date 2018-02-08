@@ -236,15 +236,16 @@ namespace app {
 		}
 
 
-		void init_sw_(int ofsx, int h, int loc, gui::widget_check* out[], int num)
+		void init_sw_(int ofsx, int h, int loc, gui::widget_check* out[], int num, int swn)
 		{
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;			
 			for(int i = 0; i < num; ++i) {
-				widget::param wp(vtx::irect(ofsx, 20 + h * loc, 40, 40), dialog_);
-				widget_check::param wp_;
+				widget::param wp(vtx::irect(ofsx, 20 + h * loc, 60, 40), dialog_);
+				widget_check::param wp_((boost::format("%d") % swn).str());
+				++swn;
 				out[i] = wd.add_widget<widget_check>(wp, wp_);
-				ofsx += 50;
+				ofsx += 60;
 			}
 		}
 
@@ -254,7 +255,7 @@ namespace app {
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
-			init_sw_(ofsx, h, loc, dc1_sw_, 5);
+			init_sw_(ofsx, h, loc, dc1_sw_, 5, 43);
 			++loc;
 			{
 				widget::param wp(vtx::irect(ofsx, 20 + h * loc, 90, 40), dialog_);
@@ -333,7 +334,7 @@ namespace app {
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
-			init_sw_(ofsx, h, loc, dc2_sw_, 14);
+			init_sw_(ofsx, h, loc, dc2_sw_, 14, 15);
 			++loc;
 			{
 				widget::param wp(vtx::irect(ofsx, 20 + h * loc, 90, 40), dialog_);
@@ -413,7 +414,7 @@ namespace app {
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
-			init_sw_(ofsx, h, loc, gen_sw_, 5);
+			init_sw_(ofsx, h, loc, gen_sw_, 5, 44);
 			++loc;
 			// ジェネレーター・モジュール
 			{
@@ -524,7 +525,7 @@ namespace app {
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
-			init_sw_(ofsx, h, loc, crm_sw_, 14);
+			init_sw_(ofsx, h, loc, crm_sw_, 14, 1);
 			++loc;
 			// ＣＲメジャー・モジュール
 			{
@@ -588,7 +589,7 @@ namespace app {
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
-			init_sw_(ofsx, h, loc, icm_sw_, 6);
+			init_sw_(ofsx, h, loc, icm_sw_, 6, 34);
 			{  // exec
 				widget::param wp(vtx::irect(d_w - 50, 20 + h * loc, 30, 30), dialog_);
 				widget_button::param wp_(">");
@@ -680,7 +681,7 @@ namespace app {
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
-			int d_w = 950;
+			int d_w = 1000;
 			int d_h = 700;
 			{
 				widget::param wp(vtx::irect(100, 100, d_w, d_h));

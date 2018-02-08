@@ -44,71 +44,42 @@ namespace app {
 
 		gui::widget_frame*		tools_;
 
-		gui::widget_check*		time_;
-		gui::widget_spinbox*   	time_org_;
-		gui::widget_spinbox*   	time_len_;
-		gui::widget_label*		time_in_;
+		gui::widget_list*		time_div_;
+		gui::widget_list*		trg_ch_;
+		gui::widget_list*		trg_slope_;
+		gui::widget_spinbox*	trg_window_;
+		gui::widget_label*		trg_level_;
+		gui::widget_list*		ch_gain_[4];
 
-		gui::widget_check*		volt_;
-		gui::widget_spinbox*   	volt_org_;
-		gui::widget_spinbox*	volt_len_;
-		gui::widget_label*		volt_in_;
+		struct mesure_t {
+			gui::widget_check*		ena_;
+			gui::widget_spinbox*   	org_;
+			gui::widget_spinbox*   	len_;
+			gui::widget_label*		in_;
+			mesure_t() : ena_(nullptr), org_(nullptr), len_(nullptr), in_(nullptr)
+			{ }
 
+			void load(sys::preference& pre)
+			{
+				if(ena_ != nullptr) {
+					ena_->load(pre);
+				}
+			}
 
-#if 0
-		gui::widget_list*		oscillo_secdiv_;		///< オシロスコープ設定、時間（周期）
-		gui::widget_list*		oscillo_trg_ch_;		///< オシロスコープ設定、トリガー・チャネル選択
-		gui::widget_list*		oscillo_trg_slope_;		///< オシロスコープ設定、トリガー・スロープ選択
-		gui::widget_spinbox*	oscillo_trg_window_;	///< オシロスコープ設定、トリガー・ウィンドウ
-		gui::widget_label*		oscillo_trg_level_;		///< オシロスコープ設定、トリガー・レベル
-		oscillo_t				oscillo_[4];			///< オシロスコープ各チャネル設定
-#endif
+			void save(sys::preference& pre)
+			{
+				if(ena_ != nullptr) {
+					ena_->save(pre);
+				}
+			}
+		};
+		mesure_t				time_;
+		mesure_t				volt_;
 
 
 
 		vtx::ipos				size_;
 
-#if 0
-				wp_.init_list_.push_back("1000 ms");
-				wp_.init_list_.push_back("500 ms");
-				wp_.init_list_.push_back("250 ms");
-				wp_.init_list_.push_back("100 ms");
-				wp_.init_list_.push_back("50 ms");
-				wp_.init_list_.push_back("10 ms");
-				wp_.init_list_.push_back("5 ms");
-				wp_.init_list_.push_back("1 ms");
-				wp_.init_list_.push_back("500 us");
-				wp_.init_list_.push_back("100 us");
-				wp_.init_list_.push_back("50 us");
-				wp_.init_list_.push_back("25 us");
-				wp_.init_list_.push_back("10 us");
-				wp_.init_list_.push_back("5 us");
-				wp_.init_list_.push_back("1 us");
-
-			{ // DIV select
-				widget::param wp(vtx::irect(10, 20 + 40 * 1, menu_width - 20, 30), menu_);
-				widget_list::param wp_("1000 ms");
-				wp_.init_list_.push_back("1000 ms");
-				wp_.init_list_.push_back("500 ms");
-				wp_.init_list_.push_back("250 ms");
-				wp_.init_list_.push_back("100 ms");
-				wp_.init_list_.push_back("50 ms");
-				wp_.init_list_.push_back("10 ms");
-				wp_.init_list_.push_back("5 ms");
-				wp_.init_list_.push_back("1 ms");
-				wp_.init_list_.push_back("500 us");
-				wp_.init_list_.push_back("100 us");
-				wp_.init_list_.push_back("50 us");
-				wp_.init_list_.push_back("25 us");
-				wp_.init_list_.push_back("10 us");
-				wp_.init_list_.push_back("5 us");
-				wp_.init_list_.push_back("1 us");
-//				wp_.select_func_ = [this](const std::string& text, uint32_t pos) {
-//					utils::format("List Selected: '%s', (%d)\n") % text.c_str() % pos;
-//				};
-				div_ = wd.add_widget<widget_list>(wp, wp_);
-			}
-#endif
 		static constexpr double div_tbls_[] = {
 			1000e-3,
 			500e-3,
@@ -136,20 +107,68 @@ namespace app {
 		void render_view_(const vtx::irect& clip)
 		{
 //			gui::widget_director& wd = director_.at().widget_director_;
-
 			glDisable(GL_TEXTURE_2D);
-
 //			auto pos = div_->get_menu()->get_select_pos();
 			waves_.render(clip.size, 65536);
-
 			glEnable(GL_TEXTURE_2D);
-
 			size_ = clip.size;
 		}
 
 
 		void service_view_()
 		{
+		}
+
+
+		void init_mesure_(int loc, const std::string& text, mesure_t& t)
+		{
+			using namespace gui;
+			widget_director& wd = director_.at().widget_director_;
+
+			int y = loc * 50;
+			{  // メジャー有効、無効
+				widget::param wp(vtx::irect(10, 22 + 5 + y, 130, 40), tools_);
+				widget_check::param wp_(text);
+				t.ena_ = wd.add_widget<widget_check>(wp, wp_);
+				t.ena_->at_local_param().select_func_ = [=](bool f) {
+					waves_.at_info().time_enable_ = f;
+				};
+			}
+			y += 50;
+			{
+				widget::param wp(vtx::irect(10, 22 + 5 + y, 130, 40), tools_);
+				widget_spinbox::param wp_(0, 0, 100);
+				t.org_ = wd.add_widget<widget_spinbox>(wp, wp_);
+				t.org_->at_local_param().select_func_
+					= [=](widget_spinbox::state st, int before, int newpos) {
+					return (boost::format("%d") % newpos).str();
+				};
+			}
+			y += 50;
+			{
+				widget::param wp(vtx::irect(10, 22 + 5 + y, 130, 40), tools_);
+				widget_spinbox::param wp_(0, 0, 100);
+				t.len_ = wd.add_widget<widget_spinbox>(wp, wp_);
+				t.len_->at_local_param().select_func_
+					= [=](widget_spinbox::state st, int before, int newpos) {
+					return (boost::format("%d") % newpos).str();
+				};
+			}
+		}
+
+
+		std::string limiti_(const std::string& str, int min, int max, const char* form)
+		{
+			std::string newtext;
+			int v;
+			if((utils::input("%d", str.c_str()) % v).status()) {
+				if(v < min) v = min;
+				else if(v > max) v = max;
+				char tmp[256];
+				utils::format(form, tmp, sizeof(tmp)) % v;
+				newtext = tmp;
+			}
+			return newtext;
 		}
 
 	public:
@@ -161,12 +180,10 @@ namespace app {
 		wave_cap(utils::director<core>& d) : director_(d),
 			waves_(), frame_(nullptr), core_(nullptr),
 			tools_(nullptr),
-			time_(nullptr), time_org_(nullptr), time_len_(nullptr), time_in_(nullptr),
-			volt_(nullptr), volt_org_(nullptr), volt_len_(nullptr), volt_in_(nullptr)
+			time_div_(nullptr), trg_ch_(nullptr), trg_slope_(nullptr),
+			trg_window_(nullptr), trg_level_(nullptr), ch_gain_{ nullptr },
 
-//			oscillo_secdiv_(nullptr) ,oscillo_trg_ch_(nullptr), oscillo_trg_slope_(nullptr),
-//			oscillo_trg_window_(nullptr), oscillo_trg_level_(nullptr),
-
+			time_(), volt_()
 		{ }
 
 
@@ -201,106 +218,80 @@ namespace app {
 				core_ = wd.add_widget<widget_view>(wp, wp_);
 			}
 
-			int menu_width = 200;
+			int menu_width  = 230;
+			int menu_height = 540;
 			{	// 波形ツールフレーム
-				widget::param wp(vtx::irect(100, 100, menu_width, 500));
+				widget::param wp(vtx::irect(100, 100, menu_width, menu_height));
 				widget_frame::param wp_;
 				wp_.plate_param_.set_caption(12);
 				tools_ = wd.add_widget<widget_frame>(wp, wp_);
 				tools_->set_state(gui::widget::state::SIZE_LOCK);
 			}
-			{  // 時間メジャー有効、無効
-				widget::param wp(vtx::irect(10, 22 + 50 * 0, 130, 40), tools_);
-				widget_check::param wp_("Time:");
-				time_ = wd.add_widget<widget_check>(wp, wp_);
-				time_->at_local_param().select_func_ = [=](bool f) {
-					waves_.at_info().time_enable_ = f;
-				};
-			}
-			{
-				widget::param wp(vtx::irect(10, 22 + 50 * 1, 130, 40), tools_);
-				widget_spinbox::param wp_(0, 0, 100);
-				time_org_ = wd.add_widget<widget_spinbox>(wp, wp_);
-				time_org_->at_local_param().select_func_
-					= [=](widget_spinbox::state st, int before, int newpos) {
-					return (boost::format("%d") % newpos).str();
-				};
-			}
-			{
-				widget::param wp(vtx::irect(10, 22 + 50 * 2, 130, 40), tools_);
-				widget_spinbox::param wp_(0, 0, 100);
-				time_len_ = wd.add_widget<widget_spinbox>(wp, wp_);
-				time_len_->at_local_param().select_func_
-					= [=](widget_spinbox::state st, int before, int newpos) {
-					return (boost::format("%d") % newpos).str();
-				};
-			}
-
-
-#if 0
-			// オシロスコープ設定
-			// CH選択（1～4、math1～4･･･）
-			// math1=CH1-CH3、math2=CH3-CH2、math3=CH4-CH2、math4=(CH1-CH3)×CH3
-			// 電圧/電流レンジ選択、時間レンジ選択、トリガー選択、フィルター選択、平均化選択
 			{  // 時間軸リスト 10K、20K、50K、100K、200K、500K、1M、2M、5M、10M、20M、50M、100M
-				widget::param wp(vtx::irect(ofsx, 20 + h * 4, 220, 40), dialog_);
+				widget::param wp(vtx::irect(20, 22 + 10, 110, 40), tools_);
 				widget_list::param wp_;
-				wp_.init_list_.push_back("100us ( 10KHz)");
-				wp_.init_list_.push_back(" 50us ( 20KHz)");
-				wp_.init_list_.push_back(" 20us ( 50KHz)");
-				wp_.init_list_.push_back(" 10us (100KHz)");
-				wp_.init_list_.push_back("  5us (200KHz)");
-				wp_.init_list_.push_back("  2us (500KHz)");
-				wp_.init_list_.push_back("  1us (  1MHz)");
-				wp_.init_list_.push_back("500ns (  2MHz)");
-				wp_.init_list_.push_back("200ns (  5MHz)");
-				wp_.init_list_.push_back("100ns ( 10MHz)");
-				wp_.init_list_.push_back(" 50ns ( 20MHz)");
-				wp_.init_list_.push_back(" 20ns ( 50MHz)");
-				wp_.init_list_.push_back(" 10ns (100MHz)");
-				oscillo_secdiv_ = wd.add_widget<widget_list>(wp, wp_);
+				wp_.init_list_.push_back("100us");
+				wp_.init_list_.push_back(" 50us");
+				wp_.init_list_.push_back(" 20us");
+				wp_.init_list_.push_back(" 10us");
+				wp_.init_list_.push_back("  5us");
+				wp_.init_list_.push_back("  2us");
+				wp_.init_list_.push_back("  1us");
+				wp_.init_list_.push_back("500ns");
+				wp_.init_list_.push_back("200ns");
+				wp_.init_list_.push_back("100ns");
+				wp_.init_list_.push_back(" 50ns");
+				wp_.init_list_.push_back(" 20ns");
+				wp_.init_list_.push_back(" 10ns");
+				time_div_ = wd.add_widget<widget_list>(wp, wp_);
 			}
 			{  // トリガー・チャネル選択
-				widget::param wp(vtx::irect(ofsx + 240, 20 + h * 4, 100, 40), dialog_);
+				widget::param wp(vtx::irect(20 + 120, 22 + 10, 80, 40), tools_);
 				widget_list::param wp_;
+				wp_.init_list_.push_back("---");
 				wp_.init_list_.push_back("CH0");
 				wp_.init_list_.push_back("CH1");
 				wp_.init_list_.push_back("CH2");
 				wp_.init_list_.push_back("CH3");
-				oscillo_trg_ch_ = wd.add_widget<widget_list>(wp, wp_);
+				trg_ch_ = wd.add_widget<widget_list>(wp, wp_);
 			}
 			{  // トリガー・スロープ選択
-				widget::param wp(vtx::irect(ofsx + 360, 20 + h * 4, 100, 40), dialog_);
+				widget::param wp(vtx::irect(20, 22 + 60, 80, 40), tools_);
 				widget_list::param wp_;
-				wp_.init_list_.push_back("Pos");
-				wp_.init_list_.push_back("Neg");
-				oscillo_trg_slope_ = wd.add_widget<widget_list>(wp, wp_);
+				wp_.init_list_.push_back("Fall");
+				wp_.init_list_.push_back("Rise");
+				trg_slope_ = wd.add_widget<widget_list>(wp, wp_);
 			}
 			{  // トリガー・ウィンドウ（１～１５）
-				widget::param wp(vtx::irect(ofsx + 480, 20 + h * 4, 100, 40), dialog_);
+				widget::param wp(vtx::irect(20 + 90, 22 + 60, 90, 40), tools_);
 				widget_spinbox::param wp_(1, 1, 15);
-				oscillo_trg_window_ = wd.add_widget<widget_spinbox>(wp, wp_);
-				oscillo_trg_window_->at_local_param().select_func_
+				trg_window_ = wd.add_widget<widget_spinbox>(wp, wp_);
+				trg_window_->at_local_param().select_func_
 					= [=](widget_spinbox::state st, int before, int newpos) {
 					return (boost::format("%d") % newpos).str();
 				};
 			}
 			{  // トリガーレベル設定
-				widget::param wp(vtx::irect(ofsx + 600, 20 + h * 4, 80, 40), dialog_);
+				widget::param wp(vtx::irect(20, 22 + 110, 80, 40), tools_);
 				widget_label::param wp_("1", false);
-				oscillo_trg_level_ = wd.add_widget<widget_label>(wp, wp_);
-				oscillo_trg_level_->at_local_param().select_func_ = [=](const std::string& str) {
-					oscillo_trg_level_->set_text(limiti_(str, 1, 65534, "%d"));
+				trg_level_ = wd.add_widget<widget_label>(wp, wp_);
+				trg_level_->at_local_param().select_func_ = [=](const std::string& str) {
+					trg_level_->set_text(limiti_(str, 1, 65534, "%d"));
 				};
 			}
-			init_oscillo_(wd, ofsx,       20 + h * 5, "CH0", oscillo_[0]);
-			init_oscillo_(wd, ofsx + 290, 20 + h * 5, "CH1", oscillo_[1]);
-			init_oscillo_(wd, ofsx,       20 + h * 6, "CH2", oscillo_[2]);
-			init_oscillo_(wd, ofsx + 290, 20 + h * 6, "CH3", oscillo_[3]);
-#endif
+			for(int i = 0; i < 4; ++i) {
+					widget::param wp(vtx::irect(20, 22 + 10, 110, 40), tools_);
+					widget_list::param wp_;
+					wp_.init_list_.push_back("100us");
+					wp_.init_list_.push_back(" 50us");
+					wp_.init_list_.push_back(" 20us");
+					wp_.init_list_.push_back(" 10us");
+
+			}
 
 
-
+			init_mesure_(5, "Time", time_);
+			init_mesure_(7, "Volt", volt_);
 
 
 			sys::preference& pre = director_.at().preference_;
@@ -335,12 +326,12 @@ namespace app {
 		void update()
 		{
 			if(frame_ == nullptr) return;
-			if(time_org_ == nullptr) return;
-			if(time_len_ == nullptr) return;
-			time_org_->at_local_param().max_pos_ = size_.x;
-			time_len_->at_local_param().max_pos_ = size_.x;
-			waves_.at_info().time_org_ = time_org_->get_select_pos();
-			waves_.at_info().time_len_ = time_len_->get_select_pos();
+			if(time_.org_ == nullptr) return;
+			if(time_.len_ == nullptr) return;
+			time_.org_->at_local_param().max_pos_ = size_.x;
+			time_.len_->at_local_param().max_pos_ = size_.x;
+			waves_.at_info().time_org_ = time_.org_->get_select_pos();
+			waves_.at_info().time_len_ = time_.len_->get_select_pos();
 		}
 
 
@@ -359,14 +350,15 @@ namespace app {
 			if(tools_ != nullptr) {
 				tools_->load(pre);
 			}
-			if(time_ != nullptr) {
-				time_->load(pre);
-				waves_.at_info().time_enable_ = time_->get_check();
-			}
-			if(volt_ != nullptr) {
-				volt_->load(pre);
-				waves_.at_info().volt_enable_ = volt_->get_check();
-			}
+			time_.load(pre);
+			volt_.load(pre);
+#if 0
+					waves_.at_info().time_enable_ = time_->get_check();
+				}
+				if(volt_ != nullptr) {
+					volt_->load(pre);
+					waves_.at_info().volt_enable_ = volt_->get_check();
+#endif
 		}
 
 
@@ -385,12 +377,8 @@ namespace app {
 			if(tools_ != nullptr) {
 				tools_->save(pre);
 			}
-			if(time_ != nullptr) {
-				time_->save(pre);
-			}
-			if(volt_ != nullptr) {
-				volt_->save(pre);
-			}
+			time_.save(pre);
+			volt_.save(pre);
 		}
 	};
 }
