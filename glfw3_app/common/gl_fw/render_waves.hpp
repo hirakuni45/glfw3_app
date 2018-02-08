@@ -31,7 +31,7 @@ namespace view {
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct chr_param {
 			img::rgba8	color_;		///< 描画色
-			int32_t		offset_;	///< 垂直オフセット（電圧）
+			vtx::ipos	offset_;	///< オフセット
 			float		gain_;		///< 垂直ゲイン（電圧）
 
 			bool		update_;	///< 描画の更新「true」
@@ -190,6 +190,15 @@ namespace view {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief  波形の最大数を取得
+			@return 波形の最大数
+		*/
+		//-----------------------------------------------------------------//
+		uint32_t size() const { return LIMIT; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief  パラメーターを取得
 			@param[in]	ch	チャネル
 			@return パラメーター
@@ -247,26 +256,13 @@ namespace view {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  波形生成
-			@param[in]	time	生成時間 [sec]
-			@param[in]	div		分解能 [sec]
-			@return 生成した数
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t create_buffer(double time, double div)
+		void create_buffer()
 		{
-			if(div <= 0.0 || time <= 0.0) return 0;
-
-			auto n = time / div;
-
-			if(n <= 0.0) return 0;
-			else if(n > static_cast<double>(LIMIT)) return 0;
-
 			for(int i = 0; i < CHN; ++i) {
-				ch_[i].units_.resize(static_cast<uint32_t>(n));
+				ch_[i].units_.resize(size());
 			}
-			div_ = div;  // 分解能
-
-			return n;
 		}
 
 
@@ -330,19 +326,21 @@ namespace view {
 						update = true;
 					}
 				}
+				int mod_x = 0;
 				if(update || t.param_.update_) {
 					float gain = t.param_.gain_;
-					uint32_t ts = 0;
+					uint32_t tsc = t.param_.offset_.x * tstep;
 					for(uint32_t i = 0; i < size.x; ++i) {
-						float v = static_cast<float>(t.units_[ts >> 16]);
+						uint32_t idx = (tsc >> 16) % t.units_.size();
+						float v = static_cast<float>(t.units_[idx]);
 						t.lines_[i] = vtx::spos(i, v * gain);
-						ts += tstep;
+						tsc += tstep;
 					}
 					t.param_.update_ = false;
 				}
 				if(!t.lines_.empty()) {
 					glPushMatrix();
-					gl::glTranslate(0, t.param_.offset_);
+					gl::glTranslate(mod_x, t.param_.offset_.y);
 					gl::glColor(t.param_.color_);
 					gl::draw_line_strip(t.lines_);
 					glPopMatrix();
