@@ -75,7 +75,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		ignitor(utils::director<core>& d) : director_(d),
 			root_menu_(d, client_),
-			wave_cap_(d),
+			wave_cap_(d, client_),
 			load_(nullptr), div_(nullptr), load_ctx_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
 			io_service_(),
