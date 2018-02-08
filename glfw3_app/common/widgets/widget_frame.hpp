@@ -257,13 +257,15 @@ namespace gui {
 			} else {
 				++err;
 			}
-			if(pre.get_position(path + "/size", p)) {
-				if(w_ena) at_rect().size.x = p.x;
-				if(h_ena) at_rect().size.y = p.y;
-			} else {
-				++err;
+			// サイズ、ロックの場合、サイズを上書きしない
+			if(!get_state(widget::state::SIZE_LOCK)) {
+				if(pre.get_position(path + "/size", p)) {
+					if(w_ena) at_rect().size.x = p.x;
+					if(h_ena) at_rect().size.y = p.y;
+				} else {
+					++err;
+				}
 			}
-
 			return err == 0;
 		}
 
