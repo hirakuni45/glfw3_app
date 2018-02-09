@@ -24,7 +24,7 @@
 #include "utils/preference.hpp"
 
 #include "relay_map.hpp"
-#include "ign_client.hpp"
+#include "ign_client_tcp.hpp"
 
 namespace app {
 
@@ -39,7 +39,7 @@ namespace app {
 
 		utils::director<core>&	director_;
 
-		net::ign_client&		client_;
+		net::ign_client_tcp&	client_;
 
 		gui::widget_dialog*		dialog_;
 		gui::widget_label*		unit_name_;				///< 単体試験名
@@ -104,11 +104,11 @@ namespace app {
 			std::string build() const
 			{
 				std::string s;
-				s += (boost::format("dc1 D1SW%04X\n") % sw).str();
+				s += (boost::format("dc1 D1SW%02X\n") % sw).str();
 				s += (boost::format("dc1 D1MD%d\n") % mode).str();
+				s += (boost::format("dc1 D1OE%d\n") % ena).str();
 				s += (boost::format("dc1 D1VS%05X\n") % (volt & 0xfffff)).str();
 				s += (boost::format("dc1 D1IS%05X\n") % (curr & 0xfffff)).str();
-				s += (boost::format("dc1 D1OE%d\n") % ena).str();
 				return s;
 			}
 		};
@@ -254,7 +254,7 @@ namespace app {
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
-			init_sw_(ofsx, h, loc, dc1_sw_, 5, 43);
+			init_sw_(ofsx, h, loc, dc1_sw_, 5, 40);
 			++loc;
 			{
 				widget::param wp(vtx::irect(ofsx, 20 + h * loc, 90, 40), dialog_);
@@ -319,7 +319,7 @@ namespace app {
 					if((utils::input("%f", dc1_current_->get_text().c_str()) % v).status()) {
 						t.curr = v / 31.25e-6;
 					}
-					client_.send(t.build());
+					client_.send_data(t.build());
 				};
 			}
 		}
@@ -396,7 +396,7 @@ namespace app {
 						t.curr = v / 100e-6;
 					}
 
-					client_.send(t.build());
+					client_.send_data(t.build());
 				};
 			}
 		}
@@ -505,7 +505,7 @@ namespace app {
 						t.volt = v / 0.02f;
 					}
 
-					client_.send(t.build());
+					client_.send_data(t.build());
 				};
 			}
 		}
@@ -567,7 +567,7 @@ namespace app {
 					t.freq = crm_freq_->get_select_pos();
 					t.mode = crm_mode_->get_select_pos();
 
-					client_.send(t.build());
+					client_.send_data(t.build());
 				};
 			}
 		}
@@ -592,7 +592,7 @@ namespace app {
 					}
 					t.sw = sw;
 
-					client_.send(t.build());
+					client_.send_data(t.build());
 				};
 			}
 		}
@@ -620,7 +620,7 @@ namespace app {
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		inspection(utils::director<core>& d, net::ign_client& client) : director_(d), client_(client),
+		inspection(utils::director<core>& d, net::ign_client_tcp& client) : director_(d), client_(client),
 			dialog_(nullptr),
 			unit_name_(nullptr), load_file_(nullptr), save_file_(nullptr),
 

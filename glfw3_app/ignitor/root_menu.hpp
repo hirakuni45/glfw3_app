@@ -21,7 +21,7 @@
 
 #include "project.hpp"
 #include "inspection.hpp"
-#include "ign_client.hpp"
+#include "ign_client_tcp.hpp"
 
 #define NATIVE_FILER
 
@@ -43,7 +43,7 @@ namespace app {
 
 		utils::director<core>&	director_;
 
-		net::ign_client&		client_;
+		net::ign_client_tcp&	client_;
 
 		gui::widget_button*		new_project_;
 		gui::widget_label*		proj_title_;
@@ -166,7 +166,7 @@ return;
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		root_menu(utils::director<core>& d, net::ign_client& client) : director_(d),
+		root_menu(utils::director<core>& d, net::ign_client_tcp& client) : director_(d),
 			client_(client),
 			new_project_(nullptr),  proj_title_(nullptr),
 			load_project_(nullptr), proj_path_(nullptr),
@@ -230,7 +230,7 @@ return;
 				if(cont_setting_ip_[i] == nullptr) break;
 				const std::string& ip = cont_setting_ip_[i]->get_text();
 				ips += ip;
-				if(i < 3) ips += ",";
+				if(i < 3) ips += ".";
 			}
 			return ips; 
 		}
@@ -453,7 +453,7 @@ return;
 					cont_setting_exec_->at_local_param().select_func_ = [=](uint32_t id) {
 						auto s = cont_setting_cmds_->get_text();
 						s += '\n';
-						client_.send(s);
+						client_.send_data(s);
 					};
 				}
 			}

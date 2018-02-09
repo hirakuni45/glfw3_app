@@ -25,7 +25,8 @@
 
 #include "gl_fw/render_waves.hpp"
 
-#include "ign_client.hpp"
+// #include "ign_client.hpp"
+#include "ign_client_tcp.hpp"
 
 namespace app {
 
@@ -38,7 +39,7 @@ namespace app {
 
 		utils::director<core>&	director_;
 
-		net::ign_client&		client_;
+		net::ign_client_tcp&	client_;
 
 		typedef view::render_waves<uint16_t, 2048, 4> WAVES;
 		WAVES					waves_;
@@ -83,18 +84,18 @@ namespace app {
 
 			{  // 位置
 				widget::param wp(vtx::irect(x, y, 100, 40), tools_);
-				widget_spinbox::param wp_(0, 0, 100);
+				widget_spinbox::param wp_(0, 0, 20); // grid 数の倍
 				t.pos_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				t.pos_->at_local_param().select_func_
 					= [=](widget_spinbox::state st, int before, int newpos) {
 					float a = static_cast<float>(newpos)
-						/ static_cast<float>(waves_.get_info().grid_step_);
+						/ static_cast<float>(size_.y / (waves_.get_info().grid_step_ / 2));
 					return (boost::format("%2.1f") % a).str();
 				};
 			}
 			{  // 電圧スケール
 				widget::param wp(vtx::irect(x, y + 50, 100, 40), tools_);
-				widget_spinbox::param wp_(0, 0, 7);
+				widget_spinbox::param wp_(0, 0, 15);
 				t.scale_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				t.scale_->at_local_param().select_func_
 					= [=](widget_spinbox::state st, int before, int newpos) {
@@ -244,7 +245,7 @@ namespace app {
 			s += (boost::format("wdm %06X\n") % cmd).str();
 			// channel gain
 			for(int i = 0; i < 4; ++i) {
-				cmd = ((0b00011000 | (i + 1)) << 16) | ((ch_gain_[i]->get_select_pos() % 8) << 5);
+				cmd = ((0b00011000 | (i + 1)) << 16) | ((ch_gain_[i]->get_select_pos() % 8) << 13);
 				s += (boost::format("wdm %06X\n") % cmd).str();
 			}
 			{  // trigger channel
@@ -282,8 +283,7 @@ namespace app {
 		uint32_t get_time_scale_() const
 		{
 			static const uint32_t tmtbl[8] = {
-				65536 * 2,
-				65536, 32768, 16384, 8192, 4096, 2048, 1024
+				65536, 32768+16384, 32768, 16384+8192, 16384, 8192+4096, 8192, 4096+2048
 			};
 			uint32_t idx = 0;
 			if(time_scale_ != nullptr) {
@@ -315,7 +315,7 @@ namespace app {
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		wave_cap(utils::director<core>& d, net::ign_client& client) : director_(d),
+		wave_cap(utils::director<core>& d, net::ign_client_tcp& client) : director_(d),
 			client_(client),
 			waves_(), frame_(nullptr), core_(nullptr),
 			tools_(nullptr),
@@ -425,7 +425,7 @@ namespace app {
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
 				exec_->at_local_param().select_func_ = [=](int n) {
 					auto s = build_wdm_();
-					client_.send(s);
+					client_.send_data(s);
 				};
 			}
 
@@ -510,18 +510,24 @@ namespace app {
 			{
 				chn_[0].update(size_);
 
+				auto grid_step = waves_.get_info().grid_step_;
+
 				auto ts = get_time_scale_();
 				time_offset_->at_local_param().max_pos_ = 
-					(waves_.size() * ts / 65536 - size_.x) / waves_.get_info().grid_step_;
+					(waves_.size() * ts / 65536 - size_.x) / grid_step;
 	
 				auto ofs = time_offset_->get_select_pos();
-				waves_.at_param(0).offset_.x = ofs * waves_.get_info().grid_step_;
+				waves_.at_param(0).offset_.x = ofs * grid_step;
 
-				waves_.at_param(0).offset_.y = chn_[0].pos_->get_select_pos();
+				// 波形位置
+				chn_[0].pos_->at_local_param().max_pos_ = size_.y / (grid_step / 2);
+				waves_.at_param(0).offset_.y = chn_[0].pos_->get_select_pos() * (grid_step / 2);
+				// 波形拡大、縮小
 				auto n = chn_[0].scale_->get_select_pos();
-				static const uint32_t gaintbl[8] = {
-					32, 64, 128, 256, 512, 1024, 2048, 4096 };
-				waves_.at_param(0).gain_ = static_cast<float>(gaintbl[n & 7]) / 65536.0f;
+				static const uint32_t gaintbl[16] = {
+					32, 32+16, 64, 64+32, 128, 128+64, 256, 256+128,
+					512, 512+256, 1024, 1024+512, 2048, 2048+1024, 4096, 4096+2048 };
+				waves_.at_param(0).gain_ = static_cast<float>(gaintbl[n & 15]) / 65536.0f;
 			}
 
 			waves_.copy(0, client_.get_wdm(0), waves_.size());

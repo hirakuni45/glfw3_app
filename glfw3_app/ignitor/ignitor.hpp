@@ -23,8 +23,8 @@
 #include "widgets/widget_utils.hpp"
 
 #include "root_menu.hpp"
-#include "ign_client.hpp"
-#include "ign_server.hpp"
+// #include "ign_client.hpp"
+#include "ign_client_tcp.hpp"
 #include "wave_cap.hpp"
 
 namespace app {
@@ -50,8 +50,8 @@ namespace app {
 		gui::widget_frame*		terminal_frame_;
 		gui::widget_terminal*	terminal_core_;
 
-		asio::io_service		io_service_;
-		net::ign_client			client_;
+///		asio::io_service		io_service_;
+		net::ign_client_tcp		client_;
 		uint32_t				delay_client_;
 		bool					connect_client_;
 		bool					start_client_;
@@ -78,8 +78,9 @@ namespace app {
 			wave_cap_(d, client_),
 			load_(nullptr), div_(nullptr), load_ctx_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
-			io_service_(),
-			client_(io_service_),
+///			io_service_(),
+///			client_(io_service_),
+			client_(),
 			delay_client_(60), connect_client_(false), start_client_(false),
 ///			server_(io_service_),
 			ip_()
@@ -215,7 +216,7 @@ namespace app {
 			gui::widget_director& wd = director_.at().widget_director_;
 
 			if(start_client_) {
-				if(client_.connect()) {
+				if(client_.probe()) {
 					client_.service();
 				}
 			} else {
@@ -236,9 +237,8 @@ namespace app {
 					}
 				}
 			}
-///			server_.service();
 
-			io_service_.run();
+///			io_service_.run();
 
 			wave_cap_.update();
 
