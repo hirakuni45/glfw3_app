@@ -333,7 +333,8 @@ namespace view {
 					for(uint32_t i = 0; i < size.x; ++i) {
 						uint32_t idx = (tsc >> 16) % t.units_.size();
 						float v = static_cast<float>(t.units_[idx]);
-						t.lines_[i] = vtx::spos(i, v * gain);
+						v -= 32768.0f;
+						t.lines_[i] = vtx::spos(i, v * -gain);
 						tsc += tstep;
 					}
 					t.param_.update_ = false;
