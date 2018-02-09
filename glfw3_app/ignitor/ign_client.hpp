@@ -46,13 +46,14 @@ namespace net {
 		typedef std::queue<std::string> SQUEUE;
 		SQUEUE				rmsg_;
 
-
 		uint32_t			crcd_;
 		uint32_t			crrd_;
 
 		uint32_t			wdm_ch_;
 		uint32_t			wdm_pos_;
 		uint16_t			wdm_buff_[2048];
+
+		std::string			back_;
 
 		void send_end_(const boost::system::error_code& error)
 		{
@@ -76,8 +77,8 @@ namespace net {
     	{
 			if(recv_.size() > 0) {
 ///				std::cout << "response : " << asio::buffer_cast<const char*>(recv_.data()) << std::endl;
-				std::string s = asio::buffer_cast<const char*>(recv_.data());
-				rmsg_.push(s);
+				rmsg_.emplace(asio::buffer_cast<const char*>(recv_.data()));
+
 				recv_.consume(recv_.size());
 
 				async_recv_();
@@ -167,6 +168,7 @@ namespace net {
 
 			ips_ = "127.0.0.1";
 			if(!ip.empty()) ips_ = ip;
+///			socket_.async_connect(ip::tcp::endpoint(ip::address::from_string(ips_), pn),
 			socket_.async_connect(ip::tcp::endpoint(ip::address::from_string("192.168.0.20"), pn),
 				boost::bind(&ign_client::on_connect_, this, _1));
 //				boost::bind(&ign_client::on_connect_, this, asio::placeholders::error));
