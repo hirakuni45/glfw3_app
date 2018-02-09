@@ -160,9 +160,9 @@ namespace gui {
 
 			float sx = sc;
 			float sy = sc;
-			glViewport(wp.clip_.org.x * sx, vsz.y - wp.clip_.org.y * sy - wp.clip_.size.y * sy,
-				wp.clip_.size.x * sx + 1, wp.clip_.size.y * sy + 1);
-			wd_.at_mobj().setup_matrix(wp.clip_.size.x, wp.clip_.size.y);
+			glViewport(wp.clip_.org.x * sx, vsz.y - wp.clip_.org.y * sy - wp.clip_.size.y * sy - 1,
+				wp.clip_.size.x * sx, wp.clip_.size.y * sy);
+			wd_.at_mobj().setup_matrix(wp.clip_.size.x - 1, wp.clip_.size.y - 1);
 
 			if(param_.render_func_ != nullptr) {
 				param_.render_func_(wp.clip_);
