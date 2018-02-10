@@ -65,7 +65,14 @@ GLFW application
    pacman -S mingw-w64-x86_64-ffmpeg
    pacman -S mingw-w64-x86_64-bullet
 ```
-   
+
+・好みのテキストエディターをインストール。
+※自分の場合は「emacs」、最近、コンソールベースで使え、日本語も正しく   
+表示（mintty 設定を参照）できます。   
+```
+  pacman -S emacs
+```
+  
 ### 開発環境（OS-X）
 
 ・macports をインストール、各種ライブラリーをインストールして下さい。  
@@ -105,6 +112,36 @@ GUI フレームワークでは、「Inconsolata」の OTF フォントを使っ
 ※Linux 環境では、apt−get 等でインストールできます。
 ```
    sudo apt-get install fonts-inconsolata
+```
+
+### コンソールの設定（mintty の設定）
+   
+・コンソールフォントのインストール   
+mintty では、日本語と英字を美しく表示できるように、日本語フォントを   
+インストールしておきます。   
+お勧めは「Myrica M」ですが、他にも色々あるので、好みのフォントを
+インストールできます、その場合、「.minttyrc」のフォント設定を修正します。
+
+<a href="https://myrica.estable.jp/myricamhistry/" target="_blank">Myrica M</a>   
+   
+・mintty の設定ファイルをホームディレクトリーに「.minttyrc」として置きます。
+※「Term」設定で、「xterm-256color」にしている情報がありますが、間違いです、
+サポートされていません、バックスペースが正しく動かなくなるので、設定しないで下さい。   
+```
+Locale=ja_JP
+Charset=UTF-8
+BoldAsFont=no
+Font=MyricaM M
+FontHeight=12
+FontSmoothing=full
+Columns=100
+Rows=30
+Transparency=medium
+Term=xterm
+RightClickAction=paste
+OpaqueWhenFocused=no
+PgUpDnScroll=yes
+CursorType=block
 ```
    
 ### 全体のソース・コード取得
