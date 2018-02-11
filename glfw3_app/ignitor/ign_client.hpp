@@ -149,7 +149,7 @@ namespace net {
 			@return 接続なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool connect() const { return connect_; }
+		bool probe() const { return connect_; }
 
 
 		//-----------------------------------------------------------------//

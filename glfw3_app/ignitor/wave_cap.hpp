@@ -15,6 +15,7 @@
 #include "widgets/widget.hpp"
 #include "widgets/widget_frame.hpp"
 #include "widgets/widget_null.hpp"
+#include "widgets/widget_sheet.hpp"
 #include "widgets/widget_button.hpp"
 #include "widgets/widget_filer.hpp"
 #include "widgets/widget_terminal.hpp"
@@ -38,7 +39,8 @@ namespace app {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class wave_cap {
 
-		utils::director<core>&	director_;
+		typedef utils::director<core> DR;
+		DR&						director_;
 
 		net::ign_client_tcp&	client_;
 
@@ -63,14 +65,58 @@ namespace app {
 
 
 		struct chn_t {
+			gui::widget_null*		root_;
 			float					unit_v_;  ///< １単位に対する電圧
 			gui::widget_check*		ena_;
 			gui::widget_spinbox*	pos_;
 			gui::widget_spinbox*	scale_;
 
-			chn_t() : unit_v_(1.25f / 65535.0f),
+			chn_t() : root_(nullptr), unit_v_(1.25f / 65535.0f),
 				ena_(nullptr), pos_(nullptr), scale_(nullptr)
 			{ }
+
+
+			void init(DR& dr, WAVES& wvs, gui::widget* root, int ch, int x, int y)
+			{
+				using namespace gui;
+				auto& wd = dr.at().widget_director_;
+
+				{  // 有効、無効
+					widget::param wp(vtx::irect(x, y, 60, 40), root);
+					widget_check::param wp_((boost::format("CH%d") % ch).str());
+					ena_ = wd.add_widget<widget_check>(wp, wp_);
+					ena_->at_local_param().select_func_ = [=](bool f) {
+					};
+				}
+				y += 50;
+				{  // 位置
+					widget::param wp(vtx::irect(x, y, 110, 40), root);
+					widget_spinbox::param wp_(0, 0, 20); // grid 数の倍
+					pos_ = wd.add_widget<widget_spinbox>(wp, wp_);
+					pos_->at_local_param().select_func_
+						= [=](widget_spinbox::state st, int before, int newpos) {
+						int wy = root->get_param().rect_.size.y;
+						float a = static_cast<float>(newpos)
+							/ static_cast<float>(wy / (wvs.get_info().grid_step_ / 2));
+						return (boost::format("%2.1f") % a).str();
+					};
+				}
+				y += 50;
+				{  // 電圧スケール
+					widget::param wp(vtx::irect(x, y, 110, 40), root);
+					widget_spinbox::param wp_(0, 0, (volt_scale_size_ - 1));
+					scale_ = wd.add_widget<widget_spinbox>(wp, wp_);
+					scale_->at_local_param().select_func_
+						= [=](widget_spinbox::state st, int before, int newpos) {
+						// グリッドに対する電圧表示
+//						auto sc = get_volt_scale_(newpos);
+//						auto a = static_cast<float>(sc) / 65536.0f;
+//						float a = waves_.get_info().grid_step_ * t.unit_v_;
+						return (boost::format("%d") % newpos).str();
+					};
+				}
+			}
+
 
 			void update(const vtx::ipos& size)
 			{
@@ -79,46 +125,6 @@ namespace app {
 				}
 			}
 		};
-
-
-		void init_channel_(chn_t& t, int ch, int x, int y)
-		{
-			using namespace gui;
-			widget_director& wd = director_.at().widget_director_;
-			{  // 有効、無効
-				widget::param wp(vtx::irect(x, y, 60, 40), tools_);
-				widget_check::param wp_((boost::format("CH%d") % ch).str());
-				t.ena_ = wd.add_widget<widget_check>(wp, wp_);
-				t.ena_->at_local_param().select_func_ = [=](bool f) {
-				};
-			}
-			y += 50;
-			{  // 位置
-				widget::param wp(vtx::irect(x, y, 110, 40), tools_);
-				widget_spinbox::param wp_(0, 0, 20); // grid 数の倍
-				t.pos_ = wd.add_widget<widget_spinbox>(wp, wp_);
-				t.pos_->at_local_param().select_func_
-					= [=](widget_spinbox::state st, int before, int newpos) {
-					float a = static_cast<float>(newpos)
-						/ static_cast<float>(size_.y / (waves_.get_info().grid_step_ / 2));
-					return (boost::format("%2.1f") % a).str();
-				};
-			}
-			y += 50;
-			{  // 電圧スケール
-				widget::param wp(vtx::irect(x, y, 110, 40), tools_);
-				widget_spinbox::param wp_(0, 0, (volt_scale_size_ - 1));
-				t.scale_ = wd.add_widget<widget_spinbox>(wp, wp_);
-				t.scale_->at_local_param().select_func_
-					= [=](widget_spinbox::state st, int before, int newpos) {
-					// グリッドに対する電圧表示
-//					auto sc = get_volt_scale_(newpos);
-//					auto a = static_cast<float>(sc) / 65536.0f;
-//					float a = waves_.get_info().grid_step_ * t.unit_v_;
-					return (boost::format("%d") % newpos).str();
-				};
-			}
-		}
 
 		chn_t			chn_[4];
 
@@ -501,7 +507,7 @@ namespace app {
 			}
 
 
-			init_channel_(chn_[0], 0, 180, 380);
+			chn_[0].init(director_, waves_, tools_, 0, 180, 380);
 
 
 			sys::preference& pre = director_.at().preference_;
@@ -529,6 +535,8 @@ namespace app {
 		void update()
 		{
 			if(frame_ == nullptr) return;
+
+			exec_->set_stall(!client_.probe());
 
 			if(time_.org_ != nullptr) {
 				time_.org_->at_local_param().max_pos_ = size_.x;
@@ -618,5 +626,3 @@ namespace app {
 		}
 	};
 }
-
-
