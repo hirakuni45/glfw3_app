@@ -85,14 +85,16 @@ namespace gui {
 				ALL,		///< 全てラウンド
 				TOP,		///< 上側をラウンド
 				BOTTOM,		///< 下側をラウンド
+				UPPER_OPEN,	///< 上がオープン（シート用）
+				UNDER_OPEN,	///< 下がオープン（シート用）
 			};
 
 			round_style	round_style_;	///< ラウンド・スタイル
-			short		round_radius_;		///< ラウンド半径
-			short		frame_width_;		///< フレーム幅
-			short		caption_width_;		///< キャプション幅
+			short		round_radius_;	///< ラウンド半径
+			short		frame_width_;	///< フレーム幅
+			short		caption_width_;	///< キャプション幅
 			vtx::ipos	grid_;			///< リサイズ・グリッド
-			bool		resizeble_;			///< リサイズが可能な場合
+			bool		resizeble_;		///< リサイズが可能な場合
 
 			plate_param() : round_style_(round_style::ALL),
 				round_radius_(8), frame_width_(4), caption_width_(0),

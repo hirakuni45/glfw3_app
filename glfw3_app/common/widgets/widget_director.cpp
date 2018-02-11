@@ -51,6 +51,7 @@ namespace gui {
 	widget::color_param widget_director::default_filer_color_;
 	widget::color_param widget_director::default_tree_color_;
 	widget::color_param widget_director::default_terminal_color_;
+	widget::color_param widget_director::default_sheet_color_;
 
 	void widget_director::message_widget_(widget* w, const std::string& s)
 	{
@@ -346,6 +347,10 @@ namespace gui {
 		fc.set( 55, 157, 235);
 		bc = fc * 0.7f;
 		default_terminal_color_ = widget::color_param(fc, bc);
+
+		fc.set( 75, 167, 190);
+		bc = fc * 0.7f;
+		default_sheet_color_ = widget::color_param(fc, bc);
 
 		img::paint::intensity_rect ir;
 		// ボタンの頂点輝度設定

@@ -127,6 +127,7 @@ namespace gui {
 		static widget::color_param		default_filer_color_;
 		static widget::color_param		default_tree_color_;
 		static widget::color_param		default_terminal_color_;
+		static widget::color_param		default_sheet_color_;
 
 		//-----------------------------------------------------------------//
 		/*!
