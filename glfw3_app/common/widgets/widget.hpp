@@ -226,19 +226,24 @@ namespace gui {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct slider_param {
-			struct direction {
-				enum type {
-					HOLIZONTAL,	///< 水平スライダー
-					VERTICAL	///< 垂直スライダー
-				};
+
+			//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+			/*!
+				@brief	スライダー方向型
+			*/
+			//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+			enum class direction {
+				HOLIZONTAL,	///< 水平スライダー
+				VERTICAL	///< 垂直スライダー
 			};
-			direction::type	direction_;		///< 方向性
-			float		position_;			///< 位置
-			float		handle_ratio_;		///< ハンドル割合
-			float		grid_;				///< グリッド
-			bool		accelerator_;		///< アクセレーターを有効にする場合
-			bool		handle_resize_;		///< ハンドル・リサイズ
-			slider_param(float pos = 0.0f, direction::type dir = direction::HOLIZONTAL) :
+
+			direction	direction_;		///< 方向性
+			float		position_;		///< 位置
+			float		handle_ratio_;	///< ハンドル割合
+			float		grid_;			///< グリッド
+			bool		accelerator_;	///< アクセレーターを有効にする場合
+			bool		handle_resize_;	///< ハンドル・リサイズ
+			slider_param(float pos = 0.0f, direction dir = direction::HOLIZONTAL) :
 				direction_(dir), position_(pos),
 				handle_ratio_(0.1f), grid_(0.0f),
 				accelerator_(true), handle_resize_(true)
@@ -267,7 +272,7 @@ namespace gui {
 				limit_
 			};
 		};
-		typedef std::bitset<action::limit_>	action_types;
+		typedef std::bitset<action::limit_> action_types;
 
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//

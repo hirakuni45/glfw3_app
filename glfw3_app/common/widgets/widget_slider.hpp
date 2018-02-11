@@ -46,7 +46,8 @@ namespace gui {
 			bool					select_fin_;	///< 選択が完了した場合に呼び出す
 			select_func_type		select_func_;
 
-			param(float pos = 0.0f, slider_param::direction::type dir = slider_param::direction::HOLIZONTAL) :
+			param(float pos = 0.0f,
+				slider_param::direction dir = slider_param::direction::HOLIZONTAL) :
 				plate_param_(),
 				color_param_(widget_director::default_slider_color_),
 				slider_param_(pos, dir),
