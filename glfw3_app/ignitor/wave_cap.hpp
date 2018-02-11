@@ -8,6 +8,7 @@
 				https://github.com/hirakuni45/RX/blob/master/LICENSE
 */
 //=====================================================================//
+#include <array>
 #include "core/glcore.hpp"
 #include "utils/i_scene.hpp"
 #include "utils/director.hpp"
@@ -62,10 +63,13 @@ namespace app {
 
 
 		struct chn_t {
+			float					unit_v_;  ///< １単位に対する電圧
+			gui::widget_check*		ena_;
 			gui::widget_spinbox*	pos_;
 			gui::widget_spinbox*	scale_;
 
-			chn_t() : pos_(nullptr), scale_(nullptr)
+			chn_t() : unit_v_(1.25f / 65535.0f),
+				ena_(nullptr), pos_(nullptr), scale_(nullptr)
 			{ }
 
 			void update(const vtx::ipos& size)
@@ -77,13 +81,20 @@ namespace app {
 		};
 
 
-		void init_channel_(chn_t& t, int x, int y)
+		void init_channel_(chn_t& t, int ch, int x, int y)
 		{
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
-
+			{  // 有効、無効
+				widget::param wp(vtx::irect(x, y, 60, 40), tools_);
+				widget_check::param wp_((boost::format("CH%d") % ch).str());
+				t.ena_ = wd.add_widget<widget_check>(wp, wp_);
+				t.ena_->at_local_param().select_func_ = [=](bool f) {
+				};
+			}
+			y += 50;
 			{  // 位置
-				widget::param wp(vtx::irect(x, y, 100, 40), tools_);
+				widget::param wp(vtx::irect(x, y, 110, 40), tools_);
 				widget_spinbox::param wp_(0, 0, 20); // grid 数の倍
 				t.pos_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				t.pos_->at_local_param().select_func_
@@ -93,12 +104,17 @@ namespace app {
 					return (boost::format("%2.1f") % a).str();
 				};
 			}
+			y += 50;
 			{  // 電圧スケール
-				widget::param wp(vtx::irect(x, y + 50, 100, 40), tools_);
-				widget_spinbox::param wp_(0, 0, 15);
+				widget::param wp(vtx::irect(x, y, 110, 40), tools_);
+				widget_spinbox::param wp_(0, 0, (volt_scale_size_ - 1));
 				t.scale_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				t.scale_->at_local_param().select_func_
 					= [=](widget_spinbox::state st, int before, int newpos) {
+					// グリッドに対する電圧表示
+//					auto sc = get_volt_scale_(newpos);
+//					auto a = static_cast<float>(sc) / 65536.0f;
+//					float a = waves_.get_info().grid_step_ * t.unit_v_;
 					return (boost::format("%d") % newpos).str();
 				};
 			}
@@ -280,16 +296,26 @@ namespace app {
 		}
 
 
-		uint32_t get_time_scale_() const
+		static const uint32_t time_scale_size_ = 11;
+		uint32_t get_time_scale_(uint32_t idx)
 		{
-			static const uint32_t tmtbl[8] = {
-				65536, 32768+16384, 32768, 16384+8192, 16384, 8192+4096, 8192, 4096+2048
+			static const uint32_t table[time_scale_size_] = {
+				65536, 32768+16384, 32768, 16384+8192,
+				16384, 8192+4096, 8192, 4096+2048,
+				4096, 4096+2048, 2048
 			};
-			uint32_t idx = 0;
-			if(time_scale_ != nullptr) {
-				idx = time_scale_->get_select_pos();
-			}
-			return tmtbl[idx & 7];
+			return table[idx % time_scale_size_];
+		}
+
+
+		static const uint32_t volt_scale_size_ = 16;
+		uint32_t get_volt_scale_(uint32_t idx)
+		{
+			static const uint32_t tbl[volt_scale_size_] = {
+				32, 32+16, 64, 64+32, 128, 128+64, 256, 256+128,
+				512, 512+256, 1024, 1024+512, 2048, 2048+1024, 4096, 4096+2048,
+			};
+			return tbl[idx % volt_scale_size_];
 		}
 
 
@@ -297,8 +323,11 @@ namespace app {
 		{
 //			gui::widget_director& wd = director_.at().widget_director_;
 			glDisable(GL_TEXTURE_2D);
-//			auto pos = div_->get_menu()->get_select_pos();
-			waves_.render(clip.size, get_time_scale_());
+			uint32_t idx = 0;
+			if(time_scale_ != nullptr) {
+				idx = time_scale_->get_select_pos();
+			}
+			waves_.render(clip.size, get_time_scale_(idx));
 			glEnable(GL_TEXTURE_2D);
 			size_ = clip.size;
 		}
@@ -337,8 +366,9 @@ namespace app {
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
+			size_.set(400, 400);
 			{	// 波形フレーム
-				widget::param wp(vtx::irect(40, 150, 400, 400));
+				widget::param wp(vtx::irect(40, 150, size_.x, size_.y));
 				widget_frame::param wp_;
 				wp_.plate_param_.set_caption(12);
 				frame_ = wd.add_widget<widget_frame>(wp, wp_);
@@ -413,7 +443,7 @@ namespace app {
 			}
 			{  // トリガーレベル設定
 				widget::param wp(vtx::irect(20, 22 + 110, 80, 40), tools_);
-				widget_label::param wp_("1", false);
+				widget_label::param wp_("32768", false);
 				trg_level_ = wd.add_widget<widget_label>(wp, wp_);
 				trg_level_->at_local_param().select_func_ = [=](const std::string& str) {
 					trg_level_->set_text(limiti_(str, 1, 65534, "%d"));
@@ -451,16 +481,17 @@ namespace app {
 			init_mesure_(8, "Volt", volt_);
 
 			{  // タイム・スケール
-				widget::param wp(vtx::irect(180, 280, 100, 40), tools_);
-				widget_spinbox::param wp_(0, 0, 7);
+				widget::param wp(vtx::irect(180, 280, 110, 40), tools_);
+				widget_spinbox::param wp_(0, 0, time_scale_size_ - 1);
 				time_scale_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				time_scale_->at_local_param().select_func_
 					= [=](widget_spinbox::state st, int before, int newpos) {
-					return (boost::format("%d") % newpos).str();
+					float r = 65536.0f / static_cast<float>(get_time_scale_(newpos));
+					return (boost::format("%2.1f") % r).str();
 				};
 			}
 			{  // タイム・オフセット（グリッド単位）
-				widget::param wp(vtx::irect(180, 330, 100, 40), tools_);
+				widget::param wp(vtx::irect(180, 330, 110, 40), tools_);
 				widget_spinbox::param wp_(0, 0, 50);
 				time_offset_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				time_offset_->at_local_param().select_func_
@@ -470,7 +501,7 @@ namespace app {
 			}
 
 
-			init_channel_(chn_[0], 180, 380);
+			init_channel_(chn_[0], 0, 180, 380);
 
 
 			sys::preference& pre = director_.at().preference_;
@@ -486,8 +517,6 @@ namespace app {
 //			waves_.at_param(0).color_ = img::rgba8(255, 128, 255, 255);
 //			waves_.at_param(1).color_ = img::rgba8(128, 255, 255, 255);
 
-			waves_.at_info().volt_org_ = 80;
-			waves_.at_info().volt_len_ = 130;
 ///			waves_.build_sin(10e3);
 		}
 
@@ -500,19 +529,30 @@ namespace app {
 		void update()
 		{
 			if(frame_ == nullptr) return;
-			if(time_.org_ == nullptr) return;
-			if(time_.len_ == nullptr) return;
-			time_.org_->at_local_param().max_pos_ = size_.x;
-			time_.len_->at_local_param().max_pos_ = size_.x;
-			waves_.at_info().time_org_ = time_.org_->get_select_pos();
-			waves_.at_info().time_len_ = time_.len_->get_select_pos();
+
+			if(time_.org_ != nullptr) {
+				time_.org_->at_local_param().max_pos_ = size_.x;
+				waves_.at_info().time_org_ = time_.org_->get_select_pos();
+			}
+			if(time_.len_ != nullptr) {
+				time_.len_->at_local_param().max_pos_ = size_.x;
+				waves_.at_info().time_len_ = time_.len_->get_select_pos();
+			}
+			if(volt_.org_ != nullptr) {
+				volt_.org_->at_local_param().max_pos_ = size_.x;
+				waves_.at_info().volt_org_ = volt_.org_->get_select_pos();
+			}
+			if(volt_.len_ != nullptr) {
+				volt_.len_->at_local_param().max_pos_ = size_.x;
+				waves_.at_info().volt_len_ = volt_.len_->get_select_pos();
+			}
 
 			{
 				chn_[0].update(size_);
 
 				auto grid_step = waves_.get_info().grid_step_;
 
-				auto ts = get_time_scale_();
+				auto ts = get_time_scale_(time_scale_->get_select_pos());
 				time_offset_->at_local_param().max_pos_ = 
 					(waves_.size() * ts / 65536 - size_.x) / grid_step;
 	
@@ -524,10 +564,7 @@ namespace app {
 				waves_.at_param(0).offset_.y = chn_[0].pos_->get_select_pos() * (grid_step / 2);
 				// 波形拡大、縮小
 				auto n = chn_[0].scale_->get_select_pos();
-				static const uint32_t gaintbl[16] = {
-					32, 32+16, 64, 64+32, 128, 128+64, 256, 256+128,
-					512, 512+256, 1024, 1024+512, 2048, 2048+1024, 4096, 4096+2048 };
-				waves_.at_param(0).gain_ = static_cast<float>(gaintbl[n & 15]) / 65536.0f;
+				waves_.at_param(0).gain_ = static_cast<float>(get_volt_scale_(n)) / 65536.0f;
 			}
 
 			waves_.copy(0, client_.get_wdm(0), waves_.size());
