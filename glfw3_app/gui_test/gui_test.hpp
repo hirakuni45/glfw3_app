@@ -27,6 +27,7 @@
 #include "widgets/widget_progress.hpp"
 #include "widgets/widget_spinbox.hpp"
 #include "widgets/widget_view.hpp"
+#include "widgets/widget_sheet.hpp"
 
 #include "utils/select_file.hpp"
 
@@ -70,6 +71,8 @@ namespace app {
 
 		gui::widget_arrow*		arrow_up_;
 		gui::widget_arrow*		arrow_dn_;
+
+		gui::widget_sheet*		sheet_;
 
 		uint32_t	filer_id_;
 		uint32_t	menu_id_;
@@ -321,6 +324,47 @@ namespace app {
 				widget_arrow::param wp_(widget_arrow::direction::down);
 				wp_.master_ = arrow_up_;
 				arrow_dn_ = wd.add_widget<widget_arrow>(wp, wp_);
+			}
+
+			if(1) {  // シート（プロパティーシート）のテスト
+				widget* root_aaa = nullptr;
+				widget* root_bbb = nullptr;
+				widget* root_ccc = nullptr;
+				{  // aaa
+					widget::param wpr(vtx::irect(20, 20, 0, 0));
+					widget_null::param wpr_;
+					root_aaa = wd.add_widget<widget_null>(wpr, wpr_);
+
+					widget::param wp(vtx::irect(20, 20, 100, 40), root_aaa);
+					widget_button::param wp_("aaa");
+					wd.add_widget<widget_button>(wp, wp_);
+				}
+				{  // bbb
+					widget::param wpr(vtx::irect(20, 20, 0, 0));
+					widget_null::param wpr_;
+					root_bbb = wd.add_widget<widget_null>(wpr, wpr_);
+
+					widget::param wp(vtx::irect(20, 60, 100, 40), root_bbb);
+					widget_button::param wp_("bbb");
+					wd.add_widget<widget_button>(wp, wp_);
+				}
+				{  // ccc
+					widget::param wpr(vtx::irect(20, 20, 0, 0));
+					widget_null::param wpr_;
+					root_ccc = wd.add_widget<widget_null>(wpr, wpr_);
+
+					widget::param wp(vtx::irect(20, 100, 100, 40), root_ccc);
+					widget_button::param wp_("ccc");
+					wd.add_widget<widget_button>(wp, wp_);
+				}
+				{
+					widget::param wp(vtx::irect(250, 350, 400, 300));
+					widget_sheet::param wp_;
+					wp_.sheets_.emplace_back("aaa", root_aaa);
+					wp_.sheets_.emplace_back("bbb", root_bbb);
+					wp_.sheets_.emplace_back("ccc", root_ccc);
+					sheet_ = wd.add_widget<widget_sheet>(wp, wp_);
+				}
 			}
 
 			if(1) { // メニューのテスト
