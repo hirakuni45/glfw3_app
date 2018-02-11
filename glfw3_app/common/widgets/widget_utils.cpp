@@ -55,33 +55,44 @@ namespace gui {
 	{
 		if(pp.round_style_ == widget::plate_param::round_style::ALL) {
 			return;
-		} else {
-			const vtx::ipos& size = pa.get_size();
-			img::paint npa;
-			npa.create(size, pa.test_alpha());
-			npa.fill(img::rgba8(0, 0));
-			npa.set_fore_color(cp.fore_color_);
-			npa.set_back_color(cp.back_color_);
-			if(pp.frame_width_) {
-				npa.set_round(0);
-				npa.fill_rect();
-				npa.set_intensity_rect(cp.inten_rect_);
-				npa.swap_color();
-				short wf = pp.frame_width_;
-				npa.fill_rect(wf, wf, size.x - 2 * wf, size.y - 2 * wf, cp.ir_enable_);
-			} else {
-				npa.set_intensity_rect(cp.inten_rect_);
-				npa.set_round(0);
-				npa.swap_color();
-				npa.fill_rect(cp.ir_enable_);
-			}
+		}
 
-			if(pp.round_style_ == widget::plate_param::round_style::TOP) {
-				pa.copy(vtx::spos(0, size.y - pp.round_radius_), npa,
-					vtx::srect(0, size.y - pp.round_radius_, size.x, pp.round_radius_));
-			} else if(pp.round_style_ == widget::plate_param::round_style::BOTTOM) {
-				pa.copy(vtx::spos(0), npa, vtx::srect(0, 0, size.x, pp.round_radius_));
+		const vtx::ipos& size = pa.get_size();
+		img::paint npa;
+		npa.create(size, pa.test_alpha());
+		npa.fill(img::rgba8(0, 0));
+		npa.set_fore_color(cp.fore_color_);
+		npa.set_back_color(cp.back_color_);
+		if(pp.frame_width_) {
+			npa.set_round(0);
+			npa.fill_rect();
+			npa.set_intensity_rect(cp.inten_rect_);
+			npa.swap_color();
+			short wf = pp.frame_width_;
+			if(pp.round_style_ == widget::plate_param::round_style::UPPER_OPEN) {
+				npa.fill_rect(wf, wf + wf, size.x - 2 * wf, size.y - wf, cp.ir_enable_);
+			} else if(pp.round_style_ == widget::plate_param::round_style::UNDER_OPEN) {
+				npa.fill_rect(wf, wf, size.x - 2 * wf, size.y - wf, cp.ir_enable_);
+			} else {
+				npa.fill_rect(wf, wf, size.x - 2 * wf, size.y - 2 * wf, cp.ir_enable_);
 			}
+		} else {
+			npa.set_intensity_rect(cp.inten_rect_);
+			npa.set_round(0);
+			npa.swap_color();
+			npa.fill_rect(cp.ir_enable_);
+		}
+
+		if(pp.round_style_ == widget::plate_param::round_style::UPPER_OPEN) {
+			pa.copy(vtx::spos(0), npa, vtx::srect(0, 0, size.x, pp.round_radius_));
+		} else if(pp.round_style_ == widget::plate_param::round_style::UNDER_OPEN) {
+			pa.copy(vtx::spos(0, size.y - pp.round_radius_), npa,
+				vtx::srect(0, size.y - pp.round_radius_, size.x, pp.round_radius_));
+		} else if(pp.round_style_ == widget::plate_param::round_style::TOP) {
+			pa.copy(vtx::spos(0, size.y - pp.round_radius_), npa,
+				vtx::srect(0, size.y - pp.round_radius_, size.x, pp.round_radius_));
+		} else if(pp.round_style_ == widget::plate_param::round_style::BOTTOM) {
+			pa.copy(vtx::spos(0), npa, vtx::srect(0, 0, size.x, pp.round_radius_));
 		}
 	}
 
@@ -114,7 +125,8 @@ namespace gui {
 			pa.set_round(rd);
 			pa.swap_color();
 			pa.alpha_blend();
-			pa.fill_rect(wf, wf + pp.caption_width_, size.x - 2 * wf, size.y - 2 * wf - pp.caption_width_, cp.ir_enable_);
+			pa.fill_rect(wf, wf + pp.caption_width_, size.x - 2 * wf,
+				size.y - 2 * wf - pp.caption_width_, cp.ir_enable_);
 			mix_round_(pa, cp, pp);
 		} else {
 			pa.set_intensity_rect(cp.inten_rect_);
