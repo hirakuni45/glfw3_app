@@ -1,14 +1,14 @@
 #pragma once
 //=====================================================================//
 /*!	@file
-	@brief	GUI widget_dial クラス
+	@brief	GUI widget_dial クラス @n
+			※工事中・・・
     @author 平松邦仁 (hira@rvf-rc45.net)
 	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
 //=====================================================================//
-#include "core/glcore.hpp"
 #include "widgets/widget_director.hpp"
 #include "widgets/widget_utils.hpp"
 

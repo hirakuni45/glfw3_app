@@ -49,7 +49,7 @@ namespace gui {
 			int		width_;	///< ボーダーの幅
 			int		ofs_;	///< オフセット
 
-			widget::color_param	color_;
+			widget::color_param	color_;	///< 頂点カラーで変調する場合のパラメーター
 
 			param(type t) : type_(t), pos_(0), size_(0), width_(4), ofs_(0),
 				color_(widget_director::default_border_color_) { }

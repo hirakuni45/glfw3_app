@@ -35,7 +35,7 @@ namespace gui {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
-			plate_param	plate_param_;	///< プレート・パラメーター
+			plate_param	plate_param_;	///< 平面描画パラメーター
 			color_param	color_param_;	///< カラー・パラメーター
 			text_param	text_param_;	///< テキスト描画のパラメーター
 			color_param	color_param_select_;	///< 選択時カラー・パラメーター

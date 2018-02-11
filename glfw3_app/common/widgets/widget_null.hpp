@@ -1,7 +1,7 @@
 #pragma once
 //=====================================================================//
 /*!	@file
-	@brief	GUI widget_null クラス（ヘッダー）
+	@brief	GUI widget_null クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
 	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
 				Released under the MIT license @n

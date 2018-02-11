@@ -47,7 +47,7 @@ namespace gui {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
-			plate_param		plate_param_;
+			plate_param		plate_param_;	///< 平面描画パラメーター
 			color_param		color_param_;	///< 頂点カラーで変調する場合のパラメーター
 			const img::i_img*	image_;		///< ボタンに画像を使う場合
 			gl::mobj::handle	handle_;	///< ボタンにモーションオブジェクトを使う場合

@@ -44,12 +44,13 @@ namespace gui {
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
 			style::type	type_;
-			widget::text_param	text_param_;
-			float	gray_text_gain_;	///< 不許可時のグレースケールゲイン
-			bool	disable_gray_text_;	///< 不許可時、文字をグレースケールする場合
-			bool	draw_box_;			///< ボックスの表示を行わない場合 false
-			bool	check_;				///< 許可、不許可の状態
-			select_func_type	select_func_;
+			text_param	text_param_;		///< テキスト描画のパラメータ
+			float	gray_text_gain_;		///< 不許可時のグレースケールゲイン
+			bool	disable_gray_text_;		///< 不許可時、文字をグレースケールする場合
+			bool	draw_box_;				///< ボックスの表示を行わない場合 false
+			bool	check_;					///< 許可、不許可の状態
+
+			select_func_type	select_func_;	///< セレクト関数
 
 			param(const std::string& text = "", bool check = false) :
 				type_(style::CHECKED),

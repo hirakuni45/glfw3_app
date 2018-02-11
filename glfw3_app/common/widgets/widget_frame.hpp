@@ -34,14 +34,16 @@ namespace gui {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
-			plate_param		plate_param_;
-			color_param		color_param_;
-			text_param		text_param_;
-			shift_param		shift_param_;
+			plate_param		plate_param_;	///< 平面描画パラメーター
+			color_param		color_param_;	///< 頂点カラーで変調する場合のパラメーター
+			text_param		text_param_;	///< テキスト描画のパラメータ
+			shift_param		shift_param_;	///< テキスト描画のパラメータ
 
-			param() : plate_param_(),
-					  color_param_(widget_director::default_frame_color_),
-					  text_param_(), shift_param_()
+			param(const std::string& text = "") :
+				plate_param_(),
+				color_param_(widget_director::default_frame_color_),
+				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255)),
+				shift_param_()
 			{ }
 		};
 

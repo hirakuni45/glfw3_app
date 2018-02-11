@@ -50,7 +50,7 @@ namespace gui {
 
 			bool		menu_enable_;	///< メニュー許可
 
-			select_func_type	select_func_;
+			select_func_type	select_func_;	///< セレクト関数
 
 			//-------------------------------------------------------------//
 			/*!
