@@ -46,7 +46,9 @@ namespace gui {
 				sheet_t(const std::string& t, widget* w) : title_(t), widget_(w) { }
 			};
 			typedef std::vector<sheet_t> SHEETS;
-			SHEETS			sheets_;
+			SHEETS			sheets_;		///< タイトル、ルートのホルダー
+
+			bool			ext_title_;		///< 拡張されたタイトル表示
 
 			param() :
 				plate_param_(), color_param_(widget_director::default_sheet_color_),
@@ -54,7 +56,7 @@ namespace gui {
 				shift_param_(),
 				index_(0), id_(0),
 				select_func_(nullptr),
-				sheets_()
+				sheets_(), ext_title_(true)
 			{ }
 		};
 
@@ -68,6 +70,16 @@ namespace gui {
 		uint32_t			id_;
 
 		bool				init_;
+
+		void set_title_()
+		{
+			auto s = param_.sheets_[param_.index_].title_;
+			if(param_.ext_title_) {
+				s += (boost::format(" (%d/%d)")
+					% (param_.index_ + 1) % param_.sheets_.size()).str();
+			}
+			param_.text_param_.set_text(s);
+		}
 
 	public:
 		//-----------------------------------------------------------------//
@@ -144,7 +156,7 @@ namespace gui {
 
 			// ペアレンツの設定
 			if(param_.index_ < param_.sheets_.size()) {
-				param_.text_param_.set_text(param_.sheets_[param_.index_].title_);
+				set_title_();
 			}
 			for(auto& s : param_.sheets_) {
 				if(s.widget_ != nullptr) {
@@ -181,7 +193,7 @@ namespace gui {
 				} else {  // select
 				}
 				if(back != param_.index_) {
-					param_.text_param_.set_text(param_.sheets_[param_.index_].title_);
+					set_title_();
 					++id_;
 				}
 			}
