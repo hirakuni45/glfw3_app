@@ -3,7 +3,7 @@
 /*!	@file
 	@brief	GUI widget_check クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2018 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -29,11 +29,9 @@ namespace gui {
 			@brief	widget_check 表示タイプ
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		struct style {
-			enum type {
-				CHECKED,		///< チェックド・ボックス
-				MINUS_PLUS,		///< minus, plus
-			};
+		enum class style {
+			CHECKED,		///< チェックド・ボックス（中心点）
+			MINUS_PLUS,		///<「－」、「＋」
 		};
 
 
@@ -43,12 +41,13 @@ namespace gui {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
-			style::type	type_;
+			style		type_;				///< 描画表現
 			text_param	text_param_;		///< テキスト描画のパラメータ
-			float	gray_text_gain_;		///< 不許可時のグレースケールゲイン
-			bool	disable_gray_text_;		///< 不許可時、文字をグレースケールする場合
-			bool	draw_box_;				///< ボックスの表示を行わない場合 false
-			bool	check_;					///< 許可、不許可の状態
+			float		gray_text_gain_;	///< 不許可時のグレースケールゲイン
+			bool		disable_gray_text_;	///< 不許可時、文字をグレースケールする場合
+			bool		draw_box_;			///< ボックスの表示を行わない場合 false
+			bool		check_;				///< 許可、不許可の状態
+			bool		init_func_;			///< 初期化時にもセレクト関数を呼ぶ場合
 
 			select_func_type	select_func_;	///< セレクト関数
 
@@ -58,7 +57,7 @@ namespace gui {
 				vtx::placement(vtx::placement::holizontal::LEFT,
 				vtx::placement::vertical::CENTER)),
 				gray_text_gain_(0.65f), disable_gray_text_(true), draw_box_(true),
-				check_(check), select_func_(nullptr)
+				check_(check), init_func_(true), select_func_(nullptr)
 				{ }
 		};
 
@@ -82,7 +81,8 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_check(widget_director& wd, const widget::param& bp, const param& p) :
 			widget(bp), wd_(wd), param_(p),
-			obj_state_(false), ena_h_(0), dis_h_(0), check_(p.check_) { }
+			obj_state_(false), ena_h_(0), dis_h_(0), check_(p.check_)
+		{ }
 
 
 		//-----------------------------------------------------------------//
@@ -174,6 +174,8 @@ namespace gui {
 				dis_h_ = wd_.get_share_image().minus_box_;
 				ena_h_ = wd_.get_share_image().plus_box_;
 			}
+
+
 		}
 
 
@@ -202,15 +204,19 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void service() override
 		{
-			if(!get_state(state::ENABLE)) {
-				return;
+			bool dofunc = param_.init_func_;
+			if(get_state(state::ENABLE)) {
+				if(check_ != param_.check_) {
+					dofunc = true;
+				}
 			}
 
-			if(check_ != param_.check_) {
+			if(dofunc) {
 				if(param_.select_func_ != nullptr) {
 					param_.select_func_(param_.check_);
 				}
 				check_ = param_.check_;
+				param_.init_func_ = false;
 			}
 		}
 
