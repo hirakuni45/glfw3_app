@@ -86,6 +86,16 @@ namespace app {
 			return tbls[time_div_->get_select_pos() % 15];
 		}
 
+		static const uint32_t volt_scale_size_ = 16;
+		static uint32_t get_volt_scale_(uint32_t idx)
+		{
+			static const uint32_t tbl[volt_scale_size_] = {
+				32, 32+16, 64, 64+32, 128, 128+64, 256, 256+128,
+				512, 512+256, 1024, 1024+512, 2048, 2048+1024, 4096, 4096+2048,
+			};
+			return tbl[idx % volt_scale_size_];
+		}
+
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
@@ -100,9 +110,10 @@ namespace app {
 			gui::widget_spinbox*	scale_;
 			float					unit_volt_;  ///< １単位に対する電圧
 
-			chn_t(WAVES& waves, float v) : waves_(waves), root_(nullptr),
+			// fs: フルスケール電圧
+			chn_t(WAVES& waves, float fs) : waves_(waves), root_(nullptr),
 				ena_(nullptr), pos_(nullptr), scale_(nullptr),
-				unit_volt_(v / 65535.0f)
+				unit_volt_(fs / 65535.0f)
 			{ }
 
 
@@ -125,29 +136,29 @@ namespace app {
 						waves_.at_param(ch).render_ = f;
 					};
 				}
-				{  // 電圧位置
-					widget::param wp(vtx::irect(10, 70, 110, 40), root_);
-					widget_spinbox::param wp_(0, 0, 20); // grid 数の倍
+				{  // 電圧位置 (+-1.0)
+					widget::param wp(vtx::irect(10, 70, 130, 40), root_);
+					widget_spinbox::param wp_(0, -20, 20); // grid 数の倍
 					pos_ = wd.add_widget<widget_spinbox>(wp, wp_);
 					pos_->at_local_param().select_func_
 						= [=](widget_spinbox::state st, int before, int newpos) {
 						int wy = share->get_param().rect_.size.y;
-						float a = static_cast<float>(newpos)
-							/ static_cast<float>(wy / (waves_.get_info().grid_step_ / 2));
-						return (boost::format("%2.1f") % a).str();
+						float a = static_cast<float>(-newpos)
+							/ static_cast<float>(wy * 2 / waves_.get_info().grid_step_);
+						return (boost::format("%3.2f") % a).str();
 					};
 				}
 				{  // 電圧スケール
-					widget::param wp(vtx::irect(10, 120, 110, 40), root_);
+					widget::param wp(vtx::irect(10, 120, 130, 40), root_);
 					widget_spinbox::param wp_(0, 0, (volt_scale_size_ - 1));
 					scale_ = wd.add_widget<widget_spinbox>(wp, wp_);
 					scale_->at_local_param().select_func_
 						= [=](widget_spinbox::state st, int before, int newpos) {
 						// グリッドに対する電圧表示
-//						auto sc = get_volt_scale_(newpos);
-//						auto a = static_cast<float>(sc) / 65536.0f;
-//						float a = waves_.get_info().grid_step_ * t.unit_v_;
-						return (boost::format("%d") % newpos).str();
+						auto sc = get_volt_scale_(newpos);
+						auto a = static_cast<float>(sc) / 65536.0f;
+//						float a = waves_.get_info().grid_step_ * t.unit_volt_;
+						return (boost::format("%3.2f") % a).str();
 					};
 				}
 			}
@@ -157,11 +168,12 @@ namespace app {
 			{
 				if(pos_ == nullptr || scale_ == nullptr) return;
 
-				pos_->at_local_param().max_pos_ = size.y;
+				pos_->at_local_param().min_pos_ = -(size.y / grid_step) * 3 / 2;
+				pos_->at_local_param().max_pos_ =  (size.y / grid_step) * 3 / 2;
 
 				// 波形位置
-				pos_->at_local_param().max_pos_ = size.y / (grid_step / 2);
-				waves_.at_param(ch).offset_.y = pos_->get_select_pos() * (grid_step / 2);
+				waves_.at_param(ch).offset_.y = (size.y / 2)
+					+ pos_->get_select_pos() * (grid_step / 2);
 				// 波形拡大、縮小
 				auto n = scale_->get_select_pos();
 				waves_.at_param(ch).gain_ = static_cast<float>(get_volt_scale_(n)) / 65536.0f;
@@ -511,17 +523,6 @@ namespace app {
 				4096, 4096+2048, 2048
 			};
 			return table[idx % time_scale_size_];
-		}
-
-
-		static const uint32_t volt_scale_size_ = 16;
-		static uint32_t get_volt_scale_(uint32_t idx)
-		{
-			static const uint32_t tbl[volt_scale_size_] = {
-				32, 32+16, 64, 64+32, 128, 128+64, 256, 256+128,
-				512, 512+256, 1024, 1024+512, 2048, 2048+1024, 4096, 4096+2048,
-			};
-			return tbl[idx % volt_scale_size_];
 		}
 
 
