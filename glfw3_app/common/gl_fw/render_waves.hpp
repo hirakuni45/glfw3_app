@@ -35,9 +35,10 @@ namespace view {
 			float		gain_;		///< 垂直ゲイン（電圧）
 
 			bool		update_;	///< 描画の更新「true」
+			bool		render_;	///< 描画しない場合「false」
 
 			chr_param() : color_(img::rgba8(255, 255)),
-				offset_(0), gain_(1.0f), update_(false)
+				offset_(0), gain_(1.0f), update_(false), render_(true)
 			{ }
 		};
 
@@ -315,6 +316,8 @@ namespace view {
 			win_size_ = size;
 			for(uint32_t n = 0; n < CHN; ++n) {
 				ch_t& t = ch_[n];
+				if(!t.param_.render_) continue;
+
 				bool update = update_win;
 				if(t.units_.empty()) update = false;
 				else {
