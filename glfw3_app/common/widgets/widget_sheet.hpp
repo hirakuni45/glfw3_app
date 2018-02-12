@@ -131,6 +131,44 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	個別パラメーターへの取得(ro)
+			@return 個別パラメーター
+		*/
+		//-----------------------------------------------------------------//
+		const param& get_local_param() const { return param_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	個別パラメーターへの取得
+			@return 個別パラメーター
+		*/
+		//-----------------------------------------------------------------//
+		param& at_local_param() { return param_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	シート追加
+			@param[in]	title	タイトル
+			@param[in]	root	ルート
+		*/
+		//-----------------------------------------------------------------//
+		void add(const std::string& title, widget* root)
+		{
+			if(root == nullptr) return;
+
+			root->at_param().parents_ = this;
+			param_.sheets_.emplace_back(title, root);
+			if((param_.sheets_.size() - 1) == param_.index_) {
+				set_title_();
+			}
+			init_ = false;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
@@ -173,6 +211,8 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void update() override
 		{
+			if(param_.sheets_.empty()) return;
+
 			auto x = get_param().in_point_.x;
 			auto y = get_param().in_point_.y;
 			if(get_selected() && y >= 0 && y <= param_.plate_param_.caption_width_) {
