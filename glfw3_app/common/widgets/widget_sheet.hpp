@@ -252,8 +252,10 @@ namespace gui {
 			}
 
 			if(!init_ || param_.id_ != id_) {
-				init_ = true;
-
+				if(!init_) {
+					set_title_();
+					init_ = true;
+				}
 				for(uint32_t i = 0; i < param_.sheets_.size(); ++i) {
 					widget* w = param_.sheets_[i].widget_;
 					if(w != nullptr) {
