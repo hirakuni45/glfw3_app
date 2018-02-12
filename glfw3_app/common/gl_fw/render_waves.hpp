@@ -178,6 +178,9 @@ namespace view {
 		ch_t		ch_[CHN];
 		double		div_;
 
+		float		gain_[CHN];
+		vtx::ipos	offset_[CHN];
+
 		vtx::ipos	win_size_;
 
 	public:
@@ -186,7 +189,7 @@ namespace view {
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		render_waves() : ch_{ }, div_(0.0), win_size_(0) { }
+		render_waves() : ch_{ }, div_(0.0), gain_{ 1.0f }, win_size_(0) { }
 
 
 		//-----------------------------------------------------------------//
@@ -270,18 +273,20 @@ namespace view {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  テスト波形生成
+			@param[in]	ch		チャネル
 			@param[in]	frq		周波数 [Hz]
+			@param[in]	gain	ゲイン（振幅）
 		*/
 		//-----------------------------------------------------------------//
-		void build_sin(double frq)
+		void build_sin(uint32_t ch, double frq, double gain)
 		{
-#if 0
-			for(uint32_t i = 0; i < units_.size(); ++i) {
-//				double t = 1.0 / frq;
-				double t = 1.0 / 1024.0;
-				units_[i] = 32768 - static_cast<UNIT>(sin(2.0 * vtx::get_pi<double>() * t * i) * 32767.0);
+			if(ch >= CHN) return;
+
+			for(uint32_t i = 0; i < ch_[ch].units_.size(); ++i) {
+				double t = frq / static_cast<double>(LIMIT);
+				ch_[ch].units_[i] = 32768 - static_cast<UNIT>(sin(2.0 * vtx::get_pi<double>()
+					* t * i) * gain * 32767.0);
 			}
-#endif
 		}
 
 
@@ -326,6 +331,14 @@ namespace view {
 					}
 					if(t.tstep_ != tstep) {
 						t.tstep_ = tstep;
+						update = true;
+					}
+					if(t.param_.gain_ != gain_[n]) {
+						gain_[n] = t.param_.gain_;
+						update = true;
+					}
+					if(t.param_.offset_ != offset_[n]) {
+						offset_[n] = t.param_.offset_;
 						update = true;
 					}
 				}
