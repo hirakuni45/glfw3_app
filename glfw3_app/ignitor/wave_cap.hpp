@@ -63,18 +63,46 @@ namespace app {
 		gui::widget_sheet*		share_frame_;
 
 
-		/// チャネル・クラス
+		double get_time_div_() const {
+			if(time_div_ == nullptr) return 0.0;
+
+			static constexpr double tbls[] = {
+				1000e-3,
+				500e-3,
+				250e-3,
+				100e-3,
+				50e-3,
+				10e-3,
+				5e-3,
+				1e-3,
+				500e-6,
+				100e-6,
+				50e-6,
+				25e-6,
+				10e-6,
+				5e-6,
+				1e-6,
+			};
+			return tbls[time_div_->get_select_pos() % 15];
+		}
+
+
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief  チャネル・クラス
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct chn_t {
 			WAVES&					waves_;
 			gui::widget_null*		root_;
 			gui::widget_check*		ena_;
 			gui::widget_spinbox*	pos_;
 			gui::widget_spinbox*	scale_;
-			float					unit_v_;  ///< １単位に対する電圧
+			float					unit_volt_;  ///< １単位に対する電圧
 
-			chn_t(WAVES& waves) : waves_(waves), root_(nullptr),
+			chn_t(WAVES& waves, float v) : waves_(waves), root_(nullptr),
 				ena_(nullptr), pos_(nullptr), scale_(nullptr),
-				unit_v_(1.25f / 65535.0f)
+				unit_volt_(v / 65535.0f)
 			{ }
 
 
@@ -97,7 +125,7 @@ namespace app {
 						waves_.at_param(ch).render_ = f;
 					};
 				}
-				{  // 位置
+				{  // 電圧位置
 					widget::param wp(vtx::irect(10, 70, 110, 40), root_);
 					widget_spinbox::param wp_(0, 0, 20); // grid 数の倍
 					pos_ = wd.add_widget<widget_spinbox>(wp, wp_);
@@ -127,9 +155,10 @@ namespace app {
 
 			void update(int ch, int grid_step, const vtx::ipos& size)
 			{
-				if(pos_ != nullptr) {
-					pos_->at_local_param().max_pos_ = size.y;
-				}
+				if(pos_ == nullptr || scale_ == nullptr) return;
+
+				pos_->at_local_param().max_pos_ = size.y;
+
 				// 波形位置
 				pos_->at_local_param().max_pos_ = size.y / (grid_step / 2);
 				waves_.at_param(ch).offset_.y = pos_->get_select_pos() * (grid_step / 2);
@@ -173,7 +202,12 @@ namespace app {
 		chn_t			chn2_;
 		chn_t			chn3_;
 
-		/// メジャー・クラス
+
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief  メジャー・クラス
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct measure_t {
 			WAVES&					waves_;
 
@@ -290,7 +324,12 @@ namespace app {
 		measure_t				measure_time_;
 		measure_t				measure_volt_;
 
-		// 時間軸編集
+
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief  時間軸クラス
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct time_t {
 			WAVES&					waves_;
 
@@ -332,6 +371,7 @@ namespace app {
 					offset_ = wd.add_widget<widget_spinbox>(wp, wp_);
 					offset_->at_local_param().select_func_
 						= [=](widget_spinbox::state st, int before, int newpos) {
+
 						return (boost::format("%d") % newpos).str();
 					};
 				}
@@ -376,24 +416,6 @@ namespace app {
 		time_t					time_;
 
 		vtx::ipos				size_;
-
-		static constexpr double div_tbls_[] = {
-			1000e-3,
-			500e-3,
-			250e-3,
-			100e-3,
-			50e-3,
-			10e-3,
-			5e-3,
-			1e-3,
-			500e-6,
-			100e-6,
-			50e-6,
-			25e-6,
-			10e-6,
-			5e-6,
-			1e-6,
-		};
 
 
 		std::string limiti_(const std::string& str, int min, int max, const char* form)
@@ -505,7 +527,6 @@ namespace app {
 
 		void render_view_(const vtx::irect& clip)
 		{
-//			gui::widget_director& wd = director_.at().widget_director_;
 			glDisable(GL_TEXTURE_2D);
 			uint32_t idx = 0;
 			if(time_.scale_ != nullptr) {
@@ -535,7 +556,10 @@ namespace app {
 			time_div_(nullptr), trg_ch_(nullptr), trg_slope_(nullptr),
 			trg_window_(nullptr), trg_level_(nullptr), ch_gain_{ nullptr },
 			exec_(nullptr), share_frame_(nullptr),
-			chn0_(waves_), chn1_(waves_), chn2_(waves_), chn3_(waves_),
+			chn0_(waves_, 1.25f),
+			chn1_(waves_, 1.25f),
+			chn2_(waves_, 1.25f),
+			chn3_(waves_, 1.25f),
 			measure_time_(waves_, true), measure_volt_(waves_, false),
 			time_(waves_), size_(0)
 		{ }
@@ -682,10 +706,15 @@ namespace app {
 
 			waves_.create_buffer();
 
-//			waves_.at_param(0).color_ = img::rgba8(255, 128, 255, 255);
-//			waves_.at_param(1).color_ = img::rgba8(128, 255, 255, 255);
+			waves_.at_param(0).color_ = img::rgba8(255,  64, 255, 255);
+			waves_.at_param(1).color_ = img::rgba8( 64, 255, 255, 255);
+			waves_.at_param(2).color_ = img::rgba8(255, 255,  64, 255);
+			waves_.at_param(3).color_ = img::rgba8( 64, 255,  64, 255);
 
-///			waves_.build_sin(10e3);
+			waves_.build_sin(0, 9.0, 0.9f);
+			waves_.build_sin(1, 15.0, 0.75f);
+			waves_.build_sin(2, 20.0, 0.5f);
+			waves_.build_sin(3, 25.0, 0.25f);
 		}
 
 
@@ -712,7 +741,7 @@ namespace app {
 
 			time_.update(grid_step, size_);
 
-			waves_.copy(0, client_.get_wdm(0), waves_.size());
+//			waves_.copy(0, client_.get_wdm(0), waves_.size());
 		}
 
 
