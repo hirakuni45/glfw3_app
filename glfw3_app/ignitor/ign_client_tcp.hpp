@@ -41,7 +41,8 @@ namespace net {
 
 		uint32_t	wdm_ch_;
 		uint32_t	wdm_pos_;
-		uint16_t	wdm_buff_[2048];
+		uint32_t	wdm_st_[4];
+		uint16_t	wdm_buff_[2048 * 4];
 
 	public:
 		//-----------------------------------------------------------------//
@@ -51,8 +52,8 @@ namespace net {
 		//-----------------------------------------------------------------//
 		ign_client_tcp() : startup_(false),
 			sock_(0),
-
-			connect_(false), crcd_(0), crrd_(0)
+			connect_(false), crcd_(0), crrd_(0),
+			wdm_ch_(0), wdm_pos_(0), wdm_st_{ 0 }
 		{
 		}
 
@@ -69,8 +70,9 @@ namespace net {
 
 		uint32_t get_crrd() const { return crrd_; }
 
-		const uint16_t* get_wdm(uint32_t ch) const { return wdm_buff_; }
+		const uint16_t* get_wdm(uint32_t ch) const { return &wdm_buff_[2048 * (ch & 3)]; }
 
+		uint32_t get_wdm_st(uint32_t ch) const { return wdm_st_[ch & 3]; }
 
 		//-----------------------------------------------------------------//
 		/*!
@@ -182,21 +184,22 @@ namespace net {
 					utils::input("%d", t.c_str()) % v;
 					wdm_ch_ = v;
 					wdm_pos_ = 0;
-///std::cout << "WDM ch: %d" << v << std::endl;
+// std::cout << "WDM capture CH: " << wdm_ch_ << std::endl;
 				} else if(s.find("WDMW") == 0) {  // WDM 波形
 					auto t = s.substr(4);
-// std::cout << wdm_pos_ << ": ";
 					while(t.size() > 4) {
 						auto d = t.substr(4);
 						t[4] = 0;
 						int v;
 						utils::input("%x", t.c_str()) % v;
-						wdm_buff_[wdm_pos_ % 2048] = v;
-// std::cout << v << ", ";
+						wdm_buff_[(wdm_ch_ & 3) * 2048 + (wdm_pos_ % 2048)] = v;
 						++wdm_pos_;
+						if(wdm_pos_ >= 2048) {
+// std::cout << "WDM capture END" << std::endl;
+							++wdm_st_[wdm_ch_ & 3];
+						}
 						t = d;
 					}
-// std::cout << std::endl;
 				}
 			}
 		}

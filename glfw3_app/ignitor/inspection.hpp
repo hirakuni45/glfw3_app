@@ -93,29 +93,35 @@ namespace app {
 		gui::widget_text*		help_;			///< HELP
 
 		struct dc1_t {
-			uint16_t	sw;		///< 5 bits
+			uint32_t	sw;		///< 5 bits
+			uint32_t	delay;	///< SW オンからコマンド発行までの遅延（10ms単位）
 			bool		ena;	///< 0, 1
 			bool		mode;	///< 0, 1
 			uint32_t	volt;	///< 20 bits
 			uint32_t	curr;	///< 20 bits
 
-			dc1_t() : sw(0), ena(0), mode(0), volt(0), curr(0) { }
+			dc1_t() : sw(0), delay(1), ena(0), mode(0), volt(0), curr(0) { }
 
 			std::string build() const
 			{
 				std::string s;
 				s += (boost::format("dc1 D1SW%02X\n") % sw).str();
+				s += (boost::format("delay %d\n") % delay).str();
 				s += (boost::format("dc1 D1MD%d\n") % mode).str();
 				s += (boost::format("dc1 D1OE%d\n") % ena).str();
-				s += (boost::format("dc1 D1VS%05X\n") % (volt & 0xfffff)).str();
-				s += (boost::format("dc1 D1IS%05X\n") % (curr & 0xfffff)).str();
+				if(mode != 0) {
+					s += (boost::format("dc1 D1VS%05X\n") % (volt & 0xfffff)).str();
+				} else {
+					s += (boost::format("dc1 D1IS%05X\n") % (curr & 0xfffff)).str();
+				}
 				return s;
 			}
 		};
 
 
 		struct dc2_t {
-			uint16_t	sw;		///< 14 bits
+			uint32_t	sw;		///< 14 bits
+			uint32_t	delay;	///< SW オンからコマンド発行までの遅延（10ms単位）
 			bool		ena;	///< 0, 1
 			bool		mode;	///< 0, 1
 			uint32_t	volt;	///< 20 bits
@@ -127,9 +133,13 @@ namespace app {
 			{
 				std::string s;
 				s += (boost::format("dc2 D2SW%04X\n") % sw).str();
+				s += (boost::format("delay %d\n") % delay).str();
 				s += (boost::format("dc2 D2MD%d\n") % mode).str();
-				s += (boost::format("dc2 D2VS%05X\n") % (volt & 0xfffff)).str();
-				s += (boost::format("dc2 D2IS%05X\n") % (curr & 0xfffff)).str();
+				if(mode != 0) {
+					s += (boost::format("dc2 D2VS%05X\n") % (volt & 0xfffff)).str();
+				} else {
+					s += (boost::format("dc2 D2IS%05X\n") % (curr & 0xfffff)).str();
+				}
 				s += (boost::format("dc2 D2OE%d\n") % ena).str();
 				return s;
 			}
@@ -264,8 +274,8 @@ namespace app {
 			{
 				widget::param wp(vtx::irect(ofsx + 90, 20 + h * loc, 110, 40), dialog_);
 				widget_list::param wp_;
-				wp_.init_list_.push_back("定電圧");
 				wp_.init_list_.push_back("定電流");
+				wp_.init_list_.push_back("定電圧");
 				dc1_mode_ = wd.add_widget<widget_list>(wp, wp_);
 			}
 			{  // 60V/0.1V, 30A/10mA
@@ -340,8 +350,8 @@ namespace app {
 			{
 				widget::param wp(vtx::irect(ofsx + 90, 20 + h * loc, 110, 40), dialog_);
 				widget_list::param wp_;
-				wp_.init_list_.push_back("定電圧");
 				wp_.init_list_.push_back("定電流");
+				wp_.init_list_.push_back("定電圧");
 				dc2_mode_ = wd.add_widget<widget_list>(wp, wp_);
 			}
 			{  // 300V/0.1V, 100mA/0.01mA
