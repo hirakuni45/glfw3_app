@@ -132,13 +132,14 @@ namespace app {
 		}
 
 
-		static const uint32_t time_unit_size_ = 16;
+		static const uint32_t time_unit_size_ = 20;
 		static float get_time_unit_(uint32_t idx) {
 			static const float tbl[time_unit_size_] = {
 				100e-9, 250e-9, 500e-9, 1e-6,
 				2.5e-6, 5e-6, 10e-6, 25e-6,
 				50e-6, 100e-6, 250e-6, 500e-6,
-				1e-3, 2.5e-3, 5e-3, 10e-3
+				1e-3, 2.5e-3, 5e-3, 10e-3,
+				25e-3, 50e-3, 75e-3, 100e-3
 			};
 			return tbl[idx % time_unit_size_];
 		}
@@ -768,10 +769,10 @@ namespace app {
 			waves_.at_param(2).color_ = img::rgba8(255, 255,  64, 255);
 			waves_.at_param(3).color_ = img::rgba8( 64, 255,  64, 255);
 
-			waves_.build_sin(0,  9.0, 0.9f);
-			waves_.build_sin(1, 15.0, 0.75f);
-			waves_.build_sin(2, 20.0, 0.5f);
-			waves_.build_sin(3, 25.0, 0.25f);
+//			waves_.build_sin(0,  9.0, 0.9f);
+//			waves_.build_sin(1, 15.0, 0.75f);
+//			waves_.build_sin(2, 20.0, 0.5f);
+//			waves_.build_sin(3, 25.0, 0.25f);
 		}
 
 
