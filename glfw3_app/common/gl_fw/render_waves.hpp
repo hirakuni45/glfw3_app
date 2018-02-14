@@ -36,9 +36,11 @@ namespace view {
 
 			bool		update_;	///< 描画の更新「true」
 			bool		render_;	///< 描画しない場合「false」
+			bool		ground_;	///< GND 電位表示
 
 			chr_param() : color_(img::rgba8(255, 255)),
-				offset_(0), gain_(1.0f), update_(false), render_(true)
+				offset_(0), gain_(1.0f), update_(false), render_(true),
+				ground_(false)
 			{ }
 		};
 
