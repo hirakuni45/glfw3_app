@@ -27,7 +27,6 @@
 
 #include "gl_fw/render_waves.hpp"
 
-// #include "ign_client.hpp"
 #include "ign_client_tcp.hpp"
 
 namespace app {
@@ -63,41 +62,43 @@ namespace app {
 
 		gui::widget_sheet*		share_frame_;
 
-
 		double					sample_rate_;
 
 		uint32_t				wdm_st_[4];
 
+		static const uint32_t time_div_size_ = 16;
 		double get_time_div_() const {
 			if(time_div_ == nullptr) return 0.0;
 
-			static constexpr double tbls[] = {
-				1000e-3,
-				500e-3,
-				250e-3,
-				100e-3,
-				50e-3,
-				10e-3,
-				5e-3,
-				1e-3,
-				500e-6,
-				100e-6,
-				50e-6,
-				25e-6,
-				10e-6,
-				5e-6,
-				1e-6,
+			static constexpr double tbls[time_div_size_] = {
+				1.0 / 1e3,
+				1.0 / 2e3,
+				1.0 / 5e3,
+				1.0 / 10e3,
+				1.0 / 20e3,
+				1.0 / 50e3,
+				1.0 / 100e3,
+				1.0 / 200e3,
+				1.0 / 500e3,
+				1.0 / 1e6,
+				1.0 / 2e6,
+				1.0 / 5e6,
+				1.0 / 10e6,
+				1.0 / 20e6,
+				1.0 / 50e6,
+				1.0 / 100e6
 			};
-			return tbls[time_div_->get_select_pos() % 15];
+			return tbls[time_div_->get_select_pos() % time_div_size_];
 		}
 
-
+		// チャネル毎の電圧スケールサイズ
 		static uint32_t get_volt_scale_size_(uint32_t ch) {
 			if(ch == 0) return 8;
 			else if(ch == 1) return 12;
 			else if(ch == 2) return 10;
 			else return 9;
 		}
+
 
 		static float get_volt_scale_value_(uint32_t ch, uint32_t idx) {
 			if(ch == 0) {
@@ -135,11 +136,31 @@ namespace app {
 		static const uint32_t time_unit_size_ = 20;
 		static float get_time_unit_(uint32_t idx) {
 			static const float tbl[time_unit_size_] = {
-				100e-9, 250e-9, 500e-9, 1e-6,
-				2.5e-6, 5e-6, 10e-6, 25e-6,
-				50e-6, 100e-6, 250e-6, 500e-6,
-				1e-3, 2.5e-3, 5e-3, 10e-3,
-				25e-3, 50e-3, 75e-3, 100e-3
+				100e-9, 250e-9, 500e-9,   1e-6,
+				2.5e-6,   5e-6,  10e-6,  25e-6,
+				 50e-6, 100e-6, 250e-6, 500e-6,
+				  1e-3, 2.5e-3,   5e-3,  10e-3,
+				 25e-3,  50e-3,  75e-3, 100e-3
+			};
+			return tbl[idx % time_unit_size_];
+		}
+		static float get_time_unit_base_(uint32_t idx) {
+			static const float tbl[time_unit_size_] = {
+				1e-9, 1e-9, 1e-9, 1e-6,
+				1e-6, 1e-6, 1e-6, 1e-6,
+				1e-6, 1e-6, 1e-6, 1e-6,
+				1e-3, 1e-3, 1e-3, 1e-3,
+				1e-3, 1e-3, 1e-3, 1e-3
+			};
+			return tbl[idx % time_unit_size_];
+		}
+		static const char* get_time_unit_str_(uint32_t idx) {
+			static const char* tbl[time_unit_size_] = {
+				"nS", "nS", "nS", "uS",
+				"uS", "uS", "uS", "uS",
+				"uS", "uS", "uS", "uS",
+				"mS", "mS", "mS", "mS",
+				"mS", "mS", "mS", "mS"
 			};
 			return tbl[idx % time_unit_size_];
 		}
@@ -150,21 +171,27 @@ namespace app {
 			return static_cast<uint32_t>(65536.0f * step / rate);
 		}
 
+
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief  チャネル・クラス
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct chn_t {
-			WAVES&					waves_;
-			gui::widget_null*		root_;
-			gui::widget_check*		ena_;
-			gui::widget_spinbox*	pos_;
-			gui::widget_spinbox*	scale_;
+			WAVES&					waves_;	///< 波形レンダリング
+			gui::widget_null*		root_;	///< ルート
+			gui::widget_check*		ena_;	///< チャネル有効、無効
+			gui::widget_check*		gnd_;	///< GND 電位
+			gui::widget_spinbox*	pos_;  	///< 水平位置
+			gui::widget_spinbox*	scale_;	///< 電圧スケール
+			gui::widget_check*		mes_;	///< メジャー有効
+			gui::widget_spinbox*	org_;	///< 計測開始位置
+			gui::widget_spinbox*	len_;	///< 計測長さ
 
 			// fs: フルスケール電圧
 			chn_t(WAVES& waves, float fs) : waves_(waves), root_(nullptr),
-				ena_(nullptr), pos_(nullptr), scale_(nullptr)
+				ena_(nullptr), gnd_(nullptr), pos_(nullptr), scale_(nullptr),
+				mes_(nullptr), org_(nullptr), len_(nullptr)
 			{ }
 
 
@@ -187,6 +214,11 @@ namespace app {
 						waves_.at_param(ch).render_ = f;
 					};
 				}
+				{  // GND 電位
+					widget::param wp(vtx::irect(10 + 90, 30, 80, 40), root_);
+					widget_check::param wp_("GND");
+					gnd_ = wd.add_widget<widget_check>(wp, wp_);
+				}
 				{  // 電圧位置 (+-1.0)
 					widget::param wp(vtx::irect(10, 70, 130, 40), root_);
 					widget_spinbox::param wp_(0, -20, 20); // grid 数の倍
@@ -200,7 +232,7 @@ namespace app {
 					};
 				}
 				{  // 電圧スケール
-					widget::param wp(vtx::irect(10, 120, 160, 40), root_);
+					widget::param wp(vtx::irect(10 + 140, 70, 160, 40), root_);
 					widget_spinbox::param wp_(0, 0, (get_volt_scale_size_(ch) - 1));
 					scale_ = wd.add_widget<widget_spinbox>(wp, wp_);
 					scale_->at_local_param().select_func_
@@ -211,24 +243,76 @@ namespace app {
 						return (boost::format("%3.2f %c") % a % unit[ch]).str();
 					};
 				}
+				{  // メジャー有効、無効
+					widget::param wp(vtx::irect(10, 120, 130, 40), root_);
+					widget_check::param wp_("Measure");
+					mes_ = wd.add_widget<widget_check>(wp, wp_);
+				}
+				{  // メジャー開始位置
+					widget::param wp(vtx::irect(10, 170, 130, 40), root_);
+					widget_spinbox::param wp_(0, 0, 100);
+					org_ = wd.add_widget<widget_spinbox>(wp, wp_);
+					org_->at_local_param().select_func_
+						= [=](widget_spinbox::state st, int before, int newpos) {
+						float a = static_cast<float>(newpos) 
+							/ static_cast<float>(waves_.get_info().grid_step_);
+						return (boost::format("%3.2f") % a).str();
+					};
+				}
+				{  // メジャー長さ
+					widget::param wp(vtx::irect(10 + 140, 170, 160, 40), root_);
+					widget_spinbox::param wp_(0, 0, 100); // grid 数の倍
+					len_ = wd.add_widget<widget_spinbox>(wp, wp_);
+					len_->at_local_param().select_func_
+						= [=](widget_spinbox::state st, int before, int newpos) {
+						// メジャーに対する電圧、電流表示
+						float a = static_cast<float>(-newpos) 
+							/ static_cast<float>(waves_.get_info().grid_step_)
+							* get_volt_scale_value_(ch, scale_->get_select_pos());
+						static const char unit[4] = { 'A', 'V', 'V', 'V' };
+						return (boost::format("%3.2f %c") % a % unit[ch]).str();
+					};
+				}
 			}
 
 
-			void update(int ch, int grid_step, const vtx::ipos& size)
+			void update(uint32_t ch, const vtx::ipos& size, bool mena)
 			{
 				if(pos_ == nullptr || scale_ == nullptr) return;
+				if(org_ == nullptr || len_ == nullptr) return;
 
-				pos_->at_local_param().min_pos_ = -(size.y / grid_step) * 3 / 2;
-				pos_->at_local_param().max_pos_ =  (size.y / grid_step) * 3 / 2;
+				int grid = waves_.get_info().grid_step_;
+
+				auto pos = (size.y / grid) * 3 / 2;
+				pos_->at_local_param().min_pos_ = -pos;
+				pos_->at_local_param().max_pos_ =  pos;
+
+				int msofs = size.y / 2;
+				org_->at_local_param().min_pos_ = -msofs;
+				org_->at_local_param().max_pos_ =  msofs;
+				len_->at_local_param().min_pos_ = -size.y;
+				len_->at_local_param().max_pos_ =  size.y;
 
 				// 波形位置
 				waves_.at_param(ch).offset_.y = (size.y / 2)
-					+ pos_->get_select_pos() * (grid_step / 2);
+					+ pos_->get_select_pos() * (grid / 2);
 				// 波形拡大、縮小
 				float value = get_volt_scale_value_(ch, scale_->get_select_pos())
-					/ static_cast<float>(waves_.get_info().grid_step_);
+					/ static_cast<float>(grid);
 				float u = get_volt_scale_limit_(ch) / static_cast<float>(32768);
+				if(gnd_->get_check()) u = 0.0f;
 				waves_.at_param(ch).gain_ = u / value;
+
+				// 電圧計測設定
+				if(mena) {
+					if(mes_->get_check()) {
+						waves_.at_info().volt_enable_ = true;
+						waves_.at_info().volt_org_ = org_->get_select_pos() + msofs;
+						waves_.at_info().volt_len_ = len_->get_select_pos();
+					} else {
+						waves_.at_info().volt_enable_ = false;
+					}
+				}
 			}
 
 
@@ -237,11 +321,23 @@ namespace app {
 				if(ena_ != nullptr) {
 					ena_->load(pre);
 				}
+				if(gnd_ != nullptr) {
+					gnd_->load(pre);
+				}
 				if(pos_ != nullptr) {
 					pos_->load(pre);
 				}
 				if(scale_ != nullptr) {
 					scale_->load(pre);
+				}
+				if(mes_ != nullptr) {
+					mes_->load(pre);
+				}
+				if(org_ != nullptr) {
+					org_->load(pre);
+				}
+				if(len_ != nullptr) {
+					len_->load(pre);
 				}
 			}
 
@@ -251,16 +347,26 @@ namespace app {
 				if(ena_ != nullptr) {
 					ena_->save(pre);
 				}
+				if(gnd_ != nullptr) {
+					gnd_->save(pre);
+				}
 				if(pos_ != nullptr) {
 					pos_->save(pre);
 				}
 				if(scale_ != nullptr) {
 					scale_->save(pre);
 				}
+				if(mes_ != nullptr) {
+					mes_->save(pre);
+				}
+				if(org_ != nullptr) {
+					org_->save(pre);
+				}
+				if(len_ != nullptr) {
+					len_->save(pre);
+				}
 			}
 		};
-
-
 		chn_t			chn0_;
 		chn_t			chn1_;
 		chn_t			chn2_;
@@ -269,7 +375,7 @@ namespace app {
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
-			@brief  メジャー・クラス
+			@brief  時間軸計測クラス
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct measure_t {
@@ -279,13 +385,13 @@ namespace app {
 			gui::widget_check*		ena_;
 			gui::widget_spinbox*   	org_;
 			gui::widget_spinbox*   	len_;
-			gui::widget_label*		in_;
-			bool					type_;
-			float					unit_;
+			gui::widget_text*		frq_;	///< 周波数表示
+			uint32_t				tbp_;	///< タイム・ベース位置
 
-			measure_t(WAVES& waves, bool ty) : waves_(waves), root_(nullptr),
-				ena_(nullptr), org_(nullptr), len_(nullptr), in_(nullptr),
-				type_(ty), unit_(0.0f)
+			measure_t(WAVES& waves) : waves_(waves), root_(nullptr),
+				ena_(nullptr), org_(nullptr), len_(nullptr),
+				frq_(nullptr),
+				tbp_(0.0f)
 			{ }
 
 
@@ -301,15 +407,11 @@ namespace app {
 					share->add(text, root_);
 				}
 				{  // メジャー有効、無効
-					widget::param wp(vtx::irect(10, 30, 120, 40), root_);
-					widget_check::param wp_(text);
+					widget::param wp(vtx::irect(10, 30, 140, 40), root_);
+					widget_check::param wp_("Enable");
 					ena_ = wd.add_widget<widget_check>(wp, wp_);
 					ena_->at_local_param().select_func_ = [=](bool f) {
-						if(type_) {
-							waves_.at_info().time_enable_ = f;
-						} else {
-							waves_.at_info().volt_enable_ = f;
-						}
+						waves_.at_info().time_enable_ = f;
 					};
 				}
 				{
@@ -318,9 +420,10 @@ namespace app {
 					org_ = wd.add_widget<widget_spinbox>(wp, wp_);
 					org_->at_local_param().select_func_
 						= [=](widget_spinbox::state st, int before, int newpos) {
-						float t = unit_ * static_cast<float>(newpos)
+						float t = get_time_unit_(tbp_) * static_cast<float>(newpos)
 							/ waves_.get_info().grid_step_;
-						return (boost::format("%3.2E") % t).str();
+						float a = t / get_time_unit_base_(tbp_);
+						return (boost::format("%2.1f %s") % a % get_time_unit_str_(tbp_)).str();
 					};
 				}
 				{
@@ -329,32 +432,34 @@ namespace app {
 					len_ = wd.add_widget<widget_spinbox>(wp, wp_);
 					len_->at_local_param().select_func_
 						= [=](widget_spinbox::state st, int before, int newpos) {
-						float t = unit_ * static_cast<float>(newpos)
+						float t = get_time_unit_(tbp_)
+							* static_cast<float>(newpos)
 							/ waves_.get_info().grid_step_;
-						return (boost::format("%3.2E") % t).str();
+						float a = t / get_time_unit_base_(tbp_);
+						float f = 1.0f / t;
+						frq_->set_text((boost::format("%2.1f Hz") % f).str());
+						return (boost::format("%2.1f %s") % a % get_time_unit_str_(tbp_)).str();
 					};
+				}
+				{
+					widget::param wp(vtx::irect(10, 170, 150, 40), root_);
+					widget_text::param wp_;
+					frq_ = wd.add_widget<widget_text>(wp, wp_);
 				}
 			}
 
 
 			void update(const vtx::ipos& size)
 			{
-				if(org_ != nullptr) {
-					org_->at_local_param().max_pos_ = size.x;
-					if(type_) {
-						waves_.at_info().time_org_ = org_->get_select_pos();
-					} else {
-						waves_.at_info().volt_org_ = org_->get_select_pos();
-					}
-				}
-				if(len_ != nullptr) {
-					len_->at_local_param().max_pos_ = size.x;
-					if(type_) {
-						waves_.at_info().time_len_ = len_->get_select_pos();
-					} else {
-						waves_.at_info().volt_len_ = len_->get_select_pos();
-					}
-				}
+				if(org_ == nullptr || len_ == nullptr) return;
+
+				org_->at_local_param().min_pos_ = 0;
+				org_->at_local_param().max_pos_ = size.x;
+				waves_.at_info().time_org_ = org_->get_select_pos();
+
+				len_->at_local_param().min_pos_ = 0;
+				len_->at_local_param().max_pos_ = size.x;
+				waves_.at_info().time_len_ = len_->get_select_pos();
 			}
 
 
@@ -369,10 +474,8 @@ namespace app {
 				if(len_ != nullptr) {
 					len_->load(pre);
 				}
-				if(in_ != nullptr) {
-					in_->load(pre);
-				}
 			}
+
 
 			void save(sys::preference& pre)
 			{
@@ -385,13 +488,9 @@ namespace app {
 				if(len_ != nullptr) {
 					len_->save(pre);
 				}
-				if(in_ != nullptr) {
-					in_->save(pre);
-				}
 			}
 		};
 		measure_t				measure_time_;
-		measure_t				measure_volt_;
 
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -430,8 +529,8 @@ namespace app {
 					scale_ = wd.add_widget<widget_spinbox>(wp, wp_);
 					scale_->at_local_param().select_func_
 						= [=](widget_spinbox::state st, int before, int newpos) {
-						float ts = get_time_unit_(newpos);
-						return (boost::format("%3.2E") % ts).str();
+						float a = get_time_unit_(newpos) / get_time_unit_base_(newpos);
+						return (boost::format("%2.1f %s") % a % get_time_unit_str_(newpos)).str();
 					};
 				}
 				{  // タイム・オフセット（グリッド単位）
@@ -441,7 +540,9 @@ namespace app {
 					offset_->at_local_param().select_func_
 						= [=](widget_spinbox::state st, int before, int newpos) {
 						float t = get_time_unit_(scale_->get_select_pos()) * newpos;
-						return (boost::format("%3.2E") % t).str();
+						auto un = scale_->get_select_pos();
+						float a = t / get_time_unit_base_(un);
+						return (boost::format("%2.1f %s") % a % get_time_unit_str_(un)).str();
 					};
 				}
 			}
@@ -613,7 +714,7 @@ namespace app {
 			chn1_(waves_, 1.25f),
 			chn2_(waves_, 1.25f),
 			chn3_(waves_, 1.25f),
-			measure_time_(waves_, true), measure_volt_(waves_, false),
+			measure_time_(waves_),
 			time_(waves_), size_(0)
 		{ }
 
@@ -629,13 +730,13 @@ namespace app {
 			widget_director& wd = director_.at().widget_director_;
 
 			size_.set(400, 400);
-			{	// 波形フレーム
+			{  // 波形描画フレーム
 				widget::param wp(vtx::irect(40, 150, size_.x, size_.y));
 				widget_frame::param wp_;
 				wp_.plate_param_.set_caption(12);
 				frame_ = wd.add_widget<widget_frame>(wp, wp_);
 			}
-			{
+			{  // 波形描画ビュー 
 				widget::param wp(vtx::irect(0), frame_);
 				widget_view::param wp_;
 				wp_.update_func_ = [=]() {
@@ -659,37 +760,40 @@ namespace app {
 				tools_ = wd.add_widget<widget_frame>(wp, wp_);
 				tools_->set_state(gui::widget::state::SIZE_LOCK);
 			}
-			{	// 共有フレーム
-				widget::param wp(vtx::irect(5, 330, mw - 10, mh - 330 - 5), tools_);
+			{	// 共有フレーム（プロパティシート）
+				widget::param wp(vtx::irect(5, 280, mw - 10, mh - 280 - 5), tools_);
 				widget_sheet::param wp_;
 				share_frame_ = wd.add_widget<widget_sheet>(wp, wp_);
 			}
 
-			for(uint32_t i = 0; i < 4; ++i) {
-				widget::param wp(vtx::irect(20 + 70 * i, 22, 70, 40), tools_);
+			for(uint32_t i = 0; i < 4; ++i) {  //  WMD スイッチ設定
+				widget::param wp(vtx::irect(20 + 65 * i, 22, 65, 40), tools_);
 				widget_check::param wp_((boost::format("%d") % (29 + i)).str());
 				sw_[i] = wd.add_widget<widget_check>(wp, wp_);
 			}
 			{  // 時間軸リスト 10K、20K、50K、100K、200K、500K、1M、2M、5M、10M、20M、50M、100M
 				widget::param wp(vtx::irect(20, 22 + 50, 110, 40), tools_);
 				widget_list::param wp_;
-				wp_.init_list_.push_back("100us");
-				wp_.init_list_.push_back(" 50us");
-				wp_.init_list_.push_back(" 20us");
-				wp_.init_list_.push_back(" 10us");
-				wp_.init_list_.push_back("  5us");
-				wp_.init_list_.push_back("  2us");
-				wp_.init_list_.push_back("  1us");
-				wp_.init_list_.push_back("500ns");
-				wp_.init_list_.push_back("200ns");
-				wp_.init_list_.push_back("100ns");
-				wp_.init_list_.push_back(" 50ns");
-				wp_.init_list_.push_back(" 20ns");
-				wp_.init_list_.push_back(" 10ns");
+				wp_.init_list_.push_back("1mS");
+				wp_.init_list_.push_back("500uS");
+				wp_.init_list_.push_back("200uS");
+				wp_.init_list_.push_back("100uS");
+				wp_.init_list_.push_back(" 50uS");
+				wp_.init_list_.push_back(" 20uS");
+				wp_.init_list_.push_back(" 10uS");
+				wp_.init_list_.push_back("  5uS");
+				wp_.init_list_.push_back("  2uS");
+				wp_.init_list_.push_back("  1uS");
+				wp_.init_list_.push_back("500nS");
+				wp_.init_list_.push_back("200nS");
+				wp_.init_list_.push_back("100nS");
+				wp_.init_list_.push_back(" 50nS");
+				wp_.init_list_.push_back(" 20nS");
+				wp_.init_list_.push_back(" 10nS");
 				time_div_ = wd.add_widget<widget_list>(wp, wp_);
 			}
 			{  // トリガー・チャネル選択
-				widget::param wp(vtx::irect(20 + 120, 22 + 50, 90, 40), tools_);
+				widget::param wp(vtx::irect(20 + 120, 22 + 50, 80, 40), tools_);
 				widget_list::param wp_;
 				wp_.init_list_.push_back("CH1");
 				wp_.init_list_.push_back("CH2");
@@ -698,14 +802,14 @@ namespace app {
 				trg_ch_ = wd.add_widget<widget_list>(wp, wp_);
 			}
 			{  // トリガー・スロープ選択
-				widget::param wp(vtx::irect(20, 22 + 100, 80, 40), tools_);
+				widget::param wp(vtx::irect(20 + 210, 22 + 50, 80, 40), tools_);
 				widget_list::param wp_;
 				wp_.init_list_.push_back("Fall");
 				wp_.init_list_.push_back("Rise");
 				trg_slope_ = wd.add_widget<widget_list>(wp, wp_);
 			}
 			{  // トリガー・ウィンドウ（１～１５）
-				widget::param wp(vtx::irect(20 + 90, 22 + 100, 90, 40), tools_);
+				widget::param wp(vtx::irect(20, 22 + 100, 90, 40), tools_);
 				widget_spinbox::param wp_(1, 1, 15);
 				trg_window_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				trg_window_->at_local_param().select_func_
@@ -714,7 +818,7 @@ namespace app {
 				};
 			}
 			{  // トリガーレベル設定
-				widget::param wp(vtx::irect(20, 22 + 150, 150, 40), tools_);
+				widget::param wp(vtx::irect(20 + 100, 22 + 100, 100, 40), tools_);
 				widget_label::param wp_("32768", false);
 				trg_level_ = wd.add_widget<widget_label>(wp, wp_);
 				trg_level_->at_local_param().select_func_ = [=](const std::string& str) {
@@ -722,7 +826,7 @@ namespace app {
 				};
 			}
 			{  // exec
-				widget::param wp(vtx::irect(mw - 40, 22 + 150, 30, 30), tools_);
+				widget::param wp(vtx::irect(mw - 40, 22 + 200, 30, 30), tools_);
 				widget_button::param wp_(">");
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
 				exec_->at_local_param().select_func_ = [=](int n) {
@@ -732,26 +836,25 @@ namespace app {
 				};
 			}
 
-			for(int i = 0; i < 4; ++i) {
-					static const vtx::ipos ofs[4] = {
-						{ 0, 0 }, { 110, 0 }, { 0, 50 }, { 110, 50 }
-					};
-					widget::param wp(vtx::irect(20 + ofs[i].x, 22 + 200 + ofs[i].y,
-						100, 40), tools_);
-					widget_list::param wp_;
-					wp_.init_list_.push_back("-22dB");
-					wp_.init_list_.push_back("-16dB");
-					wp_.init_list_.push_back("-10dB");
-					wp_.init_list_.push_back(" -4dB");
-					wp_.init_list_.push_back("  2dB");
-					wp_.init_list_.push_back("  8dB");
-					wp_.init_list_.push_back(" 14dB");
-					wp_.init_list_.push_back(" 20dB");
-					ch_gain_[i] = wd.add_widget<widget_list>(wp, wp_);
+			for(int i = 0; i < 4; ++i) {  // 各チャネル減衰設定
+				static const vtx::ipos ofs[4] = {
+					{ 0, 0 }, { 110, 0 }, { 0, 50 }, { 110, 50 }
+				};
+				widget::param wp(vtx::irect(20 + ofs[i].x, 22 + 150 + ofs[i].y,
+					100, 40), tools_);
+				widget_list::param wp_;
+				wp_.init_list_.push_back("-22dB");
+				wp_.init_list_.push_back("-16dB");
+				wp_.init_list_.push_back("-10dB");
+				wp_.init_list_.push_back(" -4dB");
+				wp_.init_list_.push_back("  2dB");
+				wp_.init_list_.push_back("  8dB");
+				wp_.init_list_.push_back(" 14dB");
+				wp_.init_list_.push_back(" 20dB");
+				ch_gain_[i] = wd.add_widget<widget_list>(wp, wp_);
 			}
 
 			measure_time_.init(director_, share_frame_, "Time Measure");
-			measure_volt_.init(director_, share_frame_, "Volt Measure");
 
 			chn0_.init(director_, share_frame_, 0);
 			chn1_.init(director_, share_frame_, 1);
@@ -769,10 +872,10 @@ namespace app {
 			waves_.at_param(2).color_ = img::rgba8(255, 255,  64, 255);
 			waves_.at_param(3).color_ = img::rgba8( 64, 255,  64, 255);
 
-//			waves_.build_sin(0,  9.0, 0.9f);
-//			waves_.build_sin(1, 15.0, 0.75f);
-//			waves_.build_sin(2, 20.0, 0.5f);
-//			waves_.build_sin(3, 25.0, 0.25f);
+			waves_.build_sin(0, 10.0, 1.0f);
+			waves_.build_sin(1, 15.0, 0.75f);
+			waves_.build_sin(2, 20.0, 0.5f);
+			waves_.build_sin(3, 25.0, 0.25f);
 		}
 
 
@@ -784,22 +887,22 @@ namespace app {
 		void update()
 		{
 			if(frame_ == nullptr) return;
+			if(share_frame_ == nullptr) return;
 
 			exec_->set_stall(!client_.probe());
 
-			measure_time_.unit_ = get_time_unit_(time_.scale_->get_select_pos());
-//			measure_volt_.unit_ = 
-
+			measure_time_.tbp_ = time_.scale_->get_select_pos();
 			measure_time_.update(size_);
-			measure_volt_.update(size_);
+
+			chn0_.update(0, size_, share_frame_->get_select_pos() == 1);
+			chn1_.update(1, size_, share_frame_->get_select_pos() == 2);
+			chn2_.update(2, size_, share_frame_->get_select_pos() == 3);
+			chn3_.update(3, size_, share_frame_->get_select_pos() == 4);
+			if(share_frame_->get_select_pos() < 1 || share_frame_->get_select_pos() > 4) {
+				waves_.at_info().volt_enable_ = false;				
+			}
 
 			auto grid_step = waves_.get_info().grid_step_;
-
-			chn0_.update(0, grid_step, size_);
-			chn1_.update(1, grid_step, size_);
-			chn2_.update(2, grid_step, size_);
-			chn3_.update(3, grid_step, size_);
-
 			time_.update(grid_step, size_, sample_rate_);
 
 			for(uint32_t i = 0; i < 4; ++i) {
@@ -865,7 +968,6 @@ namespace app {
 			time_.load(pre);
 
 			measure_time_.load(pre);
-			measure_volt_.load(pre);
 		}
 
 
@@ -922,7 +1024,6 @@ namespace app {
 			time_.save(pre);
 
 			measure_time_.save(pre);
-			measure_volt_.save(pre);
 		}
 	};
 }
