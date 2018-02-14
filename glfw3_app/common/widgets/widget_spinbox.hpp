@@ -57,6 +57,7 @@ namespace gui {
 			int					min_pos_;	///< 最低位置
 			int					sel_pos_;	///< 選択位置
 			int					max_pos_;	///< 最大位置
+			int					page_step_;	///< ページ移動量
 
 			bool				scroll_ctrl_;	///< スクロール・コントロール（マウスのダイアル）
 			bool				accel_;			///< ボタンのアクセル・コントロール
@@ -68,7 +69,7 @@ namespace gui {
 				text_param_("", img::rgba8(255, 255), img::rgba8(0, 255)),
 				image_(0), handle_(0), id_(0),
 				select_func_(),
-				min_pos_(min), sel_pos_(sel), max_pos_(max),
+				min_pos_(min), sel_pos_(sel), max_pos_(max), page_step_((max - min) / 10),
 				scroll_ctrl_(true),
 				accel_(true), accel_delay_(35), accel_inter_(10)
 				{ }
@@ -276,7 +277,14 @@ namespace gui {
 					}
 				}
 			}
-
+#if 0
+			if(get_focus()) {
+				const utils::lstring& ins = wd_.get_keyboard().input();
+				for(uint32_t ch : ins) {
+// std::cout << "Key: " << ch << std::endl;
+				}
+			}
+#endif
 			if(st != state::none) {
 				int before = param_.sel_pos_;
 				++param_.id_;
