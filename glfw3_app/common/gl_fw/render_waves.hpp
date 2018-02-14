@@ -107,9 +107,13 @@ namespace view {
 					grid_.push_back(vtx::spos(h, 0));
 					grid_.push_back(vtx::spos(h, size.y));
 				}
-				for(int v = 0; v < size.y; v += grid_step_) {  // ---
-					grid_.push_back(vtx::spos(0, v));
-					grid_.push_back(vtx::spos(size.x, v));
+				// ---
+				int org = (size.y / 2) / grid_step_;
+				org *= grid_step_;
+				if(org < (size.y / 2)) org += grid_step_;
+				for(int v = -org; v < (size.y / 2); v += grid_step_) {
+					grid_.push_back(vtx::spos(0, v + size.y / 2));
+					grid_.push_back(vtx::spos(size.x, v + size.y / 2));
 				}
 
 				time_.clear();
