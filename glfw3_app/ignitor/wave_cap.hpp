@@ -503,12 +503,13 @@ namespace app {
 
 			gui::widget_null*		root_;
 
-			gui::widget_spinbox*	scale_;
-			gui::widget_spinbox*	offset_;
+			gui::widget_spinbox*	scale_;		///< 時間スケール
+			gui::widget_spinbox*	offset_;	///< 時間オフセット
+			gui::widget_check*		trg_gate_;	///< トリガー表示
 
 			time_t(WAVES& waves) : waves_(waves),
 				root_(nullptr),
-				scale_(nullptr), offset_(nullptr)
+				scale_(nullptr), offset_(nullptr), trg_gate_(nullptr)
 			{ }
 
 
@@ -545,6 +546,11 @@ namespace app {
 						return (boost::format("%2.1f %s") % a % get_time_unit_str_(un)).str();
 					};
 				}
+				{  // トリガー・ゲート有効、無効
+					widget::param wp(vtx::irect(10, 140, 140, 40), root_);
+					widget_check::param wp_("Trigger");
+					trg_gate_ = wd.add_widget<widget_check>(wp, wp_);
+				}
 			}
 
 
@@ -571,6 +577,9 @@ namespace app {
 				if(offset_ != nullptr) {
 					offset_->load(pre);
 				}
+				if(trg_gate_ != nullptr) {
+					trg_gate_->load(pre);
+				}
 			}
 
 
@@ -581,6 +590,9 @@ namespace app {
 				}
 				if(offset_ != nullptr) {
 					offset_->save(pre);
+				}
+				if(trg_gate_ != nullptr) {
+					trg_gate_->save(pre);
 				}
 			}
 		};
