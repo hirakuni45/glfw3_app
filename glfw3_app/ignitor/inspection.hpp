@@ -48,8 +48,6 @@ namespace app {
 		utils::select_file		unit_load_filer_;
 		utils::select_file		unit_save_filer_;
 
-//		gui::widget_list*		inspection_standards_;	///< 検査規格 (Inspection standards)
-
 		// DC1 設定
 		gui::widget_check*		dc1_sw_[5];		///< DC1 接続スイッチ
 		gui::widget_check*		dc1_ena_;		///< DC1 有効、無効
@@ -89,6 +87,9 @@ namespace app {
 		gui::widget_button*		icm_exec_;		///< ICM 設定転送
 
 		gui::widget_label*		wait_time_;		///< Wait時間設定
+		gui::widget_list*		test_term_;		///< 検査端子設定
+		gui::widget_label*		test_min_;		///< 検査最小値
+		gui::widget_label*		test_max_;		///< 検査最大値
 
 		gui::widget_text*		help_;			///< HELP
 
@@ -203,7 +204,7 @@ namespace app {
 			std::string build() const
 			{
 				std::string s;
-				s = (boost::format("icm CSW%02X\n") % sw).str();
+				s = (boost::format("icm ICSW%02X\n") % sw).str();
 				return s;
 			}
 		};
@@ -258,13 +259,28 @@ namespace app {
 			}
 		}
 
+		void init_sw_(int ofsx, int h, int loc, gui::widget_check* out[], int num, const char* swt[])
+		{
+			using namespace gui;
+			widget_director& wd = director_.at().widget_director_;			
+			for(int i = 0; i < num; ++i) {
+				widget::param wp(vtx::irect(ofsx, 20 + h * loc, 60, 40), dialog_);
+				widget_check::param wp_(swt[i]);
+				out[i] = wd.add_widget<widget_check>(wp, wp_);
+				ofsx += 60;
+			}
+		}
+
 
 		void init_dc1_(int d_w, int ofsx, int h, int loc)
 		{
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
-			init_sw_(ofsx, h, loc, dc1_sw_, 5, 40);
+			static const char* swt[] = {
+				"40", "41", "42", "43", "49"
+			};
+			init_sw_(ofsx, h, loc, dc1_sw_, 5, swt);
 			++loc;
 			{
 				widget::param wp(vtx::irect(ofsx, 20 + h * loc, 90, 40), dialog_);
@@ -651,7 +667,8 @@ namespace app {
 
 			icm_sw_{ nullptr }, icm_exec_(nullptr),
 
-			wait_time_(nullptr),
+			wait_time_(nullptr), test_term_(nullptr), test_min_(nullptr), test_max_(nullptr),
+
 			help_(nullptr)
 		{ }
 
@@ -679,7 +696,7 @@ namespace app {
 			widget_director& wd = director_.at().widget_director_;
 
 			int d_w = 1000;
-			int d_h = 700;
+			int d_h = 610;
 			{
 				widget::param wp(vtx::irect(100, 100, d_w, d_h));
 				widget_dialog::param wp_;
@@ -789,13 +806,35 @@ namespace app {
 				init_crm_(d_w, ofsx, h, 7);
 				init_icm_(d_w, ofsx, h, 9);
 
-			{  // (10) Wait時間設定： ０～１．０ｓ（レンジ：０．０１ｓ）
-				widget::param wp(vtx::irect(ofsx, 20 + h * 12, 90, 40), dialog_);
+			{  // Wait時間設定： ０～１．０ｓ（レンジ：０．０１ｓ）
+				widget::param wp(vtx::irect(ofsx, 20 + h * 10, 90, 40), dialog_);
 				widget_label::param wp_("0", false);
 				wait_time_ = wd.add_widget<widget_label>(wp, wp_);
 				wait_time_->at_local_param().select_func_ = [=](const std::string& str) {
 					wait_time_->set_text(limitf_(str, 0.0f, 1.0f, "%3.2f"));
 				};
+			}
+			{  // 計測ポイント選択
+				widget::param wp(vtx::irect(ofsx + 100, 20 + h * 10, 90, 40), dialog_);
+				widget_list::param wp_;
+				wp_.init_list_.push_back("T1");
+				wp_.init_list_.push_back("T2");
+				wp_.init_list_.push_back("T3");
+				wp_.init_list_.push_back("T4");
+				wp_.init_list_.push_back("T5");
+				wp_.init_list_.push_back("T6");
+				wp_.init_list_.push_back("T7");
+				test_term_ = wd.add_widget<widget_list>(wp, wp_);
+			}
+			{  // テスト MIN 値
+				widget::param wp(vtx::irect(ofsx + 200, 20 + h * 10, 90, 40), dialog_);
+				widget_label::param wp_("", false);
+				test_min_ = wd.add_widget<widget_label>(wp, wp_);
+			}
+			{  // テスト MAX 値
+				widget::param wp(vtx::irect(ofsx + 300, 20 + h * 10, 90, 40), dialog_);
+				widget_label::param wp_("", false);
+				test_max_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 
 			{  // help message
