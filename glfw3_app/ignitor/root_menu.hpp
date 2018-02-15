@@ -531,6 +531,10 @@ return;
 
 			project_.update();
 
+			if(cont_setting_exec_ != nullptr) {
+				cont_setting_exec_->set_stall(!client_.probe());
+			}
+
 #ifdef NATIVE_FILER
 			if(proj_load_filer_.state()) {
 				auto path = proj_load_filer_.get();
