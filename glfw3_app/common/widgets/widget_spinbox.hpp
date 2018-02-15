@@ -57,7 +57,8 @@ namespace gui {
 			int					min_pos_;	///< 最低位置
 			int					sel_pos_;	///< 選択位置
 			int					max_pos_;	///< 最大位置
-			int					page_step_;	///< ページ移動量
+			int					page_div_;	///< ページ移動分割数
+			int					page_step_;	///< ページ移動数(page_div_ が０の場合）
 
 			bool				scroll_ctrl_;	///< スクロール・コントロール（マウスのダイアル）
 			bool				accel_;			///< ボタンのアクセル・コントロール
@@ -69,7 +70,8 @@ namespace gui {
 				text_param_("", img::rgba8(255, 255), img::rgba8(0, 255)),
 				image_(0), handle_(0), id_(0),
 				select_func_(),
-				min_pos_(min), sel_pos_(sel), max_pos_(max), page_step_((max - min) / 10),
+				min_pos_(min), sel_pos_(sel), max_pos_(max),
+				page_div_(0), page_step_((max - min) / 10),
 				scroll_ctrl_(true),
 				accel_(true), accel_delay_(35), accel_inter_(10)
 				{ }
@@ -84,10 +86,11 @@ namespace gui {
 		gl::mobj::handle	up_objh_;
 		gl::mobj::handle	dn_objh_;
 
-		bool	initial_;
+		bool		initial_;
 
 		uint16_t	delay_cnt_;
 
+		int			sel_pos_;
 
 		state get_button_state_(int& d) const
 		{
@@ -114,7 +117,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_spinbox(widget_director& wd, const widget::param& bp, const param& p) :
 			widget(bp), wd_(wd), param_(p), objh_(0), up_objh_(0), dn_objh_(0),
-		    initial_(false), delay_cnt_(0) { }
+		    initial_(false), delay_cnt_(0), sel_pos_(0) { }
 
 
 		//-----------------------------------------------------------------//
@@ -184,7 +187,20 @@ namespace gui {
 			@return 選択位置
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t get_select_pos() const { return param_.sel_pos_; }
+		int get_select_pos() const { return param_.sel_pos_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	選択位置の設定
+			@param[in]	pos	設定位置
+		*/
+		//-----------------------------------------------------------------//
+		void set_select_pos(int pos) {
+			if(param_.min_pos_ <= pos && pos <= param_.max_pos_) { 
+				param_.sel_pos_ = pos;
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -229,6 +245,8 @@ namespace gui {
 				t.plate_param_ = param_.plate_param_;
 				objh_ = wd_.share_add(t);
 			}
+
+			sel_pos_ = param_.sel_pos_;
 		}
 
 
@@ -277,16 +295,24 @@ namespace gui {
 					}
 				}
 			}
-#if 0
+
 			if(get_focus()) {
-				const utils::lstring& ins = wd_.get_keyboard().input();
-				for(uint32_t ch : ins) {
-// std::cout << "Key: " << ch << std::endl;
+				gl::core& core = gl::core::get_instance();
+				const gl::device& dev = core.get_device();
+				int step = param_.page_step_;
+				if(param_.page_div_ != 0) {
+					step = (param_.max_pos_ - param_.min_pos_) / param_.page_div_;
+				}
+				if(dev.get_positive(gl::device::key::PAGE_UP)) {
+					d =  step;
+					st = state::inc;
+				} else if(dev.get_positive(gl::device::key::PAGE_DOWN)) {
+					d = -step;
+					st = state::dec;
 				}
 			}
-#endif
-			if(st != state::none) {
-				int before = param_.sel_pos_;
+
+			if(st != state::none || sel_pos_ != param_.sel_pos_) {
 				++param_.id_;
 				if(d > 0) {
 					param_.sel_pos_ += d;
@@ -298,11 +324,12 @@ namespace gui {
 					st = state::dec;
 				}
 				if(param_.select_func_ != nullptr) {
-					auto t = param_.select_func_(st, before, param_.sel_pos_);
+					auto t = param_.select_func_(st, sel_pos_, param_.sel_pos_);
 					if(!t.empty()) {
 						param_.text_param_.set_text(t);
 					}
 				}
+				sel_pos_ = param_.sel_pos_;
 			}
 		}
 
