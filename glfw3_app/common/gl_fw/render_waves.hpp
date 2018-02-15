@@ -71,11 +71,16 @@ namespace view {
 			bool		volt_enable_;	///< 電圧軸有効
 //			bool		volt_anime_;	///< 電圧軸アニメーション
 
+			img::rgba8	trig_color_;	///< トリガー軸カラー
+			int32_t		trig_pos_;		///< トリガー軸位置（時間軸）
+			bool		trig_enable_;	///< トリガー軸有効
+
 		private:
 			vtx::sposs	grid_;
 			vtx::sposs	time_;
 			vtx::sposs	volt_;
 			vtx::ipos	size_;
+			vtx::sposs	trig_;
 
 			uint32_t	count_;
 
@@ -84,6 +89,7 @@ namespace view {
 				bits <<= 1;
 				if(mod) bits |= 1;
 			}
+
 
 		public:
 			info_param() : grid_color_(img::rgba8(255, 255, 255, 96)), grid_step_(30),
@@ -96,8 +102,13 @@ namespace view {
 				volt_color_(img::rgba8(128, 255, 128, 192)),
 				volt_org_(0), volt_len_(0),
 				volt_stipple_(0b1110110011101100), volt_enable_(true),
+
+				trig_color_(img::rgba8(190, 255, 140, 192)),
+				trig_pos_(0), trig_enable_(true),
+
 				grid_(), time_(), volt_(), size_(), count_(0)
 			{ }
+
 
 			void build(const vtx::ipos& size)
 			{
@@ -125,7 +136,12 @@ namespace view {
 				volt_.clear();
 				volt_.push_back(vtx::spos(0, 0));
 				volt_.push_back(vtx::spos(size.x, 0));
+
+				trig_.clear();
+				trig_.push_back(vtx::spos(0, 0));
+				trig_.push_back(vtx::spos(0, size.y));
 			}
+
 
 			void render()
 			{
@@ -153,6 +169,14 @@ namespace view {
 					gl::draw_lines(volt_);
 					gl::glTranslate(0, volt_len_);
 					gl::draw_lines(volt_);
+					glPopMatrix();
+				}
+				if(trig_enable_) {
+					glLineStipple(1, time_stipple_);
+					glPushMatrix();
+					gl::glTranslate(trig_pos_, 0);
+					gl::glColor(trig_color_);
+					gl::draw_lines(trig_);
 					glPopMatrix();
 				}
 				if(count_ > 0) {
@@ -308,7 +332,8 @@ namespace view {
 		{
 			if(len > ch_[ch].units_.size()) len = ch_[ch].units_.size();
 			for(uint32_t i = 0; i < len; ++i) {
-				ch_[ch].units_[i] = *src++;
+				uint16_t w = *src++;
+				ch_[ch].units_[i] = w;
 			}
 			ch_[ch].param_.update_ = true;
 		}
