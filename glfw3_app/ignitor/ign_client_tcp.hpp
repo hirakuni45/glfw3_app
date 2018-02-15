@@ -42,7 +42,7 @@ namespace net {
 		uint32_t	wdm_ch_;
 		uint32_t	wdm_pos_;
 		uint32_t	wdm_st_[4];
-		uint16_t	wdm_buff_[2048 * 4];
+		uint16_t	wdm_buff_[1024 * 4];
 
 	public:
 		//-----------------------------------------------------------------//
@@ -70,7 +70,7 @@ namespace net {
 
 		uint32_t get_crrd() const { return crrd_; }
 
-		const uint16_t* get_wdm(uint32_t ch) const { return &wdm_buff_[2048 * (ch & 3)]; }
+		const uint16_t* get_wdm(uint32_t ch) const { return &wdm_buff_[1024 * (ch & 3)]; }
 
 		uint32_t get_wdm_st(uint32_t ch) const { return wdm_st_[ch & 3]; }
 
@@ -192,9 +192,9 @@ namespace net {
 						t[4] = 0;
 						int v;
 						utils::input("%x", t.c_str()) % v;
-						wdm_buff_[(wdm_ch_ & 3) * 2048 + (wdm_pos_ % 2048)] = v;
+						wdm_buff_[(wdm_ch_ & 3) * 1024 + (wdm_pos_ % 1024)] = v;
 						++wdm_pos_;
-						if(wdm_pos_ >= 2048) {
+						if(wdm_pos_ >= 1024) {
 // std::cout << "WDM capture END" << std::endl;
 							++wdm_st_[wdm_ch_ & 3];
 						}
