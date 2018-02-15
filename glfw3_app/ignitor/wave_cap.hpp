@@ -43,7 +43,7 @@ namespace app {
 
 		net::ign_client_tcp&	client_;
 
-		typedef view::render_waves<uint16_t, 2048, 4> WAVES;
+		typedef view::render_waves<uint16_t, 1024, 4> WAVES;
 		WAVES					waves_;
 
 		gui::widget_frame*		frame_;
@@ -290,8 +290,12 @@ namespace app {
 				int msofs = size.y / 2;
 				org_->at_local_param().min_pos_ = -msofs;
 				org_->at_local_param().max_pos_ =  msofs;
+				org_->at_local_param().page_div_ = 0;
+				org_->at_local_param().page_step_ = -grid;
 				len_->at_local_param().min_pos_ = -size.y;
 				len_->at_local_param().max_pos_ =  size.y;
+				len_->at_local_param().page_div_ = 0;
+				len_->at_local_param().page_step_ = -grid;
 
 				// 波形位置
 				waves_.at_param(ch).offset_.y = (size.y / 2)
@@ -453,12 +457,18 @@ namespace app {
 			{
 				if(org_ == nullptr || len_ == nullptr) return;
 
+				auto grid = waves_.get_info().grid_step_;
+
 				org_->at_local_param().min_pos_ = 0;
 				org_->at_local_param().max_pos_ = size.x;
+				org_->at_local_param().page_div_ = 0;
+				org_->at_local_param().page_step_ = grid;
 				waves_.at_info().time_org_ = org_->get_select_pos();
 
 				len_->at_local_param().min_pos_ = 0;
 				len_->at_local_param().max_pos_ = size.x;
+				len_->at_local_param().page_div_ = 0;
+				len_->at_local_param().page_step_ = grid;
 				waves_.at_info().time_len_ = len_->get_select_pos();
 			}
 
@@ -505,11 +515,12 @@ namespace app {
 
 			gui::widget_spinbox*	scale_;		///< 時間スケール
 			gui::widget_spinbox*	offset_;	///< 時間オフセット
+			gui::widget_button*		res_ofs_;	///< 時間オフセット、リセット
 			gui::widget_check*		trg_gate_;	///< トリガー表示
 
 			time_t(WAVES& waves) : waves_(waves),
 				root_(nullptr),
-				scale_(nullptr), offset_(nullptr), trg_gate_(nullptr)
+				scale_(nullptr), offset_(nullptr), res_ofs_(nullptr), trg_gate_(nullptr)
 			{ }
 
 
@@ -546,6 +557,15 @@ namespace app {
 						return (boost::format("%2.1f %s") % a % get_time_unit_str_(un)).str();
 					};
 				}
+				{  // オフセット・リセット
+					widget::param wp(vtx::irect(10 + 215, 95, 30, 30), root_);
+					widget_button::param wp_("R");
+					res_ofs_ = wd.add_widget<widget_button>(wp, wp_);
+					res_ofs_->at_local_param().select_func_
+						= [=](uint32_t id) {
+						offset_->set_select_pos(0);
+					};
+				}
 				{  // トリガー・ゲート有効、無効
 					widget::param wp(vtx::irect(10, 140, 140, 40), root_);
 					widget_check::param wp_("Trigger");
@@ -554,18 +574,29 @@ namespace app {
 			}
 
 
-			void update(int grid_step, const vtx::ipos& size, float rate)
+			void update(const vtx::ipos& size, float rate)
 			{
-				auto ts = get_time_scale_(scale_->get_select_pos(),
-					waves_.get_info().grid_step_, rate);
-				offset_->at_local_param().max_pos_ = 
-					(waves_.size() * ts / 65536 - size.x) / grid_step;
-	
+				int grid = waves_.get_info().grid_step_;
+
+				auto ts = get_time_scale_(scale_->get_select_pos(), grid, rate);
+				int w = (waves_.size() / 2 * ts / 65536 - size.x) / grid;
+				offset_->at_local_param().min_pos_ = -w;
+				offset_->at_local_param().max_pos_ =  w;
+
 				auto ofs = offset_->get_select_pos();
-				waves_.at_param(0).offset_.x = ofs * grid_step;
-				waves_.at_param(1).offset_.x = ofs * grid_step;
-				waves_.at_param(2).offset_.x = ofs * grid_step;
-				waves_.at_param(3).offset_.x = ofs * grid_step;
+				// 波形のトリガー先頭
+//				ofs += 512;
+				waves_.at_param(0).offset_.x = ofs * grid;
+				waves_.at_param(1).offset_.x = ofs * grid;
+				waves_.at_param(2).offset_.x = ofs * grid;
+				waves_.at_param(3).offset_.x = ofs * grid;
+
+				if(trg_gate_->get_check()) {
+					waves_.at_info().trig_enable_ = true;
+					waves_.at_info().trig_pos_ = -offset_->get_select_pos() * grid;
+				} else {
+					waves_.at_info().trig_enable_ = false;
+				}
 			}
 
 
@@ -914,9 +945,9 @@ namespace app {
 				waves_.at_info().volt_enable_ = false;				
 			}
 
-			auto grid_step = waves_.get_info().grid_step_;
-			time_.update(grid_step, size_, sample_rate_);
+			time_.update(size_, sample_rate_);
 
+			// 波形のコピー
 			for(uint32_t i = 0; i < 4; ++i) {
 				auto st = client_.get_wdm_st(i);
 				if(wdm_st_[i] != st) {
