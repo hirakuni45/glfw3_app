@@ -239,6 +239,11 @@ tarball:
 	tar cfvz $(TARGET)_$(shell date +%Y%m%d%H).tgz \
 	*.[hc]pp Makefile ../common/*/*.[hc]pp ../common/*/*.[hc]
 
+copyapp:
+	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -mwindows -o $(TARGET)$(FEXT)
+	cp $(TARGET)$(FEXT) /c/graviton/app/.
+	rm /c/graviton/app/$(TARGET).pre
+
 bin_zip:
 	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -mwindows -o $(TARGET)$(FEXT) 
 	rm -f $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip
