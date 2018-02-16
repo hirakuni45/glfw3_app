@@ -309,6 +309,11 @@ namespace gui {
 				} else if(dev.get_positive(gl::device::key::PAGE_DOWN)) {
 					d = -step;
 					st = state::dec;
+				} else if(dev.get_positive(gl::device::key::UP)) {
+					d = step >= 0 ? 1 : -1;
+					st = state::inc;
+				} else if(dev.get_positive(gl::device::key::DOWN)) {
+					d = step < 0 ? -1 : 1;
 				}
 			}
 
