@@ -71,6 +71,8 @@ namespace app {
 		gui::widget_label*		gen_freq_;	///< ジェネレータ設定・周波数（1Hz to 100Hz / 1Hz)
 		gui::widget_label*		gen_volt_;	///< ジェネレータ設定・電圧（0 to 14V / 0.1V）
 		gui::widget_label*		gen_duty_;	///< ジェネレーター設定・Duty（0.1% to 100% / 0.1%）
+		gui::widget_check*		gen_iena_;	///< ジェネレータ内臓電源、有効、無効
+		gui::widget_label*		gen_ivolt_;	///< ジェネレータ設定・内臓電源
 		gui::widget_button*		gen_exec_;	///< ジェネレーター設定転送
 
 		// CRM 設定
@@ -154,8 +156,10 @@ namespace app {
 			uint16_t   	frq;	///< 7 bits
 			uint16_t	duty;	///< 10 bits
 			uint16_t	volt;	///< 10 bits
+			bool		iena;	///< 内臓電源
+			uint32_t	ivolt;	///< 内臓電源電圧
 
-			wgm_t() : ena(0), type(0), frq(0), duty(0), volt(0) { }
+			wgm_t() : ena(0), type(0), frq(0), duty(0), volt(0), iena(false), ivolt(0) { }
 
 			std::string build() const
 			{
@@ -166,6 +170,8 @@ namespace app {
 				s += (boost::format("wgm WGPW%03X\n") % (duty & 0x3ff)).str();
 				s += (boost::format("wgm WGPV%03X\n") % (volt & 0x3ff)).str();
 				s += (boost::format("wgm WGOE%d\n") % ena).str();
+				s += (boost::format("wgm WGDV%05X\n") % (ivolt & 0xfffff)).str();
+				s += (boost::format("wgm WGDE%d\n") % iena).str();
 				return s;
 			}
 		};
@@ -506,6 +512,31 @@ namespace app {
 					wd.add_widget<widget_text>(wp, wp_);
 				}
 			}
+			// ジェネレーター内臓電源
+			{
+				int ofs = 230 + 120 * 2 + 80 + 40;
+				widget::param wp(vtx::irect(ofsx + ofs, 20 + h * loc, 80, 40), dialog_);
+				widget_check::param wp_("電源");
+				gen_iena_ = wd.add_widget<widget_check>(wp, wp_);
+			}
+			{  // 内臓電源設定
+				int ofs = 230 + 120 * 2 + 80 + 40 + 90;
+				widget::param wp(vtx::irect(ofsx + ofs, 20 + h * loc, 70, 40), dialog_);
+				widget_label::param wp_("0", false);
+				gen_ivolt_ = wd.add_widget<widget_label>(wp, wp_);
+				gen_ivolt_->at_local_param().select_func_ = [=](const std::string& str) {
+					gen_ivolt_->set_text(limitf_(str, 0.0f, 14.0f, "%2.1f"));
+				};
+				{
+					int ofs = 230 + 120 * 2 + 80 + 40 + 90 + 80;
+					widget::param wp(vtx::irect(ofsx + ofs, 20 + h * loc, 30, 40), dialog_);
+					widget_text::param wp_("V");
+					wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
+												 vtx::placement::vertical::CENTER);
+					wd.add_widget<widget_text>(wp, wp_);
+				}
+			}
+
 			{
 				widget::param wp(vtx::irect(d_w - 50, 20 + h * loc, 30, 30), dialog_);
 				widget_button::param wp_(">");
@@ -530,8 +561,13 @@ namespace app {
 					if((utils::input("%f", gen_volt_->get_text().c_str()) % v).status()) {
 						t.volt = v / 0.02f;
 					}
-
-					client_.send_data(t.build());
+					t.iena = gen_iena_->get_check();
+					if((utils::input("%f", gen_ivolt_->get_text().c_str()) % v).status()) {
+						t.ivolt = v / 15.626e-6;
+					}
+auto s = t.build();
+std::cout << s << std::endl;
+					client_.send_data(s);
 				};
 			}
 		}
@@ -659,7 +695,8 @@ namespace app {
 			dc2_exec_(nullptr),
 
 			gen_ena_(nullptr), gen_mode_(nullptr), gen_freq_(nullptr),
-			gen_volt_(nullptr), gen_duty_(nullptr), gen_exec_(nullptr),
+			gen_volt_(nullptr), gen_duty_(nullptr), gen_iena_(nullptr), gen_ivolt_(nullptr),
+			gen_exec_(nullptr),
 
 			crm_sw_{ nullptr },
 			crm_ena_(nullptr), crm_freq_(nullptr), crm_mode_(nullptr),
@@ -712,9 +749,9 @@ namespace app {
 				"ファイル名：",
 				"ＤＣ１：", nullptr,
 				"ＤＣ２：", nullptr,
-				"発信機：", nullptr,
-				"ＣＲ測定：", nullptr,
-				"負荷切替："
+				"ＷＧＭ：", nullptr,
+				"ＣＲＭ：", nullptr,
+				"ＩＣＭ："
 			};
 			for(int i = 0; i < sizeof(tbls) / sizeof(const char*); ++i) {
 				widget::param wp(vtx::irect(20, 20 + h * i, w, h), dialog_);
@@ -800,6 +837,7 @@ namespace app {
 					}
 				};
 #endif
+				ofsx = 110;
 				init_dc1_(d_w, ofsx, h, 1);
 				init_dc2_(d_w, ofsx, h, 3);
 				init_gen_(d_w, ofsx, h, 5);
@@ -967,6 +1005,8 @@ std::cout << s << std::flush;
 			gen_freq_->save(pre);
 			gen_volt_->save(pre);
 			gen_duty_->save(pre);
+			gen_iena_->save(pre);
+			gen_ivolt_->save(pre);
 
 			save_sw_(pre, crm_sw_, 14);
 			crm_ena_->save(pre);
@@ -1013,6 +1053,8 @@ std::cout << s << std::flush;
 				gen_freq_->load(pre);
 				gen_volt_->load(pre);
 				gen_duty_->load(pre);
+				gen_iena_->load(pre);
+				gen_ivolt_->load(pre);
 
 				load_sw_(pre, crm_sw_, 14);
 				crm_ena_->load(pre);
