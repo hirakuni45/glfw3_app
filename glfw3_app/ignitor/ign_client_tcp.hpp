@@ -24,7 +24,10 @@ namespace net {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class ign_client_tcp {
+	public:
+		static const uint32_t WAVE_BUFF_SIZE = 2048;
 
+	private:
 		bool		startup_;
 
 		SOCKET		sock_;
@@ -42,7 +45,7 @@ namespace net {
 		uint32_t	wdm_ch_;
 		uint32_t	wdm_pos_;
 		uint32_t	wdm_st_[4];
-		uint16_t	wdm_buff_[1024 * 4];
+		uint16_t	wdm_buff_[WAVE_BUFF_SIZE * 4];
 
 	public:
 		//-----------------------------------------------------------------//
@@ -70,7 +73,9 @@ namespace net {
 
 		uint32_t get_crrd() const { return crrd_; }
 
-		const uint16_t* get_wdm(uint32_t ch) const { return &wdm_buff_[1024 * (ch & 3)]; }
+		const uint16_t* get_wdm(uint32_t ch) const {
+			return &wdm_buff_[WAVE_BUFF_SIZE * (ch & 3)];
+		}
 
 		uint32_t get_wdm_st(uint32_t ch) const { return wdm_st_[ch & 3]; }
 
@@ -119,7 +124,7 @@ namespace net {
 			int ret = connect(sock_, (struct sockaddr *)&cl, sizeof(cl));
 			if(ret == SOCKET_ERROR) {
 				closesocket(sock_);
-				perror("IGN connect fail...");
+				perror("TCP connect fail...");
 				return false;
 			}
 
@@ -192,9 +197,10 @@ namespace net {
 						t[4] = 0;
 						int v;
 						utils::input("%x", t.c_str()) % v;
-						wdm_buff_[(wdm_ch_ & 3) * 1024 + (wdm_pos_ % 1024)] = v;
+						auto pos = wdm_pos_ % WAVE_BUFF_SIZE;
+						wdm_buff_[(wdm_ch_ & 3) * WAVE_BUFF_SIZE + pos] = v;
 						++wdm_pos_;
-						if(wdm_pos_ >= 1024) {
+						if(wdm_pos_ >= WAVE_BUFF_SIZE) {
 // std::cout << "WDM capture END" << std::endl;
 							++wdm_st_[wdm_ch_ & 3];
 						}
@@ -221,5 +227,3 @@ namespace net {
 		}
 	};
 }
-
-
