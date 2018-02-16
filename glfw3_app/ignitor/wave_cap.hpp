@@ -41,9 +41,10 @@ namespace app {
 		typedef utils::director<core> DR;
 		DR&						director_;
 
-		net::ign_client_tcp&	client_;
+		typedef net::ign_client_tcp CLIENT;
+		CLIENT&					client_;
 
-		typedef view::render_waves<uint16_t, 1024, 4> WAVES;
+		typedef view::render_waves<uint16_t, CLIENT::WAVE_BUFF_SIZE, 4> WAVES;
 		WAVES					waves_;
 
 		gui::widget_frame*		frame_;
@@ -395,7 +396,7 @@ namespace app {
 			measure_t(WAVES& waves) : waves_(waves), root_(nullptr),
 				ena_(nullptr), org_(nullptr), len_(nullptr),
 				frq_(nullptr),
-				tbp_(0.0f)
+				tbp_(0)
 			{ }
 
 
@@ -436,8 +437,7 @@ namespace app {
 					len_ = wd.add_widget<widget_spinbox>(wp, wp_);
 					len_->at_local_param().select_func_
 						= [=](widget_spinbox::state st, int before, int newpos) {
-						float t = get_time_unit_(tbp_)
-							* static_cast<float>(newpos)
+						float t = get_time_unit_(tbp_) * static_cast<float>(newpos)
 							/ waves_.get_info().grid_step_;
 						float a = t / get_time_unit_base_(tbp_);
 						float f = 1.0f / t;
@@ -585,7 +585,7 @@ namespace app {
 
 				auto ofs = offset_->get_select_pos();
 				// 波形のトリガー先頭
-//				ofs += 512;
+				ofs += CLIENT::WAVE_BUFF_SIZE / 2;
 				waves_.at_param(0).offset_.x = ofs * grid;
 				waves_.at_param(1).offset_.x = ofs * grid;
 				waves_.at_param(2).offset_.x = ofs * grid;
@@ -723,12 +723,20 @@ namespace app {
 		void render_view_(const vtx::irect& clip)
 		{
 			glDisable(GL_TEXTURE_2D);
-			uint32_t idx = 0;
+			uint32_t n = 0;
 			if(time_.scale_ != nullptr) {
-				idx = time_.scale_->get_select_pos();
+				n = time_.scale_->get_select_pos();
 			}
-			waves_.render(clip.size, get_time_scale_(idx,
-				waves_.get_info().grid_step_, sample_rate_));
+			uint32_t step = get_time_scale_(n, waves_.get_info().grid_step_, sample_rate_);
+static int nnn = 0;
+if(nnn >= 60) {
+	// std::cout << "Step: " << step << std::endl;
+	nnn = 0;
+} else {
+	++nnn;
+}
+
+			waves_.render(clip.size, step);
 			glEnable(GL_TEXTURE_2D);
 			size_ = clip.size;
 		}
@@ -745,7 +753,7 @@ namespace app {
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		wave_cap(utils::director<core>& d, net::ign_client_tcp& client) : director_(d),
+		wave_cap(utils::director<core>& d, CLIENT& client) : director_(d),
 			client_(client),
 			waves_(), frame_(nullptr), core_(nullptr),
 			tools_(nullptr),
@@ -915,10 +923,10 @@ namespace app {
 			waves_.at_param(2).color_ = img::rgba8(255, 255,  64, 255);
 			waves_.at_param(3).color_ = img::rgba8( 64, 255,  64, 255);
 
-			waves_.build_sin(0, 10.0, 1.0f);
-			waves_.build_sin(1, 15.0, 0.75f);
-			waves_.build_sin(2, 20.0, 0.5f);
-			waves_.build_sin(3, 25.0, 0.25f);
+//			waves_.build_sin(0, 10.0, 1.0f);
+//			waves_.build_sin(1, 15.0, 0.75f);
+//			waves_.build_sin(2, 20.0, 0.5f);
+//			waves_.build_sin(3, 25.0, 0.25f);
 		}
 
 
