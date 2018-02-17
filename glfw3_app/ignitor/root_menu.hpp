@@ -56,7 +56,7 @@ namespace app {
 		gui::widget_button*		igni_settings_;
 		gui::widget_button*		cont_settings_;
 
-		gui::widget_button*		unit_test_;
+///		gui::widget_button*		unit_test_;
 
 		gui::widget_button*		run_;
 
@@ -173,7 +173,7 @@ return;
 			edit_project_(nullptr),
 			save_project_(nullptr),
 			igni_settings_(nullptr), cont_settings_(nullptr),
-			unit_test_(nullptr),
+//			unit_test_(nullptr),
 			run_(nullptr),
 			proj_name_dialog_(nullptr), proj_name_label_(nullptr),
 			project_(d), inspection_(d, client),
@@ -336,6 +336,7 @@ return;
 					cont_setting_dialog_->enable();
 				};
 			}
+#if 0
 			{  // UnitTestボタン
 				widget::param wp(vtx::irect(ofs_x_ + 20 + btn_w_, ofs_y_ + sph * 4, btn_w_, btn_h_));
 				widget_button::param wp_("単体試験");
@@ -343,6 +344,7 @@ return;
 				unit_test_->at_local_param().select_func_ = [=](bool f) {
 				};
 			}
+#endif
 			{  // 検査開始ボタン
 				widget::param wp(vtx::irect(scw - btn_w_ - ofs_x_, ofs_y_ + sph * 0, btn_w_, btn_h_));
 				widget_button::param wp_("検査開始");
@@ -539,6 +541,10 @@ return;
 			if(proj_load_filer_.state()) {
 				auto path = proj_load_filer_.get();
 				if(!path.empty()) {
+					if(utils::get_file_ext(path).empty()) {
+						path += '.';
+						path += PROJECT_EXT_;
+					}
 					if(load_project_file_(path)) {
 						proj_path_->set_text(path);
 					} else {
@@ -551,6 +557,10 @@ return;
 			if(proj_save_filer_.state()) {
 				auto path = proj_save_filer_.get();
 				if(!path.empty()) {
+					if(utils::get_file_ext(path).empty()) {
+						path += '.';
+						path += PROJECT_EXT_;
+					}
 					if(!save_project_file_(path)) {
 // save error
 					}
