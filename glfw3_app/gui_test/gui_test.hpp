@@ -28,6 +28,7 @@
 #include "widgets/widget_spinbox.hpp"
 #include "widgets/widget_view.hpp"
 #include "widgets/widget_sheet.hpp"
+#include "widgets/widget_chip.hpp"
 
 #include "utils/select_file.hpp"
 
@@ -73,6 +74,8 @@ namespace app {
 		gui::widget_arrow*		arrow_dn_;
 
 		gui::widget_sheet*		sheet_;
+
+		gui::widget_chip*		chip_;
 
 		uint32_t	filer_id_;
 		uint32_t	menu_id_;
@@ -366,6 +369,15 @@ namespace app {
 					sheet_ = wd.add_widget<widget_sheet>(wp, wp_);
 				}
 			}
+			{  // widget_chip のテスト
+				widget::param wp(vtx::irect(300, 280, 100, 30));
+				widget_chip::param wp_("Help!");
+				chip_ = wd.add_widget<widget_chip>(wp, wp_);
+				chip_->at_local_param().select_func_ = [=](uint32_t id) {
+					chip_->at_org().x += 4;
+				};
+			}
+
 
 			if(1) { // メニューのテスト
 				widget::param wp(vtx::irect(10, 10, 180, 30));
