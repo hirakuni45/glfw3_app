@@ -732,7 +732,7 @@ std::cout << s << std::endl;
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
-			int d_w = 1000;
+			int d_w = 970;
 			int d_h = 610;
 			{
 				widget::param wp(vtx::irect(100, 100, d_w, d_h));
@@ -936,6 +936,7 @@ std::cout << s << std::flush;
 				if(!path.empty()) {
 					auto ph = path;
 					if(utils::get_file_ext(path).empty()) {
+						ph += '.';
 						ph += UNIT_EXT_;
 					}
 					load(ph);
@@ -946,6 +947,7 @@ std::cout << s << std::flush;
 				if(!path.empty()) {
 					auto ph = path;
 					if(utils::get_file_ext(path).empty()) {
+						ph += '.';
 						ph += UNIT_EXT_;
 					}
 					save(ph);
