@@ -294,8 +294,11 @@ namespace view {
 		//-----------------------------------------------------------------//
 		void create_buffer()
 		{
-			for(int i = 0; i < CHN; ++i) {
+			for(uint32_t i = 0; i < CHN; ++i) {
 				ch_[i].units_.resize(size());
+				for(uint32_t j = 0; j < size(); ++j) {
+					ch_[i].units_[j] = 32768;
+				}
 			}
 		}
 
@@ -377,11 +380,13 @@ namespace view {
 				if(update || t.param_.update_) {
 					float gain = t.param_.gain_;
 					uint32_t tsc = t.param_.offset_.x * tstep;
+					t.lines_.clear();
 					for(uint32_t i = 0; i < size.x; ++i) {
-						uint32_t idx = (tsc >> 16) % t.units_.size();
+						uint32_t idx = (tsc >> 16);
+						if(idx >= t.units_.size()) break;
 						float v = static_cast<float>(t.units_[idx]);
 						v -= 32768.0f;
-						t.lines_[i] = vtx::spos(i, v * -gain);
+						t.lines_.emplace_back(i, v * -gain);
 						tsc += tstep;
 					}
 					t.param_.update_ = false;
