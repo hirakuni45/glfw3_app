@@ -5,8 +5,7 @@ TARGET		=	ignitor_app
 
 ifeq ($(OS),Windows_NT)
 FEXT	=	.exe
-# ICON_RC = icon.rc
-ICON_RC =
+ICON_RC = icon.rc
 SYSTEM := WIN
 else
   UNAME := $(shell uname -s)
