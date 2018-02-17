@@ -45,6 +45,9 @@ namespace app {
 		gui::widget_list*		ports_;
 		gui::widget_button*		connect_;
 		gui::widget_button*		capture_;
+		gui::widget_list*		slope_;
+		gui::widget_label*		level_;
+		gui::widget_button*		trigger_;
 
 		gui::widget_filer*		load_ctx_;
 
@@ -56,7 +59,7 @@ namespace app {
 		gui::widget_frame*		view_frame_;
 		gui::widget_view*		view_core_;
 
-		typedef view::render_waves<uint16_t, 65536, 2> WAVES;
+		typedef view::render_waves<uint16_t, 1024, 2> WAVES;
 		WAVES					waves_;
 
 		typedef device::serial_win32 SERIAL;
@@ -181,6 +184,7 @@ namespace app {
 		efo_test(utils::director<core>& d) : director_(d),
 			menu_(nullptr), load_(nullptr), div_(nullptr),
 			ports_(nullptr), connect_(nullptr), capture_(nullptr),
+			slope_(nullptr), level_(nullptr), trigger_(nullptr),
 			load_ctx_(nullptr),
 			wave_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
@@ -202,7 +206,7 @@ namespace app {
 			gl::core& core = gl::core::get_instance();
 
 			int menu_width  = 130;
-			int menu_height = 400;
+			int menu_height = 500;
 			{	// メニューパレット
 				widget::param wp(vtx::irect(10, 10, menu_width, menu_height));
 				widget_frame::param wp_;
@@ -230,7 +234,7 @@ namespace app {
 
 			{ // DIV select
 				widget::param wp(vtx::irect(10, 20+40*1, menu_width - 20, 30), menu_);
-				widget_list::param wp_("1000 ms");
+				widget_list::param wp_("2.6 uS");
 				wp_.init_list_.push_back("1000 ms");
 				wp_.init_list_.push_back("500 ms");
 				wp_.init_list_.push_back("250 ms");
@@ -274,13 +278,36 @@ namespace app {
 					}
 				};
 			}
-			{ // キャプチャー・ボタン
+			{  // キャプチャー・ボタン
 				widget::param wp(vtx::irect(10, 20+40*8, menu_width - 20, 30), menu_);
 				widget_button::param wp_("capture");
 				capture_ = wd.add_widget<widget_button>(wp, wp_);
 				capture_->at_local_param().select_func_ = [=](int fd) {
 					char tmp[1];
 					tmp[0] = 'B';
+					serial_.write(tmp, sizeof(tmp));
+				};
+			}
+			{  // スロープ選択
+				widget::param wp(vtx::irect(10, 20+40*9, menu_width - 20, 30), menu_);
+				widget_list::param wp_;
+				wp_.init_list_.push_back("pos");
+				wp_.init_list_.push_back("neg");
+				slope_ = wd.add_widget<widget_list>(wp, wp_);
+			}
+			{  // トリガー・レベル
+				widget::param wp(vtx::irect(10, 20+40*10, menu_width - 20, 30), menu_);
+				widget_label::param wp_("0");
+				level_ = wd.add_widget<widget_label>(wp, wp_);
+			}
+			{ // トリガー・ボタン
+				widget::param wp(vtx::irect(10, 20+40*11, menu_width - 20, 30), menu_);
+				widget_button::param wp_("trigger");
+				capture_ = wd.add_widget<widget_button>(wp, wp_);
+				capture_->at_local_param().select_func_ = [=](int fd) {
+					char tmp[1];
+					if(slope_->get_select_pos() == 0) tmp[0] = 'q';
+					else tmp[0] = 'Q';
 					serial_.write(tmp, sizeof(tmp));
 				};
 			}
@@ -384,10 +411,11 @@ namespace app {
 ///			if(save_ctx_ != nullptr) save_ctx_->load(pre);
 			if(ports_ != nullptr) ports_->load(pre);
 			if(div_ != nullptr) div_->load(pre);
+			if(slope_ != nullptr) slope_->load(pre); 
+			if(level_ != nullptr) level_->load(pre); 
 
-			// テスト波形生成
-			waves_.create_buffer(0.5, 10e-6);
-///			waves_.build_sin(10e3);
+			// 波形バッファ生成
+			waves_.create_buffer();
 		}
 
 
@@ -417,8 +445,8 @@ namespace app {
 			waves_.at_param(1).gain_ = 0.025f;
 			waves_.at_param(0).color_ = img::rgba8(255, 128, 255, 255);
 			waves_.at_param(1).color_ = img::rgba8(128, 255, 255, 255);
-			waves_.at_param(0).offset_ = 0;
-			waves_.at_param(1).offset_ = 200;
+			waves_.at_param(0).offset_.y = -300;
+			waves_.at_param(1).offset_.y = -380;
 
 			waves_.at_info().time_org_ = 50;
 			waves_.at_info().time_len_ = 150;
@@ -467,6 +495,8 @@ namespace app {
 		{
 			sys::preference& pre = director_.at().preference_;
 
+			if(slope_ != nullptr) slope_->save(pre); 
+			if(level_ != nullptr) level_->save(pre); 
 			if(div_ != nullptr) div_->save(pre);
 			if(ports_ != nullptr) ports_->save(pre);
 
