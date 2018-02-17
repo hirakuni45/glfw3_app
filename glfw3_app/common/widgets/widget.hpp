@@ -96,8 +96,8 @@ namespace gui {
 			vtx::ipos	grid_;			///< リサイズ・グリッド
 			bool		resizeble_;		///< リサイズが可能な場合
 
-			plate_param() : round_style_(round_style::ALL),
-				round_radius_(8), frame_width_(4), caption_width_(0),
+			plate_param(short rr = 8, short fw = 4) : round_style_(round_style::ALL),
+				round_radius_(rr), frame_width_(fw), caption_width_(0),
 				grid_(16), resizeble_(false)
 			{ }
 
