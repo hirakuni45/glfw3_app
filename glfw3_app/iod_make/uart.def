@@ -1,0 +1,22 @@
+#
+# RL78/G13 I/O Device Maker 定義
+#
+base {
+	.title	"RL78/G13 グループ・ポート・レジスター定義",
+			"Copyright 2016 Kunihito Hiramatsu"
+	.author	"平松邦仁 (hira@rvf-rc45.net)"
+	.file	"common/io_utils.hpp"
+	.space	"device"
+}
+
+#---------------------------------------------------------------
+
+reg {
+
+
+
+
+}
+
+
+

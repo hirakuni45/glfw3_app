@@ -1,0 +1,69 @@
+#
+# RL78/G13 I/O Device Maker 定義
+#
+base {
+	.title	"RL78/G13 グループ・システム・レジスター定義",
+			"Copyright 2016 Kunihito Hiramatsu"
+	.author	"平松邦仁 (hira@rvf-rc45.net)"
+	.file	"common/io_utils.hpp"
+	.space	"device"
+}
+
+#---------------------------------------------------------------
+
+reg {
+
+	.title		"周辺イネーブル・レジスタ０（PER0）",
+				"リセット時：00H"
+	.base		"rw8_t"
+	.address	"0xF00F0"
+	.name 		"PER0"
+
+	bit {
+		.title	"リアルタイム・クロック、12ビット・インターバル・タイマの入力クロック供給の制御"
+		.def	7
+		.name	RTCEN
+	}
+
+	bit {
+		.title	"シリアル・インタフェース１の入力クロック供給の制御"
+		.def	6
+		.name	IICA1EN
+	}
+
+	bit {
+		.title	"A/Dコンバータの入力クロックの制御"
+		.def	5
+		.name	ADCEN
+	}
+
+	bit {
+		.title	"シリアル・インタフェース０の入力クロック供給の制御"
+		.def	4
+		.name	IICA0EN
+	}
+
+	bit {
+		.title	"シリアル・アレイ・ユニット１の入力クロック供給の制御"
+		.def	3
+		.name	SAU1EN 
+	}
+
+	bit {
+		.title	"シリアル・アレイ・ユニット０の入力クロック供給の制御"
+		.def	2
+		.name	SAU0EN
+	}
+
+	bit {
+		.title	"タイマ・アレイ・ユニット１の入力クロック供給の制御"
+		.def	1
+		.name	TAU1EN
+	}
+
+	bit {
+		.title	"タイマ・アレイ・ユニット０の入力クロック供給の制御"
+		.def	0
+		.name	TAU0EN
+	}
+}
