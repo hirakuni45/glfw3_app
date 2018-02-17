@@ -50,6 +50,9 @@ namespace app {
 		gui::widget_frame*		frame_;
 		gui::widget_view*		core_;
 
+		gui::widget_frame*		terminal_frame_;
+		gui::widget_terminal*	terminal_core_;
+
 		gui::widget_frame*		tools_;
 
 		gui::widget_check*		sw_[4];
@@ -756,6 +759,7 @@ if(nnn >= 60) {
 		wave_cap(utils::director<core>& d, CLIENT& client) : director_(d),
 			client_(client),
 			waves_(), frame_(nullptr), core_(nullptr),
+			terminal_frame_(nullptr), terminal_core_(nullptr),
 			tools_(nullptr),
 			sw_{ nullptr }, time_div_(nullptr), trg_ch_(nullptr), trg_slope_(nullptr),
 			trg_window_(nullptr), trg_level_(nullptr), ch_gain_{ nullptr },
@@ -800,6 +804,24 @@ if(nnn >= 60) {
 					service_view_();
 				};
 				core_ = wd.add_widget<widget_view>(wp, wp_);
+			}
+
+			{	// ターミナル
+				{
+					widget::param wp(vtx::irect(20, 100, 100, 200));
+					widget_frame::param wp_;
+					wp_.plate_param_.set_caption(12);
+					terminal_frame_ = wd.add_widget<widget_frame>(wp, wp_);
+				}
+				{
+					widget::param wp(vtx::irect(0), terminal_frame_);
+					widget_terminal::param wp_;
+					wp_.enter_func_ = [=](const utils::lstring& text) {
+						// term_enter_(text);
+					};
+					terminal_core_ = wd.add_widget<widget_terminal>(wp, wp_);
+					term_chaout::set_output(terminal_core_);
+				}
 			}
 
 			int mw = 330;
@@ -978,6 +1000,9 @@ if(nnn >= 60) {
 			if(frame_ != nullptr) {
 				frame_->load(pre);
 			}
+			if(terminal_frame_ != nullptr) {
+				terminal_frame_->load(pre);
+			}
 			if(tools_ != nullptr) {
 				tools_->load(pre);
 			}
@@ -1033,6 +1058,9 @@ if(nnn >= 60) {
 
 			if(frame_ != nullptr) {
 				frame_->save(pre);
+			}
+			if(terminal_frame_ != nullptr) {
+				terminal_frame_->save(pre);
 			}
 			if(tools_ != nullptr) {
 				tools_->save(pre);
