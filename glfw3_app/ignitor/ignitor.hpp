@@ -47,8 +47,8 @@ namespace app {
 
 		gui::widget_filer*		load_ctx_;
 
-		gui::widget_frame*		terminal_frame_;
-		gui::widget_terminal*	terminal_core_;
+//		gui::widget_frame*		terminal_frame_;
+//		gui::widget_terminal*	terminal_core_;
 
 ///		asio::io_service		io_service_;
 		net::ign_client_tcp		client_;
@@ -77,7 +77,7 @@ namespace app {
 			root_menu_(d, client_),
 			wave_cap_(d, client_),
 			load_(nullptr), div_(nullptr), load_ctx_(nullptr),
-			terminal_frame_(nullptr), terminal_core_(nullptr),
+///			terminal_frame_(nullptr), terminal_core_(nullptr),
 ///			io_service_(),
 ///			client_(io_service_),
 			client_(),
