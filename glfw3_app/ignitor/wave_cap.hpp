@@ -13,6 +13,7 @@
 #include "utils/i_scene.hpp"
 #include "utils/director.hpp"
 #include "widgets/widget.hpp"
+#include "widgets/widget_utils.hpp"
 #include "widgets/widget_frame.hpp"
 #include "widgets/widget_null.hpp"
 #include "widgets/widget_sheet.hpp"
@@ -23,7 +24,7 @@
 #include "widgets/widget_view.hpp"
 #include "widgets/widget_radio.hpp"
 #include "widgets/widget_spinbox.hpp"
-#include "widgets/widget_utils.hpp"
+#include "widgets/widget_chip.hpp"
 
 #include "gl_fw/render_waves.hpp"
 
@@ -67,6 +68,7 @@ namespace app {
 		gui::widget_sheet*		share_frame_;
 
 		double					sample_rate_;
+		float					gain_rate_[4];
 
 		uint32_t				wdm_st_[4];
 
@@ -75,25 +77,44 @@ namespace app {
 			if(time_div_ == nullptr) return 0.0;
 
 			static constexpr double tbls[time_div_size_] = {
-				1.0 / 1e3,
-				1.0 / 2e3,
-				1.0 / 5e3,
-				1.0 / 10e3,
-				1.0 / 20e3,
-				1.0 / 50e3,
-				1.0 / 100e3,
-				1.0 / 200e3,
-				1.0 / 500e3,
-				1.0 / 1e6,
-				1.0 / 2e6,
-				1.0 / 5e6,
-				1.0 / 10e6,
-				1.0 / 20e6,
-				1.0 / 50e6,
-				1.0 / 100e6
+				1.0 / 1e3,    //  0
+				1.0 / 2e3,    //  1
+				1.0 / 5e3,    //  2
+				1.0 / 10e3,   //  3
+				1.0 / 20e3,   //  4
+				1.0 / 50e3,   //  5
+				1.0 / 100e3,  //  6
+				1.0 / 200e3,  //  7
+				1.0 / 500e3,  //  8
+				1.0 / 1e6,    //  9
+				1.0 / 2e6,    // 10
+				1.0 / 5e6,    // 11
+				1.0 / 10e6,   // 12
+				1.0 / 20e6,   // 13
+				1.0 / 50e6,   // 14
+				1.0 / 100e6   // 15
 			};
 			return tbls[time_div_->get_select_pos() % time_div_size_];
 		}
+
+
+		static const uint32_t gain_rate_size_ = 8;
+		double get_gain_rate_(uint32_t ch) const {
+			if(ch_gain_[ch] == nullptr) return 0.0f;
+			auto n = ch_gain_[ch]->get_select_pos() % gain_rate_size_;
+			static constexpr float tbls[gain_rate_size_] = {
+				0.0625f,
+				0.125f,
+				0.25f,
+				0.5f,
+				1.0f,
+				2.0f,
+				4.0f,
+				8.0f
+			};
+			return tbls[n];
+		}
+
 
 		// チャネル毎の電圧スケールサイズ
 		static uint32_t get_volt_scale_size_(uint32_t ch) {
@@ -138,8 +159,8 @@ namespace app {
 
 
 		static const uint32_t time_unit_size_ = 20;
-		static float get_time_unit_(uint32_t idx) {
-			static const float tbl[time_unit_size_] = {
+		static double get_time_unit_(uint32_t idx) {
+			static const double tbl[time_unit_size_] = {
 				100e-9, 250e-9, 500e-9,   1e-6,
 				2.5e-6,   5e-6,  10e-6,  25e-6,
 				 50e-6, 100e-6, 250e-6, 500e-6,
@@ -225,7 +246,7 @@ namespace app {
 				}
 				{  // 電圧位置 (+-1.0)
 					widget::param wp(vtx::irect(10, 70, 130, 40), root_);
-					widget_spinbox::param wp_(0, -20, 20); // grid 数の倍
+					widget_spinbox::param wp_(-20, 0, 20); // grid 数の倍
 					pos_ = wd.add_widget<widget_spinbox>(wp, wp_);
 					pos_->at_local_param().select_func_
 						= [=](widget_spinbox::state st, int before, int newpos) {
@@ -280,7 +301,7 @@ namespace app {
 			}
 
 
-			void update(uint32_t ch, const vtx::ipos& size, bool mena)
+			void update(uint32_t ch, const vtx::ipos& size, bool mena, float gainrate)
 			{
 				if(pos_ == nullptr || scale_ == nullptr) return;
 				if(org_ == nullptr || len_ == nullptr) return;
@@ -309,7 +330,7 @@ namespace app {
 					/ static_cast<float>(grid);
 				float u = get_volt_scale_limit_(ch) / static_cast<float>(32768);
 				if(gnd_->get_check()) u = 0.0f;
-				waves_.at_param(ch).gain_ = u / value;
+				waves_.at_param(ch).gain_ = u / value / gainrate;
 
 				// 電圧計測設定
 				if(mena) {
@@ -379,6 +400,31 @@ namespace app {
 		chn_t			chn1_;
 		chn_t			chn2_;
 		chn_t			chn3_;
+
+
+		chn_t& at_ch(uint32_t no) {
+			switch(no) {
+			case 0: return chn0_;
+			case 1: return chn1_;
+			case 2: return chn2_;
+			case 3: return chn3_;
+			default:
+				return chn0_;
+			}
+		}
+
+
+		const chn_t& get_ch(uint32_t no) const {
+			switch(no) {
+			case 0: return chn0_;
+			case 1: return chn1_;
+			case 2: return chn2_;
+			case 3: return chn3_;
+			default:
+				return chn0_;
+			}
+		}
+
 
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -550,7 +596,7 @@ namespace app {
 				}
 				{  // タイム・オフセット（グリッド単位）
 					widget::param wp(vtx::irect(10, 90, 200, 40), root_);
-					widget_spinbox::param wp_(0, 0, 50);
+					widget_spinbox::param wp_(-50, 0, 50);
 					offset_ = wd.add_widget<widget_spinbox>(wp, wp_);
 					offset_->at_local_param().select_func_
 						= [=](widget_spinbox::state st, int before, int newpos) {
@@ -588,7 +634,6 @@ namespace app {
 
 				auto ofs = offset_->get_select_pos();
 				// 波形のトリガー先頭
-				ofs += CLIENT::WAVE_BUFF_SIZE / 2;
 				waves_.at_param(0).offset_.x = ofs * grid;
 				waves_.at_param(1).offset_.x = ofs * grid;
 				waves_.at_param(2).offset_.x = ofs * grid;
@@ -720,6 +765,28 @@ namespace app {
 		// 波形描画
 		void update_view_()
 		{
+			if(core_->get_selected()) {
+				auto msp = core_->get_param().in_point_;
+				auto grid = waves_.get_info().grid_step_;
+				int pos = msp.x + time_.offset_->get_select_pos() * grid;
+				uint32_t n = 0;
+				if(time_.scale_ != nullptr) {
+					n = time_.scale_->get_select_pos();
+				}
+				auto idx = waves_.convert_index(sample_rate_, get_time_unit_(n), pos);
+				for(uint32_t i = 0; i < 4; ++i) {
+					if(!get_ch(i).ena_->get_check()) continue;
+					auto w = waves_.get(i, idx);
+					float a = static_cast<float>(w - 32768) / 32768.0f;
+					a *= get_volt_scale_limit_(i);
+					if(get_ch(i).gnd_->get_check()) {
+						a = 0.0f;
+					}
+					char ch = i == 0 ? 'A' : 'V';
+					std::string s = (boost::format("CH%d: %2.1f %c\n") % (i + 1) % a % ch).str();
+					terminal_core_->output(s);
+				}
+			}
 		}
 
 
@@ -730,16 +797,8 @@ namespace app {
 			if(time_.scale_ != nullptr) {
 				n = time_.scale_->get_select_pos();
 			}
-			uint32_t step = get_time_scale_(n, waves_.get_info().grid_step_, sample_rate_);
-static int nnn = 0;
-if(nnn >= 60) {
-	// std::cout << "Step: " << step << std::endl;
-	nnn = 0;
-} else {
-	++nnn;
-}
+			waves_.render(clip.size, sample_rate_, get_time_unit_(n));
 
-			waves_.render(clip.size, step);
 			glEnable(GL_TEXTURE_2D);
 			size_ = clip.size;
 		}
@@ -763,7 +822,7 @@ if(nnn >= 60) {
 			tools_(nullptr),
 			sw_{ nullptr }, time_div_(nullptr), trg_ch_(nullptr), trg_slope_(nullptr),
 			trg_window_(nullptr), trg_level_(nullptr), ch_gain_{ nullptr },
-			exec_(nullptr), share_frame_(nullptr), sample_rate_(1e-6),
+			exec_(nullptr), share_frame_(nullptr), sample_rate_(1e-6), gain_rate_{ 1.0f },
 			wdm_st_{ 0 },
 			chn0_(waves_, 1.25f),
 			chn1_(waves_, 1.25f),
@@ -904,6 +963,9 @@ if(nnn >= 60) {
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
 				exec_->at_local_param().select_func_ = [=](int n) {
 					sample_rate_ = get_time_div_();
+					for(uint32_t i = 0; i < 4; ++i) {
+						gain_rate_[i] = get_gain_rate_(i);
+					}
 					auto s = build_wdm_();
 					client_.send_data(s);
 				};
@@ -925,6 +987,7 @@ if(nnn >= 60) {
 				wp_.init_list_.push_back(" 14dB");
 				wp_.init_list_.push_back(" 20dB");
 				ch_gain_[i] = wd.add_widget<widget_list>(wp, wp_);
+				ch_gain_[i]->select(4);
 			}
 
 			measure_time_.init(director_, share_frame_, "Time Measure");
@@ -945,10 +1008,11 @@ if(nnn >= 60) {
 			waves_.at_param(2).color_ = img::rgba8(255, 255,  64, 255);
 			waves_.at_param(3).color_ = img::rgba8( 64, 255,  64, 255);
 
-//			waves_.build_sin(0, 10.0, 1.0f);
-//			waves_.build_sin(1, 15.0, 0.75f);
-//			waves_.build_sin(2, 20.0, 0.5f);
-//			waves_.build_sin(3, 25.0, 0.25f);
+			waves_.build_sin(0, sample_rate_, 15000.0, 1.0f);
+
+//			waves_.build_sin(1, 10e-6, 15000.0, 0.75f);
+//			waves_.build_sin(2, 10e-6, 20000.0, 0.5f);
+//			waves_.build_sin(3, 10e-6, 25000.0, 0.25f);
 		}
 
 
@@ -967,21 +1031,22 @@ if(nnn >= 60) {
 			measure_time_.tbp_ = time_.scale_->get_select_pos();
 			measure_time_.update(size_);
 
-			chn0_.update(0, size_, share_frame_->get_select_pos() == 1);
-			chn1_.update(1, size_, share_frame_->get_select_pos() == 2);
-			chn2_.update(2, size_, share_frame_->get_select_pos() == 3);
-			chn3_.update(3, size_, share_frame_->get_select_pos() == 4);
+			chn0_.update(0, size_, share_frame_->get_select_pos() == 1, gain_rate_[0]);
+			chn1_.update(1, size_, share_frame_->get_select_pos() == 2, gain_rate_[1]);
+			chn2_.update(2, size_, share_frame_->get_select_pos() == 3, gain_rate_[2]);
+			chn3_.update(3, size_, share_frame_->get_select_pos() == 4, gain_rate_[3]);
 			if(share_frame_->get_select_pos() < 1 || share_frame_->get_select_pos() > 4) {
 				waves_.at_info().volt_enable_ = false;				
 			}
 
 			time_.update(size_, sample_rate_);
 
-			// 波形のコピー
+			// 波形のコピー（中間位置がトリガー）
 			for(uint32_t i = 0; i < 4; ++i) {
 				auto st = client_.get_wdm_st(i);
 				if(wdm_st_[i] != st) {
-					waves_.copy(i, client_.get_wdm(i), waves_.size());
+					auto sz = waves_.size();
+					waves_.copy(i, client_.get_wdm(i), sz, sz / 2);
 					wdm_st_[i] = st;
 				}
 			}
