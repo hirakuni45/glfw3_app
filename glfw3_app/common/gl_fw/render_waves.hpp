@@ -197,7 +197,7 @@ namespace view {
 			chr_param	param_;
 			uint32_t	tstep_;
 			UNITS		units_;
-			vtx::sposs	lines_;
+			vtx::fposs	lines_;
 
 			ch_t() : param_(), tstep_(0), units_(), lines_()
 			{ }
@@ -307,19 +307,25 @@ namespace view {
 		/*!
 			@brief  テスト波形生成
 			@param[in]	ch		チャネル
+			@param[in]	smp		サンプルレート[S]
 			@param[in]	frq		周波数 [Hz]
-			@param[in]	gain	ゲイン（振幅）
+			@param[in]	gain	ゲイン（1.0 で、最大振幅）
+			@return １周期に必要なサンプリング数
 		*/
 		//-----------------------------------------------------------------//
-		void build_sin(uint32_t ch, double frq, double gain)
+		uint32_t build_sin(uint32_t ch, double smp, double frq, double gain)
 		{
-			if(ch >= CHN) return;
+			if(ch >= CHN) return 0;
 
+			double t = 1.0 / frq / smp;
+			double dt = 1.0 / t;
+			double a = 0.0;
 			for(uint32_t i = 0; i < ch_[ch].units_.size(); ++i) {
-				double t = frq / static_cast<double>(LIMIT);
-				ch_[ch].units_[i] = 32768 - static_cast<UNIT>(sin(2.0 * vtx::get_pi<double>()
-					* t * i) * gain * 32767.0);
+				ch_[ch].units_[i] = 32768 + static_cast<UNIT>(sin(2.0 * vtx::get_pi<double>() * a)
+					* gain * 32767.0);
+				a += dt;
 			}
+			return static_cast<uint32_t>(t);
 		}
 
 
@@ -360,9 +366,6 @@ namespace view {
 				bool update = update_win;
 				if(t.units_.empty()) update = false;
 				else {
-					if(t.lines_.size() != size.x) {
-						t.lines_.resize(size.x);
-					}
 					if(t.tstep_ != tstep) {
 						t.tstep_ = tstep;
 						update = true;
@@ -383,10 +386,12 @@ namespace view {
 					t.lines_.clear();
 					for(uint32_t i = 0; i < size.x; ++i) {
 						uint32_t idx = (tsc >> 16);
-						if(idx >= t.units_.size()) break;
+						if(idx >= t.units_.size()) {
+							break;
+						}
 						float v = static_cast<float>(t.units_[idx]);
 						v -= 32768.0f;
-						t.lines_.emplace_back(i, v * -gain);
+						t.lines_.push_back(vtx::spos(i, v * -gain));
 						tsc += tstep;
 					}
 					t.param_.update_ = false;
@@ -403,6 +408,22 @@ namespace view {
 			info_.build(size);
 
 			info_.render();
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  レンダリング
+   			@param[in]	size	描画サイズ（ピクセル）
+			@param[in]	wsmp	波形メモリのサンプリング周期
+			@param[in]	gsmp	グリッドのサンプリング周期
+		*/
+		//-----------------------------------------------------------------//
+		void render(const vtx::ipos& size, double wsmp, double gsmp)
+		{
+			double a = gsmp / static_cast<double>(info_.grid_step_);
+			uint32_t step = static_cast<uint32_t>(a / wsmp * 65536.0);
+			render(size, step);
 		}
 	};
 }
