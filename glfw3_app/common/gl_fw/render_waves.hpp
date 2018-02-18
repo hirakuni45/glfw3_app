@@ -444,6 +444,41 @@ namespace view {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief  波形値の取得
+			@param[in]	ch		チャネル
+			@param[in]	
+			@return 波形値
+		*/
+		//-----------------------------------------------------------------//
+		UNIT get(uint32_t ch, int32_t pos) const
+		{
+			if(ch >= CHN) return 0;
+
+			const ch_t& t = ch_[ch];
+			uint32_t sz = t.units_.size();
+			while(pos < 0) pos += sz;
+			return t.units_[pos % sz];
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  波形位置の変換
+			@param[in]	wsmp	波形メモリのサンプリング周期
+			@param[in]	gsmp	グリッドのサンプリング周期
+			@param[in]	pos		位置（ピクセル）
+			@return 波形位置
+		*/
+		//-----------------------------------------------------------------//
+		int32_t convert_index(double wsmp, double gsmp, int32_t pos) const
+		{
+			double grid = static_cast<double>(info_.grid_step_);
+			return static_cast<double>(pos) / grid * gsmp / wsmp;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief  解析
 			@param[in]	ch		チャネル
 			@param[in]	org		解析開始位置
