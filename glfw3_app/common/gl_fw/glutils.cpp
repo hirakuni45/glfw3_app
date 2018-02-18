@@ -173,6 +173,21 @@ namespace gl {
 		@param[in]	list	２頂点列
 	*/
 	//-----------------------------------------------------------------//
+	void draw_line_strip(const vtx::iposs& list)
+	{
+		::glEnableClientState(GL_VERTEX_ARRAY);
+		::glVertexPointer(2, GL_INT, 0, &list[0]);
+		::glDrawArrays(GL_LINE_STRIP, 0, list.size());
+		::glDisableClientState(GL_VERTEX_ARRAY);
+	}
+
+
+	//-----------------------------------------------------------------//
+	/*!
+		@brief	ラインの描画
+		@param[in]	list	２頂点列
+	*/
+	//-----------------------------------------------------------------//
 	void draw_line_strip(const vtx::fposs& list)
 	{
 		::glEnableClientState(GL_VERTEX_ARRAY);
