@@ -40,8 +40,8 @@ namespace app {
 
 		gui::widget_frame*		menu_;
 		gui::widget_button*		load_;
+//		gui::widget_list*		smpl_;
 		gui::widget_list*		div_;
-//		gui::widget_label*		pos_[2];
 		gui::widget_list*		ports_;
 		gui::widget_button*		connect_;
 		gui::widget_button*		capture_;
@@ -67,6 +67,37 @@ namespace app {
 		SERIAL::name_list		serial_list_;
 		typedef utils::fixed_fifo<uint8_t, 8192> FIFO;
 		FIFO					fifo_;
+
+		double get_div_rate_()
+		{
+			if(div_ == nullptr) return 0.0;
+
+			static const double tbl[] = {
+				500e-3,
+				250e-3,
+				100e-3,
+				50e-3,
+				25e-3,
+				10e-3,
+				5e-3,
+				1e-3,
+				500e-6,
+				250e-6,
+				100e-6,
+				50e-6,
+				25e-6,
+				10e-6,
+				5e-6,
+				1e-6,
+				500e-9,
+				250e-9,
+				100e-9,
+				50e-9,
+				25e-9,
+				10e-9 };
+			return tbl[div_->get_select_pos()];
+		}
+
 
 		enum class wave_task {
 			idle,
@@ -98,10 +129,11 @@ namespace app {
 			gui::widget_director& wd = director_.at().widget_director_;
 
 			glDisable(GL_TEXTURE_2D);
-///			gl::glColor(wd.get_color());
 			auto pos = div_->get_menu()->get_select_pos();
 //			auto div = div_tbls_[pos];
-			waves_.render(clip.size, 65536 * (pos + 1));
+//			waves_.render(clip.size, 65536 * (pos + 1));
+			waves_.render(clip.size, 1e-6, get_div_rate_());
+
 			glEnable(GL_TEXTURE_2D);
 		}
 
@@ -234,25 +266,29 @@ namespace app {
 
 			{ // DIV select
 				widget::param wp(vtx::irect(10, 20+40*1, menu_width - 20, 30), menu_);
-				widget_list::param wp_("2.6 uS");
-				wp_.init_list_.push_back("1000 ms");
+				widget_list::param wp_;
 				wp_.init_list_.push_back("500 ms");
 				wp_.init_list_.push_back("250 ms");
 				wp_.init_list_.push_back("100 ms");
 				wp_.init_list_.push_back("50 ms");
+				wp_.init_list_.push_back("25 ms");
 				wp_.init_list_.push_back("10 ms");
 				wp_.init_list_.push_back("5 ms");
 				wp_.init_list_.push_back("1 ms");
 				wp_.init_list_.push_back("500 us");
+				wp_.init_list_.push_back("250 us");
 				wp_.init_list_.push_back("100 us");
 				wp_.init_list_.push_back("50 us");
 				wp_.init_list_.push_back("25 us");
 				wp_.init_list_.push_back("10 us");
 				wp_.init_list_.push_back("5 us");
 				wp_.init_list_.push_back("1 us");
-//				wp_.select_func_ = [=](const std::string& text, uint32_t pos) {
-//					utils::format("List Selected: '%s', (%d)\n") % text.c_str() % pos;
-//				};
+				wp_.init_list_.push_back("500 ns");
+				wp_.init_list_.push_back("250 ns");
+				wp_.init_list_.push_back("100 ns");
+				wp_.init_list_.push_back("50 ns");
+				wp_.init_list_.push_back("25 ns");
+				wp_.init_list_.push_back("10 ns");
 				div_ = wd.add_widget<widget_list>(wp, wp_);
 			}
 
@@ -416,6 +452,8 @@ namespace app {
 
 			// 波形バッファ生成
 			waves_.create_buffer();
+
+			waves_.build_sin(0, 1e-6, 15e3, 1.0);
 		}
 
 
@@ -441,11 +479,13 @@ namespace app {
 				ports_->select(0);
 			}
 
-			waves_.at_param(0).gain_ = 0.025f;
+//			waves_.at_param(0).gain_ = 0.025f;
+			waves_.at_param(0).gain_ = 0.0018f;
 			waves_.at_param(1).gain_ = 0.025f;
 			waves_.at_param(0).color_ = img::rgba8(255, 128, 255, 255);
 			waves_.at_param(1).color_ = img::rgba8(128, 255, 255, 255);
-			waves_.at_param(0).offset_.y = -300;
+//			waves_.at_param(0).offset_.y = -300;
+			waves_.at_param(0).offset_.y = 300;
 			waves_.at_param(1).offset_.y = -380;
 
 			waves_.at_info().time_org_ = 50;
