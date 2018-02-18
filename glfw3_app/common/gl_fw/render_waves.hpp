@@ -16,7 +16,7 @@ namespace view {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
 		@brief  render_waves template class
-		@param[in]	UNIT	波形の型
+		@param[in]	UNIT	波形値の型
 		@param[in]	LIMIT	最大波形数
 		@param[in]	CHN		チャネル数
 	*/
@@ -24,6 +24,20 @@ namespace view {
 	template <typename UNIT, uint32_t LIMIT, uint32_t CHN>
 	class render_waves {
 	public:
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief  解析結果パラメーター
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		struct analize_param {
+			UNIT		min_;		///< 最小値
+			UNIT		max_;		///< 最大値
+			UNIT		average_;	///< 平均
+
+			analize_param() : min_(65535), max_(0), average_(0) { }
+		};
+
+
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief  チャネル描画パラメーター
@@ -295,9 +309,9 @@ namespace view {
 		void create_buffer()
 		{
 			for(uint32_t i = 0; i < CHN; ++i) {
-				ch_[i].units_.resize(size());
+				ch_[i].units_.clear();
 				for(uint32_t j = 0; j < size(); ++j) {
-					ch_[i].units_[j] = 32768;
+					ch_[i].units_.push_back(32768);
 				}
 			}
 		}
@@ -335,14 +349,14 @@ namespace view {
 			@param[in]	ch		チャネル
 			@param[in]	src		波形ソース
 			@param[in]	len		波形数
+			@param[in]	ofs		オフセット
 		*/
 		//-----------------------------------------------------------------//
-		void copy(uint32_t ch, const UNIT* src, uint32_t len)
+		void copy(uint32_t ch, const UNIT* src, uint32_t len, uint32_t ofs = 0)
 		{
-			if(len > ch_[ch].units_.size()) len = ch_[ch].units_.size();
 			for(uint32_t i = 0; i < len; ++i) {
 				uint16_t w = *src++;
-				ch_[ch].units_[i] = w;
+				ch_[ch].units_[(i + ofs) % ch_[ch].units_.size()] = w;
 			}
 			ch_[ch].param_.update_ = true;
 		}
@@ -350,7 +364,7 @@ namespace view {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief  レンダリング
+			@brief  レンダリング（レガシー）
    			@param[in]	size	描画サイズ（ピクセル）
 			@param[in]	step	時間軸ステップ（65536を1.0）
 		*/
@@ -382,16 +396,17 @@ namespace view {
 				int mod_x = 0;
 				if(update || t.param_.update_) {
 					float gain = t.param_.gain_;
-					uint32_t tsc = t.param_.offset_.x * tstep;
+					int32_t tsc = t.param_.offset_.x * tstep;
 					t.lines_.clear();
 					for(uint32_t i = 0; i < size.x; ++i) {
-						uint32_t idx = (tsc >> 16);
-						if(idx >= t.units_.size()) {
-							break;
+						int32_t idx = (tsc >> 16);
+						int32_t sz = t.units_.size();
+						if(-sz <= idx && idx < sz) {
+							if(idx < 0) idx += sz;
+							float v = static_cast<float>(t.units_[idx % sz]);
+							v -= 32768.0f;
+							t.lines_.push_back(vtx::spos(i, v * -gain));
 						}
-						float v = static_cast<float>(t.units_[idx]);
-						v -= 32768.0f;
-						t.lines_.push_back(vtx::spos(i, v * -gain));
 						tsc += tstep;
 					}
 					t.param_.update_ = false;
@@ -424,6 +439,39 @@ namespace view {
 			double a = gsmp / static_cast<double>(info_.grid_step_);
 			uint32_t step = static_cast<uint32_t>(a / wsmp * 65536.0);
 			render(size, step);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  解析
+			@param[in]	ch		チャネル
+			@param[in]	org		解析開始位置
+			@param[in]	len		解析長
+			@return 解析結果
+		*/
+		//-----------------------------------------------------------------//
+		analize_param analize(uint32_t ch, int32_t org, int32_t len) const
+		{
+			analize_param a;
+
+			if(ch <= CHN || len <= 0) return a;
+
+			ch_t& t = ch_[ch];
+			uint32_t sz = t.units_.size();
+			int32_t sum = 0; 
+			for(int32_t i = org; i < (org + len); ++i) {
+				int32_t idx = i;
+				if(idx < 0) idx += sz;
+				int32_t v = t.units_[i % sz];
+				if(a.min_ > v) a.min_ = v;
+				if(a.max_ < v) a.max_ = v;
+				v -= 32768;
+				sum += v;
+			}
+			a.average_ = sum / len;
+
+			return a;
 		}
 	};
 }
