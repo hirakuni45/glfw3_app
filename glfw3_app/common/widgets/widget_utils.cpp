@@ -228,6 +228,43 @@ namespace gui {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
+		@brief	テキストのサイズ取得
+		@param[in]	tp	テキスト・パラメーター
+		@return テキストのサイズ
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	vtx::ipos get_text_size(const widget::text_param& tp)
+	{
+		gl::core& core = gl::core::get_instance();
+
+		utils::lstring ls;
+		if(tp.alias_enable_ && tp.cursor_ < 0) {
+			ls = tp.alias_;
+		} else {
+			ls = tp.text_;
+		}
+		if(ls.empty()) return vtx::ipos(0);
+
+		gl::fonts& fonts = core.at_fonts();
+
+		if(!tp.font_.empty()) {
+			fonts.push_font_face();
+			fonts.set_font_type(tp.font_);
+			fonts.set_font_size(tp.font_size_);
+		}
+
+		auto fsize = fonts.get_size(ls);
+		vtx::placement tpl = tp.placement_;
+
+		if(!tp.font_.empty()) {
+			fonts.pop_font_face();
+		}
+		return fsize;
+	}
+
+
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
 		@brief	フォントの描画
 		@param[in]	tp	テキスト・パラメーター
 		@param[in]	rect   	描画位置
