@@ -160,11 +160,13 @@ namespace view {
 			void render()
 			{
 				glEnable(GL_LINE_STIPPLE);
+				glLineWidth(1.0f);
 				if(!grid_.empty() && grid_enable_) {
 					glLineStipple(1, grid_stipple_);
 					gl::glColor(grid_color_);
 					gl::draw_lines(grid_);
 				}
+				glLineWidth(2.0f);
 				if(time_enable_) {
 					glLineStipple(1, time_stipple_);
 					glPushMatrix();
@@ -200,6 +202,7 @@ namespace view {
 					rotate_(volt_stipple_);
 					count_ = 3;
 				}
+				glLineWidth(1.0f);
 				glDisable(GL_LINE_STIPPLE);
 			}
 		};
@@ -507,6 +510,34 @@ namespace view {
 			a.average_ = sum / len;
 
 			return a;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  セーブ
+			@param[in]	path	ファイル・パス
+			@return 成功なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool save(const std::string& path)
+		{
+
+			return true;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  ロード
+			@param[in]	path	ファイル・パス
+			@return 成功なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool load(const std::string& path)
+		{
+
+			return true;
 		}
 	};
 }
