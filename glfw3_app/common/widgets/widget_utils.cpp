@@ -254,7 +254,7 @@ namespace gui {
 		}
 
 		auto fsize = fonts.get_size(ls);
-		vtx::placement tpl = tp.placement_;
+//		vtx::placement tpl = tp.placement_;
 
 		if(!tp.font_.empty()) {
 			fonts.pop_font_face();
