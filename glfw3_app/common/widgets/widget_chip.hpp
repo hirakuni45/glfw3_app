@@ -36,12 +36,15 @@ namespace gui {
 			text_param		text_param_;	///< テキスト描画のパラメータ
 			uint32_t		id_;			///< セレクト ID （押された回数）
 
+			vtx::ipos		skid_;			///< 隙間
+			uint32_t		active_;		///< 有効な時間
+
 			select_func_type	select_func_;	///< セレクト関数
 
 			param(const std::string& text = "") :
 				plate_param_(15, 0), color_param_(widget_director::default_chip_color_),
 				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255)),
-				id_(0),
+				id_(0), skid_(10, 10), active_(0),
 				select_func_(nullptr)
 				{ }
 		};
@@ -119,6 +122,66 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	アクティブの有効無効
+			@param[in]	time	アクティブにしている時間 @n
+								「０」を指定すると、無効
+		*/
+		//-----------------------------------------------------------------//
+		void active(uint32_t time)
+		{
+			if(time == 0) {
+				set_state(state::ENABLE, false);
+			} else {
+				set_state(state::ENABLE);
+			}
+			param_.active_ = time;
+		} 
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	位置を参照
+			@param[in]	pos	位置
+		*/
+		//-----------------------------------------------------------------//
+		vtx::ipos& at_org() { return at_param().rect_.org; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	位置を設定
+			@param[in]	src	ソース・ウィジェット
+			@param[in]	ofs	相対位置
+		*/
+		//-----------------------------------------------------------------//
+		void set_offset(widget* src, const vtx::ipos& ofs)
+		{
+			if(src == nullptr) return;
+
+			auto pos = src->get_param().rect_.org;
+			pos += ofs;
+			at_org() = pos;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	テキストを設定
+			@param[in]	text	テキスト
+			@param[in]	asz		サイズを自動設定しない場合「false」
+		*/
+		//-----------------------------------------------------------------//
+		void set_text(const std::string& text, bool asz = true) {
+			param_.text_param_.set_text(text);
+			if(asz) {
+				auto sz = get_text_size(param_.text_param_);
+				at_param().rect_.size = sz + (param_.skid_ * 2);
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
@@ -132,7 +195,8 @@ namespace gui {
 			at_param().action_.set(widget::action::SELECT_SCALE, false);
 
 			using namespace img;
-
+//			param_.text_param_.placement_ = 
+			param_.plate_param_.resizeble_ = true;
 			vtx::spos size;
 			if(param_.plate_param_.resizeble_) {
 				vtx::spos rsz = param_.plate_param_.grid_ * 3;
@@ -148,6 +212,8 @@ namespace gui {
 			t.color_param_ = param_.color_param_;
 			t.plate_param_ = param_.plate_param_;
 			objh_ = wd_.share_add(t);
+
+			active(0);
 		}
 
 
@@ -160,6 +226,12 @@ namespace gui {
 		{
 			if(get_selected()) {
 				++param_.id_;
+			}
+			if(param_.active_ > 0) {
+				--param_.active_;
+				if(param_.active_ == 0) {
+					active(0);
+				}
 			}
 		}
 
@@ -222,26 +294,6 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		bool load(const sys::preference& pre) override {
 			return true;
-		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	位置を参照
-			@param[in]	pos	位置
-		*/
-		//-----------------------------------------------------------------//
-		vtx::ipos& at_org() { return at_param().rect_.org; }
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	テキストを設定
-			@param[in]	text	テキスト
-		*/
-		//-----------------------------------------------------------------//
-		void set_text(const std::string& text) {
-			param_.text_param_.set_text(text);
 		}
 	};
 }
