@@ -75,6 +75,7 @@ namespace app {
 
 			int d_w = 800;
 			int d_h = 600;
+#if 0
 			img::img_files imgf;
 			auto state = imgf.load("relay_map.png");
 			if(state) {
@@ -82,6 +83,7 @@ namespace app {
 				d_w = s.x + 10;
 				d_h = s.y + 60 + 10;
 			}
+#endif
 			{
 				widget::param wp(vtx::irect(100, 100, d_w, d_h));
 				widget_dialog::param wp_;
@@ -91,13 +93,13 @@ namespace app {
 //				dialog_->at_local_param().select_func_ = [this](bool ok) {
 //				};
 			}
-
+#if 0
 			{  // リレー・マップ・イメージ
 				widget::param wp(vtx::irect(5, 5, 0, 0), dialog_);
 				widget_image::param wp_(imgf.get_image().get());
 				image_ = wd.add_widget<widget_image>(wp, wp_);
 			}
-
+#endif
 			static const vtx::ipos l_tbls[] = {
 				{ 253, 52 + 20 * 0 },	// S1
 				{ 253, 52 + 20 * 1 },	// S2
