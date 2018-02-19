@@ -18,6 +18,7 @@
 #include "widgets/widget_label.hpp"
 #include "widgets/widget_spinbox.hpp"
 #include "widgets/widget_check.hpp"
+#include "widgets/widget_chip.hpp"
 #include "widgets/widget_filer.hpp"
 #include "utils/input.hpp"
 #include "utils/format.hpp"
@@ -93,7 +94,7 @@ namespace app {
 		gui::widget_label*		test_min_;		///< 検査最小値
 		gui::widget_label*		test_max_;		///< 検査最大値
 
-		gui::widget_text*		help_;			///< HELP
+		gui::widget_chip*		chip_;			///< help chip
 
 		struct dc1_t {
 			uint32_t	sw;		///< 5 bits
@@ -565,8 +566,8 @@ namespace app {
 					if((utils::input("%f", gen_ivolt_->get_text().c_str()) % v).status()) {
 						t.ivolt = v / 15.626e-6;
 					}
-auto s = t.build();
-std::cout << s << std::endl;
+					auto s = t.build();
+// std::cout << s << std::endl;
 					client_.send_data(s);
 				};
 			}
@@ -676,6 +677,13 @@ std::cout << s << std::endl;
 		}
 
 
+		void set_help_(gui::widget* src, const std::string& text)
+		{
+			auto l = src->get_param().rect_.size.x;
+			chip_->set_offset(src, vtx::ipos(l - 10, -35));
+			chip_->set_text(text);
+		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -706,7 +714,7 @@ std::cout << s << std::endl;
 
 			wait_time_(nullptr), test_term_(nullptr), test_min_(nullptr), test_max_(nullptr),
 
-			help_(nullptr)
+			chip_(nullptr)
 		{ }
 
 
@@ -733,7 +741,7 @@ std::cout << s << std::endl;
 			widget_director& wd = director_.at().widget_director_;
 
 			int d_w = 970;
-			int d_h = 610;
+			int d_h = 580;
 			{
 				widget::param wp(vtx::irect(100, 100, d_w, d_h));
 				widget_dialog::param wp_;
@@ -876,11 +884,9 @@ std::cout << s << std::endl;
 			}
 
 			{  // help message
-				widget::param wp(vtx::irect(20, d_h - 100, d_w, 40), dialog_);
-				widget_text::param wp_;
-				wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
-											 vtx::placement::vertical::CENTER);
-				help_ = wd.add_widget<widget_text>(wp, wp_);
+				widget::param wp(vtx::irect(0, 0, 100, 40), dialog_);
+				widget_chip::param wp_;
+				chip_ = wd.add_widget<widget_chip>(wp, wp_);
 			}
 		}
 
@@ -955,25 +961,29 @@ std::cout << s << std::flush;
 			}
 
 			// ヘルプ機能
+			uint32_t act = 60 * 3;
 			if(dc1_current_->get_focus()) {
-				help_->set_text("0.0 to 30.0 [A], 0.1 [A] / step");
+				set_help_(dc1_current_, "0.0 to 30.0 [A], 0.1 [A] / step");
 			} else if(dc1_voltage_->get_focus()) {
-				help_->set_text("0.0 to 60.0 [V], 0.1 [V] / step");
+				set_help_(dc1_voltage_, "0.0 to 60.0 [V], 0.1 [V] / step");
 			} else if(dc2_voltage_->get_focus()) {
-				help_->set_text("0.0 to 300.0 [V], 0.1 [V] / step");
+				set_help_(dc2_voltage_, "0.0 to 300.0 [V], 0.1 [V] / step");
 			} else if(dc2_current_->get_focus()) {
-				help_->set_text("0.0 to 100.0 [mA], 0.01 [mA] / step");
+				set_help_(dc2_current_, "0.0 to 100.0 [mA], 0.01 [mA] / step");
 			} else if(gen_freq_->get_focus()) {
-				help_->set_text("1 to 100 [Hz], 1 [Hz] / step");
+				set_help_(gen_freq_, "1 to 100 [Hz], 1 [Hz] / step");
 			} else if(gen_volt_->get_focus()) {
-				help_->set_text("0.0 to 14.0 [V], 0.1 [V] / step");
+				set_help_(gen_volt_, "0.0 to 14.0 [V], 0.1 [V] / step");
 			} else if(gen_duty_->get_focus()) {
-				help_->set_text("0.1 to 100.0 [%], 0.1 [%] / step");
+				set_help_(gen_duty_, "0.1 to 100.0 [%], 0.1 [%] / step");
 			} else if(wait_time_->get_focus()) {
-				help_->set_text("0.0 to 1.0 [秒], 0.01 [秒] / step");
+				set_help_(wait_time_, "0.0 to 1.0 [秒], 0.01 [秒] / step");
+			} else if(gen_ivolt_->get_focus()) {
+				set_help_(gen_ivolt_, "0.0 to 16.0 [V], 0.01 [V] / step");
 			} else {
-				help_->set_text("");
+				act = 0;
 			}
+			chip_->active(act);
 		}
 
 
