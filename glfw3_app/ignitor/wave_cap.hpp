@@ -117,34 +117,39 @@ namespace app {
 
 
 		// チャネル毎の電圧スケールサイズ
+		static const uint32_t volt_scale_0_size_ = 8;
+		static const uint32_t volt_scale_1_size_ = 15;
+		static const uint32_t volt_scale_2_size_ = 10;
+		static const uint32_t volt_scale_3_size_ = 12;
 		static uint32_t get_volt_scale_size_(uint32_t ch) {
-			if(ch == 0) return 8;
-			else if(ch == 1) return 12;
-			else if(ch == 2) return 10;
-			else return 9;
+			if(ch == 0) return volt_scale_0_size_;
+			else if(ch == 1) return volt_scale_1_size_;
+			else if(ch == 2) return volt_scale_2_size_;
+			else return volt_scale_3_size_;
 		}
 
 
 		static float get_volt_scale_value_(uint32_t ch, uint32_t idx) {
 			if(ch == 0) {
-				static const float tbl[8] = {
+				static const float tbl[volt_scale_0_size_] = {
 					0.25f, 0.5f, 1.0f, 2.0f, 2.5f, 5.0f, 7.5f, 10.0f
 				};
 				return tbl[idx % get_volt_scale_size_(ch)];
 			} else if(ch == 1) {
-				static const float tbl[12] = {
-					1.0f, 2.5f, 5.0f, 10.0f, 20.0f, 25.0f, 50.0f, 75.0f,
+				static const float tbl[volt_scale_1_size_] = {
+					0.125f, 0.25f, 0.5f, 1.0f, 2.5f, 5.0f, 10.0f, 20.0f, 25.0f, 50.0f, 75.0f,
 					100.0f, 125.0f, 150.0f, 200.0f
 				};
 				return tbl[idx % get_volt_scale_size_(ch)];
 			} else if(ch == 2) {
-				static const float tbl[10] = {
+				static const float tbl[volt_scale_2_size_] = {
 					0.05f, 0.1f, 0.2f, 0.25f, 0.5f, 1.0f, 1.5f, 2.0f, 2.5f, 5.0f
 				};
 				return tbl[idx % get_volt_scale_size_(ch)];
 			} else {
-				static const float tbl[9] = {
-					0.5f, 1.0f, 1.25f, 2.5f, 5.0f, 7.5f, 10.0f, 15.0f, 20.0f
+				static const float tbl[volt_scale_3_size_] = {
+					0.0625f, 0.125f, 0.25f, 0.5f, 1.0f, 1.25f, 2.5f, 5.0f,
+					7.5f, 10.0f, 15.0f, 20.0f
 				};
 				return tbl[idx % get_volt_scale_size_(ch)];				
 			}
@@ -264,8 +269,8 @@ namespace app {
 						= [=](widget_spinbox::state st, int before, int newpos) {
 						// グリッドに対する電圧表示
 						auto a = get_volt_scale_value_(ch, newpos);
-						static const char unit[4] = { 'A', 'V', 'V', 'V' };
-						return (boost::format("%3.2f %c") % a % unit[ch]).str();
+						static const char* unit[4] = { "A", "V", "V", "KV" };
+						return (boost::format("%3.2f %s") % a % unit[ch]).str();
 					};
 				}
 				{  // メジャー有効、無効
@@ -294,8 +299,8 @@ namespace app {
 						float a = static_cast<float>(-newpos) 
 							/ static_cast<float>(waves_.get_info().grid_step_)
 							* get_volt_scale_value_(ch, scale_->get_select_pos());
-						static const char unit[4] = { 'A', 'V', 'V', 'V' };
-						return (boost::format("%3.2f %c") % a % unit[ch]).str();
+						static const char* unit[4] = { "A", "V", "V", "KV" };
+						return (boost::format("%3.2f %s") % a % unit[ch]).str();
 					};
 				}
 			}
@@ -782,8 +787,8 @@ namespace app {
 					if(get_ch(i).gnd_->get_check()) {
 						a = 0.0f;
 					}
-					char ch = i == 0 ? 'A' : 'V';
-					std::string s = (boost::format("CH%d: %2.1f %c\n") % (i + 1) % a % ch).str();
+					static const char* t[4] = { "A", "V", "V", "KV" };
+					std::string s = (boost::format("CH%d: %2.1f %s\n") % (i + 1) % a % t[i]).str();
 					terminal_core_->output(s);
 				}
 			}
@@ -1008,11 +1013,7 @@ namespace app {
 			waves_.at_param(2).color_ = img::rgba8(255, 255,  64, 255);
 			waves_.at_param(3).color_ = img::rgba8( 64, 255,  64, 255);
 
-			waves_.build_sin(0, sample_rate_, 15000.0, 1.0f);
-
-//			waves_.build_sin(1, 10e-6, 15000.0, 0.75f);
-//			waves_.build_sin(2, 10e-6, 20000.0, 0.5f);
-//			waves_.build_sin(3, 10e-6, 25000.0, 0.25f);
+//			waves_.build_sin(0, sample_rate_, 15000.0, 1.0f);
 		}
 
 
