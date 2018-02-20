@@ -21,6 +21,22 @@ namespace gui {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct widget_chip : public widget {
 
+
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	オフセット・タイプ
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		enum class offset_type {
+			RIGHT_UP,		///< 右上
+			RIGHT_DOWN,		///< 右下
+			DOWN,			///< 下
+			LEFT_DOWN,		///< 左下
+			LEFT_UP,		///< 左上
+			UP,				///< 上
+		};
+
+
 		typedef widget_chip value_type;
 
 		typedef std::function< void(uint32_t) > select_func_type;
@@ -161,6 +177,36 @@ namespace gui {
 			auto pos = src->get_param().rect_.org;
 			pos += ofs;
 			at_org() = pos;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	位置を設定
+			@param[in]	src	ソース・ウィジェット
+			@param[in]	ot	オフセット・タイプ
+		*/
+		//-----------------------------------------------------------------//
+		void set_offset(widget* src, offset_type ot = offset_type::RIGHT_UP)
+		{
+			vtx::ipos ofs(0);
+			switch(ot) {
+			case offset_type::RIGHT_UP:
+				ofs.x = src->get_param().rect_.size.x;
+				ofs.y = -get_param().rect_.size.y;
+				break;
+			case offset_type::RIGHT_DOWN:
+				ofs.x = src->get_param().rect_.size.x;
+				ofs.y = src->get_param().rect_.size.y;
+				break;
+			case offset_type::DOWN:
+			case offset_type::LEFT_DOWN:
+			case offset_type::LEFT_UP:
+			case offset_type::UP:
+			default:
+				break;
+			}
+			set_offset(src, ofs);
 		}
 
 
