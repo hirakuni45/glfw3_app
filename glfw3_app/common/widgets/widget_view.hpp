@@ -120,7 +120,8 @@ namespace gui {
 			// 標準的に固定
 			at_param().state_.set(widget::state::POSITION_LOCK);
 			at_param().state_.set(widget::state::SIZE_LOCK);
-			at_param().state_.set(widget::state::MOVE_ROOT);
+			at_param().state_.set(widget::state::MOVE_ROOT, false);
+			at_param().state_.set(widget::state::MOVE_STALL);
 			at_param().state_.set(widget::state::AREA_ROOT);
 		}
 
