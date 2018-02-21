@@ -247,6 +247,7 @@ namespace gui {
 					param_.text_param_.set_text(wp_.init_list_[0]);
 				}
 				menu_ = wd_.add_widget<widget_menu>(wp, wp_);
+				menu_->select(0);  // 初期位置は、先頭にしとく
 				menu_->enable(false);
 			}
 		}
