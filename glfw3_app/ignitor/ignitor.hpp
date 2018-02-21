@@ -212,6 +212,8 @@ namespace app {
 		{
 			root_menu_.update();
 
+			wave_cap_.set_sample_param(root_menu_.get_inspection().get_sample_param());
+
 			gui::widget_director& wd = director_.at().widget_director_;
 
 			if(start_client_) {
