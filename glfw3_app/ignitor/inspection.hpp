@@ -82,6 +82,7 @@ namespace app {
 		// CRM 設定
 		gui::widget_check*		crm_sw_[14];	///< CRM 接続スイッチ
 		gui::widget_check*		crm_ena_;		///< CRM 有効、無効
+		gui::widget_list*		crm_amps_;		///< CRM 電流レンジ切り替え
 		gui::widget_list*		crm_freq_;		///< CRM 周波数（100Hz, 1KHz, 10KHz）
 		gui::widget_list*		crm_mode_;		///< CRM 抵抗測定、容量測定
 		gui::widget_label*		crm_ans_;		///< CRM 測定結果 
@@ -92,8 +93,10 @@ namespace app {
 		gui::widget_check*		icm_sw_[6];		///< ICM 接続スイッチ
 		gui::widget_button*		icm_exec_;		///< ICM 設定転送
 
+		// 測定用件
 		gui::widget_label*		wait_time_;		///< Wait時間設定
 		gui::widget_list*		test_term_;		///< 検査端子設定
+		gui::widget_label*		test_delay_;	///< 検査信号遅延時間
 		gui::widget_label*		test_min_;		///< 検査最小値
 		gui::widget_label*		test_max_;		///< 検査最大値
 
@@ -184,15 +187,17 @@ namespace app {
 		struct crm_t {
 			uint16_t	sw;		///< 14 bits
 			bool		ena;	///< 0, 1
+			uint16_t	amps;	///< 0, 1, 2
 			uint16_t	freq;	///< 0, 1, 2
 			uint16_t	mode;	///< 0, 1
 
-			crm_t() : sw(0), ena(0), freq(0), mode(0) { }
+			crm_t() : sw(0), ena(0), amps(0), freq(0), mode(0) { }
 
 			std::string build() const
 			{
 				std::string s;
 				s += (boost::format("crm CRSW%04X\n") % sw).str();
+				s += (boost::format("crm CRIS%d\n") % (amps + 1)).str();
 				static const char* frqtbl[3] = { "001", "010", "100" };
 				s += (boost::format("crm CRFQ%s\n") % frqtbl[freq % 3]).str();
 				s += (boost::format("crm CROE%d\n") % ena).str();
@@ -255,25 +260,57 @@ namespace app {
 			return newtext;
 		}
 
+		interlock::module get_module_(int swn)
+		{
+			interlock::module md = interlock::module::N;
+			switch(swn) {
+			case 1:
+				md = interlock::module::CRM;
+				break;
+			case 15:
+				md = interlock::module::DC2;
+				break;
+			case 29:
+				md = interlock::module::WDM;
+				break;
+			case 34:
+				md = interlock::module::ICM;
+				break;
+			case 40:
+				md = interlock::module::DC1;
+				break;
+			case 44:
+				md = interlock::module::WGM;
+				break;
+			default:
+				break;
+			}
+			return md;
+		}
+
 
 		void init_sw_(int ofsx, int h, int loc, gui::widget_check* out[], int num, int swn)
 		{
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;			
+			auto md = get_module_(swn);
 			for(int i = 0; i < num; ++i) {
 				widget::param wp(vtx::irect(ofsx, 20 + h * loc, 60, 40), dialog_);
 				widget_check::param wp_((boost::format("%d") % swn).str());
 				out[i] = wd.add_widget<widget_check>(wp, wp_);
 				ofsx += 60;
-				interlock_.install(static_cast<interlock::swtype>(swn), out[i]);
+				interlock_.install(md, static_cast<interlock::swtype>(swn), out[i]);
 				++swn;
 			}
 		}
 
-		void init_sw_(int ofsx, int h, int loc, gui::widget_check* out[], int num, const char* swt[])
+		// DC1 専用
+		void init_sw_dc1_(int ofsx, int h, int loc, gui::widget_check* out[], int num,
+			const char* swt[])
 		{
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;			
+			auto md = interlock::module::DC1;
 			for(int i = 0; i < num; ++i) {
 				widget::param wp(vtx::irect(ofsx, 20 + h * loc, 60, 40), dialog_);
 				widget_check::param wp_(swt[i]);
@@ -281,7 +318,7 @@ namespace app {
 				ofsx += 60;
 				int swn;
 				if((utils::input("%d", swt[i]) % swn).status()) {
-					interlock_.install(static_cast<interlock::swtype>(swn), out[i]);
+					interlock_.install(md, static_cast<interlock::swtype>(swn), out[i]);
 				}
 			}
 		}
@@ -295,7 +332,7 @@ namespace app {
 			static const char* swt[] = {
 				"40", "41", "42", "43", "49"
 			};
-			init_sw_(ofsx, h, loc, dc1_sw_, 5, swt);
+			init_sw_dc1_(ofsx, h, loc, dc1_sw_, 5, swt);
 			++loc;
 			{
 				widget::param wp(vtx::irect(ofsx, 20 + h * loc, 90, 40), dialog_);
@@ -595,28 +632,36 @@ namespace app {
 				widget_check::param wp_("有効");
 				crm_ena_ = wd.add_widget<widget_check>(wp, wp_);
 			}
-			{  // 周波数設定 (100、1K, 10K)
+			{  // 電流レンジ切り替え（2mA, 20mA, 200mA）
 				widget::param wp(vtx::irect(ofsx + 90, 20 + h * loc, 110, 40), dialog_);
 				widget_list::param wp_;
+				wp_.init_list_.push_back("  2 mA");
+				wp_.init_list_.push_back(" 20 mA");
+				wp_.init_list_.push_back("200 mA");
+				crm_amps_ = wd.add_widget<widget_list>(wp, wp_); 
+			}
+			{  // 周波数設定 (100、1K, 10K)
+				widget::param wp(vtx::irect(ofsx + 220, 20 + h * loc, 110, 40), dialog_);
+				widget_list::param wp_;
 				wp_.init_list_.push_back("100 Hz");
-				wp_.init_list_.push_back("1  KHz");
+				wp_.init_list_.push_back(" 1 KHz");
 				wp_.init_list_.push_back("10 KHz");
 				crm_freq_ = wd.add_widget<widget_list>(wp, wp_); 
 			}
 			{  // 抵抗値、容量値選択
-				widget::param wp(vtx::irect(ofsx + 220, 20 + h * loc, 110, 40), dialog_);
+				widget::param wp(vtx::irect(ofsx + 350, 20 + h * loc, 110, 40), dialog_);
 				widget_list::param wp_;
 				wp_.init_list_.push_back("抵抗値");
 				wp_.init_list_.push_back("容量値");
 				crm_mode_ = wd.add_widget<widget_list>(wp, wp_); 
 			}
 			{  // 答え
-				widget::param wp(vtx::irect(ofsx + 350, 20 + h * loc, 140, 40), dialog_);
+				widget::param wp(vtx::irect(ofsx + 490, 20 + h * loc, 140, 40), dialog_);
 				widget_label::param wp_("");
 				crm_ans_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 			{
-				widget::param wp(vtx::irect(ofsx + 500, 20 + h * loc, 50, 40), dialog_);
+				widget::param wp(vtx::irect(ofsx + 640, 20 + h * loc, 50, 40), dialog_);
 				widget_text::param wp_("-");
 				wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
 					  						 vtx::placement::vertical::CENTER);
@@ -635,6 +680,7 @@ namespace app {
 					}
 					t.sw = sw;
 					t.ena = crm_ena_->get_check();
+					t.amps = crm_amps_->get_select_pos();
 					t.freq = crm_freq_->get_select_pos();
 					t.mode = crm_mode_->get_select_pos();
 
@@ -717,12 +763,13 @@ namespace app {
 			gen_exec_(nullptr),
 
 			crm_sw_{ nullptr },
-			crm_ena_(nullptr), crm_freq_(nullptr), crm_mode_(nullptr),
+			crm_ena_(nullptr), crm_amps_(nullptr), crm_freq_(nullptr), crm_mode_(nullptr),
 			crm_ans_(nullptr), crm_exec_(nullptr),
 
 			icm_sw_{ nullptr }, icm_exec_(nullptr),
 
-			wait_time_(nullptr), test_term_(nullptr), test_min_(nullptr), test_max_(nullptr),
+			wait_time_(nullptr), test_term_(nullptr), test_delay_(nullptr),
+			test_min_(nullptr), test_max_(nullptr),
 
 			chip_(nullptr), ilock_enable_(nullptr)
 		{ }
@@ -873,22 +920,24 @@ namespace app {
 			{  // 計測ポイント選択
 				widget::param wp(vtx::irect(ofsx + 100, 20 + h * 10, 90, 40), dialog_);
 				widget_list::param wp_;
-				wp_.init_list_.push_back("T1");
-				wp_.init_list_.push_back("T2");
-				wp_.init_list_.push_back("T3");
-				wp_.init_list_.push_back("T4");
-				wp_.init_list_.push_back("T5");
-				wp_.init_list_.push_back("T6");
-				wp_.init_list_.push_back("T7");
+				wp_.init_list_.push_back("CH1");
+				wp_.init_list_.push_back("CH2");
+				wp_.init_list_.push_back("CH3");
+				wp_.init_list_.push_back("CH4");
 				test_term_ = wd.add_widget<widget_list>(wp, wp_);
 			}
-			{  // テスト MIN 値
+			{  // テスト 信号遅延時間設定
 				widget::param wp(vtx::irect(ofsx + 200, 20 + h * 10, 90, 40), dialog_);
+				widget_label::param wp_("", false);
+				test_delay_ = wd.add_widget<widget_label>(wp, wp_);
+			}
+			{  // テスト MIN 値設定
+				widget::param wp(vtx::irect(ofsx + 300, 20 + h * 10, 90, 40), dialog_);
 				widget_label::param wp_("", false);
 				test_min_ = wd.add_widget<widget_label>(wp, wp_);
 			}
-			{  // テスト MAX 値
-				widget::param wp(vtx::irect(ofsx + 300, 20 + h * 10, 90, 40), dialog_);
+			{  // テスト MAX 値設定
+				widget::param wp(vtx::irect(ofsx + 400, 20 + h * 10, 90, 40), dialog_);
 				widget_label::param wp_("", false);
 				test_max_ = wd.add_widget<widget_label>(wp, wp_);
 			}
@@ -914,6 +963,8 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void update()
 		{
+			interlock_.update(ilock_enable_->get_check());
+
 			if(!dialog_->get_state(gui::widget::state::ENABLE)) return;
 
 			// 転送スイッチの状態をネットワークの接続状態で設定
@@ -996,12 +1047,18 @@ std::cout << s << std::flush;
 				set_help_(wait_time_, "0.0 to 1.0 [秒], 0.01 [秒] / step");
 			} else if(gen_ivolt_->get_focus()) {
 				set_help_(gen_ivolt_, "0.0 to 16.0 [V], 0.01 [V] / step");
+			} else if(test_delay_->get_focus()) {
+				auto ch = test_term_->get_select_pos() + 1;
+				auto str = (boost::format("CH%d 遅延時間") % ch).str();
+				set_help_(test_delay_, str);
+			} else if(test_min_->get_focus()) {
+				set_help_(test_min_, "検査：最低値");
+			} else if(test_max_->get_focus()) {
+				set_help_(test_max_, "検査：最大値");
 			} else {
 				act = 0;
 			}
 			chip_->active(act);
-
-			interlock_.update(ilock_enable_->get_check());
 		}
 
 
@@ -1040,12 +1097,17 @@ std::cout << s << std::flush;
 
 			save_sw_(pre, crm_sw_, 14);
 			crm_ena_->save(pre);
+			crm_amps_->save(pre);
 			crm_freq_->save(pre);
 			crm_mode_->save(pre);
 
 			save_sw_(pre, icm_sw_, 6);
 
 			wait_time_->save(pre);
+			test_term_->save(pre);
+			test_delay_->save(pre);
+			test_min_->save(pre);
+			test_max_->save(pre);
 
 			ilock_enable_->save(pre);
 
@@ -1090,12 +1152,17 @@ std::cout << s << std::flush;
 
 				load_sw_(pre, crm_sw_, 14);
 				crm_ena_->load(pre);
+				crm_amps_->load(pre);
 				crm_freq_->load(pre);
 				crm_mode_->load(pre);
 
 				load_sw_(pre, icm_sw_, 6);
 
 				wait_time_->load(pre);
+				test_term_->load(pre);
+				test_delay_->load(pre);
+				test_min_->load(pre);
+				test_max_->load(pre);
 
 				ilock_enable_->load(pre);
 			}
