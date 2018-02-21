@@ -27,6 +27,7 @@
 #include "relay_map.hpp"
 #include "ign_client_tcp.hpp"
 #include "interlock.hpp"
+#include "wave_cap.hpp"
 
 namespace app {
 
@@ -103,10 +104,10 @@ namespace app {
 		gui::widget_label*		wdm_level_;		///< WDM トリガー・レベル
 		gui::widget_list*		wdm_gain_[4];	///< WDM チャネル・ゲイン
 		gui::widget_button*		wdm_exec_;		///< WDM 設定転送
-		double					sample_rate_;
-		double					gain_rate_[4];
+		wave_cap::sample_param	sample_param_;
 
 		// 測定用件
+		gui::widget_spinbox*	retry_;			///< リトライ回数
 		gui::widget_label*		wait_time_;		///< Wait時間設定
 		gui::widget_list*		test_term_;		///< 検査端子設定
 		gui::widget_label*		test_delay_;	///< 検査信号遅延時間
@@ -930,9 +931,9 @@ namespace app {
 				widget_button::param wp_(">");
 				wdm_exec_ = wd.add_widget<widget_button>(wp, wp_);
 				wdm_exec_->at_local_param().select_func_ = [=](int n) {
-					sample_rate_ = get_time_div_();
+					sample_param_.rate = get_time_div_();
 					for(uint32_t i = 0; i < 4; ++i) {
-						gain_rate_[i] = get_gain_rate_(i);
+						sample_param_.gain[i] = get_gain_rate_(i);
 					}
 					auto s = build_wdm_();
 					client_.send_data(s);
@@ -996,9 +997,9 @@ namespace app {
 			wdm_sw_{ nullptr },
 			wdm_smpl_(nullptr), wdm_ch_(nullptr), wdm_slope_(nullptr), wdm_window_(nullptr),
 			wdm_level_(nullptr), wdm_gain_{ nullptr }, wdm_exec_(nullptr),
-			sample_rate_(0.0), gain_rate_{ 1.0 },
+			sample_param_(),
 
-			wait_time_(nullptr), test_term_(nullptr), test_delay_(nullptr),
+			retry_(nullptr), wait_time_(nullptr), test_term_(nullptr), test_delay_(nullptr),
 			test_filter_(nullptr), test_width_(nullptr),
 			test_min_(nullptr), test_max_(nullptr),
 
@@ -1013,6 +1014,15 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		gui::widget_dialog* get_dialog() { return dialog_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  サンプリング・パラメーターの取得
+			@return サンプリング・パラメーター
+		*/
+		//-----------------------------------------------------------------//
+		const wave_cap::sample_param& get_sample_param() const { return sample_param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -1142,8 +1152,27 @@ namespace app {
 				init_crm_(d_w, ofsx, h, 9);
 				init_icm_(d_w, ofsx, h, 11);
 
-			{  // Wait時間設定： ０～１．０ｓ（レンジ：０．０１ｓ）
+			{  // リトライ回数
+#if 0
+				{
+					widget::param wp(vtx::irect(590, 20, 110, 40), dialog_);
+					widget_text::param wp_("リトライ：");
+					wp_.text_param_.placement_
+						= vtx::placement(vtx::placement::holizontal::LEFT,
+										 vtx::placement::vertical::CENTER);
+					wd.add_widget<widget_text>(wp, wp_);	
+				}
+#endif
 				widget::param wp(vtx::irect(ofsx, 20 + h * 12, 90, 40), dialog_);
+				widget_spinbox::param wp_(0, 0, 5);
+				retry_ = wd.add_widget<widget_spinbox>(wp, wp_);
+				retry_->at_local_param().select_func_ =
+					[=](widget_spinbox::state st, int before, int newpos) {
+					return (boost::format("%d") % newpos).str();
+				};
+			}
+			{  // Wait時間設定： ０～１．０ｓ（レンジ：０．０１ｓ）
+				widget::param wp(vtx::irect(ofsx + 100, 20 + h * 12, 90, 40), dialog_);
 				widget_label::param wp_("0", false);
 				wait_time_ = wd.add_widget<widget_label>(wp, wp_);
 				wait_time_->at_local_param().select_func_ = [=](const std::string& str) {
@@ -1151,7 +1180,7 @@ namespace app {
 				};
 			}
 			{  // 計測ポイント選択
-				widget::param wp(vtx::irect(ofsx + 100, 20 + h * 12, 90, 40), dialog_);
+				widget::param wp(vtx::irect(ofsx + 200, 20 + h * 12, 90, 40), dialog_);
 				widget_list::param wp_;
 				wp_.init_list_.push_back("CH1");
 				wp_.init_list_.push_back("CH2");
@@ -1160,12 +1189,12 @@ namespace app {
 				test_term_ = wd.add_widget<widget_list>(wp, wp_);
 			}
 			{  // テスト 信号計測ポイント（時間）
-				widget::param wp(vtx::irect(ofsx + 200, 20 + h * 12, 90, 40), dialog_);
+				widget::param wp(vtx::irect(ofsx + 300, 20 + h * 12, 90, 40), dialog_);
 				widget_label::param wp_("", false);
 				test_delay_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 			{  // 計測信号フィルター
-				widget::param wp(vtx::irect(ofsx + 300, 20 + h * 12, 90, 40), dialog_);
+				widget::param wp(vtx::irect(ofsx + 400, 20 + h * 12, 90, 40), dialog_);
 				widget_list::param wp_;
 				wp_.init_list_.push_back("SIG");
 				wp_.init_list_.push_back("AVE");
@@ -1182,17 +1211,17 @@ namespace app {
 				};
 			}
 			{  // テスト 信号計測ポイント（時間）
-				widget::param wp(vtx::irect(ofsx + 400, 20 + h * 12, 90, 40), dialog_);
+				widget::param wp(vtx::irect(ofsx + 500, 20 + h * 12, 90, 40), dialog_);
 				widget_label::param wp_("", false);
 				test_width_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 			{  // テスト MIN 値設定
-				widget::param wp(vtx::irect(ofsx + 500, 20 + h * 12, 90, 40), dialog_);
+				widget::param wp(vtx::irect(ofsx + 600, 20 + h * 12, 90, 40), dialog_);
 				widget_label::param wp_("", false);
 				test_min_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 			{  // テスト MAX 値設定
-				widget::param wp(vtx::irect(ofsx + 600, 20 + h * 12, 90, 40), dialog_);
+				widget::param wp(vtx::irect(ofsx + 700, 20 + h * 12, 90, 40), dialog_);
 				widget_label::param wp_("", false);
 				test_max_ = wd.add_widget<widget_label>(wp, wp_);
 			}
