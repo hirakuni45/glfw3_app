@@ -39,7 +39,19 @@ namespace app {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class wave_cap {
+	public:
+		//=================================================================//
+		/*!
+			@brief  サンプリング・パラメーター構造体
+		*/
+		//=================================================================//
+		struct sample_param {
+			double	rate;
+			double	gain[4];
+			sample_param() : rate(1e-6), gain{ 1.0 } { }
+		};
 
+	private:
 		typedef utils::director<core> DR;
 		DR&						director_;
 
@@ -61,8 +73,7 @@ namespace app {
 
 		gui::widget_sheet*		share_frame_;
 
-		double					sample_rate_;
-		float					gain_rate_[4];
+		sample_param			sample_param_;
 
 		uint32_t				wdm_st_[4];
 
@@ -662,7 +673,7 @@ namespace app {
 				if(time_.scale_ != nullptr) {
 					n = time_.scale_->get_select_pos();
 				}
-				auto idx = waves_.convert_index(sample_rate_, get_time_unit_(n), pos);
+				auto idx = waves_.convert_index(sample_param_.rate, get_time_unit_(n), pos);
 				for(uint32_t i = 0; i < 4; ++i) {
 					if(!get_ch(i).ena_->get_check()) continue;
 					auto w = waves_.get(i, idx);
@@ -686,7 +697,7 @@ namespace app {
 			if(time_.scale_ != nullptr) {
 				n = time_.scale_->get_select_pos();
 			}
-			waves_.render(clip.size, sample_rate_, get_time_unit_(n));
+			waves_.render(clip.size, sample_param_.rate, get_time_unit_(n));
 
 			glEnable(GL_TEXTURE_2D);
 			size_ = clip.size;
@@ -709,7 +720,8 @@ namespace app {
 			frame_(nullptr), core_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
 			tools_(nullptr),
-			share_frame_(nullptr), sample_rate_(1e-6), gain_rate_{ 1.0f },
+			share_frame_(nullptr),
+			sample_param_(),
 			wdm_st_{ 0 },
 			chn0_(waves_, 1.25f),
 			chn1_(waves_, 1.25f),
@@ -718,6 +730,31 @@ namespace app {
 			measure_time_(waves_),
 			time_(waves_), size_(0)
 		{ }
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  許可、不許可
+			@param[in]	ena	不許可の場合「false」
+		*/
+		//-----------------------------------------------------------------//
+		void enable(bool ena = true)
+		{
+			using namespace gui;
+			widget_director& wd = director_.at().widget_director_;
+
+			wd.enable(frame_, ena, true);
+			wd.enable(tools_, ena, true);
+			wd.enable(terminal_frame_, ena, true);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  サンプリング・パラメーターの設定
+			@param[in]	rate	サンプリング・パラメーター	
+		*/
+		//-----------------------------------------------------------------//
+		void set_sample_param(const sample_param& sp) { sample_param_ = sp; }
 
 
 		//-----------------------------------------------------------------//
@@ -803,7 +840,7 @@ namespace app {
 			waves_.at_param(2).color_ = img::rgba8(255, 255,  64, 255);
 			waves_.at_param(3).color_ = img::rgba8( 64, 255,  64, 255);
 
-//			waves_.build_sin(0, sample_rate_, 15000.0, 1.0f);
+//			waves_.build_sin(0, sample_param_.rate, 15000.0, 1.0f);
 		}
 
 
@@ -820,15 +857,15 @@ namespace app {
 			measure_time_.tbp_ = time_.scale_->get_select_pos();
 			measure_time_.update(size_);
 
-			chn0_.update(0, size_, share_frame_->get_select_pos() == 1, gain_rate_[0]);
-			chn1_.update(1, size_, share_frame_->get_select_pos() == 2, gain_rate_[1]);
-			chn2_.update(2, size_, share_frame_->get_select_pos() == 3, gain_rate_[2]);
-			chn3_.update(3, size_, share_frame_->get_select_pos() == 4, gain_rate_[3]);
+			chn0_.update(0, size_, share_frame_->get_select_pos() == 1, sample_param_.gain[0]);
+			chn1_.update(1, size_, share_frame_->get_select_pos() == 2, sample_param_.gain[1]);
+			chn2_.update(2, size_, share_frame_->get_select_pos() == 3, sample_param_.gain[2]);
+			chn3_.update(3, size_, share_frame_->get_select_pos() == 4, sample_param_.gain[3]);
 			if(share_frame_->get_select_pos() < 1 || share_frame_->get_select_pos() > 4) {
 				waves_.at_info().volt_enable_ = false;				
 			}
 
-			time_.update(size_, sample_rate_);
+			time_.update(size_, sample_param_.rate);
 
 			// 波形のコピー（中間位置がトリガー）
 			for(uint32_t i = 0; i < 4; ++i) {
