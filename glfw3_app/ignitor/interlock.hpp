@@ -127,6 +127,43 @@ namespace app {
 			return bustbl[static_cast<uint32_t>(swt)];
 		}
 
+
+		bool lock_sub_(module md, bustype bt, const interlock_t& t)
+		{
+			bool e = false;
+			if(md == module::WDM) {
+				if(t.module_ == module::CRM) {
+					if(bt == bustype::T2_T7) {
+						if(t.bustype_ == bustype::T2 || t.bustype_ == bustype::T7) {
+							e = true;
+						}
+					} else if(bt == bustype::T3_T7) {
+						if(t.bustype_ == bustype::T3 || t.bustype_ == bustype::T7) {
+							e = true;
+						}
+					} 
+				} else if(bt == bustype::RP_RN) {
+					if(t.bustype_ == bustype::RP || t.bustype_ == bustype::RN) {
+						e = true;
+					}
+				} else if(bt == bustype::VP_VN) {
+					if(t.bustype_ == bustype::VP || t.bustype_ == bustype::VN) {
+						e = true;
+					}
+				}
+			} else {
+				if(md == module::ICM && bt == bustype::T1) {
+					if(t.module_ == module::CRM && t.bustype_ == bustype::T1) {
+						e = true;
+					}
+				} else if(bt == t.bustype_) {
+					e = true;
+				}
+			}
+			return e;
+		}
+
+
 		void lock_bus_(module md, bustype bt, uint32_t inidx)
 		{
 //			std::cout << "Lock Bus: " << static_cast<int>(bt) << std::endl;
@@ -134,37 +171,7 @@ namespace app {
 			uint32_t idx = 0;
 			for(const auto& t : ilocks_) {
 				if(inidx != idx) {
-					bool e = false;
-					if(md == module::WDM) {
-						if(t.module_ == module::CRM) {
-							if(bt == bustype::T2_T7) {
-								if(t.bustype_ == bustype::T2 || t.bustype_ == bustype::T7) {
-									e = true;
-								}
-							} else if(bt == bustype::T3_T7) {
-								if(t.bustype_ == bustype::T3 || t.bustype_ == bustype::T7) {
-									e = true;
-								}
-							} 
-						} else if(bt == bustype::RP_RN) {
-							if(t.bustype_ == bustype::RP || t.bustype_ == bustype::RN) {
-								e = true;
-							}
-						} else if(bt == bustype::VP_VN) {
-							if(t.bustype_ == bustype::VP || t.bustype_ == bustype::VN) {
-								e = true;
-							}
-						}
-					} else {
-						if(md == module::ICM && bt == bustype::T1) {
-							if(t.module_ == module::CRM && t.bustype_ == bustype::T1) {
-								e = true;
-							}
-						} else if(bt == t.bustype_) {
-							e = true;
-						}
-					}
-					if(e) {
+					if(lock_sub_(md, bt, t)) {
 						t.check_->set_check(false);
 						t.check_->set_stall();
 					}
@@ -174,14 +181,14 @@ namespace app {
 		}
 
 
-		void free_bus_(bustype bt, uint32_t inidx)
+		void free_bus_(module md, bustype bt, uint32_t inidx)
 		{
 //			std::cout << "OFF Bus: " << static_cast<int>(t.bustype_) << std::endl;
 
 			uint32_t idx = 0;
 			for(auto& t : ilocks_) {
 				if(inidx != idx) {
-					if(t.bustype_ == bt) {
+					if(lock_sub_(md, bt, t)) {
 						t.check_->set_stall(false);
 					}
 				}
@@ -252,7 +259,7 @@ namespace app {
 					lock_bus_(t.module_, t.bustype_, idx);
 					break;
 				} else if(before && !t.check_->get_check()) {  // チェック OFF
-					free_bus_(t.bustype_, idx);
+					free_bus_(t.module_, t.bustype_, idx);
 					break;
 				}
 				++idx;
