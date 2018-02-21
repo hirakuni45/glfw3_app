@@ -43,6 +43,23 @@ namespace app {
 		gui::widget_label*		pname_[50];
 		gui::widget_text*		help_;
 
+
+		std::string get_path_(uint32_t no) const {
+			if(pname_[no]->get_text().empty()) return "";
+
+			std::string s = pbase_->get_text();
+			s += pname_[no]->get_text();
+			s += pext_->get_text();
+			if(!s.empty()) {
+				auto& core = gl::core::get_instance();
+				std::string path = core.get_current_path();
+				path += '/';
+				path += s;
+				return path;
+			}
+			return s;
+		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -51,7 +68,8 @@ namespace app {
 		//-----------------------------------------------------------------//
 		project(utils::director<core>& d) : director_(d),
 			dialog_(nullptr),
-			pbase_(nullptr), pext_(nullptr), pname_{ nullptr }, help_(nullptr)
+			pbase_(nullptr), pext_(nullptr),
+			pname_{ nullptr }, help_(nullptr)
 		{ }
 
 
@@ -62,6 +80,19 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		gui::widget_dialog* get_dialog() { return dialog_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  テスト名の取得
+			@param[in]	no	テスト番号（０～４９）
+			@return テスト名
+		*/
+		//-----------------------------------------------------------------//
+		std::string get_test_name(uint32_t no) const {
+			if(no >= 50) return "";
+			return get_path_(no);
+		} 
 
 
 		//-----------------------------------------------------------------//
@@ -108,6 +139,7 @@ namespace app {
 					widget_label::param wp_(".unt", false);
 					pext_ = wd.add_widget<widget_label>(wp, wp_);
 				}
+
 				for(int i = 0; i < 50; ++i) {
 					int x = (i / 10) * 200;
 					int y = 40 + 10 + (i % 10) * 50;
@@ -148,19 +180,11 @@ namespace app {
 				for(int i = 0; i < 50; ++i) {
 					if(pname_[i]->get_focus()) {
 						if(pname_[i]->get_text().empty()) continue;
-						s = pbase_->get_text();
-						s += pname_[i]->get_text();
-						s += pext_->get_text();
-						if(!s.empty()) {
-							auto& core = gl::core::get_instance();
-							std::string path = core.get_current_path();
-							path += '/';
-							path += s;
-							if(utils::probe_file(path)) {
-								s += " (find !)";
-							} else {
-								s += " (can't find)";
-							}
+						s = get_path_(i);
+						if(utils::probe_file(s)) {
+							s += " (find !)";
+						} else {
+							s += " (can't find)";
 						}
 						break;
 					}

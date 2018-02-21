@@ -37,10 +37,10 @@ namespace app {
 
 		static constexpr const char* PROJECT_EXT_ = "ipr";
 
-		static const int ofs_x_ = 50;
-		static const int ofs_y_ = 50;
+		static const int ofs_x_ = 10;
+		static const int ofs_y_ = 10;
 		static const int btn_w_ = 240;
-		static const int btn_h_ = 80;
+		static const int btn_h_ = 60;
 
 		utils::director<core>&	director_;
 
@@ -57,16 +57,13 @@ namespace app {
 		gui::widget_button*		save_project_;
 		gui::widget_button*		igni_settings_;
 		gui::widget_button*		cont_settings_;
-
-///		gui::widget_button*		unit_test_;
-
+		gui::widget_check*		wave_edit_;
 		gui::widget_button*		run_;
 
 		gui::widget_dialog*		proj_name_dialog_;
 		gui::widget_label*		proj_name_label_;
 
 		project					project_;
-
 		inspection				inspection_;
 
 		gui::widget_dialog*		cont_setting_dialog_;
@@ -175,6 +172,7 @@ return;
 			edit_project_(nullptr),
 			save_project_(nullptr),
 			igni_settings_(nullptr), cont_settings_(nullptr),
+			wave_edit_(nullptr),
 			run_(nullptr),
 			proj_name_dialog_(nullptr), proj_name_label_(nullptr),
 			project_(d),
@@ -198,6 +196,15 @@ return;
 		{
 			destroy();
 		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  inspection の参照を取得
+			@return inspection の参照
+		*/
+		//-----------------------------------------------------------------//
+		const inspection& get_inspection() const { return inspection_; } 
 
 
 		//-----------------------------------------------------------------//
@@ -251,13 +258,13 @@ return;
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
-			int sph = btn_h_ + 50;
+			int sph = btn_h_ + 10;
 			int scw = scs.x;
 			{
 				widget::param wp(vtx::irect(ofs_x_, ofs_y_ + sph * 0, btn_w_, btn_h_));
 				widget_button::param wp_("新規プロジェクト");
 				new_project_ = wd.add_widget<widget_button>(wp, wp_);
-				new_project_->at_local_param().select_func_ = [=](bool f) {
+				new_project_->at_local_param().select_func_ = [=](uint32_t id) {
 					proj_name_dialog_->enable();
 					root_name_ = proj_title_->get_text();
 				};
@@ -273,7 +280,7 @@ return;
 				widget::param wp(vtx::irect(ofs_x_, ofs_y_ + sph * 1, btn_w_, btn_h_));
 				widget_button::param wp_("プロジェクト・ロード");
 				load_project_ = wd.add_widget<widget_button>(wp, wp_);
-				load_project_->at_local_param().select_func_ = [=](bool f) {
+				load_project_->at_local_param().select_func_ = [=](uint32_t id) {
 					stall_button_(true);
 #ifdef NATIVE_FILER
 					std::string filter = "プロジェクト(*.";
@@ -297,7 +304,7 @@ return;
 				widget::param wp(vtx::irect(ofs_x_, ofs_y_ + sph * 2, btn_w_, btn_h_));
 				widget_button::param wp_("プロジェクト編集");
 				edit_project_ = wd.add_widget<widget_button>(wp, wp_);
-				edit_project_->at_local_param().select_func_ = [=](bool f) {
+				edit_project_->at_local_param().select_func_ = [=](uint32_t id) {
 					project_.get_dialog()->enable();
 				};
 			}
@@ -305,7 +312,7 @@ return;
 				widget::param wp(vtx::irect(ofs_x_, ofs_y_ + sph * 3, btn_w_, btn_h_));
 				widget_button::param wp_("プロジェクト・セーブ");
 				save_project_ = wd.add_widget<widget_button>(wp, wp_);
-				save_project_->at_local_param().select_func_ = [=](bool f) {
+				save_project_->at_local_param().select_func_ = [=](uint32_t id) {
 					stall_button_(true);
 #ifdef NATIVE_FILER
 					std::string filter = "プロジェクト(*.";
@@ -324,7 +331,7 @@ return;
 				widget::param wp(vtx::irect(ofs_x_, ofs_y_ + sph * 4, btn_w_, btn_h_));
 				widget_button::param wp_("単体試験編集");
 				igni_settings_ = wd.add_widget<widget_button>(wp, wp_);
-				igni_settings_->at_local_param().select_func_ = [=](bool f) {
+				igni_settings_->at_local_param().select_func_ = [=](uint32_t id) {
 					inspection_.get_dialog()->enable();
 				};
 			}
@@ -333,25 +340,24 @@ return;
 				widget::param wp(vtx::irect(ofs_x_, ofs_y_ + sph * 5, btn_w_, btn_h_));
 				widget_button::param wp_("コントローラー設定");
 				cont_settings_ = wd.add_widget<widget_button>(wp, wp_);
-				cont_settings_->at_local_param().select_func_ = [=](bool f) {
+				cont_settings_->at_local_param().select_func_ = [=](uint32_t id) {
 					save_setting_value_();
 					cont_setting_dialog_->enable();
 				};
 			}
-#if 0
-			{  // UnitTestボタン
-				widget::param wp(vtx::irect(ofs_x_ + 20 + btn_w_, ofs_y_ + sph * 4, btn_w_, btn_h_));
-				widget_button::param wp_("単体試験");
-				unit_test_ = wd.add_widget<widget_button>(wp, wp_);
-				unit_test_->at_local_param().select_func_ = [=](bool f) {
+			{  // 波形編集機能
+				widget::param wp(vtx::irect(ofs_x_, ofs_y_ + sph * 6, btn_w_, btn_h_));
+				widget_check::param wp_("波形編集");
+				wave_edit_ = wd.add_widget<widget_check>(wp, wp_);
+				wave_edit_->at_local_param().select_func_ = [=](bool f) {
+
 				};
 			}
-#endif
 			{  // 検査開始ボタン
-				widget::param wp(vtx::irect(scw - btn_w_ - ofs_x_, ofs_y_ + sph * 0, btn_w_, btn_h_));
+				widget::param wp(vtx::irect(ofs_x_, ofs_y_ + sph * 7, btn_w_, btn_h_));
 				widget_button::param wp_("検査開始");
 				run_ = wd.add_widget<widget_button>(wp, wp_);
-				run_->at_local_param().select_func_ = [=](bool f) {
+				run_->at_local_param().select_func_ = [=](uint32_t id) {
 				};
 			}
 
@@ -527,9 +533,9 @@ return;
 		//-----------------------------------------------------------------//
 		void update()
 		{
-			auto& core = gl::core::get_instance();
-			const auto& scs = core.get_rect().size;
-			run_->at_rect().org.x = scs.x - btn_w_ - ofs_x_;
+//			auto& core = gl::core::get_instance();
+//			const auto& scs = core.get_rect().size;
+//			run_->at_rect().org.x = scs.x - btn_w_ - ofs_x_;
 
 			inspection_.update();
 
