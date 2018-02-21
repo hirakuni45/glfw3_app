@@ -26,6 +26,7 @@
 
 #include "relay_map.hpp"
 #include "ign_client_tcp.hpp"
+#include "interlock.hpp"
 
 namespace app {
 
@@ -41,6 +42,8 @@ namespace app {
 		utils::director<core>&	director_;
 
 		net::ign_client_tcp&	client_;
+
+		interlock&				interlock_;
 
 		gui::widget_dialog*		dialog_;
 		gui::widget_label*		unit_name_;				///< 単体試験名
@@ -260,9 +263,10 @@ namespace app {
 			for(int i = 0; i < num; ++i) {
 				widget::param wp(vtx::irect(ofsx, 20 + h * loc, 60, 40), dialog_);
 				widget_check::param wp_((boost::format("%d") % swn).str());
-				++swn;
 				out[i] = wd.add_widget<widget_check>(wp, wp_);
 				ofsx += 60;
+				interlock_.install(static_cast<interlock::swtype>(swn), out[i]);
+				++swn;
 			}
 		}
 
@@ -275,6 +279,10 @@ namespace app {
 				widget_check::param wp_(swt[i]);
 				out[i] = wd.add_widget<widget_check>(wp, wp_);
 				ofsx += 60;
+				int swn;
+				if((utils::input("%d", swt[i]) % swn).status()) {
+					interlock_.install(static_cast<interlock::swtype>(swn), out[i]);
+				}
 			}
 		}
 
@@ -660,6 +668,7 @@ namespace app {
 			}
 		}
 
+		gui::widget_check*		ilock_enable_;
 
 		void load_sw_(sys::preference& pre, gui::widget_check* sw[], uint32_t n)
 		{
@@ -690,7 +699,8 @@ namespace app {
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		inspection(utils::director<core>& d, net::ign_client_tcp& client) : director_(d), client_(client),
+		inspection(utils::director<core>& d, net::ign_client_tcp& client, interlock& ilock) :
+			director_(d), client_(client), interlock_(ilock),
 			dialog_(nullptr),
 			unit_name_(nullptr), load_file_(nullptr), save_file_(nullptr),
 
@@ -714,7 +724,7 @@ namespace app {
 
 			wait_time_(nullptr), test_term_(nullptr), test_min_(nullptr), test_max_(nullptr),
 
-			chip_(nullptr)
+			chip_(nullptr), ilock_enable_(nullptr)
 		{ }
 
 
@@ -888,6 +898,12 @@ namespace app {
 				widget_chip::param wp_;
 				chip_ = wd.add_widget<widget_chip>(wp, wp_);
 			}
+
+			{  // インターロック機構、On/Off
+				widget::param wp(vtx::irect(ofsx + 590, 20 + h * 0, 180, 40), dialog_);
+				widget_check::param wp_("Interlock");
+				ilock_enable_ = wd.add_widget<widget_check>(wp, wp_);
+			}
 		}
 
 
@@ -984,6 +1000,8 @@ std::cout << s << std::flush;
 				act = 0;
 			}
 			chip_->active(act);
+
+			interlock_.update(ilock_enable_->get_check());
 		}
 
 
@@ -1028,6 +1046,8 @@ std::cout << s << std::flush;
 			save_sw_(pre, icm_sw_, 6);
 
 			wait_time_->save(pre);
+
+			ilock_enable_->save(pre);
 
 			return pre.save(path);
 		}
@@ -1076,6 +1096,8 @@ std::cout << s << std::flush;
 				load_sw_(pre, icm_sw_, 6);
 
 				wait_time_->load(pre);
+
+				ilock_enable_->load(pre);
 			}
 			return ret; 
 		}

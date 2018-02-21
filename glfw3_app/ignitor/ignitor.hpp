@@ -22,8 +22,8 @@
 #include "widgets/widget_view.hpp"
 #include "widgets/widget_utils.hpp"
 
+#include "interlock.hpp"
 #include "root_menu.hpp"
-// #include "ign_client.hpp"
 #include "ign_client_tcp.hpp"
 #include "wave_cap.hpp"
 
@@ -38,13 +38,11 @@ namespace app {
 
 		utils::director<core>&	director_;
 
+		interlock				interlock_;
 		root_menu				root_menu_;
-
 		wave_cap				wave_cap_;
 
 		gui::widget_button*		load_;
-		gui::widget_list*		div_;
-
 		gui::widget_filer*		load_ctx_;
 
 //		gui::widget_frame*		terminal_frame_;
@@ -74,9 +72,10 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		ignitor(utils::director<core>& d) : director_(d),
-			root_menu_(d, client_),
-			wave_cap_(d, client_),
-			load_(nullptr), div_(nullptr), load_ctx_(nullptr),
+			interlock_(),
+			root_menu_(d, client_, interlock_),
+			wave_cap_(d, client_, interlock_),
+			load_(nullptr), load_ctx_(nullptr),
 ///			terminal_frame_(nullptr), terminal_core_(nullptr),
 ///			io_service_(),
 ///			client_(io_service_),
@@ -300,10 +299,6 @@ namespace app {
 ///			}
 
 //			project_.save(pre);
-
-///			if(div_ != nullptr) {
-///				div_->save(pre);
-///			}
 		}
 	};
 }

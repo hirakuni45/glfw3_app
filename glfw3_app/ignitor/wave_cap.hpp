@@ -29,6 +29,7 @@
 #include "gl_fw/render_waves.hpp"
 
 #include "ign_client_tcp.hpp"
+#include "interlock.hpp"
 
 namespace app {
 
@@ -44,6 +45,8 @@ namespace app {
 
 		typedef net::ign_client_tcp CLIENT;
 		CLIENT&					client_;
+
+		interlock&				interlock_;
 
 		typedef view::render_waves<uint16_t, CLIENT::WAVE_BUFF_SIZE, 4> WAVES;
 		WAVES					waves_;
@@ -820,9 +823,9 @@ namespace app {
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		wave_cap(utils::director<core>& d, CLIENT& client) : director_(d),
-			client_(client),
-			waves_(), frame_(nullptr), core_(nullptr),
+		wave_cap(utils::director<core>& d, CLIENT& client, interlock& ilock) :
+			director_(d), client_(client), interlock_(ilock), waves_(),
+			frame_(nullptr), core_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
 			tools_(nullptr),
 			sw_{ nullptr }, time_div_(nullptr), trg_ch_(nullptr), trg_slope_(nullptr),

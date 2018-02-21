@@ -22,6 +22,7 @@
 #include "project.hpp"
 #include "inspection.hpp"
 #include "ign_client_tcp.hpp"
+#include "interlock.hpp"
 
 #define NATIVE_FILER
 
@@ -44,6 +45,7 @@ namespace app {
 		utils::director<core>&	director_;
 
 		net::ign_client_tcp&	client_;
+		interlock&				interlock_;
 
 		gui::widget_button*		new_project_;
 		gui::widget_label*		proj_title_;
@@ -166,17 +168,17 @@ return;
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		root_menu(utils::director<core>& d, net::ign_client_tcp& client) : director_(d),
-			client_(client),
+		root_menu(utils::director<core>& d, net::ign_client_tcp& client, interlock& ilock) :
+			director_(d), client_(client), interlock_(ilock),
 			new_project_(nullptr),  proj_title_(nullptr),
 			load_project_(nullptr), proj_path_(nullptr),
 			edit_project_(nullptr),
 			save_project_(nullptr),
 			igni_settings_(nullptr), cont_settings_(nullptr),
-//			unit_test_(nullptr),
 			run_(nullptr),
 			proj_name_dialog_(nullptr), proj_name_label_(nullptr),
-			project_(d), inspection_(d, client),
+			project_(d),
+			inspection_(d, client, ilock),
 			cont_setting_dialog_(nullptr),
 		   	cont_connect_(nullptr), cont_setting_ip_{ nullptr },
 			cont_setting_cmds_(nullptr), cont_setting_exec_(nullptr),
