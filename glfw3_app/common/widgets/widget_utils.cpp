@@ -507,12 +507,13 @@ namespace gui {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
 		@brief	シフト・テキスト・レンダー
+		@param[in]	wd	widget_director
 		@param[in]	bp	widget ベースパラメーター
 		@param[in]	tp	text パラメーター
 		@param[in]	pp	plate パラメーター
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	void shift_text_render(const widget::param& bp, const widget::text_param& tp, const widget::plate_param& pp)
+	void shift_text_render(widget_director& wd, const widget::param& bp, const widget::text_param& tp, const widget::plate_param& pp)
 	{
 		if(pp.caption_width_ <= 0) return;
 		if(tp.text_.empty()) return;
@@ -534,11 +535,11 @@ namespace gui {
 		clip.size.y  = pp.caption_width_;
 
 		widget::text_param tmp = tp;
-///		const img::rgbaf& cf = wd_.get_color();
-///		tmp.fore_color_ *= cf.r;
-///		tmp.fore_color_.alpha_scale(cf.a);
-///		tmp.shadow_color_ *= cf.r;
-///		tmp.shadow_color_.alpha_scale(cf.a);
+		const img::rgbaf& cf = wd.get_color();
+		tmp.fore_color_ *= cf.r;
+		tmp.fore_color_.alpha_scale(cf.a);
+		tmp.shadow_color_ *= cf.r;
+		tmp.shadow_color_.alpha_scale(cf.a);
 		draw_text(tmp, rect, clip);
 
 		core.at_fonts().restore_matrix();

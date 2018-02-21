@@ -196,12 +196,13 @@ namespace gui {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
 		@brief	シフト・テキスト・レンダー
+		@param[in]	wd		Widget ディレクター
 		@param[in]	bp	widget ベースパラメーター
 		@param[in]	tp	text パラメーター
 		@param[in]	pp	plate パラメーター
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	void shift_text_render(const widget::param& bp, const widget::text_param& tp, const widget::plate_param& pp);
+	void shift_text_render(widget_director& wd, const widget::param& bp, const widget::text_param& tp, const widget::plate_param& pp);
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!

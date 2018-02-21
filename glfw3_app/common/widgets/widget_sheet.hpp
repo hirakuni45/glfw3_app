@@ -246,6 +246,7 @@ namespace gui {
 					++id_;
 				}
 			}
+			shift_text_update(get_param(), param_.text_param_, param_.shift_param_);
 		}
 
 
@@ -294,7 +295,7 @@ namespace gui {
 			glEnable(GL_TEXTURE_2D);
 			wd_.at_mobj().draw(objh_, gl::mobj::attribute::normal, vtx::spos(0));
 
-			shift_text_render(get_param(), param_.text_param_, param_.plate_param_);
+			shift_text_render(wd_, get_param(), param_.text_param_, param_.plate_param_);
 
 			// チップの描画
 			using namespace gl;
