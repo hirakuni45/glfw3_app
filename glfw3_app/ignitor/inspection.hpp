@@ -46,9 +46,10 @@ namespace app {
 		interlock&				interlock_;
 
 		gui::widget_dialog*		dialog_;
-		gui::widget_label*		unit_name_;				///< 単体試験名
-		gui::widget_button*		load_file_;				///< load file
-		gui::widget_button*		save_file_;				///< save file
+		gui::widget_label*		unit_name_;			///< 単体試験名
+		gui::widget_button*		load_file_;			///< load file
+		gui::widget_button*		save_file_;			///< save file
+		gui::widget_check*		ilock_enable_;		///< Interlock 許可／不許可
 		utils::select_file		unit_load_filer_;
 		utils::select_file		unit_save_filer_;
 
@@ -93,10 +94,24 @@ namespace app {
 		gui::widget_check*		icm_sw_[6];		///< ICM 接続スイッチ
 		gui::widget_button*		icm_exec_;		///< ICM 設定転送
 
+		// WDM 設定
+		gui::widget_check*		wdm_sw_[4];		///< WDM 接続スイッチ
+		gui::widget_list*		wdm_smpl_;		///< WDM サンプリング周期
+		gui::widget_list*		wdm_ch_;		///< WDM トリガーチャネル
+		gui::widget_list*		wdm_slope_;		///< WDM スロープ
+		gui::widget_spinbox*	wdm_window_;	///< WDM トリガー領域
+		gui::widget_label*		wdm_level_;		///< WDM トリガー・レベル
+		gui::widget_list*		wdm_gain_[4];	///< WDM チャネル・ゲイン
+		gui::widget_button*		wdm_exec_;		///< WDM 設定転送
+		double					sample_rate_;
+		double					gain_rate_[4];
+
 		// 測定用件
 		gui::widget_label*		wait_time_;		///< Wait時間設定
 		gui::widget_list*		test_term_;		///< 検査端子設定
 		gui::widget_label*		test_delay_;	///< 検査信号遅延時間
+		gui::widget_list*		test_filter_;	///< 検査信号フィルター
+		gui::widget_label*		test_width_;	///< 検査信号取得幅
 		gui::widget_label*		test_min_;		///< 検査最小値
 		gui::widget_label*		test_max_;		///< 検査最大値
 
@@ -232,6 +247,7 @@ namespace app {
 			float		curt_;		/// 0.1A/0.01mA step
 		};
 
+
 		std::string limitf_(const std::string& str, float min, float max, const char* form)
 		{
 			std::string newtext;
@@ -246,6 +262,7 @@ namespace app {
 			return newtext;
 		}
 
+
 		std::string limiti_(const std::string& str, int min, int max, const char* form)
 		{
 			std::string newtext;
@@ -259,6 +276,51 @@ namespace app {
 			}
 			return newtext;
 		}
+
+
+		static const uint32_t time_div_size_ = 16;
+		double get_time_div_() const {
+			if(wdm_smpl_ == nullptr) return 0.0;
+
+			static constexpr double tbls[time_div_size_] = {
+				1.0 / 1e3,    //  0
+				1.0 / 2e3,    //  1
+				1.0 / 5e3,    //  2
+				1.0 / 10e3,   //  3
+				1.0 / 20e3,   //  4
+				1.0 / 50e3,   //  5
+				1.0 / 100e3,  //  6
+				1.0 / 200e3,  //  7
+				1.0 / 500e3,  //  8
+				1.0 / 1e6,    //  9
+				1.0 / 2e6,    // 10
+				1.0 / 5e6,    // 11
+				1.0 / 10e6,   // 12
+				1.0 / 20e6,   // 13
+				1.0 / 50e6,   // 14
+				1.0 / 100e6   // 15
+			};
+			return tbls[wdm_smpl_->get_select_pos() % time_div_size_];
+		}
+
+
+		static const uint32_t gain_rate_size_ = 8;
+		double get_gain_rate_(uint32_t ch) const {
+			if(wdm_gain_[ch] == nullptr) return 0.0f;
+			auto n = wdm_gain_[ch]->get_select_pos() % gain_rate_size_;
+			static constexpr float tbls[gain_rate_size_] = {
+				0.0625f,
+				0.125f,
+				0.25f,
+				0.5f,
+				1.0f,
+				2.0f,
+				4.0f,
+				8.0f
+			};
+			return tbls[n];
+		}
+
 
 		interlock::module get_module_(int swn)
 		{
@@ -303,6 +365,7 @@ namespace app {
 				++swn;
 			}
 		}
+
 
 		// DC1 専用
 		void init_sw_dc1_(int ofsx, int h, int loc, gui::widget_check* out[], int num,
@@ -714,7 +777,169 @@ namespace app {
 			}
 		}
 
-		gui::widget_check*		ilock_enable_;
+
+		std::string build_wdm_()
+		{
+			std::string s;
+			uint32_t cmd;
+
+			// SW
+			cmd = 0b00001000;
+			cmd <<= 16;
+			uint32_t sw = 0;
+			for(uint32_t i = 0; i < 4; ++i) {
+				sw <<= 1;
+				if(wdm_sw_[i]->get_check()) ++sw;
+			}
+			cmd |= sw << 12;
+			s += (boost::format("wdm %06X\n") % cmd).str();
+			s += "delay 1\n";
+
+			static const uint8_t smtbl[] = {
+				0b01000001,  // 1K
+				0b10000001,  // 2K
+				0b11000001,  // 5K
+				0b01000010,  // 10K
+				0b10000010,  // 20K
+				0b11000010,  // 50K
+				0b01000011,  // 100K
+				0b10000011,  // 200K
+				0b11000011,  // 500K
+				0b01000100,  // 1M
+				0b10000100,  // 2M
+				0b11000100,  // 5M
+				0b01000101,  // 10M
+				0b10000101,  // 20M
+				0b11000101,  // 50M
+				0b01000110,  // 100M
+			};
+			// sampling freq
+			cmd = (0b00010000 << 16) | (smtbl[wdm_smpl_->get_select_pos() % 16] << 8);
+			s += (boost::format("wdm %06X\n") % cmd).str();
+			// channel gain
+			for(int i = 0; i < 4; ++i) {
+				cmd = ((0b00011000 | (i + 1)) << 16) | ((wdm_gain_[i]->get_select_pos() % 8) << 13);
+				s += (boost::format("wdm %06X\n") % cmd).str();
+			}
+			{ // trigger level
+				cmd = (0b00101000 << 16);
+				int v;
+				if((utils::input("%d", wdm_level_->get_text().c_str()) % v).status()) {
+					if(v < 1) v = 1;
+					else if(v > 65534) v = 65534;
+					cmd |= v;
+					s += (boost::format("wdm %06X\n") % cmd).str();
+				}
+			}
+			{  // trigger channel
+				cmd = (0b00100000 << 16);
+				auto n = wdm_ch_->get_select_pos();
+				uint8_t sub = 0;
+				sub |= 0x80;  // trigger ON
+				cmd |= static_cast<uint32_t>(n & 3) << 14;
+				if(wdm_slope_->get_select_pos()) sub |= 0x40;
+				sub |= wdm_window_->get_select_pos() & 15;
+				cmd |= sub;
+				s += (boost::format("wdm %06X\n") % cmd).str();
+			}
+			return s;
+		}
+
+
+		void init_wdm_(int d_w, int ofsx, int h, int loc)
+		{
+			using namespace gui;
+			widget_director& wd = director_.at().widget_director_;
+
+			init_sw_(ofsx, h, loc, wdm_sw_, 4, 29);
+			for(int i = 0; i < 4; ++i) {  // 各チャネル減衰設定
+				static const vtx::ipos ofs[4] = {
+					{ 0, 0 }, { 110, 0 }, { 220, 0 }, { 330, 0 }
+				};
+				widget::param wp(vtx::irect(ofsx + ofs[i].x + 4 * 60 + 10, 20 + h * loc + ofs[i].y,
+					100, 40), dialog_);
+				widget_list::param wp_;
+				wp_.init_list_.push_back("-22dB");
+				wp_.init_list_.push_back("-16dB");
+				wp_.init_list_.push_back("-10dB");
+				wp_.init_list_.push_back(" -4dB");
+				wp_.init_list_.push_back("  2dB");
+				wp_.init_list_.push_back("  8dB");
+				wp_.init_list_.push_back(" 14dB");
+				wp_.init_list_.push_back(" 20dB");
+				wdm_gain_[i] = wd.add_widget<widget_list>(wp, wp_);
+				wdm_gain_[i]->select(4);
+			}
+			++loc;
+			{  // 時間軸リスト 10K、20K、50K、100K、200K、500K、1M、2M、5M、10M、20M、50M、100M
+				widget::param wp(vtx::irect(ofsx, 20 + h * loc, 100, 40), dialog_);
+				widget_list::param wp_;
+				wp_.init_list_.push_back("1mS");
+				wp_.init_list_.push_back("500uS");
+				wp_.init_list_.push_back("200uS");
+				wp_.init_list_.push_back("100uS");
+				wp_.init_list_.push_back(" 50uS");
+				wp_.init_list_.push_back(" 20uS");
+				wp_.init_list_.push_back(" 10uS");
+				wp_.init_list_.push_back("  5uS");
+				wp_.init_list_.push_back("  2uS");
+				wp_.init_list_.push_back("  1uS");
+				wp_.init_list_.push_back("500nS");
+				wp_.init_list_.push_back("200nS");
+				wp_.init_list_.push_back("100nS");
+				wp_.init_list_.push_back(" 50nS");
+				wp_.init_list_.push_back(" 20nS");
+				wp_.init_list_.push_back(" 10nS");
+				wdm_smpl_ = wd.add_widget<widget_list>(wp, wp_);
+			}
+			{  // トリガー・チャネル選択
+				widget::param wp(vtx::irect(ofsx + 110, 20 + h * loc, 90, 40), dialog_);
+				widget_list::param wp_;
+				wp_.init_list_.push_back("CH1");
+				wp_.init_list_.push_back("CH2");
+				wp_.init_list_.push_back("CH3");
+				wp_.init_list_.push_back("CH4");
+				wdm_ch_ = wd.add_widget<widget_list>(wp, wp_);
+			}
+			{  // トリガー・スロープ選択
+				widget::param wp(vtx::irect(ofsx + 210, 20 + h * loc, 90, 40), dialog_);
+				widget_list::param wp_;
+				wp_.init_list_.push_back("Fall");
+				wp_.init_list_.push_back("Rise");
+				wdm_slope_ = wd.add_widget<widget_list>(wp, wp_);
+			}
+			{  // トリガー・ウィンドウ（１～１５）
+				widget::param wp(vtx::irect(ofsx + 310, 20 + h * loc, 90, 40), dialog_);
+				widget_spinbox::param wp_(1, 1, 15);
+				wdm_window_ = wd.add_widget<widget_spinbox>(wp, wp_);
+				wdm_window_->at_local_param().select_func_
+					= [=](widget_spinbox::state st, int before, int newpos) {
+					return (boost::format("%d") % newpos).str();
+				};
+			}
+			{  // トリガーレベル設定
+				widget::param wp(vtx::irect(ofsx + 410, 20 + h * loc, 90, 40), dialog_);
+				widget_label::param wp_("32768", false);
+				wdm_level_ = wd.add_widget<widget_label>(wp, wp_);
+				wdm_level_->at_local_param().select_func_ = [=](const std::string& str) {
+					wdm_level_->set_text(limiti_(str, 1, 65534, "%d"));
+				};
+			}
+			{  // exec
+				widget::param wp(vtx::irect(d_w - 50, 20 + h * loc, 30, 30), dialog_);
+				widget_button::param wp_(">");
+				wdm_exec_ = wd.add_widget<widget_button>(wp, wp_);
+				wdm_exec_->at_local_param().select_func_ = [=](int n) {
+					sample_rate_ = get_time_div_();
+					for(uint32_t i = 0; i < 4; ++i) {
+						gain_rate_[i] = get_gain_rate_(i);
+					}
+					auto s = build_wdm_();
+					client_.send_data(s);
+				};
+			}
+		}
+
 
 		void load_sw_(sys::preference& pre, gui::widget_check* sw[], uint32_t n)
 		{
@@ -748,7 +973,7 @@ namespace app {
 		inspection(utils::director<core>& d, net::ign_client_tcp& client, interlock& ilock) :
 			director_(d), client_(client), interlock_(ilock),
 			dialog_(nullptr),
-			unit_name_(nullptr), load_file_(nullptr), save_file_(nullptr),
+			unit_name_(nullptr), load_file_(nullptr), save_file_(nullptr), ilock_enable_(nullptr),
 
 			dc1_sw_{ nullptr },
 			dc1_ena_(nullptr),
@@ -768,10 +993,16 @@ namespace app {
 
 			icm_sw_{ nullptr }, icm_exec_(nullptr),
 
+			wdm_sw_{ nullptr },
+			wdm_smpl_(nullptr), wdm_ch_(nullptr), wdm_slope_(nullptr), wdm_window_(nullptr),
+			wdm_level_(nullptr), wdm_gain_{ nullptr }, wdm_exec_(nullptr),
+			sample_rate_(0.0), gain_rate_{ 1.0 },
+
 			wait_time_(nullptr), test_term_(nullptr), test_delay_(nullptr),
+			test_filter_(nullptr), test_width_(nullptr),
 			test_min_(nullptr), test_max_(nullptr),
 
-			chip_(nullptr), ilock_enable_(nullptr)
+			chip_(nullptr)
 		{ }
 
 
@@ -798,7 +1029,7 @@ namespace app {
 			widget_director& wd = director_.at().widget_director_;
 
 			int d_w = 970;
-			int d_h = 580;
+			int d_h = 670;
 			{
 				widget::param wp(vtx::irect(100, 100, d_w, d_h));
 				widget_dialog::param wp_;
@@ -812,11 +1043,12 @@ namespace app {
 			int h = 45;
 			static const char* tbls[] = {
 				"ファイル名：",
+				"ＷＤＭ：", nullptr,
 				"ＤＣ１：", nullptr,
 				"ＤＣ２：", nullptr,
 				"ＷＧＭ：", nullptr,
 				"ＣＲＭ：", nullptr,
-				"ＩＣＭ："
+				"ＩＣＭ：",
 			};
 			for(int i = 0; i < sizeof(tbls) / sizeof(const char*); ++i) {
 				widget::param wp(vtx::irect(20, 20 + h * i, w, h), dialog_);
@@ -903,14 +1135,15 @@ namespace app {
 				};
 #endif
 				ofsx = 110;
-				init_dc1_(d_w, ofsx, h, 1);
-				init_dc2_(d_w, ofsx, h, 3);
-				init_gen_(d_w, ofsx, h, 5);
-				init_crm_(d_w, ofsx, h, 7);
-				init_icm_(d_w, ofsx, h, 9);
+				init_wdm_(d_w, ofsx, h, 1);
+				init_dc1_(d_w, ofsx, h, 3);
+				init_dc2_(d_w, ofsx, h, 5);
+				init_gen_(d_w, ofsx, h, 7);
+				init_crm_(d_w, ofsx, h, 9);
+				init_icm_(d_w, ofsx, h, 11);
 
 			{  // Wait時間設定： ０～１．０ｓ（レンジ：０．０１ｓ）
-				widget::param wp(vtx::irect(ofsx, 20 + h * 10, 90, 40), dialog_);
+				widget::param wp(vtx::irect(ofsx, 20 + h * 12, 90, 40), dialog_);
 				widget_label::param wp_("0", false);
 				wait_time_ = wd.add_widget<widget_label>(wp, wp_);
 				wait_time_->at_local_param().select_func_ = [=](const std::string& str) {
@@ -918,7 +1151,7 @@ namespace app {
 				};
 			}
 			{  // 計測ポイント選択
-				widget::param wp(vtx::irect(ofsx + 100, 20 + h * 10, 90, 40), dialog_);
+				widget::param wp(vtx::irect(ofsx + 100, 20 + h * 12, 90, 40), dialog_);
 				widget_list::param wp_;
 				wp_.init_list_.push_back("CH1");
 				wp_.init_list_.push_back("CH2");
@@ -926,23 +1159,45 @@ namespace app {
 				wp_.init_list_.push_back("CH4");
 				test_term_ = wd.add_widget<widget_list>(wp, wp_);
 			}
-			{  // テスト 信号遅延時間設定
-				widget::param wp(vtx::irect(ofsx + 200, 20 + h * 10, 90, 40), dialog_);
+			{  // テスト 信号計測ポイント（時間）
+				widget::param wp(vtx::irect(ofsx + 200, 20 + h * 12, 90, 40), dialog_);
 				widget_label::param wp_("", false);
 				test_delay_ = wd.add_widget<widget_label>(wp, wp_);
 			}
+			{  // 計測信号フィルター
+				widget::param wp(vtx::irect(ofsx + 300, 20 + h * 12, 90, 40), dialog_);
+				widget_list::param wp_;
+				wp_.init_list_.push_back("SIG");
+				wp_.init_list_.push_back("AVE");
+				wp_.init_list_.push_back("MIN");
+				wp_.init_list_.push_back("MAX");
+				test_filter_ = wd.add_widget<widget_list>(wp, wp_);
+				test_filter_->at_local_param().select_func_
+					= [=](const std::string& text, uint32_t pos) {
+					if(pos == 0) {
+						test_width_->set_stall();
+					} else {
+						test_width_->set_stall(false);
+					}
+				};
+			}
+			{  // テスト 信号計測ポイント（時間）
+				widget::param wp(vtx::irect(ofsx + 400, 20 + h * 12, 90, 40), dialog_);
+				widget_label::param wp_("", false);
+				test_width_ = wd.add_widget<widget_label>(wp, wp_);
+			}
 			{  // テスト MIN 値設定
-				widget::param wp(vtx::irect(ofsx + 300, 20 + h * 10, 90, 40), dialog_);
+				widget::param wp(vtx::irect(ofsx + 500, 20 + h * 12, 90, 40), dialog_);
 				widget_label::param wp_("", false);
 				test_min_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 			{  // テスト MAX 値設定
-				widget::param wp(vtx::irect(ofsx + 400, 20 + h * 10, 90, 40), dialog_);
+				widget::param wp(vtx::irect(ofsx + 600, 20 + h * 12, 90, 40), dialog_);
 				widget_label::param wp_("", false);
 				test_max_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 
-			{  // help message
+			{  // help message (widget_chip)
 				widget::param wp(vtx::irect(0, 0, 100, 40), dialog_);
 				widget_chip::param wp_;
 				chip_ = wd.add_widget<widget_chip>(wp, wp_);
@@ -950,7 +1205,7 @@ namespace app {
 
 			{  // インターロック機構、On/Off
 				widget::param wp(vtx::irect(ofsx + 590, 20 + h * 0, 180, 40), dialog_);
-				widget_check::param wp_("Interlock");
+				widget_check::param wp_("Interlock", true);
 				ilock_enable_ = wd.add_widget<widget_check>(wp, wp_);
 			}
 		}
@@ -973,6 +1228,7 @@ namespace app {
 			gen_exec_->set_stall(!client_.probe());
 			crm_exec_->set_stall(!client_.probe());
 			icm_exec_->set_stall(!client_.probe());
+			wdm_exec_->set_stall(!client_.probe());
 
 			// モジュールから受け取ったパラメーターをＧＵＩに反映
 			{ // CRCD
@@ -1044,13 +1300,15 @@ std::cout << s << std::flush;
 			} else if(gen_duty_->get_focus()) {
 				set_help_(gen_duty_, "0.1 to 100.0 [%], 0.1 [%] / step");
 			} else if(wait_time_->get_focus()) {
-				set_help_(wait_time_, "0.0 to 1.0 [秒], 0.01 [秒] / step");
+				set_help_(wait_time_, "検査遅延: 0.0 to 1.0 [秒], 0.01 [秒] / step");
 			} else if(gen_ivolt_->get_focus()) {
 				set_help_(gen_ivolt_, "0.0 to 16.0 [V], 0.01 [V] / step");
 			} else if(test_delay_->get_focus()) {
 				auto ch = test_term_->get_select_pos() + 1;
-				auto str = (boost::format("CH%d 遅延時間") % ch).str();
+				auto str = (boost::format("CH%d 検査ポイント（時間）") % ch).str();
 				set_help_(test_delay_, str);
+			} else if(test_width_->get_focus()) {
+				set_help_(test_width_, "検査幅（時間）");
 			} else if(test_min_->get_focus()) {
 				set_help_(test_min_, "検査：最低値");
 			} else if(test_max_->get_focus()) {
@@ -1103,9 +1361,22 @@ std::cout << s << std::flush;
 
 			save_sw_(pre, icm_sw_, 6);
 
+			save_sw_(pre, wdm_sw_, 4);
+			wdm_smpl_->save(pre);
+			wdm_ch_->save(pre);
+			wdm_slope_->save(pre);
+			wdm_window_->save(pre);
+			wdm_level_->save(pre);
+			wdm_gain_[0]->save(pre);
+			wdm_gain_[1]->save(pre);
+			wdm_gain_[2]->save(pre);
+			wdm_gain_[3]->save(pre);
+
 			wait_time_->save(pre);
 			test_term_->save(pre);
 			test_delay_->save(pre);
+			test_filter_->save(pre);
+			test_width_->save(pre);
 			test_min_->save(pre);
 			test_max_->save(pre);
 
@@ -1158,9 +1429,22 @@ std::cout << s << std::flush;
 
 				load_sw_(pre, icm_sw_, 6);
 
+				load_sw_(pre, wdm_sw_, 4);
+				wdm_smpl_->load(pre);
+				wdm_ch_->load(pre);
+				wdm_slope_->load(pre);
+				wdm_window_->load(pre);
+				wdm_level_->load(pre);
+				wdm_gain_[0]->load(pre);
+				wdm_gain_[1]->load(pre);
+				wdm_gain_[2]->load(pre);
+				wdm_gain_[3]->load(pre);
+
 				wait_time_->load(pre);
 				test_term_->load(pre);
 				test_delay_->load(pre);
+				test_filter_->load(pre);
+				test_width_->load(pre);
 				test_min_->load(pre);
 				test_max_->load(pre);
 

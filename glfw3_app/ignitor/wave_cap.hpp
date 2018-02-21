@@ -59,64 +59,12 @@ namespace app {
 
 		gui::widget_frame*		tools_;
 
-		gui::widget_check*		sw_[4];
-		gui::widget_list*		time_div_;
-		gui::widget_list*		trg_ch_;
-		gui::widget_list*		trg_slope_;
-		gui::widget_spinbox*	trg_window_;
-		gui::widget_label*		trg_level_;
-		gui::widget_list*		ch_gain_[4];
-		gui::widget_button*		exec_;
-
 		gui::widget_sheet*		share_frame_;
 
 		double					sample_rate_;
 		float					gain_rate_[4];
 
 		uint32_t				wdm_st_[4];
-
-		static const uint32_t time_div_size_ = 16;
-		double get_time_div_() const {
-			if(time_div_ == nullptr) return 0.0;
-
-			static constexpr double tbls[time_div_size_] = {
-				1.0 / 1e3,    //  0
-				1.0 / 2e3,    //  1
-				1.0 / 5e3,    //  2
-				1.0 / 10e3,   //  3
-				1.0 / 20e3,   //  4
-				1.0 / 50e3,   //  5
-				1.0 / 100e3,  //  6
-				1.0 / 200e3,  //  7
-				1.0 / 500e3,  //  8
-				1.0 / 1e6,    //  9
-				1.0 / 2e6,    // 10
-				1.0 / 5e6,    // 11
-				1.0 / 10e6,   // 12
-				1.0 / 20e6,   // 13
-				1.0 / 50e6,   // 14
-				1.0 / 100e6   // 15
-			};
-			return tbls[time_div_->get_select_pos() % time_div_size_];
-		}
-
-
-		static const uint32_t gain_rate_size_ = 8;
-		double get_gain_rate_(uint32_t ch) const {
-			if(ch_gain_[ch] == nullptr) return 0.0f;
-			auto n = ch_gain_[ch]->get_select_pos() % gain_rate_size_;
-			static constexpr float tbls[gain_rate_size_] = {
-				0.0625f,
-				0.125f,
-				0.25f,
-				0.5f,
-				1.0f,
-				2.0f,
-				4.0f,
-				8.0f
-			};
-			return tbls[n];
-		}
 
 
 		// チャネル毎の電圧スケールサイズ
@@ -703,73 +651,6 @@ namespace app {
 		}
 
 
-		std::string build_wdm_()
-		{
-			std::string s;
-			uint32_t cmd;
-
-			// SW
-			cmd = 0b00001000;
-			cmd <<= 16;
-			uint32_t sw = 0;
-			for(uint32_t i = 0; i < 4; ++i) {
-				sw <<= 1;
-				if(sw_[i]->get_check()) ++sw;
-			}
-			cmd |= sw << 12;
-			s += (boost::format("wdm %06X\n") % cmd).str();
-			s += "delay 1\n";
-
-			static const uint8_t smtbl[] = {
-				0b01000001,  // 1K
-				0b10000001,  // 2K
-				0b11000001,  // 5K
-				0b01000010,  // 10K
-				0b10000010,  // 20K
-				0b11000010,  // 50K
-				0b01000011,  // 100K
-				0b10000011,  // 200K
-				0b11000011,  // 500K
-				0b01000100,  // 1M
-				0b10000100,  // 2M
-				0b11000100,  // 5M
-				0b01000101,  // 10M
-				0b10000101,  // 20M
-				0b11000101,  // 50M
-				0b01000110,  // 100M
-			};
-			// sampling freq
-			cmd = (0b00010000 << 16) | (smtbl[time_div_->get_select_pos() % 16] << 8);
-			s += (boost::format("wdm %06X\n") % cmd).str();
-			// channel gain
-			for(int i = 0; i < 4; ++i) {
-				cmd = ((0b00011000 | (i + 1)) << 16) | ((ch_gain_[i]->get_select_pos() % 8) << 13);
-				s += (boost::format("wdm %06X\n") % cmd).str();
-			}
-			{ // trigger level
-				cmd = (0b00101000 << 16);
-				int v;
-				if((utils::input("%d", trg_level_->get_text().c_str()) % v).status()) {
-					if(v < 1) v = 1;
-					else if(v > 65534) v = 65534;
-					cmd |= v;
-					s += (boost::format("wdm %06X\n") % cmd).str();
-				}
-			}
-			{  // trigger channel
-				cmd = (0b00100000 << 16);
-				auto n = trg_ch_->get_select_pos();
-				uint8_t sub = 0;
-				sub |= 0x80;  // trigger ON
-				cmd |= static_cast<uint32_t>(n & 3) << 14;
-				if(trg_slope_->get_select_pos()) sub |= 0x40;
-				sub |= trg_window_->get_select_pos() & 15;
-				cmd |= sub;
-				s += (boost::format("wdm %06X\n") % cmd).str();
-			}
-			return s;
-		}
-
 		// 波形描画
 		void update_view_()
 		{
@@ -828,9 +709,7 @@ namespace app {
 			frame_(nullptr), core_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
 			tools_(nullptr),
-			sw_{ nullptr }, time_div_(nullptr), trg_ch_(nullptr), trg_slope_(nullptr),
-			trg_window_(nullptr), trg_level_(nullptr), ch_gain_{ nullptr },
-			exec_(nullptr), share_frame_(nullptr), sample_rate_(1e-6), gain_rate_{ 1.0f },
+			share_frame_(nullptr), sample_rate_(1e-6), gain_rate_{ 1.0f },
 			wdm_st_{ 0 },
 			chn0_(waves_, 1.25f),
 			chn1_(waves_, 1.25f),
@@ -906,101 +785,6 @@ namespace app {
 				share_frame_ = wd.add_widget<widget_sheet>(wp, wp_);
 			}
 
-			for(uint32_t i = 0; i < 4; ++i) {  //  WMD スイッチ設定
-				widget::param wp(vtx::irect(20 + 65 * i, 22, 65, 40), tools_);
-				widget_check::param wp_((boost::format("%d") % (29 + i)).str());
-				sw_[i] = wd.add_widget<widget_check>(wp, wp_);
-				interlock::swtype swt = static_cast<interlock::swtype>(29 + i);
-				interlock_.install(interlock::module::WDM, swt, sw_[i]);
-			}
-
-			{  // 時間軸リスト 10K、20K、50K、100K、200K、500K、1M、2M、5M、10M、20M、50M、100M
-				widget::param wp(vtx::irect(20, 22 + 50, 110, 40), tools_);
-				widget_list::param wp_;
-				wp_.init_list_.push_back("1mS");
-				wp_.init_list_.push_back("500uS");
-				wp_.init_list_.push_back("200uS");
-				wp_.init_list_.push_back("100uS");
-				wp_.init_list_.push_back(" 50uS");
-				wp_.init_list_.push_back(" 20uS");
-				wp_.init_list_.push_back(" 10uS");
-				wp_.init_list_.push_back("  5uS");
-				wp_.init_list_.push_back("  2uS");
-				wp_.init_list_.push_back("  1uS");
-				wp_.init_list_.push_back("500nS");
-				wp_.init_list_.push_back("200nS");
-				wp_.init_list_.push_back("100nS");
-				wp_.init_list_.push_back(" 50nS");
-				wp_.init_list_.push_back(" 20nS");
-				wp_.init_list_.push_back(" 10nS");
-				time_div_ = wd.add_widget<widget_list>(wp, wp_);
-			}
-			{  // トリガー・チャネル選択
-				widget::param wp(vtx::irect(20 + 120, 22 + 50, 80, 40), tools_);
-				widget_list::param wp_;
-				wp_.init_list_.push_back("CH1");
-				wp_.init_list_.push_back("CH2");
-				wp_.init_list_.push_back("CH3");
-				wp_.init_list_.push_back("CH4");
-				trg_ch_ = wd.add_widget<widget_list>(wp, wp_);
-			}
-			{  // トリガー・スロープ選択
-				widget::param wp(vtx::irect(20 + 210, 22 + 50, 80, 40), tools_);
-				widget_list::param wp_;
-				wp_.init_list_.push_back("Fall");
-				wp_.init_list_.push_back("Rise");
-				trg_slope_ = wd.add_widget<widget_list>(wp, wp_);
-			}
-			{  // トリガー・ウィンドウ（１～１５）
-				widget::param wp(vtx::irect(20, 22 + 100, 90, 40), tools_);
-				widget_spinbox::param wp_(1, 1, 15);
-				trg_window_ = wd.add_widget<widget_spinbox>(wp, wp_);
-				trg_window_->at_local_param().select_func_
-					= [=](widget_spinbox::state st, int before, int newpos) {
-					return (boost::format("%d") % newpos).str();
-				};
-			}
-			{  // トリガーレベル設定
-				widget::param wp(vtx::irect(20 + 100, 22 + 100, 100, 40), tools_);
-				widget_label::param wp_("32768", false);
-				trg_level_ = wd.add_widget<widget_label>(wp, wp_);
-				trg_level_->at_local_param().select_func_ = [=](const std::string& str) {
-					trg_level_->set_text(limiti_(str, 1, 65534, "%d"));
-				};
-			}
-			{  // exec
-				widget::param wp(vtx::irect(mw - 40, 22 + 200, 30, 30), tools_);
-				widget_button::param wp_(">");
-				exec_ = wd.add_widget<widget_button>(wp, wp_);
-				exec_->at_local_param().select_func_ = [=](int n) {
-					sample_rate_ = get_time_div_();
-					for(uint32_t i = 0; i < 4; ++i) {
-						gain_rate_[i] = get_gain_rate_(i);
-					}
-					auto s = build_wdm_();
-					client_.send_data(s);
-				};
-			}
-
-			for(int i = 0; i < 4; ++i) {  // 各チャネル減衰設定
-				static const vtx::ipos ofs[4] = {
-					{ 0, 0 }, { 110, 0 }, { 0, 50 }, { 110, 50 }
-				};
-				widget::param wp(vtx::irect(20 + ofs[i].x, 22 + 150 + ofs[i].y,
-					100, 40), tools_);
-				widget_list::param wp_;
-				wp_.init_list_.push_back("-22dB");
-				wp_.init_list_.push_back("-16dB");
-				wp_.init_list_.push_back("-10dB");
-				wp_.init_list_.push_back(" -4dB");
-				wp_.init_list_.push_back("  2dB");
-				wp_.init_list_.push_back("  8dB");
-				wp_.init_list_.push_back(" 14dB");
-				wp_.init_list_.push_back(" 20dB");
-				ch_gain_[i] = wd.add_widget<widget_list>(wp, wp_);
-				ch_gain_[i]->select(4);
-			}
-
 			measure_time_.init(director_, share_frame_, "Time Measure");
 
 			chn0_.init(director_, share_frame_, 0);
@@ -1032,8 +816,6 @@ namespace app {
 		{
 			if(frame_ == nullptr) return;
 			if(share_frame_ == nullptr) return;
-
-			exec_->set_stall(!client_.probe());
 
 			measure_time_.tbp_ = time_.scale_->get_select_pos();
 			measure_time_.update(size_);
@@ -1082,32 +864,6 @@ namespace app {
 				share_frame_->load(pre);
 			}
 
-			for(int i = 0; i < 4; ++i) {
-				if(sw_[i] != nullptr) {
-					sw_[i]->load(pre);
-				}
-			}
-			if(time_div_ != nullptr) {
-				time_div_->load(pre);
-			}
-			if(trg_ch_ != nullptr) {
-				trg_ch_->load(pre);
-			}
-			if(trg_slope_ != nullptr) {
-				trg_slope_->load(pre);
-			}
-			if(trg_window_ != nullptr) {
-				trg_window_->load(pre);
-			}
-			if(trg_level_ != nullptr) {
-				trg_level_->load(pre);
-			}
-			for(int i = 0; i < 4; ++i) {
-				if(ch_gain_[i] != nullptr) {
-					ch_gain_[i]->load(pre);
-				}
-			}
-
 			chn0_.load(pre);
 			chn1_.load(pre);
 			chn2_.load(pre);
@@ -1139,32 +895,6 @@ namespace app {
 			}
 			if(share_frame_ != nullptr) {
 				share_frame_->save(pre);
-			}
-
-			for(int i = 0; i < 4; ++i) {
-				if(sw_[i] != nullptr) {
-					sw_[i]->save(pre);
-				}
-			}
-			if(time_div_ != nullptr) {
-				time_div_->save(pre);
-			}
-			if(trg_ch_ != nullptr) {
-				trg_ch_->save(pre);
-			}
-			if(trg_slope_ != nullptr) {
-				trg_slope_->save(pre);
-			}
-			if(trg_window_ != nullptr) {
-				trg_window_->save(pre);
-			}
-			if(trg_level_ != nullptr) {
-				trg_level_->save(pre);
-			}
-			for(int i = 0; i < 4; ++i) {
-				if(ch_gain_[i] != nullptr) {
-					ch_gain_[i]->save(pre);
-				}
 			}
 
 			chn0_.save(pre);
