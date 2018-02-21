@@ -396,7 +396,7 @@ namespace app {
 
 			if(1) { // フレームのテスト
 				widget::param wp(vtx::irect(200, 20, 100, 80));
-				widget_frame::param wp_;
+				widget_frame::param wp_("AAA");
 				wp_.plate_param_.set_caption(12);
 				frame_ = wd.add_widget<widget_frame>(wp, wp_);
 			}
