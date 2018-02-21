@@ -910,7 +910,10 @@ namespace app {
 				widget::param wp(vtx::irect(20 + 65 * i, 22, 65, 40), tools_);
 				widget_check::param wp_((boost::format("%d") % (29 + i)).str());
 				sw_[i] = wd.add_widget<widget_check>(wp, wp_);
+				interlock::swtype swt = static_cast<interlock::swtype>(29 + i);
+				interlock_.install(interlock::module::WDM, swt, sw_[i]);
 			}
+
 			{  // 時間軸リスト 10K、20K、50K、100K、200K、500K、1M、2M、5M、10M、20M、50M、100M
 				widget::param wp(vtx::irect(20, 22 + 50, 110, 40), tools_);
 				widget_list::param wp_;
