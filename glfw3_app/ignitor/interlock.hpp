@@ -22,6 +22,22 @@ namespace app {
 	public:
 		//=================================================================//
 		/*!
+			@brief  モジュールの種別
+		*/
+		//=================================================================//
+		enum class module {
+			N,
+			CRM,
+			DC2,
+			WDM,
+			ICM,
+			DC1,
+			WGM,
+		};
+
+
+		//=================================================================//
+		/*!
 			@brief  スイッチの種別
 		*/
 		//=================================================================//
@@ -62,11 +78,12 @@ namespace app {
 
 	private:
 		struct interlock_t {
+			module	module_;
 			swtype	swtype_;
 			bustype	bustype_;
 			gui::widget_check*	check_;
 			bool	before_;
-			interlock_t() : swtype_(swtype::N), bustype_(bustype::N),
+			interlock_t() : module_(module::N), swtype_(swtype::N), bustype_(bustype::N),
 				check_(nullptr), before_(false) { }
 		};
 
@@ -110,17 +127,42 @@ namespace app {
 			return bustbl[static_cast<uint32_t>(swt)];
 		}
 
-		void lock_bus_(bustype bt, uint32_t inidx)
+		void lock_bus_(module md, bustype bt, uint32_t inidx)
 		{
 //			std::cout << "Lock Bus: " << static_cast<int>(bt) << std::endl;
 
 			uint32_t idx = 0;
 			for(const auto& t : ilocks_) {
 				if(inidx != idx) {
-
 					bool e = false;
-					if(bt == t.bustype_) {
-						e = true;
+					if(md == module::WDM) {
+						if(t.module_ == module::CRM) {
+							if(bt == bustype::T2_T7) {
+								if(t.bustype_ == bustype::T2 || t.bustype_ == bustype::T7) {
+									e = true;
+								}
+							} else if(bt == bustype::T3_T7) {
+								if(t.bustype_ == bustype::T3 || t.bustype_ == bustype::T7) {
+									e = true;
+								}
+							} 
+						} else if(bt == bustype::RP_RN) {
+							if(t.bustype_ == bustype::RP || t.bustype_ == bustype::RN) {
+								e = true;
+							}
+						} else if(bt == bustype::VP_VN) {
+							if(t.bustype_ == bustype::VP || t.bustype_ == bustype::VN) {
+								e = true;
+							}
+						}
+					} else {
+						if(md == module::ICM && bt == bustype::T1) {
+							if(t.module_ == module::CRM && t.bustype_ == bustype::T1) {
+								e = true;
+							}
+						} else if(bt == t.bustype_) {
+							e = true;
+						}
 					}
 					if(e) {
 						t.check_->set_check(false);
@@ -159,14 +201,16 @@ namespace app {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  モジュールのスイッチ登録
-			@param[in]	swtype	スイッチ種別
+			@param[in]	md		モジュール種別
+			@param[in]	swt		スイッチ種別
 			@param[in]	check	チェック GUI
 			@return 登録できたら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool install(swtype swt, gui::widget_check* check)
+		bool install(module md, swtype swt, gui::widget_check* check)
 		{
 			interlock_t t;
+			t.module_ = md;
 			t.swtype_ = swt;
 			t.bustype_ = get_bustype_(swt);
 			t.check_ = check;
@@ -187,13 +231,17 @@ namespace app {
 		{
 			bool enable = enable_;
 			enable_ = ena;
-			// interlock が無効になった場合全て、「STALL」を無効にする。
-			if(enable && !ena) {
+			if(enable && !ena) {  // interlock が無効になった場合全て、「STALL」を無効にする。
 				for(auto& t : ilocks_) {
 					t.check_->set_stall(false);
 				}
 				return;
+			} else if(!enable && ena) {  // interlock が有効になったら、状態をリセット
+				for(auto& t : ilocks_) {
+					t.before_ = false;
+				}
 			}
+
 			if(!ena) return;
 
 			uint32_t idx = 0;
@@ -201,7 +249,7 @@ namespace app {
 				bool before = t.before_;
 				t.before_ = t.check_->get_check();
 				if(!before && t.check_->get_check()) {  // チェック ON
-					lock_bus_(t.bustype_, idx);
+					lock_bus_(t.module_, t.bustype_, idx);
 					break;
 				} else if(before && !t.check_->get_check()) {  // チェック OFF
 					free_bus_(t.bustype_, idx);
