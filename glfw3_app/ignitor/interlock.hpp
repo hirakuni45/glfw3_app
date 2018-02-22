@@ -143,13 +143,13 @@ namespace app {
 						}
 					} 
 				} else if(bt == bustype::RP_RN) {
-					if(t.bustype_ == bustype::RP || t.bustype_ == bustype::RN) {
-						e = true;
-					}
+//					if(t.bustype_ == bustype::RP || t.bustype_ == bustype::RN) {
+//						e = true;
+//					}
 				} else if(bt == bustype::VP_VN) {
-					if(t.bustype_ == bustype::VP || t.bustype_ == bustype::VN) {
-						e = true;
-					}
+//					if(t.bustype_ == bustype::VP || t.bustype_ == bustype::VN) {
+//						e = true;
+//					}
 				}
 			} else {
 				if(md == module::ICM && bt == bustype::T1) {
