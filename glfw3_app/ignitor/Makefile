@@ -3,6 +3,8 @@
 #-----------------------------------------------#
 TARGET		=	ignitor_app
 
+BUILD_ID	=	$(shell date +%Y%m%d%H)
+
 ifeq ($(OS),Windows_NT)
 FEXT	=	.exe
 ICON_RC = icon.rc
@@ -142,7 +144,7 @@ POPT	=	-O2 -std=c++14
 COPT	=	-O2
 LOPT	=
 
-PFLAGS	=	-DHAVE_STDINT_H
+PFLAGS	=	-DHAVE_STDINT_H -DB_ID=$(BUILD_ID)
 CFLAGS	=
 
 ifeq ($(SYSTEM),WIN)
