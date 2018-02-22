@@ -12,7 +12,9 @@
 #include <string>
 #include <boost/format.hpp>
 
-namespace ign {
+#include "utils/string_utils.hpp"
+
+namespace app {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
@@ -21,6 +23,9 @@ namespace ign {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class csv {
 
+		typedef std::vector<utils::strings> CELL;
+
+		CELL	form_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -38,8 +43,8 @@ namespace ign {
 		//-----------------------------------------------------------------//
 		void clear()
 		{
-
 		}
+
 
 	};
 }
