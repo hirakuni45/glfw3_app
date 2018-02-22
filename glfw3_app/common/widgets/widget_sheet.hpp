@@ -70,6 +70,7 @@ namespace gui {
 		uint32_t			id_;
 
 		bool				init_;
+		bool				enable_;
 
 		void set_title_()
 		{
@@ -91,7 +92,8 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_sheet(widget_director& wd, const widget::param& wp, const param& p) :
-			widget(wp), wd_(wd), param_(p), objh_(0), id_(0), init_(false)
+			widget(wp), wd_(wd), param_(p), objh_(0), id_(0), init_(false),
+			enable_(false)
 		{ }
 
 
@@ -210,6 +212,7 @@ namespace gui {
 					s.widget_->at_param().parents_ = this;
 				}				
 			}
+			enable_ = get_state(state::ENABLE);
 		}
 
 
@@ -257,6 +260,12 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void service() override
 		{
+			bool ena = get_state(state::ENABLE);
+			if(!enable_ && ena) {
+				init_ = false;
+			}
+			enable_ = ena;
+
 			if(!get_state(state::ENABLE)) {
 				return;
 			}
