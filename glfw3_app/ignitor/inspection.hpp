@@ -102,6 +102,8 @@ namespace app {
 		gui::widget_list*		wdm_slope_;		///< WDM スロープ
 		gui::widget_spinbox*	wdm_window_;	///< WDM トリガー領域
 		gui::widget_label*		wdm_level_;		///< WDM トリガー・レベル
+		gui::widget_check*		wdm_cnv_;		///< WDM トリガー・レベル変換
+		gui::widget_label*		wdm_level_va_;	///< WDM トリガー・レベル（電圧、電流）
 		gui::widget_list*		wdm_gain_[4];	///< WDM チャネル・ゲイン
 		gui::widget_button*		wdm_exec_;		///< WDM 設定転送
 		wave_cap::sample_param	sample_param_;
@@ -926,6 +928,40 @@ namespace app {
 					wdm_level_->set_text(limiti_(str, 1, 65534, "%d"));
 				};
 			}
+			{  // トリガーレベル変換
+				widget::param wp(vtx::irect(ofsx + 510, 20 + h * loc, 70, 40), dialog_);
+				widget_check::param wp_("ＶＡ");
+				wdm_cnv_ = wd.add_widget<widget_check>(wp, wp_);
+				wdm_cnv_->at_local_param().select_func_ = [=](bool f) {
+					if(f) {
+						wdm_level_->set_stall();
+						wdm_level_va_->set_stall(false);
+					} else {
+						wdm_level_->set_stall(false);
+						wdm_level_va_->set_stall();
+					}
+				};
+			}
+			{  // トリガーレベル設定
+				widget::param wp(vtx::irect(ofsx + 590, 20 + h * loc, 90, 40), dialog_);
+				widget_label::param wp_("0", false);
+				wdm_level_va_ = wd.add_widget<widget_label>(wp, wp_);
+				wdm_level_va_->at_local_param().select_func_ = [=](const std::string& str) {
+					static const float vat[4] = { 32.768f, 655.36f, 16.384f, 65.536f };
+					auto n = wdm_ch_->get_select_pos();
+					auto s = limitf_(str, -vat[n], vat[n], "%4.3f");
+					if(s.empty()) {
+						s = "0.0";
+					}
+					wdm_level_va_->set_text(s);
+					float a;
+					if((utils::input("%f", s.c_str()) % a).status()) {
+						int32_t b = a * 32767.0f / vat[n];
+						b += 32767;
+						wdm_level_->set_text((boost::format("%d") % b).str());
+					}
+				};
+			}
 			{  // exec
 				widget::param wp(vtx::irect(d_w - 50, 20 + h * loc, 30, 30), dialog_);
 				widget_button::param wp_(">");
@@ -996,7 +1032,8 @@ namespace app {
 
 			wdm_sw_{ nullptr },
 			wdm_smpl_(nullptr), wdm_ch_(nullptr), wdm_slope_(nullptr), wdm_window_(nullptr),
-			wdm_level_(nullptr), wdm_gain_{ nullptr }, wdm_exec_(nullptr),
+			wdm_level_(nullptr), wdm_cnv_(nullptr), wdm_level_va_(nullptr),
+			wdm_gain_{ nullptr }, wdm_exec_(nullptr),
 			sample_param_(),
 
 			retry_(nullptr), wait_time_(nullptr), test_term_(nullptr), test_delay_(nullptr),
@@ -1342,6 +1379,20 @@ std::cout << s << std::flush;
 				set_help_(test_min_, "検査：最低値");
 			} else if(test_max_->get_focus()) {
 				set_help_(test_max_, "検査：最大値");
+			} else if(wdm_level_->get_focus()) {
+				set_help_(wdm_level_, "トリガーレベル（数値入力）");
+			} else if(wdm_level_va_->get_focus()) {
+				static const char* vat[4] = { "32.768 A", "655.36 V", "16.384 V", "65.536 KV" };
+				auto n = wdm_ch_->get_select_pos();
+				std::string s = "トリガーレベル（";
+				if(wdm_ch_->get_select_pos() == 0) {
+					s += "電流：±";
+				} else {
+					s += "電圧：±";
+				}
+				s += vat[n];
+				s += "）";
+				set_help_(wdm_level_va_, s);
 			} else {
 				act = 0;
 			}
