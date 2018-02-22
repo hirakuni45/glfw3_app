@@ -247,6 +247,18 @@ return;
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief  波形編集の状態を取得
+			@return	波形編集の状態
+		*/
+		//-----------------------------------------------------------------//
+		bool get_wave_edit() const {
+			if(wave_edit_ == nullptr) return false;
+			return wave_edit_->get_check();
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief  初期化（リソースの構築）
 		*/
 		//-----------------------------------------------------------------//
@@ -507,6 +519,9 @@ return;
 
 			// プリファレンスのロード
 			sys::preference& pre = director_.at().preference_;
+
+			wave_edit_->load(pre);
+
 			cont_setting_dialog_->load(pre);
 			cont_connect_->load(pre);
 			cont_setting_ip_[0]->load(pre);
@@ -589,6 +604,8 @@ return;
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 			sys::preference& pre = director_.at().preference_;
+
+			wave_edit_->save(pre);
 
 			cont_setting_dialog_->save(pre);
 			cont_connect_->save(pre);

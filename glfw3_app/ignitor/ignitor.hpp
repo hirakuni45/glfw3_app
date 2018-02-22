@@ -53,6 +53,7 @@ namespace app {
 		uint32_t				delay_client_;
 		bool					connect_client_;
 		bool					start_client_;
+		bool					wave_edit_;
 
 ///		net::ign_server			server_;
 
@@ -81,6 +82,7 @@ namespace app {
 ///			client_(io_service_),
 			client_(),
 			delay_client_(60), connect_client_(false), start_client_(false),
+			wave_edit_(false),
 ///			server_(io_service_),
 			ip_()
 		{
@@ -187,19 +189,14 @@ namespace app {
 //				terminal_frame_->load(pre);
 //			}
 
-//			if(argv_frame_ != nullptr) {
-//				argv_frame_->load(pre);
-//			}
-
 //			if(load_ctx_ != nullptr) load_ctx_->load(pre);
 ///			if(save_ctx_ != nullptr) save_ctx_->load(pre);
 
-///			if(edit_ != nullptr) edit_->load(pre);
-
-//			if(div_ != nullptr) div_->load(pre);
-
 			// テスト・サーバー起動
 ///			server_.start();
+
+			wave_edit_ = root_menu_.get_wave_edit();
+			wave_cap_.enable(wave_edit_);
 		}
 
 
@@ -211,6 +208,11 @@ namespace app {
 		void update()
 		{
 			root_menu_.update();
+			bool we = root_menu_.get_wave_edit();
+			if(wave_edit_ != we) {
+				wave_edit_ = we;
+				wave_cap_.enable(we);
+			}
 
 			wave_cap_.set_sample_param(root_menu_.get_inspection().get_sample_param());
 

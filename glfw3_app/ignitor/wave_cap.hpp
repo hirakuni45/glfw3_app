@@ -767,9 +767,11 @@ namespace app {
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
-			size_.set(400, 400);
+			size_.set(930, 820);
 			{  // 波形描画フレーム
-				widget::param wp(vtx::irect(40, 150, size_.x, size_.y));
+/// frame/00000/locate 3 611,5
+/// frame/00000/size 3 932,823
+				widget::param wp(vtx::irect(610, 5, size_.x, size_.y));
 				widget_frame::param wp_;
 				wp_.plate_param_.set_caption(12);
 				frame_ = wd.add_widget<widget_frame>(wp, wp_);
@@ -790,8 +792,10 @@ namespace app {
 			}
 
 			{	// ターミナル
+/// frame/00001/locate 3 274,609
+/// frame/00001/size 3 327,220
 				{
-					widget::param wp(vtx::irect(20, 100, 100, 200));
+					widget::param wp(vtx::irect(270, 610, 330, 220));
 					widget_frame::param wp_;
 					wp_.plate_param_.set_caption(12);
 					terminal_frame_ = wd.add_widget<widget_frame>(wp, wp_);
@@ -807,10 +811,12 @@ namespace app {
 				}
 			}
 
+/// frame/00002/locate 3 271,5
+/// frame/00002/size 3 330,600
 			int mw = 330;
 			int mh = 600;
 			{	// 波形ツールフレーム
-				widget::param wp(vtx::irect(100, 100, mw, mh));
+				widget::param wp(vtx::irect(270, 5, mw, mh));
 				widget_frame::param wp_;
 				wp_.plate_param_.set_caption(12);
 				tools_ = wd.add_widget<widget_frame>(wp, wp_);
