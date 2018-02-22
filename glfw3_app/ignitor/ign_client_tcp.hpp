@@ -41,6 +41,7 @@ namespace net {
 
 		uint32_t	crcd_;
 		uint32_t	crrd_;
+		uint32_t	d2md_;
 
 		uint32_t	wdm_ch_;
 		uint32_t	wdm_pos_;
@@ -55,7 +56,7 @@ namespace net {
 		//-----------------------------------------------------------------//
 		ign_client_tcp() : startup_(false),
 			sock_(0),
-			connect_(false), crcd_(0), crrd_(0),
+			connect_(false), crcd_(0), crrd_(0), d2md_(0),
 			wdm_ch_(0), wdm_pos_(0), wdm_st_{ 0 }
 		{
 		}
@@ -72,6 +73,8 @@ namespace net {
 		uint32_t get_crcd() const { return crcd_; }
 
 		uint32_t get_crrd() const { return crrd_; }
+
+		uint32_t get_d2md() const { return d2md_; }
 
 		const uint16_t* get_wdm(uint32_t ch) const {
 			return &wdm_buff_[WAVE_BUFF_SIZE * (ch & 3)];
@@ -182,6 +185,12 @@ namespace net {
 					int v = 0;
 					if((utils::input("%x", t.c_str()) % v).status()) {
 						crrd_ = v;
+					}			
+				} else if(s.find("D2MD") == 0) {
+					auto t = s.substr(4, 5);
+					int v = 0;
+					if((utils::input("%x", t.c_str()) % v).status()) {
+						d2md_ = v;
 					}			
 				} else if(s.find("WDCH") == 0) {  // WDM チャネル
 					auto t = s.substr(4);

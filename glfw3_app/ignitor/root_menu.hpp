@@ -23,6 +23,7 @@
 #include "inspection.hpp"
 #include "ign_client_tcp.hpp"
 #include "interlock.hpp"
+#include "csv.hpp"
 
 #define NATIVE_FILER
 
@@ -34,6 +35,8 @@ namespace app {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class root_menu {
+
+		static const int32_t  app_version_ = 80;
 
 		static constexpr const char* PROJECT_EXT_ = "ipr";
 
@@ -59,6 +62,7 @@ namespace app {
 		gui::widget_button*		cont_settings_;
 		gui::widget_check*		wave_edit_;
 		gui::widget_button*		run_;
+		gui::widget_button*		info_;
 
 		gui::widget_dialog*		proj_name_dialog_;
 		gui::widget_label*		proj_name_label_;
@@ -71,6 +75,8 @@ namespace app {
 		gui::widget_label*		cont_setting_ip_[4];
 		gui::widget_label*		cont_setting_cmds_;
 		gui::widget_button*		cont_setting_exec_;
+
+		gui::widget_dialog*		info_dialog_;
 
 #ifdef NATIVE_FILER
 		utils::select_file		proj_load_filer_;
@@ -173,7 +179,7 @@ return;
 			save_project_(nullptr),
 			igni_settings_(nullptr), cont_settings_(nullptr),
 			wave_edit_(nullptr),
-			run_(nullptr),
+			run_(nullptr), info_(nullptr),
 			proj_name_dialog_(nullptr), proj_name_label_(nullptr),
 			project_(d),
 			inspection_(d, client, ilock),
@@ -372,6 +378,14 @@ return;
 				run_->at_local_param().select_func_ = [=](uint32_t id) {
 				};
 			}
+			{  // 検査開始ボタン
+				widget::param wp(vtx::irect(ofs_x_, ofs_y_ + sph * 8, btn_w_, btn_h_));
+				widget_button::param wp_("情報");
+				info_ = wd.add_widget<widget_button>(wp, wp_);
+				info_->at_local_param().select_func_ = [=](uint32_t id) {
+					info_dialog_->enable();
+				};
+			}
 
 			{  // プロジェクト名入力ダイアログ
 				int w = 300;
@@ -437,9 +451,9 @@ return;
 					widget::param wp(vtx::irect(20, 50, 100, 40), root);
 					widget_check::param wp_("接続");
 					cont_connect_ = wd.add_widget<widget_check>(wp, wp_);
-					cont_connect_->at_local_param().select_func_ = [=](bool f) {
+///					cont_connect_->at_local_param().select_func_ = [=](bool f) {
 ///						client_.start();
-					};
+///					};
 				}
 				int ipw = 60;  // IP 設定幅
 				int ips = 20;  // IP 設定隙間
@@ -478,6 +492,22 @@ return;
 						client_.send_data(s);
 					};
 				}
+			}
+
+			{  // 情報ダイアログ
+				int w = 350;
+				int h = 210;
+				widget::param wp(vtx::irect(50, 50, w, h));
+				widget_dialog::param wp_;
+				wp_.style_ = widget_dialog::style::OK;
+				info_dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
+				std::string s =	"イグナイター検査\n";
+				uint32_t bid = B_ID;
+				s += (boost::format("Build: %d\n") % bid).str();
+				s += (boost::format("Version %d.%02d")
+					% (app_version_ / 100) % (app_version_ % 100)).str();
+				info_dialog_->set_text(s);
+				info_dialog_->enable(false);
 			}
 
 #ifndef NATIVE_FILER

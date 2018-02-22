@@ -68,6 +68,7 @@ namespace app {
 		gui::widget_list*		dc2_mode_;		///< DC2 電流、電圧モード
 		gui::widget_label*		dc2_voltage_;	///< DC2（電圧）
 		gui::widget_label*		dc2_current_;	///< DC2（電流）
+		gui::widget_label*		dc2_probe_;		///< DC2（電流、電圧測定値）
 		gui::widget_button*		dc2_exec_;		///< DC2 設定転送
 
 		// WGM 設定
@@ -170,6 +171,8 @@ namespace app {
 					s += (boost::format("dc2 D2IS%05X\n") % (curr & 0xfffff)).str();
 				}
 				s += (boost::format("dc2 D2OE%d\n") % ena).str();
+				s += "delay 1\n";
+				s += "dc2 D2M?\n";
 				return s;
 			}
 		};
@@ -518,6 +521,11 @@ namespace app {
 				wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
 											 vtx::placement::vertical::CENTER);
 				wd.add_widget<widget_text>(wp, wp_);
+			}
+			{  // 電流、電圧測定値
+				widget::param wp(vtx::irect(ofsx + 520, 20 + h * loc, 90, 40), dialog_);
+				widget_label::param wp_("");
+				dc2_probe_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 			{
 				widget::param wp(vtx::irect(d_w - 50, 20 + h * loc, 30, 30), dialog_);
@@ -1020,6 +1028,7 @@ namespace app {
 
 			dc2_sw_{ nullptr },
 			dc2_ena_(nullptr), dc2_mode_(nullptr), dc2_voltage_(nullptr), dc2_current_(nullptr),
+			dc2_probe_(nullptr),
 			dc2_exec_(nullptr),
 
 			gen_ena_(nullptr), gen_mode_(nullptr), gen_freq_(nullptr),
@@ -1273,6 +1282,13 @@ namespace app {
 				float a = static_cast<float>(v) / 1000;
 				crm_ans_->set_text((boost::format("%5.4f") % a).str());
 				crm_anst_->set_text("mΩ");
+			}
+			{  // D2MD
+				uint32_t v = client_.get_d2md();
+				float a = static_cast<float>(v);
+				a /= 999960.2f;
+				a *= 100.0f;
+				dc2_probe_->set_text((boost::format("%5.2f") % a).str());
 			}
 
 #if 0
