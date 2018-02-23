@@ -407,6 +407,10 @@ namespace view {
 						if(-sz <= idx && idx < sz) {
 							if(idx < 0) idx += sz;
 							float v = static_cast<float>(t.units_[idx % sz]);
+							if(tstep < 65536) {  // 補完する
+								float v2 = static_cast<float>(t.units_[(idx + 1) % sz]);
+								v += (v2 - v) * static_cast<float>(tsc & 0xffff) / 65535.0f;
+							}
 							v -= 32768.0f;
 							t.lines_.push_back(vtx::spos(i, v * -gain));
 						}
