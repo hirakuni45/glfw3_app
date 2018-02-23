@@ -412,7 +412,12 @@ namespace view {
 								v += (v2 - v) * static_cast<float>(tsc & 0xffff) / 65535.0f;
 							}
 							v -= 32768.0f;
-							t.lines_.push_back(vtx::spos(i, v * -gain));
+							vtx::spos np(i, v * -gain);
+							if(t.lines_.empty()) {
+								t.lines_.push_back(np);
+							} else if(t.lines_.back() != np) {
+								t.lines_.push_back(np);
+							}
 						}
 						tsc += tstep;
 					}
