@@ -38,11 +38,12 @@ namespace app {
 
 		gui::widget_dialog*		dialog_;
 
+		gui::widget_label*		csv_name_;
+
 		gui::widget_label*		pbase_;
 		gui::widget_label*		pext_;
 		gui::widget_label*		pname_[50];
 		gui::widget_text*		help_;
-
 
 		std::string get_path_(uint32_t no) const {
 			if(pname_[no]->get_text().empty()) return "";
@@ -68,6 +69,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		project(utils::director<core>& d) : director_(d),
 			dialog_(nullptr),
+			csv_name_(nullptr),
 			pbase_(nullptr), pext_(nullptr),
 			pname_{ nullptr }, help_(nullptr)
 		{ }
@@ -106,36 +108,52 @@ namespace app {
 			widget_director& wd = director_.at().widget_director_;
 
 			int w = 1020;
-			int h = 670;
+			int h = 720;
 			{  // 単体試験設定ダイアログ
 				widget::param wp(vtx::irect(120, 120, w, h));
 				widget_dialog::param wp_;
 				wp_.style_ = widget_dialog::style::OK;
 				dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
 				dialog_->enable(false);
+
+				int yy = 20;
+				{  // CSV 名設定
+					{
+						widget::param wp(vtx::irect(20, yy, 60, 40), dialog_);
+						widget_text::param wp_("CSV：");
+						wp_.text_param_.placement_
+							= vtx::placement(vtx::placement::holizontal::LEFT,
+											 vtx::placement::vertical::CENTER);
+						wd.add_widget<widget_text>(wp, wp_);	
+					}
+					widget::param wp(vtx::irect(20 + 60 + 10, yy, 150, 40), dialog_);
+					widget_label::param wp_("", false);
+					csv_name_ = wd.add_widget<widget_label>(wp, wp_);
+				}
+				yy += 50;
 				{  // 単体試験ベース名設定
 					{
-						widget::param wp(vtx::irect(20, 20, 100, 40), dialog_);
+						widget::param wp(vtx::irect(20, yy, 100, 40), dialog_);
 						widget_text::param wp_("ベース名：");
 						wp_.text_param_.placement_
 							= vtx::placement(vtx::placement::holizontal::LEFT,
 											 vtx::placement::vertical::CENTER);
 						wd.add_widget<widget_text>(wp, wp_);	
 					}
-					widget::param wp(vtx::irect(20 + 100 + 10, 20, 150, 40), dialog_);
+					widget::param wp(vtx::irect(20 + 100 + 10, yy, 150, 40), dialog_);
 					widget_label::param wp_("", false);
 					pbase_ = wd.add_widget<widget_label>(wp, wp_);
 				}
 				{  // 単体試験拡張子設定
 					{
-						widget::param wp(vtx::irect(320, 20, 90, 40), dialog_);
+						widget::param wp(vtx::irect(320, yy, 90, 40), dialog_);
 						widget_text::param wp_("拡張子：");
 						wp_.text_param_.placement_
 							= vtx::placement(vtx::placement::holizontal::LEFT,
 											 vtx::placement::vertical::CENTER);
 						wd.add_widget<widget_text>(wp, wp_);	
 					}
-					widget::param wp(vtx::irect(320 + 90 + 10, 20, 150, 40), dialog_);
+					widget::param wp(vtx::irect(320 + 90 + 10, yy, 150, 40), dialog_);
 					widget_label::param wp_(".unt", false);
 					pext_ = wd.add_widget<widget_label>(wp, wp_);
 				}
@@ -144,7 +162,7 @@ namespace app {
 					int x = (i / 10) * 200;
 					int y = 40 + 10 + (i % 10) * 50;
 					{
-						widget::param wp(vtx::irect(x + 20, y + 20, 50, 40), dialog_);
+						widget::param wp(vtx::irect(x + 20, y + yy, 50, 40), dialog_);
 						std::string no = (boost::format("%d:") % (i + 1)).str();
 						widget_text::param wp_(no);
 						wp_.text_param_.placement_
@@ -152,7 +170,7 @@ namespace app {
 											 vtx::placement::vertical::CENTER);
 						wd.add_widget<widget_text>(wp, wp_);
 					}
-					widget::param wp(vtx::irect(x + 60, y + 20, 130, 40), dialog_);
+					widget::param wp(vtx::irect(x + 60, y + yy, 130, 40), dialog_);
 					widget_label::param wp_("", false);
 					pname_[i] = wd.add_widget<widget_label>(wp, wp_);
 				}

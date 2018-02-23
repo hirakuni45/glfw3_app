@@ -87,7 +87,6 @@ namespace app {
 #endif
 		std::string				root_name_;
 
-		std::string				ip_str_[4];
 		int						ip_[4];
 
 
@@ -102,22 +101,6 @@ return;
 			cont_settings_->set_stall(f);
 			igni_settings_->set_stall(f);
 //			run_->set_stall(f);
-		}
-
-
-		void save_setting_value_()
-		{
-			for(int i = 0; i < 4; ++i) {
-				ip_str_[i] = cont_setting_ip_[i]->get_text();
-			}
-		}
-
-
-		void load_setting_value_()
-		{
-			for(int i = 0; i < 4; ++i) {
-				cont_setting_ip_[i]->set_text(ip_str_[i]);
-			}
 		}
 
 
@@ -359,7 +342,6 @@ return;
 				widget_button::param wp_("コントローラー設定");
 				cont_settings_ = wd.add_widget<widget_button>(wp, wp_);
 				cont_settings_->at_local_param().select_func_ = [=](uint32_t id) {
-					save_setting_value_();
 					cont_setting_dialog_->enable();
 				};
 			}
@@ -421,17 +403,13 @@ return;
 
 			{  // コントローラー設定ダイアログ
 				int w = 450;
-				int h = 310;
+				int h = 260;
 				widget::param wp(vtx::irect(100, 100, w, h));
 				widget_dialog::param wp_;
-				wp_.style_ = widget_dialog::style::CANCEL_OK;
+				wp_.style_ = widget_dialog::style::OK;
 				cont_setting_dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
 				cont_setting_dialog_->enable(false);
 				cont_setting_dialog_->at_local_param().select_func_ = [=](bool ok) {
-					if(!ok) {
-						load_setting_value_();
-						return;
-					}
 					for(int i = 0; i < 4; ++i) {
 						const std::string& ip = cont_setting_ip_[i]->get_text();
 						int v = 0;
@@ -495,7 +473,7 @@ return;
 			}
 
 			{  // 情報ダイアログ
-				int w = 350;
+				int w = 450;
 				int h = 210;
 				widget::param wp(vtx::irect(50, 50, w, h));
 				widget_dialog::param wp_;
@@ -504,8 +482,10 @@ return;
 				std::string s =	"イグナイター検査\n";
 				uint32_t bid = B_ID;
 				s += (boost::format("Build: %d\n") % bid).str();
-				s += (boost::format("Version %d.%02d")
+				s += (boost::format("Version %d.%02d\n")
 					% (app_version_ / 100) % (app_version_ % 100)).str();
+				s += "Copyright (C) 2018 Graviton Inc.\n";
+				s += "All Rights Reserved.";
 				info_dialog_->set_text(s);
 				info_dialog_->enable(false);
 			}
@@ -547,26 +527,8 @@ return;
 			}
 #endif
 
-			// プリファレンスのロード
-			sys::preference& pre = director_.at().preference_;
+			load();
 
-			wave_edit_->load(pre);
-
-			cont_setting_dialog_->load(pre);
-			cont_connect_->load(pre);
-			cont_setting_ip_[0]->load(pre);
-			cont_setting_ip_[1]->load(pre);
-			cont_setting_ip_[2]->load(pre);
-			cont_setting_ip_[3]->load(pre);
-
-			proj_name_dialog_->load(pre);		  // ダイアログの位置復元
-			inspection_.get_dialog()->load(pre);  // ダイアログの位置復元
-			project_.get_dialog()->load(pre);	  // ダイアログの位置復元
-
-#ifndef NATIVE_FILER
-			proj_load_filer_->load(pre);
-			proj_save_filer_->load(pre);
-#endif
 			update_project_();
 		}
 
@@ -626,6 +588,37 @@ return;
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief  プリファレンスのロード
+		*/
+		//-----------------------------------------------------------------//
+		void load()
+		{
+			sys::preference& pre = director_.at().preference_;
+
+			info_dialog_->load(pre);
+
+			wave_edit_->load(pre);
+
+			cont_setting_dialog_->load(pre);
+			cont_connect_->load(pre);
+			cont_setting_ip_[0]->load(pre);
+			cont_setting_ip_[1]->load(pre);
+			cont_setting_ip_[2]->load(pre);
+			cont_setting_ip_[3]->load(pre);
+
+			proj_name_dialog_->load(pre);		  // ダイアログの位置復元
+			inspection_.get_dialog()->load(pre);  // ダイアログの位置復元
+			project_.get_dialog()->load(pre);	  // ダイアログの位置復元
+
+#ifndef NATIVE_FILER
+			proj_load_filer_->load(pre);
+			proj_save_filer_->load(pre);
+#endif
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief  廃棄
 		*/
 		//-----------------------------------------------------------------//
@@ -634,6 +627,8 @@ return;
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 			sys::preference& pre = director_.at().preference_;
+
+			info_dialog_->save(pre);
 
 			wave_edit_->save(pre);
 
@@ -645,6 +640,7 @@ return;
 			cont_setting_ip_[3]->save(pre);
 
 			proj_name_dialog_->save(pre);		  // ダイアログの位置セーブ
+
 			inspection_.get_dialog()->save(pre);  // ダイアログの位置セーブ
 			project_.get_dialog()->save(pre);	  // ダイアログの位置セーブ
 
