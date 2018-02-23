@@ -89,7 +89,6 @@ namespace app {
 		gui::widget_list*		crm_freq_;		///< CRM 周波数（100Hz, 1KHz, 10KHz）
 		gui::widget_list*		crm_mode_;		///< CRM 抵抗測定、容量測定
 		gui::widget_label*		crm_ans_;		///< CRM 測定結果 
-		gui::widget_text*		crm_anst_;		///< CRM 測定結果単位 
 		gui::widget_button*		crm_exec_;		///< CRM 設定転送
 
 		// ICM 設定
@@ -122,6 +121,8 @@ namespace app {
 
 		gui::widget_chip*		chip_;			///< help chip
 
+		bool					startup_init_;
+
 		struct dc1_t {
 			uint32_t	sw;		///< 5 bits
 			uint32_t	delay;	///< SW オンからコマンド発行までの遅延（10ms単位）
@@ -136,14 +137,16 @@ namespace app {
 			{
 				std::string s;
 				s += (boost::format("dc1 D1SW%02X\n") % sw).str();
-				s += (boost::format("delay %d\n") % delay).str();
-				s += (boost::format("dc1 D1MD%d\n") % mode).str();
-				s += (boost::format("dc1 D1OE%d\n") % ena).str();
-				if(mode != 0) {
-					s += (boost::format("dc1 D1VS%05X\n") % (volt & 0xfffff)).str();
-				} else {
-					s += (boost::format("dc1 D1IS%05X\n") % (curr & 0xfffff)).str();
+				if(ena) {
+					s += (boost::format("delay %d\n") % delay).str();
+					s += (boost::format("dc1 D1MD%d\n") % mode).str();
+					if(mode != 0) {
+						s += (boost::format("dc1 D1VS%05X\n") % (volt & 0xfffff)).str();
+					} else {
+						s += (boost::format("dc1 D1IS%05X\n") % (curr & 0xfffff)).str();
+					}
 				}
+				s += (boost::format("dc1 D1OE%d\n") % ena).str();
 				return s;
 			}
 		};
@@ -163,16 +166,20 @@ namespace app {
 			{
 				std::string s;
 				s += (boost::format("dc2 D2SW%04X\n") % sw).str();
-				s += (boost::format("delay %d\n") % delay).str();
-				s += (boost::format("dc2 D2MD%d\n") % mode).str();
-				if(mode != 0) {
-					s += (boost::format("dc2 D2VS%05X\n") % (volt & 0xfffff)).str();
-				} else {
-					s += (boost::format("dc2 D2IS%05X\n") % (curr & 0xfffff)).str();
+				if(ena) {
+					s += (boost::format("delay %d\n") % delay).str();
+					s += (boost::format("dc2 D2MD%d\n") % mode).str();
+					if(mode != 0) {
+						s += (boost::format("dc2 D2VS%05X\n") % (volt & 0xfffff)).str();
+					} else {
+						s += (boost::format("dc2 D2IS%05X\n") % (curr & 0xfffff)).str();
+					}
 				}
 				s += (boost::format("dc2 D2OE%d\n") % ena).str();
-				s += "delay 1\n";
-				s += "dc2 D2M?\n";
+				if(ena) {
+					s += "delay 1\n";
+					s += "dc2 D2M?\n";
+				}
 				return s;
 			}
 		};
@@ -194,12 +201,16 @@ namespace app {
 			{
 				std::string s;
 				s += (boost::format("wgm WGSW%02X\n") % sw).str();
-				s += (boost::format("wgm WGSP%d\n") % type).str();
-				s += (boost::format("wgm WGFQ%02X\n") % (frq & 0x7f)).str();
-				s += (boost::format("wgm WGPW%03X\n") % (duty & 0x3ff)).str();
-				s += (boost::format("wgm WGPV%03X\n") % (volt & 0x3ff)).str();
+				if(ena) {
+					s += (boost::format("wgm WGSP%d\n") % type).str();
+					s += (boost::format("wgm WGFQ%02X\n") % (frq & 0x7f)).str();
+					s += (boost::format("wgm WGPW%03X\n") % (duty & 0x3ff)).str();
+					s += (boost::format("wgm WGPV%03X\n") % (volt & 0x3ff)).str();
+				}
 				s += (boost::format("wgm WGOE%d\n") % ena).str();
-				s += (boost::format("wgm WGDV%05X\n") % (ivolt & 0xfffff)).str();
+				if(iena) {
+					s += (boost::format("wgm WGDV%05X\n") % (ivolt & 0xfffff)).str();
+				}
 				s += (boost::format("wgm WGDE%d\n") % iena).str();
 				return s;
 			}
@@ -218,15 +229,20 @@ namespace app {
 			std::string build() const
 			{
 				std::string s;
-				s += (boost::format("crm CRSW%04X\n") % sw).str();
-				s += (boost::format("crm CRIS%d\n") % (amps + 1)).str();
-				static const char* frqtbl[3] = { "001", "010", "100" };
-				s += (boost::format("crm CRFQ%s\n") % frqtbl[freq % 3]).str();
+				if(ena) {
+					s += (boost::format("crm CRSW%04X\n") % sw).str();
+					s += (boost::format("crm CRIS%d\n") % (amps + 1)).str();
+					static const char* frqtbl[3] = { "001", "010", "100" };
+					s += (boost::format("crm CRFQ%s\n") % frqtbl[freq % 3]).str();
+				}
 				s += (boost::format("crm CROE%d\n") % ena).str();
-				if(mode) {
-					s += (boost::format("crm CRC?1\n")).str();
-				} else {
-					s += (boost::format("crm CRR?1\n")).str();
+				if(ena) {
+					s += "delay 1\n";
+					if(mode) {
+						s += (boost::format("crm CRC?1\n")).str();
+					} else {
+						s += (boost::format("crm CRR?1\n")).str();
+					}
 				}
 				return s;
 			}
@@ -234,7 +250,7 @@ namespace app {
 
 
 		struct icm_t {
-			uint16_t	sw;		///< 14 bits
+			uint16_t	sw;		///< 6 bits
 
 			icm_t() : sw(0) { }
 
@@ -731,16 +747,9 @@ namespace app {
 				crm_mode_ = wd.add_widget<widget_list>(wp, wp_); 
 			}
 			{  // 答え
-				widget::param wp(vtx::irect(ofsx + 490, 20 + h * loc, 140, 40), dialog_);
+				widget::param wp(vtx::irect(ofsx + 490, 20 + h * loc, 200, 40), dialog_);
 				widget_label::param wp_("");
 				crm_ans_ = wd.add_widget<widget_label>(wp, wp_);
-			}
-			{
-				widget::param wp(vtx::irect(ofsx + 640, 20 + h * loc, 50, 40), dialog_);
-				widget_text::param wp_("-");
-				wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
-					  						 vtx::placement::vertical::CENTER);
-				crm_anst_ = wd.add_widget<widget_text>(wp, wp_);
 			}
 			{  // exec
 				widget::param wp(vtx::irect(d_w - 50, 20 + h * loc, 30, 30), dialog_);
@@ -1011,6 +1020,38 @@ namespace app {
 			chip_->set_text(text);
 		}
 
+
+		// 各モジュールへ初期化状態の転送
+		void startup_()
+		{
+			{  // ICM
+				icm_t t;
+				client_.send_data(t.build());
+			}
+			{  // DC1
+				dc1_t t;
+				client_.send_data(t.build());
+			}
+			{  // DC2
+				dc2_t t;
+				client_.send_data(t.build());
+			}
+			{  // CRM
+				crm_t t;
+				client_.send_data(t.build());
+			}
+			{  // WGM
+				wgm_t t;
+				client_.send_data(t.build());
+			}
+			{  // WDM / SW
+				uint32_t cmd = 0b00001000;
+				cmd <<= 16;
+				auto s = (boost::format("wdm %06X\n") % cmd).str();
+				client_.send_data(s);
+			}
+		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -1052,7 +1093,9 @@ namespace app {
 			test_filter_(nullptr), test_width_(nullptr),
 			test_min_(nullptr), test_max_(nullptr),
 
-			chip_(nullptr)
+			chip_(nullptr),
+
+			startup_init_(false)
 		{ }
 
 
@@ -1252,6 +1295,13 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void update()
 		{
+#if 0
+			if(!startup_init_) {
+				if(!client_.probe()) return;
+				startup_();
+				startup_init_ = true;
+			}
+#endif
 			interlock_.update(ilock_enable_->get_check());
 
 			if(!dialog_->get_state(gui::widget::state::ENABLE)) return;
@@ -1265,24 +1315,34 @@ namespace app {
 			wdm_exec_->set_stall(!client_.probe());
 
 			// モジュールから受け取ったパラメーターをＧＵＩに反映
-			{ // CRCD
-				uint32_t v = client_.get_crcd();
-				if(v >= 1000) {
-					float a = static_cast<float>(v) / 10000;
-					crm_ans_->set_text((boost::format("%6.5f") % a).str());
-					crm_anst_->set_text("uF");
-				} else {
-					float a = static_cast<float>(v) / 10;
-					crm_ans_->set_text((boost::format("%5.4f") % a).str());
-					crm_anst_->set_text("pF");
-				}
-			}
-			{ // CRRD
+			static const uint32_t sample_num = 50;
+			if(crm_mode_->get_select_pos() == 0) {  // CRRD
 				uint32_t v = client_.get_crrd();
-				float a = static_cast<float>(v) / 1000;
-				crm_ans_->set_text((boost::format("%5.4f") % a).str());
-				crm_anst_->set_text("mΩ");
+				v -= sample_num * 0x7FFFF;
+				double a = static_cast<double>(v) / 50.0 / static_cast<double>(0x7FFFF)
+					* 1.570798233;
+				a *= 778.2;  // 778.2 mV P-P
+				static const double itbl[3] = {  // 電流テーブル
+					2.0, 20.0, 200.0
+				};
+				a /= itbl[crm_amps_->get_select_pos() % 3];
+				crm_ans_->set_text((boost::format("%5.4f Ω") % a).str());
+			} else { // CRCD
+				uint32_t v = client_.get_crcd();
+				v -= sample_num * 0x7FFFF;
+				double a = static_cast<double>(v) / 50.0 / static_cast<double>(0x7FFFF)
+					* 1.570798233;
+				a *= 778.2 * 2.0;  // 778.2 mV P-P
+				static const double itbl[3] = {  // 電流テーブル
+					2.0, 20.0, 200.0
+				};
+				a /= itbl[crm_amps_->get_select_pos() % 3];
+
+				a = 1.0 / (2.0 * 3.141592654 * 1000.0 * a);
+				a *= 1e6;
+				crm_ans_->set_text((boost::format("%5.4f uF") % a).str());
 			}
+
 			{  // D2MD
 				uint32_t v = client_.get_d2md();
 				float a = static_cast<float>(v);
@@ -1290,15 +1350,6 @@ namespace app {
 				a *= 100.0f;
 				dc2_probe_->set_text((boost::format("%5.2f") % a).str());
 			}
-
-#if 0
-				} else if(s.find("WDMW") == 0) {  // WDM 波形
-std::cout << s << std::flush;
-#if 0
-				}
-#endif
-			}
-#endif
 
 
 			if(unit_load_filer_.state()) {

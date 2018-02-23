@@ -175,13 +175,13 @@ namespace net {
 				rmsg_.pop();
 
 				if(s.find("CRCD") == 0) {
-					auto t = s.substr(4, 4);
+					auto t = s.substr(4, 8);
 					int v = 0;
 					if((utils::input("%x", t.c_str()) % v).status()) {
 						crcd_ = v;
 					}
 				} else if(s.find("CRRD") == 0) {
-					auto t = s.substr(4, 4);
+					auto t = s.substr(4, 8);
 					int v = 0;
 					if((utils::input("%x", t.c_str()) % v).status()) {
 						crrd_ = v;
