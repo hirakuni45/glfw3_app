@@ -350,7 +350,6 @@ return;
 				widget_check::param wp_("波形編集");
 				wave_edit_ = wd.add_widget<widget_check>(wp, wp_);
 				wave_edit_->at_local_param().select_func_ = [=](bool f) {
-
 				};
 			}
 			{  // 検査開始ボタン
