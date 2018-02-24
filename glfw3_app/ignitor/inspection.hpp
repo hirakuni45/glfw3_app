@@ -1244,9 +1244,9 @@ namespace app {
 				widget::param wp(vtx::irect(ofsx + 400, 20 + h * 13, 90, 40), dialog_);
 				widget_list::param wp_;
 				wp_.init_list_.push_back("SIG");
-				wp_.init_list_.push_back("AVE");
 				wp_.init_list_.push_back("MIN");
 				wp_.init_list_.push_back("MAX");
+				wp_.init_list_.push_back("AVE");
 				test_filter_ = wd.add_widget<widget_list>(wp, wp_);
 				test_filter_->at_local_param().select_func_
 					= [=](const std::string& text, uint32_t pos) {
