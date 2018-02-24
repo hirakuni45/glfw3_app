@@ -30,11 +30,11 @@ namespace view {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct analize_param {
-			UNIT		min_;		///< 最小値
-			UNIT		max_;		///< 最大値
-			UNIT		average_;	///< 平均
+			float		min_;		///< 最小値
+			float		max_;		///< 最大値
+			float		average_;	///< 平均
 
-			analize_param() : min_(65535), max_(0), average_(0) { }
+			analize_param() : min_(1.0f), max_(-1.0f), average_(0.0f) { }
 		};
 
 
@@ -230,13 +230,26 @@ namespace view {
 
 		vtx::ipos	win_size_;
 
+		bool		smooth_before_;
+		bool		smooth_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		render_waves() : ch_{ }, div_(0.0), gain_{ 1.0f }, win_size_(0) { }
+		render_waves() : ch_{ }, div_(0.0), gain_{ 1.0f }, win_size_(0),
+			smooth_before_(false), smooth_(true) { }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  スムース描画設定
+			@param[in]	ena	不許可の場合「false」
+		*/
+		//-----------------------------------------------------------------//
+		void enable_smooth(bool ena = true) { smooth_ = ena; }
 
 
 		//-----------------------------------------------------------------//
@@ -395,6 +408,9 @@ namespace view {
 						offset_[n] = t.param_.offset_;
 						update = true;
 					}
+					if(smooth_before_ != smooth_) {
+						update = true;
+					}
 				}
 				int mod_x = 0;
 				if(update || t.param_.update_) {
@@ -407,9 +423,11 @@ namespace view {
 						if(-sz <= idx && idx < sz) {
 							if(idx < 0) idx += sz;
 							float v = static_cast<float>(t.units_[idx % sz]);
-							if(tstep < 65536) {  // 補完する
-								float v2 = static_cast<float>(t.units_[(idx + 1) % sz]);
-								v += (v2 - v) * static_cast<float>(tsc & 0xffff) / 65535.0f;
+							if(smooth_) {
+								if(tstep < 65536) {  // 補完する
+									float v2 = static_cast<float>(t.units_[(idx + 1) % sz]);
+									v += (v2 - v) * static_cast<float>(tsc & 0xffff) / 65535.0f;
+								}
 							}
 							v -= 32768.0f;
 							vtx::spos np(i, v * -gain);
@@ -423,6 +441,8 @@ namespace view {
 					}
 					t.param_.update_ = false;
 				}
+				smooth_before_ = smooth_;
+
 				if(!t.lines_.empty()) {
 					glPushMatrix();
 					gl::glTranslate(mod_x, t.param_.offset_.y);
@@ -458,18 +478,61 @@ namespace view {
 		/*!
 			@brief  波形値の取得
 			@param[in]	ch		チャネル
-			@param[in]	
+			@param[in]	idx		サンプリング位置
 			@return 波形値
 		*/
 		//-----------------------------------------------------------------//
-		UNIT get(uint32_t ch, int32_t pos) const
+		UNIT get(uint32_t ch, int32_t idx) const
 		{
 			if(ch >= CHN) return 0;
 
 			const ch_t& t = ch_[ch];
 			uint32_t sz = t.units_.size();
-			while(pos < 0) pos += sz;
-			return t.units_[pos % sz];
+			while(idx < 0) {
+				idx += sz;
+			}
+			return t.units_[idx % sz];
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  波形の取得（正規化波形）
+			@param[in]	ch		チャネル
+			@param[in]	rate	サンプルレート
+			@param[in]	org		取得時間		
+			@return 波形値
+		*/
+		//-----------------------------------------------------------------//
+		float get(uint32_t ch, double rate, double org) const
+		{
+			if(ch >= CHN) return 0.0f;
+
+			const ch_t& t = ch_[ch];
+			uint32_t sz = t.units_.size();
+			uint32_t idx = static_cast<uint32_t>(org / rate);
+			if(idx >= sz) {
+				return 0.0f;
+			}
+
+			int32_t v = t.units_[idx];
+			v -= 32768;
+			if(v == -32768) v = -32767;
+			float a = static_cast<float>(v) / 32767.0f;
+			if(smooth_) {
+				float umod = (org - (static_cast<double>(idx) * rate)) / rate;
+				++idx;
+				if(idx < sz) {
+					v = t.units_[idx];
+					v -= 32768;
+				} else {
+					v = 0;
+				}
+				if(v == -32768) v = -32767;
+				float b = static_cast<float>(v) / 32768.0f;
+				a += (b - a) * umod;
+			}
+			return a;
 		}
 
 
@@ -493,30 +556,30 @@ namespace view {
 		/*!
 			@brief  解析
 			@param[in]	ch		チャネル
+			@param[in]	rate	サンプリング・レート
 			@param[in]	org		解析開始位置
 			@param[in]	len		解析長
+			@param[in]	step	刻み（必ず０以上）
 			@return 解析結果
 		*/
 		//-----------------------------------------------------------------//
-		analize_param analize(uint32_t ch, int32_t org, int32_t len) const
+		analize_param analize(uint32_t ch, double rate, double org, double len, double step) const
 		{
 			analize_param a;
+			if(ch >= CHN || len <= 0.0 || step <= 0.0) return a;
 
-			if(ch <= CHN || len <= 0) return a;
-
-			ch_t& t = ch_[ch];
+			const ch_t& t = ch_[ch];
 			uint32_t sz = t.units_.size();
-			int32_t sum = 0; 
-			for(int32_t i = org; i < (org + len); ++i) {
-				int32_t idx = i;
-				if(idx < 0) idx += sz;
-				int32_t v = t.units_[i % sz];
+			float sum = 0;
+			uint32_t n = 0;
+			for(double i = org; i <= (org + len); i += step) {
+				auto v = get(ch, rate, i);
 				if(a.min_ > v) a.min_ = v;
 				if(a.max_ < v) a.max_ = v;
-				v -= 32768;
 				sum += v;
+				++n;
 			}
-			a.average_ = sum / len;
+			a.average_ = sum / static_cast<float>(n);
 
 			return a;
 		}
