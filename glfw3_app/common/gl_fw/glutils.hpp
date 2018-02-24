@@ -823,7 +823,7 @@ namespace gl {
 		@return 画像
 	 */
 	//-----------------------------------------------------------------//
-	img::img_rgba8* get_frame_buffer(int x, int y, int w, int h);
+	img::shared_img get_frame_buffer(int x, int y, int w, int h);
 
 
 	//-----------------------------------------------------------------//

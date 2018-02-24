@@ -1729,23 +1729,27 @@ namespace gl {
 		@param[in]	y	開始位置 Y
 		@param[in]	w	幅
 		@param[in]	h	高さ
-		@return 画像
+		@return 共有画像
 	 */
 	//-----------------------------------------------------------------//
-	img::img_rgba8* get_frame_buffer(int x, int y, int w, int h)
+	img::shared_img get_frame_buffer(int x, int y, int w, int h)
 	{
 		gl::core& core = gl::core::get_instance();
 		int fbh = core.get_size().y;
-		img::img_rgba8* im = new img::img_rgba8;
-		im->create(vtx::spos(w, h), true);
-		::glReadBuffer(GL_BACK);
+		auto sim = img::shared_img(new img::img_rgba8);
+		sim->create(vtx::spos(w, h), false);
+//		::glReadBuffer(GL_BACK);
+		::glReadBuffer(GL_FRONT);
 		::glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		img::rgba8* p = im->at_image();
 		for(int yy = 0; yy < h; ++yy) {
-			::glReadPixels(x, fbh - 1 - y - yy, w, 1, GL_RGBA, GL_UNSIGNED_BYTE, p);
-			p += w;
+			img::rgba8 tmp[w];
+			::glReadPixels(x, fbh - 1 - y - yy, w, 1, GL_RGBA, GL_UNSIGNED_BYTE, tmp);
+			for(int xx = 0; xx < w; ++xx) {
+				tmp[xx].a = 255;
+				sim->put_pixel(vtx::spos(xx, yy), tmp[xx]);
+			}
 		}
-		return im;
+		return sim;
 	}
 
 
