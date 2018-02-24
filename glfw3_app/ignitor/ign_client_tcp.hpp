@@ -27,6 +27,28 @@ namespace net {
 	public:
 		static const uint32_t WAVE_BUFF_SIZE = 2048;
 
+		//=================================================================//
+		/*!
+			@brief  モジュール・ステータス構造体
+		*/
+		//=================================================================//
+		struct mod_status {
+			uint32_t	crcd_;
+			uint32_t	crcd_id_;
+
+			uint32_t	crrd_;
+			uint32_t	crrd_id_;
+
+			uint32_t	d2md_;
+			uint32_t	d2md_id_;
+
+			mod_status() :
+				crcd_(0), crcd_id_(0),
+				crrd_(0), crrd_id_(0),
+				d2md_(0), d2md_id_(0)
+			{ }
+		};
+
 	private:
 		bool		startup_;
 
@@ -39,9 +61,7 @@ namespace net {
 		typedef std::queue<std::string> SQUEUE;
 		SQUEUE		rmsg_;
 
-		uint32_t	crcd_;
-		uint32_t	crrd_;
-		uint32_t	d2md_;
+		mod_status	mod_status_;
 
 		uint32_t	wdm_ch_;
 		uint32_t	wdm_pos_;
@@ -56,7 +76,7 @@ namespace net {
 		//-----------------------------------------------------------------//
 		ign_client_tcp() : startup_(false),
 			sock_(0),
-			connect_(false), crcd_(0), crrd_(0), d2md_(0),
+			connect_(false), mod_status_(),
 			wdm_ch_(0), wdm_pos_(0), wdm_st_{ 0 }
 		{
 		}
@@ -75,11 +95,14 @@ namespace net {
 		}
 
 
-		uint32_t get_crcd() const { return crcd_; }
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  モジュール・ステータスの取得
+			@return モジュール・ステータス
+		*/
+		//-----------------------------------------------------------------//
+		const mod_status& get_mod_status() const { return mod_status_; }
 
-		uint32_t get_crrd() const { return crrd_; }
-
-		uint32_t get_d2md() const { return d2md_; }
 
 		const uint16_t* get_wdm(uint32_t ch) const {
 			return &wdm_buff_[WAVE_BUFF_SIZE * (ch & 3)];
@@ -183,19 +206,22 @@ namespace net {
 					auto t = s.substr(4, 8);
 					int v = 0;
 					if((utils::input("%x", t.c_str()) % v).status()) {
-						crcd_ = v;
+						mod_status_.crcd_ = v;
+						++mod_status_.crcd_id_;
 					}
 				} else if(s.find("CRRD") == 0) {
 					auto t = s.substr(4, 8);
 					int v = 0;
 					if((utils::input("%x", t.c_str()) % v).status()) {
-						crrd_ = v;
+						mod_status_.crrd_ = v;
+						++mod_status_.crrd_id_;
 					}			
 				} else if(s.find("D2MD") == 0) {
 					auto t = s.substr(4, 5);
 					int v = 0;
 					if((utils::input("%x", t.c_str()) % v).status()) {
-						d2md_ = v;
+						mod_status_.d2md_ = v;
+						++mod_status_.d2md_id_;
 					}			
 				} else if(s.find("WDCH") == 0) {  // WDM チャネル
 					auto t = s.substr(4);
