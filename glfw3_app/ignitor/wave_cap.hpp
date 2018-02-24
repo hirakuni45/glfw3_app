@@ -31,6 +31,8 @@
 #include "ign_client_tcp.hpp"
 #include "interlock.hpp"
 
+#define TEST_SIN
+
 namespace app {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -40,6 +42,27 @@ namespace app {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class wave_cap {
 	public:
+		//=================================================================//
+		/*!
+			@brief  情報構造体
+		*/
+		//=================================================================//
+		struct info_t {
+			double	sample_org_;	///< サンプリング開始時間
+			double	sample_width_;	///< サンプリング幅（時間）
+			double	sig_[4];		///< 各チャネル電圧
+			double	min_[4];
+			double	max_[4];
+			double	average_[4];
+
+			bool	annotate_;		///< バック・アノテート・フラグ
+			info_t() : sample_org_(0.0), sample_width_(0.0),
+				sig_{ 0.0 }, min_{ 0.0 }, max_{ 0.0 }, average_{ 0.0 },
+				annotate_(false)
+			{ }
+		};
+
+
 		//=================================================================//
 		/*!
 			@brief  サンプリング・パラメーター構造体
@@ -70,6 +93,8 @@ namespace app {
 		gui::widget_terminal*	terminal_core_;
 
 		gui::widget_frame*		tools_;
+		gui::widget_check*		annotate_;
+		gui::widget_check*		smooth_;
 
 		gui::widget_sheet*		share_frame_;
 
@@ -77,6 +102,10 @@ namespace app {
 
 		uint32_t				wdm_st_[4];
 
+		bool					info_in_;
+		vtx::ipos				info_org_;
+
+		info_t					info_;
 
 		// チャネル毎の電圧スケールサイズ
 		static const uint32_t volt_scale_0_size_ = 8;
@@ -662,30 +691,70 @@ namespace app {
 		}
 
 
+		void volt_scale_conv_(uint32_t ch, const WAVES::analize_param& ap, info_t& t)
+		{ 
+			t.min_[ch] = get_volt_scale_limit_(ch) * ap.min_;
+			t.max_[ch] = get_volt_scale_limit_(ch) * ap.max_;
+			t.average_[ch] = get_volt_scale_limit_(ch) * ap.average_;
+		}
+
+
 		// 波形描画
 		void update_view_()
 		{
+			if(core_->get_select_in()) {
+				info_in_ = true;
+				info_org_ = core_->get_param().in_point_;
+			}
 			if(core_->get_selected()) {
-				auto msp = core_->get_param().in_point_;
-				auto grid = waves_.get_info().grid_step_;
-				int pos = msp.x + time_.offset_->get_select_pos() * grid;
 				uint32_t n = 0;
 				if(time_.scale_ != nullptr) {
 					n = time_.scale_->get_select_pos();
 				}
-				auto idx = waves_.convert_index(sample_param_.rate, get_time_unit_(n), pos);
+				auto msp = core_->get_param().in_point_;
+///				auto d = msp - info_org_;
+				info_in_ = false;
+
+				auto grid = waves_.get_info().grid_step_;
+				int32_t pos = info_org_.x + time_.offset_->get_select_pos() * grid;
+				auto tu = get_time_unit_(n);
+				info_.sample_org_ = static_cast<double>(pos) * tu;
+				double org = static_cast<double>(pos) / static_cast<double>(grid) * tu;
+				int32_t fin = msp.x + time_.offset_->get_select_pos() * grid;
+				double end = static_cast<double>(fin) / static_cast<double>(grid) * tu;
+ 				info_.sample_width_ = static_cast<double>(end - pos) * tu;
 				for(uint32_t i = 0; i < 4; ++i) {
 					if(!get_ch(i).ena_->get_check()) continue;
-					auto w = waves_.get(i, idx);
-					float a = static_cast<float>(w - 32768) / 32768.0f;
+					auto a = waves_.get(i, sample_param_.rate, org);
 					a *= get_volt_scale_limit_(i);
 					if(get_ch(i).gnd_->get_check()) {
 						a = 0.0f;
 					}
+					info_.sig_[i] = a;
+
 					static const char* t[4] = { "A", "V", "V", "KV" };
-					std::string s = (boost::format("CH%d: %2.1f %s\n") % (i + 1) % a % t[i]).str();
+					std::string s = (boost::format("CH%d: %4.3f %s\n") % (i + 1) % a % t[i]).str();
 					terminal_core_->output(s);
+
+					// 波形解析
+					{
+						double step = tu / static_cast<double>(grid);
+						auto ap = waves_.analize(i, sample_param_.rate, org, end - org, step);
+						volt_scale_conv_(i, ap, info_);
+						s = (boost::format("Min: %4.3f %s\n") % info_.min_[i] % t[i]).str();
+						terminal_core_->output(s);
+						s = (boost::format("Max: %4.3f %s\n") % info_.max_[i] % t[i]).str();
+						terminal_core_->output(s);
+						s = (boost::format("Ave: %4.3f %s\n") % info_.average_[i] % t[i]).str();
+						terminal_core_->output(s);
+					}
 				}
+				info_.annotate_ = annotate_->get_check();
+			}
+
+			// フォーカスが外れたら、情報(IN) を強制終了
+			if(!core_->get_focus()) {
+				info_in_ = false;
 			}
 		}
 
@@ -693,6 +762,18 @@ namespace app {
 		void render_view_(const vtx::irect& clip)
 		{
 			glDisable(GL_TEXTURE_2D);
+
+			if(info_in_ && core_->get_select()) {
+				vtx::sposs r;
+				r.emplace_back(info_org_.x, info_org_.y);
+				auto msp = core_->get_param().in_point_;
+				r.emplace_back(msp.x, info_org_.y);
+				r.emplace_back(msp.x, msp.y);
+				r.emplace_back(info_org_.x, msp.y);
+				gl::glColor(img::rgba8(255, 255));
+				gl::draw_line_loop(r);
+			}
+
 			uint32_t n = 0;
 			if(time_.scale_ != nullptr) {
 				n = time_.scale_->get_select_pos();
@@ -719,10 +800,11 @@ namespace app {
 			director_(d), client_(client), interlock_(ilock), waves_(),
 			frame_(nullptr), core_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
-			tools_(nullptr),
+			tools_(nullptr), annotate_(nullptr), smooth_(nullptr),
 			share_frame_(nullptr),
 			sample_param_(),
 			wdm_st_{ 0 },
+			info_in_(false), info_org_(0), info_(),
 			chn0_(waves_, 1.25f),
 			chn1_(waves_, 1.25f),
 			chn2_(waves_, 1.25f),
@@ -730,6 +812,16 @@ namespace app {
 			measure_time_(waves_),
 			time_(waves_), size_(0)
 		{ }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  波形情報の取得
+			@return 波形情報
+		*/
+		//-----------------------------------------------------------------//
+		const info_t& get_info() const { return info_; }
+
 
 		//-----------------------------------------------------------------//
 		/*!
@@ -816,6 +908,18 @@ namespace app {
 				tools_ = wd.add_widget<widget_frame>(wp, wp_);
 				tools_->set_state(gui::widget::state::SIZE_LOCK);
 			}
+			{	// バック・アノテート
+				widget::param wp(vtx::irect(10, 20, 200, 40), tools_);
+				widget_check::param wp_("Back Annotate");
+				annotate_ = wd.add_widget<widget_check>(wp, wp_);
+			}
+			{	// スムース
+				widget::param wp(vtx::irect(10, 20 + 40, 200, 40), tools_);
+				widget_check::param wp_("Smooth");
+				smooth_ = wd.add_widget<widget_check>(wp, wp_);
+			}
+
+
 			{	// 共有フレーム（プロパティシート）
 				widget::param wp(vtx::irect(5, 280, mw - 10, mh - 280 - 5), tools_);
 				widget_sheet::param wp_;
@@ -839,8 +943,10 @@ namespace app {
 			waves_.at_param(1).color_ = img::rgba8( 64, 255, 255, 255);
 			waves_.at_param(2).color_ = img::rgba8(255, 255,  64, 255);
 			waves_.at_param(3).color_ = img::rgba8( 64, 255,  64, 255);
-
-//			waves_.build_sin(0, sample_param_.rate, 15000.0, 1.0f);
+#ifdef TEST_SIN
+			waves_.build_sin(0, sample_param_.rate, 15000.0, 1.0f);
+			waves_.build_sin(1, sample_param_.rate, 10000.0, 0.75f);
+#endif
 		}
 
 
@@ -854,6 +960,8 @@ namespace app {
 			if(frame_ == nullptr) return;
 			if(share_frame_ == nullptr) return;
 
+			waves_.enable_smooth(smooth_->get_check());
+
 			measure_time_.tbp_ = time_.scale_->get_select_pos();
 			measure_time_.update(size_);
 
@@ -862,7 +970,7 @@ namespace app {
 			chn2_.update(2, size_, share_frame_->get_select_pos() == 3, sample_param_.gain[2]);
 			chn3_.update(3, size_, share_frame_->get_select_pos() == 4, sample_param_.gain[3]);
 			if(share_frame_->get_select_pos() < 1 || share_frame_->get_select_pos() > 4) {
-				waves_.at_info().volt_enable_ = false;				
+				waves_.at_info().volt_enable_ = false;
 			}
 
 			time_.update(size_, sample_param_.rate);
@@ -897,6 +1005,12 @@ namespace app {
 			if(tools_ != nullptr) {
 				tools_->load(pre);
 			}
+			if(annotate_ != nullptr) {
+				annotate_->load(pre);
+			}
+			if(smooth_ != nullptr) {
+				smooth_->load(pre);
+			}
 			if(share_frame_ != nullptr) {
 				share_frame_->load(pre);
 			}
@@ -929,6 +1043,12 @@ namespace app {
 			}
 			if(tools_ != nullptr) {
 				tools_->save(pre);
+			}
+			if(annotate_ != nullptr) {
+				annotate_->save(pre);
+			}
+			if(smooth_ != nullptr) {
+				smooth_->save(pre);
 			}
 			if(share_frame_ != nullptr) {
 				share_frame_->save(pre);
