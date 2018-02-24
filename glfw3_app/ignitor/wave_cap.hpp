@@ -27,6 +27,7 @@
 #include "widgets/widget_chip.hpp"
 
 #include "gl_fw/render_waves.hpp"
+#include "img_io/img_files.hpp"
 
 #include "ign_client_tcp.hpp"
 #include "interlock.hpp"
@@ -49,16 +50,18 @@ namespace app {
 		//=================================================================//
 		struct info_t {
 			double	sample_org_;	///< サンプリング開始時間
-			double	sample_width_;	///< サンプリング幅（時間）
+			double	sample_width_;	///< サンプリング領域（時間）
 			double	sig_[4];		///< 各チャネル電圧
-			double	min_[4];
-			double	max_[4];
-			double	average_[4];
+			double	min_[4];		///< 領域の最低値
+			double	max_[4];		///< 領域の最大値
+			double	average_[4];	///< 領域のアベレージ
+
+			uint32_t	id_;		///< 領域更新 ID
 
 			bool	annotate_;		///< バック・アノテート・フラグ
 			info_t() : sample_org_(0.0), sample_width_(0.0),
 				sig_{ 0.0 }, min_{ 0.0 }, max_{ 0.0 }, average_{ 0.0 },
-				annotate_(false)
+				id_(0), annotate_(false)
 			{ }
 		};
 
@@ -485,9 +488,21 @@ namespace app {
 						float t = get_time_unit_(tbp_) * static_cast<float>(newpos)
 							/ waves_.get_info().grid_step_;
 						float a = t / get_time_unit_base_(tbp_);
-						float f = 1.0f / t;
-						frq_->set_text((boost::format("%2.1f Hz") % f).str());
-						return (boost::format("%2.1f %s") % a % get_time_unit_str_(tbp_)).str();
+						if(t > 0.0f) {
+							float f = 1.0f / t;
+							if(f >= 1000.0) {
+								f /= 1000.0;
+								frq_->set_text((boost::format("%4.3f KHz") % f).str());
+							} else if(f >= 1000000.0) {
+								f /= 1000000.0;
+								frq_->set_text((boost::format("%4.3f MHz") % f).str());
+							} else {
+								frq_->set_text((boost::format("%4.3f Hz") % f).str());
+							}
+						} else {
+							frq_->set_text("---");
+						}
+						return (boost::format("%3.2f %s") % a % get_time_unit_str_(tbp_)).str();
 					};
 				}
 				{
@@ -712,17 +727,17 @@ namespace app {
 					n = time_.scale_->get_select_pos();
 				}
 				auto msp = core_->get_param().in_point_;
-///				auto d = msp - info_org_;
 				info_in_ = false;
 
 				auto grid = waves_.get_info().grid_step_;
-				int32_t pos = info_org_.x + time_.offset_->get_select_pos() * grid;
-				auto tu = get_time_unit_(n);
-				info_.sample_org_ = static_cast<double>(pos) * tu;
-				double org = static_cast<double>(pos) / static_cast<double>(grid) * tu;
+				int32_t sta = info_org_.x + time_.offset_->get_select_pos() * grid;
 				int32_t fin = msp.x + time_.offset_->get_select_pos() * grid;
+				if(sta > fin) std::swap(sta, fin);
+				auto tu = get_time_unit_(n);
+				info_.sample_org_ = static_cast<double>(sta) * tu;
+				double org = static_cast<double>(sta) / static_cast<double>(grid) * tu;
 				double end = static_cast<double>(fin) / static_cast<double>(grid) * tu;
- 				info_.sample_width_ = static_cast<double>(end - pos) * tu;
+ 				info_.sample_width_ = static_cast<double>(end - org) * tu;
 				for(uint32_t i = 0; i < 4; ++i) {
 					if(!get_ch(i).ena_->get_check()) continue;
 					auto a = waves_.get(i, sample_param_.rate, org);
@@ -733,7 +748,14 @@ namespace app {
 					info_.sig_[i] = a;
 
 					static const char* t[4] = { "A", "V", "V", "KV" };
-					std::string s = (boost::format("CH%d: %4.3f %s\n") % (i + 1) % a % t[i]).str();
+					double len = info_.sample_width_;
+					static const char* ut[4] = { "S", "mS", "uS", "nS" };
+					uint32_t uti = 0;
+					if(len <= 1e-9) { len *= 1e9; uti = 3; }
+					else if(len <= 1e-6) { len *= 1e6; uti = 2; }
+					else if(len <= 1e-3) { len *= 1e3; uti = 1; }
+					std::string s = (boost::format("CH%d: %4.3f %s, %4.3f %s\n")
+						% (i + 1) % a % t[i] % len % ut[uti]).str();
 					terminal_core_->output(s);
 
 					// 波形解析
@@ -747,6 +769,7 @@ namespace app {
 						terminal_core_->output(s);
 						s = (boost::format("Ave: %4.3f %s\n") % info_.average_[i] % t[i]).str();
 						terminal_core_->output(s);
+						++info_.id_;
 					}
 				}
 				info_.annotate_ = annotate_->get_check();
@@ -790,6 +813,8 @@ namespace app {
 		}
 
 
+		uint32_t test_timer_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -810,7 +835,7 @@ namespace app {
 			chn2_(waves_, 1.25f),
 			chn3_(waves_, 1.25f),
 			measure_time_(waves_),
-			time_(waves_), size_(0)
+			time_(waves_), size_(0), test_timer_(0)
 		{ }
 
 
@@ -984,6 +1009,12 @@ namespace app {
 					wdm_st_[i] = st;
 				}
 			}
+#if 0
+			++test_timer_;
+			if(test_timer_ == 60) {
+				save_image("test.jpg");
+			}
+#endif
 		}
 
 
@@ -1062,6 +1093,33 @@ namespace app {
 			time_.save(pre);
 
 			measure_time_.save(pre);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  波形画像のセーブ
+			@param[in]	path	セーブ・パス
+			@return 成功なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool save_image(const std::string& path) const
+		{
+			bool ret = false;
+			if(path.empty()) return ret;
+			if(core_ == nullptr) return ret;
+
+			vtx::ipos pos;
+			gui::final_position(core_, pos);
+// std::cout << pos.x << ", " << pos.y << std::endl;
+			const auto& size = core_->get_param().rect_.size;
+// std::cout << size.x << ", " << size.y << std::endl;
+			auto simg = gl::get_frame_buffer(pos.x , pos.y, size.x, size.y);
+			img::img_files imfs;
+			imfs.set_image(simg);
+			ret = imfs.save(path);			
+
+			return ret;
 		}
 	};
 }
