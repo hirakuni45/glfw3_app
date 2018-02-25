@@ -64,9 +64,6 @@ namespace app {
 		gui::widget_button*		run_;
 		gui::widget_button*		info_;
 
-		project					project_;
-		inspection				inspection_;
-
 		gui::widget_dialog*		cont_setting_dialog_;
 		gui::widget_check*		cont_connect_;
 		gui::widget_label*		cont_setting_ip_[4];
@@ -75,6 +72,8 @@ namespace app {
 
 		gui::widget_dialog*		info_dialog_;
 
+		gui::widget_dialog*		msg_dialog_;
+
 #ifdef NATIVE_FILER
 		utils::select_file		proj_load_filer_;
 		utils::select_file		proj_save_filer_;
@@ -82,45 +81,20 @@ namespace app {
 		gui::widget_filer*		proj_load_filer_;
 		gui::widget_filer*		proj_save_filer_;
 #endif
+		inspection				inspection_;
+		project					project_;
+
 		int						ip_[4];
-
-
-		void stall_button_(bool f)
-		{
-return;
-			new_project_->set_stall(f);
-			proj_title_->set_stall(f);
-			load_project_->set_stall(f);
-//			edit_project_->set_stall(f);
-//			save_project_->set_stall(f);
-			cont_settings_->set_stall(f);
-			igni_settings_->set_stall(f);
-//			run_->set_stall(f);
-		}
-
-
-		void update_project_()
-		{
-return;
-///			if(inspection_.get_title().empty()) {
-				edit_project_->set_stall();
-				save_project_->set_stall();
-				run_->set_stall();
-///			} else {
-				edit_project_->set_stall(false);
-				save_project_->set_stall(false);
-				run_->set_stall(false);
-///			}
-		}
 
 
 		bool save_project_file_(const std::string& path)
 		{
 			sys::preference pre;
-			proj_title_->save(pre);
+
 			project_.save(pre);
 			auto ph = path;
 			if(utils::get_file_ext(path).empty()) {
+				ph += '.';
 				ph += PROJECT_EXT_;
 			}
 			return pre.save(ph);
@@ -132,16 +106,28 @@ return;
 			sys::preference pre;
 			auto ph = path;
 			if(utils::get_file_ext(path).empty()) {
+				ph += '.';
 				ph += PROJECT_EXT_;
 			}
 			auto ret = pre.load(ph);
 			if(ret) {
-				proj_title_->load(pre);
 				project_.load(pre);
 			}
 			return ret;
 		}
 
+
+		enum class task {
+			idle,
+			start,
+			loop,
+			sync,
+			fin,
+		};
+		task		task_;
+
+		uint32_t	unit_id_;
+		uint32_t	delay_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -158,15 +144,17 @@ return;
 			igni_settings_(nullptr), cont_settings_(nullptr),
 			wave_edit_(nullptr),
 			run_(nullptr), info_(nullptr),
-			project_(d),
-			inspection_(d, client, ilock),
 			cont_setting_dialog_(nullptr),
 		   	cont_connect_(nullptr), cont_setting_ip_{ nullptr },
 			cont_setting_cmds_(nullptr), cont_setting_exec_(nullptr),
+			info_dialog_(nullptr), msg_dialog_(nullptr),
 #ifndef NATIVE_FILER
 			proj_load_filer_(nullptr), proj_save_filer_(nullptr),
 #endif
-			ip_{ 0 }
+			inspection_(d, client, ilock),
+			project_(d),
+
+			ip_{ 0 }, task_(task::idle), unit_id_(0), delay_(0)
 			{ }
 
 
@@ -177,7 +165,7 @@ return;
 		//-----------------------------------------------------------------//
 		~root_menu()
 		{
-			destroy();
+			save();
 		}
 
 
@@ -284,7 +272,6 @@ return;
 				widget_button::param wp_("プロジェクト・ロード");
 				load_project_ = wd.add_widget<widget_button>(wp, wp_);
 				load_project_->at_local_param().select_func_ = [=](uint32_t id) {
-					stall_button_(true);
 #ifdef NATIVE_FILER
 					std::string filter = "プロジェクト(*.";
 					filter += PROJECT_EXT_;
@@ -298,7 +285,7 @@ return;
 				};
 				{
 					widget::param wp(vtx::irect(ofs_x_ + btn_w_ + 50,
-						ofs_y_ + sph * 1 + ((btn_h_ - 40) / 2), 600, 40));
+						ofs_y_ + sph * 1 + ((btn_h_ - 40) / 2), 900, 40));
 					widget_label::param wp_("");
 					proj_path_ = wd.add_widget<widget_label>(wp, wp_);
 				}
@@ -316,7 +303,6 @@ return;
 				widget_button::param wp_("プロジェクト・セーブ");
 				save_project_ = wd.add_widget<widget_button>(wp, wp_);
 				save_project_->at_local_param().select_func_ = [=](uint32_t id) {
-					stall_button_(true);
 #ifdef NATIVE_FILER
 					std::string filter = "プロジェクト(*.";
 					filter += PROJECT_EXT_;
@@ -359,6 +345,7 @@ return;
 				widget_button::param wp_("検査開始");
 				run_ = wd.add_widget<widget_button>(wp, wp_);
 				run_->at_local_param().select_func_ = [=](uint32_t id) {
+					task_ = task::start;
 				};
 			}
 			{  // 検査開始ボタン
@@ -370,9 +357,8 @@ return;
 				};
 			}
 
-			project_.initialize();
-
 			inspection_.initialize();
+			project_.initialize();
 
 			{  // コントローラー設定ダイアログ
 				int w = 450;
@@ -463,6 +449,15 @@ return;
 				info_dialog_->enable(false);
 			}
 
+			{  // メッセージ・ダイアログ（ボタン無し）
+				int w = 650;
+				int h = 410;
+				widget::param wp(vtx::irect(75, 75, w, h));
+				widget_dialog::param wp_(widget_dialog::style::NONE);
+				msg_dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
+				msg_dialog_->enable(false);
+			}
+
 #ifndef NATIVE_FILER
 			{  // プロジェクト・ファイラー
 				gl::core& core = gl::core::get_instance();
@@ -471,17 +466,10 @@ return;
 					widget_filer::param wp_(core.get_current_path(), "", false);
 					proj_load_filer_ = wd.add_widget<widget_filer>(wp, wp_);
 					proj_load_filer_->enable(false);
-					proj_load_filer_->at_local_param().select_file_func_ = [=](const std::string& path) {
-
-///						if(inspection_.load(path)) {
-///							proj_title_->set_text(inspection_.get_title());
-///							proj_path_->set_text(path);
-///							update_project_();
-///						}
-						stall_button_(false);
+					proj_load_filer_->at_local_param().select_file_func_ = [=]
+						(const std::string& path) {
 					};
 					proj_load_filer_->at_local_param().cancel_file_func_ = [=](void) {
-						stall_button_(false);
 					};
 				}
 				{
@@ -489,20 +477,15 @@ return;
 					widget_filer::param wp_(core.get_current_path(), "", true);
 					proj_save_filer_ = wd.add_widget<widget_filer>(wp, wp_);
 					proj_save_filer_->enable(false);
-					proj_save_filer_->at_local_param().select_file_func_ = [=](const std::string& path) {
-///						inspection_.save(path);
-						stall_button_(false);
+					proj_save_filer_->at_local_param().select_file_func_ = [=]
+						(const std::string& path) {
 					};
 					proj_save_filer_->at_local_param().cancel_file_func_ = [=](void) {
-						stall_button_(false);
 					};
 				}
 			}
 #endif
-
 			load();
-
-			update_project_();
 		}
 
 
@@ -513,13 +496,37 @@ return;
 		//-----------------------------------------------------------------//
 		void update()
 		{
-//			auto& core = gl::core::get_instance();
-//			const auto& scs = core.get_rect().size;
-//			run_->at_rect().org.x = scs.x - btn_w_ - ofs_x_;
+			project_.update();
+			if(project_.get_project_title().empty() || project_.get_project_path().empty()) {
+				edit_project_->set_stall();
+				save_project_->set_stall();
+				run_->set_stall();
+				proj_title_->set_text("");
+				proj_path_->set_text("");
+			} else {
+				edit_project_->set_stall(false);
+				proj_title_->set_text(project_.get_project_title());
+				save_project_->set_stall(false);
+				auto path = project_.get_project_path();
+				if(!path.empty()) {
+					if(path[0] != '/') {
+						gl::core& core = gl::core::get_instance();
+						auto tmp = core.get_current_path();
+						tmp += '/';
+						tmp += path;
+						path = tmp;
+					}
+				}
+				proj_path_->set_text(path);
+				if(project_.get_unit_count() > 0) {
+					// プロジェクトの設定が有効なら、ストールを解除
+					if(task_ == task::idle) {
+						run_->set_stall(false);
+					}
+				}
+			}
 
 			inspection_.update();
-
-			project_.update();
 
 			if(cont_setting_exec_ != nullptr) {
 				cont_setting_exec_->set_stall(!client_.probe());
@@ -534,13 +541,11 @@ return;
 						path += PROJECT_EXT_;
 					}
 					if(load_project_file_(path)) {
-						proj_path_->set_text(path);
+
 					} else {
-						proj_title_->set_text("");
+
 					}
 				}
-				update_project_();
-				stall_button_(false);
 			}
 			if(proj_save_filer_.state()) {
 				auto path = proj_save_filer_.get();
@@ -550,12 +555,70 @@ return;
 						path += PROJECT_EXT_;
 					}
 					if(!save_project_file_(path)) {
-// save error
+
+					} else {
+
 					}
-					stall_button_(false);
 				}
 			}
 #endif
+
+			switch(task_) {
+			case task::idle:
+				break;
+			case task::start:
+				unit_id_ = 0;
+				task_ = task::loop;
+				msg_dialog_->set_text("検査開始");
+				msg_dialog_->enable();
+				break;
+			case task::loop:
+				{
+					auto fp = project_.get_unit_name(unit_id_);
+					bool ret = inspection_.load(fp);
+					auto s = utils::get_file_name(fp);
+					if(ret) {
+						s += " (OK)";
+					} else {
+						s += " (NG)";
+					}
+					std::string top = (boost::format("Test: %s\n") % s).str();
+					inspection_.at_test_param().build_value();
+					const auto& v = inspection_.get_test_param().value_;
+					top += (boost::format("Symbol: %s\n") % v.symbol_).str();
+					top += (boost::format("Retry: %d\n") % v.retry_).str();
+					top += (boost::format("Wait:  %2.1f\n") % v.wait_).str();
+					top += (boost::format("Term:  %d\n") % v.term_).str();
+					top += (boost::format("Delay: %e\n") % v.delay_).str();
+					top += (boost::format("Filter: %d\n") % v.filter_).str();
+					top += (boost::format("Width: %e\n") % v.width_).str();
+					top += (boost::format("Min: %e\n") % v.min_).str();
+					top += (boost::format("Max: %e") % v.max_).str();
+
+					msg_dialog_->set_text(top);
+					task_ = task::sync;
+					delay_ = 120;
+				}
+				break;
+			case task::sync:
+				if(delay_ > 0) {
+					--delay_;
+					break;
+				}
+				++unit_id_;
+				if(unit_id_ >= project_.get_unit_count()) {
+					task_ = task::fin;
+				} else {
+					task_ = task::loop;
+				}
+				break;
+			case task::fin:
+				msg_dialog_->enable(false);
+				task_ = task::idle;
+				break;
+			default:
+				break;
+			}
 		}
 
 
@@ -569,6 +632,7 @@ return;
 			sys::preference& pre = director_.at().preference_;
 
 			info_dialog_->load(pre);
+			msg_dialog_->load(pre);
 
 			wave_edit_->load(pre);
 
@@ -592,16 +656,17 @@ return;
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief  廃棄
+			@brief  セーブ
 		*/
 		//-----------------------------------------------------------------//
-		void destroy()
+		void save()
 		{
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 			sys::preference& pre = director_.at().preference_;
 
 			info_dialog_->save(pre);
+			msg_dialog_->save(pre);
 
 			wave_edit_->save(pre);
 

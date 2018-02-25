@@ -86,11 +86,62 @@ namespace app {
 			gui::widget_label*		min_;		///< 検査最小値
 			gui::widget_label*		max_;		///< 検査最大値
 
+			struct value_t {
+				std::string		symbol_;
+				uint32_t		retry_;
+				double			wait_;
+				uint32_t		term_;
+				double			delay_;
+				uint32_t		filter_;
+				double			width_;
+				double			min_;
+				double			max_;
+				value_t() : symbol_(), retry_(0), wait_(0.0),
+					term_(0), delay_(0.0), filter_(0), width_(0.0), min_(0.0), max_(0.0)
+				{ }
+			};
+			value_t			value_;
+
 			test_param(utils::director<core>& d) : director_(d),
 				symbol_(nullptr), retry_(nullptr), wait_(nullptr),
 				term_(nullptr), delay_(nullptr), filter_(nullptr),
-				width_(nullptr), min_(nullptr), max_(nullptr)
+				width_(nullptr), min_(nullptr), max_(nullptr), value_()
 			{ }
+
+
+			void build_value()
+			{
+				value_.symbol_ = symbol_->get_text();
+				value_.retry_ = retry_->get_select_pos();
+				{
+					int n = 0;
+					utils::string_to_int(wait_->get_text(), n);
+					value_.wait_ = n;
+				}
+				value_.term_ = term_->get_select_pos();
+				{
+					double a = 0.0f;
+					utils::string_to_double(delay_->get_text(), a);
+					value_.delay_ = a;
+				}
+				value_.filter_ = filter_->get_select_pos();
+				{
+					double a = 0.0f;
+					utils::string_to_double(width_->get_text(), a);
+					value_.width_ = a;
+				}
+				{
+					double a = 0.0f;
+					utils::string_to_double(min_->get_text(), a);
+					value_.min_ = a;
+				}
+				{
+					double a = 0.0f;
+					utils::string_to_double(max_->get_text(), a);
+					value_.max_ = a;
+				}
+			}
+
 
 			void init(gui::widget* root, int d_w, int ofsx, int h, int loc)
 			{
@@ -118,14 +169,15 @@ namespace app {
 						wait_->set_text(limitf_(str, 0.0f, 1.0f, "%3.2f"));
 					};
 				}
-				{  // 計測ポイント選択
+				{  // 計測対象選択
 					widget::param wp(vtx::irect(ofsx + 200, 20 + h * 13, 90, 40), root);
 					widget_list::param wp_;
 					wp_.init_list_.push_back("CH1");
 					wp_.init_list_.push_back("CH2");
 					wp_.init_list_.push_back("CH3");
 					wp_.init_list_.push_back("CH4");
-					wp_.init_list_.push_back("LCR");
+					wp_.init_list_.push_back("DC2");
+					wp_.init_list_.push_back("CRM");
 					term_ = wd.add_widget<widget_list>(wp, wp_);
 				}
 				{  // テスト 信号計測ポイント（時間）
@@ -219,6 +271,7 @@ namespace app {
 		gui::widget_list*		dc1_mode_;		///< DC1 電流、電圧モード
 		gui::widget_label*		dc1_voltage_;	///< DC1（電圧）
 		gui::widget_label*		dc1_current_;	///< DC1（電流）
+		gui::widget_spinbox*	dc1_count_;		///< DC1 熱抵抗測定回数
 		gui::widget_button*		dc1_exec_;		///< DC1 設定転送
 
 		// DC2 設定
@@ -229,6 +282,7 @@ namespace app {
 		gui::widget_label*		dc2_current_;	///< DC2（電流）
 		gui::widget_label*		dc2_probe_;		///< DC2（電流、電圧測定値）
 		gui::widget_button*		dc2_exec_;		///< DC2 設定転送
+		bool					dc2_probe_mode_;
 
 		// WGM 設定
 		gui::widget_check*		gen_sw_[5];	///< ジェネレータ接続スイッチ
@@ -264,6 +318,8 @@ namespace app {
 		gui::widget_check*		wdm_cnv_;		///< WDM トリガー・レベル変換
 		gui::widget_label*		wdm_level_va_;	///< WDM トリガー・レベル（電圧、電流）
 		gui::widget_list*		wdm_gain_[4];	///< WDM チャネル・ゲイン
+		gui::widget_list*		wdm_ie_trg_;	///< WDM 内部、外部トリガ
+		gui::widget_list*		wdm_sm_trg_;	///< WDM Single, Manual トリガ
 		gui::widget_button*		wdm_exec_;		///< WDM 設定転送
 		wave_cap::sample_param	sample_param_;
 
@@ -284,23 +340,31 @@ namespace app {
 			bool		mode;	///< 0, 1
 			uint32_t	volt;	///< 20 bits
 			uint32_t	curr;	///< 20 bits
+			bool		thermal;	///< 熱抵抗モード
+			uint32_t	count;	///< 熱抵抗測定回数（最大５００）
 
-			dc1_t() : sw(0), delay(1), ena(0), mode(0), volt(0), curr(0) { }
+			dc1_t() : sw(0), delay(1), ena(0), mode(0), volt(0), curr(0),
+				thermal(false), count(0) { }
 
 			std::string build() const
 			{
 				std::string s;
 				s += (boost::format("dc1 D1SW%02X\n") % sw).str();
-				if(ena) {
-					s += (boost::format("delay %d\n") % delay).str();
-					s += (boost::format("dc1 D1MD%d\n") % mode).str();
-					if(mode != 0) {
-						s += (boost::format("dc1 D1VS%05X\n") % (volt & 0xfffff)).str();
-					} else {
-						s += (boost::format("dc1 D1IS%05X\n") % (curr & 0xfffff)).str();
+				if(thermal) {
+					s += (boost::format("dc1 D1IS%05X\n") % (curr & 0xfffff)).str();
+					s += (boost::format("dc1 D1TT%03X\n") % (count & 0x1ff)).str();
+				} else {
+					if(ena) {
+						s += (boost::format("delay %d\n") % delay).str();
+						s += (boost::format("dc1 D1MD%d\n") % mode).str();
+						if(mode != 0) {
+							s += (boost::format("dc1 D1VS%05X\n") % (volt & 0xfffff)).str();
+						} else {
+							s += (boost::format("dc1 D1IS%05X\n") % (curr & 0xfffff)).str();
+						}
 					}
-				}
-				s += (boost::format("dc1 D1OE%d\n") % ena).str();
+					s += (boost::format("dc1 D1OE%d\n") % ena).str();
+				}			
 				return s;
 			}
 		};
@@ -355,12 +419,12 @@ namespace app {
 			{
 				std::string s;
 				s += (boost::format("wgm WGSW%02X\n") % sw).str();
-				if(ena) {
-					s += (boost::format("wgm WGSP%d\n") % type).str();
-					s += (boost::format("wgm WGFQ%02X\n") % (frq & 0x7f)).str();
-					s += (boost::format("wgm WGPW%03X\n") % (duty & 0x3ff)).str();
-					s += (boost::format("wgm WGPV%03X\n") % (volt & 0x3ff)).str();
-				}
+
+				s += (boost::format("wgm WGSP%d\n") % type).str();
+				s += (boost::format("wgm WGFQ%02X\n") % (frq & 0x7f)).str();
+				s += (boost::format("wgm WGPW%03X\n") % (duty & 0x3ff)).str();
+				s += (boost::format("wgm WGPV%03X\n") % (volt & 0x3ff)).str();
+
 				s += (boost::format("wgm WGOE%d\n") % ena).str();
 				if(iena) {
 					s += (boost::format("wgm WGDV%05X\n") % (ivolt & 0xfffff)).str();
@@ -554,6 +618,7 @@ namespace app {
 				widget_list::param wp_;
 				wp_.init_list_.push_back("定電流");
 				wp_.init_list_.push_back("定電圧");
+				wp_.init_list_.push_back("熱抵抗");
 				dc1_mode_ = wd.add_widget<widget_list>(wp, wp_);
 			}
 			{  // 60V/0.1V, 30A/10mA
@@ -586,6 +651,15 @@ namespace app {
 											 vtx::placement::vertical::CENTER);
 				wd.add_widget<widget_text>(wp, wp_);
 			}
+			{  // 熱抵抗回数
+				widget::param wp(vtx::irect(ofsx + 510, 20 + h * loc, 110, 40), dialog_);
+				widget_spinbox::param wp_(10, 10, 500);
+				dc1_count_ = wd.add_widget<widget_spinbox>(wp, wp_);
+				dc1_count_->at_local_param().select_func_
+					= [=](widget_spinbox::state st, int before, int newpos) {
+					return (boost::format("%d") % newpos).str();
+				};
+			} 
 			{
 				widget::param wp(vtx::irect(d_w - 50, 20 + h * loc, 30, 30), dialog_);
 				widget_button::param wp_(">");
@@ -599,7 +673,15 @@ namespace app {
 					}
 					t.sw = sw;
 					t.ena = dc1_ena_->get_check();
-					t.mode = dc1_mode_->get_select_pos() & 1;
+					if(dc1_mode_->get_select_pos() < 2) {
+						t.mode = dc1_mode_->get_select_pos() & 1;
+						t.count = 10;
+						t.thermal = false;
+					} else {
+						t.count = dc1_count_->get_select_pos();
+						t.thermal = true;
+					}
+
 					float v;
 					if((utils::input("%f", dc1_voltage_->get_text().c_str()) % v).status()) {
 						t.volt = v / 62.5e-6;
@@ -663,7 +745,7 @@ namespace app {
 				wd.add_widget<widget_text>(wp, wp_);
 			}
 			{  // 電流、電圧測定値
-				widget::param wp(vtx::irect(ofsx + 520, 20 + h * loc, 90, 40), dialog_);
+				widget::param wp(vtx::irect(ofsx + 520, 20 + h * loc, 150, 40), dialog_);
 				widget_label::param wp_("");
 				dc2_probe_ = wd.add_widget<widget_label>(wp, wp_);
 			}
@@ -681,6 +763,7 @@ namespace app {
 					t.sw = sw;
 					t.ena = dc2_ena_->get_check();
 					t.mode = dc2_mode_->get_select_pos() & 1;
+					dc2_probe_mode_ = t.mode;
 					float v;
 					if((utils::input("%f", dc2_voltage_->get_text().c_str()) % v).status()) {
 						t.volt = v / 312.5e-6;
@@ -978,6 +1061,8 @@ namespace app {
 			}
 			{  // trigger channel
 				cmd = (0b00100000 << 16);
+				if(wdm_ie_trg_->get_select_pos()) cmd |= 0x0200;
+				if(wdm_sm_trg_->get_select_pos()) cmd |= 0x0100;
 				auto n = wdm_ch_->get_select_pos();
 				uint8_t sub = 0;
 				sub |= 0x80;  // trigger ON
@@ -1014,6 +1099,13 @@ namespace app {
 				wp_.init_list_.push_back(" 20dB");
 				wdm_gain_[i] = wd.add_widget<widget_list>(wp, wp_);
 				wdm_gain_[i]->select(4);
+			}
+			{  // 内部、外部トリガー選択
+				widget::param wp(vtx::irect(ofsx + 690, 20 + h * loc, 100, 40), dialog_);
+				widget_list::param wp_;
+				wp_.init_list_.push_back("Int");
+				wp_.init_list_.push_back("Ext");
+				wdm_ie_trg_ = wd.add_widget<widget_list>(wp, wp_);
 			}
 			++loc;
 			{  // 時間軸リスト 10K、20K、50K、100K、200K、500K、1M、2M、5M、10M、20M、50M、100M
@@ -1105,6 +1197,13 @@ namespace app {
 					}
 				};
 			}
+			{  // Single, Manual トリガー選択
+				widget::param wp(vtx::irect(ofsx + 690, 20 + h * loc, 100, 40), dialog_);
+				widget_list::param wp_;
+				wp_.init_list_.push_back("Single");
+				wp_.init_list_.push_back("Manual");
+				wdm_sm_trg_ = wd.add_widget<widget_list>(wp, wp_);
+			}
 			{  // exec
 				widget::param wp(vtx::irect(d_w - 50, 20 + h * loc, 30, 30), dialog_);
 				widget_button::param wp_(">");
@@ -1188,13 +1287,15 @@ namespace app {
 			unit_name_(nullptr), load_file_(nullptr), save_file_(nullptr), ilock_enable_(nullptr),
 
 			dc1_sw_{ nullptr },
-			dc1_ena_(nullptr),
+			dc1_ena_(nullptr), dc1_mode_(nullptr), dc1_voltage_(nullptr), dc1_current_(nullptr),
+			dc1_count_(nullptr),
 			dc1_exec_(nullptr),
 
 			dc2_sw_{ nullptr },
 			dc2_ena_(nullptr), dc2_mode_(nullptr), dc2_voltage_(nullptr), dc2_current_(nullptr),
 			dc2_probe_(nullptr),
 			dc2_exec_(nullptr),
+			dc2_probe_mode_(false),
 
 			gen_ena_(nullptr), gen_mode_(nullptr), gen_freq_(nullptr),
 			gen_volt_(nullptr), gen_duty_(nullptr), gen_iena_(nullptr), gen_ivolt_(nullptr),
@@ -1209,7 +1310,8 @@ namespace app {
 			wdm_sw_{ nullptr },
 			wdm_smpl_(nullptr), wdm_ch_(nullptr), wdm_slope_(nullptr), wdm_window_(nullptr),
 			wdm_level_(nullptr), wdm_cnv_(nullptr), wdm_level_va_(nullptr),
-			wdm_gain_{ nullptr }, wdm_exec_(nullptr),
+			wdm_gain_{ nullptr }, wdm_ie_trg_(nullptr), wdm_sm_trg_(nullptr),
+			wdm_exec_(nullptr),
 			sample_param_(),
 
 			test_(d),
@@ -1228,6 +1330,15 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		const test_param& get_test_param() const { return test_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  テスト・パラメーターの取得
+			@return テスト・パラメーター
+		*/
+		//-----------------------------------------------------------------//
+		test_param& at_test_param() { return test_; }
 
 
 		//-----------------------------------------------------------------//
@@ -1415,9 +1526,15 @@ namespace app {
 				d2md_id_ = client_.get_mod_status().d2md_id_;
 				uint32_t v = client_.get_mod_status().d2md_;
 				float a = static_cast<float>(v);
-				a /= 999960.2f;
-				a *= 100.0f;
-				dc2_probe_->set_text((boost::format("%5.2f") % a).str());
+				if(dc2_probe_mode_) {
+					a /= 999960.2f;
+					a *= 100.0f;
+					dc2_probe_->set_text((boost::format("%5.2f mA") % a).str());
+				} else {
+					a /= static_cast<float>(0xFFFFF);
+	   				a *= 330.0f;
+					dc2_probe_->set_text((boost::format("%5.2f V") % a).str());
+				}
 			}
 
 			if(unit_load_filer_.state()) {
@@ -1518,6 +1635,7 @@ namespace app {
 			dc1_mode_->save(pre);
 			dc1_voltage_->save(pre);
 			dc1_current_->save(pre);
+			dc1_count_->save(pre);
 
 			save_sw_(pre, dc2_sw_, 14);
 			dc2_ena_->save(pre);
@@ -1552,6 +1670,8 @@ namespace app {
 			wdm_gain_[1]->save(pre);
 			wdm_gain_[2]->save(pre);
 			wdm_gain_[3]->save(pre);
+			wdm_ie_trg_->save(pre);
+			wdm_sm_trg_->save(pre);
 
 			test_.save(pre);
 
@@ -1580,6 +1700,7 @@ namespace app {
 				dc1_mode_->load(pre);
 				dc1_voltage_->load(pre);
 				dc1_current_->load(pre);
+				dc1_count_->load(pre);
 
 				load_sw_(pre, dc2_sw_, 14);
 				dc2_ena_->load(pre);
@@ -1614,6 +1735,8 @@ namespace app {
 				wdm_gain_[1]->load(pre);
 				wdm_gain_[2]->load(pre);
 				wdm_gain_[3]->load(pre);
+				wdm_ie_trg_->load(pre);
+				wdm_sm_trg_->load(pre);
 
 				test_.load(pre);
 
