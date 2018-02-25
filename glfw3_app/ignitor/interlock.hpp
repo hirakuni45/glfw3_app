@@ -73,7 +73,9 @@ namespace app {
 			T3_T7,
 			VP,
 			VN,
-			VP_VN
+			VP_VN,
+			N34,
+			N48,
 		};
 
 	private:
@@ -109,7 +111,8 @@ namespace app {
 				// 欠番 S33
 				bustype::N,
 				// ICM: S34 to S39
-				bustype::T1,
+				/// bustype::T1,
+				bustype::N34,  // S34 除外
 				bustype::RP,
 				bustype::RP,
 				bustype::RP,
@@ -120,7 +123,9 @@ namespace app {
 				bustype::T7, bustype::T7, bustype::RP,
 				// WGM: S44 to S48
 				bustype::T3,
-				bustype::T3, bustype::T3, bustype::T3, bustype::T7,
+				bustype::T3, bustype::T3, bustype::T3,
+				// bustype::T7,
+				bustype::N48,  // S48 除外
 				// DC1: S49
 				bustype::RP,
 			};
