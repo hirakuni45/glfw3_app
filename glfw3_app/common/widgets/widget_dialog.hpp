@@ -33,6 +33,7 @@ namespace gui {
 		enum class style {
 			OK,			///< OK ボタンのみ
 			CANCEL_OK,	///< キャンセル、OK ボタン
+			NONE,		///< ボタン無し
 		};
 
 
@@ -223,13 +224,16 @@ namespace gui {
 			// 構成部品の作成
 			const vtx::spos& size = get_rect().size;
 
-			short fw = param_.plate_param_.frame_width_;
-			short btn_width = 100;
-			short btn_height = 40;
-			short space_height = 10;
+			int fw = param_.plate_param_.frame_width_;
+			int btn_width = 100;
+			int btn_height = 40;
+			int space_height = 10;
 			vtx::spos btn_size(btn_width, btn_height);
 			short y = size.y - space_height - btn_height;
-			if(param_.style_ == style::OK) {
+			if(param_.style_ == style::NONE) {
+				btn_height = 0;
+				space_height = 0;
+			} else if(param_.style_ == style::OK) {
 				widget::param wp(vtx::irect(vtx::ipos(
 					(size.x - fw - btn_width) / 2, y),
 					btn_size), this);
@@ -271,6 +275,10 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void update() override
 		{
+			if(param_.style_ == style::NONE) {
+				return;
+			}
+
 			bool close = false;
 			if(ok_ && ok_->get_selected()) {
 				param_.return_ok_     = true;
