@@ -36,14 +36,23 @@ namespace app {
 
 		utils::director<core>&	director_;
 
-		gui::widget_dialog*		dialog_;
+		gui::widget_dialog*		name_dialog_;
+		gui::widget_label*		proj_name_;
+		gui::widget_label*		proj_dir_;
 
+		gui::widget_dialog*		dialog_;
 		gui::widget_label*		csv_name_;
+		gui::widget_list*		image_ext_;
 
 		gui::widget_label*		pbase_;
 		gui::widget_label*		pext_;
 		gui::widget_label*		pname_[50];
 		gui::widget_text*		help_;
+
+		gui::widget_dialog*		msg_dialog_;
+
+		std::string				proj_title_;
+		std::string				root_path_;
 
 		std::string get_path_(uint32_t no) const {
 			if(pname_[no]->get_text().empty()) return "";
@@ -68,17 +77,46 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		project(utils::director<core>& d) : director_(d),
+			name_dialog_(nullptr), proj_name_(nullptr), proj_dir_(nullptr),
 			dialog_(nullptr),
 			csv_name_(nullptr),
 			pbase_(nullptr), pext_(nullptr),
-			pname_{ nullptr }, help_(nullptr)
+			pname_{ nullptr }, help_(nullptr),
+			msg_dialog_(nullptr), proj_title_(), root_path_()
 		{ }
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief  ダイアログの取得
-			@return ダイアログ
+			@brief  プロジェクト名ダイアログの取得
+			@return プロジェクト名ダイアログ
+		*/
+		//-----------------------------------------------------------------//
+		gui::widget_dialog* get_name_dialog() { return name_dialog_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  プロジェクト・タイトルの取得
+			@return プロジェクト・タイトル
+		*/
+		//-----------------------------------------------------------------//
+		const std::string& get_project_title() const { return proj_title_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  ルート・パスの取得
+			@return ルート・パス
+		*/
+		//-----------------------------------------------------------------//
+		const std::string& get_root_path() const { return root_path_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  プロジェクト・ダイアログの取得
+			@return プロジェクト・ダイアログ
 		*/
 		//-----------------------------------------------------------------//
 		gui::widget_dialog* get_dialog() { return dialog_; }
@@ -107,9 +145,72 @@ namespace app {
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
-			int w = 1020;
-			int h = 720;
+			{  // プロジェクト名入力ダイアログ
+				int w = 300;
+				int h = 260;
+				widget::param wp(vtx::irect(100, 100, w, h));
+				widget_dialog::param wp_;
+				wp_.style_ = widget_dialog::style::CANCEL_OK;
+				name_dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
+				name_dialog_->enable(false);
+				name_dialog_->at_local_param().select_func_ = [=](bool ok) {
+					proj_title_.clear();
+					root_path_.clear();
+					if(ok) {
+						auto s = proj_name_->get_text();
+						if(s.empty()) {
+							msg_dialog_->set_text(
+								"プロジェクトのタイトル\nが指定されていません。");
+							msg_dialog_->enable();
+							return;
+						}
+						s = proj_dir_->get_text();
+						if(s.empty()) {
+							msg_dialog_->set_text(
+								"プロジェクトのルートフォルダ\nが指定されていません。");
+							msg_dialog_->enable();
+							return;
+						} else {
+							auto path = proj_dir_->get_text();
+							if(!utils::is_directory(path)) {
+								msg_dialog_->set_text((boost::format(
+									"プロジェクトのルートフォルダ\n"
+									"%s\n"
+									"がありません。") % path).str());
+								msg_dialog_->enable();
+								return;
+							}
+						}
+						proj_title_ = proj_name_->get_text();
+						root_path_ = proj_dir_->get_text();
+					}
+				};
+				{
+					widget::param wp(vtx::irect(10, 10, w - 10 * 2, 40), name_dialog_);
+					widget_text::param wp_("プロジェクト名：");
+					wd.add_widget<widget_text>(wp, wp_);
+				}
+				{
+					widget::param wp(vtx::irect(10, 50, w - 10 * 2, 40), name_dialog_);
+					widget_label::param wp_("", false);
+					proj_name_ = wd.add_widget<widget_label>(wp, wp_);
+				}
+				{
+					widget::param wp(vtx::irect(10, 100, w - 10 * 2, 40), name_dialog_);
+					widget_text::param wp_("ルートフォルダ：");
+					wd.add_widget<widget_text>(wp, wp_);
+				}
+				{
+					widget::param wp(vtx::irect(10, 140, w - 10 * 2, 40), name_dialog_);
+					widget_label::param wp_("", false);
+					proj_dir_ = wd.add_widget<widget_label>(wp, wp_);
+				}
+			}
+
 			{  // 単体試験設定ダイアログ
+				int w = 1020;
+				int h = 720;
+
 				widget::param wp(vtx::irect(120, 120, w, h));
 				widget_dialog::param wp_;
 				wp_.style_ = widget_dialog::style::OK;
@@ -130,6 +231,16 @@ namespace app {
 					widget_label::param wp_("", false);
 					csv_name_ = wd.add_widget<widget_label>(wp, wp_);
 				}
+				{
+
+					widget::param wp(vtx::irect(20 + 70 + 170, yy, 100, 40), dialog_);
+					widget_list::param wp_;
+					wp_.init_list_.push_back("JPEG");
+					wp_.init_list_.push_back("PNG");
+					wp_.init_list_.push_back("BMP");
+					image_ext_ = wd.add_widget<widget_list>(wp, wp_);
+				}
+
 				yy += 50;
 				{  // 単体試験ベース名設定
 					{
@@ -183,6 +294,16 @@ namespace app {
 					help_ = wd.add_widget<widget_text>(wp, wp_);	
 				}
 			}
+
+			{  // メッセージ・ダイアログ
+				int w = 400;
+				int h = 200;
+				widget::param wp(vtx::irect(100, 100, w, h));
+				widget_dialog::param wp_;
+				wp_.style_ = widget_dialog::style::OK;
+				msg_dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
+				msg_dialog_->enable(false);
+			}
 		}
 
 
@@ -224,8 +345,12 @@ namespace app {
 			if(dialog_ == nullptr) return false;
 			if(pbase_ == nullptr) return false;
 			if(pext_ == nullptr) return false;
+			if(csv_name_ == nullptr) return false;
+			if(image_ext_ == nullptr) return false;
 
 			dialog_->save(pre);
+			csv_name_->save(pre);
+			image_ext_->save(pre);
 			pbase_->save(pre);
 			pext_->save(pre);
 			for(int i = 0; i < 50; ++i) {
@@ -248,8 +373,12 @@ namespace app {
 			if(dialog_ == nullptr) return false;
 			if(pbase_ == nullptr) return false;
 			if(pext_ == nullptr) return false;
+			if(csv_name_ == nullptr) return false;
+			if(image_ext_ == nullptr) return false;
 
 			dialog_->load(pre);
+			csv_name_->load(pre);
+			image_ext_->load(pre);
 			pbase_->load(pre);
 			pext_->load(pre);
 			for(int i = 0; i < 50; ++i) {
