@@ -512,10 +512,13 @@ namespace view {
 			uint32_t sz = t.units_.size();
 			uint32_t idx = static_cast<uint32_t>(org / rate);
 			if(idx >= sz) {
-				return 0.0f;
+				idx += sz;
+				if(idx >= sz) {
+					return 0.0f ;
+				}
 			}
 
-			int32_t v = t.units_[idx];
+			int32_t v = t.units_[idx % sz];
 			v -= 32768;
 			if(v == -32768) v = -32767;
 			float a = static_cast<float>(v) / 32767.0f;
