@@ -38,6 +38,165 @@ namespace app {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class inspection {
 
+		static std::string limitf_(const std::string& str, float min, float max, const char* form)
+		{
+			std::string newtext;
+			float v;
+			if((utils::input("%f", str.c_str()) % v).status()) {
+				if(v < min) v = min;
+				else if(v > max) v = max;
+				char tmp[256];
+				utils::format(form, tmp, sizeof(tmp)) % v;
+				newtext = tmp;
+			}
+			return newtext;
+		}
+
+
+		static std::string limiti_(const std::string& str, int min, int max, const char* form)
+		{
+			std::string newtext;
+			int v;
+			if((utils::input("%d", str.c_str()) % v).status()) {
+				if(v < min) v = min;
+				else if(v > max) v = max;
+				char tmp[256];
+				utils::format(form, tmp, sizeof(tmp)) % v;
+				newtext = tmp;
+			}
+			return newtext;
+		}
+
+	public:
+		//=================================================================//
+		/*!
+			@brief  テストパラメータ、構造体
+		*/
+		//=================================================================//
+		struct test_param {
+			utils::director<core>&	director_;
+
+			gui::widget_label*		symbol_;	///< 検査記号
+			gui::widget_spinbox*	retry_;		///< リトライ回数
+			gui::widget_label*		wait_;		///< 検査遅延時間設定
+			gui::widget_list*		term_;		///< 検査端子設定
+			gui::widget_label*		delay_;		///< 検査信号遅延時間
+			gui::widget_list*		filter_;	///< 検査信号フィルター
+			gui::widget_label*		width_;		///< 検査信号取得幅
+			gui::widget_label*		min_;		///< 検査最小値
+			gui::widget_label*		max_;		///< 検査最大値
+
+			test_param(utils::director<core>& d) : director_(d),
+				symbol_(nullptr), retry_(nullptr), wait_(nullptr),
+				term_(nullptr), delay_(nullptr), filter_(nullptr),
+				width_(nullptr), min_(nullptr), max_(nullptr)
+			{ }
+
+			void init(gui::widget* root, int d_w, int ofsx, int h, int loc)
+			{
+				using namespace gui;
+				widget_director& wd = director_.at().widget_director_;
+				{  // 検査記号
+					widget::param wp(vtx::irect(ofsx, 20 + h * 12, 90, 40), root);
+					widget_label::param wp_("", false);
+					symbol_ = wd.add_widget<widget_label>(wp, wp_);
+				}
+				{  // リトライ回数
+					widget::param wp(vtx::irect(ofsx, 20 + h * 13, 90, 40), root);
+					widget_spinbox::param wp_(1, 1, 5);
+					retry_ = wd.add_widget<widget_spinbox>(wp, wp_);
+					retry_->at_local_param().select_func_ =
+						[=](widget_spinbox::state st, int before, int newpos) {
+						return (boost::format("%d") % newpos).str();
+					};
+				}
+				{  // Wait時間設定： ０～１．０ｓ（レンジ：０．０１ｓ）
+					widget::param wp(vtx::irect(ofsx + 100, 20 + h * 13, 90, 40), root);
+					widget_label::param wp_("0", false);
+					wait_ = wd.add_widget<widget_label>(wp, wp_);
+					wait_->at_local_param().select_func_ = [=](const std::string& str) {
+						wait_->set_text(limitf_(str, 0.0f, 1.0f, "%3.2f"));
+					};
+				}
+				{  // 計測ポイント選択
+					widget::param wp(vtx::irect(ofsx + 200, 20 + h * 13, 90, 40), root);
+					widget_list::param wp_;
+					wp_.init_list_.push_back("CH1");
+					wp_.init_list_.push_back("CH2");
+					wp_.init_list_.push_back("CH3");
+					wp_.init_list_.push_back("CH4");
+					wp_.init_list_.push_back("LCR");
+					term_ = wd.add_widget<widget_list>(wp, wp_);
+				}
+				{  // テスト 信号計測ポイント（時間）
+					widget::param wp(vtx::irect(ofsx + 300, 20 + h * 13, 90, 40), root);
+					widget_label::param wp_("0", false);
+					delay_ = wd.add_widget<widget_label>(wp, wp_);
+				}
+				{  // 計測信号フィルター
+					widget::param wp(vtx::irect(ofsx + 400, 20 + h * 13, 90, 40), root);
+					widget_list::param wp_;
+					wp_.init_list_.push_back("SIG");
+					wp_.init_list_.push_back("MIN");
+					wp_.init_list_.push_back("MAX");
+					wp_.init_list_.push_back("AVE");
+					filter_ = wd.add_widget<widget_list>(wp, wp_);
+					filter_->at_local_param().select_func_
+						= [=](const std::string& text, uint32_t pos) {
+						if(pos == 0) {
+							width_->set_stall();
+						} else {
+							width_->set_stall(false);
+						}
+					};
+				}
+				{  // テスト 信号計測ポイント（時間）
+					widget::param wp(vtx::irect(ofsx + 500, 20 + h * 13, 90, 40), root);
+					widget_label::param wp_("0", false);
+					width_ = wd.add_widget<widget_label>(wp, wp_);
+				}
+				{  // テスト MIN 値設定
+					widget::param wp(vtx::irect(ofsx + 600, 20 + h * 13, 90, 40), root);
+					widget_label::param wp_("0", false);
+					min_ = wd.add_widget<widget_label>(wp, wp_);
+				}
+				{  // テスト MAX 値設定
+					widget::param wp(vtx::irect(ofsx + 700, 20 + h * 13, 90, 40), root);
+					widget_label::param wp_("0", false);
+					max_ = wd.add_widget<widget_label>(wp, wp_);
+				}
+			} 
+
+
+			void save(sys::preference& pre)
+			{
+				symbol_->save(pre);
+				retry_->save(pre);
+				wait_->save(pre);
+				term_->save(pre);
+				delay_->save(pre);
+				filter_->save(pre);
+				width_->save(pre);
+				min_->save(pre);
+				max_->save(pre);
+			}
+
+
+			void load(sys::preference& pre)
+			{
+				symbol_->load(pre);
+				retry_->load(pre);
+				wait_->load(pre);
+				term_->load(pre);
+				delay_->load(pre);
+				filter_->load(pre);
+				width_->load(pre);
+				min_->load(pre);
+				max_->load(pre);
+			}
+		};
+
+	private:
 		static constexpr const char* UNIT_EXT_ = "unt";  ///< 単体検査ファイル、拡張子
 
 		utils::director<core>&	director_;
@@ -109,15 +268,7 @@ namespace app {
 		wave_cap::sample_param	sample_param_;
 
 		// 測定用件
-		gui::widget_label*		test_symbol_;	///< 検査記号
-		gui::widget_spinbox*	test_retry_;	///< リトライ回数
-		gui::widget_label*		test_wait_;		///< 検査遅延時間設定
-		gui::widget_list*		test_term_;		///< 検査端子設定
-		gui::widget_label*		test_delay_;	///< 検査信号遅延時間
-		gui::widget_list*		test_filter_;	///< 検査信号フィルター
-		gui::widget_label*		test_width_;	///< 検査信号取得幅
-		gui::widget_label*		test_min_;		///< 検査最小値
-		gui::widget_label*		test_max_;		///< 検査最大値
+		test_param				test_;
 
 		gui::widget_chip*		chip_;			///< help chip
 
@@ -272,36 +423,6 @@ namespace app {
 			float		curt_max_;	/// 0.1A/0.01mA step
 			float		curt_;		/// 0.1A/0.01mA step
 		};
-
-
-		std::string limitf_(const std::string& str, float min, float max, const char* form)
-		{
-			std::string newtext;
-			float v;
-			if((utils::input("%f", str.c_str()) % v).status()) {
-				if(v < min) v = min;
-				else if(v > max) v = max;
-				char tmp[256];
-				utils::format(form, tmp, sizeof(tmp)) % v;
-				newtext = tmp;
-			}
-			return newtext;
-		}
-
-
-		std::string limiti_(const std::string& str, int min, int max, const char* form)
-		{
-			std::string newtext;
-			int v;
-			if((utils::input("%d", str.c_str()) % v).status()) {
-				if(v < min) v = min;
-				else if(v > max) v = max;
-				char tmp[256];
-				utils::format(form, tmp, sizeof(tmp)) % v;
-				newtext = tmp;
-			}
-			return newtext;
-		}
 
 
 		static const uint32_t time_div_size_ = 16;
@@ -1091,16 +1212,22 @@ namespace app {
 			wdm_gain_{ nullptr }, wdm_exec_(nullptr),
 			sample_param_(),
 
-			test_symbol_(nullptr),
-			test_retry_(nullptr), test_wait_(nullptr), test_term_(nullptr), test_delay_(nullptr),
-			test_filter_(nullptr), test_width_(nullptr),
-			test_min_(nullptr), test_max_(nullptr),
+			test_(d),
 
 			chip_(nullptr),
 
 			startup_init_(false),
 			crrd_id_(0), crcd_id_(0), d2md_id_(0)
 		{ }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  テスト・パラメーターの取得
+			@return テスト・パラメーター
+		*/
+		//-----------------------------------------------------------------//
+		const test_param& get_test_param() const { return test_; }
 
 
 		//-----------------------------------------------------------------//
@@ -1206,77 +1333,7 @@ namespace app {
 			init_crm_(d_w, ofsx, h, 9);
 			init_icm_(d_w, ofsx, h, 11);
 
-			// 検査設定
-			{  // 検査記号
-				widget::param wp(vtx::irect(ofsx, 20 + h * 12, 90, 40), dialog_);
-				widget_label::param wp_("", false);
-				test_symbol_ = wd.add_widget<widget_label>(wp, wp_);
-			}
-			{  // リトライ回数
-				widget::param wp(vtx::irect(ofsx, 20 + h * 13, 90, 40), dialog_);
-				widget_spinbox::param wp_(1, 1, 5);
-				test_retry_ = wd.add_widget<widget_spinbox>(wp, wp_);
-				test_retry_->at_local_param().select_func_ =
-					[=](widget_spinbox::state st, int before, int newpos) {
-					return (boost::format("%d") % newpos).str();
-				};
-			}
-			{  // Wait時間設定： ０～１．０ｓ（レンジ：０．０１ｓ）
-				widget::param wp(vtx::irect(ofsx + 100, 20 + h * 13, 90, 40), dialog_);
-				widget_label::param wp_("0", false);
-				test_wait_ = wd.add_widget<widget_label>(wp, wp_);
-				test_wait_->at_local_param().select_func_ = [=](const std::string& str) {
-					test_wait_->set_text(limitf_(str, 0.0f, 1.0f, "%3.2f"));
-				};
-			}
-			{  // 計測ポイント選択
-				widget::param wp(vtx::irect(ofsx + 200, 20 + h * 13, 90, 40), dialog_);
-				widget_list::param wp_;
-				wp_.init_list_.push_back("CH1");
-				wp_.init_list_.push_back("CH2");
-				wp_.init_list_.push_back("CH3");
-				wp_.init_list_.push_back("CH4");
-				wp_.init_list_.push_back("LCR");
-				test_term_ = wd.add_widget<widget_list>(wp, wp_);
-			}
-			{  // テスト 信号計測ポイント（時間）
-				widget::param wp(vtx::irect(ofsx + 300, 20 + h * 13, 90, 40), dialog_);
-				widget_label::param wp_("0", false);
-				test_delay_ = wd.add_widget<widget_label>(wp, wp_);
-			}
-			{  // 計測信号フィルター
-				widget::param wp(vtx::irect(ofsx + 400, 20 + h * 13, 90, 40), dialog_);
-				widget_list::param wp_;
-				wp_.init_list_.push_back("SIG");
-				wp_.init_list_.push_back("MIN");
-				wp_.init_list_.push_back("MAX");
-				wp_.init_list_.push_back("AVE");
-				test_filter_ = wd.add_widget<widget_list>(wp, wp_);
-				test_filter_->at_local_param().select_func_
-					= [=](const std::string& text, uint32_t pos) {
-					if(pos == 0) {
-						test_width_->set_stall();
-					} else {
-						test_width_->set_stall(false);
-					}
-				};
-			}
-			{  // テスト 信号計測ポイント（時間）
-				widget::param wp(vtx::irect(ofsx + 500, 20 + h * 13, 90, 40), dialog_);
-				widget_label::param wp_("0", false);
-				test_width_ = wd.add_widget<widget_label>(wp, wp_);
-			}
-			{  // テスト MIN 値設定
-				widget::param wp(vtx::irect(ofsx + 600, 20 + h * 13, 90, 40), dialog_);
-				widget_label::param wp_("0", false);
-				test_min_ = wd.add_widget<widget_label>(wp, wp_);
-			}
-			{  // テスト MAX 値設定
-				widget::param wp(vtx::irect(ofsx + 700, 20 + h * 13, 90, 40), dialog_);
-				widget_label::param wp_("0", false);
-				test_max_ = wd.add_widget<widget_label>(wp, wp_);
-			}
-
+			test_.init(dialog_, d_w, ofsx, h, 12);
 
 			{  // help message (widget_chip)
 				widget::param wp(vtx::irect(0, 0, 100, 40), dialog_);
@@ -1404,22 +1461,22 @@ namespace app {
 				set_help_(gen_duty_, "0.1 to 100.0 [%], 0.1 [%] / step");
 			} else if(gen_ivolt_->get_focus()) {
 				set_help_(gen_ivolt_, "0.0 to 16.0 [V], 0.01 [V] / step");
-			} else if(test_symbol_->get_focus()) {
-				set_help_(test_symbol_, "検査記号");
-			} else if(test_wait_->get_focus()) {
-				set_help_(test_wait_, "検査遅延: 0.0 to 1.0 [秒], 0.01 [秒] / step");
-			} else if(test_retry_->get_focus()) {
-				set_help_(test_retry_, "検査リトライ回数");
-			} else if(test_delay_->get_focus()) {
-				auto ch = test_term_->get_select_pos() + 1;
+			} else if(test_.symbol_->get_focus()) {
+				set_help_(test_.symbol_, "検査記号");
+			} else if(test_.wait_->get_focus()) {
+				set_help_(test_.wait_, "検査遅延: 0.0 to 1.0 [秒], 0.01 [秒] / step");
+			} else if(test_.retry_->get_focus()) {
+				set_help_(test_.retry_, "検査リトライ回数");
+			} else if(test_.delay_->get_focus()) {
+				auto ch = test_.term_->get_select_pos() + 1;
 				auto str = (boost::format("CH%d 検査ポイント（時間）") % ch).str();
-				set_help_(test_delay_, str);
-			} else if(test_width_->get_focus()) {
-				set_help_(test_width_, "検査幅（時間）");
-			} else if(test_min_->get_focus()) {
-				set_help_(test_min_, "検査：最低値");
-			} else if(test_max_->get_focus()) {
-				set_help_(test_max_, "検査：最大値");
+				set_help_(test_.delay_, str);
+			} else if(test_.width_->get_focus()) {
+				set_help_(test_.width_, "検査幅（時間）");
+			} else if(test_.min_->get_focus()) {
+				set_help_(test_.min_, "検査：最低値");
+			} else if(test_.max_->get_focus()) {
+				set_help_(test_.max_, "検査：最大値");
 			} else if(wdm_level_->get_focus()) {
 				set_help_(wdm_level_, "トリガーレベル（数値入力）");
 			} else if(wdm_level_va_->get_focus()) {
@@ -1496,15 +1553,7 @@ namespace app {
 			wdm_gain_[2]->save(pre);
 			wdm_gain_[3]->save(pre);
 
-			test_symbol_->save(pre);
-			test_retry_->save(pre);
-			test_wait_->save(pre);
-			test_term_->save(pre);
-			test_delay_->save(pre);
-			test_filter_->save(pre);
-			test_width_->save(pre);
-			test_min_->save(pre);
-			test_max_->save(pre);
+			test_.save(pre);
 
 			ilock_enable_->save(pre);
 
@@ -1566,15 +1615,7 @@ namespace app {
 				wdm_gain_[2]->load(pre);
 				wdm_gain_[3]->load(pre);
 
-				test_symbol_->load(pre);
-				test_retry_->load(pre);
-				test_wait_->load(pre);
-				test_term_->load(pre);
-				test_delay_->load(pre);
-				test_filter_->load(pre);
-				test_width_->load(pre);
-				test_min_->load(pre);
-				test_max_->load(pre);
+				test_.load(pre);
 
 				ilock_enable_->load(pre);
 			}
