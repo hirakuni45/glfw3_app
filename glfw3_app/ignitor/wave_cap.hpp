@@ -737,7 +737,7 @@ namespace app {
 				info_.sample_org_ = static_cast<double>(sta) * tu;
 				double org = static_cast<double>(sta) / static_cast<double>(grid) * tu;
 				double end = static_cast<double>(fin) / static_cast<double>(grid) * tu;
- 				info_.sample_width_ = static_cast<double>(end - org) * tu;
+ 				info_.sample_width_ = end - org;
 				for(uint32_t i = 0; i < 4; ++i) {
 					if(!get_ch(i).ena_->get_check()) continue;
 					auto a = waves_.get(i, sample_param_.rate, org);
@@ -751,19 +751,18 @@ namespace app {
 					double len = info_.sample_width_;
 					static const char* ut[4] = { "S", "mS", "uS", "nS" };
 					uint32_t uti = 0;
-					if(len <= 1e-9) { len *= 1e9; uti = 3; }
-					else if(len <= 1e-6) { len *= 1e6; uti = 2; }
-					else if(len <= 1e-3) { len *= 1e3; uti = 1; }
+					if(len < 1e-6) { len *= 1e9; uti = 3; }
+					else if(len < 1e-3) { len *= 1e6; uti = 2; }
+					else if(len < 1.0) { len *= 1e3; uti = 1; }
 					std::string s = (boost::format("CH%d: %4.3f %s, %4.3f %s\n")
 						% (i + 1) % a % t[i] % len % ut[uti]).str();
 					terminal_core_->output(s);
 
-					// 波形解析
-					{
+					{  // 波形解析
 						double step = tu / static_cast<double>(grid);
 						auto ap = waves_.analize(i, sample_param_.rate, org, end - org, step);
 						volt_scale_conv_(i, ap, info_);
-						s = (boost::format("Min: %4.3f %s\n") % info_.min_[i] % t[i]).str();
+						s = (boost::format("Min: %4.3f %s, ") % info_.min_[i] % t[i]).str();
 						terminal_core_->output(s);
 						s = (boost::format("Max: %4.3f %s\n") % info_.max_[i] % t[i]).str();
 						terminal_core_->output(s);
