@@ -25,7 +25,7 @@ namespace app {
 
 		typedef std::vector<utils::strings> CELL;
 
-		CELL	form_;
+		CELL	cell_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -38,13 +38,82 @@ namespace app {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief  作成
+			@param[in]	columns	列
+			@param[in]	rows	行
+		*/
+		//-----------------------------------------------------------------//
+		void create(uint32_t columns, uint32_t rows)
+		{
+			cell_.clear();
+			for(uint32_t r = 0; r < rows; ++r) {
+				utils::strings line;
+				for(uint32_t c = 0; c < columns; ++c) {
+					line.push_back("");
+				}
+				cell_.push_back(line);
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief  クリア
 		*/
 		//-----------------------------------------------------------------//
 		void clear()
 		{
+			cell_.clear();
 		}
 
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  設定
+			@param[in]	columns	列
+			@param[in]	rows	行
+			@param[in]	str		文字列
+			@return 設定不可なら「false」
+		*/
+		//-----------------------------------------------------------------//
+		bool set(uint32_t columns, uint32_t rows, const std::string& str)
+		{
+			if(cell_.size() <= rows) return false;
+
+			utils::strings& ss = cell_[rows];
+			if(ss.size() <= columns) return false;
+			ss[columns] = str;
+			return true;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  セーブ
+			@param[in]	path	セーブ・パス
+			@return 成功なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool save(const std::string& path)
+		{
+			utils::file_io fio;
+			if(!fio.open(path, "wb")) {
+				return false;
+			}
+
+			for(uint32_t r = 0; r < cell_.size(); ++r) {
+				utils::strings& line = cell_[r];
+				for(uint32_t c = 0; c < line.size(); ++c) {
+					const std::string& s = line[c];
+					fio.put(s);
+					if(c < (line.size() - 1)) fio.put(",");
+					else if(c == (line.size() - 1)) fio.put("\n");
+				}
+			}
+			fio.close();
+
+			return true;
+		}
 
 	};
 }
