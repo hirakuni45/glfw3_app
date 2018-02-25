@@ -59,6 +59,8 @@ namespace app {
 
 		std::string				ip_;
 
+		uint32_t				info_id_;
+
 		// ターミナル、行入力
 		void term_enter_(const utils::lstring& text) {
 			auto s = utils::utf32_to_utf8(text);
@@ -84,7 +86,8 @@ namespace app {
 			delay_client_(60), connect_client_(false), start_client_(false),
 			wave_edit_(false),
 ///			server_(io_service_),
-			ip_()
+			ip_(),
+			info_id_(0)
 		{
 		}
 
@@ -245,6 +248,29 @@ namespace app {
 
 			wave_cap_.update();
 
+			// 波形計測のバックアノテーション
+			const auto& inf = wave_cap_.get_info();
+			if(inf.id_ != info_id_) {
+				if(inf.annotate_) {
+					const auto& test = root_menu_.at_inspection().get_test_param();
+					if(test.delay_ != nullptr) {
+						test.delay_->set_text((boost::format("%e") % inf.sample_org_).str());
+					}
+					if(test.width_ != nullptr) {
+						test.width_->set_text((boost::format("%e") % inf.sample_width_).str());
+					}
+					if(test.term_ != nullptr) {
+						auto n = test.term_->get_select_pos();
+						if(n <= 3 && test.min_ != nullptr) {
+							test.min_->set_text((boost::format("%4.3f") % inf.min_[n]).str());
+						}
+						if(n <= 3 && test.max_ != nullptr) {
+							test.max_->set_text((boost::format("%4.3f") % inf.max_[n]).str());
+						}
+					}
+				}
+				info_id_ = inf.id_;
+			}
 #if 0
 #if 0
 			// Drag & Drop されたファイル

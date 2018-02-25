@@ -64,9 +64,6 @@ namespace app {
 		gui::widget_button*		run_;
 		gui::widget_button*		info_;
 
-		gui::widget_dialog*		proj_name_dialog_;
-		gui::widget_label*		proj_name_label_;
-
 		project					project_;
 		inspection				inspection_;
 
@@ -85,8 +82,6 @@ namespace app {
 		gui::widget_filer*		proj_load_filer_;
 		gui::widget_filer*		proj_save_filer_;
 #endif
-		std::string				root_name_;
-
 		int						ip_[4];
 
 
@@ -163,7 +158,6 @@ return;
 			igni_settings_(nullptr), cont_settings_(nullptr),
 			wave_edit_(nullptr),
 			run_(nullptr), info_(nullptr),
-			proj_name_dialog_(nullptr), proj_name_label_(nullptr),
 			project_(d),
 			inspection_(d, client, ilock),
 			cont_setting_dialog_(nullptr),
@@ -189,11 +183,20 @@ return;
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief  inspection を取得
+			@return inspection
+		*/
+		//-----------------------------------------------------------------//
+		const inspection& get_inspection() const { return inspection_; } 
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief  inspection の参照を取得
 			@return inspection の参照
 		*/
 		//-----------------------------------------------------------------//
-		const inspection& get_inspection() const { return inspection_; } 
+		inspection& at_inspection() { return inspection_; } 
 
 
 		//-----------------------------------------------------------------//
@@ -266,8 +269,7 @@ return;
 				widget_button::param wp_("新規プロジェクト");
 				new_project_ = wd.add_widget<widget_button>(wp, wp_);
 				new_project_->at_local_param().select_func_ = [=](uint32_t id) {
-					proj_name_dialog_->enable();
-					root_name_ = proj_title_->get_text();
+					project_.get_name_dialog()->enable();
 				};
 				{
 					widget::param wp(vtx::irect(ofs_x_ + btn_w_ + 50,
@@ -366,34 +368,6 @@ return;
 				info_->at_local_param().select_func_ = [=](uint32_t id) {
 					info_dialog_->enable();
 				};
-			}
-
-			{  // プロジェクト名入力ダイアログ
-				int w = 300;
-				int h = 200;
-				widget::param wp(vtx::irect(100, 100, w, h));
-				widget_dialog::param wp_;
-				wp_.style_ = widget_dialog::style::CANCEL_OK;
-				proj_name_dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
-				proj_name_dialog_->enable(false);
-				proj_name_dialog_->at_local_param().select_func_ = [=](bool ok) {
-					if(!ok) {
-						proj_title_->set_text(root_name_);
-						return;
-					}
-					proj_title_->set_text(proj_name_label_->get_text());
-					update_project_();
-				};
-				{
-					widget::param wp(vtx::irect(10, 20, w - 10 * 2, 40), proj_name_dialog_);
-					widget_text::param wp_("プロジェクト名：");
-					wd.add_widget<widget_text>(wp, wp_);
-				}
-				{
-					widget::param wp(vtx::irect(10, 70, w - 10 * 2, 40), proj_name_dialog_);
-					widget_label::param wp_("", false);
-					proj_name_label_ = wd.add_widget<widget_label>(wp, wp_);
-				}
 			}
 
 			project_.initialize();
@@ -605,9 +579,9 @@ return;
 			cont_setting_ip_[2]->load(pre);
 			cont_setting_ip_[3]->load(pre);
 
-			proj_name_dialog_->load(pre);		  // ダイアログの位置復元
-			inspection_.get_dialog()->load(pre);  // ダイアログの位置復元
-			project_.get_dialog()->load(pre);	  // ダイアログの位置復元
+			project_.get_name_dialog()->load(pre);	// ダイアログの位置復元
+			project_.get_dialog()->load(pre);	  	// ダイアログの位置復元
+			inspection_.get_dialog()->load(pre);  	// ダイアログの位置復元
 
 #ifndef NATIVE_FILER
 			proj_load_filer_->load(pre);
@@ -638,41 +612,14 @@ return;
 			cont_setting_ip_[2]->save(pre);
 			cont_setting_ip_[3]->save(pre);
 
-			proj_name_dialog_->save(pre);		  // ダイアログの位置セーブ
-
-			inspection_.get_dialog()->save(pre);  // ダイアログの位置セーブ
-			project_.get_dialog()->save(pre);	  // ダイアログの位置セーブ
+			project_.get_name_dialog()->save(pre);	// ダイアログの位置セーブ
+			project_.get_dialog()->save(pre);	  	// ダイアログの位置セーブ
+			inspection_.get_dialog()->save(pre);  	// ダイアログの位置セーブ
 
 #ifndef NATIVE_FILER
 			proj_load_filer_->save(pre);
 			proj_save_filer_->save(pre);
-
-			wd.del_widget(proj_save_filer_);
-			proj_save_filer_ = nullptr;
-			wd.del_widget(proj_load_filer_);
-			proj_load_filer_ = nullptr;
 #endif
-			wd.del_widget(cont_setting_dialog_);
-			cont_setting_dialog_ = nullptr;
-			wd.del_widget(proj_name_dialog_);
-			proj_name_dialog_ = nullptr;
-
-			wd.del_widget(cont_settings_);
-			cont_settings_ = nullptr;
-			wd.del_widget(save_project_);
-			save_project_ = nullptr;
-			wd.del_widget(edit_project_);
-			edit_project_ = nullptr;
-
-			wd.del_widget(load_project_);
-			load_project_ = nullptr;
-			wd.del_widget(proj_path_);
-			proj_path_ = nullptr;
-
-			wd.del_widget(proj_title_);
-			proj_title_ = nullptr;
-			wd.del_widget(new_project_);
-			new_project_ = nullptr;
 		}
 	};
 }
