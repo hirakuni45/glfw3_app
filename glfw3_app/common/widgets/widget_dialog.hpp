@@ -321,7 +321,14 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		bool save(sys::preference& pre) override {
-			return true;
+			std::string path;
+			path += '/';
+			path += wd_.create_widget_name(this);
+
+			int err = 0;
+			if(!pre.put_position(path + "/locate",  vtx::ipos(get_rect().org))) ++err;
+
+			return err == 0;
 		}
 
 
@@ -333,7 +340,18 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		bool load(const sys::preference& pre) override {
-			return true;
+			std::string path;
+			path += '/';
+			path += wd_.create_widget_name(this);
+
+			int err = 0;
+			vtx::ipos p;
+			if(pre.get_position(path + "/locate", p)) {
+				at_rect().org = p;
+			} else {
+				++err;
+			}
+			return err == 0;
 		}
 	};
 }
