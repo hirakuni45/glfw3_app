@@ -44,6 +44,7 @@ namespace utils {
 	bool string_to_int(const std::string& src, std::vector<int32_t>& dst, const std::string& spc = " ,:");
 	bool string_to_float(const std::string& src, float& dst);
 	bool string_to_float(const std::string& src, std::vector<float>& dst, const std::string& spc = " ,:");
+	bool string_to_double(const std::string& src, double& dst);
 
 	bool string_to_matrix4x4(const std::string& src, mtx::fmat4& dst);
 

@@ -131,6 +131,17 @@ namespace utils {
 	}
 
 
+	bool string_to_double(const std::string& src, double& dst)
+	{
+		try {
+			dst = boost::lexical_cast<double>(src);
+		} catch(boost::bad_lexical_cast& bad) {
+			return false;
+		}
+		return true;
+	}
+
+
 	bool string_to_matrix4x4(const std::string& src, mtx::fmat4& dst)
 	{
 		std::vector<float> vv;
