@@ -441,7 +441,6 @@ namespace view {
 					}
 					t.param_.update_ = false;
 				}
-				smooth_before_ = smooth_;
 
 				if(!t.lines_.empty()) {
 					glPushMatrix();
@@ -451,6 +450,7 @@ namespace view {
 					glPopMatrix();
 				}
 			}
+			smooth_before_ = smooth_;
 
 			info_.build(size);
 
