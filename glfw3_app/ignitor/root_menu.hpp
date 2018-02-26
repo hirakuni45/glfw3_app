@@ -24,6 +24,8 @@
 #include "ign_client_tcp.hpp"
 #include "interlock.hpp"
 #include "csv.hpp"
+#include "wave_cap.hpp"
+#include "test.hpp"
 
 #define NATIVE_FILER
 
@@ -49,6 +51,9 @@ namespace app {
 
 		net::ign_client_tcp&	client_;
 		interlock&				interlock_;
+
+		wave_cap				wave_cap_;
+		uint32_t				info_id_;
 
 		gui::widget_button*		new_project_;
 		gui::widget_label*		proj_title_;
@@ -118,16 +123,23 @@ namespace app {
 
 
 		enum class task {
-			idle,
-			start,
-			loop,
-			sync,
-			fin,
+			idle,	///< アイドル状態
+			start,	///< 開始
+			loop,	///< ループ基点
+			wait,	///< 測定遅延
+			sence,	///< センシング
+			sync,	///< 同期
+			error,	///< エラー
+			retry,	///< リトライ
+			fin,	///< 終了
 		};
 		task		task_;
 
 		uint32_t	unit_id_;
-		uint32_t	delay_;
+		uint32_t	wait_;
+		uint32_t	retry_;
+
+		test::value_t	value_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -137,6 +149,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		root_menu(utils::director<core>& d, net::ign_client_tcp& client, interlock& ilock) :
 			director_(d), client_(client), interlock_(ilock),
+			wave_cap_(d, client, interlock_), info_id_(0),
 			new_project_(nullptr),  proj_title_(nullptr),
 			load_project_(nullptr), proj_path_(nullptr),
 			edit_project_(nullptr),
@@ -154,7 +167,7 @@ namespace app {
 			inspection_(d, client, ilock),
 			project_(d),
 
-			ip_{ 0 }, task_(task::idle), unit_id_(0), delay_(0)
+			ip_{ 0 }, task_(task::idle), unit_id_(0), wait_(0), retry_(0)
 			{ }
 
 
@@ -222,18 +235,6 @@ namespace app {
 				if(i < 3) ips += ".";
 			}
 			return ips; 
-		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief  波形編集の状態を取得
-			@return	波形編集の状態
-		*/
-		//-----------------------------------------------------------------//
-		bool get_wave_edit() const {
-			if(wave_edit_ == nullptr) return false;
-			return wave_edit_->get_check();
 		}
 
 
@@ -338,6 +339,7 @@ namespace app {
 				widget_check::param wp_("波形編集");
 				wave_edit_ = wd.add_widget<widget_check>(wp, wp_);
 				wave_edit_->at_local_param().select_func_ = [=](bool f) {
+					wave_cap_.enable(f);
 				};
 			}
 			{  // 検査開始ボタン
@@ -485,7 +487,11 @@ namespace app {
 				}
 			}
 #endif
+			wave_cap_.initialize();
+
 			load();
+
+			wave_cap_.enable(wave_edit_->get_check());
 		}
 
 
@@ -527,6 +533,34 @@ namespace app {
 			}
 
 			inspection_.update();
+
+			wave_cap_.set_sample_param(get_inspection().get_sample_param());
+
+			wave_cap_.update();
+
+			// 波形計測のバックアノテーション
+			const auto& inf = wave_cap_.get_info();
+			if(inf.id_ != info_id_) {
+				if(inf.annotate_) {
+					const auto& test = at_inspection().get_test_param();
+					if(test.delay_ != nullptr) {
+						test.delay_->set_text((boost::format("%e") % inf.sample_org_).str());
+					}
+					if(test.width_ != nullptr) {
+						test.width_->set_text((boost::format("%e") % inf.sample_width_).str());
+					}
+					if(test.term_ != nullptr) {
+						auto n = test.term_->get_select_pos();
+						if(n <= 3 && test.min_ != nullptr) {
+							test.min_->set_text((boost::format("%4.3f") % inf.min_[n]).str());
+						}
+						if(n <= 3 && test.max_ != nullptr) {
+							test.max_->set_text((boost::format("%4.3f") % inf.max_[n]).str());
+						}
+					}
+				}
+				info_id_ = inf.id_;
+			}
 
 			if(cont_setting_exec_ != nullptr) {
 				cont_setting_exec_->set_stall(!client_.probe());
@@ -571,7 +605,9 @@ namespace app {
 				task_ = task::loop;
 				msg_dialog_->set_text("検査開始");
 				msg_dialog_->enable();
+				retry_ = 0;
 				break;
+
 			case task::loop:
 				{
 					auto fp = project_.get_unit_name(unit_id_);
@@ -586,25 +622,62 @@ namespace app {
 					inspection_.at_test_param().build_value();
 					const auto& v = inspection_.get_test_param().value_;
 					top += (boost::format("Symbol: %s\n") % v.symbol_).str();
-					top += (boost::format("Retry: %d\n") % v.retry_).str();
-					top += (boost::format("Wait:  %2.1f\n") % v.wait_).str();
+					top += (boost::format("Retry: %d/%d\n") % retry_ % v.retry_).str();
+					top += (boost::format("Wait:  %2.1f [s]\n") % v.wait_).str();
 					top += (boost::format("Term:  %d\n") % v.term_).str();
-					top += (boost::format("Delay: %e\n") % v.delay_).str();
+					top += (boost::format("Delay: %e [s]\n") % v.delay_).str();
 					top += (boost::format("Filter: %d\n") % v.filter_).str();
-					top += (boost::format("Width: %e\n") % v.width_).str();
-					top += (boost::format("Min: %e\n") % v.min_).str();
-					top += (boost::format("Max: %e") % v.max_).str();
+					top += (boost::format("Width: %e [s]\n") % v.width_).str();
+					top += (boost::format("Min: %e [s]\n") % v.min_).str();
+					top += (boost::format("Max: %e [s]") % v.max_).str();
+					value_ = v;
 
 					msg_dialog_->set_text(top);
-					task_ = task::sync;
-					delay_ = 120;
+
+					wait_ = static_cast<uint32_t>(value_.wait_ * 60.0);
+wait_ = 120;
+					if(wait_ > 0) {
+						task_ = task::wait;
+					} else {
+						task_ = task::sence;
+					}
 				}
 				break;
-			case task::sync:
-				if(delay_ > 0) {
-					--delay_;
+
+			case task::wait:
+				if(wait_ > 0) {
+					--wait_;
 					break;
 				}
+				task_ = task::sence;
+				break;
+
+			case task::sence:
+				{
+					bool f = wave_cap_.value_check(value_);
+					if(f) {
+						task_ = task::sync;
+					} else {
+						task_ = task::retry;
+					}
+				}
+				break;
+
+			case task::retry:
+				++retry_;
+				if(retry_ >= value_.retry_) {
+					task_ = task::error;
+				} else {
+					task_ = task::loop;
+				}
+				break;
+
+			case task::error:
+				msg_dialog_->set_text("error:");
+				task_ = task::sync;
+				break;
+
+			case task::sync:
 				++unit_id_;
 				if(unit_id_ >= project_.get_unit_count()) {
 					task_ = task::fin;
@@ -612,10 +685,12 @@ namespace app {
 					task_ = task::loop;
 				}
 				break;
+
 			case task::fin:
 				msg_dialog_->enable(false);
 				task_ = task::idle;
 				break;
+
 			default:
 				break;
 			}
@@ -651,6 +726,7 @@ namespace app {
 			proj_load_filer_->load(pre);
 			proj_save_filer_->load(pre);
 #endif
+			wave_cap_.load();
 		}
 
 
@@ -685,7 +761,8 @@ namespace app {
 			proj_load_filer_->save(pre);
 			proj_save_filer_->save(pre);
 #endif
+
+			wave_cap_.save();
 		}
 	};
 }
-

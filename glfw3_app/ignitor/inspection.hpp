@@ -28,6 +28,7 @@
 #include "ign_client_tcp.hpp"
 #include "interlock.hpp"
 #include "wave_cap.hpp"
+#include "test.hpp"
 
 namespace app {
 
@@ -86,21 +87,7 @@ namespace app {
 			gui::widget_label*		min_;		///< 検査最小値
 			gui::widget_label*		max_;		///< 検査最大値
 
-			struct value_t {
-				std::string		symbol_;
-				uint32_t		retry_;
-				double			wait_;
-				uint32_t		term_;
-				double			delay_;
-				uint32_t		filter_;
-				double			width_;
-				double			min_;
-				double			max_;
-				value_t() : symbol_(), retry_(0), wait_(0.0),
-					term_(0), delay_(0.0), filter_(0), width_(0.0), min_(0.0), max_(0.0)
-				{ }
-			};
-			value_t			value_;
+			test::value_t			value_;
 
 			test_param(utils::director<core>& d) : director_(d),
 				symbol_(nullptr), retry_(nullptr), wait_(nullptr),

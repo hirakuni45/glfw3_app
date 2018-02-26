@@ -25,7 +25,6 @@
 #include "interlock.hpp"
 #include "root_menu.hpp"
 #include "ign_client_tcp.hpp"
-#include "wave_cap.hpp"
 
 namespace app {
 
@@ -40,7 +39,6 @@ namespace app {
 
 		interlock				interlock_;
 		root_menu				root_menu_;
-		wave_cap				wave_cap_;
 
 		gui::widget_button*		load_;
 		gui::widget_filer*		load_ctx_;
@@ -53,13 +51,10 @@ namespace app {
 		uint32_t				delay_client_;
 		bool					connect_client_;
 		bool					start_client_;
-		bool					wave_edit_;
 
 ///		net::ign_server			server_;
 
 		std::string				ip_;
-
-		uint32_t				info_id_;
 
 		// ターミナル、行入力
 		void term_enter_(const utils::lstring& text) {
@@ -77,19 +72,15 @@ namespace app {
 		ignitor(utils::director<core>& d) : director_(d),
 			interlock_(),
 			root_menu_(d, client_, interlock_),
-			wave_cap_(d, client_, interlock_),
 			load_(nullptr), load_ctx_(nullptr),
 ///			terminal_frame_(nullptr), terminal_core_(nullptr),
 ///			io_service_(),
 ///			client_(io_service_),
 			client_(),
 			delay_client_(60), connect_client_(false), start_client_(false),
-			wave_edit_(false),
 ///			server_(io_service_),
-			ip_(),
-			info_id_(0)
-		{
-		}
+			ip_()
+		{ }
 
 
 		//-----------------------------------------------------------------//
@@ -100,8 +91,6 @@ namespace app {
 		void initialize()
 		{
 			root_menu_.initialize();
-
-			wave_cap_.initialize();
 
 			using namespace gui;
 //			widget_director& wd = director_.at().widget_director_;
@@ -177,8 +166,6 @@ namespace app {
 			}
 #endif
 
-			wave_cap_.load();
-
 			// プリファレンスのロード
 //			sys::preference& pre = director_.at().preference_;
 
@@ -197,9 +184,6 @@ namespace app {
 
 			// テスト・サーバー起動
 ///			server_.start();
-
-			wave_edit_ = root_menu_.get_wave_edit();
-			wave_cap_.enable(wave_edit_);
 		}
 
 
@@ -211,13 +195,6 @@ namespace app {
 		void update()
 		{
 			root_menu_.update();
-			bool we = root_menu_.get_wave_edit();
-			if(wave_edit_ != we) {
-				wave_edit_ = we;
-				wave_cap_.enable(we);
-			}
-
-			wave_cap_.set_sample_param(root_menu_.get_inspection().get_sample_param());
 
 			gui::widget_director& wd = director_.at().widget_director_;
 
@@ -246,31 +223,6 @@ namespace app {
 
 ///			io_service_.run();
 
-			wave_cap_.update();
-
-			// 波形計測のバックアノテーション
-			const auto& inf = wave_cap_.get_info();
-			if(inf.id_ != info_id_) {
-				if(inf.annotate_) {
-					const auto& test = root_menu_.at_inspection().get_test_param();
-					if(test.delay_ != nullptr) {
-						test.delay_->set_text((boost::format("%e") % inf.sample_org_).str());
-					}
-					if(test.width_ != nullptr) {
-						test.width_->set_text((boost::format("%e") % inf.sample_width_).str());
-					}
-					if(test.term_ != nullptr) {
-						auto n = test.term_->get_select_pos();
-						if(n <= 3 && test.min_ != nullptr) {
-							test.min_->set_text((boost::format("%4.3f") % inf.min_[n]).str());
-						}
-						if(n <= 3 && test.max_ != nullptr) {
-							test.max_->set_text((boost::format("%4.3f") % inf.max_[n]).str());
-						}
-					}
-				}
-				info_id_ = inf.id_;
-			}
 #if 0
 #if 0
 			// Drag & Drop されたファイル
@@ -311,8 +263,6 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void destroy()
 		{
-			wave_cap_.save();
-
 //			sys::preference& pre = director_.at().preference_;
 
 ///			if(edit_ != nullptr) edit_->save(pre);

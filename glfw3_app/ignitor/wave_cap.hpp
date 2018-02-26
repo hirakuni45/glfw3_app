@@ -31,8 +31,9 @@
 
 #include "ign_client_tcp.hpp"
 #include "interlock.hpp"
+#include "test.hpp"
 
-#define TEST_SIN
+// #define TEST_SIN
 
 namespace app {
 
@@ -836,6 +837,34 @@ namespace app {
 			measure_time_(waves_),
 			time_(waves_), size_(0), test_timer_(0)
 		{ }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  評価
+			@return NG の場合「false」
+		*/
+		//-----------------------------------------------------------------//
+		bool value_check(const test::value_t& value)
+		{
+			uint32_t ch = value.term_;
+			if(ch < 4) {
+				if(value.filter_ == 0) {  // SIG
+					auto a = waves_.get(ch, sample_param_.rate, value.delay_);
+					a *= get_volt_scale_limit_(ch);
+					if(value.min_ <= a && a <= value.max_) {
+						return true;
+					} else {
+						return false;
+					}
+				} else {
+
+				}
+				return false;
+			} else {
+				return false;
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
