@@ -509,11 +509,12 @@ namespace view {
 			if(ch >= CHN) return 0.0f;
 
 			const ch_t& t = ch_[ch];
-			uint32_t sz = t.units_.size();
-			uint32_t idx = static_cast<uint32_t>(org / rate);
-			if(idx >= sz) {
+			int32_t sz = t.units_.size();
+			int32_t idx = static_cast<uint32_t>(org / rate);
+			int32_t idxorg = idx;
+			if(idx < 0) {
 				idx += sz;
-				if(idx >= sz) {
+				if(idx < 0) {
 					return 0.0f ;
 				}
 			}
@@ -523,7 +524,7 @@ namespace view {
 			if(v == -32768) v = -32767;
 			float a = static_cast<float>(v) / 32767.0f;
 			if(smooth_) {
-				float umod = (org - (static_cast<double>(idx) * rate)) / rate;
+				float umod = (org - (static_cast<double>(idxorg) * rate)) / rate;
 				++idx;
 				if(idx < sz) {
 					v = t.units_[idx];
