@@ -33,7 +33,7 @@
 #include "interlock.hpp"
 #include "test.hpp"
 
-// #define TEST_SIN
+#define TEST_SIN
 
 namespace app {
 
@@ -813,8 +813,6 @@ namespace app {
 		}
 
 
-		uint32_t test_timer_;
-
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -835,7 +833,7 @@ namespace app {
 			chn2_(waves_, 1.25f),
 			chn3_(waves_, 1.25f),
 			measure_time_(waves_),
-			time_(waves_), size_(0), test_timer_(0)
+			time_(waves_), size_(0)
 		{ }
 
 

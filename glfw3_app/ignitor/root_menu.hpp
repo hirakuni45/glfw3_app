@@ -127,6 +127,7 @@ namespace app {
 			start,	///< 開始
 			loop,	///< ループ基点
 			wait,	///< 測定遅延
+			mctrl,	///< モジュール制御
 			sence,	///< センシング
 			sync,	///< 同期
 			error,	///< エラー
@@ -649,6 +650,11 @@ wait_ = 120;
 					--wait_;
 					break;
 				}
+				task_ = task::mctrl;
+				break;
+
+			case task::mctrl:
+//				inspection_.
 				task_ = task::sence;
 				break;
 
