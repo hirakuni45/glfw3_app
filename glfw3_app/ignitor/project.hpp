@@ -50,6 +50,7 @@ namespace app {
 
 		gui::widget_label*		pbase_;
 		gui::widget_label*		pext_;
+		gui::widget_check*		auto_save_;
 		gui::widget_label*		pname_[50];
 		gui::widget_text*		help_;
 
@@ -90,8 +91,7 @@ namespace app {
 			name_dialog_(nullptr), proj_name_(nullptr), proj_dir_(nullptr),
 			dialog_(nullptr),
 			csv_all_(nullptr), csv_idx_(nullptr), csv_base_(nullptr), image_ext_(nullptr),
-
-			pbase_(nullptr), pext_(nullptr),
+			pbase_(nullptr), pext_(nullptr), auto_save_(nullptr),
 			pname_{ nullptr }, help_(nullptr),
 			msg_dialog_(nullptr)
 		{ }
@@ -144,6 +144,15 @@ namespace app {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief  CSV ファイル・インデックスの取得
+			@return CSV ファイル・インデックス
+		*/
+		//-----------------------------------------------------------------//
+		uint32_t get_csv_index() const { return csv_idx_->get_select_pos(); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief  プロジェクト・ダイアログの取得
 			@return プロジェクト・ダイアログ
 		*/
@@ -182,6 +191,90 @@ namespace app {
 			if(no >= 50) return "";
 			return get_path_(no);
 		} 
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  自動セーブの取得
+			@return 自動セーブ
+		*/
+		//-----------------------------------------------------------------//
+		bool get_autosave() const { return auto_save_->get_check(); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  CSV1 参照
+			@return CSV1
+		*/
+		//-----------------------------------------------------------------//
+		csv& at_csv1() { return csv1_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  CSV2 参照
+			@return CSV2
+		*/
+		//-----------------------------------------------------------------//
+		csv& at_csv2() { return csv2_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  CSV1 のロード
+		*/
+		//-----------------------------------------------------------------//
+		void load_csv1()
+		{
+			auto& core = gl::core::get_instance();
+			std::string path = core.get_current_path();
+			path += '/';
+			path += proj_dir_->get_text();
+			path += '/';
+			path += csv_all_->get_text();
+			path += ".csv";
+			csv1_.load(path);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  CSV1 のセーブ
+		*/
+		//-----------------------------------------------------------------//
+		void save_csv1()
+		{
+			auto& core = gl::core::get_instance();
+			std::string path = core.get_current_path();
+			path += '/';
+			path += proj_dir_->get_text();
+			path += '/';
+			path += csv_all_->get_text();
+			path += ".csv";
+// std::cout << path << std::endl;
+			csv1_.save(path);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  CSV2 のセーブ
+		*/
+		//-----------------------------------------------------------------//
+		void save_csv2()
+		{
+			auto& core = gl::core::get_instance();
+			std::string path = core.get_current_path();
+			path += '/';
+			path += proj_dir_->get_text();
+			path += '/';
+			path += csv_base_->get_text();
+			path += (boost::format("%04d") % csv_idx_->get_select_pos()).str();
+			path += ".csv";
+// std::cout << path << std::endl;
+			csv2_.save(path);
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -342,6 +435,11 @@ namespace app {
 					widget_label::param wp_(".unt", false);
 					pext_ = wd.add_widget<widget_label>(wp, wp_);
 				}
+				{
+					widget::param wp(vtx::irect(320 + 100 + 160, yy, 130, 40), dialog_);
+					widget_check::param wp_("自動保存");
+					auto_save_ = wd.add_widget<widget_check>(wp, wp_);
+				}
 
 				for(int i = 0; i < 50; ++i) {
 					int x = (i / 10) * 200;
@@ -393,11 +491,10 @@ namespace app {
 			csv1_.set(0, 5, "MAX");
 			csv1_.set(0, 6, "MIN");
 			csv1_.set(0, 7, "AVG");
-
+			csv1_.set(0, 8, "NG");
 			for(uint32_t i = 0; i < num; ++i) {
-				csv1_.set(0, 8 + i, (boost::format("%d") % (i + 1)).str());
+				csv1_.set(0, 9 + i, (boost::format("%d") % (i + 1)).str());
 			}
-///			csv1_.save("aaa.csv");
 
 			csv2_.create(51, 30);
 			csv2_.set(0, 0, "検査番号");
@@ -456,6 +553,7 @@ namespace app {
 			if(dialog_ == nullptr) return false;
 			if(pbase_ == nullptr) return false;
 			if(pext_ == nullptr) return false;
+			if(auto_save_ == nullptr) return false;
 			if(csv_all_ == nullptr) return false;
 			if(csv_idx_ == nullptr) return false;
 			if(csv_base_ == nullptr) return false;
@@ -465,6 +563,7 @@ namespace app {
 			csv_all_->save(pre);
 			csv_idx_->save(pre);
 			csv_base_->save(pre);
+			auto_save_->save(pre);
 			image_ext_->save(pre);
 			proj_name_->save(pre);
 			proj_dir_->save(pre);
@@ -491,6 +590,7 @@ namespace app {
 			if(dialog_ == nullptr) return false;
 			if(pbase_ == nullptr) return false;
 			if(pext_ == nullptr) return false;
+			if(auto_save_ == nullptr) return false;
 			if(csv_all_ == nullptr) return false;
 			if(csv_idx_ == nullptr) return false;
 			if(csv_base_ == nullptr) return false;
@@ -500,6 +600,7 @@ namespace app {
 			csv_all_->load(pre);
 			csv_idx_->load(pre);
 			csv_base_->load(pre);
+			auto_save_->load(pre);
 			image_ext_->load(pre);
 			proj_name_->load(pre);
 			proj_dir_->load(pre);

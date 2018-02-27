@@ -240,6 +240,9 @@ tarball:
 	tar cfvz $(TARGET)_$(shell date +%Y%m%d%H).tgz \
 	*.[hc]pp Makefile ../common/*/*.[hc]pp ../common/*/*.[hc]
 
+clearpre:
+	rm $(TARGET).pre
+
 copyapp:
 	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -mwindows -o $(TARGET)$(FEXT)
 	cp $(TARGET)$(FEXT) /c/graviton/app/.

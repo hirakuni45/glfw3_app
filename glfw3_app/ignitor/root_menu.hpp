@@ -91,6 +91,7 @@ namespace app {
 
 		int						ip_[4];
 
+		bool					init_client_;
 
 		bool save_project_file_(const std::string& path)
 		{
@@ -131,6 +132,7 @@ namespace app {
 			sence,	///< センシング
 			sync,	///< 同期
 			error,	///< エラー
+			sync_error,   ///< エラー同期
 			retry,	///< リトライ
 			fin,	///< 終了
 		};
@@ -141,6 +143,99 @@ namespace app {
 		uint32_t	retry_;
 
 		test::value_t	value_;
+
+		gui::widget_dialog*		err_dialog_;
+		gui::widget_dialog*		okc_dialog_;
+
+
+		enum class mctrl_task {
+			idle,
+
+			init_icm,
+			init_dc2,
+			init_crm,
+			init_wgm,
+			init_dc1,
+
+			icm,
+			dc2,
+			crm,
+			wgm,
+			dc1,
+			wdm,
+		};
+		mctrl_task		mctrl_task_;
+		uint32_t		mctrl_delay_;
+		uint32_t		mctrl_id_;
+		uint32_t		dc2_id_;
+		uint32_t		crm_id_;
+		uint32_t		wdm_id_[4];
+		uint32_t		time_out_;
+
+		void mctrl_service()
+		{
+			switch(mctrl_task_) {
+			case mctrl_task::idle:
+				break;
+
+			case mctrl_task::init_icm:
+				inspection_.exec_icm();
+				mctrl_task_ = mctrl_task::init_dc2;
+				break;
+			case mctrl_task::init_dc2:
+				inspection_.exec_dc2();
+				mctrl_task_ = mctrl_task::init_crm;
+				break;
+			case mctrl_task::init_crm:
+				inspection_.exec_crm();
+				mctrl_task_ = mctrl_task::init_wgm;
+				break;
+			case mctrl_task::init_wgm:
+				inspection_.exec_gen();
+				mctrl_task_ = mctrl_task::init_dc1;
+				break;
+			case mctrl_task::init_dc1:
+				inspection_.exec_dc1();
+				mctrl_task_ = mctrl_task::idle;
+				break;
+
+			case mctrl_task::icm:
+				inspection_.exec_icm();
+				// ※ ICM 設定が以前と異なる場合に安全時間待機
+				mctrl_delay_ = 15;  // ICM リレー安全時間 0.25 sec
+				mctrl_task_ = mctrl_task::dc2;
+				break;
+
+			case mctrl_task::dc2:
+				inspection_.exec_dc2();
+				mctrl_task_ = mctrl_task::crm;
+				break;
+
+			case mctrl_task::crm:
+				inspection_.exec_crm();
+				mctrl_task_ = mctrl_task::wgm;
+				break;
+
+			case mctrl_task::wgm:
+				inspection_.exec_gen();
+				mctrl_task_ = mctrl_task::dc1;
+				break;
+
+			case mctrl_task::dc1:
+				inspection_.exec_dc1();
+				mctrl_task_ = mctrl_task::wdm;
+				break;
+
+			case mctrl_task::wdm:
+				inspection_.exec_wdm();
+				mctrl_task_ = mctrl_task::idle;
+				++mctrl_id_;
+				break;
+
+			default:
+				break;
+			}
+		}
 
 	public:
 		//-----------------------------------------------------------------//
@@ -165,10 +260,15 @@ namespace app {
 #ifndef NATIVE_FILER
 			proj_load_filer_(nullptr), proj_save_filer_(nullptr),
 #endif
-			inspection_(d, client, ilock),
+			inspection_(d, client, ilock, wave_cap_),
 			project_(d),
 
-			ip_{ 0 }, task_(task::idle), unit_id_(0), wait_(0), retry_(0)
+			ip_{ 0 }, init_client_(false),
+
+			task_(task::idle), unit_id_(0), wait_(0), retry_(0),
+			err_dialog_(nullptr), okc_dialog_(nullptr),
+			mctrl_task_(mctrl_task::idle), mctrl_delay_(0), mctrl_id_(0),
+			dc2_id_(0), crm_id_(0), wdm_id_{ 0 }, time_out_(0)
 			{ }
 
 
@@ -367,8 +467,7 @@ namespace app {
 				int w = 450;
 				int h = 260;
 				widget::param wp(vtx::irect(100, 100, w, h));
-				widget_dialog::param wp_;
-				wp_.style_ = widget_dialog::style::OK;
+				widget_dialog::param wp_(widget_dialog::style::OK);
 				cont_setting_dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
 				cont_setting_dialog_->enable(false);
 				cont_setting_dialog_->at_local_param().select_func_ = [=](bool ok) {
@@ -438,8 +537,7 @@ namespace app {
 				int w = 450;
 				int h = 210;
 				widget::param wp(vtx::irect(50, 50, w, h));
-				widget_dialog::param wp_;
-				wp_.style_ = widget_dialog::style::OK;
+				widget_dialog::param wp_(widget_dialog::style::OK);
 				info_dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
 				std::string s =	"イグナイター検査\n";
 				uint32_t bid = B_ID;
@@ -490,6 +588,30 @@ namespace app {
 #endif
 			wave_cap_.initialize();
 
+			{  // エラー・ダイアログ
+				int w = 550;
+				int h = 300;
+				widget::param wp(vtx::irect(75, 75, w, h));
+				widget_dialog::param wp_;
+				err_dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
+				err_dialog_->enable(false);
+			}
+			{  // 確認ダイアログ
+				int w = 550;
+				int h = 300;
+				widget::param wp(vtx::irect(75, 75, w, h));
+				widget_dialog::param wp_(widget_dialog::style::CANCEL_OK);
+				okc_dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
+				okc_dialog_->enable(false);
+				okc_dialog_->at_local_param().select_func_ = [=](bool ok) {
+					if(ok) {
+						task_ = task::sync;
+					} else {
+						task_ = task::fin;
+					}
+				};
+			}
+
 			load();
 
 			wave_cap_.enable(wave_edit_->get_check());
@@ -503,6 +625,12 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void update()
 		{
+			// ネットワーク接続時
+			if(!init_client_ && client_.probe()) {
+//				mctrl_task_ = mctrl_task::init_icm;
+				init_client_ = true;
+			}
+
 			project_.update();
 			if(project_.get_project_title().empty() || project_.get_project_path().empty()) {
 				edit_project_->set_stall();
@@ -534,6 +662,7 @@ namespace app {
 			}
 
 			inspection_.update();
+			inspection_.update_client();
 
 			wave_cap_.set_sample_param(get_inspection().get_sample_param());
 
@@ -598,28 +727,41 @@ namespace app {
 			}
 #endif
 
+			// 検査ループ制御
 			switch(task_) {
 			case task::idle:
 				break;
+
+			// 検査開始
 			case task::start:
+				if(!client_.probe()) {
+					err_dialog_->set_text("コントローラー設定、「接続」\nを確認下さい。");
+					err_dialog_->enable();
+					task_ = task::idle;
+					break;
+				}
 				unit_id_ = 0;
 				task_ = task::loop;
 				msg_dialog_->set_text("検査開始");
 				msg_dialog_->enable();
 				retry_ = 0;
+				
 				break;
 
 			case task::loop:
 				{
 					auto fp = project_.get_unit_name(unit_id_);
-					bool ret = inspection_.load(fp);
 					auto s = utils::get_file_name(fp);
-					if(ret) {
-						s += " (OK)";
-					} else {
-						s += " (NG)";
+					if(!inspection_.load(fp)) {
+						std::string str;
+						str = (boost::format("ファイル「%s」\n") % s).str();
+						str += "が読めません。";
+						err_dialog_->set_text(str);
+						err_dialog_->enable();
+						task_ = task::idle;
+						break;
 					}
-					std::string top = (boost::format("Test: %s\n") % s).str();
+					std::string top = (boost::format("検査「%s」\n") % s).str();
 					inspection_.at_test_param().build_value();
 					const auto& v = inspection_.get_test_param().value_;
 					top += (boost::format("Symbol: %s\n") % v.symbol_).str();
@@ -635,13 +777,41 @@ namespace app {
 
 					msg_dialog_->set_text(top);
 
-					wait_ = static_cast<uint32_t>(value_.wait_ * 60.0);
-wait_ = 120;
-					if(wait_ > 0) {
-						task_ = task::wait;
-					} else {
-						task_ = task::sence;
+					std::string unit;
+					std::string min;
+					std::string max;
+					if(v.term_ == 0) {
+						unit = "A";
+					} else if(v.term_ == 1) {
+						unit = "V";
+					} else if(v.term_ == 2) {
+						unit = "V";
+					} else if(v.term_ == 3) {
+						unit = "KV";
+					} else if(v.term_ == 4) {
+
+					} else if(v.term_ == 5) {
+						min = (boost::format("%3.2f") % v.min_).str();
+						max = (boost::format("%3.2f") % v.max_).str();
+						if(inspection_.get_crm_mode() == 0) { // 抵抗
+							unit = "mOHM";
+						} else {
+							unit = "uF";
+						}
 					}
+
+					project_.at_csv1().set(unit_id_ + 1, 1, v.symbol_);
+					project_.at_csv1().set(unit_id_ + 1, 2, max);
+					project_.at_csv1().set(unit_id_ + 1, 3, min);
+					project_.at_csv1().set(unit_id_ + 1, 4, unit);
+
+					project_.at_csv2().set(unit_id_ + 1, 1, v.symbol_);
+					project_.at_csv2().set(unit_id_ + 1, 2, max);
+					project_.at_csv2().set(unit_id_ + 1, 3, min);
+					project_.at_csv2().set(unit_id_ + 1, 4, unit);
+
+					wait_ = static_cast<uint32_t>(value_.wait_ * 60.0);
+					task_ = task::wait;
 				}
 				break;
 
@@ -650,17 +820,78 @@ wait_ = 120;
 					--wait_;
 					break;
 				}
+
+				mctrl_task_ = mctrl_task::icm;
+				for(int i = 0; i < 4; ++i) {
+					wdm_id_[i] = client_.get_mod_status().wdm_id_[i];
+				}
+				crm_id_ = client_.get_mod_status().crm_id_;
+
+				time_out_ = 60 * 5;
 				task_ = task::mctrl;
 				break;
 
 			case task::mctrl:
-//				inspection_.
-				task_ = task::sence;
+				mctrl_service();
+				if(value_.term_ < 4) { // WDM CH1 to CH4
+					uint32_t n = 0;
+					for(int i = 0; i < 4; ++i) {
+						if(wdm_id_[i] != client_.get_mod_status().wdm_id_[i]) {
+							++n;
+						}
+					}
+					if(n == 4) {
+						for(int i = 0; i < 4; ++i) {
+							wdm_id_[i] = client_.get_mod_status().wdm_id_[i];
+						}
+						task_ = task::sence;
+					}
+				} else if(value_.term_ == 4) {  // DC2
+
+				} else if(value_.term_ == 5) {  // CRM
+					if(crm_id_ != client_.get_mod_status().crm_id_) {
+						task_ = task::sence;
+					}
+				} else if(value_.term_ == 6) {  // 熱抵抗検査
+
+				}
+				if(time_out_ > 0) {
+					--time_out_;
+				} else {
+					std::string str;
+					str = "コントローラーとの通信が\n";
+					str += "タイムアウトしました。";
+					err_dialog_->set_text(str);
+					err_dialog_->enable();
+					task_ = task::idle;					
+				}
 				break;
 
 			case task::sence:
 				{
-					bool f = wave_cap_.value_check(value_);
+					bool f = false;
+					// 動特性検査時
+					if(value_.term_ < 4) { // WDM CH1 to CH4
+						f = wave_cap_.value_check(value_);
+					} else if(value_.term_ == 4) {  // DC2
+
+					} else if(value_.term_ == 5) {  // CRM
+						double v = 0.0;
+						if(inspection_.get_crm_mode() == 0) { // 抵抗
+							v = inspection_.get_crrd_value();
+						} else {
+							v = inspection_.get_crcd_value();
+						}
+						if(value_.min_ <= v && v <= value_.max_) {
+							f = true;
+						}
+						std::string st = (boost::format("%3.2f") % v).str();
+						auto idx = project_.get_csv_index() - 1;
+						project_.at_csv1().set(unit_id_ + 1, 9 + idx, st);
+						project_.at_csv2().set(unit_id_ + 1, 5, st);
+					} else if(value_.term_ == 6) {  // 熱抵抗検査
+
+					}
 					if(f) {
 						task_ = task::sync;
 					} else {
@@ -679,13 +910,24 @@ wait_ = 120;
 				break;
 
 			case task::error:
-				msg_dialog_->set_text("error:");
-				task_ = task::sync;
+				{
+					std::string str;
+					str = (boost::format("「%s」") % value_.symbol_).str();
+					str += "検査エラー：\nデータ保存しますか？";
+					okc_dialog_->set_text(str);
+					okc_dialog_->enable();
+					task_ = task::sync_error;
+					break;
+				}
+
+			case task::sync_error:
 				break;
 
 			case task::sync:
 				++unit_id_;
 				if(unit_id_ >= project_.get_unit_count()) {
+					project_.save_csv1();
+					project_.save_csv2();
 					task_ = task::fin;
 				} else {
 					task_ = task::loop;
@@ -714,6 +956,8 @@ wait_ = 120;
 
 			info_dialog_->load(pre);
 			msg_dialog_->load(pre);
+			err_dialog_->load(pre);
+			okc_dialog_->load(pre);
 
 			wave_edit_->load(pre);
 
@@ -732,7 +976,7 @@ wait_ = 120;
 			proj_load_filer_->load(pre);
 			proj_save_filer_->load(pre);
 #endif
-			wave_cap_.load();
+			wave_cap_.load(pre);
 		}
 
 
@@ -749,6 +993,8 @@ wait_ = 120;
 
 			info_dialog_->save(pre);
 			msg_dialog_->save(pre);
+			err_dialog_->save(pre);
+			okc_dialog_->save(pre);
 
 			wave_edit_->save(pre);
 
@@ -768,7 +1014,7 @@ wait_ = 120;
 			proj_save_filer_->save(pre);
 #endif
 
-			wave_cap_.save();
+			wave_cap_.save(pre);
 		}
 	};
 }

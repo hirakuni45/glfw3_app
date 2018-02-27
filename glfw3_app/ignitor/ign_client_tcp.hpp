@@ -33,6 +33,8 @@ namespace net {
 		*/
 		//=================================================================//
 		struct mod_status {
+			uint32_t	crm_id_;
+
 			uint32_t	crcd_;
 			uint32_t	crcd_id_;
 
@@ -42,10 +44,16 @@ namespace net {
 			uint32_t	d2md_;
 			uint32_t	d2md_id_;
 
+			uint32_t	wdm_id_[4];
+
+			uint32_t	treg_id_[2];
+
 			mod_status() :
+				crm_id_(0),
 				crcd_(0), crcd_id_(0),
 				crrd_(0), crrd_id_(0),
-				d2md_(0), d2md_id_(0)
+				d2md_(0), d2md_id_(0),
+				wdm_id_{ 0 }, treg_id_{ 0 }
 			{ }
 		};
 
@@ -65,8 +73,11 @@ namespace net {
 
 		uint32_t	wdm_ch_;
 		uint32_t	wdm_pos_;
-		uint32_t	wdm_st_[4];
 		uint16_t	wdm_buff_[WAVE_BUFF_SIZE * 4];
+
+		uint32_t	treg_ch_;
+		uint32_t	treg_pos_;
+		uint16_t	treg_buff_[WAVE_BUFF_SIZE * 2];
 
 	public:
 		//-----------------------------------------------------------------//
@@ -77,7 +88,8 @@ namespace net {
 		ign_client_tcp() : startup_(false),
 			sock_(0),
 			connect_(false), mod_status_(),
-			wdm_ch_(0), wdm_pos_(0), wdm_st_{ 0 }
+			wdm_ch_(0), wdm_pos_(0), wdm_buff_{ 0 },
+			treg_ch_(0), treg_pos_(0), treg_buff_{ 0 }
 		{
 		}
 
@@ -104,11 +116,29 @@ namespace net {
 		const mod_status& get_mod_status() const { return mod_status_; }
 
 
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  波形の取得
+			@param[in]	ch	チャネル
+			@return 波形
+		*/
+		//-----------------------------------------------------------------//
 		const uint16_t* get_wdm(uint32_t ch) const {
 			return &wdm_buff_[WAVE_BUFF_SIZE * (ch & 3)];
 		}
 
-		uint32_t get_wdm_st(uint32_t ch) const { return wdm_st_[ch & 3]; }
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  熱抵抗波形の取得
+			@param[in]	ch	チャネル（前半:0、後半:1）
+			@return 熱抵抗波形
+		*/
+		//-----------------------------------------------------------------//
+		const uint16_t* get_treg(uint32_t ch) const {
+			return &treg_buff_[WAVE_BUFF_SIZE * (ch & 1)];
+		}
+
 
 		//-----------------------------------------------------------------//
 		/*!
@@ -208,6 +238,7 @@ namespace net {
 					if((utils::input("%x", t.c_str()) % v).status()) {
 						mod_status_.crcd_ = v;
 						++mod_status_.crcd_id_;
+						++mod_status_.crm_id_;
 					}
 				} else if(s.find("CRRD") == 0) {
 					auto t = s.substr(4, 8);
@@ -215,6 +246,7 @@ namespace net {
 					if((utils::input("%x", t.c_str()) % v).status()) {
 						mod_status_.crrd_ = v;
 						++mod_status_.crrd_id_;
+						++mod_status_.crm_id_;
 					}			
 				} else if(s.find("D2MD") == 0) {
 					auto t = s.substr(4, 5);
@@ -241,8 +273,30 @@ namespace net {
 						wdm_buff_[(wdm_ch_ & 3) * WAVE_BUFF_SIZE + pos] = v;
 						++wdm_pos_;
 						if(wdm_pos_ >= WAVE_BUFF_SIZE) {
-// std::cout << "WDM capture END" << std::endl;
-							++wdm_st_[wdm_ch_ & 3];
+							++mod_status_.wdm_id_[wdm_ch_ & 3];
+						}
+						t = d;
+					}
+				} else if(s.find("TRCH") == 0) {  // 熱抵抗チャネル (0, 1)
+					auto t = s.substr(4);
+					int v = 0;
+					utils::input("%d", t.c_str()) % v;
+					treg_ch_ = v;
+					treg_pos_ = 0;
+// std::cout << "TRCH: " << treg_ch_ << std::endl;
+				} else if(s.find("TRMW") == 0) {  // 熱抵抗波形 (0, 1)
+					auto t = s.substr(4);
+					while(t.size() > 4) {
+						auto d = t.substr(4);
+						t[4] = 0;
+						int v;
+						utils::input("%x", t.c_str()) % v;
+						auto pos = treg_pos_ % WAVE_BUFF_SIZE;
+						treg_buff_[(treg_ch_ & 1) * WAVE_BUFF_SIZE + pos] = v;
+						++treg_pos_;
+						if(treg_pos_ >= WAVE_BUFF_SIZE) {
+							++mod_status_.treg_id_[treg_ch_ & 3];
+// std::cout << "TRMW: " << treg_ch_ << std::endl;
 						}
 						t = d;
 					}

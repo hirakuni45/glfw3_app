@@ -115,5 +115,37 @@ namespace app {
 			return true;
 		}
 
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  ロード
+			@param[in]	path	ロード・パス
+			@return 成功なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool load(const std::string& path)
+		{
+			utils::file_io fio;
+			if(!fio.open(path, "rb")) {
+				return false;
+			}
+
+			uint32_t lno = 0;
+			while(fio.eof()) {
+				auto line = fio.get_line();
+				if(line.empty()) continue;
+
+				auto ss = utils::split_text(line, ",");
+				uint32_t n = 0;
+				for(auto s : ss) {
+					set(n, lno, s);
+					++n;
+				}
+				++lno;
+			}
+			fio.close();
+
+			return true;
+		}
 	};
 }

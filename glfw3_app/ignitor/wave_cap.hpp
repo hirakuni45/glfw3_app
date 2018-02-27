@@ -33,7 +33,7 @@
 #include "interlock.hpp"
 #include "test.hpp"
 
-#define TEST_SIN
+// #define TEST_SIN
 
 namespace app {
 
@@ -104,7 +104,8 @@ namespace app {
 
 		sample_param			sample_param_;
 
-		uint32_t				wdm_st_[4];
+		uint32_t				wdm_id_[4];
+		uint32_t				treg_id_[2];
 
 		bool					info_in_;
 		vtx::ipos				info_org_;
@@ -826,7 +827,7 @@ namespace app {
 			tools_(nullptr), annotate_(nullptr), smooth_(nullptr),
 			share_frame_(nullptr),
 			sample_param_(),
-			wdm_st_{ 0 },
+			wdm_id_{ 0 }, treg_id_{ 0 },
 			info_in_(false), info_org_(0), info_(),
 			chn0_(waves_, 1.25f),
 			chn1_(waves_, 1.25f),
@@ -986,7 +987,7 @@ namespace app {
 
 			time_.init(director_, share_frame_);
 
-			load();
+///			load();
 
 			waves_.create_buffer();
 
@@ -1028,13 +1029,24 @@ namespace app {
 
 			// 波形のコピー（中間位置がトリガー）
 			for(uint32_t i = 0; i < 4; ++i) {
-				auto st = client_.get_wdm_st(i);
-				if(wdm_st_[i] != st) {
+				auto id = client_.get_mod_status().wdm_id_[i];
+				if(wdm_id_[i] != id) {
 					auto sz = waves_.size();
 					waves_.copy(i, client_.get_wdm(i), sz, sz / 2);
-					wdm_st_[i] = st;
+					wdm_id_[i] = id;
 				}
 			}
+
+			// 仮熱抵抗表示
+			for(uint32_t i = 0; i < 2; ++i) {
+				auto id = client_.get_mod_status().treg_id_[i];
+				if(treg_id_[i] != id) {
+					auto sz = waves_.size();
+					waves_.copy(i + 1, client_.get_treg(i), sz, sz / 2);
+					treg_id_[i] = id;
+				}
+			}
+
 #if 0
 			++test_timer_;
 			if(test_timer_ == 60) {
@@ -1049,9 +1061,9 @@ namespace app {
 			@brief  ロード
 		*/
 		//-----------------------------------------------------------------//
-		void load()
+		void load(sys::preference& pre)
 		{
-			sys::preference& pre = director_.at().preference_;
+///			sys::preference& pre = director_.at().preference_;
 
 			if(frame_ != nullptr) {
 				frame_->load(pre);
@@ -1088,9 +1100,9 @@ namespace app {
 			@brief  セーブ
 		*/
 		//-----------------------------------------------------------------//
-		void save()
+		void save(sys::preference& pre)
 		{
-			sys::preference& pre = director_.at().preference_;
+//			sys::preference& pre = director_.at().preference_;
 
 			if(frame_ != nullptr) {
 				frame_->save(pre);

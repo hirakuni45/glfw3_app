@@ -244,6 +244,8 @@ namespace app {
 
 		interlock&				interlock_;
 
+		wave_cap&				wave_cap_;
+
 		gui::widget_dialog*		dialog_;
 		gui::widget_label*		unit_name_;			///< 単体試験名
 		gui::widget_button*		load_file_;			///< load file
@@ -319,6 +321,9 @@ namespace app {
 		uint32_t				crrd_id_;
 		uint32_t				crcd_id_;
 		uint32_t				d2md_id_;
+
+		double					crrd_value_;
+		double					crcd_value_;
 
 		struct dc1_t {
 			uint32_t	sw;		///< 5 bits
@@ -1262,14 +1267,15 @@ namespace app {
 			}
 		}
 
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		inspection(utils::director<core>& d, net::ign_client_tcp& client, interlock& ilock) :
-			director_(d), client_(client), interlock_(ilock),
+		inspection(utils::director<core>& d, net::ign_client_tcp& client, interlock& ilock, wave_cap& wc) :
+			director_(d), client_(client), interlock_(ilock), wave_cap_(wc),
 			dialog_(nullptr),
 			unit_name_(nullptr), load_file_(nullptr), save_file_(nullptr), ilock_enable_(nullptr),
 
@@ -1306,7 +1312,8 @@ namespace app {
 			chip_(nullptr),
 
 			startup_init_(false),
-			crrd_id_(0), crcd_id_(0), d2md_id_(0)
+			crrd_id_(0), crcd_id_(0), d2md_id_(0),
+			crrd_value_(0.0), crcd_value_(0.0)
 		{ }
 
 
@@ -1345,6 +1352,9 @@ namespace app {
 		//-----------------------------------------------------------------//
 		const wave_cap::sample_param& get_sample_param() const { return sample_param_; }
 
+		bool get_crm_mode() const { return crm_mode_->get_select_pos(); }
+		double get_crrd_value() const { return crrd_value_; }
+		double get_crcd_value() const { return crcd_value_; }
 
 		//-----------------------------------------------------------------//
 		/*!
@@ -1392,6 +1402,68 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		void exec_wdm() { wdm_exec_->exec(); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  各モジュールからの受信(DC2, CRM)
+		*/
+		//-----------------------------------------------------------------//
+		void update_client()
+		{
+			// モジュールから受け取ったパラメーターをＧＵＩに反映
+			static const uint32_t sample_num = 50;
+			if(crm_mode_->get_select_pos() == 0) {  // CRRD
+				if(crrd_id_ != client_.get_mod_status().crrd_id_) {
+					crrd_id_ = client_.get_mod_status().crrd_id_;
+					uint32_t v = client_.get_mod_status().crrd_;
+					v -= sample_num * 0x7FFFF;
+					double a = static_cast<double>(v) / 50.0 / static_cast<double>(0x7FFFF)
+						* 1.570798233;
+					a *= 778.2;  // 778.2 mV P-P
+					static const double itbl[3] = {  // 電流テーブル
+						2.0, 20.0, 200.0
+					};
+					a /= itbl[crm_amps_->get_select_pos() % 3];
+					crrd_value_ = a;
+					crm_ans_->set_text((boost::format("%5.4f Ω") % a).str());
+				}
+			} else { // CRCD
+				if(crcd_id_ != client_.get_mod_status().crcd_id_) {
+					crcd_id_ = client_.get_mod_status().crcd_id_;
+					uint32_t v = client_.get_mod_status().crcd_;
+					v -= sample_num * 0x7FFFF;
+					double a = static_cast<double>(v) / 50.0 / static_cast<double>(0x7FFFF)
+						* 1.570798233;
+					a *= 778.2 * 2.0;  // 778.2 mV P-P
+					static const double itbl[3] = {  // 電流テーブル
+						2.0, 20.0, 200.0
+					};
+					a /= itbl[crm_amps_->get_select_pos() % 3];
+
+					a = 1.0 / (2.0 * 3.141592654 * 1000.0 * a);
+					a *= 1e6;
+					crcd_value_ = a;
+					crm_ans_->set_text((boost::format("%5.4f uF") % a).str());
+				}
+			}
+
+			// D2MD
+			if(d2md_id_ != client_.get_mod_status().d2md_id_) {
+				d2md_id_ = client_.get_mod_status().d2md_id_;
+				uint32_t v = client_.get_mod_status().d2md_;
+				float a = static_cast<float>(v);
+				if(dc2_probe_mode_) {
+					a /= 999960.2f;
+					a *= 100.0f;
+					dc2_probe_->set_text((boost::format("%5.2f mA") % a).str());
+				} else {
+					a /= static_cast<float>(0xFFFFF);
+	   				a *= 330.0f;
+					dc2_probe_->set_text((boost::format("%5.2f V") % a).str());
+				}
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -1518,57 +1590,6 @@ namespace app {
 			icm_exec_->set_stall(!client_.probe());
 			wdm_exec_->set_stall(!client_.probe());
 
-			// モジュールから受け取ったパラメーターをＧＵＩに反映
-			static const uint32_t sample_num = 50;
-			if(crm_mode_->get_select_pos() == 0) {  // CRRD
-				if(crrd_id_ != client_.get_mod_status().crrd_id_) {
-					crrd_id_ = client_.get_mod_status().crrd_id_;
-					uint32_t v = client_.get_mod_status().crrd_;
-					v -= sample_num * 0x7FFFF;
-					double a = static_cast<double>(v) / 50.0 / static_cast<double>(0x7FFFF)
-						* 1.570798233;
-					a *= 778.2;  // 778.2 mV P-P
-					static const double itbl[3] = {  // 電流テーブル
-						2.0, 20.0, 200.0
-					};
-					a /= itbl[crm_amps_->get_select_pos() % 3];
-					crm_ans_->set_text((boost::format("%5.4f Ω") % a).str());
-				}
-			} else { // CRCD
-				if(crcd_id_ != client_.get_mod_status().crcd_id_) {
-					crcd_id_ = client_.get_mod_status().crcd_id_;
-					uint32_t v = client_.get_mod_status().crcd_;
-					v -= sample_num * 0x7FFFF;
-					double a = static_cast<double>(v) / 50.0 / static_cast<double>(0x7FFFF)
-						* 1.570798233;
-					a *= 778.2 * 2.0;  // 778.2 mV P-P
-					static const double itbl[3] = {  // 電流テーブル
-						2.0, 20.0, 200.0
-					};
-					a /= itbl[crm_amps_->get_select_pos() % 3];
-
-					a = 1.0 / (2.0 * 3.141592654 * 1000.0 * a);
-					a *= 1e6;
-					crm_ans_->set_text((boost::format("%5.4f uF") % a).str());
-				}
-			}
-
-			// D2MD
-			if(d2md_id_ != client_.get_mod_status().d2md_id_) {
-				d2md_id_ = client_.get_mod_status().d2md_id_;
-				uint32_t v = client_.get_mod_status().d2md_;
-				float a = static_cast<float>(v);
-				if(dc2_probe_mode_) {
-					a /= 999960.2f;
-					a *= 100.0f;
-					dc2_probe_->set_text((boost::format("%5.2f mA") % a).str());
-				} else {
-					a /= static_cast<float>(0xFFFFF);
-	   				a *= 330.0f;
-					dc2_probe_->set_text((boost::format("%5.2f V") % a).str());
-				}
-			}
-
 			if(unit_load_filer_.state()) {
 				auto path = unit_load_filer_.get();
 				if(!path.empty()) {
@@ -1577,7 +1598,12 @@ namespace app {
 						ph += '.';
 						ph += UNIT_EXT_;
 					}
-					load(ph);
+					sys::preference pre;
+					auto ret = pre.load(path);
+					if(ret) {
+						load(pre);
+						wave_cap_.load(pre);
+					}
 				}
 			}
 			if(unit_save_filer_.state()) {
@@ -1588,7 +1614,10 @@ namespace app {
 						ph += '.';
 						ph += UNIT_EXT_;
 					}
-					save(ph);
+					sys::preference pre;
+					save(pre);
+					wave_cap_.save(pre);
+					pre.save(ph);
 				}
 			}
 
@@ -1657,9 +1686,8 @@ namespace app {
 			@return 正常なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(const std::string& path)
+		bool save(sys::preference& pre)
 		{
-			sys::preference pre;
 			unit_name_->save(pre);
 
 			save_sw_(pre, dc1_sw_, 5);
@@ -1709,6 +1737,21 @@ namespace app {
 
 			ilock_enable_->save(pre);
 
+			return true;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  セーブ
+			@param[in]	path	ファイルパス
+			@return 正常なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool save(const std::string& path)
+		{
+			sys::preference pre;
+			save(pre);
 			return pre.save(path);
 		}
 
@@ -1720,61 +1763,69 @@ namespace app {
 			@return 正常なら「true」
 		*/
 		//-----------------------------------------------------------------//
+		bool load(sys::preference& pre)
+		{
+			unit_name_->load(pre);
+
+			load_sw_(pre, dc1_sw_, 5);
+			dc1_ena_->load(pre);
+			dc1_mode_->load(pre);
+			dc1_voltage_->load(pre);
+			dc1_current_->load(pre);
+			dc1_count_->load(pre);
+
+			load_sw_(pre, dc2_sw_, 14);
+			dc2_ena_->load(pre);
+			dc2_mode_->load(pre);
+			dc2_voltage_->load(pre);
+			dc2_current_->load(pre);
+
+			load_sw_(pre, gen_sw_, 5);
+			gen_ena_->load(pre);
+			gen_mode_->load(pre);
+			gen_freq_->load(pre);
+			gen_volt_->load(pre);
+			gen_duty_->load(pre);
+			gen_iena_->load(pre);
+			gen_ivolt_->load(pre);
+
+			load_sw_(pre, crm_sw_, 14);
+			crm_ena_->load(pre);
+			crm_amps_->load(pre);
+			crm_freq_->load(pre);
+			crm_mode_->load(pre);
+
+			load_sw_(pre, icm_sw_, 6);
+
+			load_sw_(pre, wdm_sw_, 4);
+			wdm_smpl_->load(pre);
+			wdm_ch_->load(pre);
+			wdm_slope_->load(pre);
+			wdm_window_->load(pre);
+			wdm_level_->load(pre);
+			wdm_gain_[0]->load(pre);
+			wdm_gain_[1]->load(pre);
+			wdm_gain_[2]->load(pre);
+			wdm_gain_[3]->load(pre);
+			wdm_ie_trg_->load(pre);
+			wdm_sm_trg_->load(pre);
+
+			test_.load(pre);
+
+			ilock_enable_->load(pre);
+
+			return true;
+		}
+
+
 		bool load(const std::string& path)
 		{
 			sys::preference pre;
 			auto ret = pre.load(path);
 			if(ret) {
-				unit_name_->load(pre);
-
-				load_sw_(pre, dc1_sw_, 5);
-				dc1_ena_->load(pre);
-				dc1_mode_->load(pre);
-				dc1_voltage_->load(pre);
-				dc1_current_->load(pre);
-				dc1_count_->load(pre);
-
-				load_sw_(pre, dc2_sw_, 14);
-				dc2_ena_->load(pre);
-				dc2_mode_->load(pre);
-				dc2_voltage_->load(pre);
-				dc2_current_->load(pre);
-
-				load_sw_(pre, gen_sw_, 5);
-				gen_ena_->load(pre);
-				gen_mode_->load(pre);
-				gen_freq_->load(pre);
-				gen_volt_->load(pre);
-				gen_duty_->load(pre);
-				gen_iena_->load(pre);
-				gen_ivolt_->load(pre);
-
-				load_sw_(pre, crm_sw_, 14);
-				crm_ena_->load(pre);
-				crm_amps_->load(pre);
-				crm_freq_->load(pre);
-				crm_mode_->load(pre);
-
-				load_sw_(pre, icm_sw_, 6);
-
-				load_sw_(pre, wdm_sw_, 4);
-				wdm_smpl_->load(pre);
-				wdm_ch_->load(pre);
-				wdm_slope_->load(pre);
-				wdm_window_->load(pre);
-				wdm_level_->load(pre);
-				wdm_gain_[0]->load(pre);
-				wdm_gain_[1]->load(pre);
-				wdm_gain_[2]->load(pre);
-				wdm_gain_[3]->load(pre);
-				wdm_ie_trg_->load(pre);
-				wdm_sm_trg_->load(pre);
-
-				test_.load(pre);
-
-				ilock_enable_->load(pre);
+				ret = load(pre);
 			}
-			return ret; 
+			return ret;
 		}
 	};
 }
