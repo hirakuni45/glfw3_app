@@ -73,6 +73,8 @@ PSOURCES	=	main.cpp \
 #				snd_io/aac_io.cpp
 #				img_io/pdf_in.cpp
 
+# PNG_FILES	=	graviton.png
+
 STDLIBS		=
 
 ifeq ($(SYSTEM),WIN)
@@ -130,6 +132,7 @@ CP	=	clang++
 CC	=	clang
 LK	=	clang++
 RC	=	windres
+OBJCOPY = objcopy
 
 ifeq ($(SYSTEM),WIN)
 CPMM	=	g++
@@ -180,7 +183,9 @@ CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
 CPWARN	=	-Wall -Werror -Wno-unused-private-field -Wno-unused-variable
 
 OBJECTS	=	$(addprefix $(BUILD)/,$(patsubst %.cpp,%.o,$(PSOURCES))) \
-			$(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(CSOURCES)))
+			$(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(CSOURCES))) \
+			$(addprefix $(BUILD)/,$(patsubst %.png,%.o,$(PNG_FILES)))
+
 DEPENDS =   $(patsubst %.o,%.d, $(OBJECTS))
 
 ifdef ICON_RC
@@ -206,6 +211,9 @@ $(BUILD)/%.o : %.cpp
 
 $(ICON_OBJ): $(ICON_RC)
 	$(RC) -i $< -o $@
+
+$(BUILD)/%.o : %.png
+	$(OBJCOPY) -I binary -O elf32-i386 -B i386 $< $@
 
 $(BUILD)/%.d : %.c
 	mkdir -p $(dir $@); \
