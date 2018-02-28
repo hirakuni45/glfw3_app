@@ -24,6 +24,8 @@
 #include "utils/format.hpp"
 #include "utils/preference.hpp"
 #include "img_io/img_files.hpp"
+#include "utils/select_dir.hpp"
+#include "utils/select_file.hpp"
 
 #include "csv.hpp"
 
@@ -36,13 +38,15 @@ namespace app {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class project {
 
+		static constexpr const char* PROJECT_EXT_ = "ipr";
+
 		utils::director<core>&	director_;
 
 		gui::widget_dialog*		name_dialog_;
 		gui::widget_label*		proj_name_;
-		gui::widget_label*		proj_dir_;
+		gui::widget_label*		proj_root_;
 
-		gui::widget_dialog*		dialog_;
+		gui::widget_dialog*		edit_dialog_;
 		gui::widget_label*		csv_all_;
 		gui::widget_spinbox*	csv_idx_;
 		gui::widget_label*		csv_base_;
@@ -56,6 +60,11 @@ namespace app {
 
 		gui::widget_dialog*		msg_dialog_;
 
+		gui::widget_button*		proj_dir_;
+
+		utils::select_dir		sel_dir_;
+		utils::select_file		proj_load_filer_;
+		utils::select_file		proj_save_filer_;
 
 		csv						csv1_;
 		csv						csv2_;
@@ -66,19 +75,46 @@ namespace app {
 			if(pname_[no] == nullptr) return s;
 			if(pname_[no]->get_text().empty()) return s;
 
-			s += proj_dir_->get_text();
+			s = proj_root_->get_text();
 			s += '/';
 			s += pbase_->get_text();
 			s += pname_[no]->get_text();
 			s += pext_->get_text();
 			if(!s.empty()) {
 				auto& core = gl::core::get_instance();
-				std::string path = core.get_current_path();
-				path += '/';
-				path += s;
-				return path;
+				return utils::append_path(core.get_current_path(), s);
 			}
 			return s;
+		}
+
+
+		bool save_project_file_(const std::string& path)
+		{
+			sys::preference pre;
+
+			save(pre);
+			auto ph = path;
+			if(utils::get_file_ext(path).empty()) {
+				ph += '.';
+				ph += PROJECT_EXT_;
+			}
+			return pre.save(ph);
+		}
+
+
+		bool load_project_file_(const std::string& path)
+		{
+			sys::preference pre;
+			auto ph = path;
+			if(utils::get_file_ext(path).empty()) {
+				ph += '.';
+				ph += PROJECT_EXT_;
+			}
+			auto ret = pre.load(ph);
+			if(ret) {
+				load(pre);
+			}
+			return ret;
 		}
 
 	public:
@@ -88,22 +124,63 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		project(utils::director<core>& d) : director_(d),
-			name_dialog_(nullptr), proj_name_(nullptr), proj_dir_(nullptr),
-			dialog_(nullptr),
+			name_dialog_(nullptr), proj_name_(nullptr), proj_root_(nullptr),
+			edit_dialog_(nullptr),
 			csv_all_(nullptr), csv_idx_(nullptr), csv_base_(nullptr), image_ext_(nullptr),
 			pbase_(nullptr), pext_(nullptr), auto_save_(nullptr),
 			pname_{ nullptr }, help_(nullptr),
-			msg_dialog_(nullptr)
+			msg_dialog_(nullptr), proj_dir_(nullptr)
 		{ }
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief  プロジェクト名ダイアログの取得
-			@return プロジェクト名ダイアログ
+			@brief  名前ダイアログの有効、無効
+			@param[in]	ena	不許可の場合「false」
 		*/
 		//-----------------------------------------------------------------//
-		gui::widget_dialog* get_name_dialog() { return name_dialog_; }
+		void enable_name_dialog(bool ena = true) { name_dialog_->enable(ena); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  編集ダイアログの有効、無効
+			@param[in]	ena	不許可の場合「false」
+		*/
+		//-----------------------------------------------------------------//
+		void enable_edit_dialog(bool ena = true) { edit_dialog_->enable(ena); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  プロジェクト・ロード・ファイル選択
+		*/
+		//-----------------------------------------------------------------//
+		void open_load_file()
+		{
+			std::string filter = "プロジェクト(*.";
+			filter += PROJECT_EXT_;
+			filter += ")\t*.";
+			filter += PROJECT_EXT_;
+			filter += "\t";
+			proj_load_filer_.open(filter, false, proj_root_->get_text());
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  プロジェクト・セーブ・ファイル選択
+		*/
+		//-----------------------------------------------------------------//
+		void open_save_file()
+		{
+			std::string filter = "プロジェクト(*.";
+			filter += PROJECT_EXT_;
+			filter += ")\t*.";
+			filter += PROJECT_EXT_;
+			filter += "\t";
+			proj_save_filer_.open(filter, true, proj_root_->get_text());
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -124,9 +201,9 @@ namespace app {
 			@return ルート・パス
 		*/
 		//-----------------------------------------------------------------//
-		std::string get_project_path() const {
-			if(proj_dir_ == nullptr) return "";
-			return proj_dir_->get_text();
+		std::string get_project_root() const {
+			if(proj_root_ == nullptr) return "";
+			return proj_root_->get_text();
 		}
 
 #if 0
@@ -149,15 +226,6 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		uint32_t get_csv_index() const { return csv_idx_->get_select_pos(); }
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief  プロジェクト・ダイアログの取得
-			@return プロジェクト・ダイアログ
-		*/
-		//-----------------------------------------------------------------//
-		gui::widget_dialog* get_dialog() { return dialog_; }
 
 
 		//-----------------------------------------------------------------//
@@ -227,12 +295,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void load_csv1()
 		{
-			auto& core = gl::core::get_instance();
-			std::string path = core.get_current_path();
-			path += '/';
-			path += proj_dir_->get_text();
-			path += '/';
-			path += csv_all_->get_text();
+			auto path = utils::append_path(proj_root_->get_text(), csv_all_->get_text());
 			path += ".csv";
 			csv1_.load(path);
 		}
@@ -245,14 +308,8 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void save_csv1()
 		{
-			auto& core = gl::core::get_instance();
-			std::string path = core.get_current_path();
-			path += '/';
-			path += proj_dir_->get_text();
-			path += '/';
-			path += csv_all_->get_text();
+			auto path = utils::append_path(proj_root_->get_text(), csv_all_->get_text());
 			path += ".csv";
-// std::cout << path << std::endl;
 			csv1_.save(path);
 		}
 
@@ -264,16 +321,11 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void save_csv2()
 		{
-			auto& core = gl::core::get_instance();
-			std::string path = core.get_current_path();
-			path += '/';
-			path += proj_dir_->get_text();
-			path += '/';
-			path += csv_base_->get_text();
+			auto path = utils::append_path(proj_root_->get_text(), csv_base_->get_text());
 			path += (boost::format("%04d") % csv_idx_->get_select_pos()).str();
 			path += ".csv";
-// std::cout << path << std::endl;
-			csv2_.save(path);
+std::cout << path << std::endl;
+//			csv2_.save(path);
 		}
 
 
@@ -288,7 +340,7 @@ namespace app {
 			widget_director& wd = director_.at().widget_director_;
 
 			{  // プロジェクト名入力ダイアログ
-				int w = 300;
+				int w = 500;
 				int h = 260;
 				widget::param wp(vtx::irect(100, 100, w, h));
 				widget_dialog::param wp_;
@@ -304,14 +356,14 @@ namespace app {
 							msg_dialog_->enable();
 							return;
 						}
-						s = proj_dir_->get_text();
+						s = proj_root_->get_text();
 						if(s.empty()) {
 							msg_dialog_->set_text(
 								"プロジェクトのルートフォルダ\nが指定されていません。");
 							msg_dialog_->enable();
 							return;
 						} else {
-							auto path = proj_dir_->get_text();
+							auto path = proj_root_->get_text();
 							if(!utils::is_directory(path)) {
 								msg_dialog_->set_text((boost::format(
 									"プロジェクトのルートフォルダ\n"
@@ -324,7 +376,7 @@ namespace app {
 					}
 				};
 				{
-					widget::param wp(vtx::irect(10, 10, w - 10 * 2, 40), name_dialog_);
+					widget::param wp(vtx::irect(10, 20, 400, 40), name_dialog_);
 					widget_text::param wp_("プロジェクト名：");
 					wd.add_widget<widget_text>(wp, wp_);
 				}
@@ -334,14 +386,22 @@ namespace app {
 					proj_name_ = wd.add_widget<widget_label>(wp, wp_);
 				}
 				{
-					widget::param wp(vtx::irect(10, 100, w - 10 * 2, 40), name_dialog_);
-					widget_text::param wp_("ルートフォルダ：");
+					widget::param wp(vtx::irect(10, 120, 400, 40), name_dialog_);
+					widget_text::param wp_("プロジェクト・フォルダ：");
 					wd.add_widget<widget_text>(wp, wp_);
 				}
 				{
-					widget::param wp(vtx::irect(10, 140, w - 10 * 2, 40), name_dialog_);
+					widget::param wp(vtx::irect(330, 100, 160, 40), name_dialog_);
+					widget_button::param wp_("フォルダ選択");
+					proj_dir_ = wd.add_widget<widget_button>(wp, wp_);
+					proj_dir_->at_local_param().select_func_ = [=](uint32_t) {
+						sel_dir_.open("プロジェクト・フォルダ選択", proj_root_->get_text()); 
+					};
+				}
+				{
+					widget::param wp(vtx::irect(10, 150, w - 10 * 2, 40), name_dialog_);
 					widget_label::param wp_("", false);
-					proj_dir_ = wd.add_widget<widget_label>(wp, wp_);
+					proj_root_ = wd.add_widget<widget_label>(wp, wp_);
 				}
 			}
 
@@ -352,33 +412,33 @@ namespace app {
 				widget::param wp(vtx::irect(120, 120, w, h));
 				widget_dialog::param wp_;
 				wp_.style_ = widget_dialog::style::OK;
-				dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
-				dialog_->enable(false);
+				edit_dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
+				edit_dialog_->enable(false);
 
 				int yy = 20;
 				{  // CSV ALL 名設定
 					{
-						widget::param wp(vtx::irect(20, yy, 100, 40), dialog_);
+						widget::param wp(vtx::irect(20, yy, 100, 40), edit_dialog_);
 						widget_text::param wp_("CSV(1):");
 						wp_.text_param_.placement_
 							= vtx::placement(vtx::placement::holizontal::LEFT,
 											 vtx::placement::vertical::CENTER);
 						wd.add_widget<widget_text>(wp, wp_);	
 					}
-					widget::param wp(vtx::irect(20 + 110, yy, 150, 40), dialog_);
+					widget::param wp(vtx::irect(20 + 110, yy, 150, 40), edit_dialog_);
 					widget_label::param wp_("", false);
 					csv_all_ = wd.add_widget<widget_label>(wp, wp_);
 				}
 				{  // 試料番号設定
 					{
-						widget::param wp(vtx::irect(20 + 280, yy, 70, 40), dialog_);
+						widget::param wp(vtx::irect(20 + 280, yy, 70, 40), edit_dialog_);
 						widget_text::param wp_("試料:");
 						wp_.text_param_.placement_
 							= vtx::placement(vtx::placement::holizontal::LEFT,
 											 vtx::placement::vertical::CENTER);
 						wd.add_widget<widget_text>(wp, wp_);	
 					}
-					widget::param wp(vtx::irect(20 + 350, yy, 130, 40), dialog_);
+					widget::param wp(vtx::irect(20 + 350, yy, 130, 40), edit_dialog_);
 					widget_spinbox::param wp_(1, 1, 1000);
 					csv_idx_ = wd.add_widget<widget_spinbox>(wp, wp_);
 					csv_idx_->at_local_param().select_func_ =
@@ -388,19 +448,19 @@ namespace app {
 				}
 				{  // CSV BASE 名設定
 					{
-						widget::param wp(vtx::irect(20 + 500, yy, 90, 40), dialog_);
+						widget::param wp(vtx::irect(20 + 500, yy, 90, 40), edit_dialog_);
 						widget_text::param wp_("CSV(2):");
 						wp_.text_param_.placement_
 							= vtx::placement(vtx::placement::holizontal::LEFT,
 											 vtx::placement::vertical::CENTER);
 						wd.add_widget<widget_text>(wp, wp_);	
 					}
-					widget::param wp(vtx::irect(20 + 600, yy, 150, 40), dialog_);
+					widget::param wp(vtx::irect(20 + 600, yy, 150, 40), edit_dialog_);
 					widget_label::param wp_("", false);
 					csv_base_ = wd.add_widget<widget_label>(wp, wp_);
 				}
 				{
-					widget::param wp(vtx::irect(20 + 770, yy, 100, 40), dialog_);
+					widget::param wp(vtx::irect(20 + 770, yy, 100, 40), edit_dialog_);
 					widget_list::param wp_;
 					wp_.init_list_.push_back("JPEG");
 					wp_.init_list_.push_back("PNG");
@@ -411,32 +471,32 @@ namespace app {
 				yy += 50;
 				{  // 単体試験ベース名設定
 					{
-						widget::param wp(vtx::irect(20, yy, 100, 40), dialog_);
+						widget::param wp(vtx::irect(20, yy, 100, 40), edit_dialog_);
 						widget_text::param wp_("ベース名：");
 						wp_.text_param_.placement_
 							= vtx::placement(vtx::placement::holizontal::LEFT,
 											 vtx::placement::vertical::CENTER);
 						wd.add_widget<widget_text>(wp, wp_);	
 					}
-					widget::param wp(vtx::irect(20 + 100 + 10, yy, 150, 40), dialog_);
+					widget::param wp(vtx::irect(20 + 100 + 10, yy, 150, 40), edit_dialog_);
 					widget_label::param wp_("", false);
 					pbase_ = wd.add_widget<widget_label>(wp, wp_);
 				}
 				{  // 単体試験拡張子設定
 					{
-						widget::param wp(vtx::irect(320, yy, 90, 40), dialog_);
+						widget::param wp(vtx::irect(320, yy, 90, 40), edit_dialog_);
 						widget_text::param wp_("拡張子：");
 						wp_.text_param_.placement_
 							= vtx::placement(vtx::placement::holizontal::LEFT,
 											 vtx::placement::vertical::CENTER);
 						wd.add_widget<widget_text>(wp, wp_);	
 					}
-					widget::param wp(vtx::irect(320 + 90 + 10, yy, 150, 40), dialog_);
+					widget::param wp(vtx::irect(320 + 90 + 10, yy, 150, 40), edit_dialog_);
 					widget_label::param wp_(".unt", false);
 					pext_ = wd.add_widget<widget_label>(wp, wp_);
 				}
 				{
-					widget::param wp(vtx::irect(320 + 100 + 160, yy, 130, 40), dialog_);
+					widget::param wp(vtx::irect(320 + 100 + 160, yy, 130, 40), edit_dialog_);
 					widget_check::param wp_("自動保存");
 					auto_save_ = wd.add_widget<widget_check>(wp, wp_);
 				}
@@ -445,7 +505,7 @@ namespace app {
 					int x = (i / 10) * 200;
 					int y = 40 + 10 + (i % 10) * 50;
 					{
-						widget::param wp(vtx::irect(x + 20, y + yy, 50, 40), dialog_);
+						widget::param wp(vtx::irect(x + 20, y + yy, 50, 40), edit_dialog_);
 						std::string no = (boost::format("%d:") % (i + 1)).str();
 						widget_text::param wp_(no);
 						wp_.text_param_.placement_
@@ -453,12 +513,12 @@ namespace app {
 											 vtx::placement::vertical::CENTER);
 						wd.add_widget<widget_text>(wp, wp_);
 					}
-					widget::param wp(vtx::irect(x + 60, y + yy, 130, 40), dialog_);
+					widget::param wp(vtx::irect(x + 60, y + yy, 130, 40), edit_dialog_);
 					widget_label::param wp_("", false);
 					pname_[i] = wd.add_widget<widget_label>(wp, wp_);
 				}
 				{
-					widget::param wp(vtx::irect(20, h - 100, w - 20 * 2, 40), dialog_);
+					widget::param wp(vtx::irect(20, h - 100, w - 20 * 2, 40), edit_dialog_);
 					widget_text::param wp_;
 					wp_.text_param_.placement_
 						= vtx::placement(vtx::placement::holizontal::LEFT,
@@ -522,7 +582,13 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void update()
 		{
-			if(dialog_->get_state(gui::widget::state::ENABLE)) {
+			if(name_dialog_->get_state(gui::widget::state::ENABLE)) {
+				if(sel_dir_.get_state() == utils::select_dir::state::selected) {
+					proj_root_->set_text(sel_dir_.get());
+				}
+			}
+
+			if(edit_dialog_->get_state(gui::widget::state::ENABLE)) {
 				std::string s;
 				for(int i = 0; i < 50; ++i) {
 					if(pname_[i]->get_focus()) {
@@ -538,6 +604,35 @@ namespace app {
 				}
 				help_->set_text(s);
 			}
+
+			if(proj_load_filer_.state()) {
+				auto path = proj_load_filer_.get();
+				if(!path.empty()) {
+					if(utils::get_file_ext(path).empty()) {
+						path += '.';
+						path += PROJECT_EXT_;
+					}
+					if(load_project_file_(path)) {
+
+					} else {
+
+					}
+				}
+			}
+			if(proj_save_filer_.state()) {
+				auto path = proj_save_filer_.get();
+				if(!path.empty()) {
+					if(utils::get_file_ext(path).empty()) {
+						path += '.';
+						path += PROJECT_EXT_;
+					}
+					if(!save_project_file_(path)) {
+
+					} else {
+
+					}
+				}
+			}
 		}
 
 
@@ -550,7 +645,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		bool save(sys::preference& pre)
 		{
-			if(dialog_ == nullptr) return false;
+///			if(dialog_ == nullptr) return false;
 			if(pbase_ == nullptr) return false;
 			if(pext_ == nullptr) return false;
 			if(auto_save_ == nullptr) return false;
@@ -559,14 +654,14 @@ namespace app {
 			if(csv_base_ == nullptr) return false;
 			if(image_ext_ == nullptr) return false;
 
-			dialog_->save(pre);
+///			dialog_->save(pre);
 			csv_all_->save(pre);
 			csv_idx_->save(pre);
 			csv_base_->save(pre);
 			auto_save_->save(pre);
 			image_ext_->save(pre);
 			proj_name_->save(pre);
-			proj_dir_->save(pre);
+			proj_root_->save(pre);
 
 			pbase_->save(pre);
 			pext_->save(pre);
@@ -587,7 +682,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		bool load(sys::preference& pre)
 		{
-			if(dialog_ == nullptr) return false;
+///			if(dialog_ == nullptr) return false;
 			if(pbase_ == nullptr) return false;
 			if(pext_ == nullptr) return false;
 			if(auto_save_ == nullptr) return false;
@@ -596,14 +691,13 @@ namespace app {
 			if(csv_base_ == nullptr) return false;
 			if(image_ext_ == nullptr) return false;
 
-			dialog_->load(pre);
 			csv_all_->load(pre);
 			csv_idx_->load(pre);
 			csv_base_->load(pre);
 			auto_save_->load(pre);
 			image_ext_->load(pre);
 			proj_name_->load(pre);
-			proj_dir_->load(pre);
+			proj_root_->load(pre);
 
 			pbase_->load(pre);
 			pext_->load(pre);
@@ -611,12 +705,33 @@ namespace app {
 				if(pname_[i] == nullptr) return false;
 				pname_[i]->load(pre);
 			}
-
-//			auto& core = gl::core::get_instance();
-//			std::string cp = core.get_current_path();
-//			std::cout << cp << std::endl;
-
 			return true;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  ダイアログ・セーブ（位置）
+			@param[in]	pre	プリファレンス（参照）
+		*/
+		//-----------------------------------------------------------------//
+		void save_dialog(sys::preference& pre)
+		{
+			edit_dialog_->save(pre);
+			name_dialog_->save(pre);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  ダイアログ・ロード（位置）
+			@param[in]	pre	プリファレンス（参照）
+		*/
+		//-----------------------------------------------------------------//
+		void load_dialog(sys::preference& pre)
+		{
+			edit_dialog_->load(pre);
+			name_dialog_->load(pre);
 		}
 	};
 }

@@ -40,28 +40,13 @@ namespace app {
 		interlock				interlock_;
 		root_menu				root_menu_;
 
-		gui::widget_button*		load_;
-		gui::widget_filer*		load_ctx_;
-
-//		gui::widget_frame*		terminal_frame_;
-//		gui::widget_terminal*	terminal_core_;
-
 ///		asio::io_service		io_service_;
 		net::ign_client_tcp		client_;
 		uint32_t				delay_client_;
 		bool					connect_client_;
 		bool					start_client_;
 
-///		net::ign_server			server_;
-
 		std::string				ip_;
-
-		// ターミナル、行入力
-		void term_enter_(const utils::lstring& text) {
-			auto s = utils::utf32_to_utf8(text);
-//			project_.logic_edit_.command(s);
-///			std::cout << s << std::endl;
-		}
 
 	public:
 		//-----------------------------------------------------------------//
@@ -72,13 +57,10 @@ namespace app {
 		ignitor(utils::director<core>& d) : director_(d),
 			interlock_(),
 			root_menu_(d, client_, interlock_),
-			load_(nullptr), load_ctx_(nullptr),
-///			terminal_frame_(nullptr), terminal_core_(nullptr),
 ///			io_service_(),
 ///			client_(io_service_),
 			client_(),
 			delay_client_(60), connect_client_(false), start_client_(false),
-///			server_(io_service_),
 			ip_()
 		{ }
 
@@ -91,99 +73,6 @@ namespace app {
 		void initialize()
 		{
 			root_menu_.initialize();
-
-			using namespace gui;
-//			widget_director& wd = director_.at().widget_director_;
-//			gl::core& core = gl::core::get_instance();
-#if 0
-			{ // ロード起動ボタン
-				widget::param wp(vtx::irect(10, 20 + 40 * 0, menu_width - 20, 30), menu_);
-				widget_button::param wp_("load");
-				wp_.select_func_ = [this](int id) {
-//					gui::get_open_file_name();
-					if(load_ctx_) {
-//						script_on_ = false;
-						bool f = load_ctx_->get_state(gui::widget::state::ENABLE);
-						load_ctx_->enable(!f);
-//						save_->set_stall(!f);
-//						export_->set_stall(!f);
-//						script_->set_stall(!f);
-					}
-				};
-				load_ = wd.add_widget<widget_button>(wp, wp_);
-			}
-
-			{ // load ファイラー本体
-				widget::param wp(vtx::irect(10, 30, 300, 200));
-				widget_filer::param wp_(core.get_current_path());
-				wp_.select_file_func_ = [this](const std::string& path) {
-#if 0
-					bool f = false;
-					if(script_on_) {
-						f = project_.logic_edit_.injection(path);
-					} else {
-						f = project_.logic_.load(path);
-					}
-					load_->set_stall(false);
-					save_->set_stall(false);
-					export_->set_stall(false);
-					script_->set_stall(false);
-					if(!f) {  // load error
-						if(script_on_) dialog_->set_text("Script error:\n" + path);
-						else dialog_->set_text("Load error:\n" + path);
-						dialog_->enable();
-					}
-#endif
-				};
-				load_ctx_ = wd.add_widget<widget_filer>(wp, wp_);
-				load_ctx_->enable(false);
-			}
-#endif
-
-#if 0
-			{	// ターミナル
-				{
-					widget::param wp(vtx::irect(20, 100, 100, 200));
-					widget_frame::param wp_;
-					wp_.plate_param_.set_caption(12);
-					terminal_frame_ = wd.add_widget<widget_frame>(wp, wp_);
-				}
-				{
-					widget::param wp(vtx::irect(0), terminal_frame_);
-					widget_terminal::param wp_;
-					wp_.enter_func_ = [this](const utils::lstring& text) {
-						term_enter_(text);
-					};
-					terminal_core_ = wd.add_widget<widget_terminal>(wp, wp_);
-					term_chaout::set_output(terminal_core_);
-				}
-
-				// ロジック編集クラスの出力先の設定
-//				project_.logic_edit_.set_output([this](const std::string& s) {
-//					terminal_core_->output(s);
-//				}
-//				);
-			}
-#endif
-
-			// プリファレンスのロード
-//			sys::preference& pre = director_.at().preference_;
-
-//			if(menu_ != nullptr) {
-//				menu_->load(pre, false, false);
-//			}
-
-///			project_.load(pre);
-
-//			if(terminal_frame_ != nullptr) {
-//				terminal_frame_->load(pre);
-//			}
-
-//			if(load_ctx_ != nullptr) load_ctx_->load(pre);
-///			if(save_ctx_ != nullptr) save_ctx_->load(pre);
-
-			// テスト・サーバー起動
-///			server_.start();
 		}
 
 
@@ -258,27 +147,9 @@ namespace app {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief  廃棄
+			@brief	廃棄
 		*/
 		//-----------------------------------------------------------------//
-		void destroy()
-		{
-//			sys::preference& pre = director_.at().preference_;
-
-///			if(edit_ != nullptr) edit_->save(pre);
-
-///			if(load_ctx_ != nullptr) load_ctx_->save(pre);
-///			if(save_ctx_ != nullptr) save_ctx_->save(pre);
-
-//			if(argv_frame_ != nullptr) {
-//				argv_frame_->save(pre);
-//			}
-
-///			if(terminal_frame_ != nullptr) {
-///				terminal_frame_->save(pre);
-///			}
-
-//			project_.save(pre);
-		}
+		void destroy() { }
 	};
 }

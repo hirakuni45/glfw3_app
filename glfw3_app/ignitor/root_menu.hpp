@@ -17,7 +17,6 @@
 #include "widgets/widget_filer.hpp"
 #include "utils/input.hpp"
 #include "utils/format.hpp"
-#include "utils/select_file.hpp"
 
 #include "project.hpp"
 #include "inspection.hpp"
@@ -26,8 +25,6 @@
 #include "csv.hpp"
 #include "wave_cap.hpp"
 #include "test.hpp"
-
-#define NATIVE_FILER
 
 namespace app {
 
@@ -39,8 +36,6 @@ namespace app {
 	class root_menu {
 
 		static const int32_t  app_version_ = 80;
-
-		static constexpr const char* PROJECT_EXT_ = "ipr";
 
 		static const int ofs_x_ = 10;
 		static const int ofs_y_ = 10;
@@ -79,49 +74,12 @@ namespace app {
 
 		gui::widget_dialog*		msg_dialog_;
 
-#ifdef NATIVE_FILER
-		utils::select_file		proj_load_filer_;
-		utils::select_file		proj_save_filer_;
-#else
-		gui::widget_filer*		proj_load_filer_;
-		gui::widget_filer*		proj_save_filer_;
-#endif
 		inspection				inspection_;
 		project					project_;
 
 		int						ip_[4];
 
 		bool					init_client_;
-
-		bool save_project_file_(const std::string& path)
-		{
-			sys::preference pre;
-
-			project_.save(pre);
-			auto ph = path;
-			if(utils::get_file_ext(path).empty()) {
-				ph += '.';
-				ph += PROJECT_EXT_;
-			}
-			return pre.save(ph);
-		}
-
-
-		bool load_project_file_(const std::string& path)
-		{
-			sys::preference pre;
-			auto ph = path;
-			if(utils::get_file_ext(path).empty()) {
-				ph += '.';
-				ph += PROJECT_EXT_;
-			}
-			auto ret = pre.load(ph);
-			if(ret) {
-				project_.load(pre);
-			}
-			return ret;
-		}
-
 
 		enum class task {
 			idle,	///< アイドル状態
@@ -257,9 +215,6 @@ namespace app {
 		   	cont_connect_(nullptr), cont_setting_ip_{ nullptr },
 			cont_setting_cmds_(nullptr), cont_setting_exec_(nullptr),
 			info_dialog_(nullptr), msg_dialog_(nullptr),
-#ifndef NATIVE_FILER
-			proj_load_filer_(nullptr), proj_save_filer_(nullptr),
-#endif
 			inspection_(d, client, ilock, wave_cap_),
 			project_(d),
 
@@ -359,7 +314,7 @@ namespace app {
 				widget_button::param wp_("新規プロジェクト");
 				new_project_ = wd.add_widget<widget_button>(wp, wp_);
 				new_project_->at_local_param().select_func_ = [=](uint32_t id) {
-					project_.get_name_dialog()->enable();
+					project_.enable_name_dialog();
 				};
 				{
 					widget::param wp(vtx::irect(ofs_x_ + btn_w_ + 50,
@@ -374,16 +329,7 @@ namespace app {
 				widget_button::param wp_("プロジェクト・ロード");
 				load_project_ = wd.add_widget<widget_button>(wp, wp_);
 				load_project_->at_local_param().select_func_ = [=](uint32_t id) {
-#ifdef NATIVE_FILER
-					std::string filter = "プロジェクト(*.";
-					filter += PROJECT_EXT_;
-					filter += ")\t*.";
-					filter += PROJECT_EXT_;
-					filter += "\t";
-					proj_load_filer_.open(filter);
-#else
-					proj_load_filer_->enable();
-#endif
+					project_.open_load_file();
 				};
 				{
 					widget::param wp(vtx::irect(ofs_x_ + btn_w_ + 50,
@@ -397,7 +343,7 @@ namespace app {
 				widget_button::param wp_("プロジェクト編集");
 				edit_project_ = wd.add_widget<widget_button>(wp, wp_);
 				edit_project_->at_local_param().select_func_ = [=](uint32_t id) {
-					project_.get_dialog()->enable();
+					project_.enable_edit_dialog();
 				};
 			}
 			{
@@ -405,16 +351,7 @@ namespace app {
 				widget_button::param wp_("プロジェクト・セーブ");
 				save_project_ = wd.add_widget<widget_button>(wp, wp_);
 				save_project_->at_local_param().select_func_ = [=](uint32_t id) {
-#ifdef NATIVE_FILER
-					std::string filter = "プロジェクト(*.";
-					filter += PROJECT_EXT_;
-					filter += ")\t*.";
-					filter += PROJECT_EXT_;
-					filter += "\t";
-					proj_save_filer_.open(filter, true);
-#else
-					proj_save_filer_->enable();
-#endif
+					project_.open_save_file();
 				};
 			}
 
@@ -559,33 +496,6 @@ namespace app {
 				msg_dialog_->enable(false);
 			}
 
-#ifndef NATIVE_FILER
-			{  // プロジェクト・ファイラー
-				gl::core& core = gl::core::get_instance();
-				{
-					widget::param wp(vtx::irect(30, 30, 500, 400));
-					widget_filer::param wp_(core.get_current_path(), "", false);
-					proj_load_filer_ = wd.add_widget<widget_filer>(wp, wp_);
-					proj_load_filer_->enable(false);
-					proj_load_filer_->at_local_param().select_file_func_ = [=]
-						(const std::string& path) {
-					};
-					proj_load_filer_->at_local_param().cancel_file_func_ = [=](void) {
-					};
-				}
-				{
-					widget::param wp(vtx::irect(30, 30, 500, 400));
-					widget_filer::param wp_(core.get_current_path(), "", true);
-					proj_save_filer_ = wd.add_widget<widget_filer>(wp, wp_);
-					proj_save_filer_->enable(false);
-					proj_save_filer_->at_local_param().select_file_func_ = [=]
-						(const std::string& path) {
-					};
-					proj_save_filer_->at_local_param().cancel_file_func_ = [=](void) {
-					};
-				}
-			}
-#endif
 			wave_cap_.initialize();
 
 			{  // エラー・ダイアログ
@@ -632,7 +542,7 @@ namespace app {
 			}
 
 			project_.update();
-			if(project_.get_project_title().empty() || project_.get_project_path().empty()) {
+			if(project_.get_project_title().empty() || project_.get_project_root().empty()) {
 				edit_project_->set_stall();
 				save_project_->set_stall();
 				run_->set_stall();
@@ -642,16 +552,7 @@ namespace app {
 				edit_project_->set_stall(false);
 				proj_title_->set_text(project_.get_project_title());
 				save_project_->set_stall(false);
-				auto path = project_.get_project_path();
-				if(!path.empty()) {
-					if(path[0] != '/') {
-						gl::core& core = gl::core::get_instance();
-						auto tmp = core.get_current_path();
-						tmp += '/';
-						tmp += path;
-						path = tmp;
-					}
-				}
+				auto path = project_.get_project_root();
 				proj_path_->set_text(path);
 				if(project_.get_unit_count() > 0) {
 					// プロジェクトの設定が有効なら、ストールを解除
@@ -695,37 +596,6 @@ namespace app {
 			if(cont_setting_exec_ != nullptr) {
 				cont_setting_exec_->set_stall(!client_.probe());
 			}
-
-#ifdef NATIVE_FILER
-			if(proj_load_filer_.state()) {
-				auto path = proj_load_filer_.get();
-				if(!path.empty()) {
-					if(utils::get_file_ext(path).empty()) {
-						path += '.';
-						path += PROJECT_EXT_;
-					}
-					if(load_project_file_(path)) {
-
-					} else {
-
-					}
-				}
-			}
-			if(proj_save_filer_.state()) {
-				auto path = proj_save_filer_.get();
-				if(!path.empty()) {
-					if(utils::get_file_ext(path).empty()) {
-						path += '.';
-						path += PROJECT_EXT_;
-					}
-					if(!save_project_file_(path)) {
-
-					} else {
-
-					}
-				}
-			}
-#endif
 
 			// 検査ループ制御
 			switch(task_) {
@@ -968,14 +838,9 @@ namespace app {
 			cont_setting_ip_[2]->load(pre);
 			cont_setting_ip_[3]->load(pre);
 
-			project_.get_name_dialog()->load(pre);	// ダイアログの位置復元
-			project_.get_dialog()->load(pre);	  	// ダイアログの位置復元
+			project_.load_dialog(pre);	// ダイアログの位置復元
 			inspection_.get_dialog()->load(pre);  	// ダイアログの位置復元
 
-#ifndef NATIVE_FILER
-			proj_load_filer_->load(pre);
-			proj_save_filer_->load(pre);
-#endif
 			wave_cap_.load(pre);
 		}
 
@@ -1005,14 +870,8 @@ namespace app {
 			cont_setting_ip_[2]->save(pre);
 			cont_setting_ip_[3]->save(pre);
 
-			project_.get_name_dialog()->save(pre);	// ダイアログの位置セーブ
-			project_.get_dialog()->save(pre);	  	// ダイアログの位置セーブ
+			project_.save_dialog(pre);	// ダイアログの位置セーブ
 			inspection_.get_dialog()->save(pre);  	// ダイアログの位置セーブ
-
-#ifndef NATIVE_FILER
-			proj_load_filer_->save(pre);
-			proj_save_filer_->save(pre);
-#endif
 
 			wave_cap_.save(pre);
 		}
