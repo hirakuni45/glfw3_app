@@ -85,18 +85,14 @@ namespace utils {
 			BROWSEINFO bi;
 			ZeroMemory(&bi, sizeof(BROWSEINFO));
 //			bi.hwndOwner	= hwndOwner;
-			bi.lpfn			= SHBrowseProc;	//  コールバック関数を指定
-			//  デフォルトで選択させておくフォルダを指定
+			bi.lpfn			= SHBrowseProc;
 			bi.lParam		= (LPARAM)t.fpath_.c_str();
 			bi.lpszTitle	= t.title_.c_str();
-// "フォルダを選択してください";	//  タイトルの指定
+			bi.ulFlags      = BIF_NEWDIALOGSTYLE;
 			ITEMIDLIST* pidl = SHBrowseForFolder(&bi);	//  フォルダダイアログの起動
 			char path[_MAX_PATH];
 			path[0] = 0;
 			if(pidl) {
-///				LPTSTR lpszBuffer;
-///				DWORD dwBufferSize = _MAX_PATH;
-				//  選択されたフォルダ名を取得
 				SHGetPathFromIDList(pidl, path);
 				SHFree(pidl);
 				ret = true;

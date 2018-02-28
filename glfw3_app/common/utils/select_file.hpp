@@ -27,6 +27,7 @@ namespace utils {
 
 			pthread_mutex_t		sync_;
 
+			std::string			init_dir_;
 			std::string			filter_;
 			std::string			path_;
 
@@ -45,9 +46,9 @@ namespace utils {
 			info_t& t = *(static_cast<info_t*>(entry));
 #ifdef WIN32
 			OPENFILENAME ofn;
-			char szFile[ MAX_PATH ] = "";
-			ZeroMemory( &ofn, sizeof( ofn ) );
-			ofn.lStructSize = sizeof( OPENFILENAME );
+			char szFile[MAX_PATH] = "";
+			ZeroMemory(&ofn, sizeof(ofn));
+			ofn.lStructSize = sizeof(OPENFILENAME);
 
 			std::string filter = t.filter_;
 			filter += utils::utf8_to_sjis("すべてのファイル(*.*)");
@@ -58,6 +59,7 @@ namespace utils {
 			ofn.lpstrFilter = filter.c_str();
 			ofn.lpstrFile = szFile;
 			ofn.nMaxFile = MAX_PATH;
+			ofn.lpstrInitialDir = t.init_dir_.c_str();
 			ofn.Flags = OFN_FILEMUSTEXIST;
 			bool ret = false;
 			if(t.save_) {
@@ -93,21 +95,22 @@ namespace utils {
 			@brief	オープン
 			@param[in]	filter	フィルター（"xxxx\tyyyy\t"）
 			@param[in]	save	保存の場合「true」
+			@param[in]	idir	初期フォルダ
 			@return 正常なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool open(const std::string& filter = "", bool save = false)
+		bool open(const std::string& filter = "", bool save = false, const std::string& idir = "")
 		{
 			if(open_) return false;
 
 			pthread_mutex_init(&info_.sync_, nullptr);
 			id_ = info_.id_;
+			info_.init_dir_ = convert_delimiter(utf8_to_sjis(idir), '/', '\\');
 			info_.filter_ = utils::code_conv(utf8_to_sjis(filter), '\t', '\0');
 			info_.path_.clear();
 			info_.save_ = save;
 			pthread_create(&pth_, nullptr, task_, &info_);
 			open_ = true;
-
 			return true;
 		}
 
