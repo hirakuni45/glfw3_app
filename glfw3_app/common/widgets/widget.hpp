@@ -3,7 +3,7 @@
 /*!	@file
 	@brief	GUI widget 基底クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2018 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -361,6 +361,7 @@ namespace gui {
 			widget*				parents_;		///< 親ウィジェット
 			action_types		action_;		///< アクション
 			state_types			state_;			///< 状態制御
+			uint32_t			pre_group_;		///< プリファレンス・グループ
 
 			param(const vtx::irect& r = vtx::irect(0), widget* parents = nullptr) :
 				rect_(r), clip_(r), rpos_(r.org),
@@ -369,7 +370,8 @@ namespace gui {
 				speed_(0), in_point_(0),
 				hold_frame_(0), holded_frame_(0),
 				parents_(parents),
-				action_()
+				action_(), state_(),
+				pre_group_(0)
 			{
 				state_.set(state::ENABLE);
 				state_.set(state::RENDER_ENABLE);

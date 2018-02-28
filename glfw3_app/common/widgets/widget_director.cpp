@@ -1083,34 +1083,4 @@ namespace gui {
 			++id;
 		}
 	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	widget 固有の文字列を生成
-		@param[in]	w	生成する widget
-		@return widget 固有の文字列
-	*/
-	//-----------------------------------------------------------------//
-	const std::string widget_director::create_widget_name(const widget* w) const
-	{
-		std::map<uint32_t, widget*> tbl;
-		typedef std::pair<uint32_t, widget*> tbl_p;
-		for(auto ww : widgets_) {
-			if(w->type() == ww->type()) {
-				tbl.insert(tbl_p(ww->get_serial(), ww));
-			}
-		}
-
-		int n = 0;
-		for(const auto& t : tbl) {
-			if(t.second == w) break;
-			++n;
-		}
-
-		std::string s = w->type_name();
-		s += '/';
-		s += (boost::format("%05d") % n).str();
-		return s;
-	}
 }

@@ -179,7 +179,7 @@ namespace gui {
 		T* add_widget(const widget::param& bp, const typename T::param& tp) {
 			T* w = new T(*this, bp, tp);
 			w->initialize();
-			w->set_serial(serial_);
+			w->set_serial(serial_ + bp.pre_group_);
 			if(bp.parents_ != nullptr) {  // 親の状態を反映
 				if(!root_widget(w)->get_state(widget::state::ENABLE)) {
 					w->set_state(widget::state::ENABLE, false);
@@ -489,7 +489,29 @@ namespace gui {
 			@return widget 固有の文字列
 		*/
 		//-----------------------------------------------------------------//
-		const std::string create_widget_name(const widget* w) const;
+		std::string create_widget_name(const widget* w) const
+		{
+			if(w == nullptr) return "";
+
+			std::map<uint32_t, widget*> tbl;
+			typedef std::pair<uint32_t, widget*> tbl_p;
+			for(auto ww : widgets_) {
+				if(w->type() == ww->type()) {
+					tbl.insert(tbl_p(ww->get_serial(), ww));
+				}
+			}
+
+			int n = 0;
+			for(const auto& t : tbl) {
+				if(t.second == w) break;
+				++n;
+			}
+
+			std::string s = w->type_name();
+			s += '/';
+			s += (boost::format("%05d") % n).str();
+			return s;
+		}
 
 
 		//-----------------------------------------------------------------//
