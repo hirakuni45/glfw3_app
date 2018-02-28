@@ -522,10 +522,14 @@ namespace utils {
 		} else {
 			ch = 0;
 		}
-#endif
+		if(ch != 0 && (ch == '/' || ch == '\\')) {
+			return true;
+		}
+#else
 		if(ch != 0 && ch == '/') {
 			return true;
 		}
+#endif
 		return false;
 	}
 
