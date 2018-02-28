@@ -31,6 +31,7 @@
 #include "widgets/widget_chip.hpp"
 
 #include "utils/select_file.hpp"
+#include "utils/select_dir.hpp"
 
 namespace app {
 
@@ -83,7 +84,7 @@ namespace app {
 
 
 		utils::select_file		sel_file_;
-
+		utils::select_dir		sel_dir_;
 
 		void view_update_()
 		{
@@ -548,14 +549,20 @@ namespace app {
 
 			if(filer_open_) {
 				if(filer_open_->get_selected()) {
-					sel_file_.open();
-///					if(filer_) {
+					gl::core& core = gl::core::get_instance();
+					auto cp = core.get_current_path();
+///					sel_dir_.open("テスト・フォルダを選択", cp);
+					sel_file_.open("*.*", false, cp);
+					if(filer_) {
 ///						filer_->enable(!filer_->get_state(gui::widget::state::ENABLE));
-///					}
+					}
 				}
 			}
 			if(sel_file_.state()) {
 				std::cout << sel_file_.get() << std::endl;
+			}
+			if(sel_dir_.get_state() == utils::select_dir::state::selected) {
+				std::cout << sel_dir_.get() << std::endl;
 			}
 
 			if(filer_) {
