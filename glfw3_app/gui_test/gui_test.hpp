@@ -29,6 +29,7 @@
 #include "widgets/widget_view.hpp"
 #include "widgets/widget_sheet.hpp"
 #include "widgets/widget_chip.hpp"
+#include "widgets/widget_table.hpp"
 
 #include "utils/select_file.hpp"
 #include "utils/select_dir.hpp"
