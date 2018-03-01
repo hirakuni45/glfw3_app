@@ -420,7 +420,7 @@ namespace view {
 					for(uint32_t i = 0; i < size.x; ++i) {
 						int32_t idx = (tsc >> 16);
 						int32_t sz = t.units_.size();
-						if(-sz <= idx && idx < sz) {
+						if(-(sz / 2) <= idx && idx < (sz / 2)) {
 							if(idx < 0) idx += sz;
 							float v = static_cast<float>(t.units_[idx % sz]);
 							if(smooth_) {
