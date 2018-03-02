@@ -9,7 +9,7 @@
 */
 //=====================================================================//
 #include "widgets/widget_director.hpp"
-#include "widgets/widget_null.hpp"
+#include "widgets/widget_slider.hpp"
 
 namespace gui {
 
@@ -31,20 +31,27 @@ namespace gui {
 
 			std::vector<widget*>	cell_;
 
+			bool		scroll_bar_h_;	///< 水平スクロール・バーによる制御
+			bool		scroll_bar_v_;	///< 垂直スクロール・バーによる制御
 			bool		scroll_ctrl_;	///< スクロール・コントロール（マウスのダイアル）
 
-			param() : cell_(), scroll_ctrl_(true)
+			param() : cell_(), scroll_bar_h_(false), scroll_bar_v_(false),
+				scroll_ctrl_(true)
 			{ }
 		};
 
 	private:
 		widget_director&	wd_;
 
+		widget_slider*		slider_h_;
+		widget_slider*		slider_v_;
+
 		param				param_;
 
 		vtx::iposs			ref_poss_;
 		vtx::ipos			ref_size_;
 		vtx::fpos			offset_;
+		vtx::ipos			chip_size_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -53,7 +60,9 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_table(widget_director& wd, const widget::param& bp, const param& p) :
-			widget(bp), wd_(wd), param_(p), ref_poss_(), ref_size_(0), offset_(0.0f)
+			widget(bp), wd_(wd), slider_h_(nullptr), slider_v_(nullptr),
+			param_(p), ref_poss_(), ref_size_(0), offset_(0.0f),
+			chip_size_(0)
 		{ }
 
 
@@ -129,10 +138,31 @@ namespace gui {
 			at_param().state_.set(widget::state::RESIZE_H_ENABLE, false);
 			at_param().state_.set(widget::state::RESIZE_V_ENABLE, false);
 			at_param().state_.set(widget::state::SERVICE);
-			at_param().state_.set(widget::state::MOVE_ROOT, false);
 			at_param().state_.set(widget::state::RESIZE_ROOT);
+//			at_param().state_.set(widget::state::MOVE_STALL);
+//			at_param().state_.set(widget::state::MOVE_ROOT, false);
 //			at_param().state_.set(widget::state::CLIP_PARENTS);
 //			at_param().state_.set(widget::state::AREA_ROOT);
+
+			auto h = wd_.get_share_image().down_box_;
+			chip_size_ = wd_.at_mobj().get_size(h);
+
+			if(param_.scroll_bar_h_) {
+				widget::param wp(vtx::irect(chip_size_.x, get_rect().size.y - chip_size_.y,
+					get_rect().size.x - chip_size_.x * 2, chip_size_.y), this);
+				widget_slider::param wp_(0.0f, slider_param::direction::HOLIZONTAL);
+				wp_.slider_param_.handle_ratio_ = 0.5f;
+				slider_h_ = wd_.add_widget<widget_slider>(wp, wp_);
+				at_rect().size.y -= chip_size_.y;
+			}
+			if(param_.scroll_bar_v_) {
+				widget::param wp(vtx::irect(get_rect().size.x - chip_size_.x, chip_size_.y,
+					chip_size_.x, get_rect().size.y - chip_size_.y * 2), this);
+				widget_slider::param wp_(0.0f, slider_param::direction::VERTICAL);
+				wp_.slider_param_.handle_ratio_ = 0.5f;
+				slider_v_ = wd_.add_widget<widget_slider>(wp, wp_);
+				at_rect().size.x -= chip_size_.x;
+			}
 
 			// 基準の位置をセーブしておく
 			for(auto w : param_.cell_) {
@@ -145,7 +175,13 @@ namespace gui {
 				}
 				w->at_param().parents_ = this;
 				w->at_param().state_.set(widget::state::CLIP_PARENTS);
+//				w->at_param().state_.set(widget::state::MOVE_STALL);
+//				w->at_param().state_.set(widget::state::MOVE_ROOT, false);
 //				w->at_param().state_.set(widget::state::AREA_ROOT);
+			}
+			// 親の状態を子に継承
+			if(get_param().parents_ != nullptr) {
+				wd_.enable(this, get_param().parents_->get_enable(), true);
 			}
 		}
 
@@ -158,17 +194,44 @@ namespace gui {
 		void update() override
 		{
 			if(get_focus()) {
-				auto szy = get_param().rect_.size.y;
-				if(ref_size_.y > szy) {
+				const vtx::spos& size = get_rect().size;
+				if(ref_size_.y > size.y) {
 					if(param_.scroll_ctrl_) {
 						const vtx::spos& scr = wd_.get_scroll();
 						offset_.y += static_cast<float>(scr.y * 8);
 						if(offset_.y > 0.0f) offset_.y = 0.0f;
-						else if(offset_.y < -static_cast<float>(ref_size_.y - szy)) {
-							offset_.y = -static_cast<float>(ref_size_.y - szy);
+						else if(offset_.y < -static_cast<float>(ref_size_.y - size.y)) {
+							offset_.y = -static_cast<float>(ref_size_.y - size.y);
 						}
 					}
 				}
+
+//				vtx::spos pos(size.x - chip_size_.x, 0);
+
+#if 0
+				gl::core& core = gl::core::get_instance();
+				const gl::device& dev = core.get_device();
+				int step = param_.page_step_;
+				if(param_.page_div_ != 0) {
+					step = (param_.max_pos_ - param_.min_pos_) / param_.page_div_;
+				}
+				if(dev.get_positive(gl::device::key::PAGE_UP)) {
+					d =  step;
+					st = state::inc;
+				} else if(dev.get_positive(gl::device::key::PAGE_DOWN)) {
+					d = -step;
+					st = state::dec;
+				} else if(dev.get_positive(gl::device::key::UP)) {
+					d = step >= 0 ? 1 : -1;
+					st = state::inc;
+				} else if(dev.get_positive(gl::device::key::DOWN)) {
+					d = step < 0 ? -1 : 1;
+				}
+#endif
+			}
+
+			if(slider_v_ != nullptr) {
+//				slider_v_->
 			}
 
 			uint32_t i = 0;
@@ -201,6 +264,24 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void render() override
 		{
+			using namespace gl;
+
+			if(param_.scroll_bar_h_ || param_.scroll_bar_v_) {
+				core& core = core::get_instance();
+				const vtx::spos& siz = core.get_rect().size;
+				wd_.at_mobj().setup_matrix(siz.x, siz.y);
+				wd_.set_TSC();
+			}
+			if(param_.scroll_bar_v_) {  // チップの描画
+				gl::mobj::handle uph = wd_.get_share_image().up_box_;
+				gl::mobj::handle dnh = wd_.get_share_image().down_box_;
+				const vtx::spos& bs = wd_.at_mobj().get_size(uph);  // uph, dnh は同じ大きさ
+				const vtx::spos& size = get_rect().size;
+				vtx::spos pos(size.x, 0);
+				wd_.at_mobj().draw(uph, gl::mobj::attribute::normal, pos);
+				pos.y = size.y - bs.y;
+				wd_.at_mobj().draw(dnh, gl::mobj::attribute::normal, pos);
+			}
 		}
 
 
