@@ -79,10 +79,11 @@ namespace app {
 
 		gui::widget_chip*		chip_;
 
+		gui::widget_table*		table_;
+
 		uint32_t	filer_id_;
 		uint32_t	menu_id_;
 		int			menu_ins_cnt_;
-
 
 		utils::select_file		sel_file_;
 		utils::select_dir		sel_dir_;
@@ -129,6 +130,7 @@ namespace app {
 			spinbox_(nullptr),
 			view_frame_(nullptr), view_core_(nullptr),
 			arrow_up_(nullptr), arrow_dn_(nullptr),
+			sheet_(nullptr), chip_(nullptr), table_(nullptr),
 			filer_id_(0), menu_id_(0), menu_ins_cnt_(0)
 		{ }
 
@@ -363,7 +365,7 @@ namespace app {
 					wd.add_widget<widget_button>(wp, wp_);
 				}
 				{
-					widget::param wp(vtx::irect(250, 350, 400, 300));
+					widget::param wp(vtx::irect(250, 300, 400, 200));
 					widget_sheet::param wp_;
 					wp_.sheets_.emplace_back("aaa", root_aaa);
 					wp_.sheets_.emplace_back("bbb", root_bbb);
@@ -381,6 +383,7 @@ namespace app {
 			}
 
 
+
 			if(1) { // メニューのテスト
 				widget::param wp(vtx::irect(10, 10, 180, 30));
 				widget_menu::param wp_;
@@ -393,7 +396,6 @@ namespace app {
 				};
 				menu_ = wd.add_widget<widget_menu>(wp, wp_);
 			}
-
 
 
 			if(1) { // フレームのテスト
@@ -497,6 +499,24 @@ namespace app {
 					};
 					view_core_ = wd.add_widget<widget_view>(wp, wp_);
 				}
+			}
+
+
+			{  // table
+				widget::param wpt(vtx::irect(250, 550, 400, 200));
+				widget_table::param wpt_;
+				static const int lw = 32;  // ラベルの高さ
+				for(uint32_t i = 0; i < 8; ++i) {
+					widget::param wp(vtx::irect(0, lw * i, 400, lw));
+					widget_label::param wp_((boost::format("Item gpwql: %d") % i).str());
+					wp_.text_param_.placement_.hpt = vtx::placement::holizontal::LEFT;
+            		wp_.plate_param_.frame_width_ = 0;
+            		wp_.plate_param_.round_radius_ = 0;
+            		wp_.plate_param_.resizeble_ = true;
+					widget_label* w = wd.add_widget<widget_label>(wp, wp_);
+					wpt_.cell_.push_back(w);
+				}
+				table_ = wd.add_widget<widget_table>(wpt, wpt_);
 			}
 
 			// プリファレンスの取得
