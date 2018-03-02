@@ -400,7 +400,8 @@ std::cout << path << std::endl;
 				}
 				{
 					widget::param wp(vtx::irect(10, 150, w - 10 * 2, 40), name_dialog_);
-					widget_label::param wp_("", false);
+					auto& core = gl::core::get_instance();
+					widget_label::param wp_(core.get_current_path(), false);
 					proj_root_ = wd.add_widget<widget_label>(wp, wp_);
 				}
 			}
@@ -719,6 +720,7 @@ std::cout << path << std::endl;
 		{
 			edit_dialog_->save(pre);
 			name_dialog_->save(pre);
+			proj_root_->save(pre);
 		}
 
 
@@ -732,6 +734,7 @@ std::cout << path << std::endl;
 		{
 			edit_dialog_->load(pre);
 			name_dialog_->load(pre);
+			proj_root_->load(pre);
 		}
 	};
 }
