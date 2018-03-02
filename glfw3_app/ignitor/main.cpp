@@ -1,8 +1,10 @@
 //=====================================================================//
 /*! @file
-	@brief  メイン @n
-			Copyright 2017 Kunihito Hiramatsu
-	@author 平松邦仁 (hira@rvf-rc45.net)
+	@brief  メイン
+    @author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2017, 2018 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/RX/blob/master/LICENSE
 */
 //=====================================================================//
 #include "main.hpp"
@@ -49,7 +51,9 @@ int main(int argc, char** argv)
 
 	director.install_scene<start_app>();
 
-	while(!core.get_exit_signal()) {
+	bool exitloop = false;
+	while(!exitloop) {
+
 		core.service();
 
 		glClearColor(0, 0, 0, 255);
@@ -64,10 +68,20 @@ int main(int argc, char** argv)
 
 		director.render();
 
+		if(core.get_exit_signal()) {
+			if(director.get().exit_func_ != nullptr) {
+				bool ret = director.get().exit_func_();
+				if(ret) {
+					exitloop = true;
+				}
+			} else {
+				exitloop = true;
+			}
+		}
 		core.flip_frame();
-
 //		director.at().sound_.service();
 	}
+
 	// プログラム終了の廃棄
 	director.erase_scene();
 	director.render();

@@ -1,9 +1,11 @@
 #pragma once
 //=====================================================================//
 /*! @file
-	@brief  共有ヘッダー @n
-			Copyright 2017 Kunihito Hiramatsu
-	@author 平松邦仁 (hira@rvf-rc45.net)
+	@brief  共有ヘッダー
+    @author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2017, 2018 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/RX/blob/master/LICENSE
 */
 //=====================================================================//
 // #include "snd_io/sound.hpp"
@@ -30,11 +32,13 @@ namespace app {
 		gui::widget_director	widget_director_;
 		gui::ui_policy			ui_policy_;
 
-		sys::preference		preference_;
+		sys::preference			preference_;
+
+		std::function<bool ()>	exit_func_;
 
 //		core() : sound_()
 		core() :
 			     widget_director_(), ui_policy_(widget_director_)
-			   , preference_() { }
+			   , preference_(), exit_func_() { }
 	};
 }
