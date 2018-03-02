@@ -80,7 +80,7 @@ STDLIBS		=
 ifeq ($(SYSTEM),WIN)
 LOCAL_PATH	=	/mingw64
 OPTLIBS		=	opengl32 glfw3 glew32 \
-				comdlg32 \
+				comdlg32 hid setupapi ksguid \
 				ws2_32 wsock32 \
 				pthread \
 				png turbojpeg jpeg openjp2 \
