@@ -3,7 +3,7 @@
 /*! @file
     @brief  イグナイター・アプリケーション・クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2018 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/RX/blob/master/LICENSE
 */
@@ -48,6 +48,8 @@ namespace app {
 
 		std::string				ip_;
 
+		uint32_t				exit_loop_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -61,7 +63,7 @@ namespace app {
 ///			client_(io_service_),
 			client_(),
 			delay_client_(60), connect_client_(false), start_client_(false),
-			ip_()
+			ip_(), exit_loop_(60)
 		{ }
 
 
@@ -73,6 +75,15 @@ namespace app {
 		void initialize()
 		{
 			root_menu_.initialize();
+#if 0
+			director_.at().exit_func_ = [=]() {
+				std::cout << "Recive EXIT" << std::endl;
+				if(exit_loop_ > 0) {
+					--exit_loop_;
+				}
+				return exit_loop_ == 0;
+			};
+#endif
 		}
 
 
