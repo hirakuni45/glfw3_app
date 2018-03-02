@@ -17,6 +17,7 @@
 #include "widgets/widget_filer.hpp"
 #include "utils/input.hpp"
 #include "utils/format.hpp"
+#include "utils/serial_win32.hpp"
 
 #include "project.hpp"
 #include "inspection.hpp"
@@ -68,6 +69,7 @@ namespace app {
 		gui::widget_check*		cont_connect_;
 		gui::widget_label*		cont_setting_ip_[4];
 		gui::widget_label*		cont_setting_cmds_;
+		gui::widget_list*		cont_setting_serial_;
 		gui::widget_button*		cont_setting_exec_;
 
 		gui::widget_dialog*		info_dialog_;
@@ -129,6 +131,10 @@ namespace app {
 		uint32_t		crm_id_;
 		uint32_t		wdm_id_[4];
 		uint32_t		time_out_;
+
+		typedef device::serial_win32 SERIAL;
+		SERIAL				serial_;
+		SERIAL::name_list	serial_list_;
 
 		void mctrl_service()
 		{
@@ -213,7 +219,8 @@ namespace app {
 			run_(nullptr), info_(nullptr),
 			cont_setting_dialog_(nullptr),
 		   	cont_connect_(nullptr), cont_setting_ip_{ nullptr },
-			cont_setting_cmds_(nullptr), cont_setting_exec_(nullptr),
+			cont_setting_cmds_(nullptr), cont_setting_serial_(nullptr),
+			cont_setting_exec_(nullptr),
 			info_dialog_(nullptr), msg_dialog_(nullptr),
 			inspection_(d, client, ilock, wave_cap_),
 			project_(d),
@@ -223,7 +230,9 @@ namespace app {
 			task_(task::idle), unit_id_(0), wait_(0), retry_(0),
 			err_dialog_(nullptr), okc_dialog_(nullptr),
 			mctrl_task_(mctrl_task::idle), mctrl_delay_(0), mctrl_id_(0),
-			dc2_id_(0), crm_id_(0), wdm_id_{ 0 }, time_out_(0)
+			dc2_id_(0), crm_id_(0), wdm_id_{ 0 }, time_out_(0),
+
+			serial_(), serial_list_()
 			{ }
 
 
@@ -427,9 +436,6 @@ namespace app {
 					widget::param wp(vtx::irect(20, 50, 100, 40), root);
 					widget_check::param wp_("接続");
 					cont_connect_ = wd.add_widget<widget_check>(wp, wp_);
-///					cont_connect_->at_local_param().select_func_ = [=](bool f) {
-///						client_.start();
-///					};
 				}
 				int ipw = 60;  // IP 設定幅
 				int ips = 20;  // IP 設定隙間
@@ -457,6 +463,11 @@ namespace app {
 					widget::param wp(vtx::irect(10, 100, w - 10 * 2, 40), root);
 					widget_label::param wp_("", false);
 					cont_setting_cmds_ = wd.add_widget<widget_label>(wp, wp_);
+				}
+				{  // コントローラー・シリアル・ポート
+					widget::param wp(vtx::irect(10, 150, 260, 40), root);
+					widget_list::param wp_;
+					cont_setting_serial_ = wd.add_widget<widget_list>(wp, wp_);
 				}
 				{  // コントローラー・コマンド実行ボタン
 					widget::param wp(vtx::irect(w - 110, 150, 100, 40), root);
@@ -537,7 +548,7 @@ namespace app {
 		{
 			// ネットワーク接続時
 			if(!init_client_ && client_.probe()) {
-//				mctrl_task_ = mctrl_task::init_icm;
+				mctrl_task_ = mctrl_task::init_icm;
 				init_client_ = true;
 			}
 
@@ -591,6 +602,18 @@ namespace app {
 					}
 				}
 				info_id_ = inf.id_;
+			}
+
+			// シリアルポート
+			if(serial_list_.empty() || !serial_.compare(serial_list_)) {
+				serial_.create_list();
+				serial_list_ = serial_.get_list();
+				utils::strings list;
+				for(const auto& t : serial_list_) {
+					list.push_back(t.port);
+				}
+				cont_setting_serial_->get_menu()->build(list);
+                cont_setting_serial_->select(0);
 			}
 
 			if(cont_setting_exec_ != nullptr) {
