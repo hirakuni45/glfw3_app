@@ -29,16 +29,22 @@ namespace gui {
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
 
-			std::vector<widget_null*>	cell_;
+			std::vector<widget*>	cell_;
 
-			param() : cell_()
+			bool		scroll_ctrl_;	///< スクロール・コントロール（マウスのダイアル）
+
+			param() : cell_(), scroll_ctrl_(true)
 			{ }
 		};
 
 	private:
 		widget_director&	wd_;
 
-		param		param_;
+		param				param_;
+
+		vtx::iposs			ref_poss_;
+		vtx::ipos			ref_size_;
+		vtx::fpos			offset_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -47,7 +53,7 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_table(widget_director& wd, const widget::param& bp, const param& p) :
-			widget(bp), wd_(wd), param_(p)
+			widget(bp), wd_(wd), param_(p), ref_poss_(), ref_size_(0), offset_(0.0f)
 		{ }
 
 
@@ -125,11 +131,21 @@ namespace gui {
 			at_param().state_.set(widget::state::SERVICE);
 			at_param().state_.set(widget::state::MOVE_ROOT, false);
 			at_param().state_.set(widget::state::RESIZE_ROOT);
-			at_param().state_.set(widget::state::CLIP_PARENTS);
-			at_param().state_.set(widget::state::AREA_ROOT);
+//			at_param().state_.set(widget::state::CLIP_PARENTS);
+//			at_param().state_.set(widget::state::AREA_ROOT);
 
+			// 基準の位置をセーブしておく
 			for(auto w : param_.cell_) {
-
+				ref_poss_.push_back(w->at_param().rect_.org);
+				if(ref_size_.x < w->get_param().rect_.end_x()) {
+					ref_size_.x = w->get_param().rect_.end_x();
+				}
+				if(ref_size_.y < w->get_param().rect_.end_y()) {
+					ref_size_.y = w->get_param().rect_.end_y();
+				}
+				w->at_param().parents_ = this;
+				w->at_param().state_.set(widget::state::CLIP_PARENTS);
+//				w->at_param().state_.set(widget::state::AREA_ROOT);
 			}
 		}
 
@@ -141,6 +157,26 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void update() override
 		{
+			if(get_focus()) {
+				auto szy = get_param().rect_.size.y;
+				if(ref_size_.y > szy) {
+					if(param_.scroll_ctrl_) {
+						const vtx::spos& scr = wd_.get_scroll();
+						offset_.y += static_cast<float>(scr.y * 8);
+						if(offset_.y > 0.0f) offset_.y = 0.0f;
+						else if(offset_.y < -static_cast<float>(ref_size_.y - szy)) {
+							offset_.y = -static_cast<float>(ref_size_.y - szy);
+						}
+					}
+				}
+			}
+
+			uint32_t i = 0;
+			for(auto w : param_.cell_) {
+				w->at_param().rect_.org.x = ref_poss_[i].x + static_cast<int>(offset_.x);
+				w->at_param().rect_.org.y = ref_poss_[i].y + static_cast<int>(offset_.y);
+				++i;
+			}
 		}
 
 
@@ -165,7 +201,6 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void render() override
 		{
-
 		}
 
 
@@ -184,6 +219,7 @@ namespace gui {
 			path += wd_.create_widget_name(this);
 
 			int err = 0;
+			if(!pre.put_position(path + "/locate",  vtx::ipos(get_rect().org))) ++err;
 
 			return err == 0;
 		}
@@ -203,7 +239,12 @@ namespace gui {
 			path += wd_.create_widget_name(this);
 
 			int err = 0;
-
+			vtx::ipos p;
+			if(pre.get_position(path + "/locate", p)) {
+				at_rect().org = p;
+			} else {
+				++err;
+			}
 			return err == 0;
 		}
 	};
