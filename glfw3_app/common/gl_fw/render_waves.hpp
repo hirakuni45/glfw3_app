@@ -40,6 +40,20 @@ namespace view {
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
+			@brief  計測パラメーター
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		struct measure_param {
+			uint32_t	org_ch_;	///< 開始チャネル
+			float		org_slope_;	///< 開始スロープ割合（負なら立下り）
+			uint32_t	fin_ch_;	///< 終端チャネル
+			float		fin_slope_;	///< 終端スロープ割合（負なら立下り）
+			measure_param() : org_ch_(0), org_slope_(0.0f), fin_ch_(0), fin_slope_(0.0f) { }
+		};
+
+
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
 			@brief  チャネル描画パラメーター
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -76,14 +90,12 @@ namespace view {
 			int32_t		time_len_;		///< 時間軸長さ
 			uint16_t	time_stipple_;	///< 時間軸破線パターン
 			bool		time_enable_;	///< 時間軸有効
-//			bool		time_anime_;	///< 時間軸アニメーション
 
 			img::rgba8	volt_color_;	///< 電圧軸カラー
 			int32_t		volt_org_;		///< 電圧軸開始
 			int32_t		volt_len_;		///< 電圧軸長さ
 			uint16_t	volt_stipple_;	///< 電圧軸破線パターン
 			bool		volt_enable_;	///< 電圧軸有効
-//			bool		volt_anime_;	///< 電圧軸アニメーション
 
 			img::rgba8	trig_color_;	///< トリガー軸カラー
 			int32_t		trig_pos_;		///< トリガー軸位置（時間軸）
@@ -412,6 +424,7 @@ namespace view {
 						update = true;
 					}
 				}
+
 				int mod_x = 0;
 				if(update || t.param_.update_) {
 					float gain = t.param_.gain_;
@@ -586,6 +599,100 @@ namespace view {
 			a.average_ = sum / static_cast<float>(n);
 
 			return a;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  スキャン
+			@param[in]	ch		チャネル
+			@param[in]	wsmp	サンプリング周期
+			@param[in]	org		開始時間
+			@param[in]	len		スキャン時間
+			@param[in]	slope	スロープ（負の場合、立下り）
+			@return 計測時間
+		*/
+		//-----------------------------------------------------------------//
+		double scan(uint32_t ch, double wsmp, double org, double len, float slope) const
+		{
+			const ch_t& t = ch_[ch];
+
+			// 最小値、最大値の取得
+			float min = get(ch, wsmp, org);
+			float max = min;
+			std::vector<float> tmp;
+			for(double o = org; o < (org + len); o += wsmp) {
+				auto w = get(ch, wsmp, o);
+				if(min > w) min = w;
+				else if(max < w) max = w;
+				tmp.push_back(w);
+			}
+			if(tmp.empty()) return 0.0;
+
+			// std::cout << "Samples: " << tmp.size() << std::endl;
+
+			// リミット値の決定
+			float limit;
+			if(slope < 0.0f) {
+				limit = ((max - min) * -slope) + min;
+			} else {
+				limit = ((max - min) *  slope) + min;
+			}
+
+			// 勾配領域の検出と取得
+			double area_org = org;
+			double area_fin = org;
+			double o = org;
+			char f  = '.';
+			char bf = '.';
+			for(auto w : tmp) {
+				if(w <= min) f = '-';
+				else if(w >= max) f = '+';
+				if(bf == '-' && f == '+') {
+					std::cout << "Pos: " << o << std::endl;
+				}
+				if(bf == '+' && f == '-') {
+					std::cout << "Neg: " << o << std::endl;
+				}
+				bf = f;
+				o += wsmp;
+			}
+
+std::cout << ch << "AreaOrg: " << area_org << ", AreaFin: " << area_fin << std::endl;
+
+			o = org;
+			for(auto w : tmp) {
+				if(area_org <= o && o <= area_fin) {
+					if(slope < 0.0f) {
+						if(w < limit) {
+							return o;
+						}
+					} else {  // positive
+						if(w > limit) {
+							return o;
+						}
+					}
+				}
+				o += wsmp;
+			}
+			return 0.0;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  計測
+			@param[in]	wsmp	サンプリング周期			
+			@param[in]	param	計測パラメータ
+			@return 計測時間
+		*/
+		//-----------------------------------------------------------------//
+		double measure(double wsmp, double org, double len, const measure_param& param) const
+		{
+			auto a = scan(param.org_ch_, wsmp, org, len, param.org_slope_);
+			auto b = scan(param.fin_ch_, wsmp, org, len, param.fin_slope_);
+std::cout << a << ", " << b << std::endl;
+			return b - a;
 		}
 
 

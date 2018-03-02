@@ -33,7 +33,7 @@
 #include "interlock.hpp"
 #include "test.hpp"
 
-// #define TEST_SIN
+#define TEST_SIN
 
 namespace app {
 
@@ -75,7 +75,12 @@ namespace app {
 		struct sample_param {
 			double	rate;
 			double	gain[4];
-			sample_param() : rate(1e-6), gain{ 1.0 } { }
+			sample_param() : rate(1e-6) {
+				gain[0] = 1.0;
+				gain[1] = 1.0;
+				gain[2] = 1.0;
+				gain[3] = 1.0;
+			}
 		};
 
 	private:
@@ -99,6 +104,13 @@ namespace app {
 		gui::widget_frame*		tools_;
 		gui::widget_check*		annotate_;
 		gui::widget_check*		smooth_;
+		gui::widget_list*		org_trg_;
+		gui::widget_spinbox*	org_slope_;
+		gui::widget_list*		fin_trg_;
+		gui::widget_spinbox*	fin_slope_;
+		gui::widget_text*		ch_to_time_;
+		uint32_t				mese_id_before_;
+		uint32_t				mese_id_;
 
 		gui::widget_sheet*		share_frame_;
 
@@ -825,6 +837,8 @@ namespace app {
 			frame_(nullptr), core_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
 			tools_(nullptr), annotate_(nullptr), smooth_(nullptr),
+			org_trg_(nullptr), org_slope_(nullptr), fin_trg_(nullptr), fin_slope_(nullptr),
+			ch_to_time_(nullptr), mese_id_before_(0), mese_id_(0),
 			share_frame_(nullptr),
 			sample_param_(),
 			wdm_id_{ 0 }, treg_id_{ 0 },
@@ -970,6 +984,64 @@ namespace app {
 				widget_check::param wp_("Smooth");
 				smooth_ = wd.add_widget<widget_check>(wp, wp_);
 			}
+			{	// 計測開始チャネルとスロープ
+				widget::param wp(vtx::irect(10, 20 + 80, 110, 40), tools_);
+				widget_list::param wp_;
+				wp_.init_list_.push_back("CH1 ↑");
+				wp_.init_list_.push_back("CH1 ↓");
+				wp_.init_list_.push_back("CH2 ↑");
+				wp_.init_list_.push_back("CH2 ↓");
+				wp_.init_list_.push_back("CH3 ↑");
+				wp_.init_list_.push_back("CH3 ↓");
+				wp_.init_list_.push_back("CH4 ↑");
+				wp_.init_list_.push_back("CH4 ↓");
+				org_trg_ = wd.add_widget<widget_list>(wp, wp_);
+				org_trg_->at_local_param().select_func_ = [=](const std::string& t, uint32_t p) {
+					++mese_id_;
+				};
+			}
+			{	// 計測開始トリガー・レベル
+				widget::param wp(vtx::irect(130, 20 + 80, 100, 40), tools_);
+				widget_spinbox::param wp_(0, 50, 100);
+				org_slope_ = wd.add_widget<widget_spinbox>(wp, wp_);
+				org_slope_->at_local_param().select_func_ =
+					[=](widget_spinbox::state st, int before, int newpos) {
+					++mese_id_;
+					return (boost::format("%d") % newpos).str();
+				};
+			}
+			{	// 計測終了チャネルとスロープ
+				widget::param wp(vtx::irect(10, 20 + 130, 110, 40), tools_);
+				widget_list::param wp_;
+				wp_.init_list_.push_back("CH1 ↑");
+				wp_.init_list_.push_back("CH1 ↓");
+				wp_.init_list_.push_back("CH2 ↑");
+				wp_.init_list_.push_back("CH2 ↓");
+				wp_.init_list_.push_back("CH3 ↑");
+				wp_.init_list_.push_back("CH3 ↓");
+				wp_.init_list_.push_back("CH4 ↑");
+				wp_.init_list_.push_back("CH4 ↓");
+				fin_trg_ = wd.add_widget<widget_list>(wp, wp_);
+				fin_trg_->at_local_param().select_func_ = [=](const std::string& t, uint32_t p) {
+					++mese_id_;
+				};
+
+			}
+			{	// 計測終了トリガー・レベル
+				widget::param wp(vtx::irect(130, 20 + 130, 100, 40), tools_);
+				widget_spinbox::param wp_(0, 50, 100);
+				fin_slope_ = wd.add_widget<widget_spinbox>(wp, wp_);
+				fin_slope_->at_local_param().select_func_ =
+					[=](widget_spinbox::state st, int before, int newpos) {
+					++mese_id_;
+					return (boost::format("%d") % newpos).str();
+				};
+			}
+			{	// 計測時間表示
+				widget::param wp(vtx::irect(10, 20 + 180, 120, 40), tools_);
+				widget_text::param wp_;
+				ch_to_time_ = wd.add_widget<widget_text>(wp, wp_);
+			}
 
 
 			{	// 共有フレーム（プロパティシート）
@@ -987,14 +1059,13 @@ namespace app {
 
 			time_.init(director_, share_frame_);
 
-///			load();
-
 			waves_.create_buffer();
 
 			waves_.at_param(0).color_ = img::rgba8(255,  64, 255, 255);
 			waves_.at_param(1).color_ = img::rgba8( 64, 255, 255, 255);
 			waves_.at_param(2).color_ = img::rgba8(255, 255,  64, 255);
 			waves_.at_param(3).color_ = img::rgba8( 64, 255,  64, 255);
+
 #ifdef TEST_SIN
 			waves_.build_sin(0, sample_param_.rate, 15000.0, 1.0f);
 			waves_.build_sin(1, sample_param_.rate, 10000.0, 0.75f);
@@ -1037,6 +1108,28 @@ namespace app {
 				}
 			}
 
+			if(mese_id_before_ != mese_id_) {  // チャネル間計測
+				double len = get_time_unit_(time_.scale_->get_select_pos());
+				len *= waves_.get_info().grid_step_;
+				WAVES::measure_param param;
+
+				param.org_ch_ = org_trg_->get_select_pos() / 2;
+				float base = 100.0f;
+				if(org_trg_->get_select_pos() & 1) base = -100.0f;
+				param.org_slope_ = static_cast<float>(org_slope_->get_select_pos()) / base;
+
+				param.fin_ch_ = fin_trg_->get_select_pos() / 2;
+				base = 100.0f;
+				if(fin_trg_->get_select_pos() & 1) base = -100.0f;
+				param.fin_slope_ = static_cast<float>(fin_slope_->get_select_pos()) / base;
+
+				auto tm = waves_.measure(sample_param_.rate, 0.0, len, param);
+
+				ch_to_time_->set_text((boost::format("%f") % tm).str());
+				mese_id_before_ = mese_id_;
+			}
+
+#if 0
 			// 仮熱抵抗表示
 			for(uint32_t i = 0; i < 2; ++i) {
 				auto id = client_.get_mod_status().treg_id_[i];
@@ -1046,6 +1139,7 @@ namespace app {
 					treg_id_[i] = id;
 				}
 			}
+#endif
 
 #if 0
 			++test_timer_;
@@ -1092,6 +1186,11 @@ namespace app {
 			time_.load(pre);
 
 			measure_time_.load(pre);
+
+			org_trg_->load(pre);
+			org_slope_->load(pre);
+			fin_trg_->load(pre);
+			fin_slope_->load(pre);
 		}
 
 
@@ -1131,6 +1230,11 @@ namespace app {
 			time_.save(pre);
 
 			measure_time_.save(pre);
+
+			org_trg_->save(pre);
+			org_slope_->save(pre);
+			fin_trg_->save(pre);
+			fin_slope_->save(pre);
 		}
 
 
