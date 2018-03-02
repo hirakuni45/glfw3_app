@@ -74,6 +74,8 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		void set_path(const std::string& path, const std::string& filter = "") {
+			if(path.empty()) return;
+
 			pthread_mutex_lock(&file_t_.sync_);
 			ans_ = file_t_.ans_;
 			file_t_.path_ = path;

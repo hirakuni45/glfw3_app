@@ -176,7 +176,7 @@ namespace utils {
 	/*!
 		@brief	ファイル情報リストを正規表現フィルターで再構成
 		@param[in]	src		fileinfos クラス
-		@param[in]	filter	拡張子文字列
+		@param[in]	filter	拡張子文字列 (ex: "xxx,yyy,...")
 		@param[in]	cap		「false」なら大文字小文字を判定する
 		@param[in]	last	「false」なら最初に現れた「.」にマッチ
 		@return		出力列
