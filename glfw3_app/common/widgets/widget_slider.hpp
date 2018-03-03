@@ -68,8 +68,8 @@ namespace gui {
 
 		vtx::spos			handle_offset_;
 
-		gl::mobj::handle	base_h_;	///< ベース
-		gl::mobj::handle	hand_h_;	///< ハンドル
+		gl::mobj::handle	base_h_;		///< ベース
+		gl::mobj::handle	hand_h_;		///< ハンドル
 
 		float               position_;
 
@@ -194,6 +194,24 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		slider_param& at_slider_param() { return param_.slider_param_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	スライダー位置の取得
+			@return スライダー位置
+		*/
+		//-----------------------------------------------------------------//
+		float get_position() const { return param_.slider_param_.position_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	スライダー位置の参照
+			@return スライダー位置
+		*/
+		//-----------------------------------------------------------------//
+		float& at_position() { return param_.slider_param_.position_; }
 
 
 		//-----------------------------------------------------------------//
