@@ -9,6 +9,7 @@
 */
 //=====================================================================//
 #include "widgets/widget_director.hpp"
+#include "widgets/widget_null.hpp"
 #include "widgets/widget_scrollbar.hpp"
 
 namespace gui {
@@ -31,25 +32,27 @@ namespace gui {
 
 			std::vector<widget*>	cell_;
 
+			vtx::ipos	item_size_;		///< アイテムの大きさ
+
 			bool		scroll_bar_h_;	///< 水平スクロール・バーによる制御
 			bool		scroll_bar_v_;	///< 垂直スクロール・バーによる制御
 			bool		scroll_ctrl_;	///< スクロール・コントロール（マウスのダイアル）
 
-			param() : cell_(), scroll_bar_h_(false), scroll_bar_v_(false),
-				scroll_ctrl_(true)
+			param() : cell_(), item_size_(0),
+				scroll_bar_h_(false), scroll_bar_v_(false), scroll_ctrl_(true)
 			{ }
 		};
 
 	private:
 		widget_director&	wd_;
 
+		param				param_;
+
+		widget_null*		base_;
 		widget_scrollbar*	scroll_h_;
 		widget_scrollbar*	scroll_v_;
 
-		param				param_;
-
-		vtx::iposs			ref_poss_;
-		vtx::ipos			ref_size_;
+		vtx::ipos			max_;
 		vtx::fpos			offset_;
 		vtx::ipos			chip_size_;
 
@@ -60,9 +63,9 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_table(widget_director& wd, const widget::param& bp, const param& p) :
-			widget(bp), wd_(wd), scroll_h_(nullptr), scroll_v_(nullptr),
-			param_(p), ref_poss_(), ref_size_(0), offset_(0.0f),
-			chip_size_(0)
+			widget(bp), wd_(wd), param_(p),
+			base_(nullptr), scroll_h_(nullptr), scroll_v_(nullptr),
+			max_(0), offset_(0.0f), chip_size_(0)
 		{ }
 
 
@@ -129,6 +132,24 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	水平スクロールバーの取得
+			@return 水平スクロールバー
+		*/
+		//-----------------------------------------------------------------//
+		widget_scrollbar* get_scrollbar_h() const { return scroll_h_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	垂直スクロールバーの取得
+			@return 垂直スクロールバー
+		*/
+		//-----------------------------------------------------------------//
+		widget_scrollbar* get_scrollbar_v() const { return scroll_v_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
@@ -139,44 +160,57 @@ namespace gui {
 			at_param().state_.set(widget::state::RESIZE_V_ENABLE, false);
 			at_param().state_.set(widget::state::SERVICE);
 			at_param().state_.set(widget::state::RESIZE_ROOT);
+//			at_param().state_.set(widget::state::CLIP_PARENTS);
 //			at_param().state_.set(widget::state::MOVE_STALL);
 //			at_param().state_.set(widget::state::MOVE_ROOT, false);
-//			at_param().state_.set(widget::state::CLIP_PARENTS);
 //			at_param().state_.set(widget::state::AREA_ROOT);
 
 			auto h = wd_.get_share_image().down_box_;
 			chip_size_ = wd_.at_mobj().get_size(h);
 
+			vtx::ipos msz = get_rect().size;
 			if(param_.scroll_bar_h_) {
-				widget::param wp(vtx::irect(chip_size_.x, get_rect().size.y - chip_size_.y,
-					get_rect().size.x - chip_size_.x * 2, chip_size_.y), this);
+				msz.y -= chip_size_.y;
+			}
+			if(param_.scroll_bar_v_) {
+				msz.x -= chip_size_.x;
+			}
+
+			for(auto w : param_.cell_) {  // 子の最大値をスキャン
+				if(max_.x < w->get_rect().end_x()) max_.x = w->get_rect().end_x();
+				if(max_.y < w->get_rect().end_y()) max_.y = w->get_rect().end_y();
+			}
+			{
+				widget::param wp(vtx::irect(0, 0, max_.x, max_.y), this);
+				wp.state_.set(widget::state::CLIP_PARENTS);
+				widget_null::param wp_;
+				base_ = wd_.add_widget<widget_null>(wp, wp_);
+			}
+			for(auto w : param_.cell_) {  // 子の基本設定
+				w->at_param().parents_ = base_;
+				w->at_param().state_.set(widget::state::CLIP_PARENTS);
+			}
+
+			if(param_.scroll_bar_h_) {
+				widget::param wp(vtx::irect(0, 0, 0, 0), this);
 				widget_scrollbar::param wp_(widget_scrollbar::style::HOLIZONTAL);
+				wp_.handle_ratio_ = static_cast<float>(msz.x) / static_cast<float>(max_.x);
+				wp_.scroll_step_  =
+					static_cast<float>(param_.item_size_.x) / static_cast<float>(max_.x - msz.x);
+				wp_.scroll_gain_  = wp_.scroll_step_ * 0.5f;
 				scroll_h_ = wd_.add_widget<widget_scrollbar>(wp, wp_);
-				at_rect().size.y -= chip_size_.y;
 			}
 			if(param_.scroll_bar_v_) {
 				widget::param wp(vtx::irect(0, 0, 0, 0), this);
 				widget_scrollbar::param wp_(widget_scrollbar::style::VERTICAL);
+				wp_.handle_ratio_ = static_cast<float>(msz.y) / static_cast<float>(max_.y);
+				wp_.scroll_step_  =
+					static_cast<float>(param_.item_size_.y) / static_cast<float>(max_.y - msz.y);
+				wp_.scroll_gain_  = wp_.scroll_step_ * 0.5f;
 				scroll_v_ = wd_.add_widget<widget_scrollbar>(wp, wp_);
-//				at_rect().size.x -= chip_size_.x;
 			}
 
-			// 基準の位置をセーブしておく
-			for(auto w : param_.cell_) {
-				ref_poss_.push_back(w->at_param().rect_.org);
-				if(ref_size_.x < w->get_param().rect_.end_x()) {
-					ref_size_.x = w->get_param().rect_.end_x();
-				}
-				if(ref_size_.y < w->get_param().rect_.end_y()) {
-					ref_size_.y = w->get_param().rect_.end_y();
-				}
-				w->at_param().parents_ = this;
-				w->at_param().state_.set(widget::state::CLIP_PARENTS);
-//				w->at_param().state_.set(widget::state::MOVE_STALL);
-//				w->at_param().state_.set(widget::state::MOVE_ROOT, false);
-//				w->at_param().state_.set(widget::state::AREA_ROOT);
-			}
-			// 親の状態を子に継承
+			// 親の状態を子に反映
 			if(get_param().parents_ != nullptr) {
 				wd_.enable(this, get_param().parents_->get_enable(), true);
 			}
@@ -190,21 +224,25 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void update() override
 		{
+			if(param_.scroll_bar_v_ && scroll_v_ != nullptr) {
+				auto pr = scroll_v_->get_slider()->get_slider_param().position_;
+				offset_.y = pr * static_cast<float>(max_.y - get_rect().size.y);
+			}
+
 			if(get_focus()) {
-				const vtx::spos& size = get_rect().size;
-				if(ref_size_.y > size.y) {
+#if 0
+				if(get_rect().size.y > size.y) {
 					if(param_.scroll_ctrl_) {
 						const vtx::spos& scr = wd_.get_scroll();
 						offset_.y += static_cast<float>(scr.y * 8);
 						if(offset_.y > 0.0f) offset_.y = 0.0f;
-						else if(offset_.y < -static_cast<float>(ref_size_.y - size.y)) {
-							offset_.y = -static_cast<float>(ref_size_.y - size.y);
+						else if(offset_.y < -static_cast<float>(get_rect().size.y - size.y)) {
+							offset_.y = static_cast<float>(get_rect().size.y - size.y);
 						}
 					}
 				}
-
+#endif
 //				vtx::spos pos(size.x - chip_size_.x, 0);
-
 #if 0
 				gl::core& core = gl::core::get_instance();
 				const gl::device& dev = core.get_device();
@@ -226,13 +264,6 @@ namespace gui {
 				}
 #endif
 			}
-
-			uint32_t i = 0;
-			for(auto w : param_.cell_) {
-				w->at_param().rect_.org.x = ref_poss_[i].x + static_cast<int>(offset_.x);
-				w->at_param().rect_.org.y = ref_poss_[i].y + static_cast<int>(offset_.y);
-				++i;
-			}
 		}
 
 
@@ -244,9 +275,11 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void service() override
 		{
-			if(!get_state(widget::state::ENABLE)) {
+			if(!get_enable()) {
 				return;
 			}
+			base_->at_rect().org.x = -offset_.x;
+			base_->at_rect().org.y = -offset_.y;
 		}
 
 
@@ -257,26 +290,6 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void render() override
 		{
-#if 0
-			using namespace gl;
-
-			if(param_.scroll_bar_h_ || param_.scroll_bar_v_) {
-				core& core = core::get_instance();
-				const vtx::spos& siz = core.get_rect().size;
-				wd_.at_mobj().setup_matrix(siz.x, siz.y);
-				wd_.set_TSC();
-			}
-			if(param_.scroll_bar_v_) {  // チップの描画
-				gl::mobj::handle uph = wd_.get_share_image().up_box_;
-				gl::mobj::handle dnh = wd_.get_share_image().down_box_;
-				const vtx::spos& bs = wd_.at_mobj().get_size(uph);  // uph, dnh は同じ大きさ
-				const vtx::spos& size = get_rect().size;
-				vtx::spos pos(size.x, 0);
-				wd_.at_mobj().draw(uph, gl::mobj::attribute::normal, pos);
-				pos.y = size.y - bs.y;
-				wd_.at_mobj().draw(dnh, gl::mobj::attribute::normal, pos);
-			}
-#endif
 		}
 
 
