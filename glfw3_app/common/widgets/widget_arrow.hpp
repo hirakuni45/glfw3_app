@@ -216,10 +216,6 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void update() override
 		{
-			if(!get_state(widget::state::ENABLE)) {
-				return;
-			}
-
 			if(get_select()) {
 				++count_;
 				if(count_ >= param_.delay_) {
