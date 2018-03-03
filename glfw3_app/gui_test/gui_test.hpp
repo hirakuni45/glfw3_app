@@ -502,9 +502,11 @@ namespace app {
 			}
 
 
-			{  // table
+			if(1) {  // table
 				widget::param wpt(vtx::irect(250, 550, 400, 200));
 				widget_table::param wpt_;
+///				wpt_.scroll_bar_h_ = true;
+				wpt_.scroll_bar_v_ = true;
 				static const int lw = 32;  // ラベルの高さ
 				for(uint32_t i = 0; i < 8; ++i) {
 					widget::param wp(vtx::irect(0, lw * i, 400, lw));
