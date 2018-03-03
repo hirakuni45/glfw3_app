@@ -241,11 +241,12 @@ namespace gui {
 			float		position_;		///< 位置
 			float		handle_ratio_;	///< ハンドル割合
 			float		grid_;			///< グリッド
+			float		step_;			///< ステップ
 			bool		accelerator_;	///< アクセレーターを有効にする場合
 			bool		handle_resize_;	///< ハンドル・リサイズ
 			slider_param(float pos = 0.0f, direction dir = direction::HOLIZONTAL) :
 				direction_(dir), position_(pos),
-				handle_ratio_(0.1f), grid_(0.0f),
+				handle_ratio_(0.1f), grid_(0.0f), step_(0.1f),
 				accelerator_(true), handle_resize_(true)
 			{ }
 		};
