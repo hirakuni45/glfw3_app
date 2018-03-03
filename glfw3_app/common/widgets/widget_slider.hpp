@@ -3,7 +3,7 @@
 /*!	@file
 	@brief	GUI Widget スライダー・クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2018 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -42,7 +42,6 @@ namespace gui {
 			bool					hand_ctrl_;		///< ハンドル・コントロール
 			bool					scroll_ctrl_;	///< スクロール・コントロール（マウスのダイアル）
 			bool					select_fin_;	///< 選択が完了した場合に呼び出す
-			bool					arrow_ctrl_;	///< 矢印制御
 			float					scroll_gain_;	///< スクロール・ゲイン
 
 			select_func_type		select_func_;
@@ -53,7 +52,7 @@ namespace gui {
 				color_param_(widget_director::default_slider_color_),
 				slider_param_(pos, dir),
 				base_image_(0), hand_image_(0),
-				hand_ctrl_(true),　scroll_ctrl_(true), select_fin_(false), arrow_ctrl_(false),
+				hand_ctrl_(true), scroll_ctrl_(true), select_fin_(false),
 				scroll_gain_(0.01f),
 				select_func_(nullptr)
 				{ }
@@ -122,7 +121,8 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_slider(widget_director& wd, const widget::param& wp, const param& p) :
 			widget(wp), wd_(wd), param_(p), ref_position_(0.0f),
-			handle_offset_(0), base_h_(0), hand_h_(0), position_(-1.0f)
+			handle_offset_(0), base_h_(0), hand_h_(0),
+			position_(-1.0f)
 		{ }
 
 
@@ -210,6 +210,7 @@ namespace gui {
 			at_param().state_.set(widget::state::MOVE_STALL);
 
 			auto size = get_rect().size;
+
 			img::paint pa;
 			{
 				const widget::plate_param& pp = param_.plate_param_;
@@ -240,7 +241,9 @@ namespace gui {
 					size.y = static_cast<float>(size.y - wf * 2) * hr;
 				}
 				plate_param pp = param_.plate_param_;
-				pp.round_radius_ -= param_.plate_param_.frame_width_;
+				if(pp.round_radius_ > param_.plate_param_.frame_width_) {
+					pp.round_radius_ -= param_.plate_param_.frame_width_;
+				}
 				pp.frame_width_ = 0;
 				color_param cp = param_.color_param_;
 				cp.swap_color();
@@ -384,7 +387,6 @@ namespace gui {
 
 			if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) {
 				glPushMatrix();
-				vtx::srect rect;
 				if(wp.state_[widget::state::CLIP_PARENTS]) {
 					draw_mobj(wd_, base_h_, wp.clip_);
 				} else {
