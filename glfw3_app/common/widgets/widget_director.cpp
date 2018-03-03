@@ -42,6 +42,7 @@ namespace gui {
 	widget::color_param widget_director::default_slider_color_;
 	widget::color_param widget_director::default_progress_color_;
 	widget::color_param widget_director::default_check_color_;
+	widget::color_param widget_director::default_checkp_color_;
 	widget::color_param widget_director::default_list_color_;
 	widget::color_param widget_director::default_list_color_select_;
 	widget::color_param widget_director::default_menu_color_;
@@ -314,6 +315,9 @@ namespace gui {
 		fc.set( 72, 193, 241);
 		bc.set( 47,  72,  86);
 		default_check_color_ = widget::color_param(fc, bc);
+		fc.set( 72, 193, 241);
+		fc.set( 64, 130, 150);
+		default_checkp_color_ = widget::color_param(fc, bc);
 
 		fc.set( 48, 193, 251);
 		bc = fc * 0.7f;
@@ -426,15 +430,25 @@ namespace gui {
 
 			spos size(24);
 			img::paint fr;
-			widget::plate_param pp;
-			pp.frame_width_  = 4;
-			pp.round_radius_ = 4;
-			create_round_frame(fr, pp, default_check_color_, size);
+			{
+				widget::plate_param pp;
+				pp.frame_width_  = 4;
+				pp.round_radius_ = 4;
+				create_round_frame(fr, pp, default_check_color_, size);
+			}
 			share_img_.un_check_ = mobj_.install(&fr);
+
+			img::paint frp;
+			{
+				widget::plate_param pp;
+				pp.frame_width_  = 4;
+				pp.round_radius_ = 4;
+				create_round_frame(frp, pp, default_checkp_color_, size);
+			}
+///			share_img_.sl_check_ = mobj_.install(&frp);
 
 			img::paint pa;
 			pa = fr;
-
 			// スクエアドットでチェックされた見た目
 			pa.swap_color();
 			pa.fill_rect(8, 8, 8, 8);
@@ -463,6 +477,13 @@ namespace gui {
 			ss.push_back(spos(12-4, 16));
 			pa.fill_polygon(ss);
 			share_img_.up_box_ = mobj_.install(&pa);
+			pa = frp;
+			pa.swap_color();
+			ss.push_back(spos(12,    8));
+			ss.push_back(spos(12+4, 16));
+			ss.push_back(spos(12-4, 16));
+			pa.fill_polygon(ss);
+			share_img_.up_boxp_ = mobj_.install(&pa);
 
 			pa = fr;
 			pa.swap_color();
@@ -472,6 +493,14 @@ namespace gui {
 			ss.push_back(spos(12+4,  8));
 			pa.fill_polygon(ss);
 			share_img_.down_box_ = mobj_.install(&pa);
+			pa = frp;
+			pa.swap_color();
+			ss.clear();
+			ss.push_back(spos(12,   16));
+			ss.push_back(spos(12-4,  8));
+			ss.push_back(spos(12+4,  8));
+			pa.fill_polygon(ss);
+			share_img_.down_boxp_ = mobj_.install(&pa);
 
 			pa = fr;
 			pa.swap_color();
@@ -481,6 +510,14 @@ namespace gui {
 			ss.push_back(spos(8,  12+4));
 			pa.fill_polygon(ss);
 			share_img_.right_box_ = mobj_.install(&pa);
+			pa = frp;
+			pa.swap_color();
+			ss.clear();
+			ss.push_back(spos(16, 12));
+			ss.push_back(spos(8,  12-4));
+			ss.push_back(spos(8,  12+4));
+			pa.fill_polygon(ss);
+			share_img_.right_boxp_ = mobj_.install(&pa);
 
 			pa = fr;
 			pa.swap_color();
@@ -490,6 +527,14 @@ namespace gui {
 			ss.push_back(spos(16, 12-4));
 			pa.fill_polygon(ss);
 			share_img_.left_box_ = mobj_.install(&pa);
+			pa = frp;
+			pa.swap_color();
+			ss.clear();
+			ss.push_back(spos(8,  12));
+			ss.push_back(spos(16, 12+4));
+			ss.push_back(spos(16, 12-4));
+			pa.fill_polygon(ss);
+			share_img_.left_boxp_ = mobj_.install(&pa);
 
 			// ラジオボタン
 			pa.fill(img::rgba8(0, 0));

@@ -3,7 +3,7 @@
 /*!	@file
 	@brief	GUI Widget ディレクター（ヘッダー）
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2018 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -37,19 +37,23 @@ namespace gui {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct share_img {
-			gl::mobj::handle	un_check_;	///< チェックボタン解除
-			gl::mobj::handle	to_check_;	///< チェックボタン選択
+			gl::mobj::handle	un_check_;		///< チェックボタン解除
+			gl::mobj::handle	to_check_;		///< チェックボタン選択
 
-			gl::mobj::handle	un_radio_;	///< ラジオボタン解除
-			gl::mobj::handle	to_radio_;	///< ラジオボタン選択
+			gl::mobj::handle	un_radio_;		///< ラジオボタン解除
+			gl::mobj::handle	to_radio_;		///< ラジオボタン選択
 
-			gl::mobj::handle	minus_box_;	///< マイナス箱
-			gl::mobj::handle	plus_box_;	///< プラス箱
+			gl::mobj::handle	minus_box_;		///< マイナス箱
+			gl::mobj::handle	plus_box_;		///< プラス箱
 
-			gl::mobj::handle	up_box_;	///< up arrow
-			gl::mobj::handle	down_box_;	///< down arrow
-			gl::mobj::handle	left_box_;	///< left arrow
-			gl::mobj::handle	right_box_;	///< right arrow
+			gl::mobj::handle	up_box_;		///< up arrow
+			gl::mobj::handle	up_boxp_;		///< up arrow PUSH
+			gl::mobj::handle	down_box_;		///< down arrow
+			gl::mobj::handle	down_boxp_;		///< down arrow PUSH
+			gl::mobj::handle	left_box_;		///< left arrow
+			gl::mobj::handle	left_boxp_;		///< left arrow PUSH
+			gl::mobj::handle	right_box_;		///< right arrow
+			gl::mobj::handle	right_boxp_;	///< right arrow PUSH
 
 			gl::mobj::handle	VR_junction_;	///< 垂直、右、交差点（ト）
 			gl::mobj::handle	R_junction_;	///< 右、交差点（L）
@@ -59,7 +63,8 @@ namespace gui {
 			share_img() : un_check_(0), to_check_(0),
 				un_radio_(0), to_radio_(0),
 				minus_box_(0), plus_box_(0),
-				up_box_(0), down_box_(0), left_box_(0), right_box_(0),
+				up_box_(0), up_boxp_(0), down_box_(0), down_boxp_(0),
+				left_box_(0), left_boxp_(0), right_box_(0), right_boxp_(0),
 				VR_junction_(0), R_junction_(0), V_line_(0), H_line_(0)
 			{ }
 		};
@@ -118,6 +123,7 @@ namespace gui {
 		static widget::color_param		default_slider_color_;
 		static widget::color_param		default_progress_color_;
 		static widget::color_param		default_check_color_;
+		static widget::color_param		default_checkp_color_;
 		static widget::color_param		default_list_color_;
 		static widget::color_param		default_list_color_select_;
 		static widget::color_param		default_menu_color_;
