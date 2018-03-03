@@ -9,7 +9,7 @@
 */
 //=====================================================================//
 #include "widgets/widget_director.hpp"
-#include "widgets/widget_slider.hpp"
+#include "widgets/widget_scrollbar.hpp"
 
 namespace gui {
 
@@ -43,8 +43,8 @@ namespace gui {
 	private:
 		widget_director&	wd_;
 
-		widget_slider*		slider_h_;
-		widget_slider*		slider_v_;
+		widget_scrollbar*	scroll_h_;
+		widget_scrollbar*	scroll_v_;
 
 		param				param_;
 
@@ -60,7 +60,7 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_table(widget_director& wd, const widget::param& bp, const param& p) :
-			widget(bp), wd_(wd), slider_h_(nullptr), slider_v_(nullptr),
+			widget(bp), wd_(wd), scroll_h_(nullptr), scroll_v_(nullptr),
 			param_(p), ref_poss_(), ref_size_(0), offset_(0.0f),
 			chip_size_(0)
 		{ }
@@ -150,18 +150,15 @@ namespace gui {
 			if(param_.scroll_bar_h_) {
 				widget::param wp(vtx::irect(chip_size_.x, get_rect().size.y - chip_size_.y,
 					get_rect().size.x - chip_size_.x * 2, chip_size_.y), this);
-				widget_slider::param wp_(0.0f, slider_param::direction::HOLIZONTAL);
-				wp_.slider_param_.handle_ratio_ = 0.5f;
-				slider_h_ = wd_.add_widget<widget_slider>(wp, wp_);
+				widget_scrollbar::param wp_(widget_scrollbar::style::HOLIZONTAL);
+				scroll_h_ = wd_.add_widget<widget_scrollbar>(wp, wp_);
 				at_rect().size.y -= chip_size_.y;
 			}
 			if(param_.scroll_bar_v_) {
-				widget::param wp(vtx::irect(get_rect().size.x - chip_size_.x, chip_size_.y,
-					chip_size_.x, get_rect().size.y - chip_size_.y * 2), this);
-				widget_slider::param wp_(0.0f, slider_param::direction::VERTICAL);
-				wp_.slider_param_.handle_ratio_ = 0.5f;
-				slider_v_ = wd_.add_widget<widget_slider>(wp, wp_);
-				at_rect().size.x -= chip_size_.x;
+				widget::param wp(vtx::irect(0, 0, 0, 0), this);
+				widget_scrollbar::param wp_(widget_scrollbar::style::VERTICAL);
+				scroll_v_ = wd_.add_widget<widget_scrollbar>(wp, wp_);
+//				at_rect().size.x -= chip_size_.x;
 			}
 
 			// 基準の位置をセーブしておく
@@ -230,10 +227,6 @@ namespace gui {
 #endif
 			}
 
-			if(slider_v_ != nullptr) {
-//				slider_v_->
-			}
-
 			uint32_t i = 0;
 			for(auto w : param_.cell_) {
 				w->at_param().rect_.org.x = ref_poss_[i].x + static_cast<int>(offset_.x);
@@ -264,6 +257,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void render() override
 		{
+#if 0
 			using namespace gl;
 
 			if(param_.scroll_bar_h_ || param_.scroll_bar_v_) {
@@ -282,6 +276,7 @@ namespace gui {
 				pos.y = size.y - bs.y;
 				wd_.at_mobj().draw(dnh, gl::mobj::attribute::normal, pos);
 			}
+#endif
 		}
 
 
