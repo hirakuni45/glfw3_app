@@ -50,7 +50,7 @@ namespace gui {
 			dec,	///< デクリメント
 		};
 
-		typedef std::function< void(float) > select_func_type;
+		typedef std::function< void(state st, float pos) > select_func_type;
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
@@ -58,12 +58,15 @@ namespace gui {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
-
-			style				style_;
+			style				style_;			///< スクロール・バーのスタイル
+			float				handle_ratio_;	///< スクロール・ハンドルの比率
+			float				scroll_gain_;	///< スクロール・ゲイン
+			float				scroll_step_;	///< スクロール・ステップ
 
 			select_func_type	select_func_;
 
-			param(style st) : style_(st),
+			param(style st) : style_(st), handle_ratio_(0.25f),
+				scroll_gain_(0.1f), scroll_step_(0.1f),
 				select_func_(nullptr)
 				{ }
 		};
@@ -143,6 +146,15 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	スライダーの取得
+			@return スライダー
+		*/
+		//-----------------------------------------------------------------//
+		widget_slider* get_slider() const { return slider_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
@@ -171,21 +183,30 @@ namespace gui {
 					widget_arrow::param wp_(widget_arrow::direction::up);
 					arrow_inc_ = wd_.add_widget<widget_arrow>(wp, wp_);
 					arrow_inc_->at_local_param().select_func_ = [=](uint32_t level) {
-						std::cout << "!" << std::endl;
+						float& pos = slider_->at_position();
+						pos -= param_.scroll_step_;
+						if(pos < 0.0f) pos = 0.0f;
 					};
 				}
 				{
 	                widget::param wp(vtx::irect(0, bs.y, bs.x, msz.y - bs.y * 2), this);
 					widget_slider::param wp_(0.0f, slider_param::direction::VERTICAL);
+					wp_.slider_param_.handle_ratio_ = param_.handle_ratio_;
+					wp_.scroll_gain_ = param_.scroll_gain_;
 					wp_.plate_param_.round_radius_ = 0;
 					slider_ = wd_.add_widget<widget_slider>(wp, wp_);
+//					slider_->at_local_param().select_
 				}
 				{
 	                widget::param wp(vtx::irect(0, msz.y - bs.y, 0, 0), this);
 					widget_arrow::param wp_(widget_arrow::direction::down);
 					arrow_dec_ = wd_.add_widget<widget_arrow>(wp, wp_);
+					arrow_dec_->at_local_param().select_func_ = [=](uint32_t level) {
+						float& pos = slider_->at_position();
+						pos += param_.scroll_step_;
+						if(pos > 1.0f) pos = 1.0f;
+					};
 				}
-			} else {
 			}
 		}
 
