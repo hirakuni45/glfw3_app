@@ -224,25 +224,17 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void update() override
 		{
-			if(param_.scroll_bar_v_ && scroll_v_ != nullptr) {
-				auto pr = scroll_v_->get_slider()->get_slider_param().position_;
-				offset_.y = pr * static_cast<float>(max_.y - get_rect().size.y);
-			}
-
 			if(get_focus()) {
+				if(param_.scroll_ctrl_) {
 #if 0
-				if(get_rect().size.y > size.y) {
-					if(param_.scroll_ctrl_) {
-						const vtx::spos& scr = wd_.get_scroll();
-						offset_.y += static_cast<float>(scr.y * 8);
-						if(offset_.y > 0.0f) offset_.y = 0.0f;
-						else if(offset_.y < -static_cast<float>(get_rect().size.y - size.y)) {
-							offset_.y = static_cast<float>(get_rect().size.y - size.y);
-						}
-					}
-				}
+					const vtx::spos& scr = wd_.get_scroll();
+					float& pos = scroll_v_->get_slider()->at_position();
+					pos += static_cast<float>(scr.y)
+						* scroll_v_->get_local_param().scroll_step_ * 0.5f;
+					if(pos < 0.0f) pos = 0.0f;
+					else if(pos > 1.0f) pos = 1.0f;
 #endif
-//				vtx::spos pos(size.x - chip_size_.x, 0);
+				}
 #if 0
 				gl::core& core = gl::core::get_instance();
 				const gl::device& dev = core.get_device();
@@ -264,8 +256,12 @@ namespace gui {
 				}
 #endif
 			}
-		}
 
+			if(param_.scroll_bar_v_ && scroll_v_ != nullptr) {
+				auto pr = scroll_v_->get_slider()->get_position();
+				offset_.y = pr * static_cast<float>(max_.y - get_rect().size.y);
+			}
+		}
 
 
 		//-----------------------------------------------------------------//

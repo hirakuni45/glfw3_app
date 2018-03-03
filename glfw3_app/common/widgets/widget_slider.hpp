@@ -329,23 +329,51 @@ namespace gui {
 						ratio = ((step + 1) / 2) * sp.grid_;
 					}
 					param_.slider_param_.position_ = ratio;
-				} else if(param_.scroll_ctrl_) {
-					const vtx::spos& scr = wd_.get_scroll();
-					float ratio = param_.slider_param_.position_;
-					if(scr.y != 0) {
-						if(sp.direction_ == slider_param::direction::HOLIZONTAL) {
-							ratio += static_cast<float>(scr.y) * -param_.scroll_gain_;
-						} else if(sp.direction_ == slider_param::direction::VERTICAL) {
-							ratio += static_cast<float>(scr.y) *  param_.scroll_gain_;
+				} else {	
+					if(param_.scroll_ctrl_) {
+						const vtx::spos& scr = wd_.get_scroll();
+						float ratio = param_.slider_param_.position_;
+						if(scr.y != 0) {
+							if(sp.direction_ == slider_param::direction::HOLIZONTAL) {
+								ratio += static_cast<float>(scr.y) * -param_.scroll_gain_;
+							} else if(sp.direction_ == slider_param::direction::VERTICAL) {
+								ratio += static_cast<float>(scr.y) *  param_.scroll_gain_;
+							}
+							if(ratio < 0.0f) ratio = 0.0f;
+							else if(ratio > 1.0f) ratio = 1.0f;
+							if(sp.grid_ > 0.0f) {
+								short step = ratio / (sp.grid_ * 0.5f);
+								ratio = ((step + 1) / 2) * sp.grid_;
+							}
+							param_.slider_param_.position_ = ratio;
 						}
-						if(ratio < 0.0f) ratio = 0.0f;
-						else if(ratio > 1.0f) ratio = 1.0f;
-						if(sp.grid_ > 0.0f) {
-							short step = ratio / (sp.grid_ * 0.5f);
-							ratio = ((step + 1) / 2) * sp.grid_;
-						}
-						param_.slider_param_.position_ = ratio;
 					}
+				}
+			}
+			if(get_focus()) {
+				gl::core& core = gl::core::get_instance();
+				const gl::device& dev = core.get_device();
+				float& pos = param_.slider_param_.position_;
+				if(sp.direction_ == slider_param::direction::HOLIZONTAL) {
+					if(dev.get_positive(gl::device::key::LEFT)) {
+						pos -= param_.scroll_gain_;
+					}
+					if(dev.get_positive(gl::device::key::RIGHT)) {
+						pos += param_.scroll_gain_;
+					}
+				} else if(sp.direction_ == slider_param::direction::VERTICAL) {
+					if(dev.get_positive(gl::device::key::UP)) {
+						pos -= param_.scroll_gain_;
+					}
+					if(dev.get_positive(gl::device::key::DOWN)) {
+						pos += param_.scroll_gain_;
+					}
+				}
+				if(pos < 0.0f) {
+					pos = 0.0f;
+				}
+				if(pos > 1.0f) {
+					pos = 1.0f;
 				}
 			}
 

@@ -195,7 +195,6 @@ namespace gui {
 					wp_.scroll_gain_ = param_.scroll_gain_;
 					wp_.plate_param_.round_radius_ = 0;
 					slider_ = wd_.add_widget<widget_slider>(wp, wp_);
-//					slider_->at_local_param().select_
 				}
 				{
 	                widget::param wp(vtx::irect(0, msz.y - bs.y, 0, 0), this);
