@@ -36,7 +36,7 @@ namespace app {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class root_menu {
 
-		static const int32_t  app_version_ = 80;
+		static const int32_t  app_version_ = 90;
 
 		static const int ofs_x_ = 10;
 		static const int ofs_y_ = 10;
