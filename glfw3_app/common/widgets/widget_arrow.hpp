@@ -56,6 +56,7 @@ namespace gui {
 			int32_t				min_;		///< 最小値
 			int32_t				max_;		///< 最大値
 			uint32_t			delay_;		///< カウントアップ・ディレイ（フレーム単位）
+			uint32_t			repeat_;	///< リピート間隔
 			widget_arrow*		master_;	///< カウンター・マスター
 
 			select_func_type	select_func_;	///< セレクト関数
@@ -66,7 +67,7 @@ namespace gui {
 			param(direction dir = direction::none) :
 				plate_param_(), color_param_(widget_director::default_button_color_),
 				image_(nullptr), handle_(0), id_(0),
-				level_(0), min_(0), max_(100), delay_(16), master_(nullptr),
+				level_(0), min_(0), max_(100), delay_(40), repeat_(6), master_(nullptr),
 				select_func_(nullptr), level_func_(nullptr), dir_(dir)
 				{ }
 		};
@@ -216,18 +217,18 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void update() override
 		{
+			if(get_selected() && count_ < (param_.delay_ - param_.repeat_)) {				
+				++param_.id_;
+				update_level_();
+			}
 			if(get_select()) {
 				++count_;
 				if(count_ >= param_.delay_) {
-					count_ = 0;
+					++param_.id_;
+					count_ -= param_.repeat_;
 					update_level_();
 				}
 			} else {
-				count_ = 0;
-			}
-			if(get_selected()) {
-				++param_.id_;
-				update_level_();
 				count_ = 0;
 			}
 		}
