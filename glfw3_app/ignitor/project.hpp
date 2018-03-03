@@ -19,13 +19,14 @@
 #include "widgets/widget_label.hpp"
 #include "widgets/widget_spinbox.hpp"
 #include "widgets/widget_check.hpp"
-#include "widgets/widget_filer.hpp"
+#include "widgets/widget_table.hpp"
 #include "utils/input.hpp"
 #include "utils/format.hpp"
 #include "utils/preference.hpp"
 #include "img_io/img_files.hpp"
 #include "utils/select_dir.hpp"
 #include "utils/select_file.hpp"
+#include "utils/files.hpp"
 
 #include "csv.hpp"
 
@@ -55,8 +56,7 @@ namespace app {
 		gui::widget_label*		pbase_;
 		gui::widget_label*		pext_;
 		gui::widget_check*		auto_save_;
-		gui::widget_label*		pname_[50];
-		gui::widget_text*		help_;
+		gui::widget_table*		files_core_;
 
 		gui::widget_dialog*		msg_dialog_;
 
@@ -66,10 +66,12 @@ namespace app {
 		utils::select_file		proj_load_filer_;
 		utils::select_file		proj_save_filer_;
 
+		utils::files			files_;
+
 		csv						csv1_;
 		csv						csv2_;
 
-
+#if 0
 		std::string get_path_(uint32_t no) const {
 			std::string s;
 			if(pname_[no] == nullptr) return s;
@@ -85,6 +87,26 @@ namespace app {
 				return utils::append_path(core.get_current_path(), s);
 			}
 			return s;
+		}
+#endif
+
+		void update_unit_list_()
+		{
+// std::cout << proj_root_->get_text() << std::endl;
+			files_.set_path(proj_root_->get_text(), "unt");
+			auto& cell = files_core_->get_local_param().cell_;
+			const auto& fis = files_.get();
+			uint32_t i = 0;
+			for(const auto& fi : fis) {
+				if(fi.get_name() == ".") continue;
+				else if(fi.get_name() == "..") continue;
+				if(i < cell.size()) {
+					gui::widget_label* w = static_cast<gui::widget_label*>(cell[i]);
+					w->set_text(fi.get_name());
+///					std::cout << fi.get_name() << std::endl;
+					++i;
+				}
+			}
 		}
 
 
@@ -128,7 +150,7 @@ namespace app {
 			edit_dialog_(nullptr),
 			csv_all_(nullptr), csv_idx_(nullptr), csv_base_(nullptr), image_ext_(nullptr),
 			pbase_(nullptr), pext_(nullptr), auto_save_(nullptr),
-			pname_{ nullptr }, help_(nullptr),
+			files_core_(nullptr),
 			msg_dialog_(nullptr), proj_dir_(nullptr)
 		{ }
 
@@ -148,7 +170,10 @@ namespace app {
 			@param[in]	ena	不許可の場合「false」
 		*/
 		//-----------------------------------------------------------------//
-		void enable_edit_dialog(bool ena = true) { edit_dialog_->enable(ena); }
+		void enable_edit_dialog(bool ena = true) {
+			update_unit_list_();
+			edit_dialog_->enable(ena);
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -257,7 +282,8 @@ namespace app {
 		//-----------------------------------------------------------------//
 		std::string get_unit_name(uint32_t no) const {
 			if(no >= 50) return "";
-			return get_path_(no);
+///			return get_path_(no);
+			return "";
 		} 
 
 
@@ -501,30 +527,26 @@ std::cout << path << std::endl;
 					widget_check::param wp_("自動保存");
 					auto_save_ = wd.add_widget<widget_check>(wp, wp_);
 				}
-
-				for(int i = 0; i < 50; ++i) {
-					int x = (i / 10) * 200;
-					int y = 40 + 10 + (i % 10) * 50;
-					{
-						widget::param wp(vtx::irect(x + 20, y + yy, 50, 40), edit_dialog_);
-						std::string no = (boost::format("%d:") % (i + 1)).str();
-						widget_text::param wp_(no);
+				yy += 50;
+				{
+					static const int lh = 32;  // ラベルの高さ
+					static const int lw = 500;
+					widget::param wpt(vtx::irect(20, yy, lw, lh * 16), edit_dialog_);
+					widget_table::param wpt_;
+					wpt_.scroll_bar_v_ = true;
+					wpt_.item_size_.set(500, 32);
+					for(int i = 0; i < 50; ++i) {
+						widget::param wp(vtx::irect(0, i * lh, lw, lh));
+						widget_label::param wp_;
 						wp_.text_param_.placement_
 							= vtx::placement(vtx::placement::holizontal::LEFT,
 											 vtx::placement::vertical::CENTER);
-						wd.add_widget<widget_text>(wp, wp_);
+						wp_.plate_param_.frame_width_ = 0;
+						wp_.plate_param_.round_radius_ = 0;
+						wp_.plate_param_.resizeble_ = true;
+						wpt_.cell_.push_back(wd.add_widget<widget_label>(wp, wp_));
 					}
-					widget::param wp(vtx::irect(x + 60, y + yy, 130, 40), edit_dialog_);
-					widget_label::param wp_("", false);
-					pname_[i] = wd.add_widget<widget_label>(wp, wp_);
-				}
-				{
-					widget::param wp(vtx::irect(20, h - 100, w - 20 * 2, 40), edit_dialog_);
-					widget_text::param wp_;
-					wp_.text_param_.placement_
-						= vtx::placement(vtx::placement::holizontal::LEFT,
-										 vtx::placement::vertical::CENTER);
-					help_ = wd.add_widget<widget_text>(wp, wp_);	
+					files_core_ = wd.add_widget<widget_table>(wpt, wpt_);
 				}
 			}
 
@@ -589,23 +611,6 @@ std::cout << path << std::endl;
 				}
 			}
 
-			if(edit_dialog_->get_state(gui::widget::state::ENABLE)) {
-				std::string s;
-				for(int i = 0; i < 50; ++i) {
-					if(pname_[i]->get_focus()) {
-						if(pname_[i]->get_text().empty()) continue;
-						s = get_path_(i);
-						if(utils::probe_file(s)) {
-							s += " (find !)";
-						} else {
-							s += " (can't find)";
-						}
-						break;
-					}
-				}
-				help_->set_text(s);
-			}
-
 			if(proj_load_filer_.state()) {
 				auto path = proj_load_filer_.get();
 				if(!path.empty()) {
@@ -627,7 +632,7 @@ std::cout << path << std::endl;
 						path += '.';
 						path += PROJECT_EXT_;
 					}
-					if(!save_project_file_(path)) {
+					if(save_project_file_(path)) {
 
 					} else {
 
@@ -666,10 +671,7 @@ std::cout << path << std::endl;
 
 			pbase_->save(pre);
 			pext_->save(pre);
-			for(int i = 0; i < 50; ++i) {
-				if(pname_[i] == nullptr) return false;
-				pname_[i]->save(pre);
-			}
+			files_core_->save(pre);
 			return true;
 		}
 
@@ -702,10 +704,8 @@ std::cout << path << std::endl;
 
 			pbase_->load(pre);
 			pext_->load(pre);
-			for(int i = 0; i < 50; ++i) {
-				if(pname_[i] == nullptr) return false;
-				pname_[i]->load(pre);
-			}
+			files_core_->load(pre);
+
 			return true;
 		}
 
