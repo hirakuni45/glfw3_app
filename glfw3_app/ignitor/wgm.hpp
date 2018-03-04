@@ -53,7 +53,7 @@ namespace app {
 		gui::widget_label*		ivolt_;	///< ジェネレータ設定・内臓電源
 		gui::widget_button*		exec_;	///< ジェネレーター設定転送
 
-
+	private:
 		struct wgm_t {
 			uint16_t	sw;		///< 5 bits
 			bool		ena;	///< 0, 1
@@ -85,7 +85,7 @@ namespace app {
 			}
 		};
 
-
+	public:
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  コンストラクター
@@ -99,6 +99,11 @@ namespace app {
 		{ }
 
 
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  スタートアップ
+		*/
+		//-----------------------------------------------------------------//
 		void startup()
 		{
 			wgm_t t;
@@ -265,6 +270,43 @@ namespace app {
 				ret = false;
 			}
 			return ret;
+		}
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  セーブ
+			@param[in]	pre	プリファレンス
+		*/
+		//-----------------------------------------------------------------//
+		void save(sys::preference& pre)
+		{
+			tools::save_sw(pre, sw_, 5);
+			ena_->save(pre);
+			mode_->save(pre);
+			freq_->save(pre);
+			volt_->save(pre);
+			duty_->save(pre);
+			iena_->save(pre);
+			ivolt_->save(pre);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  ロード
+			@param[in]	pre	プリファレンス
+		*/
+		//-----------------------------------------------------------------//
+		void load(sys::preference& pre)
+		{
+			tools::load_sw(pre, sw_, 5);
+			ena_->load(pre);
+			mode_->load(pre);
+			freq_->load(pre);
+			volt_->load(pre);
+			duty_->load(pre);
+			iena_->load(pre);
+			ivolt_->load(pre);
 		}
 	};
 }

@@ -32,13 +32,13 @@
 #include "test.hpp"
 #include "kikusui.hpp"
 
+#include "wdm.hpp"
 #include "dc1.hpp"
+#include "dc2.hpp"
 #include "wgm.hpp"
+#include "crm.hpp"
 #include "icm.hpp"
 #include "test_param.hpp"
-
-// DC2 を菊水電源で置き換える場合有効にする
-#define DC2_KIKUSUI
 
 namespace app {
 
@@ -68,48 +68,11 @@ namespace app {
 		utils::select_file		unit_save_filer_;
 
 		dc1						dc1_;
-
-		// DC2 設定
-		gui::widget_check*		dc2_sw_[14];	///< DC2 接続スイッチ
-		gui::widget_check*		dc2_ena_;		///< DC2 有効、無効
-		gui::widget_list*		dc2_mode_;		///< DC2 電流、電圧モード
-		gui::widget_label*		dc2_voltage_;	///< DC2（電圧）
-		gui::widget_label*		dc2_current_;	///< DC2（電流）
-		gui::widget_label*		dc2_probe_;		///< DC2（電流、電圧測定値）
-		gui::widget_button*		dc2_exec_;		///< DC2 設定転送
-		bool					dc2_probe_mode_;
-		uint32_t				dc2_curr_delay_;
-		uint32_t				dc2_curr_id_;
-		uint32_t				dc2_volt_delay_;
-		uint32_t				dc2_volt_id_;
-
+		dc2						dc2_;
 		wgm						wgm_;
-
-		// CRM 設定
-		gui::widget_check*		crm_sw_[14];	///< CRM 接続スイッチ
-		gui::widget_check*		crm_ena_;		///< CRM 有効、無効
-		gui::widget_list*		crm_amps_;		///< CRM 電流レンジ切り替え
-		gui::widget_list*		crm_freq_;		///< CRM 周波数（100Hz, 1KHz, 10KHz）
-		gui::widget_list*		crm_mode_;		///< CRM 抵抗測定、容量測定
-		gui::widget_label*		crm_ans_;		///< CRM 測定結果 
-		gui::widget_button*		crm_exec_;		///< CRM 設定転送
-
+		crm						crm_;
 		icm						icm_;
-
-		// WDM 設定
-		gui::widget_check*		wdm_sw_[4];		///< WDM 接続スイッチ
-		gui::widget_list*		wdm_smpl_;		///< WDM サンプリング周期
-		gui::widget_list*		wdm_ch_;		///< WDM トリガーチャネル
-		gui::widget_list*		wdm_slope_;		///< WDM スロープ
-		gui::widget_spinbox*	wdm_window_;	///< WDM トリガー領域
-		gui::widget_label*		wdm_level_;		///< WDM トリガー・レベル
-		gui::widget_check*		wdm_cnv_;		///< WDM トリガー・レベル変換
-		gui::widget_label*		wdm_level_va_;	///< WDM トリガー・レベル（電圧、電流）
-		gui::widget_list*		wdm_gain_[4];	///< WDM チャネル・ゲイン
-		gui::widget_list*		wdm_ie_trg_;	///< WDM 内部、外部トリガ
-		gui::widget_list*		wdm_sm_trg_;	///< WDM Single, Manual トリガ
-		gui::widget_button*		wdm_exec_;		///< WDM 設定転送
-		wave_cap::sample_param	sample_param_;
+		wdm						wdm_;
 
 		// 測定用件
 		test_param				test_param_;
@@ -124,72 +87,6 @@ namespace app {
 		double					crrd_value_;
 		double					crcd_value_;
 
-		struct dc2_t {
-			uint32_t	sw;		///< 14 bits
-			uint32_t	delay;	///< SW オンからコマンド発行までの遅延（10ms単位）
-			bool		ena;	///< 0, 1
-			bool		mode;	///< 0, 1
-			uint32_t	volt;	///< 20 bits
-			uint32_t	curr;	///< 20 bits
-
-			dc2_t() : sw(0), ena(0), mode(0), volt(0), curr(0) { }
-
-			std::string build() const
-			{
-				std::string s;
-				s += (boost::format("dc2 D2SW%04X\n") % sw).str();
-#ifndef DC2_KIKUSUI
-				if(ena) {
-					s += (boost::format("delay %d\n") % delay).str();
-					s += (boost::format("dc2 D2MD%d\n") % mode).str();
-					if(mode != 0) {
-						s += (boost::format("dc2 D2VS%05X\n") % (volt & 0xfffff)).str();
-					} else {
-						s += (boost::format("dc2 D2IS%05X\n") % (curr & 0xfffff)).str();
-					}
-				}
-				s += (boost::format("dc2 D2OE%d\n") % ena).str();
-				if(ena) {
-					s += "delay 1\n";
-					s += "dc2 D2M?\n";
-				}
-#endif
-				return s;
-			}
-		};
-
-
-		struct crm_t {
-			uint16_t	sw;		///< 14 bits
-			bool		ena;	///< 0, 1
-			uint16_t	amps;	///< 0, 1, 2
-			uint16_t	freq;	///< 0, 1, 2
-			uint16_t	mode;	///< 0, 1
-
-			crm_t() : sw(0), ena(0), amps(0), freq(0), mode(0) { }
-
-			std::string build() const
-			{
-				std::string s;
-				if(ena) {
-					s += (boost::format("crm CRSW%04X\n") % sw).str();
-					s += (boost::format("crm CRIS%d\n") % (amps + 1)).str();
-					static const char* frqtbl[3] = { "001", "010", "100" };
-					s += (boost::format("crm CRFQ%s\n") % frqtbl[freq % 3]).str();
-				}
-				s += (boost::format("crm CROE%d\n") % ena).str();
-				if(ena) {
-					s += "delay 1\n";
-					if(mode) {
-						s += (boost::format("crm CRC?1\n")).str();
-					} else {
-						s += (boost::format("crm CRR?1\n")).str();
-					}
-				}
-				return s;
-			}
-		};
-
 
 		struct vc_t {
 			float		volt_max_;	/// 0.1V step
@@ -199,473 +96,16 @@ namespace app {
 		};
 
 
-		static const uint32_t time_div_size_ = 16;
-		double get_time_div_() const {
-			if(wdm_smpl_ == nullptr) return 0.0;
-
-			static constexpr double tbls[time_div_size_] = {
-				1.0 / 1e3,    //  0
-				1.0 / 2e3,    //  1
-				1.0 / 5e3,    //  2
-				1.0 / 10e3,   //  3
-				1.0 / 20e3,   //  4
-				1.0 / 50e3,   //  5
-				1.0 / 100e3,  //  6
-				1.0 / 200e3,  //  7
-				1.0 / 500e3,  //  8
-				1.0 / 1e6,    //  9
-				1.0 / 2e6,    // 10
-				1.0 / 5e6,    // 11
-				1.0 / 10e6,   // 12
-				1.0 / 20e6,   // 13
-				1.0 / 50e6,   // 14
-				1.0 / 100e6   // 15
-			};
-			return tbls[wdm_smpl_->get_select_pos() % time_div_size_];
-		}
-
-
-		static const uint32_t gain_rate_size_ = 8;
-		double get_gain_rate_(uint32_t ch) const {
-			if(wdm_gain_[ch] == nullptr) return 0.0f;
-			auto n = wdm_gain_[ch]->get_select_pos() % gain_rate_size_;
-			static constexpr float tbls[gain_rate_size_] = {
-				0.0625f,
-				0.125f,
-				0.25f,
-				0.5f,
-				1.0f,
-				2.0f,
-				4.0f,
-				8.0f
-			};
-			return tbls[n];
-		}
-
-
-		void init_dc2_(int d_w, int ofsx, int h, int loc)
-		{
-			using namespace gui;
-			widget_director& wd = director_.at().widget_director_;
-
-			tools::init_sw(wd, dialog_, interlock_, ofsx, h, loc, dc2_sw_, 14, 15);
-			++loc;
-			{
-				widget::param wp(vtx::irect(ofsx, 20 + h * loc, 90, 40), dialog_);
-				widget_check::param wp_("有効");
-				dc2_ena_ = wd.add_widget<widget_check>(wp, wp_);
-			}
-			{
-				widget::param wp(vtx::irect(ofsx + 90, 20 + h * loc, 110, 40), dialog_);
-				widget_list::param wp_;
-				wp_.init_list_.push_back("定電流");
-				wp_.init_list_.push_back("定電圧");
-				dc2_mode_ = wd.add_widget<widget_list>(wp, wp_);
-			}
-			{  // 300V/0.1V, 100mA/0.01mA
-				widget::param wp(vtx::irect(ofsx + 230, 20 + h * loc, 90, 40), dialog_);
-				widget_label::param wp_("0", false);
-				dc2_voltage_ = wd.add_widget<widget_label>(wp, wp_);
-				dc2_voltage_->at_local_param().select_func_ = [=](const std::string& str) {
-					dc2_voltage_->set_text(tools::limitf(str, 0.0f, 300.0f, "%2.1f"));
-				};
-			}
-			{
-				widget::param wp(vtx::irect(ofsx + 330, 20 + h * loc, 40, 40), dialog_);
-				widget_text::param wp_("V");
-				wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
-											 vtx::placement::vertical::CENTER);
-				wd.add_widget<widget_text>(wp, wp_);
-			}
-			{  // Max: 100mA / step: 0.01mA
-				widget::param wp(vtx::irect(ofsx + 370, 20 + h * loc, 90, 40), dialog_);
-				widget_label::param wp_("0", false);
-				dc2_current_ = wd.add_widget<widget_label>(wp, wp_);
-				dc2_current_->at_local_param().select_func_ = [=](const std::string& str) {
-					dc2_current_->set_text(tools::limitf(str, 0.0f, 100.0f, "%3.2f"));
-				};
-			}
-			{
-				widget::param wp(vtx::irect(ofsx + 470, 20 + h * loc, 50, 40), dialog_);
-				widget_text::param wp_("mA");
-				wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
-											 vtx::placement::vertical::CENTER);
-				wd.add_widget<widget_text>(wp, wp_);
-			}
-			{  // 電流、電圧測定値
-				widget::param wp(vtx::irect(ofsx + 520, 20 + h * loc, 150, 40), dialog_);
-				widget_label::param wp_("");
-				dc2_probe_ = wd.add_widget<widget_label>(wp, wp_);
-			}
-			{
-				widget::param wp(vtx::irect(d_w - 50, 20 + h * loc, 30, 30), dialog_);
-				widget_button::param wp_(">");
-				dc2_exec_ = wd.add_widget<widget_button>(wp, wp_);
-				dc2_exec_->at_local_param().select_func_ = [=](int n) {
-					dc2_t t;
-					uint16_t sw = 0;
-					for(int i = 0; i < 14; ++i) {
-						sw <<= 1;
-						if(dc2_sw_[i]->get_check()) sw |= 1;
-					}
-					t.sw = sw;
-#ifdef DC2_KIKUSUI
-					kikusui_.set_output(dc2_ena_->get_check());
-					bool err = false;
-					float c = 0.0f;
-					if((utils::input("%f", dc2_current_->get_text().c_str()) % c).status()) {
-						c /= 1000.0f;
-					} else {
-						err = true;
-					}
-					float v = 0.0f;
-					if((utils::input("%f", dc2_voltage_->get_text().c_str()) % v).status()) {
-					} else {
-						err = true;
-					}
-					if(!err) {
-						if(dc2_mode_->get_select_pos() == 0) {  // 電流 [mA]
-							kikusui_.set_curr(c, v);
-							dc2_curr_delay_ = 30;
-						} else {  // 電圧 [V]
-							kikusui_.set_volt(v, c);
-							dc2_volt_delay_ = 30;
-						}
-					}
-#else
-					t.ena = dc2_ena_->get_check();
-					t.mode = dc2_mode_->get_select_pos() & 1;
-					dc2_probe_mode_ = t.mode;
-					float v;
-					if((utils::input("%f", dc2_voltage_->get_text().c_str()) % v).status()) {
-						t.volt = v / 312.5e-6;
-					}
-					if((utils::input("%f", dc2_current_->get_text().c_str()) % v).status()) {
-						t.curr = v / 100e-6;
-					}
-#endif
-					client_.send_data(t.build());
-				};
-			}
-		}
-
-
-		void init_crm_(int d_w, int ofsx, int h, int loc)
-		{
-			using namespace gui;
-			widget_director& wd = director_.at().widget_director_;
-
-			tools::init_sw(wd, dialog_, interlock_, ofsx, h, loc, crm_sw_, 14, 1);
-			++loc;
-			// ＣＲメジャー・モジュール
-			{
-				widget::param wp(vtx::irect(ofsx, 20 + h * loc, 90, 40), dialog_);
-				widget_check::param wp_("有効");
-				crm_ena_ = wd.add_widget<widget_check>(wp, wp_);
-			}
-			{  // 電流レンジ切り替え（2mA, 20mA, 200mA）
-				widget::param wp(vtx::irect(ofsx + 90, 20 + h * loc, 110, 40), dialog_);
-				widget_list::param wp_;
-				wp_.init_list_.push_back("  2 mA");
-				wp_.init_list_.push_back(" 20 mA");
-				wp_.init_list_.push_back("200 mA");
-				crm_amps_ = wd.add_widget<widget_list>(wp, wp_); 
-			}
-			{  // 周波数設定 (100、1K, 10K)
-				widget::param wp(vtx::irect(ofsx + 220, 20 + h * loc, 110, 40), dialog_);
-				widget_list::param wp_;
-				wp_.init_list_.push_back("100 Hz");
-				wp_.init_list_.push_back(" 1 KHz");
-				wp_.init_list_.push_back("10 KHz");
-				crm_freq_ = wd.add_widget<widget_list>(wp, wp_); 
-			}
-			{  // 抵抗値、容量値選択
-				widget::param wp(vtx::irect(ofsx + 350, 20 + h * loc, 110, 40), dialog_);
-				widget_list::param wp_;
-				wp_.init_list_.push_back("抵抗値");
-				wp_.init_list_.push_back("容量値");
-				crm_mode_ = wd.add_widget<widget_list>(wp, wp_); 
-			}
-			{  // 答え
-				widget::param wp(vtx::irect(ofsx + 490, 20 + h * loc, 200, 40), dialog_);
-				widget_label::param wp_("");
-				crm_ans_ = wd.add_widget<widget_label>(wp, wp_);
-			}
-			{  // exec
-				widget::param wp(vtx::irect(d_w - 50, 20 + h * loc, 30, 30), dialog_);
-				widget_button::param wp_(">");
-				crm_exec_ = wd.add_widget<widget_button>(wp, wp_);
-				crm_exec_->at_local_param().select_func_ = [=](int n) {
-					crm_t t;
-					uint16_t sw = 0;
-					for(int i = 0; i < 14; ++i) {
-						sw <<= 1;
-						if(crm_sw_[i]->get_check()) sw |= 1;
-					}
-					t.sw = sw;
-					t.ena = crm_ena_->get_check();
-					t.amps = crm_amps_->get_select_pos();
-					t.freq = crm_freq_->get_select_pos();
-					t.mode = crm_mode_->get_select_pos();
-
-					client_.send_data(t.build());
-				};
-			}
-		}
-
-
-		std::string build_wdm_()
-		{
-			std::string s;
-			uint32_t cmd;
-
-			// SW
-			cmd = 0b00001000;
-			cmd <<= 16;
-			uint32_t sw = 0;
-			for(uint32_t i = 0; i < 4; ++i) {
-				sw <<= 1;
-				if(wdm_sw_[i]->get_check()) ++sw;
-			}
-			cmd |= sw << 12;
-			s += (boost::format("wdm %06X\n") % cmd).str();
-			s += "delay 1\n";
-
-			static const uint8_t smtbl[] = {
-				0b01000001,  // 1K
-				0b10000001,  // 2K
-				0b11000001,  // 5K
-				0b01000010,  // 10K
-				0b10000010,  // 20K
-				0b11000010,  // 50K
-				0b01000011,  // 100K
-				0b10000011,  // 200K
-				0b11000011,  // 500K
-				0b01000100,  // 1M
-				0b10000100,  // 2M
-				0b11000100,  // 5M
-				0b01000101,  // 10M
-				0b10000101,  // 20M
-				0b11000101,  // 50M
-				0b01000110,  // 100M
-			};
-			// sampling freq
-			cmd = (0b00010000 << 16) | (smtbl[wdm_smpl_->get_select_pos() % 16] << 8);
-			s += (boost::format("wdm %06X\n") % cmd).str();
-			// channel gain
-			for(int i = 0; i < 4; ++i) {
-				cmd = ((0b00011000 | (i + 1)) << 16) | ((wdm_gain_[i]->get_select_pos() % 8) << 13);
-				s += (boost::format("wdm %06X\n") % cmd).str();
-			}
-			{ // trigger level
-				cmd = (0b00101000 << 16);
-				int v;
-				if((utils::input("%d", wdm_level_->get_text().c_str()) % v).status()) {
-					if(v < 1) v = 1;
-					else if(v > 65534) v = 65534;
-					cmd |= v;
-					s += (boost::format("wdm %06X\n") % cmd).str();
-				}
-			}
-			{  // trigger channel
-				cmd = (0b00100000 << 16);
-				if(wdm_ie_trg_->get_select_pos()) cmd |= 0x0200;
-				if(wdm_sm_trg_->get_select_pos()) cmd |= 0x0100;
-				auto n = wdm_ch_->get_select_pos();
-				uint8_t sub = 0;
-				sub |= 0x80;  // trigger ON
-				cmd |= static_cast<uint32_t>(n & 3) << 14;
-				if(wdm_slope_->get_select_pos()) sub |= 0x40;
-				sub |= wdm_window_->get_select_pos() & 15;
-				cmd |= sub;
-				s += (boost::format("wdm %06X\n") % cmd).str();
-			}
-			return s;
-		}
-
-
-		void init_wdm_(int d_w, int ofsx, int h, int loc)
-		{
-			using namespace gui;
-			widget_director& wd = director_.at().widget_director_;
-
-			tools::init_sw(wd, dialog_, interlock_, ofsx, h, loc, wdm_sw_, 4, 29);
-			for(int i = 0; i < 4; ++i) {  // 各チャネル減衰設定
-				static const vtx::ipos ofs[4] = {
-					{ 0, 0 }, { 110, 0 }, { 220, 0 }, { 330, 0 }
-				};
-				widget::param wp(vtx::irect(ofsx + ofs[i].x + 4 * 60 + 10, 20 + h * loc + ofs[i].y,
-					100, 40), dialog_);
-				widget_list::param wp_;
-				wp_.init_list_.push_back("-22dB");
-				wp_.init_list_.push_back("-16dB");
-				wp_.init_list_.push_back("-10dB");
-				wp_.init_list_.push_back(" -4dB");
-				wp_.init_list_.push_back("  2dB");
-				wp_.init_list_.push_back("  8dB");
-				wp_.init_list_.push_back(" 14dB");
-				wp_.init_list_.push_back(" 20dB");
-				wdm_gain_[i] = wd.add_widget<widget_list>(wp, wp_);
-				wdm_gain_[i]->select(4);
-			}
-			{  // 内部、外部トリガー選択
-				widget::param wp(vtx::irect(ofsx + 690, 20 + h * loc, 100, 40), dialog_);
-				widget_list::param wp_;
-				wp_.init_list_.push_back("Int");
-				wp_.init_list_.push_back("Ext");
-				wdm_ie_trg_ = wd.add_widget<widget_list>(wp, wp_);
-			}
-			++loc;
-			{  // 時間軸リスト 10K、20K、50K、100K、200K、500K、1M、2M、5M、10M、20M、50M、100M
-				widget::param wp(vtx::irect(ofsx, 20 + h * loc, 100, 40), dialog_);
-				widget_list::param wp_;
-				wp_.init_list_.push_back("1mS");
-				wp_.init_list_.push_back("500uS");
-				wp_.init_list_.push_back("200uS");
-				wp_.init_list_.push_back("100uS");
-				wp_.init_list_.push_back(" 50uS");
-				wp_.init_list_.push_back(" 20uS");
-				wp_.init_list_.push_back(" 10uS");
-				wp_.init_list_.push_back("  5uS");
-				wp_.init_list_.push_back("  2uS");
-				wp_.init_list_.push_back("  1uS");
-				wp_.init_list_.push_back("500nS");
-				wp_.init_list_.push_back("200nS");
-				wp_.init_list_.push_back("100nS");
-				wp_.init_list_.push_back(" 50nS");
-				wp_.init_list_.push_back(" 20nS");
-				wp_.init_list_.push_back(" 10nS");
-				wdm_smpl_ = wd.add_widget<widget_list>(wp, wp_);
-			}
-			{  // トリガー・チャネル選択
-				widget::param wp(vtx::irect(ofsx + 110, 20 + h * loc, 90, 40), dialog_);
-				widget_list::param wp_;
-				wp_.init_list_.push_back("CH1");
-				wp_.init_list_.push_back("CH2");
-				wp_.init_list_.push_back("CH3");
-				wp_.init_list_.push_back("CH4");
-				wdm_ch_ = wd.add_widget<widget_list>(wp, wp_);
-			}
-			{  // トリガー・スロープ選択
-				widget::param wp(vtx::irect(ofsx + 210, 20 + h * loc, 90, 40), dialog_);
-				widget_list::param wp_;
-				wp_.init_list_.push_back("Fall");
-				wp_.init_list_.push_back("Rise");
-				wdm_slope_ = wd.add_widget<widget_list>(wp, wp_);
-			}
-			{  // トリガー・ウィンドウ（１～１５）
-				widget::param wp(vtx::irect(ofsx + 310, 20 + h * loc, 90, 40), dialog_);
-				widget_spinbox::param wp_(1, 1, 15);
-				wdm_window_ = wd.add_widget<widget_spinbox>(wp, wp_);
-				wdm_window_->at_local_param().select_func_
-					= [=](widget_spinbox::state st, int before, int newpos) {
-					return (boost::format("%d") % newpos).str();
-				};
-			}
-			{  // トリガーレベル設定
-				widget::param wp(vtx::irect(ofsx + 410, 20 + h * loc, 90, 40), dialog_);
-				widget_label::param wp_("32768", false);
-				wdm_level_ = wd.add_widget<widget_label>(wp, wp_);
-				wdm_level_->at_local_param().select_func_ = [=](const std::string& str) {
-					wdm_level_->set_text(tools::limiti(str, 1, 65534, "%d"));
-				};
-			}
-			{  // トリガーレベル変換
-				widget::param wp(vtx::irect(ofsx + 510, 20 + h * loc, 70, 40), dialog_);
-				widget_check::param wp_("ＶＡ");
-				wdm_cnv_ = wd.add_widget<widget_check>(wp, wp_);
-				wdm_cnv_->at_local_param().select_func_ = [=](bool f) {
-					if(f) {
-						wdm_level_->set_stall();
-						wdm_level_va_->set_stall(false);
-					} else {
-						wdm_level_->set_stall(false);
-						wdm_level_va_->set_stall();
-					}
-				};
-			}
-			{  // トリガーレベル設定
-				widget::param wp(vtx::irect(ofsx + 590, 20 + h * loc, 90, 40), dialog_);
-				widget_label::param wp_("0", false);
-				wdm_level_va_ = wd.add_widget<widget_label>(wp, wp_);
-				wdm_level_va_->at_local_param().select_func_ = [=](const std::string& str) {
-					static const float vat[4] = { 32.768f, 655.36f, 16.384f, 65.536f };
-					auto n = wdm_ch_->get_select_pos();
-					auto g = get_gain_rate_(n);
-					auto s = tools::limitf(str, -vat[n] * g, vat[n] * g, "%4.3f");
-					if(s.empty()) {
-						s = "0.0";
-					}
-					wdm_level_va_->set_text(s);
-					float a;
-					if((utils::input("%f", s.c_str()) % a).status()) {
-						int32_t b = a * 32767.0f / vat[n] * g;
-						b += 32767;
-						wdm_level_->set_text((boost::format("%d") % b).str());
-					}
-				};
-			}
-			{  // Single, Manual トリガー選択
-				widget::param wp(vtx::irect(ofsx + 690, 20 + h * loc, 100, 40), dialog_);
-				widget_list::param wp_;
-				wp_.init_list_.push_back("Single");
-				wp_.init_list_.push_back("Manual");
-				wdm_sm_trg_ = wd.add_widget<widget_list>(wp, wp_);
-			}
-			{  // exec
-				widget::param wp(vtx::irect(d_w - 50, 20 + h * loc, 30, 30), dialog_);
-				widget_button::param wp_(">");
-				wdm_exec_ = wd.add_widget<widget_button>(wp, wp_);
-				wdm_exec_->at_local_param().select_func_ = [=](int n) {
-					sample_param_.rate = get_time_div_();
-					for(uint32_t i = 0; i < 4; ++i) {
-						sample_param_.gain[i] = get_gain_rate_(i);
-					}
-					auto s = build_wdm_();
-					client_.send_data(s);
-				};
-			}
-		}
-
-
-		void load_sw_(sys::preference& pre, gui::widget_check* sw[], uint32_t n)
-		{
-			for(uint32_t i = 0; i < n; ++i) {
-				sw[i]->load(pre);
-			}
-		}
-
-
-		void save_sw_(sys::preference& pre, gui::widget_check* sw[], uint32_t n)
-		{
-			for(uint32_t i = 0; i < n; ++i) {
-				sw[i]->save(pre);
-			}
-		}
-
-
 		// 各モジュールへ初期化状態の転送
 		void startup_()
 		{
 			icm_.startup();
 			dc1_.startup();
-			{  // DC2
-				dc2_t t;
-				client_.send_data(t.build());
-			}
-			{  // CRM
-				crm_t t;
-				client_.send_data(t.build());
-			}
+			dc2_.startup();
+			crm_.startup();
 			wgm_.startup();
-			{  // WDM / SW
-				uint32_t cmd = 0b00001000;
-				cmd <<= 16;
-				auto s = (boost::format("wdm %06X\n") % cmd).str();
-				client_.send_data(s);
-			}
+			wdm_.startup();
 		}
-
 
 	public:
 		//-----------------------------------------------------------------//
@@ -679,29 +119,11 @@ namespace app {
 			unit_name_(nullptr), load_file_(nullptr), save_file_(nullptr), ilock_enable_(nullptr),
 
 			dc1_(d, client_, interlock_),
-
-			dc2_sw_{ nullptr },
-			dc2_ena_(nullptr), dc2_mode_(nullptr), dc2_voltage_(nullptr), dc2_current_(nullptr),
-			dc2_probe_(nullptr),
-			dc2_exec_(nullptr),
-			dc2_probe_mode_(false), dc2_curr_delay_(0), dc2_curr_id_(0),
-			dc2_volt_delay_(0), dc2_volt_id_(0),
-
+			dc2_(d, client_, interlock_, kikusui_),
 			wgm_(d, client_, interlock_),
-
-			crm_sw_{ nullptr },
-			crm_ena_(nullptr), crm_amps_(nullptr), crm_freq_(nullptr), crm_mode_(nullptr),
-			crm_ans_(nullptr), crm_exec_(nullptr),
-
+			crm_(d, client_, interlock_),
 			icm_(d, client_, interlock_),
-
-			wdm_sw_{ nullptr },
-			wdm_smpl_(nullptr), wdm_ch_(nullptr), wdm_slope_(nullptr), wdm_window_(nullptr),
-			wdm_level_(nullptr), wdm_cnv_(nullptr), wdm_level_va_(nullptr),
-			wdm_gain_{ nullptr }, wdm_ie_trg_(nullptr), wdm_sm_trg_(nullptr),
-			wdm_exec_(nullptr),
-			sample_param_(),
-
+			wdm_(d, client_, interlock_),
 			test_param_(d),
 
 			chip_(nullptr),
@@ -745,9 +167,9 @@ namespace app {
 			@return サンプリング・パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		const wave_cap::sample_param& get_sample_param() const { return sample_param_; }
+		const wave_cap::sample_param& get_sample_param() const { return wdm_.sample_param_; }
 
-		bool get_crm_mode() const { return crm_mode_->get_select_pos(); }
+		bool get_crm_mode() const { return crm_.mode_->get_select_pos(); }
 		double get_crrd_value() const { return crrd_value_; }
 		double get_crcd_value() const { return crcd_value_; }
 
@@ -764,7 +186,7 @@ namespace app {
 			@brief  DC2 コマンドの発行
 		*/
 		//-----------------------------------------------------------------//
-		void exec_dc2() { dc2_exec_->exec(); }
+		void exec_dc2() { dc2_.exec_->exec(); }
 
 
 		//-----------------------------------------------------------------//
@@ -780,7 +202,7 @@ namespace app {
 			@brief  CRM コマンドの発行
 		*/
 		//-----------------------------------------------------------------//
-		void exec_crm() { crm_exec_->exec(); }
+		void exec_crm() { crm_.exec_->exec(); }
 
 
 		//-----------------------------------------------------------------//
@@ -796,7 +218,7 @@ namespace app {
 			@brief  WDM コマンドの発行
 		*/
 		//-----------------------------------------------------------------//
-		void exec_wdm() { wdm_exec_->exec(); }
+		void exec_wdm() { wdm_.exec_->exec(); }
 
 
 		//-----------------------------------------------------------------//
@@ -808,7 +230,7 @@ namespace app {
 		{
 			// モジュールから受け取ったパラメーターをＧＵＩに反映
 			static const uint32_t sample_num = 50;
-			if(crm_mode_->get_select_pos() == 0) {  // CRRD
+			if(crm_.mode_->get_select_pos() == 0) {  // CRRD
 				if(crrd_id_ != client_.get_mod_status().crrd_id_) {
 					crrd_id_ = client_.get_mod_status().crrd_id_;
 					uint32_t v = client_.get_mod_status().crrd_;
@@ -819,9 +241,9 @@ namespace app {
 					static const double itbl[3] = {  // 電流テーブル
 						2.0, 20.0, 200.0
 					};
-					a /= itbl[crm_amps_->get_select_pos() % 3];
+					a /= itbl[crm_.amps_->get_select_pos() % 3];
 					crrd_value_ = a;
-					crm_ans_->set_text((boost::format("%5.4f Ω") % a).str());
+					crm_.ans_->set_text((boost::format("%5.4f Ω") % a).str());
 				}
 			} else { // CRCD
 				if(crcd_id_ != client_.get_mod_status().crcd_id_) {
@@ -834,28 +256,12 @@ namespace app {
 					static const double itbl[3] = {  // 電流テーブル
 						2.0, 20.0, 200.0
 					};
-					a /= itbl[crm_amps_->get_select_pos() % 3];
+					a /= itbl[crm_.amps_->get_select_pos() % 3];
 
 					a = 1.0 / (2.0 * 3.141592654 * 1000.0 * a);
 					a *= 1e6;
 					crcd_value_ = a;
-					crm_ans_->set_text((boost::format("%5.4f uF") % a).str());
-				}
-			}
-
-			// D2MD
-			if(d2md_id_ != client_.get_mod_status().d2md_id_) {
-				d2md_id_ = client_.get_mod_status().d2md_id_;
-				uint32_t v = client_.get_mod_status().d2md_;
-				float a = static_cast<float>(v);
-				if(dc2_probe_mode_) {
-					a /= 999960.2f;
-					a *= 100.0f;
-					dc2_probe_->set_text((boost::format("%5.2f mA") % a).str());
-				} else {
-					a /= static_cast<float>(0xFFFFF);
-	   				a *= 330.0f;
-					dc2_probe_->set_text((boost::format("%5.2f V") % a).str());
+					crm_.ans_->set_text((boost::format("%5.4f uF") % a).str());
 				}
 			}
 		}
@@ -936,11 +342,11 @@ namespace app {
 			}
 
 			ofsx = 110;
-			init_wdm_(d_w, ofsx, h, 1);
+			wdm_.init(dialog_, d_w, ofsx, h, 1);
 			dc1_.init(dialog_, d_w, ofsx, h, 3);
-			init_dc2_(d_w, ofsx, h, 5);
+			dc2_.init(dialog_, d_w, ofsx, h, 5);
 			wgm_.init(dialog_, d_w, ofsx, h, 7);
-			init_crm_(d_w, ofsx, h, 9);
+			crm_.init(dialog_, d_w, ofsx, h, 9);
 			icm_.init(dialog_, d_w, ofsx, h, 11);
 
 			test_param_.init(dialog_, d_w, ofsx, h, 12);
@@ -975,43 +381,17 @@ namespace app {
 #endif
 			interlock_.update(ilock_enable_->get_check());
 
-#ifdef DC2_KIKUSUI
-			if(dc2_curr_delay_ > 0) {
-				--dc2_curr_delay_;
-				if(dc2_curr_delay_ == 0) {
-					dc2_curr_id_ = kikusui_.get_curr_id();
-					kikusui_.req_curr();
-				}
-			}
-			if(dc2_volt_delay_ > 0) {
-				--dc2_volt_delay_;
-				if(dc2_volt_delay_ == 0) {
-					dc2_volt_id_ = kikusui_.get_volt_id();
-					kikusui_.req_volt();
-				}
-			}
-			if(dc2_curr_id_ != kikusui_.get_curr_id()) {
-				dc2_curr_id_ = kikusui_.get_curr_id();
-				auto c = kikusui_.get_curr();
-				c *= 1000.0f;
-				dc2_probe_->set_text((boost::format("%6.5f") % c).str());
-			}
-			if(dc2_volt_id_ != kikusui_.get_volt_id()) {
-				dc2_volt_id_ = kikusui_.get_volt_id();
-				auto v = kikusui_.get_volt();
-				dc2_probe_->set_text((boost::format("%6.5f") % v).str());
-			}
-#endif
+			dc2_.update();
 
 			if(!dialog_->get_state(gui::widget::state::ENABLE)) return;
 
 			// 転送スイッチの状態をネットワークの接続状態で設定
 			dc1_.exec_->set_stall(!client_.probe());
-			dc2_exec_->set_stall(!client_.probe());
+			dc2_.exec_->set_stall(!client_.probe());
 			wgm_.exec_->set_stall(!client_.probe());
-			crm_exec_->set_stall(!client_.probe());
+			crm_.exec_->set_stall(!client_.probe());
 			icm_.exec_->set_stall(!client_.probe());
-			wdm_exec_->set_stall(!client_.probe());
+			wdm_.exec_->set_stall(!client_.probe());
 
 			if(unit_load_filer_.state()) {
 				auto path = unit_load_filer_.get();
@@ -1046,29 +426,10 @@ namespace app {
 
 			// ヘルプ機能
 			uint32_t act = 60 * 3;
-			if(dc2_voltage_->get_focus()) {
-				tools::set_help(chip_, dc2_voltage_, "0.0 to 300.0 [V], 0.1 [V] / step");
-			} else if(dc2_current_->get_focus()) {
-				tools::set_help(chip_, dc2_current_, "0.0 to 100.0 [mA], 0.01 [mA] / step");
-			} else if(wdm_level_->get_focus()) {
-				tools::set_help(chip_, wdm_level_, "トリガーレベル（数値入力）");
-			} else if(wdm_level_va_->get_focus()) {
-				static const float vat[4] = { 32.768f, 655.36f, 16.384f, 65.536f };
-				static const char* vau[4] = { " A", " V", " V", " KV" };
-				auto n = wdm_ch_->get_select_pos();
-				std::string s = "トリガーレベル（";
-				if(wdm_ch_->get_select_pos() == 0) {
-					s += "電流：±";
-				} else {
-					s += "電圧：±";
-				}
-				auto a = get_gain_rate_(n);
-				s += (boost::format("%4.3f") % (vat[n] * a)).str();
-				s += vau[n];
-				s += "）";
-				tools::set_help(chip_, wdm_level_va_, s);
-			} else if(wgm_.help(chip_)) {
+			if(wdm_.help(chip_)) {
 			} else if(dc1_.help(chip_)) {
+			} else if(dc2_.help(chip_)) {
+			} else if(wgm_.help(chip_)) {
 			} else if(test_param_.help(chip_)) {
 			} else {
 				act = 0;
@@ -1088,49 +449,12 @@ namespace app {
 		{
 			unit_name_->save(pre);
 
-			save_sw_(pre, dc1_.sw_, 5);
-			dc1_.ena_->save(pre);
-			dc1_.mode_->save(pre);
-			dc1_.voltage_->save(pre);
-			dc1_.current_->save(pre);
-			dc1_.count_->save(pre);
-
-			save_sw_(pre, dc2_sw_, 14);
-			dc2_ena_->save(pre);
-			dc2_mode_->save(pre);
-			dc2_voltage_->save(pre);
-			dc2_current_->save(pre);
-
-			save_sw_(pre, wgm_.sw_, 5);
-			wgm_.ena_->save(pre);
-			wgm_.mode_->save(pre);
-			wgm_.freq_->save(pre);
-			wgm_.volt_->save(pre);
-			wgm_.duty_->save(pre);
-			wgm_.iena_->save(pre);
-			wgm_.ivolt_->save(pre);
-
-			save_sw_(pre, crm_sw_, 14);
-			crm_ena_->save(pre);
-			crm_amps_->save(pre);
-			crm_freq_->save(pre);
-			crm_mode_->save(pre);
-
-			save_sw_(pre, icm_.sw_, 6);
-
-			save_sw_(pre, wdm_sw_, 4);
-			wdm_smpl_->save(pre);
-			wdm_ch_->save(pre);
-			wdm_slope_->save(pre);
-			wdm_window_->save(pre);
-			wdm_level_->save(pre);
-			wdm_gain_[0]->save(pre);
-			wdm_gain_[1]->save(pre);
-			wdm_gain_[2]->save(pre);
-			wdm_gain_[3]->save(pre);
-			wdm_ie_trg_->save(pre);
-			wdm_sm_trg_->save(pre);
-
+			dc1_.save(pre);
+			dc2_.save(pre);
+			wgm_.save(pre);
+			crm_.save(pre);
+			wdm_.save(pre);
+			icm_.save(pre);
 			test_param_.save(pre);
 
 			ilock_enable_->save(pre);
@@ -1165,49 +489,12 @@ namespace app {
 		{
 			unit_name_->load(pre);
 
-			load_sw_(pre, dc1_.sw_, 5);
-			dc1_.ena_->load(pre);
-			dc1_.mode_->load(pre);
-			dc1_.voltage_->load(pre);
-			dc1_.current_->load(pre);
-			dc1_.count_->load(pre);
-
-			load_sw_(pre, dc2_sw_, 14);
-			dc2_ena_->load(pre);
-			dc2_mode_->load(pre);
-			dc2_voltage_->load(pre);
-			dc2_current_->load(pre);
-
-			load_sw_(pre, wgm_.sw_, 5);
-			wgm_.ena_->load(pre);
-			wgm_.mode_->load(pre);
-			wgm_.freq_->load(pre);
-			wgm_.volt_->load(pre);
-			wgm_.duty_->load(pre);
-			wgm_.iena_->load(pre);
-			wgm_.ivolt_->load(pre);
-
-			load_sw_(pre, crm_sw_, 14);
-			crm_ena_->load(pre);
-			crm_amps_->load(pre);
-			crm_freq_->load(pre);
-			crm_mode_->load(pre);
-
-			load_sw_(pre, icm_.sw_, 6);
-
-			load_sw_(pre, wdm_sw_, 4);
-			wdm_smpl_->load(pre);
-			wdm_ch_->load(pre);
-			wdm_slope_->load(pre);
-			wdm_window_->load(pre);
-			wdm_level_->load(pre);
-			wdm_gain_[0]->load(pre);
-			wdm_gain_[1]->load(pre);
-			wdm_gain_[2]->load(pre);
-			wdm_gain_[3]->load(pre);
-			wdm_ie_trg_->load(pre);
-			wdm_sm_trg_->load(pre);
-
+			dc1_.load(pre);
+			dc2_.load(pre);
+			wgm_.load(pre);
+			crm_.load(pre);
+			wdm_.load(pre);
+			icm_.load(pre);
 			test_param_.load(pre);
 
 			ilock_enable_->load(pre);

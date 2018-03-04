@@ -51,7 +51,7 @@ namespace app {
 		gui::widget_spinbox*	count_;		///< DC1 熱抵抗測定回数
 		gui::widget_button*		exec_;		///< DC1 設定転送
 
-
+	private:
 		struct dc1_t {
 			uint32_t	sw;		///< 5 bits
 			uint32_t	delay;	///< SW オンからコマンド発行までの遅延（10ms単位）
@@ -88,27 +88,6 @@ namespace app {
 			}
 		};
 
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief  コンストラクター
-		*/
-		//-----------------------------------------------------------------//
-		dc1(utils::director<core>& d, net::ign_client_tcp& client, interlock& ilc) :
-			director_(d), client_(client), interlock_(ilc),
-			sw_{ nullptr },
-			ena_(nullptr), mode_(nullptr), voltage_(nullptr), current_(nullptr),
-			count_(nullptr),
-			exec_(nullptr)
-		{ }
-
-		void startup()
-		{
-			dc1_t t;
-			client_.send_data(t.build());
-		}
-
-
 		// DC1 専用
 		void init_sw_dc1_(gui::widget* root, int ofsx, int h, int loc, gui::widget_check* out[], int num,
 			const char* swt[])
@@ -128,6 +107,31 @@ namespace app {
 			}
 		}
 
+	public:
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  コンストラクター
+		*/
+		//-----------------------------------------------------------------//
+		dc1(utils::director<core>& d, net::ign_client_tcp& client, interlock& ilc) :
+			director_(d), client_(client), interlock_(ilc),
+			sw_{ nullptr },
+			ena_(nullptr), mode_(nullptr), voltage_(nullptr), current_(nullptr),
+			count_(nullptr),
+			exec_(nullptr)
+		{ }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  スタートアップ
+		*/
+		//-----------------------------------------------------------------//
+		void startup()
+		{
+			dc1_t t;
+			client_.send_data(t.build());
+		}
 
 
 		void init(gui::widget* root, int d_w, int ofsx, int h, int loc)
@@ -245,6 +249,40 @@ namespace app {
 				ret = false;
 			}
 			return ret;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  セーブ
+			@param[in]	pre	プリファレンス
+		*/
+		//-----------------------------------------------------------------//
+		void save(sys::preference& pre)
+		{
+			tools::save_sw(pre, sw_, 5);
+			ena_->save(pre);
+			mode_->save(pre);
+			voltage_->save(pre);
+			current_->save(pre);
+			count_->save(pre);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  ロード
+			@param[in]	pre	プリファレンス
+		*/
+		//-----------------------------------------------------------------//
+		void load(sys::preference& pre)
+		{
+			tools::load_sw(pre, sw_, 5);
+			ena_->load(pre);
+			mode_->load(pre);
+			voltage_->load(pre);
+			current_->load(pre);
+			count_->load(pre);
 		}
 	};
 }

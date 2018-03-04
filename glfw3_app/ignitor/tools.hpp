@@ -11,6 +11,7 @@
 #include <string>
 #include "utils/input.hpp"
 #include "utils/format.hpp"
+#include "utils/preference.hpp"
 
 #include "interlock.hpp"
 
@@ -102,5 +103,22 @@ namespace app {
 				++swn;
 			}
 		}
+
+
+		static void load_sw(sys::preference& pre, gui::widget_check* sw[], uint32_t n)
+		{
+			for(uint32_t i = 0; i < n; ++i) {
+				sw[i]->load(pre);
+			}
+		}
+
+
+		static void save_sw(sys::preference& pre, gui::widget_check* sw[], uint32_t n)
+		{
+			for(uint32_t i = 0; i < n; ++i) {
+				sw[i]->save(pre);
+			}
+		}
+
 	};
 }
