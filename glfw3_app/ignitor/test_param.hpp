@@ -51,6 +51,11 @@ namespace app {
 		test::value_t			value_;
 
 
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  コンストラクター
+		*/
+		//-----------------------------------------------------------------//
 		test_param(utils::director<core>& d) : director_(d),
 			symbol_(nullptr), retry_(nullptr), wait_(nullptr),
 			term_(nullptr), delay_(nullptr), filter_(nullptr),
@@ -58,6 +63,11 @@ namespace app {
 		{ }
 
 
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  値の構築
+		*/
+		//-----------------------------------------------------------------//
 		void build_value()
 		{
 			value_.symbol_ = symbol_->get_text();
@@ -92,6 +102,15 @@ namespace app {
 		}
 
 
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  初期化
+			@param[in]	root	ルート
+			@param[in]	d_w		横幅
+			@param[in]	ofsx	オフセット
+			@param[in]	loc		ロケーション（高さ）
+		*/
+		//-----------------------------------------------------------------//
 		void init(gui::widget* root, int d_w, int ofsx, int h, int loc)
 		{
 			using namespace gui;
@@ -169,6 +188,12 @@ namespace app {
 		} 
 
 
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  ヘルプ機能
+			@param[in]	chip	ヘルプ・チップ
+		*/
+		//-----------------------------------------------------------------//
 		bool help(gui::widget_chip* chip)
 		{
 			bool ret = true;

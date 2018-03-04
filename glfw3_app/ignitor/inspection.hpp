@@ -32,6 +32,9 @@
 #include "test.hpp"
 #include "kikusui.hpp"
 
+#include "dc1.hpp"
+#include "wgm.hpp"
+#include "icm.hpp"
 #include "test_param.hpp"
 
 // DC2 を菊水電源で置き換える場合有効にする
@@ -64,14 +67,7 @@ namespace app {
 		utils::select_file		unit_load_filer_;
 		utils::select_file		unit_save_filer_;
 
-		// DC1 設定
-		gui::widget_check*		dc1_sw_[5];		///< DC1 接続スイッチ
-		gui::widget_check*		dc1_ena_;		///< DC1 有効、無効
-		gui::widget_list*		dc1_mode_;		///< DC1 電流、電圧モード
-		gui::widget_label*		dc1_voltage_;	///< DC1（電圧）
-		gui::widget_label*		dc1_current_;	///< DC1（電流）
-		gui::widget_spinbox*	dc1_count_;		///< DC1 熱抵抗測定回数
-		gui::widget_button*		dc1_exec_;		///< DC1 設定転送
+		dc1						dc1_;
 
 		// DC2 設定
 		gui::widget_check*		dc2_sw_[14];	///< DC2 接続スイッチ
@@ -87,16 +83,7 @@ namespace app {
 		uint32_t				dc2_volt_delay_;
 		uint32_t				dc2_volt_id_;
 
-		// WGM 設定
-		gui::widget_check*		gen_sw_[5];	///< ジェネレータ接続スイッチ
-		gui::widget_check*		gen_ena_;	///< ジェネレータ有効、無効
-		gui::widget_list*		gen_mode_;	///< ジェネレータモード（矩形波、三角波、直流）
-		gui::widget_label*		gen_freq_;	///< ジェネレータ設定・周波数（1Hz to 100Hz / 1Hz)
-		gui::widget_label*		gen_volt_;	///< ジェネレータ設定・電圧（0 to 14V / 0.1V）
-		gui::widget_label*		gen_duty_;	///< ジェネレーター設定・Duty（0.1% to 100% / 0.1%）
-		gui::widget_check*		gen_iena_;	///< ジェネレータ内臓電源、有効、無効
-		gui::widget_label*		gen_ivolt_;	///< ジェネレータ設定・内臓電源
-		gui::widget_button*		gen_exec_;	///< ジェネレーター設定転送
+		wgm						wgm_;
 
 		// CRM 設定
 		gui::widget_check*		crm_sw_[14];	///< CRM 接続スイッチ
@@ -107,9 +94,7 @@ namespace app {
 		gui::widget_label*		crm_ans_;		///< CRM 測定結果 
 		gui::widget_button*		crm_exec_;		///< CRM 設定転送
 
-		// ICM 設定
-		gui::widget_check*		icm_sw_[6];		///< ICM 接続スイッチ
-		gui::widget_button*		icm_exec_;		///< ICM 設定転送
+		icm						icm_;
 
 		// WDM 設定
 		gui::widget_check*		wdm_sw_[4];		///< WDM 接続スイッチ
@@ -138,43 +123,6 @@ namespace app {
 
 		double					crrd_value_;
 		double					crcd_value_;
-
-		struct dc1_t {
-			uint32_t	sw;		///< 5 bits
-			uint32_t	delay;	///< SW オンからコマンド発行までの遅延（10ms単位）
-			bool		ena;	///< 0, 1
-			bool		mode;	///< 0, 1
-			uint32_t	volt;	///< 20 bits
-			uint32_t	curr;	///< 20 bits
-			bool		thermal;	///< 熱抵抗モード
-			uint32_t	count;	///< 熱抵抗測定回数（最大５００）
-
-			dc1_t() : sw(0), delay(1), ena(0), mode(0), volt(0), curr(0),
-				thermal(false), count(0) { }
-
-			std::string build() const
-			{
-				std::string s;
-				s += (boost::format("dc1 D1SW%02X\n") % sw).str();
-				if(thermal) {
-					s += (boost::format("dc1 D1IS%05X\n") % (curr & 0xfffff)).str();
-					s += (boost::format("dc1 D1TT%03X\n") % (count & 0x1ff)).str();
-				} else {
-					if(ena) {
-						s += (boost::format("delay %d\n") % delay).str();
-						s += (boost::format("dc1 D1MD%d\n") % mode).str();
-						if(mode != 0) {
-							s += (boost::format("dc1 D1VS%05X\n") % (volt & 0xfffff)).str();
-						} else {
-							s += (boost::format("dc1 D1IS%05X\n") % (curr & 0xfffff)).str();
-						}
-					}
-					s += (boost::format("dc1 D1OE%d\n") % ena).str();
-				}			
-				return s;
-			}
-		};
-
 
 		struct dc2_t {
 			uint32_t	sw;		///< 14 bits
@@ -211,38 +159,6 @@ namespace app {
 		};
 
 
-		struct wgm_t {
-			uint16_t	sw;		///< 5 bits
-			bool		ena;	///< 0, 1
-			bool		type;	///< 0, 1
-			uint16_t   	frq;	///< 7 bits
-			uint16_t	duty;	///< 10 bits
-			uint16_t	volt;	///< 10 bits
-			bool		iena;	///< 内臓電源
-			uint32_t	ivolt;	///< 内臓電源電圧
-
-			wgm_t() : ena(0), type(0), frq(0), duty(0), volt(0), iena(false), ivolt(0) { }
-
-			std::string build() const
-			{
-				std::string s;
-				s += (boost::format("wgm WGSW%02X\n") % sw).str();
-
-				s += (boost::format("wgm WGSP%d\n") % type).str();
-				s += (boost::format("wgm WGFQ%02X\n") % (frq & 0x7f)).str();
-				s += (boost::format("wgm WGPW%03X\n") % (duty & 0x3ff)).str();
-				s += (boost::format("wgm WGPV%03X\n") % (volt & 0x3ff)).str();
-
-				s += (boost::format("wgm WGOE%d\n") % ena).str();
-				if(iena) {
-					s += (boost::format("wgm WGDV%05X\n") % (ivolt & 0xfffff)).str();
-				}
-				s += (boost::format("wgm WGDE%d\n") % iena).str();
-				return s;
-			}
-		};
-
-
 		struct crm_t {
 			uint16_t	sw;		///< 14 bits
 			bool		ena;	///< 0, 1
@@ -270,20 +186,6 @@ namespace app {
 						s += (boost::format("crm CRR?1\n")).str();
 					}
 				}
-				return s;
-			}
-		};
-
-
-		struct icm_t {
-			uint16_t	sw;		///< 6 bits
-
-			icm_t() : sw(0) { }
-
-			std::string build() const
-			{
-				std::string s;
-				s = (boost::format("icm ICSW%02X\n") % sw).str();
 				return s;
 			}
 		};
@@ -341,174 +243,12 @@ namespace app {
 		}
 
 
-		interlock::module get_module_(int swn)
-		{
-			interlock::module md = interlock::module::N;
-			switch(swn) {
-			case 1:
-				md = interlock::module::CRM;
-				break;
-			case 15:
-				md = interlock::module::DC2;
-				break;
-			case 29:
-				md = interlock::module::WDM;
-				break;
-			case 34:
-				md = interlock::module::ICM;
-				break;
-			case 40:
-				md = interlock::module::DC1;
-				break;
-			case 44:
-				md = interlock::module::WGM;
-				break;
-			default:
-				break;
-			}
-			return md;
-		}
-
-
-		void init_sw_(int ofsx, int h, int loc, gui::widget_check* out[], int num, int swn)
-		{
-			using namespace gui;
-			widget_director& wd = director_.at().widget_director_;			
-			auto md = get_module_(swn);
-			for(int i = 0; i < num; ++i) {
-				widget::param wp(vtx::irect(ofsx, 20 + h * loc, 60, 40), dialog_);
-				widget_check::param wp_((boost::format("%d") % swn).str());
-				out[i] = wd.add_widget<widget_check>(wp, wp_);
-				ofsx += 60;
-				interlock_.install(md, static_cast<interlock::swtype>(swn), out[i]);
-				++swn;
-			}
-		}
-
-
-		// DC1 専用
-		void init_sw_dc1_(int ofsx, int h, int loc, gui::widget_check* out[], int num,
-			const char* swt[])
-		{
-			using namespace gui;
-			widget_director& wd = director_.at().widget_director_;			
-			auto md = interlock::module::DC1;
-			for(int i = 0; i < num; ++i) {
-				widget::param wp(vtx::irect(ofsx, 20 + h * loc, 60, 40), dialog_);
-				widget_check::param wp_(swt[i]);
-				out[i] = wd.add_widget<widget_check>(wp, wp_);
-				ofsx += 60;
-				int swn;
-				if((utils::input("%d", swt[i]) % swn).status()) {
-					interlock_.install(md, static_cast<interlock::swtype>(swn), out[i]);
-				}
-			}
-		}
-
-
-		void init_dc1_(int d_w, int ofsx, int h, int loc)
-		{
-			using namespace gui;
-			widget_director& wd = director_.at().widget_director_;
-
-			static const char* swt[] = {
-				"40", "41", "42", "43", "49"
-			};
-			init_sw_dc1_(ofsx, h, loc, dc1_sw_, 5, swt);
-			++loc;
-			{
-				widget::param wp(vtx::irect(ofsx, 20 + h * loc, 90, 40), dialog_);
-				widget_check::param wp_("有効");
-				dc1_ena_ = wd.add_widget<widget_check>(wp, wp_);
-			}
-			{
-				widget::param wp(vtx::irect(ofsx + 90, 20 + h * loc, 110, 40), dialog_);
-				widget_list::param wp_;
-				wp_.init_list_.push_back("定電流");
-				wp_.init_list_.push_back("定電圧");
-				wp_.init_list_.push_back("熱抵抗");
-				dc1_mode_ = wd.add_widget<widget_list>(wp, wp_);
-			}
-			{  // 60V/0.1V, 30A/10mA
-				widget::param wp(vtx::irect(ofsx + 230, 20 + h * loc, 90, 40), dialog_);
-				widget_label::param wp_("0", false);
-				dc1_voltage_ = wd.add_widget<widget_label>(wp, wp_);
-				dc1_voltage_->at_local_param().select_func_ = [=](const std::string& str) {
-					dc1_voltage_->set_text(tools::limitf(str, 0.0f, 60.0f, "%3.1f"));
-				};
-			}
-			{
-				widget::param wp(vtx::irect(ofsx + 330, 20 + h * loc, 40, 40), dialog_);
-				widget_text::param wp_("V");
-				wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
-											 vtx::placement::vertical::CENTER);
-				wd.add_widget<widget_text>(wp, wp_);
-			}
-			{  // Max: 30A / step: 10mA
-				widget::param wp(vtx::irect(ofsx + 370, 20 + h * loc, 90, 40), dialog_);
-				widget_label::param wp_("0", false);
-				dc1_current_ = wd.add_widget<widget_label>(wp, wp_);
-				dc1_current_->at_local_param().select_func_ = [=](const std::string& str) {
-					dc1_current_->set_text(tools::limitf(str, 0.0f, 30.0f, "%4.2f"));
-				};
-			}
-			{
-				widget::param wp(vtx::irect(ofsx + 470, 20 + h * loc, 50, 40), dialog_);
-				widget_text::param wp_("A");
-				wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
-											 vtx::placement::vertical::CENTER);
-				wd.add_widget<widget_text>(wp, wp_);
-			}
-			{  // 熱抵抗回数
-				widget::param wp(vtx::irect(ofsx + 510, 20 + h * loc, 110, 40), dialog_);
-				widget_spinbox::param wp_(10, 10, 500);
-				dc1_count_ = wd.add_widget<widget_spinbox>(wp, wp_);
-				dc1_count_->at_local_param().select_func_
-					= [=](widget_spinbox::state st, int before, int newpos) {
-					return (boost::format("%d") % newpos).str();
-				};
-			} 
-			{
-				widget::param wp(vtx::irect(d_w - 50, 20 + h * loc, 30, 30), dialog_);
-				widget_button::param wp_(">");
-				dc1_exec_ = wd.add_widget<widget_button>(wp, wp_);
-				dc1_exec_->at_local_param().select_func_ = [=](int n) {
-					dc1_t t;
-					uint16_t sw = 0;
-					for(int i = 0; i < 5; ++i) {
-						sw <<= 1;
-						if(dc1_sw_[i]->get_check()) sw |= 1;
-					}
-					t.sw = sw;
-					t.ena = dc1_ena_->get_check();
-					if(dc1_mode_->get_select_pos() < 2) {
-						t.mode = dc1_mode_->get_select_pos() & 1;
-						t.count = 10;
-						t.thermal = false;
-					} else {
-						t.count = dc1_count_->get_select_pos();
-						t.thermal = true;
-					}
-
-					float v;
-					if((utils::input("%f", dc1_voltage_->get_text().c_str()) % v).status()) {
-						t.volt = v / 62.5e-6;
-					}
-					if((utils::input("%f", dc1_current_->get_text().c_str()) % v).status()) {
-						t.curr = v / 31.25e-6;
-					}
-					client_.send_data(t.build());
-				};
-			}
-		}
-
-
 		void init_dc2_(int d_w, int ofsx, int h, int loc)
 		{
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
-			init_sw_(ofsx, h, loc, dc2_sw_, 14, 15);
+			tools::init_sw(wd, dialog_, interlock_, ofsx, h, loc, dc2_sw_, 14, 15);
 			++loc;
 			{
 				widget::param wp(vtx::irect(ofsx, 20 + h * loc, 90, 40), dialog_);
@@ -610,151 +350,12 @@ namespace app {
 		}
 
 
-		void init_gen_(int d_w, int ofsx, int h, int loc)
-		{
-			using namespace gui;
-			widget_director& wd = director_.at().widget_director_;
-
-			init_sw_(ofsx, h, loc, gen_sw_, 5, 44);
-			++loc;
-			// ジェネレーター・モジュール
-			{
-				widget::param wp(vtx::irect(ofsx, 20 + h * loc, 100, 40), dialog_);
-				widget_check::param wp_("有効");
-				gen_ena_ = wd.add_widget<widget_check>(wp, wp_);
-			}
-			{  // (6) ジェネレータ設定： 出力モード選択（矩形波/三角波/直流）
-			   // タイプ（連続、単発）、
-			   // 出力電圧、周波数、ON時間（レンジ：0.01ms）
-				widget::param wp(vtx::irect(ofsx + 90, 20 + h * loc, 110, 40), dialog_);
-				widget_list::param wp_;
-				wp_.init_list_.push_back("矩形波");
-				wp_.init_list_.push_back("三角波");
-				gen_mode_ = wd.add_widget<widget_list>(wp, wp_);
-				gen_mode_->at_local_param().select_func_ = [=](const std::string& str,
-															   uint32_t pos) {
-					if(pos == 0) {
-						gen_duty_->set_stall(false);
-					} else {
-						gen_duty_->set_stall();
-					}
-				};
-			}
-			{  // ジェネレータ設定、周波数（1Hz to 100Hz, 1Hz/step)
-				widget::param wp(vtx::irect(ofsx + 230 + 130 * 0, 20 + h * loc, 70, 40), dialog_);
-				widget_label::param wp_("1", false);
-				gen_freq_ = wd.add_widget<widget_label>(wp, wp_);
-				gen_freq_->at_local_param().select_func_ = [=](const std::string& str) {
-					gen_freq_->set_text(tools::limitf(str, 1.0f, 100.0f, "%1.0f"));
-				};
-				{
-					widget::param wp(vtx::irect(ofsx + 230 + 120 * 0 + 80, 20 + h * loc, 30, 40),
-						dialog_);
-					widget_text::param wp_("Hz");
-					wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
-												 vtx::placement::vertical::CENTER);
-					wd.add_widget<widget_text>(wp, wp_);
-				}
-			}
-			{  // ジェネレータ設定、電圧（0V to 14V, 0.1V/step)
-				widget::param wp(vtx::irect(ofsx + 230 + 120 * 1, 20 + h * loc, 70, 40), dialog_);
-				widget_label::param wp_("0", false);
-				gen_volt_ = wd.add_widget<widget_label>(wp, wp_);
-				gen_volt_->at_local_param().select_func_ = [=](const std::string& str) {
-					gen_volt_->set_text(tools::limitf(str, 0.0f, 14.0f, "%2.1f"));
-				};
-				{
-					widget::param wp(vtx::irect(ofsx + 230 + 120 * 1 + 80, 20 + h * loc, 30, 40),
-									 dialog_);
-					widget_text::param wp_("V");
-					wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
-												 vtx::placement::vertical::CENTER);
-					wd.add_widget<widget_text>(wp, wp_);
-				}
-			}
-			{  // ジェネレータ設定、DUTY（0.1% to 100%, 0.1%/step）
-				widget::param wp(vtx::irect(ofsx + 230 + 120 * 2, 20 + h * loc, 70, 40), dialog_);
-				widget_label::param wp_("0.1", false);
-				gen_duty_ = wd.add_widget<widget_label>(wp, wp_);
-				gen_duty_->at_local_param().select_func_ = [=](const std::string& str) {
-					gen_duty_->set_text(tools::limitf(str, 0.1f, 100.0f, "%2.1f"));
-				};
-				{
-					widget::param wp(vtx::irect(ofsx + 230 + 120 * 2 + 80, 20 + h * loc, 30, 40),
-									 dialog_);
-					widget_text::param wp_("%");
-					wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
-												 vtx::placement::vertical::CENTER);
-					wd.add_widget<widget_text>(wp, wp_);
-				}
-			}
-			// ジェネレーター内臓電源
-			{
-				int ofs = 230 + 120 * 2 + 80 + 40;
-				widget::param wp(vtx::irect(ofsx + ofs, 20 + h * loc, 80, 40), dialog_);
-				widget_check::param wp_("電源");
-				gen_iena_ = wd.add_widget<widget_check>(wp, wp_);
-			}
-			{  // 内臓電源設定
-				int ofs = 230 + 120 * 2 + 80 + 40 + 90;
-				widget::param wp(vtx::irect(ofsx + ofs, 20 + h * loc, 70, 40), dialog_);
-				widget_label::param wp_("0", false);
-				gen_ivolt_ = wd.add_widget<widget_label>(wp, wp_);
-				gen_ivolt_->at_local_param().select_func_ = [=](const std::string& str) {
-					gen_ivolt_->set_text(tools::limitf(str, 0.0f, 14.0f, "%2.1f"));
-				};
-				{
-					int ofs = 230 + 120 * 2 + 80 + 40 + 90 + 80;
-					widget::param wp(vtx::irect(ofsx + ofs, 20 + h * loc, 30, 40), dialog_);
-					widget_text::param wp_("V");
-					wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
-												 vtx::placement::vertical::CENTER);
-					wd.add_widget<widget_text>(wp, wp_);
-				}
-			}
-
-			{
-				widget::param wp(vtx::irect(d_w - 50, 20 + h * loc, 30, 30), dialog_);
-				widget_button::param wp_(">");
-				gen_exec_ = wd.add_widget<widget_button>(wp, wp_);
-				gen_exec_->at_local_param().select_func_ = [=](int n) {
-					wgm_t t;
-					uint16_t sw = 0;
-					for(int i = 0; i < 5; ++i) {
-						sw <<= 1;
-						if(gen_sw_[i]->get_check()) sw |= 1;
-					}
-					t.sw = sw;
-					t.ena = gen_ena_->get_check();
-					t.type = gen_mode_->get_select_pos() & 1;
-					float v;
-					if((utils::input("%f", gen_freq_->get_text().c_str()) % v).status()) {
-						t.frq = v;
-					}
-					if((utils::input("%f", gen_duty_->get_text().c_str()) % v).status()) {
-						t.duty = v * 10.0f;
-					}
-					if((utils::input("%f", gen_volt_->get_text().c_str()) % v).status()) {
-						t.volt = v / 0.02f;
-					}
-					t.iena = gen_iena_->get_check();
-					if((utils::input("%f", gen_ivolt_->get_text().c_str()) % v).status()) {
-						t.ivolt = v / 15.626e-6;
-					}
-					auto s = t.build();
-// std::cout << s << std::endl;
-					client_.send_data(s);
-				};
-			}
-		}
-
-
 		void init_crm_(int d_w, int ofsx, int h, int loc)
 		{
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
-			init_sw_(ofsx, h, loc, crm_sw_, 14, 1);
+			tools::init_sw(wd, dialog_, interlock_, ofsx, h, loc, crm_sw_, 14, 1);
 			++loc;
 			// ＣＲメジャー・モジュール
 			{
@@ -806,31 +407,6 @@ namespace app {
 					t.amps = crm_amps_->get_select_pos();
 					t.freq = crm_freq_->get_select_pos();
 					t.mode = crm_mode_->get_select_pos();
-
-					client_.send_data(t.build());
-				};
-			}
-		}
-
-
-		void init_icm_(int d_w, int ofsx, int h, int loc)
-		{
-			using namespace gui;
-			widget_director& wd = director_.at().widget_director_;
-
-			init_sw_(ofsx, h, loc, icm_sw_, 6, 34);
-			{  // exec
-				widget::param wp(vtx::irect(d_w - 50, 20 + h * loc, 30, 30), dialog_);
-				widget_button::param wp_(">");
-				icm_exec_ = wd.add_widget<widget_button>(wp, wp_);
-				icm_exec_->at_local_param().select_func_ = [=](int n) {
-					icm_t t;
-					uint16_t sw = 0;
-					for(int i = 0; i < 6; ++i) {
-						sw <<= 1;
-						if(icm_sw_[i]->get_check()) sw |= 1;
-					}
-					t.sw = sw;
 
 					client_.send_data(t.build());
 				};
@@ -913,7 +489,7 @@ namespace app {
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
-			init_sw_(ofsx, h, loc, wdm_sw_, 4, 29);
+			tools::init_sw(wd, dialog_, interlock_, ofsx, h, loc, wdm_sw_, 4, 29);
 			for(int i = 0; i < 4; ++i) {  // 各チャネル減衰設定
 				static const vtx::ipos ofs[4] = {
 					{ 0, 0 }, { 110, 0 }, { 220, 0 }, { 330, 0 }
@@ -1071,14 +647,8 @@ namespace app {
 		// 各モジュールへ初期化状態の転送
 		void startup_()
 		{
-			{  // ICM
-				icm_t t;
-				client_.send_data(t.build());
-			}
-			{  // DC1
-				dc1_t t;
-				client_.send_data(t.build());
-			}
+			icm_.startup();
+			dc1_.startup();
 			{  // DC2
 				dc2_t t;
 				client_.send_data(t.build());
@@ -1087,10 +657,7 @@ namespace app {
 				crm_t t;
 				client_.send_data(t.build());
 			}
-			{  // WGM
-				wgm_t t;
-				client_.send_data(t.build());
-			}
+			wgm_.startup();
 			{  // WDM / SW
 				uint32_t cmd = 0b00001000;
 				cmd <<= 16;
@@ -1111,10 +678,7 @@ namespace app {
 			dialog_(nullptr),
 			unit_name_(nullptr), load_file_(nullptr), save_file_(nullptr), ilock_enable_(nullptr),
 
-			dc1_sw_{ nullptr },
-			dc1_ena_(nullptr), dc1_mode_(nullptr), dc1_voltage_(nullptr), dc1_current_(nullptr),
-			dc1_count_(nullptr),
-			dc1_exec_(nullptr),
+			dc1_(d, client_, interlock_),
 
 			dc2_sw_{ nullptr },
 			dc2_ena_(nullptr), dc2_mode_(nullptr), dc2_voltage_(nullptr), dc2_current_(nullptr),
@@ -1123,15 +687,13 @@ namespace app {
 			dc2_probe_mode_(false), dc2_curr_delay_(0), dc2_curr_id_(0),
 			dc2_volt_delay_(0), dc2_volt_id_(0),
 
-			gen_ena_(nullptr), gen_mode_(nullptr), gen_freq_(nullptr),
-			gen_volt_(nullptr), gen_duty_(nullptr), gen_iena_(nullptr), gen_ivolt_(nullptr),
-			gen_exec_(nullptr),
+			wgm_(d, client_, interlock_),
 
 			crm_sw_{ nullptr },
 			crm_ena_(nullptr), crm_amps_(nullptr), crm_freq_(nullptr), crm_mode_(nullptr),
 			crm_ans_(nullptr), crm_exec_(nullptr),
 
-			icm_sw_{ nullptr }, icm_exec_(nullptr),
+			icm_(d, client_, interlock_),
 
 			wdm_sw_{ nullptr },
 			wdm_smpl_(nullptr), wdm_ch_(nullptr), wdm_slope_(nullptr), wdm_window_(nullptr),
@@ -1194,7 +756,7 @@ namespace app {
 			@brief  DC1 コマンドの発行
 		*/
 		//-----------------------------------------------------------------//
-		void exec_dc1() { dc1_exec_->exec(); }
+		void exec_dc1() { dc1_.exec_->exec(); }
 
 
 		//-----------------------------------------------------------------//
@@ -1210,7 +772,7 @@ namespace app {
 			@brief  GEN コマンドの発行
 		*/
 		//-----------------------------------------------------------------//
-		void exec_gen() { gen_exec_->exec(); }
+		void exec_gen() { wgm_.exec_->exec(); }
 
 
 		//-----------------------------------------------------------------//
@@ -1226,7 +788,7 @@ namespace app {
 			@brief  ICM コマンドの発行
 		*/
 		//-----------------------------------------------------------------//
-		void exec_icm() { icm_exec_->exec(); }
+		void exec_icm() { icm_.exec_->exec(); }
 
 
 		//-----------------------------------------------------------------//
@@ -1375,11 +937,11 @@ namespace app {
 
 			ofsx = 110;
 			init_wdm_(d_w, ofsx, h, 1);
-			init_dc1_(d_w, ofsx, h, 3);
+			dc1_.init(dialog_, d_w, ofsx, h, 3);
 			init_dc2_(d_w, ofsx, h, 5);
-			init_gen_(d_w, ofsx, h, 7);
+			wgm_.init(dialog_, d_w, ofsx, h, 7);
 			init_crm_(d_w, ofsx, h, 9);
-			init_icm_(d_w, ofsx, h, 11);
+			icm_.init(dialog_, d_w, ofsx, h, 11);
 
 			test_param_.init(dialog_, d_w, ofsx, h, 12);
 
@@ -1444,11 +1006,11 @@ namespace app {
 			if(!dialog_->get_state(gui::widget::state::ENABLE)) return;
 
 			// 転送スイッチの状態をネットワークの接続状態で設定
-			dc1_exec_->set_stall(!client_.probe());
-///			dc2_exec_->set_stall(!client_.probe());
-			gen_exec_->set_stall(!client_.probe());
+			dc1_.exec_->set_stall(!client_.probe());
+			dc2_exec_->set_stall(!client_.probe());
+			wgm_.exec_->set_stall(!client_.probe());
 			crm_exec_->set_stall(!client_.probe());
-			icm_exec_->set_stall(!client_.probe());
+			icm_.exec_->set_stall(!client_.probe());
 			wdm_exec_->set_stall(!client_.probe());
 
 			if(unit_load_filer_.state()) {
@@ -1484,22 +1046,10 @@ namespace app {
 
 			// ヘルプ機能
 			uint32_t act = 60 * 3;
-			if(dc1_current_->get_focus()) {
-				tools::set_help(chip_, dc1_current_, "0.0 to 30.0 [A], 0.1 [A] / step");
-			} else if(dc1_voltage_->get_focus()) {
-				tools::set_help(chip_, dc1_voltage_, "0.0 to 60.0 [V], 0.1 [V] / step");
-			} else if(dc2_voltage_->get_focus()) {
+			if(dc2_voltage_->get_focus()) {
 				tools::set_help(chip_, dc2_voltage_, "0.0 to 300.0 [V], 0.1 [V] / step");
 			} else if(dc2_current_->get_focus()) {
 				tools::set_help(chip_, dc2_current_, "0.0 to 100.0 [mA], 0.01 [mA] / step");
-			} else if(gen_freq_->get_focus()) {
-				tools::set_help(chip_, gen_freq_, "1 to 100 [Hz], 1 [Hz] / step");
-			} else if(gen_volt_->get_focus()) {
-				tools::set_help(chip_, gen_volt_, "0.0 to 14.0 [V], 0.1 [V] / step");
-			} else if(gen_duty_->get_focus()) {
-				tools::set_help(chip_, gen_duty_, "0.1 to 100.0 [%], 0.1 [%] / step");
-			} else if(gen_ivolt_->get_focus()) {
-				tools::set_help(chip_, gen_ivolt_, "0.0 to 16.0 [V], 0.01 [V] / step");
 			} else if(wdm_level_->get_focus()) {
 				tools::set_help(chip_, wdm_level_, "トリガーレベル（数値入力）");
 			} else if(wdm_level_va_->get_focus()) {
@@ -1517,7 +1067,10 @@ namespace app {
 				s += vau[n];
 				s += "）";
 				tools::set_help(chip_, wdm_level_va_, s);
-			} else if(!test_param_.help(chip_)) {
+			} else if(wgm_.help(chip_)) {
+			} else if(dc1_.help(chip_)) {
+			} else if(test_param_.help(chip_)) {
+			} else {
 				act = 0;
 			}
 			chip_->active(act);
@@ -1535,12 +1088,12 @@ namespace app {
 		{
 			unit_name_->save(pre);
 
-			save_sw_(pre, dc1_sw_, 5);
-			dc1_ena_->save(pre);
-			dc1_mode_->save(pre);
-			dc1_voltage_->save(pre);
-			dc1_current_->save(pre);
-			dc1_count_->save(pre);
+			save_sw_(pre, dc1_.sw_, 5);
+			dc1_.ena_->save(pre);
+			dc1_.mode_->save(pre);
+			dc1_.voltage_->save(pre);
+			dc1_.current_->save(pre);
+			dc1_.count_->save(pre);
 
 			save_sw_(pre, dc2_sw_, 14);
 			dc2_ena_->save(pre);
@@ -1548,14 +1101,14 @@ namespace app {
 			dc2_voltage_->save(pre);
 			dc2_current_->save(pre);
 
-			save_sw_(pre, gen_sw_, 5);
-			gen_ena_->save(pre);
-			gen_mode_->save(pre);
-			gen_freq_->save(pre);
-			gen_volt_->save(pre);
-			gen_duty_->save(pre);
-			gen_iena_->save(pre);
-			gen_ivolt_->save(pre);
+			save_sw_(pre, wgm_.sw_, 5);
+			wgm_.ena_->save(pre);
+			wgm_.mode_->save(pre);
+			wgm_.freq_->save(pre);
+			wgm_.volt_->save(pre);
+			wgm_.duty_->save(pre);
+			wgm_.iena_->save(pre);
+			wgm_.ivolt_->save(pre);
 
 			save_sw_(pre, crm_sw_, 14);
 			crm_ena_->save(pre);
@@ -1563,7 +1116,7 @@ namespace app {
 			crm_freq_->save(pre);
 			crm_mode_->save(pre);
 
-			save_sw_(pre, icm_sw_, 6);
+			save_sw_(pre, icm_.sw_, 6);
 
 			save_sw_(pre, wdm_sw_, 4);
 			wdm_smpl_->save(pre);
@@ -1612,12 +1165,12 @@ namespace app {
 		{
 			unit_name_->load(pre);
 
-			load_sw_(pre, dc1_sw_, 5);
-			dc1_ena_->load(pre);
-			dc1_mode_->load(pre);
-			dc1_voltage_->load(pre);
-			dc1_current_->load(pre);
-			dc1_count_->load(pre);
+			load_sw_(pre, dc1_.sw_, 5);
+			dc1_.ena_->load(pre);
+			dc1_.mode_->load(pre);
+			dc1_.voltage_->load(pre);
+			dc1_.current_->load(pre);
+			dc1_.count_->load(pre);
 
 			load_sw_(pre, dc2_sw_, 14);
 			dc2_ena_->load(pre);
@@ -1625,14 +1178,14 @@ namespace app {
 			dc2_voltage_->load(pre);
 			dc2_current_->load(pre);
 
-			load_sw_(pre, gen_sw_, 5);
-			gen_ena_->load(pre);
-			gen_mode_->load(pre);
-			gen_freq_->load(pre);
-			gen_volt_->load(pre);
-			gen_duty_->load(pre);
-			gen_iena_->load(pre);
-			gen_ivolt_->load(pre);
+			load_sw_(pre, wgm_.sw_, 5);
+			wgm_.ena_->load(pre);
+			wgm_.mode_->load(pre);
+			wgm_.freq_->load(pre);
+			wgm_.volt_->load(pre);
+			wgm_.duty_->load(pre);
+			wgm_.iena_->load(pre);
+			wgm_.ivolt_->load(pre);
 
 			load_sw_(pre, crm_sw_, 14);
 			crm_ena_->load(pre);
@@ -1640,7 +1193,7 @@ namespace app {
 			crm_freq_->load(pre);
 			crm_mode_->load(pre);
 
-			load_sw_(pre, icm_sw_, 6);
+			load_sw_(pre, icm_.sw_, 6);
 
 			load_sw_(pre, wdm_sw_, 4);
 			wdm_smpl_->load(pre);
