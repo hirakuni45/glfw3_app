@@ -209,6 +209,7 @@ namespace app {
 						if(ch == '\r' || ch == '\n') ch = 0;
 						s += ch;
 					}
+std::cout << s << std::endl;
 					utils::string_to_float(s, volt_);
 					++volt_id_;
 					task_ = task::idle;
@@ -223,6 +224,7 @@ namespace app {
 						if(ch == '\r' || ch == '\n') ch = 0;
 						s += ch;
 					}
+std::cout << s << std::endl;
 					utils::string_to_float(s, curr_);
 					++curr_id_;
 					task_ = task::idle;

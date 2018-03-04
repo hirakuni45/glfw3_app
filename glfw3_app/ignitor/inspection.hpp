@@ -1617,9 +1617,9 @@ namespace app {
 #ifdef DC2_KIKUSUI
 			if(dc2_curr_id_ != kikusui_.get_curr_id()) {
 				dc2_curr_id_ = kikusui_.get_curr_id();
-				auto v = kikusui_.get_curr();
-				v *= 1000.0f;
-				dc2_probe_->set_text((boost::format("%6.5f") % v).str());
+				auto c = kikusui_.get_curr();
+				c /= 1000.0f;
+				dc2_probe_->set_text((boost::format("%6.5f") % c).str());
 			}
 			if(dc2_volt_id_ != kikusui_.get_volt_id()) {
 				dc2_volt_id_ = kikusui_.get_volt_id();
