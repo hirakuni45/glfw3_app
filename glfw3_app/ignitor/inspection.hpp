@@ -276,7 +276,9 @@ namespace app {
 		gui::widget_label*		dc2_probe_;		///< DC2（電流、電圧測定値）
 		gui::widget_button*		dc2_exec_;		///< DC2 設定転送
 		bool					dc2_probe_mode_;
+		uint32_t				dc2_curr_delay_;
 		uint32_t				dc2_curr_id_;
+		uint32_t				dc2_volt_delay_;
 		uint32_t				dc2_volt_id_;
 
 		// WGM 設定
@@ -778,12 +780,10 @@ namespace app {
 					if(!err) {
 						if(dc2_mode_->get_select_pos() == 0) {  // 電流 [mA]
 							kikusui_.set_curr(c, v);
-							dc2_curr_id_ = kikusui_.get_curr_id();
-							kikusui_.req_curr();
+							dc2_curr_delay_ = 30;
 						} else {  // 電圧 [V]
 							kikusui_.set_volt(v, c);
-							dc2_volt_id_ = kikusui_.get_volt_id();
-							kikusui_.req_volt();
+							dc2_volt_delay_ = 30;
 						}
 					}
 #else
@@ -1322,7 +1322,8 @@ namespace app {
 			dc2_ena_(nullptr), dc2_mode_(nullptr), dc2_voltage_(nullptr), dc2_current_(nullptr),
 			dc2_probe_(nullptr),
 			dc2_exec_(nullptr),
-			dc2_probe_mode_(false), dc2_curr_id_(0), dc2_volt_id_(0),
+			dc2_probe_mode_(false), dc2_curr_delay_(0), dc2_curr_id_(0),
+			dc2_volt_delay_(0), dc2_volt_id_(0),
 
 			gen_ena_(nullptr), gen_mode_(nullptr), gen_freq_(nullptr),
 			gen_volt_(nullptr), gen_duty_(nullptr), gen_iena_(nullptr), gen_ivolt_(nullptr),
@@ -1615,10 +1616,24 @@ namespace app {
 			interlock_.update(ilock_enable_->get_check());
 
 #ifdef DC2_KIKUSUI
+			if(dc2_curr_delay_ > 0) {
+				--dc2_curr_delay_;
+				if(dc2_curr_delay_ == 0) {
+					dc2_curr_id_ = kikusui_.get_curr_id();
+					kikusui_.req_curr();
+				}
+			}
+			if(dc2_volt_delay_ > 0) {
+				--dc2_volt_delay_;
+				if(dc2_volt_delay_ == 0) {
+					dc2_volt_id_ = kikusui_.get_volt_id();
+					kikusui_.req_volt();
+				}
+			}
 			if(dc2_curr_id_ != kikusui_.get_curr_id()) {
 				dc2_curr_id_ = kikusui_.get_curr_id();
 				auto c = kikusui_.get_curr();
-				c /= 1000.0f;
+				c *= 1000.0f;
 				dc2_probe_->set_text((boost::format("%6.5f") % c).str());
 			}
 			if(dc2_volt_id_ != kikusui_.get_volt_id()) {

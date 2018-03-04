@@ -11,6 +11,7 @@
 #include <boost/format.hpp>
 #include "utils/serial_win32.hpp"
 #include "utils/fixed_fifo.hpp"
+#include "utils/input.hpp"
 #include "utils/string_utils.hpp"
 
 namespace app {
@@ -199,34 +200,35 @@ namespace app {
 			auto rl = serial_.read(tmp, sizeof(tmp));
 			for(uint32_t i = 0; i < rl; ++i) {
 				fifo_.put(tmp[i]);
+// std::cout << tmp[i] << std::endl;
 			}
 			switch(task_) {
 			case task::volt:
-				if(fifo_.length() >= 14) {
+				if(fifo_.length() >= 9) {
 					std::string s;
-					for(uint32_t i = 0; i < 14; ++i) {
+					for(uint32_t i = 0; i < 9; ++i) {
 						auto ch = fifo_.get();
 						if(ch == '\r' || ch == '\n') ch = 0;
 						s += ch;
 					}
-std::cout << s << std::endl;
-					utils::string_to_float(s, volt_);
-					++volt_id_;
+					if((utils::input("%f", s.c_str()) % volt_).status()) {
+						++volt_id_;
+					}
 					task_ = task::idle;
 				}
 				break;
 
 			case task::curr:
-				if(fifo_.length() >= 14) {
+				if(fifo_.length() >= 9) {
 					std::string s;
-					for(uint32_t i = 0; i < 14; ++i) {
+					for(uint32_t i = 0; i < 9; ++i) {
 						auto ch = fifo_.get();
 						if(ch == '\r' || ch == '\n') ch = 0;
 						s += ch;
 					}
-std::cout << s << std::endl;
-					utils::string_to_float(s, curr_);
-					++curr_id_;
+					if((utils::input("%f", s.c_str()) % curr_).status()) {
+						++curr_id_;
+					}
 					task_ = task::idle;
 				}
 				break;
