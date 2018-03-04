@@ -49,6 +49,7 @@ namespace app {
 		std::string				ip_;
 
 		uint32_t				exit_loop_;
+		bool					root_menu_exit_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -63,7 +64,7 @@ namespace app {
 ///			client_(io_service_),
 			client_(),
 			delay_client_(60), connect_client_(false), start_client_(false),
-			ip_(), exit_loop_(60)
+			ip_(), exit_loop_(60), root_menu_exit_(false)
 		{ }
 
 
@@ -75,15 +76,18 @@ namespace app {
 		void initialize()
 		{
 			root_menu_.initialize();
-#if 0
+
 			director_.at().exit_func_ = [=]() {
-				std::cout << "Recive EXIT" << std::endl;
+				if(!root_menu_exit_) {
+					root_menu_.exit();
+					root_menu_exit_ = true;
+				}
+//				std::cout << "Recive EXIT" << std::endl;
 				if(exit_loop_ > 0) {
 					--exit_loop_;
 				}
 				return exit_loop_ == 0;
 			};
-#endif
 		}
 
 
