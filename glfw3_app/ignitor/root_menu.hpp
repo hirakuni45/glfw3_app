@@ -629,6 +629,7 @@ namespace app {
 				} else {
 	                cont_setting_serial_->select(sel);
 				}
+				kikusui_.start();
 			}
 			if(!serial_list_.empty()) {
 				if(!serial_.probe()) {
