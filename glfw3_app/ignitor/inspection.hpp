@@ -24,12 +24,15 @@
 #include "utils/format.hpp"
 #include "utils/preference.hpp"
 
+#include "tools.hpp"
 #include "relay_map.hpp"
 #include "ign_client_tcp.hpp"
 #include "interlock.hpp"
 #include "wave_cap.hpp"
 #include "test.hpp"
 #include "kikusui.hpp"
+
+#include "test_param.hpp"
 
 // DC2 を菊水電源で置き換える場合有効にする
 #define DC2_KIKUSUI
@@ -41,205 +44,8 @@ namespace app {
 		@brief  単体検査クラス
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	class inspection {
-
-		static std::string limitf_(const std::string& str, float min, float max, const char* form)
-		{
-			std::string newtext;
-			float v;
-			if((utils::input("%f", str.c_str()) % v).status()) {
-				if(v < min) v = min;
-				else if(v > max) v = max;
-				char tmp[256];
-				utils::format(form, tmp, sizeof(tmp)) % v;
-				newtext = tmp;
-			}
-			return newtext;
-		}
-
-
-		static std::string limiti_(const std::string& str, int min, int max, const char* form)
-		{
-			std::string newtext;
-			int v;
-			if((utils::input("%d", str.c_str()) % v).status()) {
-				if(v < min) v = min;
-				else if(v > max) v = max;
-				char tmp[256];
-				utils::format(form, tmp, sizeof(tmp)) % v;
-				newtext = tmp;
-			}
-			return newtext;
-		}
-
-	public:
-		//=================================================================//
-		/*!
-			@brief  テストパラメータ、構造体
-		*/
-		//=================================================================//
-		struct test_param {
-			utils::director<core>&	director_;
-
-			gui::widget_label*		symbol_;	///< 検査記号
-			gui::widget_spinbox*	retry_;		///< リトライ回数
-			gui::widget_label*		wait_;		///< 検査遅延時間設定
-			gui::widget_list*		term_;		///< 検査端子設定
-			gui::widget_label*		delay_;		///< 検査信号遅延時間
-			gui::widget_list*		filter_;	///< 検査信号フィルター
-			gui::widget_label*		width_;		///< 検査信号取得幅
-			gui::widget_label*		min_;		///< 検査最小値
-			gui::widget_label*		max_;		///< 検査最大値
-
-			test::value_t			value_;
-
-			test_param(utils::director<core>& d) : director_(d),
-				symbol_(nullptr), retry_(nullptr), wait_(nullptr),
-				term_(nullptr), delay_(nullptr), filter_(nullptr),
-				width_(nullptr), min_(nullptr), max_(nullptr), value_()
-			{ }
-
-
-			void build_value()
-			{
-				value_.symbol_ = symbol_->get_text();
-				value_.retry_ = retry_->get_select_pos();
-				{
-					int n = 0;
-					utils::string_to_int(wait_->get_text(), n);
-					value_.wait_ = n;
-				}
-				value_.term_ = term_->get_select_pos();
-				{
-					double a = 0.0f;
-					utils::string_to_double(delay_->get_text(), a);
-					value_.delay_ = a;
-				}
-				value_.filter_ = filter_->get_select_pos();
-				{
-					double a = 0.0f;
-					utils::string_to_double(width_->get_text(), a);
-					value_.width_ = a;
-				}
-				{
-					double a = 0.0f;
-					utils::string_to_double(min_->get_text(), a);
-					value_.min_ = a;
-				}
-				{
-					double a = 0.0f;
-					utils::string_to_double(max_->get_text(), a);
-					value_.max_ = a;
-				}
-			}
-
-
-			void init(gui::widget* root, int d_w, int ofsx, int h, int loc)
-			{
-				using namespace gui;
-				widget_director& wd = director_.at().widget_director_;
-				{  // 検査記号
-					widget::param wp(vtx::irect(ofsx, 20 + h * 12, 90, 40), root);
-					widget_label::param wp_("", false);
-					symbol_ = wd.add_widget<widget_label>(wp, wp_);
-				}
-				{  // リトライ回数
-					widget::param wp(vtx::irect(ofsx, 20 + h * 13, 90, 40), root);
-					widget_spinbox::param wp_(1, 1, 5);
-					retry_ = wd.add_widget<widget_spinbox>(wp, wp_);
-					retry_->at_local_param().select_func_ =
-						[=](widget_spinbox::state st, int before, int newpos) {
-						return (boost::format("%d") % newpos).str();
-					};
-				}
-				{  // Wait時間設定： ０～１．０ｓ（レンジ：０．０１ｓ）
-					widget::param wp(vtx::irect(ofsx + 100, 20 + h * 13, 90, 40), root);
-					widget_label::param wp_("0", false);
-					wait_ = wd.add_widget<widget_label>(wp, wp_);
-					wait_->at_local_param().select_func_ = [=](const std::string& str) {
-						wait_->set_text(limitf_(str, 0.0f, 1.0f, "%3.2f"));
-					};
-				}
-				{  // 計測対象選択
-					widget::param wp(vtx::irect(ofsx + 200, 20 + h * 13, 90, 40), root);
-					widget_list::param wp_;
-					wp_.init_list_.push_back("CH1");
-					wp_.init_list_.push_back("CH2");
-					wp_.init_list_.push_back("CH3");
-					wp_.init_list_.push_back("CH4");
-					wp_.init_list_.push_back("DC2");
-					wp_.init_list_.push_back("CRM");
-					term_ = wd.add_widget<widget_list>(wp, wp_);
-				}
-				{  // テスト 信号計測ポイント（時間）
-					widget::param wp(vtx::irect(ofsx + 300, 20 + h * 13, 90, 40), root);
-					widget_label::param wp_("0", false);
-					delay_ = wd.add_widget<widget_label>(wp, wp_);
-				}
-				{  // 計測信号フィルター
-					widget::param wp(vtx::irect(ofsx + 400, 20 + h * 13, 90, 40), root);
-					widget_list::param wp_;
-					wp_.init_list_.push_back("SIG");
-					wp_.init_list_.push_back("MIN");
-					wp_.init_list_.push_back("MAX");
-					wp_.init_list_.push_back("AVE");
-					filter_ = wd.add_widget<widget_list>(wp, wp_);
-					filter_->at_local_param().select_func_
-						= [=](const std::string& text, uint32_t pos) {
-						if(pos == 0) {
-							width_->set_stall();
-						} else {
-							width_->set_stall(false);
-						}
-					};
-				}
-				{  // テスト 信号計測ポイント（時間）
-					widget::param wp(vtx::irect(ofsx + 500, 20 + h * 13, 90, 40), root);
-					widget_label::param wp_("0", false);
-					width_ = wd.add_widget<widget_label>(wp, wp_);
-				}
-				{  // テスト MIN 値設定
-					widget::param wp(vtx::irect(ofsx + 600, 20 + h * 13, 90, 40), root);
-					widget_label::param wp_("0", false);
-					min_ = wd.add_widget<widget_label>(wp, wp_);
-				}
-				{  // テスト MAX 値設定
-					widget::param wp(vtx::irect(ofsx + 700, 20 + h * 13, 90, 40), root);
-					widget_label::param wp_("0", false);
-					max_ = wd.add_widget<widget_label>(wp, wp_);
-				}
-			} 
-
-
-			void save(sys::preference& pre)
-			{
-				symbol_->save(pre);
-				retry_->save(pre);
-				wait_->save(pre);
-				term_->save(pre);
-				delay_->save(pre);
-				filter_->save(pre);
-				width_->save(pre);
-				min_->save(pre);
-				max_->save(pre);
-			}
-
-
-			void load(sys::preference& pre)
-			{
-				symbol_->load(pre);
-				retry_->load(pre);
-				wait_->load(pre);
-				term_->load(pre);
-				delay_->load(pre);
-				filter_->load(pre);
-				width_->load(pre);
-				min_->load(pre);
-				max_->load(pre);
-			}
-		};
-
-	private:
+	class inspection
+	{
 		static constexpr const char* UNIT_EXT_ = "unt";  ///< 単体検査ファイル、拡張子
 
 		utils::director<core>&	director_;
@@ -321,7 +127,7 @@ namespace app {
 		wave_cap::sample_param	sample_param_;
 
 		// 測定用件
-		test_param				test_;
+		test_param				test_param_;
 
 		gui::widget_chip*		chip_;			///< help chip
 
@@ -628,7 +434,7 @@ namespace app {
 				widget_label::param wp_("0", false);
 				dc1_voltage_ = wd.add_widget<widget_label>(wp, wp_);
 				dc1_voltage_->at_local_param().select_func_ = [=](const std::string& str) {
-					dc1_voltage_->set_text(limitf_(str, 0.0f, 60.0f, "%3.1f"));
+					dc1_voltage_->set_text(tools::limitf(str, 0.0f, 60.0f, "%3.1f"));
 				};
 			}
 			{
@@ -643,7 +449,7 @@ namespace app {
 				widget_label::param wp_("0", false);
 				dc1_current_ = wd.add_widget<widget_label>(wp, wp_);
 				dc1_current_->at_local_param().select_func_ = [=](const std::string& str) {
-					dc1_current_->set_text(limitf_(str, 0.0f, 30.0f, "%4.2f"));
+					dc1_current_->set_text(tools::limitf(str, 0.0f, 30.0f, "%4.2f"));
 				};
 			}
 			{
@@ -721,7 +527,7 @@ namespace app {
 				widget_label::param wp_("0", false);
 				dc2_voltage_ = wd.add_widget<widget_label>(wp, wp_);
 				dc2_voltage_->at_local_param().select_func_ = [=](const std::string& str) {
-					dc2_voltage_->set_text(limitf_(str, 0.0f, 300.0f, "%2.1f"));
+					dc2_voltage_->set_text(tools::limitf(str, 0.0f, 300.0f, "%2.1f"));
 				};
 			}
 			{
@@ -736,7 +542,7 @@ namespace app {
 				widget_label::param wp_("0", false);
 				dc2_current_ = wd.add_widget<widget_label>(wp, wp_);
 				dc2_current_->at_local_param().select_func_ = [=](const std::string& str) {
-					dc2_current_->set_text(limitf_(str, 0.0f, 100.0f, "%3.2f"));
+					dc2_current_->set_text(tools::limitf(str, 0.0f, 100.0f, "%3.2f"));
 				};
 			}
 			{
@@ -839,7 +645,7 @@ namespace app {
 				widget_label::param wp_("1", false);
 				gen_freq_ = wd.add_widget<widget_label>(wp, wp_);
 				gen_freq_->at_local_param().select_func_ = [=](const std::string& str) {
-					gen_freq_->set_text(limitf_(str, 1.0f, 100.0f, "%1.0f"));
+					gen_freq_->set_text(tools::limitf(str, 1.0f, 100.0f, "%1.0f"));
 				};
 				{
 					widget::param wp(vtx::irect(ofsx + 230 + 120 * 0 + 80, 20 + h * loc, 30, 40),
@@ -855,7 +661,7 @@ namespace app {
 				widget_label::param wp_("0", false);
 				gen_volt_ = wd.add_widget<widget_label>(wp, wp_);
 				gen_volt_->at_local_param().select_func_ = [=](const std::string& str) {
-					gen_volt_->set_text(limitf_(str, 0.0f, 14.0f, "%2.1f"));
+					gen_volt_->set_text(tools::limitf(str, 0.0f, 14.0f, "%2.1f"));
 				};
 				{
 					widget::param wp(vtx::irect(ofsx + 230 + 120 * 1 + 80, 20 + h * loc, 30, 40),
@@ -871,7 +677,7 @@ namespace app {
 				widget_label::param wp_("0.1", false);
 				gen_duty_ = wd.add_widget<widget_label>(wp, wp_);
 				gen_duty_->at_local_param().select_func_ = [=](const std::string& str) {
-					gen_duty_->set_text(limitf_(str, 0.1f, 100.0f, "%2.1f"));
+					gen_duty_->set_text(tools::limitf(str, 0.1f, 100.0f, "%2.1f"));
 				};
 				{
 					widget::param wp(vtx::irect(ofsx + 230 + 120 * 2 + 80, 20 + h * loc, 30, 40),
@@ -895,7 +701,7 @@ namespace app {
 				widget_label::param wp_("0", false);
 				gen_ivolt_ = wd.add_widget<widget_label>(wp, wp_);
 				gen_ivolt_->at_local_param().select_func_ = [=](const std::string& str) {
-					gen_ivolt_->set_text(limitf_(str, 0.0f, 14.0f, "%2.1f"));
+					gen_ivolt_->set_text(tools::limitf(str, 0.0f, 14.0f, "%2.1f"));
 				};
 				{
 					int ofs = 230 + 120 * 2 + 80 + 40 + 90 + 80;
@@ -1185,7 +991,7 @@ namespace app {
 				widget_label::param wp_("32768", false);
 				wdm_level_ = wd.add_widget<widget_label>(wp, wp_);
 				wdm_level_->at_local_param().select_func_ = [=](const std::string& str) {
-					wdm_level_->set_text(limiti_(str, 1, 65534, "%d"));
+					wdm_level_->set_text(tools::limiti(str, 1, 65534, "%d"));
 				};
 			}
 			{  // トリガーレベル変換
@@ -1210,7 +1016,7 @@ namespace app {
 					static const float vat[4] = { 32.768f, 655.36f, 16.384f, 65.536f };
 					auto n = wdm_ch_->get_select_pos();
 					auto g = get_gain_rate_(n);
-					auto s = limitf_(str, -vat[n] * g, vat[n] * g, "%4.3f");
+					auto s = tools::limitf(str, -vat[n] * g, vat[n] * g, "%4.3f");
 					if(s.empty()) {
 						s = "0.0";
 					}
@@ -1259,14 +1065,6 @@ namespace app {
 			for(uint32_t i = 0; i < n; ++i) {
 				sw[i]->save(pre);
 			}
-		}
-
-
-		void set_help_(gui::widget* src, const std::string& text)
-		{
-			auto l = src->get_param().rect_.size.x;
-			chip_->set_offset(src, vtx::ipos(l - 10, -35));
-			chip_->set_text(text);
 		}
 
 
@@ -1342,7 +1140,7 @@ namespace app {
 			wdm_exec_(nullptr),
 			sample_param_(),
 
-			test_(d),
+			test_param_(d),
 
 			chip_(nullptr),
 
@@ -1358,7 +1156,7 @@ namespace app {
 			@return テスト・パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		const test_param& get_test_param() const { return test_; }
+		const test_param& get_test_param() const { return test_param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -1367,7 +1165,7 @@ namespace app {
 			@return テスト・パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		test_param& at_test_param() { return test_; }
+		test_param& at_test_param() { return test_param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -1583,7 +1381,7 @@ namespace app {
 			init_crm_(d_w, ofsx, h, 9);
 			init_icm_(d_w, ofsx, h, 11);
 
-			test_.init(dialog_, d_w, ofsx, h, 12);
+			test_param_.init(dialog_, d_w, ofsx, h, 12);
 
 			{  // help message (widget_chip)
 				widget::param wp(vtx::irect(0, 0, 100, 40), dialog_);
@@ -1687,39 +1485,23 @@ namespace app {
 			// ヘルプ機能
 			uint32_t act = 60 * 3;
 			if(dc1_current_->get_focus()) {
-				set_help_(dc1_current_, "0.0 to 30.0 [A], 0.1 [A] / step");
+				tools::set_help(chip_, dc1_current_, "0.0 to 30.0 [A], 0.1 [A] / step");
 			} else if(dc1_voltage_->get_focus()) {
-				set_help_(dc1_voltage_, "0.0 to 60.0 [V], 0.1 [V] / step");
+				tools::set_help(chip_, dc1_voltage_, "0.0 to 60.0 [V], 0.1 [V] / step");
 			} else if(dc2_voltage_->get_focus()) {
-				set_help_(dc2_voltage_, "0.0 to 300.0 [V], 0.1 [V] / step");
+				tools::set_help(chip_, dc2_voltage_, "0.0 to 300.0 [V], 0.1 [V] / step");
 			} else if(dc2_current_->get_focus()) {
-				set_help_(dc2_current_, "0.0 to 100.0 [mA], 0.01 [mA] / step");
+				tools::set_help(chip_, dc2_current_, "0.0 to 100.0 [mA], 0.01 [mA] / step");
 			} else if(gen_freq_->get_focus()) {
-				set_help_(gen_freq_, "1 to 100 [Hz], 1 [Hz] / step");
+				tools::set_help(chip_, gen_freq_, "1 to 100 [Hz], 1 [Hz] / step");
 			} else if(gen_volt_->get_focus()) {
-				set_help_(gen_volt_, "0.0 to 14.0 [V], 0.1 [V] / step");
+				tools::set_help(chip_, gen_volt_, "0.0 to 14.0 [V], 0.1 [V] / step");
 			} else if(gen_duty_->get_focus()) {
-				set_help_(gen_duty_, "0.1 to 100.0 [%], 0.1 [%] / step");
+				tools::set_help(chip_, gen_duty_, "0.1 to 100.0 [%], 0.1 [%] / step");
 			} else if(gen_ivolt_->get_focus()) {
-				set_help_(gen_ivolt_, "0.0 to 16.0 [V], 0.01 [V] / step");
-			} else if(test_.symbol_->get_focus()) {
-				set_help_(test_.symbol_, "検査記号");
-			} else if(test_.wait_->get_focus()) {
-				set_help_(test_.wait_, "検査遅延: 0.0 to 1.0 [秒], 0.01 [秒] / step");
-			} else if(test_.retry_->get_focus()) {
-				set_help_(test_.retry_, "検査リトライ回数");
-			} else if(test_.delay_->get_focus()) {
-				auto ch = test_.term_->get_select_pos() + 1;
-				auto str = (boost::format("CH%d 検査ポイント（時間）") % ch).str();
-				set_help_(test_.delay_, str);
-			} else if(test_.width_->get_focus()) {
-				set_help_(test_.width_, "検査幅（時間）");
-			} else if(test_.min_->get_focus()) {
-				set_help_(test_.min_, "検査：最低値");
-			} else if(test_.max_->get_focus()) {
-				set_help_(test_.max_, "検査：最大値");
+				tools::set_help(chip_, gen_ivolt_, "0.0 to 16.0 [V], 0.01 [V] / step");
 			} else if(wdm_level_->get_focus()) {
-				set_help_(wdm_level_, "トリガーレベル（数値入力）");
+				tools::set_help(chip_, wdm_level_, "トリガーレベル（数値入力）");
 			} else if(wdm_level_va_->get_focus()) {
 				static const float vat[4] = { 32.768f, 655.36f, 16.384f, 65.536f };
 				static const char* vau[4] = { " A", " V", " V", " KV" };
@@ -1734,8 +1516,8 @@ namespace app {
 				s += (boost::format("%4.3f") % (vat[n] * a)).str();
 				s += vau[n];
 				s += "）";
-				set_help_(wdm_level_va_, s);
-			} else {
+				tools::set_help(chip_, wdm_level_va_, s);
+			} else if(!test_param_.help(chip_)) {
 				act = 0;
 			}
 			chip_->active(act);
@@ -1796,7 +1578,7 @@ namespace app {
 			wdm_ie_trg_->save(pre);
 			wdm_sm_trg_->save(pre);
 
-			test_.save(pre);
+			test_param_.save(pre);
 
 			ilock_enable_->save(pre);
 
@@ -1873,7 +1655,7 @@ namespace app {
 			wdm_ie_trg_->load(pre);
 			wdm_sm_trg_->load(pre);
 
-			test_.load(pre);
+			test_param_.load(pre);
 
 			ilock_enable_->load(pre);
 

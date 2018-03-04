@@ -21,7 +21,7 @@ namespace app {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct tools {
 
-		static std::string limitf_(const std::string& str, float min, float max, const char* form)
+		static std::string limitf(const std::string& str, float min, float max, const char* form)
 		{
 			std::string newtext;
 			float v;
@@ -36,7 +36,7 @@ namespace app {
 		}
 
 
-		static std::string limiti_(const std::string& str, int min, int max, const char* form)
+		static std::string limiti(const std::string& str, int min, int max, const char* form)
 		{
 			std::string newtext;
 			int v;
@@ -50,5 +50,12 @@ namespace app {
 			return newtext;
 		}
 
+
+		static void set_help(gui::widget_chip* chip, gui::widget* src, const std::string& text)
+		{
+			auto l = src->get_param().rect_.size.x;
+			chip->set_offset(src, vtx::ipos(l - 10, -35));
+			chip->set_text(text);
+		}
 	};
 }

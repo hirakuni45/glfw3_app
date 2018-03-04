@@ -64,7 +64,7 @@ namespace app {
 ///			client_(io_service_),
 			client_(),
 			delay_client_(60), connect_client_(false), start_client_(false),
-			ip_(), exit_loop_(60), root_menu_exit_(false)
+			ip_(), exit_loop_(30), root_menu_exit_(false)
 		{ }
 
 

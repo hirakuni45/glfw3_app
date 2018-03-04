@@ -705,21 +705,6 @@ namespace app {
 		vtx::ipos				size_;
 
 
-		std::string limiti_(const std::string& str, int min, int max, const char* form)
-		{
-			std::string newtext;
-			int v;
-			if((utils::input("%d", str.c_str()) % v).status()) {
-				if(v < min) v = min;
-				else if(v > max) v = max;
-				char tmp[256];
-				utils::format(form, tmp, sizeof(tmp)) % v;
-				newtext = tmp;
-			}
-			return newtext;
-		}
-
-
 		void volt_scale_conv_(uint32_t ch, const WAVES::analize_param& ap, info_t& t)
 		{ 
 			t.min_[ch] = get_volt_scale_limit_(ch) * ap.min_;
