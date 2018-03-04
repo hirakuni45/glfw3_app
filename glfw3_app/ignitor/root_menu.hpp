@@ -224,7 +224,7 @@ namespace app {
 			cont_setting_cmds_(nullptr), cont_setting_serial_(nullptr),
 			cont_setting_exec_(nullptr),
 			info_dialog_(nullptr), msg_dialog_(nullptr),
-			inspection_(d, client, ilock, wave_cap_),
+			inspection_(d, client, ilock, wave_cap_, kikusui_),
 			project_(d),
 
 			ip_{ 0 }, init_client_(false),
@@ -587,6 +587,8 @@ namespace app {
 			wave_cap_.set_sample_param(get_inspection().get_sample_param());
 
 			wave_cap_.update();
+
+			kikusui_.update();
 
 			// 波形計測のバックアノテーション
 			const auto& inf = wave_cap_.get_info();

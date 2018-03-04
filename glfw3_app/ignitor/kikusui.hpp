@@ -37,7 +37,8 @@ namespace app {
 		float		volt_;
 		float		curr_;
 
-	   uint32_t		id_;
+	   uint32_t		volt_id_;
+	   uint32_t		curr_id_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -46,7 +47,8 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		kikusui(device::serial_win32& serial) : serial_(serial),
-			fifo_(), task_(task::idle), volt_(0.0f), curr_(0.0f), id_(0)
+			fifo_(), task_(task::idle), volt_(0.0f), curr_(0.0f),
+			volt_id_(0), curr_id_(0)
 		{ }
 
 
@@ -116,11 +118,20 @@ namespace app {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief  タスク ID を取得
-			@return タスク ID
+			@brief  電流 ID を取得
+			@return 電流 ID
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t get_id() const { return id_; }
+		uint32_t get_curr_id() const { return curr_id_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  電圧 ID を取得
+			@return 電圧 ID
+		*/
+		//-----------------------------------------------------------------//
+		uint32_t get_volt_id() const { return volt_id_; }
 
 
 		//-----------------------------------------------------------------//
@@ -143,10 +154,10 @@ namespace app {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief  サービス
+			@brief  アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void service()
+		void update()
 		{
 			char tmp[256];
 			auto rl = serial_.read(tmp, sizeof(tmp));
@@ -163,7 +174,7 @@ namespace app {
 						s += ch;
 					}
 					utils::string_to_float(s, volt_);
-					++id_;
+					++volt_id_;
 					task_ = task::idle;
 				}
 				break;
@@ -177,7 +188,7 @@ namespace app {
 						s += ch;
 					}
 					utils::string_to_float(s, curr_);
-					++id_;
+					++curr_id_;
 					task_ = task::idle;
 				}
 				break;

@@ -29,6 +29,10 @@
 #include "interlock.hpp"
 #include "wave_cap.hpp"
 #include "test.hpp"
+#include "kikusui.hpp"
+
+// DC2 を菊水電源で置き換える場合有効にする
+#define DC2_KIKUSUI
 
 namespace app {
 
@@ -243,8 +247,8 @@ namespace app {
 		net::ign_client_tcp&	client_;
 
 		interlock&				interlock_;
-
 		wave_cap&				wave_cap_;
+		kikusui&				kikusui_;
 
 		gui::widget_dialog*		dialog_;
 		gui::widget_label*		unit_name_;			///< 単体試験名
@@ -272,6 +276,8 @@ namespace app {
 		gui::widget_label*		dc2_probe_;		///< DC2（電流、電圧測定値）
 		gui::widget_button*		dc2_exec_;		///< DC2 設定転送
 		bool					dc2_probe_mode_;
+		uint32_t				dc2_curr_id_;
+		uint32_t				dc2_volt_id_;
 
 		// WGM 設定
 		gui::widget_check*		gen_sw_[5];	///< ジェネレータ接続スイッチ
@@ -376,6 +382,7 @@ namespace app {
 			{
 				std::string s;
 				s += (boost::format("dc2 D2SW%04X\n") % sw).str();
+#ifndef DC2_KIKUSUI
 				if(ena) {
 					s += (boost::format("delay %d\n") % delay).str();
 					s += (boost::format("dc2 D2MD%d\n") % mode).str();
@@ -390,6 +397,7 @@ namespace app {
 					s += "delay 1\n";
 					s += "dc2 D2M?\n";
 				}
+#endif
 				return s;
 			}
 		};
@@ -753,6 +761,23 @@ namespace app {
 						if(dc2_sw_[i]->get_check()) sw |= 1;
 					}
 					t.sw = sw;
+#ifdef DC2_KIKUSUI
+					if(dc2_mode_->get_select_pos() == 0) {  // 電流 [mA]
+						float v;
+						if((utils::input("%f", dc2_current_->get_text().c_str()) % v).status()) {
+							kikusui_.set_curr(v / 1000.0f);
+							dc2_curr_id_ = kikusui_.get_curr_id();
+							kikusui_.req_curr();
+						}
+					} else {  // 電圧 [V]
+						float v;
+						if((utils::input("%f", dc2_voltage_->get_text().c_str()) % v).status()) {
+							kikusui_.set_volt(v);
+							dc2_volt_id_ = kikusui_.get_volt_id();
+							kikusui_.req_volt();
+						}
+					}
+#else
 					t.ena = dc2_ena_->get_check();
 					t.mode = dc2_mode_->get_select_pos() & 1;
 					dc2_probe_mode_ = t.mode;
@@ -763,7 +788,7 @@ namespace app {
 					if((utils::input("%f", dc2_current_->get_text().c_str()) % v).status()) {
 						t.curr = v / 100e-6;
 					}
-
+#endif
 					client_.send_data(t.build());
 				};
 			}
@@ -1274,8 +1299,8 @@ namespace app {
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		inspection(utils::director<core>& d, net::ign_client_tcp& client, interlock& ilock, wave_cap& wc) :
-			director_(d), client_(client), interlock_(ilock), wave_cap_(wc),
+		inspection(utils::director<core>& d, net::ign_client_tcp& client, interlock& ilock, wave_cap& wc, kikusui& kik) :
+			director_(d), client_(client), interlock_(ilock), wave_cap_(wc), kikusui_(kik),
 			dialog_(nullptr),
 			unit_name_(nullptr), load_file_(nullptr), save_file_(nullptr), ilock_enable_(nullptr),
 
@@ -1288,7 +1313,7 @@ namespace app {
 			dc2_ena_(nullptr), dc2_mode_(nullptr), dc2_voltage_(nullptr), dc2_current_(nullptr),
 			dc2_probe_(nullptr),
 			dc2_exec_(nullptr),
-			dc2_probe_mode_(false),
+			dc2_probe_mode_(false), dc2_curr_id_(0), dc2_volt_id_(0),
 
 			gen_ena_(nullptr), gen_mode_(nullptr), gen_freq_(nullptr),
 			gen_volt_(nullptr), gen_duty_(nullptr), gen_iena_(nullptr), gen_ivolt_(nullptr),
@@ -1579,6 +1604,20 @@ namespace app {
 			}
 #endif
 			interlock_.update(ilock_enable_->get_check());
+
+#ifdef DC2_KIKUSUI
+			if(dc2_curr_id_ != kikusui_.get_curr_id()) {
+				dc2_curr_id_ = kikusui_.get_curr_id();
+				auto v = kikusui_.get_curr();
+				v *= 1000.0f;
+				dc2_probe_->set_text((boost::format("%6.5f") % v).str());
+			}
+			if(dc2_volt_id_ != kikusui_.get_volt_id()) {
+				dc2_volt_id_ = kikusui_.get_volt_id();
+				auto v = kikusui_.get_volt();
+				dc2_probe_->set_text((boost::format("%6.5f") % v).str());
+			}
+#endif
 
 			if(!dialog_->get_state(gui::widget::state::ENABLE)) return;
 
