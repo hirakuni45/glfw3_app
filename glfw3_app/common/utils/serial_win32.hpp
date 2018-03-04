@@ -234,7 +234,8 @@ namespace device {
 			} else {
 				DCB dcb;
 				GetCommState(fd_, &dcb);
-				dcb.BaudRate = CBR_115200;
+//				dcb.BaudRate = CBR_115200;
+				dcb.BaudRate = CBR_57600;
 				dcb.ByteSize = 8;
 				dcb.StopBits = ONESTOPBIT;
 				dcb.Parity   = NOPARITY;
