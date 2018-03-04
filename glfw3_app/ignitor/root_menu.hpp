@@ -26,6 +26,7 @@
 #include "csv.hpp"
 #include "wave_cap.hpp"
 #include "test.hpp"
+#include "kikusui.hpp"
 
 namespace app {
 
@@ -135,6 +136,7 @@ namespace app {
 		typedef device::serial_win32 SERIAL;
 		SERIAL				serial_;
 		SERIAL::name_list	serial_list_;
+		kikusui				kikusui_;
 
 		void mctrl_service()
 		{
@@ -232,7 +234,7 @@ namespace app {
 			mctrl_task_(mctrl_task::idle), mctrl_delay_(0), mctrl_id_(0),
 			dc2_id_(0), crm_id_(0), wdm_id_{ 0 }, time_out_(0),
 
-			serial_(), serial_list_()
+			serial_(), serial_list_(), kikusui_(serial_)
 			{ }
 
 
@@ -468,6 +470,12 @@ namespace app {
 					widget::param wp(vtx::irect(10, 150, 260, 40), root);
 					widget_list::param wp_;
 					cont_setting_serial_ = wd.add_widget<widget_list>(wp, wp_);
+					cont_setting_serial_->at_local_param().select_func_ =
+						[=](const std::string& str, uint32_t pos) {
+						if(serial_.probe()) {
+							serial_.close();
+						}
+					}; 
 				}
 				{  // コントローラー・コマンド実行ボタン
 					widget::param wp(vtx::irect(w - 110, 150, 100, 40), root);
@@ -613,7 +621,18 @@ namespace app {
 					list.push_back(t.port);
 				}
 				cont_setting_serial_->get_menu()->build(list);
-                cont_setting_serial_->select(0);
+				auto sel = cont_setting_serial_->get_local_param().text_param_.get_text();
+				if(sel.empty()) {
+	                cont_setting_serial_->select(0);
+				} else {
+	                cont_setting_serial_->select(sel);
+				}
+			}
+			if(!serial_list_.empty()) {
+				if(!serial_.probe()) {
+					serial_.open(cont_setting_serial_->get_select_text());
+// std::cout << "Serial Open: " << cont_setting_serial_->get_select_text() << std::endl;
+				}
 			}
 
 			if(cont_setting_exec_ != nullptr) {
@@ -860,6 +879,7 @@ namespace app {
 			cont_setting_ip_[1]->load(pre);
 			cont_setting_ip_[2]->load(pre);
 			cont_setting_ip_[3]->load(pre);
+			cont_setting_serial_->load(pre);
 
 			project_.load_dialog(pre);	// ダイアログの位置復元
 			inspection_.get_dialog()->load(pre);  	// ダイアログの位置復元
@@ -892,6 +912,7 @@ namespace app {
 			cont_setting_ip_[1]->save(pre);
 			cont_setting_ip_[2]->save(pre);
 			cont_setting_ip_[3]->save(pre);
+			cont_setting_serial_->save(pre);
 
 			project_.save_dialog(pre);	// ダイアログの位置セーブ
 			inspection_.get_dialog()->save(pre);  	// ダイアログの位置セーブ
