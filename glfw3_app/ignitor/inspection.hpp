@@ -1623,7 +1623,7 @@ namespace app {
 
 			// 転送スイッチの状態をネットワークの接続状態で設定
 			dc1_exec_->set_stall(!client_.probe());
-			dc2_exec_->set_stall(!client_.probe());
+///			dc2_exec_->set_stall(!client_.probe());
 			gen_exec_->set_stall(!client_.probe());
 			crm_exec_->set_stall(!client_.probe());
 			icm_exec_->set_stall(!client_.probe());

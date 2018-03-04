@@ -251,6 +251,17 @@ namespace app {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief  終了処理
+		*/
+		//-----------------------------------------------------------------//
+		void exit()
+		{
+			kikusui_.stop();
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief  inspection を取得
 			@return inspection
 		*/
@@ -629,12 +640,13 @@ namespace app {
 				} else {
 	                cont_setting_serial_->select(sel);
 				}
-				kikusui_.start();
 			}
 			if(!serial_list_.empty()) {
 				if(!serial_.probe()) {
-					serial_.open(cont_setting_serial_->get_select_text());
+					if(serial_.open(cont_setting_serial_->get_select_text())) {
 // std::cout << "Serial Open: " << cont_setting_serial_->get_select_text() << std::endl;
+						kikusui_.start();
+					}
 				}
 			}
 

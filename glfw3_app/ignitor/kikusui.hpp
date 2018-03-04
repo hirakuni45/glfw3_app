@@ -61,6 +61,24 @@ namespace app {
 		{
 			std::string s = "INST:NSEL 6\r\n";
 			serial_.write(s.c_str(), s.size());
+			s = "OUTP 1\r\n";
+			serial_.write(s.c_str(), s.size());
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  停止
+		*/
+		//-----------------------------------------------------------------//
+		void stop()
+		{
+			std::string s = "CURR 0 A\r\n";
+			serial_.write(s.c_str(), s.size());
+			s = "VOLT 0 V\r\n";
+			serial_.write(s.c_str(), s.size());
+			s = "OUTP 0\r\n";
+			serial_.write(s.c_str(), s.size());
 		}
 
 
@@ -72,7 +90,10 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void set_volt(float volt)
 		{
-			auto s = (boost::format("VOLT:LEV %5.4f\r\n") % volt).str();
+			float curr = 0.1f;  // 最大電流
+			auto s = (boost::format("CURR %5.4f A\r\n") % curr).str();
+			serial_.write(s.c_str(), s.size());
+			s = (boost::format("VOLT %5.4f V\r\n") % volt).str();
 			serial_.write(s.c_str(), s.size());
 		}
 
@@ -85,7 +106,10 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void set_curr(float curr)
 		{
-			auto s = (boost::format("CURR:LEV %5.4f\r\n") % curr).str();
+			float volt = 10.0f;  // 最大電圧
+			auto s = (boost::format("VOLT %5.4f V\r\n") % volt).str();
+			serial_.write(s.c_str(), s.size());
+			s = (boost::format("CURR %5.4f A\r\n") % curr).str();
 			serial_.write(s.c_str(), s.size());
 		}
 
