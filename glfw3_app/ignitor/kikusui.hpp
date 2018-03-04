@@ -61,8 +61,6 @@ namespace app {
 		{
 			std::string s = "INST:NSEL 6\r\n";
 			serial_.write(s.c_str(), s.size());
-			s = "OUTP 1\r\n";
-			serial_.write(s.c_str(), s.size());
 		}
 
 
@@ -84,16 +82,32 @@ namespace app {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief  電圧設定
-			@param[in]	volt	設定電圧
+			@brief  出力設定
+			@param[in]	ena		許可の場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		void set_volt(float volt)
+		void set_output(bool ena)
 		{
-			float curr = 0.1f;  // 最大電流
-			auto s = (boost::format("CURR %5.4f A\r\n") % curr).str();
+			std::string s;
+			if(ena) {
+				s = "OUTP 1\r\n";
+			} else {
+				s = "OUTP 0\r\n";
+			}
 			serial_.write(s.c_str(), s.size());
-			s = (boost::format("VOLT %5.4f V\r\n") % volt).str();
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  電圧設定
+			@param[in]	volt	設定電圧
+			@param[in]	curr	最大電流
+		*/
+		//-----------------------------------------------------------------//
+		void set_volt(float volt, float curr)
+		{
+			auto s = (boost::format("CURR %5.4f A;VOLT %5.4f V\r\n") % curr % volt).str();
 			serial_.write(s.c_str(), s.size());
 		}
 
@@ -102,14 +116,12 @@ namespace app {
 		/*!
 			@brief  電流設定
 			@param[in]	curr	設定電流
+			@param[in]	volt	最大電圧
 		*/
 		//-----------------------------------------------------------------//
-		void set_curr(float curr)
+		void set_curr(float curr, float volt)
 		{
-			float volt = 10.0f;  // 最大電圧
-			auto s = (boost::format("VOLT %5.4f V\r\n") % volt).str();
-			serial_.write(s.c_str(), s.size());
-			s = (boost::format("CURR %5.4f A\r\n") % curr).str();
+			auto s = (boost::format("VOLT %5.4f V;CURR %5.4f A\r\n") % volt % curr).str();
 			serial_.write(s.c_str(), s.size());
 		}
 

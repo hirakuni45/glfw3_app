@@ -762,17 +762,26 @@ namespace app {
 					}
 					t.sw = sw;
 #ifdef DC2_KIKUSUI
-					if(dc2_mode_->get_select_pos() == 0) {  // 電流 [mA]
-						float v;
-						if((utils::input("%f", dc2_current_->get_text().c_str()) % v).status()) {
-							kikusui_.set_curr(v / 1000.0f);
+					kikusui_.set_output(dc2_ena_->get_check());
+					bool err = false;
+					float c = 0.0f;
+					if((utils::input("%f", dc2_current_->get_text().c_str()) % c).status()) {
+						c /= 1000.0f;
+					} else {
+						err = true;
+					}
+					float v = 0.0f;
+					if((utils::input("%f", dc2_voltage_->get_text().c_str()) % v).status()) {
+					} else {
+						err = true;
+					}
+					if(!err) {
+						if(dc2_mode_->get_select_pos() == 0) {  // 電流 [mA]
+							kikusui_.set_curr(c, v);
 							dc2_curr_id_ = kikusui_.get_curr_id();
 							kikusui_.req_curr();
-						}
-					} else {  // 電圧 [V]
-						float v;
-						if((utils::input("%f", dc2_voltage_->get_text().c_str()) % v).status()) {
-							kikusui_.set_volt(v);
+						} else {  // 電圧 [V]
+							kikusui_.set_volt(v, c);
 							dc2_volt_id_ = kikusui_.get_volt_id();
 							kikusui_.req_volt();
 						}
