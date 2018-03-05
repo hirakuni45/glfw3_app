@@ -109,23 +109,6 @@ namespace app {
 		gui::widget_dialog*		okc_dialog_;
 
 
-		enum class mctrl_task {
-			idle,
-
-			init_icm,
-			init_dc2,
-			init_crm,
-			init_wgm,
-			init_dc1,
-
-			icm,
-			dc2,
-			crm,
-			wgm,
-			dc1,
-			wdm,
-		};
-		mctrl_task		mctrl_task_;
 		uint32_t		mctrl_delay_;
 		uint32_t		mctrl_id_;
 		uint32_t		dc2_id_;
@@ -137,71 +120,6 @@ namespace app {
 		SERIAL				serial_;
 		SERIAL::name_list	serial_list_;
 		kikusui				kikusui_;
-
-		void mctrl_service()
-		{
-			switch(mctrl_task_) {
-			case mctrl_task::idle:
-				break;
-
-			case mctrl_task::init_icm:
-				inspection_.exec_icm();
-				mctrl_task_ = mctrl_task::init_dc2;
-				break;
-			case mctrl_task::init_dc2:
-				inspection_.exec_dc2();
-				mctrl_task_ = mctrl_task::init_crm;
-				break;
-			case mctrl_task::init_crm:
-				inspection_.exec_crm();
-				mctrl_task_ = mctrl_task::init_wgm;
-				break;
-			case mctrl_task::init_wgm:
-				inspection_.exec_gen();
-				mctrl_task_ = mctrl_task::init_dc1;
-				break;
-			case mctrl_task::init_dc1:
-				inspection_.exec_dc1();
-				mctrl_task_ = mctrl_task::idle;
-				break;
-
-			case mctrl_task::icm:
-				inspection_.exec_icm();
-				// ※ ICM 設定が以前と異なる場合に安全時間待機
-				mctrl_delay_ = 15;  // ICM リレー安全時間 0.25 sec
-				mctrl_task_ = mctrl_task::dc2;
-				break;
-
-			case mctrl_task::dc2:
-				inspection_.exec_dc2();
-				mctrl_task_ = mctrl_task::crm;
-				break;
-
-			case mctrl_task::crm:
-				inspection_.exec_crm();
-				mctrl_task_ = mctrl_task::wgm;
-				break;
-
-			case mctrl_task::wgm:
-				inspection_.exec_gen();
-				mctrl_task_ = mctrl_task::dc1;
-				break;
-
-			case mctrl_task::dc1:
-				inspection_.exec_dc1();
-				mctrl_task_ = mctrl_task::wdm;
-				break;
-
-			case mctrl_task::wdm:
-				inspection_.exec_wdm();
-				mctrl_task_ = mctrl_task::idle;
-				++mctrl_id_;
-				break;
-
-			default:
-				break;
-			}
-		}
 
 	public:
 		//-----------------------------------------------------------------//
@@ -231,7 +149,7 @@ namespace app {
 
 			task_(task::idle), unit_id_(0), wait_(0), retry_(0),
 			err_dialog_(nullptr), okc_dialog_(nullptr),
-			mctrl_task_(mctrl_task::idle), mctrl_delay_(0), mctrl_id_(0),
+//			mctrl_task_(mctrl_task::idle), mctrl_delay_(0), mctrl_id_(0),
 			dc2_id_(0), crm_id_(0), wdm_id_{ 0 }, time_out_(0),
 
 			serial_(), serial_list_(), kikusui_(serial_)
@@ -565,12 +483,6 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void update()
 		{
-			// ネットワーク接続時
-			if(!init_client_ && client_.probe()) {
-				mctrl_task_ = mctrl_task::init_icm;
-				init_client_ = true;
-			}
-
 			project_.update();
 			if(project_.get_project_title().empty() || project_.get_project_root().empty()) {
 				edit_project_->set_stall();
@@ -667,41 +579,18 @@ namespace app {
 					std::string top = (boost::format("検査「%s」\n") % s).str();
 					inspection_.at_test_param().build_value();
 					const auto& v = inspection_.get_test_param().value_;
-					top += (boost::format("Symbol: %s\n") % v.symbol_).str();
-					top += (boost::format("Retry: %d/%d\n") % retry_ % v.retry_).str();
-					top += (boost::format("Wait:  %2.1f [s]\n") % v.wait_).str();
-					top += (boost::format("Term:  %d\n") % v.term_).str();
-					top += (boost::format("Delay: %e [s]\n") % v.delay_).str();
-					top += (boost::format("Filter: %d\n") % v.filter_).str();
-					top += (boost::format("Width: %e [s]\n") % v.width_).str();
-					top += (boost::format("Min: %e [s]\n") % v.min_).str();
-					top += (boost::format("Max: %e [s]") % v.max_).str();
+					top += (boost::format("検査項目: %s\n") % v.symbol_).str();
+					top += (boost::format("リトライ: %d/%d\n") % retry_ % v.retry_).str();
+					top += (boost::format("待ち時間:  %2.1f [s]\n") % v.wait_).str();
+					std::string unit = inspection_.get_test_unit();
+					top += (boost::format("単位: [%s]\n") % unit).str();
+					std::string min = (boost::format("Min: %e [s]\n") % v.min_).str(); 
+					top += min;
+					std::string max = (boost::format("Max: %e [s]") % v.max_).str();
+					top += max;
 					value_ = v;
 
 					msg_dialog_->set_text(top);
-
-					std::string unit;
-					std::string min;
-					std::string max;
-					if(v.term_ == 0) {
-						unit = "A";
-					} else if(v.term_ == 1) {
-						unit = "V";
-					} else if(v.term_ == 2) {
-						unit = "V";
-					} else if(v.term_ == 3) {
-						unit = "KV";
-					} else if(v.term_ == 4) {
-
-					} else if(v.term_ == 5) {
-						min = (boost::format("%3.2f") % v.min_).str();
-						max = (boost::format("%3.2f") % v.max_).str();
-						if(inspection_.get_crm_mode() == 0) { // 抵抗
-							unit = "mOHM";
-						} else {
-							unit = "uF";
-						}
-					}
 
 					project_.at_csv1().set(unit_id_ + 1, 1, v.symbol_);
 					project_.at_csv1().set(unit_id_ + 1, 2, max);
@@ -724,39 +613,34 @@ namespace app {
 					break;
 				}
 
-				mctrl_task_ = mctrl_task::icm;
 				for(int i = 0; i < 4; ++i) {
 					wdm_id_[i] = client_.get_mod_status().wdm_id_[i];
 				}
 				crm_id_ = client_.get_mod_status().crm_id_;
-
+				{
+					auto testmode = inspection_.get_test_mode();
+					if(testmode != inspection::test_mode::NONE) {
+						inspection_.request_test(testmode);
+					}
+				}
 				time_out_ = 60 * 5;
 				task_ = task::mctrl;
 				break;
 
 			case task::mctrl:
-				mctrl_service();
-				if(value_.term_ < 4) { // WDM CH1 to CH4
-					uint32_t n = 0;
-					for(int i = 0; i < 4; ++i) {
-						if(wdm_id_[i] != client_.get_mod_status().wdm_id_[i]) {
-							++n;
+				{
+					auto testmode = inspection_.get_test_mode();
+					switch(testmode) {
+					case inspection::test_mode::C_MES:
+					case inspection::test_mode::R_MES:
+						if(crm_id_ != client_.get_mod_status().crm_id_) {
+							task_ = task::sence;
 						}
+						break;
+///						if(wdm_id_[i] != client_.get_mod_status().wdm_id_[i]) {
+					default:
+						break;
 					}
-					if(n == 4) {
-						for(int i = 0; i < 4; ++i) {
-							wdm_id_[i] = client_.get_mod_status().wdm_id_[i];
-						}
-						task_ = task::sence;
-					}
-				} else if(value_.term_ == 4) {  // DC2
-
-				} else if(value_.term_ == 5) {  // CRM
-					if(crm_id_ != client_.get_mod_status().crm_id_) {
-						task_ = task::sence;
-					}
-				} else if(value_.term_ == 6) {  // 熱抵抗検査
-
 				}
 				if(time_out_ > 0) {
 					--time_out_;
@@ -766,36 +650,30 @@ namespace app {
 					str += "タイムアウトしました。";
 					err_dialog_->set_text(str);
 					err_dialog_->enable();
+					msg_dialog_->enable(false);
 					task_ = task::idle;					
 				}
 				break;
 
 			case task::sence:
 				{
-					bool f = false;
-					// 動特性検査時
-					if(value_.term_ < 4) { // WDM CH1 to CH4
-						f = wave_cap_.value_check(value_);
-					} else if(value_.term_ == 4) {  // DC2
-
-					} else if(value_.term_ == 5) {  // CRM
-						double v = 0.0;
-						if(inspection_.get_crm_mode() == 0) { // 抵抗
-							v = inspection_.get_crrd_value();
-						} else {
-							v = inspection_.get_crcd_value();
-						}
-						if(value_.min_ <= v && v <= value_.max_) {
-							f = true;
-						}
+					double v = 0.0;
+					auto testmode = inspection_.get_test_mode();
+					switch(testmode) {
+					case inspection::test_mode::C_MES:
+						v = inspection_.get_crcd_value();
+						break;
+					case inspection::test_mode::R_MES:
+						v = inspection_.get_crrd_value();
+						break;
+					default:
+						break;
+					}
+					if(value_.min_ <= v && v <= value_.max_) {
 						std::string st = (boost::format("%3.2f") % v).str();
 						auto idx = project_.get_csv_index() - 1;
 						project_.at_csv1().set(unit_id_ + 1, 9 + idx, st);
 						project_.at_csv2().set(unit_id_ + 1, 5, st);
-					} else if(value_.term_ == 6) {  // 熱抵抗検査
-
-					}
-					if(f) {
 						task_ = task::sync;
 					} else {
 						task_ = task::retry;

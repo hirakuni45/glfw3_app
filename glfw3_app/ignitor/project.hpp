@@ -52,11 +52,8 @@ namespace app {
 		gui::widget_spinbox*	csv_idx_;
 		gui::widget_label*		csv_base_;
 		gui::widget_list*		image_ext_;
-
-		gui::widget_label*		pbase_;
-		gui::widget_label*		pext_;
-		gui::widget_check*		auto_save_;
 		gui::widget_table*		files_core_;
+		gui::widget_label*		log_name_;
 
 		gui::widget_dialog*		msg_dialog_;
 
@@ -70,44 +67,6 @@ namespace app {
 
 		csv						csv1_;
 		csv						csv2_;
-
-#if 0
-		std::string get_path_(uint32_t no) const {
-			std::string s;
-			if(pname_[no] == nullptr) return s;
-			if(pname_[no]->get_text().empty()) return s;
-
-			s = proj_root_->get_text();
-			s += '/';
-			s += pbase_->get_text();
-			s += pname_[no]->get_text();
-			s += pext_->get_text();
-			if(!s.empty()) {
-				auto& core = gl::core::get_instance();
-				return utils::append_path(core.get_current_path(), s);
-			}
-			return s;
-		}
-#endif
-
-		void update_unit_list_()
-		{
-// std::cout << proj_root_->get_text() << std::endl;
-			files_.set_path(proj_root_->get_text(), "unt");
-			auto& cell = files_core_->get_local_param().cell_;
-			const auto& fis = files_.get();
-			uint32_t i = 0;
-			for(const auto& fi : fis) {
-				if(fi.get_name() == ".") continue;
-				else if(fi.get_name() == "..") continue;
-				if(i < cell.size()) {
-					gui::widget_label* w = static_cast<gui::widget_label*>(cell[i]);
-					w->set_text(fi.get_name());
-///					std::cout << fi.get_name() << std::endl;
-					++i;
-				}
-			}
-		}
 
 
 		bool save_project_file_(const std::string& path)
@@ -149,8 +108,7 @@ namespace app {
 			name_dialog_(nullptr), proj_name_(nullptr), proj_root_(nullptr),
 			edit_dialog_(nullptr),
 			csv_all_(nullptr), csv_idx_(nullptr), csv_base_(nullptr), image_ext_(nullptr),
-			pbase_(nullptr), pext_(nullptr), auto_save_(nullptr),
-			files_core_(nullptr),
+			files_core_(nullptr), log_name_(nullptr),
 			msg_dialog_(nullptr), proj_dir_(nullptr)
 		{ }
 
@@ -166,12 +124,42 @@ namespace app {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief  ユニット・リストの更新
+		*/
+		//-----------------------------------------------------------------//
+		void update_unit_list()
+		{
+// std::cout << proj_root_->get_text() << std::endl;
+			files_.set_path(proj_root_->get_text(), "unt");
+			auto& cell = files_core_->get_local_param().cell_;
+			for(auto t : cell) {  // 全てのセルを一度「空」にする。
+				static_cast<gui::widget_label*>(t)->set_text("");
+			}
+			const auto& fis = files_.get();
+			uint32_t i = 0;
+			for(const auto& fi : fis) {
+				if(fi.get_name() == ".") continue;
+				else if(fi.get_name() == "..") continue;
+				if(i < cell.size()) {
+					gui::widget_label* w = static_cast<gui::widget_label*>(cell[i]);
+					w->set_text(fi.get_name());
+///					std::cout << fi.get_name() << std::endl;
+					++i;
+				}
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief  編集ダイアログの有効、無効
 			@param[in]	ena	不許可の場合「false」
 		*/
 		//-----------------------------------------------------------------//
 		void enable_edit_dialog(bool ena = true) {
-			update_unit_list_();
+			if(ena) {
+				update_unit_list();
+			}
 			edit_dialog_->enable(ena);
 		}
 
@@ -189,6 +177,7 @@ namespace app {
 			filter += PROJECT_EXT_;
 			filter += "\t";
 			proj_load_filer_.open(filter, false, proj_root_->get_text());
+			update_unit_list();
 		}
 
 
@@ -262,8 +251,10 @@ namespace app {
 		uint32_t get_unit_count() const
 		{
 			uint32_t num = 0;
-			for(uint32_t i = 0; i < 50; ++i) {
-				auto path = get_unit_name(i);
+			auto& cell = files_core_->get_local_param().cell_;
+			for(auto t : cell) {  // 全てのセルを一度「空」にする。
+				gui::widget_label* w = static_cast<gui::widget_label*>(t);
+				auto path = w->get_text();
 				if(path.empty()) continue;
 				if(utils::probe_file(path)) {
 					++num;
@@ -281,19 +272,14 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		std::string get_unit_name(uint32_t no) const {
-			if(no >= 50) return "";
-///			return get_path_(no);
-			return "";
+			auto& cell = files_core_->get_local_param().cell_;
+			if(no < cell.size()) {
+				gui::widget_label* w = static_cast<gui::widget_label*>(cell[no]);
+				return w->get_text();
+			} else {
+				return "";
+			}
 		} 
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief  自動セーブの取得
-			@return 自動セーブ
-		*/
-		//-----------------------------------------------------------------//
-		bool get_autosave() const { return auto_save_->get_check(); }
 
 
 		//-----------------------------------------------------------------//
@@ -432,9 +418,9 @@ std::cout << path << std::endl;
 				}
 			}
 
-			{  // 単体試験設定ダイアログ
-				int w = 1020;
-				int h = 720;
+			{  // 全体試験設定ダイアログ
+				int w = 600;
+				int h = 630;
 
 				widget::param wp(vtx::irect(120, 120, w, h));
 				widget_dialog::param wp_;
@@ -473,21 +459,31 @@ std::cout << path << std::endl;
 						return (boost::format("%d") % newpos).str();
 					};
 				}
+
+				yy += 50;
 				{  // CSV BASE 名設定
 					{
-						widget::param wp(vtx::irect(20 + 500, yy, 90, 40), edit_dialog_);
+						widget::param wp(vtx::irect(20, yy, 90, 40), edit_dialog_);
 						widget_text::param wp_("CSV(2):");
 						wp_.text_param_.placement_
 							= vtx::placement(vtx::placement::holizontal::LEFT,
 											 vtx::placement::vertical::CENTER);
 						wd.add_widget<widget_text>(wp, wp_);	
 					}
-					widget::param wp(vtx::irect(20 + 600, yy, 150, 40), edit_dialog_);
+					widget::param wp(vtx::irect(20 + 110, yy, 150, 40), edit_dialog_);
 					widget_label::param wp_("", false);
 					csv_base_ = wd.add_widget<widget_label>(wp, wp_);
 				}
 				{
-					widget::param wp(vtx::irect(20 + 770, yy, 100, 40), edit_dialog_);
+					{
+						widget::param wp(vtx::irect(20 + 280, yy, 70, 40), edit_dialog_);
+						widget_text::param wp_("画像:");
+						wp_.text_param_.placement_
+							= vtx::placement(vtx::placement::holizontal::LEFT,
+											 vtx::placement::vertical::CENTER);
+						wd.add_widget<widget_text>(wp, wp_);	
+					}
+					widget::param wp(vtx::irect(20 + 350, yy, 100, 40), edit_dialog_);
 					widget_list::param wp_;
 					wp_.init_list_.push_back("JPEG");
 					wp_.init_list_.push_back("PNG");
@@ -496,42 +492,10 @@ std::cout << path << std::endl;
 				}
 
 				yy += 50;
-				{  // 単体試験ベース名設定
-					{
-						widget::param wp(vtx::irect(20, yy, 100, 40), edit_dialog_);
-						widget_text::param wp_("ベース名：");
-						wp_.text_param_.placement_
-							= vtx::placement(vtx::placement::holizontal::LEFT,
-											 vtx::placement::vertical::CENTER);
-						wd.add_widget<widget_text>(wp, wp_);	
-					}
-					widget::param wp(vtx::irect(20 + 100 + 10, yy, 150, 40), edit_dialog_);
-					widget_label::param wp_("", false);
-					pbase_ = wd.add_widget<widget_label>(wp, wp_);
-				}
-				{  // 単体試験拡張子設定
-					{
-						widget::param wp(vtx::irect(320, yy, 90, 40), edit_dialog_);
-						widget_text::param wp_("拡張子：");
-						wp_.text_param_.placement_
-							= vtx::placement(vtx::placement::holizontal::LEFT,
-											 vtx::placement::vertical::CENTER);
-						wd.add_widget<widget_text>(wp, wp_);	
-					}
-					widget::param wp(vtx::irect(320 + 90 + 10, yy, 150, 40), edit_dialog_);
-					widget_label::param wp_(".unt", false);
-					pext_ = wd.add_widget<widget_label>(wp, wp_);
-				}
+				static const int lh = 32;  // ラベルの高さ
+				static const int lw = 530;
 				{
-					widget::param wp(vtx::irect(320 + 100 + 160, yy, 130, 40), edit_dialog_);
-					widget_check::param wp_("自動保存");
-					auto_save_ = wd.add_widget<widget_check>(wp, wp_);
-				}
-				yy += 50;
-				{
-					static const int lh = 32;  // ラベルの高さ
-					static const int lw = 500;
-					widget::param wpt(vtx::irect(20, yy, lw, lh * 16), edit_dialog_);
+					widget::param wpt(vtx::irect(20, yy, lw, lh * 12), edit_dialog_);
 					widget_table::param wpt_;
 					wpt_.scroll_bar_v_ = true;
 					wpt_.item_size_.set(500, 32);
@@ -547,6 +511,20 @@ std::cout << path << std::endl;
 						wpt_.cell_.push_back(wd.add_widget<widget_label>(wp, wp_));
 					}
 					files_core_ = wd.add_widget<widget_table>(wpt, wpt_);
+				}
+				yy += lh * 12 + 10;
+				{  // ログファイル名
+					{
+						widget::param wp(vtx::irect(20, yy, 90, 40), edit_dialog_);
+						widget_text::param wp_("ログ名:");
+						wp_.text_param_.placement_
+							= vtx::placement(vtx::placement::holizontal::LEFT,
+											 vtx::placement::vertical::CENTER);
+						wd.add_widget<widget_text>(wp, wp_);	
+					}
+					widget::param wp(vtx::irect(20 + 110, yy, 150, 40), edit_dialog_);
+					widget_label::param wp_("", false);
+					log_name_ = wd.add_widget<widget_label>(wp, wp_);
 				}
 			}
 
@@ -651,27 +629,22 @@ std::cout << path << std::endl;
 		//-----------------------------------------------------------------//
 		bool save(sys::preference& pre)
 		{
-///			if(dialog_ == nullptr) return false;
-			if(pbase_ == nullptr) return false;
-			if(pext_ == nullptr) return false;
-			if(auto_save_ == nullptr) return false;
 			if(csv_all_ == nullptr) return false;
 			if(csv_idx_ == nullptr) return false;
 			if(csv_base_ == nullptr) return false;
 			if(image_ext_ == nullptr) return false;
 
-///			dialog_->save(pre);
 			csv_all_->save(pre);
 			csv_idx_->save(pre);
 			csv_base_->save(pre);
-			auto_save_->save(pre);
 			image_ext_->save(pre);
 			proj_name_->save(pre);
 			proj_root_->save(pre);
 
-			pbase_->save(pre);
-			pext_->save(pre);
 			files_core_->save(pre);
+
+			log_name_->save(pre);
+
 			return true;
 		}
 
@@ -685,10 +658,6 @@ std::cout << path << std::endl;
 		//-----------------------------------------------------------------//
 		bool load(sys::preference& pre)
 		{
-///			if(dialog_ == nullptr) return false;
-			if(pbase_ == nullptr) return false;
-			if(pext_ == nullptr) return false;
-			if(auto_save_ == nullptr) return false;
 			if(csv_all_ == nullptr) return false;
 			if(csv_idx_ == nullptr) return false;
 			if(csv_base_ == nullptr) return false;
@@ -697,14 +666,13 @@ std::cout << path << std::endl;
 			csv_all_->load(pre);
 			csv_idx_->load(pre);
 			csv_base_->load(pre);
-			auto_save_->load(pre);
 			image_ext_->load(pre);
 			proj_name_->load(pre);
 			proj_root_->load(pre);
 
-			pbase_->load(pre);
-			pext_->load(pre);
 			files_core_->load(pre);
+
+			log_name_->load(pre);
 
 			return true;
 		}

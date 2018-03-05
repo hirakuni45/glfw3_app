@@ -16,6 +16,9 @@
 #include "utils/format.hpp"
 #include "utils/string_utils.hpp"
 
+// デバッグ・エミュレーションを行う場合有効にする
+#define DEBUG_EMU
+
 namespace net {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -158,6 +161,10 @@ namespace net {
 		//-----------------------------------------------------------------//
 		bool start(const std::string& ip, uint16_t pn)
 		{
+#ifdef DEBUG_EMU
+			connect_ = true;
+			return true;
+#endif
 			if(!startup_) {
 				WSADATA wsaData;
 				int res = WSAStartup(MAKEWORD(2,0), &wsaData);
@@ -206,6 +213,10 @@ namespace net {
 		//-----------------------------------------------------------------//
 		void service()
 		{
+#ifdef DEBUG_EMU
+
+
+#else
 			if(!connect_) return;
 
 			char tmp[8192];
@@ -302,6 +313,7 @@ namespace net {
 					}
 				}
 			}
+#endif
 		}
 
 
@@ -313,11 +325,37 @@ namespace net {
 		//-----------------------------------------------------------------//
 		void send_data(const std::string& text)
 		{
+#ifdef DEBUG_EMU
+			if(text.find("CRR?1") != std::string::npos) {
+				double a = 50.0;
+				a *= 2.0;
+				a /= 778.2;
+				a *= 50.0;
+				a *= static_cast<double>(0x7FFFF) / 1.570798233;
+				mod_status_.crrd_ = 50 * 0x7ffff + static_cast<uint32_t>(a);
+				++mod_status_.crrd_id_;
+				++mod_status_.crm_id_;
+			} else if(text.find("CRC?1") != std::string::npos) {
+				double a = 0.33;
+				a /= 1e6;
+				a = 1.0 / (2.0 * 3.141592654 * 1000.0 * a);
+				a *= 2.0;
+				a /= 778.2 * 2.0;  // 778.2 mV P-P
+				a *= 50.0;
+				a *= static_cast<double>(0x7FFFF) / 1.570798233;
+				mod_status_.crcd_ = 50 * 0x7ffff + static_cast<uint32_t>(a);
+				++mod_status_.crcd_id_;
+				++mod_status_.crm_id_;
+			}
+			std::cout << text << std::endl;
+			return;
+#else
 			if(send(sock_, text.c_str(), text.size(), 0) == SOCKET_ERROR) {
 				shutdown(sock_, 2);
 				closesocket(sock_);
 				connect_ = false;
 			}
+#endif
 		}
 	};
 }

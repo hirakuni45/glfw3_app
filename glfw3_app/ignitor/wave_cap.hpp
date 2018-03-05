@@ -845,6 +845,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		bool value_check(const test::value_t& value)
 		{
+#if 0
 			uint32_t ch = value.term_;
 			if(ch < 4) {
 				if(value.filter_ == 0) {  // SIG
@@ -862,6 +863,8 @@ namespace app {
 			} else {
 				return false;
 			}
+#endif
+			return false;
 		}
 
 

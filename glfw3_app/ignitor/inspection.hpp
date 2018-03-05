@@ -51,8 +51,21 @@ namespace app {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class inspection
 	{
+	public:
 		static constexpr const char* UNIT_EXT_ = "unt";  ///< 単体検査ファイル、拡張子
 
+		//=================================================================//
+		/*!
+			@brief  計測モード
+		*/
+		//=================================================================//
+		enum class test_mode {
+			NONE,		///< 無効
+			C_MES,		///< 容量計測
+			R_MES,		///< 抵抗計測
+		};
+
+	private:
 		utils::director<core>&	director_;
 
 		net::ign_client_tcp&	client_;
@@ -90,6 +103,7 @@ namespace app {
 		double					crrd_value_;
 		double					crcd_value_;
 
+		test_mode				test_mode_;
 
 		struct vc_t {
 			float		volt_max_;	/// 0.1V step
@@ -98,16 +112,121 @@ namespace app {
 			float		curt_;		/// 0.1A/0.01mA step
 		};
 
+		enum class cmd_task {
+			idle,		///< アイドル
 
-		// 各モジュールへ初期化状態の転送
-		void startup_()
+			init_all,	///< 全ての初期化
+			init_all0,
+			init_all1,
+			init_all2,
+			init_all3,
+			init_all4,
+
+			crm,		///< CRM 開始
+			crm0,
+
+
+
+		};
+		cmd_task		cmd_task_;
+
+		void cmd_service_()
 		{
-			icm_.startup();
-			dc1_.startup();
-			dc2_.startup();
-			crm_.startup();
-			wgm_.startup();
-			wdm_.startup();
+			if(!client_.probe()) return;
+
+			switch(cmd_task_) {
+			case cmd_task::idle:
+				break;
+
+			case cmd_task::init_all:
+				icm_.startup();
+				cmd_task_ = cmd_task::init_all0;
+				break;
+			case cmd_task::init_all0:
+				dc1_.startup();
+				cmd_task_ = cmd_task::init_all1;
+				break;
+			case cmd_task::init_all1:
+				dc2_.startup();
+				cmd_task_ = cmd_task::init_all2;
+				break;
+			case cmd_task::init_all2:
+				crm_.startup();
+				cmd_task_ = cmd_task::init_all3;
+				break;
+			case cmd_task::init_all3:
+				wgm_.startup();
+				cmd_task_ = cmd_task::init_all4;
+				break;
+			case cmd_task::init_all4:
+				wdm_.startup();
+				cmd_task_ = cmd_task::idle;
+				break;
+
+			case cmd_task::crm:
+				icm_.exec_->exec();
+				cmd_task_ = cmd_task::crm0;
+				break;
+			case cmd_task::crm0:
+				crm_.exec_->exec();
+				cmd_task_ = cmd_task::idle;
+				break;
+
+#if 0
+//				
+			case mctrl_task::init_dc2:
+				inspection_.exec_dc2();
+				mctrl_task_ = mctrl_task::init_crm;
+				break;
+			case mctrl_task::init_crm:
+				inspection_.exec_crm();
+				mctrl_task_ = mctrl_task::init_wgm;
+				break;
+			case mctrl_task::init_wgm:
+				inspection_.exec_gen();
+				mctrl_task_ = mctrl_task::init_dc1;
+				break;
+			case mctrl_task::init_dc1:
+				inspection_.exec_dc1();
+				mctrl_task_ = mctrl_task::idle;
+				break;
+
+			case mctrl_task::icm:
+				inspection_.exec_icm();
+				// ※ ICM 設定が以前と異なる場合に安全時間待機
+				mctrl_delay_ = 15;  // ICM リレー安全時間 0.25 sec
+				mctrl_task_ = mctrl_task::dc2;
+				break;
+
+			case mctrl_task::dc2:
+				inspection_.exec_dc2();
+				mctrl_task_ = mctrl_task::crm;
+				break;
+
+			case mctrl_task::crm:
+				inspection_.exec_crm();
+				mctrl_task_ = mctrl_task::wgm;
+				break;
+
+			case mctrl_task::wgm:
+				inspection_.exec_gen();
+				mctrl_task_ = mctrl_task::dc1;
+				break;
+
+			case mctrl_task::dc1:
+				inspection_.exec_dc1();
+				mctrl_task_ = mctrl_task::wdm;
+				break;
+
+			case mctrl_task::wdm:
+				inspection_.exec_wdm();
+				mctrl_task_ = mctrl_task::idle;
+				++mctrl_id_;
+				break;
+#endif
+			default:
+				break;
+			}
 		}
 
 	public:
@@ -134,8 +253,45 @@ namespace app {
 
 			startup_init_(false),
 			crrd_id_(0), crcd_id_(0), d2md_id_(0),
-			crrd_value_(0.0), crcd_value_(0.0)
+			crrd_value_(0.0), crcd_value_(0.0),
+			test_mode_(test_mode::NONE), cmd_task_(cmd_task::idle)
 		{ }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  計測モードの取得
+			@return 計測モード
+		*/
+		//-----------------------------------------------------------------//
+		test_mode get_test_mode() const {
+			if(sheet_->get_select_pos() == 0) {  // CR
+				if(crm_.mode_->get_select_pos() == 0) {
+					return test_mode::R_MES;
+				} else {
+					return test_mode::C_MES;
+				}
+			}			
+			return test_mode::NONE;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  計測単位の取得
+			@return 計測単位
+		*/
+		//-----------------------------------------------------------------//
+		std::string get_test_unit() const {
+			if(sheet_->get_select_pos() == 0) {  // CR
+				if(crm_.mode_->get_select_pos() == 0) {
+					return "mOHM";
+				} else {
+					return "uF";
+				}
+			}			
+			return "";
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -173,7 +329,6 @@ namespace app {
 		//-----------------------------------------------------------------//
 		const wave_cap::sample_param& get_sample_param() const { return wdm_.sample_param_; }
 
-
 		bool get_crm_mode() const { return crm_.mode_->get_select_pos(); }
 		double get_crrd_value() const { return crrd_value_; }
 		double get_crcd_value() const { return crcd_value_; }
@@ -181,50 +336,26 @@ namespace app {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief  DC1 コマンドの発行
+			@brief  計測リクエスト
+			@param[in]	mode	計測モード
+			@return 処理中なら「false」
 		*/
 		//-----------------------------------------------------------------//
-		void exec_dc1() { dc1_.exec_->exec(); }
+		bool request_test(test_mode mode)
+		{
+			if(cmd_task_ != cmd_task::idle) return false;
 
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief  DC2 コマンドの発行
-		*/
-		//-----------------------------------------------------------------//
-		void exec_dc2() { dc2_.exec_->exec(); }
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief  GEN コマンドの発行
-		*/
-		//-----------------------------------------------------------------//
-		void exec_gen() { wgm_.exec_->exec(); }
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief  CRM コマンドの発行
-		*/
-		//-----------------------------------------------------------------//
-		void exec_crm() { crm_.exec_->exec(); }
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief  ICM コマンドの発行
-		*/
-		//-----------------------------------------------------------------//
-		void exec_icm() { icm_.exec_->exec(); }
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief  WDM コマンドの発行
-		*/
-		//-----------------------------------------------------------------//
-		void exec_wdm() { wdm_.exec_->exec(); }
+			test_mode_ = mode;
+			switch(mode) {
+			case test_mode::R_MES:
+			case test_mode::C_MES:
+				cmd_task_ = cmd_task::crm;
+				break;
+			default:
+				break;
+			}
+			return true;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -384,16 +515,16 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void update()
 		{
-#if 0
-			if(!startup_init_) {
-				if(!client_.probe()) return;
-				startup_();
+			if(!startup_init_ && client_.probe()) {
+				cmd_task_ = cmd_task::init_all;
 				startup_init_ = true;
-			}
-#endif
+			} 
+
 			interlock_.update(ilock_enable_->get_check());
 
 			dc2_.update();
+
+			cmd_service_();
 
 			if(!dialog_->get_state(gui::widget::state::ENABLE)) return;
 

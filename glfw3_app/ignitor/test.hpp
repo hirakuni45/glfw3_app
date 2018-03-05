@@ -29,14 +29,10 @@ namespace app {
 			std::string		symbol_;
 			uint32_t		retry_;
 			double			wait_;
-			uint32_t		term_;
-			double			delay_;
-			uint32_t		filter_;
-			double			width_;
 			double			min_;
 			double			max_;
 			value_t() : symbol_(), retry_(0), wait_(0.0),
-				term_(0), delay_(0.0), filter_(0), width_(0.0), min_(0.0), max_(0.0)
+				min_(0.0), max_(0.0)
 			{ }
 		};
 	};
