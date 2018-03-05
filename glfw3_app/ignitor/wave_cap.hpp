@@ -59,10 +59,9 @@ namespace app {
 
 			uint32_t	id_;		///< 領域更新 ID
 
-			bool	annotate_;		///< バック・アノテート・フラグ
 			info_t() : sample_org_(0.0), sample_width_(0.0),
 				sig_{ 0.0 }, min_{ 0.0 }, max_{ 0.0 }, average_{ 0.0 },
-				id_(0), annotate_(false)
+				id_(0)
 			{ }
 		};
 
@@ -102,13 +101,14 @@ namespace app {
 		gui::widget_terminal*	terminal_core_;
 
 		gui::widget_frame*		tools_;
-		gui::widget_check*		annotate_;
 		gui::widget_check*		smooth_;
+		gui::widget_list*		mesa_type_;
 		gui::widget_list*		org_trg_;
 		gui::widget_spinbox*	org_slope_;
 		gui::widget_list*		fin_trg_;
 		gui::widget_spinbox*	fin_slope_;
 		gui::widget_text*		ch_to_time_;
+		gui::widget_button*		wdm_exec_;
 		uint32_t				mese_id_before_;
 		uint32_t				mese_id_;
 
@@ -704,6 +704,7 @@ namespace app {
 
 		vtx::ipos				size_;
 
+		double					mese_value_;
 
 		void volt_scale_conv_(uint32_t ch, const WAVES::analize_param& ap, info_t& t)
 		{ 
@@ -770,7 +771,6 @@ namespace app {
 						++info_.id_;
 					}
 				}
-				info_.annotate_ = annotate_->get_check();
 			}
 
 			// フォーカスが外れたら、情報(IN) を強制終了
@@ -811,6 +811,42 @@ namespace app {
 		}
 
 
+		void mesa_run_()
+		{
+			double len = get_time_unit_(time_.scale_->get_select_pos());
+			len *= waves_.get_info().grid_step_;
+			WAVES::measure_param param;
+			double tm = 0.0;
+			if(mesa_type_->get_select_pos() == 0) {  // single
+				param.org_ch_ = org_trg_->get_select_pos() / 2;
+				float base = 100.0f;
+				if(org_trg_->get_select_pos() & 1) base = -100.0f;
+				param.org_slope_ = static_cast<float>(org_slope_->get_select_pos()) / base;
+
+				tm = waves_.measure1(sample_param_.rate, 0.0, len, param);
+
+			} else if(mesa_type_->get_select_pos() == 1) {  // multi
+				param.org_ch_ = org_trg_->get_select_pos() / 2;
+				float base = 100.0f;
+				if(org_trg_->get_select_pos() & 1) base = -100.0f;
+				param.org_slope_ = static_cast<float>(org_slope_->get_select_pos()) / base;
+
+				param.fin_ch_ = fin_trg_->get_select_pos() / 2;
+				base = 100.0f;
+				if(fin_trg_->get_select_pos() & 1) base = -100.0f;
+				param.fin_slope_ = static_cast<float>(fin_slope_->get_select_pos()) / base;
+
+				tm = waves_.measure2(sample_param_.rate, 0.0, len, param);
+			}
+
+			uint32_t idx = time_.scale_->get_select_pos();
+			tm /= get_time_unit_base_(idx);
+			std::string un = get_time_unit_str_(idx);
+			ch_to_time_->set_text((boost::format("%5.4f [%s]") % tm % un).str());
+
+			mese_value_ = tm;
+		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -821,9 +857,10 @@ namespace app {
 			director_(d), client_(client), interlock_(ilock), waves_(),
 			frame_(nullptr), core_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
-			tools_(nullptr), annotate_(nullptr), smooth_(nullptr),
+			tools_(nullptr), smooth_(nullptr), mesa_type_(nullptr),
 			org_trg_(nullptr), org_slope_(nullptr), fin_trg_(nullptr), fin_slope_(nullptr),
-			ch_to_time_(nullptr), mese_id_before_(0), mese_id_(0),
+			ch_to_time_(nullptr), wdm_exec_(nullptr),
+			mese_id_before_(0), mese_id_(0),
 			share_frame_(nullptr),
 			sample_param_(),
 			wdm_id_{ 0 }, treg_id_{ 0 },
@@ -833,38 +870,19 @@ namespace app {
 			chn2_(waves_, 1.25f),
 			chn3_(waves_, 1.25f),
 			measure_time_(waves_),
-			time_(waves_), size_(0)
+			time_(waves_), size_(0),
+			mese_value_(0.0)
 		{ }
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief  評価
-			@return NG の場合「false」
+			@brief  計測結果の取得
+			@return 計測結果
 		*/
 		//-----------------------------------------------------------------//
-		bool value_check(const test::value_t& value)
-		{
-#if 0
-			uint32_t ch = value.term_;
-			if(ch < 4) {
-				if(value.filter_ == 0) {  // SIG
-					auto a = waves_.get(ch, sample_param_.rate, value.delay_);
-					a *= get_volt_scale_limit_(ch);
-					if(value.min_ <= a && a <= value.max_) {
-						return true;
-					} else {
-						return false;
-					}
-				} else {
-
-				}
-				return false;
-			} else {
-				return false;
-			}
-#endif
-			return false;
+		double get_mesa_value() const {
+			return mese_value_;
 		}
 
 
@@ -879,6 +897,33 @@ namespace app {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief  転送ボタンを取得
+			@return 転送ボタン
+		*/
+		//-----------------------------------------------------------------//
+		gui::widget_button* get_exec_button() const { return wdm_exec_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  測定単位取得
+			@return 測定単位
+		*/
+		//-----------------------------------------------------------------//
+		std::string get_unit() const {
+			std::string u;
+			auto n = mesa_type_->get_select_pos();
+			if(n == 0 || n == 1) {  // 時間
+				return get_time_unit_str_(time_.scale_->get_select_pos());
+			} else {  // 電圧
+
+			}
+			return u;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief  許可、不許可
 			@param[in]	ena	不許可の場合「false」
 		*/
@@ -888,9 +933,11 @@ namespace app {
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
-			wd.enable(frame_, ena, true);
-			wd.enable(tools_, ena, true);
-			wd.enable(terminal_frame_, ena, true);
+			if(frame_->get_enable() != ena) {
+				wd.enable(frame_, ena, true);
+				wd.enable(tools_, ena, true);
+				wd.enable(terminal_frame_, ena, true);
+			}
 		}
 
 
@@ -962,18 +1009,13 @@ namespace app {
 				tools_ = wd.add_widget<widget_frame>(wp, wp_);
 				tools_->set_state(gui::widget::state::SIZE_LOCK);
 			}
-			{	// バック・アノテート
-				widget::param wp(vtx::irect(10, 20, 200, 40), tools_);
-				widget_check::param wp_("Back Annotate");
-				annotate_ = wd.add_widget<widget_check>(wp, wp_);
-			}
 			{	// スムース
-				widget::param wp(vtx::irect(10, 20 + 40, 200, 40), tools_);
+				widget::param wp(vtx::irect(10, 20, 200, 40), tools_);
 				widget_check::param wp_("Smooth");
 				smooth_ = wd.add_widget<widget_check>(wp, wp_);
 			}
 			{	// 計測開始チャネルとスロープ
-				widget::param wp(vtx::irect(10, 20 + 80, 110, 40), tools_);
+				widget::param wp(vtx::irect(10, 120, 110, 40), tools_);
 				widget_list::param wp_;
 				wp_.init_list_.push_back("CH1 ↑");
 				wp_.init_list_.push_back("CH1 ↓");
@@ -989,7 +1031,7 @@ namespace app {
 				};
 			}
 			{	// 計測開始トリガー・レベル
-				widget::param wp(vtx::irect(130, 20 + 80, 100, 40), tools_);
+				widget::param wp(vtx::irect(130, 120, 100, 40), tools_);
 				widget_spinbox::param wp_(0, 50, 100);
 				org_slope_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				org_slope_->at_local_param().select_func_ =
@@ -999,7 +1041,7 @@ namespace app {
 				};
 			}
 			{	// 計測終了チャネルとスロープ
-				widget::param wp(vtx::irect(10, 20 + 130, 110, 40), tools_);
+				widget::param wp(vtx::irect(10, 170, 110, 40), tools_);
 				widget_list::param wp_;
 				wp_.init_list_.push_back("CH1 ↑");
 				wp_.init_list_.push_back("CH1 ↓");
@@ -1013,10 +1055,9 @@ namespace app {
 				fin_trg_->at_local_param().select_func_ = [=](const std::string& t, uint32_t p) {
 					++mese_id_;
 				};
-
 			}
 			{	// 計測終了トリガー・レベル
-				widget::param wp(vtx::irect(130, 20 + 130, 100, 40), tools_);
+				widget::param wp(vtx::irect(130, 170, 100, 40), tools_);
 				widget_spinbox::param wp_(0, 50, 100);
 				fin_slope_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				fin_slope_->at_local_param().select_func_ =
@@ -1026,7 +1067,7 @@ namespace app {
 				};
 			}
 			{	// 計測時間表示
-				widget::param wp(vtx::irect(10, 20 + 180, 120, 40), tools_);
+				widget::param wp(vtx::irect(10, 220, 260, 40), tools_);
 				widget_text::param wp_;
 				ch_to_time_ = wd.add_widget<widget_text>(wp, wp_);
 			}
@@ -1045,6 +1086,22 @@ namespace app {
 			chn3_.init(director_, share_frame_, 3);
 
 			time_.init(director_, share_frame_);
+
+			{  // 計測タイプ
+				widget::param wp(vtx::irect(10, 20 + 50, 130, 40), tools_);
+				widget_list::param wp_;
+				wp_.init_list_.push_back("SINGLE");
+				wp_.init_list_.push_back("MULTI");
+//				wp_.init_list_.push_back("DELAY");
+				mesa_type_ = wd.add_widget<widget_list>(wp, wp_);
+				mesa_type_->at_local_param().select_func_ = [=](const std::string& t, uint32_t p) {
+				};
+			}
+			{  // 計測開始ボタン
+				widget::param wp(vtx::irect(270, 220, 30, 30), tools_);
+				widget_button::param wp_(">");
+				wdm_exec_ = wd.add_widget<widget_button>(wp, wp_);
+			}
 
 			waves_.create_buffer();
 
@@ -1070,6 +1127,18 @@ namespace app {
 			if(frame_ == nullptr) return;
 			if(share_frame_ == nullptr) return;
 
+			if(mesa_type_->get_select_pos() == 0) {  // トリガーからの時間計測
+				fin_trg_->set_stall();
+				fin_slope_->set_stall();
+			} else if(mesa_type_->get_select_pos() == 1) {  // チャネル間時間計測
+				fin_trg_->set_stall(false);
+				fin_slope_->set_stall(false);
+			} else {  // delay 後の電圧計測
+
+			}
+
+			wdm_exec_->set_stall(!client_.probe());
+
 			waves_.enable_smooth(smooth_->get_check());
 
 			measure_time_.tbp_ = time_.scale_->get_select_pos();
@@ -1092,30 +1161,15 @@ namespace app {
 					auto sz = waves_.size();
 					waves_.copy(i, client_.get_wdm(i), sz, sz / 2);
 					wdm_id_[i] = id;
+					++mese_id_;
 				}
 			}
 
-			if(mese_id_before_ != mese_id_) {  // チャネル間計測
-				double len = get_time_unit_(time_.scale_->get_select_pos());
-				len *= waves_.get_info().grid_step_;
-				WAVES::measure_param param;
-
-				param.org_ch_ = org_trg_->get_select_pos() / 2;
-				float base = 100.0f;
-				if(org_trg_->get_select_pos() & 1) base = -100.0f;
-				param.org_slope_ = static_cast<float>(org_slope_->get_select_pos()) / base;
-
-				param.fin_ch_ = fin_trg_->get_select_pos() / 2;
-				base = 100.0f;
-				if(fin_trg_->get_select_pos() & 1) base = -100.0f;
-				param.fin_slope_ = static_cast<float>(fin_slope_->get_select_pos()) / base;
-
-				auto tm = waves_.measure(sample_param_.rate, 0.0, len, param);
-
-				ch_to_time_->set_text((boost::format("%f") % tm).str());
+			// 時間計測 ( single, multi)
+			if(mese_id_before_ != mese_id_) {
+				mesa_run_();
 				mese_id_before_ = mese_id_;
 			}
-
 #if 0
 			// 仮熱抵抗表示
 			for(uint32_t i = 0; i < 2; ++i) {
@@ -1127,7 +1181,6 @@ namespace app {
 				}
 			}
 #endif
-
 #if 0
 			++test_timer_;
 			if(test_timer_ == 60) {
@@ -1144,8 +1197,6 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void load(sys::preference& pre)
 		{
-///			sys::preference& pre = director_.at().preference_;
-
 			if(frame_ != nullptr) {
 				frame_->load(pre);
 			}
@@ -1154,9 +1205,6 @@ namespace app {
 			}
 			if(tools_ != nullptr) {
 				tools_->load(pre);
-			}
-			if(annotate_ != nullptr) {
-				annotate_->load(pre);
 			}
 			if(smooth_ != nullptr) {
 				smooth_->load(pre);
@@ -1188,8 +1236,6 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void save(sys::preference& pre)
 		{
-//			sys::preference& pre = director_.at().preference_;
-
 			if(frame_ != nullptr) {
 				frame_->save(pre);
 			}
@@ -1198,9 +1244,6 @@ namespace app {
 			}
 			if(tools_ != nullptr) {
 				tools_->save(pre);
-			}
-			if(annotate_ != nullptr) {
-				annotate_->save(pre);
 			}
 			if(smooth_ != nullptr) {
 				smooth_->save(pre);
