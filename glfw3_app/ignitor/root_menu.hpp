@@ -747,6 +747,7 @@ namespace app {
 				if(inspection_.get_test_mode() == inspection::test_mode::WDM) {
 					auto path = project_.get_image_path(unit_id_);					
 					wave_cap_.save_image(path);
+					project_.at_csv2().set(unit_id_ + 1, 12, path);
 					msg_dialog_->enable();
 				}
 				++unit_id_;

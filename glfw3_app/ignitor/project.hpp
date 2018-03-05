@@ -260,7 +260,7 @@ namespace app {
 		std::string get_image_path(uint32_t idx) const {
 			auto path = get_project_root();
 			std::string base = csv_base_->get_text();
-			std::string ext = image_ext_->get_select_text();
+			std::string ext = utils::to_lower_text(image_ext_->get_select_text());
 			path += (boost::format("/%s%04d.%s") % base % idx % ext).str();
 			return path; 
 		}

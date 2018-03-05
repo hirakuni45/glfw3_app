@@ -1181,12 +1181,6 @@ namespace app {
 				}
 			}
 #endif
-#if 0
-			++test_timer_;
-			if(test_timer_ == 60) {
-				save_image("test.jpg");
-			}
-#endif
 		}
 
 
