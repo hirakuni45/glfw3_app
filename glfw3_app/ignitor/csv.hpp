@@ -69,7 +69,7 @@ namespace app {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief  設定
+			@brief  アイテムの設定
 			@param[in]	columns	列
 			@param[in]	rows	行
 			@param[in]	str		文字列
@@ -84,6 +84,24 @@ namespace app {
 			if(ss.size() <= columns) return false;
 			ss[columns] = str;
 			return true;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  アイテムの取得
+			@param[in]	columns	列
+			@param[in]	rows	行
+			@return 文字列
+		*/
+		//-----------------------------------------------------------------//
+		std::string get(uint32_t columns, uint32_t rows) const
+		{
+			if(cell_.size() <= rows) return "";
+
+			const utils::strings& ss = cell_[rows];
+			if(ss.size() <= columns) return "";
+			return ss[columns];
 		}
 
 
@@ -131,10 +149,9 @@ namespace app {
 			}
 
 			uint32_t lno = 0;
-			while(fio.eof()) {
+			while(!fio.eof()) {
 				auto line = fio.get_line();
 				if(line.empty()) continue;
-
 				auto ss = utils::split_text(line, ",");
 				uint32_t n = 0;
 				for(auto s : ss) {
