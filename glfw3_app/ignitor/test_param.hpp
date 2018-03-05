@@ -107,21 +107,29 @@ namespace app {
 			@brief  初期化
 			@param[in]	root	ルート
 			@param[in]	d_w		横幅
-			@param[in]	ofsx	オフセット
-			@param[in]	loc		ロケーション（高さ）
+			@param[in]	ofsx	オフセットＸ
+			@param[in]	ofsy	オフセットＹ
 		*/
 		//-----------------------------------------------------------------//
-		void init(gui::widget* root, int d_w, int ofsx, int h, int loc)
+		void init(gui::widget* root, int d_w, int ofsx, int ofsy)
 		{
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
+#if 0
+			{  // 単体試験名
+				widget::param wp(vtx::irect(ofsx, 20 + h * 0, 300, 40), dialog_);
+				widget_label::param wp_("", false);
+				unit_name_ = wd.add_widget<widget_label>(wp, wp_);
+			}
+#endif
 			{  // 検査記号
-				widget::param wp(vtx::irect(ofsx, 20 + h * 12, 90, 40), root);
+				widget::param wp(vtx::irect(ofsx, ofsy, 90, 40), root);
 				widget_label::param wp_("", false);
 				symbol_ = wd.add_widget<widget_label>(wp, wp_);
 			}
+			ofsy += 50;
 			{  // リトライ回数
-				widget::param wp(vtx::irect(ofsx, 20 + h * 13, 90, 40), root);
+				widget::param wp(vtx::irect(ofsx, ofsy, 90, 40), root);
 				widget_spinbox::param wp_(1, 1, 5);
 				retry_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				retry_->at_local_param().select_func_ =
@@ -130,7 +138,7 @@ namespace app {
 				};
 			}
 			{  // Wait時間設定： ０～１．０ｓ（レンジ：０．０１ｓ）
-				widget::param wp(vtx::irect(ofsx + 100, 20 + h * 13, 90, 40), root);
+				widget::param wp(vtx::irect(ofsx + 100, ofsy, 90, 40), root);
 				widget_label::param wp_("0", false);
 				wait_ = wd.add_widget<widget_label>(wp, wp_);
 				wait_->at_local_param().select_func_ = [=](const std::string& str) {
@@ -138,7 +146,7 @@ namespace app {
 				};
 			}
 			{  // 計測対象選択
-				widget::param wp(vtx::irect(ofsx + 200, 20 + h * 13, 90, 40), root);
+				widget::param wp(vtx::irect(ofsx + 200, ofsy, 90, 40), root);
 				widget_list::param wp_;
 				wp_.init_list_.push_back("CH1");
 				wp_.init_list_.push_back("CH2");
@@ -149,12 +157,12 @@ namespace app {
 				term_ = wd.add_widget<widget_list>(wp, wp_);
 			}
 			{  // テスト 信号計測ポイント（時間）
-				widget::param wp(vtx::irect(ofsx + 300, 20 + h * 13, 90, 40), root);
+				widget::param wp(vtx::irect(ofsx + 300, ofsy, 90, 40), root);
 				widget_label::param wp_("0", false);
 				delay_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 			{  // 計測信号フィルター
-				widget::param wp(vtx::irect(ofsx + 400, 20 + h * 13, 90, 40), root);
+				widget::param wp(vtx::irect(ofsx + 400, ofsy, 90, 40), root);
 				widget_list::param wp_;
 				wp_.init_list_.push_back("SIG");
 				wp_.init_list_.push_back("MIN");
@@ -171,17 +179,17 @@ namespace app {
 				};
 			}
 			{  // テスト 信号計測ポイント（時間）
-				widget::param wp(vtx::irect(ofsx + 500, 20 + h * 13, 90, 40), root);
+				widget::param wp(vtx::irect(ofsx + 500, ofsy, 90, 40), root);
 				widget_label::param wp_("0", false);
 				width_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 			{  // テスト MIN 値設定
-				widget::param wp(vtx::irect(ofsx + 600, 20 + h * 13, 90, 40), root);
+				widget::param wp(vtx::irect(ofsx + 600, ofsy, 90, 40), root);
 				widget_label::param wp_("0", false);
 				min_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 			{  // テスト MAX 値設定
-				widget::param wp(vtx::irect(ofsx + 700, 20 + h * 13, 90, 40), root);
+				widget::param wp(vtx::irect(ofsx + 700, ofsy, 90, 40), root);
 				widget_label::param wp_("0", false);
 				max_ = wd.add_widget<widget_label>(wp, wp_);
 			}
@@ -216,6 +224,10 @@ namespace app {
 			} else {
 				ret = false;
 			}
+#if 0
+			else if(unit_name_->get_focus()) {
+				tools::set_help(chip_, unit_name_, "単体試験名");
+#endif
 			return ret;
 		}
 

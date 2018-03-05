@@ -19,6 +19,7 @@
 #include "widgets/widget_spinbox.hpp"
 #include "widgets/widget_check.hpp"
 #include "widgets/widget_chip.hpp"
+#include "widgets/widget_sheet.hpp"
 #include "widgets/widget_filer.hpp"
 #include "utils/input.hpp"
 #include "utils/format.hpp"
@@ -60,10 +61,11 @@ namespace app {
 		kikusui&				kikusui_;
 
 		gui::widget_dialog*		dialog_;
-		gui::widget_label*		unit_name_;			///< 単体試験名
 		gui::widget_button*		load_file_;			///< load file
 		gui::widget_button*		save_file_;			///< save file
 		gui::widget_check*		ilock_enable_;		///< Interlock 許可／不許可
+		gui::widget_sheet*		sheet_;
+		gui::widget_null*		style_[3];
 		utils::select_file		unit_load_filer_;
 		utils::select_file		unit_save_filer_;
 
@@ -116,7 +118,8 @@ namespace app {
 		inspection(utils::director<core>& d, net::ign_client_tcp& client, interlock& ilock, wave_cap& wc, kikusui& kik) :
 			director_(d), client_(client), interlock_(ilock), wave_cap_(wc), kikusui_(kik),
 			dialog_(nullptr),
-			unit_name_(nullptr), load_file_(nullptr), save_file_(nullptr), ilock_enable_(nullptr),
+			load_file_(nullptr), save_file_(nullptr), ilock_enable_(nullptr),
+			sheet_(nullptr), style_{ nullptr },
 
 			dc1_(d, client_, interlock_),
 			dc2_(d, client_, interlock_, kikusui_),
@@ -169,9 +172,11 @@ namespace app {
 		//-----------------------------------------------------------------//
 		const wave_cap::sample_param& get_sample_param() const { return wdm_.sample_param_; }
 
+
 		bool get_crm_mode() const { return crm_.mode_->get_select_pos(); }
 		double get_crrd_value() const { return crrd_value_; }
 		double get_crcd_value() const { return crcd_value_; }
+
 
 		//-----------------------------------------------------------------//
 		/*!
@@ -278,7 +283,7 @@ namespace app {
 			widget_director& wd = director_.at().widget_director_;
 
 			int d_w = 970;
-			int d_h = 720;
+			int d_h = 630;
 			{
 				widget::param wp(vtx::irect(100, 100, d_w, d_h));
 				widget_dialog::param wp_;
@@ -288,16 +293,42 @@ namespace app {
 				dialog_->at_local_param().select_func_ = [=](bool ok) {
 				};
 			}
+			{	// 共有フレーム（プロパティシート）
+				widget::param wp(vtx::irect(5, 110, d_w - 10, 350), dialog_);
+				widget_sheet::param wp_;
+				sheet_ = wd.add_widget<widget_sheet>(wp, wp_);
+			}
+			{
+				widget::param wp(vtx::irect(0, 0, 0, 0), sheet_);
+				widget_null::param wp_;
+				style_[0] = wd.add_widget<widget_null>(wp, wp_);
+				sheet_->add("静的検査 (CR 測定)", style_[0]);
+			}
+			{
+				widget::param wp(vtx::irect(0, 0, 0, 0), sheet_);
+				widget_null::param wp_;
+				style_[1] = wd.add_widget<widget_null>(wp, wp_);
+				sheet_->add("静的検査 (DC2 検査)", style_[1]);
+			}
+			{
+				widget::param wp(vtx::irect(0, 0, 0, 0), sheet_);
+				widget_null::param wp_;
+				style_[2] = wd.add_widget<widget_null>(wp, wp_);
+				sheet_->add("動的検査", style_[2]);
+			}
+
+
 			int w = 130;
 			int h = 45;
+#if 0
 			static const char* tbls[] = {
 				"ファイル名：",
+				"ＩＣＭ：",
 				"ＷＤＭ：", nullptr,
 				"ＤＣ１：", nullptr,
 				"ＤＣ２：", nullptr,
 				"ＷＧＭ：", nullptr,
 				"ＣＲＭ：", nullptr,
-				"ＩＣＭ：",
 				"検査：",
 			};
 			for(int i = 0; i < sizeof(tbls) / sizeof(const char*); ++i) {
@@ -308,12 +339,8 @@ namespace app {
 											 vtx::placement::vertical::CENTER);
 				wd.add_widget<widget_text>(wp, wp_);
 			}
+#endif
 			int ofsx = w + 10;
-			{  // 単体試験名
-				widget::param wp(vtx::irect(ofsx, 20 + h * 0, 300, 40), dialog_);
-				widget_label::param wp_("", false);
-				unit_name_ = wd.add_widget<widget_label>(wp, wp_);
-			}
 			{  // ロード・ファイル
 				widget::param wp(vtx::irect(ofsx + 320, 20 + h * 0, 100, 40), dialog_);
 				widget_button::param wp_("ロード");
@@ -340,16 +367,16 @@ namespace app {
 					unit_save_filer_.open(filter, true);
 				};
 			}
-
 			ofsx = 110;
-			wdm_.init(dialog_, d_w, ofsx, h, 1);
-			dc1_.init(dialog_, d_w, ofsx, h, 3);
-			dc2_.init(dialog_, d_w, ofsx, h, 5);
-			wgm_.init(dialog_, d_w, ofsx, h, 7);
-			crm_.init(dialog_, d_w, ofsx, h, 9);
-			icm_.init(dialog_, d_w, ofsx, h, 11);
+			icm_.init(dialog_, d_w, ofsx, 60);
 
-			test_param_.init(dialog_, d_w, ofsx, h, 12);
+			crm_.init(style_[0], d_w, ofsx,  30);
+			dc2_.init(style_[1], d_w, ofsx,  30);
+			wdm_.init(style_[2], d_w, ofsx,  40);
+			dc1_.init(style_[2], d_w, ofsx, 140);
+			wgm_.init(style_[2], d_w, ofsx, 240);
+
+			test_param_.init(dialog_, d_w, ofsx, 470);
 
 			{  // help message (widget_chip)
 				widget::param wp(vtx::irect(0, 0, 100, 40), dialog_);
@@ -426,14 +453,12 @@ namespace app {
 
 			// ヘルプ機能
 			uint32_t act = 60 * 3;
-			if(wdm_.help(chip_)) {
-			} else if(dc1_.help(chip_)) {
-			} else if(dc2_.help(chip_)) {
-			} else if(wgm_.help(chip_)) {
-			} else if(test_param_.help(chip_)) {
-			} else {
-				act = 0;
-			}
+			if(wdm_.help(chip_)) { }
+			else if(dc1_.help(chip_)) { }
+			else if(dc2_.help(chip_)) { }
+			else if(wgm_.help(chip_)) { }
+			else if(test_param_.help(chip_)) { }
+			else { act = 0; }
 			chip_->active(act);
 		}
 
@@ -447,7 +472,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		bool save(sys::preference& pre)
 		{
-			unit_name_->save(pre);
+///			unit_name_->save(pre);
 
 			dc1_.save(pre);
 			dc2_.save(pre);
@@ -458,6 +483,7 @@ namespace app {
 			test_param_.save(pre);
 
 			ilock_enable_->save(pre);
+			sheet_->save(pre);
 
 			return true;
 		}
@@ -487,7 +513,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		bool load(sys::preference& pre)
 		{
-			unit_name_->load(pre);
+///			unit_name_->load(pre);
 
 			dc1_.load(pre);
 			dc2_.load(pre);
@@ -498,6 +524,7 @@ namespace app {
 			test_param_.load(pre);
 
 			ilock_enable_->load(pre);
+			sheet_->load(pre);
 
 			return true;
 		}

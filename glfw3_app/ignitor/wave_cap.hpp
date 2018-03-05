@@ -1028,7 +1028,6 @@ namespace app {
 				ch_to_time_ = wd.add_widget<widget_text>(wp, wp_);
 			}
 
-
 			{	// 共有フレーム（プロパティシート）
 				widget::param wp(vtx::irect(5, 280, mw - 10, mh - 280 - 5), tools_);
 				widget_sheet::param wp_;
