@@ -174,7 +174,12 @@ namespace gui {
 		{
 			if(src == nullptr) return;
 
-			auto pos = src->get_param().rect_.org;
+			auto pos = src->get_rect().org;
+			widget* w = src->get_param().parents_;
+			while(w != nullptr && w != get_param().parents_) {
+				pos += w->get_rect().org;
+				w = w->get_param().parents_;
+			}
 			pos += ofs;
 			at_org() = pos;
 		}
@@ -192,12 +197,12 @@ namespace gui {
 			vtx::ipos ofs(0);
 			switch(ot) {
 			case offset_type::RIGHT_UP:
-				ofs.x = src->get_param().rect_.size.x;
-				ofs.y = -get_param().rect_.size.y;
+				ofs.x = src->get_rect().size.x;
+				ofs.y = -get_rect().size.y;
 				break;
 			case offset_type::RIGHT_DOWN:
-				ofs.x = src->get_param().rect_.size.x;
-				ofs.y = src->get_param().rect_.size.y;
+				ofs.x = src->get_rect().size.x;
+				ofs.y = src->get_rect().size.y;
 				break;
 			case offset_type::DOWN:
 			case offset_type::LEFT_DOWN:
