@@ -74,12 +74,14 @@ namespace gui {
 
 		void set_title_()
 		{
-			auto s = param_.sheets_[param_.index_].title_;
-			if(param_.ext_title_) {
-				s += (boost::format(" (%d/%d)")
-					% (param_.index_ + 1) % param_.sheets_.size()).str();
+			if(param_.index_ < param_.sheets_.size()) {
+				auto s = param_.sheets_[param_.index_].title_;
+				if(param_.ext_title_) {
+					s += (boost::format(" (%d/%d)")
+						% (param_.index_ + 1) % param_.sheets_.size()).str();
+				}
+				param_.text_param_.set_text(s);
 			}
-			param_.text_param_.set_text(s);
 		}
 
 	public:
