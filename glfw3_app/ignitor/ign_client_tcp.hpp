@@ -346,6 +346,8 @@ namespace net {
 				mod_status_.crcd_ = 50 * 0x7ffff + static_cast<uint32_t>(a);
 				++mod_status_.crcd_id_;
 				++mod_status_.crm_id_;
+			} else if(text.find("wdm 20") != std::string::npos) {
+				++mod_status_.wdm_id_[2];
 			}
 			std::cout << text << std::endl;
 			return;
