@@ -634,48 +634,40 @@ namespace view {
 			// リミット値の決定
 			float limit;
 			if(slope < 0.0f) {
-				limit = ((max - min) * -slope) + min;
+				limit = min + ((max - min) * -slope);
 			} else {
-				limit = ((max - min) *  slope) + min;
+				limit = min + ((max - min) *  slope);
 			}
 
-			// 勾配領域の検出と取得
-			double area_org = org;
-			double area_fin = org;
-			double o = org;
-			char f  = '.';
-			char bf = '.';
-			for(auto w : tmp) {
-				if(w <= min) f = '-';
-				else if(w >= max) f = '+';
-				if(bf == '-' && f == '+') {
-					std::cout << "Pos: " << o << std::endl;
-				}
-				if(bf == '+' && f == '-') {
-					std::cout << "Neg: " << o << std::endl;
-				}
-				bf = f;
-				o += wsmp;
-			}
-
-std::cout << ch << "AreaOrg: " << area_org << ", AreaFin: " << area_fin << std::endl;
-
-			o = org;
-			for(auto w : tmp) {
-				if(area_org <= o && o <= area_fin) {
-					if(slope < 0.0f) {
-						if(w < limit) {
-							return o;
-						}
-					} else {  // positive
-						if(w > limit) {
-							return o;
-						}
+			uint32_t n = 0;
+			if(tmp[0] < limit) {
+				if(slope > 0.0f) {
+					while(tmp[n] < limit) {
+						++n;
+					}
+				} else {
+					while(tmp[n] < limit) {
+						++n;
+					}
+					while(tmp[n] > limit) {
+						++n;
 					}
 				}
-				o += wsmp;
+			} else if(tmp[0] > limit) {
+				if(slope < 0.0f) {
+					while(tmp[n] > limit) {
+						++n;
+					}
+				} else {
+					while(tmp[n] > limit) {
+						++n;
+					}
+					while(tmp[n] < limit) {
+						++n;
+					}
+				}
 			}
-			return 0.0;
+			return wsmp * static_cast<double>(n);
 		}
 
 
@@ -687,11 +679,24 @@ std::cout << ch << "AreaOrg: " << area_org << ", AreaFin: " << area_fin << std::
 			@return 計測時間
 		*/
 		//-----------------------------------------------------------------//
-		double measure(double wsmp, double org, double len, const measure_param& param) const
+		double measure1(double wsmp, double org, double len, const measure_param& param) const
+		{
+			return scan(param.org_ch_, wsmp, org, len, param.org_slope_);
+		}
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  計測
+			@param[in]	wsmp	サンプリング周期			
+			@param[in]	param	計測パラメータ
+			@return 計測時間
+		*/
+		//-----------------------------------------------------------------//
+		double measure2(double wsmp, double org, double len, const measure_param& param) const
 		{
 			auto a = scan(param.org_ch_, wsmp, org, len, param.org_slope_);
 			auto b = scan(param.fin_ch_, wsmp, org, len, param.fin_slope_);
-std::cout << a << ", " << b << std::endl;
+// std::cout << a << ", " << b << std::endl;
 			return b - a;
 		}
 
