@@ -109,21 +109,21 @@ namespace app {
 		}
 
 
-		void init(gui::widget* root, int d_w, int ofsx, int h, int loc)
+		void init(gui::widget* root, int d_w, int ofsx, int ofsy)
 		{
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
-			tools::init_sw(wd, root, interlock_, ofsx, h, loc, sw_, 14, 1);
-			++loc;
+			tools::init_sw(wd, root, interlock_, ofsx, ofsy, sw_, 14, 1);
+			ofsy += 50;
 			// ＣＲメジャー・モジュール
 			{
-				widget::param wp(vtx::irect(ofsx, 20 + h * loc, 90, 40), root);
+				widget::param wp(vtx::irect(ofsx, ofsy, 90, 40), root);
 				widget_check::param wp_("有効");
 				ena_ = wd.add_widget<widget_check>(wp, wp_);
 			}
 			{  // 電流レンジ切り替え（2mA, 20mA, 200mA）
-				widget::param wp(vtx::irect(ofsx + 90, 20 + h * loc, 110, 40), root);
+				widget::param wp(vtx::irect(ofsx + 90, ofsy, 110, 40), root);
 				widget_list::param wp_;
 				wp_.init_list_.push_back("  2 mA");
 				wp_.init_list_.push_back(" 20 mA");
@@ -131,7 +131,7 @@ namespace app {
 				amps_ = wd.add_widget<widget_list>(wp, wp_); 
 			}
 			{  // 周波数設定 (100、1K, 10K)
-				widget::param wp(vtx::irect(ofsx + 220, 20 + h * loc, 110, 40), root);
+				widget::param wp(vtx::irect(ofsx + 220, ofsy, 110, 40), root);
 				widget_list::param wp_;
 				wp_.init_list_.push_back("100 Hz");
 				wp_.init_list_.push_back(" 1 KHz");
@@ -139,19 +139,19 @@ namespace app {
 				freq_ = wd.add_widget<widget_list>(wp, wp_); 
 			}
 			{  // 抵抗値、容量値選択
-				widget::param wp(vtx::irect(ofsx + 350, 20 + h * loc, 110, 40), root);
+				widget::param wp(vtx::irect(ofsx + 350, ofsy, 110, 40), root);
 				widget_list::param wp_;
 				wp_.init_list_.push_back("抵抗値");
 				wp_.init_list_.push_back("容量値");
 				mode_ = wd.add_widget<widget_list>(wp, wp_); 
 			}
 			{  // 答え
-				widget::param wp(vtx::irect(ofsx + 490, 20 + h * loc, 200, 40), root);
+				widget::param wp(vtx::irect(ofsx + 490, ofsy, 200, 40), root);
 				widget_label::param wp_("");
 				ans_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 			{  // exec
-				widget::param wp(vtx::irect(d_w - 50, 20 + h * loc, 30, 30), root);
+				widget::param wp(vtx::irect(d_w - 50, ofsy, 30, 30), root);
 				widget_button::param wp_(">");
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
 				exec_->at_local_param().select_func_ = [=](int n) {

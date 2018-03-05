@@ -89,14 +89,14 @@ namespace app {
 		};
 
 		// DC1 専用
-		void init_sw_dc1_(gui::widget* root, int ofsx, int h, int loc, gui::widget_check* out[], int num,
+		void init_sw_dc1_(gui::widget* root, int ofsx, int ofsy, gui::widget_check* out[], int num,
 			const char* swt[])
 		{
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;			
 			auto md = interlock::module::DC1;
 			for(int i = 0; i < num; ++i) {
-				widget::param wp(vtx::irect(ofsx, 20 + h * loc, 60, 40), root);
+				widget::param wp(vtx::irect(ofsx, ofsy, 60, 40), root);
 				widget_check::param wp_(swt[i]);
 				out[i] = wd.add_widget<widget_check>(wp, wp_);
 				ofsx += 60;
@@ -134,7 +134,7 @@ namespace app {
 		}
 
 
-		void init(gui::widget* root, int d_w, int ofsx, int h, int loc)
+		void init(gui::widget* root, int d_w, int ofsx, int ofsy)
 		{
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
@@ -143,15 +143,15 @@ namespace app {
 				"40", "41", "42", "43", "49"
 			};
 
-			init_sw_dc1_(root, ofsx, h, loc, sw_, 5, swt);
-			++loc;
+			init_sw_dc1_(root, ofsx, ofsy, sw_, 5, swt);
+			ofsy += 50;
 			{
-				widget::param wp(vtx::irect(ofsx, 20 + h * loc, 90, 40), root);
+				widget::param wp(vtx::irect(ofsx, ofsy, 90, 40), root);
 				widget_check::param wp_("有効");
 				ena_ = wd.add_widget<widget_check>(wp, wp_);
 			}
 			{
-				widget::param wp(vtx::irect(ofsx + 90, 20 + h * loc, 110, 40), root);
+				widget::param wp(vtx::irect(ofsx + 90, ofsy, 110, 40), root);
 				widget_list::param wp_;
 				wp_.init_list_.push_back("定電流");
 				wp_.init_list_.push_back("定電圧");
@@ -159,7 +159,7 @@ namespace app {
 				mode_ = wd.add_widget<widget_list>(wp, wp_);
 			}
 			{  // 60V/0.1V, 30A/10mA
-				widget::param wp(vtx::irect(ofsx + 230, 20 + h * loc, 90, 40), root);
+				widget::param wp(vtx::irect(ofsx + 230, ofsy, 90, 40), root);
 				widget_label::param wp_("0", false);
 				voltage_ = wd.add_widget<widget_label>(wp, wp_);
 				voltage_->at_local_param().select_func_ = [=](const std::string& str) {
@@ -167,14 +167,14 @@ namespace app {
 				};
 			}
 			{
-				widget::param wp(vtx::irect(ofsx + 330, 20 + h * loc, 40, 40), root);
+				widget::param wp(vtx::irect(ofsx + 330, ofsy, 40, 40), root);
 				widget_text::param wp_("V");
 				wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
 											 vtx::placement::vertical::CENTER);
 				wd.add_widget<widget_text>(wp, wp_);
 			}
 			{  // Max: 30A / step: 10mA
-				widget::param wp(vtx::irect(ofsx + 370, 20 + h * loc, 90, 40), root);
+				widget::param wp(vtx::irect(ofsx + 370, ofsy, 90, 40), root);
 				widget_label::param wp_("0", false);
 				current_ = wd.add_widget<widget_label>(wp, wp_);
 				current_->at_local_param().select_func_ = [=](const std::string& str) {
@@ -182,14 +182,14 @@ namespace app {
 				};
 			}
 			{
-				widget::param wp(vtx::irect(ofsx + 470, 20 + h * loc, 50, 40), root);
+				widget::param wp(vtx::irect(ofsx + 470, ofsy, 50, 40), root);
 				widget_text::param wp_("A");
 				wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
 											 vtx::placement::vertical::CENTER);
 				wd.add_widget<widget_text>(wp, wp_);
 			}
 			{  // 熱抵抗回数
-				widget::param wp(vtx::irect(ofsx + 510, 20 + h * loc, 110, 40), root);
+				widget::param wp(vtx::irect(ofsx + 510, ofsy, 110, 40), root);
 				widget_spinbox::param wp_(10, 10, 500);
 				count_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				count_->at_local_param().select_func_
@@ -198,7 +198,7 @@ namespace app {
 				};
 			} 
 			{
-				widget::param wp(vtx::irect(d_w - 50, 20 + h * loc, 30, 30), root);
+				widget::param wp(vtx::irect(d_w - 50, ofsy, 30, 30), root);
 				widget_button::param wp_(">");
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
 				exec_->at_local_param().select_func_ = [=](int n) {

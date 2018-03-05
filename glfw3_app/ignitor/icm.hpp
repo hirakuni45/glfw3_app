@@ -84,15 +84,15 @@ namespace app {
 		}
 
 
-		void init(gui::widget* root, int d_w, int ofsx, int h, int loc)
+		void init(gui::widget* root, int d_w, int ofsx, int ofsy)
 		{
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
-			tools::init_sw(wd, root, interlock_, ofsx, h, loc, sw_, 6, 34);
+			tools::init_sw(wd, root, interlock_, ofsx, ofsy, sw_, 6, 34);
 
 			{  // exec
-				widget::param wp(vtx::irect(d_w - 50, 20 + h * loc, 30, 30), root);
+				widget::param wp(vtx::irect(d_w - 50, ofsy, 30, 30), root);
 				widget_button::param wp_(">");
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
 				exec_->at_local_param().select_func_ = [=](int n) {

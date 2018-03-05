@@ -126,27 +126,27 @@ namespace app {
 		}
 
 
-		void init(gui::widget* root, int d_w, int ofsx, int h, int loc)
+		void init(gui::widget* root, int d_w, int ofsx, int ofsy)
 		{
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
-			tools::init_sw(wd, root, interlock_, ofsx, h, loc, sw_, 14, 15);
-			++loc;
+			tools::init_sw(wd, root, interlock_, ofsx, ofsy, sw_, 14, 15);
+			ofsy += 50;
 			{
-				widget::param wp(vtx::irect(ofsx, 20 + h * loc, 90, 40), root);
+				widget::param wp(vtx::irect(ofsx, ofsy, 90, 40), root);
 				widget_check::param wp_("有効");
 				ena_ = wd.add_widget<widget_check>(wp, wp_);
 			}
 			{
-				widget::param wp(vtx::irect(ofsx + 90, 20 + h * loc, 110, 40), root);
+				widget::param wp(vtx::irect(ofsx + 90, ofsy, 110, 40), root);
 				widget_list::param wp_;
 				wp_.init_list_.push_back("定電流");
 				wp_.init_list_.push_back("定電圧");
 				mode_ = wd.add_widget<widget_list>(wp, wp_);
 			}
 			{  // 300V/0.1V, 100mA/0.01mA
-				widget::param wp(vtx::irect(ofsx + 230, 20 + h * loc, 90, 40), root);
+				widget::param wp(vtx::irect(ofsx + 230, ofsy, 90, 40), root);
 				widget_label::param wp_("0", false);
 				voltage_ = wd.add_widget<widget_label>(wp, wp_);
 				voltage_->at_local_param().select_func_ = [=](const std::string& str) {
@@ -154,14 +154,14 @@ namespace app {
 				};
 			}
 			{
-				widget::param wp(vtx::irect(ofsx + 330, 20 + h * loc, 40, 40), root);
+				widget::param wp(vtx::irect(ofsx + 330, ofsy, 40, 40), root);
 				widget_text::param wp_("V");
 				wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
 											 vtx::placement::vertical::CENTER);
 				wd.add_widget<widget_text>(wp, wp_);
 			}
 			{  // Max: 100mA / step: 0.01mA
-				widget::param wp(vtx::irect(ofsx + 370, 20 + h * loc, 90, 40), root);
+				widget::param wp(vtx::irect(ofsx + 370, ofsy, 90, 40), root);
 				widget_label::param wp_("0", false);
 				current_ = wd.add_widget<widget_label>(wp, wp_);
 				current_->at_local_param().select_func_ = [=](const std::string& str) {
@@ -169,19 +169,19 @@ namespace app {
 				};
 			}
 			{
-				widget::param wp(vtx::irect(ofsx + 470, 20 + h * loc, 50, 40), root);
+				widget::param wp(vtx::irect(ofsx + 470, ofsy, 50, 40), root);
 				widget_text::param wp_("mA");
 				wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
 											 vtx::placement::vertical::CENTER);
 				wd.add_widget<widget_text>(wp, wp_);
 			}
 			{  // 電流、電圧測定値
-				widget::param wp(vtx::irect(ofsx + 520, 20 + h * loc, 150, 40), root);
+				widget::param wp(vtx::irect(ofsx + 520, ofsy, 150, 40), root);
 				widget_label::param wp_("");
 				probe_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 			{
-				widget::param wp(vtx::irect(d_w - 50, 20 + h * loc, 30, 30), root);
+				widget::param wp(vtx::irect(d_w - 50, ofsy, 30, 30), root);
 				widget_button::param wp_(">");
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
 				exec_->at_local_param().select_func_ = [=](int n) {
