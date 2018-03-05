@@ -89,6 +89,14 @@ namespace app {
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
+			{
+				widget::param wp(vtx::irect(20, ofsy, 60, 40), root);
+				widget_text::param wp_("ICM:");
+				wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
+											 vtx::placement::vertical::CENTER);
+				wd.add_widget<widget_text>(wp, wp_);
+			}
+
 			tools::init_sw(wd, root, interlock_, ofsx, ofsy, sw_, 6, 34);
 
 			{  // exec

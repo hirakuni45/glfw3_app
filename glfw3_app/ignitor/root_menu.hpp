@@ -601,30 +601,6 @@ namespace app {
 
 			kikusui_.update();
 
-			// 波形計測のバックアノテーション
-			const auto& inf = wave_cap_.get_info();
-			if(inf.id_ != info_id_) {
-				if(inf.annotate_) {
-					const auto& test = at_inspection().get_test_param();
-					if(test.delay_ != nullptr) {
-						test.delay_->set_text((boost::format("%e") % inf.sample_org_).str());
-					}
-					if(test.width_ != nullptr) {
-						test.width_->set_text((boost::format("%e") % inf.sample_width_).str());
-					}
-					if(test.term_ != nullptr) {
-						auto n = test.term_->get_select_pos();
-						if(n <= 3 && test.min_ != nullptr) {
-							test.min_->set_text((boost::format("%4.3f") % inf.min_[n]).str());
-						}
-						if(n <= 3 && test.max_ != nullptr) {
-							test.max_->set_text((boost::format("%4.3f") % inf.max_[n]).str());
-						}
-					}
-				}
-				info_id_ = inf.id_;
-			}
-
 			// シリアルポート
 			if(serial_list_.empty() || !serial_.compare(serial_list_)) {
 				serial_.create_list();

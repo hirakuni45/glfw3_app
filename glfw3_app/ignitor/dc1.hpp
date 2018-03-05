@@ -139,6 +139,14 @@ namespace app {
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
+			{
+				widget::param wp(vtx::irect(15, ofsy, 60, 40), root);
+				widget_text::param wp_("DC1:");
+				wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
+											 vtx::placement::vertical::CENTER);
+				wd.add_widget<widget_text>(wp, wp_);
+			}
+
 			static const char* swt[] = {
 				"40", "41", "42", "43", "49"
 			};
@@ -242,9 +250,9 @@ namespace app {
 		{
 			bool ret = true;
 			if(current_->get_focus()) {
-				tools::set_help(chip, current_, "0.0 to 30.0 [A], 0.1 [A] / step");
+				tools::set_help(chip, current_, "0.0 to 30.0 [A]");
 			} else if(voltage_->get_focus()) {
-				tools::set_help(chip, voltage_, "0.0 to 60.0 [V], 0.1 [V] / step");
+				tools::set_help(chip, voltage_, "0.0 to 60.0 [V]");
 			} else {
 				ret = false;
 			}

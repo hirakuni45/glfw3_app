@@ -19,6 +19,7 @@
 #include "widgets/widget_spinbox.hpp"
 #include "widgets/widget_check.hpp"
 #include "widgets/widget_chip.hpp"
+#include "widgets/widget_null.hpp"
 #include "widgets/widget_sheet.hpp"
 #include "widgets/widget_filer.hpp"
 #include "utils/input.hpp"
@@ -65,7 +66,7 @@ namespace app {
 		gui::widget_button*		save_file_;			///< save file
 		gui::widget_check*		ilock_enable_;		///< Interlock 許可／不許可
 		gui::widget_sheet*		sheet_;
-		gui::widget_null*		style_[3];
+		gui::widget_null*		style_[4];
 		utils::select_file		unit_load_filer_;
 		utils::select_file		unit_save_filer_;
 
@@ -283,7 +284,7 @@ namespace app {
 			widget_director& wd = director_.at().widget_director_;
 
 			int d_w = 970;
-			int d_h = 630;
+			int d_h = 580;
 			{
 				widget::param wp(vtx::irect(100, 100, d_w, d_h));
 				widget_dialog::param wp_;
@@ -294,7 +295,7 @@ namespace app {
 				};
 			}
 			{	// 共有フレーム（プロパティシート）
-				widget::param wp(vtx::irect(5, 110, d_w - 10, 350), dialog_);
+				widget::param wp(vtx::irect(5, 60, d_w - 10, 350), dialog_);
 				widget_sheet::param wp_;
 				sheet_ = wd.add_widget<widget_sheet>(wp, wp_);
 			}
@@ -302,47 +303,32 @@ namespace app {
 				widget::param wp(vtx::irect(0, 0, 0, 0), sheet_);
 				widget_null::param wp_;
 				style_[0] = wd.add_widget<widget_null>(wp, wp_);
-				sheet_->add("静的検査 (CR 測定)", style_[0]);
+				sheet_->add("静的検査 (容量、抵抗 測定)", style_[0]);
 			}
 			{
 				widget::param wp(vtx::irect(0, 0, 0, 0), sheet_);
 				widget_null::param wp_;
 				style_[1] = wd.add_widget<widget_null>(wp, wp_);
-				sheet_->add("静的検査 (DC2 検査)", style_[1]);
+				sheet_->add("静的検査 (電圧、電流 検査)", style_[1]);
 			}
 			{
 				widget::param wp(vtx::irect(0, 0, 0, 0), sheet_);
 				widget_null::param wp_;
 				style_[2] = wd.add_widget<widget_null>(wp, wp_);
-				sheet_->add("動的検査", style_[2]);
+				sheet_->add("動的検査（特性 検査）", style_[2]);
+			}
+			{
+				widget::param wp(vtx::irect(0, 0, 0, 0), sheet_);
+				widget_null::param wp_;
+				style_[3] = wd.add_widget<widget_null>(wp, wp_);
+				sheet_->add("熱抵抗測定", style_[3]);
 			}
 
-
-			int w = 130;
+			int w = 100;
 			int h = 45;
-#if 0
-			static const char* tbls[] = {
-				"ファイル名：",
-				"ＩＣＭ：",
-				"ＷＤＭ：", nullptr,
-				"ＤＣ１：", nullptr,
-				"ＤＣ２：", nullptr,
-				"ＷＧＭ：", nullptr,
-				"ＣＲＭ：", nullptr,
-				"検査：",
-			};
-			for(int i = 0; i < sizeof(tbls) / sizeof(const char*); ++i) {
-				widget::param wp(vtx::irect(20, 20 + h * i, w, h), dialog_);
-				if(tbls[i] == nullptr) continue;
-				widget_text::param wp_(tbls[i]);
-				wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
-											 vtx::placement::vertical::CENTER);
-				wd.add_widget<widget_text>(wp, wp_);
-			}
-#endif
 			int ofsx = w + 10;
 			{  // ロード・ファイル
-				widget::param wp(vtx::irect(ofsx + 320, 20 + h * 0, 100, 40), dialog_);
+				widget::param wp(vtx::irect(20, 480, 100, 40), dialog_);
 				widget_button::param wp_("ロード");
 				load_file_ = wd.add_widget<widget_button>(wp, wp_);
 				load_file_->at_local_param().select_func_ = [=](bool f) {
@@ -354,8 +340,8 @@ namespace app {
 					unit_load_filer_.open(filter);
 				};
 			}
-			{  // ロード・ファイル
-				widget::param wp(vtx::irect(ofsx + 440, 20 + h * 0, 100, 40), dialog_);
+			{  // セーブ・ファイル
+				widget::param wp(vtx::irect(130, 480, 100, 40), dialog_);
 				widget_button::param wp_("セーブ");
 				save_file_ = wd.add_widget<widget_button>(wp, wp_);
 				save_file_->at_local_param().select_func_ = [=](bool f) {
@@ -367,28 +353,27 @@ namespace app {
 					unit_save_filer_.open(filter, true);
 				};
 			}
-			ofsx = 110;
-			icm_.init(dialog_, d_w, ofsx, 60);
-
+			{  // インターロック機構、On/Off
+				widget::param wp(vtx::irect(240, 480, 180, 40), dialog_);
+				widget_check::param wp_("Interlock", true);
+				ilock_enable_ = wd.add_widget<widget_check>(wp, wp_);
+			}
+			{  // help message (widget_chip)
+				widget::param wp(vtx::irect(0, 0, 100, 40), dialog_);
+				widget_chip::param wp_;
+				chip_ = wd.add_widget<widget_chip>(wp, wp_);
+				chip_->active(0);
+			}
+			ofsx = 90;
+			icm_.init(dialog_, d_w, ofsx, 15);
+			ofsx -= 5;
 			crm_.init(style_[0], d_w, ofsx,  30);
 			dc2_.init(style_[1], d_w, ofsx,  30);
 			wdm_.init(style_[2], d_w, ofsx,  40);
 			dc1_.init(style_[2], d_w, ofsx, 140);
 			wgm_.init(style_[2], d_w, ofsx, 240);
-
-			test_param_.init(dialog_, d_w, ofsx, 470);
-
-			{  // help message (widget_chip)
-				widget::param wp(vtx::irect(0, 0, 100, 40), dialog_);
-				widget_chip::param wp_;
-				chip_ = wd.add_widget<widget_chip>(wp, wp_);
-			}
-
-			{  // インターロック機構、On/Off
-				widget::param wp(vtx::irect(ofsx + 590, 20 + h * 0, 180, 40), dialog_);
-				widget_check::param wp_("Interlock", true);
-				ilock_enable_ = wd.add_widget<widget_check>(wp, wp_);
-			}
+			ofsx = 130;
+			test_param_.init(dialog_, d_w, ofsx, 420);
 		}
 
 
