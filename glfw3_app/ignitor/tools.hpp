@@ -12,6 +12,7 @@
 #include "utils/input.hpp"
 #include "utils/format.hpp"
 #include "utils/preference.hpp"
+#include "widgets/widget_chip.hpp"
 
 #include "interlock.hpp"
 
@@ -120,5 +121,16 @@ namespace app {
 			}
 		}
 
+
+		static std::string double_to_str(double a)
+		{
+			std::string str;
+			if(a >= 0.001) {
+				str = (boost::format("%4.3f") % a).str(); 
+			} else {
+				str = (boost::format("%e") % a).str();
+			}
+			return str;
+		}
 	};
 }
