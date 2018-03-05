@@ -121,6 +121,8 @@ namespace app {
 		SERIAL::name_list	serial_list_;
 		kikusui				kikusui_;
 
+		double			last_value_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -152,7 +154,8 @@ namespace app {
 //			mctrl_task_(mctrl_task::idle), mctrl_delay_(0), mctrl_id_(0),
 			dc2_id_(0), crm_id_(0), wdm_id_{ 0 }, time_out_(0),
 
-			serial_(), serial_list_(), kikusui_(serial_)
+			serial_(), serial_list_(), kikusui_(serial_),
+			last_value_(0.0)
 			{ }
 
 
@@ -560,7 +563,9 @@ namespace app {
 				msg_dialog_->set_text("検査開始");
 				msg_dialog_->enable();
 				retry_ = 0;
-				
+				project_.reset_csv1();
+				project_.load_csv1();
+				project_.reset_csv2();
 				break;
 
 			case task::loop:
@@ -584,10 +589,20 @@ namespace app {
 					top += (boost::format("待ち時間:  %2.1f [s]\n") % v.wait_).str();
 					std::string unit = inspection_.get_test_unit();
 					top += (boost::format("単位: [%s]\n") % unit).str();
-					std::string min = (boost::format("Min: %e [s]\n") % v.min_).str(); 
-					top += min;
-					std::string max = (boost::format("Max: %e [s]") % v.max_).str();
-					top += max;
+					std::string min;
+					if(v.min_ >= 0.001) {
+						min = (boost::format("%4.3f") % v.min_).str(); 
+					} else {
+						min = (boost::format("%e") % v.min_).str();
+					}
+					top += (boost::format("Min: %s [%s]\n") % min % unit).str();
+					std::string max;
+					if(v.max_ >= 0.001) {
+						max = (boost::format("%4.3f") % v.max_).str(); 
+					} else {
+						max = (boost::format("%e") % v.max_).str();
+					}
+					top += (boost::format("Max: %s [%s]\n") % max % unit).str();
 					value_ = v;
 
 					msg_dialog_->set_text(top);
@@ -601,6 +616,11 @@ namespace app {
 					project_.at_csv2().set(unit_id_ + 1, 2, max);
 					project_.at_csv2().set(unit_id_ + 1, 3, min);
 					project_.at_csv2().set(unit_id_ + 1, 4, unit);
+					// Time/Div
+					{
+//						wave_cap_.
+//						project_.at_csv2().set(unit_id_ + 1, 6, );
+					}
 
 					wait_ = static_cast<uint32_t>(value_.wait_ * 60.0);
 					task_ = task::wait;
@@ -634,10 +654,18 @@ namespace app {
 					case inspection::test_mode::C_MES:
 					case inspection::test_mode::R_MES:
 						if(crm_id_ != client_.get_mod_status().crm_id_) {
+							crm_id_ = client_.get_mod_status().crm_id_;
 							task_ = task::sence;
 						}
 						break;
-///						if(wdm_id_[i] != client_.get_mod_status().wdm_id_[i]) {
+					case inspection::test_mode::WDM:
+						for(uint32_t i = 0; i < 4; ++i) {
+							if(wdm_id_[i] != client_.get_mod_status().wdm_id_[i]) {
+								wdm_id_[i] = client_.get_mod_status().wdm_id_[i];
+								task_ = task::sence;
+							}
+						}
+						break;
 					default:
 						break;
 					}
@@ -666,14 +694,22 @@ namespace app {
 					case inspection::test_mode::R_MES:
 						v = inspection_.get_crrd_value();
 						break;
+					case inspection::test_mode::WDM:
+						v = wave_cap_.get_mesa_value();
+						break;
 					default:
 						break;
 					}
+					last_value_ = v;
 					if(value_.min_ <= v && v <= value_.max_) {
-						std::string st = (boost::format("%3.2f") % v).str();
+						std::string st = (boost::format("%4.3f") % v).str();
 						auto idx = project_.get_csv_index() - 1;
 						project_.at_csv1().set(unit_id_ + 1, 9 + idx, st);
 						project_.at_csv2().set(unit_id_ + 1, 5, st);
+						if(inspection_.get_test_mode() == inspection::test_mode::WDM) {
+							msg_dialog_->enable(false);  // メッセージダイアログを消す。
+							wave_cap_.enable();  // 波形編集を有効にする。
+						}
 						task_ = task::sync;
 					} else {
 						task_ = task::retry;
@@ -693,7 +729,10 @@ namespace app {
 			case task::error:
 				{
 					std::string str;
-					str = (boost::format("「%s」") % value_.symbol_).str();
+					str += (boost::format("Min: %4.3f\n") % value_.min_).str();
+					str += (boost::format("Max: %4.3f\n") % value_.max_).str();
+					str += (boost::format("Val: %4.3f\n") % last_value_).str();
+					str += (boost::format("「%s」") % value_.symbol_).str();
 					str += "検査エラー：\nデータ保存しますか？";
 					okc_dialog_->set_text(str);
 					okc_dialog_->enable();
@@ -705,10 +744,18 @@ namespace app {
 				break;
 
 			case task::sync:
+				if(inspection_.get_test_mode() == inspection::test_mode::WDM) {
+					auto path = project_.get_image_path(unit_id_);					
+					wave_cap_.save_image(path);
+					msg_dialog_->enable();
+				}
 				++unit_id_;
 				if(unit_id_ >= project_.get_unit_count()) {
+					project_.calc_csv1();
 					project_.save_csv1();
 					project_.save_csv2();
+					project_.next_item();
+					project_.save_proj();
 					task_ = task::fin;
 				} else {
 					task_ = task::loop;

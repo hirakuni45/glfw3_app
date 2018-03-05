@@ -29,6 +29,7 @@
 #include "utils/files.hpp"
 
 #include "csv.hpp"
+#include "tools.hpp"
 
 namespace app {
 
@@ -58,6 +59,8 @@ namespace app {
 		gui::widget_dialog*		msg_dialog_;
 
 		gui::widget_button*		proj_dir_;
+
+		std::string				last_path_;
 
 		utils::select_dir		sel_dir_;
 		utils::select_file		proj_load_filer_;
@@ -109,7 +112,7 @@ namespace app {
 			edit_dialog_(nullptr),
 			csv_all_(nullptr), csv_idx_(nullptr), csv_base_(nullptr), image_ext_(nullptr),
 			files_core_(nullptr), log_name_(nullptr),
-			msg_dialog_(nullptr), proj_dir_(nullptr)
+			msg_dialog_(nullptr), proj_dir_(nullptr), last_path_()
 		{ }
 
 
@@ -199,6 +202,33 @@ namespace app {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief  プロジェクト・ファイルをセーブ
+		*/
+		//-----------------------------------------------------------------//
+		bool save_proj()
+		{
+			if(last_path_.empty()) return false;
+			return save_project_file_(last_path_);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  アイテム・カウントを更新
+		*/
+		//-----------------------------------------------------------------//
+		void next_item()
+		{
+			auto n = csv_idx_->get_select_pos();
+			++n;
+			if(n < 1000) {
+				csv_idx_->set_select_pos(n);
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief  プロジェクト・タイトルの取得
 			@return プロジェクト・タイトル
 		*/
@@ -220,18 +250,21 @@ namespace app {
 			return proj_root_->get_text();
 		}
 
-#if 0
+
 		//-----------------------------------------------------------------//
 		/*!
-			@brief  CSV ファイル名の取得
-			@return CSV ファイル名
+			@brief  画像ファイル名の取得
+			@return 画像ファイル名
 		*/
 		//-----------------------------------------------------------------//
-		std::string get_csv_name() const {
-			if(csv_name_ == nullptr) return "";
-			return csv_name_->get_text();
+		std::string get_image_path(uint32_t idx) const {
+			auto path = get_project_root();
+			std::string base = csv_base_->get_text();
+			std::string ext = image_ext_->get_select_text();
+			path += (boost::format("/%s%04d.%s") % base % idx % ext).str();
+			return path; 
 		}
-#endif
+
 
 		//-----------------------------------------------------------------//
 		/*!
@@ -315,6 +348,60 @@ namespace app {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief  CSV1 の統計計算
+		*/
+		//-----------------------------------------------------------------//
+		void calc_csv1()
+		{
+			for(uint32_t c = 1; c < (1 + 50); ++c) {
+				if(csv1_.get(c, 9).empty()) break;
+				double ref_max;
+				if(!utils::string_to_double(csv1_.get(c, 2), ref_max)) {
+					break;
+				}
+				double ref_min;
+				if(!utils::string_to_double(csv1_.get(c, 3), ref_min)) {
+					break;
+				}
+				double min = 0.0;
+				double max = 0.0;
+				double avg = 0.0;
+				bool init = false;
+				uint32_t count = 0;
+				uint32_t ng = 0;
+				for(uint32_t r = 9; r < (9 + 1000); ++r) {
+					double a = 0.0f;
+					auto s = csv1_.get(c, r);
+					if(s.empty()) break;
+					if(utils::string_to_double(s, a)) {
+						if(!init) {
+							avg = min = max = a;
+							init = true;
+						} else {
+							if(min > a) min = a;
+							else if(max < a) max = a;
+							avg += a;
+						}
+						++count;
+						if(ref_min <= a && a <= ref_max) {
+						} else {
+							++ng;
+						}
+					}
+				}
+				if(count > 0) {
+					avg /= static_cast<double>(count);
+					csv1_.set(c, 5, tools::double_to_str(max));
+					csv1_.set(c, 6, tools::double_to_str(min));
+					csv1_.set(c, 7, tools::double_to_str(avg));
+				}
+				csv1_.set(c, 8, (boost::format("%d") % ng).str());
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief  CSV1 のセーブ
 		*/
 		//-----------------------------------------------------------------//
@@ -328,6 +415,62 @@ namespace app {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief  CSV1 のリセット
+		*/
+		//-----------------------------------------------------------------//
+		void reset_csv1()
+		{
+			csv1_.clear();
+			// CSV1 定型
+			uint32_t num = 100;
+			csv1_.create(51, 8 + num);
+			csv1_.set(0, 0, "検査番号");
+			for(uint32_t i = 0; i < 50; ++i) {
+				csv1_.set(i + 1, 0, (boost::format("%d") % (i + 1)).str());
+			}
+			csv1_.set(0, 1, "検査項目");
+			csv1_.set(0, 2, "規格 MAX");
+			csv1_.set(0, 3, "規格 MIN");
+			csv1_.set(0, 4, "単位");
+			csv1_.set(0, 5, "MAX");
+			csv1_.set(0, 6, "MIN");
+			csv1_.set(0, 7, "AVG");
+			csv1_.set(0, 8, "NG");
+			for(uint32_t i = 0; i < num; ++i) {
+				csv1_.set(0, 9 + i, (boost::format("%d") % (i + 1)).str());
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  CSV2 のリセット
+		*/
+		//-----------------------------------------------------------------//
+		void reset_csv2()
+		{
+			csv2_.clear();
+			csv2_.create(51, 30);
+			csv2_.set(0, 0, "検査番号");
+			for(uint32_t i = 0; i < 50; ++i) {
+				csv2_.set(i + 1, 0, (boost::format("%d") % (i + 1)).str());
+			}
+			csv2_.set(0,  1, "検査項目");
+			csv2_.set(0,  2, "検査規格 MAX");
+			csv2_.set(0,  3, "検査規格 MIN");
+			csv2_.set(0,  4, "単位");
+			csv2_.set(0,  5, "検査結果");
+			csv2_.set(0,  6, "Time/Div");
+			csv2_.set(0,  7, "CH1 A/Div");
+			csv2_.set(0,  8, "CH2 V/Div");
+			csv2_.set(0,  9, "CH3 V/Div");
+			csv2_.set(0, 10, "CH4 KV/Div");
+			csv2_.set(0, 11, "画像ファイル");
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief  CSV2 のセーブ
 		*/
 		//-----------------------------------------------------------------//
@@ -336,8 +479,7 @@ namespace app {
 			auto path = utils::append_path(proj_root_->get_text(), csv_base_->get_text());
 			path += (boost::format("%04d") % csv_idx_->get_select_pos()).str();
 			path += ".csv";
-std::cout << path << std::endl;
-//			csv2_.save(path);
+			csv2_.save(path);
 		}
 
 
@@ -537,42 +679,6 @@ std::cout << path << std::endl;
 				msg_dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
 				msg_dialog_->enable(false);
 			}
-
-			// CSV1 定型
-			uint32_t num = 100;
-			csv1_.create(51, 8 + num);
-			csv1_.set(0, 0, "検査番号");
-			for(uint32_t i = 0; i < 50; ++i) {
-				csv1_.set(i + 1, 0, (boost::format("%d") % (i + 1)).str());
-			}
-			csv1_.set(0, 1, "検査項目");
-			csv1_.set(0, 2, "規格 MAX");
-			csv1_.set(0, 3, "規格 MIN");
-			csv1_.set(0, 4, "単位");
-			csv1_.set(0, 5, "MAX");
-			csv1_.set(0, 6, "MIN");
-			csv1_.set(0, 7, "AVG");
-			csv1_.set(0, 8, "NG");
-			for(uint32_t i = 0; i < num; ++i) {
-				csv1_.set(0, 9 + i, (boost::format("%d") % (i + 1)).str());
-			}
-
-			csv2_.create(51, 30);
-			csv2_.set(0, 0, "検査番号");
-			for(uint32_t i = 0; i < 50; ++i) {
-				csv2_.set(i + 1, 0, (boost::format("%d") % (i + 1)).str());
-			}
-			csv2_.set(0,  1, "検査項目");
-			csv2_.set(0,  2, "検査規格 MAX");
-			csv2_.set(0,  3, "検査規格 MIN");
-			csv2_.set(0,  4, "単位");
-			csv2_.set(0,  5, "検査結果");
-			csv2_.set(0,  6, "Time/Div");
-			csv2_.set(0,  7, "CH1 A/Div");
-			csv2_.set(0,  8, "CH2 V/Div");
-			csv2_.set(0,  9, "CH3 V/Div");
-			csv2_.set(0, 10, "CH4 KV/Div");
-			csv2_.set(0, 11, "画像ファイル");
 		}
 
 
@@ -597,9 +703,7 @@ std::cout << path << std::endl;
 						path += PROJECT_EXT_;
 					}
 					if(load_project_file_(path)) {
-
-					} else {
-
+						last_path_ = path;
 					}
 				}
 			}
@@ -611,9 +715,7 @@ std::cout << path << std::endl;
 						path += PROJECT_EXT_;
 					}
 					if(save_project_file_(path)) {
-
-					} else {
-
+						last_path_ = path;
 					}
 				}
 			}

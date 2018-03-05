@@ -61,8 +61,10 @@ namespace app {
 		//=================================================================//
 		enum class test_mode {
 			NONE,		///< 無効
-			C_MES,		///< 容量計測
-			R_MES,		///< 抵抗計測
+			C_MES,		///< 静特性（容量計測）
+			R_MES,		///< 静特性（抵抗計測）
+
+			WDM,		///< 動特性（波形計測）
 		};
 
 	private:
@@ -103,6 +105,8 @@ namespace app {
 		double					crrd_value_;
 		double					crcd_value_;
 
+		uint32_t				wdm_exec_id_;
+
 		test_mode				test_mode_;
 
 		struct vc_t {
@@ -125,7 +129,10 @@ namespace app {
 			crm,		///< CRM 開始
 			crm0,
 
-
+			wdm,		///< WDM 開始
+			wdm0,
+			wdm1,
+			wdm2,
 
 		};
 		cmd_task		cmd_task_;
@@ -137,6 +144,7 @@ namespace app {
 			switch(cmd_task_) {
 			case cmd_task::idle:
 				break;
+
 
 			case cmd_task::init_all:
 				icm_.startup();
@@ -163,6 +171,7 @@ namespace app {
 				cmd_task_ = cmd_task::idle;
 				break;
 
+
 			case cmd_task::crm:
 				icm_.exec_->exec();
 				cmd_task_ = cmd_task::crm0;
@@ -172,58 +181,26 @@ namespace app {
 				cmd_task_ = cmd_task::idle;
 				break;
 
-#if 0
-//				
-			case mctrl_task::init_dc2:
-				inspection_.exec_dc2();
-				mctrl_task_ = mctrl_task::init_crm;
+
+			case cmd_task::wdm:
+				icm_.exec_->exec();
+				cmd_task_ = cmd_task::wdm0;
 				break;
-			case mctrl_task::init_crm:
-				inspection_.exec_crm();
-				mctrl_task_ = mctrl_task::init_wgm;
+			case cmd_task::wdm0:
+				dc1_.exec_->exec();
+				cmd_task_ = cmd_task::wdm1;
 				break;
-			case mctrl_task::init_wgm:
-				inspection_.exec_gen();
-				mctrl_task_ = mctrl_task::init_dc1;
+			case cmd_task::wdm1:
+				wgm_.exec_->exec();
+				cmd_task_ = cmd_task::wdm2;
 				break;
-			case mctrl_task::init_dc1:
-				inspection_.exec_dc1();
-				mctrl_task_ = mctrl_task::idle;
+			case cmd_task::wdm2:
+				wdm_.exec_->exec();
+				cmd_task_ = cmd_task::idle;
 				break;
 
-			case mctrl_task::icm:
-				inspection_.exec_icm();
-				// ※ ICM 設定が以前と異なる場合に安全時間待機
-				mctrl_delay_ = 15;  // ICM リレー安全時間 0.25 sec
-				mctrl_task_ = mctrl_task::dc2;
-				break;
 
-			case mctrl_task::dc2:
-				inspection_.exec_dc2();
-				mctrl_task_ = mctrl_task::crm;
-				break;
 
-			case mctrl_task::crm:
-				inspection_.exec_crm();
-				mctrl_task_ = mctrl_task::wgm;
-				break;
-
-			case mctrl_task::wgm:
-				inspection_.exec_gen();
-				mctrl_task_ = mctrl_task::dc1;
-				break;
-
-			case mctrl_task::dc1:
-				inspection_.exec_dc1();
-				mctrl_task_ = mctrl_task::wdm;
-				break;
-
-			case mctrl_task::wdm:
-				inspection_.exec_wdm();
-				mctrl_task_ = mctrl_task::idle;
-				++mctrl_id_;
-				break;
-#endif
 			default:
 				break;
 			}
@@ -254,6 +231,7 @@ namespace app {
 			startup_init_(false),
 			crrd_id_(0), crcd_id_(0), d2md_id_(0),
 			crrd_value_(0.0), crcd_value_(0.0),
+			wdm_exec_id_(0),
 			test_mode_(test_mode::NONE), cmd_task_(cmd_task::idle)
 		{ }
 
@@ -271,7 +249,11 @@ namespace app {
 				} else {
 					return test_mode::C_MES;
 				}
-			}			
+			} else if(sheet_->get_select_pos() == 1) {
+			} else if(sheet_->get_select_pos() == 2) {
+				return test_mode::WDM;
+			} else {
+			}
 			return test_mode::NONE;
 		}
 
@@ -289,7 +271,12 @@ namespace app {
 				} else {
 					return "uF";
 				}
-			}			
+			} else if(sheet_->get_select_pos() == 1) {
+
+			} else if(sheet_->get_select_pos() == 2) {
+				return wave_cap_.get_unit();
+			} else {
+			}
 			return "";
 		}
 
@@ -351,6 +338,11 @@ namespace app {
 			case test_mode::C_MES:
 				cmd_task_ = cmd_task::crm;
 				break;
+
+			case test_mode::WDM:
+				cmd_task_ = cmd_task::wdm;
+				break;
+
 			default:
 				break;
 			}
@@ -523,6 +515,11 @@ namespace app {
 			interlock_.update(ilock_enable_->get_check());
 
 			dc2_.update();
+
+			if(wdm_exec_id_ != wave_cap_.get_exec_button()->get_local_param().id_) {
+				wdm_exec_id_ = wave_cap_.get_exec_button()->get_local_param().id_;
+				cmd_task_ = cmd_task::wdm;				
+			}
 
 			cmd_service_();
 
