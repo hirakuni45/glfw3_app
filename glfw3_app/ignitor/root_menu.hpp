@@ -709,6 +709,16 @@ namespace app {
 						if(inspection_.get_test_mode() == inspection::test_mode::WDM) {
 							msg_dialog_->enable(false);  // メッセージダイアログを消す。
 							wave_cap_.enable();  // 波形編集を有効にする。
+							{
+								auto st = wave_cap_.get_time_scale();
+								std::string s = (boost::format("%4.3f") % st).str();
+								project_.at_csv2().set(unit_id_ + 1, 6, s);
+							}
+							for(uint32_t i = 0; i < 4; ++i) {
+								auto sv = wave_cap_.get_volt_scale(i);
+								std::string s = (boost::format("%4.3f") % sv).str();
+								project_.at_csv2().set(unit_id_ + 1, 7 + i, s);
+							}
 						}
 						task_ = task::sync;
 					} else {
@@ -747,7 +757,7 @@ namespace app {
 				if(inspection_.get_test_mode() == inspection::test_mode::WDM) {
 					auto path = project_.get_image_path(unit_id_);					
 					wave_cap_.save_image(path);
-					project_.at_csv2().set(unit_id_ + 1, 12, path);
+					project_.at_csv2().set(unit_id_ + 1, 11, path);
 					msg_dialog_->enable();
 				}
 				++unit_id_;

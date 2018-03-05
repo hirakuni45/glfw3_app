@@ -888,6 +888,48 @@ namespace app {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief  時間スケール値を取得
+			@return 時間スケール値
+		*/
+		//-----------------------------------------------------------------//
+		double get_time_scale() const {
+			uint32_t newpos = time_.scale_->get_select_pos();
+			return get_time_unit_(newpos) / get_time_unit_base_(newpos);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  電圧スケール値を取得
+			@param[in]	ch	チャネル
+			@return 電圧スケール値
+		*/
+		//-----------------------------------------------------------------//
+		float get_volt_scale(uint32_t ch) const
+		{
+			uint32_t newpos = 0;
+			switch(ch) {
+			case 0:
+				newpos = chn0_.scale_->get_select_pos();
+				break;
+			case 1:
+				newpos = chn1_.scale_->get_select_pos();
+				break;
+			case 2:
+				newpos = chn2_.scale_->get_select_pos();
+				break;
+			case 3:
+				newpos = chn3_.scale_->get_select_pos();
+				break;
+			default:
+				break;
+			}
+			return get_volt_scale_value_(ch, newpos);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief  波形情報の取得
 			@return 波形情報
 		*/
