@@ -91,15 +91,19 @@ namespace view {
 			uint16_t	time_stipple_;	///< 時間軸破線パターン
 			bool		time_enable_;	///< 時間軸有効
 
-			img::rgba8	volt_color_;	///< 電圧軸カラー
-			int32_t		volt_org_;		///< 電圧軸開始
-			int32_t		volt_len_;		///< 電圧軸長さ
-			uint16_t	volt_stipple_;	///< 電圧軸破線パターン
-			bool		volt_enable_;	///< 電圧軸有効
+			img::rgba8	volt_color_[CHN];	///< 電圧軸カラー
+			int32_t		volt_org_[CHN];		///< 電圧軸開始
+			int32_t		volt_len_[CHN];		///< 電圧軸長さ
+			uint16_t	volt_stipple_;		///< 電圧軸破線パターン
+			bool		volt_enable_[CHN];	///< 電圧軸有効
 
 			img::rgba8	trig_color_;	///< トリガー軸カラー
 			int32_t		trig_pos_;		///< トリガー軸位置（時間軸）
 			bool		trig_enable_;	///< トリガー軸有効
+
+			img::rgba8	meas_color_[2];	///< メジャー（時間計測）軸カラー
+			int32_t		meas_pos_[2];	///< メジャー（時間計測）軸位置（時間軸）
+			bool		meas_enable_[2];///< メジャー（時間計測）軸有効
 
 		private:
 			vtx::sposs	grid_;
@@ -116,7 +120,6 @@ namespace view {
 				if(mod) bits |= 1;
 			}
 
-
 		public:
 			info_param() : grid_color_(img::rgba8(255, 255, 255, 96)), grid_step_(30),
 				grid_stipple_(0b1111000011110000), grid_enable_(true),
@@ -125,12 +128,15 @@ namespace view {
 				time_org_(0), time_len_(0),
 				time_stipple_(0b1110110011101100), time_enable_(true),
 
-				volt_color_(img::rgba8(128, 255, 128, 192)),
-				volt_org_(0), volt_len_(0),
-				volt_stipple_(0b1110110011101100), volt_enable_(true),
+				volt_color_{ img::rgba8(128, 255, 128, 192) },
+				volt_org_{0}, volt_len_{0},
+				volt_stipple_(0b1110110011101100), volt_enable_{true},
 
 				trig_color_(img::rgba8(190, 255, 140, 192)),
 				trig_pos_(0), trig_enable_(true),
+
+				meas_color_{ img::rgba8(255, 195, 128, 192) },
+				meas_pos_{ 0 }, meas_enable_{ true },
 
 				grid_(), time_(), volt_(), size_(), count_(0)
 			{ }
@@ -189,15 +195,17 @@ namespace view {
 					gl::draw_lines(time_);
 					glPopMatrix();
 				}
-				if(volt_enable_) {
-					glLineStipple(1, volt_stipple_);
-					glPushMatrix();
-					gl::glTranslate(0, volt_org_);
-					gl::glColor(volt_color_);
-					gl::draw_lines(volt_);
-					gl::glTranslate(0, volt_len_);
-					gl::draw_lines(volt_);
-					glPopMatrix();
+				for(uint32_t i = 0; i < CHN; ++i) {
+					if(volt_enable_[i]) {
+						glLineStipple(1, volt_stipple_);
+						glPushMatrix();
+						gl::glTranslate(0, volt_org_[i]);
+						gl::glColor(volt_color_[i]);
+						gl::draw_lines(volt_);
+						gl::glTranslate(0, volt_len_[i]);
+						gl::draw_lines(volt_);
+						glPopMatrix();
+					}
 				}
 				if(trig_enable_) {
 					glLineStipple(1, time_stipple_);
@@ -206,6 +214,16 @@ namespace view {
 					gl::glColor(trig_color_);
 					gl::draw_lines(trig_);
 					glPopMatrix();
+				}
+				for(uint32_t i = 0; i < 2; ++i) {
+					if(meas_enable_[i]) {
+						glLineStipple(1, time_stipple_);
+						glPushMatrix();
+						gl::glTranslate(meas_pos_[i], 0);
+						gl::glColor(meas_color_[i]);
+						gl::draw_lines(trig_);
+						glPopMatrix();
+					}
 				}
 				if(count_ > 0) {
 					--count_;
@@ -629,40 +647,53 @@ namespace view {
 			}
 			if(tmp.empty()) return 0.0;
 
-			// std::cout << "Samples: " << tmp.size() << std::endl;
+			if(min < 0.0f) {
+				min *= 0.999f;
+			} else {
+				min *= 1.001f;
+			}
+			if(max > 0.0f) {
+				max *= 0.999f;
+			} else {
+				max *= 1.001f;
+			}
 
+			// std::cout << "Samples: " << tmp.size() << std::endl;
+// std::cout << "min: " << min << std::endl;
+// std::cout << "max: " << max << std::endl;
 			// リミット値の決定
-			float limit;
+			float limit = 0.0f;
 			if(slope < 0.0f) {
 				limit = min + ((max - min) * -slope);
 			} else {
 				limit = min + ((max - min) *  slope);
 			}
+// std::cout << "Limit: " << limit << std::endl;
 
 			uint32_t n = 0;
 			if(tmp[0] < limit) {
 				if(slope > 0.0f) {
-					while(tmp[n] < limit) {
+					while(n < tmp.size() && tmp[n] < limit) {
 						++n;
 					}
 				} else {
-					while(tmp[n] < limit) {
+					while(n < tmp.size() && tmp[n] < limit) {
 						++n;
 					}
-					while(tmp[n] > limit) {
+					while(n < tmp.size() && tmp[n] > limit) {
 						++n;
 					}
 				}
 			} else if(tmp[0] > limit) {
 				if(slope < 0.0f) {
-					while(tmp[n] > limit) {
+					while(n < tmp.size() && tmp[n] > limit) {
 						++n;
 					}
 				} else {
-					while(tmp[n] > limit) {
+					while(n < tmp.size() && tmp[n] > limit) {
 						++n;
 					}
-					while(tmp[n] < limit) {
+					while(n < tmp.size() && tmp[n] < limit) {
 						++n;
 					}
 				}
@@ -679,7 +710,7 @@ namespace view {
 			@return 計測時間
 		*/
 		//-----------------------------------------------------------------//
-		double measure1(double wsmp, double org, double len, const measure_param& param) const
+		double measure_org(double wsmp, double org, double len, const measure_param& param) const
 		{
 			return scan(param.org_ch_, wsmp, org, len, param.org_slope_);
 		}
@@ -687,17 +718,14 @@ namespace view {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  計測
-			@param[in]	wsmp	サンプリング周期			
+			@param[in]	wsmp	サンプリング周期
 			@param[in]	param	計測パラメータ
 			@return 計測時間
 		*/
 		//-----------------------------------------------------------------//
-		double measure2(double wsmp, double org, double len, const measure_param& param) const
+		double measure_fin(double wsmp, double org, double len, const measure_param& param) const
 		{
-			auto a = scan(param.org_ch_, wsmp, org, len, param.org_slope_);
-			auto b = scan(param.fin_ch_, wsmp, org, len, param.fin_slope_);
-// std::cout << a << ", " << b << std::endl;
-			return b - a;
+			return scan(param.fin_ch_, wsmp, org, len, param.fin_slope_);
 		}
 
 
