@@ -134,6 +134,12 @@ namespace app {
 			wdm1,
 			wdm2,
 
+			all_off,	///< all off sequence
+			all_off0,
+			all_off1,
+			all_off2,
+			all_off3,
+			all_off4,
 		};
 		cmd_task		cmd_task_;
 
@@ -144,7 +150,6 @@ namespace app {
 			switch(cmd_task_) {
 			case cmd_task::idle:
 				break;
-
 
 			case cmd_task::init_all:
 				icm_.startup();
@@ -199,7 +204,30 @@ namespace app {
 				cmd_task_ = cmd_task::idle;
 				break;
 
-
+			case cmd_task::all_off:
+				wdm_.startup();
+				cmd_task_ = cmd_task::all_off0;
+				break;
+			case cmd_task::all_off0:
+				wgm_.startup();
+				cmd_task_ = cmd_task::all_off1;
+				break;
+			case cmd_task::all_off1:
+				dc1_.startup();
+				cmd_task_ = cmd_task::all_off2;
+				break;
+			case cmd_task::all_off2:
+				dc2_.startup();
+				cmd_task_ = cmd_task::all_off3;
+				break;
+			case cmd_task::all_off3:
+				crm_.startup();
+				cmd_task_ = cmd_task::all_off4;
+				break;
+			case cmd_task::all_off4:
+				icm_.startup();
+				cmd_task_ = cmd_task::idle;
+				break;
 
 			default:
 				break;
@@ -234,6 +262,17 @@ namespace app {
 			wdm_exec_id_(0),
 			test_mode_(test_mode::NONE), cmd_task_(cmd_task::idle)
 		{ }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  オフラインシーケンス
+		*/
+		//-----------------------------------------------------------------//
+		void offline()
+		{
+			cmd_task_ = cmd_task::all_off;
+		}
 
 
 		//-----------------------------------------------------------------//
