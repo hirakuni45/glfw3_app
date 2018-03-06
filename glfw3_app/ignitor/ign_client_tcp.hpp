@@ -17,7 +17,7 @@
 #include "utils/string_utils.hpp"
 
 // デバッグ・エミュレーションを行う場合有効にする
-#define DEBUG_EMU
+// #define DEBUG_EMU
 
 namespace net {
 
