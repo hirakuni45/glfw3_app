@@ -289,18 +289,22 @@ namespace app {
 					mes_ = wd.add_widget<widget_check>(wp, wp_);
 				}
 				{  // メジャー開始位置
-					widget::param wp(vtx::irect(10, 170, 130, 40), root_);
+					widget::param wp(vtx::irect(10, 170, 145, 40), root_);
 					widget_spinbox::param wp_(0, 0, 100);
 					org_ = wd.add_widget<widget_spinbox>(wp, wp_);
 					org_->at_local_param().select_func_
 						= [=](widget_spinbox::state st, int before, int newpos) {
-						float a = static_cast<float>(newpos) 
-							/ static_cast<float>(waves_.get_info().grid_step_);
-						return (boost::format("%3.2f") % a).str();
+						float a = static_cast<float>(-newpos) 
+							/ static_cast<float>(waves_.get_info().grid_step_)
+							* get_volt_scale_value_(ch, scale_->get_select_pos());
+
+						float b = static_cast<float>(-pos_->get_select_pos()) / 2.0f;
+						b *= get_volt_scale_value_(ch, scale_->get_select_pos());
+						return (boost::format("%3.2f") % (a - b)).str();
 					};
 				}
 				{  // メジャー長さ
-					widget::param wp(vtx::irect(10 + 140, 170, 160, 40), root_);
+					widget::param wp(vtx::irect(10 + 155, 170, 145, 40), root_);
 					widget_spinbox::param wp_(0, 0, 100); // grid 数の倍
 					len_ = wd.add_widget<widget_spinbox>(wp, wp_);
 					len_->at_local_param().select_func_
@@ -309,8 +313,7 @@ namespace app {
 						float a = static_cast<float>(-newpos) 
 							/ static_cast<float>(waves_.get_info().grid_step_)
 							* get_volt_scale_value_(ch, scale_->get_select_pos());
-						static const char* unit[4] = { "A", "V", "V", "KV" };
-						return (boost::format("%3.2f %s") % a % unit[ch]).str();
+						return (boost::format("%3.2f") % a).str();
 					};
 				}
 			}
