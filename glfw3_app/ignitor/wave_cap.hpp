@@ -105,12 +105,14 @@ namespace app {
 		gui::widget_list*		mesa_type_;
 		gui::widget_list*		org_trg_;
 		gui::widget_spinbox*	org_slope_;
+		gui::widget_check*		org_ena_;
 		gui::widget_list*		fin_trg_;
 		gui::widget_spinbox*	fin_slope_;
+		gui::widget_check*		fin_ena_;
 		gui::widget_text*		ch_to_time_;
 		gui::widget_button*		wdm_exec_;
-		uint32_t				mese_id_before_;
-		uint32_t				mese_id_;
+		uint32_t				meas_id_before_;
+		uint32_t				meas_id_;
 
 		gui::widget_sheet*		share_frame_;
 
@@ -314,7 +316,7 @@ namespace app {
 			}
 
 
-			void update(uint32_t ch, const vtx::ipos& size, bool mena, float gainrate)
+			void update(uint32_t ch, const vtx::ipos& size, float gainrate)
 			{
 				if(pos_ == nullptr || scale_ == nullptr) return;
 				if(org_ == nullptr || len_ == nullptr) return;
@@ -346,14 +348,12 @@ namespace app {
 				waves_.at_param(ch).gain_ = u / value / gainrate;
 
 				// 電圧計測設定
-				if(mena) {
-					if(mes_->get_check()) {
-						waves_.at_info().volt_enable_ = true;
-						waves_.at_info().volt_org_ = org_->get_select_pos() + msofs;
-						waves_.at_info().volt_len_ = len_->get_select_pos();
-					} else {
-						waves_.at_info().volt_enable_ = false;
-					}
+				if(mes_->get_check()) {
+					waves_.at_info().volt_enable_[ch] = true;
+					waves_.at_info().volt_org_[ch] = org_->get_select_pos() + msofs;
+					waves_.at_info().volt_len_[ch] = len_->get_select_pos();
+				} else {
+					waves_.at_info().volt_enable_[ch] = false;
 				}
 			}
 
@@ -592,9 +592,12 @@ namespace app {
 			gui::widget_button*		res_ofs_;	///< 時間オフセット、リセット
 			gui::widget_check*		trg_gate_;	///< トリガー表示
 
+			uint32_t				id_;
+
 			time_t(WAVES& waves) : waves_(waves),
 				root_(nullptr),
-				scale_(nullptr), offset_(nullptr), res_ofs_(nullptr), trg_gate_(nullptr)
+				scale_(nullptr), offset_(nullptr), res_ofs_(nullptr), trg_gate_(nullptr),
+				id_(0)
 			{ }
 
 
@@ -615,6 +618,7 @@ namespace app {
 					scale_ = wd.add_widget<widget_spinbox>(wp, wp_);
 					scale_->at_local_param().select_func_
 						= [=](widget_spinbox::state st, int before, int newpos) {
+						++id_;
 						float a = get_time_unit_(newpos) / get_time_unit_base_(newpos);
 						return (boost::format("%2.1f %s") % a % get_time_unit_str_(newpos)).str();
 					};
@@ -625,6 +629,7 @@ namespace app {
 					offset_ = wd.add_widget<widget_spinbox>(wp, wp_);
 					offset_->at_local_param().select_func_
 						= [=](widget_spinbox::state st, int before, int newpos) {
+						++id_;
 						float t = get_time_unit_(scale_->get_select_pos()) * newpos;
 						auto un = scale_->get_select_pos();
 						float a = t / get_time_unit_base_(un);
@@ -635,8 +640,8 @@ namespace app {
 					widget::param wp(vtx::irect(10 + 215, 95, 30, 30), root_);
 					widget_button::param wp_("R");
 					res_ofs_ = wd.add_widget<widget_button>(wp, wp_);
-					res_ofs_->at_local_param().select_func_
-						= [=](uint32_t id) {
+					res_ofs_->at_local_param().select_func_ = [=](uint32_t id) {
+						++id_;
 						offset_->set_select_pos(0);
 					};
 				}
@@ -644,6 +649,9 @@ namespace app {
 					widget::param wp(vtx::irect(10, 140, 140, 40), root_);
 					widget_check::param wp_("Trigger");
 					trg_gate_ = wd.add_widget<widget_check>(wp, wp_);
+					trg_gate_->at_local_param().select_func_ = [=](bool ena) {
+						++id_;
+					};
 				}
 			}
 
@@ -701,6 +709,7 @@ namespace app {
 			}
 		};
 		time_t					time_;
+		uint32_t				time_id_;
 
 		vtx::ipos				size_;
 
@@ -811,7 +820,7 @@ namespace app {
 		}
 
 
-		void mesa_run_()
+		void meas_run_()
 		{
 			double len = get_time_unit_(time_.scale_->get_select_pos());
 			len *= waves_.get_info().grid_step_;
@@ -823,7 +832,11 @@ namespace app {
 				if(org_trg_->get_select_pos() & 1) base = -100.0f;
 				param.org_slope_ = static_cast<float>(org_slope_->get_select_pos()) / base;
 
-				tm = waves_.measure1(sample_param_.rate, 0.0, len, param);
+				tm = waves_.measure_org(sample_param_.rate, 0.0, len, param);
+				uint32_t idx = time_.scale_->get_select_pos();
+				auto grid = waves_.get_info().grid_step_;
+				auto ofs = time_.offset_->get_select_pos() * -grid;
+				waves_.at_info().meas_pos_[0] = ofs + (tm / get_time_unit_(idx)) * grid;
 
 			} else if(mesa_type_->get_select_pos() == 1) {  // multi
 				param.org_ch_ = org_trg_->get_select_pos() / 2;
@@ -836,7 +849,16 @@ namespace app {
 				if(fin_trg_->get_select_pos() & 1) base = -100.0f;
 				param.fin_slope_ = static_cast<float>(fin_slope_->get_select_pos()) / base;
 
-				tm = waves_.measure2(sample_param_.rate, 0.0, len, param);
+				auto a = waves_.measure_org(sample_param_.rate, 0.0, len, param);
+				uint32_t idx = time_.scale_->get_select_pos();
+				auto grid = waves_.get_info().grid_step_;
+				auto ofs = time_.offset_->get_select_pos() * -grid;
+				waves_.at_info().meas_pos_[0] = ofs + (a / get_time_unit_(idx)) * grid;
+
+				auto b = waves_.measure_fin(sample_param_.rate, a, len - a, param);
+				waves_.at_info().meas_pos_[1] = ofs + (b / get_time_unit_(idx)) * grid;
+
+				tm = b -a;
 			}
 
 			uint32_t idx = time_.scale_->get_select_pos();
@@ -858,9 +880,10 @@ namespace app {
 			frame_(nullptr), core_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
 			tools_(nullptr), smooth_(nullptr), mesa_type_(nullptr),
-			org_trg_(nullptr), org_slope_(nullptr), fin_trg_(nullptr), fin_slope_(nullptr),
+			org_trg_(nullptr), org_slope_(nullptr), org_ena_(nullptr),
+			fin_trg_(nullptr), fin_slope_(nullptr), fin_ena_(nullptr),
 			ch_to_time_(nullptr), wdm_exec_(nullptr),
-			mese_id_before_(0), mese_id_(0),
+			meas_id_before_(0), meas_id_(0),
 			share_frame_(nullptr),
 			sample_param_(),
 			wdm_id_{ 0 }, treg_id_{ 0 },
@@ -870,7 +893,7 @@ namespace app {
 			chn2_(waves_, 1.25f),
 			chn3_(waves_, 1.25f),
 			measure_time_(waves_),
-			time_(waves_), size_(0),
+			time_(waves_), time_id_(0), size_(0),
 			mese_value_(0.0)
 		{ }
 
@@ -1069,7 +1092,7 @@ namespace app {
 				wp_.init_list_.push_back("CH4 ↓");
 				org_trg_ = wd.add_widget<widget_list>(wp, wp_);
 				org_trg_->at_local_param().select_func_ = [=](const std::string& t, uint32_t p) {
-					++mese_id_;
+					++meas_id_;
 				};
 			}
 			{	// 計測開始トリガー・レベル
@@ -1078,10 +1101,11 @@ namespace app {
 				org_slope_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				org_slope_->at_local_param().select_func_ =
 					[=](widget_spinbox::state st, int before, int newpos) {
-					++mese_id_;
+					++meas_id_;
 					return (boost::format("%d") % newpos).str();
 				};
 			}
+
 			{	// 計測終了チャネルとスロープ
 				widget::param wp(vtx::irect(10, 170, 110, 40), tools_);
 				widget_list::param wp_;
@@ -1095,7 +1119,7 @@ namespace app {
 				wp_.init_list_.push_back("CH4 ↓");
 				fin_trg_ = wd.add_widget<widget_list>(wp, wp_);
 				fin_trg_->at_local_param().select_func_ = [=](const std::string& t, uint32_t p) {
-					++mese_id_;
+					++meas_id_;
 				};
 			}
 			{	// 計測終了トリガー・レベル
@@ -1104,10 +1128,11 @@ namespace app {
 				fin_slope_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				fin_slope_->at_local_param().select_func_ =
 					[=](widget_spinbox::state st, int before, int newpos) {
-					++mese_id_;
+					++meas_id_;
 					return (boost::format("%d") % newpos).str();
 				};
 			}
+
 			{	// 計測時間表示
 				widget::param wp(vtx::irect(10, 220, 260, 40), tools_);
 				widget_text::param wp_;
@@ -1144,13 +1169,33 @@ namespace app {
 				widget_button::param wp_(">");
 				wdm_exec_ = wd.add_widget<widget_button>(wp, wp_);
 			}
+			{	// 計測ライン描画 (org)
+				widget::param wp(vtx::irect(240, 120, 100, 40), tools_);
+				widget_check::param wp_("1st");
+				org_ena_ = wd.add_widget<widget_check>(wp, wp_);
+				org_ena_->at_local_param().select_func_ = [=](bool ena) {
+					waves_.at_info().meas_enable_[0] = ena;
+				};
+			}
+			{	// 計測ライン描画 (fin)
+				widget::param wp(vtx::irect(240, 170, 100, 40), tools_);
+				widget_check::param wp_("2nd");
+				fin_ena_ = wd.add_widget<widget_check>(wp, wp_);
+				fin_ena_->at_local_param().select_func_ = [=](bool ena) {
+					waves_.at_info().meas_enable_[1] = ena;
+				};
+			}
 
 			waves_.create_buffer();
 
 			waves_.at_param(0).color_ = img::rgba8(255,  64, 255, 255);
+			waves_.at_info().volt_color_[0] = img::rgba8(255,  64, 255, 255);
 			waves_.at_param(1).color_ = img::rgba8( 64, 255, 255, 255);
+			waves_.at_info().volt_color_[1] = img::rgba8( 64, 255, 255, 255);
 			waves_.at_param(2).color_ = img::rgba8(255, 255,  64, 255);
+			waves_.at_info().volt_color_[2] = img::rgba8(255, 255,  64, 255);
 			waves_.at_param(3).color_ = img::rgba8( 64, 255,  64, 255);
+			waves_.at_info().volt_color_[3] = img::rgba8( 64, 255,  64, 255);
 
 #ifdef TEST_SIN
 			waves_.build_sin(0, sample_param_.rate, 15000.0, 1.0f);
@@ -1172,9 +1217,11 @@ namespace app {
 			if(mesa_type_->get_select_pos() == 0) {  // トリガーからの時間計測
 				fin_trg_->set_stall();
 				fin_slope_->set_stall();
+				fin_ena_->set_stall();
 			} else if(mesa_type_->get_select_pos() == 1) {  // チャネル間時間計測
 				fin_trg_->set_stall(false);
 				fin_slope_->set_stall(false);
+				fin_ena_->set_stall(false);
 			} else {  // delay 後の電圧計測
 
 			}
@@ -1186,13 +1233,10 @@ namespace app {
 			measure_time_.tbp_ = time_.scale_->get_select_pos();
 			measure_time_.update(size_);
 
-			chn0_.update(0, size_, share_frame_->get_select_pos() == 1, sample_param_.gain[0]);
-			chn1_.update(1, size_, share_frame_->get_select_pos() == 2, sample_param_.gain[1]);
-			chn2_.update(2, size_, share_frame_->get_select_pos() == 3, sample_param_.gain[2]);
-			chn3_.update(3, size_, share_frame_->get_select_pos() == 4, sample_param_.gain[3]);
-			if(share_frame_->get_select_pos() < 1 || share_frame_->get_select_pos() > 4) {
-				waves_.at_info().volt_enable_ = false;
-			}
+			chn0_.update(0, size_, sample_param_.gain[0]);
+			chn1_.update(1, size_, sample_param_.gain[1]);
+			chn2_.update(2, size_, sample_param_.gain[2]);
+			chn3_.update(3, size_, sample_param_.gain[3]);
 
 			time_.update(size_, sample_param_.rate);
 
@@ -1203,14 +1247,19 @@ namespace app {
 					auto sz = waves_.size();
 					waves_.copy(i, client_.get_wdm(i), sz, sz / 2);
 					wdm_id_[i] = id;
-					++mese_id_;
+					++meas_id_;
 				}
 			}
 
+			if(time_id_ != time_.id_) {
+				time_id_ = time_.id_;
+				++meas_id_;
+			}
+
 			// 時間計測 ( single, multi)
-			if(mese_id_before_ != mese_id_) {
-				mesa_run_();
-				mese_id_before_ = mese_id_;
+			if(meas_id_before_ != meas_id_) {
+				meas_run_();
+				meas_id_before_ = meas_id_;
 			}
 #if 0
 			// 仮熱抵抗表示
@@ -1260,8 +1309,10 @@ namespace app {
 
 			org_trg_->load(pre);
 			org_slope_->load(pre);
+			org_ena_->load(pre);
 			fin_trg_->load(pre);
 			fin_slope_->load(pre);
+			fin_ena_->load(pre);
 		}
 
 
@@ -1299,8 +1350,10 @@ namespace app {
 
 			org_trg_->save(pre);
 			org_slope_->save(pre);
+			org_ena_->save(pre);
 			fin_trg_->save(pre);
 			fin_slope_->save(pre);
+			fin_ena_->save(pre);
 		}
 
 
