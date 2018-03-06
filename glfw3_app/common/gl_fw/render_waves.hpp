@@ -101,7 +101,7 @@ namespace view {
 			int32_t		trig_pos_;		///< トリガー軸位置（時間軸）
 			bool		trig_enable_;	///< トリガー軸有効
 
-			img::rgba8	meas_color_[2];	///< メジャー（時間計測）軸カラー
+			img::rgba8	meas_color_;	///< メジャー（時間計測）軸カラー
 			int32_t		meas_pos_[2];	///< メジャー（時間計測）軸位置（時間軸）
 			bool		meas_enable_[2];///< メジャー（時間計測）軸有効
 
@@ -135,7 +135,7 @@ namespace view {
 				trig_color_(img::rgba8(190, 255, 140, 192)),
 				trig_pos_(0), trig_enable_(true),
 
-				meas_color_{ img::rgba8(255, 195, 128, 192) },
+				meas_color_(img::rgba8(255, 195, 128, 192)),
 				meas_pos_{ 0 }, meas_enable_{ true },
 
 				grid_(), time_(), volt_(), size_(), count_(0)
@@ -220,7 +220,7 @@ namespace view {
 						glLineStipple(1, time_stipple_);
 						glPushMatrix();
 						gl::glTranslate(meas_pos_[i], 0);
-						gl::glColor(meas_color_[i]);
+						gl::glColor(meas_color_);
 						gl::draw_lines(trig_);
 						glPopMatrix();
 					}
