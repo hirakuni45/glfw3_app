@@ -177,6 +177,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void exit()
 		{
+			inspection_.offline();
 			kikusui_.stop();
 		}
 
