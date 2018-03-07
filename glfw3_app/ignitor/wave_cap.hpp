@@ -280,6 +280,8 @@ namespace app {
 						// グリッドに対する電圧表示
 						auto a = get_volt_scale_value_(ch, newpos);
 						static const char* unit[4] = { "A", "V", "V", "KV" };
+						org_->exec();
+						len_->exec();
 						return (boost::format("%3.2f %s") % a % unit[ch]).str();
 					};
 				}
