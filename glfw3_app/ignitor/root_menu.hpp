@@ -499,6 +499,7 @@ namespace app {
 				proj_title_->set_text(project_.get_project_title());
 				save_project_->set_stall(false);
 				auto path = project_.get_project_root();
+				wave_cap_.set_project_root(path);
 				proj_path_->set_text(path);
 				if(project_.get_unit_count() > 0) {
 					// プロジェクトの設定が有効なら、ストールを解除

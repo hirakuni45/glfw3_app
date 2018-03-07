@@ -34,12 +34,13 @@
 #include "test.hpp"
 #include "kikusui.hpp"
 
+#include "icm.hpp"
 #include "wdm.hpp"
 #include "dc1.hpp"
 #include "dc2.hpp"
 #include "wgm.hpp"
 #include "crm.hpp"
-#include "icm.hpp"
+#include "thr.hpp"
 #include "test_param.hpp"
 
 namespace app {
@@ -91,6 +92,7 @@ namespace app {
 		crm						crm_;
 		icm						icm_;
 		wdm						wdm_;
+		thr						thr_;
 
 		// 測定用件
 		test_param				test_param_;
@@ -134,12 +136,24 @@ namespace app {
 			wdm1,
 			wdm2,
 
-			all_off,	///< all off sequence
-			all_off0,
-			all_off1,
-			all_off2,
-			all_off3,
-			all_off4,
+			dc2,		///< DC2 開始
+			dc2_0,
+
+			off_all,	///< 全てのスイッチ、オフ
+			off_all0,
+			off_all1,
+			off_all2,
+			off_all3,
+			off_all4,
+
+			off_crm,	///< CRM スイッチ、オフ
+
+			off_dc2,	///< DC2 スイッチ、オフ
+
+			off_wdm,	///< WDM スイッチ、オフ
+			off_wdm0,
+			off_wdm1,
+
 		};
 		cmd_task		cmd_task_;
 
@@ -186,6 +200,14 @@ namespace app {
 				cmd_task_ = cmd_task::idle;
 				break;
 
+			case cmd_task::dc2:
+				icm_.exec_->exec();
+				cmd_task_ = cmd_task::dc2_0;
+				break;
+			case cmd_task::dc2_0:
+				dc2_.exec_->exec();
+				cmd_task_ = cmd_task::idle;
+				break;
 
 			case cmd_task::wdm:
 				icm_.exec_->exec();
@@ -204,28 +226,54 @@ namespace app {
 				cmd_task_ = cmd_task::idle;
 				break;
 
-			case cmd_task::all_off:
+			case cmd_task::off_all:
 				wdm_.startup();
-				cmd_task_ = cmd_task::all_off0;
+				cmd_task_ = cmd_task::off_all0;
 				break;
-			case cmd_task::all_off0:
+			case cmd_task::off_all0:
 				wgm_.startup();
-				cmd_task_ = cmd_task::all_off1;
+				cmd_task_ = cmd_task::off_all1;
 				break;
-			case cmd_task::all_off1:
+			case cmd_task::off_all1:
 				dc1_.startup();
-				cmd_task_ = cmd_task::all_off2;
+				cmd_task_ = cmd_task::off_all2;
 				break;
-			case cmd_task::all_off2:
+			case cmd_task::off_all2:
 				dc2_.startup();
-				cmd_task_ = cmd_task::all_off3;
+				cmd_task_ = cmd_task::off_all3;
 				break;
-			case cmd_task::all_off3:
+			case cmd_task::off_all3:
 				crm_.startup();
-				cmd_task_ = cmd_task::all_off4;
+				cmd_task_ = cmd_task::off_all4;
 				break;
-			case cmd_task::all_off4:
+			case cmd_task::off_all4:
 				icm_.startup();
+				cmd_task_ = cmd_task::idle;
+				break;
+
+			// CRM のオフ（ICM はそのまま）
+			case cmd_task::off_crm:
+				crm_.startup();
+				cmd_task_ = cmd_task::idle;
+				break;
+
+			// DC2 のオフ（ICM はそのまま）
+			case cmd_task::off_dc2:
+				dc2_.startup();
+				cmd_task_ = cmd_task::idle;
+				break;
+
+			// WDM のオフ（ICM はそのまま）
+			case cmd_task::off_wdm:
+				wgm_.startup();
+				cmd_task_ = cmd_task::off_wdm0;
+				break;
+			case cmd_task::off_wdm0:
+				dc1_.startup();
+				cmd_task_ = cmd_task::off_wdm1;
+				break;
+			case cmd_task::off_wdm1:
+				wdm_.startup();
 				cmd_task_ = cmd_task::idle;
 				break;
 
@@ -252,6 +300,7 @@ namespace app {
 			crm_(d, client_, interlock_),
 			icm_(d, client_, interlock_),
 			wdm_(d, client_, interlock_),
+			thr_(d, client_, interlock_),
 			test_param_(d),
 
 			chip_(nullptr),
@@ -271,7 +320,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void offline()
 		{
-			cmd_task_ = cmd_task::all_off;
+			cmd_task_ = cmd_task::off_all;
 		}
 
 
@@ -282,16 +331,16 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		test_mode get_test_mode() const {
-			if(sheet_->get_select_pos() == 0) {  // CR
+			if(sheet_->get_select_pos() == 0) {  // CR (静特性）
 				if(crm_.mode_->get_select_pos() == 0) {
 					return test_mode::R_MES;
 				} else {
 					return test_mode::C_MES;
 				}
-			} else if(sheet_->get_select_pos() == 1) {
-			} else if(sheet_->get_select_pos() == 2) {
+			} else if(sheet_->get_select_pos() == 1) {  // DC2 (静特性）
+			} else if(sheet_->get_select_pos() == 2) {  // WDM (動特性）
 				return test_mode::WDM;
-			} else {
+			} else {  // THR (熱抵抗)
 			}
 			return test_mode::NONE;
 		}
@@ -310,11 +359,16 @@ namespace app {
 				} else {
 					return "uF";
 				}
-			} else if(sheet_->get_select_pos() == 1) {
-
-			} else if(sheet_->get_select_pos() == 2) {
+			} else if(sheet_->get_select_pos() == 1) {  // DC2
+				if(dc2_.mode_->get_select_pos() == 0) {  // 電流 [mA]
+					return "mA";
+				} else {  // 電圧 [V]
+					return "V";
+				} 
+			} else if(sheet_->get_select_pos() == 2) {  // WDM
 				return wave_cap_.get_unit();
-			} else {
+			} else {  // THR
+
 			}
 			return "";
 		}
@@ -534,6 +588,7 @@ namespace app {
 			wdm_.init(style_[2], d_w, ofsx,  40);
 			dc1_.init(style_[2], d_w, ofsx, 140);
 			wgm_.init(style_[2], d_w, ofsx, 240);
+			thr_.init(style_[3], d_w, ofsx,  40);
 			ofsx = 130;
 			test_param_.init(dialog_, d_w, ofsx, 420);
 		}
@@ -553,8 +608,6 @@ namespace app {
 
 			interlock_.update(ilock_enable_->get_check());
 
-			dc2_.update();
-
 			if(wdm_exec_id_ != wave_cap_.get_exec_button()->get_local_param().id_) {
 				wdm_exec_id_ = wave_cap_.get_exec_button()->get_local_param().id_;
 				cmd_task_ = cmd_task::wdm;				
@@ -562,15 +615,16 @@ namespace app {
 
 			cmd_service_();
 
-			if(!dialog_->get_state(gui::widget::state::ENABLE)) return;
-
 			// 転送スイッチの状態をネットワークの接続状態で設定
-			dc1_.exec_->set_stall(!client_.probe());
-			dc2_.exec_->set_stall(!client_.probe());
-			wgm_.exec_->set_stall(!client_.probe());
-			crm_.exec_->set_stall(!client_.probe());
-			icm_.exec_->set_stall(!client_.probe());
-			wdm_.exec_->set_stall(!client_.probe());
+			icm_.update();
+			dc1_.update();
+			dc2_.update();
+			wgm_.update();
+			crm_.update();
+			wdm_.update();
+			thr_.update();
+
+			if(!dialog_->get_state(gui::widget::state::ENABLE)) return;
 
 			if(unit_load_filer_.state()) {
 				auto path = unit_load_filer_.get();
@@ -608,7 +662,9 @@ namespace app {
 			if(wdm_.help(chip_)) { }
 			else if(dc1_.help(chip_)) { }
 			else if(dc2_.help(chip_)) { }
+			else if(crm_.help(chip_)) { }
 			else if(wgm_.help(chip_)) { }
+			else if(thr_.help(chip_)) { }
 			else if(test_param_.help(chip_)) { }
 			else { act = 0; }
 			chip_->active(act);
@@ -626,12 +682,13 @@ namespace app {
 		{
 ///			unit_name_->save(pre);
 
+			icm_.save(pre);
 			dc1_.save(pre);
 			dc2_.save(pre);
 			wgm_.save(pre);
 			crm_.save(pre);
 			wdm_.save(pre);
-			icm_.save(pre);
+			thr_.save(pre);
 			test_param_.save(pre);
 
 			ilock_enable_->save(pre);
@@ -667,12 +724,13 @@ namespace app {
 		{
 ///			unit_name_->load(pre);
 
+			icm_.load(pre);
 			dc1_.load(pre);
 			dc2_.load(pre);
 			wgm_.load(pre);
 			crm_.load(pre);
 			wdm_.load(pre);
-			icm_.load(pre);
+			thr_.load(pre);
 			test_param_.load(pre);
 
 			ilock_enable_->load(pre);
