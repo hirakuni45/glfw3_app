@@ -203,6 +203,15 @@ namespace app {
 		}
 
 
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  初期化
+			@param[in]	root	ルート
+			@param[in]	d_w		横幅最大
+			@param[in]	ofsx	オフセット X
+			@param[in]	ofsy	オフセット Y
+		*/
+		//-----------------------------------------------------------------//
 		void init(gui::widget* root, int d_w, int ofsx, int ofsy)
 		{
 			using namespace gui;
@@ -352,6 +361,20 @@ namespace app {
 					client_.send_data(s);
 				};
 			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  アップデート
+		*/
+		//-----------------------------------------------------------------//
+		void update()
+		{
+			bool ena = false;
+//			if(client_.probe() && all_->get_check()) ena = true; 
+			if(client_.probe()) ena = true; 
+			exec_->set_stall(!ena);
 		}
 
 

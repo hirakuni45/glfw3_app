@@ -50,6 +50,7 @@ namespace app {
 		gui::widget_list*		mode_;		///< CRM 抵抗測定、容量測定
 		gui::widget_label*		ans_;		///< CRM 測定結果 
 		gui::widget_button*		exec_;		///< CRM 設定転送
+		gui::widget_check*		all_;		///< CRM 全体
 
 	private:
 		struct crm_t {
@@ -93,7 +94,7 @@ namespace app {
 			director_(d), client_(client), interlock_(ilc),
 			sw_{ nullptr },
 			ena_(nullptr), amps_(nullptr), freq_(nullptr), mode_(nullptr),
-			ans_(nullptr), exec_(nullptr)
+			ans_(nullptr), exec_(nullptr), all_(nullptr)
 		{ }
 
 
@@ -109,6 +110,15 @@ namespace app {
 		}
 
 
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  初期化
+			@param[in]	root	ルート
+			@param[in]	d_w		横幅最大
+			@param[in]	ofsx	オフセット X
+			@param[in]	ofsy	オフセット Y
+		*/
+		//-----------------------------------------------------------------//
 		void init(gui::widget* root, int d_w, int ofsx, int ofsy)
 		{
 			using namespace gui;
@@ -159,7 +169,7 @@ namespace app {
 				ans_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 			{  // exec
-				widget::param wp(vtx::irect(d_w - 50, ofsy, 30, 30), root);
+				widget::param wp(vtx::irect(d_w - 85, ofsy, 30, 30), root);
 				widget_button::param wp_(">");
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
 				exec_->at_local_param().select_func_ = [=](int n) {
@@ -178,6 +188,47 @@ namespace app {
 					client_.send_data(t.build());
 				};
 			}
+			{
+				widget::param wp(vtx::irect(d_w - 45, ofsy, 30, 30), root);
+				widget_check::param wp_;
+				all_ = wd.add_widget<widget_check>(wp, wp_);
+				all_->at_local_param().select_func_ = [=](bool ena) {
+					if(!ena) {
+						startup();
+					}
+				};
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  アップデート
+		*/
+		//-----------------------------------------------------------------//
+		void update()
+		{
+			bool ena = false;
+			if(client_.probe() && all_->get_check()) ena = true; 
+			exec_->set_stall(!ena);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  ヘルプ機能
+			@param[in]	chip	ヘルプ・チップ
+		*/
+		//-----------------------------------------------------------------//
+		bool help(gui::widget_chip* chip)
+		{
+			bool ret = true;
+			if(all_->get_focus()) {
+				tools::set_help(chip, all_, "CRM ON/OFF");
+			} else {
+				ret = false;
+			}
+			return ret;
 		}
 
 
@@ -194,6 +245,7 @@ namespace app {
 			amps_->save(pre);
 			freq_->save(pre);
 			mode_->save(pre);
+			all_->save(pre);
 		}
 
 
@@ -210,6 +262,7 @@ namespace app {
 			amps_->load(pre);
 			freq_->load(pre);
 			mode_->load(pre);
+			all_->load(pre);
 		}
 	};
 }

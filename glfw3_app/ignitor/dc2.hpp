@@ -55,6 +55,8 @@ namespace app {
 		gui::widget_label*		current_;	///< DC2（電流）
 		gui::widget_label*		probe_;		///< DC2（電流、電圧測定値）
 		gui::widget_button*		exec_;		///< DC2 設定転送
+		gui::widget_check*		all_;		///< DC2 全体
+
 		bool					probe_mode_;
 		uint32_t				curr_delay_;
 		uint32_t				curr_id_;
@@ -108,7 +110,7 @@ namespace app {
 			sw_{ nullptr },
 			ena_(nullptr), mode_(nullptr), voltage_(nullptr), current_(nullptr),
 			probe_(nullptr),
-			exec_(nullptr),
+			exec_(nullptr), all_(nullptr),
 			probe_mode_(false), curr_delay_(0), curr_id_(0),
 			volt_delay_(0), volt_id_(0)
 		{ }
@@ -126,6 +128,15 @@ namespace app {
 		}
 
 
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  初期化
+			@param[in]	root	ルート
+			@param[in]	d_w		横幅最大
+			@param[in]	ofsx	オフセット X
+			@param[in]	ofsy	オフセット Y
+		*/
+		//-----------------------------------------------------------------//
 		void init(gui::widget* root, int d_w, int ofsx, int ofsy)
 		{
 			using namespace gui;
@@ -189,7 +200,7 @@ namespace app {
 				probe_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 			{
-				widget::param wp(vtx::irect(d_w - 50, ofsy, 30, 30), root);
+				widget::param wp(vtx::irect(d_w - 85, ofsy, 30, 30), root);
 				widget_button::param wp_(">");
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
 				exec_->at_local_param().select_func_ = [=](int n) {
@@ -238,11 +249,25 @@ namespace app {
 					client_.send_data(t.build());
 				};
 			}
+			{
+				widget::param wp(vtx::irect(d_w - 45, ofsy, 30, 30), root);
+				widget_check::param wp_;
+				all_ = wd.add_widget<widget_check>(wp, wp_);
+				all_->at_local_param().select_func_ = [=](bool ena) {
+					if(!ena) {
+						startup();
+					}
+				};
+			}
 		}
 
 
 		void update()
 		{
+			bool ena = false;
+			if(client_.probe() && all_->get_check()) ena = true; 
+			exec_->set_stall(!ena);
+
 #ifdef DC2_KIKUSUI
 			if(curr_delay_ > 0) {
 				--curr_delay_;
@@ -303,6 +328,8 @@ namespace app {
 				tools::set_help(chip, voltage_, "0.0 to 300.0 [V]");
 			} else if(current_->get_focus()) {
 				tools::set_help(chip, current_, "0.0 to 100.0 [mA]");
+			} else if(all_->get_focus()) {
+				tools::set_help(chip, all_, "DC2 ON/OFF");
 			} else {
 				ret = false;
 			}
@@ -323,6 +350,7 @@ namespace app {
 			mode_->save(pre);
 			voltage_->save(pre);
 			current_->save(pre);
+			all_->save(pre);
 		}
 
 
@@ -339,6 +367,7 @@ namespace app {
 			mode_->load(pre);
 			voltage_->load(pre);
 			current_->load(pre);
+			all_->load(pre);
 		}
 	};
 }

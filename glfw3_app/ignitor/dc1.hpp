@@ -42,7 +42,6 @@ namespace app {
 		interlock&				interlock_;
 
 	public:
-		// DC1 設定
 		gui::widget_check*		sw_[5];		///< DC1 接続スイッチ
 		gui::widget_check*		ena_;		///< DC1 有効、無効
 		gui::widget_list*		mode_;		///< DC1 電流、電圧モード
@@ -50,6 +49,7 @@ namespace app {
 		gui::widget_label*		current_;	///< DC1（電流）
 		gui::widget_spinbox*	count_;		///< DC1 熱抵抗測定回数
 		gui::widget_button*		exec_;		///< DC1 設定転送
+		gui::widget_check*		all_;		///< DC1 全体
 
 	private:
 		struct dc1_t {
@@ -118,7 +118,7 @@ namespace app {
 			sw_{ nullptr },
 			ena_(nullptr), mode_(nullptr), voltage_(nullptr), current_(nullptr),
 			count_(nullptr),
-			exec_(nullptr)
+			exec_(nullptr), all_(nullptr)
 		{ }
 
 
@@ -134,6 +134,15 @@ namespace app {
 		}
 
 
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  初期化
+			@param[in]	root	ルート
+			@param[in]	d_w		横幅最大
+			@param[in]	ofsx	オフセット X
+			@param[in]	ofsy	オフセット Y
+		*/
+		//-----------------------------------------------------------------//
 		void init(gui::widget* root, int d_w, int ofsx, int ofsy)
 		{
 			using namespace gui;
@@ -206,7 +215,7 @@ namespace app {
 				};
 			} 
 			{
-				widget::param wp(vtx::irect(d_w - 50, ofsy, 30, 30), root);
+				widget::param wp(vtx::irect(d_w - 85, ofsy, 30, 30), root);
 				widget_button::param wp_(">");
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
 				exec_->at_local_param().select_func_ = [=](int n) {
@@ -237,6 +246,29 @@ namespace app {
 					client_.send_data(t.build());
 				};
 			}
+			{
+				widget::param wp(vtx::irect(d_w - 45, ofsy, 30, 30), root);
+				widget_check::param wp_;
+				all_ = wd.add_widget<widget_check>(wp, wp_);
+				all_->at_local_param().select_func_ = [=](bool ena) {
+					if(!ena) {
+						startup();
+					}
+				};
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  アップデート
+		*/
+		//-----------------------------------------------------------------//
+		void update()
+		{
+			bool ena = false;
+			if(client_.probe() && all_->get_check()) ena = true; 
+			exec_->set_stall(!ena);
 		}
 
 
@@ -253,6 +285,8 @@ namespace app {
 				tools::set_help(chip, current_, "0.0 to 30.0 [A]");
 			} else if(voltage_->get_focus()) {
 				tools::set_help(chip, voltage_, "0.0 to 60.0 [V]");
+			} else if(all_->get_focus()) {
+				tools::set_help(chip, all_, "DC1 ON/OFF");
 			} else {
 				ret = false;
 			}
@@ -274,6 +308,7 @@ namespace app {
 			voltage_->save(pre);
 			current_->save(pre);
 			count_->save(pre);
+			all_->save(pre);
 		}
 
 
@@ -291,6 +326,7 @@ namespace app {
 			voltage_->load(pre);
 			current_->load(pre);
 			count_->load(pre);
+			all_->load(pre);
 		}
 	};
 }

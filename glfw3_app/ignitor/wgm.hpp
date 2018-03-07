@@ -52,6 +52,7 @@ namespace app {
 		gui::widget_check*		iena_;	///< ジェネレータ内臓電源、有効、無効
 		gui::widget_label*		ivolt_;	///< ジェネレータ設定・内臓電源
 		gui::widget_button*		exec_;	///< ジェネレーター設定転送
+		gui::widget_check*		all_;	///< ジェネレータ全体
 
 	private:
 		struct wgm_t {
@@ -95,7 +96,7 @@ namespace app {
 			director_(d), client_(client), interlock_(ilc),
 			ena_(nullptr), mode_(nullptr), freq_(nullptr),
 			volt_(nullptr), duty_(nullptr), iena_(nullptr), ivolt_(nullptr),
-			exec_(nullptr)
+			exec_(nullptr), all_(nullptr)
 		{ }
 
 
@@ -111,6 +112,15 @@ namespace app {
 		}
 
 
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  初期化
+			@param[in]	root	ルート
+			@param[in]	d_w		横幅最大
+			@param[in]	ofsx	オフセット X
+			@param[in]	ofsy	オフセット Y
+		*/
+		//-----------------------------------------------------------------//
 		void init(gui::widget* root, int d_w, int ofsx, int ofsy)
 		{
 			using namespace gui;
@@ -185,7 +195,7 @@ namespace app {
 				widget_label::param wp_("0.1", false);
 				duty_ = wd.add_widget<widget_label>(wp, wp_);
 				duty_->at_local_param().select_func_ = [=](const std::string& str) {
-					duty_->set_text(tools::limitf(str, 0.1f, 100.0f, "%2.1f"));
+					duty_->set_text(tools::limitf(str, 0.1f, 50.0f, "%2.1f"));
 				};
 				{
 					widget::param wp(vtx::irect(ofsx + 230 + 120 * 2 + 80, ofsy, 30, 40),
@@ -222,7 +232,7 @@ namespace app {
 			}
 
 			{
-				widget::param wp(vtx::irect(d_w - 50, ofsy, 30, 30), root);
+				widget::param wp(vtx::irect(d_w - 85, ofsy, 30, 30), root);
 				widget_button::param wp_(">");
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
 				exec_->at_local_param().select_func_ = [=](int n) {
@@ -254,6 +264,29 @@ namespace app {
 					client_.send_data(s);
 				};
 			}
+			{
+				widget::param wp(vtx::irect(d_w - 45, ofsy, 30, 30), root);
+				widget_check::param wp_;
+				all_ = wd.add_widget<widget_check>(wp, wp_);
+				all_->at_local_param().select_func_ = [=](bool ena) {
+					if(!ena) {
+						startup();
+					}
+				};
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  アップデート
+		*/
+		//-----------------------------------------------------------------//
+		void update()
+		{
+			bool ena = false;
+			if(client_.probe() && all_->get_check()) ena = true; 
+			exec_->set_stall(!ena);
 		}
 
 
@@ -269,16 +302,19 @@ namespace app {
 			if(freq_->get_focus()) {
 				tools::set_help(chip, freq_, "1 to 100 [Hz], 1 [Hz] / step");
 			} else if(volt_->get_focus()) {
-				tools::set_help(chip, volt_, "0.0 to 14.0 [V], 0.1 [V] / step");
+				tools::set_help(chip, volt_, "0.0 to 14.0 [V]");
 			} else if(duty_->get_focus()) {
-				tools::set_help(chip, duty_, "0.1 to 100.0 [%], 0.1 [%] / step");
+				tools::set_help(chip, duty_, "0.1 to 50.0 [%]");
 			} else if(ivolt_->get_focus()) {
-				tools::set_help(chip, ivolt_, "0.0 to 16.0 [V], 0.01 [V] / step");
+				tools::set_help(chip, ivolt_, "0.0 to 16.0 [V]");
+			} else if(all_->get_focus()) {
+				tools::set_help(chip, all_, "WGM ON/OFF");
 			} else {
 				ret = false;
 			}
 			return ret;
 		}
+
 
 		//-----------------------------------------------------------------//
 		/*!
@@ -296,6 +332,7 @@ namespace app {
 			duty_->save(pre);
 			iena_->save(pre);
 			ivolt_->save(pre);
+			all_->save(pre);
 		}
 
 
@@ -315,6 +352,7 @@ namespace app {
 			duty_->load(pre);
 			iena_->load(pre);
 			ivolt_->load(pre);
+			all_->load(pre);
 		}
 	};
 }
