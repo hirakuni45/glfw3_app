@@ -57,7 +57,7 @@ namespace app {
 
 		static void set_help(gui::widget_chip* chip, gui::widget* src, const std::string& text)
 		{
-			chip->set_offset(src);
+			chip->set_offset(src, gui::widget_chip::offset_type::CENTER_UP);
 			chip->set_text(text);
 		}
 
