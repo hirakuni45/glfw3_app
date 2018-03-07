@@ -13,6 +13,7 @@
 #include "utils/format.hpp"
 #include "utils/preference.hpp"
 #include "widgets/widget_chip.hpp"
+#include "widgets/widget_check.hpp"
 
 #include "interlock.hpp"
 
@@ -102,6 +103,23 @@ namespace app {
 				ofsx += 60;
 				ilc.install(md, static_cast<interlock::swtype>(swn), out[i]);
 				++swn;
+			}
+		}
+
+
+		static void init_sw_dc1(gui::widget_director& wd, gui::widget* root, interlock& ilc,
+			int ofsx, int ofsy, gui::widget_check* out[], int num, const char* swt[])
+		{
+			auto md = interlock::module::DC1;
+			for(int i = 0; i < num; ++i) {
+				gui::widget::param wp(vtx::irect(ofsx, ofsy, 60, 40), root);
+				gui::widget_check::param wp_(swt[i]);
+				out[i] = wd.add_widget<gui::widget_check>(wp, wp_);
+				ofsx += 60;
+				int swn;
+				if((utils::input("%d", swt[i]) % swn).status()) {
+					ilc.install(md, static_cast<interlock::swtype>(swn), out[i]);
+				}
 			}
 		}
 
