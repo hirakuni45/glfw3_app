@@ -92,6 +92,8 @@ namespace gui {
 
 		int			sel_pos_;
 
+		state		state_;
+
 		state get_button_state_(int& d) const
 		{
 			state st = state::none;
@@ -117,7 +119,8 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_spinbox(widget_director& wd, const widget::param& bp, const param& p) :
 			widget(bp), wd_(wd), param_(p), objh_(0), up_objh_(0), dn_objh_(0),
-		    initial_(false), delay_cnt_(0), sel_pos_(0) { }
+		    initial_(false), delay_cnt_(0), sel_pos_(0),
+			state_(state::none) { }
 
 
 		//-----------------------------------------------------------------//
@@ -310,10 +313,11 @@ namespace gui {
 					d = -step;
 					st = state::dec;
 				} else if(dev.get_positive(gl::device::key::UP)) {
-					d = step >= 0 ? 1 : -1;
+					d = step > 0 ?  1 : 0;
 					st = state::inc;
 				} else if(dev.get_positive(gl::device::key::DOWN)) {
-					d = step < 0 ? -1 : 1;
+					d = step > 0 ? -1 : 0;
+					st = state::dec;
 				}
 			}
 
@@ -328,13 +332,7 @@ namespace gui {
 					if(param_.sel_pos_ < param_.min_pos_) param_.sel_pos_ = param_.min_pos_;
 					st = state::dec;
 				}
-				if(param_.select_func_ != nullptr) {
-					auto t = param_.select_func_(st, sel_pos_, param_.sel_pos_);
-					if(!t.empty()) {
-						param_.text_param_.set_text(t);
-					}
-				}
-				sel_pos_ = param_.sel_pos_;
+				state_ = st;
 			}
 		}
 
@@ -344,7 +342,18 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override { }
+		void service() override
+		{
+			if(!get_enable()) return;
+
+		   	if(param_.select_func_ != nullptr && state_ != state::none) {
+	   			auto t = param_.select_func_(state_, sel_pos_, param_.sel_pos_);
+   				if(!t.empty()) {
+					param_.text_param_.set_text(t);
+				}
+			}
+			sel_pos_ = param_.sel_pos_;
+		}
 
 
 		//-----------------------------------------------------------------//
