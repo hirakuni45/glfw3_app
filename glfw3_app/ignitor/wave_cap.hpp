@@ -43,6 +43,9 @@ namespace app {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class wave_cap {
+
+		static constexpr const char* WAVE_DATA_EXT_ = "wad";
+
 	public:
 		//=================================================================//
 		/*!
@@ -102,6 +105,8 @@ namespace app {
 
 		gui::widget_frame*		tools_;
 		gui::widget_check*		smooth_;
+		gui::widget_button*		load_;
+		gui::widget_button*		save_;
 		gui::widget_list*		mesa_type_;
 		gui::widget_list*		org_trg_;
 		gui::widget_spinbox*	org_slope_;
@@ -874,6 +879,26 @@ namespace app {
 			mese_value_ = tm;
 		}
 
+		std::string				proj_root_;
+		utils::select_file		data_load_filer_;
+		utils::select_file		data_save_filer_;
+
+		bool save_data_file_(const std::string& path)
+		{
+std::cout << path << std::endl;
+			
+
+			return true;
+		}
+
+
+		bool load_data_file_(const std::string& path)
+		{
+std::cout << path << std::endl;
+
+			return true;
+		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -884,7 +909,8 @@ namespace app {
 			director_(d), client_(client), interlock_(ilock), waves_(),
 			frame_(nullptr), core_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
-			tools_(nullptr), smooth_(nullptr), mesa_type_(nullptr),
+			tools_(nullptr), smooth_(nullptr), load_(nullptr), save_(nullptr),
+			mesa_type_(nullptr),
 			org_trg_(nullptr), org_slope_(nullptr), org_ena_(nullptr),
 			fin_trg_(nullptr), fin_slope_(nullptr), fin_ena_(nullptr),
 			ch_to_time_(nullptr), wdm_exec_(nullptr),
@@ -899,8 +925,21 @@ namespace app {
 			chn3_(waves_, 1.25f),
 			measure_time_(waves_),
 			time_(waves_), time_id_(0), size_(0),
-			mese_value_(0.0)
+			mese_value_(0.0),
+			proj_root_(), data_load_filer_(), data_save_filer_()
 		{ }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  プロジェクト・ルートの設定
+			@param[in]	root	プロジェクト・ルート
+		*/
+		//-----------------------------------------------------------------//
+		void set_project_root(const std::string& root)
+		{
+			proj_root_ = root;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -1080,10 +1119,38 @@ namespace app {
 				tools_->set_state(gui::widget::state::SIZE_LOCK);
 			}
 			{	// スムース
-				widget::param wp(vtx::irect(10, 20, 200, 40), tools_);
+				widget::param wp(vtx::irect(10, 20, 110, 40), tools_);
 				widget_check::param wp_("Smooth");
 				smooth_ = wd.add_widget<widget_check>(wp, wp_);
 			}
+			{	// ロード
+				widget::param wp(vtx::irect(140, 20, 80, 40), tools_);
+				widget_button::param wp_("Load");
+				load_ = wd.add_widget<widget_button>(wp, wp_);
+				load_->at_local_param().select_func_ = [=](uint32_t id) {
+					std::string filter = "波形データ(*.";
+					filter += WAVE_DATA_EXT_;
+					filter += ")\t*.";
+					filter += WAVE_DATA_EXT_;
+					filter += "\t";
+					data_load_filer_.open(filter, false, proj_root_);
+				};
+			}
+			{	// セーブ
+				widget::param wp(vtx::irect(230, 20, 80, 40), tools_);
+				widget_button::param wp_("Save");
+				save_ = wd.add_widget<widget_button>(wp, wp_);
+				save_->at_local_param().select_func_ = [=](uint32_t id) {
+					std::string filter = "波形データ(*.";
+					filter += WAVE_DATA_EXT_;
+					filter += ")\t*.";
+					filter += WAVE_DATA_EXT_;
+					filter += "\t";
+					data_load_filer_.open(filter, true, proj_root_);
+				};
+			}
+
+
 			{	// 計測開始チャネルとスロープ
 				widget::param wp(vtx::irect(10, 120, 110, 40), tools_);
 				widget_list::param wp_;
@@ -1194,13 +1261,13 @@ namespace app {
 			waves_.create_buffer();
 
 			waves_.at_param(0).color_ = img::rgba8(255,  64, 255, 255);
-			waves_.at_info().volt_color_[0] = img::rgba8(255,  64, 255, 255);
+			waves_.at_info().volt_color_[0] = waves_.get_param(0).color_;
 			waves_.at_param(1).color_ = img::rgba8( 64, 255, 255, 255);
-			waves_.at_info().volt_color_[1] = img::rgba8( 64, 255, 255, 255);
-			waves_.at_param(2).color_ = img::rgba8(255, 255,  64, 255);
-			waves_.at_info().volt_color_[2] = img::rgba8(255, 255,  64, 255);
+			waves_.at_info().volt_color_[1] = waves_.get_param(1).color_;
+			waves_.at_param(2).color_ = img::rgba8(255, 255,  32, 255);
+			waves_.at_info().volt_color_[2] = waves_.get_param(2).color_;
 			waves_.at_param(3).color_ = img::rgba8( 64, 255,  64, 255);
-			waves_.at_info().volt_color_[3] = img::rgba8( 64, 255,  64, 255);
+			waves_.at_info().volt_color_[3] = waves_.get_param(3).color_;
 
 #ifdef TEST_SIN
 			waves_.build_sin(0, sample_param_.rate, 15000.0, 1.0f);
@@ -1218,6 +1285,21 @@ namespace app {
 		{
 			if(frame_ == nullptr) return;
 			if(share_frame_ == nullptr) return;
+
+			auto sheetpos = share_frame_->get_select_pos();
+			switch(sheetpos) {
+			case 1:
+			case 2:
+			case 3:
+			case 4:
+				share_frame_->at_local_param().text_param_.fore_color_
+					= waves_.get_param(sheetpos - 1).color_;
+				break;
+			default:
+				share_frame_->at_local_param().text_param_.fore_color_
+					= img::rgba8( 255, 255, 255, 255);
+				break;
+			}
 
 			if(mesa_type_->get_select_pos() == 0) {  // トリガーからの時間計測
 				fin_trg_->set_stall();
@@ -1277,6 +1359,31 @@ namespace app {
 				}
 			}
 #endif
+
+			if(data_load_filer_.state()) {
+				auto path = data_load_filer_.get();
+				if(!path.empty()) {
+					if(utils::get_file_ext(path).empty()) {
+						path += '.';
+						path += WAVE_DATA_EXT_;
+					}
+					if(load_data_file_(path)) {
+						// last_path_ = path;
+					}
+				}
+			}
+			if(data_save_filer_.state()) {
+				auto path = data_save_filer_.get();
+				if(!path.empty()) {
+					if(utils::get_file_ext(path).empty()) {
+						path += '.';
+						path += WAVE_DATA_EXT_;
+					}
+					if(save_data_file_(path)) {
+						// last_path_ = path;
+					}
+				}
+			}
 		}
 
 
@@ -1377,13 +1484,37 @@ namespace app {
 
 			vtx::ipos pos;
 			gui::final_position(core_, pos);
-// std::cout << pos.x << ", " << pos.y << std::endl;
 			const auto& size = core_->get_param().rect_.size;
-// std::cout << size.x << ", " << size.y << std::endl;
 			auto simg = gl::get_frame_buffer(pos.x , pos.y, size.x, size.y);
 			img::img_files imfs;
 			imfs.set_image(simg);
 			ret = imfs.save(path);			
+
+			return ret;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  波形データのセーブ
+			@param[in]	path	セーブ・パス
+			@return 成功なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool save_data(const std::string& path) const
+		{
+			bool ret = false;
+			if(path.empty()) return ret;
+			if(core_ == nullptr) return ret;
+
+			utils::file_io fio;
+			if(!fio.open(path, "wb")) {
+				return false;
+			}
+
+			
+
+			fio.close();
 
 			return ret;
 		}
