@@ -62,6 +62,7 @@ namespace app {
 		{
 			std::string s = "INST:NSEL 6\r\n";
 			serial_.write(s.c_str(), s.size());
+// std::cout << "Kikusui start" << std::endl;
 		}
 
 
@@ -96,6 +97,7 @@ namespace app {
 				s = "OUTP 0\r\n";
 			}
 			serial_.write(s.c_str(), s.size());
+// std::cout << s << std::flush;
 		}
 
 
@@ -110,6 +112,7 @@ namespace app {
 		{
 			auto s = (boost::format("CURR %5.4f A;VOLT %5.4f V\r\n") % curr % volt).str();
 			serial_.write(s.c_str(), s.size());
+std::cout << "VOLT: " << s << std::flush;
 		}
 
 
@@ -124,6 +127,7 @@ namespace app {
 		{
 			auto s = (boost::format("VOLT %5.4f V;CURR %5.4f A\r\n") % volt % curr).str();
 			serial_.write(s.c_str(), s.size());
+std::cout << "CURR: " << s << std::flush;
 		}
 
 
@@ -134,7 +138,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void req_volt()
 		{
-			std::string s = "MEAS:VOLT?\r\n";
+			std::string s = "MEAS:VOLT:DC?\r\n";
 			serial_.write(s.c_str(), s.size());
 			task_ = task::volt;
 		}
@@ -147,7 +151,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void req_curr()
 		{
-			std::string s = "MEAS:CURR?\r\n";
+			std::string s = "MEAS:CURR:DC?\r\n";
 			serial_.write(s.c_str(), s.size());
 			task_ = task::curr;
 		}
@@ -226,6 +230,7 @@ namespace app {
 						if(ch == '\r' || ch == '\n') ch = 0;
 						s += ch;
 					}
+std::cout << s << std::endl;
 					if((utils::input("%f", s.c_str()) % curr_).status()) {
 						++curr_id_;
 					}
