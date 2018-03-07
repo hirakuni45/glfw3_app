@@ -34,6 +34,7 @@ namespace gui {
 			LEFT_DOWN,		///< 左下
 			LEFT_UP,		///< 左上
 			UP,				///< 上
+			CENTER_UP,		///< 中心の上
 		};
 
 
@@ -203,6 +204,10 @@ namespace gui {
 			case offset_type::RIGHT_DOWN:
 				ofs.x = src->get_rect().size.x;
 				ofs.y = src->get_rect().size.y;
+				break;
+			case offset_type::CENTER_UP:
+				ofs.x = src->get_rect().size.x / 2;
+				ofs.y = -get_rect().size.y;
 				break;
 			case offset_type::DOWN:
 			case offset_type::LEFT_DOWN:
