@@ -125,6 +125,7 @@ namespace app {
 		{
 			dc2_t t;
 			client_.send_data(t.build());
+			kikusui_.set_output(0);
 		}
 
 
@@ -228,10 +229,10 @@ namespace app {
 					if(!err) {
 						if(mode_->get_select_pos() == 0) {  // 電流 [mA]
 							kikusui_.set_curr(c, v);
-							curr_delay_ = 30;
+							volt_delay_ = 60 * 3;
 						} else {  // 電圧 [V]
 							kikusui_.set_volt(v, c);
-							volt_delay_ = 30;
+							curr_delay_ = 60 * 3;
 						}
 					}
 #else

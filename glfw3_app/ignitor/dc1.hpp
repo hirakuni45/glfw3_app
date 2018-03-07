@@ -47,7 +47,6 @@ namespace app {
 		gui::widget_list*		mode_;		///< DC1 電流、電圧モード
 		gui::widget_label*		voltage_;	///< DC1（電圧）
 		gui::widget_label*		current_;	///< DC1（電流）
-		gui::widget_spinbox*	count_;		///< DC1 熱抵抗測定回数
 		gui::widget_button*		exec_;		///< DC1 設定転送
 		gui::widget_check*		all_;		///< DC1 全体
 
@@ -88,25 +87,6 @@ namespace app {
 			}
 		};
 
-		// DC1 専用
-		void init_sw_dc1_(gui::widget* root, int ofsx, int ofsy, gui::widget_check* out[], int num,
-			const char* swt[])
-		{
-			using namespace gui;
-			widget_director& wd = director_.at().widget_director_;			
-			auto md = interlock::module::DC1;
-			for(int i = 0; i < num; ++i) {
-				widget::param wp(vtx::irect(ofsx, ofsy, 60, 40), root);
-				widget_check::param wp_(swt[i]);
-				out[i] = wd.add_widget<widget_check>(wp, wp_);
-				ofsx += 60;
-				int swn;
-				if((utils::input("%d", swt[i]) % swn).status()) {
-					interlock_.install(md, static_cast<interlock::swtype>(swn), out[i]);
-				}
-			}
-		}
-
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -117,7 +97,6 @@ namespace app {
 			director_(d), client_(client), interlock_(ilc),
 			sw_{ nullptr },
 			ena_(nullptr), mode_(nullptr), voltage_(nullptr), current_(nullptr),
-			count_(nullptr),
 			exec_(nullptr), all_(nullptr)
 		{ }
 
@@ -159,8 +138,7 @@ namespace app {
 			static const char* swt[] = {
 				"40", "41", "42", "43", "49"
 			};
-
-			init_sw_dc1_(root, ofsx, ofsy, sw_, 5, swt);
+			tools::init_sw_dc1(wd, root, interlock_, ofsx, ofsy, sw_, 5, swt);
 			ofsy += 50;
 			{
 				widget::param wp(vtx::irect(ofsx, ofsy, 90, 40), root);
@@ -172,7 +150,6 @@ namespace app {
 				widget_list::param wp_;
 				wp_.init_list_.push_back("定電流");
 				wp_.init_list_.push_back("定電圧");
-				wp_.init_list_.push_back("熱抵抗");
 				mode_ = wd.add_widget<widget_list>(wp, wp_);
 			}
 			{  // 60V/0.1V, 30A/10mA
@@ -205,15 +182,6 @@ namespace app {
 											 vtx::placement::vertical::CENTER);
 				wd.add_widget<widget_text>(wp, wp_);
 			}
-			{  // 熱抵抗回数
-				widget::param wp(vtx::irect(ofsx + 510, ofsy, 110, 40), root);
-				widget_spinbox::param wp_(10, 10, 500);
-				count_ = wd.add_widget<widget_spinbox>(wp, wp_);
-				count_->at_local_param().select_func_
-					= [=](widget_spinbox::state st, int before, int newpos) {
-					return (boost::format("%d") % newpos).str();
-				};
-			} 
 			{
 				widget::param wp(vtx::irect(d_w - 85, ofsy, 30, 30), root);
 				widget_button::param wp_(">");
@@ -231,9 +199,9 @@ namespace app {
 						t.mode = mode_->get_select_pos() & 1;
 						t.count = 10;
 						t.thermal = false;
-					} else {
-						t.count = count_->get_select_pos();
-						t.thermal = true;
+///					} else {
+///						t.count = count_->get_select_pos();
+///						t.thermal = true;
 					}
 
 					float v;
@@ -307,7 +275,6 @@ namespace app {
 			mode_->save(pre);
 			voltage_->save(pre);
 			current_->save(pre);
-			count_->save(pre);
 			all_->save(pre);
 		}
 
@@ -325,7 +292,6 @@ namespace app {
 			mode_->load(pre);
 			voltage_->load(pre);
 			current_->load(pre);
-			count_->load(pre);
 			all_->load(pre);
 		}
 	};

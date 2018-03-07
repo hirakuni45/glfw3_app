@@ -67,7 +67,7 @@ namespace app {
 				std::string s;
 				if(ena) {
 					s += (boost::format("crm CRSW%04X\n") % sw).str();
-					s += (boost::format("crm CRIS%d\n") % (amps + 1)).str();
+					s += (boost::format("crm CRIS%d\n") % amps).str();
 					static const char* frqtbl[3] = { "001", "010", "100" };
 					s += (boost::format("crm CRFQ%s\n") % frqtbl[freq % 3]).str();
 				}
@@ -143,6 +143,7 @@ namespace app {
 			{  // 電流レンジ切り替え（2mA, 20mA, 200mA）
 				widget::param wp(vtx::irect(ofsx + 90, ofsy, 110, 40), root);
 				widget_list::param wp_;
+				wp_.init_list_.push_back("0.2 mA");
 				wp_.init_list_.push_back("  2 mA");
 				wp_.init_list_.push_back(" 20 mA");
 				wp_.init_list_.push_back("200 mA");
