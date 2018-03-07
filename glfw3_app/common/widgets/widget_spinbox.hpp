@@ -208,6 +208,31 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	実行
+			@param[in]	st	ステート（標準では「選択」値の変化はしない）
+		*/
+		//-----------------------------------------------------------------//
+		void exec(state st = state::select)
+		{
+			++param_.id_;
+			switch(st) {
+			case state::inc:
+				++param_.sel_pos_;
+				if(param_.sel_pos_ > param_.max_pos_) param_.sel_pos_ = param_.max_pos_;
+				break;
+			case state::dec:
+				param_.sel_pos_--;
+				if(param_.sel_pos_ < param_.min_pos_) param_.sel_pos_ = param_.min_pos_;
+				break;
+			default:
+				break;
+			}
+			state_ = st;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
