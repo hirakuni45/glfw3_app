@@ -3,7 +3,7 @@
 /*! @file
     @brief  イグナイター・ルート・メニュー・クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2018 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/RX/blob/master/LICENSE
 */
@@ -37,7 +37,7 @@ namespace app {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class root_menu {
 
-		static const int32_t  app_version_ = 90;
+		static const int32_t  app_version_ = 95;
 
 		static const int ofs_x_ = 10;
 		static const int ofs_y_ = 10;
