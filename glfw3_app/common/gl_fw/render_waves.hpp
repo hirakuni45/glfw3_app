@@ -738,6 +738,8 @@ namespace view {
 		//-----------------------------------------------------------------//
 		bool save(const std::string& path)
 		{
+			utils::file_io fio;
+			
 
 			return true;
 		}
