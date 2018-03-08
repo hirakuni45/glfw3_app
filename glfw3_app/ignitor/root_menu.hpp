@@ -510,7 +510,6 @@ namespace app {
 			}
 
 			inspection_.update();
-			inspection_.update_client();
 
 			wave_cap_.set_sample_param(get_inspection().get_sample_param());
 
