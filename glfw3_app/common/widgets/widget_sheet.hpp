@@ -370,6 +370,7 @@ namespace gui {
 			else {
 				param_.index_ = v;
 			}
+			++id_;
 			return err == 0;
 		}
 	};
