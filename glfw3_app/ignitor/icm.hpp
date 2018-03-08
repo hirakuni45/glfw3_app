@@ -45,6 +45,7 @@ namespace app {
 		// ICM 設定
 		gui::widget_check*		sw_[6];		///< ICM 接続スイッチ
 		gui::widget_button*		exec_;		///< ICM 設定転送
+		gui::widget_check*		all_;		///< ICM 全体
 
 	private:
 		struct icm_t {
@@ -68,7 +69,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		icm(utils::director<core>& d, net::ign_client_tcp& client, interlock& ilc) :
 			director_(d), client_(client), interlock_(ilc),
-			sw_{ nullptr }, exec_(nullptr)
+			sw_{ nullptr }, exec_(nullptr), all_(nullptr)
 		{ }			
 
 
@@ -109,19 +110,33 @@ namespace app {
 			tools::init_sw(wd, root, interlock_, ofsx, ofsy, sw_, 6, 34);
 
 			{  // exec
-				widget::param wp(vtx::irect(d_w - 50, ofsy, 30, 30), root);
+				widget::param wp(vtx::irect(d_w - 85, ofsy, 30, 30), root);
 				widget_button::param wp_(">");
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
 				exec_->at_local_param().select_func_ = [=](int n) {
 					icm_t t;
 					uint16_t sw = 0;
-					for(int i = 0; i < 6; ++i) {
+					for(uint32_t i = 0; i < 6; ++i) {
 						sw <<= 1;
 						if(sw_[i]->get_check()) sw |= 1;
 					}
 					t.sw = sw;
 
 					client_.send_data(t.build());
+				};
+			}
+			{
+				widget::param wp(vtx::irect(d_w - 45, ofsy, 30, 30), root);
+				widget_check::param wp_;
+				all_ = wd.add_widget<widget_check>(wp, wp_);
+				all_->at_local_param().select_func_ = [=](bool ena) {
+					if(!ena) {
+						startup();						
+					}
+					for(uint32_t i = 0; i < 6; ++i) {
+						sw_[i]->set_stall(!ena, widget::STALL_GROUP::_1);
+					}
+					exec_->set_stall(!ena, widget::STALL_GROUP::_1);
 				};
 			}
 		}
@@ -134,10 +149,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void update()
 		{
-			bool ena = false;
-///			if(client_.probe() && all_->get_check()) ena = true; 
-			if(client_.probe()) ena = true; 
-			exec_->set_stall(!ena);
+			exec_->set_stall(client_.probe());
 		}
 
 
@@ -150,6 +162,7 @@ namespace app {
 		void save(sys::preference& pre)
 		{
 			tools::save_sw(pre, sw_, 6);
+			all_->save(pre);
 		}
 
 
@@ -162,6 +175,7 @@ namespace app {
 		void load(sys::preference& pre)
 		{
 			tools::load_sw(pre, sw_, 6);
+			all_->load(pre);
 		}
 	};
 }

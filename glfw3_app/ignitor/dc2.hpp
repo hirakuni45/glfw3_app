@@ -207,7 +207,7 @@ namespace app {
 				exec_->at_local_param().select_func_ = [=](int n) {
 					dc2_t t;
 					uint16_t sw = 0;
-					for(int i = 0; i < 14; ++i) {
+					for(uint32_t i = 0; i < 14; ++i) {
 						sw <<= 1;
 						if(sw_[i]->get_check()) sw |= 1;
 					}
@@ -258,16 +258,27 @@ namespace app {
 					if(!ena) {
 						startup();
 					}
+					for(uint32_t i = 0; i < 14; ++i) {
+						sw_[i]->set_stall(!ena, widget::STALL_GROUP::_1);
+					}
+					ena_->set_stall(!ena, widget::STALL_GROUP::_1);
+					mode_->set_stall(!ena, widget::STALL_GROUP::_1);
+					voltage_->set_stall(!ena, widget::STALL_GROUP::_1);
+					current_->set_stall(!ena, widget::STALL_GROUP::_1);
+					exec_->set_stall(!ena, widget::STALL_GROUP::_1);
 				};
 			}
 		}
 
 
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  アップデート
+		*/
+		//-----------------------------------------------------------------//
 		void update()
 		{
-			bool ena = false;
-			if(client_.probe() && all_->get_check()) ena = true; 
-			exec_->set_stall(!ena);
+			exec_->set_stall(!client_.probe());
 
 #ifdef DC2_KIKUSUI
 			if(curr_delay_ > 0) {

@@ -272,6 +272,17 @@ namespace app {
 					if(!ena) {
 						startup();
 					}
+					for(uint32_t i = 0; i < 5; ++i) {
+						sw_[i]->set_stall(!ena, widget::STALL_GROUP::_1);
+					}
+					ena_->set_stall(!ena, widget::STALL_GROUP::_1);
+					mode_->set_stall(!ena, widget::STALL_GROUP::_1);
+					freq_->set_stall(!ena, widget::STALL_GROUP::_1);
+					volt_->set_stall(!ena, widget::STALL_GROUP::_1);
+					duty_->set_stall(!ena, widget::STALL_GROUP::_1);
+					iena_->set_stall(!ena, widget::STALL_GROUP::_1);
+					ivolt_->set_stall(!ena, widget::STALL_GROUP::_1);
+					exec_->set_stall(!ena, widget::STALL_GROUP::_1);
 				};
 			}
 		}
@@ -284,9 +295,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void update()
 		{
-			bool ena = false;
-			if(client_.probe() && all_->get_check()) ena = true; 
-			exec_->set_stall(!ena);
+			exec_->set_stall(!client_.probe());
 		}
 
 

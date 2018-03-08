@@ -195,8 +195,16 @@ namespace app {
 				all_ = wd.add_widget<widget_check>(wp, wp_);
 				all_->at_local_param().select_func_ = [=](bool ena) {
 					if(!ena) {
-						startup();
+						startup();						
 					}
+					for(uint32_t i = 0; i < 14; ++i) {
+						sw_[i]->set_stall(!ena, widget::STALL_GROUP::_1);
+					}
+					ena_->set_stall(!ena, widget::STALL_GROUP::_1);
+					amps_->set_stall(!ena, widget::STALL_GROUP::_1);
+					freq_->set_stall(!ena, widget::STALL_GROUP::_1);
+					mode_->set_stall(!ena, widget::STALL_GROUP::_1);
+					exec_->set_stall(!ena, widget::STALL_GROUP::_1);
 				};
 			}
 		}
@@ -209,9 +217,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void update()
 		{
-			bool ena = false;
-			if(client_.probe() && all_->get_check()) ena = true; 
-			exec_->set_stall(!ena);
+			exec_->set_stall(!client_.probe());
 		}
 
 
