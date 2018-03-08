@@ -739,7 +739,17 @@ namespace view {
 		bool save(const std::string& path)
 		{
 			utils::file_io fio;
-			
+
+			if(!fio.open(path, "wb")) {
+				return false;
+			}
+
+			for(uint32_t ch = 0; ch < CHN; ++ch) {
+				for(auto w : ch_[ch].units_) {
+					fio.put(w);
+				}
+			}
+			fio.close();
 
 			return true;
 		}
@@ -754,6 +764,19 @@ namespace view {
 		//-----------------------------------------------------------------//
 		bool load(const std::string& path)
 		{
+			utils::file_io fio;
+
+			if(!fio.open(path, "rb")) {
+				return false;
+			}
+
+			for(uint32_t ch = 0; ch < CHN; ++ch) {
+				for(auto& w : ch_[ch].units_) {
+					fio.get<UNIT>(w);
+				}
+				ch_[ch].param_.update_ = true;
+			}
+			fio.close();
 
 			return true;
 		}
