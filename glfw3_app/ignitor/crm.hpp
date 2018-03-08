@@ -52,7 +52,13 @@ namespace app {
 		gui::widget_button*		exec_;		///< CRM 設定転送
 		gui::widget_check*		all_;		///< CRM 全体
 
+		double					crrd_value_;
+		double					crcd_value_;
+
 	private:
+		uint32_t				crrd_id_;
+		uint32_t				crcd_id_;
+
 		struct crm_t {
 			uint16_t	sw;		///< 14 bits
 			bool		ena;	///< 0, 1
@@ -94,7 +100,9 @@ namespace app {
 			director_(d), client_(client), interlock_(ilc),
 			sw_{ nullptr },
 			ena_(nullptr), amps_(nullptr), freq_(nullptr), mode_(nullptr),
-			ans_(nullptr), exec_(nullptr), all_(nullptr)
+			ans_(nullptr), exec_(nullptr), all_(nullptr),
+			crrd_value_(0.0), crcd_value_(0.0),
+			crrd_id_(0), crcd_id_(0)
 		{ }
 
 
@@ -218,6 +226,44 @@ namespace app {
 		void update()
 		{
 			exec_->set_stall(!client_.probe());
+
+			// モジュールから受け取ったパラメーターをＧＵＩに反映
+			static const uint32_t sample_num = 50;
+			if(mode_->get_select_pos() == 0) {  // CRRD
+				if(crrd_id_ != client_.get_mod_status().crrd_id_) {
+					crrd_id_ = client_.get_mod_status().crrd_id_;
+					uint32_t v = client_.get_mod_status().crrd_;
+					v -= sample_num * 0x7FFFF;
+					double a = static_cast<double>(v) / 50.0 / static_cast<double>(0x7FFFF)
+						* 1.570798233;
+					a *= 778.2;  // 778.2 mV P-P
+					static const double itbl[4] = {  // 電流テーブル
+						0.2, 2.0, 20.0, 200.0
+					};
+					a /= itbl[amps_->get_select_pos()];
+					crrd_value_ = a;
+					ans_->set_text((boost::format("%5.4f Ω") % a).str());
+				}
+			} else { // CRCD
+				if(crcd_id_ != client_.get_mod_status().crcd_id_) {
+					crcd_id_ = client_.get_mod_status().crcd_id_;
+					uint32_t v = client_.get_mod_status().crcd_;
+// std::cout << v << std::endl;
+					v -= sample_num * 0x7FFFF;
+					double a = static_cast<double>(v) / 50.0 / static_cast<double>(0x7FFFF)
+						* 1.570798233;
+					a *= 778.2;  // 778.2 mV P-P
+					static const double itbl[4] = {  // 電流テーブル
+						0.2, 2.0, 20.0, 200.0
+					};
+					a /= itbl[amps_->get_select_pos()];
+
+					a = 1.0 / (2.0 * 3.141592654 * 1000.0 * a);
+					a *= 1e6;
+					crcd_value_ = a;
+					ans_->set_text((boost::format("%5.4f uF") % a).str());
+				}
+			}
 		}
 
 

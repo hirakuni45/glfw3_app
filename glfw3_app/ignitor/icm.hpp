@@ -149,7 +149,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void update()
 		{
-			exec_->set_stall(client_.probe());
+			exec_->set_stall(!client_.probe());
 		}
 
 

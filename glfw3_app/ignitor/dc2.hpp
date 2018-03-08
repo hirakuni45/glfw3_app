@@ -51,8 +51,9 @@ namespace app {
 		gui::widget_check*		sw_[14];	///< DC2 接続スイッチ
 		gui::widget_check*		ena_;		///< DC2 有効、無効
 		gui::widget_list*		mode_;		///< DC2 電流、電圧モード
-		gui::widget_label*		voltage_;	///< DC2（電圧）
-		gui::widget_label*		current_;	///< DC2（電流）
+		gui::widget_label*		voltage_;	///< DC2 出力電圧
+		gui::widget_label*		current_;	///< DC2 出力電流
+		gui::widget_label*		delay_;		///< DC2 測定遅延
 		gui::widget_label*		probe_;		///< DC2（電流、電圧測定値）
 		gui::widget_button*		exec_;		///< DC2 設定転送
 		gui::widget_check*		all_;		///< DC2 全体
@@ -109,7 +110,7 @@ namespace app {
 			director_(d), client_(client), interlock_(ilc), kikusui_(kik),
 			sw_{ nullptr },
 			ena_(nullptr), mode_(nullptr), voltage_(nullptr), current_(nullptr),
-			probe_(nullptr),
+			delay_(nullptr), probe_(nullptr),
 			exec_(nullptr), all_(nullptr),
 			probe_mode_(false), curr_delay_(0), curr_id_(0),
 			volt_delay_(0), volt_id_(0)
@@ -166,7 +167,7 @@ namespace app {
 				mode_ = wd.add_widget<widget_list>(wp, wp_);
 			}
 			{  // 300V/0.1V, 100mA/0.01mA
-				widget::param wp(vtx::irect(ofsx + 230, ofsy, 90, 40), root);
+				widget::param wp(vtx::irect(ofsx + 210, ofsy, 90, 40), root);
 				widget_label::param wp_("0", false);
 				voltage_ = wd.add_widget<widget_label>(wp, wp_);
 				voltage_->at_local_param().select_func_ = [=](const std::string& str) {
@@ -174,14 +175,14 @@ namespace app {
 				};
 			}
 			{
-				widget::param wp(vtx::irect(ofsx + 330, ofsy, 40, 40), root);
+				widget::param wp(vtx::irect(ofsx + 310, ofsy, 30, 40), root);
 				widget_text::param wp_("V");
 				wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
 											 vtx::placement::vertical::CENTER);
 				wd.add_widget<widget_text>(wp, wp_);
 			}
 			{  // Max: 100mA / step: 0.01mA
-				widget::param wp(vtx::irect(ofsx + 370, ofsy, 90, 40), root);
+				widget::param wp(vtx::irect(ofsx + 340, ofsy, 90, 40), root);
 				widget_label::param wp_("0", false);
 				current_ = wd.add_widget<widget_label>(wp, wp_);
 				current_->at_local_param().select_func_ = [=](const std::string& str) {
@@ -189,14 +190,22 @@ namespace app {
 				};
 			}
 			{
-				widget::param wp(vtx::irect(ofsx + 470, ofsy, 50, 40), root);
+				widget::param wp(vtx::irect(ofsx + 440, ofsy, 40, 40), root);
 				widget_text::param wp_("mA");
 				wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
 											 vtx::placement::vertical::CENTER);
 				wd.add_widget<widget_text>(wp, wp_);
 			}
+			{  // 測定遅延時間
+				widget::param wp(vtx::irect(ofsx + 490, ofsy, 100, 40), root);
+				widget_label::param wp_("0.5", false);
+				delay_ = wd.add_widget<widget_label>(wp, wp_);
+				delay_->at_local_param().select_func_ = [=](const std::string& str) {
+					delay_->set_text(tools::limitf(str, 0.45f, 5.0f, "%2.1f"));
+				};
+			}
 			{  // 電流、電圧測定値
-				widget::param wp(vtx::irect(ofsx + 520, ofsy, 150, 40), root);
+				widget::param wp(vtx::irect(ofsx + 600, ofsy, 150, 40), root);
 				widget_label::param wp_("");
 				probe_ = wd.add_widget<widget_label>(wp, wp_);
 			}
@@ -214,25 +223,31 @@ namespace app {
 					t.sw = sw;
 #ifdef DC2_KIKUSUI
 					kikusui_.set_output(ena_->get_check());
-					bool err = false;
+					int err = 0;
 					float c = 0.0f;
 					if((utils::input("%f", current_->get_text().c_str()) % c).status()) {
 						c /= 1000.0f;
 					} else {
-						err = true;
+						++err;
 					}
 					float v = 0.0f;
 					if((utils::input("%f", voltage_->get_text().c_str()) % v).status()) {
 					} else {
-						err = true;
+						++err;
 					}
-					if(!err) {
+					float tm = 0.0f;
+					if((utils::input("%f", delay_->get_text().c_str()) % tm).status()) {
+					} else {
+						++err;
+					}
+
+					if(err == 0) {
 						if(mode_->get_select_pos() == 0) {  // 電流 [mA]
 							kikusui_.set_curr(c, v);
-							volt_delay_ = 60 * 3;
+							volt_delay_ = static_cast<uint32_t>(tm * 60.0f);
 						} else {  // 電圧 [V]
 							kikusui_.set_volt(v, c);
-							curr_delay_ = 60 * 3;
+							curr_delay_ = static_cast<uint32_t>(tm * 60.0f);
 						}
 					}
 #else
@@ -265,6 +280,7 @@ namespace app {
 					mode_->set_stall(!ena, widget::STALL_GROUP::_1);
 					voltage_->set_stall(!ena, widget::STALL_GROUP::_1);
 					current_->set_stall(!ena, widget::STALL_GROUP::_1);
+					delay_->set_stall(!ena, widget::STALL_GROUP::_1);
 					exec_->set_stall(!ena, widget::STALL_GROUP::_1);
 				};
 			}
@@ -340,6 +356,8 @@ namespace app {
 				tools::set_help(chip, voltage_, "0.0 to 300.0 [V]");
 			} else if(current_->get_focus()) {
 				tools::set_help(chip, current_, "0.0 to 100.0 [mA]");
+			} else if(delay_->get_focus()) {
+				tools::set_help(chip, delay_, "測定遅延時間 [Sec]");
 			} else if(all_->get_focus()) {
 				tools::set_help(chip, all_, "DC2 ON/OFF");
 			} else {
@@ -362,6 +380,7 @@ namespace app {
 			mode_->save(pre);
 			voltage_->save(pre);
 			current_->save(pre);
+			delay_->save(pre);
 			all_->save(pre);
 		}
 
@@ -379,6 +398,7 @@ namespace app {
 			mode_->load(pre);
 			voltage_->load(pre);
 			current_->load(pre);
+			delay_->load(pre);
 			all_->load(pre);
 		}
 	};

@@ -40,12 +40,12 @@ namespace app {
 		utils::director<core>&	director_;
 		net::ign_client_tcp&	client_;
 		interlock&				interlock_;
+		kikusui&				kikusui_;
 
 	public:
 		gui::widget_check*		sw_[5];		///< DC1 接続スイッチ
 
 		gui::widget_label*		thk_;		///< THR 温度係数
-
 		gui::widget_label*		current_;	///< DC1（電流）
 		gui::widget_spinbox*	count_;		///< DC1 熱抵抗測定回数
 
@@ -54,20 +54,124 @@ namespace app {
 		gui::widget_button*		exec_;		///< THR 設定転送
 		gui::widget_check*		all_;		///< THR 全体
 
+	private:
+
+		struct thr_t {
+			uint16_t	sw;
+			uint32_t	curr;	///< 20 bits
+			uint32_t	count;	///< 熱抵抗測定回数（最大５００）
+
+			thr_t() : sw(0), curr(0), count(0) { }
+
+			std::string build() const
+			{
+				std::string s;
+				// DC1 熱抵抗関係設定
+				{  // DC1: S42, S49, 定電流モード、加熱電流設定、出力は OFF
+					s += (boost::format("dc1 D1SW%02X\n") % sw).str();
+					uint16_t delay = 5;
+					s += (boost::format("delay %d\n") % delay).str();
+					s += "dc1 D1MD0\n";  // CC mode
+					s += (boost::format("dc1 D1IS%05X\n") % (curr & 0xfffff)).str();
+					s += (boost::format("dc1 D1TT%03X\n") % (count & 0x1ff)).str();
+				}
+				return s;
+			}
+		};
+		thr_t		thr_;
+
+
+		std::string build_sub_() const
+		{
+			std::string s;
+			{  // DC2 S15, S28, 定電圧１４Ｖ、
+				uint32_t dc2_sw = 0b10000000000001;
+				s += (boost::format("dc2 D2SW%04X\n") % dc2_sw).str();
+				kikusui_.set_output(1);
+				kikusui_.set_volt(14.0f, 0.1f);  // 14V 定電圧、最大 0.1A
+			}
+			{  // WGM: S45, S48, 内臓電源電圧 7.2V、出力 OFF
+				// S44, S41, S42, S43, S44
+				uint16_t wgm_sw = 0b01001;
+				s += (boost::format("wgm WGSW%02X\n") % wgm_sw).str();
+				uint32_t ivolt = 7.2f / 15.626e-6;
+				s += (boost::format("wgm WGDV%05X\n") % (ivolt & 0xfffff)).str();
+				int iena = 1;
+				s += (boost::format("wgm WGDE%d\n") % iena).str();
+			}
+			{  // WDM 熱抵抗関係設定
+				// SW　(0,1,2,3　CH2）
+				uint32_t cmd = 0b00001000;
+				cmd <<= 16;
+				uint32_t sw = 0b1111;  // all ON!
+				cmd |= sw << 12;
+				s += (boost::format("wdm %06X\n") % cmd).str();
+				s += "delay 1\n";
+
+				// sampling freq
+				cmd = (0b00010000 << 16) | 0b01000011;  // 100K (10uS)
+				s += (boost::format("wdm %06X\n") % cmd).str();
+
+				// trigger channel
+				cmd = (0b00100000 << 16);
+				cmd |= 0x0200;  // external trigger
+//				if(sm_trg_->get_select_pos()) cmd |= 0x0100;
+				auto ch = 1;
+				uint8_t sub = 0;
+				sub |= 0x80;  // trigger ON
+				cmd |= static_cast<uint32_t>(ch & 3) << 14;
+//				if(slope_->get_select_pos()) sub |= 0x40;
+//				sub |= window_->get_select_pos() & 15;
+				cmd |= sub;
+				s += (boost::format("wdm %06X\n") % cmd).str();
+			}
+			return s;
+		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		thr(utils::director<core>& d, net::ign_client_tcp& client, interlock& ilc) :
-			director_(d), client_(client), interlock_(ilc),
+		thr(utils::director<core>& d, net::ign_client_tcp& client, interlock& ilc, kikusui& kik) :
+			director_(d), client_(client), interlock_(ilc), kikusui_(kik),
 			sw_{ nullptr },
 			thk_(nullptr), 
 			current_(nullptr), count_(nullptr),
 			probe_(nullptr),
-			exec_(nullptr), all_(nullptr)
+			exec_(nullptr), all_(nullptr),
+			thr_()
 			{ }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  スタートアップ
+		*/
+		//-----------------------------------------------------------------//
+		void startup()
+		{
+			std::string s;
+			{  // DC1
+				uint16_t sw = 0;
+				s += (boost::format("dc1 D1SW%02X\n") % sw).str();
+				uint16_t mode = 0;
+				s += (boost::format("dc1 D1MD%d\n") % mode).str();
+				uint32_t curr = 0;
+				s += (boost::format("dc1 D1IS%05X\n") % (curr & 0xfffff)).str();
+				uint16_t ena = 0;
+				s += (boost::format("dc1 D1OE%d\n") % ena).str();
+			}
+			{  // WDM
+				// SW
+				uint32_t cmd = 0b00001000;
+				cmd <<= 16;
+				s += (boost::format("wdm %06X\n") % cmd).str();
+
+			}
+			client_.send_data(s);
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -125,7 +229,7 @@ namespace app {
 			} 
 			{  // 温度係数
 				widget::param wp(vtx::irect(ofsx + 250, ofsy, 110, 40), root);
-				widget_label::param wp_("", false);
+				widget_label::param wp_("0.707", false);
 				thk_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 			{  // 測定値
@@ -139,33 +243,22 @@ namespace app {
 				widget_button::param wp_(">");
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
 				exec_->at_local_param().select_func_ = [=](int n) {
-#if 0
-					dc1_t t;
+					auto s = build_sub_();
+					thr_t t;
 					uint16_t sw = 0;
 					for(int i = 0; i < 5; ++i) {
 						sw <<= 1;
 						if(sw_[i]->get_check()) sw |= 1;
 					}
 					t.sw = sw;
-					t.ena = ena_->get_check();
-					if(mode_->get_select_pos() < 2) {
-						t.mode = mode_->get_select_pos() & 1;
-						t.count = 10;
-						t.thermal = false;
-					} else {
-						t.count = count_->get_select_pos();
-						t.thermal = true;
-					}
-
+					t.count = count_->get_select_pos();
 					float v;
-					if((utils::input("%f", voltage_->get_text().c_str()) % v).status()) {
-						t.volt = v / 62.5e-6;
-					}
 					if((utils::input("%f", current_->get_text().c_str()) % v).status()) {
 						t.curr = v / 31.25e-6;
 					}
-					client_.send_data(t.build());
-#endif
+					s += t.build();
+std::cout << s << std::flush;
+					client_.send_data(s);
 				};
 			}
 			{
@@ -174,8 +267,15 @@ namespace app {
 				all_ = wd.add_widget<widget_check>(wp, wp_);
 				all_->at_local_param().select_func_ = [=](bool ena) {
 					if(!ena) {
-///						startup();
+						startup();
 					}
+					for(uint32_t i = 0; i < 5; ++i) {
+						sw_[i]->set_stall(!ena, widget::STALL_GROUP::_1);
+					}
+					thk_->set_stall(!ena, widget::STALL_GROUP::_1);
+					current_->set_stall(!ena, widget::STALL_GROUP::_1);
+					count_->set_stall(!ena, widget::STALL_GROUP::_1);
+					exec_->set_stall(!ena, widget::STALL_GROUP::_1);
 				};
 			}
 		}
@@ -188,9 +288,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void update()
 		{
-			bool ena = false;
-			if(client_.probe() && all_->get_check()) ena = true; 
-			exec_->set_stall(!ena);
+			exec_->set_stall(!client_.probe());
 		}
 
 
