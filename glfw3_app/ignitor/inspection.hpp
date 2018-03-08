@@ -101,12 +101,7 @@ namespace app {
 		gui::widget_chip*		chip_;			///< help chip
 
 		bool					startup_init_;
-		uint32_t				crrd_id_;
-		uint32_t				crcd_id_;
 		uint32_t				d2md_id_;
-
-		double					crrd_value_;
-		double					crcd_value_;
 
 		uint32_t				wdm_exec_id_;
 
@@ -301,14 +296,13 @@ namespace app {
 			crm_(d, client_, interlock_),
 			icm_(d, client_, interlock_),
 			wdm_(d, client_, interlock_),
-			thr_(d, client_, interlock_),
+			thr_(d, client_, interlock_, kikusui_),
 			test_param_(d),
 
 			chip_(nullptr),
 
 			startup_init_(false),
-			crrd_id_(0), crcd_id_(0), d2md_id_(0),
-			crrd_value_(0.0), crcd_value_(0.0),
+			d2md_id_(0),
 			wdm_exec_id_(0),
 			test_mode_(test_mode::NONE), cmd_task_(cmd_task::idle)
 		{ }
@@ -413,8 +407,8 @@ namespace app {
 		const wave_cap::sample_param& get_sample_param() const { return wdm_.sample_param_; }
 
 		bool get_crm_mode() const { return crm_.mode_->get_select_pos(); }
-		double get_crrd_value() const { return crrd_value_; }
-		double get_crcd_value() const { return crcd_value_; }
+		double get_crrd_value() const { return crm_.crrd_value_; }
+		double get_crcd_value() const { return crm_.crcd_value_; }
 
 
 		//-----------------------------------------------------------------//
@@ -448,52 +442,6 @@ namespace app {
 				break;
 			}
 			return true;
-		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief  各モジュールからの受信(DC2, CRM)
-		*/
-		//-----------------------------------------------------------------//
-		void update_client()
-		{
-			// モジュールから受け取ったパラメーターをＧＵＩに反映
-			static const uint32_t sample_num = 50;
-			if(crm_.mode_->get_select_pos() == 0) {  // CRRD
-				if(crrd_id_ != client_.get_mod_status().crrd_id_) {
-					crrd_id_ = client_.get_mod_status().crrd_id_;
-					uint32_t v = client_.get_mod_status().crrd_;
-					v -= sample_num * 0x7FFFF;
-					double a = static_cast<double>(v) / 50.0 / static_cast<double>(0x7FFFF)
-						* 1.570798233;
-					a *= 778.2;  // 778.2 mV P-P
-					static const double itbl[3] = {  // 電流テーブル
-						2.0, 20.0, 200.0
-					};
-					a /= itbl[crm_.amps_->get_select_pos() % 3];
-					crrd_value_ = a;
-					crm_.ans_->set_text((boost::format("%5.4f Ω") % a).str());
-				}
-			} else { // CRCD
-				if(crcd_id_ != client_.get_mod_status().crcd_id_) {
-					crcd_id_ = client_.get_mod_status().crcd_id_;
-					uint32_t v = client_.get_mod_status().crcd_;
-					v -= sample_num * 0x7FFFF;
-					double a = static_cast<double>(v) / 50.0 / static_cast<double>(0x7FFFF)
-						* 1.570798233;
-					a *= 778.2 * 2.0;  // 778.2 mV P-P
-					static const double itbl[3] = {  // 電流テーブル
-						2.0, 20.0, 200.0
-					};
-					a /= itbl[crm_.amps_->get_select_pos() % 3];
-
-					a = 1.0 / (2.0 * 3.141592654 * 1000.0 * a);
-					a *= 1e6;
-					crcd_value_ = a;
-					crm_.ans_->set_text((boost::format("%5.4f uF") % a).str());
-				}
-			}
 		}
 
 
