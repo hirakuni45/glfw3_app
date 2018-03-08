@@ -112,7 +112,7 @@ namespace app {
 		{
 			auto s = (boost::format("CURR %5.4f A;VOLT %5.4f V\r\n") % curr % volt).str();
 			serial_.write(s.c_str(), s.size());
-std::cout << "VOLT: " << s << std::flush;
+// std::cout << "VOLT: " << s << std::flush;
 		}
 
 
@@ -127,7 +127,7 @@ std::cout << "VOLT: " << s << std::flush;
 		{
 			auto s = (boost::format("VOLT %5.4f V;CURR %5.4f A\r\n") % volt % curr).str();
 			serial_.write(s.c_str(), s.size());
-std::cout << "CURR: " << s << std::flush;
+// std::cout << "CURR: " << s << std::flush;
 		}
 
 
