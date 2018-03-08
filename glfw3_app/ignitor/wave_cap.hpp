@@ -33,7 +33,7 @@
 #include "interlock.hpp"
 #include "test.hpp"
 
-#define TEST_SIN
+// #define TEST_SIN
 
 namespace app {
 
@@ -108,6 +108,7 @@ namespace app {
 		gui::widget_button*		load_;
 		gui::widget_button*		save_;
 		gui::widget_list*		mesa_type_;
+		gui::widget_label*		mesa_filt_;
 		gui::widget_list*		org_trg_;
 		gui::widget_spinbox*	org_slope_;
 		gui::widget_check*		org_ena_;
@@ -118,6 +119,8 @@ namespace app {
 		gui::widget_button*		wdm_exec_;
 		uint32_t				meas_id_before_;
 		uint32_t				meas_id_;
+		float					org_value_;
+		float					fin_value_;
 
 		gui::widget_sheet*		share_frame_;
 
@@ -130,6 +133,8 @@ namespace app {
 		vtx::ipos				info_org_;
 
 		info_t					info_;
+
+		gui::widget_chip*		chip_;
 
 		// チャネル毎の電圧スケールサイズ
 		static const uint32_t volt_scale_0_size_ = 8;
@@ -883,22 +888,6 @@ namespace app {
 		utils::select_file		data_load_filer_;
 		utils::select_file		data_save_filer_;
 
-		bool save_data_file_(const std::string& path)
-		{
-std::cout << path << std::endl;
-			
-
-			return true;
-		}
-
-
-		bool load_data_file_(const std::string& path)
-		{
-std::cout << path << std::endl;
-
-			return true;
-		}
-
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -910,11 +899,11 @@ std::cout << path << std::endl;
 			frame_(nullptr), core_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
 			tools_(nullptr), smooth_(nullptr), load_(nullptr), save_(nullptr),
-			mesa_type_(nullptr),
+			mesa_type_(nullptr), mesa_filt_(nullptr),
 			org_trg_(nullptr), org_slope_(nullptr), org_ena_(nullptr),
 			fin_trg_(nullptr), fin_slope_(nullptr), fin_ena_(nullptr),
 			ch_to_time_(nullptr), wdm_exec_(nullptr),
-			meas_id_before_(0), meas_id_(0),
+			meas_id_before_(0), meas_id_(0), org_value_(0.0f), fin_value_(0.0f),
 			share_frame_(nullptr),
 			sample_param_(),
 			wdm_id_{ 0 }, treg_id_{ 0 },
@@ -1146,7 +1135,7 @@ std::cout << path << std::endl;
 					filter += ")\t*.";
 					filter += WAVE_DATA_EXT_;
 					filter += "\t";
-					data_load_filer_.open(filter, true, proj_root_);
+					data_save_filer_.open(filter, true, proj_root_);
 				};
 			}
 
@@ -1227,14 +1216,18 @@ std::cout << path << std::endl;
 			time_.init(director_, share_frame_);
 
 			{  // 計測タイプ
-				widget::param wp(vtx::irect(10, 20 + 50, 130, 40), tools_);
+				widget::param wp(vtx::irect(10, 20 + 50, 120, 40), tools_);
 				widget_list::param wp_;
 				wp_.init_list_.push_back("SINGLE");
 				wp_.init_list_.push_back("MULTI");
-//				wp_.init_list_.push_back("DELAY");
 				mesa_type_ = wd.add_widget<widget_list>(wp, wp_);
 				mesa_type_->at_local_param().select_func_ = [=](const std::string& t, uint32_t p) {
 				};
+			}
+			{  // 計測フィルタ係数
+				widget::param wp(vtx::irect(10 + 130, 20 + 50, 130, 40), tools_);
+				widget_label::param wp_("0.7", false);
+				mesa_filt_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 			{  // 計測開始ボタン
 				widget::param wp(vtx::irect(270, 220, 30, 30), tools_);
@@ -1256,6 +1249,12 @@ std::cout << path << std::endl;
 				fin_ena_->at_local_param().select_func_ = [=](bool ena) {
 					waves_.at_info().meas_enable_[1] = ena;
 				};
+			}
+			{  // help message (widget_chip)
+				widget::param wp(vtx::irect(0, 0, 100, 40), tools_);
+				widget_chip::param wp_;
+				chip_ = wd.add_widget<widget_chip>(wp, wp_);
+				chip_->active(0);
 			}
 
 			waves_.create_buffer();
@@ -1309,8 +1308,6 @@ std::cout << path << std::endl;
 				fin_trg_->set_stall(false);
 				fin_slope_->set_stall(false);
 				fin_ena_->set_stall(false);
-			} else {  // delay 後の電圧計測
-
 			}
 
 			wdm_exec_->set_stall(!client_.probe());
@@ -1348,17 +1345,31 @@ std::cout << path << std::endl;
 				meas_run_();
 				meas_id_before_ = meas_id_;
 			}
-#if 0
+
 			// 仮熱抵抗表示
 			for(uint32_t i = 0; i < 2; ++i) {
 				auto id = client_.get_mod_status().treg_id_[i];
 				if(treg_id_[i] != id) {
+std::cout << "Th REG recv" << std::endl;
 					auto sz = waves_.size();
 					waves_.copy(i + 1, client_.get_treg(i), sz, sz / 2);
 					treg_id_[i] = id;
 				}
 			}
-#endif
+
+			{
+				uint32_t act = 60 * 3;
+				if(org_slope_->get_focus()) {
+					std::string s;
+					tools::set_help(chip_, org_slope_, s);
+				} else if(fin_slope_->get_focus()) {
+					std::string s;
+					tools::set_help(chip_, fin_slope_, s);
+				} else {
+					act = 0;
+				}
+				chip_->active(act);
+			}
 
 			if(data_load_filer_.state()) {
 				auto path = data_load_filer_.get();
@@ -1367,8 +1378,7 @@ std::cout << path << std::endl;
 						path += '.';
 						path += WAVE_DATA_EXT_;
 					}
-					if(load_data_file_(path)) {
-						// last_path_ = path;
+					if(waves_.load(path)) {
 					}
 				}
 			}
@@ -1379,8 +1389,7 @@ std::cout << path << std::endl;
 						path += '.';
 						path += WAVE_DATA_EXT_;
 					}
-					if(save_data_file_(path)) {
-						// last_path_ = path;
+					if(waves_.save(path)) {
 					}
 				}
 			}
@@ -1419,6 +1428,8 @@ std::cout << path << std::endl;
 
 			measure_time_.load(pre);
 
+			mesa_type_->load(pre);
+			mesa_filt_->load(pre);
 			org_trg_->load(pre);
 			org_slope_->load(pre);
 			org_ena_->load(pre);
@@ -1460,6 +1471,8 @@ std::cout << path << std::endl;
 
 			measure_time_.save(pre);
 
+			mesa_type_->save(pre);
+			mesa_filt_->save(pre);
 			org_trg_->save(pre);
 			org_slope_->save(pre);
 			org_ena_->save(pre);
@@ -1489,32 +1502,6 @@ std::cout << path << std::endl;
 			img::img_files imfs;
 			imfs.set_image(simg);
 			ret = imfs.save(path);			
-
-			return ret;
-		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief  波形データのセーブ
-			@param[in]	path	セーブ・パス
-			@return 成功なら「true」
-		*/
-		//-----------------------------------------------------------------//
-		bool save_data(const std::string& path) const
-		{
-			bool ret = false;
-			if(path.empty()) return ret;
-			if(core_ == nullptr) return ret;
-
-			utils::file_io fio;
-			if(!fio.open(path, "wb")) {
-				return false;
-			}
-
-			
-
-			fio.close();
 
 			return ret;
 		}
