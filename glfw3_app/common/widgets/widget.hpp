@@ -342,6 +342,19 @@ namespace gui {
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
+			@brief	ストール・グループ
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		enum class STALL_GROUP {
+			_0,		///< グループ 0 
+			_1,		///< グループ 1
+			_2,		///< グループ 2
+			_3,		///< グループ 3
+		};
+
+
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
 			@brief	widget ベース・パラメーター
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -364,6 +377,7 @@ namespace gui {
 			action_types		action_;		///< アクション
 			state_types			state_;			///< 状態制御
 			uint32_t			pre_group_;		///< プリファレンス・グループ
+			uint32_t			stall_group_;	///< ストール・グループ
 
 			param(const vtx::irect& r = vtx::irect(0), widget* parents = nullptr) :
 				rect_(r), clip_(r), rpos_(r.org),
@@ -373,7 +387,7 @@ namespace gui {
 				hold_frame_(0), holded_frame_(0),
 				parents_(parents),
 				action_(), state_(),
-				pre_group_(0)
+				pre_group_(0), stall_group_(0)
 			{
 				state_.set(state::ENABLE);
 				state_.set(state::RENDER_ENABLE);
@@ -552,7 +566,14 @@ namespace gui {
 			@param[in]	f	不許可の場合「false」
 		*/
 		//-----------------------------------------------------------------//
-		void set_stall(bool f = true) { param_.state_[state::STALL] = f; }
+		void set_stall(bool f = true, STALL_GROUP stg = STALL_GROUP::_0) {
+			if(f) {
+				param_.stall_group_ |=  (1 << static_cast<uint32_t>(stg));
+			} else {
+				param_.stall_group_ &= ~(1 << static_cast<uint32_t>(stg));
+			}
+			param_.state_[state::STALL] = param_.stall_group_ != 0;
+		}
 
 
 		//-----------------------------------------------------------------//
