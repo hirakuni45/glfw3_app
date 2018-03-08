@@ -660,7 +660,7 @@ namespace app {
 							task_ = task::sence;
 						}
 						break;
-					case inspection::test_mode::WDM:
+					case inspection::test_mode::WD:
 						for(uint32_t i = 0; i < 4; ++i) {
 							if(wdm_id_[i] != client_.get_mod_status().wdm_id_[i]) {
 								wdm_id_[i] = client_.get_mod_status().wdm_id_[i];
@@ -696,7 +696,7 @@ namespace app {
 					case inspection::test_mode::R_MES:
 						v = inspection_.get_crrd_value();
 						break;
-					case inspection::test_mode::WDM:
+					case inspection::test_mode::WD:
 						v = wave_cap_.get_mesa_value();
 						break;
 					default:
@@ -708,7 +708,7 @@ namespace app {
 						auto idx = project_.get_csv_index() - 1;
 						project_.at_csv1().set(unit_id_ + 1, 9 + idx, st);
 						project_.at_csv2().set(unit_id_ + 1, 5, st);
-						if(inspection_.get_test_mode() == inspection::test_mode::WDM) {
+						if(inspection_.get_test_mode() == inspection::test_mode::WD) {
 							msg_dialog_->enable(false);  // メッセージダイアログを消す。
 							wave_cap_.enable();  // 波形編集を有効にする。
 							{
@@ -756,7 +756,7 @@ namespace app {
 				break;
 
 			case task::sync:
-				if(inspection_.get_test_mode() == inspection::test_mode::WDM) {
+				if(inspection_.get_test_mode() == inspection::test_mode::WD) {
 					auto path = project_.get_image_path(unit_id_);					
 					wave_cap_.save_image(path);
 					project_.at_csv2().set(unit_id_ + 1, 11, path);

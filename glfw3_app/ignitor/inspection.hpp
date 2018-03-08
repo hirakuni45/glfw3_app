@@ -62,10 +62,11 @@ namespace app {
 		//=================================================================//
 		enum class test_mode {
 			NONE,		///< 無効
-			C_MES,		///< 静特性（容量計測）
-			R_MES,		///< 静特性（抵抗計測）
-
-			WDM,		///< 動特性（波形計測）
+			C_MES,		///< 容量計測（静特性）
+			R_MES,		///< 抵抗計測（静特性）
+			VI,			///< 電圧、電流計測（静特性）
+			THR,		///< 熱抵抗計測（静特性）
+			WD,			///< 波形計測（動特性）
 		};
 
 	private:
@@ -338,9 +339,11 @@ namespace app {
 					return test_mode::C_MES;
 				}
 			} else if(sheet_->get_select_pos() == 1) {  // DC2 (静特性）
+				return test_mode::VI;
 			} else if(sheet_->get_select_pos() == 2) {  // WDM (動特性）
-				return test_mode::WDM;
+				return test_mode::WD;
 			} else {  // THR (熱抵抗)
+				return test_mode::THR;
 			}
 			return test_mode::NONE;
 		}
@@ -432,9 +435,14 @@ namespace app {
 				cmd_task_ = cmd_task::crm;
 				break;
 
-			case test_mode::WDM:
+			case test_mode::VI:
+				cmd_task_ = cmd_task::dc2;
+				break;
+
+			case test_mode::WD:
 				cmd_task_ = cmd_task::wdm;
 				break;
+
 
 			default:
 				break;
