@@ -306,7 +306,7 @@ namespace net {
 						treg_buff_[(treg_ch_ & 1) * WAVE_BUFF_SIZE + pos] = v;
 						++treg_pos_;
 						if(treg_pos_ >= WAVE_BUFF_SIZE) {
-							++mod_status_.treg_id_[treg_ch_ & 3];
+							++mod_status_.treg_id_[treg_ch_ & 1];
 // std::cout << "TRMW: " << treg_ch_ << std::endl;
 						}
 						t = d;
