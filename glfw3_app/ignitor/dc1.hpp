@@ -299,6 +299,7 @@ namespace app {
 			voltage_->load(pre);
 			current_->load(pre);
 			all_->load(pre);
+			all_->exec();
 		}
 	};
 }

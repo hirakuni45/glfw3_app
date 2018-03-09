@@ -400,6 +400,7 @@ namespace app {
 			current_->load(pre);
 			delay_->load(pre);
 			all_->load(pre);
+			all_->exec();
 		}
 	};
 }

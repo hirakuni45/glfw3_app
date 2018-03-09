@@ -316,6 +316,7 @@ namespace app {
 			freq_->load(pre);
 			mode_->load(pre);
 			all_->load(pre);
+			all_->exec();
 		}
 	};
 }

@@ -94,8 +94,11 @@ namespace app {
 				// S44, S41, S42, S43, S44
 				uint16_t wgm_sw = 0b01001;
 				s += (boost::format("wgm WGSW%02X\n") % wgm_sw).str();
+
 				uint32_t ivolt = 7.2f / 15.626e-6;
 				s += (boost::format("wgm WGDV%05X\n") % (ivolt & 0xfffff)).str();
+				uint32_t volt = 5.0f / 0.02f;
+				s += (boost::format("wgm WGPV%03X\n") % (volt & 0x3ff)).str();
 				int iena = 1;
 				s += (boost::format("wgm WGDE%d\n") % iena).str();
 			}
@@ -343,6 +346,7 @@ std::cout << s << std::flush;
 			current_->load(pre);
 			count_->load(pre);
 			all_->load(pre);
+			all_->exec();
 		}
 	};
 }

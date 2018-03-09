@@ -176,6 +176,7 @@ namespace app {
 		{
 			tools::load_sw(pre, sw_, 6);
 			all_->load(pre);
+			all_->exec();
 		}
 	};
 }
