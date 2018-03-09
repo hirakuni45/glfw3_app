@@ -470,6 +470,35 @@ namespace app {
 				widget::param wp(vtx::irect(5, 60, d_w - 10, 350), dialog_);
 				widget_sheet::param wp_;
 				sheet_ = wd.add_widget<widget_sheet>(wp, wp_);
+				sheet_->at_local_param().select_func_ = [=](uint32_t newidx, uint32_t id) {
+					bool c0 = false;
+					bool c1 = false;
+					bool c2 = false;
+					bool c3 = false;
+					switch(newidx) {
+					case 0:
+						c0 = true;
+						break;
+					case 1:
+						c1 = true;
+						break;
+					case 2:
+						c2 = true;
+						break;
+					case 3:
+						c3 = true;
+						break;
+					default:
+						break;
+					}
+					if(!c0) crm_.all_->set_check(c0);
+					if(!c1) dc2_.all_->set_check(c1);
+					if(!c2) {
+						dc1_.all_->set_check(c2);
+						wgm_.all_->set_check(c2);
+					}
+					if(!c3) thr_.all_->set_check(c3);
+				};
 			}
 			{
 				widget::param wp(vtx::irect(0, 0, 0, 0), sheet_);
