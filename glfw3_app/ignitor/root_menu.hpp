@@ -28,6 +28,9 @@
 #include "test.hpp"
 #include "kikusui.hpp"
 
+// 菊水の電源無検出の場合、「OK」ダイアログ
+#define KIKUSUI_NO_FAIL
+
 namespace app {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -71,6 +74,7 @@ namespace app {
 		gui::widget_label*		cont_setting_ip_[4];
 		gui::widget_label*		cont_setting_cmds_;
 		gui::widget_list*		cont_setting_serial_;
+		gui::widget_text*		cont_setting_msg_;
 		gui::widget_button*		cont_setting_exec_;
 
 		gui::widget_dialog*		info_dialog_;
@@ -120,6 +124,7 @@ namespace app {
 		SERIAL				serial_;
 		SERIAL::name_list	serial_list_;
 		kikusui				kikusui_;
+		uint32_t			kikusui_loop_;
 
 		double			last_value_;
 
@@ -142,7 +147,7 @@ namespace app {
 			cont_setting_dialog_(nullptr),
 		   	cont_connect_(nullptr), cont_setting_ip_{ nullptr },
 			cont_setting_cmds_(nullptr), cont_setting_serial_(nullptr),
-			cont_setting_exec_(nullptr),
+			cont_setting_msg_(nullptr), cont_setting_exec_(nullptr),
 			info_dialog_(nullptr), msg_dialog_(nullptr),
 			inspection_(d, client, ilock, wave_cap_, kikusui_),
 			project_(d),
@@ -154,7 +159,7 @@ namespace app {
 //			mctrl_task_(mctrl_task::idle), mctrl_delay_(0), mctrl_id_(0),
 			dc2_id_(0), crm_id_(0), wdm_id_{ 0 }, time_out_(0),
 
-			serial_(), serial_list_(), kikusui_(serial_),
+			serial_(), serial_list_(), kikusui_(serial_), kikusui_loop_(0),
 			last_value_(0.0)
 			{ }
 
@@ -345,8 +350,8 @@ namespace app {
 			project_.initialize();
 
 			{  // コントローラー設定ダイアログ
-				int w = 450;
-				int h = 260;
+				int w = 520;
+				int h = 290;
 				widget::param wp(vtx::irect(100, 100, w, h));
 				widget_dialog::param wp_(widget_dialog::style::OK);
 				cont_setting_dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
@@ -419,6 +424,11 @@ namespace app {
 						s += '\n';
 						client_.send_data(s);
 					};
+				}
+				{  // メッセージ表示用
+					widget::param wp(vtx::irect(10, 200, w - 20, 40), root);
+					widget_text::param wp_;
+					cont_setting_msg_ = wd.add_widget<widget_text>(wp, wp_);
 				}
 			}
 
@@ -538,6 +548,23 @@ namespace app {
 					if(serial_.open(cont_setting_serial_->get_select_text())) {
 // std::cout << "Serial Open: " << cont_setting_serial_->get_select_text() << std::endl;
 						kikusui_.start();
+						kikusui_loop_ = 60;
+					}
+				}
+			}
+			if(kikusui_loop_ > 0) {
+				--kikusui_loop_;
+				if(kikusui_loop_ == 0) {
+					if(kikusui_.get_idn().empty()) {
+#ifdef KIKUSUI_NO_FAIL
+						err_dialog_->set_text("KIKUSUI PAV320-0.65 が見つかりません。");
+						err_dialog_->enable();
+#else
+						msg_dialog_->set_text("KIKUSUI PAV320-0.65 が見つかりません。");
+						msg_dialog_->enable();
+#endif
+					} else {
+						cont_setting_msg_->set_text(kikusui_.get_idn());
 					}
 				}
 			}
