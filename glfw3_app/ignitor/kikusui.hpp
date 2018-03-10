@@ -48,14 +48,26 @@ namespace app {
 		uint32_t	curr_id_;
 
 		uint32_t	loop_;
-		bool		term_;
 		bool		timeout_;
-		uint32_t	refc_loop_;
-		uint32_t	refc_id_;
-		bool		refc_;
-		float		ref_curr_;
+		uint32_t	refc_wait_;
+		float		refc_;
+
+		std::string	rt_;
 
 		std::string	idn_;
+
+		bool get_text_()
+		{
+			while(fifo_.length() > 0) {
+				auto ch = fifo_.get();
+				if(ch == '\n') {
+					return true;
+				} else if(ch != '\r') {
+					rt_ += ch;
+				}
+			}
+			return false;
+		}
 
 	public:
 		//-----------------------------------------------------------------//
@@ -65,8 +77,8 @@ namespace app {
 		//-----------------------------------------------------------------//
 		kikusui(device::serial_win32& serial) : serial_(serial),
 			fifo_(), task_(task::idle), volt_(0.0f), curr_(0.0f),
-			volt_id_(0), curr_id_(0), loop_(0), term_(false), timeout_(false),
-			refc_loop_(0), refc_id_(0), refc_(false), ref_curr_(0.0f), idn_()
+			volt_id_(0), curr_id_(0), loop_(0), timeout_(false),
+			refc_wait_(0), refc_(0.0f), idn_()
 		{ }
 
 
@@ -79,8 +91,9 @@ namespace app {
 		{
 			std::string s = "INST:NSEL 6;*IDN?\r\n";
 			serial_.write(s.c_str(), s.size());
+			rt_.clear();
 			task_ = task::state;
-			loop_ = 60;  // time out 1 sec
+			loop_ = 60;  // *IDN? time out 1 sec
 		}
 
 
@@ -137,7 +150,8 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void set_volt(float volt, float curr)
 		{
-			auto s = (boost::format("CURR %5.4f A;VOLT %5.4f V\r\n") % curr % volt).str();
+			auto s = (boost::format("CURR %5.4f A;VOLT %5.4f V\r\n")
+				% (curr + refc_) % volt).str();
 			serial_.write(s.c_str(), s.size());
 // std::cout << "VOLT: " << s << std::flush;
 		}
@@ -152,7 +166,8 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void set_curr(float curr, float volt)
 		{
-			auto s = (boost::format("VOLT %5.4f V;CURR %5.4f A\r\n") % volt % curr).str();
+			auto s = (boost::format("VOLT %5.4f V;CURR %5.4f A\r\n")
+				% volt % (curr + refc_)).str();
 			serial_.write(s.c_str(), s.size());
 // std::cout << "CURR: " << s << std::flush;
 		}
@@ -167,6 +182,7 @@ namespace app {
 		{
 			std::string s = "MEAS:VOLT:DC?\r\n";
 			serial_.write(s.c_str(), s.size());
+			rt_.clear();
 			task_ = task::volt;
 		}
 
@@ -180,18 +196,9 @@ namespace app {
 		{
 			std::string s = "MEAS:CURR:DC?\r\n";
 			serial_.write(s.c_str(), s.size());
-			timeout_ = false;
+			rt_.clear();
 			task_ = task::curr;
 		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief  電流 ID を取得
-			@return 電流 ID
-		*/
-		//-----------------------------------------------------------------//
-		uint32_t get_curr_id() const { return curr_id_; }
 
 
 		//-----------------------------------------------------------------//
@@ -205,7 +212,7 @@ namespace app {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief  電圧を取得
+			@brief  電圧を取得 [V]
 			@return 電圧
 		*/
 		//-----------------------------------------------------------------//
@@ -214,20 +221,34 @@ namespace app {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief  基準電流を取得
-			@return 基準電流
+			@brief  電流 ID を取得
+			@return 電流 ID
 		*/
 		//-----------------------------------------------------------------//
-		float get_ref_curr() const { return ref_curr_; }
+		uint32_t get_curr_id() const { return curr_id_; }
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief  電流を取得
+			@brief  基準電流を取得 [A]
+			@return 基準電流
+		*/
+		//-----------------------------------------------------------------//
+		float get_ref_curr() const { return refc_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  電流を取得 [A]
 			@return 電流
 		*/
 		//-----------------------------------------------------------------//
-		float get_curr() const { return curr_ - ref_curr_; }
+		float get_curr() const {
+			auto a = curr_ - refc_;
+			// 負電流の場合は、絶対値にしとく・・
+			if(a < 0.0f) a = std::abs(a);
+			return a;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -242,105 +263,61 @@ namespace app {
 			for(uint32_t i = 0; i < rl; ++i) {
 				char ch = tmp[i];
 				fifo_.put(ch);
-				if(ch == '\n') {
-					term_ = true;
-					break;
-				}
 			}
 
 			switch(task_) {
 			case task::state:
-				while(fifo_.length() > 0) {
-					auto ch = fifo_.get();
-					if(ch == '\r') {
-						ch = 0;
-					} else if(ch == '\n') {
-//						task_ = task::refc;
-						task_ = task::idle;
-						break;
-					}
-					idn_ += ch;
-				}
-				if(loop_ > 0) {
-					--loop_;
+				if(get_text_()) {
+					idn_ = rt_;
+					task_ = task::refc;
 				} else {
-					timeout_ = true;
-					task_ = task::idle;
+					if(loop_ > 0) {
+						--loop_;
+					} else {
+						timeout_ = true;
+						task_ = task::idle;
+					}
 				}
 				break;
 
 			case task::refc:
 				set_output(1);
-				refc_loop_ = 90;
+				refc_wait_ = 90;
 				task_ = task::refc_wait;
 				break;
 			case task::refc_wait:
-				if(refc_loop_ > 0) {
-					refc_loop_--;
+				if(refc_wait_ > 0) {
+					refc_wait_--;
 				} else {
 					std::string s = "MEAS:CURR:DC?\r\n";
-					serial_.write(s.c_str(), s.size());					
+					serial_.write(s.c_str(), s.size());
+					rt_.clear();
 					task_ = task::refc_sync;
 				}
 				break;
 			case task::refc_sync:
-#if 0
-				if(fifo_.length() > 0) {
-					std::string s;
-					while(fifo_.length() > 0) {
-						auto ch = fifo_.get();
-						if(ch == '\r') {
-							ch = 0;
-						} else if(ch == '\n') {
-							break;
-						}
-						s += ch;
-					}
-					if((utils::input("%f", s.c_str()) % curr_).status()) {
-						++curr_id_;
+				if(get_text_()) {
+					if((utils::input("%f", rt_.c_str()) % refc_).status()) {
 					}
 					set_output(0);
 					task_ = task::idle;
 				}
-#endif
 				break;
 
 			case task::volt:
-				if(fifo_.length() > 0 && term_) {
-					std::string s;
-					while(fifo_.length() > 0) {
-						auto ch = fifo_.get();
-						if(ch == '\r') {
-							ch = 0;
-						} else if(ch == '\n') {
-							break;
-						}
-						s += ch;
-					}
-					if((utils::input("%f", s.c_str()) % volt_).status()) {
+				if(get_text_()) {
+					if((utils::input("%f", rt_.c_str()) % volt_).status()) {
 						++volt_id_;
 					}
-					term_ = false;
 					task_ = task::idle;
 				}
 				break;
 
 			case task::curr:
-				if(fifo_.length() > 0 && term_) {
-					std::string s;
-					while(fifo_.length() > 0) {
-						auto ch = fifo_.get();
-						if(ch == '\r') {
-							ch = 0;
-						} else if(ch == '\n') {
-							break;
-						}
-						s += ch;
-					}
-					if((utils::input("%f", s.c_str()) % curr_).status()) {
+				if(get_text_()) {
+					if((utils::input("%f", rt_.c_str()) % curr_).status()) {
 						++curr_id_;
 					}
-					term_ = true;
 					task_ = task::idle;
 				}
 				break;
