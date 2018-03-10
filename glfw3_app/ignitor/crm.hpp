@@ -87,7 +87,7 @@ namespace app {
 				}
 				s += (boost::format("crm CROE%d\n") % ena).str();
 				if(ena) {
-					s += "delay 3\n";
+					s += "delay 10\n";
 					if(mode) {
 						s += (boost::format("crm CRC?1\n")).str();
 					} else {
