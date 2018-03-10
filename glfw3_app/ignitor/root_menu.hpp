@@ -156,7 +156,6 @@ namespace app {
 
 			task_(task::idle), unit_id_(0), wait_(0), retry_(0),
 			err_dialog_(nullptr), okc_dialog_(nullptr),
-//			mctrl_task_(mctrl_task::idle), mctrl_delay_(0), mctrl_id_(0),
 			dc2_id_(0), crm_id_(0), wdm_id_{ 0 }, time_out_(0),
 
 			serial_(), serial_list_(), kikusui_(serial_), kikusui_loop_(0),
