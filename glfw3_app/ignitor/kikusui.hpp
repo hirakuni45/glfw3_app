@@ -1,7 +1,10 @@
 #pragma once
 //=====================================================================//
 /*! @file
-    @brief  菊水電源インターフェース・クラス
+    @brief  菊水電源インターフェース・クラス @n
+			※0.14 mA 以下の電流を測定出来ない為、停電流源による下駄を @n
+			履かせている。@n
+			その為、起動時に定電流源の基準を測定している。
     @author 平松邦仁 (hira@rvf-rc45.net)
 	@copyright	Copyright (C) 2018 Kunihito Hiramatsu @n
 				Released under the MIT license @n
