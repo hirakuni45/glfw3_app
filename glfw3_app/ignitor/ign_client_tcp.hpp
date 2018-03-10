@@ -327,7 +327,7 @@ namespace net {
 		{
 #ifdef DEBUG_EMU
 			if(text.find("CRR?1") != std::string::npos) {
-				double a = 50.0;
+				double a = 390.0;  // オーム
 				a *= 2.0;
 				a /= 778.2;
 				a *= 50.0;
@@ -340,7 +340,7 @@ namespace net {
 				a /= 1e6;
 				a = 1.0 / (2.0 * 3.141592654 * 1000.0 * a);
 				a *= 2.0;
-				a /= 778.2 * 2.0;  // 778.2 mV P-P
+				a /= 778.2;  // 778.2 mV P-P
 				a *= 50.0;
 				a *= static_cast<double>(0x7FFFF) / 1.570798233;
 				mod_status_.crcd_ = 50 * 0x7ffff + static_cast<uint32_t>(a);
