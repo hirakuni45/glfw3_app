@@ -58,6 +58,9 @@ namespace app {
 		gui::widget_button*		exec_;		///< DC2 設定転送
 		gui::widget_check*		all_;		///< DC2 全体
 
+		gui::widget_button*		run_refs_;	///< DC2 校正モード
+//		gui::widget_text*		reg_refs_[6];
+
 		bool					probe_mode_;
 		uint32_t				curr_delay_;
 		uint32_t				curr_id_;
@@ -201,7 +204,7 @@ namespace app {
 				widget_label::param wp_("0.5", false);
 				delay_ = wd.add_widget<widget_label>(wp, wp_);
 				delay_->at_local_param().select_func_ = [=](const std::string& str) {
-					delay_->set_text(tools::limitf(str, 0.45f, 5.0f, "%2.1f"));
+					delay_->set_text(tools::limitf(str, 0.45f, 30.0f, "%2.1f"));
 				};
 			}
 			{  // 電流、電圧測定値
@@ -263,6 +266,7 @@ namespace app {
 					}
 #endif
 					client_.send_data(t.build());
+					probe_->set_text("");
 				};
 			}
 			{
@@ -282,6 +286,7 @@ namespace app {
 					current_->set_stall(!ena, widget::STALL_GROUP::_1);
 					delay_->set_stall(!ena, widget::STALL_GROUP::_1);
 					exec_->set_stall(!ena, widget::STALL_GROUP::_1);
+					probe_->set_text("");
 				};
 			}
 		}
