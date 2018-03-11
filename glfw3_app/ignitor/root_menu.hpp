@@ -685,6 +685,13 @@ namespace app {
 							task_ = task::sence;
 						}
 						break;
+					case inspection::test_mode::V_MES:
+					case inspection::test_mode::I_MES:
+						if(dc2_id_ != inspection_.get_dc2_id()) {
+							dc2_id_ = inspection_.get_dc2_id();
+							task_ = task::sence;
+						}
+						break;
 					case inspection::test_mode::WD:
 						for(uint32_t i = 0; i < 4; ++i) {
 							if(wdm_id_[i] != client_.get_mod_status().wdm_id_[i]) {
@@ -720,6 +727,12 @@ namespace app {
 						break;
 					case inspection::test_mode::R_MES:
 						v = inspection_.get_crrd_value();
+						break;
+					case inspection::test_mode::V_MES:
+						v = inspection_.get_volt_value();
+						break;
+					case inspection::test_mode::I_MES:
+						v = inspection_.get_curr_value();
 						break;
 					case inspection::test_mode::WD:
 						v = wave_cap_.get_mesa_value();

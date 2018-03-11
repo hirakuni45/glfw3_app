@@ -62,9 +62,10 @@ namespace app {
 		//=================================================================//
 		enum class test_mode {
 			NONE,		///< 無効
-			C_MES,		///< 容量計測（静特性）
-			R_MES,		///< 抵抗計測（静特性）
-			VI,			///< 電圧、電流計測（静特性）
+			C_MES,		///< 容量計測（CRM/静特性）
+			R_MES,		///< 抵抗計測（CRM/静特性）
+			V_MES,		///< 電圧計測（DC2/静特性）
+			I_MES,		///< 電流計測（DC2/静特性）
 			THR,		///< 熱抵抗計測（静特性）
 			WD,			///< 波形計測（動特性）
 		};
@@ -333,7 +334,11 @@ namespace app {
 					return test_mode::C_MES;
 				}
 			} else if(sheet_->get_select_pos() == 1) {  // DC2 (静特性）
-				return test_mode::VI;
+				if(dc2_.mode_->get_select_pos() == 0) {
+					return test_mode::I_MES;
+				} else {
+					return test_mode::V_MES;
+				}
 			} else if(sheet_->get_select_pos() == 2) {  // WDM (動特性）
 				return test_mode::WD;
 			} else {  // THR (熱抵抗)
@@ -410,6 +415,11 @@ namespace app {
 		double get_crrd_value() const { return crm_.crrd_value_; }
 		double get_crcd_value() const { return crm_.crcd_value_; }
 
+		uint32_t get_dc2_id() const { return dc2_.id_; }
+		bool get_dc2_mode() const { return dc2_.mode_->get_select_pos(); }
+		double get_volt_value() const { return dc2_.volt_value_; }
+		double get_curr_value() const { return dc2_.curr_value_; }
+
 
 		//-----------------------------------------------------------------//
 		/*!
@@ -429,7 +439,8 @@ namespace app {
 				cmd_task_ = cmd_task::crm;
 				break;
 
-			case test_mode::VI:
+			case test_mode::V_MES:
+			case test_mode::I_MES:
 				cmd_task_ = cmd_task::dc2;
 				break;
 
