@@ -389,6 +389,7 @@ namespace gui {
 ///						param_.select_func_(menu_->get_select_text(), menu_->get_select_pos());
 ///					}
 				}
+				enable_ = false;
 			}
 			return err == 0;
 		}

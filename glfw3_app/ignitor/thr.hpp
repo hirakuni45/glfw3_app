@@ -69,7 +69,7 @@ namespace app {
 				// DC1 熱抵抗関係設定
 				{  // DC1: S42, S49, 定電流モード、加熱電流設定、出力は OFF
 					s += (boost::format("dc1 D1SW%02X\n") % sw).str();
-					uint16_t delay = 5;
+					uint16_t delay = 10;
 					s += (boost::format("delay %d\n") % delay).str();
 					s += "dc1 D1MD0\n";  // CC mode
 					s += (boost::format("dc1 D1IS%05X\n") % (curr & 0xfffff)).str();
@@ -89,13 +89,18 @@ namespace app {
 				s += (boost::format("dc2 D2SW%04X\n") % dc2_sw).str();
 				kikusui_.set_output(1);
 				kikusui_.set_volt(14.0f, 0.1f);  // 14V 定電圧、最大 0.1A
+				uint16_t delay = 10;
+				s += (boost::format("delay %d\n") % delay).str();
 			}
 			{  // WGM: S45, S48, 内臓電源電圧 7.2V、出力 OFF
 				// S44, S41, S42, S43, S44
 				uint16_t wgm_sw = 0b01001;
 				s += (boost::format("wgm WGSW%02X\n") % wgm_sw).str();
+
 				uint32_t ivolt = 7.2f / 15.626e-6;
 				s += (boost::format("wgm WGDV%05X\n") % (ivolt & 0xfffff)).str();
+				uint32_t volt = 5.0f / 0.02f;
+				s += (boost::format("wgm WGPV%03X\n") % (volt & 0x3ff)).str();
 				int iena = 1;
 				s += (boost::format("wgm WGDE%d\n") % iena).str();
 			}
@@ -106,23 +111,25 @@ namespace app {
 				uint32_t sw = 0b1111;  // all ON!
 				cmd |= sw << 12;
 				s += (boost::format("wdm %06X\n") % cmd).str();
-				s += "delay 1\n";
 
 				// sampling freq
 				// 100K (10uS)
 				cmd = (0b00010000 << 16) | (static_cast<uint32_t>(0b01000011) << 8);
 				s += (boost::format("wdm %06X\n") % cmd).str();
 
+				cmd = (0b00100000 << 16);
+				s += (boost::format("wdm %06X\n") % cmd).str();
+
 				// trigger channel
 				cmd = (0b00100000 << 16);
-				cmd |= 0x0200;  // external trigger
+				cmd |= 0x0200;  // external trigger, single trigger
 //				if(sm_trg_->get_select_pos()) cmd |= 0x0100;
-				auto ch = 1;
+				uint32_t ch = 0;
 				uint8_t sub = 0;
 				sub |= 0x80;  // trigger ON
 				cmd |= static_cast<uint32_t>(ch & 3) << 14;
 //				if(slope_->get_select_pos()) sub |= 0x40;
-//				sub |= window_->get_select_pos() & 15;
+				sub |= 1;  // windows = 1
 				cmd |= sub;
 				s += (boost::format("wdm %06X\n") % cmd).str();
 			}
@@ -154,6 +161,9 @@ namespace app {
 		void startup()
 		{
 			std::string s;
+			{  // DC2
+				kikusui_.set_output(0);
+			}
 			{  // DC1
 				uint16_t sw = 0;
 				s += (boost::format("dc1 D1SW%02X\n") % sw).str();
@@ -169,7 +179,24 @@ namespace app {
 				uint32_t cmd = 0b00001000;
 				cmd <<= 16;
 				s += (boost::format("wdm %06X\n") % cmd).str();
-
+			}
+			{  // WGM
+				uint32_t sw = 0;
+				uint32_t type = 0;
+				uint32_t frq = 0;
+				uint32_t duty = 0;
+				uint32_t volt = 0;
+				uint32_t ena = 0;
+				uint32_t iena = 0;
+				uint32_t ivolt = 0;
+				s += (boost::format("wgm WGSW%02X\n") % sw).str();
+				s += (boost::format("wgm WGSP%d\n") % type).str();
+				s += (boost::format("wgm WGFQ%02X\n") % (frq & 0x7f)).str();
+				s += (boost::format("wgm WGPW%03X\n") % (duty & 0x3ff)).str();
+				s += (boost::format("wgm WGPV%03X\n") % (volt & 0x3ff)).str();
+				s += (boost::format("wgm WGOE%d\n") % ena).str();
+				s += (boost::format("wgm WGDV%05X\n") % (ivolt & 0xfffff)).str();
+				s += (boost::format("wgm WGDE%d\n") % iena).str();
 			}
 			client_.send_data(s);
 		}
@@ -244,7 +271,8 @@ namespace app {
 				widget_button::param wp_(">");
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
 				exec_->at_local_param().select_func_ = [=](int n) {
-					auto s = build_sub_();
+					std::string s = build_sub_();
+// std::cout << s << std::flush;
 					thr_t t;
 					uint16_t sw = 0;
 					for(int i = 0; i < 5; ++i) {
@@ -258,7 +286,7 @@ namespace app {
 						t.curr = v / 31.25e-6;
 					}
 					s += t.build();
-std::cout << s << std::flush;
+// std::cout << s << std::endl;
 					client_.send_data(s);
 				};
 			}
@@ -344,6 +372,7 @@ std::cout << s << std::flush;
 			current_->load(pre);
 			count_->load(pre);
 			all_->load(pre);
+			all_->exec();
 		}
 	};
 }

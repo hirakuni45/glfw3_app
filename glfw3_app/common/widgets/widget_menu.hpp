@@ -431,7 +431,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void update() override
 		{
-			if(!get_state(widget::state::ENABLE) || list_.empty()) {
+			if(list_.empty()) {
 				return;
 			}
 

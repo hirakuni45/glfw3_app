@@ -58,13 +58,20 @@ namespace app {
 		gui::widget_button*		exec_;		///< DC2 設定転送
 		gui::widget_check*		all_;		///< DC2 全体
 
+		gui::widget_button*		run_refs_;	///< DC2 校正モード
+//		gui::widget_text*		reg_refs_[6];
+
 		bool					probe_mode_;
 		uint32_t				curr_delay_;
 		uint32_t				curr_id_;
+		float					curr_value_;
 		uint32_t				volt_delay_;
 		uint32_t				volt_id_;
+		float					volt_value_;
+		uint32_t				id_;
 
 	private:
+
 		struct dc2_t {
 			uint32_t	sw;		///< 14 bits
 			uint32_t	delay;	///< SW オンからコマンド発行までの遅延（10ms単位）
@@ -112,8 +119,10 @@ namespace app {
 			ena_(nullptr), mode_(nullptr), voltage_(nullptr), current_(nullptr),
 			delay_(nullptr), probe_(nullptr),
 			exec_(nullptr), all_(nullptr),
-			probe_mode_(false), curr_delay_(0), curr_id_(0),
-			volt_delay_(0), volt_id_(0)
+			probe_mode_(false),
+			curr_delay_(0), curr_id_(0), curr_value_(0.0f),
+			volt_delay_(0), volt_id_(0), volt_value_(0.0f),
+			id_(0)
 		{ }
 
 
@@ -201,7 +210,7 @@ namespace app {
 				widget_label::param wp_("0.5", false);
 				delay_ = wd.add_widget<widget_label>(wp, wp_);
 				delay_->at_local_param().select_func_ = [=](const std::string& str) {
-					delay_->set_text(tools::limitf(str, 0.45f, 5.0f, "%2.1f"));
+					delay_->set_text(tools::limitf(str, 0.45f, 30.0f, "%2.1f"));
 				};
 			}
 			{  // 電流、電圧測定値
@@ -263,6 +272,7 @@ namespace app {
 					}
 #endif
 					client_.send_data(t.build());
+					probe_->set_text("");
 				};
 			}
 			{
@@ -282,6 +292,7 @@ namespace app {
 					current_->set_stall(!ena, widget::STALL_GROUP::_1);
 					delay_->set_stall(!ena, widget::STALL_GROUP::_1);
 					exec_->set_stall(!ena, widget::STALL_GROUP::_1);
+					probe_->set_text("");
 				};
 			}
 		}
@@ -316,11 +327,15 @@ namespace app {
 				auto c = kikusui_.get_curr();
 				c *= 1000.0f;
 				probe_->set_text((boost::format("%6.5f") % c).str());
+				curr_value_ = c;
+				++id_;
 			}
 			if(volt_id_ != kikusui_.get_volt_id()) {
 				volt_id_ = kikusui_.get_volt_id();
 				auto v = kikusui_.get_volt();
 				probe_->set_text((boost::format("%6.5f") % v).str());
+				volt_value_ = v;
+				++id_;
 			}
 #endif
 #if 0
@@ -400,6 +415,7 @@ namespace app {
 			current_->load(pre);
 			delay_->load(pre);
 			all_->load(pre);
+			all_->exec();
 		}
 	};
 }

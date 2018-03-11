@@ -8,6 +8,7 @@
 				https://github.com/hirakuni45/RX/blob/master/LICENSE
 */
 //=====================================================================//
+#include <algorithm>
 #include "core/glcore.hpp"
 #include "utils/director.hpp"
 #include "utils/select_file.hpp"
@@ -56,8 +57,15 @@ namespace app {
 		double					crcd_value_;
 
 	private:
+		static const uint32_t crm_count_limit_ = 5;  // 測定回数
+
+		std::vector<float>		crrd_vals_;
+		std::vector<float>		crcd_vals_;
+
 		uint32_t				crrd_id_;
 		uint32_t				crcd_id_;
+
+		std::string				req_cmd_;
 
 		struct crm_t {
 			uint16_t	sw;		///< 14 bits
@@ -79,7 +87,7 @@ namespace app {
 				}
 				s += (boost::format("crm CROE%d\n") % ena).str();
 				if(ena) {
-					s += "delay 1\n";
+					s += "delay 10\n";
 					if(mode) {
 						s += (boost::format("crm CRC?1\n")).str();
 					} else {
@@ -89,6 +97,18 @@ namespace app {
 				return s;
 			}
 		};
+
+
+		float median_(std::vector<float>& ss)
+		{
+			std::sort(ss.begin(), ss.end());
+			float v = ss[ss.size() / 2];
+			if((ss.size() & 1) == 0) {
+				v += ss[(ss.size() / 2) + 1];
+				v *= 0.5f;
+			}
+			return v;
+		}
 
 	public:
 		//-----------------------------------------------------------------//
@@ -102,7 +122,7 @@ namespace app {
 			ena_(nullptr), amps_(nullptr), freq_(nullptr), mode_(nullptr),
 			ans_(nullptr), exec_(nullptr), all_(nullptr),
 			crrd_value_(0.0), crcd_value_(0.0),
-			crrd_id_(0), crcd_id_(0)
+			crrd_vals_(), crcd_vals_(), crrd_id_(0), crcd_id_(0), req_cmd_()
 		{ }
 
 
@@ -193,8 +213,11 @@ namespace app {
 					t.amps = amps_->get_select_pos();
 					t.freq = freq_->get_select_pos();
 					t.mode = mode_->get_select_pos();
-
-					client_.send_data(t.build());
+					req_cmd_ = t.build();
+					client_.send_data(req_cmd_);
+					crrd_vals_.clear();
+					crcd_vals_.clear();
+					ans_->set_text("");
 				};
 			}
 			{
@@ -213,6 +236,7 @@ namespace app {
 					freq_->set_stall(!ena, widget::STALL_GROUP::_1);
 					mode_->set_stall(!ena, widget::STALL_GROUP::_1);
 					exec_->set_stall(!ena, widget::STALL_GROUP::_1);
+					ans_->set_text("");
 				};
 			}
 		}
@@ -241,8 +265,13 @@ namespace app {
 						0.2, 2.0, 20.0, 200.0
 					};
 					a /= itbl[amps_->get_select_pos()];
-					crrd_value_ = a;
-					ans_->set_text((boost::format("%5.4f Ω") % a).str());
+					crrd_vals_.push_back(a);
+					if(crrd_vals_.size() >= crm_count_limit_) {
+						crrd_value_ = median_(crrd_vals_);
+						ans_->set_text((boost::format("%4.3f Ω") % crrd_value_).str());
+					} else {
+						client_.send_data(req_cmd_);
+					}
 				}
 			} else { // CRCD
 				if(crcd_id_ != client_.get_mod_status().crcd_id_) {
@@ -260,8 +289,14 @@ namespace app {
 
 					a = 1.0 / (2.0 * 3.141592654 * 1000.0 * a);
 					a *= 1e6;
-					crcd_value_ = a;
-					ans_->set_text((boost::format("%5.4f uF") % a).str());
+					crcd_vals_.push_back(a);
+std::cout << a << std::endl;
+					if(crcd_vals_.size() >= crm_count_limit_) {
+						crcd_value_ = median_(crcd_vals_);
+						ans_->set_text((boost::format("%4.3f uF") % crcd_value_).str());
+					} else {
+						client_.send_data(req_cmd_);
+					}
 				}
 			}
 		}
@@ -316,6 +351,7 @@ namespace app {
 			freq_->load(pre);
 			mode_->load(pre);
 			all_->load(pre);
+			all_->exec();
 		}
 	};
 }
