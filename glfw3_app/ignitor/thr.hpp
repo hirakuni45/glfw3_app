@@ -109,7 +109,8 @@ namespace app {
 				s += "delay 1\n";
 
 				// sampling freq
-				cmd = (0b00010000 << 16) | 0b01000011;  // 100K (10uS)
+				// 100K (10uS)
+				cmd = (0b00010000 << 16) | (static_cast<uint32_t>(0b01000011) << 8);
 				s += (boost::format("wdm %06X\n") % cmd).str();
 
 				// trigger channel
