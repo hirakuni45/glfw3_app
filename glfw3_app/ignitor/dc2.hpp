@@ -59,7 +59,7 @@ namespace app {
 		gui::widget_check*		all_;		///< DC2 全体
 
 		gui::widget_button*		run_refs_;	///< DC2 校正モード
-//		gui::widget_text*		reg_refs_[6];
+		gui::widget_text*		reg_refs_[6];
 
 		bool					probe_mode_;
 		uint32_t				curr_delay_;
@@ -118,7 +118,7 @@ namespace app {
 			sw_{ nullptr },
 			ena_(nullptr), mode_(nullptr), voltage_(nullptr), current_(nullptr),
 			delay_(nullptr), probe_(nullptr),
-			exec_(nullptr), all_(nullptr),
+			exec_(nullptr), all_(nullptr), run_refs_(nullptr), reg_refs_{ nullptr },
 			probe_mode_(false),
 			curr_delay_(0), curr_id_(0), curr_value_(0.0f),
 			volt_delay_(0), volt_id_(0), volt_value_(0.0f),
@@ -292,8 +292,21 @@ namespace app {
 					current_->set_stall(!ena, widget::STALL_GROUP::_1);
 					delay_->set_stall(!ena, widget::STALL_GROUP::_1);
 					exec_->set_stall(!ena, widget::STALL_GROUP::_1);
+					run_refs_->set_stall(!ena, widget::STALL_GROUP::_1);
 					probe_->set_text("");
 				};
+			}
+			{  // 校正ボタン
+				widget::param wp(vtx::irect(ofsx, ofsy + 50, 100, 40), root);
+				wp.pre_group_ = 1000;
+				widget_button::param wp_("校正");
+				run_refs_ = wd.add_widget<widget_button>(wp, wp_);
+			}
+			for(uint32_t i = 0; i < 5; ++i) {  // 校正データ
+				widget::param wp(vtx::irect(ofsx + 110 + i * 80, ofsy + 50, 70, 40), root);
+				wp.pre_group_ = 1000;
+				widget_text::param wp_("-");
+				reg_refs_[i] = wd.add_widget<widget_text>(wp, wp_);
 			}
 		}
 
