@@ -52,6 +52,10 @@ namespace app {
 		gui::widget_label*		ans_;		///< CRM 測定結果 
 		gui::widget_button*		exec_;		///< CRM 設定転送
 		gui::widget_check*		all_;		///< CRM 全体
+		gui::widget_button*		run_refs_;	///< CRM 公正用ボタン
+		gui::widget_text*		reg_refs_[5];
+
+		gui::widget_dialog*		dialog_;
 
 		double					crrd_value_;
 		double					crcd_value_;
@@ -65,18 +69,27 @@ namespace app {
 		uint32_t				crrd_id_;
 		uint32_t				crcd_id_;
 
-		std::string				req_cmd_;
+		enum class refs_task {
+			none,
+			term1,
+			term2,
+			term3,
+			term4,
+			term5,
+			fin
+		};
+		refs_task				refs_task_;
 
 		struct crm_t {
 			uint16_t	sw;		///< 14 bits
 			bool		ena;	///< 0, 1
-			uint16_t	amps;	///< 0, 1, 2
+			uint16_t	amps;	///< 0, 1, 2, 3
 			uint16_t	freq;	///< 0, 1, 2
 			uint16_t	mode;	///< 0, 1
 
 			crm_t() : sw(0), ena(0), amps(0), freq(0), mode(0) { }
 
-			std::string build() const
+			std::string build(uint32_t delay) const
 			{
 				std::string s;
 				if(ena) {
@@ -87,16 +100,36 @@ namespace app {
 				}
 				s += (boost::format("crm CROE%d\n") % ena).str();
 				if(ena) {
-					s += "delay 10\n";
-					if(mode) {
+//					if(delay > 0) {
+//						s += (boost::format("delay %d\n") % delay).str();
+//					}
+					if(mode > 0) {  // mode 1, 2
 						s += (boost::format("crm CRC?1\n")).str();
-					} else {
+					} else {  // mode 0
 						s += (boost::format("crm CRR?1\n")).str();
 					}
 				}
 				return s;
 			}
 		};
+		crm_t			last_crm_t_;
+
+
+		std::string make_crm_param_(uint32_t delay)
+		{
+			crm_t& t = last_crm_t_;
+			uint16_t sw = 0;
+			for(int i = 0; i < 14; ++i) {
+				sw <<= 1;
+				if(sw_[i]->get_check()) sw |= 1;
+			}
+			t.sw = sw;
+			t.ena = ena_->get_check();
+			t.amps = amps_->get_select_pos();
+			t.freq = freq_->get_select_pos();
+			t.mode = mode_->get_select_pos();
+			return t.build(delay);
+		}
 
 
 		float median_(std::vector<float>& ss)
@@ -110,6 +143,21 @@ namespace app {
 			return v;
 		}
 
+
+		void refs_sub_(const std::string& ins = "")
+		{
+			int n = static_cast<int>(refs_task_) - static_cast<int>(refs_task::term1);
+			std::string str;
+			if(!ins.empty()) {
+				str = (boost::format("Term%d の校正値：%s") % n % ins).str();
+			}
+			if(refs_task_ != refs_task::fin) {
+				if(!str.empty()) str += '\n';	
+				str += (boost::format("Term%d の校正を行います。") % (n + 1)).str();
+			}
+			dialog_->set_text(str);
+		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -121,8 +169,10 @@ namespace app {
 			sw_{ nullptr },
 			ena_(nullptr), amps_(nullptr), freq_(nullptr), mode_(nullptr),
 			ans_(nullptr), exec_(nullptr), all_(nullptr),
+			run_refs_(nullptr), reg_refs_{ nullptr }, dialog_(nullptr),
 			crrd_value_(0.0), crcd_value_(0.0),
-			crrd_vals_(), crcd_vals_(), crrd_id_(0), crcd_id_(0), req_cmd_()
+			crrd_vals_(), crcd_vals_(), crrd_id_(0), crcd_id_(0),
+			refs_task_(refs_task::none), last_crm_t_()
 		{ }
 
 
@@ -134,7 +184,7 @@ namespace app {
 		void startup()
 		{
 			crm_t t;
-			client_.send_data(t.build());
+			client_.send_data(t.build(0));
 		}
 
 
@@ -190,6 +240,7 @@ namespace app {
 				widget_list::param wp_;
 				wp_.init_list_.push_back("抵抗値");
 				wp_.init_list_.push_back("容量値");
+				wp_.init_list_.push_back("容量値（抵抗除外）");
 				mode_ = wd.add_widget<widget_list>(wp, wp_); 
 			}
 			{  // 答え
@@ -202,19 +253,8 @@ namespace app {
 				widget_button::param wp_(">");
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
 				exec_->at_local_param().select_func_ = [=](int n) {
-					crm_t t;
-					uint16_t sw = 0;
-					for(int i = 0; i < 14; ++i) {
-						sw <<= 1;
-						if(sw_[i]->get_check()) sw |= 1;
-					}
-					t.sw = sw;
-					t.ena = ena_->get_check();
-					t.amps = amps_->get_select_pos();
-					t.freq = freq_->get_select_pos();
-					t.mode = mode_->get_select_pos();
-					req_cmd_ = t.build();
-					client_.send_data(req_cmd_);
+					auto str = make_crm_param_(120);
+					client_.send_data(str);
 					crrd_vals_.clear();
 					crcd_vals_.clear();
 					ans_->set_text("");
@@ -236,7 +276,65 @@ namespace app {
 					freq_->set_stall(!ena, widget::STALL_GROUP::_1);
 					mode_->set_stall(!ena, widget::STALL_GROUP::_1);
 					exec_->set_stall(!ena, widget::STALL_GROUP::_1);
+					run_refs_->set_stall(!ena, widget::STALL_GROUP::_1);
 					ans_->set_text("");
+				};
+			}
+			{  // 校正ボタン
+				widget::param wp(vtx::irect(ofsx, ofsy + 50, 100, 40), root);
+				wp.pre_group_ = 1000;
+				widget_button::param wp_("校正");
+				run_refs_ = wd.add_widget<widget_button>(wp, wp_);
+				run_refs_->at_local_param().select_func_ = [=](uint32_t id) {
+					refs_task_ = refs_task::term1;
+					refs_sub_();
+					dialog_->enable();
+				};
+			}
+			for(uint32_t i = 0; i < 5; ++i) {  // 校正データ表示
+				widget::param wp(vtx::irect(ofsx + 110 + i * 80, ofsy + 50, 70, 40), root);
+				wp.pre_group_ = 1000;
+				widget_text::param wp_("---");
+				wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
+											 vtx::placement::vertical::CENTER);
+				reg_refs_[i] = wd.add_widget<widget_text>(wp, wp_);
+			}
+			if(0) {  // 校正ダイアログ
+				widget::param wp(vtx::irect(100, 100, 500, 300));
+				wp.pre_group_ = 1000;
+				widget_dialog::param wp_(widget_dialog::style::CANCEL_OK);
+				dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
+				dialog_->enable(false);
+				dialog_->at_local_param().select_func_ = [=](bool ok) {
+					switch(refs_task_) {
+					case refs_task::term1:
+						dialog_->enable(ok);
+						refs_task_ = refs_task::term2;
+						refs_sub_("0.0011");
+						break;
+					case refs_task::term2:
+						dialog_->enable(ok);
+						refs_task_ = refs_task::term3;
+						refs_sub_("0.0012");
+						break;
+					case refs_task::term3:
+						dialog_->enable(ok);
+						refs_task_ = refs_task::term4;
+						refs_sub_("0.0013");
+						break;
+					case refs_task::term4:
+						dialog_->enable(ok);
+						refs_task_ = refs_task::term5;
+						refs_sub_("0.0014");
+						break;
+					case refs_task::term5:
+						dialog_->enable(ok);
+						refs_task_ = refs_task::fin;
+						refs_sub_("0.0015");
+						break;
+					default:
+						break;
+					}
 				};
 			}
 		}
@@ -256,10 +354,15 @@ namespace app {
 			if(mode_->get_select_pos() == 0) {  // CRRD
 				if(crrd_id_ != client_.get_mod_status().crrd_id_) {
 					crrd_id_ = client_.get_mod_status().crrd_id_;
-					uint32_t v = client_.get_mod_status().crrd_;
-					v -= sample_num * 0x7FFFF;
-					double a = static_cast<double>(v) / 50.0 / static_cast<double>(0x7FFFF)
-						* 1.570798233;
+					int32_t v = client_.get_mod_status().crrd_;
+					int32_t ofs = sample_num * 0x7FFFF;
+					v -= ofs;
+//					if(v < -ofs || v > ofs) {
+//						ans_->set_text("OVF");
+//						return;
+//					}
+					double a = static_cast<double>(v) / static_cast<double>(ofs) * 1.570798233;
+// std::cout << a << std::endl;
 					a *= 778.2;  // 778.2 mV P-P
 					static const double itbl[4] = {  // 電流テーブル
 						0.2, 2.0, 20.0, 200.0
@@ -268,34 +371,41 @@ namespace app {
 					crrd_vals_.push_back(a);
 					if(crrd_vals_.size() >= crm_count_limit_) {
 						crrd_value_ = median_(crrd_vals_);
-						ans_->set_text((boost::format("%4.3f Ω") % crrd_value_).str());
+						ans_->set_text((boost::format("%6.5f Ω") % crrd_value_).str());
 					} else {
-						client_.send_data(req_cmd_);
+						auto str = make_crm_param_(0);
+						client_.send_data(str);
 					}
 				}
-			} else { // CRCD
+			} else { // CRCD (1, 2)
 				if(crcd_id_ != client_.get_mod_status().crcd_id_) {
 					crcd_id_ = client_.get_mod_status().crcd_id_;
-					uint32_t v = client_.get_mod_status().crcd_;
-// std::cout << v << std::endl;
-					v -= sample_num * 0x7FFFF;
-					double a = static_cast<double>(v) / 50.0 / static_cast<double>(0x7FFFF)
-						* 1.570798233;
+					int32_t v = client_.get_mod_status().crcd_;
+					int32_t ofs = sample_num * 0x7FFFF;
+					v -= ofs;
+//					if(v < -ofs || v > ofs) {
+//						ans_->set_text("OVF");
+//						return;
+//					}
+					double a = static_cast<double>(v) / static_cast<double>(ofs) * 1.570798233;
 					a *= 778.2;  // 778.2 mV P-P
+					double b = 390.0;
 					static const double itbl[4] = {  // 電流テーブル
 						0.2, 2.0, 20.0, 200.0
 					};
-					a /= itbl[amps_->get_select_pos()];
-
-					a = 1.0 / (2.0 * 3.141592654 * 1000.0 * a);
+//					a /= itbl[amps_->get_select_pos()];
+//					a = 1.0 / (2.0 * 3.141592654 * 1000.0 * a);
+///					a = itbl[amps_->get_select_pos()] / (2.0 * 3.141592654 * 1000.0 * a);
+					a = (itbl[amps_->get_select_pos()] * a * a)
+						/ (2.0 * 3.141592654 * 1000.0 * (a * a + b * b));
 					a *= 1e6;
 					crcd_vals_.push_back(a);
-std::cout << a << std::endl;
 					if(crcd_vals_.size() >= crm_count_limit_) {
 						crcd_value_ = median_(crcd_vals_);
-						ans_->set_text((boost::format("%4.3f uF") % crcd_value_).str());
+						ans_->set_text((boost::format("%6.5f uF") % crcd_value_).str());
 					} else {
-						client_.send_data(req_cmd_);
+						auto str = make_crm_param_(0);
+						client_.send_data(str);
 					}
 				}
 			}

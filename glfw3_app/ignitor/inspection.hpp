@@ -14,7 +14,6 @@
 #include "widgets/widget_dialog.hpp"
 #include "widgets/widget_frame.hpp"
 #include "widgets/widget_button.hpp"
-#include "widgets/widget_text.hpp"
 #include "widgets/widget_label.hpp"
 #include "widgets/widget_spinbox.hpp"
 #include "widgets/widget_check.hpp"
