@@ -1004,11 +1004,11 @@ namespace app {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief  測定単位取得
-			@return 測定単位
+			@brief  測定単位文字列の取得
+			@return 測定単位文字列
 		*/
 		//-----------------------------------------------------------------//
-		std::string get_unit() const {
+		std::string get_unit_str() const {
 			std::string u;
 			auto n = mesa_type_->get_select_pos();
 			if(n == 0 || n == 1) {  // 時間
