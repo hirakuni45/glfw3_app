@@ -261,6 +261,21 @@ namespace app {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief  測定単位文字列の取得
+			@return 測定単位文字列
+		*/
+		//-----------------------------------------------------------------//
+		std::string get_unit_str() const {
+			if(mode_->get_select_pos() == 0) {  // 抵抗
+				return "Ω";
+			} else {  // 容量
+				return "uF";
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief  スタートアップ
 		*/
 		//-----------------------------------------------------------------//
@@ -530,7 +545,7 @@ namespace app {
 			case refs_task::term5:
 				if(refs_id_ != crm_id_) {
 					refs_id_ = crm_id_;
-					auto s = (boost::format("%6.5f") % crrd_value_).str();
+					auto s = (boost::format("%6.5f Ω") % crrd_value_).str();
 					int idx = static_cast<int>(refs_task_) - static_cast<int>(refs_task::term1);
 					reg_refs_[idx]->set_text(s);
 					refs_msg_(s);

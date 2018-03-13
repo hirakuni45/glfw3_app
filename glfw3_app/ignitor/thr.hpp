@@ -42,16 +42,14 @@ namespace app {
 		interlock&				interlock_;
 		kikusui&				kikusui_;
 
-	public:
 		gui::widget_check*		sw_[5];		///< DC1 接続スイッチ
 
 		gui::widget_label*		thk_;		///< THR 温度係数
 		gui::widget_label*		current_;	///< DC1（電流）
 		gui::widget_spinbox*	count_;		///< DC1 熱抵抗測定回数
-
 		gui::widget_label*		probe_;		///< THR 熱抵抗値
-
 		gui::widget_button*		exec_;		///< THR 設定転送
+	public:
 		gui::widget_check*		all_;		///< THR 全体
 
 	private:
@@ -151,6 +149,17 @@ namespace app {
 			exec_(nullptr), all_(nullptr),
 			thr_()
 			{ }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  測定単位文字列の取得
+			@return 測定単位文字列
+		*/
+		//-----------------------------------------------------------------//
+		const std::string get_unit_str() const {
+			return "℃/W";
+		}
 
 
 		//-----------------------------------------------------------------//
