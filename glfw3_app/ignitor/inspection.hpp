@@ -101,6 +101,7 @@ namespace app {
 		gui::widget_chip*		chip_;			///< help chip
 
 		bool					startup_init_;
+		bool					dc1_all_ena_;
 		uint32_t				d2md_id_;
 
 		uint32_t				wdm_exec_id_;
@@ -125,7 +126,6 @@ namespace app {
 			init_all4,
 
 			crm,		///< CRM 開始
-			crm0,
 
 			wdm,		///< WDM 開始
 			wdm0,
@@ -133,7 +133,6 @@ namespace app {
 			wdm2,
 
 			dc2,		///< DC2 開始
-			dc2_0,
 
 			off_all,	///< 全てのスイッチ、オフ
 			off_all0,
@@ -142,13 +141,18 @@ namespace app {
 			off_all3,
 			off_all4,
 
-			off_crm,	///< CRM スイッチ、オフ
+			off_crm,	///< CRM スイッチ、オフ (CRM)
 
-			off_dc2,	///< DC2 スイッチ、オフ
+			off_dc2,	///< DC2 スイッチ、オフ (DC2)
 
-			off_wdm,	///< WDM スイッチ、オフ
+			off_wdm,	///< WDM スイッチ、オフ (DC1, WDM, WGM, ICM)
 			off_wdm0,
 			off_wdm1,
+			off_wdm2,
+
+			off_thr,	///< THR 関係 OFF (DC1, WDM)
+			off_thr0,
+			off_thr1,
 
 		};
 		cmd_task		cmd_task_;
@@ -188,22 +192,16 @@ namespace app {
 
 
 			case cmd_task::crm:
-				icm_.exec_->exec();
-				cmd_task_ = cmd_task::crm0;
-				break;
-			case cmd_task::crm0:
 				crm_.exec_->exec();
 				cmd_task_ = cmd_task::idle;
 				break;
 
+
 			case cmd_task::dc2:
-				icm_.exec_->exec();
-				cmd_task_ = cmd_task::dc2_0;
-				break;
-			case cmd_task::dc2_0:
 				dc2_.exec_->exec();
 				cmd_task_ = cmd_task::idle;
 				break;
+
 
 			case cmd_task::wdm:
 				icm_.exec_->exec();
@@ -221,6 +219,7 @@ namespace app {
 				wdm_.exec_->exec();
 				cmd_task_ = cmd_task::idle;
 				break;
+
 
 			case cmd_task::off_all:
 				wdm_.startup();
@@ -247,17 +246,20 @@ namespace app {
 				cmd_task_ = cmd_task::idle;
 				break;
 
-			// CRM のオフ（ICM はそのまま）
+
+			// CRM のオフ
 			case cmd_task::off_crm:
 				crm_.startup();
 				cmd_task_ = cmd_task::idle;
 				break;
 
-			// DC2 のオフ（ICM はそのまま）
+
+			// DC2 のオフ
 			case cmd_task::off_dc2:
 				dc2_.startup();
 				cmd_task_ = cmd_task::idle;
 				break;
+
 
 			// WDM のオフ（ICM はそのまま）
 			case cmd_task::off_wdm:
@@ -269,6 +271,23 @@ namespace app {
 				cmd_task_ = cmd_task::off_wdm1;
 				break;
 			case cmd_task::off_wdm1:
+				wdm_.startup();
+				cmd_task_ = cmd_task::off_wdm2;
+				break;
+			case cmd_task::off_wdm2:
+				icm_.startup();
+				cmd_task_ = cmd_task::idle;
+				break;
+
+			case cmd_task::off_thr:
+				dc1_.startup();
+				cmd_task_ = cmd_task::off_thr0;
+				break;
+			case cmd_task::off_thr0:
+				wgm_.startup();
+				cmd_task_ = cmd_task::off_thr1;
+				break;
+			case cmd_task::off_thr1:
 				wdm_.startup();
 				cmd_task_ = cmd_task::idle;
 				break;
@@ -301,7 +320,7 @@ namespace app {
 
 			chip_(nullptr),
 
-			startup_init_(false),
+			startup_init_(false), dc1_all_ena_(false),
 			d2md_id_(0),
 			wdm_exec_id_(0),
 			test_mode_(test_mode::NONE), cmd_task_(cmd_task::idle)
@@ -313,12 +332,45 @@ namespace app {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief  オフラインシーケンス
+			@brief  全オフライン
+		*/
+		//-----------------------------------------------------------------//
+		void offline_all()
+		{
+			cmd_task_ = cmd_task::off_all;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  モード別、オフライン
 		*/
 		//-----------------------------------------------------------------//
 		void offline()
 		{
-			cmd_task_ = cmd_task::off_all;
+			switch(get_test_mode()) {
+			case test_mode::R_MES:
+			case test_mode::C_MES:
+				cmd_task_ = cmd_task::off_crm;
+				break;
+
+			case test_mode::I_MES:
+			case test_mode::V_MES:
+				cmd_task_ = cmd_task::off_dc2;
+				break;
+
+			case test_mode::WD:
+				cmd_task_ = cmd_task::off_wdm;
+				break;
+
+			case test_mode::THR:
+				cmd_task_ = cmd_task::off_thr;
+				break;
+
+			default:
+				cmd_task_ = cmd_task::off_all;
+				break;
+			}
 		}
 
 
@@ -356,23 +408,15 @@ namespace app {
 			@return 計測単位
 		*/
 		//-----------------------------------------------------------------//
-		std::string get_test_unit() const {
-			if(sheet_->get_select_pos() == 0) {  // CR
-				if(crm_.mode_->get_select_pos() == 0) {
-					return "mOHM";
-				} else {
-					return "uF";
-				}
+		std::string get_unit_str() const {
+			if(sheet_->get_select_pos() == 0) {  // CRM
+				return crm_.get_unit_str();
 			} else if(sheet_->get_select_pos() == 1) {  // DC2
-				if(dc2_.mode_->get_select_pos() == 0) {  // 電流 [mA]
-					return "mA";
-				} else {  // 電圧 [V]
-					return "V";
-				} 
+				return dc2_.get_unit_str();
 			} else if(sheet_->get_select_pos() == 2) {  // WDM
-				return wave_cap_.get_unit();
+				return wave_cap_.get_unit_str();
 			} else {  // THR 熱抵抗
-				return "℃/W";
+				return thr_.get_unit_str();
 			}
 			return "";
 		}
@@ -615,6 +659,15 @@ namespace app {
 			// 転送スイッチの状態をネットワークの接続状態で設定
 			icm_.update();
 			dc1_.update();
+			{  // DC1 が ALLOFF の場合、WGM も ALLOFF にする。
+				bool all = dc1_.all_->get_check();
+				if(dc1_all_ena_ && !all) {
+					if(wgm_.all_->get_check()) {
+						wgm_.all_->set_check(false);
+					}
+				}
+				dc1_all_ena_ = all;
+			}
 			dc2_.update();
 			wgm_.update();
 			crm_.update();

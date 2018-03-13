@@ -181,7 +181,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void exit()
 		{
-			inspection_.offline();
+			inspection_.offline_all();
 			kikusui_.stop();
 		}
 
@@ -614,7 +614,7 @@ namespace app {
 					top += (boost::format("検査項目: %s\n") % v.symbol_).str();
 					top += (boost::format("リトライ: %d/%d\n") % retry_ % v.retry_).str();
 					top += (boost::format("待ち時間:  %2.1f [s]\n") % v.wait_).str();
-					std::string unit = inspection_.get_test_unit();
+					std::string unit = inspection_.get_unit_str();
 					top += (boost::format("単位: [%s]\n") % unit).str();
 					std::string min;
 					if(v.min_ >= 0.001) {
@@ -809,11 +809,13 @@ namespace app {
 					project_.save_proj();
 					task_ = task::fin;
 				} else {
+					inspection_.offline();
 					task_ = task::loop;
 				}
 				break;
 
 			case task::fin:
+				inspection_.offline_all();
 				msg_dialog_->enable(false);
 				task_ = task::idle;
 				break;
