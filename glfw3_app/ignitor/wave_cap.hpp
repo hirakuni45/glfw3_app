@@ -1063,6 +1063,8 @@ namespace app {
 				widget::param wp(vtx::irect(610, 5, size_.x, size_.y));
 				widget_frame::param wp_;
 				wp_.plate_param_.set_caption(12);
+				wp_.color_param_.fore_color_ = img::rgba8(65, 100, 150);
+				wp_.color_param_.back_color_ = wp_.color_param_.fore_color_ * 0.7f;
 				frame_ = wd.add_widget<widget_frame>(wp, wp_);
 			}
 			{  // 波形描画ビュー 
