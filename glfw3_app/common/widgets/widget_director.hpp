@@ -10,6 +10,7 @@
 //=====================================================================//
 #include <vector>
 #include <functional>
+#include <iostream>
 #include <boost/unordered_set.hpp>
 #include "widgets/widget.hpp"
 #include "widgets/common_parts.hpp"
@@ -75,6 +76,7 @@ namespace gui {
 		gl::mobj				mobj_;
 		common_parts			common_parts_;
 		uint32_t				serial_;
+		uint32_t				serial_group_;
 		widgets					widgets_;
 		widgets					ci_widgets_;
 
@@ -144,7 +146,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_director() :
 			img_files_(),
-			mobj_(), common_parts_(mobj_), serial_(0), widgets_(),
+			mobj_(), common_parts_(mobj_), serial_(0), serial_group_(5000), widgets_(),
 			position_(0.0f), scale_(1.0f),
 			select_widget_(nullptr),
 			move_widget_(nullptr),
@@ -185,13 +187,18 @@ namespace gui {
 		T* add_widget(const widget::param& bp, const typename T::param& tp) {
 			T* w = new T(*this, bp, tp);
 			w->initialize();
-			w->set_serial(serial_ + bp.pre_group_);
+			uint32_t serial = bp.pre_group_ == 0 ? serial_ : serial_group_;
+			w->set_serial(serial);
 			if(bp.parents_ != nullptr) {  // 親の状態を反映
 				if(!root_widget(w)->get_state(widget::state::ENABLE)) {
 					w->set_state(widget::state::ENABLE, false);
 				}
 			}
-			++serial_;
+			if(bp.pre_group_ == 0) {
+				++serial_;
+			} else {
+				++serial_group_;
+			}
 			widgets_.push_back(w);
 			return w;
 		}
