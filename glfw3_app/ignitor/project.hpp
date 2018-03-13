@@ -786,7 +786,7 @@ namespace app {
 			@param[in]	pre	プリファレンス（参照）
 		*/
 		//-----------------------------------------------------------------//
-		void save_dialog(sys::preference& pre)
+		void save_sys(sys::preference& pre)
 		{
 			edit_dialog_->save(pre);
 			name_dialog_->save(pre);
@@ -800,7 +800,7 @@ namespace app {
 			@param[in]	pre	プリファレンス（参照）
 		*/
 		//-----------------------------------------------------------------//
-		void load_dialog(sys::preference& pre)
+		void load_sys(sys::preference& pre)
 		{
 			edit_dialog_->load(pre);
 			name_dialog_->load(pre);
