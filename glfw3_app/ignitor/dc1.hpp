@@ -51,6 +51,8 @@ namespace app {
 		gui::widget_check*		all_;		///< DC1 全体
 
 	private:
+		uint32_t				offline_;
+
 		struct dc1_t {
 			uint32_t	sw;		///< 5 bits
 			uint32_t	delay;	///< SW オンからコマンド発行までの遅延（10ms単位）
@@ -97,7 +99,7 @@ namespace app {
 			director_(d), client_(client), interlock_(ilc),
 			sw_{ nullptr },
 			ena_(nullptr), mode_(nullptr), voltage_(nullptr), current_(nullptr),
-			exec_(nullptr), all_(nullptr)
+			exec_(nullptr), all_(nullptr), offline_(0)
 		{ }
 
 
@@ -219,8 +221,8 @@ namespace app {
 				widget_check::param wp_;
 				all_ = wd.add_widget<widget_check>(wp, wp_);
 				all_->at_local_param().select_func_ = [=](bool ena) {
-					if(!ena) {
-						startup();
+					if(!ena) {  // オフラインは WGM の関係があり、遅延させる。
+						offline_ = 2;
 					}
 					for(uint32_t i = 0; i < 5; ++i) {
 						sw_[i]->set_stall(!ena, widget::STALL_GROUP::_1);
@@ -243,6 +245,13 @@ namespace app {
 		void update()
 		{
 			exec_->set_stall(!client_.probe());
+			// オフライン遅延処理
+			if(offline_ > 0) {
+				--offline_;
+				if(offline_ == 0) {
+					startup();
+				}
+			}
 		}
 
 
