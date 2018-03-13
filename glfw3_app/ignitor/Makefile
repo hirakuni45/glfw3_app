@@ -259,6 +259,6 @@ copyapp:
 bin_zip:
 	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -mwindows -o $(TARGET)$(FEXT) 
 	rm -f $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip
-	zip $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip *.exe *.dll
+	zip $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip *.exe update.txt
 
 -include $(DEPENDS)
