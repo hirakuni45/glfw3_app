@@ -308,6 +308,9 @@ namespace app {
 		{ }
 
 
+		const crm& get_crm() const { return crm_; } 
+
+
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  オフラインシーケンス
@@ -368,8 +371,8 @@ namespace app {
 				} 
 			} else if(sheet_->get_select_pos() == 2) {  // WDM
 				return wave_cap_.get_unit();
-			} else {  // THR
-
+			} else {  // THR 熱抵抗
+				return "℃/W";
 			}
 			return "";
 		}
@@ -477,7 +480,7 @@ namespace app {
 				};
 			}
 			{	// 共有フレーム（プロパティシート）
-				widget::param wp(vtx::irect(5, 60, d_w - 10, 350), dialog_);
+				widget::param wp(vtx::irect(5, 10, d_w - 10, 400), dialog_);
 				widget_sheet::param wp_;
 				sheet_ = wd.add_widget<widget_sheet>(wp, wp_);
 				sheet_->at_local_param().select_func_ = [=](uint32_t newidx, uint32_t id) {
@@ -575,14 +578,13 @@ namespace app {
 				chip_ = wd.add_widget<widget_chip>(wp, wp_);
 				chip_->active(0);
 			}
-			ofsx = 90;
-			icm_.init(dialog_, d_w, ofsx, 15);
-			ofsx -= 5;
+			ofsx = 90 - 5;
+			icm_.init(style_[2], d_w, ofsx,  30);
 			crm_.init(style_[0], d_w, ofsx,  30);
 			dc2_.init(style_[1], d_w, ofsx,  30);
-			wdm_.init(style_[2], d_w, ofsx,  40);
-			dc1_.init(style_[2], d_w, ofsx, 140);
-			wgm_.init(style_[2], d_w, ofsx, 240);
+			wdm_.init(style_[2], d_w, ofsx,  40 + 40);
+			dc1_.init(style_[2], d_w, ofsx, 140 + 40);
+			wgm_.init(style_[2], d_w, ofsx, 240 + 40);
 			thr_.init(style_[3], d_w, ofsx,  40);
 			ofsx = 130;
 			test_param_.init(dialog_, d_w, ofsx, 420);
@@ -669,7 +671,33 @@ namespace app {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  セーブ
-			@param[in]	path	ファイルパス
+			@param[in]	pre	プリファレンス
+		*/
+		//-----------------------------------------------------------------//
+		void save_sys(sys::preference& pre)
+		{
+			dialog_->save(pre);
+			crm_.save_sys(pre);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  ロード
+			@param[in]	pre	プリファレンス
+		*/
+		//-----------------------------------------------------------------//
+		void load_sys(sys::preference& pre)
+		{
+			dialog_->load(pre);
+			crm_.load_sys(pre);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  セーブ
+			@param[in]	pre	プリファレンス
 			@return 正常なら「true」
 		*/
 		//-----------------------------------------------------------------//
@@ -711,7 +739,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  ロード
-			@param[in]	path	ファイルパス
+			@param[in]	pre	プリファレンス
 			@return 正常なら「true」
 		*/
 		//-----------------------------------------------------------------//

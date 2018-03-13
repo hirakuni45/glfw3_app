@@ -40,7 +40,7 @@ namespace app {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class root_menu {
 
-		static const int32_t  app_version_ = 95;
+		static const int32_t  app_version_ = 98;
 
 		static const int ofs_x_ = 10;
 		static const int ofs_y_ = 10;
@@ -432,7 +432,7 @@ namespace app {
 			}
 
 			{  // 情報ダイアログ
-				int w = 450;
+				int w = 750;
 				int h = 210;
 				widget::param wp(vtx::irect(50, 50, w, h));
 				widget_dialog::param wp_(widget_dialog::style::OK);
@@ -442,7 +442,7 @@ namespace app {
 				s += (boost::format("Build: %d\n") % bid).str();
 				s += (boost::format("Version %d.%02d\n")
 					% (app_version_ / 100) % (app_version_ % 100)).str();
-				s += "Copyright (C) 2018 Graviton Inc.\n";
+				s += "Copyright (C) 2018 Hitachi Automotive Systems Hanshin,Ltd.\n";
 				s += "All Rights Reserved.";
 				info_dialog_->set_text(s);
 				info_dialog_->enable(false);
@@ -663,7 +663,7 @@ namespace app {
 				for(int i = 0; i < 4; ++i) {
 					wdm_id_[i] = client_.get_mod_status().wdm_id_[i];
 				}
-				crm_id_ = client_.get_mod_status().crm_id_;
+				crm_id_ = inspection_.get_crm().get_id();
 				{
 					auto testmode = inspection_.get_test_mode();
 					if(testmode != inspection::test_mode::NONE) {
@@ -680,8 +680,8 @@ namespace app {
 					switch(testmode) {
 					case inspection::test_mode::C_MES:
 					case inspection::test_mode::R_MES:
-						if(crm_id_ != client_.get_mod_status().crm_id_) {
-							crm_id_ = client_.get_mod_status().crm_id_;
+						if(crm_id_ != inspection_.get_crm().get_id()) {
+							crm_id_ = inspection_.get_crm().get_id();
 							task_ = task::sence;
 						}
 						break;
@@ -848,8 +848,8 @@ namespace app {
 			cont_setting_ip_[3]->load(pre);
 			cont_setting_serial_->load(pre);
 
-			project_.load_dialog(pre);	// ダイアログの位置復元
-			inspection_.get_dialog()->load(pre);  	// ダイアログの位置復元
+			project_.load_sys(pre);
+			inspection_.load_sys(pre);
 
 			wave_cap_.load(pre);
 		}
@@ -881,8 +881,8 @@ namespace app {
 			cont_setting_ip_[3]->save(pre);
 			cont_setting_serial_->save(pre);
 
-			project_.save_dialog(pre);	// ダイアログの位置セーブ
-			inspection_.get_dialog()->save(pre);  	// ダイアログの位置セーブ
+			project_.save_sys(pre);
+			inspection_.save_sys(pre);
 
 			wave_cap_.save(pre);
 		}
