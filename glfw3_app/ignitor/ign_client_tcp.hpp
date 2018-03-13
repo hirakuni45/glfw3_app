@@ -36,8 +36,6 @@ namespace net {
 		*/
 		//=================================================================//
 		struct mod_status {
-			uint32_t	crm_id_;
-
 			uint32_t	crcd_;
 			uint32_t	crcd_id_;
 
@@ -52,7 +50,6 @@ namespace net {
 			uint32_t	treg_id_[2];
 
 			mod_status() :
-				crm_id_(0),
 				crcd_(0), crcd_id_(0),
 				crrd_(0), crrd_id_(0),
 				d2md_(0), d2md_id_(0),
@@ -249,7 +246,6 @@ namespace net {
 					if((utils::input("%x", t.c_str()) % v).status()) {
 						mod_status_.crcd_ = v;
 						++mod_status_.crcd_id_;
-						++mod_status_.crm_id_;
 					}
 				} else if(s.find("CRRD") == 0) {
 					auto t = s.substr(4, 8);
@@ -257,7 +253,6 @@ namespace net {
 					if((utils::input("%x", t.c_str()) % v).status()) {
 						mod_status_.crrd_ = v;
 						++mod_status_.crrd_id_;
-						++mod_status_.crm_id_;
 					}			
 				} else if(s.find("D2MD") == 0) {
 					auto t = s.substr(4, 5);
@@ -327,14 +322,15 @@ namespace net {
 		{
 #ifdef DEBUG_EMU
 			if(text.find("CRR?1") != std::string::npos) {
-				double a = 390.0;  // オーム
-				a *= 2.0;
+				static double aaa = 0.0123;
+				double a = aaa;  // オーム
+				aaa += 0.0001;
+				a *= 200.0;  // 200mA
 				a /= 778.2;
 				a *= 50.0;
 				a *= static_cast<double>(0x7FFFF) / 1.570798233;
 				mod_status_.crrd_ = 50 * 0x7ffff + static_cast<uint32_t>(a);
 				++mod_status_.crrd_id_;
-				++mod_status_.crm_id_;
 			} else if(text.find("CRC?1") != std::string::npos) {
 				double a = 0.33;
 				a /= 1e6;
@@ -345,7 +341,6 @@ namespace net {
 				a *= static_cast<double>(0x7FFFF) / 1.570798233;
 				mod_status_.crcd_ = 50 * 0x7ffff + static_cast<uint32_t>(a);
 				++mod_status_.crcd_id_;
-				++mod_status_.crm_id_;
 			} else if(text.find("wdm 20") != std::string::npos) {
 				++mod_status_.wdm_id_[2];
 			}
