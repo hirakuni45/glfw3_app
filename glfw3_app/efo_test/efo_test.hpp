@@ -491,8 +491,10 @@ namespace app {
 			waves_.at_info().time_org_ = 50;
 			waves_.at_info().time_len_ = 150;
 
-			waves_.at_info().volt_org_ = 90;
-			waves_.at_info().volt_len_ = 130;
+			waves_.at_info().volt_org_[0] = 90;
+			waves_.at_info().volt_len_[0] = 130;
+			waves_.at_info().volt_org_[1] = 90;
+			waves_.at_info().volt_len_[1] = 130;
 
 			service_waves_();
 #if 0
