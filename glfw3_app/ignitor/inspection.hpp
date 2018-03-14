@@ -327,6 +327,12 @@ namespace app {
 		{ }
 
 
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  CRM の参照 (const)
+			@return CRM
+		*/
+		//-----------------------------------------------------------------//
 		const crm& get_crm() const { return crm_; } 
 
 
@@ -457,9 +463,6 @@ namespace app {
 		//-----------------------------------------------------------------//
 		const wave_cap::sample_param& get_sample_param() const { return wdm_.sample_param_; }
 
-		bool get_crm_mode() const { return crm_.mode_->get_select_pos(); }
-		double get_crrd_value() const { return crm_.crrd_value_; }
-		double get_crcd_value() const { return crm_.crcd_value_; }
 
 		uint32_t get_dc2_id() const { return dc2_.id_; }
 		bool get_dc2_mode() const { return dc2_.mode_->get_select_pos(); }
@@ -528,6 +531,7 @@ namespace app {
 				widget_sheet::param wp_;
 				sheet_ = wd.add_widget<widget_sheet>(wp, wp_);
 				sheet_->at_local_param().select_func_ = [=](uint32_t newidx, uint32_t id) {
+std::cout << "Sheet index: " << newidx << std::endl;
 					bool c0 = false;
 					bool c1 = false;
 					bool c2 = false;
@@ -548,13 +552,24 @@ namespace app {
 					default:
 						break;
 					}
-					if(!c0) crm_.all_->set_check(c0);
-					if(!c1) dc2_.all_->set_check(c1);
-					if(!c2) {
-						dc1_.all_->set_check(c2);
-						wgm_.all_->set_check(c2);
+					if(!c0) {
+						crm_.all_->set_check(c0);
+						crm_.all_->exec();
 					}
-					if(!c3) thr_.all_->set_check(c3);
+					if(!c1) {
+						dc2_.all_->set_check(c1);
+						dc2_.all_->exec();
+					}
+					if(!c2) {
+						wgm_.all_->set_check(c2);
+						wgm_.all_->exec();
+						dc1_.all_->set_check(c2);
+						dc1_.all_->exec();
+					}
+					if(!c3) {
+						thr_.all_->set_check(c3);
+						thr_.all_->exec();
+					}
 				};
 			}
 			{

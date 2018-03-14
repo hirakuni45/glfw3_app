@@ -723,10 +723,10 @@ namespace app {
 					auto testmode = inspection_.get_test_mode();
 					switch(testmode) {
 					case inspection::test_mode::C_MES:
-						v = inspection_.get_crcd_value();
+						v = inspection_.get_crm().crcd_value_;
 						break;
 					case inspection::test_mode::R_MES:
-						v = inspection_.get_crrd_value();
+						v = inspection_.get_crm().crrd_value_;
 						break;
 					case inspection::test_mode::V_MES:
 						v = inspection_.get_volt_value();
