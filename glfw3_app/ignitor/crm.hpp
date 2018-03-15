@@ -38,7 +38,7 @@ namespace app {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class crm
 	{
-		static const uint32_t DUMMY_LOOP_COUNT = 30;  // ダミーループ
+		static const uint32_t DUMMY_LOOP_COUNT = 45;  // ダミーループ
 
 		static const uint32_t crm_count_limit_ = 10;  // メディアン測定回数
 
@@ -62,6 +62,8 @@ namespace app {
 
 		gui::widget_dialog*		dialog_;
 		gui::widget_dialog*		info_;
+
+		gui::widget_label*		net_regs_;		///< CRM 合成抵抗設定
 
 		double					crrd_value_;
 		double					crcd_value_;
@@ -248,7 +250,7 @@ namespace app {
 			ena_(nullptr), amps_(nullptr), freq_(nullptr), mode_(nullptr),
 			ans_(nullptr), exec_(nullptr), all_(nullptr),
 			run_refs_(nullptr), ena_refs_(nullptr), reg_refs_{ nullptr },
-			dialog_(nullptr), info_(nullptr),
+			dialog_(nullptr), info_(nullptr), net_regs_(nullptr),
 			crrd_value_(0.0), crcd_value_(0.0),
 			crrd_vals_(), crcd_vals_(), crrd_id_(0), crcd_id_(0),
 			refs_task_(refs_task::idle), refs_id_(0), dummy_count_(0), last_cmd_(),
@@ -390,6 +392,7 @@ namespace app {
 					run_refs_->set_stall(!ena, widget::STALL_GROUP::_1);
 					ena_refs_->set_stall(!ena, widget::STALL_GROUP::_1);
 					ans_->set_text("");
+					last_cmd_.clear();
 				};
 			}
 			{  // 校正ボタン
@@ -401,6 +404,7 @@ namespace app {
 					refs_task_ = refs_task::start;
 					refs_msg_("");
 					dialog_->enable();
+					last_cmd_.clear();
 				};
 			}
 			{  // 校正データ、有効／無効
@@ -473,6 +477,12 @@ namespace app {
 				info_ = wd.add_widget<widget_dialog>(wp, wp_);
 				info_->enable(false);
 			}
+			{  // 合成回路、抵抗設定
+				widget::param wp(vtx::irect(ofsx + 220, ofsy + 50, 110, 40), root);
+				wp.pre_group_ = 1;
+				widget_label::param wp_("390.0", false);
+				net_regs_ = wd.add_widget<widget_label>(wp, wp_);
+			}
 		}
 
 
@@ -498,6 +508,11 @@ namespace app {
 					int32_t v = client_.get_mod_status().crrd_;
 					int32_t ofs = sample_num * 0x7FFFF;
 					v -= ofs;
+					double lim = static_cast<double>(ofs) / 1.570798233;
+					if(v >= lim) {
+						ans_->set_text("OVF");
+						return;
+					}
 					double a = static_cast<double>(v) / static_cast<double>(ofs) * 1.570798233;
 // std::cout << a << std::endl;
 					a *= 778.2;  // 778.2 mV P-P
@@ -505,6 +520,8 @@ namespace app {
 						0.2, 2.0, 20.0, 200.0
 					};
 					a /= itbl[amps_->get_select_pos()];
+					// 補正値
+//					a *= 1.0476;
 					crrd_vals_.push_back(a);
 					if(crrd_vals_.size() >= crm_count_limit_) {
 						crrd_value_ = median_(crrd_vals_);
@@ -530,6 +547,11 @@ namespace app {
 					int32_t v = client_.get_mod_status().crcd_;
 					int32_t ofs = sample_num * 0x7FFFF;
 					v -= ofs;
+					double lim = static_cast<double>(ofs) / 1.570798233;
+					if(v >= lim) {
+						ans_->set_text("OVF");
+						return;
+					}
 					double a = static_cast<double>(v) / static_cast<double>(ofs) * 1.570798233;
 					a *= 778.2;  // 778.2 mV P-P
 					static const double itbl[4] = {  // 電流テーブル
@@ -542,9 +564,13 @@ namespace app {
 					double fq = ftbl[freq_->get_select_pos()];
 					if(mode_->get_select_pos() == 1) {  // 容量
 						a = ib / (2.0 * 3.141592654 * fq * a);
+
 					} else {  // 合成
-						double b = 390.0;
+						float b = 390.0;
+						if((utils::input("%f", net_regs_->get_text().c_str()) % b).status()) {
+						}
 						a = (ib * a * a) / ((2.0 * 3.141592654 * fq * (a * a + b * b)));
+						a *= 1.66;
 					}
 					a *= 1e6;
 					crcd_vals_.push_back(a);
@@ -633,6 +659,7 @@ namespace app {
 //				reg_refs_[i]->save(pre);
 //			}
 			reg_refs_[0]->save(pre);
+			net_regs_->save(pre);
 		}
 
 
@@ -674,6 +701,7 @@ namespace app {
 //			}
 			reg_refs_[0]->load(pre);
 			ena_refs_->exec();
+			net_regs_->load(pre);
 		}
 	};
 }
