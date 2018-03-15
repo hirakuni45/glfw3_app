@@ -26,6 +26,14 @@ namespace app {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct tools {
 
+		static void set_checks(gui::widget_check* target[], bool ena, uint32_t n)
+		{
+			for(uint32_t i = 0; i < n; ++i) {
+				target[i]->set_check(ena);
+			}
+		}
+ 
+
 		static std::string limitf(const std::string& str, float min, float max, const char* form)
 		{
 			std::string newtext;
