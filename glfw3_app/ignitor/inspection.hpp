@@ -315,7 +315,7 @@ namespace app {
 			crm_(d, client_, interlock_),
 			icm_(d, client_, interlock_),
 			wdm_(d, client_, interlock_),
-			thr_(d, client_, interlock_, kikusui_),
+			thr_(d, client_, interlock_, kikusui_, wave_cap_),
 			test_param_(d),
 
 			chip_(nullptr),

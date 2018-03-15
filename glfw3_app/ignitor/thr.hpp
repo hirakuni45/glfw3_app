@@ -27,6 +27,7 @@
 #include "ign_client_tcp.hpp"
 #include "interlock.hpp"
 #include "tools.hpp"
+#include "wave_cap.hpp"
 
 namespace app {
 
@@ -41,6 +42,7 @@ namespace app {
 		net::ign_client_tcp&	client_;
 		interlock&				interlock_;
 		kikusui&				kikusui_;
+		wave_cap&				wave_cap_;
 
 		gui::widget_check*		sw_[5];		///< DC1 接続スイッチ
 
@@ -78,6 +80,7 @@ namespace app {
 		};
 		thr_t		thr_;
 
+		uint32_t	id_;
 
 		std::string build_sub_() const
 		{
@@ -115,6 +118,10 @@ namespace app {
 				cmd = (0b00010000 << 16) | (static_cast<uint32_t>(0b01000011) << 8);
 				s += (boost::format("wdm %06X\n") % cmd).str();
 
+				// channel gain
+				cmd = ((0b00011000 | 2) << 16) | (7 << 13);
+				s += (boost::format("wdm %06X\n") % cmd).str();
+
 				cmd = (0b00100000 << 16);
 				s += (boost::format("wdm %06X\n") % cmd).str();
 
@@ -140,14 +147,14 @@ namespace app {
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		thr(utils::director<core>& d, net::ign_client_tcp& client, interlock& ilc, kikusui& kik) :
-			director_(d), client_(client), interlock_(ilc), kikusui_(kik),
+		thr(utils::director<core>& d, net::ign_client_tcp& client, interlock& ilc, kikusui& kik, wave_cap& wac) :
+			director_(d), client_(client), interlock_(ilc), kikusui_(kik), wave_cap_(wac),
 			sw_{ nullptr },
 			thk_(nullptr), 
 			current_(nullptr), count_(nullptr),
 			probe_(nullptr),
 			exec_(nullptr), all_(nullptr),
-			thr_()
+			thr_(), id_(0)
 			{ }
 
 
@@ -327,6 +334,12 @@ namespace app {
 		void update()
 		{
 			exec_->set_stall(!client_.probe());
+
+			if(id_ != wave_cap_.get_treg_value_id()) {
+				auto a = wave_cap_.get_treg_value();
+				probe_->set_text((boost::format("%5.4f mV") % (a * 1000.0f)).str());
+				id_ = wave_cap_.get_treg_value_id();
+			}
 		}
 
 

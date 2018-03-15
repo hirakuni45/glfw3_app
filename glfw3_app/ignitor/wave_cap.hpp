@@ -129,12 +129,19 @@ namespace app {
 		uint32_t				wdm_id_[4];
 		uint32_t				treg_id_[2];
 
+		WAVES::analize_param	treg_1st_;
+		WAVES::analize_param	treg_2nd_;
+		float					treg_value_;
+		uint32_t				treg_value_id_;
+
 		bool					info_in_;
 		vtx::ipos				info_org_;
 
 		info_t					info_;
 
 		gui::widget_chip*		chip_;
+
+
 
 		// チャネル毎の電圧スケールサイズ
 		static const uint32_t volt_scale_0_size_ = 8;
@@ -873,7 +880,7 @@ namespace app {
 				auto b = waves_.measure_fin(sample_param_.rate, a, len - a, param);
 				waves_.at_info().meas_pos_[1] = ofs + (b / get_time_unit_(idx)) * grid;
 
-				tm = b -a;
+				tm = b - a;
 			}
 
 			uint32_t idx = time_.scale_->get_select_pos();
@@ -907,6 +914,7 @@ namespace app {
 			share_frame_(nullptr),
 			sample_param_(),
 			wdm_id_{ 0 }, treg_id_{ 0 },
+			treg_1st_(), treg_2nd_(), treg_value_(0.0f), treg_value_id_(0),
 			info_in_(false), info_org_(0), info_(),
 			chn0_(waves_, 1.25f),
 			chn1_(waves_, 1.25f),
@@ -1018,6 +1026,11 @@ namespace app {
 			}
 			return u;
 		}
+
+
+		float get_treg_value() const { return treg_value_; }
+
+		uint32_t get_treg_value_id() const { return treg_value_id_; }
 
 
 		//-----------------------------------------------------------------//
@@ -1352,9 +1365,25 @@ namespace app {
 			for(uint32_t i = 0; i < 2; ++i) {
 				auto id = client_.get_mod_status().treg_id_[i];
 				if(treg_id_[i] != id) {
-std::cout << "Th REG recv" << std::endl;
 					auto sz = waves_.size();
+#if 1
+					if(i == 0) {
+						waves_.copy(1, client_.get_treg(i) + sz / 2, sz / 2, sz / 2);
+// std::cout << treg_1st_.average_ << std::endl;
+					} else {
+						waves_.copy(1, client_.get_treg(i) + sz / 2, sz / 2, 0);
+						treg_2nd_ = waves_.analize(1, 1.0, (768.0 - 32.0), 64.0, 1.0);
+						treg_1st_ = waves_.analize(1, 1.0, (768.0 + 1024.0 - 32.0), 64.0, 1.0);
+// std::cout << treg_2nd_.average_ << std::endl;
+						float a = treg_1st_.average_ - treg_2nd_.average_; 
+						float u = get_volt_scale_limit_(1);
+						treg_value_ = a * u / 8.0;
+						++treg_value_id_;
+// std::cout << a << std::endl;
+					}
+#else
 					waves_.copy(i + 1, client_.get_treg(i), sz, sz / 2);
+#endif
 					treg_id_[i] = id;
 				}
 			}
@@ -1363,14 +1392,14 @@ std::cout << "Th REG recv" << std::endl;
 				uint32_t act = 60 * 3;
 				if(org_slope_->get_focus()) {
 					std::string s;
-					tools::set_help(chip_, org_slope_, s);
+//					tools::set_help(chip_, org_slope_, s);
 				} else if(fin_slope_->get_focus()) {
 					std::string s;
-					tools::set_help(chip_, fin_slope_, s);
+//					tools::set_help(chip_, fin_slope_, s);
 				} else {
 					act = 0;
 				}
-				chip_->active(act);
+//				chip_->active(act);
 			}
 
 			if(data_load_filer_.state()) {
