@@ -75,6 +75,8 @@ namespace gui {
 
 		uint32_t			id_;
 
+		bool				ena_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -82,7 +84,7 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		widget_chip(widget_director& wd, const widget::param& bp, const param& p) :
-			widget(bp), wd_(wd), param_(p), objh_(0), id_(0) { }
+			widget(bp), wd_(wd), param_(p), objh_(0), id_(0), ena_(false) { }
 
 
 		//-----------------------------------------------------------------//
@@ -280,13 +282,21 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void update() override
 		{
+			if(!ena_ && get_enable()) {
+				if(param_.active_ == 0) {
+					set_state(state::ENABLE, false);
+					return;
+				}
+			}
+			ena_ = get_enable();
+
 			if(get_selected()) {
 				++param_.id_;
 			}
 			if(param_.active_ > 0) {
 				--param_.active_;
 				if(param_.active_ == 0) {
-					active(0);
+					set_state(state::ENABLE, false);
 				}
 			}
 		}
