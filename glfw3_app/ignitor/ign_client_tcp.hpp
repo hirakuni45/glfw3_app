@@ -90,8 +90,7 @@ namespace net {
 			connect_(false), mod_status_(),
 			wdm_ch_(0), wdm_pos_(0), wdm_buff_{ 0 },
 			treg_ch_(0), treg_pos_(0), treg_buff_{ 0 }
-		{
-		}
+		{ }
 
 
 		//-----------------------------------------------------------------//
@@ -345,7 +344,7 @@ namespace net {
 			} else if(text.find("wdm 20") != std::string::npos) {
 				++mod_status_.wdm_id_[2];
 			}
-			std::cout << text << std::endl;
+///			std::cout << text << std::endl;
 			return;
 #else
 			if(send(sock_, text.c_str(), text.size(), 0) == SOCKET_ERROR) {
