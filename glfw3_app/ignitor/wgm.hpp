@@ -65,7 +65,7 @@ namespace app {
 			bool		iena;	///< 内臓電源
 			uint32_t	ivolt;	///< 内臓電源電圧
 
-			wgm_t() : ena(0), type(0), frq(0), duty(0), volt(0), iena(false), ivolt(0) { }
+			wgm_t() : sw(0), ena(0), type(0), frq(0), duty(0), volt(0), iena(false), ivolt(0) { }
 
 			std::string build() const
 			{
@@ -107,6 +107,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void startup()
 		{
+			tools::set_checks(sw_, false, 5);
 			wgm_t t;
 			client_.send_data(t.build());
 		}

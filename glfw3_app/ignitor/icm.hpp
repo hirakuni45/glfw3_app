@@ -80,6 +80,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void startup()
 		{
+			tools::set_checks(sw_, false, 6);
 			icm_t t;
 			client_.send_data(t.build());
 		}

@@ -110,6 +110,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void startup()
 		{
+			tools::set_checks(sw_, false, 5);
 			dc1_t t;
 			client_.send_data(t.build());
 		}

@@ -145,6 +145,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void startup()
 		{
+			tools::set_checks(sw_, false, 14);
 			dc2_t t;
 			client_.send_data(t.build());
 			kikusui_.set_output(0);
@@ -219,7 +220,7 @@ namespace app {
 			}
 			{  // 測定遅延時間
 				widget::param wp(vtx::irect(ofsx + 490, ofsy, 100, 40), root);
-				widget_label::param wp_("0.5", false);
+				widget_label::param wp_("1.0", false);
 				delay_ = wd.add_widget<widget_label>(wp, wp_);
 				delay_->at_local_param().select_func_ = [=](const std::string& str) {
 					delay_->set_text(tools::limitf(str, 0.45f, 30.0f, "%2.1f"));
@@ -338,14 +339,14 @@ namespace app {
 				curr_id_ = kikusui_.get_curr_id();
 				auto c = kikusui_.get_curr();
 				c *= 1000.0f;
-				probe_->set_text((boost::format("%6.5f") % c).str());
+				probe_->set_text((boost::format("%5.4f mA") % c).str());
 				curr_value_ = c;
 				++id_;
 			}
 			if(volt_id_ != kikusui_.get_volt_id()) {
 				volt_id_ = kikusui_.get_volt_id();
 				auto v = kikusui_.get_volt();
-				probe_->set_text((boost::format("%6.5f") % v).str());
+				probe_->set_text((boost::format("%5.4f V") % v).str());
 				volt_value_ = v;
 				++id_;
 			}
