@@ -28,9 +28,6 @@
 #include "test.hpp"
 #include "kikusui.hpp"
 
-// 菊水の電源無検出の場合、「OK」ダイアログ
-#define KIKUSUI_NO_FAIL
-
 namespace app {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -158,7 +155,7 @@ namespace app {
 			err_dialog_(nullptr), okc_dialog_(nullptr),
 			dc2_id_(0), crm_id_(0), wdm_id_{ 0 }, time_out_(0),
 
-			serial_(), serial_list_(), kikusui_(serial_), kikusui_loop_(0),
+			serial_(), serial_list_(), kikusui_(serial_), kikusui_loop_(60),
 			last_value_(0.0)
 			{ }
 
@@ -530,16 +527,18 @@ namespace app {
 			if(serial_list_.empty() || !serial_.compare(serial_list_)) {
 				serial_.create_list();
 				serial_list_ = serial_.get_list();
-				utils::strings list;
-				for(const auto& t : serial_list_) {
-					list.push_back(t.port);
-				}
-				cont_setting_serial_->get_menu()->build(list);
-				auto sel = cont_setting_serial_->get_local_param().text_param_.get_text();
-				if(sel.empty()) {
-	                cont_setting_serial_->select(0);
-				} else {
-	                cont_setting_serial_->select(sel);
+				if(!serial_list_.empty()) {
+					utils::strings list;
+					for(const auto& t : serial_list_) {
+						list.push_back(t.port);
+					}
+					cont_setting_serial_->get_menu()->build(list);
+					auto sel = cont_setting_serial_->get_local_param().text_param_.get_text();
+					if(sel.empty()) {
+		                cont_setting_serial_->select(0);
+					} else {
+		                cont_setting_serial_->select(sel);
+					}
 				}
 			}
 			if(!serial_list_.empty()) {
@@ -555,13 +554,13 @@ namespace app {
 				--kikusui_loop_;
 				if(kikusui_loop_ == 0) {
 					if(kikusui_.get_idn().empty()) {
-#ifdef KIKUSUI_NO_FAIL
-						err_dialog_->set_text("KIKUSUI PAV320-0.65 が見つかりません。");
+						std::string str;
+						str = "KIKUSUI PAV320-0.65 が見つかりません。";
+						if(!serial_.probe()) {
+							str += "\nシリアルポートが見つかりません。";
+						}
+						err_dialog_->set_text(str);
 						err_dialog_->enable();
-#else
-						msg_dialog_->set_text("KIKUSUI PAV320-0.65 が見つかりません。");
-						msg_dialog_->enable();
-#endif
 					} else {
 						cont_setting_msg_->set_text(kikusui_.get_idn());
 					}
