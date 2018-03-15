@@ -854,7 +854,8 @@ namespace app {
 				if(org_trg_->get_select_pos() & 1) base = -100.0f;
 				param.org_slope_ = static_cast<float>(org_slope_->get_select_pos()) / base;
 
-				tm = waves_.measure_org(sample_param_.rate, 0.0, len, param);
+				auto srate = sample_param_.rate;
+				tm = waves_.measure_org(srate, 0.0, 0.0, len, param);
 				uint32_t idx = time_.scale_->get_select_pos();
 				auto grid = waves_.get_info().grid_step_;
 				auto ofs = time_.offset_->get_select_pos() * -grid;
@@ -871,13 +872,14 @@ namespace app {
 				if(fin_trg_->get_select_pos() & 1) base = -100.0f;
 				param.fin_slope_ = static_cast<float>(fin_slope_->get_select_pos()) / base;
 
-				auto a = waves_.measure_org(sample_param_.rate, 0.0, len, param);
+				auto srate = sample_param_.rate;
+				auto a = waves_.measure_org(srate, 0.0, 0.0, len, param);
 				uint32_t idx = time_.scale_->get_select_pos();
 				auto grid = waves_.get_info().grid_step_;
 				auto ofs = time_.offset_->get_select_pos() * -grid;
 				waves_.at_info().meas_pos_[0] = ofs + (a / get_time_unit_(idx)) * grid;
 
-				auto b = waves_.measure_fin(sample_param_.rate, a, len - a, param);
+				auto b = waves_.measure_fin(srate, 0.0, a, len, param);
 				waves_.at_info().meas_pos_[1] = ofs + (b / get_time_unit_(idx)) * grid;
 
 				tm = b - a;
