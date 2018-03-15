@@ -531,7 +531,7 @@ namespace app {
 				widget_sheet::param wp_;
 				sheet_ = wd.add_widget<widget_sheet>(wp, wp_);
 				sheet_->at_local_param().select_func_ = [=](uint32_t newidx, uint32_t id) {
-std::cout << "Sheet index: " << newidx << std::endl;
+// std::cout << "Sheet index: " << newidx << std::endl;
 					bool c0 = false;
 					bool c1 = false;
 					bool c2 = false;
@@ -561,6 +561,8 @@ std::cout << "Sheet index: " << newidx << std::endl;
 						dc2_.all_->exec();
 					}
 					if(!c2) {
+						icm_.all_->set_check(c2);
+						icm_.all_->exec();
 						wgm_.all_->set_check(c2);
 						wgm_.all_->exec();
 						dc1_.all_->set_check(c2);
