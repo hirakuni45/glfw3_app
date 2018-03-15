@@ -320,6 +320,7 @@ namespace net {
 		//-----------------------------------------------------------------//
 		void send_data(const std::string& text)
 		{
+// std::cout << text << std::endl;
 #ifdef DEBUG_EMU
 			if(text.find("CRR?1") != std::string::npos) {
 				static double aaa = 0.0123;
