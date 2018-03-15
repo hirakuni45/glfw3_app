@@ -57,6 +57,7 @@ namespace app {
 		gui::widget_button*		exec_;		///< CRM 設定転送
 		gui::widget_check*		all_;		///< CRM 全体
 		gui::widget_button*		run_refs_;	///< CRM 公正用ボタン
+		gui::widget_check*		ena_refs_;
 		gui::widget_text*		reg_refs_[5];
 
 		gui::widget_dialog*		dialog_;
@@ -101,8 +102,8 @@ namespace app {
 			std::string build(uint32_t delay) const
 			{
 				std::string s;
+				s = (boost::format("crm CRSW%04X\n") % sw).str();
 				if(ena) {
-					s += (boost::format("crm CRSW%04X\n") % sw).str();
 					s += (boost::format("crm CRIS%d\n") % amps).str();
 					static const char* frqtbl[3] = { "001", "010", "100" };
 					s += (boost::format("crm CRFQ%s\n") % frqtbl[freq % 3]).str();
@@ -157,10 +158,10 @@ namespace app {
 			int n = static_cast<int>(refs_task_) - static_cast<int>(refs_task::start);
 			std::string str = "200 mA / 抵抗測定\n";
 			if(n >= 1 && n <= 5) {
-				str += (boost::format("Term%d - Term6 の校正値：%s\n") % n % ins).str();
+				str += (boost::format("Term1 - Term4 の校正値：%s\n") % ins).str();
 			}
 			if(n >= 0 && n <= 4) {
-				str += (boost::format("Term%d - Term6 の校正を行います。") % (n + 1)).str();
+				str += (boost::format("Term1 - Term4 の校正を行います。")).str();
 			}
 			dialog_->set_text(str);
 		}
@@ -172,7 +173,7 @@ namespace app {
 			crm_t t;
 			switch(n) {
 			case 1:
-				t.sw = 0b10000000000010;  // T1 - T6
+				t.sw = 0b10000000001000;  // T1 - T4
 				break;
 			case 2:
 				t.sw = 0b01000000000010;  // T2 - T6
@@ -211,6 +212,10 @@ namespace app {
 		double get_bias_()
 		{
 			double ofs = 0.0;
+			// T1 - T4
+			if((utils::input("%f", reg_refs_[0]->get_text().c_str()) % ofs).status()) {
+			}
+#if 0
 			if(sw_[0]->get_check()) {  // T1
 				if((utils::input("%f", reg_refs_[0]->get_text().c_str()) % ofs).status()) {
 				}
@@ -227,6 +232,7 @@ namespace app {
 				if((utils::input("%f", reg_refs_[4]->get_text().c_str()) % ofs).status()) {
 				}
 			}
+#endif
 			return ofs;
 		}
 
@@ -241,8 +247,8 @@ namespace app {
 			sw_{ nullptr },
 			ena_(nullptr), amps_(nullptr), freq_(nullptr), mode_(nullptr),
 			ans_(nullptr), exec_(nullptr), all_(nullptr),
-			run_refs_(nullptr), reg_refs_{ nullptr }, dialog_(nullptr),
-			info_(nullptr),
+			run_refs_(nullptr), ena_refs_(nullptr), reg_refs_{ nullptr },
+			dialog_(nullptr), info_(nullptr),
 			crrd_value_(0.0), crcd_value_(0.0),
 			crrd_vals_(), crcd_vals_(), crrd_id_(0), crcd_id_(0),
 			refs_task_(refs_task::idle), refs_id_(0), dummy_count_(0), last_cmd_(),
@@ -281,6 +287,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void startup()
 		{
+			tools::set_checks(sw_, false, 14);
 			crm_t t;
 			client_.send_data(t.build(0));
 		}
@@ -381,6 +388,7 @@ namespace app {
 					mode_->set_stall(!ena, widget::STALL_GROUP::_1);
 					exec_->set_stall(!ena, widget::STALL_GROUP::_1);
 					run_refs_->set_stall(!ena, widget::STALL_GROUP::_1);
+					ena_refs_->set_stall(!ena, widget::STALL_GROUP::_1);
 					ans_->set_text("");
 				};
 			}
@@ -395,8 +403,19 @@ namespace app {
 					dialog_->enable();
 				};
 			}
+			{  // 校正データ、有効／無効
+				widget::param wp(vtx::irect(ofsx + 110, ofsy + 50, 90, 40), root);
+				wp.pre_group_ = 1;
+				widget_check::param wp_("有効");
+				ena_refs_ = wd.add_widget<widget_check>(wp, wp_);
+				ena_refs_->at_local_param().select_func_ = [=](bool ena) {
+					for(uint32_t i = 0; i < 5; ++i) {
+						reg_refs_[i]->set_stall(!ena);
+					}
+				};
+			}
 			for(uint32_t i = 0; i < 5; ++i) {  // 校正データ表示
-				widget::param wp(vtx::irect(ofsx + 110 + i * 120, ofsy + 50, 100, 40), root);
+				widget::param wp(vtx::irect(ofsx + i * 140, ofsy + 100, 120, 40), root);
 				wp.pre_group_ = 1;
 				widget_text::param wp_("*");
 				wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
@@ -417,7 +436,7 @@ namespace app {
 					}
 					switch(refs_task_) {
 					case refs_task::start:
-						refs_task_ = refs_task::term1;
+						refs_task_ = refs_task::term5;
 						refs_msg_("");
 						refs_send_();
 						break;
@@ -490,7 +509,9 @@ namespace app {
 					if(crrd_vals_.size() >= crm_count_limit_) {
 						crrd_value_ = median_(crrd_vals_);
 						if(amps_->get_select_pos() == 3 && refs_task_ == refs_task::idle) {
-							crrd_value_ -= get_bias_();
+							if(ena_refs_->get_check()) {
+								crrd_value_ -= get_bias_();
+							}
 						}
 						ans_->set_text((boost::format("%6.5f Ω") % crrd_value_).str());
 						++crm_id_;
@@ -546,8 +567,9 @@ namespace app {
 				if(refs_id_ != crm_id_) {
 					refs_id_ = crm_id_;
 					auto s = (boost::format("%6.5f Ω") % crrd_value_).str();
-					int idx = static_cast<int>(refs_task_) - static_cast<int>(refs_task::term1);
-					reg_refs_[idx]->set_text(s);
+///					int idx = static_cast<int>(refs_task_) - static_cast<int>(refs_task::term1);
+///					reg_refs_[idx]->set_text(s);
+					reg_refs_[0]->set_text(s);
 					refs_msg_(s);
 					dialog_->enable();
 				}
@@ -585,9 +607,10 @@ namespace app {
 		{
 			dialog_->save(pre);
 			info_->save(pre);
-			for(uint32_t i = 0; i < 5; ++i) {
-				reg_refs_[i]->save(pre);
-			}
+//			for(uint32_t i = 0; i < 5; ++i) {
+//				reg_refs_[i]->save(pre);
+//			}
+			reg_refs_[0]->save(pre);
 		}
 
 
@@ -605,9 +628,11 @@ namespace app {
 			freq_->save(pre);
 			mode_->save(pre);
 			all_->save(pre);
-			for(uint32_t i = 0; i < 5; ++i) {
-				reg_refs_[i]->save(pre);
-			}
+			ena_refs_->save(pre);
+//			for(uint32_t i = 0; i < 5; ++i) {
+//				reg_refs_[i]->save(pre);
+//			}
+			reg_refs_[0]->save(pre);
 		}
 
 
@@ -621,9 +646,10 @@ namespace app {
 		{
 			dialog_->load(pre);
 			info_->load(pre);
-			for(uint32_t i = 0; i < 5; ++i) {
-				reg_refs_[i]->load(pre);
-			}
+//			for(uint32_t i = 0; i < 5; ++i) {
+//				reg_refs_[i]->load(pre);
+//			}
+			reg_refs_[0]->load(pre);
 		}
 
 
@@ -642,9 +668,12 @@ namespace app {
 			mode_->load(pre);
 			all_->load(pre);
 			all_->exec();
-			for(uint32_t i = 0; i < 5; ++i) {
-				reg_refs_[i]->load(pre);
-			}
+			ena_refs_->load(pre);
+//			for(uint32_t i = 0; i < 5; ++i) {
+//				reg_refs_[i]->load(pre);
+//			}
+			reg_refs_[0]->load(pre);
+			ena_refs_->exec();
 		}
 	};
 }
