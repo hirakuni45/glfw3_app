@@ -54,6 +54,8 @@ namespace app {
 	public:
 		gui::widget_check*		all_;		///< THR 全体
 
+		float					thr_value_;	///< 熱抵抗値
+
 	private:
 
 		struct thr_t {
@@ -156,6 +158,15 @@ namespace app {
 			exec_(nullptr), all_(nullptr),
 			thr_(), id_(0)
 			{ }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  値の更新 ID 取得
+			@return 値の更新 ID
+		*/
+		//-----------------------------------------------------------------//
+		uint32_t get_id() const { return id_; }
 
 
 		//-----------------------------------------------------------------//
@@ -338,6 +349,10 @@ namespace app {
 			if(id_ != wave_cap_.get_treg_value_id()) {
 				auto a = wave_cap_.get_treg_value();
 				probe_->set_text((boost::format("%5.4f mV") % (a * 1000.0f)).str());
+				float k = 1.0f;
+				if((utils::input("%f", thk_->get_text().c_str()) % k).status()) {
+				}
+				thr_value_ = a / k;
 				id_ = wave_cap_.get_treg_value_id();
 			}
 		}
