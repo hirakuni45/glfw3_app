@@ -26,7 +26,6 @@
 #include "utils/preference.hpp"
 
 #include "tools.hpp"
-#include "relay_map.hpp"
 #include "ign_client_tcp.hpp"
 #include "interlock.hpp"
 #include "wave_cap.hpp"
@@ -531,7 +530,6 @@ namespace app {
 				widget_sheet::param wp_;
 				sheet_ = wd.add_widget<widget_sheet>(wp, wp_);
 				sheet_->at_local_param().select_func_ = [=](uint32_t newidx, uint32_t id) {
-// std::cout << "Sheet index: " << newidx << std::endl;
 					bool c0 = false;
 					bool c1 = false;
 					bool c2 = false;
