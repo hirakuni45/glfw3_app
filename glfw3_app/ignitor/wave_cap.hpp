@@ -864,6 +864,7 @@ namespace app {
 				uint32_t idx = time_.scale_->get_select_pos();
 				auto ofs = time_.offset_->get_select_pos() * -grid;
 				waves_.at_info().meas_pos_[0] = ofs + (tm / get_time_unit_(idx)) * grid;
+				waves_.at_info().meas_color_[0] = waves_.get_info().volt_color_[param.org_ch_];
 
 			} else if(mesa_type_->get_select_pos() == 1) {  // multi
 				param.org_ch_ = org_trg_->get_select_pos() / 2;
@@ -881,9 +882,11 @@ namespace app {
 				uint32_t idx = time_.scale_->get_select_pos();
 				auto ofs = time_.offset_->get_select_pos() * -grid;
 				waves_.at_info().meas_pos_[0] = ofs + (a / get_time_unit_(idx)) * grid;
+				waves_.at_info().meas_color_[0] = waves_.get_info().volt_color_[param.org_ch_];
 
 				auto b = waves_.measure_fin(srate, offset, a, length, param);
 				waves_.at_info().meas_pos_[1] = ofs + (b / get_time_unit_(idx)) * grid;
+				waves_.at_info().meas_color_[1] = waves_.get_info().volt_color_[param.fin_ch_];
 
 				tm = b - a;
 			}
@@ -1236,7 +1239,7 @@ namespace app {
 			time_.init(director_, share_frame_);
 
 			{  // 計測タイプ
-				widget::param wp(vtx::irect(10, 20 + 50, 120, 40), tools_);
+				widget::param wp(vtx::irect(10, 20 + 50, 140, 40), tools_);
 				widget_list::param wp_;
 				wp_.init_list_.push_back("SINGLE T");
 				wp_.init_list_.push_back("MULTI T");
@@ -1245,7 +1248,7 @@ namespace app {
 				};
 			}
 			{  // 計測フィルタ係数
-				widget::param wp(vtx::irect(10 + 130, 20 + 50, 130, 40), tools_);
+				widget::param wp(vtx::irect(10 + 150, 20 + 50, 110, 40), tools_);
 				widget_label::param wp_("0.7", false);
 				mesa_filt_ = wd.add_widget<widget_label>(wp, wp_);
 			}
@@ -1415,6 +1418,7 @@ namespace app {
 						path += WAVE_DATA_EXT_;
 					}
 					if(waves_.load(path)) {
+						meas_run_();						
 					}
 				}
 			}
