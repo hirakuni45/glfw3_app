@@ -337,6 +337,24 @@ namespace app {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief  DC2 の参照 (const)
+			@return DC2
+		*/
+		//-----------------------------------------------------------------//
+		const dc2& get_dc2() const { return dc2_; } 
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  THR の参照 (const)
+			@return THR
+		*/
+		//-----------------------------------------------------------------//
+		const thr& get_thr() const { return thr_; } 
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief  全オフライン
 		*/
 		//-----------------------------------------------------------------//
@@ -393,10 +411,10 @@ namespace app {
 					return test_mode::C_MES;
 				}
 			} else if(sheet_->get_select_pos() == 1) {  // DC2 (静特性）
-				if(dc2_.mode_->get_select_pos() == 0) {
-					return test_mode::I_MES;
-				} else {
+				if(dc2_.mode_->get_select_pos() == 0) {  // 電流設定、電圧取得
 					return test_mode::V_MES;
+				} else {  // 電圧設定、電流取得
+					return test_mode::I_MES;
 				}
 			} else if(sheet_->get_select_pos() == 2) {  // WDM (動特性）
 				return test_mode::WD;
@@ -461,12 +479,6 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		const wave_cap::sample_param& get_sample_param() const { return wdm_.sample_param_; }
-
-
-		uint32_t get_dc2_id() const { return dc2_.id_; }
-		bool get_dc2_mode() const { return dc2_.mode_->get_select_pos(); }
-		double get_volt_value() const { return dc2_.volt_value_; }
-		double get_curr_value() const { return dc2_.curr_value_; }
 
 
 		//-----------------------------------------------------------------//
