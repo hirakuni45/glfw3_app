@@ -115,6 +115,7 @@ namespace app {
 		uint32_t		dc2_id_;
 		uint32_t		crm_id_;
 		uint32_t		wdm_id_[4];
+		uint32_t		thr_id_;
 		uint32_t		time_out_;
 
 		typedef device::serial_win32 SERIAL;
@@ -153,7 +154,7 @@ namespace app {
 
 			task_(task::idle), unit_id_(0), wait_(0), retry_(0),
 			err_dialog_(nullptr), okc_dialog_(nullptr),
-			dc2_id_(0), crm_id_(0), wdm_id_{ 0 }, time_out_(0),
+			dc2_id_(0), crm_id_(0), wdm_id_{ 0 }, thr_id_(0), time_out_(0),
 
 			serial_(), serial_list_(), kikusui_(serial_), kikusui_loop_(60),
 			last_value_(0.0)
@@ -663,12 +664,15 @@ namespace app {
 					wdm_id_[i] = client_.get_mod_status().wdm_id_[i];
 				}
 				crm_id_ = inspection_.get_crm().get_id();
+				dc2_id_ = inspection_.get_dc2().get_id();
+				thr_id_ = inspection_.get_thr().get_id();
 				{
 					auto testmode = inspection_.get_test_mode();
 					if(testmode != inspection::test_mode::NONE) {
 						inspection_.request_test(testmode);
 					}
 				}
+
 				time_out_ = 60 * 5;
 				task_ = task::mctrl;
 				break;
@@ -686,8 +690,8 @@ namespace app {
 						break;
 					case inspection::test_mode::V_MES:
 					case inspection::test_mode::I_MES:
-						if(dc2_id_ != inspection_.get_dc2_id()) {
-							dc2_id_ = inspection_.get_dc2_id();
+						if(dc2_id_ != inspection_.get_dc2().get_id()) {
+							dc2_id_ = inspection_.get_dc2().get_id();
 							task_ = task::sence;
 						}
 						break;
@@ -697,6 +701,12 @@ namespace app {
 								wdm_id_[i] = client_.get_mod_status().wdm_id_[i];
 								task_ = task::sence;
 							}
+						}
+						break;
+					case inspection::test_mode::THR:
+						if(thr_id_ != inspection_.get_thr().get_id()) {
+							thr_id_ = inspection_.get_thr().get_id();
+							task_ = task::sence;
 						}
 						break;
 					default:
@@ -728,13 +738,16 @@ namespace app {
 						v = inspection_.get_crm().crrd_value_;
 						break;
 					case inspection::test_mode::V_MES:
-						v = inspection_.get_volt_value();
+						v = inspection_.get_dc2().volt_value_;
 						break;
 					case inspection::test_mode::I_MES:
-						v = inspection_.get_curr_value();
+						v = inspection_.get_dc2().curr_value_;
 						break;
 					case inspection::test_mode::WD:
 						v = wave_cap_.get_mesa_value();
+						break;
+					case inspection::test_mode::THR:
+						v = inspection_.get_thr().thr_value_;
 						break;
 					default:
 						break;
