@@ -844,8 +844,12 @@ namespace app {
 
 		void meas_run_()
 		{
-			double len = get_time_unit_(time_.scale_->get_select_pos());
-			len *= waves_.get_info().grid_step_;
+			// スキャンする長さは、見えている範囲に制限する。
+			auto grid = waves_.get_info().grid_step_;
+			double unit = get_time_unit_(time_.scale_->get_select_pos());
+			double length = static_cast<double>(size_.x / grid) * unit;
+			double offset = static_cast<double>(time_.offset_->get_select_pos()) * unit;
+
 			WAVES::measure_param param;
 			double tm = 0.0;
 			if(mesa_type_->get_select_pos() == 0) {  // single
@@ -855,9 +859,9 @@ namespace app {
 				param.org_slope_ = static_cast<float>(org_slope_->get_select_pos()) / base;
 
 				auto srate = sample_param_.rate;
-				tm = waves_.measure_org(srate, 0.0, 0.0, len, param);
+				tm = waves_.measure_org(srate, offset, 0.0, length, param);
+
 				uint32_t idx = time_.scale_->get_select_pos();
-				auto grid = waves_.get_info().grid_step_;
 				auto ofs = time_.offset_->get_select_pos() * -grid;
 				waves_.at_info().meas_pos_[0] = ofs + (tm / get_time_unit_(idx)) * grid;
 
@@ -873,13 +877,12 @@ namespace app {
 				param.fin_slope_ = static_cast<float>(fin_slope_->get_select_pos()) / base;
 
 				auto srate = sample_param_.rate;
-				auto a = waves_.measure_org(srate, 0.0, 0.0, len, param);
+				auto a = waves_.measure_org(srate, offset, 0.0, length, param);
 				uint32_t idx = time_.scale_->get_select_pos();
-				auto grid = waves_.get_info().grid_step_;
 				auto ofs = time_.offset_->get_select_pos() * -grid;
 				waves_.at_info().meas_pos_[0] = ofs + (a / get_time_unit_(idx)) * grid;
 
-				auto b = waves_.measure_fin(srate, 0.0, a, len, param);
+				auto b = waves_.measure_fin(srate, offset, a, length, param);
 				waves_.at_info().meas_pos_[1] = ofs + (b / get_time_unit_(idx)) * grid;
 
 				tm = b - a;
@@ -1235,8 +1238,8 @@ namespace app {
 			{  // 計測タイプ
 				widget::param wp(vtx::irect(10, 20 + 50, 120, 40), tools_);
 				widget_list::param wp_;
-				wp_.init_list_.push_back("SINGLE");
-				wp_.init_list_.push_back("MULTI");
+				wp_.init_list_.push_back("SINGLE T");
+				wp_.init_list_.push_back("MULTI T");
 				mesa_type_ = wd.add_widget<widget_list>(wp, wp_);
 				mesa_type_->at_local_param().select_func_ = [=](const std::string& t, uint32_t p) {
 				};
