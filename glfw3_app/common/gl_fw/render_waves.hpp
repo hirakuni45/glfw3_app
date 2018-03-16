@@ -632,17 +632,24 @@ namespace view {
 			@return 計測時間
 		*/
 		//-----------------------------------------------------------------//
-		double scan(uint32_t ch, double wsmp, double org, double scs, double len, float slope) const
+		double scan(uint32_t ch, double wsmp,
+			double org, double scs, double len, float slope) const
 		{
+			if(ch >= CHN) return 0.0;
+
 			const ch_t& t = ch_[ch];
 
 			// 最小値、最大値の取得
 			float min = get(ch, wsmp, org);
 			float max = min;
 			std::vector<float> tmp;
+			auto nn = t.units_.size() - t.param_.offset_.x;
+			if(nn < 0) return 0.0;
+			double lim = static_cast<double>(nn) * wsmp;
 			uint32_t n = 0;
 			for(double o = org; o < (org + len); o += wsmp) {
-				if(o < scs) ++n; 
+				if(o >= lim) break;
+				if(o < scs) ++n;
 				auto w = get(ch, wsmp, o);
 				if(min > w) min = w;
 				else if(max < w) max = w;
@@ -650,27 +657,14 @@ namespace view {
 			}
 			if(tmp.empty()) return 0.0;
 
-			if(min < 0.0f) {
-				min *= 0.999f;
-			} else {
-				min *= 1.001f;
-			}
-			if(max > 0.0f) {
-				max *= 0.999f;
-			} else {
-				max *= 1.001f;
-			}
-
-			// std::cout << "Samples: " << tmp.size() << std::endl;
-// std::cout << "min: " << min << std::endl;
-// std::cout << "max: " << max << std::endl;
-// std::cout << "Limit: " << limit << std::endl;
 			// リミット値の決定
 			float limit = 0.0f;
 			if(slope < 0.0f) {
 				limit = min + ((max - min) * -slope);
+				while(n < tmp.size() && n > 0 && max > tmp[n]) --n;
 			} else {
 				limit = min + ((max - min) *  slope);
+				while(n < tmp.size() && n > 0 && min < tmp[n]) --n;
 			}
 
 			if(tmp[n] <= limit) {
@@ -707,12 +701,16 @@ namespace view {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  計測
-			@param[in]	wsmp	サンプリング周期			
+			@param[in]	wsmp	サンプリング周期
+			@param[in]	org		開始時間
+			@param[in]	scs		スキャン開始時間
+			@param[in]	len		スキャン時間
 			@param[in]	param	計測パラメータ
 			@return 計測時間
 		*/
 		//-----------------------------------------------------------------//
-		double measure_org(double wsmp, double org, double scs, double len, const measure_param& param) const
+		double measure_org(double wsmp, double org, double scs, double len,
+			const measure_param& param) const
 		{
 			return scan(param.org_ch_, wsmp, org, scs, len, param.org_slope_);
 		}
@@ -722,11 +720,15 @@ namespace view {
 		/*!
 			@brief  計測
 			@param[in]	wsmp	サンプリング周期
+			@param[in]	org		開始時間
+			@param[in]	scs		スキャン開始時間
+			@param[in]	len		スキャン時間
 			@param[in]	param	計測パラメータ
 			@return 計測時間
 		*/
 		//-----------------------------------------------------------------//
-		double measure_fin(double wsmp, double org, double scs, double len, const measure_param& param) const
+		double measure_fin(double wsmp, double org, double scs, double len,
+			const measure_param& param) const
 		{
 			return scan(param.fin_ch_, wsmp, org, scs, len, param.fin_slope_);
 		}
