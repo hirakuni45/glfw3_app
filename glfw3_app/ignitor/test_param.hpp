@@ -134,7 +134,7 @@ namespace app {
 				widget_label::param wp_("0", false);
 				wait_ = wd.add_widget<widget_label>(wp, wp_);
 				wait_->at_local_param().select_func_ = [=](const std::string& str) {
-					wait_->set_text(tools::limitf(str, 0.0f, 1.0f, "%3.2f"));
+					wait_->set_text(tools::limitf(str, 0.0f, 10.0f, "%3.2f"));
 				};
 			}
 			ofsx += 100;
@@ -164,13 +164,13 @@ namespace app {
 			if(symbol_->get_focus()) {
 				tools::set_help(chip, symbol_, "検査記号");
 			} else if(wait_->get_focus()) {
-				tools::set_help(chip, wait_, "検査遅延: 0.0 to 1.0 [秒]");
+				tools::set_help(chip, wait_, "検査遅延: [秒]");
 			} else if(retry_->get_focus()) {
 				tools::set_help(chip, retry_, "検査リトライ回数");
 			} else if(min_->get_focus()) {
-				tools::set_help(chip, min_, "検査：最低値");
+				tools::set_help(chip, min_, "検査：最低値 (Min)");
 			} else if(max_->get_focus()) {
-				tools::set_help(chip, max_, "検査：最大値");
+				tools::set_help(chip, max_, "検査：最大値 (Max)");
 			} else {
 				ret = false;
 			}
