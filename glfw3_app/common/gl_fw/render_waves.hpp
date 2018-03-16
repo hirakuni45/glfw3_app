@@ -48,7 +48,9 @@ namespace view {
 			float		org_slope_;	///< 開始スロープ割合（負なら立下り）
 			uint32_t	fin_ch_;	///< 終端チャネル
 			float		fin_slope_;	///< 終端スロープ割合（負なら立下り）
-			measure_param() : org_ch_(0), org_slope_(0.0f), fin_ch_(0), fin_slope_(0.0f) { }
+			float		lo_filter_;	///< ローパスフィルター係数（1.0ならフィルター無し）	
+			measure_param() : org_ch_(0), org_slope_(0.0f), fin_ch_(0), fin_slope_(0.0f),
+				lo_filter_(1.0f) { }
 		};
 
 
@@ -528,6 +530,22 @@ namespace view {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief  正規化
+			@param[in]	w	元の値
+			@return 正規化された値
+		*/
+		//-----------------------------------------------------------------//
+		static float normalize(UNIT w)
+		{
+			int32_t v = w;
+			v -= 32768;
+			if(v == -32768) v = -32767;
+			return static_cast<float>(v) / 32767.0f;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief  波形の取得（正規化波形）
 			@param[in]	ch		チャネル
 			@param[in]	rate	サンプルレート
@@ -550,24 +568,38 @@ namespace view {
 				}
 			}
 
-			int32_t v = t.units_[idx % sz];
-			v -= 32768;
-			if(v == -32768) v = -32767;
-			float a = static_cast<float>(v) / 32767.0f;
+			auto a = normalize(t.units_[idx % sz]);
 			if(smooth_) {
 				float umod = (org - (static_cast<double>(idxorg) * rate)) / rate;
 				++idx;
+				float b = 0.0f;
 				if(idx < sz) {
-					v = t.units_[idx];
-					v -= 32768;
-				} else {
-					v = 0;
+					b = normalize(t.units_[idx]);
 				}
-				if(v == -32768) v = -32767;
-				float b = static_cast<float>(v) / 32768.0f;
 				a += (b - a) * umod;
 			}
 			return a;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  単純ローパス・フィルター
+			@param[in]	ch		チャネル
+			@param[in]	k		係数
+		*/
+		//-----------------------------------------------------------------//
+		void filter(uint32_t ch, float k)
+		{
+			if(ch_[ch].units_.empty()) return;
+
+			float v = normalize(ch_[ch].units_[0]);
+			for(auto& w : ch_[ch].units_) {
+				float a = normalize(w);
+				float d = (a - v) * k;
+				v = a;
+				w = static_cast<UNIT>((a + d) * 32767.0f) + 32768;
+			}
 		}
 
 
