@@ -367,7 +367,12 @@ namespace app {
 					/ static_cast<float>(grid);
 				float u = get_volt_scale_limit_(ch) / static_cast<float>(32768);
 				if(gnd_->get_check()) u = 0.0f;
-				waves_.at_param(ch).gain_ = u / value / gainrate;
+				if(ch == 1) {
+///////////////////////////////////////////// option gain
+					waves_.at_param(ch).gain_ = u / value / gainrate * 1.131f;
+				} else {
+					waves_.at_param(ch).gain_ = u / value / gainrate;
+				}
 
 				// 電圧計測設定
 				if(mes_->get_check()) {
@@ -772,6 +777,7 @@ namespace app {
 				for(uint32_t i = 0; i < 4; ++i) {
 					if(!get_ch(i).ena_->get_check()) continue;
 					auto a = waves_.get(i, sample_param_.rate, org);
+					if(i == 1) a *= 1.131f;
 					a *= get_volt_scale_limit_(i);
 					if(get_ch(i).gnd_->get_check()) {
 						a = 0.0f;
@@ -1249,7 +1255,7 @@ namespace app {
 			}
 			{  // 計測フィルタ係数
 				widget::param wp(vtx::irect(10 + 150, 20 + 50, 110, 40), tools_);
-				widget_label::param wp_("0.7", false);
+				widget_label::param wp_("1.0", false);
 				mesa_filt_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 			{  // 計測開始ボタン
@@ -1347,7 +1353,7 @@ namespace app {
 
 			time_.update(size_, sample_param_.rate);
 
-			// 波形のコピー（中間位置がトリガー）
+			// 波形のコピー（中間位置がトリガーポイント）
 			for(uint32_t i = 0; i < 4; ++i) {
 				auto id = client_.get_mod_status().wdm_id_[i];
 				if(wdm_id_[i] != id) {
