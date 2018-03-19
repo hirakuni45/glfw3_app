@@ -50,8 +50,8 @@ namespace app {
 		gui::widget_label*		current_;	///< DC1（電流）
 		gui::widget_spinbox*	count_;		///< DC1 熱抵抗測定回数
 		gui::widget_label*		probe_;		///< THR 熱抵抗値
-		gui::widget_button*		exec_;		///< THR 設定転送
 	public:
+		gui::widget_button*		exec_;		///< THR 設定転送
 		gui::widget_check*		all_;		///< THR 全体
 
 		float					thr_value_;	///< 熱抵抗値
@@ -83,6 +83,8 @@ namespace app {
 		thr_t		thr_;
 
 		uint32_t	id_;
+
+		uint32_t	thr_id_;
 
 		std::string build_sub_() const
 		{
@@ -156,7 +158,7 @@ namespace app {
 			current_(nullptr), count_(nullptr),
 			probe_(nullptr),
 			exec_(nullptr), all_(nullptr),
-			thr_(), id_(0)
+			thr_(), id_(0), thr_id_(0)
 			{ }
 
 
@@ -166,7 +168,7 @@ namespace app {
 			@return 値の更新 ID
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t get_id() const { return id_; }
+		uint32_t get_id() const { return thr_id_; }
 
 
 		//-----------------------------------------------------------------//
@@ -284,7 +286,7 @@ namespace app {
 			} 
 			{  // 温度係数
 				widget::param wp(vtx::irect(ofsx + 250, ofsy, 110, 40), root);
-				widget_label::param wp_("0.707", false);
+				widget_label::param wp_("2.1", false);
 				thk_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 			{  // 測定値
@@ -299,7 +301,6 @@ namespace app {
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
 				exec_->at_local_param().select_func_ = [=](int n) {
 					std::string s = build_sub_();
-// std::cout << s << std::flush;
 					thr_t t;
 					uint16_t sw = 0;
 					for(int i = 0; i < 5; ++i) {
@@ -347,13 +348,19 @@ namespace app {
 			exec_->set_stall(!client_.probe());
 
 			if(id_ != wave_cap_.get_treg_value_id()) {
+				id_ = wave_cap_.get_treg_value_id();
 				auto a = wave_cap_.get_treg_value();
-				probe_->set_text((boost::format("%5.4f mV") % (a * 1000.0f)).str());
+				auto b = wave_cap_.get_treg_value2();
 				float k = 1.0f;
 				if((utils::input("%f", thk_->get_text().c_str()) % k).status()) {
 				}
-				thr_value_ = a / k;
-				id_ = wave_cap_.get_treg_value_id();
+				float curr = 0.0f;
+				if((utils::input("%f", current_->get_text().c_str()) % curr).status()) {
+				}
+				thr_value_ = a * 1000.0f / (curr * b * k);
+				probe_->set_text((boost::format("%4.3f %s") % thr_value_ % get_unit_str()).str());
+				startup();
+				++thr_id_;
 			}
 		}
 

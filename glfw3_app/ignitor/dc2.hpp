@@ -344,6 +344,7 @@ namespace app {
 					kikusui_.req_volt();
 				}
 			}
+			auto id = id_;
 			if(curr_id_ != kikusui_.get_curr_id()) {
 				curr_id_ = kikusui_.get_curr_id();
 				auto c = kikusui_.get_curr();
@@ -358,6 +359,9 @@ namespace app {
 				probe_->set_text((boost::format("%5.4f V") % v).str());
 				volt_value_ = v;
 				++id_;
+			}
+			if(id != id_) {
+				kikusui_.set_output(0);
 			}
 #endif
 #if 0

@@ -132,6 +132,7 @@ namespace app {
 		WAVES::analize_param	treg_1st_;
 		WAVES::analize_param	treg_2nd_;
 		float					treg_value_;
+		float					treg_value2_;
 		uint32_t				treg_value_id_;
 
 		bool					info_in_;
@@ -367,9 +368,11 @@ namespace app {
 					/ static_cast<float>(grid);
 				float u = get_volt_scale_limit_(ch) / static_cast<float>(32768);
 				if(gnd_->get_check()) u = 0.0f;
-				if(ch == 1) {
 ///////////////////////////////////////////// option gain
-					waves_.at_param(ch).gain_ = u / value / gainrate * 1.131f;
+				if(ch == 0) {
+					waves_.at_param(ch).gain_ = u / value / gainrate * 1.067f;
+				} else if(ch == 1) {
+					waves_.at_param(ch).gain_ = u / value / gainrate * 1.029f;
 				} else {
 					waves_.at_param(ch).gain_ = u / value / gainrate;
 				}
@@ -928,7 +931,8 @@ namespace app {
 			share_frame_(nullptr),
 			sample_param_(),
 			wdm_id_{ 0 }, treg_id_{ 0 },
-			treg_1st_(), treg_2nd_(), treg_value_(0.0f), treg_value_id_(0),
+			treg_1st_(), treg_2nd_(), treg_value_(0.0f), treg_value2_(0.0f), 
+			treg_value_id_(0),
 			info_in_(false), info_org_(0), info_(),
 			chn0_(waves_, 1.25f),
 			chn1_(waves_, 1.25f),
@@ -1043,7 +1047,7 @@ namespace app {
 
 
 		float get_treg_value() const { return treg_value_; }
-
+		float get_treg_value2() const { return treg_value2_; }
 		uint32_t get_treg_value_id() const { return treg_value_id_; }
 
 
@@ -1249,6 +1253,7 @@ namespace app {
 				widget_list::param wp_;
 				wp_.init_list_.push_back("SINGLE T");
 				wp_.init_list_.push_back("MULTI T");
+				wp_.init_list_.push_back("SINGLE V");
 				mesa_type_ = wd.add_widget<widget_list>(wp, wp_);
 				mesa_type_->at_local_param().select_func_ = [=](const std::string& t, uint32_t p) {
 				};
@@ -1337,6 +1342,9 @@ namespace app {
 				fin_trg_->set_stall(false);
 				fin_slope_->set_stall(false);
 				fin_ena_->set_stall(false);
+			} else if(mesa_type_->get_select_pos() == 2) {  // トリガーからの電圧
+
+
 			}
 
 			wdm_exec_->set_stall(!client_.probe());
@@ -1386,12 +1394,17 @@ namespace app {
 // std::cout << treg_1st_.average_ << std::endl;
 					} else {
 						waves_.copy(1, client_.get_treg(i) + sz / 2, sz / 2, 0);
-						treg_2nd_ = waves_.analize(1, 1.0, (768.0 - 32.0), 64.0, 1.0);
-						treg_1st_ = waves_.analize(1, 1.0, (768.0 + 1024.0 - 32.0), 64.0, 1.0);
-// std::cout << treg_2nd_.average_ << std::endl;
+						treg_2nd_ = waves_.analize(1, 1.0, (800.0 - 50.0), 100.0, 1.0);
+						treg_1st_ = waves_.analize(1, 1.0, (1024.0 + 800.0 - 50.0), 100.0, 1.0);
 						float a = treg_1st_.average_ - treg_2nd_.average_; 
+//						float a = treg_1st_.median_ - treg_2nd_.median_; 
 						float u = get_volt_scale_limit_(1);
-						treg_value_ = a * u / 8.0;
+						treg_value_  = a * u / 64.0;
+std::cout << treg_value_ << std::endl;
+//						auto b = waves_.analize(1, 1.0, (256.0 + 1024.0 - 32.0), 64.0, 1.0);
+						auto b = waves_.analize(1, 1.0, (256.0 - 32.0), 64.0, 1.0);
+						treg_value2_ = b.average_ * u / 64.0;
+std::cout << treg_value2_ << std::endl;
 						++treg_value_id_;
 // std::cout << a << std::endl;
 					}

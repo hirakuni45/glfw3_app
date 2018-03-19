@@ -90,6 +90,7 @@ namespace app {
 			start,	///< 開始
 			loop,	///< ループ基点
 			wait,	///< 測定遅延
+			request,	///< リクエスト
 			mctrl,	///< モジュール制御
 			sence,	///< センシング
 			sync,	///< 同期
@@ -666,15 +667,20 @@ namespace app {
 				crm_id_ = inspection_.get_crm().get_id();
 				dc2_id_ = inspection_.get_dc2().get_id();
 				thr_id_ = inspection_.get_thr().get_id();
+
+				task_ = task::request;
+				break;
+
+			case task::request:
 				{
 					auto testmode = inspection_.get_test_mode();
 					if(testmode != inspection::test_mode::NONE) {
-						inspection_.request_test(testmode);
+						if(inspection_.request_test(testmode)) {
+							time_out_ = 60 * 5;
+							task_ = task::mctrl;
+						}
 					}
 				}
-
-				time_out_ = 60 * 5;
-				task_ = task::mctrl;
 				break;
 
 			case task::mctrl:
@@ -716,6 +722,7 @@ namespace app {
 				if(time_out_ > 0) {
 					--time_out_;
 				} else {
+					inspection_.offline_all();
 					std::string str;
 					str = "コントローラーとの通信が\n";
 					str += "タイムアウトしました。";
@@ -790,6 +797,7 @@ namespace app {
 
 			case task::error:
 				{
+					inspection_.offline_all();
 					std::string str;
 					str += (boost::format("Min: %4.3f\n") % value_.min_).str();
 					str += (boost::format("Max: %4.3f\n") % value_.max_).str();

@@ -508,20 +508,18 @@ namespace app {
 					int32_t v = client_.get_mod_status().crrd_;
 					int32_t ofs = sample_num * 0x7FFFF;
 					v -= ofs;
+// std::cout << v << std::endl;
 					double lim = static_cast<double>(ofs) / 1.570798233;
 					if(v >= lim) {
 						ans_->set_text("OVF");
 						return;
 					}
 					double a = static_cast<double>(v) / static_cast<double>(ofs) * 1.570798233;
-// std::cout << a << std::endl;
 					a *= 778.2;  // 778.2 mV P-P
 					static const double itbl[4] = {  // 電流テーブル
 						0.2, 2.0, 20.0, 200.0
 					};
 					a /= itbl[amps_->get_select_pos()];
-					// 補正値
-//					a *= 1.0476;
 					crrd_vals_.push_back(a);
 					if(crrd_vals_.size() >= crm_count_limit_) {
 						crrd_value_ = median_(crrd_vals_);
@@ -547,6 +545,7 @@ namespace app {
 					int32_t v = client_.get_mod_status().crcd_;
 					int32_t ofs = sample_num * 0x7FFFF;
 					v -= ofs;
+// std::cout << v << std::endl;
 					double lim = static_cast<double>(ofs) / 1.570798233;
 					if(v >= lim) {
 						ans_->set_text("OVF");
@@ -564,13 +563,11 @@ namespace app {
 					double fq = ftbl[freq_->get_select_pos()];
 					if(mode_->get_select_pos() == 1) {  // 容量
 						a = ib / (2.0 * 3.141592654 * fq * a);
-
 					} else {  // 合成
 						float b = 390.0;
 						if((utils::input("%f", net_regs_->get_text().c_str()) % b).status()) {
 						}
 						a = (ib * a * a) / ((2.0 * 3.141592654 * fq * (a * a + b * b)));
-						a *= 1.66;
 					}
 					a *= 1e6;
 					crcd_vals_.push_back(a);

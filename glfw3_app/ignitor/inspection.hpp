@@ -133,6 +133,8 @@ namespace app {
 
 			dc2,		///< DC2 開始
 
+			thr,		///< THR 開始
+
 			off_all,	///< 全てのスイッチ、オフ
 			off_all0,
 			off_all1,
@@ -150,8 +152,6 @@ namespace app {
 			off_wdm2,
 
 			off_thr,	///< THR 関係 OFF (DC1, WDM)
-			off_thr0,
-			off_thr1,
 
 		};
 		cmd_task		cmd_task_;
@@ -189,19 +189,19 @@ namespace app {
 				cmd_task_ = cmd_task::idle;
 				break;
 
-
+			// CRM
 			case cmd_task::crm:
 				crm_.exec_->exec();
 				cmd_task_ = cmd_task::idle;
 				break;
 
-
+			// DC2
 			case cmd_task::dc2:
 				dc2_.exec_->exec();
 				cmd_task_ = cmd_task::idle;
 				break;
 
-
+			// WDM
 			case cmd_task::wdm:
 				icm_.exec_->exec();
 				cmd_task_ = cmd_task::wdm0;
@@ -216,6 +216,12 @@ namespace app {
 				break;
 			case cmd_task::wdm2:
 				wdm_.exec_->exec();
+				cmd_task_ = cmd_task::idle;
+				break;
+
+			// THR
+			case cmd_task::thr:
+				thr_.exec_->exec();
 				cmd_task_ = cmd_task::idle;
 				break;
 
@@ -260,7 +266,7 @@ namespace app {
 				break;
 
 
-			// WDM のオフ（ICM はそのまま）
+			// WDM のオフ
 			case cmd_task::off_wdm:
 				wgm_.startup();
 				cmd_task_ = cmd_task::off_wdm0;
@@ -279,15 +285,7 @@ namespace app {
 				break;
 
 			case cmd_task::off_thr:
-				dc1_.startup();
-				cmd_task_ = cmd_task::off_thr0;
-				break;
-			case cmd_task::off_thr0:
-				wgm_.startup();
-				cmd_task_ = cmd_task::off_thr1;
-				break;
-			case cmd_task::off_thr1:
-				wdm_.startup();
+				thr_.startup();
 				cmd_task_ = cmd_task::idle;
 				break;
 
@@ -508,6 +506,9 @@ namespace app {
 				cmd_task_ = cmd_task::wdm;
 				break;
 
+			case test_mode::THR:
+				cmd_task_ = cmd_task::thr;
+				break;
 
 			default:
 				break;
