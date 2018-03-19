@@ -32,9 +32,10 @@ namespace view {
 		struct analize_param {
 			float		min_;		///< 最小値
 			float		max_;		///< 最大値
+			float		median_;	///< Median
 			float		average_;	///< 平均
 
-			analize_param() : min_(1.0f), max_(-1.0f), average_(0.0f) { }
+			analize_param() : min_(1.0f), max_(-1.0f), median_(0.0f), average_(0.0f) { }
 		};
 
 
@@ -639,12 +640,20 @@ namespace view {
 			uint32_t sz = t.units_.size();
 			float sum = 0;
 			uint32_t n = 0;
+			std::vector<float> buff;
 			for(double i = org; i <= (org + len); i += step) {
 				auto v = get(ch, rate, i);
+				buff.push_back(v);
 				if(a.min_ > v) a.min_ = v;
 				if(a.max_ < v) a.max_ = v;
 				sum += v;
 				++n;
+			}
+			std::sort(buff.begin(), buff.end());
+			if(buff.size() & 1) {
+				a.median_ = buff[buff.size() / 2];
+			} else {
+				a.median_ = (buff[buff.size() / 2] + buff[buff.size() / 2 + 1]) * 0.5f;
 			}
 			a.average_ = sum / static_cast<float>(n);
 
