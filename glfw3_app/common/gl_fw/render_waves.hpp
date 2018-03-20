@@ -104,6 +104,10 @@ namespace view {
 			int32_t		trig_pos_;		///< トリガー軸位置（時間軸）
 			bool		trig_enable_;	///< トリガー軸有効
 
+			img::rgba8	delay_color_;	///< ディレイ軸カラー
+			int32_t		delay_pos_;		///< ディレイ軸位置（時間軸）
+			bool		delay_enable_;	///< ディレイ軸有効
+
 			img::rgba8	meas_color_[2];	///< メジャー（時間計測）軸カラー
 			int32_t		meas_pos_[2];	///< メジャー（時間計測）軸位置（時間軸）
 			bool		meas_enable_[2];///< メジャー（時間計測）軸有効
@@ -137,6 +141,9 @@ namespace view {
 
 				trig_color_(img::rgba8(190, 255, 140, 192)),
 				trig_pos_(0), trig_enable_(true),
+
+				delay_color_(img::rgba8(190, 255, 140, 192)),
+				delay_pos_(0), delay_enable_(true),
 
 				meas_color_{ img::rgba8(255, 195, 128, 192) },
 				meas_pos_{ 0 }, meas_enable_{ true },
@@ -215,6 +222,14 @@ namespace view {
 					glPushMatrix();
 					gl::glTranslate(trig_pos_, 0);
 					gl::glColor(trig_color_);
+					gl::draw_lines(trig_);
+					glPopMatrix();
+				}
+				if(delay_enable_) {
+					glLineStipple(1, time_stipple_);
+					glPushMatrix();
+					gl::glTranslate(delay_pos_, 0);
+					gl::glColor(delay_color_);
 					gl::draw_lines(trig_);
 					glPopMatrix();
 				}
@@ -576,8 +591,8 @@ namespace view {
 				float b = 0.0f;
 				if(idx < sz) {
 					b = normalize(t.units_[idx]);
+					a += (b - a) * umod;
 				}
-				a += (b - a) * umod;
 			}
 			return a;
 		}
@@ -684,9 +699,10 @@ namespace view {
 			float min = get(ch, wsmp, org);
 			float max = min;
 			std::vector<float> tmp;
-			auto nn = t.units_.size() - t.param_.offset_.x;
-			if(nn < 0) return 0.0;
-			double lim = static_cast<double>(nn) * wsmp;
+//			auto nn = t.units_.size() + t.param_.offset_.x;
+//			if(nn < 0) return 0.0;
+//			double lim = static_cast<double>(nn) * wsmp;
+			double lim = static_cast<double>(t.units_.size() / 2) * wsmp;
 			uint32_t n = 0;
 			for(double o = org; o < (org + len); o += wsmp) {
 				if(o >= lim) break;
@@ -697,7 +713,12 @@ namespace view {
 				tmp.push_back(w);
 			}
 			if(tmp.empty()) return 0.0;
-
+#if 0
+if(ch == 0) {
+  std::cout << org << std::endl;
+  std::cout << "Min: " << min << ", Max: " << max << std::endl;
+}
+#endif
 			// リミット値の決定
 			float limit = 0.0f;
 			if(slope < 0.0f) {
