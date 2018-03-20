@@ -115,7 +115,7 @@ namespace app {
 		uint32_t		mctrl_id_;
 		uint32_t		dc2_id_;
 		uint32_t		crm_id_;
-		uint32_t		wdm_id_[4];
+		uint32_t		mesa_id_;
 		uint32_t		thr_id_;
 		uint32_t		time_out_;
 
@@ -155,7 +155,7 @@ namespace app {
 
 			task_(task::idle), unit_id_(0), wait_(0), retry_(0),
 			err_dialog_(nullptr), okc_dialog_(nullptr),
-			dc2_id_(0), crm_id_(0), wdm_id_{ 0 }, thr_id_(0), time_out_(0),
+			dc2_id_(0), crm_id_(0), mesa_id_(0), thr_id_(0), time_out_(0),
 
 			serial_(), serial_list_(), kikusui_(serial_), kikusui_loop_(60),
 			last_value_(0.0)
@@ -609,6 +609,7 @@ namespace app {
 						task_ = task::idle;
 						break;
 					}
+std::cout << fp << std::endl;
 					std::string top = (boost::format("検査「%s」\n") % s).str();
 					inspection_.at_test_param().build_value();
 					const auto& v = inspection_.get_test_param().value_;
@@ -661,11 +662,9 @@ namespace app {
 					break;
 				}
 
-				for(int i = 0; i < 4; ++i) {
-					wdm_id_[i] = client_.get_mod_status().wdm_id_[i];
-				}
 				crm_id_ = inspection_.get_crm().get_id();
 				dc2_id_ = inspection_.get_dc2().get_id();
+				mesa_id_ = wave_cap_.get_mesa_id();
 				thr_id_ = inspection_.get_thr().get_id();
 
 				task_ = task::request;
@@ -702,11 +701,9 @@ namespace app {
 						}
 						break;
 					case inspection::test_mode::WD:
-						for(uint32_t i = 0; i < 4; ++i) {
-							if(wdm_id_[i] != client_.get_mod_status().wdm_id_[i]) {
-								wdm_id_[i] = client_.get_mod_status().wdm_id_[i];
-								task_ = task::sence;
-							}
+						if(mesa_id_ != wave_cap_.get_mesa_id()) {
+							mesa_id_ = wave_cap_.get_mesa_id();
+							task_ = task::sence;
 						}
 						break;
 					case inspection::test_mode::THR:

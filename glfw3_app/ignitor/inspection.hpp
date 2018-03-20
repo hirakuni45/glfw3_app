@@ -39,6 +39,7 @@
 #include "wgm.hpp"
 #include "crm.hpp"
 #include "thr.hpp"
+#include "dif.hpp"
 #include "test_param.hpp"
 
 namespace app {
@@ -82,7 +83,7 @@ namespace app {
 		gui::widget_button*		save_file_;			///< save file
 		gui::widget_check*		ilock_enable_;		///< Interlock 許可／不許可
 		gui::widget_sheet*		sheet_;
-		gui::widget_null*		style_[4];
+		gui::widget_null*		style_[6];
 		utils::select_file		unit_load_filer_;
 		utils::select_file		unit_save_filer_;
 
@@ -93,6 +94,7 @@ namespace app {
 		icm						icm_;
 		wdm						wdm_;
 		thr						thr_;
+		dif						dif_;
 
 		// 測定用件
 		test_param				test_param_;
@@ -313,6 +315,7 @@ namespace app {
 			icm_(d, client_, interlock_),
 			wdm_(d, client_, interlock_),
 			thr_(d, client_, interlock_, kikusui_, wave_cap_),
+			dif_(d),
 			test_param_(d),
 
 			chip_(nullptr),
@@ -503,6 +506,7 @@ namespace app {
 				break;
 
 			case test_mode::WD:
+std::cout << "WDM" << std::endl;
 				cmd_task_ = cmd_task::wdm;
 				break;
 
@@ -608,6 +612,18 @@ namespace app {
 				widget_null::param wp_;
 				style_[3] = wd.add_widget<widget_null>(wp, wp_);
 				sheet_->add("熱抵抗測定", style_[3]);
+			}
+			{
+				widget::param wp(vtx::irect(0, 0, 0, 0), sheet_);
+				widget_null::param wp_;
+				style_[4] = wd.add_widget<widget_null>(wp, wp_);
+				sheet_->add("ヒステリシス検査", style_[4]);
+			}
+			{
+				widget::param wp(vtx::irect(0, 0, 0, 0), sheet_);
+				widget_null::param wp_;
+				style_[5] = wd.add_widget<widget_null>(wp, wp_);
+				sheet_->add("高動的検査", style_[5]);
 			}
 
 			int w = 100;

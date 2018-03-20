@@ -397,7 +397,6 @@ namespace app {
 			}
 			{  // 校正ボタン
 				widget::param wp(vtx::irect(ofsx, ofsy + 50, 100, 40), root);
-				wp.pre_group_ = 1;
 				widget_button::param wp_("校正");
 				run_refs_ = wd.add_widget<widget_button>(wp, wp_);
 				run_refs_->at_local_param().select_func_ = [=](uint32_t id) {
@@ -409,7 +408,6 @@ namespace app {
 			}
 			{  // 校正データ、有効／無効
 				widget::param wp(vtx::irect(ofsx + 110, ofsy + 50, 90, 40), root);
-				wp.pre_group_ = 1;
 				widget_check::param wp_("有効");
 				ena_refs_ = wd.add_widget<widget_check>(wp, wp_);
 				ena_refs_->at_local_param().select_func_ = [=](bool ena) {
@@ -420,7 +418,6 @@ namespace app {
 			}
 			for(uint32_t i = 0; i < 5; ++i) {  // 校正データ表示
 				widget::param wp(vtx::irect(ofsx + i * 140, ofsy + 100, 120, 40), root);
-				wp.pre_group_ = 1;
 				widget_text::param wp_("*");
 				wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
 											 vtx::placement::vertical::CENTER);
@@ -428,7 +425,6 @@ namespace app {
 			}
 			{  // 校正ダイアログ
 				widget::param wp(vtx::irect(100, 100, 500, 300));
-				wp.pre_group_ = 1;
 				widget_dialog::param wp_(widget_dialog::style::CANCEL_OK);
 				dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
 				dialog_->enable(false);
@@ -472,14 +468,12 @@ namespace app {
 			}
 			{  // 校正情報
 				widget::param wp(vtx::irect(100, 100, 500, 300));
-				wp.pre_group_ = 1;
 				widget_dialog::param wp_(widget_dialog::style::NONE);
 				info_ = wd.add_widget<widget_dialog>(wp, wp_);
 				info_->enable(false);
 			}
 			{  // 合成回路、抵抗設定
 				widget::param wp(vtx::irect(ofsx + 220, ofsy + 50, 110, 40), root);
-				wp.pre_group_ = 1;
 				widget_label::param wp_("390.0", false);
 				net_regs_ = wd.add_widget<widget_label>(wp, wp_);
 			}
@@ -543,6 +537,7 @@ namespace app {
 						return;
 					}
 					int32_t v = client_.get_mod_status().crcd_;
+// std::cout << v << std::endl;
 					int32_t ofs = sample_num * 0x7FFFF;
 					v -= ofs;
 // std::cout << v << std::endl;
@@ -551,12 +546,17 @@ namespace app {
 						ans_->set_text("OVF");
 						return;
 					}
-					double a = static_cast<double>(v) / static_cast<double>(ofs) * 1.570798233;
-					a *= 778.2;  // 778.2 mV P-P
 					static const double itbl[4] = {  // 電流テーブル
 						0.2, 2.0, 20.0, 200.0
 					};
 					double ib = itbl[amps_->get_select_pos()];
+					v -= 447158 * ib;
+					v += 23989;
+
+					double a = static_cast<double>(v) / static_cast<double>(ofs) * 1.570798233;
+					a *= 778.2;  // 778.2 mV P-P
+
+
 					static const double ftbl[4] = {  // 周波数テーブル
 						100.0, 1000.0, 10000.0
 					};
@@ -566,8 +566,9 @@ namespace app {
 					} else {  // 合成
 						float b = 390.0;
 						if((utils::input("%f", net_regs_->get_text().c_str()) % b).status()) {
+							b *= ib;
 						}
-						a = (ib * a * a) / ((2.0 * 3.141592654 * fq * (a * a + b * b)));
+						a = (ib * a) / (2.0 * 3.141592654 * fq * (a * a + b * b));
 					}
 					a *= 1e6;
 					crcd_vals_.push_back(a);
