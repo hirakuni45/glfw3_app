@@ -369,8 +369,8 @@ namespace gui {
 			if(!pre.get_integer(path + "/index", v)) ++err;
 			else {
 				param_.index_ = v;
+				init_ = false;
 			}
-			++id_;
 			return err == 0;
 		}
 	};
