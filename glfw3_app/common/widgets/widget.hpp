@@ -342,6 +342,23 @@ namespace gui {
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
+			@brief	プリファレンス・グループ
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		enum class PRE_GROUP {
+			_0,		///< グループ 0 
+			_1,		///< グループ 1
+			_2,		///< グループ 2
+			_3,		///< グループ 3
+			_4,		///< グループ 4
+			_5,		///< グループ 5
+			_6,		///< グループ 6
+			_7,		///< グループ 7
+		};
+
+
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
 			@brief	ストール・グループ
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -376,7 +393,7 @@ namespace gui {
 			widget*				parents_;		///< 親ウィジェット
 			action_types		action_;		///< アクション
 			state_types			state_;			///< 状態制御
-			uint32_t			pre_group_;		///< プリファレンス・グループ
+			PRE_GROUP			pre_group_;		///< プリファレンス・グループ
 			uint32_t			stall_group_;	///< ストール・グループ
 
 			param(const vtx::irect& r = vtx::irect(0), widget* parents = nullptr) :
@@ -387,7 +404,7 @@ namespace gui {
 				hold_frame_(0), holded_frame_(0),
 				parents_(parents),
 				action_(), state_(),
-				pre_group_(0), stall_group_(0)
+				pre_group_(PRE_GROUP::_0), stall_group_(0)
 			{
 				state_.set(state::ENABLE);
 				state_.set(state::RENDER_ENABLE);
@@ -624,6 +641,17 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		bool get_enable() const {
 			return get_state(state::ENABLE);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ストールの状態を取得する
+			@return ストールの状態
+		*/
+		//-----------------------------------------------------------------//
+		bool get_stall() const {
+			return get_state(state::STALL);
 		}
 
 

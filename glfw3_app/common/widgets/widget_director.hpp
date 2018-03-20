@@ -75,8 +75,7 @@ namespace gui {
 
 		gl::mobj				mobj_;
 		common_parts			common_parts_;
-		uint32_t				serial_;
-		uint32_t				serial_group_;
+		uint32_t				serial_[8];
 		widgets					widgets_;
 		widgets					ci_widgets_;
 
@@ -146,7 +145,9 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_director() :
 			img_files_(),
-			mobj_(), common_parts_(mobj_), serial_(0), serial_group_(5000), widgets_(),
+			mobj_(), common_parts_(mobj_),
+			serial_{ 0, 5000, 10000, 15000, 20000, 25000, 30000, 35000 },
+			widgets_(),
 			position_(0.0f), scale_(1.0f),
 			select_widget_(nullptr),
 			move_widget_(nullptr),
@@ -187,18 +188,14 @@ namespace gui {
 		T* add_widget(const widget::param& bp, const typename T::param& tp) {
 			T* w = new T(*this, bp, tp);
 			w->initialize();
-			uint32_t serial = bp.pre_group_ == 0 ? serial_ : serial_group_;
-			w->set_serial(serial);
+			uint32_t preidx = static_cast<uint32_t>(bp.pre_group_) & 7;
+			w->set_serial(serial_[preidx]);
 			if(bp.parents_ != nullptr) {  // 親の状態を反映
 				if(!root_widget(w)->get_state(widget::state::ENABLE)) {
 					w->set_state(widget::state::ENABLE, false);
 				}
 			}
-			if(bp.pre_group_ == 0) {
-				++serial_;
-			} else {
-				++serial_group_;
-			}
+			++serial_[preidx];
 			widgets_.push_back(w);
 			return w;
 		}
