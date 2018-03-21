@@ -400,6 +400,17 @@ namespace app {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief  タスク状態取得
+			@return タスク動作中なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool get_task_busy() const {
+			return cmd_task_ != cmd_task::idle;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief  計測モードの取得
 			@return 計測モード
 		*/
@@ -506,7 +517,6 @@ namespace app {
 				break;
 
 			case test_mode::WD:
-std::cout << "WDM" << std::endl;
 				cmd_task_ = cmd_task::wdm;
 				break;
 
@@ -811,6 +821,8 @@ std::cout << "WDM" << std::endl;
 			thr_.save(pre);
 			test_param_.save(pre);
 
+			wave_cap_.save(pre);
+
 			ilock_enable_->save(pre);
 			sheet_->save(pre);
 
@@ -852,6 +864,8 @@ std::cout << "WDM" << std::endl;
 			wdm_.load(pre);
 			thr_.load(pre);
 			test_param_.load(pre);
+
+			wave_cap_.load(pre);
 
 			ilock_enable_->load(pre);
 			sheet_->load(pre);
