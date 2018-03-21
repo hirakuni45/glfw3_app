@@ -193,7 +193,6 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void startup()
 		{
-			tools::set_checks(sw_, false, 4);
 			uint32_t cmd = 0b00001000;
 			cmd <<= 16;
 			auto s = (boost::format("wdm %06X\n") % cmd).str();

@@ -107,7 +107,6 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void startup()
 		{
-			tools::set_checks(sw_, false, 5);
 			wgm_t t;
 			client_.send_data(t.build());
 		}
@@ -271,6 +270,7 @@ namespace app {
 				all_ = wd.add_widget<widget_check>(wp, wp_);
 				all_->at_local_param().select_func_ = [=](bool ena) {
 					if(!ena) {
+						tools::set_checks(sw_, false, 5);
 						startup();
 					}
 					for(uint32_t i = 0; i < 5; ++i) {

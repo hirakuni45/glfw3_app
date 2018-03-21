@@ -289,7 +289,6 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void startup()
 		{
-			tools::set_checks(sw_, false, 14);
 			crm_t t;
 			client_.send_data(t.build(0));
 		}
@@ -379,6 +378,7 @@ namespace app {
 				all_ = wd.add_widget<widget_check>(wp, wp_);
 				all_->at_local_param().select_func_ = [=](bool ena) {
 					if(!ena) {
+						tools::set_checks(sw_, false, 14);
 						startup();						
 					}
 					for(uint32_t i = 0; i < 14; ++i) {

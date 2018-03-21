@@ -110,7 +110,6 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void startup()
 		{
-			tools::set_checks(sw_, false, 5);
 			dc1_t t;
 			client_.send_data(t.build());
 		}
@@ -155,12 +154,12 @@ namespace app {
 				wp_.init_list_.push_back("定電圧");
 				mode_ = wd.add_widget<widget_list>(wp, wp_);
 			}
-			{  // 60V/0.1V, 30A/10mA
+			{  // 20V/0.1V
 				widget::param wp(vtx::irect(ofsx + 230, ofsy, 90, 40), root);
 				widget_label::param wp_("0", false);
 				voltage_ = wd.add_widget<widget_label>(wp, wp_);
 				voltage_->at_local_param().select_func_ = [=](const std::string& str) {
-					voltage_->set_text(tools::limitf(str, 0.0f, 60.0f, "%3.1f"));
+					voltage_->set_text(tools::limitf(str, 0.0f, 20.0f, "%3.1f"));
 				};
 			}
 			{
@@ -170,12 +169,12 @@ namespace app {
 											 vtx::placement::vertical::CENTER);
 				wd.add_widget<widget_text>(wp, wp_);
 			}
-			{  // Max: 30A / step: 10mA
+			{  // Max: 24A / step: 10mA
 				widget::param wp(vtx::irect(ofsx + 370, ofsy, 90, 40), root);
 				widget_label::param wp_("0", false);
 				current_ = wd.add_widget<widget_label>(wp, wp_);
 				current_->at_local_param().select_func_ = [=](const std::string& str) {
-					current_->set_text(tools::limitf(str, 0.0f, 30.0f, "%4.2f"));
+					current_->set_text(tools::limitf(str, 0.0f, 24.0f, "%4.2f"));
 				};
 			}
 			{
@@ -250,6 +249,7 @@ namespace app {
 			if(offline_ > 0) {
 				--offline_;
 				if(offline_ == 0) {
+					tools::set_checks(sw_, false, 5);
 					startup();
 				}
 			}
@@ -266,9 +266,9 @@ namespace app {
 		{
 			bool ret = true;
 			if(current_->get_focus()) {
-				tools::set_help(chip, current_, "0.0 to 30.0 [A]");
+				tools::set_help(chip, current_, "0.0 to 24.0 [A]");
 			} else if(voltage_->get_focus()) {
-				tools::set_help(chip, voltage_, "0.0 to 60.0 [V]");
+				tools::set_help(chip, voltage_, "0.0 to 20.0 [V]");
 			} else if(all_->get_focus()) {
 				tools::set_help(chip, all_, "DC1 ON/OFF");
 			} else {
