@@ -546,7 +546,6 @@ namespace app {
 			if(!serial_list_.empty()) {
 				if(!serial_.probe()) {
 					if(serial_.open(cont_setting_serial_->get_select_text())) {
-// std::cout << "Serial Open: " << cont_setting_serial_->get_select_text() << std::endl;
 						kikusui_.start();
 						kikusui_loop_ = 60;
 					}
@@ -597,6 +596,7 @@ namespace app {
 				break;
 
 			case task::loop:
+				if(inspection_.get_task_busy()) break;
 				{
 					auto fp = project_.get_unit_name(unit_id_);
 					auto s = utils::get_file_name(fp);
@@ -609,7 +609,7 @@ namespace app {
 						task_ = task::idle;
 						break;
 					}
-std::cout << fp << std::endl;
+
 					std::string top = (boost::format("検査「%s」\n") % s).str();
 					inspection_.at_test_param().build_value();
 					const auto& v = inspection_.get_test_param().value_;
