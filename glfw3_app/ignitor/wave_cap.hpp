@@ -1543,7 +1543,6 @@ namespace app {
 				if(wdm_id_[3] != nnn) {
 					meas_run_();
 					++mesa_id_;
-std::cout << "Wave Analize: " << mesa_id_ << std::endl;
 				}
 			}
 
@@ -1563,29 +1562,19 @@ std::cout << "Wave Analize: " << mesa_id_ << std::endl;
 				auto id = client_.get_mod_status().treg_id_[i];
 				if(treg_id_[i] != id) {
 					auto sz = waves_.size();
-#if 1
 					if(i == 0) {
 						waves_.copy(1, client_.get_treg(i) + sz / 2, sz / 2, sz / 2);
-// std::cout << treg_1st_.average_ << std::endl;
 					} else {
 						waves_.copy(1, client_.get_treg(i) + sz / 2, sz / 2, 0);
 						treg_2nd_ = waves_.analize(1, 1.0, (800.0 - 50.0), 100.0, 1.0);
 						treg_1st_ = waves_.analize(1, 1.0, (1024.0 + 800.0 - 50.0), 100.0, 1.0);
 						float a = treg_1st_.average_ - treg_2nd_.average_; 
-//						float a = treg_1st_.median_ - treg_2nd_.median_; 
 						float u = get_volt_scale_limit_(1);
 						treg_value_  = a * u / 64.0;
-// std::cout << treg_value_ << std::endl;
-//						auto b = waves_.analize(1, 1.0, (256.0 + 1024.0 - 32.0), 64.0, 1.0);
 						auto b = waves_.analize(1, 1.0, (256.0 - 32.0), 64.0, 1.0);
 						treg_value2_ = b.average_ * u / 64.0;
-// std::cout << treg_value2_ << std::endl;
 						++treg_value_id_;
-// std::cout << a << std::endl;
 					}
-#else
-					waves_.copy(i + 1, client_.get_treg(i), sz, sz / 2);
-#endif
 					treg_id_[i] = id;
 				}
 			}
