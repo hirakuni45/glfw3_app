@@ -55,6 +55,7 @@ namespace app {
 		gui::widget_list*		image_ext_;
 		gui::widget_table*		files_core_;
 		gui::widget_label*		log_name_;
+		gui::widget_check*		wav_save_;
 
 		gui::widget_dialog*		msg_dialog_;
 
@@ -111,7 +112,7 @@ namespace app {
 			name_dialog_(nullptr), proj_name_(nullptr), proj_root_(nullptr),
 			edit_dialog_(nullptr),
 			csv_all_(nullptr), csv_idx_(nullptr), csv_base_(nullptr), image_ext_(nullptr),
-			files_core_(nullptr), log_name_(nullptr),
+			files_core_(nullptr), log_name_(nullptr), wav_save_(nullptr),
 			msg_dialog_(nullptr), proj_dir_(nullptr), last_path_()
 		{ }
 
@@ -309,6 +310,25 @@ namespace app {
 			if(no < cell.size()) {
 				gui::widget_label* w = static_cast<gui::widget_label*>(cell[no]);
 				return w->get_text();
+			} else {
+				return "";
+			}
+		} 
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  波形データ名の取得
+			@param[in]	no	テスト番号（０～４９）
+			@return 波形データ名
+		*/
+		//-----------------------------------------------------------------//
+		std::string get_wave_name(uint32_t no) const {
+			auto& cell = files_core_->get_local_param().cell_;
+			if(no < cell.size()) {
+				gui::widget_label* w = static_cast<gui::widget_label*>(cell[no]);
+				auto str = w->get_text();
+				return str;
 			} else {
 				return "";
 			}
@@ -668,6 +688,12 @@ namespace app {
 					widget_label::param wp_("", false);
 					log_name_ = wd.add_widget<widget_label>(wp, wp_);
 				}
+				{
+					widget::param wp(vtx::irect(20 + 290, yy, 140, 40), edit_dialog_);
+					wp.pre_group_ = widget::PRE_GROUP::_2;
+					widget_check::param wp_("波形保存");
+					wav_save_ = wd.add_widget<widget_check>(wp, wp_);
+				}
 			}
 
 			{  // メッセージ・ダイアログ
@@ -746,6 +772,7 @@ namespace app {
 			files_core_->save(pre);
 
 			log_name_->save(pre);
+			wav_save_->save(pre);
 
 			return true;
 		}
@@ -775,6 +802,7 @@ namespace app {
 			files_core_->load(pre);
 
 			log_name_->load(pre);
+			wav_save_->load(pre);
 
 			return true;
 		}

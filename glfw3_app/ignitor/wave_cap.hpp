@@ -149,7 +149,8 @@ namespace app {
 		static float get_optional_gain_(uint32_t ch) {
 			if(ch == 0) return 1.067f;  //  CH0 補正ゲイン
 			else if(ch == 1) return 1.029f;  //	CH1 補正ゲイン 
-			else return 1.0f;
+			else if(ch == 2) return 1.111f;  // CH2 補正ゲイン
+			else return 1.0179f;  // CH3 補正ゲイン
 		}
 
 
@@ -377,15 +378,9 @@ namespace app {
 					/ static_cast<float>(grid);
 				float u = get_volt_scale_limit_(ch) / static_cast<float>(32768);
 				if(gnd_->get_check()) u = 0.0f;
-///////////////////////////////////////////// option gain
-// get_optional_gain_
-				if(ch == 0) {
-					waves_.at_param(ch).gain_ = u / value / gainrate * 1.067f;
-				} else if(ch == 1) {
-					waves_.at_param(ch).gain_ = u / value / gainrate * 1.029f;
-				} else {
-					waves_.at_param(ch).gain_ = u / value / gainrate;
-				}
+
+				//////////////////////////////////////////////////////////
+				waves_.at_param(ch).gain_ = u / value / gainrate * get_optional_gain_(ch);
 
 				// 電圧計測設定
 				if(mes_->get_check()) {
@@ -421,6 +416,9 @@ namespace app {
 				if(len_ != nullptr) {
 					len_->load(pre);
 				}
+				ena_->exec();
+				gnd_->exec();
+				mes_->exec();
 			}
 
 
@@ -1637,6 +1635,7 @@ namespace app {
 			}
 			if(smooth_ != nullptr) {
 				smooth_->load(pre);
+				smooth_->exec();
 			}
 			if(share_frame_ != nullptr) {
 				share_frame_->load(pre);

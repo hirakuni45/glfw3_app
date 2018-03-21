@@ -574,7 +574,27 @@ namespace app {
 
 			// 検査ループ制御
 			switch(task_) {
-			case task::idle:
+			case task::idle:  // 通常時
+				// CRM 測定終了
+				if(crm_id_ != inspection_.get_crm().get_id()) {
+					crm_id_ = inspection_.get_crm().get_id();
+					inspection_.offline();
+				}
+				// DC2 測定終了
+				if(dc2_id_ != inspection_.get_dc2().get_id()) {
+					dc2_id_ = inspection_.get_dc2().get_id();
+					inspection_.offline();
+				}
+				// wave_cap が新規波形を取得したら、関係スイッチを切る！
+				if(mesa_id_ != wave_cap_.get_mesa_id()) {
+					mesa_id_ = wave_cap_.get_mesa_id();
+					inspection_.offline();
+				}
+				// 熱抵抗測定が終了したら、関係スイッチを切る！
+				if(thr_id_ != inspection_.get_thr().get_id()) {
+					thr_id_ = inspection_.get_thr().get_id();
+					inspection_.offline();
+				}
 				break;
 
 			// 検査開始

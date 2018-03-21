@@ -627,7 +627,7 @@ namespace app {
 				widget::param wp(vtx::irect(0, 0, 0, 0), sheet_);
 				widget_null::param wp_;
 				style_[4] = wd.add_widget<widget_null>(wp, wp_);
-				sheet_->add("ヒステリシス検査", style_[4]);
+				sheet_->add("検査差分", style_[4]);
 			}
 			{
 				widget::param wp(vtx::irect(0, 0, 0, 0), sheet_);
@@ -684,6 +684,7 @@ namespace app {
 			dc1_.init(style_[2], d_w, ofsx, 140 + 40);
 			wgm_.init(style_[2], d_w, ofsx, 240 + 40);
 			thr_.init(style_[3], d_w, ofsx,  40);
+			dif_.init(style_[4], d_w, ofsx,  40);
 			ofsx = 130;
 			test_param_.init(dialog_, d_w, ofsx, 420);
 		}
@@ -703,6 +704,7 @@ namespace app {
 
 			interlock_.update(ilock_enable_->get_check());
 
+			// WAVE_CAP 側スイッチの転送ボタン検出
 			if(wdm_exec_id_ != wave_cap_.get_exec_button()->get_local_param().id_) {
 				wdm_exec_id_ = wave_cap_.get_exec_button()->get_local_param().id_;
 				cmd_task_ = cmd_task::wdm;				
@@ -769,6 +771,7 @@ namespace app {
 			else if(crm_.help(chip_)) { }
 			else if(wgm_.help(chip_)) { }
 			else if(thr_.help(chip_)) { }
+			else if(dif_.help(chip_)) { }
 			else if(test_param_.help(chip_)) { }
 			else { act = 0; }
 			chip_->active(act);
