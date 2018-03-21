@@ -241,6 +241,7 @@ namespace gui {
 
 			{  // メニューの生成
 				widget::param wp(vtx::irect(vtx::ipos(0), get_rect().size), this);
+				wp.pre_group_ = get_param().pre_group_;
 				widget_menu::param wp_;
 				wp_.init_list_ = param_.init_list_;
 				if(!wp_.init_list_.empty()) {

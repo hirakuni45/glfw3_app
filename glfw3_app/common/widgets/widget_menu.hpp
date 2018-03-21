@@ -89,6 +89,7 @@ namespace gui {
 		void build_list_()
 		{
 			widget::param wp(vtx::irect(vtx::ipos(0), vtx::ipos(get_rect().size.x, param_.base_height_)), this);
+			wp.pre_group_ = get_param().pre_group_;
 			widget_label::param wp_;
 			wp_.plate_param_ = param_.plate_param_;
 			wp_.color_param_ = param_.color_param_select_;
