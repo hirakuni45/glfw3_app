@@ -127,6 +127,29 @@ namespace app {
 
 		double			last_value_;
 
+
+		void set_csv_()
+		{
+			std::string st = (boost::format("%4.3f") % last_value_).str();
+			auto idx = project_.get_csv_index() - 1;
+			project_.at_csv1().set(unit_id_ + 1, 9 + idx, st);
+			project_.at_csv2().set(unit_id_ + 1, 5, st);
+			if(inspection_.get_test_mode() == inspection::test_mode::WD) {
+				msg_dialog_->enable(false);  // メッセージダイアログを消す。
+				wave_cap_.enable();  // 波形編集を有効にする。
+				{
+					auto st = wave_cap_.get_time_scale();
+					std::string s = (boost::format("%4.3f") % st).str();
+					project_.at_csv2().set(unit_id_ + 1, 6, s);
+				}
+				for(uint32_t i = 0; i < 4; ++i) {
+					auto sv = wave_cap_.get_volt_scale(i);
+					std::string s = (boost::format("%4.3f") % sv).str();
+					project_.at_csv2().set(unit_id_ + 1, 7 + i, s);
+				}
+			}
+		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -475,6 +498,7 @@ namespace app {
 				okc_dialog_->enable(false);
 				okc_dialog_->at_local_param().select_func_ = [=](bool ok) {
 					if(ok) {
+						set_csv_();
 						task_ = task::sync;
 					} else {
 						task_ = task::fin;
@@ -778,24 +802,7 @@ namespace app {
 					}
 					last_value_ = v;
 					if(value_.min_ <= v && v <= value_.max_) {
-						std::string st = (boost::format("%4.3f") % v).str();
-						auto idx = project_.get_csv_index() - 1;
-						project_.at_csv1().set(unit_id_ + 1, 9 + idx, st);
-						project_.at_csv2().set(unit_id_ + 1, 5, st);
-						if(inspection_.get_test_mode() == inspection::test_mode::WD) {
-							msg_dialog_->enable(false);  // メッセージダイアログを消す。
-							wave_cap_.enable();  // 波形編集を有効にする。
-							{
-								auto st = wave_cap_.get_time_scale();
-								std::string s = (boost::format("%4.3f") % st).str();
-								project_.at_csv2().set(unit_id_ + 1, 6, s);
-							}
-							for(uint32_t i = 0; i < 4; ++i) {
-								auto sv = wave_cap_.get_volt_scale(i);
-								std::string s = (boost::format("%4.3f") % sv).str();
-								project_.at_csv2().set(unit_id_ + 1, 7 + i, s);
-							}
-						}
+						set_csv_();
 						task_ = task::sync;
 					} else {
 						task_ = task::retry;
