@@ -52,8 +52,6 @@ namespace app {
 		gui::widget_check*		cnv_;		///< WDM トリガー・レベル変換
 		gui::widget_label*		level_va_;	///< WDM トリガー・レベル（電圧、電流）
 		gui::widget_list*		gain_[4];	///< WDM チャネル・ゲイン
-//		gui::widget_list*		ie_trg_;	///< WDM 内部、外部トリガ
-//		gui::widget_list*		sm_trg_;	///< WDM Single, Manual トリガ
 		gui::widget_button*		exec_;		///< WDM 設定転送
 		wave_cap::sample_param	sample_param_;
 
@@ -159,8 +157,6 @@ namespace app {
 			}
 			{  // trigger channel
 				cmd = (0b00100000 << 16);
-//				if(ie_trg_->get_select_pos()) cmd |= 0x0200;
-//				if(sm_trg_->get_select_pos()) cmd |= 0x0100;
 				auto n = ch_->get_select_pos();
 				uint8_t sub = 0;
 				sub |= 0x80;  // trigger ON
@@ -185,7 +181,6 @@ namespace app {
 			smpl_(nullptr), ch_(nullptr), slope_(nullptr), window_(nullptr),
 			level_(nullptr), cnv_(nullptr), level_va_(nullptr),
 			gain_{ nullptr },
-//			ie_trg_(nullptr), sm_trg_(nullptr),
 			exec_(nullptr),
 			sample_param_()
 		{ }
@@ -247,15 +242,7 @@ namespace app {
 				gain_[i] = wd.add_widget<widget_list>(wp, wp_);
 				gain_[i]->select(4);
 			}
-#if 0
-			{  // 内部、外部トリガー選択
-				widget::param wp(vtx::irect(ofsx + 690, ofsy, 100, 40), root);
-				widget_list::param wp_;
-				wp_.init_list_.push_back("Int");
-				wp_.init_list_.push_back("Ext");
-				ie_trg_ = wd.add_widget<widget_list>(wp, wp_);
-			}
-#endif
+
 			ofsy += 50;
 			{  // 時間軸リスト 10K、20K、50K、100K、200K、500K、1M、2M、5M、10M、20M、50M、100M
 				widget::param wp(vtx::irect(ofsx, ofsy, 100, 40), root);
@@ -436,8 +423,6 @@ namespace app {
 			gain_[1]->save(pre);
 			gain_[2]->save(pre);
 			gain_[3]->save(pre);
-//			ie_trg_->save(pre);
-//			sm_trg_->save(pre);
 		}
 
 
@@ -459,8 +444,6 @@ namespace app {
 			gain_[1]->load(pre);
 			gain_[2]->load(pre);
 			gain_[3]->load(pre);
-//			ie_trg_->load(pre);
-//			sm_trg_->load(pre);
 		}
 	};
 }
