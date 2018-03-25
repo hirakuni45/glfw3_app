@@ -239,7 +239,11 @@ namespace app {
 				wp_.init_list_.push_back(" 14dB");
 				wp_.init_list_.push_back(" 20dB");
 				gain_[i] = wd.add_widget<widget_list>(wp, wp_);
-				gain_[i]->select(4);
+				if(i == 1) {
+					gain_[i]->select(0);
+				} else {
+					gain_[i]->select(4);
+				}
 			}
 
 			ofsy += 50;
