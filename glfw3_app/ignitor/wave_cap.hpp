@@ -967,7 +967,14 @@ namespace app {
 				auto ch = time_mesa_ch_->get_select_pos();
 				tm *= get_volt_scale_limit_(ch) * get_optional_gain_(ch);
 				static const char* unit[4] = { "A", "V", "V", "KV" };
-				ch_to_time_->set_text((boost::format("%5.4f [%s]") % tm % unit[ch]).str());
+				auto str = (boost::format("%4.3f [%s]") % tm % unit[ch]).str();
+				if(mesa_type_->get_select_pos() >= 3) {
+					float t = time_meas_delay_
+						/ get_time_unit_base_(time_.scale_->get_select_pos());
+					auto u = get_time_unit_str_(time_.scale_->get_select_pos());
+					str += (boost::format(", %3.2f %s") % t % u).str();
+				}
+				ch_to_time_->set_text(str);
 			}
 
 			mesa_value_ = tm;
@@ -1269,7 +1276,7 @@ namespace app {
 				};
 			}
 			{	// 計測開始トリガー・レベル
-				widget::param wp(vtx::irect(130, 120, 100, 40), tools_);
+				widget::param wp(vtx::irect(130, 120, 110, 40), tools_);
 				widget_spinbox::param wp_(0, 50, 100);
 				org_slope_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				org_slope_->at_local_param().select_func_ =
@@ -1296,7 +1303,7 @@ namespace app {
 				};
 			}
 			{	// 計測終了トリガー・レベル
-				widget::param wp(vtx::irect(130, 170, 100, 40), tools_);
+				widget::param wp(vtx::irect(130, 170, 110, 40), tools_);
 				widget_spinbox::param wp_(0, 50, 100);
 				fin_slope_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				fin_slope_->at_local_param().select_func_ =
@@ -1327,7 +1334,6 @@ namespace app {
 				time_delay_->at_local_param().select_func_ =
 					[=](widget_spinbox::state st, int before, int newpos) {
 					auto grid = waves_.get_info().grid_step_;
-					waves_.at_info().delay_enable_ = true;
 					waves_.at_info().delay_pos_ = newpos * grid / 4
 						+ (-time_.offset_->get_select_pos() * grid);
 					float t = get_time_unit_(time_.scale_->get_select_pos());
@@ -1386,12 +1392,12 @@ namespace app {
 				wdm_exec_ = wd.add_widget<widget_button>(wp, wp_);
 			}
 			{	// 計測ライン描画 (org)
-				widget::param wp(vtx::irect(240, 120, 100, 40), tools_);
+				widget::param wp(vtx::irect(250, 120, 90, 40), tools_);
 				widget_check::param wp_("1st");
 				org_ena_ = wd.add_widget<widget_check>(wp, wp_);
 			}
 			{	// 計測ライン描画 (fin)
-				widget::param wp(vtx::irect(240, 170, 100, 40), tools_);
+				widget::param wp(vtx::irect(250, 170, 90, 40), tools_);
 				widget_check::param wp_("2nd");
 				fin_ena_ = wd.add_widget<widget_check>(wp, wp_);
 			}
@@ -1497,18 +1503,18 @@ namespace app {
 			}
 
 			if(org_ena_->get_enable() && !org_ena_->get_stall()) {
-				waves_.at_info().meas_enable_[0] = true;
+				waves_.at_info().meas_enable_[0] = org_ena_->get_check();
 			} else {
 				waves_.at_info().meas_enable_[0] = false;
 			}
 			if(fin_ena_->get_enable() && !fin_ena_->get_stall()) {
-				waves_.at_info().meas_enable_[1] = true;
+				waves_.at_info().meas_enable_[1] = fin_ena_->get_check();
 			} else {
 				waves_.at_info().meas_enable_[1] = false;
 			}
 
 			if(time_delay_ena_->get_enable() && !time_delay_ena_->get_stall()) {
-				waves_.at_info().delay_enable_ = true;
+				waves_.at_info().delay_enable_ = time_delay_ena_->get_check();
 			} else {
 				waves_.at_info().delay_enable_ = false;
 			}
