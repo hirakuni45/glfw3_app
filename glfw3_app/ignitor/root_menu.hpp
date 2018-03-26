@@ -78,8 +78,8 @@ namespace app {
 
 		gui::widget_dialog*		msg_dialog_;
 
-		inspection				inspection_;
 		project					project_;
+		inspection				inspection_;
 
 		int						ip_[4];
 
@@ -171,8 +171,8 @@ namespace app {
 			cont_setting_cmds_(nullptr), cont_setting_serial_(nullptr),
 			cont_setting_msg_(nullptr), cont_setting_exec_(nullptr),
 			info_dialog_(nullptr), msg_dialog_(nullptr),
-			inspection_(d, client, ilock, wave_cap_, kikusui_),
 			project_(d),
+			inspection_(d, client, ilock, wave_cap_, kikusui_, project_.at_csv1()),
 
 			ip_{ 0 }, init_client_(false),
 
@@ -569,7 +569,7 @@ namespace app {
 			}
 			if(!serial_list_.empty()) {
 				if(!serial_.probe()) {
-					if(serial_.open(cont_setting_serial_->get_select_text())) {
+					if(serial_.open(cont_setting_serial_->get_select_text(), 57600)) {
 						kikusui_.start();
 						kikusui_loop_ = 60;
 					}

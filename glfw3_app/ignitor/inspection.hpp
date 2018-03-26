@@ -77,6 +77,7 @@ namespace app {
 		interlock&				interlock_;
 		wave_cap&				wave_cap_;
 		kikusui&				kikusui_;
+		csv&					csv1_;
 
 		gui::widget_dialog*		dialog_;
 		gui::widget_button*		load_file_;			///< load file
@@ -100,6 +101,7 @@ namespace app {
 		test_param				test_param_;
 
 		gui::widget_chip*		chip_;			///< help chip
+		gui::widget_button*		all_off_;		///< All SW OFF
 
 		bool					startup_init_;
 		bool					dc1_all_ena_;
@@ -302,8 +304,9 @@ namespace app {
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		inspection(utils::director<core>& d, net::ign_client_tcp& client, interlock& ilock, wave_cap& wc, kikusui& kik) :
+		inspection(utils::director<core>& d, net::ign_client_tcp& client, interlock& ilock, wave_cap& wc, kikusui& kik, csv& csv1) :
 			director_(d), client_(client), interlock_(ilock), wave_cap_(wc), kikusui_(kik),
+			csv1_(csv1),
 			dialog_(nullptr),
 			load_file_(nullptr), save_file_(nullptr), ilock_enable_(nullptr),
 			sheet_(nullptr), style_{ nullptr },
@@ -315,10 +318,10 @@ namespace app {
 			icm_(d, client_, interlock_),
 			wdm_(d, client_, interlock_),
 			thr_(d, client_, interlock_, kikusui_, wave_cap_),
-			dif_(d),
+			dif_(d, csv1_),
 			test_param_(d),
 
-			chip_(nullptr),
+			chip_(nullptr), all_off_(nullptr),
 
 			startup_init_(false), dc1_all_ena_(false),
 			d2md_id_(0),
@@ -675,6 +678,20 @@ namespace app {
 				widget_chip::param wp_;
 				chip_ = wd.add_widget<widget_chip>(wp, wp_);
 				chip_->active(0);
+			}
+			{  // All SW OFF
+				widget::param wp(vtx::irect(d_w - 120, 480, 100, 40), dialog_);
+				wp.pre_group_ = widget::PRE_GROUP::_3;
+				widget_button::param wp_("All OFF");
+				all_off_ = wd.add_widget<widget_button>(wp, wp_);
+				all_off_->at_local_param().select_func_ = [=](bool f) {
+					icm_.reset_sw();
+					crm_.reset_sw();
+					dc2_.reset_sw();
+					dc1_.reset_sw();
+					wgm_.reset_sw();
+					crm_.reset_sw();
+				};
 			}
 			ofsx = 90 - 5;
 			icm_.init(style_[2], d_w, ofsx,  30);
