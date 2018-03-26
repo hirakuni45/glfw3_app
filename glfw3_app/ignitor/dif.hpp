@@ -25,6 +25,7 @@
 #include "utils/preference.hpp"
 
 #include "tools.hpp"
+#include "csv.hpp"
 
 namespace app {
 
@@ -36,6 +37,7 @@ namespace app {
 	class dif
 	{
 		utils::director<core>&	director_;
+		csv&					csv1_;
 
 		gui::widget_label*		tag1_;	///< 検査記号１
 		gui::widget_label*		val1_;	///< 値１
@@ -51,8 +53,8 @@ namespace app {
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		dif(utils::director<core>& d) :
-			director_(d),
+		dif(utils::director<core>& d, csv& csv1) :
+			director_(d), csv1_(csv1),
 			tag1_(nullptr), val1_(nullptr), calc_(nullptr), tag2_(nullptr), val2_(nullptr),
 			ans_(nullptr), exec_(nullptr)
 		{ }

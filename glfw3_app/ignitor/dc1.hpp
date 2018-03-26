@@ -41,12 +41,12 @@ namespace app {
 		net::ign_client_tcp&	client_;
 		interlock&				interlock_;
 
-	public:
 		gui::widget_check*		sw_[5];		///< DC1 接続スイッチ
 		gui::widget_check*		ena_;		///< DC1 有効、無効
 		gui::widget_list*		mode_;		///< DC1 電流、電圧モード
 		gui::widget_label*		voltage_;	///< DC1（電圧）
 		gui::widget_label*		current_;	///< DC1（電流）
+	public:
 		gui::widget_button*		exec_;		///< DC1 設定転送
 		gui::widget_check*		all_;		///< DC1 全体
 
@@ -101,6 +101,19 @@ namespace app {
 			ena_(nullptr), mode_(nullptr), voltage_(nullptr), current_(nullptr),
 			exec_(nullptr), all_(nullptr), offline_(0)
 		{ }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  リセット・スイッチ
+		*/
+		//-----------------------------------------------------------------//
+		void reset_sw()
+		{
+			for(uint32_t i = 0; i < 5; ++i) {
+				sw_[i]->set_check(false);
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
