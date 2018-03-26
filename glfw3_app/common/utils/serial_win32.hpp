@@ -75,6 +75,40 @@ namespace device {
 			return false;
 		}
 
+		DWORD get_baud_rate_(uint32_t speed)
+		{
+			switch(speed) {
+			case 110:
+				return CBR_110;
+			case 300:
+				return CBR_300;
+			case 600:
+				return CBR_600;
+			case 1200:
+				return CBR_1200;
+			case 2400:
+				return CBR_2400;
+			case 4800:
+				return CBR_4800;
+			case 9600:
+				return CBR_9600;
+			case 19200:
+				return CBR_19200;
+			case 38400:
+				return CBR_38400;
+			case 57600:
+				return CBR_57600;
+			case 115200:
+				return CBR_115200;
+			case 128000:
+				return CBR_128000;
+			case 256000:
+				return CBR_256000;
+			default:
+				return 0;
+			}
+		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -200,12 +234,16 @@ namespace device {
 		/*!
 			@brief	オープン
 			@param[in]	port	ポート名
+			@param[in]	speed	ボーレート（110～256000 bps）
 			@return 成功なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool open(const std::string& port)
+		bool open(const std::string& port, uint32_t speed)
 		{
 			close();
+
+			auto rate = get_baud_rate_(speed);
+			if(rate == 0) return false;
 
 			std::string full("\\\\.\\");
 			full += port;
@@ -234,11 +272,12 @@ namespace device {
 			} else {
 				DCB dcb;
 				GetCommState(fd_, &dcb);
-//				dcb.BaudRate = CBR_115200;
-				dcb.BaudRate = CBR_57600;
+				dcb.BaudRate = rate;
+
 				dcb.ByteSize = 8;
 				dcb.StopBits = ONESTOPBIT;
 				dcb.Parity   = NOPARITY;
+
 				dcb.fParity  = FALSE;
 				dcb.fBinary  = TRUE;
 //				dcb.fRtsControl = FALSE;
