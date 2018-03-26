@@ -1,7 +1,7 @@
 #pragma once
 //=====================================================================//
 /*! @file
-    @brief  CSV クラス
+    @brief  CSV 簡易クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
 	@copyright	Copyright (C) 2018 Kunihito Hiramatsu @n
 				Released under the MIT license @n
@@ -18,7 +18,7 @@ namespace app {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
-		@brief  CSV 出力クラス
+		@brief  CSV 簡易クラス
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class csv {
@@ -38,6 +38,15 @@ namespace app {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief  最大行を返す
+			@return 最大行
+		*/
+		//-----------------------------------------------------------------//
+		uint32_t get_rows() const { return cell_.size(); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief  作成
 			@param[in]	columns	列
 			@param[in]	rows	行
@@ -53,6 +62,29 @@ namespace app {
 				}
 				cell_.push_back(line);
 			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  行の検索
+			@param[in]	key	検索キー
+			@param[in]	colum	検索列
+			@return 行の位置を返す（見つからない場合「最大行」を返す）
+		*/
+		//-----------------------------------------------------------------//
+		uint32_t find_rows(const std::string& key, uint32_t colum) const
+		{
+			uint32_t n = 0;
+			for(const auto& ss : cell_) {
+				if(colum < ss.size()) {
+					if(key == ss[colum]) {
+						return n;
+					}
+				}
+				++n;
+			}
+			return n;
 		}
 
 
