@@ -227,9 +227,13 @@ run:
 
 clean:
 	rm -rf $(BUILD) $(TARGET)$(FEXT)
+	rm -rf $(TARGET).pre
 
 clean_depend:
 	rm -f $(DEPENDS)
+
+clearpre:
+	rm -rf $(TARGET).pre
 
 dllname:
 	objdump -p $(TARGET)$(FEXT) | grep "DLL Name"
