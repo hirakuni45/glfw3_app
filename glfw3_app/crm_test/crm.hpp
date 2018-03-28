@@ -25,6 +25,8 @@
 #include "utils/format.hpp"
 #include "utils/preference.hpp"
 
+#include "utils/serial_win32.hpp"
+
 namespace app {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -34,7 +36,10 @@ namespace app {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class crm
 	{
+		static const int32_t SAMPLE_NUM = 50;
+
 		utils::director<core>&	director_;
+		device::serial_win32&	serial_;
 
 		gui::widget_check*		sw_[14];	///< CRM 接続スイッチ
 		gui::widget_check*		ena_;		///< CRM 有効、無効
@@ -44,8 +49,17 @@ namespace app {
 		gui::widget_label*		ans_;		///< CRM 測定結果 
 		gui::widget_button*		exec_;		///< CRM 設定転送
 
-		double					crrd_value_;
-		double					crcd_value_;
+		gui::widget_label*		net_regs_;
+
+		gui::widget_terminal*	termcore_;
+
+		std::string				crm_line_;
+		uint32_t				crrd_id_;
+		uint32_t				crcd_id_;
+		uint32_t				crdd_id_;
+		uint32_t				crrd_value_;
+		uint32_t				crcd_value_;
+		uint32_t				crdd_value_;
 
 		struct crm_t {
 			uint16_t	sw;		///< 14 bits
@@ -56,28 +70,28 @@ namespace app {
 
 			crm_t() : sw(0), ena(0), amps(0), freq(0), mode(0) { }
 
-			std::string build(uint32_t delay) const
+			std::string build() const
 			{
 				std::string s;
-				s = (boost::format("CRSW%04X\n") % sw).str();
+				s = (boost::format("CRSW%04X \n") % sw).str();
 				if(ena) {
-					s += (boost::format("CRIS%d\n") % amps).str();
+					s += (boost::format("CRIS%d    \n") % (amps % 10)).str();
 					static const char* frqtbl[3] = { "001", "010", "100" };
-					s += (boost::format("CRFQ%s\n") % frqtbl[freq % 3]).str();
+					s += (boost::format("CRFQ%s  \n") % frqtbl[freq % 3]).str();
 				}
-				s += (boost::format("CROE%d\n") % ena).str();
+				s += (boost::format("CROE%d    \n") % ena).str();
 				if(ena) {
 					if(mode > 0) {  // mode 1, 2
-						s += (boost::format("CRC?1\n")).str();
+						s += (boost::format("CRC?1    \n")).str();
 					} else {  // mode 0
-						s += (boost::format("CRR?1\n")).str();
+						s += (boost::format("CRR?1    \n")).str();
 					}
 				}
 				return s;
 			}
 		};
 
-#if 0
+
 		std::string make_crm_param_()
 		{
 			crm_t t;
@@ -91,22 +105,35 @@ namespace app {
 			t.amps = amps_->get_select_pos();
 			t.freq = freq_->get_select_pos();
 			t.mode = mode_->get_select_pos();
-			return t.build(0);
+			return t.build();
 		}
-#endif
 
-#if 0
-		float median_(std::vector<float>& ss)
+
+		static void init_sw_(gui::widget_director& wd, gui::widget* root,
+			int ofsx, int ofsy, gui::widget_check* out[], int num, int swn)
 		{
-			std::sort(ss.begin(), ss.end());
-			float v = ss[ss.size() / 2];
-			if((ss.size() & 1) == 0) {
-				v += ss[(ss.size() / 2) + 1];
-				v *= 0.5f;
+///			auto md = get_module(swn);
+			for(int i = 0; i < num; ++i) {
+				gui::widget::param wp(vtx::irect(ofsx, ofsy, 60, 40), root);
+				gui::widget_check::param wp_((boost::format("%d") % swn).str());
+				out[i] = wd.add_widget<gui::widget_check>(wp, wp_);
+				ofsx += 60;
+///				ilc.install(md, static_cast<interlock::swtype>(swn), out[i]);
+				++swn;
 			}
+		}
+
+
+		static uint32_t get32_(const void* src)
+		{
+			uint32_t v;
+			const uint8_t* ptr = static_cast<const uint8_t*>(src);
+			v  = static_cast<uint32_t>(ptr[0]) << 24;
+			v |= static_cast<uint32_t>(ptr[1]) << 16;
+			v |= static_cast<uint32_t>(ptr[2]) << 8;
+			v |= static_cast<uint32_t>(ptr[3]);
 			return v;
 		}
-#endif
 
 	public:
 		//-----------------------------------------------------------------//
@@ -114,13 +141,20 @@ namespace app {
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		crm(utils::director<core>& d) :
-			director_(d),
+		crm(utils::director<core>& d, device::serial_win32& serial) :
+			director_(d), serial_(serial),
 			sw_{ nullptr },
 			ena_(nullptr), amps_(nullptr), freq_(nullptr), mode_(nullptr),
 			ans_(nullptr), exec_(nullptr),
-			crrd_value_(0.0), crcd_value_(0.0)
+			net_regs_(nullptr),
+			termcore_(nullptr),
+			crm_line_(),
+			crrd_id_(0), crcd_id_(0), crdd_id_(0),
+			crrd_value_(0), crcd_value_(0), crdd_value_(0)
 		{ }
+
+
+		void set_termcore(gui::widget_terminal* tc) { termcore_ = tc; }
 
 
 		//-----------------------------------------------------------------//
@@ -145,7 +179,7 @@ namespace app {
 				wd.add_widget<widget_text>(wp, wp_);
 			}
 
-///			tools::init_sw(wd, root, interlock_, ofsx, ofsy, sw_, 14, 1);
+			init_sw_(wd, root, ofsx, ofsy, sw_, 14, 1);
 			ofsy += 50;
 			// ＣＲメジャー・モジュール
 			{
@@ -184,22 +218,23 @@ namespace app {
 				ans_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 			{  // exec
-				widget::param wp(vtx::irect(d_w - 85, ofsy, 30, 30), root);
+				widget::param wp(vtx::irect(d_w - 55, ofsy, 30, 30), root);
 				widget_button::param wp_(">");
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
 				exec_->at_local_param().select_func_ = [=](int n) {
-//					auto s = make_crm_param_();
-
+					auto s = make_crm_param_();
+					serial_.write(s.c_str(), s.size());
+					if(termcore_ != nullptr) {
+						termcore_->output(s);
+					}
 					ans_->set_text("");
 				};
 			}
-#if 0
 			{  // 合成回路、抵抗設定
 				widget::param wp(vtx::irect(ofsx + 220, ofsy + 50, 110, 40), root);
 				widget_label::param wp_("390.0", false);
 				net_regs_ = wd.add_widget<widget_label>(wp, wp_);
 			}
-#endif
 		}
 
 
@@ -210,100 +245,90 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void update()
 		{
-#if 0
-			// モジュールから受け取ったパラメーターをＧＵＩに反映
-			static const uint32_t sample_num = 50;
-			if(mode_->get_select_pos() == 0) {  // CRRD
-				if(crrd_id_ != client_.get_mod_status().crrd_id_) {
-					crrd_id_ = client_.get_mod_status().crrd_id_;
-					if(dummy_count_ > 0) {
-						--dummy_count_;
-						client_.send_data(last_cmd_);
-						return;
-					}
-					int32_t v = client_.get_mod_status().crrd_;
-					int32_t ofs = sample_num * 0x7FFFF;
-					v -= ofs;
-// std::cout << v << std::endl;
-					double lim = static_cast<double>(ofs) / 1.570798233;
-					if(v >= lim) {
-						ans_->set_text("OVF");
-						return;
-					}
-					double a = static_cast<double>(v) / static_cast<double>(ofs) * 1.570798233;
-					a *= 778.2;  // 778.2 mV P-P
-					static const double itbl[4] = {  // 電流テーブル
-						0.2, 2.0, 20.0, 200.0
-					};
-					a /= itbl[amps_->get_select_pos()];
-					crrd_vals_.push_back(a);
-					if(crrd_vals_.size() >= crm_count_limit_) {
-						crrd_value_ = median_(crrd_vals_);
-						if(amps_->get_select_pos() == 3 && refs_task_ == refs_task::idle) {
-							if(ena_refs_->get_check()) {
-								crrd_value_ -= get_bias_();
-							}
-						}
-						ans_->set_text((boost::format("%6.5f Ω") % crrd_value_).str());
-						++crm_id_;
-					} else {
-						client_.send_data(last_cmd_);
-					}
-				}
-			} else { // CRCD (1, 2)
-				if(crcd_id_ != client_.get_mod_status().crcd_id_) {
-					crcd_id_ = client_.get_mod_status().crcd_id_;
-					if(dummy_count_ > 0) {
-						--dummy_count_;
-						client_.send_data(last_cmd_);
-						return;
-					}
-					int32_t v = client_.get_mod_status().crcd_;
-// std::cout << v << std::endl;
-					int32_t ofs = sample_num * 0x7FFFF;
-					v -= ofs;
-// std::cout << v << std::endl;
-					double lim = static_cast<double>(ofs) / 1.570798233;
-					if(v >= lim) {
-						ans_->set_text("OVF");
-						return;
-					}
-					static const double itbl[4] = {  // 電流テーブル
-						0.2, 2.0, 20.0, 200.0
-					};
-					double ib = itbl[amps_->get_select_pos()];
-					v -= 447158 * ib;
-					v += 23989;
-
-					double a = static_cast<double>(v) / static_cast<double>(ofs) * 1.570798233;
-					a *= 778.2;  // 778.2 mV P-P
-
-
-					static const double ftbl[4] = {  // 周波数テーブル
-						100.0, 1000.0, 10000.0
-					};
-					double fq = ftbl[freq_->get_select_pos()];
-					if(mode_->get_select_pos() == 1) {  // 容量
-						a = ib / (2.0 * 3.141592654 * fq * a);
-					} else {  // 合成
-						float b = 390.0;
-						if((utils::input("%f", net_regs_->get_text().c_str()) % b).status()) {
-							b *= ib;
-						}
-						a = (ib * a) / (2.0 * 3.141592654 * fq * (a * a + b * b));
-					}
-					a *= 1e6;
-					crcd_vals_.push_back(a);
-					if(crcd_vals_.size() >= crm_count_limit_) {
-						crcd_value_ = median_(crcd_vals_);
-						ans_->set_text((boost::format("%6.5f uF") % crcd_value_).str());
-						++crm_id_;
-					} else {
-						client_.send_data(last_cmd_);
-					}
+			{
+				char tmp[128];
+				auto len = serial_.read(tmp, sizeof(tmp));
+				for(uint32_t i = 0; i < len; ++i) {
+					crm_line_ += tmp[i];
 				}
 			}
-#endif
+
+			// 受信した文字列をデコード
+			bool crcd = false;
+			bool crrd = false;
+			bool crdd = false;
+			if(crm_line_.size() >= 9 && crm_line_[8] == '\n') {
+				if(crm_line_.find("CRCD", 4) == 0) {
+					crcd_value_ = get32_(&crm_line_[4]);
+					++crcd_id_;
+				} else if(crm_line_.find("CRRD", 4) == 0) {
+					crrd_value_ = get32_(&crm_line_[4]);
+					++crrd_id_;
+				} else if(crm_line_.find("CRDD", 4) == 0) {
+					crdd_value_ = get32_(&crm_line_[4]);
+					++crdd_id_;
+				}
+				crm_line_ = crm_line_.substr(9);
+			}
+
+			if(crdd) {
+				termcore_->output((boost::format("CRDD: %08X\n") % crdd_value_).str());
+			}
+
+			if(crrd) {  // CRRD
+				termcore_->output((boost::format("CRRD: %08X\n") % crrd_value_).str());
+				int32_t v = static_cast<int32_t>(crcd_value_);
+				int32_t ofs = static_cast<int32_t>(crdd_value_);
+				v -= ofs;
+				double lim = static_cast<double>(ofs) / 1.570798233;
+				if(v >= lim) {
+					ans_->set_text("OVF");
+					return;
+				}
+				double a = static_cast<double>(v) / static_cast<double>(ofs) * 1.570798233;
+				a *= 778.2;  // 778.2 mV P-P
+				static const double itbl[4] = {  // 電流テーブル
+					0.2, 2.0, 20.0, 200.0
+				};
+				a /= itbl[amps_->get_select_pos()];
+				ans_->set_text((boost::format("%6.5f Ω") % a).str());
+			}
+			if(crcd) {
+				termcore_->output((boost::format("CRCD: %08X\n") % crcd_value_).str());
+				int32_t v = static_cast<int32_t>(crcd_value_);
+				int32_t ofs = static_cast<int32_t>(crdd_value_);
+				v -= ofs;
+				double lim = static_cast<double>(ofs) / 1.570798233;
+				if(v >= lim) {
+					ans_->set_text("OVF");
+					return;
+				}
+				static const double itbl[4] = {  // 電流テーブル
+					0.2, 2.0, 20.0, 200.0
+				};
+				double ib = itbl[amps_->get_select_pos()];
+				v -= 447158 * ib;
+				v += 23989;
+
+				double a = static_cast<double>(v) / static_cast<double>(ofs) * 1.570798233;
+				a *= 778.2;  // 778.2 mV P-P
+
+				static const double ftbl[4] = {  // 周波数テーブル
+					100.0, 1000.0, 10000.0
+				};
+				double fq = ftbl[freq_->get_select_pos()];
+				if(mode_->get_select_pos() == 1) {  // 容量
+					a = ib / (2.0 * 3.141592654 * fq * a);
+				} else {  // 合成
+					float b = 0.0;
+					if((utils::input("%f", net_regs_->get_text().c_str()) % b).status()) {
+						b *= ib;
+					}
+					a = (ib * a) / (2.0 * 3.141592654 * fq * (a * a + b * b));
+				}
+				a *= 1e6;
+				ans_->set_text((boost::format("%6.5f uF") % a).str());
+			}
 		}
 
 

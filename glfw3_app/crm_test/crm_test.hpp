@@ -22,9 +22,6 @@
 #include "widgets/widget_view.hpp"
 #include "widgets/widget_utils.hpp"
 
-#include "gl_fw/render_waves.hpp"
-
-#include "utils/fixed_fifo.hpp"
 #include "utils/serial_win32.hpp"
 
 #include "crm.hpp"
@@ -47,11 +44,11 @@ namespace app {
 		gui::widget_frame*		terminal_frame_;
 		gui::widget_terminal*	terminal_core_;
 
+		crm						crm_;
+
 		typedef device::serial_win32 SERIAL;
 		SERIAL					serial_;
 		SERIAL::name_list		serial_list_;
-		typedef utils::fixed_fifo<uint8_t, 8192> FIFO;
-		FIFO					fifo_;
 
 		// ターミナル、行入力
 		void term_enter_(const utils::lstring& text) {
@@ -71,7 +68,8 @@ namespace app {
 			menu_(nullptr),
 			ports_(nullptr), connect_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
-			serial_(), serial_list_(), fifo_()
+			crm_(d, serial_),
+			serial_(), serial_list_()
 		{ }
 
 
@@ -86,8 +84,8 @@ namespace app {
 			widget_director& wd = director_.at().widget_director_;
 			gl::core& core = gl::core::get_instance();
 
-			int menu_width  = 800;
-			int menu_height = 500;
+			int menu_width  = 950;
+			int menu_height = 250;
 			{	// メニューパレット
 				widget::param wp(vtx::irect(10, 10, menu_width, menu_height));
 				widget_frame::param wp_;
@@ -120,12 +118,14 @@ namespace app {
 								terminal_core_->output("Open Serialport: '" + port + "'\n");
 								ports_->set_stall();
 							} else {
-								terminal_core_->output("Can't open Serialport: '" + port + "'\n"); 
+								terminal_core_->output("Can't open Serialport: '" + port + "'\n");
 							}
 						}
 					}
 				};
 			}
+
+			crm_.init(menu_, menu_width, 80, 70);
 
 			{	// ターミナル
 				{
@@ -144,6 +144,7 @@ namespace app {
 					term_chaout::set_output(terminal_core_);
 				}
 			}
+			crm_.set_termcore(terminal_core_);
 
 			// プリファレンスのロード
 			sys::preference& pre = director_.at().preference_;
@@ -179,6 +180,8 @@ namespace app {
 				ports_->get_menu()->build(list);
 				ports_->select(0);
 			}
+
+			crm_.update();
 
 			wd.update();
 		}
