@@ -262,12 +262,15 @@ namespace app {
 				if(crm_line_.find("CRCD", 4) == 0) {
 					crcd_value_ = get32_(&crm_line_[4]);
 					++crcd_id_;
+					crcd = true;
 				} else if(crm_line_.find("CRRD", 4) == 0) {
 					crrd_value_ = get32_(&crm_line_[4]);
 					++crrd_id_;
+					crrd = true;
 				} else if(crm_line_.find("CRDD", 4) == 0) {
 					crdd_value_ = get32_(&crm_line_[4]);
 					++crdd_id_;
+					crdd = true;
 				}
 				crm_line_ = crm_line_.substr(9);
 			}
