@@ -81,6 +81,7 @@ namespace app {
 				}
 				s += (boost::format("CROE%d    \n") % ena).str();
 				if(ena) {
+					s += (boost::format("CRD?1    \n")).str();
 					if(mode > 0) {  // mode 1, 2
 						s += (boost::format("CRC?1    \n")).str();
 					} else {  // mode 0
