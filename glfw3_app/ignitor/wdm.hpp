@@ -188,6 +188,20 @@ namespace app {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief  パラメータ、セットアップ
+		*/
+		//-----------------------------------------------------------------//
+		void setup()
+		{
+			sample_param_.rate = get_time_div_();
+			for(uint32_t i = 0; i < 4; ++i) {
+				sample_param_.gain[i] = get_gain_rate_(i);
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief  スタートアップ
 		*/
 		//-----------------------------------------------------------------//
@@ -350,10 +364,7 @@ namespace app {
 				widget_button::param wp_(">");
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
 				exec_->at_local_param().select_func_ = [=](int n) {
-					sample_param_.rate = get_time_div_();
-					for(uint32_t i = 0; i < 4; ++i) {
-						sample_param_.gain[i] = get_gain_rate_(i);
-					}
+					setup();
 					auto s = build_wdm_();
 					client_.send_data(s);
 				};
