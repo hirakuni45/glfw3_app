@@ -117,6 +117,7 @@ namespace app {
 		uint32_t		crm_id_;
 		uint32_t		mesa_id_;
 		uint32_t		thr_id_;
+		uint32_t		dif_id_;
 		uint32_t		time_out_;
 
 		typedef device::serial_win32 SERIAL;
@@ -134,7 +135,8 @@ namespace app {
 			auto idx = project_.get_csv_index() - 1;
 			project_.at_csv1().set(unit_id_ + 1, 9 + idx, st);
 			project_.at_csv2().set(unit_id_ + 1, 5, st);
-			if(inspection_.get_test_mode() == inspection::test_mode::WD) {
+			if(inspection_.get_test_mode() == inspection::test_mode::WD1 ||
+			   inspection_.get_test_mode() == inspection::test_mode::WD2) {
 				msg_dialog_->enable(false);  // メッセージダイアログを消す。
 				wave_cap_.enable();  // 波形編集を有効にする。
 				{
@@ -172,13 +174,13 @@ namespace app {
 			cont_setting_msg_(nullptr), cont_setting_exec_(nullptr),
 			info_dialog_(nullptr), msg_dialog_(nullptr),
 			project_(d),
-			inspection_(d, client, ilock, wave_cap_, kikusui_, project_.at_csv1()),
+			inspection_(d, client, ilock, wave_cap_, kikusui_, project_),
 
 			ip_{ 0 }, init_client_(false),
 
 			task_(task::idle), unit_id_(0), wait_(0), retry_(0),
 			err_dialog_(nullptr), okc_dialog_(nullptr),
-			dc2_id_(0), crm_id_(0), mesa_id_(0), thr_id_(0), time_out_(0),
+			dc2_id_(0), crm_id_(0), mesa_id_(0), thr_id_(0), dif_id_(0), time_out_(0),
 
 			serial_(), serial_list_(), kikusui_(serial_), kikusui_loop_(60),
 			last_value_(0.0)
@@ -744,7 +746,8 @@ namespace app {
 							task_ = task::sence;
 						}
 						break;
-					case inspection::test_mode::WD:
+					case inspection::test_mode::WD1:
+					case inspection::test_mode::WD2:
 						if(mesa_id_ != wave_cap_.get_mesa_id()) {
 							mesa_id_ = wave_cap_.get_mesa_id();
 							task_ = task::sence;
@@ -753,6 +756,12 @@ namespace app {
 					case inspection::test_mode::THR:
 						if(thr_id_ != inspection_.get_thr().get_id()) {
 							thr_id_ = inspection_.get_thr().get_id();
+							task_ = task::sence;
+						}
+						break;
+					case inspection::test_mode::DIF:
+						if(dif_id_ != inspection_.get_dif().get_id()) {
+							dif_id_ = inspection_.get_dif().get_id();
 							task_ = task::sence;
 						}
 						break;
@@ -791,11 +800,15 @@ namespace app {
 					case inspection::test_mode::I_MES:
 						v = inspection_.get_dc2().curr_value_;
 						break;
-					case inspection::test_mode::WD:
+					case inspection::test_mode::WD1:
+					case inspection::test_mode::WD2:
 						v = wave_cap_.get_mesa_value();
 						break;
 					case inspection::test_mode::THR:
 						v = inspection_.get_thr().thr_value_;
+						break;
+					case inspection::test_mode::DIF:
+						v = inspection_.get_dif().dif_value_;
 						break;
 					default:
 						break;
@@ -838,7 +851,8 @@ namespace app {
 				break;
 
 			case task::sync:
-				if(inspection_.get_test_mode() == inspection::test_mode::WD) {
+				if(inspection_.get_test_mode() == inspection::test_mode::WD1 ||
+				   inspection_.get_test_mode() == inspection::test_mode::WD2) {
 					auto path = project_.get_image_path(unit_id_);					
 					wave_cap_.save_image(path);
 					project_.at_csv2().set(unit_id_ + 1, 11, path);

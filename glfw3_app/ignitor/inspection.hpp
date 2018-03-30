@@ -42,6 +42,8 @@
 #include "dif.hpp"
 #include "test_param.hpp"
 
+#include "project.hpp"
+
 namespace app {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -66,7 +68,9 @@ namespace app {
 			V_MES,		///< 電圧計測（DC2/静特性）
 			I_MES,		///< 電流計測（DC2/静特性）
 			THR,		///< 熱抵抗計測（静特性）
-			WD,			///< 波形計測（動特性）
+			WD1,		///< 波形計測/DC1（動特性）
+			DIF,		///< 差分計算
+			WD2,		///< 波形計測/DC2（動特性）
 		};
 
 	private:
@@ -77,7 +81,7 @@ namespace app {
 		interlock&				interlock_;
 		wave_cap&				wave_cap_;
 		kikusui&				kikusui_;
-		csv&					csv1_;
+		project&				project_;
 
 		gui::widget_dialog*		dialog_;
 		gui::widget_button*		load_file_;			///< load file
@@ -304,9 +308,9 @@ namespace app {
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		inspection(utils::director<core>& d, net::ign_client_tcp& client, interlock& ilock, wave_cap& wc, kikusui& kik, csv& csv1) :
+		inspection(utils::director<core>& d, net::ign_client_tcp& client, interlock& ilock, wave_cap& wc, kikusui& kik, project& proj) :
 			director_(d), client_(client), interlock_(ilock), wave_cap_(wc), kikusui_(kik),
-			csv1_(csv1),
+			project_(proj),
 			dialog_(nullptr),
 			load_file_(nullptr), save_file_(nullptr), ilock_enable_(nullptr),
 			sheet_(nullptr), style_{ nullptr },
@@ -318,7 +322,7 @@ namespace app {
 			icm_(d, client_, interlock_),
 			wdm_(d, client_, interlock_),
 			thr_(d, client_, interlock_, kikusui_, wave_cap_),
-			dif_(d, csv1_),
+			dif_(d, project_.at_csv1()),
 			test_param_(d),
 
 			chip_(nullptr), all_off_(nullptr),
@@ -359,6 +363,15 @@ namespace app {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief  DIF の参照 (const)
+			@return DIF
+		*/
+		//-----------------------------------------------------------------//
+		const dif& get_dif() const { return dif_; } 
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief  全オフライン
 		*/
 		//-----------------------------------------------------------------//
@@ -386,13 +399,17 @@ namespace app {
 				cmd_task_ = cmd_task::off_dc2;
 				break;
 
-			case test_mode::WD:
+			case test_mode::WD1:
 				cmd_task_ = cmd_task::off_wdm;
 				break;
 
 			case test_mode::THR:
 				cmd_task_ = cmd_task::off_thr;
 				break;
+
+//			case test_mode::WD2:
+//				cmd_task_ = cmd_task::off_wdm;
+//				break;
 
 			default:
 				cmd_task_ = cmd_task::off_all;
@@ -418,7 +435,8 @@ namespace app {
 			@return 計測モード
 		*/
 		//-----------------------------------------------------------------//
-		test_mode get_test_mode() const {
+		test_mode get_test_mode() const
+		{
 			if(sheet_->get_select_pos() == 0) {  // CR (静特性）
 				if(crm_.mode_->get_select_pos() == 0) {
 					return test_mode::R_MES;
@@ -431,10 +449,14 @@ namespace app {
 				} else {  // 電圧設定、電流取得
 					return test_mode::I_MES;
 				}
-			} else if(sheet_->get_select_pos() == 2) {  // WDM (動特性）
-				return test_mode::WD;
-			} else {  // THR (熱抵抗)
+			} else if(sheet_->get_select_pos() == 2) {  // WDM/DC1 (動特性）
+				return test_mode::WD1;
+			} else if(sheet_->get_select_pos() == 3) {  // THR (熱抵抗)
 				return test_mode::THR;
+			} else if(sheet_->get_select_pos() == 4) {  // DIF（差分）
+				return test_mode::DIF;
+			} else if(sheet_->get_select_pos() == 5) {  // WDM/DC2 (動特性）
+				return test_mode::WD2;
 			}
 			return test_mode::NONE;
 		}
@@ -451,10 +473,14 @@ namespace app {
 				return crm_.get_unit_str();
 			} else if(sheet_->get_select_pos() == 1) {  // DC2
 				return dc2_.get_unit_str();
-			} else if(sheet_->get_select_pos() == 2) {  // WDM
+			} else if(sheet_->get_select_pos() == 2) {  // WDM/DC1
 				return wave_cap_.get_unit_str();
-			} else {  // THR 熱抵抗
+			} else if(sheet_->get_select_pos() == 3) {  // THR 熱抵抗
 				return thr_.get_unit_str();
+			} else if(sheet_->get_select_pos() == 4) {  // DIF
+				return dif_.get_unit_str();
+			} else if(sheet_->get_select_pos() == 5) {  // WDM/DC2
+				return wave_cap_.get_unit_str();
 			}
 			return "";
 		}
@@ -519,7 +545,8 @@ namespace app {
 				cmd_task_ = cmd_task::dc2;
 				break;
 
-			case test_mode::WD:
+			case test_mode::WD1:
+			case test_mode::WD2:
 				cmd_task_ = cmd_task::wdm;
 				break;
 
@@ -564,6 +591,7 @@ namespace app {
 					bool c1 = false;
 					bool c2 = false;
 					bool c3 = false;
+					bool c5 = false;
 					switch(newidx) {
 					case 0:
 						c0 = true;
@@ -576,6 +604,14 @@ namespace app {
 						break;
 					case 3:
 						c3 = true;
+						break;
+					case 4:
+						project_.reset_csv1();
+						project_.load_csv1();
+						dif_.set_index(project_.get_csv_index());
+						break;
+					case 5:
+						c5 = true;
 						break;
 					default:
 						break;
@@ -599,6 +635,14 @@ namespace app {
 					if(!c3) {
 						thr_.all_->set_check(c3);
 						thr_.all_->exec();
+					}
+					if(!c5) {
+						icm_.all_->set_check(c5);
+						icm_.all_->exec();
+						wgm_.all_->set_check(c5);
+						wgm_.all_->exec();
+						dc2_.all_->set_check(c5);
+						dc2_.all_->exec();
 					}
 				};
 			}
@@ -839,6 +883,7 @@ namespace app {
 			crm_.save(pre);
 			wdm_.save(pre);
 			thr_.save(pre);
+			dif_.save(pre);
 			test_param_.save(pre);
 
 			wave_cap_.save(pre);
@@ -883,6 +928,7 @@ namespace app {
 			crm_.load(pre);
 			wdm_.load(pre);
 			thr_.load(pre);
+			dif_.load(pre);
 			test_param_.load(pre);
 
 			wave_cap_.load(pre);
