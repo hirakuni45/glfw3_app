@@ -64,6 +64,29 @@ namespace app {
 			}
 		}
 
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  列の検索
+			@param[in]	key	検索キー
+			@param[in]	row	検索行
+			@return 位置を返す（見つからない場合「最大列」を返す）
+		*/
+		//-----------------------------------------------------------------//
+		uint32_t find_colum(const std::string& key, uint32_t row) const
+		{
+			if(row >= cell_.size()) return cell_.size();
+
+			const auto& ss = cell_[row];
+			uint32_t n = 0;
+			for(const auto& s : ss) {
+				if(s == key) {
+					return n;
+				}
+				++n;
+			}
+			return cell_.size();
+		}
+
 
 		//-----------------------------------------------------------------//
 		/*!
