@@ -194,30 +194,35 @@ namespace app {
 			@param[in]	d_w		横幅最大
 			@param[in]	ofsx	オフセット X
 			@param[in]	ofsy	オフセット Y
+			@param[in]	pg		プリファレンス・グループ
 		*/
 		//-----------------------------------------------------------------//
-		void init(gui::widget* root, int d_w, int ofsx, int ofsy)
+		void init(gui::widget* root, int d_w, int ofsx, int ofsy,
+			gui::widget::PRE_GROUP pg = gui::widget::PRE_GROUP::_0)
 		{
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
 			{
 				widget::param wp(vtx::irect(15, ofsy, 60, 40), root);
+				wp.pre_group_ = pg;
 				widget_text::param wp_("DC2:");
 				wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
 											 vtx::placement::vertical::CENTER);
 				wd.add_widget<widget_text>(wp, wp_);
 			}
 
-			tools::init_sw(wd, root, interlock_, ofsx, ofsy, sw_, 14, 15);
+			tools::init_sw(wd, root, interlock_, ofsx, ofsy, sw_, 14, 15, pg);
 			ofsy += 50;
 			{
 				widget::param wp(vtx::irect(ofsx, ofsy, 90, 40), root);
+				wp.pre_group_ = pg;
 				widget_check::param wp_("有効");
 				ena_ = wd.add_widget<widget_check>(wp, wp_);
 			}
 			{
 				widget::param wp(vtx::irect(ofsx + 90, ofsy, 110, 40), root);
+				wp.pre_group_ = pg;
 				widget_list::param wp_;
 				wp_.init_list_.push_back("定電流");
 				wp_.init_list_.push_back("定電圧");
@@ -225,6 +230,7 @@ namespace app {
 			}
 			{  // 300V/0.1V, 100mA/0.01mA
 				widget::param wp(vtx::irect(ofsx + 210, ofsy, 90, 40), root);
+				wp.pre_group_ = pg;
 				widget_label::param wp_("0", false);
 				voltage_ = wd.add_widget<widget_label>(wp, wp_);
 				voltage_->at_local_param().select_func_ = [=](const std::string& str) {
@@ -233,6 +239,7 @@ namespace app {
 			}
 			{
 				widget::param wp(vtx::irect(ofsx + 310, ofsy, 30, 40), root);
+				wp.pre_group_ = pg;
 				widget_text::param wp_("V");
 				wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
 											 vtx::placement::vertical::CENTER);
@@ -240,6 +247,7 @@ namespace app {
 			}
 			{  // Max: 100mA / step: 0.01mA
 				widget::param wp(vtx::irect(ofsx + 340, ofsy, 90, 40), root);
+				wp.pre_group_ = pg;
 				widget_label::param wp_("0", false);
 				current_ = wd.add_widget<widget_label>(wp, wp_);
 				current_->at_local_param().select_func_ = [=](const std::string& str) {
@@ -248,6 +256,7 @@ namespace app {
 			}
 			{
 				widget::param wp(vtx::irect(ofsx + 440, ofsy, 40, 40), root);
+				wp.pre_group_ = pg;
 				widget_text::param wp_("mA");
 				wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
 											 vtx::placement::vertical::CENTER);
@@ -255,6 +264,7 @@ namespace app {
 			}
 			{  // 測定遅延時間
 				widget::param wp(vtx::irect(ofsx + 490, ofsy, 100, 40), root);
+				wp.pre_group_ = pg;
 				widget_label::param wp_("1.0", false);
 				delay_ = wd.add_widget<widget_label>(wp, wp_);
 				delay_->at_local_param().select_func_ = [=](const std::string& str) {
@@ -263,11 +273,13 @@ namespace app {
 			}
 			{  // 電流、電圧測定値
 				widget::param wp(vtx::irect(ofsx + 600, ofsy, 150, 40), root);
+				wp.pre_group_ = pg;
 				widget_label::param wp_("");
 				probe_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 			{
 				widget::param wp(vtx::irect(d_w - 85, ofsy, 30, 30), root);
+				wp.pre_group_ = pg;
 				widget_button::param wp_(">");
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
 				exec_->at_local_param().select_func_ = [=](int n) {
@@ -325,6 +337,7 @@ namespace app {
 			}
 			{
 				widget::param wp(vtx::irect(d_w - 45, ofsy, 30, 30), root);
+				wp.pre_group_ = pg;
 				widget_check::param wp_;
 				all_ = wd.add_widget<widget_check>(wp, wp_);
 				all_->at_local_param().select_func_ = [=](bool ena) {

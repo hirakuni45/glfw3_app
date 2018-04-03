@@ -523,7 +523,7 @@ namespace app {
 				};
 			}
 
-			report_.init();
+			report_.init(app_version_);
 
 			load();
 

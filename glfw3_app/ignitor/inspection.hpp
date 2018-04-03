@@ -116,6 +116,9 @@ namespace app {
 		test_mode				test_mode_;
 
 		icm						icm__;
+		dc2						dc2__;
+		wgm						wgm__;
+		wdm						wdm__;
 
 		struct vc_t {
 			float		volt_max_;	/// 0.1V step
@@ -330,11 +333,6 @@ namespace app {
 			}
 		}
 
-
-		void init_wdm_dc2_()
-		{
-		}
-
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -365,6 +363,9 @@ namespace app {
 			wdm_exec_id_(0),
 			test_mode_(test_mode::NONE),
 			icm__(d, client_, interlock_),
+			dc2__(d, client_, interlock_, kikusui_),
+			wgm__(d, client_, interlock_),
+			wdm__(d, client_, interlock_),
 			cmd_task_(cmd_task::idle)
 		{ }
 
@@ -675,12 +676,10 @@ namespace app {
 					if(!c5) {
 						icm__.all_->set_check(c5);
 						icm__.all_->exec();
-#if 0
-						wgm_.all_->set_check(c5);
-						wgm_.all_->exec();
-						dc2_.all_->set_check(c5);
-						dc2_.all_->exec();
-#endif
+						wgm__.all_->set_check(c5);
+						wgm__.all_->exec();
+						dc2__.all_->set_check(c5);
+						dc2__.all_->exec();
 					}
 				};
 			}
@@ -774,8 +773,8 @@ namespace app {
 					wgm_.reset_sw();
 					crm_.reset_sw();
 					icm__.reset_sw();
-//					dc2__.reset_sw();
-//					wgm__.reset_sw();
+					dc2__.reset_sw();
+					wgm__.reset_sw();
 				};
 			}
 			ofsx = 90 - 5;
@@ -787,8 +786,12 @@ namespace app {
 			wgm_.init(style_[2], d_w, ofsx, 240 + 40);
 			thr_.init(style_[3], d_w, ofsx,  40);
 			dif_.init(style_[4], d_w, ofsx,  40);
-			icm__.init(style_[5], d_w, ofsx, 30, gui::widget::PRE_GROUP::_5);
-			
+
+			icm__.init(style_[5], d_w, ofsx,  30,      gui::widget::PRE_GROUP::_5);
+			wdm__.init(style_[5], d_w, ofsx,  40 + 40, gui::widget::PRE_GROUP::_5);
+			dc2__.init(style_[5], d_w, ofsx, 140 + 40, gui::widget::PRE_GROUP::_5);
+			wgm__.init(style_[5], d_w, ofsx, 240 + 40, gui::widget::PRE_GROUP::_5);
+
 			ofsx = 130;
 			test_param_.init(dialog_, d_w, ofsx, 420);
 		}
@@ -811,7 +814,11 @@ namespace app {
 			// WAVE_CAP 側スイッチの転送ボタン検出
 			if(wdm_exec_id_ != wave_cap_.get_exec_button()->get_local_param().id_) {
 				wdm_exec_id_ = wave_cap_.get_exec_button()->get_local_param().id_;
-				cmd_task_ = cmd_task::wdm_dc1;				
+				if(sheet_->get_select_pos() == 2) {
+					cmd_task_ = cmd_task::wdm_dc1;
+				} else if(sheet_->get_select_pos() == 5) {
+					cmd_task_ = cmd_task::wdm_dc2;
+				}
 			}
 
 			cmd_service_();
@@ -835,6 +842,9 @@ namespace app {
 			thr_.update();
 
 			icm__.update();
+			dc2__.update();
+			wgm__.update();
+			wdm__.update();
 
 			if(!dialog_->get_state(gui::widget::state::ENABLE)) return;
 
@@ -878,6 +888,9 @@ namespace app {
 			else if(wgm_.help(chip_)) { }
 			else if(thr_.help(chip_)) { }
 			else if(dif_.help(chip_)) { }
+			else if(wdm__.help(chip_)) { }
+			else if(dc2__.help(chip_)) { }
+			else if(wgm__.help(chip_)) { }
 			else if(test_param_.help(chip_)) { }
 			else { act = 0; }
 			chip_->active(act);
@@ -931,6 +944,11 @@ namespace app {
 			dif_.save(pre);
 			test_param_.save(pre);
 
+			icm__.save(pre);
+			dc2__.save(pre);
+			wgm__.save(pre);
+			wdm__.save(pre);
+
 			wave_cap_.save(pre);
 
 			ilock_enable_->save(pre);
@@ -975,6 +993,11 @@ namespace app {
 			thr_.load(pre);
 			dif_.load(pre);
 			test_param_.load(pre);
+
+			icm__.load(pre);
+			dc2__.load(pre);
+			wgm__.load(pre);
+			wdm__.load(pre);
 
 			wave_cap_.load(pre);
 

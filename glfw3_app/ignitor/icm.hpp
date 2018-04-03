@@ -106,7 +106,7 @@ namespace app {
 			@param[in]	d_w		横幅最大
 			@param[in]	ofsx	オフセット X
 			@param[in]	ofsy	オフセット Y
-			@param[in]	pg		ぷリファレンス・グループ
+			@param[in]	pg		プリファレンス・グループ
 		*/
 		//-----------------------------------------------------------------//
 		void init(gui::widget* root, int d_w, int ofsx, int ofsy,

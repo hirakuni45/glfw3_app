@@ -221,28 +221,32 @@ namespace app {
 			@param[in]	d_w		横幅最大
 			@param[in]	ofsx	オフセット X
 			@param[in]	ofsy	オフセット Y
+			@param[in]	pg		プリファレンス・グループ
 		*/
 		//-----------------------------------------------------------------//
-		void init(gui::widget* root, int d_w, int ofsx, int ofsy)
+		void init(gui::widget* root, int d_w, int ofsx, int ofsy,
+			gui::widget::PRE_GROUP pg = gui::widget::PRE_GROUP::_0)
 		{
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
 			{
 				widget::param wp(vtx::irect(15, ofsy, 70, 40), root);
+				wp.pre_group_ = pg;
 				widget_text::param wp_("WDM:");
 				wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
 											 vtx::placement::vertical::CENTER);
 				wd.add_widget<widget_text>(wp, wp_);
 			}
 
-			tools::init_sw(wd, root, interlock_, ofsx, ofsy, sw_, 4, 29);
+			tools::init_sw(wd, root, interlock_, ofsx, ofsy, sw_, 4, 29, pg);
 			for(int i = 0; i < 4; ++i) {  // 各チャネル減衰設定
 				static const vtx::ipos ofs[4] = {
 					{ 0, 0 }, { 110, 0 }, { 220, 0 }, { 330, 0 }
 				};
 				widget::param wp(vtx::irect(ofsx + ofs[i].x + 4 * 60 + 10, ofsy + ofs[i].y,
 					100, 40), root);
+				wp.pre_group_ = pg;
 				widget_list::param wp_;
 				wp_.init_list_.push_back("-22dB");
 				wp_.init_list_.push_back("-16dB");
@@ -262,7 +266,8 @@ namespace app {
 
 			ofsy += 50;
 			{  // 時間軸リスト 10K、20K、50K、100K、200K、500K、1M、2M、5M、10M、20M、50M、100M
-				widget::param wp(vtx::irect(ofsx, ofsy, 100, 40), root);
+				widget::param wp(vtx::irect(ofsx, ofsy, 110, 40), root);
+				wp.pre_group_ = pg;
 				widget_list::param wp_;
 				wp_.init_list_.push_back("1mS");
 				wp_.init_list_.push_back("500uS");
@@ -283,7 +288,8 @@ namespace app {
 				smpl_ = wd.add_widget<widget_list>(wp, wp_);
 			}
 			{  // トリガー・チャネル選択
-				widget::param wp(vtx::irect(ofsx + 110, ofsy, 90, 40), root);
+				widget::param wp(vtx::irect(ofsx + 120, ofsy, 90, 40), root);
+				wp.pre_group_ = pg;
 				widget_list::param wp_;
 				wp_.init_list_.push_back("CH1");
 				wp_.init_list_.push_back("CH2");
@@ -292,14 +298,16 @@ namespace app {
 				ch_ = wd.add_widget<widget_list>(wp, wp_);
 			}
 			{  // トリガー・スロープ選択
-				widget::param wp(vtx::irect(ofsx + 210, ofsy, 90, 40), root);
+				widget::param wp(vtx::irect(ofsx + 220, ofsy, 90, 40), root);
+				wp.pre_group_ = pg;
 				widget_list::param wp_;
 				wp_.init_list_.push_back("Fall");
 				wp_.init_list_.push_back("Rise");
 				slope_ = wd.add_widget<widget_list>(wp, wp_);
 			}
 			{  // トリガー・ウィンドウ（１～１５）
-				widget::param wp(vtx::irect(ofsx + 310, ofsy, 90, 40), root);
+				widget::param wp(vtx::irect(ofsx + 320, ofsy, 90, 40), root);
+				wp.pre_group_ = pg;
 				widget_spinbox::param wp_(1, 1, 15);
 				window_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				window_->at_local_param().select_func_
@@ -308,7 +316,8 @@ namespace app {
 				};
 			}
 			{  // トリガーレベル設定
-				widget::param wp(vtx::irect(ofsx + 410, ofsy, 90, 40), root);
+				widget::param wp(vtx::irect(ofsx + 420, ofsy, 90, 40), root);
+				wp.pre_group_ = pg;
 				widget_label::param wp_("32768", false);
 				level_ = wd.add_widget<widget_label>(wp, wp_);
 				level_->at_local_param().select_func_ = [=](const std::string& str) {
@@ -316,7 +325,8 @@ namespace app {
 				};
 			}
 			{  // トリガーレベル変換
-				widget::param wp(vtx::irect(ofsx + 510, ofsy, 70, 40), root);
+				widget::param wp(vtx::irect(ofsx + 520, ofsy, 70, 40), root);
+				wp.pre_group_ = pg;
 				widget_check::param wp_("ＶＡ");
 				cnv_ = wd.add_widget<widget_check>(wp, wp_);
 				cnv_->at_local_param().select_func_ = [=](bool f) {
@@ -330,7 +340,8 @@ namespace app {
 				};
 			}
 			{  // トリガーレベル設定
-				widget::param wp(vtx::irect(ofsx + 590, ofsy, 90, 40), root);
+				widget::param wp(vtx::irect(ofsx + 600, ofsy, 90, 40), root);
+				wp.pre_group_ = pg;
 				widget_label::param wp_("0", false);
 				level_va_ = wd.add_widget<widget_label>(wp, wp_);
 				level_va_->at_local_param().select_func_ = [=](const std::string& str) {
@@ -361,6 +372,7 @@ namespace app {
 #endif
 			{  // exec
 				widget::param wp(vtx::irect(d_w - 50, ofsy, 30, 30), root);
+				wp.pre_group_ = pg;
 				widget_button::param wp_(">");
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
 				exec_->at_local_param().select_func_ = [=](int n) {

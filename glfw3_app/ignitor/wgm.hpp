@@ -132,26 +132,30 @@ namespace app {
 			@param[in]	d_w		横幅最大
 			@param[in]	ofsx	オフセット X
 			@param[in]	ofsy	オフセット Y
+			@param[in]	pg		プリファレンス・グループ
 		*/
 		//-----------------------------------------------------------------//
-		void init(gui::widget* root, int d_w, int ofsx, int ofsy)
+		void init(gui::widget* root, int d_w, int ofsx, int ofsy,
+			gui::widget::PRE_GROUP pg = gui::widget::PRE_GROUP::_0)
 		{
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
 			{
 				widget::param wp(vtx::irect(15, ofsy, 70, 40), root);
+				wp.pre_group_ = pg;
 				widget_text::param wp_("WGM:");
 				wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
 											 vtx::placement::vertical::CENTER);
 				wd.add_widget<widget_text>(wp, wp_);
 			}
 
-			tools::init_sw(wd, root, interlock_, ofsx, ofsy, sw_, 5, 44);
+			tools::init_sw(wd, root, interlock_, ofsx, ofsy, sw_, 5, 44, pg);
 			ofsy += 50;
 			// ジェネレーター・モジュール
 			{
 				widget::param wp(vtx::irect(ofsx, ofsy, 100, 40), root);
+				wp.pre_group_ = pg;
 				widget_check::param wp_("有効");
 				ena_ = wd.add_widget<widget_check>(wp, wp_);
 			}
@@ -159,6 +163,7 @@ namespace app {
 			   // タイプ（連続、単発）、
 			   // 出力電圧、周波数、ON時間（レンジ：0.01ms）
 				widget::param wp(vtx::irect(ofsx + 90, ofsy, 110, 40), root);
+				wp.pre_group_ = pg;
 				widget_list::param wp_;
 				wp_.init_list_.push_back("矩形波");
 				wp_.init_list_.push_back("三角波");
@@ -173,6 +178,7 @@ namespace app {
 			}
 			{  // ジェネレータ設定、周波数（1Hz to 100Hz, 1Hz/step)
 				widget::param wp(vtx::irect(ofsx + 230 + 130 * 0, ofsy, 70, 40), root);
+				wp.pre_group_ = pg;
 				widget_label::param wp_("1", false);
 				freq_ = wd.add_widget<widget_label>(wp, wp_);
 				freq_->at_local_param().select_func_ = [=](const std::string& str) {
@@ -181,6 +187,7 @@ namespace app {
 				{
 					widget::param wp(vtx::irect(ofsx + 230 + 120 * 0 + 80, ofsy, 30, 40),
 						root);
+					wp.pre_group_ = pg;
 					widget_text::param wp_("Hz");
 					wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
 												 vtx::placement::vertical::CENTER);
@@ -189,6 +196,7 @@ namespace app {
 			}
 			{  // ジェネレータ設定、電圧（0V to 14V, 0.1V/step)
 				widget::param wp(vtx::irect(ofsx + 230 + 120 * 1, ofsy, 70, 40), root);
+				wp.pre_group_ = pg;
 				widget_label::param wp_("0", false);
 				volt_ = wd.add_widget<widget_label>(wp, wp_);
 				volt_->at_local_param().select_func_ = [=](const std::string& str) {
@@ -197,6 +205,7 @@ namespace app {
 				{
 					widget::param wp(vtx::irect(ofsx + 230 + 120 * 1 + 80, ofsy, 30, 40),
 									 root);
+					wp.pre_group_ = pg;
 					widget_text::param wp_("V");
 					wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
 												 vtx::placement::vertical::CENTER);
@@ -205,6 +214,7 @@ namespace app {
 			}
 			{  // ジェネレータ設定、DUTY（0.1% to 100%, 0.1%/step）
 				widget::param wp(vtx::irect(ofsx + 230 + 120 * 2, ofsy, 70, 40), root);
+				wp.pre_group_ = pg;
 				widget_label::param wp_("0.1", false);
 				duty_ = wd.add_widget<widget_label>(wp, wp_);
 				duty_->at_local_param().select_func_ = [=](const std::string& str) {
@@ -213,6 +223,7 @@ namespace app {
 				{
 					widget::param wp(vtx::irect(ofsx + 230 + 120 * 2 + 80, ofsy, 30, 40),
 									 root);
+					wp.pre_group_ = pg;
 					widget_text::param wp_("%");
 					wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
 												 vtx::placement::vertical::CENTER);
@@ -223,12 +234,14 @@ namespace app {
 			{
 				int ofs = 230 + 120 * 2 + 80 + 40;
 				widget::param wp(vtx::irect(ofsx + ofs, ofsy, 80, 40), root);
+				wp.pre_group_ = pg;
 				widget_check::param wp_("電源");
 				iena_ = wd.add_widget<widget_check>(wp, wp_);
 			}
 			{  // 内臓電源設定
 				int ofs = 230 + 120 * 2 + 80 + 40 + 90;
 				widget::param wp(vtx::irect(ofsx + ofs, ofsy, 70, 40), root);
+				wp.pre_group_ = pg;
 				widget_label::param wp_("0", false);
 				ivolt_ = wd.add_widget<widget_label>(wp, wp_);
 				ivolt_->at_local_param().select_func_ = [=](const std::string& str) {
@@ -237,6 +250,7 @@ namespace app {
 				{
 					int ofs = 230 + 120 * 2 + 80 + 40 + 90 + 80;
 					widget::param wp(vtx::irect(ofsx + ofs, ofsy, 30, 40), root);
+					wp.pre_group_ = pg;
 					widget_text::param wp_("V");
 					wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
 												 vtx::placement::vertical::CENTER);
@@ -246,6 +260,7 @@ namespace app {
 
 			{
 				widget::param wp(vtx::irect(d_w - 85, ofsy, 30, 30), root);
+				wp.pre_group_ = pg;
 				widget_button::param wp_(">");
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
 				exec_->at_local_param().select_func_ = [=](int n) {
@@ -279,6 +294,7 @@ namespace app {
 			}
 			{
 				widget::param wp(vtx::irect(d_w - 45, ofsy, 30, 30), root);
+				wp.pre_group_ = pg;
 				widget_check::param wp_;
 				all_ = wd.add_widget<widget_check>(wp, wp_);
 				all_->at_local_param().select_func_ = [=](bool ena) {
