@@ -101,11 +101,13 @@ namespace app {
 
 
 		static void init_sw(gui::widget_director& wd, gui::widget* root, interlock& ilc,
-			int ofsx, int ofsy, gui::widget_check* out[], int num, int swn)
+			int ofsx, int ofsy, gui::widget_check* out[], int num, int swn,
+			gui::widget::PRE_GROUP pg = gui::widget::PRE_GROUP::_0)
 		{
 			auto md = get_module(swn);
 			for(int i = 0; i < num; ++i) {
 				gui::widget::param wp(vtx::irect(ofsx, ofsy, 60, 40), root);
+				wp.pre_group_ = pg;
 				gui::widget_check::param wp_((boost::format("%d") % swn).str());
 				out[i] = wd.add_widget<gui::widget_check>(wp, wp_);
 				ofsx += 60;

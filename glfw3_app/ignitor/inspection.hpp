@@ -115,6 +115,8 @@ namespace app {
 
 		test_mode				test_mode_;
 
+		icm						icm__;
+
 		struct vc_t {
 			float		volt_max_;	/// 0.1V step
 			float		volt_;		/// 0.1V step
@@ -134,14 +136,19 @@ namespace app {
 
 			crm,		///< CRM 開始
 
-			wdm,		///< WDM 開始
-			wdm0,
-			wdm1,
-			wdm2,
+			wdm_dc1,	///< WDM/DC1 開始
+			wdm_dc1_0,
+			wdm_dc1_1,
+			wdm_dc1_2,
 
 			dc2,		///< DC2 開始
 
 			thr,		///< THR 開始
+
+			wdm_dc2,	///< WDM/DC2 開始
+			wdm_dc2_0,
+			wdm_dc2_1,
+			wdm_dc2_2,
 
 			off_all,	///< 全てのスイッチ、オフ
 			off_all0,
@@ -154,13 +161,17 @@ namespace app {
 
 			off_dc2,	///< DC2 スイッチ、オフ (DC2)
 
-			off_wdm,	///< WDM スイッチ、オフ (DC1, WDM, WGM, ICM)
-			off_wdm0,
-			off_wdm1,
-			off_wdm2,
+			off_wdm_dc1,	///< WDM/DC1 スイッチ、オフ (DC1, WDM, WGM, ICM)
+			off_wdm_dc1_0,
+			off_wdm_dc1_1,
+			off_wdm_dc1_2,
 
 			off_thr,	///< THR 関係 OFF (DC1, WDM)
 
+			off_wdm_dc2,	///< WDM/DC2 スイッチ、オフ (DC2, WDM, WGM, ICM)
+			off_wdm_dc2_0,
+			off_wdm_dc2_1,
+			off_wdm_dc2_2,
 		};
 		cmd_task		cmd_task_;
 
@@ -210,19 +221,19 @@ namespace app {
 				break;
 
 			// WDM
-			case cmd_task::wdm:
+			case cmd_task::wdm_dc1:
 				icm_.exec_->exec();
-				cmd_task_ = cmd_task::wdm0;
+				cmd_task_ = cmd_task::wdm_dc1_0;
 				break;
-			case cmd_task::wdm0:
+			case cmd_task::wdm_dc1_0:
 				dc1_.exec_->exec();
-				cmd_task_ = cmd_task::wdm1;
+				cmd_task_ = cmd_task::wdm_dc1_1;
 				break;
-			case cmd_task::wdm1:
+			case cmd_task::wdm_dc1_1:
 				wgm_.exec_->exec();
-				cmd_task_ = cmd_task::wdm2;
+				cmd_task_ = cmd_task::wdm_dc1_2;
 				break;
-			case cmd_task::wdm2:
+			case cmd_task::wdm_dc1_2:
 				wdm_.exec_->exec();
 				cmd_task_ = cmd_task::idle;
 				break;
@@ -273,21 +284,38 @@ namespace app {
 				cmd_task_ = cmd_task::idle;
 				break;
 
-
-			// WDM のオフ
-			case cmd_task::off_wdm:
+			// WDM/DC1 のオフ
+			case cmd_task::off_wdm_dc1:
 				wgm_.startup();
-				cmd_task_ = cmd_task::off_wdm0;
+				cmd_task_ = cmd_task::off_wdm_dc1_0;
 				break;
-			case cmd_task::off_wdm0:
+			case cmd_task::off_wdm_dc1_0:
 				dc1_.startup();
-				cmd_task_ = cmd_task::off_wdm1;
+				cmd_task_ = cmd_task::off_wdm_dc1_1;
 				break;
-			case cmd_task::off_wdm1:
+			case cmd_task::off_wdm_dc1_1:
 				wdm_.startup();
-				cmd_task_ = cmd_task::off_wdm2;
+				cmd_task_ = cmd_task::off_wdm_dc1_2;
 				break;
-			case cmd_task::off_wdm2:
+			case cmd_task::off_wdm_dc1_2:
+				icm_.startup();
+				cmd_task_ = cmd_task::idle;
+				break;
+
+			// WDM/DC2 のオフ
+			case cmd_task::off_wdm_dc2:
+				wgm_.startup();
+				cmd_task_ = cmd_task::off_wdm_dc2_0;
+				break;
+			case cmd_task::off_wdm_dc2_0:
+				dc2_.startup();
+				cmd_task_ = cmd_task::off_wdm_dc2_1;
+				break;
+			case cmd_task::off_wdm_dc2_1:
+				wdm_.startup();
+				cmd_task_ = cmd_task::off_wdm_dc2_2;
+				break;
+			case cmd_task::off_wdm_dc2_2:
 				icm_.startup();
 				cmd_task_ = cmd_task::idle;
 				break;
@@ -300,6 +328,11 @@ namespace app {
 			default:
 				break;
 			}
+		}
+
+
+		void init_wdm_dc2_()
+		{
 		}
 
 	public:
@@ -330,7 +363,9 @@ namespace app {
 			startup_init_(false), dc1_all_ena_(false),
 			d2md_id_(0),
 			wdm_exec_id_(0),
-			test_mode_(test_mode::NONE), cmd_task_(cmd_task::idle)
+			test_mode_(test_mode::NONE),
+			icm__(d, client_, interlock_),
+			cmd_task_(cmd_task::idle)
 		{ }
 
 
@@ -400,16 +435,16 @@ namespace app {
 				break;
 
 			case test_mode::WD1:
-				cmd_task_ = cmd_task::off_wdm;
+				cmd_task_ = cmd_task::off_wdm_dc1;
 				break;
 
 			case test_mode::THR:
 				cmd_task_ = cmd_task::off_thr;
 				break;
 
-//			case test_mode::WD2:
-//				cmd_task_ = cmd_task::off_wdm;
-//				break;
+			case test_mode::WD2:
+				cmd_task_ = cmd_task::off_wdm_dc2;
+				break;
 
 			default:
 				cmd_task_ = cmd_task::off_all;
@@ -546,8 +581,11 @@ namespace app {
 				break;
 
 			case test_mode::WD1:
+				cmd_task_ = cmd_task::wdm_dc1;
+				break;
+
 			case test_mode::WD2:
-				cmd_task_ = cmd_task::wdm;
+				cmd_task_ = cmd_task::wdm_dc2;
 				break;
 
 			case test_mode::THR:
@@ -606,8 +644,6 @@ namespace app {
 						c3 = true;
 						break;
 					case 4:
-						project_.reset_csv1();
-						project_.load_csv1();
 						dif_.set_index(project_.get_csv_index());
 						break;
 					case 5:
@@ -637,12 +673,14 @@ namespace app {
 						thr_.all_->exec();
 					}
 					if(!c5) {
-						icm_.all_->set_check(c5);
-						icm_.all_->exec();
+						icm__.all_->set_check(c5);
+						icm__.all_->exec();
+#if 0
 						wgm_.all_->set_check(c5);
 						wgm_.all_->exec();
 						dc2_.all_->set_check(c5);
 						dc2_.all_->exec();
+#endif
 					}
 				};
 			}
@@ -735,6 +773,9 @@ namespace app {
 					dc1_.reset_sw();
 					wgm_.reset_sw();
 					crm_.reset_sw();
+					icm__.reset_sw();
+//					dc2__.reset_sw();
+//					wgm__.reset_sw();
 				};
 			}
 			ofsx = 90 - 5;
@@ -746,6 +787,8 @@ namespace app {
 			wgm_.init(style_[2], d_w, ofsx, 240 + 40);
 			thr_.init(style_[3], d_w, ofsx,  40);
 			dif_.init(style_[4], d_w, ofsx,  40);
+			icm__.init(style_[5], d_w, ofsx, 30, gui::widget::PRE_GROUP::_5);
+			
 			ofsx = 130;
 			test_param_.init(dialog_, d_w, ofsx, 420);
 		}
@@ -768,7 +811,7 @@ namespace app {
 			// WAVE_CAP 側スイッチの転送ボタン検出
 			if(wdm_exec_id_ != wave_cap_.get_exec_button()->get_local_param().id_) {
 				wdm_exec_id_ = wave_cap_.get_exec_button()->get_local_param().id_;
-				cmd_task_ = cmd_task::wdm;				
+				cmd_task_ = cmd_task::wdm_dc1;				
 			}
 
 			cmd_service_();
@@ -790,6 +833,8 @@ namespace app {
 			crm_.update();
 			wdm_.update();
 			thr_.update();
+
+			icm__.update();
 
 			if(!dialog_->get_state(gui::widget::state::ENABLE)) return;
 

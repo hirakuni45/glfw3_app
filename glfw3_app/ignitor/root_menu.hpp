@@ -27,6 +27,7 @@
 #include "wave_cap.hpp"
 #include "test.hpp"
 #include "kikusui.hpp"
+#include "report.hpp"
 
 namespace app {
 
@@ -121,13 +122,16 @@ namespace app {
 		uint32_t		time_out_;
 
 		typedef device::serial_win32 SERIAL;
-		SERIAL				serial_;
-		SERIAL::name_list	serial_list_;
-		kikusui				kikusui_;
-		uint32_t			kikusui_loop_;
+		SERIAL			serial_;
+		typedef SERIAL::name_list SERIAL_LIST;
+		SERIAL_LIST		serial_list_;
+		kikusui			kikusui_;
+		uint32_t		kikusui_loop_;
 
 		double			last_value_;
 
+		gui::widget_button*		disp_report_;
+		report			report_;
 
 		void set_csv_()
 		{
@@ -183,7 +187,9 @@ namespace app {
 			dc2_id_(0), crm_id_(0), mesa_id_(0), thr_id_(0), dif_id_(0), time_out_(0),
 
 			serial_(), serial_list_(), kikusui_(serial_), kikusui_loop_(60),
-			last_value_(0.0)
+			last_value_(0.0),
+
+			disp_report_(nullptr), report_(d, project_)
 			{ }
 
 
@@ -360,8 +366,17 @@ namespace app {
 					task_ = task::start;
 				};
 			}
-			{  // 検査開始ボタン
+			{  // 検査レポート表示
 				widget::param wp(vtx::irect(ofs_x_, ofs_y_ + sph * 8, btn_w_, btn_h_));
+				wp.pre_group_ = widget::PRE_GROUP::_4;
+				widget_button::param wp_("検査レポート表示");
+				disp_report_ = wd.add_widget<widget_button>(wp, wp_);
+				disp_report_->at_local_param().select_func_ = [=](uint32_t id) {
+					report_.get()->enable();
+				};
+			}
+			{  // 検査開始ボタン
+				widget::param wp(vtx::irect(ofs_x_, ofs_y_ + sph * 9, btn_w_, btn_h_));
 				widget_button::param wp_("情報");
 				info_ = wd.add_widget<widget_button>(wp, wp_);
 				info_->at_local_param().select_func_ = [=](uint32_t id) {
@@ -508,6 +523,8 @@ namespace app {
 				};
 			}
 
+			report_.init();
+
 			load();
 
 			wave_cap_.enable(wave_edit_->get_check());
@@ -526,6 +543,7 @@ namespace app {
 				edit_project_->set_stall();
 				save_project_->set_stall();
 				run_->set_stall();
+				disp_report_->set_stall();
 				proj_title_->set_text("");
 				proj_path_->set_text("");
 			} else {
@@ -541,6 +559,7 @@ namespace app {
 						run_->set_stall(false);
 					}
 				}
+				disp_report_->set_stall(false);
 			}
 
 			inspection_.update();
@@ -548,6 +567,8 @@ namespace app {
 			wave_cap_.set_sample_param(get_inspection().get_sample_param());
 
 			wave_cap_.update();
+
+			report_.update();
 
 			kikusui_.update();
 
@@ -712,6 +733,7 @@ namespace app {
 				dc2_id_ = inspection_.get_dc2().get_id();
 				mesa_id_ = wave_cap_.get_mesa_id();
 				thr_id_ = inspection_.get_thr().get_id();
+				dif_id_ = inspection_.get_dif().get_id();
 
 				task_ = task::request;
 				break;
@@ -722,8 +744,18 @@ namespace app {
 					if(testmode != inspection::test_mode::NONE) {
 						if(inspection_.request_test(testmode)) {
 							time_out_ = 60 * 5;
+							if(testmode == inspection::test_mode::V_MES ||
+							   testmode == inspection::test_mode::I_MES) {
+							   auto t = inspection_.get_dc2().get_delay_time();
+							   time_out_ += static_cast<uint32_t>(t * 60.0f);
+							}
 							task_ = task::mctrl;
 						}
+					} else {
+						err_dialog_->set_text("test mode error");
+						err_dialog_->enable();
+						msg_dialog_->enable(false);
+						task_ = task::idle;
 					}
 				}
 				break;
@@ -853,9 +885,11 @@ namespace app {
 			case task::sync:
 				if(inspection_.get_test_mode() == inspection::test_mode::WD1 ||
 				   inspection_.get_test_mode() == inspection::test_mode::WD2) {
-					auto path = project_.get_image_path(unit_id_);					
-					wave_cap_.save_image(path);
-					project_.at_csv2().set(unit_id_ + 1, 11, path);
+					if(project_.probe_csv2()) {
+						auto path = project_.get_image_path(unit_id_);					
+						wave_cap_.save_image(path);
+						project_.at_csv2().set(unit_id_ + 1, 11, path);
+					}
 					msg_dialog_->enable();
 				}
 				++unit_id_;
@@ -912,6 +946,8 @@ namespace app {
 			inspection_.load_sys(pre);
 
 			wave_cap_.load(pre);
+
+			report_.load(pre);
 		}
 
 
@@ -945,6 +981,8 @@ namespace app {
 			inspection_.save_sys(pre);
 
 			wave_cap_.save(pre);
+
+			report_.save(pre);
 		}
 	};
 }

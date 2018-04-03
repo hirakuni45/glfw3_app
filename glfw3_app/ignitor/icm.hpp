@@ -43,6 +43,7 @@ namespace app {
 
 	public:
 		// ICM 設定
+		gui::widget_text*		text_;
 		gui::widget_check*		sw_[6];		///< ICM 接続スイッチ
 		gui::widget_button*		exec_;		///< ICM 設定転送
 		gui::widget_check*		all_;		///< ICM 全体
@@ -69,7 +70,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		icm(utils::director<core>& d, net::ign_client_tcp& client, interlock& ilc) :
 			director_(d), client_(client), interlock_(ilc),
-			sw_{ nullptr }, exec_(nullptr), all_(nullptr)
+			text_(nullptr), sw_{ nullptr }, exec_(nullptr), all_(nullptr)
 		{ }			
 
 
@@ -105,25 +106,29 @@ namespace app {
 			@param[in]	d_w		横幅最大
 			@param[in]	ofsx	オフセット X
 			@param[in]	ofsy	オフセット Y
+			@param[in]	pg		ぷリファレンス・グループ
 		*/
 		//-----------------------------------------------------------------//
-		void init(gui::widget* root, int d_w, int ofsx, int ofsy)
+		void init(gui::widget* root, int d_w, int ofsx, int ofsy,
+			gui::widget::PRE_GROUP pg = gui::widget::PRE_GROUP::_0)
 		{
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
 			{
 				widget::param wp(vtx::irect(20, ofsy, 60, 40), root);
+				wp.pre_group_ = pg;
 				widget_text::param wp_("ICM:");
 				wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
 											 vtx::placement::vertical::CENTER);
-				wd.add_widget<widget_text>(wp, wp_);
+				text_ = wd.add_widget<widget_text>(wp, wp_);
 			}
 
-			tools::init_sw(wd, root, interlock_, ofsx, ofsy, sw_, 6, 34);
+			tools::init_sw(wd, root, interlock_, ofsx, ofsy, sw_, 6, 34, pg);
 
 			{  // exec
 				widget::param wp(vtx::irect(d_w - 85, ofsy, 30, 30), root);
+				wp.pre_group_ = pg;
 				widget_button::param wp_(">");
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
 				exec_->at_local_param().select_func_ = [=](int n) {
@@ -140,6 +145,7 @@ namespace app {
 			}
 			{
 				widget::param wp(vtx::irect(d_w - 45, ofsy, 30, 30), root);
+				wp.pre_group_ = pg;
 				widget_check::param wp_;
 				all_ = wd.add_widget<widget_check>(wp, wp_);
 				all_->at_local_param().select_func_ = [=](bool ena) {

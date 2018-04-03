@@ -72,7 +72,6 @@ namespace app {
 		csv						csv1_;
 		csv						csv2_;
 
-
 		bool save_project_file_(const std::string& path)
 		{
 			sys::preference pre;
@@ -491,11 +490,25 @@ namespace app {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief  CSV2 が有効か検査
+			@return 有効な場合「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool probe_csv2() const {
+			return !csv_base_->get_text().empty();
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief  CSV2 のセーブ
 		*/
 		//-----------------------------------------------------------------//
 		void save_csv2()
 		{
+			if(!probe_csv2()) {
+				return;
+			}
 			auto path = utils::append_path(proj_root_->get_text(), csv_base_->get_text());
 			path += (boost::format("%04d") % csv_idx_->get_select_pos()).str();
 			path += ".csv";
@@ -730,6 +743,9 @@ namespace app {
 					}
 					if(load_project_file_(path)) {
 						last_path_ = path;
+						// CSV1 ファイルをロード
+						reset_csv1();
+						load_csv1();
 					}
 				}
 			}

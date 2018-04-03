@@ -99,6 +99,7 @@ namespace app {
 			}
 			ans_->set_text((boost::format("%4.3f [%s]") % d % unit).str());
 			unit_ = unit;
+			++dif_id_;
 		}
 
 	public:
@@ -201,7 +202,7 @@ namespace app {
 				val2_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 			{  // 答え
-				widget::param wp(vtx::irect(ofsx + 300, ofsy + 50, 150, 40), root);
+				widget::param wp(vtx::irect(ofsx + 300, ofsy + 50, 180, 40), root);
 				wp.pre_group_ = widget::PRE_GROUP::_1;
 				widget_label::param wp_("");
 				ans_ = wd.add_widget<widget_label>(wp, wp_);
