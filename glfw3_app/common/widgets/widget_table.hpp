@@ -182,6 +182,7 @@ namespace gui {
 			}
 			{
 				widget::param wp(vtx::irect(0, 0, max_.x, max_.y), this);
+				wp.pre_group_ = get_param().pre_group_;
 				wp.state_.set(widget::state::CLIP_PARENTS);
 				widget_null::param wp_;
 				base_ = wd_.add_widget<widget_null>(wp, wp_);
@@ -193,6 +194,7 @@ namespace gui {
 
 			if(param_.scroll_bar_h_) {
 				widget::param wp(vtx::irect(0, 0, 0, 0), this);
+				wp.pre_group_ = get_param().pre_group_;
 				widget_scrollbar::param wp_(widget_scrollbar::style::HOLIZONTAL);
 				wp_.handle_ratio_ = static_cast<float>(msz.x) / static_cast<float>(max_.x);
 				wp_.scroll_step_  =
@@ -202,6 +204,7 @@ namespace gui {
 			}
 			if(param_.scroll_bar_v_) {
 				widget::param wp(vtx::irect(0, 0, 0, 0), this);
+				wp.pre_group_ = get_param().pre_group_;
 				widget_scrollbar::param wp_(widget_scrollbar::style::VERTICAL);
 				wp_.handle_ratio_ = static_cast<float>(msz.y) / static_cast<float>(max_.y);
 				wp_.scroll_step_  =

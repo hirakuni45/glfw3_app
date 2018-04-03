@@ -180,6 +180,7 @@ namespace gui {
 				at_rect().size.y = msz.y;
 				{
 	                widget::param wp(vtx::irect(0, 0, 0, 0), this);
+					wp.pre_group_ = get_param().pre_group_;
 					widget_arrow::param wp_(widget_arrow::direction::up);
 					arrow_inc_ = wd_.add_widget<widget_arrow>(wp, wp_);
 					arrow_inc_->at_local_param().select_func_ = [=](uint32_t level) {
@@ -190,6 +191,7 @@ namespace gui {
 				}
 				{
 	                widget::param wp(vtx::irect(0, bs.y, bs.x, msz.y - bs.y * 2), this);
+					wp.pre_group_ = get_param().pre_group_;
 					widget_slider::param wp_(0.0f, slider_param::direction::VERTICAL);
 					wp_.slider_param_.handle_ratio_ = param_.handle_ratio_;
 					wp_.scroll_gain_ = param_.scroll_gain_;
@@ -198,6 +200,7 @@ namespace gui {
 				}
 				{
 	                widget::param wp(vtx::irect(0, msz.y - bs.y, 0, 0), this);
+					wp.pre_group_ = get_param().pre_group_;
 					widget_arrow::param wp_(widget_arrow::direction::down);
 					arrow_dec_ = wd_.add_widget<widget_arrow>(wp, wp_);
 					arrow_dec_->at_local_param().select_func_ = [=](uint32_t level) {
