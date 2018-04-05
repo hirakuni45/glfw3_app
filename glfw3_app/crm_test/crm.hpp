@@ -82,11 +82,8 @@ namespace app {
 				s += (boost::format("CROE%d    \n") % ena).str();
 				if(ena) {
 					s += (boost::format("CRD?1    \n")).str();
-					if(mode > 0) {  // mode 1, 2
-						s += (boost::format("CRC?1    \n")).str();
-					} else {  // mode 0
-						s += (boost::format("CRR?1    \n")).str();
-					}
+					s += (boost::format("CRR?1    \n")).str();
+					s += (boost::format("CRC?1    \n")).str();
 				}
 				return s;
 			}
@@ -279,7 +276,8 @@ namespace app {
 				termcore_->output((boost::format("CRDD: %08X\n") % crdd_value_).str());
 			}
 
-			if(crrd) {  // CRRD
+			// 抵抗測定の場合
+			if(mode_->get_select_pos() == 0 && crrd) {  // CRRD
 				termcore_->output((boost::format("CRRD: %08X\n") % crrd_value_).str());
 				int32_t v = static_cast<int32_t>(crcd_value_);
 				int32_t ofs = static_cast<int32_t>(crdd_value_);
@@ -297,41 +295,54 @@ namespace app {
 				a /= itbl[amps_->get_select_pos()];
 				ans_->set_text((boost::format("%6.5f Ω") % a).str());
 			}
+			// 容量、合成容量の場合
 			if(crcd) {
 				termcore_->output((boost::format("CRCD: %08X\n") % crcd_value_).str());
-				int32_t v = static_cast<int32_t>(crcd_value_);
+				// 基準値 (ofs)
 				int32_t ofs = static_cast<int32_t>(crdd_value_);
-				v -= ofs;
+
+				// 抵抗値 (r)
+				int32_t r = static_cast<int32_t>(crrd_value_);
+				r -= ofs;
+
+				// 容量値 (c)
+				int32_t c = static_cast<int32_t>(crcd_value_);
+				c -= ofs;
 				double lim = static_cast<double>(ofs) / 1.570798233;
-				if(v >= lim) {
+				if(c >= lim) {
 					ans_->set_text("OVF");
 					return;
 				}
+				if(r >= lim) {
+					ans_->set_text("OVF");
+					return;
+				}
+
 				static const double itbl[4] = {  // 電流テーブル
 					0.2, 2.0, 20.0, 200.0
 				};
 				double ib = itbl[amps_->get_select_pos()];
-				v -= 447158 * ib;
-				v += 23989;
+				c -= 447158 * ib;
+				c += 23989;
 
-				double a = static_cast<double>(v) / static_cast<double>(ofs) * 1.570798233;
-				a *= 778.2;  // 778.2 mV P-P
+				double fc = static_cast<double>(c) / static_cast<double>(ofs) * 1.570798233;
+				fc *= 778.2;  // 778.2 mV P-P
 
 				static const double ftbl[4] = {  // 周波数テーブル
 					100.0, 1000.0, 10000.0
 				};
 				double fq = ftbl[freq_->get_select_pos()];
 				if(mode_->get_select_pos() == 1) {  // 容量
-					a = ib / (2.0 * 3.141592654 * fq * a);
+					fc = ib / (2.0 * 3.141592654 * fq * fc);
 				} else {  // 合成
 					float b = 0.0;
 					if((utils::input("%f", net_regs_->get_text().c_str()) % b).status()) {
 						b *= ib;
 					}
-					a = (ib * a) / (2.0 * 3.141592654 * fq * (a * a + b * b));
+					fc = (ib * fc) / (2.0 * 3.141592654 * fq * (fc * fc + b * b));
 				}
-				a *= 1e6;
-				ans_->set_text((boost::format("%6.5f uF") % a).str());
+				fc *= 1e6;
+				ans_->set_text((boost::format("%6.5f uF") % fc).str());
 			}
 		}
 
