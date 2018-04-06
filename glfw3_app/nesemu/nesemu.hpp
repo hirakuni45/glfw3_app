@@ -214,7 +214,7 @@ namespace app {
 				{
 					widget::param wp(vtx::irect(0), terminal_frame_);
 					widget_terminal::param wp_;
-					wp_.enter_func_ = [this] (const utils::lstring& inp) {
+					wp_.enter_func_ = [=] (const utils::lstring& inp) {
 						auto s = utils::utf32_to_utf8(inp);
 						tools_.command(s);
 					};
@@ -227,7 +227,7 @@ namespace app {
 			{  	// ファイラー
 				widget::param wp(vtx::irect(10, 10, 200, 200));
 				widget_filer::param wp_(core.get_current_path(), "");
-				wp_.select_file_func_ = [this](const std::string& fn) {
+				wp_.select_file_func_ = [=](const std::string& fn) {
 					if(nsfplay_.open(fn)) {
 						nes_file_ = "";
 						nsf_play_ = true;
@@ -263,7 +263,7 @@ namespace app {
 				{   // スピン・ボックス
 					widget::param wp(vtx::irect(10, 35, 90, 30), menu_frame_);
 					widget_spinbox::param wp_(0, 0, 9);
-					wp_.select_func_ = [this] (widget_spinbox::state st, int before, int newpos) {
+					wp_.select_func_ = [=] (widget_spinbox::state st, int before, int newpos) {
 						return (boost::format("%d") % newpos).str();
 					};
 					state_slot_ = wd.add_widget<widget_spinbox>(wp, wp_);
@@ -272,7 +272,7 @@ namespace app {
 					widget::param wp(vtx::irect(110, 35+40*0, 90, 30), menu_frame_);
 					widget_button::param wp_("Save");
 					state_save_ = wd.add_widget<widget_button>(wp, wp_);
-					state_save_->at_local_param().select_func_ = [this](int id) {
+					state_save_->at_local_param().select_func_ = [=](int id) {
 						state_setslot(get_state_no_());
 						if(state_save() != 0) {
 							dialog_->set_text("Save state error");
@@ -287,7 +287,7 @@ namespace app {
 					widget::param wp(vtx::irect(110, 35+40*1, 90, 30), menu_frame_);
 					widget_button::param wp_("Load");
 					state_load_ = wd.add_widget<widget_button>(wp, wp_);
-					state_load_->at_local_param().select_func_ = [this](int id) {
+					state_load_->at_local_param().select_func_ = [=](int id) {
 						state_setslot(get_state_no_());
 						if(!nes_play_) {
 							dialog_->set_text("Load state error: 'NES file not load'");
@@ -302,7 +302,7 @@ namespace app {
 					widget::param wp(vtx::irect(10, 35+40*2, 90, 30), menu_frame_);
 					widget_button::param wp_("Reset");
 					nes_reset_ = wd.add_widget<widget_button>(wp, wp_);
-					nes_reset_->at_local_param().select_func_ = [this](int id) {
+					nes_reset_->at_local_param().select_func_ = [=](int id) {
 						nes_reset(HARD_RESET);
 					};
 				}
