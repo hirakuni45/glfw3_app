@@ -23,6 +23,8 @@ namespace gui {
 
 		typedef widget_table value_type;
 
+		typedef std::function< void(uint32_t pos, uint32_t id) > select_func_type;
+
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	widget_table パラメーター
@@ -30,15 +32,20 @@ namespace gui {
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
 
-			std::vector<widget*>	cell_;
+			std::vector<widget*>	cell_;			///< 初期化時、セル群
 
 			vtx::ipos	item_size_;		///< アイテムの大きさ
+
+			uint32_t			pos_;			///< 選択位置
+			uint32_t			id_;			///< 選択 ID
+			select_func_type	select_func_;	///< セレクト関数
 
 			bool		scroll_bar_h_;	///< 水平スクロール・バーによる制御
 			bool		scroll_bar_v_;	///< 垂直スクロール・バーによる制御
 			bool		scroll_ctrl_;	///< スクロール・コントロール（マウスのダイアル）
 
 			param() : cell_(), item_size_(0),
+				pos_(0), id_(0), select_func_(),
 				scroll_bar_h_(false), scroll_bar_v_(false), scroll_ctrl_(true)
 			{ }
 		};
@@ -48,6 +55,8 @@ namespace gui {
 
 		param				param_;
 
+		std::vector<widgets>	child_list_;
+
 		widget_null*		base_;
 		widget_scrollbar*	scroll_h_;
 		widget_scrollbar*	scroll_v_;
@@ -55,6 +64,8 @@ namespace gui {
 		vtx::ipos			max_;
 		vtx::fpos			offset_;
 		vtx::ipos			chip_size_;
+
+		uint32_t			id_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -64,8 +75,9 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_table(widget_director& wd, const widget::param& bp, const param& p) :
 			widget(bp), wd_(wd), param_(p),
+			child_list_(),
 			base_(nullptr), scroll_h_(nullptr), scroll_v_(nullptr),
-			max_(0), offset_(0.0f), chip_size_(0)
+			max_(0), offset_(0.0f), chip_size_(0), id_(0)
 		{ }
 
 
@@ -190,6 +202,8 @@ namespace gui {
 			for(auto w : param_.cell_) {  // 子の基本設定
 				w->at_param().parents_ = base_;
 				w->at_param().state_.set(widget::state::CLIP_PARENTS);
+				auto ws = wd_.parents_widget(w);
+				child_list_.push_back(ws);
 			}
 
 			if(param_.scroll_bar_h_) {
@@ -258,6 +272,23 @@ namespace gui {
 					d = step < 0 ? -1 : 1;
 				}
 #endif
+
+				uint32_t pos = 0;
+				widget* selw = nullptr;
+				for(auto ws : child_list_) {
+					for(auto w : ws) {
+						if(w->get_selected()) {
+							selw = w;
+							break;
+						}
+					}
+					if(selw != nullptr) {
+						param_.pos_ = pos;
+						++param_.id_;
+						break;
+					}
+					++pos;
+				}
 			}
 
 			if(param_.scroll_bar_v_ && scroll_v_ != nullptr) {
@@ -277,8 +308,16 @@ namespace gui {
 			if(!get_enable()) {
 				return;
 			}
+
 			base_->at_rect().org.x = -offset_.x;
 			base_->at_rect().org.y = -offset_.y;
+
+			if(param_.id_ != id_) {
+				if(param_.select_func_ != nullptr) {
+					param_.select_func_(param_.pos_, param_.id_);
+				}
+				id_ = param_.id_;
+			}
 		}
 
 
