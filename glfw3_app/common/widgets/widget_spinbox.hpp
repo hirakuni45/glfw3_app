@@ -376,6 +376,7 @@ namespace gui {
    				if(!t.empty()) {
 					param_.text_param_.set_text(t);
 				}
+				state_ = state::none;
 			}
 			sel_pos_ = param_.sel_pos_;
 		}
