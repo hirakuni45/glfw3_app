@@ -22,7 +22,7 @@ namespace gui {
 
 		typedef widget_button value_type;
 
-		typedef std::function< void(uint32_t) > select_func_type;
+		typedef std::function< void(uint32_t id) > select_func_type;
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
