@@ -24,6 +24,8 @@
 #include "utils/input.hpp"
 #include "utils/format.hpp"
 #include "utils/preference.hpp"
+#include "gl_fw/glmobj.hpp"
+#include "img_io/img_files.hpp"
 
 #include "tools.hpp"
 #include "project.hpp"
@@ -80,6 +82,8 @@ namespace app {
 
 		uint32_t	index_;
 
+		gl::mobj	mobj_;
+
 		void add_unit_label_(gui::widget* frame, int x, int y, int h, unit_t& t)
 		{
 			using namespace gui;
@@ -127,7 +131,7 @@ namespace app {
 			csv_idx_(nullptr), table_(nullptr),
 			units_(), ena_(false),
 			total_(0), pass_(0), fail_(0), retry_(0),
-			index_(0)
+			index_(0), mobj_()
 		{ }
 
 
@@ -166,7 +170,7 @@ namespace app {
 			int x = 20;
 			int y = 20;
 			{
-				widget::param wp(vtx::irect(x, y, 300, 300), dialog_);
+				widget::param wp(vtx::irect(x, y + 50, 650, 650), dialog_);
 				wp.pre_group_ = widget::PRE_GROUP::_4;
 				widget_image::param wp_;
 				wav_image_ = wd.add_widget<widget_image>(wp, wp_);
@@ -317,7 +321,27 @@ namespace app {
 					units_.push_back(t);
 				}
 				table_ = wd.add_widget<widget_table>(wpt, wpt_);
+				table_->at_local_param().select_func_ = [=](uint32_t pos, uint32_t id) {
+					auto path = project_.get_image_path(pos);
+					if(utils::probe_file(path)) {
+						img::img_files imfs;
+						if(imfs.load(path)) {
+							mobj_.destroy();
+							mobj_.initialize();
+							auto img = imfs.get_image();
+							auto isz = img.get()->get_size();
+							float sx = 650.0f / static_cast<float>(isz.x);
+							float sy = 650.0f / static_cast<float>(isz.y);
+							wav_image_->at_local_param().scale_.x = sx < sy ? sx : sy;
+							wav_image_->at_local_param().scale_.y = sx < sy ? sx : sy;
+							wav_image_->at_local_param().mobj_handle_ = mobj_.install(img.get());
+						}
+					}
+				};
 			}
+
+			mobj_.initialize();
+			wav_image_->at_local_param().mobj_ = mobj_;
 		}
 
 
