@@ -345,6 +345,25 @@ namespace app {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief  CSV1 ファイルのタイムスタンプ取得
+			@return CSV1 ファイルのタイムスタンプ
+		*/
+		//-----------------------------------------------------------------//
+		time_t get_csv1_timestamp() const {
+			auto path = utils::append_path(proj_root_->get_text(), csv_all_->get_text());
+			path += ".csv";
+			struct stat st;
+		    int ierr = stat(path.c_str(), &st);
+			time_t t = 0;
+		    if(ierr == 0) {
+				t = st.st_mtime;
+			}
+			return t;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief  CSV2 参照
 			@return CSV2
 		*/

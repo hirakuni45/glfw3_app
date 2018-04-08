@@ -49,6 +49,8 @@ namespace app {
 		gui::widget_text*		str_title_;
 		gui::widget_text*		str_date_;
 
+		gui::widget_text*		str_result_;
+
 		gui::widget_label*		str_total_;
 		gui::widget_label*		str_pass_;
 		gui::widget_label*		str_fail_;
@@ -126,7 +128,7 @@ namespace app {
 			director_(d), project_(proj),
 			dialog_(nullptr),
 			wav_image_(nullptr),
-			str_date_(nullptr),
+			str_title_(nullptr), str_date_(nullptr), str_result_(nullptr),
 			str_total_(nullptr), str_pass_(nullptr), str_fail_(nullptr), str_retry_(nullptr),
 			csv_idx_(nullptr), table_(nullptr),
 			units_(), ena_(false),
@@ -170,7 +172,7 @@ namespace app {
 			int x = 20;
 			int y = 20;
 			{
-				widget::param wp(vtx::irect(x, y + 50, 650, 650), dialog_);
+				widget::param wp(vtx::irect(x, y + 50, 660, 660), dialog_);
 				wp.pre_group_ = widget::PRE_GROUP::_4;
 				widget_image::param wp_;
 				wav_image_ = wd.add_widget<widget_image>(wp, wp_);
@@ -195,7 +197,17 @@ namespace app {
 				wd.add_widget<widget_text>(wp, wp_);
 			}
 			{
-				widget::param wp(vtx::irect(ww - 260, y, 250, 35), dialog_);
+				widget::param wp(vtx::irect(x + 700, y + 50, 300, 100), dialog_);
+				wp.pre_group_ = widget::PRE_GROUP::_4;
+				widget_text::param wp_("OK");
+				wp_.text_param_.font_size_ = 96;
+				wp_.text_param_.placement_
+					= vtx::placement(vtx::placement::holizontal::LEFT,
+									 vtx::placement::vertical::CENTER);
+				str_result_ = wd.add_widget<widget_text>(wp, wp_);
+			}
+			{
+				widget::param wp(vtx::irect(ww - 280, y, 270, 35), dialog_);
 				wp.pre_group_ = widget::PRE_GROUP::_4;
 				widget_text::param wp_;
 				wp_.text_param_.placement_
@@ -330,8 +342,9 @@ namespace app {
 							mobj_.initialize();
 							auto img = imfs.get_image();
 							auto isz = img.get()->get_size();
-							float sx = 650.0f / static_cast<float>(isz.x);
-							float sy = 650.0f / static_cast<float>(isz.y);
+							auto sz = wav_image_->get_rect().size;
+							float sx = static_cast<float>(sz.x) / static_cast<float>(isz.x);
+							float sy = static_cast<float>(sz.y) / static_cast<float>(isz.y);
 							wav_image_->at_local_param().scale_.x = sx < sy ? sx : sy;
 							wav_image_->at_local_param().scale_.y = sx < sy ? sx : sy;
 							wav_image_->at_local_param().mobj_handle_ = mobj_.install(img.get());
@@ -354,10 +367,10 @@ namespace app {
 		{
 			bool ena = dialog_->get_enable();
 			if(!ena_ && ena) {
+				csv& c = project_.at_csv1();
 				{
-					time_t tt;
-					time(&tt);
-					struct tm* t = localtime(&tt);
+					auto ts = project_.get_csv1_timestamp();
+					struct tm* t = localtime(&ts);
 					auto s = (boost::format("%4d年") % (t->tm_year + 1900)).str();
 					s += (boost::format("%d月") % (t->tm_mon + 1)).str();
 					s += (boost::format("%d日") % (t->tm_mday)).str();
@@ -367,7 +380,6 @@ namespace app {
 					str_date_->set_text(s);
 				}
 				str_title_->set_text(project_.get_project_title());
-				csv& c = project_.at_csv1();
 				total_ = 0;
 				pass_ = 0;
 				fail_ = 0;
