@@ -14,6 +14,8 @@
 #include "utils/director.hpp"
 #include "widgets/widget.hpp"
 
+#include "root_menu.hpp"
+
 namespace app {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -25,13 +27,17 @@ namespace app {
 
 		utils::director<core>&	director_;
 
+		root_menu	root_menu_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		ansur(utils::director<core>& d) : director_(d) { }
+		ansur(utils::director<core>& d) : director_(d),
+			root_menu_(d)
+		{ }
 
 
 		//-----------------------------------------------------------------//
@@ -41,6 +47,9 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void initialize()
 		{
+			root_menu_.initialize();
+
+			root_menu_.load();
 		}
 
 
@@ -53,6 +62,7 @@ namespace app {
 		{
 			gui::widget_director& wd = director_.at().widget_director_;
 
+			root_menu_.update();
 
 			wd.update();
 		}
@@ -77,6 +87,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void destroy()
 		{
+			root_menu_.save();
 		}
 	};
 }

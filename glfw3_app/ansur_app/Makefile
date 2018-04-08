@@ -29,7 +29,8 @@ VPATH		=	../common
 # 				./emu/nofrendo.c
 
 CSOURCES	=	minizip/ioapi.c \
-				minizip/unzip.c
+				minizip/unzip.c \
+				ftpsub.c
 
 PSOURCES	=	main.cpp \
 				core/glcore.cpp \
@@ -74,11 +75,13 @@ STDLIBS		=
 ifeq ($(SYSTEM),WIN)
 LOCAL_PATH	=	/mingw64
 OPTLIBS		=	opengl32 glfw3 glew32 \
+				ws2_32 wsock32 \
 				pthread \
 				png turbojpeg jpeg openjp2 \
 				freetype \
 				mad tag \
-				z openal
+				z openal \
+				iconv
 else
 LOCAL_PATH	=	/usr/local
 OPTLIBS		=	glfw3 GLEW \
@@ -101,8 +104,8 @@ INC_SYS		+=	$(LOCAL_PATH)/opt/jpeg-turbo/include
 LIBDIR		+=	$(LOCAL_PATH)/opt/jpeg-turbo/lib
 endif
 
-PINC_APP	=	. ../common ./emu ./emu/cpu ./emu/nes ./emu/mappers ./emu/sndhrdw ./emu/libsnss
-CINC_APP	=	. ../common ./emu ./emu/cpu ./emu/nes ./emu/mappers ./emu/sndhrdw ./emu/libsnss
+PINC_APP	=	. ../common
+CINC_APP	=	. ../common
 
 INC_S	=	$(addprefix -isystem , $(INC_SYS))
 INC_L	=	$(addprefix -isystem , $(INC_LIB))
@@ -168,7 +171,7 @@ endif
 # -Wuninitialized -Wunused -Werror -Wshadow
 CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
 			-Wformat
-CPWARN	=	-Wall -Werror -Wno-unused-private-field
+CPWARN	=	-Wall -Werror -Wno-unused-private-field -Wno-unused-variable
 
 OBJECTS	=	$(addprefix $(BUILD)/,$(patsubst %.cpp,%.o,$(PSOURCES))) \
 			$(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(CSOURCES)))
