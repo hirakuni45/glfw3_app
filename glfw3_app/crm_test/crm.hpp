@@ -1,7 +1,38 @@
 #pragma once
 //=====================================================================//
 /*! @file
-    @brief  CRM 直接、クラス
+    @brief  CRM 直接、クラス @n
+		１、DC成分の除去 @n
+			FPGAからレポートされる抵抗成分データCRRD、容量成分データCRCD、@n
+			直流成分データCRDDを使用して、まずDC成分の除去を実施してください。@n
+			SRP = CRRD - CRDD  //電圧オフセット分を取り除いた実数部データです。@n
+			SIP = CRCD - CRDD  //電圧オフセット分を取り除いた虚数部データです。@n
+		２、位相オフセット成分の除去 @n
+			回路等に含まれる位相オフセット分を除去するため、SRPおよびSIPを次の様に@n
+			修正願います。@n
+			CRP = SRP + A_CAL * SIP  //A_CALの値は、純抵抗を測定した時（位相校正操作時）の @n
+        	CIP = SIP - A_CAL * SRP  //(SIP/SRP)の値（位相補正係数）を使用します。（後述）@n
+		３、抵抗値および容量値の算出 @n
+			CRPおよびCIPの値から、次の式を用いて抵抗値と容量値を求めます。@n
+        	R [ohm]= COR * (CRP^2 + CIP^2) / (_i * CRP) @n
+        	C [F] = (COC * _i * CIP) / {(2 * π * _f) * (CRP^2 + CIP^2) } @n
+			ここで：@n
+			CORは抵抗値計算用の定数係数 = 4.6588E-8 @n
+			COCは容量値計算用の定数係数 = 21454732.4 @n
+			_iはユーザーが選択した測定電流値 [Ap-p] @n
+			_fはユーザーが選択した測定周波数 [Hz] @n
+		４、位相補正係数A_CALの決定 @n
+			位相オフセットは、電圧オフセットのように半自動的に除去する事ができないので、@n
+			ユーザー操作によりシステムの構成を行う必要があります。並列容量が存在しない筈 @n
+			の純抵抗素子；@n
+			・0.2mAp-p時には3.3KΩ程度@n
+			・2mAp-p時には330Ω程度@n
+			・20mAp-p時には33Ω程度@n
+			・200mAp-p時には3.3Ω程度@n
+			（いずれも、0.778Vp-pを越えない範囲でなるべく大きな測定電圧が得られる値です。@n
+			正確である必要はありません。）@n
+			の抵抗を測定させ、その時のSIP/SRPの計算結果をA_CALの値として使用します。@n
+			（この値には測定回路系に含まれる位相誤差の合計値[rad]がほぼそのまま反映されます。）
     @author 平松邦仁 (hira@rvf-rc45.net)
 	@copyright	Copyright (C) 2018 Kunihito Hiramatsu @n
 				Released under the MIT license @n
@@ -48,6 +79,8 @@ namespace app {
 		gui::widget_list*		mode_;		///< CRM 抵抗測定、容量測定
 		gui::widget_label*		ans_;		///< CRM 測定結果 
 		gui::widget_button*		exec_;		///< CRM 設定転送
+		gui::widget_list*		carib_type_;
+		gui::widget_button*		carib_;
 
 		gui::widget_label*		net_regs_;
 
@@ -60,6 +93,15 @@ namespace app {
 		uint32_t				crrd_value_;
 		uint32_t				crcd_value_;
 		uint32_t				crdd_value_;
+
+		enum class carib_task {
+			idle,
+			_0,   ///< 0.2mA / 3.3K
+			_1,   ///< 2mA   / 330
+			_2,   ///< 20mA  / 33
+			_3,   ///< 200mA / 3.3
+		};
+		carib_task				carib_task_;
 
 		struct crm_t {
 			uint16_t	sw;		///< 14 bits
@@ -144,11 +186,13 @@ namespace app {
 			sw_{ nullptr },
 			ena_(nullptr), amps_(nullptr), freq_(nullptr), mode_(nullptr),
 			ans_(nullptr), exec_(nullptr),
+			carib_type_(nullptr), carib_(nullptr),
 			net_regs_(nullptr),
 			termcore_(nullptr),
 			crm_line_(),
 			crrd_id_(0), crcd_id_(0), crdd_id_(0),
-			crrd_value_(0), crcd_value_(0), crdd_value_(0)
+			crrd_value_(0), crcd_value_(0), crdd_value_(0),
+			carib_task_(carib_task::idle)
 		{ }
 
 
@@ -229,9 +273,27 @@ namespace app {
 				};
 			}
 			{  // 合成回路、抵抗設定
-				widget::param wp(vtx::irect(ofsx + 220, ofsy + 50, 110, 40), root);
+				widget::param wp(vtx::irect(ofsx + 330, ofsy + 60, 110, 40), root);
 				widget_label::param wp_("390.0", false);
 				net_regs_ = wd.add_widget<widget_label>(wp, wp_);
+			}
+			{  // キャリブレーション・リスト
+				widget::param wp(vtx::irect(ofsx, ofsy + 60, 170, 40), root);
+				widget_list::param wp_;
+				wp_.init_list_.push_back("0.2mA/3.3K");
+				wp_.init_list_.push_back("2mA/330");
+				wp_.init_list_.push_back("20mA/33");
+				wp_.init_list_.push_back("200mA/3.3");
+				carib_type_ = wd.add_widget<widget_list>(wp, wp_); 
+			}
+			{  // キャリブレーション
+				widget::param wp(vtx::irect(ofsx + 190, ofsy + 60, 90, 40), root);
+				widget_button::param wp_("carib");
+				carib_ = wd.add_widget<widget_button>(wp, wp_);
+				carib_->at_local_param().select_func_ = [=](int n) {
+					
+					// task_ = carib_type_->get_select_pos();
+				};
 			}
 		}
 
@@ -244,7 +306,7 @@ namespace app {
 		void update()
 		{
 			{
-				char tmp[128];
+				char tmp[256];
 				auto len = serial_.read(tmp, sizeof(tmp));
 				for(uint32_t i = 0; i < len; ++i) {
 					crm_line_ += tmp[i];
