@@ -12,6 +12,7 @@
 #include "widgets/widget_director.hpp"
 #include "widgets/widget_utils.hpp"
 #include "widgets/widget_frame.hpp"
+#include "widgets/widget_null.hpp"
 #include <boost/optional.hpp>
 
 namespace gui {
