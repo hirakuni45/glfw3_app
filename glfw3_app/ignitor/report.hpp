@@ -15,6 +15,7 @@
 #include "widgets/widget_frame.hpp"
 #include "widgets/widget_button.hpp"
 #include "widgets/widget_text.hpp"
+#include "widgets/widget_image.hpp"
 #include "widgets/widget_label.hpp"
 #include "widgets/widget_spinbox.hpp"
 #include "widgets/widget_check.hpp"
@@ -41,6 +42,8 @@ namespace app {
 
 		gui::widget_dialog*		dialog_;
 
+		gui::widget_image*		wav_image_;
+
 		gui::widget_text*		str_title_;
 		gui::widget_text*		str_date_;
 
@@ -54,12 +57,12 @@ namespace app {
 		gui::widget_table*		table_;
 
 		struct unit_t {
-			gui::widget_label*	symbol_;
-			gui::widget_label*	okng_;
-			gui::widget_label*	val_;
-			gui::widget_label*	min_;
-			gui::widget_label*	max_;
-			gui::widget_label*	unit_;
+			gui::widget_label*	symbol_;  ///< 検査記号
+			gui::widget_label*	okng_;    ///< 合否
+			gui::widget_label*	val_;     ///< 測定値
+			gui::widget_label*	min_;     ///< 最小値
+			gui::widget_label*	max_;     ///< 最大値
+			gui::widget_label*	unit_;    ///< 単位
 			unit_t() : symbol_(nullptr), okng_(nullptr),
 				val_(nullptr), min_(nullptr), max_(nullptr),
 				unit_(nullptr) { }
@@ -118,6 +121,7 @@ namespace app {
 		report(utils::director<core>& d, project& proj) :
 			director_(d), project_(proj),
 			dialog_(nullptr),
+			wav_image_(nullptr),
 			str_date_(nullptr),
 			str_total_(nullptr), str_pass_(nullptr), str_fail_(nullptr), str_retry_(nullptr),
 			csv_idx_(nullptr), table_(nullptr),
@@ -147,7 +151,7 @@ namespace app {
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
-			int ww = 940;
+			int ww = 1440;
 			int hh = 730;
 			{  // コントローラー設定ダイアログ
 				widget::param wp(vtx::irect(100, 100, ww, hh));
@@ -161,6 +165,12 @@ namespace app {
 
 			int x = 20;
 			int y = 20;
+			{
+				widget::param wp(vtx::irect(x, y, 300, 300), dialog_);
+				wp.pre_group_ = widget::PRE_GROUP::_4;
+				widget_image::param wp_;
+				wav_image_ = wd.add_widget<widget_image>(wp, wp_);
+			}
 			{
 				widget::param wp(vtx::irect(x, y, 200, 35), dialog_);
 				wp.pre_group_ = widget::PRE_GROUP::_4;
@@ -201,14 +211,14 @@ namespace app {
 				wd.add_widget<widget_text>(wp, wp_);
 			}
 			{
-				widget::param wp(vtx::irect(ww - 160, y, 150, 35), dialog_);
+				widget::param wp(vtx::irect(ww - 165, y, 150, 35), dialog_);
 				wp.pre_group_ = widget::PRE_GROUP::_4;
 				widget_label::param wp_;
 				str_total_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 			y += 40;
 			{
-				widget::param wp(vtx::irect(ww - 260, y, 90, 35), dialog_);
+				widget::param wp(vtx::irect(ww - 265, y, 90, 35), dialog_);
 				wp.pre_group_ = widget::PRE_GROUP::_4;
 				widget_text::param wp_("Pass:");
 				wp_.text_param_.placement_
@@ -217,14 +227,14 @@ namespace app {
 				wd.add_widget<widget_text>(wp, wp_);
 			}
 			{
-				widget::param wp(vtx::irect(ww - 160, y, 150, 35), dialog_);
+				widget::param wp(vtx::irect(ww - 165, y, 150, 35), dialog_);
 				wp.pre_group_ = widget::PRE_GROUP::_4;
 				widget_label::param wp_;
 				str_pass_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 			y += 40;
 			{
-				widget::param wp(vtx::irect(ww - 260, y, 90, 35), dialog_);
+				widget::param wp(vtx::irect(ww - 265, y, 90, 35), dialog_);
 				wp.pre_group_ = widget::PRE_GROUP::_4;
 				widget_text::param wp_("Fail:");
 				wp_.text_param_.placement_
@@ -233,14 +243,14 @@ namespace app {
 				wd.add_widget<widget_text>(wp, wp_);
 			}
 			{
-				widget::param wp(vtx::irect(ww - 160, y, 150, 35), dialog_);
+				widget::param wp(vtx::irect(ww - 165, y, 150, 35), dialog_);
 				wp.pre_group_ = widget::PRE_GROUP::_4;
 				widget_label::param wp_;
 				str_fail_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 			y += 40;
 			{
-				widget::param wp(vtx::irect(ww - 260, y, 90, 35), dialog_);
+				widget::param wp(vtx::irect(ww - 265, y, 90, 35), dialog_);
 				widget_text::param wp_("Retry:");
 				wp_.text_param_.placement_
 					= vtx::placement(vtx::placement::holizontal::LEFT,
@@ -248,11 +258,14 @@ namespace app {
 				wd.add_widget<widget_text>(wp, wp_);
 			}
 			{
-				widget::param wp(vtx::irect(ww - 160, y, 150, 35), dialog_);
+				widget::param wp(vtx::irect(ww - 165, y, 150, 35), dialog_);
 				wp.pre_group_ = widget::PRE_GROUP::_4;
 				widget_label::param wp_;
 				str_retry_ = wd.add_widget<widget_label>(wp, wp_);
 			}
+			static const int lh = 32;  // ラベルの高さ
+			static const int lw = 700;
+			x = ww - lw - 24 - 15;
 			{  // 試料番号設定
 				{
 					widget::param wp(vtx::irect(x, y, 70, 40), dialog_);
@@ -276,8 +289,6 @@ namespace app {
 			}
 			y += 50;
 
-			static const int lh = 32;  // ラベルの高さ
-			static const int lw = 700;
 			add_unit_label_(dialog_, x, y, lh, units_str_);
 	  		units_str_.symbol_->set_text("検査項目");
 	  		units_str_.okng_->set_text("合否");
@@ -327,8 +338,8 @@ namespace app {
 					s += (boost::format("%d月") % (t->tm_mon + 1)).str();
 					s += (boost::format("%d日") % (t->tm_mday)).str();
 					s += (boost::format(" %2d") % (t->tm_hour)).str();
-					s += (boost::format(":%2d") % (t->tm_min)).str();
-					s += (boost::format(":%2d") % (t->tm_sec)).str();
+					s += (boost::format(":%02d") % (t->tm_min)).str();
+					s += (boost::format(":%02d") % (t->tm_sec)).str();
 					str_date_->set_text(s);
 				}
 				str_title_->set_text(project_.get_project_title());

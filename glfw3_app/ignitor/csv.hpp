@@ -74,7 +74,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		uint32_t find_colum(const std::string& key, uint32_t row) const
 		{
-			if(row >= cell_.size()) return cell_.size();
+			if(key.empty() || row >= cell_.size()) return cell_.size();
 
 			const auto& ss = cell_[row];
 			uint32_t n = 0;
@@ -98,6 +98,8 @@ namespace app {
 		//-----------------------------------------------------------------//
 		uint32_t find_rows(const std::string& key, uint32_t colum) const
 		{
+			if(key.empty()) return cell_.size();
+
 			uint32_t n = 0;
 			for(const auto& ss : cell_) {
 				if(colum < ss.size()) {
