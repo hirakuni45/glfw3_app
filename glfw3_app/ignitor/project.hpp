@@ -71,6 +71,7 @@ namespace app {
 
 		csv						csv1_;
 		csv						csv2_;
+		csv						retry_;
 
 		bool save_project_file_(const std::string& path)
 		{
@@ -460,7 +461,7 @@ namespace app {
 		{
 			csv1_.clear();
 			// CSV1 定型
-			uint32_t num = 100;
+			uint32_t num = 1000;
 			csv1_.create(51, 8 + num);
 //			csv1_.set(0, 0, "検査番号");
 			csv1_.set(0, 0, "No.");
@@ -546,6 +547,17 @@ namespace app {
 			path += ".csv";
 			csv2_.save(path);
 		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  RETRY 参照
+			@return RETRY
+		*/
+		//-----------------------------------------------------------------//
+		csv& at_retry() { return retry_; }
+
+
 
 
 		//-----------------------------------------------------------------//
