@@ -294,6 +294,10 @@ namespace app {
 				widget_button::param wp_("carib");
 				carib_ = wd.add_widget<widget_button>(wp, wp_);
 				carib_->at_local_param().select_func_ = [=](int n) {
+					amps_->select(carib_type_->get_select_pos());
+					auto s = make_crm_param_();
+					serial_.write(s.c_str(), s.size());
+					termcore_->output(s);
 					carib_task_ = static_cast<carib_task>(carib_type_->get_select_pos() + 1);
 				};
 			}
@@ -318,13 +322,6 @@ namespace app {
 				for(uint32_t i = 0; i < len; ++i) {
 					crm_line_ += tmp[i];
 				}
-#if 0
-if(!crm_line_.empty()) {
-	std::cout << crm_line_.size() << std::endl;
-	std::cout << crm_line_ << std::endl;
-	crm_line_.clear();
-}
-#endif
 			}
 
 			// 受信した文字列をデコード
