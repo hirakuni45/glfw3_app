@@ -154,7 +154,7 @@ namespace gui {
 			int				cursor_;		///< カーソル位置反転表示（エリアスは無効になる）
 
 			text_param() :
-				text_(), font_(), font_size_(24), proportional_(true),
+				text_(), font_(), font_size_(20), proportional_(true),
 				alias_enable_(false), alias_(),
 				fore_color_(255, 255), shadow_color_(0, 255),
 				shadow_offset_(1),
@@ -167,7 +167,7 @@ namespace gui {
 				const vtx::placement& pl = vtx::placement(
 				vtx::placement::holizontal::CENTER,
 				vtx::placement::vertical::CENTER)) :
-					text_(), font_(), font_size_(24), proportional_(true),
+					text_(), font_(), font_size_(20), proportional_(true),
 					alias_enable_(false), alias_(),
 					fore_color_(fc), shadow_color_(sc), shadow_offset_(1),
 					placement_(pl),

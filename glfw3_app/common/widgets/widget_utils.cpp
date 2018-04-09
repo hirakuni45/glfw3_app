@@ -295,6 +295,8 @@ namespace gui {
 			fonts.push_font_face();
 			fonts.set_font_type(tp.font_);
 			fonts.set_font_size(tp.font_size_);
+		} else {
+			fonts.set_font_size(tp.font_size_);
 		}
 
 //		float sx = vsz.x / siz.x;
