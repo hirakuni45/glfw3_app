@@ -649,7 +649,11 @@ namespace view {
 		analize_param analize(uint32_t ch, double rate, double org, double len, double step) const
 		{
 			analize_param a;
-			if(ch >= CHN || len <= 0.0 || step <= 0.0) return a;
+			if(ch >= CHN || step <= 0.0) return a;
+
+			if(len < 0.0) {
+				std::swap(org, len);
+			}
 
 			const ch_t& t = ch_[ch];
 			uint32_t sz = t.units_.size();
