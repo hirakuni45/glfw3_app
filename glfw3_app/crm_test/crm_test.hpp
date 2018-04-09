@@ -85,7 +85,7 @@ namespace app {
 			gl::core& core = gl::core::get_instance();
 
 			int menu_width  = 950;
-			int menu_height = 250;
+			int menu_height = 320;
 			{	// メニューパレット
 				widget::param wp(vtx::irect(10, 10, menu_width, menu_height));
 				widget_frame::param wp_;
@@ -149,6 +149,8 @@ namespace app {
 			// プリファレンスのロード
 			sys::preference& pre = director_.at().preference_;
 
+			crm_.load(pre);
+
 			if(menu_ != nullptr) {
 				menu_->load(pre, false, false);
 			}
@@ -207,6 +209,8 @@ namespace app {
 		void destroy()
 		{
 			sys::preference& pre = director_.at().preference_;
+
+			crm_.save(pre);
 
 			if(ports_ != nullptr) ports_->save(pre);
 

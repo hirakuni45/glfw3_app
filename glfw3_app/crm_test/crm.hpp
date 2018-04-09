@@ -82,6 +82,8 @@ namespace app {
 		gui::widget_list*		carib_type_;
 		gui::widget_button*		carib_;
 
+		gui::widget_label*		carib_tbls_[4];
+
 		gui::widget_label*		net_regs_;
 
 		gui::widget_terminal*	termcore_;
@@ -96,10 +98,10 @@ namespace app {
 
 		enum class carib_task {
 			idle,
-			_0,   ///< 0.2mA / 3.3K
-			_1,   ///< 2mA   / 330
-			_2,   ///< 20mA  / 33
-			_3,   ///< 200mA / 3.3
+			C0,   ///< 0.2mA / 3.3K
+			C1,   ///< 2mA   / 330
+			C2,   ///< 20mA  / 33
+			C3,   ///< 200mA / 3.3
 		};
 		carib_task				carib_task_;
 
@@ -187,6 +189,7 @@ namespace app {
 			ena_(nullptr), amps_(nullptr), freq_(nullptr), mode_(nullptr),
 			ans_(nullptr), exec_(nullptr),
 			carib_type_(nullptr), carib_(nullptr),
+			carib_tbls_{ nullptr },
 			net_regs_(nullptr),
 			termcore_(nullptr),
 			crm_line_(),
@@ -286,14 +289,18 @@ namespace app {
 				wp_.init_list_.push_back("200mA/3.3");
 				carib_type_ = wd.add_widget<widget_list>(wp, wp_); 
 			}
-			{  // キャリブレーション
+			{  // キャリブレーション・ボタン
 				widget::param wp(vtx::irect(ofsx + 190, ofsy + 60, 90, 40), root);
 				widget_button::param wp_("carib");
 				carib_ = wd.add_widget<widget_button>(wp, wp_);
 				carib_->at_local_param().select_func_ = [=](int n) {
-					
-					// task_ = carib_type_->get_select_pos();
+					carib_task_ = static_cast<carib_task>(carib_type_->get_select_pos() + 1);
 				};
+			}
+			for(int i = 0; i < 4; ++i) {  // キャリブレーション・データ
+				widget::param wp(vtx::irect(ofsx + 180 * i, ofsy + 120, 170, 40), root);
+				widget_label::param wp_("");
+				carib_tbls_[i] = wd.add_widget<widget_label>(wp, wp_);
 			}
 		}
 
@@ -311,6 +318,13 @@ namespace app {
 				for(uint32_t i = 0; i < len; ++i) {
 					crm_line_ += tmp[i];
 				}
+#if 0
+if(!crm_line_.empty()) {
+	std::cout << crm_line_.size() << std::endl;
+	std::cout << crm_line_ << std::endl;
+	crm_line_.clear();
+}
+#endif
 			}
 
 			// 受信した文字列をデコード
@@ -318,15 +332,20 @@ namespace app {
 			bool crrd = false;
 			bool crdd = false;
 			if(crm_line_.size() >= 9 && crm_line_[8] == '\n') {
-				if(crm_line_.find("CRCD", 4) == 0) {
+				std::string key;
+				key += crm_line_[0];
+				key += crm_line_[1];
+				key += crm_line_[2];
+				key += crm_line_[3];
+				if(key == "CRCD") {
 					crcd_value_ = get32_(&crm_line_[4]);
 					++crcd_id_;
 					crcd = true;
-				} else if(crm_line_.find("CRRD", 4) == 0) {
+				} else if(key == "CRRD") {
 					crrd_value_ = get32_(&crm_line_[4]);
 					++crrd_id_;
 					crrd = true;
-				} else if(crm_line_.find("CRDD", 4) == 0) {
+				} else if(key == "CRDD") {
 					crdd_value_ = get32_(&crm_line_[4]);
 					++crdd_id_;
 					crdd = true;
@@ -338,10 +357,20 @@ namespace app {
 				termcore_->output((boost::format("CRDD: %08X\n") % crdd_value_).str());
 			}
 
+			if(carib_task_ != carib_task::idle) {
+				if(crcd) {
+					float r = static_cast<int32_t>(crrd_value_ - crdd_value_);
+					float c = static_cast<int32_t>(crcd_value_ - crdd_value_);
+					std::string s = (boost::format("%5.4f") % (c / r)).str();
+					carib_tbls_[carib_type_->get_select_pos()]->set_text(s);
+				}
+				return;
+			}
+
 			// 抵抗測定の場合
 			if(mode_->get_select_pos() == 0 && crrd) {  // CRRD
 				termcore_->output((boost::format("CRRD: %08X\n") % crrd_value_).str());
-				int32_t v = static_cast<int32_t>(crcd_value_);
+				int32_t v = static_cast<int32_t>(crrd_value_);
 				int32_t ofs = static_cast<int32_t>(crdd_value_);
 				v -= ofs;
 				double lim = static_cast<double>(ofs) / 1.570798233;
@@ -356,9 +385,8 @@ namespace app {
 				};
 				a /= itbl[amps_->get_select_pos()];
 				ans_->set_text((boost::format("%6.5f Ω") % a).str());
-			}
-			// 容量、合成容量の場合
-			if(crcd) {
+
+			} else if(mode_->get_select_pos() != 0 && crcd) {  // 容量、合成容量の場合
 				termcore_->output((boost::format("CRCD: %08X\n") % crcd_value_).str());
 				// 基準値 (ofs)
 				int32_t ofs = static_cast<int32_t>(crdd_value_);
@@ -422,6 +450,10 @@ namespace app {
 			amps_->save(pre);
 			freq_->save(pre);
 			mode_->save(pre);
+			carib_tbls_[0]->save(pre);
+			carib_tbls_[1]->save(pre);
+			carib_tbls_[2]->save(pre);
+			carib_tbls_[3]->save(pre);
 		}
 
 
@@ -438,6 +470,10 @@ namespace app {
 			amps_->load(pre);
 			freq_->load(pre);
 			mode_->load(pre);
+			carib_tbls_[0]->load(pre);
+			carib_tbls_[1]->load(pre);
+			carib_tbls_[2]->load(pre);
+			carib_tbls_[3]->load(pre);
 		}
 	};
 }
