@@ -1329,7 +1329,7 @@ namespace app {
 				widget::param wp(vtx::irect(10 + 120, 220, 110, 40), tools_);
 				wp.pre_group_ = widget::PRE_GROUP::_1;
 				auto grid = waves_.get_info().grid_step_;
-				widget_spinbox::param wp_(0, 0, size_.x / grid * 4);
+				widget_spinbox::param wp_(-size_.x / grid * 4, 0, size_.x / grid * 4);
 				time_delay_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				time_delay_->at_local_param().select_func_ =
 					[=](widget_spinbox::state st, int before, int newpos) {

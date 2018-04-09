@@ -36,6 +36,9 @@ namespace net {
 		*/
 		//=================================================================//
 		struct mod_status {
+			uint32_t	crdd_;
+			uint32_t	crdd_id_;
+
 			uint32_t	crcd_;
 			uint32_t	crcd_id_;
 
@@ -50,6 +53,7 @@ namespace net {
 			uint32_t	treg_id_[2];
 
 			mod_status() :
+				crdd_(0), crdd_id_(0),
 				crcd_(0), crcd_id_(0),
 				crrd_(0), crrd_id_(0),
 				d2md_(0), d2md_id_(0),
@@ -241,6 +245,7 @@ namespace net {
 
 				if(s.find("CRCD") == 0) {
 					auto t = s.substr(4, 8);
+std::cout << t << std::endl;
 					int v = 0;
 					if((utils::input("%x", t.c_str()) % v).status()) {
 						mod_status_.crcd_ = v;
@@ -248,10 +253,19 @@ namespace net {
 					}
 				} else if(s.find("CRRD") == 0) {
 					auto t = s.substr(4, 8);
+std::cout << t << std::endl;
 					int v = 0;
 					if((utils::input("%x", t.c_str()) % v).status()) {
 						mod_status_.crrd_ = v;
 						++mod_status_.crrd_id_;
+					}			
+				} else if(s.find("CRDD") == 0) {
+					auto t = s.substr(4, 8);
+std::cout << t << std::endl;
+					int v = 0;
+					if((utils::input("%x", t.c_str()) % v).status()) {
+						mod_status_.crdd_ = v;
+						++mod_status_.crdd_id_;
 					}			
 				} else if(s.find("D2MD") == 0) {
 					auto t = s.substr(4, 5);

@@ -254,7 +254,7 @@ clearpre:
 copyapp:
 	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -mwindows -o $(TARGET)$(FEXT)
 	cp $(TARGET)$(FEXT) /c/graviton/app/.
-	rm -f /c/graviton/app/$(TARGET).pre
+#	rm -f /c/graviton/app/$(TARGET).pre
 
 bin_zip:
 	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -mwindows -o $(TARGET)$(FEXT) 

@@ -178,7 +178,8 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		const std::string get_unit_str() const {
-			return "℃/W";
+//			return "℃/W";
+			return "C/W";
 		}
 
 

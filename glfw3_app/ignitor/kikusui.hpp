@@ -302,6 +302,7 @@ namespace app {
 				if(get_text_()) {
 					if((utils::input("%f", rt_.c_str()) % refc_).status()) {
 					}
+					std::cout << "Kikusui ref [A]: " << refc_ << std::endl;
 					set_output(0);
 					task_ = task::idle;
 				}

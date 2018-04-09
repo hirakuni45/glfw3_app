@@ -63,11 +63,12 @@ namespace app {
 		struct unit_t {
 			gui::widget_label*	symbol_;  ///< 検査記号
 			gui::widget_label*	okng_;    ///< 合否
+			gui::widget_label*	retry_;   ///< リトライ回数
 			gui::widget_label*	val_;     ///< 測定値
 			gui::widget_label*	min_;     ///< 最小値
 			gui::widget_label*	max_;     ///< 最大値
 			gui::widget_label*	unit_;    ///< 単位
-			unit_t() : symbol_(nullptr), okng_(nullptr),
+			unit_t() : symbol_(nullptr), okng_(nullptr), retry_(nullptr),
 				val_(nullptr), min_(nullptr), max_(nullptr),
 				unit_(nullptr) { }
 		};
@@ -91,9 +92,9 @@ namespace app {
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
-			static const int wtbls[] = { 250, 50, 100, 100, 100, 100 };
+			static const int wtbls[] = { 200, 50, 80, 100, 100, 100, 70 };
 			int xx = x;
-			for(uint32_t i = 0; i < 6; ++i) {
+			for(uint32_t i = 0; i < 7; ++i) {
 				widget::param wp(vtx::irect(xx, y, wtbls[i], h), frame);
 				xx += wtbls[i];
 				wp.pre_group_ = widget::PRE_GROUP::_4;
@@ -111,10 +112,11 @@ namespace app {
 				wp_.plate_param_.resizeble_ = true;
 				if(i == 0) t.symbol_ = wd.add_widget<widget_label>(wp, wp_);
 				else if(i == 1) t.okng_ = wd.add_widget<widget_label>(wp, wp_);
-				else if(i == 2) t.val_ = wd.add_widget<widget_label>(wp, wp_);
-				else if(i == 3) t.min_ = wd.add_widget<widget_label>(wp, wp_);
-				else if(i == 4) t.max_ = wd.add_widget<widget_label>(wp, wp_);
-				else if(i == 5) t.unit_ = wd.add_widget<widget_label>(wp, wp_);
+				else if(i == 2) t.retry_ = wd.add_widget<widget_label>(wp, wp_);
+				else if(i == 3) t.val_ = wd.add_widget<widget_label>(wp, wp_);
+				else if(i == 4) t.min_ = wd.add_widget<widget_label>(wp, wp_);
+				else if(i == 5) t.max_ = wd.add_widget<widget_label>(wp, wp_);
+				else if(i == 6) t.unit_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 		}
 
@@ -308,6 +310,7 @@ namespace app {
 			add_unit_label_(dialog_, x, y, lh, units_str_);
 	  		units_str_.symbol_->set_text("検査項目");
 	  		units_str_.okng_->set_text("合否");
+	  		units_str_.retry_->set_text("リトライ");
 	  		units_str_.val_->set_text("結果");
 	  		units_str_.min_->set_text("最小");
 	  		units_str_.max_->set_text("最大");
@@ -383,10 +386,13 @@ namespace app {
 				total_ = 0;
 				pass_ = 0;
 				fail_ = 0;
+				uint32_t nocnt = 0;
 				for(uint32_t i = 0; i < 50; ++i) {
 					auto sym = c.get(i + 1, 1);
 					if(sym.empty()) break;
 					units_[i].symbol_->set_text(sym);
+					std::string ret = "0";  // リトライ
+					units_[i].retry_->set_text(ret);
 					auto vals = c.get(i + 1, 9 + index_);
 					units_[i].val_->set_text(vals);
 					auto mins = c.get(i + 1, 3);
@@ -409,9 +415,18 @@ namespace app {
 						}
 					} else {
 						units_[i].okng_->set_text("－");
+						++nocnt;
 					}
 					units_[i].unit_->set_text(c.get(i + 1, 4));
 					++total_;
+				}
+				if(total_ == nocnt) {
+					str_result_->set_text("Ready");
+				} else if(total_ == pass_) {  
+					str_result_->set_text("All OK");
+				} else {
+					auto s = (boost::format("NG %d") % (total_ - pass_)).str();
+					str_result_->set_text(s);
 				}
 			}
 			ena_ = ena;

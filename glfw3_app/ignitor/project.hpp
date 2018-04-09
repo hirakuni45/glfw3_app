@@ -462,14 +462,20 @@ namespace app {
 			// CSV1 定型
 			uint32_t num = 100;
 			csv1_.create(51, 8 + num);
-			csv1_.set(0, 0, "検査番号");
+//			csv1_.set(0, 0, "検査番号");
+			csv1_.set(0, 0, "No.");
 			for(uint32_t i = 0; i < 50; ++i) {
 				csv1_.set(i + 1, 0, (boost::format("%d") % (i + 1)).str());
 			}
-			csv1_.set(0, 1, "検査項目");
-			csv1_.set(0, 2, "規格 MAX");
-			csv1_.set(0, 3, "規格 MIN");
-			csv1_.set(0, 4, "単位");
+
+//			csv1_.set(0, 1, "検査項目");
+			csv1_.set(0, 1, "Item");
+//			csv1_.set(0, 2, "規格 MAX");
+			csv1_.set(0, 2, "Spec.Max");
+//			csv1_.set(0, 3, "規格 MIN");
+			csv1_.set(0, 3, "Spec.Min");
+//			csv1_.set(0, 4, "単位");
+			csv1_.set(0, 4, "Unit");
 			csv1_.set(0, 5, "MAX");
 			csv1_.set(0, 6, "MIN");
 			csv1_.set(0, 7, "AVG");
@@ -489,21 +495,28 @@ namespace app {
 		{
 			csv2_.clear();
 			csv2_.create(51, 30);
-			csv2_.set(0, 0, "検査番号");
+//			csv2_.set(0, 0, "検査番号");
+			csv2_.set(0, 0, "No.");
 			for(uint32_t i = 0; i < 50; ++i) {
 				csv2_.set(i + 1, 0, (boost::format("%d") % (i + 1)).str());
 			}
-			csv2_.set(0,  1, "検査項目");
-			csv2_.set(0,  2, "検査規格 MAX");
-			csv2_.set(0,  3, "検査規格 MIN");
-			csv2_.set(0,  4, "単位");
-			csv2_.set(0,  5, "検査結果");
+//			csv2_.set(0,  1, "検査項目");
+			csv2_.set(0,  1, "Item");
+//			csv2_.set(0,  2, "検査規格 MAX");
+			csv2_.set(0,  2, "Spec.Max");
+//			csv2_.set(0,  3, "検査規格 MIN");
+			csv2_.set(0,  3, "Spec.Min");
+//			csv2_.set(0,  4, "単位");
+			csv2_.set(0,  4, "Unit");
+//			csv2_.set(0,  5, "検査結果");
+			csv2_.set(0,  5, "Result");
 			csv2_.set(0,  6, "Time/Div");
 			csv2_.set(0,  7, "CH1 A/Div");
 			csv2_.set(0,  8, "CH2 V/Div");
 			csv2_.set(0,  9, "CH3 V/Div");
 			csv2_.set(0, 10, "CH4 KV/Div");
-			csv2_.set(0, 11, "画像ファイル");
+//			csv2_.set(0, 11, "画像ファイル");
+			csv2_.set(0, 11, "PhotoFile");
 		}
 
 

@@ -69,11 +69,12 @@ namespace app {
 		double					crcd_value_;
 
 	private:
-		std::vector<float>		crrd_vals_;
-		std::vector<float>		crcd_vals_;
-
+		uint32_t				crdd_id_;
+		int32_t					crdd_val_;
 		uint32_t				crrd_id_;
+		int32_t					crrd_val_;
 		uint32_t				crcd_id_;
+		int32_t					crcd_val_;
 
 		enum class refs_task {
 			idle,
@@ -87,7 +88,6 @@ namespace app {
 		refs_task				refs_task_;
 		uint32_t				refs_id_;
 
-		uint32_t				dummy_count_;
 		std::string				last_cmd_;
 
 		uint32_t				crm_id_;
@@ -112,14 +112,11 @@ namespace app {
 				}
 				s += (boost::format("crm CROE%d\n") % ena).str();
 				if(ena) {
-//					if(delay > 0) {
-//						s += (boost::format("delay %d\n") % delay).str();
-//					}
-					if(mode > 0) {  // mode 1, 2
-						s += (boost::format("crm CRC?1\n")).str();
-					} else {  // mode 0
-						s += (boost::format("crm CRR?1\n")).str();
-					}
+					s += (boost::format("crm CRD?1\n")).str();
+					s += "delay 1\n";
+					s += (boost::format("crm CRR?1\n")).str();
+					s += "delay 1\n";
+					s += (boost::format("crm CRC?1\n")).str();
 				}
 				return s;
 			}
@@ -206,7 +203,6 @@ namespace app {
 				crcd_id_ = client_.get_mod_status().crcd_id_;
 				last_cmd_ = t.build(0);
 				client_.send_data(last_cmd_);
-				dummy_count_ = DUMMY_LOOP_COUNT;
 			}
 		}
 
@@ -252,8 +248,8 @@ namespace app {
 			run_refs_(nullptr), ena_refs_(nullptr), reg_refs_{ nullptr },
 			dialog_(nullptr), info_(nullptr), net_regs_(nullptr),
 			crrd_value_(0.0), crcd_value_(0.0),
-			crrd_vals_(), crcd_vals_(), crrd_id_(0), crcd_id_(0),
-			refs_task_(refs_task::idle), refs_id_(0), dummy_count_(0), last_cmd_(),
+			crdd_id_(0), crdd_val_(0), crrd_id_(0), crrd_val_(0), crcd_id_(0), crcd_val_(0),
+			refs_task_(refs_task::idle), refs_id_(0), last_cmd_(),
 			crm_id_(0)
 		{ }
 
@@ -275,7 +271,8 @@ namespace app {
 		//-----------------------------------------------------------------//
 		std::string get_unit_str() const {
 			if(mode_->get_select_pos() == 0) {  // 抵抗
-				return "Ω";
+//				return "Ω";
+				return "Ohm";
 			} else {  // 容量
 				return "uF";
 			}
@@ -373,15 +370,11 @@ namespace app {
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
 				exec_->at_local_param().select_func_ = [=](int n) {
 					auto s = make_crm_param_();
-					if(last_cmd_ != s) {
-						dummy_count_ = DUMMY_LOOP_COUNT;
-					}
 					last_cmd_ = s;
+					crdd_id_ = client_.get_mod_status().crdd_id_;
 					crrd_id_ = client_.get_mod_status().crrd_id_;
 					crcd_id_ = client_.get_mod_status().crcd_id_;
 					client_.send_data(last_cmd_);
-					crrd_vals_.clear();
-					crcd_vals_.clear();
 					ans_->set_text("");
 				};
 			}
@@ -504,21 +497,35 @@ namespace app {
 
 			// モジュールから受け取ったパラメーターをＧＵＩに反映
 			static const uint32_t sample_num = 50;
-			if(mode_->get_select_pos() == 0) {  // CRRD
-				if(crrd_id_ != client_.get_mod_status().crrd_id_) {
-					crrd_id_ = client_.get_mod_status().crrd_id_;
-					if(dummy_count_ > 0) {
-						--dummy_count_;
-						client_.send_data(last_cmd_);
-						return;
-					}
-					int32_t v = client_.get_mod_status().crrd_;
-					int32_t ofs = sample_num * 0x7FFFF;
+
+			bool trg = false;
+			if(crdd_id_ != client_.get_mod_status().crdd_id_) {
+				crdd_id_ = client_.get_mod_status().crdd_id_;
+				crdd_val_ = client_.get_mod_status().crdd_;
+utils::format("CRDD: %06X\n") % crdd_val_;
+			}
+			if(crrd_id_ != client_.get_mod_status().crrd_id_) {
+				crrd_id_ = client_.get_mod_status().crrd_id_;
+				crrd_val_ = client_.get_mod_status().crrd_;
+utils::format("CRRD: %06X\n") % crrd_val_;
+			}
+			if(crcd_id_ != client_.get_mod_status().crcd_id_) {
+				crcd_id_ = client_.get_mod_status().crcd_id_;
+				crcd_val_ = client_.get_mod_status().crcd_;
+utils::format("CRCD: %06X\n\n") % crcd_val_;
+				trg = true;
+			}
+
+			if(trg) {
+				if(mode_->get_select_pos() == 0) {  // CRRD
+					int32_t v = crrd_val_;
+					int32_t ofs = crdd_val_;
 					v -= ofs;
-// std::cout << v << std::endl;
 					double lim = static_cast<double>(ofs) / 1.570798233;
 					if(v >= lim) {
 						ans_->set_text("OVF");
+						crrd_value_ = 1e6;
+						++crm_id_;
 						return;
 					}
 					double a = static_cast<double>(v) / static_cast<double>(ofs) * 1.570798233;
@@ -527,36 +534,18 @@ namespace app {
 						0.2, 2.0, 20.0, 200.0
 					};
 					a /= itbl[amps_->get_select_pos()];
-					crrd_vals_.push_back(a);
-					if(crrd_vals_.size() >= crm_count_limit_) {
-						crrd_value_ = median_(crrd_vals_);
-						if(amps_->get_select_pos() == 3 && refs_task_ == refs_task::idle) {
-							if(ena_refs_->get_check()) {
-								crrd_value_ -= get_bias_();
-							}
-						}
-						ans_->set_text((boost::format("%6.5f Ω") % crrd_value_).str());
-						++crm_id_;
-					} else {
-						client_.send_data(last_cmd_);
-					}
-				}
-			} else { // CRCD (1, 2)
-				if(crcd_id_ != client_.get_mod_status().crcd_id_) {
-					crcd_id_ = client_.get_mod_status().crcd_id_;
-					if(dummy_count_ > 0) {
-						--dummy_count_;
-						client_.send_data(last_cmd_);
-						return;
-					}
-					int32_t v = client_.get_mod_status().crcd_;
-// std::cout << v << std::endl;
+					crrd_value_ = a;
+					ans_->set_text((boost::format("%6.5f Ω") % crrd_value_).str());
+					++crm_id_;
+				} else { // CRCD (1, 2)
+					int32_t v = crcd_val_;
 					int32_t ofs = sample_num * 0x7FFFF;
 					v -= ofs;
-// std::cout << v << std::endl;
 					double lim = static_cast<double>(ofs) / 1.570798233;
 					if(v >= lim) {
 						ans_->set_text("OVF");
+						crcd_value_ = 1e3;
+						++crm_id_;
 						return;
 					}
 					static const double itbl[4] = {  // 電流テーブル
@@ -568,7 +557,6 @@ namespace app {
 
 					double a = static_cast<double>(v) / static_cast<double>(ofs) * 1.570798233;
 					a *= 778.2;  // 778.2 mV P-P
-
 
 					static const double ftbl[4] = {  // 周波数テーブル
 						100.0, 1000.0, 10000.0
@@ -584,14 +572,9 @@ namespace app {
 						a = (ib * a) / (2.0 * 3.141592654 * fq * (a * a + b * b));
 					}
 					a *= 1e6;
-					crcd_vals_.push_back(a);
-					if(crcd_vals_.size() >= crm_count_limit_) {
-						crcd_value_ = median_(crcd_vals_);
-						ans_->set_text((boost::format("%6.5f uF") % crcd_value_).str());
-						++crm_id_;
-					} else {
-						client_.send_data(last_cmd_);
-					}
+					crcd_value_ = a;
+					ans_->set_text((boost::format("%6.5f uF") % crcd_value_).str());
+					++crm_id_;
 				}
 			}
 
