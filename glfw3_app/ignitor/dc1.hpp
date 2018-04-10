@@ -125,6 +125,7 @@ namespace app {
 		{
 			dc1_t t;
 			client_.send_data(t.build());
+// std::cout << "DC1 Startup" << std::endl;
 		}
 
 
@@ -322,7 +323,7 @@ namespace app {
 			voltage_->load(pre);
 			current_->load(pre);
 			all_->load(pre);
-			all_->exec();
+//			if(exec) all_->exec();
 		}
 	};
 }

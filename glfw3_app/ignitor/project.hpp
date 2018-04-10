@@ -534,6 +534,19 @@ namespace app {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief  CSV2 のロード
+		*/
+		//-----------------------------------------------------------------//
+		void load_csv2()
+		{
+			auto path = utils::append_path(proj_root_->get_text(), csv_base_->get_text());
+			path += ".csv";
+			csv2_.load(path);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief  CSV2 のセーブ
 		*/
 		//-----------------------------------------------------------------//
@@ -543,7 +556,6 @@ namespace app {
 				return;
 			}
 			auto path = utils::append_path(proj_root_->get_text(), csv_base_->get_text());
-			path += (boost::format("%04d") % csv_idx_->get_select_pos()).str();
 			path += ".csv";
 			csv2_.save(path);
 		}

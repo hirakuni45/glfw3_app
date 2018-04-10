@@ -417,7 +417,7 @@ namespace app {
 			current_->load(pre);
 			count_->load(pre);
 			all_->load(pre);
-			all_->exec();
+//			all_->exec();
 		}
 	};
 }

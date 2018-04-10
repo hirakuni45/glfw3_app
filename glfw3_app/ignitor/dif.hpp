@@ -57,7 +57,7 @@ namespace app {
 
 	private:
 
-		void run_()
+		void run_(uint32_t idx)
 		{
 			std::string unit;
 			float v1 = 0.0f;
@@ -67,7 +67,7 @@ namespace app {
 					ans_->set_text("? " + tag1_->get_text());
 					return;
 				}
-				if(!(utils::input("%f", csv1_.get(pos, index_ - 1 + 9).c_str()) % v1).status()) {
+				if(!(utils::input("%f", csv1_.get(pos, idx - 1 + 9).c_str()) % v1).status()) {
 					ans_->set_text("#? " + tag1_->get_text());
 					return;
 				}
@@ -81,7 +81,7 @@ namespace app {
 					ans_->set_text("? " + tag2_->get_text());
 					return;
 				}
-				if(!(utils::input("%f", csv1_.get(pos, index_ - 1 + 9).c_str()) % v2).status()) {
+				if(!(utils::input("%f", csv1_.get(pos, idx - 1 + 9).c_str()) % v2).status()) {
 					ans_->set_text("#? " + tag2_->get_text());
 					return;
 				}
@@ -97,6 +97,7 @@ namespace app {
 			} else {
 				d = v1 + v2;
 			}
+			dif_value_ = d;
 			ans_->set_text((boost::format("%4.3f [%s]") % d % unit).str());
 			unit_ = unit;
 			++dif_id_;
@@ -127,11 +128,20 @@ namespace app {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief  計算
+			@param[in]	idx	試料インデックス
+		*/
+		//-----------------------------------------------------------------//
+		void exec(uint32_t idx) { run_(idx); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief  測定単位文字列の取得
 			@return 測定単位文字列
 		*/
 		//-----------------------------------------------------------------//
-		const std::string get_unit_str() const {
+		const std::string& get_unit_str() const {
 			return unit_;
 		}
 
@@ -213,7 +223,7 @@ namespace app {
 				widget_button::param wp_(">");
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
 				exec_->at_local_param().select_func_ = [=](int n) {
-					run_();
+					run_(index_);
 				};
 			}
 		}

@@ -218,7 +218,7 @@ namespace app {
 				widget_label::param wp_("0.1", false);
 				duty_ = wd.add_widget<widget_label>(wp, wp_);
 				duty_->at_local_param().select_func_ = [=](const std::string& str) {
-					duty_->set_text(tools::limitf(str, 0.1f, 50.0f, "%2.1f"));
+					duty_->set_text(tools::limitf(str, 0.1f, 100.0f, "%2.1f"));
 				};
 				{
 					widget::param wp(vtx::irect(ofsx + 230 + 120 * 2 + 80, ofsy, 30, 40),
@@ -281,7 +281,7 @@ namespace app {
 						t.duty = v * 10.0f;
 					}
 					if((utils::input("%f", volt_->get_text().c_str()) % v).status()) {
-						t.volt = v / 0.02f;
+						t.volt = (v * 1.0309f / 0.02f);
 					}
 					t.iena = iena_->get_check();
 					if((utils::input("%f", ivolt_->get_text().c_str()) % v).status()) {
@@ -392,8 +392,7 @@ namespace app {
 			iena_->load(pre);
 			ivolt_->load(pre);
 			all_->load(pre);
-			all_->exec();
+//			all_->exec();
 		}
 	};
 }
-

@@ -156,6 +156,22 @@ namespace app {
 			}
 		}
 
+
+		bool load_unit_file_()
+		{
+			auto fp = project_.get_unit_name(unit_id_);
+			auto s = utils::get_file_name(fp);
+			bool f = inspection_.load(fp);
+			if(!f) {
+				std::string str;
+				str = (boost::format("ファイル「%s」\n") % s).str();
+				str += "が読めません。";
+				err_dialog_->set_text(str);
+				err_dialog_->enable();
+			}
+			return f;
+		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -653,30 +669,25 @@ namespace app {
 					break;
 				}
 				unit_id_ = 0;
-				task_ = task::loop;
 				msg_dialog_->set_text("検査開始");
 				msg_dialog_->enable();
 				retry_ = 0;
 				project_.reset_csv1();
 				project_.load_csv1();
 				project_.reset_csv2();
+				project_.load_csv2();
+				task_ = task::loop;
+				if(!load_unit_file_()) {
+					task_ = task::idle;
+				}
 				break;
 
 			case task::loop:
 				if(inspection_.get_task_busy()) break;
+
 				{
 					auto fp = project_.get_unit_name(unit_id_);
 					auto s = utils::get_file_name(fp);
-					if(!inspection_.load(fp)) {
-						std::string str;
-						str = (boost::format("ファイル「%s」\n") % s).str();
-						str += "が読めません。";
-						err_dialog_->set_text(str);
-						err_dialog_->enable();
-						task_ = task::idle;
-						break;
-					}
-
 					std::string top = (boost::format("検査「%s」\n") % s).str();
 					inspection_.at_test_param().build_value();
 					const auto& v = inspection_.get_test_param().value_;
@@ -712,11 +723,6 @@ namespace app {
 					project_.at_csv2().set(unit_id_ + 1, 2, max);
 					project_.at_csv2().set(unit_id_ + 1, 3, min);
 					project_.at_csv2().set(unit_id_ + 1, 4, unit);
-					// Time/Div
-					{
-//						wave_cap_.
-//						project_.at_csv2().set(unit_id_ + 1, 6, );
-					}
 
 					wait_ = static_cast<uint32_t>(value_.wait_ * 60.0);
 					task_ = task::wait;
@@ -728,7 +734,6 @@ namespace app {
 					--wait_;
 					break;
 				}
-
 				crm_id_ = inspection_.get_crm().get_id();
 				dc2_id_ = inspection_.get_dc2().get_id();
 				mesa_id_ = wave_cap_.get_mesa_id();
@@ -794,6 +799,9 @@ namespace app {
 					case inspection::test_mode::DIF:
 						if(dif_id_ != inspection_.get_dif().get_id()) {
 							dif_id_ = inspection_.get_dif().get_id();
+							std::string unit = inspection_.get_unit_str();
+							project_.at_csv1().set(unit_id_ + 1, 4, unit);
+							project_.at_csv2().set(unit_id_ + 1, 4, unit);
 							task_ = task::sence;
 						}
 						break;
@@ -805,6 +813,9 @@ namespace app {
 					--time_out_;
 				} else {
 					inspection_.offline_all();
+					project_.calc_csv1();
+					project_.save_csv1();
+					project_.save_csv2();
 					std::string str;
 					str = "コントローラーとの通信が\n";
 					str += "タイムアウトしました。";
@@ -901,8 +912,24 @@ namespace app {
 					project_.save_proj();
 					task_ = task::fin;
 				} else {
-					inspection_.offline();
 					task_ = task::loop;
+					bool offall = true;
+					auto tmb = inspection_.get_test_mode();
+					bool f = load_unit_file_();
+					if(tmb == inspection::test_mode::WD1 || tmb == inspection::test_mode::WD2) {
+						tmb = inspection_.get_test_mode();
+						if(tmb == inspection::test_mode::WD1 ||
+						   tmb == inspection::test_mode::WD2) {
+							offall = false;
+						}
+					}
+					if(offall) {
+						inspection_.offline_all();
+// std::cout << "Off ALL" << std::endl;
+					} else {
+						inspection_.offline_all_without_msw();
+// std::cout << "Off ALL (without MSW)" << std::endl;
+					}
 				}
 				break;
 

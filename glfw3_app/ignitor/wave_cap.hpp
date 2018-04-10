@@ -147,10 +147,12 @@ namespace app {
 
 		// チャネル補正ゲイン
 		static float get_optional_gain_(uint32_t ch) {
-			if(ch == 0) return 1.067f;  //  CH0 補正ゲイン
-			else if(ch == 1) return 1.029f;  //	CH1 補正ゲイン 
-			else if(ch == 2) return 1.111f;  // CH2 補正ゲイン
-			else return 1.0179f;  // CH3 補正ゲイン
+			if(ch == 0) return 1.067f;  //  CH1 補正ゲイン
+			else if(ch == 1) return 1.029f;  //	CH2 補正ゲイン 
+//			else if(ch == 2) return 1.111f;  // CH3 補正ゲイン
+//			else if(ch == 2) return 1.0777f;  // CH3 補正ゲイン
+			else if(ch == 2) return 1.0566f;  // CH3 補正ゲイン
+			else return 1.0179f;  // CH4 補正ゲイン
 		}
 
 

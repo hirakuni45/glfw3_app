@@ -101,7 +101,7 @@ namespace app {
 
 			crm_t() : sw(0), ena(0), amps(0), freq(0), mode(0) { }
 
-			std::string build(uint32_t delay) const
+			std::string build() const
 			{
 				std::string s;
 				s = (boost::format("crm CRSW%04X\n") % sw).str();
@@ -113,11 +113,12 @@ namespace app {
 				s += (boost::format("crm CROE%d\n") % ena).str();
 				if(ena) {
 					s += (boost::format("crm CRD?1\n")).str();
-					s += "delay 1\n";
+					s += "delay 2\n";
 					s += (boost::format("crm CRR?1\n")).str();
-					s += "delay 1\n";
-					s += (boost::format("crm CRC?1\n")).str();
+//					s += "delay 1\n";
+//					s += (boost::format("crm CRC?1\n")).str();
 				}
+std::cout << s << std::endl;
 				return s;
 			}
 		};
@@ -136,7 +137,7 @@ namespace app {
 			t.amps = amps_->get_select_pos();
 			t.freq = freq_->get_select_pos();
 			t.mode = mode_->get_select_pos();
-			return t.build(0);
+			return t.build();
 		}
 
 
@@ -201,7 +202,7 @@ namespace app {
 				refs_id_ = crm_id_;
 				crrd_id_ = client_.get_mod_status().crrd_id_;
 				crcd_id_ = client_.get_mod_status().crcd_id_;
-				last_cmd_ = t.build(0);
+				last_cmd_ = t.build();
 				client_.send_data(last_cmd_);
 			}
 		}
@@ -299,8 +300,8 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void startup()
 		{
-			crm_t t;
-			client_.send_data(t.build(0));
+//			crm_t t;
+//			client_.send_data(t.build());
 		}
 
 
@@ -370,11 +371,10 @@ namespace app {
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
 				exec_->at_local_param().select_func_ = [=](int n) {
 					auto s = make_crm_param_();
-					last_cmd_ = s;
 					crdd_id_ = client_.get_mod_status().crdd_id_;
 					crrd_id_ = client_.get_mod_status().crrd_id_;
 					crcd_id_ = client_.get_mod_status().crcd_id_;
-					client_.send_data(last_cmd_);
+					client_.send_data(s);
 					ans_->set_text("");
 				};
 			}
@@ -502,18 +502,18 @@ namespace app {
 			if(crdd_id_ != client_.get_mod_status().crdd_id_) {
 				crdd_id_ = client_.get_mod_status().crdd_id_;
 				crdd_val_ = client_.get_mod_status().crdd_;
-utils::format("CRDD: %06X\n") % crdd_val_;
+utils::format("CRDD: %08X\n") % crdd_val_;
 			}
 			if(crrd_id_ != client_.get_mod_status().crrd_id_) {
 				crrd_id_ = client_.get_mod_status().crrd_id_;
 				crrd_val_ = client_.get_mod_status().crrd_;
-utils::format("CRRD: %06X\n") % crrd_val_;
+utils::format("CRRD: %08X\n") % crrd_val_;
+				trg = true;
 			}
 			if(crcd_id_ != client_.get_mod_status().crcd_id_) {
 				crcd_id_ = client_.get_mod_status().crcd_id_;
 				crcd_val_ = client_.get_mod_status().crcd_;
-utils::format("CRCD: %06X\n\n") % crcd_val_;
-				trg = true;
+utils::format("CRCD: %08X\n\n") % crcd_val_;
 			}
 
 			if(trg) {

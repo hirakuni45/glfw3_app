@@ -160,6 +160,13 @@ namespace app {
 			off_all3,
 			off_all4,
 
+			off_all_msw,	///< 機械式スイッチを除く
+			off_all_msw0,
+			off_all_msw1,
+			off_all_msw2,
+
+			off_icm_dc1,	///< ICM, DC1 スイッチ、オフ (ICM, DC1)
+
 			off_crm,	///< CRM スイッチ、オフ (CRM)
 
 			off_dc2,	///< DC2 スイッチ、オフ (DC2)
@@ -223,7 +230,7 @@ namespace app {
 				cmd_task_ = cmd_task::idle;
 				break;
 
-			// WDM
+			// WDM/DC1
 			case cmd_task::wdm_dc1:
 				icm_.exec_->exec();
 				cmd_task_ = cmd_task::wdm_dc1_0;
@@ -240,6 +247,27 @@ namespace app {
 				wdm_.exec_->exec();
 				cmd_task_ = cmd_task::idle;
 				break;
+
+			// WDM/DC2
+			case cmd_task::wdm_dc2:
+				icm__.exec_->exec();
+				cmd_task_ = cmd_task::wdm_dc2_0;
+				break;
+			case cmd_task::wdm_dc2_0:
+				dc2__.exec_->exec();
+				wgm__.exec_->exec();
+				cmd_task_ = cmd_task::wdm_dc2_1;
+				break;
+			case cmd_task::wdm_dc2_1:
+				wdm__.exec_->exec();
+				cmd_task_ = cmd_task::idle;
+//				cmd_task_ = cmd_task::wdm_dc2_2;
+				break;
+			case cmd_task::wdm_dc2_2:
+
+				cmd_task_ = cmd_task::idle;
+				break;
+
 
 			// THR
 			case cmd_task::thr:
@@ -274,6 +302,23 @@ namespace app {
 				break;
 
 
+			case cmd_task::off_all_msw:
+				wdm_.startup();
+				cmd_task_ = cmd_task::off_all_msw0;
+				break;
+			case cmd_task::off_all_msw0:
+				wgm_.startup();
+				cmd_task_ = cmd_task::off_all_msw1;
+				break;
+			case cmd_task::off_all_msw1:
+				dc2_.startup();
+				cmd_task_ = cmd_task::off_all_msw2;
+				break;
+			case cmd_task::off_all_msw2:
+				crm_.startup();
+				cmd_task_ = cmd_task::idle;
+				break;
+
 			// CRM のオフ
 			case cmd_task::off_crm:
 				crm_.startup();
@@ -307,19 +352,19 @@ namespace app {
 
 			// WDM/DC2 のオフ
 			case cmd_task::off_wdm_dc2:
-				wgm_.startup();
+				wgm__.startup();
 				cmd_task_ = cmd_task::off_wdm_dc2_0;
 				break;
 			case cmd_task::off_wdm_dc2_0:
-				dc2_.startup();
+				dc2__.startup();
 				cmd_task_ = cmd_task::off_wdm_dc2_1;
 				break;
 			case cmd_task::off_wdm_dc2_1:
-				wdm_.startup();
+				wdm__.startup();
 				cmd_task_ = cmd_task::off_wdm_dc2_2;
 				break;
 			case cmd_task::off_wdm_dc2_2:
-				icm_.startup();
+				icm__.startup();
 				cmd_task_ = cmd_task::idle;
 				break;
 
@@ -419,6 +464,17 @@ namespace app {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief  機械式スイッチを除く、全オフライン
+		*/
+		//-----------------------------------------------------------------//
+		void offline_all_without_msw()
+		{
+			cmd_task_ = cmd_task::off_all_msw;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief  モード別、オフライン
 		*/
 		//-----------------------------------------------------------------//
@@ -451,6 +507,17 @@ namespace app {
 				cmd_task_ = cmd_task::off_all;
 				break;
 			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  ICM オフライン
+		*/
+		//-----------------------------------------------------------------//
+		void offline_icm_dc1()
+		{
+			cmd_task_ = cmd_task::off_icm_dc1;
 		}
 
 
@@ -591,6 +658,10 @@ namespace app {
 
 			case test_mode::THR:
 				cmd_task_ = cmd_task::thr;
+				break;
+
+			case test_mode::DIF:
+				dif_.exec(project_.get_csv_index());
 				break;
 
 			default:
@@ -861,6 +932,14 @@ namespace app {
 					if(ret) {
 						load(pre);
 						wave_cap_.load(pre);
+						icm_.all_->exec();
+						dc1_.all_->exec();
+						wgm_.all_->exec();
+						dc2_.all_->exec();
+						thr_.all_->exec();
+						icm__.all_->exec();
+						dc2__.all_->exec();
+						wgm__.all_->exec();
 					}
 				}
 			}

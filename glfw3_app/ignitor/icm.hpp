@@ -76,6 +76,22 @@ namespace app {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief  スイッチを取得
+			@return スイッチ
+		*/
+		//-----------------------------------------------------------------//
+		uint32_t get_sw() const {
+			uint32_t sw = 0;
+			for(uint32_t i = 0; i < 6; ++i) {
+				sw <<= 1;
+				if(sw_[i]->get_check()) sw |= 1;
+			}
+			return sw;
+		} 
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief  リセット・スイッチ
 		*/
 		//-----------------------------------------------------------------//
@@ -96,6 +112,7 @@ namespace app {
 		{
 			icm_t t;
 			client_.send_data(t.build());
+// std::cout << "icm startup" << std::endl;
 		}
 
 
@@ -139,7 +156,7 @@ namespace app {
 						if(sw_[i]->get_check()) sw |= 1;
 					}
 					t.sw = sw;
-
+// std::cout << "icm exec" << std::endl;
 					client_.send_data(t.build());
 				};
 			}
@@ -196,7 +213,6 @@ namespace app {
 		{
 			tools::load_sw(pre, sw_, 6);
 			all_->load(pre);
-			all_->exec();
 		}
 	};
 }

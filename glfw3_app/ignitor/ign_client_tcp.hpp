@@ -242,6 +242,7 @@ namespace net {
 			while(!rmsg_.empty()) {
 				auto s = rmsg_.front();
 				rmsg_.pop();
+std::cout << s << std::endl;
 
 				if(s.find("CRCD") == 0) {
 					auto t = s.substr(4, 8);

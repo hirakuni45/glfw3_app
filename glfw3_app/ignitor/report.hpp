@@ -135,7 +135,7 @@ namespace app {
 			csv_idx_(nullptr), table_(nullptr),
 			units_(), ena_(false),
 			total_(0), pass_(0), fail_(0), retry_(0),
-			index_(0), mobj_()
+			index_(1), mobj_()
 		{ }
 
 
@@ -393,7 +393,7 @@ namespace app {
 					units_[i].symbol_->set_text(sym);
 					std::string ret = "0";  // リトライ
 					units_[i].retry_->set_text(ret);
-					auto vals = c.get(i + 1, 9 + index_);
+					auto vals = c.get(i + 1, 9 + index_ - 1);
 					units_[i].val_->set_text(vals);
 					auto mins = c.get(i + 1, 3);
 					units_[i].min_->set_text(mins);
