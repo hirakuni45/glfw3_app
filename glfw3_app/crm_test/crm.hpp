@@ -82,7 +82,7 @@ namespace app {
 		gui::widget_list*		carib_type_;
 		gui::widget_button*		carib_;
 
-		gui::widget_label*		carib_tbls_[4];
+		gui::widget_label*		carib_data_[4];
 
 		gui::widget_label*		net_regs_;
 
@@ -110,9 +110,8 @@ namespace app {
 			bool		ena;	///< 0, 1
 			uint16_t	amps;	///< 0, 1, 2, 3
 			uint16_t	freq;	///< 0, 1, 2
-			uint16_t	mode;	///< 0, 1
 
-			crm_t() : sw(0), ena(0), amps(0), freq(0), mode(0) { }
+			crm_t() : sw(0), ena(0), amps(0), freq(0) { }
 
 			std::string build() const
 			{
@@ -146,7 +145,22 @@ namespace app {
 			t.ena = ena_->get_check();
 			t.amps = amps_->get_select_pos();
 			t.freq = freq_->get_select_pos();
-			t.mode = mode_->get_select_pos();
+			return t.build();
+		}
+
+
+		std::string make_carib_param_()
+		{
+			crm_t t;
+			uint16_t sw = 0;
+			for(int i = 0; i < 14; ++i) {
+				sw <<= 1;
+				if(sw_[i]->get_check()) sw |= 1;
+			}
+			t.sw = sw;
+			t.ena = 1;
+			t.amps = carib_type_->get_select_pos();
+			t.freq = freq_->get_select_pos();
 			return t.build();
 		}
 
@@ -189,7 +203,7 @@ namespace app {
 			ena_(nullptr), amps_(nullptr), freq_(nullptr), mode_(nullptr),
 			ans_(nullptr), exec_(nullptr),
 			carib_type_(nullptr), carib_(nullptr),
-			carib_tbls_{ nullptr },
+			carib_data_{ nullptr },
 			net_regs_(nullptr),
 			termcore_(nullptr),
 			crm_line_(),
@@ -269,9 +283,8 @@ namespace app {
 				exec_->at_local_param().select_func_ = [=](int n) {
 					auto s = make_crm_param_();
 					serial_.write(s.c_str(), s.size());
-					if(termcore_ != nullptr) {
-						termcore_->output(s);
-					}
+					termcore_->output((boost::format("Start Measure: %d\n") % n).str());
+					termcore_->output(s);
 					ans_->set_text("");
 				};
 			}
@@ -293,18 +306,20 @@ namespace app {
 				widget::param wp(vtx::irect(ofsx + 190, ofsy + 60, 90, 40), root);
 				widget_button::param wp_("carib");
 				carib_ = wd.add_widget<widget_button>(wp, wp_);
-				carib_->at_local_param().select_func_ = [=](int n) {
-					amps_->select(carib_type_->get_select_pos());
-					auto s = make_crm_param_();
+				carib_->at_local_param().select_func_ = [=](int id) {
+					auto n = carib_type_->get_select_pos();
+					amps_->select(n);
+					auto s = make_carib_param_();
 					serial_.write(s.c_str(), s.size());
+					termcore_->output((boost::format("Start carib: %d\n") % n).str());
 					termcore_->output(s);
-					carib_task_ = static_cast<carib_task>(carib_type_->get_select_pos() + 1);
+					carib_task_ = static_cast<carib_task>(n + 1);
 				};
 			}
 			for(int i = 0; i < 4; ++i) {  // キャリブレーション・データ
-				widget::param wp(vtx::irect(ofsx + 180 * i, ofsy + 120, 170, 40), root);
+				widget::param wp(vtx::irect(ofsx + 200 * i, ofsy + 120, 190, 40), root);
 				widget_label::param wp_("");
-				carib_tbls_[i] = wd.add_widget<widget_label>(wp, wp_);
+				carib_data_[i] = wd.add_widget<widget_label>(wp, wp_);
 			}
 		}
 
@@ -353,13 +368,20 @@ namespace app {
 			if(crdd) {
 				termcore_->output((boost::format("CRDD: %08X\n") % crdd_value_).str());
 			}
+			if(crrd) {
+				termcore_->output((boost::format("CRRD: %08X\n") % crrd_value_).str());
+			}
+			if(crcd) {
+				termcore_->output((boost::format("CRCD: %08X\n") % crcd_value_).str());
+			}
 
 			if(carib_task_ != carib_task::idle) {
 				if(crcd) {
-					float r = static_cast<int32_t>(crrd_value_ - crdd_value_);
-					float c = static_cast<int32_t>(crcd_value_ - crdd_value_);
-					std::string s = (boost::format("%5.4f") % (c / r)).str();
-					carib_tbls_[carib_type_->get_select_pos()]->set_text(s);
+					double r = static_cast<double>(crrd_value_ - crdd_value_);
+					double c = static_cast<double>(crcd_value_ - crdd_value_);
+					std::string s = (boost::format("%6.5f") % (c / r)).str();
+					carib_data_[carib_type_->get_select_pos()]->set_text(s);
+					carib_task_ = carib_task::idle;
 				}
 				return;
 			}
@@ -447,10 +469,9 @@ namespace app {
 			amps_->save(pre);
 			freq_->save(pre);
 			mode_->save(pre);
-			carib_tbls_[0]->save(pre);
-			carib_tbls_[1]->save(pre);
-			carib_tbls_[2]->save(pre);
-			carib_tbls_[3]->save(pre);
+			for(uint32_t i = 0; i < 4; ++i) {
+				carib_data_[i]->save(pre);
+			}
 		}
 
 
@@ -467,10 +488,9 @@ namespace app {
 			amps_->load(pre);
 			freq_->load(pre);
 			mode_->load(pre);
-			carib_tbls_[0]->load(pre);
-			carib_tbls_[1]->load(pre);
-			carib_tbls_[2]->load(pre);
-			carib_tbls_[3]->load(pre);
+			for(uint32_t i = 0; i < 4; ++i) {
+				carib_data_[i]->load(pre);
+			}
 		}
 	};
 }
