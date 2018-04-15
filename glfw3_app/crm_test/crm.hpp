@@ -377,9 +377,9 @@ namespace app {
 
 			if(carib_task_ != carib_task::idle) {
 				if(crcd) {
-					double r = static_cast<double>(crrd_value_ - crdd_value_);
-					double c = static_cast<double>(crcd_value_ - crdd_value_);
-					std::string s = (boost::format("%6.5f") % (c / r)).str();
+					double CRP = static_cast<double>(crrd_value_ - crdd_value_);
+					double SIP = static_cast<double>(crcd_value_ - crdd_value_);
+					std::string s = (boost::format("%6.5f") % (SIP / CRP)).str();
 					carib_data_[carib_type_->get_select_pos()]->set_text(s);
 					carib_task_ = carib_task::idle;
 				}
@@ -388,7 +388,6 @@ namespace app {
 
 			// 抵抗測定の場合
 			if(mode_->get_select_pos() == 0 && crrd) {  // CRRD
-				termcore_->output((boost::format("CRRD: %08X\n") % crrd_value_).str());
 				int32_t v = static_cast<int32_t>(crrd_value_);
 				int32_t ofs = static_cast<int32_t>(crdd_value_);
 				v -= ofs;
@@ -406,52 +405,50 @@ namespace app {
 				ans_->set_text((boost::format("%6.5f Ω") % a).str());
 
 			} else if(mode_->get_select_pos() != 0 && crcd) {  // 容量、合成容量の場合
-				termcore_->output((boost::format("CRCD: %08X\n") % crcd_value_).str());
-				// 基準値 (ofs)
-				int32_t ofs = static_cast<int32_t>(crdd_value_);
 
-				// 抵抗値 (r)
-				int32_t r = static_cast<int32_t>(crrd_value_);
-				r -= ofs;
-
-				// 容量値 (c)
-				int32_t c = static_cast<int32_t>(crcd_value_);
-				c -= ofs;
-				double lim = static_cast<double>(ofs) / 1.570798233;
-				if(c >= lim) {
-					ans_->set_text("OVF");
-					return;
+				double SRP = static_cast<double>(crrd_value_ - crdd_value_);
+				double SIP = static_cast<double>(crcd_value_ - crdd_value_);
+//			CRP = SRP + A_CAL * SIP  //A_CALの値は、純抵抗を測定した時（位相校正操作時）の
+//        	CIP = SIP - A_CAL * SRP  //(SIP/SRP)の値（位相補正係数）を使用します。（後述）
+				double A_CAL = 0.0;
+				{
+					auto s = carib_data_[amps_->get_select_pos()]->get_text(); 
+					float a;
+					utils::input("%f", s.c_str()) % a;
+					A_CAL = a;
 				}
-				if(r >= lim) {
-					ans_->set_text("OVF");
-					return;
-				}
-
-				static const double itbl[4] = {  // 電流テーブル
-					0.2, 2.0, 20.0, 200.0
+				double CRP = SRP + (A_CAL * SIP);
+				termcore_->output((boost::format("CRP: %6.5f\n") % CRP).str());
+				double CIP = SIP - (A_CAL * SRP);
+				termcore_->output((boost::format("CIP: %6.5f\n") % CIP).str());
+//			CORは抵抗値計算用の定数係数 = 4.6588E-8 @n
+//			COCは容量値計算用の定数係数 = 21454732.4 @n
+//			_iはユーザーが選択した測定電流値 [Ap-p] @n
+//			_fはユーザーが選択した測定周波数 [Hz] @n
+				double COR = 4.6588E-8;
+				double COC = 21454732.4;
+				static const double itbl[4] = {  // 電流テーブル [A]
+					0.2 / 1000.0, 2.0 / 1000.0, 20.0 / 1000.0, 200.0 / 1000.0
 				};
-				double ib = itbl[amps_->get_select_pos()];
-				c -= 447158 * ib;
-				c += 23989;
-
-				double fc = static_cast<double>(c) / static_cast<double>(ofs) * 1.570798233;
-				fc *= 778.2;  // 778.2 mV P-P
-
-				static const double ftbl[4] = {  // 周波数テーブル
+				double _i = itbl[amps_->get_select_pos()];
+				static const double ftbl[4] = {  // 周波数テーブル [Hz]
 					100.0, 1000.0, 10000.0
 				};
-				double fq = ftbl[freq_->get_select_pos()];
-				if(mode_->get_select_pos() == 1) {  // 容量
-					fc = ib / (2.0 * 3.141592654 * fq * fc);
-				} else {  // 合成
-					float b = 0.0;
-					if((utils::input("%f", net_regs_->get_text().c_str()) % b).status()) {
-						b *= ib;
-					}
-					fc = (ib * fc) / (2.0 * 3.141592654 * fq * (fc * fc + b * b));
+				double _f = ftbl[freq_->get_select_pos()];
+//        	R [ohm]= COR * (CRP^2 + CIP^2) / (_i * CRP) @n
+//        	C [F] = (COC * _i * CIP) / {(2 * π * _f) * (CRP^2 + CIP^2) } @n
+//			ここで：@n
+				double R = COR * ((CRP * CRP) + (CIP * CIP)) / (_i * CRP);
+				termcore_->output((boost::format("R: %6.5f [ohm]\n") % R).str());
+				double PAI = 3.141592654;
+				double C = (COC * _i * CIP) / ((2 * PAI * _f) * ((CRP * CRP) + (CIP * CIP))); 
+				termcore_->output((boost::format("C: %6.5f [uF]\n") % (C * 1e6)).str());
+
+				if(mode_->get_select_pos() == 1) {
+					ans_->set_text((boost::format("6.5f uF") % C).str());
+				} else {
+					ans_->set_text((boost::format("%6.5f ohm / %6.5f uF") % R % C).str());
 				}
-				fc *= 1e6;
-				ans_->set_text((boost::format("%6.5f uF") % fc).str());
 			}
 		}
 
