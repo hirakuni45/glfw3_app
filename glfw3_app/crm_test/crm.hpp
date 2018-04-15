@@ -84,7 +84,7 @@ namespace app {
 
 		gui::widget_label*		carib_data_[4];
 
-		gui::widget_label*		net_regs_;
+//		gui::widget_label*		net_regs_;
 
 		gui::widget_terminal*	termcore_;
 
@@ -204,7 +204,7 @@ namespace app {
 			ans_(nullptr), exec_(nullptr),
 			carib_type_(nullptr), carib_(nullptr),
 			carib_data_{ nullptr },
-			net_regs_(nullptr),
+//			net_regs_(nullptr),
 			termcore_(nullptr),
 			crm_line_(),
 			crrd_id_(0), crcd_id_(0), crdd_id_(0),
@@ -272,7 +272,7 @@ namespace app {
 				mode_ = wd.add_widget<widget_list>(wp, wp_); 
 			}
 			{  // 答え
-				widget::param wp(vtx::irect(ofsx + 500, ofsy, 200, 40), root);
+				widget::param wp(vtx::irect(ofsx + 500, ofsy, 300, 40), root);
 				widget_label::param wp_("");
 				ans_ = wd.add_widget<widget_label>(wp, wp_);
 			}
@@ -289,9 +289,9 @@ namespace app {
 				};
 			}
 			{  // 合成回路、抵抗設定
-				widget::param wp(vtx::irect(ofsx + 330, ofsy + 60, 110, 40), root);
-				widget_label::param wp_("390.0", false);
-				net_regs_ = wd.add_widget<widget_label>(wp, wp_);
+//				widget::param wp(vtx::irect(ofsx + 330, ofsy + 60, 110, 40), root);
+//				widget_label::param wp_("390.0", false);
+//				net_regs_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 			{  // キャリブレーション・リスト
 				widget::param wp(vtx::irect(ofsx, ofsy + 60, 170, 40), root);
