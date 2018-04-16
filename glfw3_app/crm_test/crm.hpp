@@ -58,6 +58,9 @@
 
 #include "utils/serial_win32.hpp"
 
+// シリアル通信のエミュレーション
+#define SERIAL_EMU
+
 namespace app {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -84,17 +87,12 @@ namespace app {
 
 		gui::widget_label*		carib_data_[4];
 
-//		gui::widget_label*		net_regs_;
-
 		gui::widget_terminal*	termcore_;
 
 		std::string				crm_line_;
-		uint32_t				crrd_id_;
-		uint32_t				crcd_id_;
-		uint32_t				crdd_id_;
-		uint32_t				crrd_value_;
-		uint32_t				crcd_value_;
-		uint32_t				crdd_value_;
+		int32_t					crrd_value_;
+		int32_t					crcd_value_;
+		int32_t					crdd_value_;
 
 		enum class carib_task {
 			idle,
@@ -104,6 +102,8 @@ namespace app {
 			C3,   ///< 200mA / 3.3
 		};
 		carib_task				carib_task_;
+
+		bool					serial_out_;
 
 		struct crm_t {
 			uint16_t	sw;		///< 14 bits
@@ -180,15 +180,53 @@ namespace app {
 		}
 
 
-		static uint32_t get32_(const void* src)
+		static int32_t get32_(const void* src)
 		{
-			uint32_t v;
+			int32_t v;
 			const uint8_t* ptr = static_cast<const uint8_t*>(src);
 			v  = static_cast<uint32_t>(ptr[0]) << 24;
 			v |= static_cast<uint32_t>(ptr[1]) << 16;
 			v |= static_cast<uint32_t>(ptr[2]) << 8;
 			v |= static_cast<uint32_t>(ptr[3]);
 			return v;
+		}
+
+
+		static void put32_(void* dst, int32_t val)
+		{
+			uint8_t* ptr = static_cast<uint8_t*>(dst);
+			ptr[0] = (val >> 24) & 0xff;
+			ptr[1] = (val >> 16) & 0xff;
+			ptr[2] = (val >> 8) & 0xff;
+			ptr[3] =  val & 0xff;
+		}
+
+
+		static void put_(const char* key, int32_t val, std::string& out)
+		{
+			out += key;
+			char tmp[4];
+			put32_(tmp, val);
+			out += tmp[0];
+			out += tmp[1];
+			out += tmp[2];
+			out += tmp[3];
+			out += '\n';
+		}
+
+
+		// 抵抗値から、CRM の値を求める
+		uint32_t crm_reg_(double r)
+		{
+			static const double itbl[4] = {  // 電流テーブル
+				0.2, 2.0, 20.0, 200.0
+			};
+			double a = r;  // オーム
+			a *= itbl[amps_->get_select_pos()];
+			a /= 778.2;
+			a *= 50.0;
+			a *= static_cast<double>(0x7FFFF) / 1.570798233;
+			return 50 * 0x7ffff + static_cast<uint32_t>(a);
 		}
 
 	public:
@@ -204,12 +242,10 @@ namespace app {
 			ans_(nullptr), exec_(nullptr),
 			carib_type_(nullptr), carib_(nullptr),
 			carib_data_{ nullptr },
-//			net_regs_(nullptr),
 			termcore_(nullptr),
 			crm_line_(),
-			crrd_id_(0), crcd_id_(0), crdd_id_(0),
 			crrd_value_(0), crcd_value_(0), crdd_value_(0),
-			carib_task_(carib_task::idle)
+			carib_task_(carib_task::idle), serial_out_(false)
 		{ }
 
 
@@ -283,15 +319,11 @@ namespace app {
 				exec_->at_local_param().select_func_ = [=](int n) {
 					auto s = make_crm_param_();
 					serial_.write(s.c_str(), s.size());
+					serial_out_ = true;
 					termcore_->output((boost::format("Start Measure: %d\n") % n).str());
 					termcore_->output(s);
 					ans_->set_text("");
 				};
-			}
-			{  // 合成回路、抵抗設定
-//				widget::param wp(vtx::irect(ofsx + 330, ofsy + 60, 110, 40), root);
-//				widget_label::param wp_("390.0", false);
-//				net_regs_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 			{  // キャリブレーション・リスト
 				widget::param wp(vtx::irect(ofsx, ofsy + 60, 170, 40), root);
@@ -311,6 +343,7 @@ namespace app {
 					amps_->select(n);
 					auto s = make_carib_param_();
 					serial_.write(s.c_str(), s.size());
+					serial_out_ = true;
 					termcore_->output((boost::format("Start carib: %d\n") % n).str());
 					termcore_->output(s);
 					carib_task_ = static_cast<carib_task>(n + 1);
@@ -332,11 +365,27 @@ namespace app {
 		void update()
 		{
 			{
+#ifdef SERIAL_EMU
+				if(serial_out_) {
+#if 0
+					put_("CRDD", 0x7ffff * 50, crm_line_);
+					auto reg = crm_reg_(100.0);
+					put_("CRRD", reg, crm_line_);
+					put_("CRCD", 0x7ffff * 50, crm_line_);
+#else
+					put_("CRDD", 0x1900172, crm_line_);
+					put_("CRRD", 0x18F6989, crm_line_);
+					put_("CRCD", 0x18FCBAD, crm_line_);
+#endif
+					serial_out_ = false;
+				}
+#else
 				char tmp[256];
 				auto len = serial_.read(tmp, sizeof(tmp));
 				for(uint32_t i = 0; i < len; ++i) {
 					crm_line_ += tmp[i];
 				}
+#endif
 			}
 
 			// 受信した文字列をデコード
@@ -351,28 +400,18 @@ namespace app {
 				key += crm_line_[3];
 				if(key == "CRCD") {
 					crcd_value_ = get32_(&crm_line_[4]);
-					++crcd_id_;
+					termcore_->output((boost::format("CRCD: %08X\n") % crcd_value_).str());
 					crcd = true;
 				} else if(key == "CRRD") {
 					crrd_value_ = get32_(&crm_line_[4]);
-					++crrd_id_;
+					termcore_->output((boost::format("CRRD: %08X\n") % crrd_value_).str());
 					crrd = true;
 				} else if(key == "CRDD") {
 					crdd_value_ = get32_(&crm_line_[4]);
-					++crdd_id_;
+					termcore_->output((boost::format("CRDD: %08X\n") % crdd_value_).str());
 					crdd = true;
 				}
 				crm_line_ = crm_line_.substr(9);
-			}
-
-			if(crdd) {
-				termcore_->output((boost::format("CRDD: %08X\n") % crdd_value_).str());
-			}
-			if(crrd) {
-				termcore_->output((boost::format("CRRD: %08X\n") % crrd_value_).str());
-			}
-			if(crcd) {
-				termcore_->output((boost::format("CRCD: %08X\n") % crcd_value_).str());
 			}
 
 			if(carib_task_ != carib_task::idle) {
@@ -407,7 +446,9 @@ namespace app {
 			} else if(mode_->get_select_pos() != 0 && crcd) {  // 容量、合成容量の場合
 
 				double SRP = static_cast<double>(crrd_value_ - crdd_value_);
+				termcore_->output((boost::format("SRP: %6.5f\n") % SRP).str());
 				double SIP = static_cast<double>(crcd_value_ - crdd_value_);
+				termcore_->output((boost::format("SIP: %6.5f\n") % SIP).str());
 //			CRP = SRP + A_CAL * SIP  //A_CALの値は、純抵抗を測定した時（位相校正操作時）の
 //        	CIP = SIP - A_CAL * SRP  //(SIP/SRP)の値（位相補正係数）を使用します。（後述）
 				double A_CAL = 0.0;
@@ -431,7 +472,7 @@ namespace app {
 					0.2 / 1000.0, 2.0 / 1000.0, 20.0 / 1000.0, 200.0 / 1000.0
 				};
 				double _i = itbl[amps_->get_select_pos()];
-				static const double ftbl[4] = {  // 周波数テーブル [Hz]
+				static const double ftbl[3] = {  // 周波数テーブル [Hz]
 					100.0, 1000.0, 10000.0
 				};
 				double _f = ftbl[freq_->get_select_pos()];
@@ -445,7 +486,7 @@ namespace app {
 				termcore_->output((boost::format("C: %6.5f [uF]\n") % (C * 1e6)).str());
 
 				if(mode_->get_select_pos() == 1) {
-					ans_->set_text((boost::format("6.5f uF") % C).str());
+					ans_->set_text((boost::format("%6.5f uF") % C).str());
 				} else {
 					ans_->set_text((boost::format("%6.5f ohm / %6.5f uF") % R % C).str());
 				}
