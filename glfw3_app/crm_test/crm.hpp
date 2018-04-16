@@ -59,7 +59,7 @@
 #include "utils/serial_win32.hpp"
 
 // シリアル通信のエミュレーション
-#define SERIAL_EMU
+// #define SERIAL_EMU
 
 namespace app {
 
