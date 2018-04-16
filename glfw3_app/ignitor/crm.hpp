@@ -65,6 +65,9 @@ namespace app {
 
 		gui::widget_label*		net_regs_;		///< CRM 合成抵抗設定
 
+		gui::widget_list*		carib_type_;
+		gui::widget_text*		carib_data_[4 * 3];
+
 		double					crrd_value_;
 		double					crcd_value_;
 
@@ -76,17 +79,23 @@ namespace app {
 		uint32_t				crcd_id_;
 		int32_t					crcd_val_;
 
-		enum class refs_task {
+		enum class carib_task {
 			idle,
-			start,
-			term1,
-			term2,
-			term3,
-			term4,
-			term5,
+			C0,		///< 100Hz 0.2mA
+			C1,		///< 100Hz 2.0mA
+			C2,		///< 100Hz 20mA
+			C3,		///< 100Hz 200mA
+			C4,
+			C5,
+			C6,
+			C7,
+			C8,
+			C9,
+			C10,
+			C11,
+			REG,	///< 0 ohm caribrations
 		};
-		refs_task				refs_task_;
-		uint32_t				refs_id_;
+		carib_task				carib_task_;
 
 		std::string				last_cmd_;
 
@@ -97,9 +106,8 @@ namespace app {
 			bool		ena;	///< 0, 1
 			uint16_t	amps;	///< 0, 1, 2, 3
 			uint16_t	freq;	///< 0, 1, 2
-			uint16_t	mode;	///< 0, 1
 
-			crm_t() : sw(0), ena(0), amps(0), freq(0), mode(0) { }
+			crm_t() : sw(0), ena(0), amps(0), freq(0) { }
 
 			std::string build() const
 			{
@@ -112,17 +120,30 @@ namespace app {
 				}
 				s += (boost::format("crm CROE%d\n") % ena).str();
 				if(ena) {
-					s += (boost::format("crm CRD?1\n")).str();
 					s += "delay 2\n";
+					s += (boost::format("crm CRD?1\n")).str();
 					s += (boost::format("crm CRR?1\n")).str();
-//					s += "delay 1\n";
-//					s += (boost::format("crm CRC?1\n")).str();
+					s += (boost::format("crm CRC?1\n")).str();
 				}
-std::cout << s << std::endl;
 				return s;
 			}
 		};
 
+
+		std::string make_carib_param_(uint32_t amps)
+		{
+			crm_t t;
+			uint16_t sw = 0;
+			for(int i = 0; i < 14; ++i) {
+				sw <<= 1;
+				if(sw_[i]->get_check()) sw |= 1;
+			}
+			t.sw = sw;
+			t.ena = 1;
+			t.amps = amps;
+			t.freq = freq_->get_select_pos();
+			return t.build();
+		}
 
 		std::string make_crm_param_()
 		{
@@ -136,104 +157,30 @@ std::cout << s << std::endl;
 			t.ena = ena_->get_check();
 			t.amps = amps_->get_select_pos();
 			t.freq = freq_->get_select_pos();
-			t.mode = mode_->get_select_pos();
 			return t.build();
 		}
 
 
-		float median_(std::vector<float>& ss)
+		bool calc_regs_(double& ans)
 		{
-			std::sort(ss.begin(), ss.end());
-			float v = ss[ss.size() / 2];
-			if((ss.size() & 1) == 0) {
-				v += ss[(ss.size() / 2) + 1];
-				v *= 0.5f;
+			int32_t v = crrd_val_;
+			int32_t ofs = crdd_val_;
+			v -= ofs;
+			double lim = static_cast<double>(ofs) / 1.570798233;
+			if(v >= lim) {
+				ans = 10e6;
+				return false;
 			}
-			return v;
+			double a = static_cast<double>(v) / static_cast<double>(ofs) * 1.570798233;
+			a *= 778.2;  // 778.2 mV P-P
+			static const double itbl[4] = {  // 電流テーブル
+				0.2, 2.0, 20.0, 200.0
+			};
+			a /= itbl[amps_->get_select_pos()];
+			ans = a;
+			return true;
 		}
 
-
-		void refs_msg_(const std::string& ins = "")
-		{
-			int n = static_cast<int>(refs_task_) - static_cast<int>(refs_task::start);
-			std::string str = "200 mA / 抵抗測定\n";
-			if(n >= 1 && n <= 5) {
-				str += (boost::format("Term1 - Term4 の校正値：%s\n") % ins).str();
-			}
-			if(n >= 0 && n <= 4) {
-				str += (boost::format("Term1 - Term4 の校正を行います。")).str();
-			}
-			dialog_->set_text(str);
-		}
-
-
-		void refs_send_()
-		{
-			int n = static_cast<int>(refs_task_) - static_cast<int>(refs_task::start);
-			crm_t t;
-			switch(n) {
-			case 1:
-				t.sw = 0b10000000001000;  // T1 - T4
-				break;
-			case 2:
-				t.sw = 0b01000000000010;  // T2 - T6
-				break;
-			case 3:
-				t.sw = 0b00100000000010;  // T3 - T6
-				break;
-			case 4:
-				t.sw = 0b00010000000010;  // T4 - T6
-				break;
-			case 5:
-				t.sw = 0b00001000000010;  // T5 - T6
-				break;
-			default:
-				return;
-				break;
-			}
-			if(n >= 1 && n <= 5) {
-				t.ena = true;
-				t.amps = 3;  // 200 mA
-				amps_->select(3);
-				t.freq = 0;  // 100Hz
-				freq_->select(0);
-				t.mode = 0;  // 抵抗
-				mode_->select(0);				
-				refs_id_ = crm_id_;
-				crrd_id_ = client_.get_mod_status().crrd_id_;
-				crcd_id_ = client_.get_mod_status().crcd_id_;
-				last_cmd_ = t.build();
-				client_.send_data(last_cmd_);
-			}
-		}
-
-
-		double get_bias_()
-		{
-			double ofs = 0.0;
-			// T1 - T4
-			if((utils::input("%f", reg_refs_[0]->get_text().c_str()) % ofs).status()) {
-			}
-#if 0
-			if(sw_[0]->get_check()) {  // T1
-				if((utils::input("%f", reg_refs_[0]->get_text().c_str()) % ofs).status()) {
-				}
-			} else if(sw_[1]->get_check()) {  // T2
-				if((utils::input("%f", reg_refs_[1]->get_text().c_str()) % ofs).status()) {
-				}
-			} else if(sw_[2]->get_check()) {  // T3
-				if((utils::input("%f", reg_refs_[2]->get_text().c_str()) % ofs).status()) {
-				}
-			} else if(sw_[3]->get_check()) {  // T4
-				if((utils::input("%f", reg_refs_[3]->get_text().c_str()) % ofs).status()) {
-				}
-			} else if(sw_[4]->get_check()) {  // T5
-				if((utils::input("%f", reg_refs_[4]->get_text().c_str()) % ofs).status()) {
-				}
-			}
-#endif
-			return ofs;
-		}
 
 	public:
 		//-----------------------------------------------------------------//
@@ -248,9 +195,10 @@ std::cout << s << std::endl;
 			ans_(nullptr), exec_(nullptr), all_(nullptr),
 			run_refs_(nullptr), ena_refs_(nullptr), reg_refs_{ nullptr },
 			dialog_(nullptr), info_(nullptr), net_regs_(nullptr),
+			carib_type_(nullptr), carib_data_{ nullptr },
 			crrd_value_(0.0), crcd_value_(0.0),
 			crdd_id_(0), crdd_val_(0), crrd_id_(0), crrd_val_(0), crcd_id_(0), crcd_val_(0),
-			refs_task_(refs_task::idle), refs_id_(0), last_cmd_(),
+			carib_task_(carib_task::idle), last_cmd_(),
 			crm_id_(0)
 		{ }
 
@@ -272,7 +220,6 @@ std::cout << s << std::endl;
 		//-----------------------------------------------------------------//
 		std::string get_unit_str() const {
 			if(mode_->get_select_pos() == 0) {  // 抵抗
-//				return "Ω";
 				return "Ohm";
 			} else {  // 容量
 				return "uF";
@@ -397,34 +344,38 @@ std::cout << s << std::endl;
 					exec_->set_stall(!ena, widget::STALL_GROUP::_1);
 					run_refs_->set_stall(!ena, widget::STALL_GROUP::_1);
 					ena_refs_->set_stall(!ena, widget::STALL_GROUP::_1);
+					carib_type_->set_stall(!ena, widget::STALL_GROUP::_1);
 					ans_->set_text("");
 					last_cmd_.clear();
 				};
 			}
 			{  // 校正ボタン
-				widget::param wp(vtx::irect(ofsx, ofsy + 50, 100, 40), root);
+				widget::param wp(vtx::irect(ofsx + 180, ofsy + 50, 100, 40), root);
 				widget_button::param wp_("校正");
 				run_refs_ = wd.add_widget<widget_button>(wp, wp_);
 				run_refs_->at_local_param().select_func_ = [=](uint32_t id) {
-					refs_task_ = refs_task::start;
-					refs_msg_("");
-					dialog_->enable();
-					last_cmd_.clear();
+					auto n = carib_type_->get_select_pos();
+					if(n >= 4) {  // 200mA
+						n = 3;
+					}
+					auto s = make_carib_param_(n);
+					crdd_id_ = client_.get_mod_status().crdd_id_;
+					crrd_id_ = client_.get_mod_status().crrd_id_;
+					crcd_id_ = client_.get_mod_status().crcd_id_;
+					client_.send_data(s);
+					carib_task_ = static_cast<carib_task>(carib_type_->get_select_pos() + 1);
 				};
 			}
 			{  // 校正データ、有効／無効
-				widget::param wp(vtx::irect(ofsx + 110, ofsy + 50, 90, 40), root);
+				widget::param wp(vtx::irect(ofsx + 290, ofsy + 50, 90, 40), root);
 				widget_check::param wp_("有効");
 				ena_refs_ = wd.add_widget<widget_check>(wp, wp_);
 				ena_refs_->at_local_param().select_func_ = [=](bool ena) {
-					for(uint32_t i = 0; i < 5; ++i) {
-						reg_refs_[i]->set_stall(!ena);
-					}
 				};
 			}
 			for(uint32_t i = 0; i < 5; ++i) {  // 校正データ表示
-				widget::param wp(vtx::irect(ofsx + i * 140, ofsy + 100, 120, 40), root);
-				widget_text::param wp_("*");
+				widget::param wp(vtx::irect(ofsx + i * 140, ofsy + 250, 120, 40), root);
+				widget_text::param wp_;
 				wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
 											 vtx::placement::vertical::CENTER);
 				reg_refs_[i] = wd.add_widget<widget_text>(wp, wp_);
@@ -434,43 +385,6 @@ std::cout << s << std::endl;
 				widget_dialog::param wp_(widget_dialog::style::CANCEL_OK);
 				dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
 				dialog_->enable(false);
-				dialog_->at_local_param().select_func_ = [=](bool ok) {
-					if(!ok) {
-						dialog_->enable(false);
-						refs_task_ = refs_task::idle;
-						return;
-					}
-					switch(refs_task_) {
-					case refs_task::start:
-						refs_task_ = refs_task::term5;
-						refs_msg_("");
-						refs_send_();
-						break;
-					case refs_task::term1:
-						refs_task_ = refs_task::term2;
-						refs_send_();
-						break;
-					case refs_task::term2:
-						refs_task_ = refs_task::term3;
-						refs_send_();
-						break;
-					case refs_task::term3:
-						refs_task_ = refs_task::term4;
-						refs_send_();
-						break;
-					case refs_task::term4:
-						refs_task_ = refs_task::term5;
-						refs_send_();
-						break;
-					case refs_task::term5:
-						refs_task_ = refs_task::idle;
-						break;
-					default:
-						break;
-					}
-
-
-				};
 			}
 			{  // 校正情報
 				widget::param wp(vtx::irect(100, 100, 500, 300));
@@ -479,9 +393,32 @@ std::cout << s << std::endl;
 				info_->enable(false);
 			}
 			{  // 合成回路、抵抗設定
-				widget::param wp(vtx::irect(ofsx + 220, ofsy + 50, 110, 40), root);
-				widget_label::param wp_("390.0", false);
+				widget::param wp(vtx::irect(ofsx + 550, ofsy + 50, 110, 40), root);
+				widget_label::param wp_;
 				net_regs_ = wd.add_widget<widget_label>(wp, wp_);
+			}
+
+			{  // キャリブレーション・リスト
+				widget::param wp(vtx::irect(ofsx, ofsy + 50, 170, 40), root);
+				wp.pre_group_ = widget::PRE_GROUP::_5;
+				widget_list::param wp_;
+				wp_.init_list_.push_back("0.2mA/3.3K");
+				wp_.init_list_.push_back("2mA/330");
+				wp_.init_list_.push_back("20mA/33");
+				wp_.init_list_.push_back("200mA/3.3");
+				wp_.init_list_.push_back("200mA/0");
+				carib_type_ = wd.add_widget<widget_list>(wp, wp_); 
+			}
+			// キャリブレーション・データ（進角）
+			for(uint32_t i = 0; i < 12; ++i) {
+				uint32_t x = i % 4;
+				uint32_t y = i / 4;
+				widget::param wp(vtx::irect(ofsx + x * 200, ofsy + 100 + y * 50, 190, 40), root);
+				wp.pre_group_ = widget::PRE_GROUP::_5;
+				widget_text::param wp_("0");
+				wp_.text_param_.placement_ = vtx::placement(vtx::placement::holizontal::LEFT,
+											 vtx::placement::vertical::CENTER);
+				carib_data_[i] = wd.add_widget<widget_text>(wp, wp_);
 			}
 		}
 
@@ -502,100 +439,113 @@ std::cout << s << std::endl;
 			if(crdd_id_ != client_.get_mod_status().crdd_id_) {
 				crdd_id_ = client_.get_mod_status().crdd_id_;
 				crdd_val_ = client_.get_mod_status().crdd_;
-utils::format("CRDD: %08X\n") % crdd_val_;
+// utils::format("CRDD: %08X\n") % crdd_val_;
 			}
 			if(crrd_id_ != client_.get_mod_status().crrd_id_) {
 				crrd_id_ = client_.get_mod_status().crrd_id_;
 				crrd_val_ = client_.get_mod_status().crrd_;
-utils::format("CRRD: %08X\n") % crrd_val_;
-				trg = true;
+// utils::format("CRRD: %08X\n") % crrd_val_;
 			}
 			if(crcd_id_ != client_.get_mod_status().crcd_id_) {
 				crcd_id_ = client_.get_mod_status().crcd_id_;
 				crcd_val_ = client_.get_mod_status().crcd_;
-utils::format("CRCD: %08X\n\n") % crcd_val_;
+// utils::format("CRCD: %08X\n\n") % crcd_val_;
+				trg = true;
 			}
 
-			if(trg) {
-				if(mode_->get_select_pos() == 0) {  // CRRD
-					int32_t v = crrd_val_;
-					int32_t ofs = crdd_val_;
-					v -= ofs;
-					double lim = static_cast<double>(ofs) / 1.570798233;
-					if(v >= lim) {
-						ans_->set_text("OVF");
-						crrd_value_ = 1e6;
-						++crm_id_;
-						return;
+			if(!trg) {
+				return;
+			} 
+
+			// キャリブレーション設定
+			if(carib_task_ != carib_task::idle) {
+				uint32_t n = static_cast<uint32_t>(carib_task_) - 1;
+				if(n < 12) {
+					double CRP = static_cast<double>(crrd_val_ - crdd_val_);
+					double SIP = static_cast<double>(crcd_val_ - crdd_val_);
+					std::string s = (boost::format("%6.5f") % (SIP / CRP)).str();
+					carib_data_[n]->set_text(s);
+				} else {  // 0 ohm, internal register
+					double a;
+					if(calc_regs_(a)) {
+						reg_refs_[0]->set_text((boost::format("%6.5f") % a).str());
 					}
-					double a = static_cast<double>(v) / static_cast<double>(ofs) * 1.570798233;
-					a *= 778.2;  // 778.2 mV P-P
-					static const double itbl[4] = {  // 電流テーブル
-						0.2, 2.0, 20.0, 200.0
-					};
-					a /= itbl[amps_->get_select_pos()];
-					crrd_value_ = a;
+				}
+				carib_task_ = carib_task::idle;
+				return;
+			}
+
+			if(mode_->get_select_pos() == 0) {  // CRRD
+				double a = 0.0;
+				auto ret = calc_regs_(a);
+				if(ena_refs_->get_check() && amps_->get_select_pos() == 3) {
+					float ofs = 0.0f;
+					utils::input("%f", reg_refs_[0]->get_text().c_str()) % ofs;
+					a -= ofs;
+				}
+				crrd_value_ = a;
+				if(ret) {
 					ans_->set_text((boost::format("%6.5f Ω") % crrd_value_).str());
-					++crm_id_;
-				} else { // CRCD (1, 2)
-					int32_t v = crcd_val_;
-					int32_t ofs = sample_num * 0x7FFFF;
-					v -= ofs;
-					double lim = static_cast<double>(ofs) / 1.570798233;
-					if(v >= lim) {
-						ans_->set_text("OVF");
-						crcd_value_ = 1e3;
-						++crm_id_;
-						return;
-					}
-					static const double itbl[4] = {  // 電流テーブル
-						0.2, 2.0, 20.0, 200.0
-					};
-					double ib = itbl[amps_->get_select_pos()];
-					v -= 447158 * ib;
-					v += 23989;
-
-					double a = static_cast<double>(v) / static_cast<double>(ofs) * 1.570798233;
-					a *= 778.2;  // 778.2 mV P-P
-
-					static const double ftbl[4] = {  // 周波数テーブル
-						100.0, 1000.0, 10000.0
-					};
-					double fq = ftbl[freq_->get_select_pos()];
-					if(mode_->get_select_pos() == 1) {  // 容量
-						a = ib / (2.0 * 3.141592654 * fq * a);
-					} else {  // 合成
-						float b = 390.0;
-						if((utils::input("%f", net_regs_->get_text().c_str()) % b).status()) {
-							b *= ib;
-						}
-						a = (ib * a) / (2.0 * 3.141592654 * fq * (a * a + b * b));
-					}
-					a *= 1e6;
-					crcd_value_ = a;
-					ans_->set_text((boost::format("%6.5f uF") % crcd_value_).str());
-					++crm_id_;
+				} else {
+					ans_->set_text("OVF");
 				}
-			}
-
-			switch(refs_task_) {
-			case refs_task::term1:
-			case refs_task::term2:
-			case refs_task::term3:
-			case refs_task::term4:
-			case refs_task::term5:
-				if(refs_id_ != crm_id_) {
-					refs_id_ = crm_id_;
-					auto s = (boost::format("%6.5f Ω") % crrd_value_).str();
-///					int idx = static_cast<int>(refs_task_) - static_cast<int>(refs_task::term1);
-///					reg_refs_[idx]->set_text(s);
-					reg_refs_[0]->set_text(s);
-					refs_msg_(s);
-					dialog_->enable();
+				++crm_id_;
+			} else { // CRCD (1, 2)
+				int32_t v = crcd_val_;
+				int32_t ofs = sample_num * 0x7FFFF;
+				v -= ofs;
+				double lim = static_cast<double>(ofs) / 1.570798233;
+				if(v >= lim) {
+					ans_->set_text("OVF");
+					crcd_value_ = 10e3;
+					++crm_id_;
+					return;
 				}
-				break;
-			default:
-				break;
+				double SRP = static_cast<double>(crrd_val_ - crdd_val_);
+//				termcore_->output((boost::format("SRP: %6.5f\n") % SRP).str());
+				double SIP = static_cast<double>(crcd_val_ - crdd_val_);
+//				termcore_->output((boost::format("SIP: %6.5f\n") % SIP).str());
+//			CRP = SRP + A_CAL * SIP  //A_CALの値は、純抵抗を測定した時（位相校正操作時）の
+//        	CIP = SIP - A_CAL * SRP  //(SIP/SRP)の値（位相補正係数）を使用します。（後述）
+				double A_CAL = 0.0;
+				{
+					uint32_t n = freq_->get_select_pos() * 4 + amps_->get_select_pos();
+					auto s = carib_data_[n]->get_text(); 
+					float a;
+					utils::input("%f", s.c_str()) % a;
+					A_CAL = a;
+				}
+				double CRP = SRP + (A_CAL * SIP);
+//				termcore_->output((boost::format("CRP: %6.5f\n") % CRP).str());
+				double CIP = SIP - (A_CAL * SRP);
+//				termcore_->output((boost::format("CIP: %6.5f\n") % CIP).str());
+//			CORは抵抗値計算用の定数係数 = 4.6588E-8 @n
+//			COCは容量値計算用の定数係数 = 21454732.4 @n
+//			_iはユーザーが選択した測定電流値 [Ap-p] @n
+//			_fはユーザーが選択した測定周波数 [Hz] @n
+				double COR = 4.6588E-8;
+				double COC = 21454732.4;
+				static const double itbl[4] = {  // 電流テーブル [A]
+					0.2 / 1000.0, 2.0 / 1000.0, 20.0 / 1000.0, 200.0 / 1000.0
+				};
+				double _i = itbl[amps_->get_select_pos()];
+				static const double ftbl[3] = {  // 周波数テーブル [Hz]
+					100.0, 1000.0, 10000.0
+				};
+				double _f = ftbl[freq_->get_select_pos()];
+//        	R [ohm]= COR * (CRP^2 + CIP^2) / (_i * CRP) @n
+//        	C [F] = (COC * _i * CIP) / {(2 * π * _f) * (CRP^2 + CIP^2) } @n
+//			ここで：@n
+				double R = COR * ((CRP * CRP) + (CIP * CIP)) / (_i * CRP);
+//				termcore_->output((boost::format("R: %6.5f [ohm]\n") % R).str());
+				double PAI = 3.141592654;
+				double C = (COC * _i * CIP) / ((2 * PAI * _f) * ((CRP * CRP) + (CIP * CIP))); 
+				C *= 1e6;
+//				termcore_->output((boost::format("C: %6.5f [uF]\n") % C).str());
+				ans_->set_text((boost::format("%6.5f uF") % C).str());
+				net_regs_->set_text((boost::format("%6.5f Ω") % R).str());
+				crcd_value_ = C;
+				++crm_id_;
 			}
 		}
 
@@ -617,6 +567,7 @@ utils::format("CRCD: %08X\n\n") % crcd_val_;
 			return ret;
 		}
 
+
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  セーブ（システム）
@@ -627,10 +578,10 @@ utils::format("CRCD: %08X\n\n") % crcd_val_;
 		{
 			dialog_->save(pre);
 			info_->save(pre);
-//			for(uint32_t i = 0; i < 5; ++i) {
-//				reg_refs_[i]->save(pre);
-//			}
 			reg_refs_[0]->save(pre);
+			for(uint32_t i = 0; i < 12; ++i) {
+				carib_data_[i]->save(pre);
+			}
 		}
 
 
@@ -649,11 +600,11 @@ utils::format("CRCD: %08X\n\n") % crcd_val_;
 			mode_->save(pre);
 			all_->save(pre);
 			ena_refs_->save(pre);
-//			for(uint32_t i = 0; i < 5; ++i) {
-//				reg_refs_[i]->save(pre);
-//			}
 			reg_refs_[0]->save(pre);
 			net_regs_->save(pre);
+			for(uint32_t i = 0; i < 12; ++i) {
+				carib_data_[i]->save(pre);
+			}
 		}
 
 
@@ -667,10 +618,10 @@ utils::format("CRCD: %08X\n\n") % crcd_val_;
 		{
 			dialog_->load(pre);
 			info_->load(pre);
-//			for(uint32_t i = 0; i < 5; ++i) {
-//				reg_refs_[i]->load(pre);
-//			}
 			reg_refs_[0]->load(pre);
+			for(uint32_t i = 0; i < 12; ++i) {
+				carib_data_[i]->load(pre);
+			}
 		}
 
 
@@ -690,12 +641,12 @@ utils::format("CRCD: %08X\n\n") % crcd_val_;
 			all_->load(pre);
 			all_->exec();
 			ena_refs_->load(pre);
-//			for(uint32_t i = 0; i < 5; ++i) {
-//				reg_refs_[i]->load(pre);
-//			}
 			reg_refs_[0]->load(pre);
 			ena_refs_->exec();
 			net_regs_->load(pre);
+			for(uint32_t i = 0; i < 12; ++i) {
+				carib_data_[i]->load(pre);
+			}
 		}
 	};
 }
