@@ -363,7 +363,8 @@ namespace app {
 					crrd_id_ = client_.get_mod_status().crrd_id_;
 					crcd_id_ = client_.get_mod_status().crcd_id_;
 					client_.send_data(s);
-					carib_task_ = static_cast<carib_task>(carib_type_->get_select_pos() + 1);
+					uint32_t ct = freq_->get_select_pos() * 4 + carib_type_->get_select_pos();
+					carib_task_ = static_cast<carib_task>(ct + 1);
 				};
 			}
 			{  // 校正データ、有効／無効
@@ -439,17 +440,17 @@ namespace app {
 			if(crdd_id_ != client_.get_mod_status().crdd_id_) {
 				crdd_id_ = client_.get_mod_status().crdd_id_;
 				crdd_val_ = client_.get_mod_status().crdd_;
-// utils::format("CRDD: %08X\n") % crdd_val_;
+utils::format("CRDD: %08X\n") % crdd_val_;
 			}
 			if(crrd_id_ != client_.get_mod_status().crrd_id_) {
 				crrd_id_ = client_.get_mod_status().crrd_id_;
 				crrd_val_ = client_.get_mod_status().crrd_;
-// utils::format("CRRD: %08X\n") % crrd_val_;
+utils::format("CRRD: %08X\n") % crrd_val_;
 			}
 			if(crcd_id_ != client_.get_mod_status().crcd_id_) {
 				crcd_id_ = client_.get_mod_status().crcd_id_;
 				crcd_val_ = client_.get_mod_status().crcd_;
-// utils::format("CRCD: %08X\n\n") % crcd_val_;
+utils::format("CRCD: %08X\n\n") % crcd_val_;
 				trg = true;
 			}
 
