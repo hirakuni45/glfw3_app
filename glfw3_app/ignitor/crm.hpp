@@ -38,9 +38,7 @@ namespace app {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class crm
 	{
-		static const uint32_t DUMMY_LOOP_COUNT = 45;  // ダミーループ
-
-		static const uint32_t crm_count_limit_ = 10;  // メディアン測定回数
+		static const uint32_t DUMMY_LOOP_COUNT = 4;  // ダミーループ
 
 		utils::director<core>&	director_;
 		net::ign_client_tcp&	client_;
@@ -100,6 +98,8 @@ namespace app {
 		std::string				last_cmd_;
 
 		uint32_t				crm_id_;
+
+		uint32_t				dummy_loop_;
 
 		struct crm_t {
 			uint16_t	sw;		///< 14 bits
@@ -199,7 +199,7 @@ namespace app {
 			crrd_value_(0.0), crcd_value_(0.0),
 			crdd_id_(0), crdd_val_(0), crrd_id_(0), crrd_val_(0), crcd_id_(0), crcd_val_(0),
 			carib_task_(carib_task::idle), last_cmd_(),
-			crm_id_(0)
+			crm_id_(0), dummy_loop_(0)
 		{ }
 
 
@@ -322,6 +322,8 @@ namespace app {
 					crrd_id_ = client_.get_mod_status().crrd_id_;
 					crcd_id_ = client_.get_mod_status().crcd_id_;
 					client_.send_data(s);
+					last_cmd_ = s;
+					dummy_loop_ = DUMMY_LOOP_COUNT;
 					ans_->set_text("");
 				};
 			}
@@ -363,6 +365,8 @@ namespace app {
 					crrd_id_ = client_.get_mod_status().crrd_id_;
 					crcd_id_ = client_.get_mod_status().crcd_id_;
 					client_.send_data(s);
+					last_cmd_ = s;
+					dummy_loop_ = DUMMY_LOOP_COUNT;
 					uint32_t ct = freq_->get_select_pos() * 4 + carib_type_->get_select_pos();
 					carib_task_ = static_cast<carib_task>(ct + 1);
 				};
@@ -457,6 +461,11 @@ utils::format("CRCD: %08X\n\n") % crcd_val_;
 			if(!trg) {
 				return;
 			} 
+			if(dummy_loop_ > 0) {
+				--dummy_loop_;
+				client_.send_data(last_cmd_);				
+				return;
+			}
 
 			// キャリブレーション設定
 			if(carib_task_ != carib_task::idle) {
