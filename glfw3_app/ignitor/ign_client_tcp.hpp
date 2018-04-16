@@ -334,32 +334,34 @@ std::cout << t << std::endl;
 		//-----------------------------------------------------------------//
 		void send_data(const std::string& text)
 		{
-// std::cout << text << std::endl;
 #ifdef DEBUG_EMU
-			if(text.find("CRR?1") != std::string::npos) {
-				static double aaa = 0.0123;
-				double a = aaa;  // オーム
-				aaa += 0.0001;
-				a *= 200.0;  // 200mA
-				a /= 778.2;
-				a *= 50.0;
-				a *= static_cast<double>(0x7FFFF) / 1.570798233;
-				mod_status_.crrd_ = 50 * 0x7ffff + static_cast<uint32_t>(a);
-				++mod_status_.crrd_id_;
-			} else if(text.find("CRC?1") != std::string::npos) {
-				double a = 0.33;
-				a /= 1e6;
-				a = 1.0 / (2.0 * 3.141592654 * 1000.0 * a);
-				a *= 2.0;
-				a /= 778.2;  // 778.2 mV P-P
-				a *= 50.0;
-				a *= static_cast<double>(0x7FFFF) / 1.570798233;
-				mod_status_.crcd_ = 50 * 0x7ffff + static_cast<uint32_t>(a);
-				++mod_status_.crcd_id_;
-			} else if(text.find("wdm 20") != std::string::npos) {
-				++mod_status_.wdm_id_[2];
+			auto ss = utils::split_text(text, "\n");
+			for(auto s : ss) {
+				if(s.find("CRD?1") != std::string::npos) {
+					mod_status_.crdd_ = 50 * 0x7ffff;
+					++mod_status_.crdd_id_;
+				} else if(s.find("CRR?1") != std::string::npos) {
+					double a = 3300;  // オーム
+					a *= 0.2;  // 3300/0.2mA
+					a /= 778.2;
+					a *= 50.0;
+					a *= static_cast<double>(0x7FFFF) / 1.570798233;
+					mod_status_.crrd_ = 50 * 0x7ffff + static_cast<uint32_t>(a);
+					++mod_status_.crrd_id_;
+				} else if(s.find("CRC?1") != std::string::npos) {
+					double a = 0.33;
+					a /= 1e6;
+					a = 1.0 / (2.0 * 3.141592654 * 1000.0 * a);
+					a *= 2.0;
+					a /= 778.2;  // 778.2 mV P-P
+					a *= 50.0;
+					a *= static_cast<double>(0x7FFFF) / 1.570798233;
+					mod_status_.crcd_ = 50 * 0x7ffff + static_cast<uint32_t>(a);
+					++mod_status_.crcd_id_;
+				} else if(text.find("wdm 20") != std::string::npos) {
+					++mod_status_.wdm_id_[2];
+				}
 			}
-///			std::cout << text << std::endl;
 			return;
 #else
 			if(send(sock_, text.c_str(), text.size(), 0) == SOCKET_ERROR) {
