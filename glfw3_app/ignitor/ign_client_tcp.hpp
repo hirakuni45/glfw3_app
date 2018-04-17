@@ -242,11 +242,11 @@ namespace net {
 			while(!rmsg_.empty()) {
 				auto s = rmsg_.front();
 				rmsg_.pop();
-std::cout << s << std::endl;
+// std::cout << s << std::endl;
 
 				if(s.find("CRCD") == 0) {
 					auto t = s.substr(4, 8);
-std::cout << t << std::endl;
+// std::cout << t << std::endl;
 					int v = 0;
 					if((utils::input("%x", t.c_str()) % v).status()) {
 						mod_status_.crcd_ = v;
@@ -254,7 +254,7 @@ std::cout << t << std::endl;
 					}
 				} else if(s.find("CRRD") == 0) {
 					auto t = s.substr(4, 8);
-std::cout << t << std::endl;
+// std::cout << t << std::endl;
 					int v = 0;
 					if((utils::input("%x", t.c_str()) % v).status()) {
 						mod_status_.crrd_ = v;
@@ -262,7 +262,7 @@ std::cout << t << std::endl;
 					}			
 				} else if(s.find("CRDD") == 0) {
 					auto t = s.substr(4, 8);
-std::cout << t << std::endl;
+// std::cout << t << std::endl;
 					int v = 0;
 					if((utils::input("%x", t.c_str()) % v).status()) {
 						mod_status_.crdd_ = v;
