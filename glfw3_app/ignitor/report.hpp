@@ -63,12 +63,11 @@ namespace app {
 		struct unit_t {
 			gui::widget_label*	symbol_;  ///< 検査記号
 			gui::widget_label*	okng_;    ///< 合否
-			gui::widget_label*	retry_;   ///< リトライ回数
 			gui::widget_label*	val_;     ///< 測定値
 			gui::widget_label*	min_;     ///< 最小値
 			gui::widget_label*	max_;     ///< 最大値
 			gui::widget_label*	unit_;    ///< 単位
-			unit_t() : symbol_(nullptr), okng_(nullptr), retry_(nullptr),
+			unit_t() : symbol_(nullptr), okng_(nullptr),
 				val_(nullptr), min_(nullptr), max_(nullptr),
 				unit_(nullptr) { }
 		};
@@ -81,7 +80,6 @@ namespace app {
 		uint32_t	total_;
 		uint32_t	pass_;
 		uint32_t	fail_;
-		uint32_t	retry_;
 
 		uint32_t	index_;
 
@@ -92,9 +90,9 @@ namespace app {
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 
-			static const int wtbls[] = { 200, 50, 80, 100, 100, 100, 70 };
+			static const int wtbls[] = { 200, 50, 100, 100, 100, 70 };
 			int xx = x;
-			for(uint32_t i = 0; i < 7; ++i) {
+			for(uint32_t i = 0; i < 6; ++i) {
 				widget::param wp(vtx::irect(xx, y, wtbls[i], h), frame);
 				xx += wtbls[i];
 				wp.pre_group_ = widget::PRE_GROUP::_4;
@@ -112,11 +110,10 @@ namespace app {
 				wp_.plate_param_.resizeble_ = true;
 				if(i == 0) t.symbol_ = wd.add_widget<widget_label>(wp, wp_);
 				else if(i == 1) t.okng_ = wd.add_widget<widget_label>(wp, wp_);
-				else if(i == 2) t.retry_ = wd.add_widget<widget_label>(wp, wp_);
-				else if(i == 3) t.val_ = wd.add_widget<widget_label>(wp, wp_);
-				else if(i == 4) t.min_ = wd.add_widget<widget_label>(wp, wp_);
-				else if(i == 5) t.max_ = wd.add_widget<widget_label>(wp, wp_);
-				else if(i == 6) t.unit_ = wd.add_widget<widget_label>(wp, wp_);
+				else if(i == 2) t.val_ = wd.add_widget<widget_label>(wp, wp_);
+				else if(i == 3) t.min_ = wd.add_widget<widget_label>(wp, wp_);
+				else if(i == 4) t.max_ = wd.add_widget<widget_label>(wp, wp_);
+				else if(i == 5) t.unit_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 		}
 
@@ -134,7 +131,7 @@ namespace app {
 			str_total_(nullptr), str_pass_(nullptr), str_fail_(nullptr), str_retry_(nullptr),
 			csv_idx_(nullptr), table_(nullptr),
 			units_(), ena_(false),
-			total_(0), pass_(0), fail_(0), retry_(0),
+			total_(0), pass_(0), fail_(0),
 			index_(1), mobj_()
 		{ }
 
@@ -199,7 +196,7 @@ namespace app {
 				wd.add_widget<widget_text>(wp, wp_);
 			}
 			{
-				widget::param wp(vtx::irect(x + 700, y + 50, 300, 100), dialog_);
+				widget::param wp(vtx::irect(x + 750, y + 50, 300, 100), dialog_);
 				wp.pre_group_ = widget::PRE_GROUP::_4;
 				widget_text::param wp_("OK");
 				wp_.text_param_.font_size_ = 96;
@@ -269,7 +266,8 @@ namespace app {
 			y += 40;
 			{
 				widget::param wp(vtx::irect(ww - 265, y, 90, 35), dialog_);
-				widget_text::param wp_("Retry:");
+//				widget_text::param wp_("Retry:");
+				widget_text::param wp_;
 				wp_.text_param_.placement_
 					= vtx::placement(vtx::placement::holizontal::LEFT,
 									 vtx::placement::vertical::CENTER);
@@ -282,7 +280,7 @@ namespace app {
 				str_retry_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 			static const int lh = 32;  // ラベルの高さ
-			static const int lw = 700;
+			static const int lw = 620;
 			x = ww - lw - 24 - 15;
 			{  // 試料番号設定
 				{
@@ -310,7 +308,6 @@ namespace app {
 			add_unit_label_(dialog_, x, y, lh, units_str_);
 	  		units_str_.symbol_->set_text("検査項目");
 	  		units_str_.okng_->set_text("合否");
-	  		units_str_.retry_->set_text("リトライ");
 	  		units_str_.val_->set_text("結果");
 	  		units_str_.min_->set_text("最小");
 	  		units_str_.max_->set_text("最大");
@@ -368,9 +365,47 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void update()
 		{
+			str_retry_->set_state(gui::widget::state::ENABLE, false);
+
 			bool ena = dialog_->get_enable();
 			if(!ena_ && ena) {
 				csv& c = project_.at_csv1();
+				// 試料数のカウント
+				total_ = 0;
+				pass_ = 0;
+				fail_ = 0;
+				for(uint32_t i = 0; i < c.get_rows(); ++i) {
+					auto vals = c.get(1, 9 + i);
+					if(vals.empty()) continue;
+					++total_;
+					uint32_t okc = 0;
+					uint32_t cnt = 0;
+					for(uint32_t j = 0; j < 50; ++j) {
+						auto vals = c.get(j + 1, 9 + i);
+						auto mins = c.get(j + 1, 3);
+						auto maxs = c.get(j + 1, 2);
+						if(!vals.empty() && !mins.empty() && !maxs.empty()) {
+							float val = 0.0f;
+							utils::input("%f", vals.c_str()) % val;
+							float min = 0.0f;
+							utils::input("%f", mins.c_str()) % min;
+							float max = 0.0f;
+							utils::input("%f", maxs.c_str()) % max;
+							++cnt;
+// std::cout << vals << " " << mins << " " << maxs << std::endl;
+							if(min <= val && val <= max) {
+								++okc;
+							}
+						} else {
+							break;
+						}
+					}
+// std::cout << okc << ", " << cnt << std::endl;
+					if(okc == 0 || cnt == 0) ;
+					else if(okc == cnt) ++pass_;
+					else ++fail_; 
+				}
+
 				{
 					auto ts = project_.get_csv1_timestamp();
 					struct tm* t = localtime(&ts);
@@ -383,16 +418,12 @@ namespace app {
 					str_date_->set_text(s);
 				}
 				str_title_->set_text(project_.get_project_title());
-				total_ = 0;
-				pass_ = 0;
-				fail_ = 0;
+
 				uint32_t nocnt = 0;
 				for(uint32_t i = 0; i < 50; ++i) {
 					auto sym = c.get(i + 1, 1);
 					if(sym.empty()) break;
 					units_[i].symbol_->set_text(sym);
-					std::string ret = "0";  // リトライ
-					units_[i].retry_->set_text(ret);
 					auto vals = c.get(i + 1, 9 + index_ - 1);
 					units_[i].val_->set_text(vals);
 					auto mins = c.get(i + 1, 3);
@@ -408,17 +439,17 @@ namespace app {
 						utils::input("%f", maxs.c_str()) % max;
 						if(min <= val && val <= max) {
 							units_[i].okng_->set_text("○");
-							++pass_;
+//							++pass_;
 						} else {
 							units_[i].okng_->set_text("×");
-							++fail_;
+//							++fail_;
 						}
 					} else {
 						units_[i].okng_->set_text("－");
-						++nocnt;
+//						++nocnt;
 					}
 					units_[i].unit_->set_text(c.get(i + 1, 4));
-					++total_;
+//					++total_;
 				}
 				if(total_ == nocnt) {
 					str_result_->set_text("Ready");
@@ -434,7 +465,6 @@ namespace app {
 			str_total_->set_text((boost::format("%d") % total_).str());
 			str_pass_->set_text((boost::format("%d") % pass_).str());
 			str_fail_->set_text((boost::format("%d") % fail_).str());
-			str_retry_->set_text((boost::format("%d") % retry_).str());
 		}
 
 

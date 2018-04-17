@@ -758,10 +758,11 @@ namespace app {
 		double					time_meas_delay_;
 
 		void volt_scale_conv_(uint32_t ch, const WAVES::analize_param& ap, info_t& t)
-		{ 
-			t.min_[ch] = get_volt_scale_limit_(ch) * ap.min_;
-			t.max_[ch] = get_volt_scale_limit_(ch) * ap.max_;
-			t.average_[ch] = get_volt_scale_limit_(ch) * ap.average_;
+		{
+			float gain = 1.0f / sample_param_.gain[ch];
+			t.min_[ch] = get_volt_scale_limit_(ch) * ap.min_ * gain;
+			t.max_[ch] = get_volt_scale_limit_(ch) * ap.max_ * gain;
+			t.average_[ch] = get_volt_scale_limit_(ch) * ap.average_ * gain;
 		}
 
 
@@ -794,6 +795,7 @@ namespace app {
 					auto a = waves_.get(i, sample_param_.rate, org);
 					a *= get_optional_gain_(i);
 					a *= get_volt_scale_limit_(i);
+					a /= sample_param_.gain[i];
 					if(get_ch(i).gnd_->get_check()) {
 						a = 0.0f;
 					}
@@ -931,7 +933,7 @@ namespace app {
 					auto srate = sample_param_.rate;
 					auto ch = time_mesa_ch_->get_select_pos();
 					auto ana = waves_.analize(ch, srate, 0.0, time_meas_delay_ + srate, srate);
-					tm = ana.max_;
+					tm = ana.max_ / sample_param_.gain[ch];
 					waves_.at_info().delay_color_ = waves_.get_info().volt_color_[ch];
 				}
 				break;
@@ -941,7 +943,7 @@ namespace app {
 					auto srate = sample_param_.rate;
 					auto ch = time_mesa_ch_->get_select_pos();
 					auto ana = waves_.analize(ch, srate, 0.0, time_meas_delay_ + srate, srate);
-					tm = ana.min_;
+					tm = ana.min_ / sample_param_.gain[ch];
 					waves_.at_info().delay_color_ = waves_.get_info().volt_color_[ch];
 				}
 				break;
@@ -951,7 +953,7 @@ namespace app {
 					auto srate = sample_param_.rate;
 					auto ch = time_mesa_ch_->get_select_pos();
 					auto ana = waves_.analize(ch, srate, 0.0, time_meas_delay_ + srate, srate);
-					tm = ana.average_;
+					tm = ana.average_ / sample_param_.gain[ch];
 					waves_.at_info().delay_color_ = waves_.get_info().volt_color_[ch];
 				}
 				break;
@@ -1662,12 +1664,15 @@ namespace app {
 			mesa_filt_->load(pre);
 			org_trg_->load(pre);
 			org_slope_->load(pre);
+			org_slope_->exec();
 			org_ena_->load(pre);
 			fin_trg_->load(pre);
 			fin_slope_->load(pre);
+			fin_slope_->exec();
 			fin_ena_->load(pre);
 			time_mesa_ch_->load(pre);
 			time_delay_->load(pre);
+			time_delay_->exec();
 			time_delay_ena_->load(pre);
 		}
 

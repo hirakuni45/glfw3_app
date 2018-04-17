@@ -114,11 +114,11 @@ namespace app {
 			}
 #endif
 			{  // 検査記号
-				widget::param wp(vtx::irect(ofsx, ofsy, 90, 40), root);
+				widget::param wp(vtx::irect(ofsx, ofsy, 150, 40), root);
 				widget_label::param wp_("", false);
 				symbol_ = wd.add_widget<widget_label>(wp, wp_);
 			}
-			ofsx += 100;
+			ofsx += 160;
 			{  // リトライ回数
 				widget::param wp(vtx::irect(ofsx, ofsy, 90, 40), root);
 				widget_spinbox::param wp_(1, 1, 5);

@@ -622,7 +622,15 @@ namespace app {
 			@return サンプリング・パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		const wave_cap::sample_param& get_sample_param() const { return wdm_.sample_param_; }
+		const wave_cap::sample_param& get_sample_param() const {
+			if(sheet_->get_select_pos() == 2) {  // WDM/DC1 (動特性）
+				return wdm_.sample_param_;
+			} else if(sheet_->get_select_pos() == 3) {  // THR 熱抵抗
+				return wdm_.sample_param_;
+			} else {
+				return wdm__.sample_param_;
+			}
+		}
 
 
 		//-----------------------------------------------------------------//

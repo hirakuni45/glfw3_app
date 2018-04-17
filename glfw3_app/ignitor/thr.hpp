@@ -83,8 +83,10 @@ namespace app {
 		thr_t		thr_;
 
 		uint32_t	id_;
-
 		uint32_t	thr_id_;
+
+		bool		send_task_;
+		std::string	last_cmd_;
 
 		std::string build_sub_() const
 		{
@@ -92,11 +94,10 @@ namespace app {
 			{  // DC2 S15, S28, 定電圧１４Ｖ、
 				uint32_t dc2_sw = 0b10000000000001;
 				s += (boost::format("dc2 D2SW%04X\n") % dc2_sw).str();
-				kikusui_.set_output(1);
-				kikusui_.set_volt(14.0f, 0.1f);  // 14V 定電圧、最大 0.1A
-				uint16_t delay = 10;
-				s += (boost::format("delay %d\n") % delay).str();
+				client_.send_data(s);
 			}
+
+			s.clear();
 			{  // WGM: S45, S48, 内臓電源電圧 7.2V、出力 OFF
 				// S44, S41, S42, S43, S44
 				uint16_t wgm_sw = 0b01001;
@@ -158,7 +159,7 @@ namespace app {
 			current_(nullptr), count_(nullptr),
 			probe_(nullptr),
 			exec_(nullptr), all_(nullptr),
-			thr_(), id_(0), thr_id_(0)
+			thr_(), id_(0), thr_id_(0), send_task_(false)
 			{ }
 
 
@@ -178,7 +179,6 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		const std::string get_unit_str() const {
-//			return "℃/W";
 			return "C/W";
 		}
 
@@ -302,6 +302,7 @@ namespace app {
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
 				exec_->at_local_param().select_func_ = [=](int n) {
 					std::string s = build_sub_();
+
 					thr_t t;
 					uint16_t sw = 0;
 					for(int i = 0; i < 5; ++i) {
@@ -316,7 +317,10 @@ namespace app {
 					}
 					s += t.build();
 // std::cout << s << std::endl;
-					client_.send_data(s);
+					last_cmd_ = s;
+					send_task_ = true;
+//					uint16_t delay = 10;
+//					s += (boost::format("delay %d\n") % delay).str();
 				};
 			}
 			{
@@ -347,6 +351,13 @@ namespace app {
 		void update()
 		{
 			exec_->set_stall(!client_.probe());
+
+			if(send_task_) {
+				kikusui_.set_output(1);
+				kikusui_.set_volt(14.0f, 0.1f);  // 14V 定電圧、最大 0.2A
+				client_.send_data(last_cmd_);
+				send_task_ = false;
+			}
 
 			if(id_ != wave_cap_.get_treg_value_id()) {
 				id_ = wave_cap_.get_treg_value_id();

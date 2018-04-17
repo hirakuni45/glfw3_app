@@ -97,7 +97,7 @@ namespace app {
 				4.0f,
 				8.0f
 			};
-			if(n == 1) return tbls[n] * 8.0f; 
+			if(ch == 1) return tbls[n] * 8.0f; 
 			else return tbls[n];
 		}
 
