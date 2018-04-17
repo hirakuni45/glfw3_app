@@ -122,7 +122,9 @@ namespace app {
 				if(ena) {
 					s += "delay 2\n";
 					s += (boost::format("crm CRD?1\n")).str();
+					s += "delay 1\n";
 					s += (boost::format("crm CRR?1\n")).str();
+					s += "delay 1\n";
 					s += (boost::format("crm CRC?1\n")).str();
 				}
 				return s;
@@ -247,8 +249,8 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void startup()
 		{
-//			crm_t t;
-//			client_.send_data(t.build());
+			crm_t t;
+			client_.send_data(t.build());
 		}
 
 
@@ -325,6 +327,7 @@ namespace app {
 					last_cmd_ = s;
 					dummy_loop_ = DUMMY_LOOP_COUNT;
 					ans_->set_text("");
+					net_regs_->set_text("");
 				};
 			}
 			{
@@ -348,6 +351,7 @@ namespace app {
 					ena_refs_->set_stall(!ena, widget::STALL_GROUP::_1);
 					carib_type_->set_stall(!ena, widget::STALL_GROUP::_1);
 					ans_->set_text("");
+					net_regs_->set_text("");
 					last_cmd_.clear();
 				};
 			}
@@ -359,6 +363,10 @@ namespace app {
 					auto n = carib_type_->get_select_pos();
 					if(n >= 4) {  // 200mA
 						n = 3;
+						carib_task_ = carib_task::REG;
+					} else {
+						uint32_t ct = freq_->get_select_pos() * 4 + carib_type_->get_select_pos();
+						carib_task_ = static_cast<carib_task>(ct + 1);
 					}
 					auto s = make_carib_param_(n);
 					crdd_id_ = client_.get_mod_status().crdd_id_;
@@ -366,17 +374,13 @@ namespace app {
 					crcd_id_ = client_.get_mod_status().crcd_id_;
 					client_.send_data(s);
 					last_cmd_ = s;
-					dummy_loop_ = DUMMY_LOOP_COUNT;
-					uint32_t ct = freq_->get_select_pos() * 4 + carib_type_->get_select_pos();
-					carib_task_ = static_cast<carib_task>(ct + 1);
+					dummy_loop_ = DUMMY_LOOP_COUNT;					
 				};
 			}
 			{  // 校正データ、有効／無効
-				widget::param wp(vtx::irect(ofsx + 290, ofsy + 50, 90, 40), root);
-				widget_check::param wp_("有効");
+				widget::param wp(vtx::irect(ofsx + 290, ofsy + 50, 200, 40), root);
+				widget_check::param wp_("200mA/0Ohm");
 				ena_refs_ = wd.add_widget<widget_check>(wp, wp_);
-				ena_refs_->at_local_param().select_func_ = [=](bool ena) {
-				};
 			}
 			for(uint32_t i = 0; i < 5; ++i) {  // 校正データ表示
 				widget::param wp(vtx::irect(ofsx + i * 140, ofsy + 250, 120, 40), root);
@@ -398,7 +402,7 @@ namespace app {
 				info_->enable(false);
 			}
 			{  // 合成回路、抵抗設定
-				widget::param wp(vtx::irect(ofsx + 550, ofsy + 50, 110, 40), root);
+				widget::param wp(vtx::irect(ofsx + 500, ofsy + 50, 200, 40), root);
 				widget_label::param wp_;
 				net_regs_ = wd.add_widget<widget_label>(wp, wp_);
 			}
@@ -444,17 +448,17 @@ namespace app {
 			if(crdd_id_ != client_.get_mod_status().crdd_id_) {
 				crdd_id_ = client_.get_mod_status().crdd_id_;
 				crdd_val_ = client_.get_mod_status().crdd_;
-utils::format("CRDD: %08X\n") % crdd_val_;
+// utils::format("CRDD: %08X\n") % crdd_val_;
 			}
 			if(crrd_id_ != client_.get_mod_status().crrd_id_) {
 				crrd_id_ = client_.get_mod_status().crrd_id_;
 				crrd_val_ = client_.get_mod_status().crrd_;
-utils::format("CRRD: %08X\n") % crrd_val_;
+// utils::format("CRRD: %08X\n") % crrd_val_;
 			}
 			if(crcd_id_ != client_.get_mod_status().crcd_id_) {
 				crcd_id_ = client_.get_mod_status().crcd_id_;
 				crcd_val_ = client_.get_mod_status().crcd_;
-utils::format("CRCD: %08X\n\n") % crcd_val_;
+// utils::format("CRCD: %08X\n\n") % crcd_val_;
 				trg = true;
 			}
 
