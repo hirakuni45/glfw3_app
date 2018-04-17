@@ -154,7 +154,7 @@ namespace app {
 		void set_volt(float volt, float curr)
 		{
 			auto s = (boost::format("CURR %5.4f A;VOLT %5.4f V\r\n")
-				% (curr + refc_) % volt).str();
+				% (curr + refc_) % (volt - 0.09f)).str();
 			serial_.write(s.c_str(), s.size());
 // std::cout << "VOLT: " << s << std::flush;
 		}
@@ -219,7 +219,7 @@ namespace app {
 			@return 電圧
 		*/
 		//-----------------------------------------------------------------//
-		float get_volt() const { return volt_; }
+		float get_volt() const { return volt_ + 0.09f; }
 
 
 		//-----------------------------------------------------------------//
@@ -272,7 +272,10 @@ namespace app {
 			case task::state:
 				if(get_text_()) {
 					idn_ = rt_;
-					task_ = task::refc;
+					// 定電流源は正確なので測定は省く（4.0206mA）
+					refc_ = 4.0206e-3;
+//					task_ = task::refc;
+					task_ = task::idle;
 				} else {
 					if(loop_ > 0) {
 						--loop_;
