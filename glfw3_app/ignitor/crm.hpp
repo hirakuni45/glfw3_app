@@ -40,6 +40,8 @@ namespace app {
 	{
 		static const uint32_t DUMMY_LOOP_COUNT = 4;  // ダミーループ
 
+		static constexpr const char* CARIB_DATA_EXT_ = "crb";
+
 		utils::director<core>&	director_;
 		net::ign_client_tcp&	client_;
 		interlock&				interlock_;
@@ -65,6 +67,10 @@ namespace app {
 
 		gui::widget_list*		carib_type_;
 		gui::widget_text*		carib_data_[4 * 3];
+
+		gui::widget_button*		carib_load_;
+		gui::widget_button*		carib_save_;
+		gui::widget_label*		carib_file_;
 
 		double					crrd_value_;
 		double					crcd_value_;
@@ -98,8 +104,11 @@ namespace app {
 		std::string				last_cmd_;
 
 		uint32_t				crm_id_;
-
 		uint32_t				dummy_loop_;
+
+		std::string				proj_root_;
+		utils::select_file		load_filer_;
+		utils::select_file		save_filer_;
 
 		struct crm_t {
 			uint16_t	sw;		///< 14 bits
@@ -198,11 +207,24 @@ namespace app {
 			run_refs_(nullptr), ena_refs_(nullptr), reg_refs_{ nullptr },
 			dialog_(nullptr), info_(nullptr), net_regs_(nullptr),
 			carib_type_(nullptr), carib_data_{ nullptr },
+			carib_load_(nullptr), carib_save_(nullptr), carib_file_(nullptr),
 			crrd_value_(0.0), crcd_value_(0.0),
 			crdd_id_(0), crdd_val_(0), crrd_id_(0), crrd_val_(0), crcd_id_(0), crcd_val_(0),
 			carib_task_(carib_task::idle), last_cmd_(),
-			crm_id_(0), dummy_loop_(0)
+			crm_id_(0), dummy_loop_(0), load_filer_(), save_filer_()
 		{ }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  プロジェクト・ルートの設定
+			@param[in]	root	プロジェクト・ルート
+		*/
+		//-----------------------------------------------------------------//
+		void set_project_root(const std::string& root)
+		{
+			proj_root_ = root;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -429,6 +451,40 @@ namespace app {
 											 vtx::placement::vertical::CENTER);
 				carib_data_[i] = wd.add_widget<widget_text>(wp, wp_);
 			}
+			{  // 校正データロードボタン
+				widget::param wp(vtx::irect(ofsx + 550, ofsy + 250, 140, 40), root);
+				wp.pre_group_ = widget::PRE_GROUP::_5;
+				widget_button::param wp_("校正ロード");
+				carib_load_ = wd.add_widget<widget_button>(wp, wp_);
+				carib_load_->at_local_param().select_func_ = [=](uint32_t id) {
+					std::string filter = "校正データ(*.";
+					filter += CARIB_DATA_EXT_;
+					filter += ")\t*.";
+					filter += CARIB_DATA_EXT_;
+					filter += "\t";
+					load_filer_.open(filter, false, proj_root_);
+				};
+			}
+			{  // 校正データセーブボタン
+				widget::param wp(vtx::irect(ofsx + 700, ofsy + 250, 140, 40), root);
+				wp.pre_group_ = widget::PRE_GROUP::_5;
+				widget_button::param wp_("校正セーブ");
+				carib_save_ = wd.add_widget<widget_button>(wp, wp_);
+				carib_save_->at_local_param().select_func_ = [=](uint32_t id) {
+					std::string filter = "校正データ(*.";
+					filter += CARIB_DATA_EXT_;
+					filter += ")\t*.";
+					filter += CARIB_DATA_EXT_;
+					filter += "\t";
+					save_filer_.open(filter, true, proj_root_);
+				};
+			}
+			{  // キャリブレーション・ファイル
+				widget::param wp(vtx::irect(ofsx + 240, ofsy + 250, 300, 40), root);
+				wp.pre_group_ = widget::PRE_GROUP::_5;
+				widget_label::param wp_;
+				carib_file_ = wd.add_widget<widget_label>(wp, wp_);
+			}
 		}
 
 
@@ -439,6 +495,29 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void update()
 		{
+			if(load_filer_.state()) {
+				auto path = load_filer_.get();
+				if(!path.empty()) {
+					if(utils::get_file_ext(path).empty()) {
+						path += '.';
+						path += CARIB_DATA_EXT_;
+					}
+					load_carib(path);
+					carib_file_->set_text(utils::get_file_name(path));
+				}
+			}
+			if(save_filer_.state()) {
+				auto path = save_filer_.get();
+				if(!path.empty()) {
+					if(utils::get_file_ext(path).empty()) {
+						path += '.';
+						path += CARIB_DATA_EXT_;
+					}
+					save_carib(path);
+					carib_file_->set_text(utils::get_file_name(path));
+				}
+			}
+
 			exec_->set_stall(!client_.probe());
 
 			// モジュールから受け取ったパラメーターをＧＵＩに反映
@@ -596,6 +675,7 @@ namespace app {
 			for(uint32_t i = 0; i < 12; ++i) {
 				carib_data_[i]->save(pre);
 			}
+			carib_file_->save(pre);
 		}
 
 
@@ -616,15 +696,33 @@ namespace app {
 			ena_refs_->save(pre);
 			reg_refs_[0]->save(pre);
 			net_regs_->save(pre);
+			carib_type_->save(pre);
 			for(uint32_t i = 0; i < 12; ++i) {
 				carib_data_[i]->save(pre);
 			}
+			carib_file_->save(pre);
 		}
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief  セーブ（システム）
+			@brief  セーブ・キャリブレーション・データ
+			@param[in]	path	ファイル・パス
+		*/
+		//-----------------------------------------------------------------//
+		void save_carib(const std::string& path)
+		{
+			sys::preference pre;
+			for(uint32_t i = 0; i < 12; ++i) {
+				carib_data_[i]->save(pre);
+			}
+			pre.save(path);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  ロード（システム）
 			@param[in]	pre	プリファレンス
 		*/
 		//-----------------------------------------------------------------//
@@ -636,6 +734,7 @@ namespace app {
 			for(uint32_t i = 0; i < 12; ++i) {
 				carib_data_[i]->load(pre);
 			}
+			carib_file_->load(pre);
 		}
 
 
@@ -658,8 +757,40 @@ namespace app {
 			reg_refs_[0]->load(pre);
 			ena_refs_->exec();
 			net_regs_->load(pre);
+			carib_type_->load(pre);
 			for(uint32_t i = 0; i < 12; ++i) {
 				carib_data_[i]->load(pre);
+			}
+			carib_file_->load(pre);
+			// キャリブレーション・データのロード
+			auto path = carib_file_->get_text();
+			if(!path.empty()) {
+				auto fp = proj_root_;
+				if(!proj_root_.empty()) {
+					fp += '/';
+				}
+				fp += path;
+				if(utils::probe_file(fp)) {
+					load_carib(fp);
+				}
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  ロード・キャリブレーション・データ
+			@param[in]	path	ファイル・パス
+		*/
+		//-----------------------------------------------------------------//
+		void load_carib(const std::string& path)
+		{
+			sys::preference pre;
+			auto ret = pre.load(path);
+			if(ret) {
+				for(uint32_t i = 0; i < 12; ++i) {
+					carib_data_[i]->load(pre);
+				}
 			}
 		}
 	};
