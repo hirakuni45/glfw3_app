@@ -254,17 +254,16 @@ namespace app {
 				cmd_task_ = cmd_task::wdm_dc2_0;
 				break;
 			case cmd_task::wdm_dc2_0:
-				dc2__.exec_->exec();
+				dc2__.setup_sw();  // DC2 スイッチのみ有効にしておく
 				wgm__.exec_->exec();
 				cmd_task_ = cmd_task::wdm_dc2_1;
 				break;
 			case cmd_task::wdm_dc2_1:
 				wdm__.exec_->exec();
-				cmd_task_ = cmd_task::idle;
-//				cmd_task_ = cmd_task::wdm_dc2_2;
+				cmd_task_ = cmd_task::wdm_dc2_2;
 				break;
 			case cmd_task::wdm_dc2_2:
-
+				dc2__.exec_->exec();  // 制御電圧を出す
 				cmd_task_ = cmd_task::idle;
 				break;
 
@@ -396,7 +395,7 @@ namespace app {
 			wgm_(d, client_, interlock_),
 			crm_(d, client_, interlock_),
 			icm_(d, client_, interlock_),
-			wdm_(d, client_, interlock_),
+			wdm_(d, client_, interlock_, false),
 			thr_(d, client_, interlock_, kikusui_, wave_cap_),
 			dif_(d, project_.at_csv1()),
 			test_param_(d),
@@ -410,7 +409,7 @@ namespace app {
 			icm__(d, client_, interlock_),
 			dc2__(d, client_, interlock_, kikusui_),
 			wgm__(d, client_, interlock_),
-			wdm__(d, client_, interlock_),
+			wdm__(d, client_, interlock_, true),
 			cmd_task_(cmd_task::idle)
 		{ }
 
@@ -422,6 +421,15 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		const crm& get_crm() const { return crm_; } 
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  CRM の参照
+			@return CRM
+		*/
+		//-----------------------------------------------------------------//
+		crm& at_crm() { return crm_; } 
 
 
 		//-----------------------------------------------------------------//

@@ -56,6 +56,7 @@ namespace app {
 		wave_cap::sample_param	sample_param_;
 
 	private:
+		bool					init_;
 
 		static const uint32_t time_div_size_ = 16;
 		double get_time_div_() const {
@@ -169,20 +170,72 @@ namespace app {
 			return s;
 		}
 
+
+		std::string build_init_wdm_()
+		{
+			std::string s;
+			uint32_t cmd;
+
+			// SW
+			cmd = 0b00001000;
+			cmd <<= 16;
+			uint32_t sw = 0;
+			for(uint32_t i = 0; i < 4; ++i) {
+				sw <<= 1;
+				++sw;
+			}
+			cmd |= sw << 12;
+			s += (boost::format("wdm %06X\n") % cmd).str();
+			s += "delay 1\n";
+
+			static const uint8_t smtbl[] = {
+				0b01000110,  // 100M
+			};
+			// sampling freq
+			cmd = (0b00010000 << 16) | (smtbl[0] << 8);
+			s += (boost::format("wdm %06X\n") % cmd).str();
+			// channel gain
+			for(int i = 0; i < 4; ++i) {
+				cmd = ((0b00011000 | (i + 1)) << 16) | (0 << 13);
+				s += (boost::format("wdm %06X\n") % cmd).str();
+			}
+			{ // trigger level
+				cmd = (0b00101000 << 16);
+				int v = 32768;
+				cmd |= v;
+				s += (boost::format("wdm %06X\n") % cmd).str();
+			}
+			{  // trigger channel
+				cmd = (0b00100000 << 16);
+				uint8_t sub = 0;
+				sub |= 0x80;  // trigger ON
+				uint32_t ch = 0 << 6;  // ch0
+				ch |= 1;  // manual trigger
+				cmd |= static_cast<uint32_t>(ch) << 8;
+//				if(slope_->get_select_pos()) sub |= 0x40;
+				sub |= 1;  // window
+				cmd |= sub;
+				s += (boost::format("wdm %06X\n") % cmd).str();
+			}
+			return s;
+		}
+
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		wdm(utils::director<core>& d, net::ign_client_tcp& client, interlock& ilc) :
+		wdm(utils::director<core>& d, net::ign_client_tcp& client, interlock& ilc, bool init) :
 			director_(d), client_(client), interlock_(ilc),
 			sw_{ nullptr },
 			smpl_(nullptr), ch_(nullptr), slope_(nullptr), window_(nullptr),
 			level_(nullptr), cnv_(nullptr), level_va_(nullptr),
 			gain_{ nullptr },
 			exec_(nullptr),
-			sample_param_()
+			sample_param_(),
+			init_(init)
 		{ }
 
 
@@ -361,15 +414,6 @@ namespace app {
 					}
 				};
 			}
-#if 0
-			{  // Single, Manual トリガー選択
-				widget::param wp(vtx::irect(ofsx + 690, ofsy, 100, 40), root);
-				widget_list::param wp_;
-				wp_.init_list_.push_back("Single");
-				wp_.init_list_.push_back("Manual");
-				sm_trg_ = wd.add_widget<widget_list>(wp, wp_);
-			}
-#endif
 			{  // exec
 				widget::param wp(vtx::irect(d_w - 50, ofsy, 30, 30), root);
 				wp.pre_group_ = pg;
@@ -395,6 +439,11 @@ namespace app {
 //			if(client_.probe() && all_->get_check()) ena = true; 
 			if(client_.probe()) ena = true; 
 			exec_->set_stall(!ena);
+
+			if(ena && !init_) {
+				client_.send_data(build_init_wdm_());
+				init_ = true;
+			}
 		}
 
 
