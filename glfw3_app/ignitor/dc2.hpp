@@ -79,6 +79,13 @@ namespace app {
 
 			dc2_t() : sw(0), ena(0), mode(0), volt(0), curr(0) { }
 
+
+			std::string build_sw() const
+			{
+				return (boost::format("dc2 D2SW%04X\n") % sw).str();
+			}
+
+
 			std::string build() const
 			{
 				std::string s;
@@ -171,6 +178,25 @@ namespace app {
 			for(uint32_t i = 0; i < 14; ++i) {
 				sw_[i]->set_check(false);
 			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  セットアップ・スイッチ @n
+					スイッチのみ有効にする。
+		*/
+		//-----------------------------------------------------------------//
+		void setup_sw()
+		{
+			dc2_t t;
+			uint16_t sw = 0;
+			for(uint32_t i = 0; i < 14; ++i) {
+				sw <<= 1;
+				if(sw_[i]->get_check()) sw |= 1;
+			}
+			t.sw = sw;
+			client_.send_data(t.build_sw());
 		}
 
 
