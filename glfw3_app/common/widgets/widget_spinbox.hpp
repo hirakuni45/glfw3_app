@@ -203,6 +203,7 @@ namespace gui {
 			if(param_.min_pos_ <= pos && pos <= param_.max_pos_) { 
 				param_.sel_pos_ = pos;
 			}
+			exec();
 		}
 
 
@@ -451,6 +452,7 @@ namespace gui {
 
 			int err = 0;
 			if(!pre.get_integer(path + "/selector", param_.sel_pos_)) ++err;
+			exec();
 			return err == 0;
 		}
 	};
