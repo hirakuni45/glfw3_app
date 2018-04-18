@@ -38,7 +38,7 @@ namespace app {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class root_menu {
 
-		static const int32_t  app_version_ = 103;
+		static const int32_t  app_version_ = 104;
 
 		static const int ofs_x_ = 10;
 		static const int ofs_y_ = 10;
@@ -135,7 +135,7 @@ namespace app {
 
 		void set_csv_()
 		{
-			std::string st = (boost::format("%4.3f") % last_value_).str();
+			std::string st = (boost::format("%6.5f") % last_value_).str();
 			auto idx = project_.get_csv_index() - 1;
 			project_.at_csv1().set(unit_id_ + 1, 9 + idx, st);
 			project_.at_csv2().set(unit_id_ + 1, 5, st);
@@ -145,12 +145,12 @@ namespace app {
 				wave_cap_.enable();  // 波形編集を有効にする。
 				{
 					auto st = wave_cap_.get_time_scale();
-					std::string s = (boost::format("%4.3f") % st).str();
+					std::string s = (boost::format("%6.5f") % st).str();
 					project_.at_csv2().set(unit_id_ + 1, 6, s);
 				}
 				for(uint32_t i = 0; i < 4; ++i) {
 					auto sv = wave_cap_.get_volt_scale(i);
-					std::string s = (boost::format("%4.3f") % sv).str();
+					std::string s = (boost::format("%6.5f") % sv).str();
 					project_.at_csv2().set(unit_id_ + 1, 7 + i, s);
 				}
 			}
@@ -568,6 +568,7 @@ namespace app {
 				save_project_->set_stall(false);
 				auto path = project_.get_project_root();
 				wave_cap_.set_project_root(path);
+				inspection_.at_crm().set_project_root(path);	
 				proj_path_->set_text(path);
 				if(project_.get_unit_count() > 0) {
 					// プロジェクトの設定が有効なら、ストールを解除
@@ -698,14 +699,14 @@ namespace app {
 					top += (boost::format("単位: [%s]\n") % unit).str();
 					std::string min;
 					if(v.min_ >= 0.001) {
-						min = (boost::format("%4.3f") % v.min_).str(); 
+						min = (boost::format("%6.5f") % v.min_).str(); 
 					} else {
 						min = (boost::format("%e") % v.min_).str();
 					}
 					top += (boost::format("Min: %s [%s]\n") % min % unit).str();
 					std::string max;
 					if(v.max_ >= 0.001) {
-						max = (boost::format("%4.3f") % v.max_).str(); 
+						max = (boost::format("%6.5f") % v.max_).str(); 
 					} else {
 						max = (boost::format("%e") % v.max_).str();
 					}
@@ -879,9 +880,9 @@ namespace app {
 				{
 					inspection_.offline_all();
 					std::string str;
-					str += (boost::format("Min: %4.3f\n") % value_.min_).str();
-					str += (boost::format("Max: %4.3f\n") % value_.max_).str();
-					str += (boost::format("Val: %4.3f\n") % last_value_).str();
+					str += (boost::format("Min: %6.5f\n") % value_.min_).str();
+					str += (boost::format("Max: %6.5f\n") % value_.max_).str();
+					str += (boost::format("Val: %6.5f\n") % last_value_).str();
 					str += (boost::format("「%s」") % value_.symbol_).str();
 					str += "検査エラー：\nデータ保存しますか？";
 					okc_dialog_->set_text(str);
