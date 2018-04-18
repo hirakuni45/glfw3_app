@@ -452,7 +452,8 @@ namespace gui {
 
 			int err = 0;
 			if(!pre.get_integer(path + "/selector", param_.sel_pos_)) ++err;
-			exec();
+// std::cout << param_.sel_pos_ << std::endl;
+			initial_ = false;
 			return err == 0;
 		}
 	};
