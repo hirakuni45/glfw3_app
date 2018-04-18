@@ -110,7 +110,6 @@ namespace app {
 			}
 		};
 
-
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -316,6 +315,7 @@ namespace app {
 						if(sw_[i]->get_check()) sw |= 1;
 					}
 					t.sw = sw;
+					client_.send_data(t.build());
 #ifdef DC2_KIKUSUI
 					kikusui_.set_output(ena_->get_check());
 					int err = 0;
@@ -357,7 +357,6 @@ namespace app {
 						t.curr = v / 100e-6;
 					}
 #endif
-					client_.send_data(t.build());
 					probe_->set_text("");
 				};
 			}
@@ -427,6 +426,7 @@ namespace app {
 				++id_;
 			}
 			if(id != id_) {
+				kikusui_.set_curr(0, 0);
 				kikusui_.set_output(0);
 			}
 #endif

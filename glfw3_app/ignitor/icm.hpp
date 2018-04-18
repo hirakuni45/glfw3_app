@@ -111,7 +111,9 @@ namespace app {
 		void startup()
 		{
 			icm_t t;
-			client_.send_data(t.build());
+			auto s = t.build();
+			std::cout << s << std::endl;
+			client_.send_data(s);
 // std::cout << "icm startup" << std::endl;
 		}
 
@@ -156,8 +158,9 @@ namespace app {
 						if(sw_[i]->get_check()) sw |= 1;
 					}
 					t.sw = sw;
-// std::cout << "icm exec" << std::endl;
-					client_.send_data(t.build());
+					auto s = t.build();
+std::cout << s << std::endl;
+					client_.send_data(s);
 				};
 			}
 			{

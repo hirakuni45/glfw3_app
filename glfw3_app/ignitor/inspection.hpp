@@ -120,6 +120,8 @@ namespace app {
 		wgm						wgm__;
 		wdm						wdm__;
 
+		uint32_t				cmd_wait_;
+
 		struct vc_t {
 			float		volt_max_;	/// 0.1V step
 			float		volt_;		/// 0.1V step
@@ -150,6 +152,7 @@ namespace app {
 
 			wdm_dc2,	///< WDM/DC2 開始
 			wdm_dc2_0,
+			wdm_dc2_w,
 			wdm_dc2_1,
 			wdm_dc2_2,
 
@@ -195,6 +198,7 @@ namespace app {
 
 			case cmd_task::init_all:
 				icm_.startup();
+				icm__.startup();
 				cmd_task_ = cmd_task::init_all0;
 				break;
 			case cmd_task::init_all0:
@@ -203,6 +207,7 @@ namespace app {
 				break;
 			case cmd_task::init_all1:
 				dc2_.startup();
+				dc2__.startup();
 				cmd_task_ = cmd_task::init_all2;
 				break;
 			case cmd_task::init_all2:
@@ -211,10 +216,12 @@ namespace app {
 				break;
 			case cmd_task::init_all3:
 				wgm_.startup();
+				wgm__.startup();
 				cmd_task_ = cmd_task::init_all4;
 				break;
 			case cmd_task::init_all4:
 				wdm_.startup();
+				wdm__.startup();
 				cmd_task_ = cmd_task::idle;
 				break;
 
@@ -256,7 +263,15 @@ namespace app {
 			case cmd_task::wdm_dc2_0:
 				dc2__.setup_sw();  // DC2 スイッチのみ有効にしておく
 				wgm__.exec_->exec();
-				cmd_task_ = cmd_task::wdm_dc2_1;
+				cmd_task_ = cmd_task::wdm_dc2_w;
+				cmd_wait_ = 40;
+				break;
+			case cmd_task::wdm_dc2_w:
+				if(cmd_wait_ > 0) {
+					--cmd_wait_;
+				} else {
+					cmd_task_ = cmd_task::wdm_dc2_1;
+				}
 				break;
 			case cmd_task::wdm_dc2_1:
 				wdm__.exec_->exec();
@@ -276,7 +291,7 @@ namespace app {
 
 
 			case cmd_task::off_all:
-				wdm_.startup();
+			dc1_.startup();
 				cmd_task_ = cmd_task::off_all0;
 				break;
 			case cmd_task::off_all0:
@@ -284,7 +299,7 @@ namespace app {
 				cmd_task_ = cmd_task::off_all1;
 				break;
 			case cmd_task::off_all1:
-				dc1_.startup();
+				wdm_.startup();
 				cmd_task_ = cmd_task::off_all2;
 				break;
 			case cmd_task::off_all2:
@@ -395,7 +410,7 @@ namespace app {
 			wgm_(d, client_, interlock_),
 			crm_(d, client_, interlock_),
 			icm_(d, client_, interlock_),
-			wdm_(d, client_, interlock_, false),
+			wdm_(d, client_, interlock_, true),
 			thr_(d, client_, interlock_, kikusui_, wave_cap_),
 			dif_(d, project_.at_csv1()),
 			test_param_(d),
@@ -409,7 +424,7 @@ namespace app {
 			icm__(d, client_, interlock_),
 			dc2__(d, client_, interlock_, kikusui_),
 			wgm__(d, client_, interlock_),
-			wdm__(d, client_, interlock_, true),
+			wdm__(d, client_, interlock_, false),
 			cmd_task_(cmd_task::idle)
 		{ }
 

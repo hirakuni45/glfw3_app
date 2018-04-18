@@ -405,18 +405,22 @@ namespace app {
 				}
 				if(pos_ != nullptr) {
 					pos_->load(pre);
+					pos_->exec();
 				}
 				if(scale_ != nullptr) {
 					scale_->load(pre);
+					scale_->exec();
 				}
 				if(mes_ != nullptr) {
 					mes_->load(pre);
 				}
 				if(org_ != nullptr) {
 					org_->load(pre);
+					org_->exec();
 				}
 				if(len_ != nullptr) {
 					len_->load(pre);
+					len_->exec();
 				}
 				ena_->exec();
 				gnd_->exec();
@@ -594,9 +598,11 @@ namespace app {
 				}
 				if(org_ != nullptr) {
 					org_->load(pre);
+					org_->exec();
 				}
 				if(len_ != nullptr) {
 					len_->load(pre);
+					len_->exec();
 				}
 			}
 
@@ -725,9 +731,11 @@ namespace app {
 			{
 				if(scale_ != nullptr) {
 					scale_->load(pre);
+					scale_->exec();
 				}
 				if(offset_ != nullptr) {
 					offset_->load(pre);
+					offset_->exec();
 				}
 				if(trg_gate_ != nullptr) {
 					trg_gate_->load(pre);
@@ -1574,12 +1582,18 @@ namespace app {
 						waves_.copy(1, client_.get_treg(i) + sz / 2, sz / 2, sz / 2);
 					} else {
 						waves_.copy(1, client_.get_treg(i) + sz / 2, sz / 2, 0);
-						treg_2nd_ = waves_.analize(1, 1.0, (800.0 - 50.0), 100.0, 1.0);
-						treg_1st_ = waves_.analize(1, 1.0, (1024.0 + 800.0 - 50.0), 100.0, 1.0);
+//						treg_2nd_ = waves_.analize(1, 1.0, (800.0 - 50.0), 100.0, 1.0);
+//						treg_1st_ = waves_.analize(1, 1.0, (1024.0 + 800.0 - 50.0), 100.0, 1.0);
+						treg_2nd_ = waves_.analize(1, 1.0, (800.0 - 100.0), 128.0 + 64.0, 1.0);
+						treg_1st_ = waves_.analize(1, 1.0, (1024.0 + 800.0 - 100.0), 128.0 + 64.0, 1.0);
+// std::cout << "1ST: " << treg_1st_.average_ << std::endl;
+// std::cout << "2ND: " << treg_2nd_.average_ << std::endl;
 						float a = treg_1st_.average_ - treg_2nd_.average_; 
+// std::cout << "  D: " << a << std::endl;
 						float u = get_volt_scale_limit_(1);
 						treg_value_  = a * u / 64.0;
 						auto b = waves_.analize(1, 1.0, (256.0 - 32.0), 64.0, 1.0);
+// std::cout << "3RD: " << b.average_ << std::endl;
 						treg_value2_ = b.average_ * u / 64.0;
 						++treg_value_id_;
 					}

@@ -915,21 +915,20 @@ namespace app {
 				} else {
 					task_ = task::loop;
 					bool offall = true;
-					auto tmb = inspection_.get_test_mode();
+					auto tmb1 = inspection_.get_test_mode();
 					bool f = load_unit_file_();
-					if(tmb == inspection::test_mode::WD1 || tmb == inspection::test_mode::WD2) {
-						tmb = inspection_.get_test_mode();
-						if(tmb == inspection::test_mode::WD1 ||
-						   tmb == inspection::test_mode::WD2) {
-							offall = false;
-						}
+					auto tmb2 = inspection_.get_test_mode();
+					if(tmb1 == inspection::test_mode::WD1 && tmb2 == inspection::test_mode::WD1) {
+						offall = false;
+					} else if(tmb1 == inspection::test_mode::WD2 && tmb2 == inspection::test_mode::WD2) {
+						offall = false;
 					}
 					if(offall) {
 						inspection_.offline_all();
-// std::cout << "Off ALL" << std::endl;
+std::cout << "Off ALL" << std::endl;
 					} else {
 						inspection_.offline_all_without_msw();
-// std::cout << "Off ALL (without MSW)" << std::endl;
+std::cout << "Off ALL (without MSW)" << std::endl;
 					}
 				}
 				break;

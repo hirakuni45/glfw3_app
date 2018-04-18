@@ -422,6 +422,7 @@ namespace app {
 				exec_->at_local_param().select_func_ = [=](int n) {
 					setup();
 					auto s = build_wdm_();
+// std::cout << s << std::endl;
 					client_.send_data(s);
 				};
 			}
