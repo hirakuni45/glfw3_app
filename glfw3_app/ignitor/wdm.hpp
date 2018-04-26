@@ -311,7 +311,7 @@ namespace app {
 				wp_.init_list_.push_back(" 20dB");
 				gain_[i] = wd.add_widget<widget_list>(wp, wp_);
 				if(i == 1) {
-					gain_[i]->select(0);
+					gain_[i]->select(1);
 				} else {
 					gain_[i]->select(4);
 				}
@@ -383,10 +383,11 @@ namespace app {
 				widget_check::param wp_("ＶＡ");
 				cnv_ = wd.add_widget<widget_check>(wp, wp_);
 				cnv_->at_local_param().select_func_ = [=](bool f) {
-					if(f) {
+					if(f) {  // 数値から、電圧、電流に変換
 						level_->set_stall();
 						level_va_->set_stall(false);
-					} else {
+						
+					} else {  // 電圧、電流から数値に変換
 						level_->set_stall(false);
 						level_va_->set_stall();
 					}
@@ -401,7 +402,7 @@ namespace app {
 					static const float vat[4] = { 32.768f, 655.36f, 16.384f, 65.536f };
 					auto n = ch_->get_select_pos();
 					auto g = get_gain_rate_(n);
-					auto s = tools::limitf(str, -vat[n] * g, vat[n] * g, "%4.3f");
+					auto s = tools::limitf(str, -vat[n] / g, vat[n] / g, "%4.3f");
 					if(s.empty()) {
 						s = "0.0";
 					}
@@ -470,7 +471,7 @@ namespace app {
 					s += "電圧：±";
 				}
 				auto a = get_gain_rate_(n);
-				s += (boost::format("%4.3f") % (vat[n] * a)).str();
+				s += (boost::format("%4.3f") % (vat[n] / a)).str();
 				s += vau[n];
 				s += "）";
 				tools::set_help(chip, level_va_, s);

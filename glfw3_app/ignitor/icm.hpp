@@ -112,9 +112,7 @@ namespace app {
 		{
 			icm_t t;
 			auto s = t.build();
-			std::cout << s << std::endl;
 			client_.send_data(s);
-// std::cout << "icm startup" << std::endl;
 		}
 
 
@@ -159,7 +157,6 @@ namespace app {
 					}
 					t.sw = sw;
 					auto s = t.build();
-std::cout << s << std::endl;
 					client_.send_data(s);
 				};
 			}

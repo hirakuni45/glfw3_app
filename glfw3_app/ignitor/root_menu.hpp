@@ -95,6 +95,7 @@ namespace app {
 			mctrl,	///< モジュール制御
 			sence,	///< センシング
 			sync,	///< 同期
+			sync2,	///< 同期２
 			error,	///< エラー
 			sync_error,   ///< エラー同期
 			retry,	///< リトライ
@@ -913,7 +914,13 @@ namespace app {
 					project_.save_proj();
 					task_ = task::fin;
 				} else {
-					task_ = task::loop;
+					task_ = task::sync2;
+				}
+				break;
+
+			case task::sync2:
+				if(inspection_.get_task_busy()) break;
+				{
 					bool offall = true;
 					auto tmb1 = inspection_.get_test_mode();
 					bool f = load_unit_file_();
@@ -925,11 +932,10 @@ namespace app {
 					}
 					if(offall) {
 						inspection_.offline_all();
-std::cout << "Off ALL" << std::endl;
 					} else {
 						inspection_.offline_all_without_msw();
-std::cout << "Off ALL (without MSW)" << std::endl;
 					}
+					task_ = task::loop;
 				}
 				break;
 
