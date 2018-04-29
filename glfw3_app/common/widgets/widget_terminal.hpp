@@ -57,6 +57,8 @@ namespace gui {
 
 		bool				focus_;
 
+		vtx::ipos			scroll_ofs_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -65,7 +67,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_terminal(widget_director& wd, const widget::param& bp, const param& p) :
 			widget(bp), wd_(wd), param_(p), terminal_(), interval_(0),
-			focus_(false) { }
+			focus_(false), scroll_ofs_(0) { }
 
 
 		//-----------------------------------------------------------------//
@@ -200,6 +202,12 @@ namespace gui {
 				focus_ = false;
 			}
 
+			if(get_focus()) {
+				const vtx::spos& scr = wd_.get_scroll();
+				scroll_ofs_ += scr;
+				if(scroll_ofs_.y < 0) scroll_ofs_.y = 0;
+			}
+
 			if(get_param().parents_ && get_state(widget::state::AREA_ROOT)) {
 				if(get_param().parents_->type() == get_type_id<widget_frame>()) {
 					// 親になってるフレームを取得
@@ -315,6 +323,14 @@ namespace gui {
 				auto ln = terminal_.get_line_num();
 				vtx::ipos ofs(0);
 				if(ln > limit.y) ofs.y = ln - limit.y;
+				auto npy = ofs.y - scroll_ofs_.y;
+				if(npy < 0) {
+					npy = 0;
+					scroll_ofs_.y = ofs.y;
+				} else if(npy > ofs.y) {
+					npy = ofs.y;
+				}
+				ofs.y = npy;
 				vtx::ipos pos;
 				for(pos.y = 0; pos.y < limit.y; ++pos.y) {
 					for(pos.x = 0; pos.x < limit.x; ++pos.x) {
