@@ -202,6 +202,7 @@ namespace gui {
 				focus_ = false;
 			}
 
+			// スクロール処理、マウスホイール
 			if(get_focus()) {
 				const vtx::spos& scr = wd_.get_scroll();
 				scroll_ofs_ += scr;
