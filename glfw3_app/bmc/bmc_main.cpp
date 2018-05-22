@@ -75,7 +75,7 @@ namespace app {
 			const bmc_core& bmc = *director_.at().bmc_;
 			for(uint32_t i = 0; i < bmc.get_bdf_pages(); ++i) {
 				std::string s = boost::lexical_cast<std::string>(i);
-				wp_.text_list_.push_back(s);
+				wp_.init_list_.push_back(s);
 			}
 			bdf_page_no_ = 0;
 			bdf_page_ = wd.add_widget<widget_list>(wp, wp_);
@@ -200,8 +200,9 @@ namespace app {
 		// BDF ファイルの複数ページ対応
 		bmc_core& bmc = *director_.at().bmc_;
 		if(bmc.get_bdf_pages()) {
-			if(bdf_page_->get_local_param().select_pos_ != bdf_page_no_) {
-				bdf_page_no_ = bdf_page_->get_local_param().select_pos_;
+//			if(bdf_page_->get_local_param().select_pos_ != bdf_page_no_) {
+			if(bdf_page_->get_select_pos() != bdf_page_no_) {
+				bdf_page_no_ = bdf_page_->get_select_pos();
 				bmc.create_bdf_image(bdf_page_no_);
 				mobj_.destroy();
 				mobj_.initialize();
