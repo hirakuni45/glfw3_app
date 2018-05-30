@@ -53,6 +53,9 @@ namespace app {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class inspection
 	{
+		static const uint32_t ICM_ON_DELAY = 2;  ///< ICM リレーが ON するまでの遅延
+		static const uint32_t WGM_ON_DELAY = 2;  ///< WGM リレーが ON するまでの遅延
+
 	public:
 		static constexpr const char* UNIT_EXT_ = "unt";  ///< 単体検査ファイル、拡張子
 
@@ -132,6 +135,8 @@ namespace app {
 		enum class cmd_task {
 			idle,		///< アイドル
 
+			delay,		///< 遅延
+
 			init_all,	///< 全ての初期化
 			init_all0,
 			init_all1,
@@ -187,13 +192,31 @@ namespace app {
 			off_wdm_dc2_2,
 		};
 		cmd_task		cmd_task_;
+		cmd_task		cmd_delay_next_;
+		uint32_t		cmd_delay_;
+
+		void set_cmd_delay_(cmd_task next_task, uint32_t delay)
+		{
+			cmd_delay_ = delay;
+			cmd_delay_next_ = next_task;
+			cmd_task_ = cmd_task::delay;
+		}
 
 		void cmd_service_()
 		{
 			if(!client_.probe()) return;
 
 			switch(cmd_task_) {
+
 			case cmd_task::idle:
+				break;
+
+			case cmd_task::delay:
+				if(cmd_delay_ > 0) {
+					--cmd_delay_;
+				} else {
+					cmd_task_ = cmd_delay_next_;
+				}
 				break;
 
 			case cmd_task::init_all:
@@ -240,7 +263,7 @@ namespace app {
 			// WDM/DC1
 			case cmd_task::wdm_dc1:
 				icm_.exec_->exec();
-				cmd_task_ = cmd_task::wdm_dc1_0;
+				set_cmd_delay_(cmd_task::wdm_dc1_0, ICM_ON_DELAY);
 				break;
 			case cmd_task::wdm_dc1_0:
 				dc1_.exec_->exec();
@@ -248,7 +271,7 @@ namespace app {
 				break;
 			case cmd_task::wdm_dc1_1:
 				wgm_.exec_->exec();
-				cmd_task_ = cmd_task::wdm_dc1_2;
+				set_cmd_delay_(cmd_task::wdm_dc1_2, WGM_ON_DELAY);
 				break;
 			case cmd_task::wdm_dc1_2:
 				wdm_.exec_->exec();
@@ -258,7 +281,7 @@ namespace app {
 			// WDM/DC2
 			case cmd_task::wdm_dc2:
 				icm__.exec_->exec();
-				cmd_task_ = cmd_task::wdm_dc2_0;
+				set_cmd_delay_(cmd_task::wdm_dc2_0, ICM_ON_DELAY);
 				break;
 			case cmd_task::wdm_dc2_0:
 				dc2__.setup_sw();  // DC2 スイッチのみ有効にしておく
@@ -425,7 +448,7 @@ namespace app {
 			dc2__(d, client_, interlock_, kikusui_),
 			wgm__(d, client_, interlock_),
 			wdm__(d, client_, interlock_, false),
-			cmd_task_(cmd_task::idle)
+			cmd_task_(cmd_task::idle), cmd_delay_next_(cmd_task::idle), cmd_delay_(0)
 		{ }
 
 
