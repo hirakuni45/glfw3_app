@@ -58,6 +58,8 @@ namespace app {
 	private:
 		bool					init_;
 
+		std::string				emu_path_;
+
 		static const uint32_t time_div_size_ = 16;
 		double get_time_div_() const {
 			if(smpl_ == nullptr) return 0.0;
@@ -103,7 +105,7 @@ namespace app {
 		}
 
 
-		std::string build_wdm_()
+		std::string build_wdm_(const std::string& opt)
 		{
 			std::string s;
 			uint32_t cmd;
@@ -165,7 +167,13 @@ namespace app {
 				if(slope_->get_select_pos()) sub |= 0x40;
 				sub |= window_->get_select_pos() & 15;
 				cmd |= sub;
-				s += (boost::format("wdm %06X\n") % cmd).str();
+				if(opt.empty()) {
+					s += (boost::format("wdm %06X\n") % cmd).str();
+				} else {
+					s += (boost::format("wdm %06X ") % cmd).str();
+					s += opt;
+					s += "\n";
+				}
 			}
 			return s;
 		}
@@ -235,8 +243,17 @@ namespace app {
 			gain_{ nullptr },
 			exec_(nullptr),
 			sample_param_(),
-			init_(init)
+			init_(init), emu_path_()
 		{ }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  波形エミュレーション・パスの設定
+			@param[in]	path	波形パス
+		*/
+		//-----------------------------------------------------------------//
+		void set_emu_path(const std::string& path) { emu_path_ = path; }
 
 
 		//-----------------------------------------------------------------//
@@ -422,8 +439,9 @@ namespace app {
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
 				exec_->at_local_param().select_func_ = [=](int n) {
 					setup();
-					auto s = build_wdm_();
-// std::cout << s << std::endl;
+//					auto s = build_wdm_(emu_path_);
+//					auto s = build_wdm_("TFALL.wad");
+					auto s = build_wdm_("");
 					client_.send_data(s);
 				};
 			}
