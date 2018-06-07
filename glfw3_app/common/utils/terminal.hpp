@@ -58,7 +58,7 @@ namespace utils {
 
 		cha_t		tmp_;
 
-		bool		cre_;
+		bool		auto_crlf_;
 
 		line		last_;
 
@@ -86,7 +86,7 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		terminal(uint32_t max = 150) : cha_(), lines_(), max_(max), pos_(0), tmp_(' '),
-			cre_(true), last_(), output_func_(nullptr)
+			auto_crlf_(false), last_(), output_func_(nullptr)
 		{
 			line l;
 			lines_.push_back(l);
@@ -99,6 +99,15 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		~terminal() { }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	自動 CR/LF の設定
+			@param[in]	f	自動機能を無効にする場合「false」
+		*/
+		//-----------------------------------------------------------------//
+		void set_auto_crlf(bool f = true) { auto_crlf_ = f; }
 
 
 		//-----------------------------------------------------------------//
@@ -154,11 +163,14 @@ namespace utils {
 
 			cha_.cha_ = cha;
 			switch(cha) {
-			case '\r':
-				if(!cre_) break; 
-			case '\n':
-				nl_();
+			case '\r':  // CR
 				pos_.x = 0;
+				break;
+			case '\n':  // LF
+				nl_();
+				if(auto_crlf_) {
+					pos_.x = 0;
+				}
 				break;
 			case 0x08:  // Back Space
 				if(pos_.x > 0) --pos_.x;
