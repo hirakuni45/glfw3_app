@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 #include "utils/bit_array.hpp"
+#include "utils/format.hpp"
 
 namespace img {
 
@@ -23,8 +24,8 @@ namespace img {
 	class bdf_io {
 
 		uint32_t	lin_code_max_;
-		typedef std::vector<uint8_t> SJIS_PAD;
-		SJIS_PAD	sjis_pad_;
+		typedef std::vector<uint8_t> PAD;
+		PAD			sjis_pad_;
 
 		uint16_t	jis_code_;
 		bool		bitmap_;
@@ -40,7 +41,8 @@ namespace img {
 		typedef utils::bit_array BIT_ARRAY;
 		BIT_ARRAY	bit_array_;
 
-///		bool	alignment_bits_;
+		bool		ascii_flag_;
+		bool		kanji_flag_;
 
 		// http://homepage1.nifty.com/docs/algo/j/jis2sjis.html
 		// で収集した変換ソースコード
@@ -110,7 +112,8 @@ namespace img {
 		//-----------------------------------------------------------------//
 		bdf_io() : lin_code_max_(0), jis_code_(0), bitmap_(false), map_max_(0),
 			jis_count_(0), lin_limit_(0),
-				   bbx_width_(0), bbx_height_(0) /* alignment_bits_(8) */ { }
+			bbx_width_(0), bbx_height_(0),
+			ascii_flag_(false), kanji_flag_(false) { }
 
 
 		//-----------------------------------------------------------------//
@@ -167,6 +170,9 @@ namespace img {
 
 			bbx_width_  = 0;
 			bbx_height_ = 0;
+
+			ascii_flag_ = false;
+			kanji_flag_ = false;
 		}
 
 
@@ -214,9 +220,20 @@ namespace img {
 					if(bitmap_) {
 						if(ss[0] == "ENDCHAR") {
 							++jis_count_;
-							uint16_t sjis = jis_to_sjis_(jis_code_);
-							uint16_t lin = sjis_to_liner_(sjis);
-							if(lin == 0xffff) {
+							bool ascii = false;
+							if(jis_code_ >= 0 && jis_code_ < 256) ascii = true;
+							uint16_t lin = 0;
+							uint16_t sjis = 0;
+							if(ascii) {
+								lin = jis_code_;
+								sjis = jis_code_;
+								ascii_flag_ = true;
+							} else {
+								sjis = jis_to_sjis_(jis_code_);
+								lin = sjis_to_liner_(sjis);
+								kanji_flag_ = true;
+							}
+							if(!ascii && lin == 0xffff) {
 								std::cerr << "Error JIS code map: " << jis_code_
 									<< std::endl; 
 								retcode = false;
@@ -287,7 +304,7 @@ namespace img {
 				}
 			}
 			fin.close();
-// std::cout << "Linear limit: " << lin_limit_ << std::endl;
+
 			return retcode;
 		}
 
@@ -307,7 +324,13 @@ namespace img {
 				return false;
 			}
 
-			fout.write(&sjis_pad_[0], sjis_pad_.size());
+			if(!sjis_pad_.empty()) {
+				if(kanji_flag_) {
+					fout.write(&sjis_pad_[0], sjis_pad_.size());
+				} else if(ascii_flag_) {
+					fout.write(&sjis_pad_[0], 256 * byte_size());
+				}
+			}
 
 			fout.close();
 
@@ -331,6 +354,8 @@ namespace img {
 			@return データ
 		*/
 		//-----------------------------------------------------------------//
-		uint8_t get_byte(uint32_t idx) const { return sjis_pad_[idx]; }
+		uint8_t get_byte(uint32_t idx) const {
+			return sjis_pad_[idx];
+		}
 	};
 }
