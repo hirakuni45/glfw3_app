@@ -52,7 +52,6 @@ PSOURCES	=	main.cpp \
 				img_io/bmp_io.cpp \
 				img_io/tga_io.cpp \
 				img_io/dds_io.cpp \
-				img_io/bdf_io.cpp \
 				img_io/png_io.cpp \
 				img_io/jpeg_io.cpp \
 				img_io/openjpeg_io.cpp \
