@@ -17,6 +17,7 @@
 #include "widgets/widget_null.hpp"
 #include "widgets/widget_button.hpp"
 #include "widgets/widget_list.hpp"
+#include "widgets/widget_spinbox.hpp"
 #include "widgets/widget_filer.hpp"
 #include "widgets/widget_terminal.hpp"
 #include "widgets/widget_view.hpp"
@@ -39,17 +40,20 @@ namespace app {
 		utils::director<core>&	director_;
 
 		gui::widget_frame*		menu_;
-		gui::widget_button*		load_;
-//		gui::widget_list*		smpl_;
-		gui::widget_list*		div_;
 		gui::widget_list*		ports_;
 		gui::widget_button*		connect_;
+
+		gui::widget_list*		div_;
+		gui::widget_spinbox*	ch1_pos_;
+		gui::widget_spinbox*	ch2_pos_;
+		gui::widget_spinbox*	ch1_gain_;
+		gui::widget_spinbox*	ch2_gain_;
+
+		gui::widget_button*		single_;
 		gui::widget_button*		capture_;
 		gui::widget_list*		slope_;
 		gui::widget_label*		level_;
 		gui::widget_button*		trigger_;
-
-		gui::widget_filer*		load_ctx_;
 
 		gui::widget_frame*		wave_;
 
@@ -101,7 +105,7 @@ namespace app {
 
 		enum class wave_task {
 			idle,
-			body,
+			multi_body,
 			flush,
 		};
 		wave_task				wave_task_;
@@ -154,19 +158,30 @@ namespace app {
 				if(fifo_.length() >= 4) {
 					auto cmd = fifo_.get();
 					auto ch = fifo_.get();
-					auto len_h = fifo_.get();
-					auto len_l = fifo_.get();
-					if(cmd == 0x02) {
+					if(cmd == 0x01) {  // SINGLE data
+						uint16_t w = fifo_.get();
+						w <<= 8;
+						w |= fifo_.get();
+						float a = static_cast<int16_t>(w);
+						a /= 32767.0f;
+						a *= 20.48f;
+						auto s = (boost::format("Value (ch%d): %4.2f [V] (%d)\n")
+							% ch % a % static_cast<int16_t>(w)).str();
+						terminal_core_->output(s);
+						wave_task_ = wave_task::idle;
+					} else if(cmd == 0x02) { // MULTI data
+						auto len_h = fifo_.get();
+						auto len_l = fifo_.get();
 						wave_ch_ = ch;
 						wave_max_ = (static_cast<uint32_t>(len_h) << 8) | len_l;
 						wave_pos_ = 0;
-						wave_task_ = wave_task::body;
+						wave_task_ = wave_task::multi_body;
 					} else {
 						wave_task_ = wave_task::flush;
 					}
 				}
 				break;
-			case wave_task::body:
+			case wave_task::multi_body:
 				if(wave_pos_ < wave_max_) {
 					auto n = fifo_.length();
 					if(n & 1) n &= 0xfffffffe;  // 偶数バイトにする
@@ -214,10 +229,16 @@ namespace app {
 		*/
 		//-----------------------------------------------------------------//
 		efo_test(utils::director<core>& d) : director_(d),
-			menu_(nullptr), load_(nullptr), div_(nullptr),
-			ports_(nullptr), connect_(nullptr), capture_(nullptr),
+			menu_(nullptr),
+			ports_(nullptr), connect_(nullptr),
+
+			div_(nullptr),
+			ch1_pos_(nullptr), ch2_pos_(nullptr),
+			ch1_gain_(nullptr), ch2_gain_(nullptr),
+
+			single_(nullptr),
+			capture_(nullptr),
 			slope_(nullptr), level_(nullptr), trigger_(nullptr),
-			load_ctx_(nullptr),
 			wave_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
 			view_frame_(nullptr), view_core_(nullptr),
@@ -238,7 +259,7 @@ namespace app {
 			gl::core& core = gl::core::get_instance();
 
 			int menu_width  = 130;
-			int menu_height = 500;
+			int menu_height = 600;
 			{	// メニューパレット
 				widget::param wp(vtx::irect(10, 10, menu_width, menu_height));
 				widget_frame::param wp_;
@@ -247,25 +268,30 @@ namespace app {
 				menu_->set_state(gui::widget::state::SIZE_LOCK);
 			}
 
-			{ // ロード起動ボタン
+			{ // Serial PORT select
 				widget::param wp(vtx::irect(10, 20+40*0, menu_width - 20, 30), menu_);
-				widget_button::param wp_("load");
-				wp_.select_func_ = [=](int id) {
-//					gui::get_open_file_name();
-					if(load_ctx_) {
-//						script_on_ = false;
-						bool f = load_ctx_->get_state(gui::widget::state::ENABLE);
-						load_ctx_->enable(!f);
-//						save_->set_stall(!f);
-//						export_->set_stall(!f);
-//						script_->set_stall(!f);
+				widget_list::param wp_;
+				ports_ = wd.add_widget<widget_list>(wp, wp_);
+			}
+
+			{ // コネクションボタン
+				widget::param wp(vtx::irect(10, 20+40*1, menu_width - 20, 30), menu_);
+				widget_button::param wp_("connect");
+				connect_ = wd.add_widget<widget_button>(wp, wp_);
+				connect_->at_local_param().select_func_ = [=](int id) {
+					const auto& port = ports_->get_select_text();
+					if(!port.empty()) {
+						if(serial_.open(port, 115200)) {
+							terminal_core_->output("Open Serialport: '" + port + "'\n");
+						} else {
+							terminal_core_->output("Can't open Serialport: '" + port + "'\n"); 
+						}
 					}
 				};
-				load_ = wd.add_widget<widget_button>(wp, wp_);
 			}
 
 			{ // DIV select
-				widget::param wp(vtx::irect(10, 20+40*1, menu_width - 20, 30), menu_);
+				widget::param wp(vtx::irect(10, 20+40*3, menu_width - 20, 30), menu_);
 				widget_list::param wp_;
 				wp_.init_list_.push_back("500 ms");
 				wp_.init_list_.push_back("250 ms");
@@ -292,30 +318,65 @@ namespace app {
 				div_ = wd.add_widget<widget_list>(wp, wp_);
 			}
 
-
-			{ // Serial PORT select
-				widget::param wp(vtx::irect(10, 20+40*6, menu_width - 20, 30), menu_);
-				widget_list::param wp_;
-				ports_ = wd.add_widget<widget_list>(wp, wp_);
-			}
-
-			{ // コネクションボタン
-				widget::param wp(vtx::irect(10, 20+40*7, menu_width - 20, 30), menu_);
-				widget_button::param wp_("connect");
-				connect_ = wd.add_widget<widget_button>(wp, wp_);
-				connect_->at_local_param().select_func_ = [=](int id) {
-					const auto& port = ports_->get_select_text();
-					if(!port.empty()) {
-						if(serial_.open(port)) {
-							terminal_core_->output("Open Serialport: '" + port + "'\n");
-						} else {
-							terminal_core_->output("Can't open Serialport: '" + port + "'\n"); 
-						}
-					}
+			{	// CH1 Positon
+				widget::param wp(vtx::irect(10, 20+40*4, menu_width - 20, 30), menu_);
+				widget_spinbox::param wp_(-200, 0, 200);
+				ch1_pos_ = wd.add_widget<widget_spinbox>(wp, wp_);
+				ch1_pos_->at_local_param().select_func_ =
+					[=](widget_spinbox::state st, int before, int newpos) {
+					waves_.at_param(0).offset_.y = newpos * 10;
+					return (boost::format("%d") % newpos).str();
 				};
 			}
-			{  // キャプチャー・ボタン
+			{	// CH2 Positon
+				widget::param wp(vtx::irect(10, 20+40*5, menu_width - 20, 30), menu_);
+				widget_spinbox::param wp_(-200, 0, 200);
+				ch2_pos_ = wd.add_widget<widget_spinbox>(wp, wp_);
+				ch2_pos_->at_local_param().select_func_ =
+					[=](widget_spinbox::state st, int before, int newpos) {
+					waves_.at_param(1).offset_.y = newpos * 10;
+					return (boost::format("%d") % newpos).str();
+				};
+			}
+			{	// CH1 Gain
+				widget::param wp(vtx::irect(10, 20+40*6, menu_width - 20, 30), menu_);
+				widget_spinbox::param wp_(0, 50, 100);
+				ch1_gain_ = wd.add_widget<widget_spinbox>(wp, wp_);
+				ch1_gain_->at_local_param().select_func_ =
+					[=](widget_spinbox::state st, int before, int newpos) {
+		  			waves_.at_param(0).gain_ = static_cast<float>(newpos) * 0.01f / 10.0f;
+					return (boost::format("%d") % newpos).str();
+				};
+			}
+			{	// CH2 Gain
+				widget::param wp(vtx::irect(10, 20+40*7, menu_width - 20, 30), menu_);
+				widget_spinbox::param wp_(0, 50, 100);
+				ch2_gain_ = wd.add_widget<widget_spinbox>(wp, wp_);
+				ch2_gain_->at_local_param().select_func_ =
+					[=](widget_spinbox::state st, int before, int newpos) {
+		  			waves_.at_param(1).gain_ = static_cast<float>(newpos) * 0.01f / 10.0f;
+					return (boost::format("%d") % newpos).str();
+				};
+			}
+
+			{ // シングル・ボタン
 				widget::param wp(vtx::irect(10, 20+40*8, menu_width - 20, 30), menu_);
+				widget_button::param wp_("single");
+				single_ = wd.add_widget<widget_button>(wp, wp_);
+				single_->at_local_param().select_func_ = [=](int id) {
+					uint8_t tmp[6];
+					tmp[0] = 0x01;  // START
+					tmp[1] = 0x00;  // Length(H)
+					tmp[2] = 0x00;  // LENGTH(L)
+					tmp[3] = 0x00;  // Volt(H)
+					tmp[4] = 0x00;  // Volt(L)
+					tmp[5] = 0x01;  // Edge
+					serial_.write(tmp, sizeof(tmp));
+				};
+			}
+
+			{  // キャプチャー・ボタン
+				widget::param wp(vtx::irect(10, 20+40*9, menu_width - 20, 30), menu_);
 				widget_button::param wp_("capture");
 				capture_ = wd.add_widget<widget_button>(wp, wp_);
 				capture_->at_local_param().select_func_ = [=](int fd) {
@@ -324,20 +385,23 @@ namespace app {
 					serial_.write(tmp, sizeof(tmp));
 				};
 			}
+
 			{  // スロープ選択
-				widget::param wp(vtx::irect(10, 20+40*9, menu_width - 20, 30), menu_);
+				widget::param wp(vtx::irect(10, 20+40*10, menu_width - 20, 30), menu_);
 				widget_list::param wp_;
 				wp_.init_list_.push_back("pos");
 				wp_.init_list_.push_back("neg");
 				slope_ = wd.add_widget<widget_list>(wp, wp_);
 			}
+
 			{  // トリガー・レベル
-				widget::param wp(vtx::irect(10, 20+40*10, menu_width - 20, 30), menu_);
+				widget::param wp(vtx::irect(10, 20+40*11, menu_width - 20, 30), menu_);
 				widget_label::param wp_("0");
 				level_ = wd.add_widget<widget_label>(wp, wp_);
 			}
+
 			{ // トリガー・ボタン
-				widget::param wp(vtx::irect(10, 20+40*11, menu_width - 20, 30), menu_);
+				widget::param wp(vtx::irect(10, 20+40*12, menu_width - 20, 30), menu_);
 				widget_button::param wp_("trigger");
 				capture_ = wd.add_widget<widget_button>(wp, wp_);
 				capture_->at_local_param().select_func_ = [=](int fd) {
@@ -346,35 +410,6 @@ namespace app {
 					else tmp[0] = 'Q';
 					serial_.write(tmp, sizeof(tmp));
 				};
-			}
-
-
-
-
-			{ // load ファイラー本体
-				widget::param wp(vtx::irect(10, 30, 300, 200));
-				widget_filer::param wp_(core.get_current_path());
-				wp_.select_file_func_ = [=](const std::string& path) {
-#if 0
-					bool f = false;
-					if(script_on_) {
-						f = project_.logic_edit_.injection(path);
-					} else {
-						f = project_.logic_.load(path);
-					}
-					load_->set_stall(false);
-					save_->set_stall(false);
-					export_->set_stall(false);
-					script_->set_stall(false);
-					if(!f) {  // load error
-						if(script_on_) dialog_->set_text("Script error:\n" + path);
-						else dialog_->set_text("Load error:\n" + path);
-						dialog_->enable();
-					}
-#endif
-				};
-				load_ctx_ = wd.add_widget<widget_filer>(wp, wp_);
-				load_ctx_->enable(false);
 			}
 
 
@@ -443,8 +478,6 @@ namespace app {
 //				argv_frame_->load(pre);
 //			}
 
-			if(load_ctx_ != nullptr) load_ctx_->load(pre);
-///			if(save_ctx_ != nullptr) save_ctx_->load(pre);
 			if(ports_ != nullptr) ports_->load(pre);
 			if(div_ != nullptr) div_->load(pre);
 			if(slope_ != nullptr) slope_->load(pre); 
@@ -453,7 +486,7 @@ namespace app {
 			// 波形バッファ生成
 			waves_.create_buffer();
 
-			waves_.build_sin(0, 1e-6, 15e3, 1.0);
+///			waves_.build_sin(0, 1e-6, 15e3, 1.0);
 		}
 
 
@@ -479,39 +512,25 @@ namespace app {
 				ports_->select(0);
 			}
 
-//			waves_.at_param(0).gain_ = 0.025f;
-			waves_.at_param(0).gain_ = 0.0018f;
-			waves_.at_param(1).gain_ = 0.025f;
+//			waves_.at_param(0).gain_ = 0.05f;
+//			waves_.at_param(0).gain_ = 0.0055f;
+//			waves_.at_param(1).gain_ = 0.05f;
+//			waves_.at_param(1).gain_ = 0.0055f;
 			waves_.at_param(0).color_ = img::rgba8(255, 128, 255, 255);
 			waves_.at_param(1).color_ = img::rgba8(128, 255, 255, 255);
 //			waves_.at_param(0).offset_.y = -300;
-			waves_.at_param(0).offset_.y = 300;
-			waves_.at_param(1).offset_.y = -380;
+//			waves_.at_param(0).offset_.y = 0;
+//			waves_.at_param(1).offset_.y = 100;
 
 			waves_.at_info().time_org_ = 50;
 			waves_.at_info().time_len_ = 150;
-
 			waves_.at_info().volt_org_[0] = 90;
 			waves_.at_info().volt_len_[0] = 130;
 			waves_.at_info().volt_org_[1] = 90;
 			waves_.at_info().volt_len_[1] = 130;
 
 			service_waves_();
-#if 0
-			// Drag & Drop されたファイル
-			gl::core& core = gl::core::get_instance();
-			int id = core.get_recv_files_id();
-			if(drop_file_id_ != id) {
-				drop_file_id_ = id;
-				const utils::strings& ss = core.get_recv_files_path();
-				if(!ss.empty()) {
-					std::string path = ss[0];
-					if(load_ctx_ != nullptr && load_ctx_->get_local_param().select_file_func_ != nullptr) {
-						load_ctx_->get_local_param().select_file_func_(path);
-					}
-				}
-			}
-#endif
+
 			wd.update();
 		}
 
@@ -542,8 +561,6 @@ namespace app {
 			if(div_ != nullptr) div_->save(pre);
 			if(ports_ != nullptr) ports_->save(pre);
 
-			if(load_ctx_ != nullptr) load_ctx_->save(pre);
-///			if(save_ctx_ != nullptr) save_ctx_->save(pre);
 			if(view_frame_ != nullptr) {
 				view_frame_->save(pre);
 			}
