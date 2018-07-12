@@ -10,10 +10,8 @@
 			%f ---> 浮動小数点数（float、double） @n
 			%c ---> １文字のキャラクター @n
 			%% ---> '%' のキャラクター
+			Copyright 2017 Kunihito Hiramatsu
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2018 Kunihito Hiramatsu @n
-				Released under the MIT license @n
-				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
 //=====================================================================//
 #include <type_traits>
@@ -96,7 +94,6 @@ namespace utils {
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		enum class error : uint8_t {
 			none,			///< エラー無し
-			null_form,		///< フォーマットが null
 			cha_sets,		///< 文字セットの不一致
 			partition,		///< 仕切りキャラクターの不一致
 			input_type,		///< 無効な入力タイプ
@@ -207,8 +204,8 @@ namespace utils {
 				}
 			};
 
-			real_t base;
-			real_t exp;
+			real_t	base;
+			real_t	exp;
 			char ch;
 			bool expf = false;
 			while((ch = inp_()) != 0) {
@@ -384,11 +381,7 @@ namespace utils {
 		basic_input(const char* form, const char* inp = nullptr) noexcept : form_(form), inp_(inp),
 			mode_(mode::NONE), error_(error::none), num_(0)
 		{
-			if(form_ == nullptr) {
-				error_ = error::null_form;
-			} else {
-				next_();
-			}
+			next_();
 		}
 
 
