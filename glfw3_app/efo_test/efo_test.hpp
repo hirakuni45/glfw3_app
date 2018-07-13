@@ -180,7 +180,15 @@ namespace app {
 				if(fifo_.length() >= 4) {
 					auto cmd = fifo_.get();
 					auto ch = fifo_.get();
-					if(cmd == 0x01) {  // SINGLE data
+					if(cmd == 0x21) {  // Version
+						auto d = fifo_.get();
+						auto c = fifo_.get();
+						auto b = fifo_.get();
+						auto a = fifo_.get();
+						auto s = (boost::format("Voltage: %d, Version %c%c.%c%c\n")
+							% static_cast<int>(ch) % a % b % c % d).str();
+						terminal_core_->output(s);
+					} else if(cmd == 0x01) {  // SINGLE data
 						uint16_t w = fifo_.get();
 						w <<= 8;
 						w |= fifo_.get();
@@ -323,8 +331,9 @@ namespace app {
 			widget_director& wd = director_.at().widget_director_;
 			gl::core& core = gl::core::get_instance();
 
-			int menu_width  = 130;
-			int menu_height = 750;
+			static const int menu_width  = 200;
+			static const int menu_height = 800;
+			static const int btn_width   = 120;
 			{	// メニューパレット
 				widget::param wp(vtx::irect(10, 10, menu_width, menu_height));
 				widget_frame::param wp_;
@@ -334,13 +343,13 @@ namespace app {
 			}
 
 			{ // Serial PORT select
-				widget::param wp(vtx::irect(10, 20+40*0, menu_width - 20, 30), menu_);
+				widget::param wp(vtx::irect(10, 20+40*0, btn_width, 30), menu_);
 				widget_list::param wp_;
 				ports_ = wd.add_widget<widget_list>(wp, wp_);
 			}
 
 			{ // コネクションボタン
-				widget::param wp(vtx::irect(10, 20+40*1, menu_width - 20, 30), menu_);
+				widget::param wp(vtx::irect(10, 20+40*1, btn_width, 30), menu_);
 				widget_button::param wp_("connect");
 				connect_ = wd.add_widget<widget_button>(wp, wp_);
 				connect_->at_local_param().select_func_ = [=](int id) {
@@ -356,7 +365,7 @@ namespace app {
 			}
 
 			{ // DIV select
-				widget::param wp(vtx::irect(10, 20+40*3, menu_width - 20, 30), menu_);
+				widget::param wp(vtx::irect(10, 20+40*3, btn_width, 30), menu_);
 				widget_list::param wp_;
 				wp_.init_list_.push_back("500 ms");
 				wp_.init_list_.push_back("250 ms");
@@ -384,7 +393,7 @@ namespace app {
 			}
 
 			{	// CH1 Positon
-				widget::param wp(vtx::irect(10, 20+40*4, menu_width - 20, 30), menu_);
+				widget::param wp(vtx::irect(10, 20+40*4, btn_width, 30), menu_);
 				widget_spinbox::param wp_(-200, 0, 200);
 				ch1_pos_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				ch1_pos_->at_local_param().select_func_ =
@@ -394,7 +403,7 @@ namespace app {
 				};
 			}
 			{	// CH2 Positon
-				widget::param wp(vtx::irect(10, 20+40*5, menu_width - 20, 30), menu_);
+				widget::param wp(vtx::irect(10, 20+40*5, btn_width, 30), menu_);
 				widget_spinbox::param wp_(-200, 0, 200);
 				ch2_pos_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				ch2_pos_->at_local_param().select_func_ =
@@ -404,7 +413,7 @@ namespace app {
 				};
 			}
 			{	// CH1 Gain
-				widget::param wp(vtx::irect(10, 20+40*6, menu_width - 20, 30), menu_);
+				widget::param wp(vtx::irect(10, 20+40*6, btn_width, 30), menu_);
 				widget_spinbox::param wp_(0, 50, 100);
 				ch1_gain_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				ch1_gain_->at_local_param().select_func_ =
@@ -414,7 +423,7 @@ namespace app {
 				};
 			}
 			{	// CH2 Gain
-				widget::param wp(vtx::irect(10, 20+40*7, menu_width - 20, 30), menu_);
+				widget::param wp(vtx::irect(10, 20+40*7, btn_width, 30), menu_);
 				widget_spinbox::param wp_(0, 50, 100);
 				ch2_gain_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				ch2_gain_->at_local_param().select_func_ =
@@ -425,7 +434,7 @@ namespace app {
 			}
 
 			{ // シングル・ボタン
-				widget::param wp(vtx::irect(10, 20+40*8, menu_width - 20, 30), menu_);
+				widget::param wp(vtx::irect(10, 20+40*8, btn_width, 30), menu_);
 				widget_button::param wp_("single");
 				single_ = wd.add_widget<widget_button>(wp, wp_);
 				single_->at_local_param().select_func_ = [=](int id) {
@@ -433,7 +442,7 @@ namespace app {
 				};
 			}
 			{ // オートテスト・ボタン
-				widget::param wp(vtx::irect(10, 20+40*9, menu_width - 20, 30), menu_);
+				widget::param wp(vtx::irect(10, 20+40*9, btn_width, 30), menu_);
 				widget_button::param wp_("autotest");
 				autotest_ = wd.add_widget<widget_button>(wp, wp_);
 				autotest_->at_local_param().select_func_ = [=](int id) {
@@ -446,23 +455,23 @@ namespace app {
 				};
 			}
 			{  // オートテスト最小
-				widget::param wp(vtx::irect(10, 20+40*10, menu_width - 20, 30), menu_);
+				widget::param wp(vtx::irect(10, 20+40*10, btn_width, 30), menu_);
 				widget_label::param wp_("0", false);
 				autotest_min_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 			{  // オートテスト最大
-				widget::param wp(vtx::irect(10, 20+40*11, menu_width - 20, 30), menu_);
+				widget::param wp(vtx::irect(10, 20+40*11, btn_width, 30), menu_);
 				widget_label::param wp_("0", false);
 				autotest_max_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 			{  // オートテスト結果
-				widget::param wp(vtx::irect(10, 20+40*12, menu_width - 20, 30), menu_);
+				widget::param wp(vtx::irect(10, 20+40*12, btn_width, 30), menu_);
 				widget_label::param wp_("");
 				autotest_result_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 
 			{  // キャプチャー・ボタン
-				widget::param wp(vtx::irect(10, 20+40*14, menu_width - 20, 30), menu_);
+				widget::param wp(vtx::irect(10, 20+40*14, btn_width, 30), menu_);
 				widget_button::param wp_("capture");
 				capture_ = wd.add_widget<widget_button>(wp, wp_);
 				capture_->at_local_param().select_func_ = [=](int fd) {
@@ -473,7 +482,7 @@ namespace app {
 			}
 
 			{  // スロープ選択
-				widget::param wp(vtx::irect(10, 20+40*15, menu_width - 20, 30), menu_);
+				widget::param wp(vtx::irect(10, 20+40*15, btn_width, 30), menu_);
 				widget_list::param wp_;
 				wp_.init_list_.push_back("pos");
 				wp_.init_list_.push_back("neg");
@@ -481,13 +490,13 @@ namespace app {
 			}
 
 			{  // トリガー・レベル
-				widget::param wp(vtx::irect(10, 20+40*16, menu_width - 20, 30), menu_);
+				widget::param wp(vtx::irect(10, 20+40*16, btn_width, 30), menu_);
 				widget_label::param wp_("0");
 				level_ = wd.add_widget<widget_label>(wp, wp_);
 			}
 
 			{ // トリガー・ボタン
-				widget::param wp(vtx::irect(10, 20+40*17, menu_width - 20, 30), menu_);
+				widget::param wp(vtx::irect(10, 20+40*17, btn_width, 30), menu_);
 				widget_button::param wp_("trigger");
 				capture_ = wd.add_widget<widget_button>(wp, wp_);
 				capture_->at_local_param().select_func_ = [=](int fd) {
@@ -497,7 +506,16 @@ namespace app {
 					serial_.write(tmp, sizeof(tmp));
 				};
 			}
-
+			{ // バージョン・ボタン
+				widget::param wp(vtx::irect(10, 20+40*18, btn_width, 30), menu_);
+				widget_button::param wp_("version");
+				single_ = wd.add_widget<widget_button>(wp, wp_);
+				single_->at_local_param().select_func_ = [=](int id) {
+					char tmp[1];
+					tmp[0] = 0x21;
+					serial_.write(tmp, sizeof(tmp));
+				};
+			}
 
 			{	// ターミナル
 				{
@@ -593,16 +611,32 @@ namespace app {
 			gui::widget_director& wd = director_.at().widget_director_;
 
 			// シリアルポートの更新
-			if(serial_list_.empty() || !serial_.compare(serial_list_)) {
-				serial_.create_list();
-				serial_list_ = serial_.get_list();
-				utils::strings list;
-				for(const auto& t : serial_list_) {
-					list.push_back(t.port);
-					terminal_core_->output(t.port + " (" + t.info + ")\n");
+			{
+				bool update = false;
+				static uint32_t count = 1;
+				++count;
+				if(count >= 60) {
+					count = 0;
+					serial_.create_list();
+					if(serial_list_.empty() || !serial_.compare(serial_list_)) {
+						update = true;
+						serial_list_ = serial_.get_list();
+					}
 				}
-				ports_->get_menu()->build(list);
-				ports_->select(0);
+				if(update) {			
+					if(serial_list_.empty()) {
+						connect_->set_stall();
+					} else {
+						connect_->set_stall(false);
+					}
+					utils::strings list;
+					for(const auto& t : serial_list_) {
+						list.push_back(t.port);
+						terminal_core_->output(t.port + " (" + t.info + ")\n");
+					}
+					ports_->get_menu()->build(list);
+					ports_->select(0);
+				}
 			}
 
 //			waves_.at_param(0).gain_ = 0.05f;
@@ -633,7 +667,6 @@ namespace app {
 					count = 0;
 				}
 			}
-
 
 			wd.update();
 		}
