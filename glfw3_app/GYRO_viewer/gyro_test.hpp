@@ -24,14 +24,17 @@
 #include "gl_fw/glcamera.hpp"
 
 #include "utils/serial_win32.hpp"
+#include "utils/format.hpp"
+#include "utils/input.hpp"
+#include "utils/vtx.hpp"
 
-// #include "crm.hpp"
+#include <queue>
 
 namespace app {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
-		@brief  CRM テスト・アプリケーション・クラス
+		@brief  ジャイロ・テスト・アプリケーション・クラス
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class gyro_test : public utils::i_scene {
@@ -40,26 +43,58 @@ namespace app {
 
 		gui::widget_frame*		menu_;
 		gui::widget_list*		ports_;
+		gui::widget_list*		baud_;
 		gui::widget_button*		connect_;
+		gui::widget_button*		carib_;
 
 		gui::widget_frame*		terminal_frame_;
 		gui::widget_terminal*	terminal_core_;
 
-		gl::camera		camera_;
-
-//		crm						crm_;
+		gl::camera				camera_;
 
 		typedef device::serial_win32 SERIAL;
 		SERIAL					serial_;
 		SERIAL::name_list		serial_list_;
 
+		typedef std::queue<char> FIFO;
+		FIFO					fifo_;
+		std::string				line_;
+
+		vtx::ivtx				raw_;
+		vtx::ivtx				ref_min_;
+		vtx::ivtx				ref_max_;
+		uint32_t				ref_count_;
+		vtx::fvtx				gv_;
+
+		uint32_t				count_;
+
 		// ターミナル、行入力
 		void term_enter_(const utils::lstring& text) {
 			auto s = utils::utf32_to_utf8(text);
-//			project_.logic_edit_.command(s);
-///			std::cout << s << std::endl;
 		}
 
+
+		std::string get_line_()
+		{
+			std::string line;
+			if(fifo_.empty()) {
+				return line;
+			}
+
+			while(!fifo_.empty()) {
+				auto ch = fifo_.front();
+				fifo_.pop();
+				if(ch == '\n') {
+					line = line_;
+					line_.clear();
+					break;
+				} else if(ch == '\r') {
+				} else {
+					line_ += ch;
+				}
+			}
+			return line;
+		}
 
 	public:
 		//-----------------------------------------------------------------//
@@ -69,10 +104,10 @@ namespace app {
 		//-----------------------------------------------------------------//
 		gyro_test(utils::director<core>& d) : director_(d),
 			menu_(nullptr),
-			ports_(nullptr), connect_(nullptr),
+			ports_(nullptr), baud_(nullptr), connect_(nullptr), carib_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
-///			crm_(d, serial_),
-			serial_(), serial_list_()
+			serial_(), serial_list_(), fifo_(),
+			raw_(), ref_min_(), ref_max_(0), ref_count_(0), gv_(), count_(0)
 		{ }
 
 
@@ -98,37 +133,63 @@ namespace app {
 			}
 
 			{ // Serial PORT select
-				widget::param wp(vtx::irect(10, 20, 150, 40), menu_);
+				widget::param wp(vtx::irect(10, 25 + 55 * 0, 150, 40), menu_);
 				widget_list::param wp_;
 				ports_ = wd.add_widget<widget_list>(wp, wp_);
 			}
-
+			{ // baud select
+				widget::param wp(vtx::irect(10, 25 + 55 * 1, 150, 40), menu_);
+				widget_list::param wp_;
+		   		wp_.init_list_.push_back("19200");
+		   		wp_.init_list_.push_back("38400");
+		   		wp_.init_list_.push_back("57600");
+		   		wp_.init_list_.push_back("115200");
+				baud_ = wd.add_widget<widget_list>(wp, wp_);
+			}
 			{ // コネクションボタン
-				widget::param wp(vtx::irect(10, 20 + 50, 150, 40), menu_);
+				widget::param wp(vtx::irect(10, 25 + 55 * 2, 150, 40), menu_);
 				widget_button::param wp_("connect");
 				connect_ = wd.add_widget<widget_button>(wp, wp_);
 				connect_->at_local_param().select_func_ = [=](int id) {
 					const auto& port = ports_->get_select_text();
 					if(serial_.probe()) {
 						ports_->set_stall(false);
+						baud_->set_stall(false);
+						carib_->set_stall();
 						serial_.close();
 						terminal_core_->output("Close Serialport: '" + port + "'\n");
 						connect_->set_text("connect");
 					} else {
 						if(!port.empty()) {
-							if(serial_.open(port, 115200)) {
-								connect_->set_text("close");
-								terminal_core_->output("Open Serialport: '" + port + "'\n");
-								ports_->set_stall();
-							} else {
-								terminal_core_->output("Can't open Serialport: '" + port + "'\n");
+							int b;
+							if((utils::input("%d", baud_->get_select_text().c_str())
+								 % b).status()) {
+								if(serial_.open(port, b)) {
+									connect_->set_text("close");
+									terminal_core_->output("Open Serialport: '" + port + "'\n");
+									ports_->set_stall();
+									baud_->set_stall();
+									carib_->set_stall(false);
+								} else {
+									terminal_core_->output(
+										"Can't open Serialport: '" + port + "'\n");
+								}
 							}
 						}
 					}
 				};
 			}
-
-///			crm_.init(menu_, menu_width, 80, 70);
+			{ // キャリブレーション・ボタン
+				widget::param wp(vtx::irect(10, 25 + 55 * 3, 150, 40), menu_);
+				widget_button::param wp_("carib");
+				carib_ = wd.add_widget<widget_button>(wp, wp_);
+				carib_->set_stall();
+				carib_->at_local_param().select_func_ = [=](int id) {
+					ref_min_.set(0);
+					ref_max_.set(0);
+					ref_count_ = 120;
+				};
+			}
 
 			{	// ターミナル
 				{
@@ -147,13 +208,13 @@ namespace app {
 					term_chaout::set_output(terminal_core_);
 				}
 			}
-///			crm_.set_termcore(terminal_core_);
 
 			// プリファレンスのロード
 			sys::preference& pre = director_.at().preference_;
 
-///			crm_.load(pre);
-
+			if(baud_ != nullptr) {
+				baud_->load(pre);
+			}
 			if(menu_ != nullptr) {
 				menu_->load(pre, false, false);
 			}
@@ -186,7 +247,66 @@ namespace app {
 				ports_->select(0);
 			}
 
-///			crm_.update();
+			// ＲＡＷデータの取得と変換
+			if(serial_.probe()) {
+				char tmp[256];
+				auto len = serial_.read(tmp, sizeof(tmp));
+				for(uint32_t i = 0; i < len; ++i) {
+					fifo_.push(tmp[i]);
+				}
+			}
+
+			while(1)  {
+				auto line = get_line_();
+				if(line.empty()) {
+					break;
+				}
+				int x, y, z;
+				if((utils::input("%d,%d,%d", line.c_str()) % x % y % z).num() == 3) {
+					raw_.x = x;
+					raw_.y = y;
+					raw_.z = z;
+//					char tmp[256];
+//					utils::sformat("%d, %d, %d\n", tmp, sizeof(tmp)) % x % y % z;
+//					terminal_core_->output(tmp);
+					if(ref_count_ > 0) {  // キャリブレーション
+						if(ref_min_.x > raw_.x) ref_min_.x = raw_.x;
+						if(ref_max_.x < raw_.x) ref_max_.x = raw_.x;
+						if(ref_min_.y > raw_.y) ref_min_.y = raw_.y;
+						if(ref_max_.y < raw_.y) ref_max_.y = raw_.y;
+						if(ref_min_.z > raw_.z) ref_min_.z = raw_.z;
+						if(ref_max_.z < raw_.z) ref_max_.z = raw_.z;
+						--ref_count_;
+						if(ref_count_ == 0) {
+							gv_.set(0.0f);
+						}
+					} else {
+						vtx::ivtx d(0);
+						if(ref_min_.x > raw_.x || ref_max_.x < raw_.x) d.x = raw_.x;
+						if(ref_min_.y > raw_.y || ref_max_.y < raw_.y) d.y = raw_.y;
+						if(ref_min_.z > raw_.z || ref_max_.z < raw_.z) d.z = raw_.z;
+						float g = 0.07f;
+						gv_.x += static_cast<float>(d.x) * g;
+						gv_.y += static_cast<float>(d.y) * g;
+						gv_.z += static_cast<float>(d.z) * g;
+					}
+				} else {
+					std::string s = "NG: ";
+					s += line;
+					terminal_core_->output(s);
+				}
+			}
+
+			if(serial_.probe()) {
+				++count_;
+				if(count_ >= 30) {
+					count_ = 0;
+					char tmp[256];
+					utils::sformat("%3.2f, %3.2f, %3.2f\n", tmp, sizeof(tmp))
+						% gv_.x % gv_.y % gv_.z;
+					terminal_core_->output(tmp);				
+				}
+			}
 
 			if(!wd.update()) {
 				camera_.update();
@@ -201,7 +321,6 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void render()
 		{
-
 			camera_.service();
 
 			{
@@ -212,6 +331,7 @@ namespace app {
 				glEnable(GL_DEPTH_TEST);
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 				glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
 				gl::draw_grid(vtx::fpos(-10.0f), vtx::fpos(10.0f), vtx::fpos(1.0f));
 				glDisable(GL_LINE_SMOOTH);
 				glDisable(GL_BLEND);
@@ -237,16 +357,16 @@ namespace app {
 		{
 			sys::preference& pre = director_.at().preference_;
 
-///			crm_.save(pre);
-
 			if(ports_ != nullptr) ports_->save(pre);
 
 			if(terminal_frame_ != nullptr) {
 				terminal_frame_->save(pre);
 			}
-
 			if(menu_ != nullptr) {
 				menu_->save(pre);
+			}
+			if(baud_ != nullptr) {
+				baud_->save(pre);
 			}
 		}
 	};
