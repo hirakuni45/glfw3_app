@@ -11,6 +11,8 @@
 #include "utils/unzip.hpp"
 #include "widgets/widget_dialog.hpp"
 
+#include "utils/format.hpp"
+
 namespace app {
 
 	//-----------------------------------------------------------------//
@@ -97,6 +99,13 @@ namespace app {
 					}
 					zip.get_file(h, &rom_[i * 0x800]);
 				}
+
+				uint32_t sum = 0;
+				for(uint32_t i = 0; i < 0x2000; ++i) {
+					sum += (uint8_t)rom_[i];
+				}
+				utils::format("SUM: %08X\n") % sum;
+
 				spinv_.setROM(&rom_[0]);
 			} else {
 				errstr = "Can't open ROM archive: '" + romzip + "'";
