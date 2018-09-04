@@ -237,4 +237,7 @@ bin_zip:
 	rm -f $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip
 	zip $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip *.exe *.dll
 
+install:
+	cp $(TARGET)$(FEXT) /usr/local/bin/.
+
 -include $(DEPENDS)
