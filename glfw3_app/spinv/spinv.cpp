@@ -86,10 +86,12 @@ namespace app {
 		{
 			utils::unzip zip;
 			std::string romzip = "invaders.zip";
+//			std::string romzip = "spaceat2.zip";
 			if(zip.open(romzip)) {
 				rom_.reserve(0x2000);
 				static const char* rom_files[] = {
 					"invaders.h", "invaders.g", "invaders.f", "invaders.e"
+//					"spaceatt.h", "spaceatt.g", "spaceatt.f", "spaceatt.e"
 				};
 				for(int i = 0; i < 4; ++i) {
 					int h = zip.find(rom_files[i]);
