@@ -1,0 +1,34 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "C:/msys64/mingw64/x86_64-w64-mingw32/include",
+                "C:/msys64/mingw64/lib/clang/5.0.1/include",
+                "C:/msys64/mingw64/include/c++/7.3.0/backward",
+                "C:/msys64/mingw64/include/c++/7.3.0/x86_64-w64-mingw32",
+                "C:/msys64/mingw64/include/c++/7.3.0",
+                "C:/msys64/mingw64/include",
+                "C:/msys64/mingw64/include/freetype2",
+                "C:/msys64/mingw64/include/openjpeg-2.3",
+                "C:/msys64/mingw64/include/taglib",
+                "${workspaceFolder}/glfw3_app/common",
+                ".",
+                "${workspaceFolder}"
+            ],
+            "defines": [
+                "__GNUC__",
+                "HAVE_STDINT_H", "BOOST_USE_WINDOWS_H",
+                "WIN32",
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "windowsSdkVersion": "8.1",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "clang-x64"
+        }
+    ],
+    "version": 4
+}
