@@ -10,6 +10,7 @@
 */
 //=====================================================================//
 #include <cmath>
+#include <cstdint>
 #include "utils/format.hpp"
 
 

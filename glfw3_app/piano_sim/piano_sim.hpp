@@ -141,13 +141,13 @@ namespace app {
 			if(midi_num_ != num) {
 				midi_num_ = num;
 				std::string tmp = midi_list_->get_select_text();
-				midi_list_->at_local_param().text_list_.clear();
+				midi_list_->at_local_param().init_list_.clear();
 				for(int32_t i = 0; i < num; ++i) {
 					auto s = snd::midi_io::get_device_name(i);
 // utils::format("%s\n") % s.c_str();
-					midi_list_->at_local_param().text_list_.push_back(s);
+					midi_list_->at_local_param().init_list_.push_back(s);
 				}
-				midi_list_->update_list();
+				midi_list_->build();
 
 				// MIDI in の開始
 				if(tmp != midi_list_->get_select_text() || !midi_in_.probe()) {
@@ -213,9 +213,9 @@ namespace app {
 				widget_filer::param wp_(core.get_current_path(), "", save);
 				filer_ = wd.add_widget<widget_filer>(wp, wp_);
 				filer_->enable(false);
-				filer_->at_local_param().select_file_func_ = [this](const std::string& file) {
+//				filer_->at_local_param().select_file_func_ = [this](const std::string& file) {
 				   	// sound_play_(file);
-				};
+//				};
 			}
 
 
