@@ -89,7 +89,7 @@ OPTLIBS		=	glfw3 GLEW \
 				pthread \
 				png turbojpeg openjp2 \
 				freetype \
-				mad faad mp4ff tag \
+				mad tag \
 				z
 endif
 
