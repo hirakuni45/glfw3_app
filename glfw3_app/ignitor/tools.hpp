@@ -42,7 +42,7 @@ namespace app {
 				if(v < min) v = min;
 				else if(v > max) v = max;
 				char tmp[256];
-				utils::format(form, tmp, sizeof(tmp)) % v;
+				utils::sformat(form, tmp, sizeof(tmp)) % v;
 				newtext = tmp;
 			}
 			return newtext;
@@ -57,7 +57,7 @@ namespace app {
 				if(v < min) v = min;
 				else if(v > max) v = max;
 				char tmp[256];
-				utils::format(form, tmp, sizeof(tmp)) % v;
+				utils::sformat(form, tmp, sizeof(tmp)) % v;
 				newtext = tmp;
 			}
 			return newtext;

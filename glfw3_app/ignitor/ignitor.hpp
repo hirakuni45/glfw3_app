@@ -20,7 +20,6 @@
 #include "widgets/widget_terminal.hpp"
 #include "widgets/widget_list.hpp"
 #include "widgets/widget_view.hpp"
-#include "widgets/widget_utils.hpp"
 
 #include "interlock.hpp"
 #include "root_menu.hpp"
