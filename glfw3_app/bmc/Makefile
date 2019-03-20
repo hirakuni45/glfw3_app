@@ -29,7 +29,6 @@ CSOURCES	=	minizip/ioapi.c \
 				minizip/unzip.c
 
 PSOURCES	=	main.cpp \
-				bmc_core.cpp \
 				bmc_main.cpp \
 				core/glcore.cpp \
 				core/device.cpp \
@@ -217,7 +216,7 @@ strip:
 endif
 
 run:
-	./$(TARGET)
+	./$(TARGET) -size 48,96 -text -header 8 -c_style nmb96_0 font_96.png aaa.h
 
 clean:
 	rm -rf $(BUILD) $(TARGET)$(FEXT)
