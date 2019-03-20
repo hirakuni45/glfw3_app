@@ -40,7 +40,7 @@ OPTLIBS		=	opengl32 glfw3 glew32 \
 				pthread \
 				png turbojpeg jpeg openjp2 \
 				freetype \
-				mad faad mp4ff tag \
+				mad tag \
 				z openal
 else
 LOCAL_PATH	=	/usr/local
@@ -49,13 +49,13 @@ OPTLIBS		=	glfw3 GLEW \
 				pthread \
 				png turbojpeg openjp2 \
 				freetype \
-				mad faad mp4ff tag \
+				mad tag \
 				z
 endif
 
 INC_SYS		=	$(LOCAL_PATH)/include \
 				$(LOCAL_PATH)/include/freetype2 \
-				$(LOCAL_PATH)/include/openjpeg-2.1 \
+				$(LOCAL_PATH)/include/openjpeg-2.3 \
 				$(LOCAL_PATH)/include/taglib
 INC_LIB		=
 LIBDIR		=	$(LOCAL_PATH)/lib
