@@ -40,7 +40,7 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		bool start(const std::string& target)
 		{
-			std::memset(&info_, sizeof(FtwInfo), 0);
+///			std::memset(&info_, sizeof(FtwInfo), 0);
 
 			info_.dirSeparator = '/';
 			info_.rootDir[0] = '/';
