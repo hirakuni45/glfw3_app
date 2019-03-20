@@ -48,7 +48,7 @@ void* TextureLoader::Load( const EFK_CHAR* path )
 	utils::utf16_to_utf8(path, s);
 	std::cout << "Texture: '" << s << "'" << std::endl;
 
-	std::auto_ptr<Effekseer::FileReader> 
+	std::unique_ptr<Effekseer::FileReader> 
 		reader( m_fileInterface->OpenRead( path ) );
 	
 	if( reader.get() != NULL )
