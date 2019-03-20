@@ -104,7 +104,7 @@ namespace av {
 				fill_func func;
 				if(audio_ctx_->sample_fmt == AV_SAMPLE_FMT_FLTP
 				|| audio_ctx_->sample_fmt == AV_SAMPLE_FMT_FLT) {
-					func = [this] (al::audio aif, int idx, const void* right, const void* left) {
+					func = [&] (al::audio aif, int idx, const void* right, const void* left) {
 						const float* r = static_cast<const float*>(right);
 						int ir = static_cast<int>(r[idx] * 32767.0f);
 						ir = std::max(ir, -32768);
@@ -121,7 +121,7 @@ namespace av {
 					};
 				} else if(audio_ctx_->sample_fmt == AV_SAMPLE_FMT_S16P
 						|| audio_ctx_->sample_fmt == AV_SAMPLE_FMT_S16) {
-					func = [this] (al::audio aif, int idx, const void* left, const void* right) {
+					func = [&] (al::audio aif, int idx, const void* left, const void* right) {
 						const int16_t* r = static_cast<const int16_t*>(right);
 						int16_t ir = r[idx];
 						int16_t il = ir;
@@ -134,7 +134,7 @@ namespace av {
 					};
 				} else if(audio_ctx_->sample_fmt == AV_SAMPLE_FMT_U8P
 						|| audio_ctx_->sample_fmt == AV_SAMPLE_FMT_U8) {
-					func = [this] (al::audio aif, int idx, const void* left, const void* right) {
+					func = [&] (al::audio aif, int idx, const void* left, const void* right) {
 						const uint8_t* r = static_cast<const uint8_t*>(right);
 						int16_t ir = static_cast<int16_t>(r[idx]);
 						ir |= ir << 8;
