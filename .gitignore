@@ -3,3 +3,8 @@
 *.pre
 release/
 */*/*.exe
+glfw3_app/bmc/fonts/
+glfw3_app/bmc/shino/
+glfw3_app/common/libvgm-master/
+glfw3_app/gameemu/
+glfw3_app/libraries/

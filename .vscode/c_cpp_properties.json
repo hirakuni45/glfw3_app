@@ -8,13 +8,9 @@
                 "C:/msys64/mingw64/include/c++/7.3.0/backward",
                 "C:/msys64/mingw64/include/c++/7.3.0/x86_64-w64-mingw32",
                 "C:/msys64/mingw64/include/c++/7.3.0",
-                "C:/msys64/mingw64/include",
-                "C:/msys64/mingw64/include/freetype2",
-                "C:/msys64/mingw64/include/openjpeg-2.3",
-                "C:/msys64/mingw64/include/taglib",
-                "${workspaceFolder}/glfw3_app/common",
                 ".",
-                "${workspaceFolder}"
+                "${workspaceFolder}",
+                "${workspaceFolder}/glfw3_app/common"
             ],
             "defines": [
                 "__GNUC__",
