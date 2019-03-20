@@ -26,7 +26,7 @@ namespace app {
 
 		int task = 0;
 		if(pn_menu_) {
-			task = pn_menu_->get_local_param().select_pos_;
+			task = pn_menu_->get_select_pos();
 		}
 		if(task == 0) {
 			for(int y = 0; y < h; ++y) {
@@ -175,9 +175,9 @@ namespace app {
 		{ // リスト
 			widget::param wp(vtx::irect(10, 10+30*3, 130, 40), tools_);
 			widget_list::param wp_;
-			wp_.text_list_.push_back("None");
-			wp_.text_list_.push_back("Smoke");
-			wp_.text_list_.push_back("Flow");
+			wp_.init_list_.push_back("None");
+			wp_.init_list_.push_back("Smoke");
+			wp_.init_list_.push_back("Flow");
 			pn_menu_ = wd.add_widget<widget_list>(wp, wp_);
 			pn_menu_->at_local_param().select_func_ = [this](const std::string& text, int pos) {
 				update_ = true;
