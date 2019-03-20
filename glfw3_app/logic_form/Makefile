@@ -44,7 +44,6 @@ PSOURCES	=	main.cpp \
 				utils/file_io.cpp \
 				utils/file_info.cpp \
 				utils/files.cpp \
-				utils/preference.cpp \
 				utils/keyboard.cpp \
 				img_io/paint.cpp \
 				img_io/bmp_io.cpp \
@@ -59,7 +58,6 @@ PSOURCES	=	main.cpp \
 				snd_io/audio_io.cpp \
 				snd_io/pcm.cpp \
 				snd_io/wav_io.cpp \
-				snd_io/aac_io.cpp \
 				snd_io/mp3_io.cpp \
 				snd_io/snd_files.cpp \
 				snd_io/sound.cpp \
@@ -76,7 +74,7 @@ OPTLIBS		=	opengl32 glfw3 glew32 \
 				pthread \
 				png turbojpeg jpeg openjp2 \
 				freetype \
-				mad faad mp4ff tag \
+				mad tag \
 				z openal
 else
 LOCAL_PATH	=	/usr/local
@@ -90,7 +88,7 @@ endif
 
 INC_SYS		=	$(LOCAL_PATH)/include \
 				$(LOCAL_PATH)/include/freetype2 \
-				$(LOCAL_PATH)/include/openjpeg-2.1 \
+				$(LOCAL_PATH)/include/openjpeg-2.3 \
 				$(LOCAL_PATH)/include/taglib
 INC_LIB		=
 LIBDIR		=	$(LOCAL_PATH)/lib
