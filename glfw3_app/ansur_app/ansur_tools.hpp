@@ -131,16 +131,21 @@ return 0;
 				}
 			}
 
+// for compile error
+#if 0
 			/* NLST実行 */
 			ftpsub_timeout_set( fbf, g_ftpnlisttimeout );
 			if( CmdLIST( fbf, sockfd, "log*.csv", ftpnlstres, C_C_NLST, 0 ) == C_RET_ERR ) {
 //				tLog_Write( "%sNLSTエラー( %s )", pcstr, fbf->retmsg );
 				return( ERROR );
 			}
+#endif
 
 			/* 待ち時間をリセット */
 			ftpsub_timeout_reset( fbf );
 
+// for compile error
+#if 0
 			/* NLST数チェック */
 			numfile = fbf->fline;
 			if( numfile <= 0 ) {
@@ -157,8 +162,9 @@ return 0;
 
 			retval = ftp_listmake( fbf, sockfd, p_sort, localdir, ftpnlstres, -1, numfile, maxgetcnt );
 			free( p_sort );
-
-			return( retval );
+#endif
+///			return( retval );
+			return 0;
 		}
 	};
 }
