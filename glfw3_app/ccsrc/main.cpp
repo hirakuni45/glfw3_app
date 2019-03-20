@@ -5,15 +5,17 @@
 	@author	平松邦仁( hira@rvf-rc45.net )
 */
 //=====================================================================//
-#include <windows.h>
 #include <iostream>
+#include <cstring>
+#include "utils/format.hpp"
 
 using namespace std;
 
 // タイトルの表示と簡単な説明
 static void title(const char *cmd)
 {
-	char	*p, buff[256];
+	char	*p;
+	char	buff[256];
 
 	p = strrchr(cmd, '\\');
 	if(p != NULL) {
@@ -30,13 +32,13 @@ static void title(const char *cmd)
 	p = strrchr(buff, '.');
 	if(p != NULL) *p = 0;
 
-	printf("Create C-source data array\n");
-	printf("Copyright (C) 2007, Hiramatsu Kunihito\n");
-	printf("usage:\n");
-	printf("	%s [options] file\n", buff);
-	printf("	-header num        ヘッダーバイト\n");
-	printf("	-length num        １行の数（標準１６バイト）\n");
-	printf("\n");
+	cout << "Create C-source data array" << endl;
+	cout << "Copyright (C) 2007, Hiramatsu Kunihito" << endl;
+	cout << "usage:" << endl;
+	cout << "	" << buff << " [options] file" << endl;
+	cout << "	-header num        ヘッダーバイト" << endl;
+	cout << "	-length num        １行の数（標準１６バイト）" << endl;
+	cout << endl;
 }
 
 //-----------------------------------------------------------------//
@@ -77,7 +79,7 @@ int main(int argc, char *argv[])
 	}
 
 	if(opterr == true) {
-		fprintf(stderr, "Illegual option...\n\n");
+		cerr << "Illegual option..." << endl << endl;
 		title((const char *)argv[0]);
 		return 1;
 	}
@@ -91,7 +93,7 @@ int main(int argc, char *argv[])
 
 	fp = fopen(fname, "rb");
 	if(fp == NULL) {
-		fprintf(stderr, "Can't open input file: '%s'\n", fname);
+		cerr << "Can't open input file: '" << fname << "'" << endl;
 		return 1;
 	}
 
@@ -100,16 +102,16 @@ int main(int argc, char *argv[])
 	int		c;
 	while((c = fgetc(fp)) != EOF) {
 		if(cnt < header_num) {
-			printf("%d,", c);
+			utils::format("%d,") % c;
 			if(cnt == (header_num - 1)) {
-				printf("\n");
+				utils::format("\n");
 			}
 		} else {
-			printf("0x%02X,", c);
+			utils::format("0x%02X,") % c;
 			len++;
 			if(len >= length_num) {
 				len = 0;
-				printf("\n");
+				utils::format("\n");
 			}
 		}
 		cnt++;
@@ -117,7 +119,7 @@ int main(int argc, char *argv[])
 	fclose(fp);
 
 	if(len != 0) {
-		printf("\n");
+		utils::format("\n");
 	}
 
 	return 0;
