@@ -321,6 +321,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void render()
 		{
+#if 0
 			camera_.service();
 
 			{
@@ -336,7 +337,7 @@ namespace app {
 				glDisable(GL_LINE_SMOOTH);
 				glDisable(GL_BLEND);
 			}
-
+#endif
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 			glEnable(GL_TEXTURE_2D);
 			glEnable(GL_BLEND);
