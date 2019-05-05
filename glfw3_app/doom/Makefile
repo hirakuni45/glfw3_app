@@ -1,3 +1,4 @@
+# -*- tab-width : 4 -*-
 #-----------------------------------------------#
 # Application Binary Build Makefile             #
 #-----------------------------------------------#
@@ -23,20 +24,100 @@ endif
 # 'debug' or 'release'
 BUILD		=	release
 
-VPATH		=	../common emu
+VPATH		=	../common
 
 # 				./emu/nofrendo.c
 
 CSOURCES	=	minizip/ioapi.c \
-				minizip/unzip.c
+				minizip/unzip.c \
+				prboom/am_map.c \
+				prboom/d_client.c \
+				prboom/d_deh.c \
+				prboom/d_items.c \
+				prboom/d_main.c \
+				prboom/doomdef.c \
+				prboom/doomstat.c \
+				prboom/dstrings.c \
+				prboom/f_finale.c \
+				prboom/f_wipe.c \
+				prboom/g_game.c \
+				prboom/gl_main.c \
+				prboom/gl_texture.c \
+				prboom/hu_lib.c \
+				prboom/hu_stuff.c \
+				prboom/info.c \
+				prboom/lprintf.c \
+				prboom/m_argv.c \
+				prboom/m_bbox.c \
+				prboom/m_cheat.c \
+				prboom/m_menu.c \
+				prboom/m_misc.c \
+				prboom/m_random.c \
+				prboom/md5.c \
+				prboom/mmus2mid.c \
+				prboom/p_ceilng.c \
+				prboom/p_checksum.c \
+				prboom/p_doors.c \
+				prboom/p_enemy.c \
+				prboom/p_floor.c \
+				prboom/p_genlin.c \
+				prboom/p_inter.c \
+				prboom/p_lights.c \
+				prboom/p_map.c \
+				prboom/p_maputl.c \
+				prboom/p_mobj.c \
+				prboom/p_plats.c \
+				prboom/p_pspr.c \
+				prboom/p_saveg.c \
+				prboom/p_setup.c \
+				prboom/p_sight.c \
+				prboom/p_spec.c \
+				prboom/p_switch.c \
+				prboom/p_telept.c \
+				prboom/p_tick.c \
+				prboom/p_user.c \
+				prboom/r_bsp.c \
+				prboom/r_data.c \
+				prboom/r_demo.c \
+				prboom/r_draw.c \
+				prboom/r_filter.c \
+				prboom/r_fps.c \
+				prboom/r_main.c \
+				prboom/r_patch.c \
+				prboom/r_plane.c \
+				prboom/r_segs.c \
+				prboom/r_sky.c \
+				prboom/r_things.c \
+				prboom/s_sound.c \
+				prboom/sounds.c \
+				prboom/st_lib.c \
+				prboom/st_stuff.c \
+				prboom/tables.c \
+				prboom/v_video.c \
+				prboom/version.c \
+				prboom/w_mmap.c \
+				prboom/w_wad.c \
+				prboom/wi_stuff.c \
+				prboom/z_bmalloc.c \
+				prboom/z_zone.c \
+				prboom-wad-tables/GAMMATBL.c \
+				prboom-wad-tables/SINETABL.c \
+				prboom-wad-tables/TANGTABL.c \
+				prboom-wad-tables/TANTOANG.c \
+				prboom-core/i_main.c \
+				prboom-core/i_system.c \
+				prboom-core/i_network.c \
+				prboom-core/i_video.c \
+				prboom-core/i_sound.c \
+				prboom-core/gamepad.c
 
 PSOURCES	=	main.cpp \
+				doom.cpp \
 				core/glcore.cpp \
 				core/device.cpp \
 				core/ftimg.cpp \
 				gl_fw/glfonts.cpp \
 				gl_fw/glmobj.cpp \
-				gl_fw/gltexfb.cpp \
 				gl_fw/glutils.cpp \
 				gl_fw/glterminal.cpp \
 				utils/vtx.cpp \
@@ -100,8 +181,8 @@ INC_SYS		+=	$(LOCAL_PATH)/opt/jpeg-turbo/include
 LIBDIR		+=	$(LOCAL_PATH)/opt/jpeg-turbo/lib
 endif
 
-PINC_APP	=	. ../common
-CINC_APP	=	. ../common
+PINC_APP	=	. ../common prboom/include
+CINC_APP	=	. ../common prboom/include prboom-wad-tables/include prboom-core/include
 
 INC_S	=	$(addprefix -isystem , $(INC_SYS))
 INC_L	=	$(addprefix -isystem , $(INC_LIB))
@@ -186,7 +267,7 @@ endif
 all: $(BUILD) $(TARGET)$(FEXT)
 
 $(TARGET)$(FEXT): $(OBJECTS) $(ICON_OBJ) Makefile
-	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -o $(TARGET)$(FEXT)
+	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -o $(TARGET)$(FEXT) 2>&1 | nkf -w
 
 $(BUILD)/%.o : %.c
 	mkdir -p $(dir $@); \
