@@ -1,11 +1,16 @@
-#-----------------------------------------------#
-# Application Binary Build Makefile             #
-#-----------------------------------------------#
-TARGET		=	seeda_peeping_app
+# -*- tab-width : 4 -*-
+#=======================================================================
+#   @file
+#   @brief  glfw_app Makefile
+#   @author 平松邦仁 (hira@rvf-rc45.net)
+#   @copyright  Copyright (C) 2019 Kunihito Hiramatsu @n
+#               Released under the MIT license @n
+#               https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
+#=======================================================================
+TARGET		=	rx_gui_emu
 
 ifeq ($(OS),Windows_NT)
 FEXT	=	.exe
-# ICON_RC = icon.rc
 ICON_RC =
 SYSTEM := WIN
 else
@@ -25,8 +30,6 @@ endif
 BUILD		=	release
 
 VPATH		=	../common
-
-# 				./emu/nofrendo.c
 
 CSOURCES	=	minizip/ioapi.c \
 				minizip/unzip.c
@@ -77,7 +80,7 @@ OPTLIBS		=	opengl32 glfw3 glew32 \
 				png turbojpeg jpeg openjp2 \
 				freetype \
 				mad tag \
-				z openal ncftp
+				z openal
 else
 LOCAL_PATH	=	/usr/local
 OPTLIBS		=	glfw3 GLEW \
@@ -92,17 +95,15 @@ INC_SYS		=	$(LOCAL_PATH)/include \
 				$(LOCAL_PATH)/include/freetype2 \
 				$(LOCAL_PATH)/include/openjpeg-2.3 \
 				$(LOCAL_PATH)/include/taglib
-INC_LIB		=	libncftp
-LIBDIR		=	$(LOCAL_PATH)/lib \
-				libncftp
-
+INC_LIB		=
+LIBDIR		=	$(LOCAL_PATH)/lib
 ifeq ($(SYSTEM),OSX)
 INC_SYS		+=	$(LOCAL_PATH)/opt/jpeg-turbo/include
 LIBDIR		+=	$(LOCAL_PATH)/opt/jpeg-turbo/lib
 endif
 
-PINC_APP	=	. ../common ./emu ./emu/cpu ./emu/nes ./emu/mappers ./emu/sndhrdw ./emu/libsnss
-CINC_APP	=	. ../common ./emu ./emu/cpu ./emu/nes ./emu/mappers ./emu/sndhrdw ./emu/libsnss
+PINC_APP	=	. ../common
+CINC_APP	=	. ../common
 
 INC_S	=	$(addprefix -isystem , $(INC_SYS))
 INC_L	=	$(addprefix -isystem , $(INC_LIB))
@@ -125,8 +126,7 @@ RC	=	windres
 ifeq ($(SYSTEM),WIN)
 CPMM	=	g++
 CCMM	=	gcc
-endif
-ifeq ($(SYSTEM),OSX)
+else
 CPMM	=	clang++
 CCMM	=	clang
 endif
