@@ -34,7 +34,6 @@ PSOURCES	=	main.cpp \
 				core/ftimg.cpp \
 				gl_fw/glfonts.cpp \
 				gl_fw/glmobj.cpp \
-				gl_fw/gltexfb.cpp \
 				gl_fw/glterminal.cpp \
 				gl_fw/glcamera.cpp \
 				gl_fw/gllight.cpp \
