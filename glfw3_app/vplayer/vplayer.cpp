@@ -230,7 +230,7 @@ namespace app {
 				} else {
 					const void* img = decoder_.get_image();
 					if(img) {
-						texfb_.rendering(gl::texfb::image::RGB, img);
+						texfb_.rendering(gl::texfb::IMAGE::RGB, img);
 						texfb_.flip();
 					}
 				}
