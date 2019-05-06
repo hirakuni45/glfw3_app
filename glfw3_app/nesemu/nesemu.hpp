@@ -425,7 +425,7 @@ namespace app {
 								*dst++ = 255;  // alpha
 							}
 						}
-						texfb_.rendering(gl::texfb::image::RGBA, (const char*)&fb_[0]);
+						texfb_.rendering(gl::texfb::IMAGE::RGBA, (const char*)&fb_[0]);
 					}
 					texfb_.flip();
 				}
