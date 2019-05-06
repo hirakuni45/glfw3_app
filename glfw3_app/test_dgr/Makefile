@@ -40,7 +40,6 @@ PSOURCES	=	main.cpp \
 				core/ftimg.cpp \
 				gl_fw/glfonts.cpp \
 				gl_fw/glmobj.cpp \
-				gl_fw/gltexfb.cpp \
 				gl_fw/glutils.cpp \
 				gl_fw/glterminal.cpp \
 				utils/vtx.cpp \
