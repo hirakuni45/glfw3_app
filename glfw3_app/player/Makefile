@@ -65,6 +65,7 @@ ifeq ($(OS),Windows_NT)
     LOCAL_INC_PATH := /mingw64/include
     LOCAL_LIB_PATH := /mingw64/lib
 	OPENJPEG_PATH := $(shell ls -d $(LOCAL_INC_PATH)/openjpeg*)
+	TAGLIB_PATH =
 	OPTLIBS = opengl32 glew32
 else
   FEXT	=
@@ -76,6 +77,7 @@ else
 	LOCAL_INC_PATH := /usr/local/include
 	LOCAL_LIB_PATH := /usr/local/lib
 	OPENJPEG_PATH := $(shell ls -d $(LOCAL_INC_PATH)/openjpeg*)
+	TAGLIB_PATH =
   endif
   ifeq ($(UNAME),Darwin)
     SYSTEM := OSX
@@ -83,7 +85,8 @@ else
 	CPP_VER := -std=c++14
 	LOCAL_INC_PATH := /usr/local/opt
 	LOCAL_LIB_PATH := /usr/local/lib
-	OPENJPEG_PATH := $(shell ls -d $(LOCAL_INC_PATH)/openjpeg*/include)
+	OPENJPEG_PATH := $(shell ls -d $(LOCAL_INC_PATH)/openjpeg*/include/openjpeg*)
+	TAGLIB_PATH := $(LOCAL_INC_PATH)/taglib/include/taglib
   endif
   OPTLIBS = GLEW 
 endif
@@ -99,7 +102,7 @@ OPTLIBS += 	glfw3 openal pthread \
 INC_SYS		=	$(LOCAL_INC_PATH) \
 				$(LOCAL_INC_PATH)/freetype2 \
 				$(OPENJPEG_PATH) \
-				$(LOCAL_INC_PATH)/taglib
+				$(TAGLIB_PATH)
 INC_LIB		=
 LIBDIR		=	$(LOCAL_LIB_PATH)
 
