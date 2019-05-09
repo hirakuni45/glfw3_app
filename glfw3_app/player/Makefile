@@ -57,6 +57,7 @@ PSOURCES	=	main.cpp \
 
 #				snd_io/aac_io.cpp
 
+# platform switcher (Windows, Linux, OS-X)
 ifeq ($(OS),Windows_NT)
     FEXT	= .exe
     ICON_RC = icon.rc
@@ -64,7 +65,12 @@ ifeq ($(OS),Windows_NT)
 	CPP_VER := -std=c++17
     LOCAL_INC_PATH := /mingw64/include
     LOCAL_LIB_PATH := /mingw64/lib
-	OPTLIBS = opengl32 glew32
+	OPTLIBS = opengl32 glew32 openal
+	CPMM	=	g++
+	CCMM	=	gcc
+	CFLAGS  = -DWIN32
+	PFLAGS  = -DWIN32 -DBOOST_USE_WINDOWS_H
+	LFLAGS =
 else
   FEXT	=
   ICON_RC =
@@ -72,15 +78,26 @@ else
   ifeq ($(UNAME),Linux)
     SYSTEM := LINUX
 	CPP_VER := -std=c++17
+	CFLAGS =
+	PFLAGS =
+	LFLAGS =
   endif
   ifeq ($(UNAME),Darwin)
     SYSTEM := OSX
 	OSX_VER := $(shell sw_vers -productVersion | sed 's/^\([0-9]*.[0-9]*\).[0-9]*/\1/')
 	CPP_VER := -std=c++14
+	CFLAGS =
+	PFLAGS =
+	LFLAGS = -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk \
+		-Wl,-search_paths_first -Wl,-headerpad_max_install_names \
+		-framework AGL -framework Cocoa -framework OpenGL -framework IOKit \
+		-framework CoreFoundation -framework CoreVideo -framework OpenAL
   endif
   LOCAL_INC_PATH := /usr/local/include
   LOCAL_LIB_PATH := /usr/local/lib
-  OPTLIBS = GLEW 
+  OPTLIBS = GLEW
+  CPMM	=	clang++
+  CCMM	=	clang
 endif
 
 # build openjpeg any version path
@@ -88,7 +105,7 @@ OPENJPEG_PATH := $(shell ls -d $(LOCAL_INC_PATH)/openjpeg*)
 
 STDLIBS		=
 
-OPTLIBS += 	glfw3 openal pthread \
+OPTLIBS += 	glfw3 pthread \
 			png jpeg openjp2 \
 			freetype \
 			mad tag \
@@ -122,25 +139,12 @@ CC	=	clang
 LK	=	clang++
 RC	=	windres
 
-ifeq ($(SYSTEM),WIN)
-CPMM	=	g++
-CCMM	=	gcc
-else
-CPMM	=	clang++
-CCMM	=	clang
-endif
-
 POPT	=	-O2 $(CPP_VER)
 COPT	=	-O2
 LOPT	=
 
-PFLAGS	=	-DHAVE_STDINT_H
-CFLAGS	=
-
-ifeq ($(SYSTEM),WIN)
-	PFLAGS += -DWIN32 -DBOOST_USE_WINDOWS_H
-	CFLAGS += -DWIN32
-endif
+PFLAGS +=	-DHAVE_STDINT_H
+CFLAGS +=
 
 ifeq ($(BUILD),debug)
 	POPT += -g
@@ -152,16 +156,6 @@ endif
 ifeq ($(BUILD),release)
 	PFLAGS += -DNDEBUG
 	CFLAGS += -DNDEBUG
-endif
-
-# 	-static-libgcc -static-libstdc++
-ifeq ($(SYSTEM),WIN)
-LFLAGS	=
-endif
-ifeq ($(SYSTEM),OSX)
-LFLAGS	=	-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX$(OSX_VER).sdk \
-			-Wl,-search_paths_first -Wl,-headerpad_max_install_names \
-			-framework AGL -framework Cocoa -framework OpenGL -framework IOKit -framework CoreFoundation -framework CoreVideo -framework OpenAL
 endif
 
 # -Wuninitialized -Wunused -Werror -Wshadow
