@@ -12,7 +12,7 @@
 extern "C" {
 #include <jpeglib.h>
 #include <jerror.h>
-#include <turbojpeg.h>
+/// #include <turbojpeg.h>
 };
 #include "utils/file_io.hpp"
 #include "jpeg_io.hpp"
