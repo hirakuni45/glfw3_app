@@ -61,7 +61,8 @@ ifeq ($(OS),Windows_NT)
     FEXT	=	.exe
     ICON_RC = icon.rc
     SYSTEM := WIN
-    LOCAL_PATH := /mingw64
+    LOCAL_INC_PATH := /mingw64/include
+    LOCAL_LIB_PATH := /mingw64/lib
 	OPTLIBS = opengl32 glew32
 else
   FEXT	=
@@ -69,12 +70,14 @@ else
   UNAME := $(shell uname -s)
   ifeq ($(UNAME),Linux)
     SYSTEM := LINUX
-	LOCAL_PATH := /usr/local
+	LOCAL_INC_PATH := /usr/local/include
+	LOCAL_LIB_PATH := /usr/local/lib
   endif
   ifeq ($(UNAME),Darwin)
     SYSTEM := OSX
 	OSX_VER := $(shell sw_vers -productVersion | sed 's/^\([0-9]*.[0-9]*\).[0-9]*/\1/')
-	LOCAL_PATH := /usr/local/opt
+	LOCAL_INC_PATH := /usr/local/Celler
+	LOCAL_LIB_PATH := /usr/local/lib
   endif
   OPTLIBS = GLEW 
 endif
@@ -87,14 +90,14 @@ OPTLIBS += 	glfw3 openal pthread \
 			mad tag \
 			z
 
-OPENJPEG_PATH := $(shell ls -d $(LOCAL_PATH)/include/openjpeg*)
+OPENJPEG_PATH := $(shell ls -d $(LOCAL_INC_PATH)/openjpeg*)
 
-INC_SYS		=	$(LOCAL_PATH)/include \
-				$(LOCAL_PATH)/include/freetype2 \
+INC_SYS		=	$(LOCAL_INC_PATH) \
+				$(LOCAL_INC_PATH)/freetype2 \
 				$(OPENJPEG_PATH) \
-				$(LOCAL_PATH)/include/taglib
+				$(LOCAL_INC_PATH)/taglib
 INC_LIB		=
-LIBDIR		=	$(LOCAL_PATH)/lib
+LIBDIR		=	$(LOCAL_LIB_PATH)
 
 PINC_APP	=	. ../common
 CINC_APP	=	. ../common
