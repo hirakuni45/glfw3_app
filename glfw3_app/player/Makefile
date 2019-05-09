@@ -1,24 +1,13 @@
-#-----------------------------------------------#
-# Application Binary Build Makefile             #
-#-----------------------------------------------#
+# -*- tab-width : 4 -*-
+#=======================================================================
+#   @file
+#   @brief  glfw_app
+#   @author 平松邦仁 (hira@rvf-rc45.net)
+#	@copyright	Copyright (C) 2019 Kunihito Hiramatsu @n
+#				Released under the MIT license @n
+#				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
+#=======================================================================
 TARGET		=	player
-
-ifeq ($(OS),Windows_NT)
-FEXT	=	.exe
-ICON_RC = icon.rc
-SYSTEM := WIN
-else
-  UNAME := $(shell uname -s)
-  ifeq ($(UNAME),Linux)
-    SYSTEM := LINUX
-  endif
-  ifeq ($(UNAME),Darwin)
-    SYSTEM := OSX
-	OSX_VER := $(shell sw_vers -productVersion | sed 's/^\([0-9]*.[0-9]*\).[0-9]*/\1/')
-  endif
-FEXT	=
-ICON_RC =
-endif
 
 # 'debug' or 'release'
 BUILD		=	release
@@ -68,37 +57,44 @@ PSOURCES	=	main.cpp \
 
 #				snd_io/aac_io.cpp
 
+ifeq ($(OS),Windows_NT)
+    FEXT	=	.exe
+    ICON_RC = icon.rc
+    SYSTEM := WIN
+    LOCAL_PATH := /mingw64
+	OPTLIBS = opengl32 glew32
+else
+  FEXT	=
+  ICON_RC =
+  UNAME := $(shell uname -s)
+  ifeq ($(UNAME),Linux)
+    SYSTEM := LINUX
+	LOCAL_PATH := /usr/local
+  endif
+  ifeq ($(UNAME),Darwin)
+    SYSTEM := OSX
+	OSX_VER := $(shell sw_vers -productVersion | sed 's/^\([0-9]*.[0-9]*\).[0-9]*/\1/')
+	LOCAL_PATH := /usr/local/opt
+  endif
+  OPTLIBS = GLEW 
+endif
+
 STDLIBS		=
 
-ifeq ($(SYSTEM),WIN)
-LOCAL_PATH	=	/mingw64
-OPTLIBS		=	opengl32 glfw3 glew32 \
-				pthread \
-				png turbojpeg jpeg openjp2 \
-				freetype \
-				mad tag \
-				z openal
-#				mad faad mp4ff tag
-else
-LOCAL_PATH	=	/usr/local
-OPTLIBS		=	glfw3 GLEW \
-				pthread \
-				png turbojpeg openjp2 \
-				freetype \
-				mad tag \
-				z
-endif
+OPTLIBS += 	glfw3 openal pthread \
+			png jpeg openjp2 \
+			freetype \
+			mad tag \
+			z
+
+OPENJPEG_PATH := $(shell ls -d $(LOCAL_PATH)/include/openjpeg*)
 
 INC_SYS		=	$(LOCAL_PATH)/include \
 				$(LOCAL_PATH)/include/freetype2 \
-				$(LOCAL_PATH)/include/openjpeg-2.3 \
+				$(OPENJPEG_PATH) \
 				$(LOCAL_PATH)/include/taglib
 INC_LIB		=
 LIBDIR		=	$(LOCAL_PATH)/lib
-ifeq ($(SYSTEM),OSX)
-INC_SYS		+=	$(LOCAL_PATH)/opt/jpeg-turbo/include
-LIBDIR		+=	$(LOCAL_PATH)/opt/jpeg-turbo/lib
-endif
 
 PINC_APP	=	. ../common
 CINC_APP	=	. ../common
@@ -129,7 +125,7 @@ CPMM	=	clang++
 CCMM	=	clang
 endif
 
-POPT	=	-O2 -std=c++14
+POPT	=	-O2 -std=c++17
 COPT	=	-O2
 LOPT	=
 
