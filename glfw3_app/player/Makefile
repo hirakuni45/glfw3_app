@@ -79,7 +79,7 @@ else
     SYSTEM := OSX
 	OSX_VER := $(shell sw_vers -productVersion | sed 's/^\([0-9]*.[0-9]*\).[0-9]*/\1/')
 	CPP_VER := -std=c++14
-	LOCAL_INC_PATH := /usr/local/Celler
+	LOCAL_INC_PATH := /usr/local/Cellar
 	LOCAL_LIB_PATH := /usr/local/lib
   endif
   OPTLIBS = GLEW 
