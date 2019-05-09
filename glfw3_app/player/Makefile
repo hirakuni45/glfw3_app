@@ -61,6 +61,7 @@ ifeq ($(OS),Windows_NT)
     FEXT	=	.exe
     ICON_RC = icon.rc
     SYSTEM := WIN
+	CPP_VER := -std=c++17
     LOCAL_INC_PATH := /mingw64/include
     LOCAL_LIB_PATH := /mingw64/lib
 	OPTLIBS = opengl32 glew32
@@ -70,12 +71,14 @@ else
   UNAME := $(shell uname -s)
   ifeq ($(UNAME),Linux)
     SYSTEM := LINUX
+	CPP_VER := -std=c++17
 	LOCAL_INC_PATH := /usr/local/include
 	LOCAL_LIB_PATH := /usr/local/lib
   endif
   ifeq ($(UNAME),Darwin)
     SYSTEM := OSX
 	OSX_VER := $(shell sw_vers -productVersion | sed 's/^\([0-9]*.[0-9]*\).[0-9]*/\1/')
+	CPP_VER := -std=c++14
 	LOCAL_INC_PATH := /usr/local/Celler
 	LOCAL_LIB_PATH := /usr/local/lib
   endif
@@ -128,7 +131,7 @@ CPMM	=	clang++
 CCMM	=	clang
 endif
 
-POPT	=	-O2 -std=c++17
+POPT	=	-O2 $(CPP_VER)
 COPT	=	-O2
 LOPT	=
 
