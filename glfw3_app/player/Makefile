@@ -58,14 +58,12 @@ PSOURCES	=	main.cpp \
 #				snd_io/aac_io.cpp
 
 ifeq ($(OS),Windows_NT)
-    FEXT	=	.exe
+    FEXT	= .exe
     ICON_RC = icon.rc
     SYSTEM := WIN
 	CPP_VER := -std=c++17
     LOCAL_INC_PATH := /mingw64/include
     LOCAL_LIB_PATH := /mingw64/lib
-	OPENJPEG_PATH := $(shell ls -d $(LOCAL_INC_PATH)/openjpeg*)
-	TAGLIB_PATH =
 	OPTLIBS = opengl32 glew32
 else
   FEXT	=
@@ -74,22 +72,19 @@ else
   ifeq ($(UNAME),Linux)
     SYSTEM := LINUX
 	CPP_VER := -std=c++17
-	LOCAL_INC_PATH := /usr/local/include
-	LOCAL_LIB_PATH := /usr/local/lib
-	OPENJPEG_PATH := $(shell ls -d $(LOCAL_INC_PATH)/openjpeg*)
-	TAGLIB_PATH =
   endif
   ifeq ($(UNAME),Darwin)
     SYSTEM := OSX
 	OSX_VER := $(shell sw_vers -productVersion | sed 's/^\([0-9]*.[0-9]*\).[0-9]*/\1/')
 	CPP_VER := -std=c++14
-	LOCAL_INC_PATH := /usr/local/opt
-	LOCAL_LIB_PATH := /usr/local/lib
-	OPENJPEG_PATH := $(shell ls -d $(LOCAL_INC_PATH)/openjpeg*/include/openjpeg*)
-	TAGLIB_PATH := $(LOCAL_INC_PATH)/taglib/include/taglib
   endif
+  LOCAL_INC_PATH := /usr/local/include
+  LOCAL_LIB_PATH := /usr/local/lib
   OPTLIBS = GLEW 
 endif
+
+# build openjpeg any version path
+OPENJPEG_PATH := $(shell ls -d $(LOCAL_INC_PATH)/openjpeg*)
 
 STDLIBS		=
 
@@ -102,7 +97,7 @@ OPTLIBS += 	glfw3 openal pthread \
 INC_SYS		=	$(LOCAL_INC_PATH) \
 				$(LOCAL_INC_PATH)/freetype2 \
 				$(OPENJPEG_PATH) \
-				$(TAGLIB_PATH)
+				$(LOCAL_INC_PATH)/taglib
 INC_LIB		=
 LIBDIR		=	$(LOCAL_LIB_PATH)
 
