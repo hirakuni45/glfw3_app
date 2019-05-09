@@ -1,8 +1,8 @@
 #pragma once
 //=====================================================================//
 /*! @file
-	@brief  GAME Emulator クラス @n
-			Copyright 2018 Kunihito Hiramatsu
+	@brief  DOOM (prboom) クラス @n
+			Copyright 2019 Kunihito Hiramatsu
 	@author 平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
@@ -21,6 +21,11 @@
 #include "snd_io/pcm.hpp"
 #include "utils/fifo.hpp"
 #include "utils/input.hpp"
+
+extern "C" {
+	int doom_main(int, const char* argv[]);
+	void D_DoomFrame(void);
+};
 
 namespace app {
 
@@ -278,6 +283,9 @@ namespace app {
 //			if(volume_ != nullptr) {
 //				volume_->load(pre);
 //			}
+
+//			static const char* argv[] = { "doom", "-cout", "ICWEFDA" };
+//			doom_main(3, argv);
 		}
 
 
@@ -365,6 +373,8 @@ namespace app {
 
 			tools_.service();
 #endif
+//			D_DoomFrame();
+
         	gui::widget_director& wd = director_.at().widget_director_;
 			wd.update();
 		}
