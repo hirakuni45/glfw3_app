@@ -152,7 +152,7 @@ CPMM	=	clang++
 CCMM	=	clang
 endif
 
-POPT	=	-O2 -std=c++14
+POPT	=	-O2 $(CPP_VER)
 COPT	=	-O2
 LOPT	=
 
@@ -174,16 +174,6 @@ endif
 ifeq ($(BUILD),release)
 	PFLAGS += -DNDEBUG
 	CFLAGS += -DNDEBUG
-endif
-
-# 	-static-libgcc -static-libstdc++
-ifeq ($(SYSTEM),WIN)
-LFLAGS	=
-endif
-ifeq ($(SYSTEM),OSX)
-LFLAGS	=	-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX$(OSX_VER).sdk \
-			-Wl,-search_paths_first -Wl,-headerpad_max_install_names \
-			-framework AGL -framework Cocoa -framework OpenGL -framework IOKit -framework CoreFoundation -framework CoreVideo -framework OpenAL
 endif
 
 # -Wuninitialized -Wunused -Werror -Wshadow
