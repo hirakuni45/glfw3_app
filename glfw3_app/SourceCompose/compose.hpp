@@ -23,10 +23,49 @@ namespace text {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class compose {
 
+		struct method_t {
+
+			enum class EXT {
+				PRIVATE,
+				PUBLIC,
+				PROTECTED,
+			};
+			EXT				ext_;
+
+			enum class TYPE {
+				CONSTRUCTOR,
+				DESTRACTOR,
+				NORMAL,
+				VIRTUAL,
+				OVERRIDE,
+			};
+			TYPE			type_;
+
+			std::string		def_;	///< 定義
+
+			typedef std::vector<std::string> IMPL;	///< implementation
+			IMPL			impl_;
+
+			method_t() : ext_(EXT::PRIVATE), type_(TYPE::NORMAL) { }
+
+			void clear(TYPE type = TYPE::NORMAL) {
+				ext_ = EXT::PRIVATE;
+				type_ = type;
+				def_.clear();
+				impl_.clear();
+			}
+		};
+		method_t	method_t_;
+		typedef std::vector<method_t> METHODS;
+
 		struct class_t {
+
 			std::string		def_;	///< クラス定義
 			std::string		name_;	///< クラス名
 
+			METHODS			methods_;
+
+			class_t() { }
 
 			void clear() {
 				def_.clear();
@@ -39,10 +78,13 @@ namespace text {
 				name_.clear();
 				const char* p = def_.c_str();
 				char ch;
-				while((ch = *p++) != 0) {
-					if(ch == ' ' || ch == '\t') continue;
-					else break;
+				while((ch = *p) != 0) {
+					if(ch == ' ' || ch == '\t') {
+						++p;
+						continue;
+					} else break;
 				}
+
 				while((ch = *p++) != 0) {
 					if(ch == ' ' || ch == '\t') break;
 					else if(ch == ':') break;
@@ -54,30 +96,30 @@ utils::format("Class name: '%s'\n") % name_.c_str();
 
 
 		typedef std::vector<std::string> LINES;
-		LINES		header_;
+		LINES			header_;
 
-		class_t		class_t_;
+		class_t			class_t_;
 
 		typedef std::vector<class_t> CLASS_TS;
-		CLASS_TS	class_ts_;
+		CLASS_TS		class_ts_;
 
 
-		LINES		source_;
+		LINES			source_;
 
 
-		uint32_t	empty_line_;
-		uint32_t	space_tab_;
-		uint32_t	comment_;
+		uint32_t		empty_line_;
+		uint32_t		space_tab_;
+		uint32_t		comment_;
 
 		enum class TASK {
 			Normal,
 			ClassDef,
 			ClassIn,
 		};
-		TASK		task_;
+		TASK			task_;
 
-		int			class_nest_;
-
+		method_t::EXT	current_ext_;
+		int				class_nest_;
 
 		void analize_nest_(const char* src)
 		{
@@ -108,7 +150,6 @@ utils::format("Class name: '%s'\n") % name_.c_str();
 
 			if(!str.empty()) {
 				class_t_.def_ = str;
-/// utils::format("Class def: '%s'\n") % str.c_str();
 				task_ = TASK::ClassDef;  // クラス定義が終わっていない
 			}
 		}
@@ -140,14 +181,94 @@ utils::format("Class name: '%s'\n") % name_.c_str();
 		}
 
 
+		void end_def_() {
+			if(method_t_.def_.empty()) return;
+utils::format("  %s\n") % method_t_.def_.c_str();
+
+			class_t_.methods_.push_back(method_t_);
+			method_t_.clear();
+			method_t_.ext_ = current_ext_;
+		}
+
+
+		void end_class_() {
+			task_ = TASK::Normal;
+			class_ts_.push_back(class_t_);
+			current_ext_ = method_t::EXT::PRIVATE;
+utils::format("\n");
+		}
+
+
+		void analize_sub_(const std::string& s) {
+			if(s == "public:") {
+				current_ext_ = method_t::EXT::PUBLIC;
+			} else if(s == "private:") {
+				current_ext_ = method_t::EXT::PRIVATE;
+			} else if(s == "protected:") {
+				current_ext_ = method_t::EXT::PROTECTED;
+			} else {
+/// utils::format("%s\n") % s.c_str();
+				if(class_nest_ == 1) {  // 定義
+					if(method_t_.def_.empty()) method_t_.def_ = s;
+					else {
+						method_t_.def_ += ' ';
+						method_t_.def_ += s;
+					}
+					if(s.back() == ';' || s == ";") {
+						end_def_();
+					}
+				} else if(class_nest_ > 1) {  // 実装
+/// utils::format("Impl: '%s'\n") % s.c_str();
+///					if(impl_.empty()) impl_ = s;
+///					else {
+///					}
+				}
+			}
+		}
+
+
 		// クラス内解析
 		void analize_class_(const char* p) {
 
-			analize_nest_(p);
+			std::string word;
+			char bch = 0;
+			char ch;
+			while((ch = *p++) != 0) {
+				if(ch == ' ' || ch == '\t') {
+					if(!word.empty()) {
+						analize_sub_(word);
+					}
+					word.clear();
+					continue;
+				} else if(ch == '/' && p[0] == '/') {  // ここから先はコメント行
+					break;										
+				} else if(ch == '{') {
+					if(!word.empty()) {
+						analize_sub_(word);
+					}
+					word.clear();
+					++class_nest_;
+				} else if(ch == '}') {
+					if(!word.empty()) {
+						analize_sub_(word);
+					}
+					word.clear();
+					class_nest_--;
+					if(class_nest_ == 1) {  // 定義終了
+						end_def_();
+					}
+				} else {
+					if(class_nest_ == 0 && ch == ';') continue;
+					word += ch;
+					bch = ch;
+				}
+			}
+			if(!word.empty()) {
+				analize_sub_(word);
+			}
 
 			if(class_nest_ == 0) {
-				task_ = TASK::Normal;
-				class_ts_.push_back(class_t_);
+				end_class_();
 			}
 		}
 
@@ -158,7 +279,7 @@ utils::format("Class name: '%s'\n") % name_.c_str();
 		*/
 		//---------------------------------------------------------------//
 		compose() : empty_line_(0), space_tab_(0), comment_(0),
-			task_(TASK::Normal), class_nest_(0)
+			task_(TASK::Normal), current_ext_(method_t::EXT::PRIVATE), class_nest_(0)
 		{ }
 
 
@@ -195,16 +316,28 @@ utils::format("Class name: '%s'\n") % name_.c_str();
 		{
 			// クラス解析
 			task_ = TASK::Normal;
-
+			bool comment = false;
 			for(auto t : header_) {
 
 				if(t.empty()) {  // 空行
 					++empty_line_;
 					continue;  
 				}
+				if(!comment) {
+					if(t.find("/*") != std::string::npos) {
+						comment = true;
+					}
+				} else if(comment) {
+					if(t.find("*/") != std::string::npos) {
+						comment = false;
+					} else {
+						continue;
+					}
+				}
+
 				if(is_space_tab_(t)) continue;
 				if(is_comment_(t)) continue;
-
+				
 
 				switch(task_) {
 				case TASK::Normal:
