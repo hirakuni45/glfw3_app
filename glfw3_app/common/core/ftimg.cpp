@@ -86,6 +86,17 @@ void get_metrics(uint32_t code)
 			path = root_path_ + fontfile;
 		}
 
+#ifdef WIN32
+		if(!utils::probe_file(path)) {
+			// インストールしたフォントファイルが、ユーザーディレクトリにある場合に対応
+			std::string userpath = "c:/Users/";
+			userpath += std::getenv("USERNAME");
+			userpath += "/AppData/Local/Microsoft/Windows/Fonts/";
+			userpath += fontfile;
+			path = userpath;
+		}
+#endif
+
 		FT_Face face;
 		FT_Error error = FT_New_Face(library_, utils::system_path(path).c_str(), 0, &face);
 		if(error) {
