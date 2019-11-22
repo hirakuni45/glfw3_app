@@ -25,7 +25,6 @@ PSOURCES	=	main.cpp \
 				side/i8080sub.cpp \
 				core/glcore.cpp \
 				core/device.cpp \
-				core/ftimg.cpp \
 				gl_fw/glfonts.cpp \
 				gl_fw/glmobj.cpp \
 				gl_fw/glutils.cpp \
