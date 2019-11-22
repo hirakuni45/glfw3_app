@@ -302,7 +302,7 @@ namespace al {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	SE リクエスト
-			@param[in]	slot	発音スロット（-1: auto）
+			@param[in]	slot	発音スロット
 			@param[in]	se_no	発音番号
 			@param[in]	loop	ループ指定
 			@return 正常なら「true」

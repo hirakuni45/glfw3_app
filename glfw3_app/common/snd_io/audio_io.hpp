@@ -255,6 +255,16 @@ namespace al {
 		}
 
 
+		bool get_slot_init(slot_handle sh) const {
+			if(sh == 0) {
+				return false;
+			}
+			ALint status;
+			alGetSourcei(sh, AL_SOURCE_STATE, &status);
+			return status == AL_INITIAL;
+		}
+
+
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	スロットの演奏状態を得る

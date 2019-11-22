@@ -13,6 +13,8 @@
 #include "pcm.hpp"
 #include "utils/file_info.hpp"
 
+#include "utils/format.hpp"
+
 namespace al {
 
 	using namespace al;
@@ -342,8 +344,12 @@ namespace al {
 			}
 		} else if(static_cast<size_t>(slot) < slots_.size()) {
 			audio_io::slot_handle sh = slots_[slot];
-			audio_io_.stop(sh);
-			audio_io_.set_wave(sh, wh);	// 波形を登録して再生
+			if(audio_io_.get_slot_init(sh)) {  // 波形を登録して再生
+				audio_io_.set_wave(sh, wh);
+			} else {
+				audio_io_.stop(sh);
+				audio_io_.rewind(sh);
+			}
 			audio_io_.set_loop(sh, loop);
 			audio_io_.play(sh);
 			f = true;
