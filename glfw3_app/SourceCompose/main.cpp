@@ -98,12 +98,13 @@ int main(int argc, char *argv[])
 		utils::format("Can't open header: '%s'\n") % header;
 	}
 
+	cmpo.analize_header();
+
 	if(!cmpo.load_source(source)) {
 		utils::format("Can't open source: '%s'\n") % source;
 	}
 
-	cmpo.analize_header();
+	cmpo.analize_source();
 
-
-
+	cmpo.list_all();
 }
