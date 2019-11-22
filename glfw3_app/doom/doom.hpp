@@ -284,8 +284,8 @@ namespace app {
 //				volume_->load(pre);
 //			}
 
-//			static const char* argv[] = { "doom", "-cout", "ICWEFDA" };
-//			doom_main(3, argv);
+			static const char* argv[] = { "doom", "-cout", "ICWEFDA" };
+			doom_main(3, argv);
 		}
 
 
