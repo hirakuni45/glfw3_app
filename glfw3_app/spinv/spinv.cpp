@@ -207,9 +207,9 @@ namespace app {
 		}
 
 		al::sound& sound = director_.at().sound_;
-		if(dev.get_positive(gl::device::key::A)) {
-			sound.request(0, se_id_[8]);
-		}
+//		if(dev.get_positive(gl::device::key::A)) {
+//			sound.request(0, se_id_[8]);
+//		}
 
 		// sound request
 		{
