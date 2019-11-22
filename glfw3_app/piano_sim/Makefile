@@ -1,3 +1,4 @@
+# -*- tab-width : 4 -*-
 #=======================================================================
 #	glfw3_app Makefile
 #   @author 平松邦仁 (hira@rvf-rc45.net)
@@ -35,7 +36,6 @@ CSOURCES	=	minizip/ioapi.c \
 PSOURCES	=	main.cpp \
 				core/glcore.cpp \
 				core/device.cpp \
-				core/ftimg.cpp \
 				gl_fw/glfonts.cpp \
 				gl_fw/glmobj.cpp \
 				gl_fw/glutils.cpp \
