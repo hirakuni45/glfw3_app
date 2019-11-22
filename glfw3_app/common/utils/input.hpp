@@ -10,7 +10,7 @@
 			%f ---> 浮動小数点数（float、double） @n
 			%c ---> １文字のキャラクター @n
 			%% ---> '%' のキャラクター
-			Copyright 2017 Kunihito Hiramatsu
+			Copyright 2017, 2018 Kunihito Hiramatsu
     @author 平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
@@ -61,7 +61,7 @@ namespace utils {
 			} else {
 				if(str_ == nullptr) {
 					char ch;
-					if(read(0, &ch, 1) == 1) {
+					if(read(STDIN_FILENO, &ch, 1) == 1) {
 						if(ch == '\n') ch = 0;
 						last_ = ch;
 					} else {
@@ -119,13 +119,24 @@ namespace utils {
 		mode	mode_;
 		error	error_;
 		int		num_;
+		uint8_t	nbc_;
 
 		uint32_t bin_() {
 			uint32_t a = 0;
 			char ch;
-			while((ch = inp_()) != 0 && ch >= '0' && ch <= '1') {
-				a <<= 1;
-				a += ch - '0';
+			while((ch = inp_()) != 0) {
+				if(ch >= '0' && ch <= '1') {
+					a <<= 1;
+					a += ch - '0';
+				} else if(nbc_ != 0 && ch == ' ') {
+					// 文字数指定がある場合「スペース」は '0' と同等に扱う
+				} else {
+					break;
+				}
+				if(nbc_ > 0) {
+					nbc_--;
+					if(nbc_ == 0) break;
+				}
 			}
 			return a;
 		}
@@ -133,9 +144,19 @@ namespace utils {
 		uint32_t oct_() {
 			uint32_t a = 0;
 			char ch;
-			while((ch = inp_()) != 0 && ch >= '0' && ch <= '7') {
-				a <<= 3;
-				a += ch - '0';
+			while((ch = inp_()) != 0) {
+				if(ch >= '0' && ch <= '7') {
+					a <<= 3;
+					a += ch - '0';
+				} else if(nbc_ != 0 && ch == ' ') {
+					// 文字数指定がある場合「スペース」は '0' と同等に扱う
+				} else {
+					break;
+				}
+				if(nbc_ > 0) {
+					nbc_--;
+					if(nbc_ == 0) break;
+				}
 			}
 			return a;
 		}
@@ -143,9 +164,19 @@ namespace utils {
 		uint32_t dec_() {
 			uint32_t a = 0;
 			char ch;
-			while((ch = inp_()) != 0 && ch >= '0' && ch <= '9') {
-				a *= 10;
-				a += ch - '0';
+			while((ch = inp_()) != 0) {
+				if(ch >= '0' && ch <= '9') {
+					a *= 10;
+					a += ch - '0';
+				} else if(nbc_ != 0 && ch == ' ') {
+					// 文字数指定がある場合「スペース」は '0' と同等に扱う
+				} else {
+					break;
+				}
+				if(nbc_ > 0) {
+					nbc_--;
+					if(nbc_ == 0) break;
+				}
 			}
 			return a;
 		}
@@ -163,8 +194,14 @@ namespace utils {
 				} else if(ch >= 'a' && ch <= 'f') {
 					a <<= 4;
 					a += ch - 'a' + 10;
+				} else if(nbc_ != 0 && ch == ' ') {
+					// 文字数指定がある場合「スペース」は '0' と同等に扱う
 				} else {
 					break;
+				}
+				if(nbc_ > 0) {
+					nbc_--;
+					if(nbc_ == 0) break;
 				}
 			}
 			return a;
@@ -265,6 +302,7 @@ namespace utils {
 						}
 					} else if(ch == '%' && *form_ != '%') {
 						cm = fmm::type;
+						nbc_ = 0;
 					} else if(ch != inp_()) {
 						error_ = error::partition;
 						return;
@@ -272,30 +310,32 @@ namespace utils {
 					break;
 
 				case fmm::type:
-					switch(ch) {
-					case 'b':
+					if(ch >= 'a') ch -= 0x20;
+					if(ch >= '0' && ch <= '9') {
+						nbc_ *= 10;
+						nbc_ += ch - '0';
+					} else if(ch == 'B') {
 						mode_ = mode::BIN;
-						break;
-					case 'o':
+						return;
+					} else if(ch == 'O') {
 						mode_ = mode::OCT;
-						break;
-					case 'd':
+						return;
+					} else if(ch == 'D') {
 						mode_ = mode::DEC;
-						break;
-					case 'x':
+						return;
+					} else if(ch == 'X') {
 						mode_ = mode::HEX;
-						break;
-					case 'f':
+						return;
+					} else if(ch == 'F') {
 						mode_ = mode::REAL;
-						break;
-					case 'c':
+						return;
+					} else if(ch == 'C') {
 						mode_ = mode::CHA;
-						break;
-					default:
+						return;
+					} else {
 						error_ = error::input_type;
-						break;
+						return;
 					}
-					return;
 				}
 			}
 			if(ch == 0 && inp_() == 0) ;
@@ -308,16 +348,27 @@ namespace utils {
 		bool neg_() {
 			bool neg = false;
 			auto s = inp_();
-			if(s == '-') { neg = true; }
-			else if(s == '+') { neg = false; }
-			else inp_.unget();
+			if(s == '-') {
+				neg = true;
+				if(nbc_ > 0) nbc_--;
+			} else if(s == '+') {
+				neg = false;
+				if(nbc_ > 0) nbc_--;
+			} else {
+				inp_.unget();
+			}
 			return neg;
 		}
 
 
 		int32_t nb_int_(bool sign = true)
 		{
+			auto nbc = nbc_;
 			auto neg = neg_();
+			if(nbc > 0 && nbc_ == 0) {
+				error_ = error::not_integer;
+				return 0;
+			}
 
 			uint32_t v = 0;
 			switch(mode_) {
@@ -338,7 +389,9 @@ namespace utils {
 				break;
 			}
 			if(error_ == error::none) {
-				inp_.unget();
+				if(nbc == 0) {
+					inp_.unget();
+				}
 				next_();
 				if(error_ == error::none) ++num_;
 			}
@@ -379,7 +432,7 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		basic_input(const char* form, const char* inp = nullptr) noexcept : form_(form), inp_(inp),
-			mode_(mode::NONE), error_(error::none), num_(0)
+			mode_(mode::NONE), error_(error::none), num_(0), nbc_(0)
 		{
 			next_();
 		}
