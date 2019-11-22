@@ -20,7 +20,6 @@ CSOURCES	=	minizip/ioapi.c \
 PSOURCES	=	main.cpp \
 				core/glcore.cpp \
 				core/device.cpp \
-				core/ftimg.cpp \
 				gl_fw/glfonts.cpp \
 				gl_fw/glmobj.cpp \
 				gl_fw/glutils.cpp \
