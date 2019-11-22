@@ -2,7 +2,7 @@
 //=====================================================================//
 /*! @file
 	@brief  GAME Emulator クラス @n
-			Copyright 2018 Kunihito Hiramatsu
+			Copyright 2019 Kunihito Hiramatsu
 	@author 平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//

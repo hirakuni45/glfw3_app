@@ -1,6 +1,12 @@
-#-----------------------------------------------#
-# Application Binary Build Makefile             #
-#-----------------------------------------------#
+# -*- tab-width : 4 -*-
+#=======================================================================
+#   @file
+#   @brief  glfw_app
+#   @author 平松邦仁 (hira@rvf-rc45.net)
+#	@copyright	Copyright (C) 2019 Kunihito Hiramatsu @n
+#				Released under the MIT license @n
+#				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
+#=======================================================================
 TARGET		=	gameemu
 
 ifeq ($(OS),Windows_NT)
@@ -25,15 +31,12 @@ BUILD		=	release
 
 VPATH		=	../common emu
 
-# 				./emu/nofrendo.c
-
 CSOURCES	=	minizip/ioapi.c \
 				minizip/unzip.c
 
 PSOURCES	=	main.cpp \
 				core/glcore.cpp \
 				core/device.cpp \
-				core/ftimg.cpp \
 				gl_fw/glfonts.cpp \
 				gl_fw/glmobj.cpp \
 				gl_fw/glutils.cpp \
@@ -65,7 +68,12 @@ PSOURCES	=	main.cpp \
 				widgets/common_parts.cpp \
 				widgets/widget_director.cpp \
 				widgets/widget_utils.cpp \
-				widgets/widget_filer.cpp
+				widgets/widget_filer.cpp \
+				src/emu/config.cpp \
+				src/emu/ioport.cpp \
+				src/emu/tilemap.cpp \
+				src/mame/drivers/rallyx.cpp \
+				src/mame/video/rallyx.cpp
 
 STDLIBS		=
 
@@ -99,7 +107,12 @@ INC_SYS		+=	$(LOCAL_PATH)/opt/jpeg-turbo/include
 LIBDIR		+=	$(LOCAL_PATH)/opt/jpeg-turbo/lib
 endif
 
-PINC_APP	=	. ../common
+PINC_APP	=	. ../common \
+				./src/osd \
+				./src/emu \
+				./src/mame \
+				./src/devices \
+				./src/lib/util
 CINC_APP	=	. ../common
 
 INC_S	=	$(addprefix -isystem , $(INC_SYS))
