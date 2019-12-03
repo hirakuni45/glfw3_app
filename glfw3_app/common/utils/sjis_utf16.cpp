@@ -8,9 +8,6 @@
 #include "utils/sjis_utf16.hpp"
 #include <boost/unordered_map.hpp>
 
-#include <iostream>
-#include <boost/format.hpp>
-
 namespace utils {
 
 static uint16_t sjis_utf16_tbl_[] = {

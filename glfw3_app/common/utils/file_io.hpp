@@ -11,6 +11,7 @@
 //=====================================================================//
 #include <cstdio>
 #include <memory>
+#include <cstring>
 #include "utils/string_utils.hpp"
 
 namespace utils {

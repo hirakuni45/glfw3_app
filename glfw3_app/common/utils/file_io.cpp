@@ -15,14 +15,11 @@
 #include <dirent.h>
 #include <unistd.h>
 
-#ifdef __PPU__
-#include <sys/paths.h>
-#include <cell/sysmodule.h>
-#include <cell/l10n.h>
-#endif
+#include "utils/format.hpp"
 
-#include <iostream>
-#include <boost/format.hpp>
+#ifdef WIN32
+#include <windows.h>
+#endif
 
 namespace utils {
 
