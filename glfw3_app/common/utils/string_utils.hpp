@@ -735,18 +735,26 @@ namespace utils {
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	フルパスから、ファイル名だけを取得する
-		@param[in]	src	ソース文字列
+		@param[in]	src		ソース文字列
+		@param[in]	bks		バックスラッシュもセパレータとする場合「true」
 		@return ファイル名（ポインター）
 	*/
 	//-----------------------------------------------------------------//
 	template <class T>
-	inline T get_file_nameT(const T& src) {
+	inline T get_file_nameT(const T& src, bool bks) {
 		if(src.empty()) return T();
 		const typename T::value_type* p = string_strrchr(src, '/');
 		if(p != nullptr) {
 			++p;
 			return T(p);
 		} else {
+			if(bks) {
+				const typename T::value_type* p = string_strrchr(src, '\\');
+				if(p != nullptr) {
+					++p;
+					return T(p);
+				}
+			}
 			const typename T::value_type* p = string_strrchr(src, ':');
 			if(p != nullptr) {
 				++p;
@@ -755,20 +763,51 @@ namespace utils {
 		}
 		return src;
 	}
-	inline std::string get_file_name(const std::string& src) { return get_file_nameT(src); }
-	inline wstring get_file_name(const wstring& src) { return get_file_nameT(src); }
-	inline lstring get_file_name(const lstring& src) { return get_file_nameT(src); }
+	inline std::string get_file_name(const std::string& src, bool bks =
+#ifdef WIN32
+		true
+#else
+		false
+#endif
+	) {
+		return get_file_nameT(src, bks);
+	}
+	inline wstring get_file_name(const wstring& src, bool bks =
+#ifdef WIN32
+		true
+#else
+		false
+#endif
+	) {
+		return get_file_nameT(src, bks);
+	}
+	inline lstring get_file_name(const lstring& src, bool bks =
+#ifdef WIN32
+		true
+#else
+		false
+#endif
+	) {
+		return get_file_nameT(src, bks);
+	}
 
 
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	ファイル・ベース名を取得
 		@param[in]	src	ソース文字列
+		@param[in]	bks		バックスラッシュもセパレータとする場合「true」
 		@return ベース名
 	*/
 	//-----------------------------------------------------------------//
-	inline std::string get_file_base(const std::string& src) {
-		auto tmp = get_file_name(src);
+	inline std::string get_file_base(const std::string& src, bool bks =
+#ifdef WIN32
+		true
+#else
+		false
+#endif
+	) {
+		auto tmp = get_file_name(src, bks);
 		return tmp.substr(0, tmp.find_last_of('.'));
 	}
 
