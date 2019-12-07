@@ -721,7 +721,7 @@ namespace utils {
 			tmp[0] = val & 255;
 			tmp[1] = val >> 8;
 			tmp[2] = val >> 16;
-			tmp[2] = val >> 24;
+			tmp[3] = val >> 24;
 			if(write(tmp, 4) != 4) {
 				return false;
 			}
