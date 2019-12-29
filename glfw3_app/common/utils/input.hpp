@@ -9,9 +9,21 @@
 			%x ---> １６進の数値 @n
 			%f ---> 浮動小数点数（float、double） @n
 			%c ---> １文字のキャラクター @n
-			%% ---> '%' のキャラクター
-			Copyright 2017, 2018 Kunihito Hiramatsu
+			%% ---> '%' のキャラクター @n
+			%a ---> 自動、２進(bnnn)、８進(onnn)、１０進、１６進(xnnn)、を判別 @n
+			Exsample: @n
+				int v; @n
+				if(!(input("%d", parse_text) % v).status()) { @n
+					// Parse error. @n
+				} else { @n
+					// Parse OK! @n
+					format("%d\n") % v; @n
+				} @n
+			+ 2019/12/26 15:30- 数値のオート入力機能追加
     @author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2017, 2019 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/RX/blob/master/LICENSE
 */
 //=====================================================================//
 #include <type_traits>
@@ -115,6 +127,7 @@ namespace utils {
 			HEX,
 			REAL,
 			CHA,
+			AUTO_NUM,
 		};
 		mode	mode_;
 		error	error_;
@@ -205,6 +218,50 @@ namespace utils {
 				}
 			}
 			return a;
+		}
+
+
+		uint32_t auto_num_()
+		{
+			enum class TYPE {
+				dec,
+				bin,
+				oct,
+				hex,
+			};
+
+			char ch = inp_();
+			if(ch != '0') {  // 最初に０がある場合無視
+				inp_.unget();
+			}
+			ch = inp_();
+			if(ch >= 0x60) { ch -= 0x20; }
+			uint32_t v = 0;
+			TYPE t(TYPE::dec);
+			if(ch == 'B') {
+				t = TYPE::bin;
+			} else if(ch == 'X') {
+				t = TYPE::hex;
+			} else if(ch == 'O') {
+				t = TYPE::oct;
+			} else {
+				inp_.unget();
+			}
+			switch(t) {
+			case TYPE::bin:
+				v = bin_();
+				break;
+			case TYPE::oct:
+				v = oct_();
+				break;
+			case TYPE::hex:
+				v = hex_();
+				break;
+			default:
+				v = dec_();
+				break;
+			}
+			return v;
 		}
 
 
@@ -332,6 +389,9 @@ namespace utils {
 					} else if(ch == 'C') {
 						mode_ = mode::CHA;
 						return;
+					} else if(ch == 'A') {
+						mode_ = mode::AUTO_NUM;
+						return;
 					} else {
 						error_ = error::input_type;
 						return;
@@ -383,6 +443,9 @@ namespace utils {
 				break;
 			case mode::HEX:
 				v = hex_();
+				break;
+			case mode::AUTO_NUM:
+				v = auto_num_();
 				break;
 			default:
 				error_ = error::not_integer;
