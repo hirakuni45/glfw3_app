@@ -1,121 +1,89 @@
 # -*- tab-width : 4 -*-
-#-----------------------------------------------#
-# Application Binary Build Makefile             #
-#-----------------------------------------------#
+#=======================================================================
+#   @file
+#   @brief  glfw_app
+#   @author 平松邦仁 (hira@rvf-rc45.net)
+#	@copyright	Copyright (C) 2019 Kunihito Hiramatsu @n
+#				Released under the MIT license @n
+#				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
+#=======================================================================
 TARGET		=	doom
-
-ifeq ($(OS),Windows_NT)
-FEXT	=	.exe
-# ICON_RC = icon.rc
-SYSTEM := WIN
-else
-  UNAME := $(shell uname -s)
-  ifeq ($(UNAME),Linux)
-    SYSTEM := LINUX
-  endif
-  ifeq ($(UNAME),Darwin)
-    SYSTEM := OSX
-	OSX_VER := $(shell sw_vers -productVersion | sed 's/^\([0-9]*.[0-9]*\).[0-9]*/\1/')
-  endif
-FEXT	=
-ICON_RC =
-endif
 
 # 'debug' or 'release'
 BUILD		=	release
 
-VPATH		=	../common
+VPATH		=	../common DOOM-master
 
-# 				./emu/nofrendo.c
+DOOM_PATH	=	DOOM-master/linuxdoom-1.10
 
 CSOURCES	=	minizip/ioapi.c \
 				minizip/unzip.c \
-				prboom/am_map.c \
-				prboom/d_client.c \
-				prboom/d_deh.c \
-				prboom/d_items.c \
-				prboom/d_main.c \
-				prboom/doomdef.c \
-				prboom/doomstat.c \
-				prboom/dstrings.c \
-				prboom/f_finale.c \
-				prboom/f_wipe.c \
-				prboom/g_game.c \
-				prboom/gl_main.c \
-				prboom/gl_texture.c \
-				prboom/hu_lib.c \
-				prboom/hu_stuff.c \
-				prboom/info.c \
-				prboom/lprintf.c \
-				prboom/m_argv.c \
-				prboom/m_bbox.c \
-				prboom/m_cheat.c \
-				prboom/m_menu.c \
-				prboom/m_misc.c \
-				prboom/m_random.c \
-				prboom/md5.c \
-				prboom/mmus2mid.c \
-				prboom/p_ceilng.c \
-				prboom/p_checksum.c \
-				prboom/p_doors.c \
-				prboom/p_enemy.c \
-				prboom/p_floor.c \
-				prboom/p_genlin.c \
-				prboom/p_inter.c \
-				prboom/p_lights.c \
-				prboom/p_map.c \
-				prboom/p_maputl.c \
-				prboom/p_mobj.c \
-				prboom/p_plats.c \
-				prboom/p_pspr.c \
-				prboom/p_saveg.c \
-				prboom/p_setup.c \
-				prboom/p_sight.c \
-				prboom/p_spec.c \
-				prboom/p_switch.c \
-				prboom/p_telept.c \
-				prboom/p_tick.c \
-				prboom/p_user.c \
-				prboom/r_bsp.c \
-				prboom/r_data.c \
-				prboom/r_demo.c \
-				prboom/r_draw.c \
-				prboom/r_filter.c \
-				prboom/r_fps.c \
-				prboom/r_main.c \
-				prboom/r_patch.c \
-				prboom/r_plane.c \
-				prboom/r_segs.c \
-				prboom/r_sky.c \
-				prboom/r_things.c \
-				prboom/s_sound.c \
-				prboom/sounds.c \
-				prboom/st_lib.c \
-				prboom/st_stuff.c \
-				prboom/tables.c \
-				prboom/v_video.c \
-				prboom/version.c \
-				prboom/w_mmap.c \
-				prboom/w_wad.c \
-				prboom/wi_stuff.c \
-				prboom/z_bmalloc.c \
-				prboom/z_zone.c \
-				prboom-wad-tables/GAMMATBL.c \
-				prboom-wad-tables/SINETABL.c \
-				prboom-wad-tables/TANGTABL.c \
-				prboom-wad-tables/TANTOANG.c \
-				prboom-core/i_main.c \
-				prboom-core/i_system.c \
-				prboom-core/i_network.c \
-				prboom-core/i_video.c \
-				prboom-core/i_sound.c \
-				prboom-core/gamepad.c
+				$(DOOM_PATH)/doomdef.c \
+				$(DOOM_PATH)/doomstat.c \
+				$(DOOM_PATH)/dstrings.c \
+				$(DOOM_PATH)/i_system.c \
+				$(DOOM_PATH)/i_sound.c \
+				$(DOOM_PATH)/i_video.c \
+				$(DOOM_PATH)/i_net.c \
+				$(DOOM_PATH)/tables.c \
+				$(DOOM_PATH)/f_finale.c \
+				$(DOOM_PATH)/f_wipe.c \
+				$(DOOM_PATH)/d_main.c \
+				$(DOOM_PATH)/d_net.c \
+				$(DOOM_PATH)/d_items.c \
+				$(DOOM_PATH)/g_game.c \
+				$(DOOM_PATH)/m_menu.c \
+				$(DOOM_PATH)/m_misc.c \
+				$(DOOM_PATH)/m_argv.c \
+				$(DOOM_PATH)/m_bbox.c \
+				$(DOOM_PATH)/m_fixed.c \
+				$(DOOM_PATH)/m_swap.c \
+				$(DOOM_PATH)/m_cheat.c \
+				$(DOOM_PATH)/m_random.c \
+				$(DOOM_PATH)/am_map.c \
+				$(DOOM_PATH)/p_ceilng.c \
+				$(DOOM_PATH)/p_doors.c \
+				$(DOOM_PATH)/p_enemy.c \
+				$(DOOM_PATH)/p_floor.c \
+				$(DOOM_PATH)/p_inter.c \
+				$(DOOM_PATH)/p_lights.c \
+				$(DOOM_PATH)/p_map.c \
+				$(DOOM_PATH)/p_maputl.c \
+				$(DOOM_PATH)/p_plats.c \
+				$(DOOM_PATH)/p_pspr.c \
+				$(DOOM_PATH)/p_setup.c \
+				$(DOOM_PATH)/p_sight.c \
+				$(DOOM_PATH)/p_spec.c \
+				$(DOOM_PATH)/p_switch.c \
+				$(DOOM_PATH)/p_mobj.c \
+				$(DOOM_PATH)/p_telept.c \
+				$(DOOM_PATH)/p_tick.c \
+				$(DOOM_PATH)/p_saveg.c \
+				$(DOOM_PATH)/p_user.c \
+				$(DOOM_PATH)/r_bsp.c \
+				$(DOOM_PATH)/r_data.c \
+				$(DOOM_PATH)/r_draw.c \
+				$(DOOM_PATH)/r_main.c \
+				$(DOOM_PATH)/r_plane.c \
+				$(DOOM_PATH)/r_segs.c \
+				$(DOOM_PATH)/r_sky.c \
+				$(DOOM_PATH)/r_things.c \
+				$(DOOM_PATH)/w_wad.c \
+				$(DOOM_PATH)/wi_stuff.c \
+				$(DOOM_PATH)/v_video.c \
+				$(DOOM_PATH)/st_lib.c \
+				$(DOOM_PATH)/st_stuff.c \
+				$(DOOM_PATH)/hu_stuff.c \
+				$(DOOM_PATH)/hu_lib.c \
+				$(DOOM_PATH)/s_sound.c \
+				$(DOOM_PATH)/z_zone.c \
+				$(DOOM_PATH)/info.c \
+				$(DOOM_PATH)/sounds.c \
+				$(DOOM_PATH)/i_main.c
 
 PSOURCES	=	main.cpp \
-				doom.cpp \
 				core/glcore.cpp \
 				core/device.cpp \
-				core/ftimg.cpp \
 				gl_fw/glfonts.cpp \
 				gl_fw/glmobj.cpp \
 				gl_fw/glutils.cpp \
@@ -149,40 +117,69 @@ PSOURCES	=	main.cpp \
 				widgets/widget_utils.cpp \
 				widgets/widget_filer.cpp
 
+# platform switcher (Windows, Linux, OS-X)
+ifeq ($(OS),Windows_NT)
+    FEXT	= .exe
+#   ICON_RC = icon.rc
+    SYSTEM := WIN
+	CPP_VER := -std=c++17
+    LOCAL_INC_PATH := /mingw64/include
+    LOCAL_LIB_PATH := /mingw64/lib
+	OPTLIBS = opengl32 glew32 openal
+	CPMM	=	g++
+	CCMM	=	gcc
+	CFLAGS  = -DWIN32
+	PFLAGS  = -DWIN32 -DBOOST_USE_WINDOWS_H
+	LFLAGS =
+else
+  FEXT	=
+  ICON_RC =
+  UNAME := $(shell uname -s)
+  ifeq ($(UNAME),Linux)
+    SYSTEM := LINUX
+	CPP_VER := -std=c++17
+	CFLAGS =
+	PFLAGS =
+	LFLAGS =
+  endif
+  ifeq ($(UNAME),Darwin)
+    SYSTEM := OSX
+	OSX_VER := $(shell sw_vers -productVersion | sed 's/^\([0-9]*.[0-9]*\).[0-9]*/\1/')
+	CPP_VER := -std=c++14
+	CFLAGS =
+	PFLAGS =
+	LFLAGS = -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk \
+		-Wl,-search_paths_first -Wl,-headerpad_max_install_names \
+		-framework AGL -framework Cocoa -framework OpenGL -framework IOKit \
+		-framework CoreFoundation -framework CoreVideo -framework OpenAL
+  endif
+  LOCAL_INC_PATH := /usr/local/include
+  LOCAL_LIB_PATH := /usr/local/lib
+  OPTLIBS = GLEW
+  CPMM	=	clang++
+  CCMM	=	clang
+endif
+
+# build openjpeg any version path
+OPENJPEG_PATH := $(shell ls -d $(LOCAL_INC_PATH)/openjpeg*)
+
 STDLIBS		=
 
-ifeq ($(SYSTEM),WIN)
-LOCAL_PATH	=	/mingw64
-OPTLIBS		=	opengl32 glfw3 glew32 \
-				pthread \
-				png turbojpeg jpeg openjp2 \
-				freetype \
-				mad tag \
-				z openal
-else
-LOCAL_PATH	=	/usr/local
-OPTLIBS		=	glfw3 GLEW \
-				pthread \
-				png turbojpeg openjp2 \
-				freetype \
-				mad faad mp4ff tag \
-				z
-endif
+OPTLIBS += 	glfw3 pthread \
+			png jpeg openjp2 \
+			freetype \
+			mad tag \
+			z
 
-INC_SYS		=	$(LOCAL_PATH)/include \
-				$(LOCAL_PATH)/include/freetype2 \
-				$(LOCAL_PATH)/include/openjpeg-2.3 \
-				$(LOCAL_PATH)/include/taglib
+INC_SYS		=	$(LOCAL_INC_PATH) \
+				$(LOCAL_INC_PATH)/freetype2 \
+				$(OPENJPEG_PATH) \
+				$(LOCAL_INC_PATH)/taglib
 INC_LIB		=
-LIBDIR		=	$(LOCAL_PATH)/lib
+LIBDIR		=	$(LOCAL_LIB_PATH)
 
-ifeq ($(SYSTEM),OSX)
-INC_SYS		+=	$(LOCAL_PATH)/opt/jpeg-turbo/include
-LIBDIR		+=	$(LOCAL_PATH)/opt/jpeg-turbo/lib
-endif
-
-PINC_APP	=	. ../common prboom/include
-CINC_APP	=	. ../common prboom/include prboom-wad-tables/include prboom-core/include
+PINC_APP	=	. ../common
+CINC_APP	=	. ../common $(DOOM_PATH)
 
 INC_S	=	$(addprefix -isystem , $(INC_SYS))
 INC_L	=	$(addprefix -isystem , $(INC_LIB))
@@ -202,26 +199,12 @@ CC	=	clang
 LK	=	clang++
 RC	=	windres
 
-ifeq ($(SYSTEM),WIN)
-CPMM	=	g++
-CCMM	=	gcc
-endif
-ifeq ($(SYSTEM),OSX)
-CPMM	=	clang++
-CCMM	=	clang
-endif
-
-POPT	=	-O2 -std=c++14
+POPT	=	-O2 $(CPP_VER)
 COPT	=	-O2
 LOPT	=
 
-PFLAGS	=	-DHAVE_STDINT_H
-CFLAGS	=
-
-ifeq ($(SYSTEM),WIN)
-	PFLAGS += -DWIN32 -DBOOST_USE_WINDOWS_H
-	CFLAGS += -DWIN32
-endif
+PFLAGS +=	-DHAVE_STDINT_H
+CFLAGS +=	-DNORMALUNIX
 
 ifeq ($(BUILD),debug)
 	POPT += -g
@@ -235,22 +218,10 @@ ifeq ($(BUILD),release)
 	CFLAGS += -DNDEBUG
 endif
 
-# 	-static-libgcc -static-libstdc++
-ifeq ($(SYSTEM),WIN)
-LFLAGS	=
-endif
-ifeq ($(SYSTEM),OSX)
-LFLAGS	=	-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX$(OSX_VER).sdk \
-			-Wl,-search_paths_first -Wl,-headerpad_max_install_names \
-			-framework AGL -framework Cocoa -framework OpenGL -framework IOKit -framework CoreFoundation -framework CoreVideo -framework OpenAL
-endif
-
 # -Wuninitialized -Wunused -Werror -Wshadow
 CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
 			-Wformat
-CPWARN	=	-Wall -Werror \
-			-Wno-unused-private-field \
-			-Wno-unused-variable
+CPWARN	=	-Wall -Werror -Wno-unused-private-field -Wno-unused-variable
 
 OBJECTS	=	$(addprefix $(BUILD)/,$(patsubst %.cpp,%.o,$(PSOURCES))) \
 			$(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(CSOURCES)))
@@ -267,7 +238,7 @@ endif
 all: $(BUILD) $(TARGET)$(FEXT)
 
 $(TARGET)$(FEXT): $(OBJECTS) $(ICON_OBJ) Makefile
-	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -o $(TARGET)$(FEXT) 2>&1 | nkf -w
+	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -o $(TARGET)$(FEXT)
 
 $(BUILD)/%.o : %.c
 	mkdir -p $(dir $@); \
@@ -307,7 +278,7 @@ clean_depend:
 	rm -f $(DEPENDS)
 
 dllname:
-	objdump -p $(TARGET)$(FEXT) | grep "DLL Name"
+	objdump -p $(TARGET)$(FEXT) | grep --text "DLL Name"
 
 tarball:
 	tar cfvz $(TARGET)_$(shell date +%Y%m%d%H).tgz \
