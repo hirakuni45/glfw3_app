@@ -25,6 +25,8 @@
 #ifndef __D_MAIN__
 #define __D_MAIN__
 
+#include <stdint.h>
+
 #include "d_event.h"
 
 #ifdef __GNUG__
@@ -34,9 +36,9 @@
 
 
 #define MAXWADFILES             20
-extern char*		wadfiles[MAXWADFILES];
+extern const char* wadfiles[MAXWADFILES];
 
-void D_AddFile (char *file);
+void D_AddFile (const char *file);
 
 
 
@@ -47,6 +49,9 @@ void D_AddFile (char *file);
 // If not overrided by user input, calls N_AdvanceDemo.
 //
 void D_DoomMain (void);
+
+void doom_keybits(uint32_t bits);
+void doom_frame (int dst_width, int dst_height, uint8_t* dst_rgba);
 
 // Called by IO functions when input is detected.
 void D_PostEvent (event_t* ev);

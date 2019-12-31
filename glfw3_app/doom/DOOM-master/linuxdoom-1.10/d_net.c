@@ -71,7 +71,7 @@ int		nodeforplayer[MAXPLAYERS];
 int             maketic;
 int		lastnettic;
 int		skiptics;
-int		ticdup;		
+int		ticdup = 1;		
 int		maxsend;	// BACKUPTICS/(2*ticdup)-1
 
 
@@ -144,6 +144,9 @@ HSendPacket
  (int	node,
   int	flags )
 {
+return;
+
+
     netbuffer->checksum = NetbufferChecksum () | flags;
 
     if (!node)
@@ -191,6 +194,8 @@ HSendPacket
 //
 boolean HGetPacket (void)
 {	
+return false;
+
     if (reboundpacket)
     {
 	*netbuffer = reboundstore;
@@ -260,6 +265,9 @@ char    exitmsg[80];
 
 void GetPackets (void)
 {
+return;
+
+
     int		netconsole;
     int		netnode;
     ticcmd_t	*src, *dest;
@@ -367,20 +375,20 @@ int      gametime;
 
 void NetUpdate (void)
 {
+
     int             nowtime;
     int             newtics;
     int				i,j;
     int				realstart;
     int				gameticdiv;
-    
+
     // check time
-    nowtime = I_GetTime ()/ticdup;
+    nowtime = I_GetTime () / ticdup;
     newtics = nowtime - gametime;
     gametime = nowtime;
-	
-    if (newtics <= 0) 	// nothing new to update
-	goto listen; 
-
+    if (newtics <= 0) { 	// nothing new to update
+		goto listen;
+	}
     if (skiptics <= newtics)
     {
 	newtics -= skiptics;
@@ -391,12 +399,11 @@ void NetUpdate (void)
 	skiptics -= newtics;
 	newtics = 0;
     }
-	
-		
-    netbuffer->player = consoleplayer;
-    
+
+///  netbuffer->player = consoleplayer;
+
     // build new ticcmds for console player
-    gameticdiv = gametic/ticdup;
+    gameticdiv = gametic / ticdup;
     for (i=0 ; i<newtics ; i++)
     {
 	I_StartTic ();
@@ -409,10 +416,10 @@ void NetUpdate (void)
 	maketic++;
     }
 
-
     if (singletics)
 	return;         // singletic update is syncronous
-    
+
+#if 0
     // send the packet to the other nodes
     for (i=0 ; i<doomcom->numnodes ; i++)
 	if (nodeingame[i])
@@ -439,10 +446,12 @@ void NetUpdate (void)
 		HSendPacket (i, 0);
 	    }
 	}
-    
+#endif
+
     // listen for other packets
   listen:
-    GetPackets ();
+///   GetPackets ();
+	return;
 }
 
 
@@ -460,12 +469,15 @@ void CheckAbort (void)
 	I_StartTic (); 
 	
     I_StartTic ();
-    for ( ; eventtail != eventhead 
-	      ; eventtail = (++eventtail)&(MAXEVENTS-1) ) 
-    { 
-	ev = &events[eventtail]; 
-	if (ev->type == ev_keydown && ev->data1 == KEY_ESCAPE)
-	    I_Error ("Network game synchronization aborted.");
+///    for ( ; eventtail != eventhead; eventtail = (++eventtail) & (MAXEVENTS - 1) ) {
+    while ( eventtail == eventhead) {
+		ev = &events[eventtail];
+		if (ev->type == ev_keydown && ev->data1 == KEY_ESCAPE) {
+	    	I_Error ("Network game synchronization aborted.");
+		}
+
+		++eventtail;
+		eventtail &= (MAXEVENTS - 1);
     } 
 }
 
@@ -554,6 +566,7 @@ extern	int			viewangleoffset;
 
 void D_CheckNetGame (void)
 {
+return;
     int             i;
 	
     for (i=0 ; i<MAXNETNODES ; i++)
@@ -601,6 +614,8 @@ void D_CheckNetGame (void)
 //
 void D_QuitNetGame (void)
 {
+return;
+
     int             i, j;
 	
     if (debugfile)
@@ -645,13 +660,24 @@ void TryRunTics (void)
     int		numplaying;
     
     // get real tics		
-    entertic = I_GetTime ()/ticdup;
+    entertic = I_GetTime () / ticdup;
     realtics = entertic - oldentertics;
     oldentertics = entertic;
-    
+
+
+    if (advancedemo) {
+		D_DoAdvanceDemo ();
+	}
+
+	M_Ticker ();
+	G_Ticker ();
+	gametic++;
+
     // get available tics
     NetUpdate ();
-	
+
+return;
+
     lowtic = MAXINT;
     numplaying = 0;
     for (i=0 ; i<doomcom->numnodes ; i++)
@@ -663,8 +689,8 @@ void TryRunTics (void)
 		lowtic = nettics[i];
 	}
     }
-    availabletics = lowtic - gametic/ticdup;
-    
+    availabletics = lowtic - gametic / ticdup;
+
     // decide how many tics to run
     if (realtics < availabletics-1)
 	counts = realtics+1;
@@ -678,10 +704,13 @@ void TryRunTics (void)
 		
     frameon++;
 
-    if (debugfile)
+    if (debugfile) {
 	fprintf (debugfile,
 		 "=======real: %i  avail: %i  game: %i\n",
 		 realtics, availabletics,counts);
+	}
+    
+
 
     if (!demoplayback)
     {	

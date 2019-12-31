@@ -48,7 +48,8 @@ rcsid[] = "$Id: m_bbox.c,v 1.1 1997/02/03 22:45:10 b1 Exp $";
 
 
 
-int	mb_used = 6;
+/// int	mb_used = 6;
+int	mb_used = 8;
 
 
 void
@@ -70,15 +71,14 @@ ticcmd_t*	I_BaseTiccmd(void)
 
 int  I_GetHeapSize (void)
 {
-    return mb_used*1024*1024;
+    return mb_used * 1024 * 1024;
 }
 
 byte* I_ZoneBase (int*	size)
 {
-    *size = mb_used*1024*1024;
+    *size = I_GetHeapSize();
     return (byte *) malloc (*size);
 }
-
 
 
 //
@@ -91,14 +91,14 @@ int  I_GetTime (void)
     struct timezone	tzp;
     int			newtics;
     static int		basetime=0;
-  
+
     gettimeofday(&tp, &tzp);
-    if (!basetime)
-	basetime = tp.tv_sec;
+    if (!basetime) {
+		basetime = tp.tv_sec;
+	}
     newtics = (tp.tv_sec-basetime)*TICRATE + tp.tv_usec*TICRATE/1000000;
     return newtics;
 }
-
 
 
 //

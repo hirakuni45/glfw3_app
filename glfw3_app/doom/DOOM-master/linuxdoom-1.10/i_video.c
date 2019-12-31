@@ -24,21 +24,11 @@
 static const char
 rcsid[] = "$Id: i_x.c,v 1.6 1997/02/03 22:45:10 b1 Exp $";
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
 /// #include <sys/ipc.h>
 /// #include <sys/shm.h>
-
-/// #include <X11/Xlib.h>
-/// #include <X11/Xutil.h>
-/// #include <X11/keysym.h>
-
-/// #include <X11/extensions/XShm.h>
-// Had to dig up XShm.c for this one.
-// It is in the libXext, but not in the XFree86 headers.
-#ifdef LINUX
-int XShmGetEventBase( Display* dpy ); // problems with g++?
-#endif
 
 #include <stdarg.h>
 #include <sys/time.h>
@@ -57,21 +47,9 @@ int XShmGetEventBase( Display* dpy ); // problems with g++?
 
 #include "doomdef.h"
 
-#define POINTER_WARP_COUNTDOWN	1
+#include "../../doomdef.hpp"
 
-#if 0
-Display*	X_display=0;
-Window		X_mainWindow;
-Colormap	X_cmap;
-Visual*		X_visual;
-GC		X_gc;
-XEvent		X_event;
-int		X_screen;
-XVisualInfo	X_visualinfo;
-XImage*		image;
-#endif
-int		X_width;
-int		X_height;
+#define POINTER_WARP_COUNTDOWN	1
 
 // MIT SHared Memory extension.
 boolean		doShm;
@@ -166,18 +144,6 @@ return 0;
 
 void I_ShutdownGraphics(void)
 {
-#if 0
-  // Detach from X server
-  if (!XShmDetach(X_display, &X_shminfo))
-	    I_Error("XShmDetach() failed in I_ShutdownGraphics()");
-
-  // Release shared memory.
-  shmdt(X_shminfo.shmaddr);
-  shmctl(X_shminfo.shmid, IPC_RMID, 0);
-
-  // Paranoia.
-  image->data = NULL;
-#endif
 }
 
 
@@ -196,11 +162,55 @@ static int	lastmousey = 0;
 boolean		mousemoved = false;
 boolean		shmFinished;
 
+
+static uint32_t pad_level_ = 0;
+static uint32_t pad_positive_ = 0;
+static uint32_t pad_negative_ = 0;
+
+
+void doom_keybits(uint32_t bits)
+{
+	pad_positive_ = ~pad_level_ &  bits;
+	pad_negative_ =  pad_level_ & ~bits;
+	pad_level_    = bits;
+}
+
+
+void post_key_event_(uint32_t bits, int event_type)
+{
+	if(bits == 0) return;
+
+	typedef struct {
+		uint32_t	bits;
+		int			rc;
+	} pad_t;
+	static const pad_t key[7] = {
+	{ KEY_BITS_UP,    KEY_UPARROW },
+	{ KEY_BITS_DOWN,  KEY_DOWNARROW },
+	{ KEY_BITS_RIGHT, KEY_RIGHTARROW },
+	{ KEY_BITS_LEFT,  KEY_LEFTARROW },
+	{ KEY_BITS_ENTER, KEY_ENTER },
+	{ KEY_BITS_ESC,   KEY_ESCAPE },
+	{ KEY_BITS_TAB,   KEY_TAB },
+ 	};
+
+	for(int i = 0; i < 7; ++i) {
+		if((bits & key[i].bits) != 0) {
+		    event_t event;
+			event.type = event_type;
+			event.data1 = key[i].rc;
+			D_PostEvent(&event);
+// printf("Event: %d, Key: %d\n", event_type, i);
+		}		
+	}
+}
+
 void I_GetEvent(void)
 {
-#if 0
-    event_t event;
+	post_key_event_(pad_positive_, ev_keydown);
+	post_key_event_(pad_negative_, ev_keyup);
 
+#if 0
     // put event-grabbing stuff in here
     XNextEvent(X_display, &X_event);
     switch (X_event.type)
@@ -283,6 +293,7 @@ void I_GetEvent(void)
 #endif
 }
 
+#if 0
 Cursor
 createnullcursor
 ( Display*	display,
@@ -307,13 +318,14 @@ createnullcursor
     XFreeGC(display,gc);
     return cursor;
 }
+#endif
 
 //
 // I_StartTic
 //
 void I_StartTic (void)
 {
-
+#if 0
     if (!X_display)
 	return;
 
@@ -339,7 +351,7 @@ void I_StartTic (void)
     }
 
     mousemoved = false;
-
+#endif
 }
 
 
@@ -351,12 +363,39 @@ void I_UpdateNoBlit (void)
     // what is this?
 }
 
+
+static uint8_t current_lut_[256 * 3];
+
+
 //
 // I_FinishUpdate
 //
-void I_FinishUpdate (void)
+void I_FinishUpdate (int dst_width, int dst_height, uint8_t* dst_rgba)
 {
+	int y = 0;
+	while (y < SCREENHEIGHT) {
+		uint8_t* src = (uint8_t*)(screens[0]);
+		src += y * SCREENWIDTH;
+		uint8_t* rgba = &dst_rgba[y * dst_width * 4];
+	    int x = 0;
+	    while (x < SCREENWIDTH) {
+			uint32_t i = *src++;
+			i *= 3;
+			rgba[0] = current_lut_[i + 0];
+			rgba[1] = current_lut_[i + 1];
+			rgba[2] = current_lut_[i + 2];
+			rgba[3] = 255;
+			rgba += 4;
+			++x;
+			if(x >= dst_width) break;
+	    }
+		++y;
+		if(y >= dst_height) break;
+	}
 
+	I_GetEvent();
+
+#if 0
     static int	lasttic;
     int		tics;
     int		i;
@@ -389,8 +428,9 @@ void I_FinishUpdate (void)
 	unsigned int fouripixels;
 
 	ilineptr = (unsigned int *) (screens[0]);
-	for (i=0 ; i<2 ; i++)
-	    olineptrs[i] = (unsigned int *) &image->data[i*X_width];
+	for (i=0 ; i<2 ; i++) {
+///	    olineptrs[i] = (unsigned int *) &image->data[i*X_width];
+	}
 
 	y = SCREENHEIGHT;
 	while (y--)
@@ -431,8 +471,10 @@ void I_FinishUpdate (void)
 	unsigned int fouripixels;
 
 	ilineptr = (unsigned int *) (screens[0]);
-	for (i=0 ; i<3 ; i++)
-	    olineptrs[i] = (unsigned int *) &image->data[i*X_width];
+	for (i=0 ; i<3 ; i++) {
+///	    olineptrs[i] = (unsigned int *) &image->data[i*X_width];
+	    olineptrs[i] = NULL;
+	}
 
 	y = SCREENHEIGHT;
 	while (y--)
@@ -481,13 +523,14 @@ void I_FinishUpdate (void)
     else if (multiply == 4)
     {
 	// Broken. Gotta fix this some day.
-	void Expand4(unsigned *, double *);
-  	Expand4 ((unsigned *)(screens[0]), (double *) (image->data));
+///	void Expand4(unsigned *, double *);
+/// Expand4 ((unsigned *)(screens[0]), (double *) (image->data));
     }
 
     if (doShm)
     {
 
+#if 0
 	if (!XShmPutImage(	X_display,
 				X_mainWindow,
 				X_gc,
@@ -497,6 +540,7 @@ void I_FinishUpdate (void)
 				X_width, X_height,
 				True ))
 	    I_Error("XShmPutImage() failed\n");
+#endif
 
 	// wait for it to finish and processes all input events
 	shmFinished = false;
@@ -509,6 +553,7 @@ void I_FinishUpdate (void)
     else
     {
 
+#if 0
 	// draw the image
 	XPutImage(	X_display,
 			X_mainWindow,
@@ -520,9 +565,9 @@ void I_FinishUpdate (void)
 
 	// sync up with server
 	XSync(X_display, False);
-
+#endif
     }
-
+#endif
 }
 
 
@@ -534,7 +579,7 @@ void I_ReadScreen (byte* scr)
     memcpy (scr, screens[0], SCREENWIDTH*SCREENHEIGHT);
 }
 
-
+#if 0
 //
 // Palette stuff.
 //
@@ -580,16 +625,18 @@ void UploadNewPalette(Colormap cmap, byte *palette)
 
 	}
 }
+#endif
 
 //
 // I_SetPalette
 //
 void I_SetPalette (byte* palette)
 {
-    UploadNewPalette(X_cmap, palette);
+	memcpy(current_lut_, palette, 256 * 3);
 }
 
 
+#if 0
 //
 // This function is probably redundant,
 //  if XShmDetach works properly.
@@ -693,10 +740,12 @@ void grabsharedmemory(int size)
   fprintf(stderr, "shared memory id=%d, addr=0x%x\n", id,
 	  (int) (image->data));
 }
+#endif
+
 
 void I_InitGraphics(void)
 {
-
+#if 0
     char*		displayname;
     char*		d;
     int			n;
@@ -916,7 +965,7 @@ void I_InitGraphics(void)
 	screens[0] = (unsigned char *) (image->data);
     else
 	screens[0] = (unsigned char *) malloc (SCREENWIDTH * SCREENHEIGHT);
-
+#endif
 }
 
 
@@ -965,6 +1014,7 @@ Expand4
 ( unsigned*	lineptr,
   double*	xline )
 {
+#if 0
     double	dpixel;
     unsigned	x;
     unsigned 	y;
@@ -1050,6 +1100,7 @@ Expand4
 	} while (x-=16);
 	xline += step;
     } while (y--);
+#endif
 }
 
 

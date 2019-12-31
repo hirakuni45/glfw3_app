@@ -175,7 +175,7 @@ short		whichSkull;		// which skull to draw
 char    skullName[2][/*8*/9] = {"M_SKULL1","M_SKULL2"};
 
 // current menudef
-menu_t*	currentMenu;                          
+static menu_t*	currentMenu;                          
 
 //
 // PROTOTYPES
@@ -247,7 +247,7 @@ enum
     main_end
 } main_e;
 
-menuitem_t MainMenu[]=
+static menuitem_t MainMenu[]=
 {
     {1,"M_NGAME",M_NewGame,'n'},
     {1,"M_OPTION",M_Options,'o'},
@@ -258,7 +258,7 @@ menuitem_t MainMenu[]=
     {1,"M_QUITG",M_QuitDOOM,'q'}
 };
 
-menu_t  MainDef =
+static menu_t MainDef =
 {
     main_end,
     NULL,
@@ -281,7 +281,7 @@ enum
     ep_end
 } episodes_e;
 
-menuitem_t EpisodeMenu[]=
+static menuitem_t EpisodeMenu[]=
 {
     {1,"M_EPI1", M_Episode,'k'},
     {1,"M_EPI2", M_Episode,'t'},
@@ -289,7 +289,7 @@ menuitem_t EpisodeMenu[]=
     {1,"M_EPI4", M_Episode,'t'}
 };
 
-menu_t  EpiDef =
+static menu_t EpiDef =
 {
     ep_end,		// # of menu items
     &MainDef,		// previous menu
@@ -312,7 +312,7 @@ enum
     newg_end
 } newgame_e;
 
-menuitem_t NewGameMenu[]=
+static menuitem_t NewGameMenu[] =
 {
     {1,"M_JKILL",	M_ChooseSkill, 'i'},
     {1,"M_ROUGH",	M_ChooseSkill, 'h'},
@@ -321,7 +321,7 @@ menuitem_t NewGameMenu[]=
     {1,"M_NMARE",	M_ChooseSkill, 'n'}
 };
 
-menu_t  NewDef =
+static menu_t NewDef =
 {
     newg_end,		// # of menu items
     &EpiDef,		// previous menu
@@ -872,16 +872,16 @@ void M_DrawNewGame(void)
 
 void M_NewGame(int choice)
 {
-    if (netgame && !demoplayback)
-    {
-	M_StartMessage(NEWGAME,NULL,false);
-	return;
+    if (netgame && !demoplayback) {
+		M_StartMessage(NEWGAME,NULL,false);
+		return;
     }
 	
-    if ( gamemode == commercial )
-	M_SetupNextMenu(&NewDef);
-    else
-	M_SetupNextMenu(&EpiDef);
+    if ( gamemode == commercial ) {
+		M_SetupNextMenu(&NewDef);
+    } else {
+		M_SetupNextMenu(&EpiDef);
+	}
 }
 
 
@@ -897,42 +897,37 @@ void M_DrawEpisode(void)
 
 void M_VerifyNightmare(int ch)
 {
-    if (ch != 'y')
-	return;
-		
+    if (ch != 'y') {
+		return;
+	}
+
     G_DeferedInitNew(nightmare,epi+1,1);
     M_ClearMenus ();
 }
 
 void M_ChooseSkill(int choice)
 {
-    if (choice == nightmare)
-    {
-	M_StartMessage(NIGHTMARE,M_VerifyNightmare,true);
-	return;
+    if (choice == nightmare) {
+		M_StartMessage(NIGHTMARE, M_VerifyNightmare, true);
+		return;
     }
 	
-    G_DeferedInitNew(choice,epi+1,1);
+    G_DeferedInitNew(choice, epi+1, 1);
     M_ClearMenus ();
 }
 
 void M_Episode(int choice)
 {
-    if ( (gamemode == shareware)
-	 && choice)
-    {
-	M_StartMessage(SWSTRING,NULL,false);
-	M_SetupNextMenu(&ReadDef1);
-	return;
+    if ( (gamemode == shareware) && choice) {
+		M_StartMessage(SWSTRING, NULL, false);
+		M_SetupNextMenu(&ReadDef1);
+		return;
     }
 
     // Yet another hack...
-    if ( (gamemode == registered)
-	 && (choice > 2))
-    {
-      fprintf( stderr,
-	       "M_Episode: 4th episode requires UltimateDOOM\n");
-      choice = 0;
+    if ( (gamemode == registered) && (choice > 2)) {
+    	fprintf( stderr, "M_Episode: 4th episode requires UltimateDOOM\n");
+    	choice = 0;
     }
 	 
     epi = choice;
@@ -944,8 +939,8 @@ void M_Episode(int choice)
 //
 // M_Options
 //
-char    detailNames[2][9]	= {"M_GDHIGH","M_GDLOW"};
-char	msgNames[2][9]		= {"M_MSGOFF","M_MSGON"};
+static char detailNames[2][9]	= {"M_GDHIGH", "M_GDLOW"};
+static char msgNames[2][9]		= {"M_MSGOFF", "M_MSGON"};
 
 
 void M_DrawOptions(void)
@@ -1622,23 +1617,23 @@ boolean M_Responder (event_t* ev)
     switch (ch)
     {
       case KEY_DOWNARROW:
-	do
-	{
+///	do
+///	{
 	    if (itemOn+1 > currentMenu->numitems-1)
 		itemOn = 0;
 	    else itemOn++;
 	    S_StartSound(NULL,sfx_pstop);
-	} while(currentMenu->menuitems[itemOn].status==-1);
+///	} while(currentMenu->menuitems[itemOn].status==-1);
 	return true;
 		
       case KEY_UPARROW:
-	do
-	{
+///	do
+///	{
 	    if (!itemOn)
 		itemOn = currentMenu->numitems-1;
 	    else itemOn--;
 	    S_StartSound(NULL,sfx_pstop);
-	} while(currentMenu->menuitems[itemOn].status==-1);
+///	} while(currentMenu->menuitems[itemOn].status==-1);
 	return true;
 
       case KEY_LEFTARROW:

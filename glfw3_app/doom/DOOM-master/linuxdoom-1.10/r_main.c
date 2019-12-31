@@ -679,53 +679,51 @@ void R_ExecuteSetViewSize (void)
 
     setsizeneeded = false;
 
-    if (setblocks == 11)
-    {
-	scaledviewwidth = SCREENWIDTH;
-	viewheight = SCREENHEIGHT;
-    }
-    else
-    {
-	scaledviewwidth = setblocks*32;
-	viewheight = (setblocks*168/10)&~7;
+    if (setblocks == 11) {
+		scaledviewwidth = SCREENWIDTH;
+		viewheight = SCREENHEIGHT;
+    } else {
+		scaledviewwidth = setblocks*32;
+		viewheight = (setblocks*168/10)&~7;
     }
     
     detailshift = setdetail;
-    viewwidth = scaledviewwidth>>detailshift;
-	
-    centery = viewheight/2;
-    centerx = viewwidth/2;
-    centerxfrac = centerx<<FRACBITS;
-    centeryfrac = centery<<FRACBITS;
+    viewwidth = scaledviewwidth >> detailshift;
+
+    centery = viewheight / 2;
+    centerx = viewwidth / 2;
+    centerxfrac = centerx << FRACBITS;
+    centeryfrac = centery << FRACBITS;
     projection = centerxfrac;
 
-    if (!detailshift)
-    {
-	colfunc = basecolfunc = R_DrawColumn;
-	fuzzcolfunc = R_DrawFuzzColumn;
-	transcolfunc = R_DrawTranslatedColumn;
-	spanfunc = R_DrawSpan;
-    }
-    else
-    {
-	colfunc = basecolfunc = R_DrawColumnLow;
-	fuzzcolfunc = R_DrawFuzzColumn;
-	transcolfunc = R_DrawTranslatedColumn;
-	spanfunc = R_DrawSpanLow;
+    if (!detailshift) {
+		colfunc = basecolfunc = R_DrawColumn;
+		fuzzcolfunc = R_DrawFuzzColumn;
+		transcolfunc = R_DrawTranslatedColumn;
+		spanfunc = R_DrawSpan;
+    } else {
+		colfunc = basecolfunc = R_DrawColumnLow;
+		fuzzcolfunc = R_DrawFuzzColumn;
+		transcolfunc = R_DrawTranslatedColumn;
+		spanfunc = R_DrawSpanLow;
     }
 
+/// printf("Pass 0.........\n");
     R_InitBuffer (scaledviewwidth, viewheight);
-	
+
+/// printf("Pass 1.........\n");
     R_InitTextureMapping ();
     
     // psprite scales
-    pspritescale = FRACUNIT*viewwidth/SCREENWIDTH;
-    pspriteiscale = FRACUNIT*SCREENWIDTH/viewwidth;
-    
+    pspritescale  = FRACUNIT * viewwidth / SCREENWIDTH;
+    pspriteiscale = FRACUNIT * SCREENWIDTH / viewwidth;
+/// printf("Pass 2.........\n");
     // thing clipping
-    for (i=0 ; i<viewwidth ; i++)
-	screenheightarray[i] = viewheight;
-    
+    for (i=0; i < viewwidth; i++) {
+/// printf("%d\n", i);
+		screenheightarray[i] = viewheight;
+	}
+/// printf("Pass 3.........\n");
     // planes
     for (i=0 ; i<viewheight ; i++)
     {
@@ -733,13 +731,13 @@ void R_ExecuteSetViewSize (void)
 	dy = abs(dy);
 	yslope[i] = FixedDiv ( (viewwidth<<detailshift)/2*FRACUNIT, dy);
     }
-	
+/// printf("Pass 4.........\n");
     for (i=0 ; i<viewwidth ; i++)
     {
 	cosadj = abs(finecosine[xtoviewangle[i]>>ANGLETOFINESHIFT]);
 	distscale[i] = FixedDiv (FRACUNIT,cosadj);
     }
-    
+/// printf("Pass 5.........\n");
     // Calculate the light levels to use
     //  for each level / scale combination.
     for (i=0 ; i< LIGHTLEVELS ; i++)

@@ -89,7 +89,7 @@ static const char rcsid[] = "$Id: d_main.c,v 1.8 1997/02/03 22:45:09 b1 Exp $";
 void D_DoomLoop (void);
 
 
-char*		wadfiles[MAXWADFILES];
+const char* wadfiles[MAXWADFILES];
 
 
 boolean		devparm;	// started game with -devparm
@@ -168,16 +168,13 @@ void D_ProcessEvents (void)
 	 && (W_CheckNumForName("map01")<0) )
       return;
 	
-///    for ( ; eventtail != eventhead ; (eventtail = ((++eventtail) & (MAXEVENTS-1))) )
-    while ( eventtail != eventhead )
+    for ( ; eventtail != eventhead ; (eventtail = ((++eventtail) & (MAXEVENTS-1))) )
     {
-	ev = &events[eventtail];
-	if (M_Responder (ev))
-	    continue;               // menu ate the event
-	G_Responder (ev);
-
-		 ++eventtail;
-		 eventtail = eventtail & (MAXEVENTS-1);
+		ev = &events[eventtail];
+		if (M_Responder (ev)) {
+	    	continue;               // menu ate the event
+		}
+		G_Responder (ev);
     }
 }
 
@@ -195,7 +192,7 @@ extern  boolean setsizeneeded;
 extern  int             showMessages;
 void R_ExecuteSetViewSize (void);
 
-void D_Display (void)
+void D_Display (int dst_width, int dst_height, uint8_t* dst_rgba)
 {
     static  boolean		viewactivestate = false;
     static  boolean		menuactivestate = false;
@@ -213,15 +210,15 @@ void D_Display (void)
 
     if (nodrawers)
 	return;                    // for comparative timing / profiling
-		
+
     redrawsbar = false;
-    
+
     // change the view size if needed
     if (setsizeneeded)
     {
-	R_ExecuteSetViewSize ();
-	oldgamestate = -1;                      // force background redraw
-	borderdrawcount = 3;
+		R_ExecuteSetViewSize ();
+		oldgamestate = -1;                      // force background redraw
+		borderdrawcount = 3;
     }
 
     // save the current screen if about to wipe
@@ -235,7 +232,7 @@ void D_Display (void)
 
     if (gamestate == GS_LEVEL && gametic)
 	HU_Erase();
-    
+
     // do buffered drawing
     switch (gamestate)
     {
@@ -264,26 +261,28 @@ void D_Display (void)
 	D_PageDrawer ();
 	break;
     }
-    
+
     // draw buffered stuff to screen
     I_UpdateNoBlit ();
-    
-    // draw the view directly
-    if (gamestate == GS_LEVEL && !automapactive && gametic)
-	R_RenderPlayerView (&players[displayplayer]);
 
-    if (gamestate == GS_LEVEL && gametic)
-	HU_Drawer ();
-    
+    // draw the view directly
+    if (gamestate == GS_LEVEL && !automapactive && gametic) {
+		R_RenderPlayerView (&players[displayplayer]);
+	}
+
+    if (gamestate == GS_LEVEL && gametic) {
+		HU_Drawer ();
+	}
+
     // clean up border stuff
-    if (gamestate != oldgamestate && gamestate != GS_LEVEL)
-	I_SetPalette (W_CacheLumpName ("PLAYPAL",PU_CACHE));
+    if (gamestate != oldgamestate && gamestate != GS_LEVEL) {
+		I_SetPalette (W_CacheLumpName ("PLAYPAL",PU_CACHE));
+	}
 
     // see if the border needs to be initially drawn
-    if (gamestate == GS_LEVEL && oldgamestate != GS_LEVEL)
-    {
-	viewactivestate = false;        // view was not active
-	R_FillBackScreen ();    // draw the pattern into the back screen
+    if (gamestate == GS_LEVEL && oldgamestate != GS_LEVEL) {
+		viewactivestate = false;        // view was not active
+		R_FillBackScreen ();    // draw the pattern into the back screen
     }
 
     // see if the border needs to be updated to the screen
@@ -324,8 +323,8 @@ void D_Display (void)
     // normal update
     if (!wipe)
     {
-	I_FinishUpdate ();              // page flip or blit buffer
-	return;
+		I_FinishUpdate (dst_width, dst_height, dst_rgba);    // page flip or blit buffer
+		return;
     }
     
     // wipe update
@@ -340,12 +339,11 @@ void D_Display (void)
 	    nowtime = I_GetTime ();
 	    tics = nowtime - wipestart;
 	} while (!tics);
-	wipestart = nowtime;
-	done = wipe_ScreenWipe(wipe_Melt
-			       , 0, 0, SCREENWIDTH, SCREENHEIGHT, tics);
-	I_UpdateNoBlit ();
-	M_Drawer ();                            // menu is drawn even on top of wipes
-	I_FinishUpdate ();                      // page flip or blit buffer
+		wipestart = nowtime;
+		done = wipe_ScreenWipe(wipe_Melt, 0, 0, SCREENWIDTH, SCREENHEIGHT, tics);
+		I_UpdateNoBlit ();
+		M_Drawer ();             // menu is drawn even on top of wipes
+		I_FinishUpdate (dst_width, dst_height, dst_rgba);     // page flip or blit buffer
     } while (!done);
 }
 
@@ -356,34 +354,42 @@ void D_Display (void)
 //
 extern  boolean         demorecording;
 
-void D_DoomLoop (void)
-{
-    if (demorecording)
-	G_BeginRecording ();
-		
-    if (M_CheckParm ("-debugfile"))
-    {
-	char    filename[20];
-	sprintf (filename,"debug%i.txt",consoleplayer);
-	printf ("debug output to: %s\n",filename);
-	debugfile = fopen (filename,"w");
-    }
-	
-    I_InitGraphics ();
+static int doom_first_ = 0;
 
-    while (1)
+/// void D_DoomLoop (void)
+void doom_frame (int dst_width, int dst_height, uint8_t* dst_rgba)
+{
+	if(doom_first_ == 0) {
+	    if (demorecording) {
+			G_BeginRecording ();
+		}
+		
+		if (M_CheckParm ("-debugfile")) {
+			char    filename[20];
+			sprintf (filename,"debug%i.txt",consoleplayer);
+			printf ("debug output to: %s\n",filename);
+			debugfile = fopen (filename,"w");
+		}
+
+		I_InitGraphics ();
+
+		doom_first_ = 1;
+	}
+
+///    while (1)
     {
 	// frame syncronous IO operations
 	I_StartFrame ();                
-	
+
 	// process one or more tics
 	if (singletics)
 	{
 	    I_StartTic ();
 	    D_ProcessEvents ();
 	    G_BuildTiccmd (&netcmds[consoleplayer][maketic%BACKUPTICS]);
-	    if (advancedemo)
-		D_DoAdvanceDemo ();
+	    if (advancedemo) {
+			D_DoAdvanceDemo ();
+		}
 	    M_Ticker ();
 	    G_Ticker ();
 	    gametic++;
@@ -393,12 +399,14 @@ void D_DoomLoop (void)
 	{
 	    TryRunTics (); // will run at least one tic
 	}
-		
-	S_UpdateSounds (players[consoleplayer].mo);// move positional sounds
+
+///	S_UpdateSounds (players[consoleplayer].mo);// move positional sounds
 
 	// Update display, next frame, with current state.
-	D_Display ();
+	D_Display (dst_width, dst_height, dst_rgba);
 
+
+#if 0
 #ifndef SNDSERV
 	// Sound mixing for the buffer is snychronous.
 	I_UpdateSound();
@@ -407,6 +415,7 @@ void D_DoomLoop (void)
 #ifndef SNDINTR
 	// Update sound output.
 	I_SubmitSound();
+#endif
 #endif
     }
 }
@@ -545,7 +554,7 @@ char            title[128];
 //
 // D_AddFile
 //
-void D_AddFile (char *file)
+void D_AddFile (const char *file)
 {
     int     numwadfiles;
     char    *newfile;
@@ -801,7 +810,7 @@ void FindResponseFile (void)
 void D_DoomMain (void)
 {
     int             p;
-    char                    file[256];
+    char            file[256];
 
     FindResponseFile ();
 	
@@ -1025,7 +1034,6 @@ void D_DoomMain (void)
 
     printf ("W_Init: Init WADfiles.\n");
     W_InitMultipleFiles (wadfiles);
-    
 
     // Check for -file in shareware
     if (modifiedgame)
@@ -1143,14 +1151,14 @@ void D_DoomMain (void)
     {
 	singledemo = true;              // quit after one demo
 	G_DeferedPlayDemo (myargv[p+1]);
-	D_DoomLoop ();  // never returns
+///	D_DoomLoop ();  // never returns
     }
 	
     p = M_CheckParm ("-timedemo");
     if (p && p < myargc-1)
     {
 	G_TimeDemo (myargv[p+1]);
-	D_DoomLoop ();  // never returns
+///	D_DoomLoop ();  // never returns
     }
 	
     p = M_CheckParm ("-loadgame");
@@ -1162,7 +1170,6 @@ void D_DoomMain (void)
 	    sprintf(file, SAVEGAMENAME"%c.dsg",myargv[p+1][0]);
 	G_LoadGame (file);
     }
-	
 
     if ( gameaction != ga_loadgame )
     {
@@ -1173,5 +1180,5 @@ void D_DoomMain (void)
 
     }
 
-    D_DoomLoop ();  // never returns
+///    D_DoomLoop ();  // never returns
 }

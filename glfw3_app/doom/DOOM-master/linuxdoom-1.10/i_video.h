@@ -23,6 +23,7 @@
 #ifndef __I_VIDEO__
 #define __I_VIDEO__
 
+#include <stdint.h>
 
 #include "doomtype.h"
 
@@ -43,7 +44,7 @@ void I_ShutdownGraphics(void);
 void I_SetPalette (byte* palette);
 
 void I_UpdateNoBlit (void);
-void I_FinishUpdate (void);
+void I_FinishUpdate (int dst_width, int dst_height, uint8_t* dst_rgba);
 
 // Wait for vertical retrace or pause a bit.
 void I_WaitVBL(int count);

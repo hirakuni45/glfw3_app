@@ -27,13 +27,13 @@ rcsid[] = "$Id: m_bbox.c,v 1.1 1997/02/03 22:45:10 b1 Exp $";
 #include <string.h>
 #include <stdio.h>
 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+/// #include <sys/socket.h>
+/// #include <netinet/in.h>
+/// #include <arpa/inet.h>
 #include <errno.h>
 #include <unistd.h>
-#include <netdb.h>
-#include <sys/ioctl.h>
+/// #include <netdb.h>
+/// #include <sys/ioctl.h>
 
 #include "i_system.h"
 #include "d_event.h"
@@ -73,12 +73,12 @@ boolean NetListen (void);
 // NETWORKING
 //
 
-int	DOOMPORT =	(IPPORT_USERRESERVED +0x1d );
+/// int	DOOMPORT =	(IPPORT_USERRESERVED +0x1d );
 
 int			sendsocket;
 int			insocket;
 
-struct	sockaddr_in	sendaddress[MAXNETNODES];
+/// struct	sockaddr_in	sendaddress[MAXNETNODES];
 
 void	(*netget) (void);
 void	(*netsend) (void);
@@ -89,6 +89,7 @@ void	(*netsend) (void);
 //
 int UDPsocket (void)
 {
+#if 0
     int	s;
 	
     // allocate a socket
@@ -97,6 +98,8 @@ int UDPsocket (void)
 	I_Error ("can't create socket: %s",strerror(errno));
 		
     return s;
+#endif
+return 0;
 }
 
 //
@@ -107,6 +110,7 @@ BindToLocalPort
 ( int	s,
   int	port )
 {
+#if 0
     int			v;
     struct sockaddr_in	address;
 	
@@ -118,6 +122,7 @@ BindToLocalPort
     v = bind (s, (void *)&address, sizeof(address));
     if (v == -1)
 	I_Error ("BindToPort: bind: %s", strerror(errno));
+#endif
 }
 
 
@@ -126,6 +131,7 @@ BindToLocalPort
 //
 void PacketSend (void)
 {
+#if 0
     int		c;
     doomdata_t	sw;
 				
@@ -152,6 +158,7 @@ void PacketSend (void)
 	
     //	if (c == -1)
     //		I_Error ("SendPacket error: %s",strerror(errno));
+#endif
 }
 
 
@@ -160,6 +167,7 @@ void PacketSend (void)
 //
 void PacketGet (void)
 {
+#if 0
     int			i;
     int			c;
     struct sockaddr_in	fromaddress;
@@ -215,12 +223,14 @@ void PacketGet (void)
 	netbuffer->cmds[c].chatchar = sw.cmds[c].chatchar;
 	netbuffer->cmds[c].buttons = sw.cmds[c].buttons;
     }
+#endif
 }
 
 
 
 int GetLocalAddress (void)
 {
+#if 0
     char		hostname[1024];
     struct hostent*	hostentry;	// host information entry
     int			v;
@@ -235,6 +245,8 @@ int GetLocalAddress (void)
 	I_Error ("GetLocalAddress : gethostbyname: couldn't get local host");
 		
     return *(int *)hostentry->h_addr_list[0];
+#endif
+return 0;
 }
 
 
@@ -250,7 +262,8 @@ void I_InitNetwork (void)
 	
     doomcom = malloc (sizeof (*doomcom) );
     memset (doomcom, 0, sizeof(*doomcom) );
-    
+ 
+#if 0   
     // set up for network
     i = M_CheckParm ("-dup");
     if (i && i< myargc-1)
@@ -329,11 +342,13 @@ void I_InitNetwork (void)
     ioctl (insocket, FIONBIO, &trueval);
 
     sendsocket = UDPsocket ();
+#endif
 }
 
 
 void I_NetCmd (void)
 {
+#if 0
     if (doomcom->command == CMD_SEND)
     {
 	netsend ();
@@ -344,5 +359,6 @@ void I_NetCmd (void)
     }
     else
 	I_Error ("Bad net cmd: %i\n",doomcom->command);
+#endif
 }
 

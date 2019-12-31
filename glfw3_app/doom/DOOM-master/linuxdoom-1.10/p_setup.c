@@ -131,7 +131,7 @@ void P_LoadVertexes (int lump)
     numvertexes = W_LumpLength (lump) / sizeof(mapvertex_t);
 
     // Allocate zone memory for buffer.
-    vertexes = Z_Malloc (numvertexes*sizeof(vertex_t),PU_LEVEL,0);	
+    vertexes = Z_Malloc (numvertexes * sizeof(vertex_t), PU_LEVEL, 0);	
 
     // Load data into cache.
     data = W_CacheLumpNum (lump,PU_STATIC);
@@ -167,8 +167,8 @@ void P_LoadSegs (int lump)
     int			side;
 	
     numsegs = W_LumpLength (lump) / sizeof(mapseg_t);
-    segs = Z_Malloc (numsegs*sizeof(seg_t),PU_LEVEL,0);	
-    memset (segs, 0, numsegs*sizeof(seg_t));
+    segs = Z_Malloc (numsegs * sizeof(seg_t), PU_LEVEL, 0);	
+    memset (segs, 0, numsegs * sizeof(seg_t));
     data = W_CacheLumpNum (lump,PU_STATIC);
 	
     ml = (mapseg_t *)data;
@@ -207,7 +207,7 @@ void P_LoadSubsectors (int lump)
     subsector_t*	ss;
 	
     numsubsectors = W_LumpLength (lump) / sizeof(mapsubsector_t);
-    subsectors = Z_Malloc (numsubsectors*sizeof(subsector_t),PU_LEVEL,0);	
+    subsectors = Z_Malloc (numsubsectors * sizeof(subsector_t), PU_LEVEL, 0);	
     data = W_CacheLumpNum (lump,PU_STATIC);
 	
     ms = (mapsubsector_t *)data;
@@ -236,8 +236,8 @@ void P_LoadSectors (int lump)
     sector_t*		ss;
 	
     numsectors = W_LumpLength (lump) / sizeof(mapsector_t);
-    sectors = Z_Malloc (numsectors*sizeof(sector_t),PU_LEVEL,0);	
-    memset (sectors, 0, numsectors*sizeof(sector_t));
+    sectors = Z_Malloc (numsectors * sizeof(sector_t), PU_LEVEL, 0);	
+    memset (sectors, 0, numsectors * sizeof(sector_t));
     data = W_CacheLumpNum (lump,PU_STATIC);
 	
     ms = (mapsector_t *)data;
@@ -271,7 +271,7 @@ void P_LoadNodes (int lump)
     node_t*	no;
 	
     numnodes = W_LumpLength (lump) / sizeof(mapnode_t);
-    nodes = Z_Malloc (numnodes*sizeof(node_t),PU_LEVEL,0);	
+    nodes = Z_Malloc (numnodes * sizeof(node_t), PU_LEVEL, 0);	
     data = W_CacheLumpNum (lump,PU_STATIC);
 	
     mn = (mapnode_t *)data;
@@ -364,8 +364,8 @@ void P_LoadLineDefs (int lump)
     vertex_t*		v2;
 	
     numlines = W_LumpLength (lump) / sizeof(maplinedef_t);
-    lines = Z_Malloc (numlines*sizeof(line_t),PU_LEVEL,0);	
-    memset (lines, 0, numlines*sizeof(line_t));
+    lines = Z_Malloc (numlines * sizeof(line_t), PU_LEVEL, 0);	
+    memset (lines, 0, numlines * sizeof(line_t));
     data = W_CacheLumpNum (lump,PU_STATIC);
 	
     mld = (maplinedef_t *)data;
@@ -443,8 +443,8 @@ void P_LoadSideDefs (int lump)
     side_t*		sd;
 	
     numsides = W_LumpLength (lump) / sizeof(mapsidedef_t);
-    sides = Z_Malloc (numsides*sizeof(side_t),PU_LEVEL,0);	
-    memset (sides, 0, numsides*sizeof(side_t));
+    sides = Z_Malloc (numsides * sizeof(side_t), PU_LEVEL, 0);	
+    memset (sides, 0, numsides * sizeof(side_t));
     data = W_CacheLumpNum (lump,PU_STATIC);
 	
     msd = (mapsidedef_t *)data;
@@ -485,7 +485,7 @@ void P_LoadBlockMap (int lump)
 	
     // clear out mobj chains
     count = sizeof(*blocklinks)* bmapwidth*bmapheight;
-    blocklinks = Z_Malloc (count,PU_LEVEL, 0);
+    blocklinks = Z_Malloc (count, PU_LEVEL, 0);
     memset (blocklinks, 0, count);
 }
 
@@ -533,7 +533,7 @@ void P_GroupLines (void)
     }
 	
     // build line tables for each sector	
-    linebuffer = Z_Malloc (total*4, PU_LEVEL, 0);
+    linebuffer = Z_Malloc (total * sizeof(linebuffer), PU_LEVEL, 0);
     sector = sectors;
     for (i=0 ; i<numsectors ; i++, sector++)
     {
@@ -580,12 +580,7 @@ void P_GroupLines (void)
 //
 // P_SetupLevel
 //
-void
-P_SetupLevel
-( int		episode,
-  int		map,
-  int		playermask,
-  skill_t	skill)
+void P_SetupLevel ( int episode, int map, int playermask, skill_t skill )
 {
     int		i;
     char	lumpname[9];
@@ -603,9 +598,10 @@ P_SetupLevel
     // will be set by player think.
     players[consoleplayer].viewz = 1; 
 
+printf("Setup Pass0\n");
     // Make sure all sounds are stopped before Z_FreeTags.
     S_Start ();			
-
+printf("Setup Pass1\n");
     
 #if 0 // UNUSED
     if (debugfile)
@@ -616,14 +612,14 @@ P_SetupLevel
     else
 #endif
 	Z_FreeTags (PU_LEVEL, PU_PURGELEVEL-1);
-
+printf("Setup Pass2\n");
 
     // UNUSED W_Profile ();
     P_InitThinkers ();
-
+printf("Setup Pass3\n");
     // if working with a devlopment map, reload it
     W_Reload ();			
-	   
+printf("Setup Pass4\n");
     // find map name
     if ( gamemode == commercial)
     {

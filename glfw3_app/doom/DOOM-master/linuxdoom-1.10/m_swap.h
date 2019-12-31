@@ -23,6 +23,7 @@
 #ifndef __M_SWAP__
 #define __M_SWAP__
 
+#include <stdint.h>
 
 #ifdef __GNUG__
 #pragma interface
@@ -37,12 +38,20 @@ long	SwapLONG(long);
 #define SHORT(x)	((short)SwapSHORT((unsigned short) (x)))
 #define LONG(x)         ((long)SwapLONG((unsigned long) (x)))
 #else
-#define SHORT(x)	(x)
-#define LONG(x)         (x)
+#define SHORT(x) (x)
+#define LONG(x)  (x)
 #endif
 
-
-
+#if 0
+inline uint32_t get32_(const void* ptr) {
+	const uint8_t* p = (const uint8_t*)(ptr);
+	uint32_t v = p[0];
+	v |= (uint32_t)p[1] << 8;
+	v |= (uint32_t)p[2] << 16;
+	v |= (uint32_t)p[3] << 24;
+	return v;
+}
+#endif
 
 #endif
 //-----------------------------------------------------------------------------

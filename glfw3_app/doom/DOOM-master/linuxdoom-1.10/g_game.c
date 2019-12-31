@@ -480,20 +480,21 @@ void G_DoLoadLevel (void)
 	    players[i].playerstate = PST_REBORN; 
 	memset (players[i].frags,0,sizeof(players[i].frags)); 
     } 
-		 
+
     P_SetupLevel (gameepisode, gamemap, 0, gameskill);    
+
     displayplayer = consoleplayer;		// view the guy you are playing    
     starttime = I_GetTime (); 
     gameaction = ga_nothing; 
     Z_CheckHeap ();
-    
+
     // clear cmd building stuff
     memset (gamekeydown, 0, sizeof(gamekeydown)); 
     joyxmove = joyymove = 0; 
     mousex = mousey = 0; 
     sendpause = sendsave = paused = false; 
-    memset (mousebuttons, 0, sizeof(mousebuttons)); 
-    memset (joybuttons, 0, sizeof(joybuttons)); 
+    memset (mousearray, 0, sizeof(mousearray)); 
+    memset (joyarray, 0, sizeof(joyarray)); 
 } 
  
  
@@ -606,94 +607,92 @@ void G_Ticker (void)
 { 
     int		i;
     int		buf; 
-    ticcmd_t*	cmd;
-    
+    ticcmd_t* cmd;
+
     // do player reborns if needed
-    for (i=0 ; i<MAXPLAYERS ; i++) 
-	if (playeringame[i] && players[i].playerstate == PST_REBORN) 
-	    G_DoReborn (i);
-    
-    // do things to change the game state
-    while (gameaction != ga_nothing) 
-    { 
-	switch (gameaction) 
-	{ 
-	  case ga_loadlevel: 
-	    G_DoLoadLevel (); 
-	    break; 
-	  case ga_newgame: 
-	    G_DoNewGame (); 
-	    break; 
-	  case ga_loadgame: 
-	    G_DoLoadGame (); 
-	    break; 
-	  case ga_savegame: 
-	    G_DoSaveGame (); 
-	    break; 
-	  case ga_playdemo: 
-	    G_DoPlayDemo (); 
-	    break; 
-	  case ga_completed: 
-	    G_DoCompleted (); 
-	    break; 
-	  case ga_victory: 
-	    F_StartFinale (); 
-	    break; 
-	  case ga_worlddone: 
-	    G_DoWorldDone (); 
-	    break; 
-	  case ga_screenshot: 
-	    M_ScreenShot (); 
-	    gameaction = ga_nothing; 
-	    break; 
-	  case ga_nothing: 
-	    break; 
-	} 
+    for (i=0 ; i<MAXPLAYERS ; i++) {
+		if (playeringame[i] && players[i].playerstate == PST_REBORN) {
+	    	G_DoReborn (i);
+		}
     }
-    
+
+    // do things to change the game state
+    while (gameaction != ga_nothing) { 
+		switch (gameaction) {
+		case ga_loadlevel: 
+	    	G_DoLoadLevel (); 
+	    	break; 
+		case ga_newgame: 
+	    	G_DoNewGame (); 
+	    	break; 
+		case ga_loadgame: 
+	    	G_DoLoadGame (); 
+	    	break; 
+		case ga_savegame: 
+	    	G_DoSaveGame (); 
+	    	break; 
+		case ga_playdemo: 
+	    	G_DoPlayDemo (); 
+	    	break; 
+		case ga_completed: 
+			G_DoCompleted (); 
+	    	break; 
+		case ga_victory: 
+	    	F_StartFinale (); 
+	    	break; 
+		case ga_worlddone: 
+	    	G_DoWorldDone (); 
+	    	break; 
+		case ga_screenshot: 
+	    	M_ScreenShot (); 
+	    	gameaction = ga_nothing; 
+	    	break; 
+		case ga_nothing: 
+	    	break; 
+		}
+    }
+
     // get commands, check consistancy,
     // and build new consistancy check
-    buf = (gametic/ticdup)%BACKUPTICS; 
+    buf = (gametic/ticdup) % BACKUPTICS; 
  
-    for (i=0 ; i<MAXPLAYERS ; i++)
-    {
-	if (playeringame[i]) 
-	{ 
-	    cmd = &players[i].cmd; 
+    for (i=0 ; i<MAXPLAYERS ; i++) {
+		if (playeringame[i]) { 
+	    	cmd = &players[i].cmd; 
  
-	    memcpy (cmd, &netcmds[i][buf], sizeof(ticcmd_t)); 
+	    	memcpy (cmd, &netcmds[i][buf], sizeof(ticcmd_t)); 
  
-	    if (demoplayback) 
-		G_ReadDemoTiccmd (cmd); 
-	    if (demorecording) 
-		G_WriteDemoTiccmd (cmd);
-	    
-	    // check for turbo cheats
-	    if (cmd->forwardmove > TURBOTHRESHOLD 
-		&& !(gametic&31) && ((gametic>>5)&3) == i )
-	    {
-		static char turbomessage[80];
-		extern char *player_names[4];
-		sprintf (turbomessage, "%s is turbo!",player_names[i]);
-		players[consoleplayer].message = turbomessage;
-	    }
+		    if (demoplayback) {
+				G_ReadDemoTiccmd (cmd);
+			} 
+		    if (demorecording) { 
+				G_WriteDemoTiccmd (cmd);
+	    	}
+
+		    // check for turbo cheats
+		    if(cmd->forwardmove > TURBOTHRESHOLD && !(gametic & 31) && ((gametic >> 5) & 3) == i) {
+				static char turbomessage[80];
+				extern char *player_names[4];
+				sprintf (turbomessage, "%s is turbo!",player_names[i]);
+				players[consoleplayer].message = turbomessage;
+		    }
 			
-	    if (netgame && !netdemo && !(gametic%ticdup) ) 
-	    { 
-		if (gametic > BACKUPTICS 
-		    && consistancy[i][buf] != cmd->consistancy) 
-		{ 
-		    I_Error ("consistency failure (%i should be %i)",
-			     cmd->consistancy, consistancy[i][buf]); 
-		} 
-		if (players[i].mo) 
-		    consistancy[i][buf] = players[i].mo->x; 
-		else 
-		    consistancy[i][buf] = rndindex; 
-	    } 
-	}
+		    if (netgame && !netdemo && !(gametic%ticdup) ) 
+		    { 
+			if (gametic > BACKUPTICS 
+			    && consistancy[i][buf] != cmd->consistancy) 
+			{ 
+			    I_Error ("consistency failure (%i should be %i)",
+				     cmd->consistancy, consistancy[i][buf]); 
+			} 
+			if (players[i].mo) 
+			    consistancy[i][buf] = players[i].mo->x; 
+			else 
+			    consistancy[i][buf] = rndindex; 
+	   		} 
+		}
     }
-    
+
     // check for special buttons
     for (i=0 ; i<MAXPLAYERS ; i++)
     {
@@ -722,7 +721,7 @@ void G_Ticker (void)
 	    } 
 	}
     }
-    
+
     // do main actions
     switch (gamestate) 
     { 
@@ -1189,7 +1188,7 @@ void R_ExecuteSetViewSize (void);
 
 char	savename[256];
 
-void G_LoadGame (char* name) 
+void G_LoadGame (const char* name) 
 { 
     strcpy (savename, name); 
     gameaction = ga_loadgame; 
@@ -1206,14 +1205,14 @@ void G_DoLoadGame (void)
     char	vcheck[VERSIONSIZE]; 
 	 
     gameaction = ga_nothing; 
-	 
+	
     length = M_ReadFile (savename, &savebuffer); 
     save_p = savebuffer + SAVESTRINGSIZE;
     
     // skip the description field 
     memset (vcheck,0,sizeof(vcheck)); 
     sprintf (vcheck,"version %i",VERSION); 
-    if (strcmp (save_p, vcheck)) 
+    if (strcmp ((const char*)save_p, vcheck)) 
 	return;				// bad version 
     save_p += VERSIONSIZE; 
 			 
@@ -1258,9 +1257,7 @@ void G_DoLoadGame (void)
 // Description is a 24 byte text string 
 //
 void
-G_SaveGame
-( int	slot,
-  char*	description ) 
+G_SaveGame( int	slot, const char* description ) 
 { 
     savegameslot = slot; 
     strcpy (savedescription, description); 
@@ -1329,11 +1326,7 @@ skill_t	d_skill;
 int     d_episode; 
 int     d_map; 
  
-void
-G_DeferedInitNew
-( skill_t	skill,
-  int		episode,
-  int		map) 
+void G_DeferedInitNew ( skill_t skill, int episode, int map) 
 { 
     d_skill = skill; 
     d_episode = episode; 
@@ -1361,49 +1354,36 @@ void G_DoNewGame (void)
 extern  int	skytexture; 
 
 
-void
-G_InitNew
-( skill_t	skill,
-  int		episode,
-  int		map ) 
+void G_InitNew ( skill_t skill, int episode, int map ) 
 { 
     int             i; 
 	 
-    if (paused) 
-    { 
-	paused = false; 
-	S_ResumeSound (); 
-    } 
-	
+    if (paused) {
+		paused = false; 
+		S_ResumeSound (); 
+    }
 
-    if (skill > sk_nightmare) 
-	skill = sk_nightmare;
+    if (skill > sk_nightmare) {
+		skill = sk_nightmare;
+	}
 
 
     // This was quite messy with SPECIAL and commented parts.
     // Supposedly hacks to make the latest edition work.
     // It might not work properly.
-    if (episode < 1)
-      episode = 1; 
+    if (episode < 1) {
+    	episode = 1;
+	}
 
-    if ( gamemode == retail )
-    {
-      if (episode > 4)
-	episode = 4;
+    if ( gamemode == retail ) {
+    	if (episode > 4) episode = 4;
+    } else if ( gamemode == shareware ) {
+    	if (episode > 1) episode = 1;	// only start episode 1 on shareware
+    } else {
+    	if (episode > 3) episode = 3;
     }
-    else if ( gamemode == shareware )
-    {
-      if (episode > 1) 
-	   episode = 1;	// only start episode 1 on shareware
-    }  
-    else
-    {
-      if (episode > 3)
-	episode = 3;
-    }
-    
 
-  
+
     if (map < 1) 
 	map = 1;
     
@@ -1450,7 +1430,7 @@ G_InitNew
     gameskill = skill; 
  
     viewactive = true;
-    
+
     // set the sky map for the episode
     if ( gamemode == commercial)
     {
@@ -1477,7 +1457,7 @@ G_InitNew
 	    skytexture = R_TextureNumForName ("SKY4");
 	    break;
 	} 
- 
+
     G_DoLoadLevel (); 
 } 
  
@@ -1527,7 +1507,7 @@ void G_WriteDemoTiccmd (ticcmd_t* cmd)
 //
 // G_RecordDemo 
 // 
-void G_RecordDemo (char* name) 
+void G_RecordDemo (const char* name) 
 { 
     int             i; 
     int				maxsize;
@@ -1538,8 +1518,8 @@ void G_RecordDemo (char* name)
     maxsize = 0x20000;
     i = M_CheckParm ("-maxdemo");
     if (i && i<myargc-1)
-	maxsize = atoi(myargv[i+1])*1024;
-    demobuffer = Z_Malloc (maxsize,PU_STATIC,NULL); 
+	maxsize = atoi(myargv[i+1]) * 1024;
+    demobuffer = Z_Malloc (maxsize, PU_STATIC, NULL); 
     demoend = demobuffer + maxsize;
 	
     demorecording = true; 
@@ -1571,9 +1551,9 @@ void G_BeginRecording (void)
 // G_PlayDemo 
 //
 
-char*	defdemoname; 
+const char* defdemoname; 
  
-void G_DeferedPlayDemo (char* name) 
+void G_DeferedPlayDemo (const char* name) 
 { 
     defdemoname = name; 
     gameaction = ga_playdemo; 
@@ -1622,7 +1602,7 @@ void G_DoPlayDemo (void)
 //
 // G_TimeDemo 
 //
-void G_TimeDemo (char* name) 
+void G_TimeDemo (const char* name) 
 { 	 
     nodrawers = M_CheckParm ("-nodraw"); 
     noblit = M_CheckParm ("-noblit"); 
