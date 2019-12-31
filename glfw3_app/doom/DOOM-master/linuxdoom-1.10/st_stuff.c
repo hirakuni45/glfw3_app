@@ -1123,7 +1123,6 @@ void ST_Drawer (boolean fullscreen, boolean refresh)
 
 void ST_loadGraphics(void)
 {
-
     int		i;
     int		j;
     int		facenum;
@@ -1131,13 +1130,12 @@ void ST_loadGraphics(void)
     char	namebuf[9];
 
     // Load the numbers, tall and short
-    for (i=0;i<10;i++)
-    {
-	sprintf(namebuf, "STTNUM%d", i);
-	tallnum[i] = (patch_t *) W_CacheLumpName(namebuf, PU_STATIC);
+    for (i=0; i < 10; i++) {
+		sprintf(namebuf, "STTNUM%d", i);
+		tallnum[i] = (patch_t *) W_CacheLumpName(namebuf, PU_STATIC);
 
-	sprintf(namebuf, "STYSNUM%d", i);
-	shortnum[i] = (patch_t *) W_CacheLumpName(namebuf, PU_STATIC);
+		sprintf(namebuf, "STYSNUM%d", i);
+		shortnum[i] = (patch_t *) W_CacheLumpName(namebuf, PU_STATIC);
     }
 
     // Load percent key.
@@ -1145,25 +1143,23 @@ void ST_loadGraphics(void)
     tallpercent = (patch_t *) W_CacheLumpName("STTPRCNT", PU_STATIC);
 
     // key cards
-    for (i=0;i<NUMCARDS;i++)
-    {
-	sprintf(namebuf, "STKEYS%d", i);
-	keys[i] = (patch_t *) W_CacheLumpName(namebuf, PU_STATIC);
+    for (i=0; i < NUMCARDS; i++) {
+		sprintf(namebuf, "STKEYS%d", i);
+		keys[i] = (patch_t *) W_CacheLumpName(namebuf, PU_STATIC);
     }
 
     // arms background
     armsbg = (patch_t *) W_CacheLumpName("STARMS", PU_STATIC);
 
     // arms ownership widgets
-    for (i=0;i<6;i++)
-    {
-	sprintf(namebuf, "STGNUM%d", i+2);
+    for (i=0; i < 6; i++) {
+		sprintf(namebuf, "STGNUM%d", i+2);
 
-	// gray #
-	arms[i][0] = (patch_t *) W_CacheLumpName(namebuf, PU_STATIC);
+		// gray #
+		arms[i][0] = (patch_t *) W_CacheLumpName(namebuf, PU_STATIC);
 
-	// yellow #
-	arms[i][1] = shortnum[i+2]; 
+		// yellow #
+		arms[i][1] = shortnum[i+2]; 
     }
 
     // face backgrounds for different color players
@@ -1193,9 +1189,9 @@ void ST_loadGraphics(void)
 	sprintf(namebuf, "STFKILL%d", i);	// pissed off
 	faces[facenum++] = W_CacheLumpName(namebuf, PU_STATIC);
     }
+
     faces[facenum++] = W_CacheLumpName("STFGOD0", PU_STATIC);
     faces[facenum++] = W_CacheLumpName("STFDEAD0", PU_STATIC);
-
 }
 
 void ST_loadData(void)

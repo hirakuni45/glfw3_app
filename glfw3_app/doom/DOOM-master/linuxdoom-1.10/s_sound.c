@@ -158,10 +158,9 @@ void S_StopChannel(int cnum);
 // Sets channels, SFX and music volume,
 //  allocates channel buffer, sets S_sfx lookup.
 //
-void S_Init
-( int		sfxVolume,
-  int		musicVolume )
-{  
+void S_Init( int sfxVolume, int musicVolume )
+{
+return;
   int		i;
 
   fprintf( stderr, "S_Init: default sfx volume %d\n", sfxVolume);
@@ -201,6 +200,7 @@ void S_Init
 //
 void S_Start(void)
 {
+return;
   int cnum;
   int mnum;
 
@@ -257,7 +257,7 @@ S_StartSoundAtVolume
   int		sfx_id,
   int		volume )
 {
-
+return;
   int		rc;
   int		sep;
   int		pitch;
@@ -394,11 +394,10 @@ S_StartSoundAtVolume
 				       priority);
 }	
 
-void
-S_StartSound
-( void*		origin,
-  int		sfx_id )
+void S_StartSound(void* origin, int sfx_id )
 {
+return;
+
 #ifdef SAWDEBUG
     // if (sfx_id == sfx_sawful)
     // sfx_id = sfx_itemup;
@@ -470,7 +469,7 @@ S_StartSound
 
 void S_StopSound(void *origin)
 {
-
+return;
     int cnum;
 
     for (cnum=0 ; cnum<numChannels ; cnum++)

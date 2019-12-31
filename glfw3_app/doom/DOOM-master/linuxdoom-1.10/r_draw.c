@@ -22,7 +22,7 @@
 //	 e.g. inline assembly, different algorithms.
 //
 //-----------------------------------------------------------------------------
-
+#include <stdint.h>
 
 static const char
 rcsid[] = "$Id: r_draw.c,v 1.4 1997/02/03 16:47:55 b1 Exp $";
@@ -60,20 +60,20 @@ rcsid[] = "$Id: r_draw.c,v 1.4 1997/02/03 16:47:55 b1 Exp $";
 //
 
 
-byte*		viewimage; 
-int		viewwidth;
-int		scaledviewwidth;
-int		viewheight;
-int		viewwindowx;
-int		viewwindowy; 
-byte*		ylookup[MAXHEIGHT]; 
-int		columnofs[MAXWIDTH]; 
+byte*	viewimage = NULL;
+int		viewwidth = 0;
+int		scaledviewwidth = 0;
+int		viewheight = 0;
+int		viewwindowx = 0;
+int		viewwindowy = 0; 
+byte*   ylookup[MAXHEIGHT] = { NULL }; 
+int		columnofs[MAXWIDTH] = { 0 }; 
 
 // Color tables for different players,
 //  translate a limited part to another
 //  (color ramps used for  suit colors).
 //
-byte		translations[3][256];	
+byte	translations[3][256];	
  
  
 
@@ -460,25 +460,25 @@ void R_InitTranslationTables (void)
 {
     int		i;
 	
-    translationtables = Z_Malloc (256*3+255, PU_STATIC, 0);
-    translationtables = (byte *)(( (int)translationtables + 255 )& ~255);
+///    translationtables = Z_Malloc (256 * 3 + 255, PU_STATIC, 0);
+///    translationtables = (byte *)(( (uint64_t)translationtables + 255 ) & ~255);
+    translationtables = Z_Malloc (256 * 3, PU_STATIC, 0);
     
     // translate just the 16 green colors
     for (i=0 ; i<256 ; i++)
     {
-	if (i >= 0x70 && i<= 0x7f)
-	{
-	    // map green ramp to gray, brown, red
-	    translationtables[i] = 0x60 + (i&0xf);
-	    translationtables [i+256] = 0x40 + (i&0xf);
-	    translationtables [i+512] = 0x20 + (i&0xf);
-	}
-	else
-	{
-	    // Keep all other colors as is.
-	    translationtables[i] = translationtables[i+256] 
-		= translationtables[i+512] = i;
-	}
+		if (i >= 0x70 && i<= 0x7f)
+		{
+		    // map green ramp to gray, brown, red
+		    translationtables[i] = 0x60 + (i&0xf);
+		    translationtables[i+256] = 0x40 + (i&0xf);
+		    translationtables[i+512] = 0x20 + (i&0xf);
+		}
+		else
+		{
+		    // Keep all other colors as is.
+		    translationtables[i] = translationtables[i + 256] = translationtables[i + 512] = i;
+		}
     }
 }
 
@@ -692,31 +692,33 @@ void R_DrawSpanLow (void)
 //  for getting the framebuffer address
 //  of a pixel to draw.
 //
-void
-R_InitBuffer
-( int		width,
-  int		height ) 
-{ 
-    int		i; 
-
+void R_InitBuffer( int width, int height ) 
+{
     // Handle resize,
     //  e.g. smaller view windows
     //  with border and/or status bar.
-    viewwindowx = (SCREENWIDTH-width) >> 1; 
+    viewwindowx = (SCREENWIDTH - width) >> 1; 
 
+/// printf("Pass-0 ===== %d, %p\n", width, columnofs);
     // Column offset. For windows.
-    for (i=0 ; i<width ; i++) 
-	columnofs[i] = viewwindowx + i;
+    for (int i = 0 ; i < width ; i++) {
+		columnofs[i] = viewwindowx + i;
+///		printf("%d: %d\n", i, columnofs[i]);
+	}
 
+/// printf("Pass-1 =====\n");
     // Samw with base row offset.
-    if (width == SCREENWIDTH) 
-	viewwindowy = 0; 
-    else 
-	viewwindowy = (SCREENHEIGHT-SBARHEIGHT-height) >> 1; 
+    if (width == SCREENWIDTH) { 
+		viewwindowy = 0;
+    } else { 
+		viewwindowy = (SCREENHEIGHT-SBARHEIGHT-height) >> 1; 
+	}
 
+/// printf("Pass-2 =====\n");
     // Preclaculate all row offsets.
-    for (i=0 ; i<height ; i++) 
-	ylookup[i] = screens[0] + (i+viewwindowy)*SCREENWIDTH; 
+    for (int i=0; i < height; i++) {
+		ylookup[i] = screens[0] + (i + viewwindowy) * SCREENWIDTH; 
+	}
 } 
  
  
