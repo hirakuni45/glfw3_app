@@ -64,7 +64,7 @@ ifeq ($(OS),Windows_NT)
 	CPP_VER := -std=c++17
     LOCAL_INC_PATH := /mingw64/include
     LOCAL_LIB_PATH := /mingw64/lib
-	OPTLIBS = opengl32 glew32 openal
+	OPTLIBS = opengl32 glew32 openal glfw3
 	CPMM	=	g++
 	CCMM	=	gcc
 	CFLAGS  = -DWIN32
@@ -91,10 +91,13 @@ else
 		-Wl,-search_paths_first -Wl,-headerpad_max_install_names \
 		-framework AGL -framework Cocoa -framework OpenGL -framework IOKit \
 		-framework CoreFoundation -framework CoreVideo -framework OpenAL
+    LOCAL_INC_PATH := /opt/local/include
+    LOCAL_LIB_PATH := /opt/local/lib
+    OPTLIBS = glfw GLEW
+  else
+    LOCAL_INC_PATH := /usr/local/include
+    LOCAL_LIB_PATH := /usr/local/lib
   endif
-  LOCAL_INC_PATH := /usr/local/include
-  LOCAL_LIB_PATH := /usr/local/lib
-  OPTLIBS = GLEW
   CPMM	=	clang++
   CCMM	=	clang
 endif
@@ -104,7 +107,7 @@ OPENJPEG_PATH := $(shell ls -d $(LOCAL_INC_PATH)/openjpeg*)
 
 STDLIBS		=
 
-OPTLIBS += 	glfw3 pthread \
+OPTLIBS += 	pthread \
 			png jpeg openjp2 \
 			freetype \
 			mad tag \
