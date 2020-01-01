@@ -125,9 +125,9 @@ ifeq ($(OS),Windows_NT)
 	CPP_VER := -std=c++17
     LOCAL_INC_PATH := /mingw64/include
     LOCAL_LIB_PATH := /mingw64/lib
-	OPTLIBS = opengl32 glew32 openal
-	CPMM	=	g++
-	CCMM	=	gcc
+	OPTLIBS = opengl32 glew32 openal glfw3
+	CPMM	= g++
+	CCMM	= gcc
 	CFLAGS  = -DWIN32
 	PFLAGS  = -DWIN32 -DBOOST_USE_WINDOWS_H
 	LFLAGS =
@@ -146,16 +146,20 @@ else
     SYSTEM := OSX
 	OSX_VER := $(shell sw_vers -productVersion | sed 's/^\([0-9]*.[0-9]*\).[0-9]*/\1/')
 	CPP_VER := -std=c++14
-	CFLAGS =
+	CFLAGS = -DOS_X
 	PFLAGS =
 	LFLAGS = -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk \
 		-Wl,-search_paths_first -Wl,-headerpad_max_install_names \
 		-framework AGL -framework Cocoa -framework OpenGL -framework IOKit \
 		-framework CoreFoundation -framework CoreVideo -framework OpenAL
+    LOCAL_INC_PATH := /opt/local/include
+    LOCAL_LIB_PATH := /opt/local/lib
+    OPTLIBS = glfw GLEW
+  else
+    LOCAL_INC_PATH := /usr/local/include
+    LOCAL_LIB_PATH := /usr/local/lib
+    OPTLIBS = glfw GLEW
   endif
-  LOCAL_INC_PATH := /usr/local/include
-  LOCAL_LIB_PATH := /usr/local/lib
-  OPTLIBS = GLEW
   CPMM	=	clang++
   CCMM	=	clang
 endif
@@ -165,7 +169,7 @@ OPENJPEG_PATH := $(shell ls -d $(LOCAL_INC_PATH)/openjpeg*)
 
 STDLIBS		=
 
-OPTLIBS += 	glfw3 pthread \
+OPTLIBS += 	pthread \
 			png jpeg openjp2 \
 			freetype \
 			mad tag \
@@ -219,8 +223,9 @@ ifeq ($(BUILD),release)
 endif
 
 # -Wuninitialized -Wunused -Werror -Wshadow
-CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
-			-Wformat
+CCWARN	=	-Wall -Werror -Wimplicit -Wreturn-type -Wswitch \
+			-Wformat \
+			-Wno-unused-const-variable -Wno-unused-variable
 CPWARN	=	-Wall -Werror -Wno-unused-private-field -Wno-unused-variable
 
 OBJECTS	=	$(addprefix $(BUILD)/,$(patsubst %.cpp,%.o,$(PSOURCES))) \
