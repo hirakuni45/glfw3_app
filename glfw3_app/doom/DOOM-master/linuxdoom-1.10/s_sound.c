@@ -645,21 +645,17 @@ void S_StartMusic(int m_id)
     S_ChangeMusic(m_id, false);
 }
 
-void
-S_ChangeMusic
-( int			musicnum,
-  int			looping )
+void S_ChangeMusic ( int musicnum, int looping )
 {
-    musicinfo_t*	music;
+    musicinfo_t*	music = NULL;
     char		namebuf[9];
 
-    if ( (musicnum <= mus_None)
-	 || (musicnum >= NUMMUSIC) )
+    if ( (musicnum <= mus_None) || (musicnum >= NUMMUSIC) )
     {
 	I_Error("Bad music number %d", musicnum);
-    }
-    else
+    } else {
 	music = &S_music[musicnum];
+    }
 
     if (mus_playing == music)
 	return;

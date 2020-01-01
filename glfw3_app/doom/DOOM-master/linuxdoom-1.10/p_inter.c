@@ -174,7 +174,8 @@ P_GiveWeapon
     boolean	gaveweapon;
 	
     if (netgame
-	&& (deathmatch!=2)
+///	&& (deathmatch!=2)
+	&& (deathmatch==0)
 	 && !dropped )
     {
 	// leave placed weapons forever on net games
