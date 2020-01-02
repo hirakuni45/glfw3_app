@@ -598,28 +598,27 @@ void P_SetupLevel ( int episode, int map, int playermask, skill_t skill )
     // will be set by player think.
     players[consoleplayer].viewz = 1; 
 
-printf("Setup Pass0\n");
     // Make sure all sounds are stopped before Z_FreeTags.
     S_Start ();			
-printf("Setup Pass1\n");
     
 #if 0 // UNUSED
-    if (debugfile)
-    {
-	Z_FreeTags (PU_LEVEL, MAXINT);
-	Z_FileDumpHeap (debugfile);
-    }
-    else
+    if (debugfile) {
+		Z_FreeTags (PU_LEVEL, MAXINT);
+		Z_FileDumpHeap (debugfile);
+    } else {
+#else
+	{
 #endif
-	Z_FreeTags (PU_LEVEL, PU_PURGELEVEL-1);
-printf("Setup Pass2\n");
+		Z_DumpHeap(PU_LEVEL, PU_PURGELEVEL - 1);
+		Z_FreeTags(PU_LEVEL, PU_PURGELEVEL - 1);
+	}
 
     // UNUSED W_Profile ();
     P_InitThinkers ();
-printf("Setup Pass3\n");
+
     // if working with a devlopment map, reload it
     W_Reload ();			
-printf("Setup Pass4\n");
+
     // find map name
     if ( gamemode == commercial)
     {
@@ -640,7 +639,7 @@ printf("Setup Pass4\n");
     lumpnum = W_GetNumForName (lumpname);
 	
     leveltime = 0;
-	
+
     // note: most of this ordering is important	
     P_LoadBlockMap (lumpnum+ML_BLOCKMAP);
     P_LoadVertexes (lumpnum+ML_VERTEXES);
@@ -651,14 +650,14 @@ printf("Setup Pass4\n");
     P_LoadSubsectors (lumpnum+ML_SSECTORS);
     P_LoadNodes (lumpnum+ML_NODES);
     P_LoadSegs (lumpnum+ML_SEGS);
-	
+
     rejectmatrix = W_CacheLumpNum (lumpnum+ML_REJECT,PU_LEVEL);
     P_GroupLines ();
 
     bodyqueslot = 0;
     deathmatch_p = deathmatchstarts;
     P_LoadThings (lumpnum+ML_THINGS);
-    
+
     // if deathmatch, randomly spawn the active players
     if (deathmatch)
     {
@@ -673,19 +672,20 @@ printf("Setup Pass4\n");
 
     // clear special respawning que
     iquehead = iquetail = 0;		
-	
+printf("SetupLevel Pass0\n");
+Z_CheckHeap();
     // set up world state
     P_SpawnSpecials ();
-	
+printf("SetupLevel Pass1\n");
     // build subsector connect matrix
     //	UNUSED P_ConnectSubsectors ();
-
+printf("SetupLevel Pass2\n");
     // preload graphics
     if (precache)
 	R_PrecacheLevel ();
 
     //printf ("free memory: 0x%x\n", Z_FreeMemory());
-
+printf("SetupLevel Pass3\n");
 }
 
 

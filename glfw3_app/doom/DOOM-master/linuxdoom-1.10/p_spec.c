@@ -1172,51 +1172,50 @@ int EV_DoDonut(line_t*	line)
 	
     secnum = -1;
     rtn = 0;
-    while ((secnum = P_FindSectorFromLineTag(line,secnum)) >= 0)
-    {
-	s1 = &sectors[secnum];
+    while ((secnum = P_FindSectorFromLineTag(line,secnum)) >= 0) {
+		s1 = &sectors[secnum];
 		
-	// ALREADY MOVING?  IF SO, KEEP GOING...
-	if (s1->specialdata)
-	    continue;
-			
-	rtn = 1;
-	s2 = getNextSector(s1->lines[0],s1);
-	for (i = 0;i < s2->linecount;i++)
-	{
+		// ALREADY MOVING?  IF SO, KEEP GOING...
+		if (s1->specialdata) {
+			continue;
+		}
+
+		rtn = 1;
+		s2 = getNextSector(s1->lines[0], s1);
+		for (i = 0; i < s2->linecount; i++) {
 ///	  if ((!s2->lines[i]->flags & ML_TWOSIDED) ||
-	  if ((s2->lines[i]->flags & ML_TWOSIDED) == 0 ||
-		(s2->lines[i]->backsector == s1))
-		continue;
-	    s3 = s2->lines[i]->backsector;
+			if ((s2->lines[i]->flags & ML_TWOSIDED) == 0 || (s2->lines[i]->backsector == s1)) {
+				continue;
+			}
+		    s3 = s2->lines[i]->backsector;
 	    
-	    //	Spawn rising slime
-	    floor = Z_Malloc (sizeof(*floor), PU_LEVSPEC, 0);
-	    P_AddThinker (&floor->thinker);
-	    s2->specialdata = floor;
-	    floor->thinker.function.acp1 = (actionf_p1) T_MoveFloor;
-	    floor->type = donutRaise;
-	    floor->crush = false;
-	    floor->direction = 1;
-	    floor->sector = s2;
-	    floor->speed = FLOORSPEED / 2;
-	    floor->texture = s3->floorpic;
-	    floor->newspecial = 0;
-	    floor->floordestheight = s3->floorheight;
+			//	Spawn rising slime
+	    	floor = Z_Malloc (sizeof(*floor), PU_LEVSPEC, 0);
+	    	P_AddThinker (&floor->thinker);
+	    	s2->specialdata = floor;
+	    	floor->thinker.function.acp1 = (actionf_p1) T_MoveFloor;
+	    	floor->type = donutRaise;
+	    	floor->crush = false;
+	    	floor->direction = 1;
+	    	floor->sector = s2;
+	    	floor->speed = FLOORSPEED / 2;
+	    	floor->texture = s3->floorpic;
+	    	floor->newspecial = 0;
+	    	floor->floordestheight = s3->floorheight;
 	    
-	    //	Spawn lowering donut-hole
-	    floor = Z_Malloc (sizeof(*floor), PU_LEVSPEC, 0);
-	    P_AddThinker (&floor->thinker);
-	    s1->specialdata = floor;
-	    floor->thinker.function.acp1 = (actionf_p1) T_MoveFloor;
-	    floor->type = lowerFloor;
-	    floor->crush = false;
-	    floor->direction = -1;
-	    floor->sector = s1;
-	    floor->speed = FLOORSPEED / 2;
-	    floor->floordestheight = s3->floorheight;
-	    break;
-	}
+	    	//	Spawn lowering donut-hole
+	    	floor = Z_Malloc (sizeof(*floor), PU_LEVSPEC, 0);
+	    	P_AddThinker (&floor->thinker);
+	    	s1->specialdata = floor;
+	    	floor->thinker.function.acp1 = (actionf_p1) T_MoveFloor;
+	    	floor->type = lowerFloor;
+	    	floor->crush = false;
+	    	floor->direction = -1;
+	    	floor->sector = s1;
+	    	floor->speed = FLOORSPEED / 2;
+	    	floor->floordestheight = s3->floorheight;
+	    	break;
+		}
     }
     return rtn;
 }
@@ -1244,120 +1243,121 @@ void P_SpawnSpecials (void)
     int		episode;
 
     episode = 1;
-    if (W_CheckNumForName("texture2") >= 0)
-	episode = 2;
+    if (W_CheckNumForName("texture2") >= 0) {
+		episode = 2;
+	}
 
-    
     // See if -TIMER needs to be used.
     levelTimer = false;
 	
     i = M_CheckParm("-avg");
-    if (i && deathmatch)
-    {
-	levelTimer = true;
-	levelTimeCount = 20 * 60 * 35;
+    if (i && deathmatch) {
+		levelTimer = true;
+		levelTimeCount = 20 * 60 * 35;
     }
 	
     i = M_CheckParm("-timer");
-    if (i && deathmatch)
-    {
-	int	time;
-	time = atoi(myargv[i+1]) * 60 * 35;
-	levelTimer = true;
-	levelTimeCount = time;
+    if (i && deathmatch) {
+		int	time;
+		time = atoi(myargv[i+1]) * 60 * 35;
+		levelTimer = true;
+		levelTimeCount = time;
     }
-    
+
+printf("P_SpawnSpecials: Pass0\n");
     //	Init special SECTORs.
     sector = sectors;
-    for (i=0 ; i<numsectors ; i++, sector++)
-    {
-	if (!sector->special)
-	    continue;
+    for (i = 0; i < numsectors; i++, sector++) {
+		if (!sector->special) {
+	    	continue;
+		}
 	
-	switch (sector->special)
-	{
-	  case 1:
-	    // FLICKERING LIGHTS
-	    P_SpawnLightFlash (sector);
-	    break;
+		switch (sector->special) {
+		case 1:
+	    	// FLICKERING LIGHTS
+	    	P_SpawnLightFlash (sector);
+	    	break;
 
-	  case 2:
-	    // STROBE FAST
-	    P_SpawnStrobeFlash(sector,FASTDARK,0);
-	    break;
+		case 2:
+	    	// STROBE FAST
+	    	P_SpawnStrobeFlash(sector, FASTDARK, 0);
+	    	break;
 	    
-	  case 3:
-	    // STROBE SLOW
-	    P_SpawnStrobeFlash(sector,SLOWDARK,0);
-	    break;
+	  	case 3:
+	    	// STROBE SLOW
+	    	P_SpawnStrobeFlash(sector, SLOWDARK, 0);
+	    	break;
 	    
-	  case 4:
-	    // STROBE FAST/DEATH SLIME
-	    P_SpawnStrobeFlash(sector,FASTDARK,0);
-	    sector->special = 4;
-	    break;
+		case 4:
+	    	// STROBE FAST/DEATH SLIME
+	    	P_SpawnStrobeFlash(sector, FASTDARK, 0);
+	    	sector->special = 4;
+	    	break;
 	    
-	  case 8:
-	    // GLOWING LIGHT
-	    P_SpawnGlowingLight(sector);
-	    break;
-	  case 9:
-	    // SECRET SECTOR
-	    totalsecret++;
-	    break;
+		case 8:
+	    	// GLOWING LIGHT
+	    	P_SpawnGlowingLight(sector);
+	    	break;
+		case 9:
+	    	// SECRET SECTOR
+	    	totalsecret++;
+	    	break;
 	    
-	  case 10:
-	    // DOOR CLOSE IN 30 SECONDS
-	    P_SpawnDoorCloseIn30 (sector);
-	    break;
+		case 10:
+	    	// DOOR CLOSE IN 30 SECONDS
+	    	P_SpawnDoorCloseIn30 (sector);
+	    	break;
 	    
-	  case 12:
-	    // SYNC STROBE SLOW
-	    P_SpawnStrobeFlash (sector, SLOWDARK, 1);
-	    break;
+		case 12:
+	    	// SYNC STROBE SLOW
+	    	P_SpawnStrobeFlash (sector, SLOWDARK, 1);
+	    	break;
 
-	  case 13:
-	    // SYNC STROBE FAST
-	    P_SpawnStrobeFlash (sector, FASTDARK, 1);
-	    break;
+		case 13:
+	    	// SYNC STROBE FAST
+	    	P_SpawnStrobeFlash (sector, FASTDARK, 1);
+	    	break;
 
-	  case 14:
-	    // DOOR RAISE IN 5 MINUTES
-	    P_SpawnDoorRaiseIn5Mins (sector, i);
-	    break;
+		case 14:
+	    	// DOOR RAISE IN 5 MINUTES
+	    	P_SpawnDoorRaiseIn5Mins (sector, i);
+	    	break;
 	    
-	  case 17:
-	    P_SpawnFireFlicker(sector);
-	    break;
-	}
+		case 17:
+	    	P_SpawnFireFlicker(sector);
+	    	break;
+		}
     }
-
+printf("P_SpawnSpecials: Pass1\n");
     
     //	Init line EFFECTs
     numlinespecials = 0;
-    for (i = 0;i < numlines; i++)
-    {
-	switch(lines[i].special)
-	{
-	  case 48:
-	    // EFFECT FIRSTCOL SCROLL+
-	    linespeciallist[numlinespecials] = &lines[i];
-	    numlinespecials++;
-	    break;
-	}
+    for (i = 0; i < numlines; i++) {
+		switch(lines[i].special)
+		{
+		case 48:
+	    	// EFFECT FIRSTCOL SCROLL+
+	    	linespeciallist[numlinespecials] = &lines[i];
+	    	numlinespecials++;
+	    	break;
+		}
     }
 
-    
+printf("P_SpawnSpecials: Pass2\n");
+Z_CheckHeap();
     //	Init other misc stuff
-    for (i = 0;i < MAXCEILINGS;i++)
-	activeceilings[i] = NULL;
-
-    for (i = 0;i < MAXPLATS;i++)
-	activeplats[i] = NULL;
-    
-    for (i = 0;i < MAXBUTTONS;i++)
-	memset(&buttonlist[i],0,sizeof(button_t));
-
+    for (i = 0; i < MAXCEILINGS; i++) {
+		activeceilings[i] = NULL;
+	}
+printf("P_SpawnSpecials: Pass3\n");
+    for (i = 0; i < MAXPLATS; i++) {
+		activeplats[i] = NULL;
+	}
+printf("P_SpawnSpecials: Pass4\n");
+    for (i = 0; i < MAXBUTTONS; i++) {
+		memset(&buttonlist[i], 0, sizeof(button_t));
+	}
+printf("P_SpawnSpecials: Pass5\n");
     // UNUSED: no horizonal sliders.
     //	P_InitSlidingDoorFrames();
 }

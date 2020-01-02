@@ -66,7 +66,7 @@ void**			lumpcache;
 
 
 #define strcmpi	strcasecmp
-#ifdef OS_X
+#ifdef __APPLE__
 void strupr (char* s)
 {
     while (*s) { *s = toupper(*s); s++; }
@@ -91,22 +91,18 @@ void ExtractFileBase( const char* path, char* dest )
     src = path + strlen(path) - 1;
     
     // back up until a \ or the start
-    while (src != path
-	   && *(src-1) != '\\'
-	   && *(src-1) != '/')
-    {
-	src--;
+    while (src != path && *(src-1) != '\\' && *(src-1) != '/') {
+		src--;
     }
     
     // copy up to eight characters
-    memset (dest,0,8);
+    memset (dest, 0, 8);
     length = 0;
     
     while (*src && *src != '.') {
 		if (++length == 9) {
 	    	I_Error ("Filename base of %s >8 chars",path);
 		}
-
 		*dest++ = toupper((int)*src++);
     }
 }
@@ -297,8 +293,8 @@ void W_InitMultipleFiles (const char** filenames)
     }
 
     // set up caching
-/// size = numlumps * sizeof(*lumpcache);
-    size = numlumps * sizeof(lumpcache);
+///	size = numlumps * sizeof(*lumpcache);
+	size = numlumps * sizeof(lumpcache);
     lumpcache = malloc (size);
     
     if (!lumpcache) {
@@ -456,11 +452,14 @@ void W_ReadLump ( int lump, void* dest )
 		handle = l->handle;
 	}
 
-   	lseek (handle, l->position, SEEK_SET);
-   	c = read (handle, dest, l->size);
+   	int retpos = lseek (handle, l->position, SEEK_SET);
+	if(retpos != l->position) {
+		I_Error ("W_ReadLump: seek error %u at %u of %u", retpos, l->position, lump);
+	}
 
+   	c = read (handle, dest, l->size);
    	if (c < l->size) {
-		I_Error ("W_ReadLump: only read %i of %i on lump %i", c, l->size,lump);
+		I_Error ("W_ReadLump: only read %i of %i on lump %i", c, l->size, lump);
 	}
 	if (l->handle == -1) {
 		close (handle);
@@ -501,7 +500,8 @@ void* W_CacheLumpNum ( int lump, int tag )
 //
 void* W_CacheLumpName( const char* name, int tag )
 {
-    return W_CacheLumpNum (W_GetNumForName(name), tag);
+	int n = W_GetNumForName(name);
+    return W_CacheLumpNum (n, tag);
 }
 
 
