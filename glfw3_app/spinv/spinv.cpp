@@ -106,7 +106,7 @@ namespace app {
 				for(uint32_t i = 0; i < 0x2000; ++i) {
 					sum += (uint8_t)rom_[i];
 				}
-				utils::format("SUM: %08X\n") % sum;
+///				utils::format("SUM: %08X\n") % sum;
 
 				spinv_.setROM(&rom_[0]);
 			} else {
@@ -199,10 +199,28 @@ namespace app {
 		if(dev.get_positive(gl::device::key::GAME_0)) {
 			spinv_.fireEvent( InvadersMachine::KeyFireDown);
 		}
+		if(dev.get_positive(gl::device::key::GAME_1)) {
+			spinv_.fireEvent( InvadersMachine::KeyFireDown);
+		}
+		if(dev.get_positive(gl::device::key::GAME_2)) {
+			spinv_.fireEvent( InvadersMachine::KeyFireDown);
+		}
+		if(dev.get_positive(gl::device::key::GAME_3)) {
+			spinv_.fireEvent( InvadersMachine::KeyFireDown);
+		}
 		if(dev.get_negative(gl::device::key::SPACE)) {
 			spinv_.fireEvent( InvadersMachine::KeyFireUp);
 		}
 		if(dev.get_negative(gl::device::key::GAME_0)) {
+			spinv_.fireEvent( InvadersMachine::KeyFireUp);
+		}
+		if(dev.get_negative(gl::device::key::GAME_1)) {
+			spinv_.fireEvent( InvadersMachine::KeyFireUp);
+		}
+		if(dev.get_negative(gl::device::key::GAME_2)) {
+			spinv_.fireEvent( InvadersMachine::KeyFireUp);
+		}
+		if(dev.get_negative(gl::device::key::GAME_3)) {
 			spinv_.fireEvent( InvadersMachine::KeyFireUp);
 		}
 
