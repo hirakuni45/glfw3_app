@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Dataset xsi:schemaLocation="http://dkgd.gsi.go.jp/spec/2012/DKGD_GMLSchema DKGD_GMLSchema.xsd" 
+	xmlns:gml="http://www.opengis.net/gml/3.2" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns="http://dkgd.gsi.go.jp/spec/2012/DKGD_GMLSchema"
+    gml:id="Dataset1">
+  <gml:description>数値地図（国土基本情報）メタデータ ID=nmDKGD-Meta19-0531.xml</gml:description>
+  <gml:name>数値地図（国土基本情報）（GML版）</gml:name>
+
+<AdmPt gml:id="D13_5049313023_1">
+<rID>50493-13023-i-917</rID>
+<lfSpanFr gml:id="D13_5049313023_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1303</ftCode>
+<admCode>08230</admCode>
+<pos>
+<gml:Point gml:id="D13_5049313023_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.177644783 140.262321474</gml:pos>
+</gml:Point>
+</pos>
+<type>郡市・東京都の区</type>
+<name>かすみがうら市</name>
+<kana>かすみがうらし</kana>
+<vis>1</vis>
+</AdmPt>
+<AdmPt gml:id="D13_5049913032_1">
+<rID>50499-13032-i-1101</rID>
+<lfSpanFr gml:id="D13_5049913032_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1303</ftCode>
+<admCode>08205</admCode>
+<pos>
+<gml:Point gml:id="D13_5049913032_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.207114346 140.281478956</gml:pos>
+</gml:Point>
+</pos>
+<type>郡市・東京都の区</type>
+<name>石岡市</name>
+<kana>いしおかし</kana>
+<vis>1</vis>
+</AdmPt>
+<AdmPt gml:id="D13_5050213026_1">
+<rID>50502-13026-i-980</rID>
+<lfSpanFr gml:id="D13_5050213026_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1303</ftCode>
+<admCode>08205</admCode>
+<devDate gml:id="D13_5050213026_1-2">
+<gml:timePosition>2010-03-11</gml:timePosition>
+</devDate>
+<pos>
+<gml:Point gml:id="D13_5050213026_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.190883889 140.287306301</gml:pos>
+</gml:Point>
+</pos>
+<type>郡市・東京都の区</type>
+<name>石岡市</name>
+<vis>0</vis>
+</AdmPt>
+</Dataset>

@@ -1,0 +1,501 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Dataset xsi:schemaLocation="http://dkgd.gsi.go.jp/spec/2012/DKGD_GMLSchema DKGD_GMLSchema.xsd" 
+	xmlns:gml="http://www.opengis.net/gml/3.2" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns="http://dkgd.gsi.go.jp/spec/2012/DKGD_GMLSchema"
+    gml:id="Dataset1">
+  <gml:description>数値地図（国土基本情報）メタデータ ID=nmDKGD-Meta19-0531.xml</gml:description>
+  <gml:name>数値地図（国土基本情報）（GML版）</gml:name>
+
+<RailCL gml:id="D8201_5049913026_1">
+<rID>50499-13026-i-1027</rID>
+<lfSpanFr gml:id="D8201_5049913026_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>8201</ftCode>
+<loc>
+<gml:Curve gml:id="D8201_5049913026_1-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.190979722 140.280107222
+ 36.191666667 140.279647611
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>普通鉄道（ＪＲ）</type>
+<snglDbl>駅部分</snglDbl>
+<railState>通常部</railState>
+<lvOrder>0</lvOrder>
+<staCode>40207000297</staCode>
+<rtCode>40201000093</rtCode>
+</RailCL>
+<RailCL gml:id="D8201_5049913026_2">
+<rID>50499-13026-i-1028</rID>
+<lfSpanFr gml:id="D8201_5049913026_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>8201</ftCode>
+<loc>
+<gml:Curve gml:id="D8201_5049913026_2-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.185766778 140.283333333
+ 36.185976389 140.283210556
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>普通鉄道（ＪＲ）</type>
+<snglDbl>複線以上</snglDbl>
+<railState>通常部</railState>
+<lvOrder>0</lvOrder>
+<rtCode>40201000093</rtCode>
+</RailCL>
+<RailCL gml:id="D8201_5049913026_3">
+<rID>50499-13026-i-1397</rID>
+<lfSpanFr gml:id="D8201_5049913026_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>8201</ftCode>
+<loc>
+<gml:Curve gml:id="D8201_5049913026_3-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.190316718 140.280519460
+ 36.190831576 140.280195195
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>普通鉄道（ＪＲ）</type>
+<snglDbl>駅部分</snglDbl>
+<railState>通常部</railState>
+<lvOrder>0</lvOrder>
+<staCode>40207000297</staCode>
+<rtCode>40201000093</rtCode>
+</RailCL>
+<RailCL gml:id="D8201_5049913026_4">
+<rID>50499-13026-i-1398</rID>
+<lfSpanFr gml:id="D8201_5049913026_4-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>8201</ftCode>
+<loc>
+<gml:Curve gml:id="D8201_5049913026_4-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.188868341 140.281428711
+ 36.190316718 140.280519460
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>普通鉄道（ＪＲ）</type>
+<snglDbl>複線以上</snglDbl>
+<railState>通常部</railState>
+<lvOrder>0</lvOrder>
+<rtCode>40201000093</rtCode>
+</RailCL>
+<RailCL gml:id="D8201_5049913026_5">
+<rID>50499-13026-i-1399</rID>
+<lfSpanFr gml:id="D8201_5049913026_5-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>8201</ftCode>
+<loc>
+<gml:Curve gml:id="D8201_5049913026_5-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.185976389 140.283210556
+ 36.186701111 140.282792222
+ 36.187590679 140.282207581
+ 36.188868341 140.281428711
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>普通鉄道（ＪＲ）</type>
+<snglDbl>複線以上</snglDbl>
+<railState>通常部</railState>
+<lvOrder>0</lvOrder>
+<rtCode>40201000093</rtCode>
+</RailCL>
+<RailCL gml:id="D8201_5049913026_6">
+<rID>50499-13026-i-1400</rID>
+<lfSpanFr gml:id="D8201_5049913026_6-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>8201</ftCode>
+<loc>
+<gml:Curve gml:id="D8201_5049913026_6-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.190831576 140.280195195
+ 36.190979722 140.280107222
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>普通鉄道（ＪＲ）</type>
+<snglDbl>駅部分</snglDbl>
+<railState>通常部</railState>
+<lvOrder>0</lvOrder>
+<staCode>40207000297</staCode>
+<rtCode>40201000093</rtCode>
+</RailCL>
+<RailCL gml:id="D8201_5049913029_1">
+<rID>50499-13029-i-1204</rID>
+<lfSpanFr gml:id="D8201_5049913029_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>8201</ftCode>
+<loc>
+<gml:Curve gml:id="D8201_5049913029_1-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.196904124 140.277367002
+ 36.197547694 140.277387058
+ 36.197997063 140.277440542
+ 36.198660052 140.277592103
+ 36.199305879 140.277799385
+ 36.199988288 140.278035635
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>普通鉄道（ＪＲ）</type>
+<snglDbl>複線以上</snglDbl>
+<railState>通常部</railState>
+<lvOrder>0</lvOrder>
+<rtCode>40201000093</rtCode>
+</RailCL>
+<RailCL gml:id="D8201_5049913029_2">
+<rID>50499-13029-i-1205</rID>
+<lfSpanFr gml:id="D8201_5049913029_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>8201</ftCode>
+<loc>
+<gml:Curve gml:id="D8201_5049913029_2-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.191933779 140.279499882
+ 36.193338072 140.278648525
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>普通鉄道（ＪＲ）</type>
+<snglDbl>複線以上</snglDbl>
+<railState>通常部</railState>
+<lvOrder>0</lvOrder>
+<rtCode>40201000093</rtCode>
+</RailCL>
+<RailCL gml:id="D8201_5049913029_3">
+<rID>50499-13029-i-1206</rID>
+<lfSpanFr gml:id="D8201_5049913029_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>8201</ftCode>
+<loc>
+<gml:Curve gml:id="D8201_5049913029_3-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.191666667 140.279647611
+ 36.191933779 140.279499882
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>普通鉄道（ＪＲ）</type>
+<snglDbl>駅部分</snglDbl>
+<railState>通常部</railState>
+<lvOrder>0</lvOrder>
+<staCode>40207000297</staCode>
+<rtCode>40201000093</rtCode>
+</RailCL>
+<RailCL gml:id="D8201_5049913029_4">
+<rID>50499-13029-i-1207</rID>
+<lfSpanFr gml:id="D8201_5049913029_4-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>8201</ftCode>
+<loc>
+<gml:Curve gml:id="D8201_5049913029_4-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.193338072 140.278648525
+ 36.194356041 140.278051237
+ 36.194703794 140.277868481
+ 36.195215037 140.277661208
+ 36.195962029 140.277458387
+ 36.196400108 140.277402663
+ 36.196904124 140.277367002
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>普通鉄道（ＪＲ）</type>
+<snglDbl>複線以上</snglDbl>
+<railState>通常部</railState>
+<lvOrder>0</lvOrder>
+<rtCode>40201000093</rtCode>
+</RailCL>
+<RailCL gml:id="D8201_5049913029_5">
+<rID>50499-13029-i-1208</rID>
+<lfSpanFr gml:id="D8201_5049913029_5-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>8201</ftCode>
+<loc>
+<gml:Curve gml:id="D8201_5049913029_5-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.199988288 140.278035635
+ 36.200000000 140.278039545
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>普通鉄道（ＪＲ）</type>
+<snglDbl>複線以上</snglDbl>
+<railState>通常部</railState>
+<lvOrder>0</lvOrder>
+<rtCode>40201000093</rtCode>
+</RailCL>
+<RailCL gml:id="D8201_5049913032_1">
+<rID>50499-13032-i-1102</rID>
+<lfSpanFr gml:id="D8201_5049913032_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>8201</ftCode>
+<loc>
+<gml:Curve gml:id="D8201_5049913032_1-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.200000000 140.278039545
+ 36.200889736 140.278336538
+ 36.202038676 140.278731041
+ 36.204137838 140.279446532
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>普通鉄道（ＪＲ）</type>
+<snglDbl>複線以上</snglDbl>
+<railState>通常部</railState>
+<lvOrder>0</lvOrder>
+<rtCode>40201000093</rtCode>
+</RailCL>
+<RailCL gml:id="D8201_5049913032_2">
+<rID>50499-13032-i-1103</rID>
+<lfSpanFr gml:id="D8201_5049913032_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>8201</ftCode>
+<loc>
+<gml:Curve gml:id="D8201_5049913032_2-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.207289742 140.280516459
+ 36.208333333 140.280873537
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>普通鉄道（ＪＲ）</type>
+<snglDbl>複線以上</snglDbl>
+<railState>通常部</railState>
+<lvOrder>0</lvOrder>
+<rtCode>40201000093</rtCode>
+</RailCL>
+<RailCL gml:id="D8201_5049913032_3">
+<rID>50499-13032-i-1104</rID>
+<lfSpanFr gml:id="D8201_5049913032_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>8201</ftCode>
+<loc>
+<gml:Curve gml:id="D8201_5049913032_3-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.204137838 140.279446532
+ 36.205461557 140.279901247
+ 36.207289742 140.280516459
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>普通鉄道（ＪＲ）</type>
+<snglDbl>複線以上</snglDbl>
+<railState>通常部</railState>
+<lvOrder>0</lvOrder>
+<rtCode>40201000093</rtCode>
+</RailCL>
+<RailCL gml:id="D8201_5050213023_1">
+<rID>50502-13023-i-1443</rID>
+<lfSpanFr gml:id="D8201_5050213023_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>8201</ftCode>
+<loc>
+<gml:Curve gml:id="D8201_5050213023_1-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.180555405 140.288618739
+ 36.183333333 140.285480421
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>普通鉄道（ＪＲ）</type>
+<snglDbl>複線以上</snglDbl>
+<railState>通常部</railState>
+<lvOrder>0</lvOrder>
+<rtCode>40201000093</rtCode>
+</RailCL>
+<RailCL gml:id="D8201_5050213023_2">
+<rID>50502-13023-i-1467</rID>
+<lfSpanFr gml:id="D8201_5050213023_2-1">
+<gml:timePosition>2016-04-15</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>8201</ftCode>
+<loc>
+<gml:Curve gml:id="D8201_5050213023_2-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.177866293 140.291666667
+ 36.180555405 140.288618739
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>普通鉄道（ＪＲ）</type>
+<snglDbl>複線以上</snglDbl>
+<railState>通常部</railState>
+<lvOrder>0</lvOrder>
+<rtCode>40201000093</rtCode>
+</RailCL>
+<RailCL gml:id="D8201_5050213026_1">
+<rID>50502-13026-i-1400</rID>
+<lfSpanFr gml:id="D8201_5050213026_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>8201</ftCode>
+<loc>
+<gml:Curve gml:id="D8201_5050213026_1-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.183333333 140.285480421
+ 36.183357321 140.285453321
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>普通鉄道（ＪＲ）</type>
+<snglDbl>複線以上</snglDbl>
+<railState>通常部</railState>
+<lvOrder>0</lvOrder>
+<rtCode>40201000093</rtCode>
+</RailCL>
+<RailCL gml:id="D8201_5050213026_2">
+<rID>50502-13026-i-1401</rID>
+<lfSpanFr gml:id="D8201_5050213026_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>8201</ftCode>
+<loc>
+<gml:Curve gml:id="D8201_5050213026_2-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.183357321 140.285453321
+ 36.183910117 140.284838269
+ 36.184360618 140.284383676
+ 36.184721019 140.284072805
+ 36.185193199 140.283711797
+ 36.185766778 140.283333333
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>普通鉄道（ＪＲ）</type>
+<snglDbl>複線以上</snglDbl>
+<railState>通常部</railState>
+<lvOrder>0</lvOrder>
+<rtCode>40201000093</rtCode>
+</RailCL>
+</Dataset>

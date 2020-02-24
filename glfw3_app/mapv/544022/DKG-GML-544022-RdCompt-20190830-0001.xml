@@ -1,0 +1,3816 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Dataset xsi:schemaLocation="http://dkgd.gsi.go.jp/spec/2012/DKGD_GMLSchema DKGD_GMLSchema.xsd" 
+	xmlns:gml="http://www.opengis.net/gml/3.2" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns="http://dkgd.gsi.go.jp/spec/2012/DKGD_GMLSchema"
+    gml:id="Dataset1">
+  <gml:description>数値地図（国土基本情報）メタデータ ID=nmDKGD-Meta19-0531.xml</gml:description>
+  <gml:name>数値地図（国土基本情報）（GML版）</gml:name>
+
+<RdCompt gml:id="D24_5049013023_1">
+<rID>50490-13023-s-2585</rID>
+<lfSpanFr gml:id="D24_5049013023_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013023_1-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.182305306 140.251226111
+ 36.182343361 140.251253750
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013023_2">
+<rID>50490-13023-s-2586</rID>
+<lfSpanFr gml:id="D24_5049013023_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013023_2-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.182289611 140.251240500
+ 36.182327722 140.251268167
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013023_3">
+<rID>50490-13023-s-2587</rID>
+<lfSpanFr gml:id="D24_5049013023_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013023_3-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.182305306 140.251226111
+ 36.182262639 140.251195167
+ 36.181608889 140.250719000
+ 36.181271222 140.250472500
+ 36.180808389 140.250137528
+ 36.180632139 140.250008917
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013023_4">
+<rID>50490-13023-s-2588</rID>
+<lfSpanFr gml:id="D24_5049013023_4-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013023_4-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.182289611 140.251240500
+ 36.182253472 140.251214361
+ 36.181599722 140.250738056
+ 36.181262056 140.250491583
+ 36.180799222 140.250156722
+ 36.180596667 140.250008917
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013023_5">
+<rID>50490-13023-s-2589</rID>
+<lfSpanFr gml:id="D24_5049013023_5-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013023_5-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.183332028 140.251997222
+ 36.182974556 140.251738417
+ 36.182643472 140.251496917
+ 36.182327722 140.251268167
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013023_6">
+<rID>50490-13023-s-2590</rID>
+<lfSpanFr gml:id="D24_5049013023_6-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013023_6-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.183332028 140.251971389
+ 36.182983722 140.251719222
+ 36.182652639 140.251477750
+ 36.182343361 140.251253750
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013023_7">
+<rID>50490-13023-s-2591</rID>
+<lfSpanFr gml:id="D24_5049013023_7-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013023_7-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.180632139 140.250008917
+ 36.180619944 140.250000000
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013023_8">
+<rID>50490-13023-s-2592</rID>
+<lfSpanFr gml:id="D24_5049013023_8-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013023_8-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.180596667 140.250008917
+ 36.180584472 140.250000000
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013023_9">
+<rID>50490-13023-s-2593</rID>
+<lfSpanFr gml:id="D24_5049013023_9-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013023_9-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.183333333 140.251972333
+ 36.183332028 140.251971389
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013023_10">
+<rID>50490-13023-s-2594</rID>
+<lfSpanFr gml:id="D24_5049013023_10-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013023_10-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.183333333 140.251998167
+ 36.183332361 140.251997472
+ 36.183332028 140.251997222
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_1">
+<rID>50490-13026-s-2733</rID>
+<lfSpanFr gml:id="D24_5049013026_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>2401</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_1-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.190274333 140.256714917
+ 36.190176056 140.256922167
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>トンネル内の道路</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_2">
+<rID>50490-13026-s-2734</rID>
+<lfSpanFr gml:id="D24_5049013026_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>2401</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_2-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.190215333 140.256676361
+ 36.190124306 140.256887083
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>トンネル内の道路</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_3">
+<rID>50490-13026-s-2735</rID>
+<lfSpanFr gml:id="D24_5049013026_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>2401</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_3-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.190168611 140.256937889
+ 36.190071722 140.257142250
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>トンネル内の道路</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_4">
+<rID>50490-13026-s-2736</rID>
+<lfSpanFr gml:id="D24_5049013026_4-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>2401</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_4-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.190176056 140.256922167
+ 36.190168611 140.256937889
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>トンネル内の道路</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_5">
+<rID>50490-13026-s-2737</rID>
+<lfSpanFr gml:id="D24_5049013026_5-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>2401</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_5-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.190117278 140.256903389
+ 36.190026056 140.257114528
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>トンネル内の道路</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_6">
+<rID>50490-13026-s-2738</rID>
+<lfSpanFr gml:id="D24_5049013026_6-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>2401</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_6-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.190124306 140.256887083
+ 36.190117278 140.256903389
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>トンネル内の道路</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_7">
+<rID>50490-13026-s-2971</rID>
+<lfSpanFr gml:id="D24_5049013026_7-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_7-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.186882556 140.254586500
+ 36.186078250 140.254001028
+ 36.185950750 140.253907500
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_8">
+<rID>50490-13026-s-2972</rID>
+<lfSpanFr gml:id="D24_5049013026_8-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_8-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.186894333 140.254569194
+ 36.186087500 140.253981972
+ 36.185961028 140.253889194
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_9">
+<rID>50490-13026-s-2973</rID>
+<lfSpanFr gml:id="D24_5049013026_9-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_9-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.191665333 140.257881361
+ 36.191538222 140.257805500
+ 36.191307361 140.257662250
+ 36.190763028 140.257317306
+ 36.190735139 140.257298722
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_10">
+<rID>50490-13026-s-2974</rID>
+<lfSpanFr gml:id="D24_5049013026_10-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_10-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.190168611 140.256937889
+ 36.190444194 140.257123000
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_11">
+<rID>50490-13026-s-2975</rID>
+<lfSpanFr gml:id="D24_5049013026_11-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_11-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.190176056 140.256922167
+ 36.190124306 140.256887083
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_12">
+<rID>50490-13026-s-2976</rID>
+<lfSpanFr gml:id="D24_5049013026_12-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_12-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.190117278 140.256903389
+ 36.190168611 140.256937889
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_13">
+<rID>50490-13026-s-2977</rID>
+<lfSpanFr gml:id="D24_5049013026_13-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_13-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.190124306 140.256887083
+ 36.189997139 140.256800833
+ 36.189707667 140.256595806
+ 36.189431278 140.256403389
+ 36.188736556 140.255899083
+ 36.188665250 140.255847667
+ 36.188528417 140.255748750
+ 36.188326333 140.255602806
+ 36.188138361 140.255466472
+ 36.188064000 140.255412056
+ 36.187968556 140.255341278
+ 36.187872528 140.255272583
+ 36.187783722 140.255207639
+ 36.187597083 140.255073556
+ 36.187465056 140.254975278
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_14">
+<rID>50490-13026-s-2978</rID>
+<lfSpanFr gml:id="D24_5049013026_14-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_14-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.183395444 140.252017500
+ 36.183341528 140.251978278
+ 36.183333333 140.251972333
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_15">
+<rID>50490-13026-s-2979</rID>
+<lfSpanFr gml:id="D24_5049013026_15-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_15-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.183388389 140.252038250
+ 36.183333333 140.251998167
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_16">
+<rID>50490-13026-s-2980</rID>
+<lfSpanFr gml:id="D24_5049013026_16-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_16-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.184615472 140.252931639
+ 36.184247472 140.252662750
+ 36.183901972 140.252412528
+ 36.183606028 140.252196611
+ 36.183474417 140.252100833
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_17">
+<rID>50490-13026-s-2981</rID>
+<lfSpanFr gml:id="D24_5049013026_17-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_17-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.184621639 140.252910278
+ 36.184256639 140.252643667
+ 36.183911139 140.252393333
+ 36.183615194 140.252177417
+ 36.183481944 140.252080444
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_18">
+<rID>50490-13026-s-2982</rID>
+<lfSpanFr gml:id="D24_5049013026_18-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_18-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.185481944 140.253537667
+ 36.185340639 140.253433972
+ 36.184828528 140.253061306
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_19">
+<rID>50490-13026-s-2983</rID>
+<lfSpanFr gml:id="D24_5049013026_19-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_19-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.185473306 140.253557194
+ 36.185331472 140.253453139
+ 36.184821889 140.253082361
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_20">
+<rID>50490-13026-s-2984</rID>
+<lfSpanFr gml:id="D24_5049013026_20-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_20-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.187452250 140.255004083
+ 36.187586167 140.255101278
+ 36.187752833 140.255223139
+ 36.187860611 140.255301889
+ 36.187956889 140.255370778
+ 36.188052361 140.255441667
+ 36.188143000 140.255507083
+ 36.188315972 140.255629083
+ 36.188528306 140.255781444
+ 36.188620111 140.255847417
+ 36.188725917 140.255923389
+ 36.189051361 140.256158722
+ 36.189418222 140.256422889
+ 36.189694694 140.256614083
+ 36.189990056 140.256817917
+ 36.190117278 140.256903389
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_21">
+<rID>50490-13026-s-2985</rID>
+<lfSpanFr gml:id="D24_5049013026_21-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_21-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.190723583 140.257308583
+ 36.190757028 140.257330722
+ 36.191300361 140.257677222
+ 36.191533306 140.257820139
+ 36.191665333 140.257899694
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_22">
+<rID>50490-13026-s-2986</rID>
+<lfSpanFr gml:id="D24_5049013026_22-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_22-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.190456583 140.257112417
+ 36.190176056 140.256922167
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_23">
+<rID>50490-13026-s-2987</rID>
+<lfSpanFr gml:id="D24_5049013026_23-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_23-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.190625278 140.257243556
+ 36.190673472 140.257275444
+ 36.190723583 140.257308583
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_24">
+<rID>50490-13026-s-2988</rID>
+<lfSpanFr gml:id="D24_5049013026_24-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_24-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.190561333 140.257183000
+ 36.190526833 140.257160028
+ 36.190512972 140.257150639
+ 36.190456583 140.257112417
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_25">
+<rID>50490-13026-s-2989</rID>
+<lfSpanFr gml:id="D24_5049013026_25-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_25-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.186882556 140.254586500
+ 36.186992500 140.254668111
+ 36.187008000 140.254679444
+ 36.187070306 140.254724972
+ 36.187112861 140.254756083
+ 36.187436028 140.254992306
+ 36.187452250 140.255004083
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_26">
+<rID>50490-13026-s-2990</rID>
+<lfSpanFr gml:id="D24_5049013026_26-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_26-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.190637167 140.257233500
+ 36.190561333 140.257183000
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_27">
+<rID>50490-13026-s-2991</rID>
+<lfSpanFr gml:id="D24_5049013026_27-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_27-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.190549194 140.257193250
+ 36.190625278 140.257243556
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_28">
+<rID>50490-13026-s-2992</rID>
+<lfSpanFr gml:id="D24_5049013026_28-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_28-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.183481944 140.252080444
+ 36.183395444 140.252017500
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_29">
+<rID>50490-13026-s-2993</rID>
+<lfSpanFr gml:id="D24_5049013026_29-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_29-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.183474417 140.252100833
+ 36.183388389 140.252038250
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_30">
+<rID>50490-13026-s-2994</rID>
+<lfSpanFr gml:id="D24_5049013026_30-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_30-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.184821889 140.253082361
+ 36.184792056 140.253060667
+ 36.184615472 140.252931639
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_31">
+<rID>50490-13026-s-2995</rID>
+<lfSpanFr gml:id="D24_5049013026_31-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_31-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.184828528 140.253061306
+ 36.184801250 140.253041472
+ 36.184621639 140.252910278
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_32">
+<rID>50490-13026-s-2996</rID>
+<lfSpanFr gml:id="D24_5049013026_32-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_32-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.185571250 140.253603167
+ 36.185481944 140.253537667
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_33">
+<rID>50490-13026-s-2997</rID>
+<lfSpanFr gml:id="D24_5049013026_33-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_33-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.185562583 140.253622694
+ 36.185473306 140.253557194
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_34">
+<rID>50490-13026-s-2998</rID>
+<lfSpanFr gml:id="D24_5049013026_34-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_34-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.185840306 140.253800583
+ 36.185571250 140.253603167
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_35">
+<rID>50490-13026-s-2999</rID>
+<lfSpanFr gml:id="D24_5049013026_35-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_35-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.185830000 140.253818917
+ 36.185562583 140.253622694
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_36">
+<rID>50490-13026-s-3000</rID>
+<lfSpanFr gml:id="D24_5049013026_36-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_36-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.185961028 140.253889194
+ 36.185840306 140.253800583
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_37">
+<rID>50490-13026-s-3001</rID>
+<lfSpanFr gml:id="D24_5049013026_37-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_37-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.185950750 140.253907500
+ 36.185830000 140.253818917
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_38">
+<rID>50490-13026-s-3002</rID>
+<lfSpanFr gml:id="D24_5049013026_38-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_38-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.187465056 140.254975278
+ 36.187448833 140.254963222
+ 36.187125139 140.254726667
+ 36.187082778 140.254695694
+ 36.187021889 140.254651222
+ 36.187006389 140.254639889
+ 36.186894333 140.254569194
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_39">
+<rID>50490-13026-s-3003</rID>
+<lfSpanFr gml:id="D24_5049013026_39-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_39-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.190735139 140.257298722
+ 36.190685278 140.257265528
+ 36.190637167 140.257233500
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_40">
+<rID>50490-13026-s-3004</rID>
+<lfSpanFr gml:id="D24_5049013026_40-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_40-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.190444194 140.257123000
+ 36.190500417 140.257160778
+ 36.190519306 140.257173444
+ 36.190549194 140.257193250
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_41">
+<rID>50490-13026-s-3005</rID>
+<lfSpanFr gml:id="D24_5049013026_41-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_41-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.191665333 140.257899694
+ 36.191666667 140.257900500
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013026_42">
+<rID>50490-13026-s-3006</rID>
+<lfSpanFr gml:id="D24_5049013026_42-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013026_42-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.191666667 140.257882167
+ 36.191665333 140.257881361
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013029_1">
+<rID>50490-13029-s-1850</rID>
+<lfSpanFr gml:id="D24_5049013029_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013029_1-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.191666667 140.257900500
+ 36.191900333 140.258041278
+ 36.192144000 140.258181611
+ 36.192414333 140.258333333
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013029_2">
+<rID>50490-13029-s-1851</rID>
+<lfSpanFr gml:id="D24_5049013029_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013029_2-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.192442972 140.258333333
+ 36.192434750 140.258328944
+ 36.192150611 140.258166417
+ 36.191906500 140.258025306
+ 36.191666667 140.257882167
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013029_3">
+<rID>50490-13029-s-1852</rID>
+<lfSpanFr gml:id="D24_5049013029_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>2401</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013029_3-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.194139889 140.256372389
+ 36.194132667 140.256393194
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>トンネル内の道路</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013029_4">
+<rID>50490-13029-s-1853</rID>
+<lfSpanFr gml:id="D24_5049013029_4-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>2401</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013029_4-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.194086333 140.256354639
+ 36.194081556 140.256367028
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>トンネル内の道路</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013029_5">
+<rID>50490-13029-s-1854</rID>
+<lfSpanFr gml:id="D24_5049013029_5-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>2401</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013029_5-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.194030056 140.256500417
+ 36.194081556 140.256367028
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>トンネル内の道路</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013029_6">
+<rID>50490-13029-s-1855</rID>
+<lfSpanFr gml:id="D24_5049013029_6-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>2401</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013029_6-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.194132667 140.256393194
+ 36.194085639 140.256528472
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>トンネル内の道路</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013029_7">
+<rID>50490-13029-s-1856</rID>
+<lfSpanFr gml:id="D24_5049013029_7-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>2401</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013029_7-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.194030056 140.256500417
+ 36.194021944 140.256521417
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>トンネル内の道路</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049013029_8">
+<rID>50490-13029-s-1857</rID>
+<lfSpanFr gml:id="D24_5049013029_8-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>2401</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049013029_8-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.194085639 140.256528472
+ 36.194081722 140.256539750
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>トンネル内の道路</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313023_1">
+<rID>50493-13023-s-4435</rID>
+<lfSpanFr gml:id="D24_5049313023_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2401</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313023_1-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.176348000 140.265010083
+ 36.176223167 140.265138250
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>トンネル内の道路</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313023_2">
+<rID>50493-13023-s-4436</rID>
+<lfSpanFr gml:id="D24_5049313023_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2401</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313023_2-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.176333556 140.264990111
+ 36.176209361 140.265117694
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>トンネル内の道路</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313029_1">
+<rID>50493-13029-s-4882</rID>
+<lfSpanFr gml:id="D24_5049313029_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313029_1-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.192430556 140.258342389
+ 36.192780861 140.258530528
+ 36.193142861 140.258720500
+ 36.193225361 140.258762528
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313029_2">
+<rID>50493-13029-s-4883</rID>
+<lfSpanFr gml:id="D24_5049313029_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313029_2-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.196044028 140.259951361
+ 36.196044472 140.259951528
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313029_3">
+<rID>50493-13029-s-4884</rID>
+<lfSpanFr gml:id="D24_5049313029_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313029_3-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.199998639 140.261468444
+ 36.199979694 140.261459389
+ 36.199605833 140.261286222
+ 36.199275750 140.261145194
+ 36.198739861 140.260935778
+ 36.198542833 140.260863667
+ 36.198373889 140.260802028
+ 36.197885278 140.260632917
+ 36.196892556 140.260285667
+ 36.196399361 140.260110639
+ 36.196038028 140.259978167
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313029_4">
+<rID>50493-13029-s-4885</rID>
+<lfSpanFr gml:id="D24_5049313029_4-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313029_4-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.199998639 140.261668083
+ 36.199888750 140.261614472
+ 36.199577139 140.261467778
+ 36.199513556 140.261434611
+ 36.199511583 140.261431278
+ 36.199511500 140.261427806
+ 36.199512222 140.261423278
+ 36.199514417 140.261420278
+ 36.199518556 140.261418972
+ 36.199616639 140.261462528
+ 36.199895861 140.261591722
+ 36.199998639 140.261641417
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313029_5">
+<rID>50493-13029-s-4886</rID>
+<lfSpanFr gml:id="D24_5049313029_5-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313029_5-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.196009472 140.259938611
+ 36.196044028 140.259951361
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313029_6">
+<rID>50493-13029-s-4887</rID>
+<lfSpanFr gml:id="D24_5049313029_6-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313029_6-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.196037611 140.259978028
+ 36.196003056 140.259965278
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313029_7">
+<rID>50493-13029-s-4888</rID>
+<lfSpanFr gml:id="D24_5049313029_7-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313029_7-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.196009472 140.259938611
+ 36.196009083 140.259938472
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313029_8">
+<rID>50493-13029-s-4889</rID>
+<lfSpanFr gml:id="D24_5049313029_8-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313029_8-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.193293917 140.258780944
+ 36.193234667 140.258750972
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313029_9">
+<rID>50493-13029-s-4890</rID>
+<lfSpanFr gml:id="D24_5049313029_9-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313029_9-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.193284972 140.258792917
+ 36.193502361 140.258903694
+ 36.193870833 140.259076139
+ 36.194186722 140.259229306
+ 36.194536444 140.259379194
+ 36.194813889 140.259498250
+ 36.195207889 140.259662167
+ 36.195274111 140.259687778
+ 36.195578333 140.259805389
+ 36.195858417 140.259912222
+ 36.196002639 140.259965139
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313029_10">
+<rID>50493-13029-s-4891</rID>
+<lfSpanFr gml:id="D24_5049313029_10-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313029_10-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.193234667 140.258750972
+ 36.193151472 140.258708861
+ 36.192783889 140.258515750
+ 36.192459889 140.258342389
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313029_11">
+<rID>50493-13029-s-4892</rID>
+<lfSpanFr gml:id="D24_5049313029_11-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313029_11-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.193225361 140.258762528
+ 36.193284972 140.258792917
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313029_12">
+<rID>50493-13029-s-4893</rID>
+<lfSpanFr gml:id="D24_5049313029_12-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313029_12-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.196009083 140.259938472
+ 36.195864889 140.259885667
+ 36.195585000 140.259778861
+ 36.195274222 140.259657750
+ 36.195214917 140.259634639
+ 36.194819722 140.259478611
+ 36.194542722 140.259363222
+ 36.194187333 140.259209611
+ 36.193875750 140.259060611
+ 36.193508444 140.258889500
+ 36.193293917 140.258780944
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313029_13">
+<rID>50493-13029-s-4894</rID>
+<lfSpanFr gml:id="D24_5049313029_13-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313029_13-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.196044472 140.259951528
+ 36.196405944 140.260084083
+ 36.196898889 140.260259000
+ 36.197234722 140.260375472
+ 36.197507389 140.260468833
+ 36.197891222 140.260606139
+ 36.198043083 140.260658444
+ 36.198380111 140.260775361
+ 36.198545806 140.260835778
+ 36.198746722 140.260909361
+ 36.198921611 140.260975806
+ 36.199089278 140.261041111
+ 36.199282944 140.261118778
+ 36.199452944 140.261190194
+ 36.199613417 140.261260028
+ 36.199813083 140.261351944
+ 36.199987722 140.261433417
+ 36.199998639 140.261438639
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313029_14">
+<rID>50493-13029-s-4895</rID>
+<lfSpanFr gml:id="D24_5049313029_14-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313029_14-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.196038028 140.259978167
+ 36.196037611 140.259978028
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313029_15">
+<rID>50493-13029-s-4896</rID>
+<lfSpanFr gml:id="D24_5049313029_15-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313029_15-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.196002639 140.259965139
+ 36.196003056 140.259965278
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313029_16">
+<rID>50493-13029-s-4897</rID>
+<lfSpanFr gml:id="D24_5049313029_16-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>2401</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313029_16-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.193414500 140.258619111
+ 36.193293917 140.258780944
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>トンネル内の道路</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313029_17">
+<rID>50493-13029-s-4898</rID>
+<lfSpanFr gml:id="D24_5049313029_17-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>2401</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313029_17-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.193360528 140.258594250
+ 36.193234667 140.258750972
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>トンネル内の道路</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313029_18">
+<rID>50493-13029-s-4899</rID>
+<lfSpanFr gml:id="D24_5049313029_18-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>2401</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313029_18-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.193293917 140.258780944
+ 36.193284972 140.258792917
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>トンネル内の道路</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313029_19">
+<rID>50493-13029-s-4900</rID>
+<lfSpanFr gml:id="D24_5049313029_19-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>2401</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313029_19-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.193284972 140.258792917
+ 36.193172444 140.258943944
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>トンネル内の道路</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313029_20">
+<rID>50493-13029-s-4901</rID>
+<lfSpanFr gml:id="D24_5049313029_20-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>2401</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313029_20-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.193234667 140.258750972
+ 36.193225361 140.258762528
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>トンネル内の道路</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313029_21">
+<rID>50493-13029-s-4902</rID>
+<lfSpanFr gml:id="D24_5049313029_21-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>2401</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313029_21-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.193225361 140.258762528
+ 36.193106306 140.258910778
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>トンネル内の道路</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313029_22">
+<rID>50493-13029-s-5950</rID>
+<lfSpanFr gml:id="D24_5049313029_22-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313029_22-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.192414333 140.258333333
+ 36.192428222 140.258341139
+ 36.192430556 140.258342389
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313029_23">
+<rID>50493-13029-s-5951</rID>
+<lfSpanFr gml:id="D24_5049313029_23-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313029_23-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.192459889 140.258342389
+ 36.192442972 140.258333333
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313029_24">
+<rID>50493-13029-s-5981</rID>
+<lfSpanFr gml:id="D24_5049313029_24-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313029_24-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.199998639 140.261438639
+ 36.200000000 140.261439306
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313029_25">
+<rID>50493-13029-s-5982</rID>
+<lfSpanFr gml:id="D24_5049313029_25-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313029_25-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.200000000 140.261668750
+ 36.199998639 140.261668083
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313029_26">
+<rID>50493-13029-s-5983</rID>
+<lfSpanFr gml:id="D24_5049313029_26-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313029_26-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.199998639 140.261641417
+ 36.200000000 140.261642083
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313029_27">
+<rID>50493-13029-s-5984</rID>
+<lfSpanFr gml:id="D24_5049313029_27-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313029_27-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.200000000 140.261469111
+ 36.199998639 140.261468444
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_1">
+<rID>50493-13032-s-6910</rID>
+<lfSpanFr gml:id="D24_5049313032_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_1-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.205847167 140.266666667
+ 36.205660639 140.266396611
+ 36.205444528 140.266097389
+ 36.205266111 140.265856417
+ 36.205257278 140.265845000
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_2">
+<rID>50493-13032-s-6911</rID>
+<lfSpanFr gml:id="D24_5049313032_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_2-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.200000000 140.261439306
+ 36.200121778 140.261497417
+ 36.200275611 140.261575000
+ 36.200433778 140.261658389
+ 36.200830833 140.261875389
+ 36.200941278 140.261939611
+ 36.201115583 140.262042861
+ 36.201194000 140.262090556
+ 36.201222583 140.262108167
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_3">
+<rID>50493-13032-s-6912</rID>
+<lfSpanFr gml:id="D24_5049313032_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_3-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.201283500 140.261959028
+ 36.201283167 140.261958806
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_4">
+<rID>50493-13032-s-6913</rID>
+<lfSpanFr gml:id="D24_5049313032_4-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_4-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.201332167 140.261963972
+ 36.201332556 140.261964222
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_5">
+<rID>50493-13032-s-6914</rID>
+<lfSpanFr gml:id="D24_5049313032_5-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_5-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.200515083 140.261929611
+ 36.200075889 140.261705806
+ 36.200000000 140.261668750
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_6">
+<rID>50493-13032-s-6915</rID>
+<lfSpanFr gml:id="D24_5049313032_6-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_6-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.200000000 140.261642083
+ 36.200068861 140.261675417
+ 36.200522278 140.261911639
+ 36.200524944 140.261919194
+ 36.200524944 140.261921417
+ 36.200515083 140.261929611
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_7">
+<rID>50493-13032-s-6916</rID>
+<lfSpanFr gml:id="D24_5049313032_7-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_7-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.201212861 140.262133250
+ 36.201253222 140.262158139
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_8">
+<rID>50493-13032-s-6917</rID>
+<lfSpanFr gml:id="D24_5049313032_8-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_8-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.201222944 140.262108389
+ 36.201263333 140.262133306
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_9">
+<rID>50493-13032-s-6918</rID>
+<lfSpanFr gml:id="D24_5049313032_9-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_9-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.201283500 140.261959028
+ 36.201323889 140.261984500
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_10">
+<rID>50493-13032-s-6919</rID>
+<lfSpanFr gml:id="D24_5049313032_10-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_10-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.201291778 140.261938833
+ 36.201332167 140.261963972
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_11">
+<rID>50493-13032-s-6920</rID>
+<lfSpanFr gml:id="D24_5049313032_11-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_11-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.205266444 140.265816472
+ 36.205275639 140.265828389
+ 36.205275917 140.265828750
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_12">
+<rID>50493-13032-s-6921</rID>
+<lfSpanFr gml:id="D24_5049313032_12-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_12-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.204122583 140.264515750
+ 36.204088361 140.264479500
+ 36.204088028 140.264479139
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_13">
+<rID>50493-13032-s-6922</rID>
+<lfSpanFr gml:id="D24_5049313032_13-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_13-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.201996750 140.262628194
+ 36.202023167 140.262647417
+ 36.202060472 140.262674528
+ 36.202060889 140.262674833
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_14">
+<rID>50493-13032-s-6923</rID>
+<lfSpanFr gml:id="D24_5049313032_14-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_14-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.201929889 140.262611833
+ 36.201920389 140.262604944
+ 36.201920028 140.262604667
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_15">
+<rID>50493-13032-s-6924</rID>
+<lfSpanFr gml:id="D24_5049313032_15-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_15-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.205247778 140.265832667
+ 36.205208083 140.265781250
+ 36.205207806 140.265780889
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_16">
+<rID>50493-13032-s-6925</rID>
+<lfSpanFr gml:id="D24_5049313032_16-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_16-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.204137167 140.264494583
+ 36.204147389 140.264505417
+ 36.204147694 140.264505750
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_17">
+<rID>50493-13032-s-6926</rID>
+<lfSpanFr gml:id="D24_5049313032_17-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_17-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.201943556 140.262589528
+ 36.201996750 140.262628194
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_18">
+<rID>50493-13032-s-6927</rID>
+<lfSpanFr gml:id="D24_5049313032_18-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_18-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.201983083 140.262650500
+ 36.201929889 140.262611833
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_19">
+<rID>50493-13032-s-6928</rID>
+<lfSpanFr gml:id="D24_5049313032_19-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_19-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.201253222 140.262158139
+ 36.201263333 140.262133306
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_20">
+<rID>50493-13032-s-6929</rID>
+<lfSpanFr gml:id="D24_5049313032_20-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_20-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.201263333 140.262133306
+ 36.201263694 140.262133528
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_21">
+<rID>50493-13032-s-6930</rID>
+<lfSpanFr gml:id="D24_5049313032_21-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_21-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.201212861 140.262133250
+ 36.201212500 140.262133028
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_22">
+<rID>50493-13032-s-6931</rID>
+<lfSpanFr gml:id="D24_5049313032_22-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_22-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.201222944 140.262108389
+ 36.201212861 140.262133250
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_23">
+<rID>50493-13032-s-6932</rID>
+<lfSpanFr gml:id="D24_5049313032_23-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_23-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.201332556 140.261964222
+ 36.201403472 140.262008389
+ 36.201613444 140.262142861
+ 36.201766278 140.262246806
+ 36.201932333 140.262362250
+ 36.202004083 140.262416556
+ 36.202022639 140.262433417
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_24">
+<rID>50493-13032-s-6933</rID>
+<lfSpanFr gml:id="D24_5049313032_24-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_24-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.201324222 140.261984722
+ 36.201323889 140.261984500
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_25">
+<rID>50493-13032-s-6934</rID>
+<lfSpanFr gml:id="D24_5049313032_25-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_25-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.201263694 140.262133528
+ 36.201438056 140.262243889
+ 36.201668611 140.262395056
+ 36.201762389 140.262457611
+ 36.201866917 140.262533806
+ 36.201933472 140.262582194
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_26">
+<rID>50493-13032-s-6935</rID>
+<lfSpanFr gml:id="D24_5049313032_26-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_26-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.201253583 140.262158361
+ 36.201253222 140.262158139
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_27">
+<rID>50493-13032-s-6936</rID>
+<lfSpanFr gml:id="D24_5049313032_27-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_27-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.201212500 140.262133028
+ 36.201184167 140.262115611
+ 36.201105750 140.262067833
+ 36.200931083 140.261964444
+ 36.200821528 140.261900694
+ 36.200425028 140.261684028
+ 36.200113500 140.261523278
+ 36.200000000 140.261469111
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_28">
+<rID>50493-13032-s-6937</rID>
+<lfSpanFr gml:id="D24_5049313032_28-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_28-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.201222583 140.262108167
+ 36.201222944 140.262108389
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_29">
+<rID>50493-13032-s-6938</rID>
+<lfSpanFr gml:id="D24_5049313032_29-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_29-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.201283167 140.261958806
+ 36.201207444 140.261911028
+ 36.201014250 140.261796111
+ 36.200874111 140.261715944
+ 36.200872333 140.261713583
+ 36.200872861 140.261710250
+ 36.200874222 140.261708056
+ 36.200877028 140.261708167
+ 36.200959472 140.261742639
+ 36.201119111 140.261831472
+ 36.201291389 140.261938583
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_30">
+<rID>50493-13032-s-6939</rID>
+<lfSpanFr gml:id="D24_5049313032_30-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_30-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.201291389 140.261938583
+ 36.201291778 140.261938833
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_31">
+<rID>50493-13032-s-6940</rID>
+<lfSpanFr gml:id="D24_5049313032_31-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_31-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.202022639 140.262433417
+ 36.202022944 140.262433694
+ 36.202016417 140.262444556
+ 36.202016083 140.262444333
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_32">
+<rID>50493-13032-s-6941</rID>
+<lfSpanFr gml:id="D24_5049313032_32-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_32-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.202016083 140.262444333
+ 36.201997889 140.262432333
+ 36.201919139 140.262378306
+ 36.201804944 140.262302167
+ 36.201589167 140.262152083
+ 36.201324222 140.261984722
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_33">
+<rID>50493-13032-s-6942</rID>
+<lfSpanFr gml:id="D24_5049313032_33-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_33-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.201933472 140.262582194
+ 36.201933861 140.262582472
+ 36.201943556 140.262589528
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_34">
+<rID>50493-13032-s-6943</rID>
+<lfSpanFr gml:id="D24_5049313032_34-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_34-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.201920028 140.262604667
+ 36.201855472 140.262557750
+ 36.201751917 140.262482250
+ 36.201559972 140.262354528
+ 36.201427778 140.262268639
+ 36.201284083 140.262177111
+ 36.201253583 140.262158361
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_35">
+<rID>50493-13032-s-6944</rID>
+<lfSpanFr gml:id="D24_5049313032_35-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_35-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.202047139 140.262697139
+ 36.202046694 140.262696806
+ 36.202023056 140.262679556
+ 36.201983083 140.262650500
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_36">
+<rID>50493-13032-s-6945</rID>
+<lfSpanFr gml:id="D24_5049313032_36-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_36-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.202060889 140.262674833
+ 36.202231889 140.262799250
+ 36.202356583 140.262888222
+ 36.202478083 140.262983972
+ 36.202626111 140.263099444
+ 36.202812333 140.263248361
+ 36.202881333 140.263306167
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_37">
+<rID>50493-13032-s-6946</rID>
+<lfSpanFr gml:id="D24_5049313032_37-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_37-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.202920111 140.263338694
+ 36.202941556 140.263356611
+ 36.203139750 140.263530944
+ 36.203263833 140.263636278
+ 36.203446917 140.263804972
+ 36.203622694 140.263970639
+ 36.203726417 140.264073389
+ 36.203798278 140.264143083
+ 36.203851194 140.264192417
+ 36.203858917 140.264200000
+ 36.204030222 140.264381444
+ 36.204102611 140.264458000
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_38">
+<rID>50493-13032-s-6947</rID>
+<lfSpanFr gml:id="D24_5049313032_38-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_38-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.202907528 140.263361667
+ 36.202907111 140.263361306
+ 36.202869083 140.263329528
+ 36.202868694 140.263329194
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_39">
+<rID>50493-13032-s-6948</rID>
+<lfSpanFr gml:id="D24_5049313032_39-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_39-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.202868694 140.263329194
+ 36.202800000 140.263271667
+ 36.202613500 140.263122500
+ 36.202464778 140.263006472
+ 36.202344861 140.262911944
+ 36.202220722 140.262823417
+ 36.202047139 140.262697139
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_40">
+<rID>50493-13032-s-6949</rID>
+<lfSpanFr gml:id="D24_5049313032_40-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_40-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.202881333 140.263306167
+ 36.202881694 140.263306472
+ 36.202919750 140.263338389
+ 36.202920111 140.263338694
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_41">
+<rID>50493-13032-s-6950</rID>
+<lfSpanFr gml:id="D24_5049313032_41-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_41-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.204147694 140.264505750
+ 36.204478583 140.264855639
+ 36.204678833 140.265083528
+ 36.204921833 140.265378111
+ 36.205143917 140.265657806
+ 36.205226361 140.265764556
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_42">
+<rID>50493-13032-s-6951</rID>
+<lfSpanFr gml:id="D24_5049313032_42-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_42-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.204133139 140.264526917
+ 36.204132806 140.264526556
+ 36.204122583 140.264515750
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_43">
+<rID>50493-13032-s-6952</rID>
+<lfSpanFr gml:id="D24_5049313032_43-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_43-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.204088028 140.264479139
+ 36.204015444 140.264402500
+ 36.203844222 140.264221167
+ 36.203837667 140.264214694
+ 36.203784667 140.264165361
+ 36.203712194 140.264095000
+ 36.203608750 140.263992583
+ 36.203433139 140.263826917
+ 36.203250778 140.263659000
+ 36.203126944 140.263553889
+ 36.202928583 140.263379333
+ 36.202907528 140.263361667
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_44">
+<rID>50493-13032-s-6953</rID>
+<lfSpanFr gml:id="D24_5049313032_44-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_44-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.204102611 140.264458000
+ 36.204102944 140.264458361
+ 36.204137167 140.264494583
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_45">
+<rID>50493-13032-s-6954</rID>
+<lfSpanFr gml:id="D24_5049313032_45-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_45-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.205275917 140.265828750
+ 36.205282500 140.265837389
+ 36.205461444 140.266079028
+ 36.205677472 140.266378250
+ 36.205876833 140.266666667
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_46">
+<rID>50493-13032-s-6955</rID>
+<lfSpanFr gml:id="D24_5049313032_46-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_46-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.205257278 140.265845000
+ 36.205256972 140.265844583
+ 36.205247778 140.265832667
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_47">
+<rID>50493-13032-s-6956</rID>
+<lfSpanFr gml:id="D24_5049313032_47-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_47-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.205207806 140.265780889
+ 36.205127611 140.265676944
+ 36.204905917 140.265397806
+ 36.204663361 140.265103667
+ 36.204463556 140.264876361
+ 36.204133139 140.264526917
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049313032_48">
+<rID>50493-13032-s-6957</rID>
+<lfSpanFr gml:id="D24_5049313032_48-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049313032_48-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.205226361 140.265764556
+ 36.205226694 140.265765000
+ 36.205266444 140.265816472
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049613032_1">
+<rID>50496-13032-s-4798</rID>
+<lfSpanFr gml:id="D24_5049613032_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049613032_1-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.208331944 140.270438667
+ 36.208278583 140.270368944
+ 36.208146833 140.270192028
+ 36.208051333 140.270059944
+ 36.207926889 140.269879417
+ 36.207819028 140.269723444
+ 36.207678278 140.269516028
+ 36.207579861 140.269372111
+ 36.207463972 140.269194667
+ 36.207363667 140.269039083
+ 36.207249583 140.268860611
+ 36.207172778 140.268741861
+ 36.207141444 140.268691083
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049613032_2">
+<rID>50496-13032-s-4799</rID>
+<lfSpanFr gml:id="D24_5049613032_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049613032_2-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.205883194 140.266675861
+ 36.205898944 140.266698639
+ 36.205976472 140.266815722
+ 36.206138611 140.267062722
+ 36.206195528 140.267149333
+ 36.206308000 140.267325139
+ 36.206379528 140.267435417
+ 36.206441278 140.267532944
+ 36.206527583 140.267668222
+ 36.206611444 140.267800583
+ 36.206701056 140.267944528
+ 36.206757056 140.268034250
+ 36.206870333 140.268213611
+ 36.206914333 140.268283250
+ 36.207035139 140.268472861
+ 36.207135472 140.268635556
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049613032_3">
+<rID>50496-13032-s-4800</rID>
+<lfSpanFr gml:id="D24_5049613032_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049613032_3-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.207159194 140.268673972
+ 36.207190417 140.268724722
+ 36.207267222 140.268843472
+ 36.207381306 140.269021806
+ 36.207481333 140.269176833
+ 36.207597306 140.269354528
+ 36.207695222 140.269497667
+ 36.207835944 140.269705056
+ 36.207942917 140.269859833
+ 36.208068250 140.270041694
+ 36.208163583 140.270173444
+ 36.208295056 140.270349889
+ 36.208331944 140.270398111
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049613032_4">
+<rID>50496-13032-s-4801</rID>
+<lfSpanFr gml:id="D24_5049613032_4-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049613032_4-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.207141444 140.268691083
+ 36.207141167 140.268690639
+ 36.207117917 140.268653000
+ 36.207117639 140.268652556
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049613032_5">
+<rID>50496-13032-s-4802</rID>
+<lfSpanFr gml:id="D24_5049613032_5-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049613032_5-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.207117639 140.268652556
+ 36.207017417 140.268490000
+ 36.206896444 140.268300167
+ 36.206851972 140.268229611
+ 36.206739333 140.268051389
+ 36.206682806 140.267960889
+ 36.206593639 140.267817611
+ 36.206510111 140.267685694
+ 36.206424000 140.267550778
+ 36.206361972 140.267452778
+ 36.206290361 140.267342611
+ 36.206177889 140.267166694
+ 36.206109500 140.267062556
+ 36.205959444 140.266834083
+ 36.205881472 140.266716333
+ 36.205853528 140.266675861
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049613032_6">
+<rID>50496-13032-s-4803</rID>
+<lfSpanFr gml:id="D24_5049613032_6-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2412</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049613032_6-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.207135472 140.268635556
+ 36.207135750 140.268636000
+ 36.207158917 140.268673528
+ 36.207159194 140.268673972
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049613032_7">
+<rID>50496-13032-s-5858</rID>
+<lfSpanFr gml:id="D24_5049613032_7-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049613032_7-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.205853528 140.266675861
+ 36.205847167 140.266666667
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049613032_8">
+<rID>50496-13032-s-5859</rID>
+<lfSpanFr gml:id="D24_5049613032_8-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049613032_8-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.205876833 140.266666667
+ 36.205883194 140.266675861
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049613032_9">
+<rID>50496-13032-s-5911</rID>
+<lfSpanFr gml:id="D24_5049613032_9-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049613032_9-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.208331944 140.270398111
+ 36.208333333 140.270399944
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5049613032_10">
+<rID>50496-13032-s-5912</rID>
+<lfSpanFr gml:id="D24_5049613032_10-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5049613032_10-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.208333333 140.270440500
+ 36.208331944 140.270438667
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5050213023_1">
+<rID>50502-13023-s-8791</rID>
+<lfSpanFr gml:id="D24_5050213023_1-1">
+<gml:timePosition>2016-08-12</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5050213023_1-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.182638389 140.291666667
+ 36.182630667 140.291619583
+ 36.182613806 140.291506528
+ 36.182627889 140.291503056
+ 36.182649306 140.291647833
+ 36.182652194 140.291666667
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5050213023_2">
+<rID>50502-13023-s-8792</rID>
+<lfSpanFr gml:id="D24_5050213023_2-1">
+<gml:timePosition>2016-08-12</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5050213023_2-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.182539917 140.291525778
+ 36.182550028 140.291523611
+ 36.182557944 140.291574917
+ 36.182562333 140.291605861
+ 36.182568556 140.291653250
+ 36.182570583 140.291666667
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5050213023_3">
+<rID>50502-13023-s-8793</rID>
+<lfSpanFr gml:id="D24_5050213023_3-1">
+<gml:timePosition>2016-08-12</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>2411</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5050213023_3-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.182561417 140.291666667
+ 36.182539917 140.291525778
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>分離帯</type>
+<vis>0</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5050213032_1">
+<rID>50502-13032-s-4645</rID>
+<lfSpanFr gml:id="D24_5050213032_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>2401</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5050213032_1-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.207389278 140.287686278
+ 36.207132194 140.287551333
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>トンネル内の道路</type>
+<vis>1</vis>
+</RdCompt>
+<RdCompt gml:id="D24_5050213032_2">
+<rID>50502-13032-s-4646</rID>
+<lfSpanFr gml:id="D24_5050213032_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>2401</ftCode>
+<loc>
+<gml:Curve gml:id="D24_5050213032_2-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.207409194 140.287664028
+ 36.207151667 140.287530972
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>トンネル内の道路</type>
+<vis>1</vis>
+</RdCompt>
+</Dataset>

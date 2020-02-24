@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Dataset xsi:schemaLocation="http://dkgd.gsi.go.jp/spec/2012/DKGD_GMLSchema DKGD_GMLSchema.xsd" 
+	xmlns:gml="http://www.opengis.net/gml/3.2" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns="http://dkgd.gsi.go.jp/spec/2012/DKGD_GMLSchema"
+    gml:id="Dataset1">
+  <gml:description>数値地図（国土基本情報）メタデータ ID=nmDKGD-Meta19-0531.xml</gml:description>
+  <gml:name>数値地図（国土基本情報）（GML版）</gml:name>
+
+<StrctSbl gml:id="D41_5049913023_1">
+<rID>50499-13023-i-1489</rID>
+<lfSpanFr gml:id="D41_5049913023_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>4104</ftCode>
+<pos>
+<gml:Point gml:id="D41_5049913023_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.181406361 140.282826583</gml:pos>
+</gml:Point>
+</pos>
+<type>記念碑</type>
+</StrctSbl>
+</Dataset>

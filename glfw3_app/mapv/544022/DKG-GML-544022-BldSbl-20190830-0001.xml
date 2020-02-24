@@ -1,0 +1,1166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Dataset xsi:schemaLocation="http://dkgd.gsi.go.jp/spec/2012/DKGD_GMLSchema DKGD_GMLSchema.xsd" 
+	xmlns:gml="http://www.opengis.net/gml/3.2" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns="http://dkgd.gsi.go.jp/spec/2012/DKGD_GMLSchema"
+    gml:id="Dataset1">
+  <gml:description>数値地図（国土基本情報）メタデータ ID=nmDKGD-Meta19-0531.xml</gml:description>
+  <gml:name>数値地図（国土基本情報）（GML版）</gml:name>
+
+<BldSbl gml:id="D32_5049313020_1">
+<rID>50493-13020-i-1071</rID>
+<lfSpanFr gml:id="D32_5049313020_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3214</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049313020_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.170915361 140.259175583</gml:pos>
+</gml:Point>
+</pos>
+<type>小学校</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049313020_2">
+<rID>50493-13020-i-1413</rID>
+<lfSpanFr gml:id="D32_5049313020_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3231</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049313020_2-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.168853227 140.265052293</gml:pos>
+</gml:Point>
+</pos>
+<type>神社</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049313020_3">
+<rID>50493-13020-i-1414</rID>
+<lfSpanFr gml:id="D32_5049313020_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3200</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049313020_3-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.168616501 140.265041064</gml:pos>
+</gml:Point>
+</pos>
+<type>指示点</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049313023_1">
+<rID>50493-13023-i-919</rID>
+<lfSpanFr gml:id="D32_5049313023_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3231</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049313023_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.175008144 140.263892493</gml:pos>
+</gml:Point>
+</pos>
+<type>神社</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049313023_2">
+<rID>50493-13023-i-920</rID>
+<lfSpanFr gml:id="D32_5049313023_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3200</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049313023_2-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.175272183 140.263892493</gml:pos>
+</gml:Point>
+</pos>
+<type>指示点</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049313026_1">
+<rID>50493-13026-i-1277</rID>
+<lfSpanFr gml:id="D32_5049313026_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3232</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049313026_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.191115555 140.266215290</gml:pos>
+</gml:Point>
+</pos>
+<type>寺院</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049313026_2">
+<rID>50493-13026-i-1278</rID>
+<lfSpanFr gml:id="D32_5049313026_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3232</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049313026_2-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.190534121 140.262988064</gml:pos>
+</gml:Point>
+</pos>
+<type>寺院</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049313026_3">
+<rID>50493-13026-i-1279</rID>
+<lfSpanFr gml:id="D32_5049313026_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3200</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049313026_3-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.191112713 140.266530815</gml:pos>
+</gml:Point>
+</pos>
+<type>指示点</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049313026_4">
+<rID>50493-13026-i-1280</rID>
+<lfSpanFr gml:id="D32_5049313026_4-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3200</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049313026_4-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.190787044 140.262988064</gml:pos>
+</gml:Point>
+</pos>
+<type>指示点</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049313029_1">
+<rID>50493-13029-i-1604</rID>
+<lfSpanFr gml:id="D32_5049313029_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3213</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049313029_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.199008306 140.264763833</gml:pos>
+</gml:Point>
+</pos>
+<type>中学校</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049313029_2">
+<rID>50493-13029-i-2121</rID>
+<lfSpanFr gml:id="D32_5049313029_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3231</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049313029_2-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.192210243 140.261672911</gml:pos>
+</gml:Point>
+</pos>
+<type>神社</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049313029_3">
+<rID>50493-13029-i-2122</rID>
+<lfSpanFr gml:id="D32_5049313029_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3200</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049313029_3-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.192218768 140.261373152</gml:pos>
+</gml:Point>
+</pos>
+<type>指示点</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049613026_1">
+<rID>50496-13026-i-1549</rID>
+<lfSpanFr gml:id="D32_5049613026_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3213</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049613026_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.185591833 140.268388361</gml:pos>
+</gml:Point>
+</pos>
+<type>中学校</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049613026_2">
+<rID>50496-13026-i-1550</rID>
+<lfSpanFr gml:id="D32_5049613026_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3214</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049613026_2-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.190081972 140.268647972</gml:pos>
+</gml:Point>
+</pos>
+<type>小学校</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049613026_3">
+<rID>50496-13026-i-2029</rID>
+<lfSpanFr gml:id="D32_5049613026_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3218</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049613026_3-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.186494989 140.273810613</gml:pos>
+</gml:Point>
+</pos>
+<type>郵便局</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049613026_4">
+<rID>50496-13026-i-2030</rID>
+<lfSpanFr gml:id="D32_5049613026_4-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3231</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049613026_4-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.184610977 140.272428323</gml:pos>
+</gml:Point>
+</pos>
+<type>神社</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049613026_5">
+<rID>50496-13026-i-2031</rID>
+<lfSpanFr gml:id="D32_5049613026_5-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3231</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049613026_5-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.187364759 140.274880435</gml:pos>
+</gml:Point>
+</pos>
+<type>神社</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049613026_6">
+<rID>50496-13026-i-2032</rID>
+<lfSpanFr gml:id="D32_5049613026_6-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3231</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049613026_6-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.187862402 140.269264885</gml:pos>
+</gml:Point>
+</pos>
+<type>神社</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049613026_7">
+<rID>50496-13026-i-2033</rID>
+<lfSpanFr gml:id="D32_5049613026_7-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3231</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049613026_7-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.188329057 140.273618351</gml:pos>
+</gml:Point>
+</pos>
+<type>神社</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049613026_8">
+<rID>50496-13026-i-2034</rID>
+<lfSpanFr gml:id="D32_5049613026_8-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3231</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049613026_8-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.189791438 140.272711073</gml:pos>
+</gml:Point>
+</pos>
+<type>神社</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049613026_9">
+<rID>50496-13026-i-2035</rID>
+<lfSpanFr gml:id="D32_5049613026_9-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3231</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049613026_9-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.191283364 140.269305134</gml:pos>
+</gml:Point>
+</pos>
+<type>神社</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049613026_10">
+<rID>50496-13026-i-2036</rID>
+<lfSpanFr gml:id="D32_5049613026_10-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3232</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049613026_10-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.188008257 140.272839330</gml:pos>
+</gml:Point>
+</pos>
+<type>寺院</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049613026_11">
+<rID>50496-13026-i-2037</rID>
+<lfSpanFr gml:id="D32_5049613026_11-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3232</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049613026_11-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.191536776 140.272369646</gml:pos>
+</gml:Point>
+</pos>
+<type>寺院</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049613026_12">
+<rID>50496-13026-i-2038</rID>
+<lfSpanFr gml:id="D32_5049613026_12-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3200</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049613026_12-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.184610977 140.272727452</gml:pos>
+</gml:Point>
+</pos>
+<type>指示点</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049613026_13">
+<rID>50496-13026-i-2039</rID>
+<lfSpanFr gml:id="D32_5049613026_13-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3200</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049613026_13-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.187622409 140.274877319</gml:pos>
+</gml:Point>
+</pos>
+<type>指示点</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049613026_14">
+<rID>50496-13026-i-2040</rID>
+<lfSpanFr gml:id="D32_5049613026_14-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3200</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049613026_14-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.187862402 140.268975087</gml:pos>
+</gml:Point>
+</pos>
+<type>指示点</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049613026_15">
+<rID>50496-13026-i-2041</rID>
+<lfSpanFr gml:id="D32_5049613026_15-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3200</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049613026_15-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.188099192 140.273618351</gml:pos>
+</gml:Point>
+</pos>
+<type>指示点</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049613026_16">
+<rID>50496-13026-i-2042</rID>
+<lfSpanFr gml:id="D32_5049613026_16-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3200</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049613026_16-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.189561572 140.272711073</gml:pos>
+</gml:Point>
+</pos>
+<type>指示点</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049613026_17">
+<rID>50496-13026-i-2043</rID>
+<lfSpanFr gml:id="D32_5049613026_17-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3200</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049613026_17-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.191041817 140.269301706</gml:pos>
+</gml:Point>
+</pos>
+<type>指示点</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049613026_18">
+<rID>50496-13026-i-2044</rID>
+<lfSpanFr gml:id="D32_5049613026_18-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3200</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049613026_18-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.191287401 140.272361758</gml:pos>
+</gml:Point>
+</pos>
+<type>指示点</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049613026_19">
+<rID>50496-13026-i-2045</rID>
+<lfSpanFr gml:id="D32_5049613026_19-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3200</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049613026_19-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.187758184 140.272833098</gml:pos>
+</gml:Point>
+</pos>
+<type>指示点</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049613029_1">
+<rID>50496-13029-i-1915</rID>
+<lfSpanFr gml:id="D32_5049613029_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3217</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049613029_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.193294656 140.271638728</gml:pos>
+</gml:Point>
+</pos>
+<type>図書館</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049613029_2">
+<rID>50496-13029-i-1916</rID>
+<lfSpanFr gml:id="D32_5049613029_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3218</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049613029_2-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.198915104 140.268883021</gml:pos>
+</gml:Point>
+</pos>
+<type>郵便局</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049613029_3">
+<rID>50496-13029-i-1917</rID>
+<lfSpanFr gml:id="D32_5049613029_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3231</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049613029_3-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.192853865 140.268152930</gml:pos>
+</gml:Point>
+</pos>
+<type>神社</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049613029_4">
+<rID>50496-13029-i-1918</rID>
+<lfSpanFr gml:id="D32_5049613029_4-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3232</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049613029_4-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.192016344 140.270338378</gml:pos>
+</gml:Point>
+</pos>
+<type>寺院</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049613029_5">
+<rID>50496-13029-i-1919</rID>
+<lfSpanFr gml:id="D32_5049613029_5-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3232</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049613029_5-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.192089877 140.272460363</gml:pos>
+</gml:Point>
+</pos>
+<type>寺院</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049613029_6">
+<rID>50496-13029-i-1920</rID>
+<lfSpanFr gml:id="D32_5049613029_6-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3200</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049613029_6-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.192613017 140.268150300</gml:pos>
+</gml:Point>
+</pos>
+<type>指示点</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049613029_7">
+<rID>50496-13029-i-1921</rID>
+<lfSpanFr gml:id="D32_5049613029_7-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3200</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049613029_7-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.191757377 140.270330489</gml:pos>
+</gml:Point>
+</pos>
+<type>指示点</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049613029_8">
+<rID>50496-13029-i-1922</rID>
+<lfSpanFr gml:id="D32_5049613029_8-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3200</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049613029_8-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.191830911 140.272468251</gml:pos>
+</gml:Point>
+</pos>
+<type>指示点</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049613032_1">
+<rID>50496-13032-i-761</rID>
+<lfSpanFr gml:id="D32_5049613032_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3212</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049613032_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.200137500 140.273370306</gml:pos>
+</gml:Point>
+</pos>
+<type>高等学校・中等教育学校</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049613032_2">
+<rID>50496-13032-i-762</rID>
+<lfSpanFr gml:id="D32_5049613032_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3214</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049613032_2-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.200498611 140.267342472</gml:pos>
+</gml:Point>
+</pos>
+<type>小学校</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049913023_1">
+<rID>50499-13023-i-1969</rID>
+<lfSpanFr gml:id="D32_5049913023_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3231</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049913023_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.181668648 140.278368413</gml:pos>
+</gml:Point>
+</pos>
+<type>神社</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049913023_2">
+<rID>50499-13023-i-1970</rID>
+<lfSpanFr gml:id="D32_5049913023_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3200</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049913023_2-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.181440606 140.278368413</gml:pos>
+</gml:Point>
+</pos>
+<type>指示点</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049913026_1">
+<rID>50499-13026-i-903</rID>
+<lfSpanFr gml:id="D32_5049913026_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3232</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049913026_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.188741167 140.275967167</gml:pos>
+</gml:Point>
+</pos>
+<type>寺院</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049913026_2">
+<rID>50499-13026-i-904</rID>
+<lfSpanFr gml:id="D32_5049913026_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3200</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049913026_2-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.190369111 140.276662361</gml:pos>
+</gml:Point>
+</pos>
+<type>指示点</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049913026_3">
+<rID>50499-13026-i-905</rID>
+<lfSpanFr gml:id="D32_5049913026_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3200</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049913026_3-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.190608833 140.278776111</gml:pos>
+</gml:Point>
+</pos>
+<type>指示点</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049913026_4">
+<rID>50499-13026-i-906</rID>
+<lfSpanFr gml:id="D32_5049913026_4-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3200</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049913026_4-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.188473944 140.275967167</gml:pos>
+</gml:Point>
+</pos>
+<type>指示点</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049913026_5">
+<rID>50499-13026-i-1387</rID>
+<lfSpanFr gml:id="D32_5049913026_5-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3231</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049913026_5-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.184448029 140.277650451</gml:pos>
+</gml:Point>
+</pos>
+<type>神社</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049913026_6">
+<rID>50499-13026-i-1388</rID>
+<lfSpanFr gml:id="D32_5049913026_6-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3231</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049913026_6-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.190603702 140.276663190</gml:pos>
+</gml:Point>
+</pos>
+<type>神社</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049913026_7">
+<rID>50499-13026-i-1389</rID>
+<lfSpanFr gml:id="D32_5049913026_7-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3231</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049913026_7-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.190610234 140.278496824</gml:pos>
+</gml:Point>
+</pos>
+<type>神社</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049913026_8">
+<rID>50499-13026-i-1390</rID>
+<lfSpanFr gml:id="D32_5049913026_8-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3232</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049913026_8-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.187617357 140.276214117</gml:pos>
+</gml:Point>
+</pos>
+<type>寺院</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049913026_9">
+<rID>50499-13026-i-1391</rID>
+<lfSpanFr gml:id="D32_5049913026_9-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3232</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049913026_9-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.184966151 140.275294301</gml:pos>
+</gml:Point>
+</pos>
+<type>寺院</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049913026_10">
+<rID>50499-13026-i-1392</rID>
+<lfSpanFr gml:id="D32_5049913026_10-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3232</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049913026_10-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.184609986 140.280602411</gml:pos>
+</gml:Point>
+</pos>
+<type>寺院</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049913026_11">
+<rID>50499-13026-i-1393</rID>
+<lfSpanFr gml:id="D32_5049913026_11-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3200</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049913026_11-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.184196067 140.277643440</gml:pos>
+</gml:Point>
+</pos>
+<type>指示点</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049913026_12">
+<rID>50499-13026-i-1394</rID>
+<lfSpanFr gml:id="D32_5049913026_12-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3200</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049913026_12-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.187614831 140.275911858</gml:pos>
+</gml:Point>
+</pos>
+<type>指示点</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049913026_13">
+<rID>50499-13026-i-1395</rID>
+<lfSpanFr gml:id="D32_5049913026_13-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3200</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049913026_13-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.185218748 140.275294301</gml:pos>
+</gml:Point>
+</pos>
+<type>指示点</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049913026_14">
+<rID>50499-13026-i-1396</rID>
+<lfSpanFr gml:id="D32_5049913026_14-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3200</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049913026_14-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.184365601 140.280605916</gml:pos>
+</gml:Point>
+</pos>
+<type>指示点</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049913026_15">
+<rID>50499-13026-i-1422</rID>
+<lfSpanFr gml:id="D32_5049913026_15-1">
+<gml:timePosition>2017-10-26</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3211</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049913026_15-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.190710081 140.279881309</gml:pos>
+</gml:Point>
+</pos>
+<type>交番</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049913029_1">
+<rID>50499-13029-i-1200</rID>
+<lfSpanFr gml:id="D32_5049913029_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3202</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049913029_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.192559500 140.277418984</gml:pos>
+</gml:Point>
+</pos>
+<type>裁判所</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049913029_2">
+<rID>50499-13029-i-1201</rID>
+<lfSpanFr gml:id="D32_5049913029_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3218</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049913029_2-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.192662826 140.278224141</gml:pos>
+</gml:Point>
+</pos>
+<type>郵便局</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049913029_3">
+<rID>50499-13029-i-1202</rID>
+<lfSpanFr gml:id="D32_5049913029_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3231</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049913029_3-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.192947776 140.275678162</gml:pos>
+</gml:Point>
+</pos>
+<type>神社</type>
+</BldSbl>
+<BldSbl gml:id="D32_5049913029_4">
+<rID>50499-13029-i-1203</rID>
+<lfSpanFr gml:id="D32_5049913029_4-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3200</ftCode>
+<pos>
+<gml:Point gml:id="D32_5049913029_4-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.192711187 140.275670273</gml:pos>
+</gml:Point>
+</pos>
+<type>指示点</type>
+</BldSbl>
+<BldSbl gml:id="D32_5050213020_1">
+<rID>50502-13020-i-1485</rID>
+<lfSpanFr gml:id="D32_5050213020_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3231</ftCode>
+<pos>
+<gml:Point gml:id="D32_5050213020_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.168168463 140.290427244</gml:pos>
+</gml:Point>
+</pos>
+<type>神社</type>
+</BldSbl>
+<BldSbl gml:id="D32_5050213020_2">
+<rID>50502-13020-i-1486</rID>
+<lfSpanFr gml:id="D32_5050213020_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3231</ftCode>
+<pos>
+<gml:Point gml:id="D32_5050213020_2-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.171268558 140.285768016</gml:pos>
+</gml:Point>
+</pos>
+<type>神社</type>
+</BldSbl>
+<BldSbl gml:id="D32_5050213020_3">
+<rID>50502-13020-i-1487</rID>
+<lfSpanFr gml:id="D32_5050213020_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3200</ftCode>
+<pos>
+<gml:Point gml:id="D32_5050213020_3-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.171264006 140.285483533</gml:pos>
+</gml:Point>
+</pos>
+<type>指示点</type>
+</BldSbl>
+<BldSbl gml:id="D32_5050213020_4">
+<rID>50502-13020-i-1488</rID>
+<lfSpanFr gml:id="D32_5050213020_4-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3200</ftCode>
+<pos>
+<gml:Point gml:id="D32_5050213020_4-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.167922631 140.290416016</gml:pos>
+</gml:Point>
+</pos>
+<type>指示点</type>
+</BldSbl>
+<BldSbl gml:id="D32_5050213023_1">
+<rID>50502-13023-i-938</rID>
+<lfSpanFr gml:id="D32_5050213023_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3218</ftCode>
+<pos>
+<gml:Point gml:id="D32_5050213023_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.182706528 140.291523694</gml:pos>
+</gml:Point>
+</pos>
+<type>郵便局</type>
+</BldSbl>
+<BldSbl gml:id="D32_5050213023_2">
+<rID>50502-13023-i-1440</rID>
+<lfSpanFr gml:id="D32_5050213023_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3218</ftCode>
+<pos>
+<gml:Point gml:id="D32_5050213023_2-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.180549914 140.284126073</gml:pos>
+</gml:Point>
+</pos>
+<type>郵便局</type>
+</BldSbl>
+<BldSbl gml:id="D32_5050213023_3">
+<rID>50502-13023-i-1441</rID>
+<lfSpanFr gml:id="D32_5050213023_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3232</ftCode>
+<pos>
+<gml:Point gml:id="D32_5050213023_3-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.179445937 140.284683391</gml:pos>
+</gml:Point>
+</pos>
+<type>寺院</type>
+</BldSbl>
+<BldSbl gml:id="D32_5050213023_4">
+<rID>50502-13023-i-1442</rID>
+<lfSpanFr gml:id="D32_5050213023_4-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3200</ftCode>
+<pos>
+<gml:Point gml:id="D32_5050213023_4-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.179705947 140.284678134</gml:pos>
+</gml:Point>
+</pos>
+<type>指示点</type>
+</BldSbl>
+<BldSbl gml:id="D32_5050213026_1">
+<rID>50502-13026-i-1398</rID>
+<lfSpanFr gml:id="D32_5050213026_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3241</ftCode>
+<pos>
+<gml:Point gml:id="D32_5050213026_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.189573326 140.288287042</gml:pos>
+</gml:Point>
+</pos>
+<type>警察署</type>
+</BldSbl>
+<BldSbl gml:id="D32_5050213026_2">
+<rID>50502-13026-i-1399</rID>
+<lfSpanFr gml:id="D32_5050213026_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3242</ftCode>
+<pos>
+<gml:Point gml:id="D32_5050213026_2-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.188965932 140.285345016</gml:pos>
+</gml:Point>
+</pos>
+<type>消防署</type>
+</BldSbl>
+<BldSbl gml:id="D32_5050213026_3">
+<rID>50502-13026-i-1416</rID>
+<lfSpanFr gml:id="D32_5050213026_3-1">
+<gml:timePosition>2016-04-15</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3212</ftCode>
+<pos>
+<gml:Point gml:id="D32_5050213026_3-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.191489927 140.283778421</gml:pos>
+</gml:Point>
+</pos>
+<type>高等学校・中等教育学校</type>
+</BldSbl>
+<BldSbl gml:id="D32_5050213026_4">
+<rID>50502-13026-i-1441</rID>
+<lfSpanFr gml:id="D32_5050213026_4-1">
+<gml:timePosition>2019-05-07</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3205</ftCode>
+<pos>
+<gml:Point gml:id="D32_5050213026_4-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.190456697 140.287114022</gml:pos>
+</gml:Point>
+</pos>
+<type>市役所・東京都の区役所</type>
+</BldSbl>
+<BldSbl gml:id="D32_5050213029_1">
+<rID>50502-13029-i-2662</rID>
+<lfSpanFr gml:id="D32_5050213029_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3231</ftCode>
+<pos>
+<gml:Point gml:id="D32_5050213029_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.196770204 140.284973999</gml:pos>
+</gml:Point>
+</pos>
+<type>神社</type>
+</BldSbl>
+<BldSbl gml:id="D32_5050213029_2">
+<rID>50502-13029-i-2663</rID>
+<lfSpanFr gml:id="D32_5050213029_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3200</ftCode>
+<pos>
+<gml:Point gml:id="D32_5050213029_2-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.196530444 140.284973999</gml:pos>
+</gml:Point>
+</pos>
+<type>指示点</type>
+</BldSbl>
+<BldSbl gml:id="D32_5050213032_1">
+<rID>50502-13032-i-1346</rID>
+<lfSpanFr gml:id="D32_5050213032_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>3214</ftCode>
+<pos>
+<gml:Point gml:id="D32_5050213032_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.203548750 140.283973000</gml:pos>
+</gml:Point>
+</pos>
+<type>小学校</type>
+</BldSbl>
+</Dataset>

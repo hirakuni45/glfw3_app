@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Dataset xsi:schemaLocation="http://dkgd.gsi.go.jp/spec/2012/DKGD_GMLSchema DKGD_GMLSchema.xsd" 
+	xmlns:gml="http://www.opengis.net/gml/3.2" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns="http://dkgd.gsi.go.jp/spec/2012/DKGD_GMLSchema"
+    gml:id="Dataset1">
+  <gml:description>数値地図（国土基本情報）メタデータ ID=nmDKGD-Meta19-0531.xml</gml:description>
+  <gml:name>数値地図（国土基本情報）（GML版）</gml:name>
+
+<GCP gml:id="D71_544022_1">
+<rID>10-00100-0-1907-400565</rID>
+<lfSpanFr gml:id="D71_544022_1-1">
+<gml:timePosition>2011-10-31</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>SJ11</orgGILvl>
+<ftCode>7103</ftCode>
+<admCode>08230</admCode>
+<pos>
+<gml:Point gml:id="D71_544022_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.175711028 140.261708000</gml:pos>
+</gml:Point>
+</pos>
+<type>水準点</type>
+<orgName>国土地理院</orgName>
+<gcpClass>一等水準点</gcpClass>
+<gcpCode>L010000004040</gcpCode>
+<gcpName>４０４０</gcpName>
+<B>130232.5597</B>
+<L>504942.1488</L>
+<alti>22.5299</alti>
+<altiAcc>4</altiAcc>
+</GCP>
+<GCP gml:id="D71_544022_2">
+<rID>10-00100-0-1907-400566</rID>
+<lfSpanFr gml:id="D71_544022_2-1">
+<gml:timePosition>2011-10-31</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>SJ11</orgGILvl>
+<ftCode>7103</ftCode>
+<admCode>08205</admCode>
+<pos>
+<gml:Point gml:id="D71_544022_2-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.190738194 140.274279722</gml:pos>
+</gml:Point>
+</pos>
+<type>水準点</type>
+<orgName>国土地理院</orgName>
+<gcpClass>一等水準点</gcpClass>
+<gcpCode>L010000004041</gcpCode>
+<gcpName>４０４１</gcpName>
+<B>130286.6575</B>
+<L>504987.407</L>
+<alti>23.7307</alti>
+<altiAcc>4</altiAcc>
+</GCP>
+<GCP gml:id="D71_544022_3">
+<rID>10-00100-0-1907-400567</rID>
+<lfSpanFr gml:id="D71_544022_3-1">
+<gml:timePosition>2011-10-31</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>SJ11</orgGILvl>
+<ftCode>7103</ftCode>
+<admCode>08205</admCode>
+<pos>
+<gml:Point gml:id="D71_544022_3-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.203435667 140.286380611</gml:pos>
+</gml:Point>
+</pos>
+<type>水準点</type>
+<orgName>国土地理院</orgName>
+<gcpClass>一等水準点</gcpClass>
+<gcpCode>L010000004042</gcpCode>
+<gcpName>４０４２</gcpName>
+<B>130332.3684</B>
+<L>505030.9702</L>
+<alti>24.4741</alti>
+<altiAcc>4</altiAcc>
+</GCP>
+<GCP gml:id="D71_544022_9">
+<rID>10-00100-0-1907-410717</rID>
+<lfSpanFr gml:id="D71_544022_9-1">
+<gml:timePosition>2011-10-31</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>SJ11</orgGILvl>
+<ftCode>7103</ftCode>
+<admCode>08230</admCode>
+<pos>
+<gml:Point gml:id="D71_544022_9-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.176328194 140.265073833</gml:pos>
+</gml:Point>
+</pos>
+<type>水準点</type>
+<orgName>国土地理院</orgName>
+<gcpClass>一等水準点</gcpClass>
+<gcpCode>L04000006-077</gcpCode>
+<gcpName>００６－０７７</gcpName>
+<B>130234.7815</B>
+<L>504954.2658</L>
+<alti>9.4793</alti>
+<altiAcc>4</altiAcc>
+</GCP>
+<GCP gml:id="D71_544022_10">
+<rID>10-00100-0-1907-410718</rID>
+<lfSpanFr gml:id="D71_544022_10-1">
+<gml:timePosition>2011-10-31</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>SJ11</orgGILvl>
+<ftCode>7103</ftCode>
+<admCode>08205</admCode>
+<pos>
+<gml:Point gml:id="D71_544022_10-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.183063889 140.272455556</gml:pos>
+</gml:Point>
+</pos>
+<type>水準点</type>
+<orgName>国土地理院</orgName>
+<gcpClass>一等水準点</gcpClass>
+<gcpCode>L04000006-078</gcpCode>
+<gcpName>００６－０７８</gcpName>
+<B>130259.03</B>
+<L>504980.84</L>
+<alti>11.8946</alti>
+<altiAcc>4</altiAcc>
+</GCP>
+<GCP gml:id="D71_544022_12">
+<rID>10-00100-0-1907-438956</rID>
+<lfSpanFr gml:id="D71_544022_12-1">
+<gml:timePosition>2014-04-01</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>KJ13</orgGILvl>
+<ftCode>7102</ftCode>
+<admCode>08205</admCode>
+<pos>
+<gml:Point gml:id="D71_544022_12-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.167811111 140.289999222</gml:pos>
+</gml:Point>
+</pos>
+<type>三角点</type>
+<orgName>国土地理院</orgName>
+<gcpClass>三等三角点</gcpClass>
+<gcpCode>TR35440220301</gcpCode>
+<gcpName>高浜</gcpName>
+<B>130204.12</B>
+<L>505043.9972</L>
+<alti>34.52</alti>
+<altiAcc>2</altiAcc>
+</GCP>
+<GCP gml:id="D71_544022_21">
+<rID>10-00100-0-1907-496870</rID>
+<lfSpanFr gml:id="D71_544022_21-1">
+<gml:timePosition>2014-04-01</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>KJ14</orgGILvl>
+<ftCode>7102</ftCode>
+<admCode>08205</admCode>
+<pos>
+<gml:Point gml:id="D71_544022_21-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.174135806 140.277145139</gml:pos>
+</gml:Point>
+</pos>
+<type>三角点</type>
+<orgName>国土地理院</orgName>
+<gcpClass>四等三角点</gcpClass>
+<gcpCode>TR45440220201</gcpCode>
+<gcpName>田島</gcpName>
+<B>130226.8889</B>
+<L>504997.7225</L>
+<alti>2.21</alti>
+<altiAcc>2</altiAcc>
+</GCP>
+<GCP gml:id="D71_544022_24">
+<rID>10-00100-0-1907-496873</rID>
+<lfSpanFr gml:id="D71_544022_24-1">
+<gml:timePosition>2014-04-01</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>KJ14</orgGILvl>
+<ftCode>7102</ftCode>
+<admCode>08205</admCode>
+<pos>
+<gml:Point gml:id="D71_544022_24-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.188412444 140.266287417</gml:pos>
+</gml:Point>
+</pos>
+<type>三角点</type>
+<orgName>国土地理院</orgName>
+<gcpClass>四等三角点</gcpClass>
+<gcpCode>TR45440222101</gcpCode>
+<gcpName>宮部</gcpName>
+<B>130278.2848</B>
+<L>504958.6347</L>
+<alti>24.96</alti>
+<altiAcc>2</altiAcc>
+</GCP>
+<GCP gml:id="D71_544022_26">
+<rID>10-00100-0-1907-496875</rID>
+<lfSpanFr gml:id="D71_544022_26-1">
+<gml:timePosition>2014-04-01</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>KJ14</orgGILvl>
+<ftCode>7102</ftCode>
+<admCode>08205</admCode>
+<pos>
+<gml:Point gml:id="D71_544022_26-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.199863389 140.273735667</gml:pos>
+</gml:Point>
+</pos>
+<type>三角点</type>
+<orgName>国土地理院</orgName>
+<gcpClass>四等三角点</gcpClass>
+<gcpCode>TR45440223101</gcpCode>
+<gcpName>国分</gcpName>
+<B>130319.5082</B>
+<L>504985.4484</L>
+<alti>40.35</alti>
+<altiAcc>2</altiAcc>
+</GCP>
+<GCP gml:id="D71_544022_28">
+<rID>10-00100-0-1907-496878</rID>
+<lfSpanFr gml:id="D71_544022_28-1">
+<gml:timePosition>2014-04-01</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>KJ14</orgGILvl>
+<ftCode>7102</ftCode>
+<admCode>08205</admCode>
+<pos>
+<gml:Point gml:id="D71_544022_28-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.203838722 140.283805306</gml:pos>
+</gml:Point>
+</pos>
+<type>三角点</type>
+<orgName>国土地理院</orgName>
+<gcpClass>四等三角点</gcpClass>
+<gcpCode>TR45440224201</gcpCode>
+<gcpName>杉並</gcpName>
+<B>130333.8194</B>
+<L>505021.6991</L>
+<alti>37.28</alti>
+<altiAcc>2</altiAcc>
+</GCP>
+</Dataset>

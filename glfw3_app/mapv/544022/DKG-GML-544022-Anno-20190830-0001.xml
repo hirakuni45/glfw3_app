@@ -1,0 +1,1150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Dataset xsi:schemaLocation="http://dkgd.gsi.go.jp/spec/2012/DKGD_GMLSchema DKGD_GMLSchema.xsd" 
+	xmlns:gml="http://www.opengis.net/gml/3.2" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns="http://dkgd.gsi.go.jp/spec/2012/DKGD_GMLSchema"
+    gml:id="Dataset1">
+  <gml:description>数値地図（国土基本情報）メタデータ ID=nmDKGD-Meta19-0531.xml</gml:description>
+  <gml:name>数値地図（国土基本情報）（GML版）</gml:name>
+
+<Anno gml:id="D1_5049013020_1">
+<rID>50490-13020-i-715</rID>
+<lfSpanFr gml:id="D1_5049013020_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0110</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049013020_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.169301056 140.251795361</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>行政区画（市区町村）</annoCtg>
+<knj>かすみがうら市</knj>
+<kana>かすみがうらし</kana>
+<arrng>1</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049013020_2">
+<rID>50490-13020-i-857</rID>
+<lfSpanFr gml:id="D1_5049013020_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049013020_2-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.168458227 140.257980594</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>西野寺</knj>
+<kana>にしのでら</kana>
+<arrng>2</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049013023_1">
+<rID>50490-13023-i-1344</rID>
+<lfSpanFr gml:id="D1_5049013023_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0411</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049013023_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.182906472 140.250540389</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>陸上交通施設（道路名）</annoCtg>
+<knj>常磐自動車道</knj>
+<kana>常磐自動車道</kana>
+<arrng>2</arrng>
+<arrngAgl>329.28</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049013029_1">
+<rID>50490-13029-i-1241</rID>
+<lfSpanFr gml:id="D1_5049013029_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0220</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049013029_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.195370774 140.254010238</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（通称）</annoCtg>
+<knj>池袋</knj>
+<kana>いけぶくろ</kana>
+<arrng>1</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049013032_1">
+<rID>50490-13032-i-1541</rID>
+<lfSpanFr gml:id="D1_5049013032_1-1">
+<gml:timePosition>2016-08-12</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049013032_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.207723486 140.252639757</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>鹿の子（四）</knj>
+<kana>かのこ４ちょうめ</kana>
+<arrng>2</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049313023_1">
+<rID>50493-13023-i-752</rID>
+<lfSpanFr gml:id="D1_5049313023_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0322</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049313023_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.182348417 140.262130667</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>河川、湖沼（河川、用水等）</annoCtg>
+<knj>恋瀬川</knj>
+<kana>こいせがわ</kana>
+<arrng>1</arrng>
+<arrngAgl>325.01</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049313023_2">
+<rID>50493-13023-i-918</rID>
+<lfSpanFr gml:id="D1_5049313023_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049313023_2-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.177160053 140.258724111</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>市川</knj>
+<kana>いちかわ</kana>
+<arrng>1</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049313026_1">
+<rID>50493-13026-i-1062</rID>
+<lfSpanFr gml:id="D1_5049313026_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0413</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049313026_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.184161222 140.259595389</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>陸上交通施設（道路構造物）</annoCtg>
+<knj>府中橋</knj>
+<kana>ふちゅうばし</kana>
+<arrng>1</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049313026_2">
+<rID>50493-13026-i-1063</rID>
+<lfSpanFr gml:id="D1_5049313026_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0411</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049313026_2-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.183962222 140.262537778</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>陸上交通施設（道路名）</annoCtg>
+<knj>恋瀬川自転車道</knj>
+<kana>こいせがわさいくりんぐこーす</kana>
+<arrng>1</arrng>
+<arrngAgl>324.37</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049313029_1">
+<rID>50493-13029-i-1831</rID>
+<lfSpanFr gml:id="D1_5049313029_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049313029_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.192148222 140.262478389</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>若宮（二）</knj>
+<kana>わかみや２ちょうめ</kana>
+<arrng>1</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049313029_2">
+<rID>50493-13029-i-2116</rID>
+<lfSpanFr gml:id="D1_5049313029_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049313029_2-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.195617034 140.262147838</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>若宮（四）</knj>
+<kana>わかみや４ちょうめ</kana>
+<arrng>1</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049313032_1">
+<rID>50493-13032-i-1842</rID>
+<lfSpanFr gml:id="D1_5049313032_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049313032_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.206050611 140.261994389</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>鹿の子（一）</knj>
+<kana>かのこ１ちょうめ</kana>
+<arrng>2</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049313032_2">
+<rID>50493-13032-i-1843</rID>
+<lfSpanFr gml:id="D1_5049313032_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049313032_2-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.206422472 140.258629167</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>鹿の子（二）</knj>
+<kana>かのこ２ちょうめ</kana>
+<arrng>2</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049313032_3">
+<rID>50493-13032-i-1844</rID>
+<lfSpanFr gml:id="D1_5049313032_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049313032_3-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.203552806 140.266608139</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>若松（三）</knj>
+<kana>わかまつ３ちょうめ</kana>
+<arrng>1</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049313032_4">
+<rID>50493-13032-i-1845</rID>
+<lfSpanFr gml:id="D1_5049313032_4-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049313032_4-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.200506139 140.262884528</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>若松（二）</knj>
+<kana>わかまつ２ちょうめ</kana>
+<arrng>2</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049613020_1">
+<rID>50496-13020-i-1053</rID>
+<lfSpanFr gml:id="D1_5049613020_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049613020_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.168240311 140.269850161</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>東野寺</knj>
+<kana>ひがしのでら</kana>
+<arrng>2</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049613023_1">
+<rID>50496-13023-i-1100</rID>
+<lfSpanFr gml:id="D1_5049613023_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0413</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049613023_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.179187528 140.268283667</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>陸上交通施設（道路構造物）</annoCtg>
+<knj>恋瀬橋</knj>
+<kana>こいせばし</kana>
+<arrng>1</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049613026_1">
+<rID>50496-13026-i-1638</rID>
+<lfSpanFr gml:id="D1_5049613026_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0673</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049613026_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.190100139 140.269841056</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>建物（文教施設）</annoCtg>
+<knj>市民会館</knj>
+<arrng>2</arrng>
+<arrngAgl>0.48</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049613026_2">
+<rID>50496-13026-i-1639</rID>
+<lfSpanFr gml:id="D1_5049613026_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049613026_2-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.186671444 140.268624917</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>総社（二）</knj>
+<kana>そうしゃ２ちょうめ</kana>
+<arrng>1</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049613026_3">
+<rID>50496-13026-i-2026</rID>
+<lfSpanFr gml:id="D1_5049613026_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049613026_3-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.190514116 140.274709841</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>国府（三）</knj>
+<kana>こくぶ３ちょうめ</kana>
+<arrng>2</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049613026_4">
+<rID>50496-13026-i-2027</rID>
+<lfSpanFr gml:id="D1_5049613026_4-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049613026_4-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.185079029 140.271829322</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>国府（七）</knj>
+<kana>こくぶ７ちょうめ</kana>
+<arrng>2</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049613026_5">
+<rID>50496-13026-i-2028</rID>
+<lfSpanFr gml:id="D1_5049613026_5-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049613026_5-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.190929979 140.271925410</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>府中（二）</knj>
+<kana>ふちゅう２ちょうめ</kana>
+<arrng>2</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049613029_1">
+<rID>50496-13029-i-1561</rID>
+<lfSpanFr gml:id="D1_5049613029_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0662</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049613029_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.195980944 140.271448417</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>建物（寺院）</annoCtg>
+<knj>国分寺</knj>
+<kana>こくぶんじ</kana>
+<arrng>1</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049613029_2">
+<rID>50496-13029-i-1562</rID>
+<lfSpanFr gml:id="D1_5049613029_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049613029_2-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.199649722 140.267918472</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>若松（一）</knj>
+<kana>わかまつ１ちょうめ</kana>
+<arrng>2</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049613029_3">
+<rID>50496-13029-i-1563</rID>
+<lfSpanFr gml:id="D1_5049613029_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049613029_3-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.191828861 140.267028694</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>総社（一）</knj>
+<kana>そうしゃ１ちょうめ</kana>
+<arrng>2</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049613029_4">
+<rID>50496-13029-i-1880</rID>
+<lfSpanFr gml:id="D1_5049613029_4-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049613029_4-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.193244546 140.268182642</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>若宮（一）</knj>
+<kana>わかみや１ちょうめ</kana>
+<arrng>1</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049613029_5">
+<rID>50496-13029-i-1881</rID>
+<lfSpanFr gml:id="D1_5049613029_5-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049613029_5-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.195297457 140.268400397</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>若宮（三）</knj>
+<kana>わかみや３ちょうめ</kana>
+<arrng>1</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049613029_6">
+<rID>50496-13029-i-1882</rID>
+<lfSpanFr gml:id="D1_5049613029_6-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049613029_6-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.199799853 140.271169562</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>府中（五）</knj>
+<kana>ふちゅう５ちょうめ</kana>
+<arrng>2</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049613029_7">
+<rID>50496-13029-i-1931</rID>
+<lfSpanFr gml:id="D1_5049613029_7-1">
+<gml:timePosition>2016-12-06</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0532</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049613029_7-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.196416222 140.273636747</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>土地利用（史跡名勝天然記念物）</annoCtg>
+<knj>常陸国分寺跡</knj>
+<kana>じょうりくこくぶんじあと</kana>
+<arrng>1</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049613032_1">
+<rID>50496-13032-i-948</rID>
+<lfSpanFr gml:id="D1_5049613032_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0532</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049613032_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.201508250 140.267767528</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>土地利用（史跡名勝天然記念物）</annoCtg>
+<knj>常陸国分尼寺跡</knj>
+<kana>じょうりくこくぶんあらでらあと</kana>
+<arrng>1</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049913023_1">
+<rID>50499-13023-i-1711</rID>
+<lfSpanFr gml:id="D1_5049913023_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049913023_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.180051111 140.282307167</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>茨城（一）</knj>
+<kana>ばらき１ちょうめ</kana>
+<arrng>1</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049913023_2">
+<rID>50499-13023-i-1712</rID>
+<lfSpanFr gml:id="D1_5049913023_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049913023_2-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.180818500 140.276022583</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>田島（一）</knj>
+<kana>たじま１ちょうめ</kana>
+<arrng>1</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049913023_3">
+<rID>50499-13023-i-1713</rID>
+<lfSpanFr gml:id="D1_5049913023_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049913023_3-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.178525667 140.279098639</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>田島（二）</knj>
+<kana>たじま２ちょうめ</kana>
+<arrng>1</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049913023_4">
+<rID>50499-13023-i-1967</rID>
+<lfSpanFr gml:id="D1_5049913023_4-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049913023_4-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.183022849 140.275832034</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>貝地（一）</knj>
+<kana>かいじ１ちょうめ</kana>
+<arrng>1</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049913023_5">
+<rID>50499-13023-i-1968</rID>
+<lfSpanFr gml:id="D1_5049913023_5-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049913023_5-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.182985217 140.280299658</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>貝地（二）</knj>
+<kana>かいじ２ちょうめ</kana>
+<arrng>1</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049913026_1">
+<rID>50499-13026-i-1020</rID>
+<lfSpanFr gml:id="D1_5049913026_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0422</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049913026_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.190995917 140.280277639</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>陸上交通施設（鉄道駅名）</annoCtg>
+<knj>石岡駅</knj>
+<kana>いしおかえき</kana>
+<arrng>1</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049913026_2">
+<rID>50499-13026-i-1021</rID>
+<lfSpanFr gml:id="D1_5049913026_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049913026_2-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.189443833 140.277649750</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>国府（一）</knj>
+<kana>こくぶ１ちょうめ</kana>
+<arrng>1</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049913026_3">
+<rID>50499-13026-i-1022</rID>
+<lfSpanFr gml:id="D1_5049913026_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049913026_3-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.187332528 140.276317944</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>国府（五）</knj>
+<kana>こくぶ５ちょうめ</kana>
+<arrng>2</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049913026_4">
+<rID>50499-13026-i-1384</rID>
+<lfSpanFr gml:id="D1_5049913026_4-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049913026_4-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.191547253 140.275597618</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>府中（一）</knj>
+<kana>ふちゅう１ちょうめ</kana>
+<arrng>1</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049913026_5">
+<rID>50499-13026-i-1385</rID>
+<lfSpanFr gml:id="D1_5049913026_5-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049913026_5-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.188660065 140.279453730</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>国府（四）</knj>
+<kana>こくぶ４ちょうめ</kana>
+<arrng>2</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049913029_1">
+<rID>50499-13029-i-894</rID>
+<lfSpanFr gml:id="D1_5049913029_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049913029_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.193234333 140.280674528</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>石岡（二）</knj>
+<kana>いしおか2ちょうめ</kana>
+<arrng>1</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049913029_2">
+<rID>50499-13029-i-895</rID>
+<lfSpanFr gml:id="D1_5049913029_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049913029_2-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.196009889 140.275858833</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>府中（三）</knj>
+<kana>ふちゅう３ちょうめ</kana>
+<arrng>2</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049913029_3">
+<rID>50499-13029-i-896</rID>
+<lfSpanFr gml:id="D1_5049913029_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049913029_3-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.199706222 140.276248111</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>府中（四）</knj>
+<kana>ふちゅう４ちょうめ</kana>
+<arrng>2</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049913029_4">
+<rID>50499-13029-i-1198</rID>
+<lfSpanFr gml:id="D1_5049913029_4-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0220</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049913029_4-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.196807432 140.282764341</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（通称）</annoCtg>
+<knj>泉町</knj>
+<kana>いずみちょう</kana>
+<arrng>2</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049913029_5">
+<rID>50499-13029-i-1199</rID>
+<lfSpanFr gml:id="D1_5049913029_5-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049913029_5-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.196737442 140.278519177</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>泉町</knj>
+<kana>いずみちょう</kana>
+<arrng>2</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049913032_1">
+<rID>50499-13032-i-868</rID>
+<lfSpanFr gml:id="D1_5049913032_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049913032_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.201024778 140.280322472</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>杉の井</knj>
+<kana>すぎのい</kana>
+<arrng>2</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049913032_2">
+<rID>50499-13032-i-869</rID>
+<lfSpanFr gml:id="D1_5049913032_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049913032_2-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.202151750 140.282783806</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>杉並（一）</knj>
+<kana>すぎなみ１ちょうめ</kana>
+<arrng>2</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049913032_3">
+<rID>50499-13032-i-870</rID>
+<lfSpanFr gml:id="D1_5049913032_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049913032_3-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.206152333 140.281393139</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>杉並（三）</knj>
+<kana>すぎなみ３ちょうめ</kana>
+<arrng>2</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049913032_4">
+<rID>50499-13032-i-871</rID>
+<lfSpanFr gml:id="D1_5049913032_4-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049913032_4-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.207508583 140.283072611</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>杉並（四）</knj>
+<kana>すぎなみ４ちょうめ</kana>
+<arrng>1</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5049913032_5">
+<rID>50499-13032-i-872</rID>
+<lfSpanFr gml:id="D1_5049913032_5-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5049913032_5-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.206332556 140.276581667</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>北府中（一）</knj>
+<kana>きたふちゅう１ちょうめ</kana>
+<arrng>2</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5050213020_1">
+<rID>50502-13020-i-1259</rID>
+<lfSpanFr gml:id="D1_5050213020_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0532</ftCode>
+<pos>
+<gml:Point gml:id="D1_5050213020_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.167481528 140.289352417</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>土地利用（史跡名勝天然記念物）</annoCtg>
+<knj>舟塚山古墳</knj>
+<kana>ふなづかやまこふん</kana>
+<arrng>2</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5050213020_2">
+<rID>50502-13020-i-1260</rID>
+<lfSpanFr gml:id="D1_5050213020_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5050213020_2-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.166711944 140.290149056</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>北根本</knj>
+<kana>きたねもと</kana>
+<arrng>1</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5050213020_3">
+<rID>50502-13020-i-1484</rID>
+<lfSpanFr gml:id="D1_5050213020_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5050213020_3-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.171358416 140.287976626</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>中津川</knj>
+<kana>なかつがわ</kana>
+<arrng>2</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5050213023_1">
+<rID>50502-13023-i-1052</rID>
+<lfSpanFr gml:id="D1_5050213023_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5050213023_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.177813806 140.285438639</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>茨城（三）</knj>
+<kana>ばらき３ちょうめ</kana>
+<arrng>2</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5050213023_2">
+<rID>50502-13023-i-1053</rID>
+<lfSpanFr gml:id="D1_5050213023_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5050213023_2-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.178638667 140.288196083</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>茨城（二）</knj>
+<kana>ばらき２ちょうめ</kana>
+<arrng>2</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5050213023_3">
+<rID>50502-13023-i-1054</rID>
+<lfSpanFr gml:id="D1_5050213023_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5050213023_3-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.183313472 140.286966806</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>南台（一）</knj>
+<kana>みなみだい１ちょうめ</kana>
+<arrng>1</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5050213026_1">
+<rID>50502-13026-i-1055</rID>
+<lfSpanFr gml:id="D1_5050213026_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5050213026_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.190379167 140.283474194</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>石岡（一）</knj>
+<kana>いしおか1ちょうめ</kana>
+<arrng>1</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5050213026_2">
+<rID>50502-13026-i-1056</rID>
+<lfSpanFr gml:id="D1_5050213026_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5050213026_2-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.188497333 140.285937611</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>東石岡（一）</knj>
+<kana>ひがしいしおか１ちょうめ</kana>
+<arrng>1</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5050213026_3">
+<rID>50502-13026-i-1057</rID>
+<lfSpanFr gml:id="D1_5050213026_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0210</ftCode>
+<pos>
+<gml:Point gml:id="D1_5050213026_3-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.186119528 140.288426806</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（町字名）</annoCtg>
+<knj>東石岡（二）</knj>
+<kana>ひがしいしおか２ちょうめ</kana>
+<arrng>1</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+<Anno gml:id="D1_5050213032_1">
+<rID>50502-13032-i-1518</rID>
+<lfSpanFr gml:id="D1_5050213032_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>0220</ftCode>
+<pos>
+<gml:Point gml:id="D1_5050213032_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.202320889 140.288468667</gml:pos>
+</gml:Point>
+</pos>
+<annoCtg>居住地名（通称）</annoCtg>
+<knj>東之辻</knj>
+<kana>ひがしのつじ</kana>
+<arrng>2</arrng>
+<arrngAgl>0.00</arrngAgl>
+</Anno>
+</Dataset>

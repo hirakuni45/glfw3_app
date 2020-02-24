@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Dataset xsi:schemaLocation="http://dkgd.gsi.go.jp/spec/2012/DKGD_GMLSchema DKGD_GMLSchema.xsd" 
+	xmlns:gml="http://www.opengis.net/gml/3.2" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns="http://dkgd.gsi.go.jp/spec/2012/DKGD_GMLSchema"
+    gml:id="Dataset1">
+  <gml:description>数値地図（国土基本情報）メタデータ ID=nmDKGD-Meta19-0531.xml</gml:description>
+  <gml:name>数値地図（国土基本情報）（GML版）</gml:name>
+
+<TrfStrct gml:id="D9_5049013020_1">
+<rID>20190830-50499-13026-s-10559</rID>
+<lfSpanFr gml:id="D9_5049013020_1-1">
+<gml:timePosition>2019-08-30</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>2921</ftCode>
+<area>
+<gml:Surface gml:id="D9_5049013020_1-g" srsName="fguuid:jgd2011.bl">
+<gml:patches>
+<gml:PolygonPatch>
+<gml:exterior>
+<gml:Ring>
+<gml:curveMember>
+<gml:Curve gml:id="D9_5049013020_1-3">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+36.190375944 140.280652806
+36.191665278 140.279791528
+36.191666667 140.279790583
+36.192705833 140.279096417
+36.192612556 140.278885111
+36.191666667 140.27952
+36.191665278 140.279520917
+36.190278333 140.280451833
+36.190375944 140.280652806
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</gml:curveMember>
+</gml:Ring>
+</gml:exterior>
+</gml:PolygonPatch>
+</gml:patches>
+</gml:Surface>
+</area>
+<type>プラットホーム（地上）</type>
+<drwOrder>0</drwOrder>
+</TrfStrct>
+</Dataset>

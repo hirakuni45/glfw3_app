@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Dataset xsi:schemaLocation="http://dkgd.gsi.go.jp/spec/2012/DKGD_GMLSchema DKGD_GMLSchema.xsd" 
+	xmlns:gml="http://www.opengis.net/gml/3.2" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns="http://dkgd.gsi.go.jp/spec/2012/DKGD_GMLSchema"
+    gml:id="Dataset1">
+  <gml:description>数値地図（国土基本情報）メタデータ ID=nmDKGD-Meta19-0531.xml</gml:description>
+  <gml:name>数値地図（国土基本情報）（GML版）</gml:name>
+
+<RTwr gml:id="D8105_5049313020_1">
+<rID>50493-13020-i-1073</rID>
+<lfSpanFr gml:id="D8105_5049313020_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>8105</ftCode>
+<pos>
+<gml:Point gml:id="D8105_5049313020_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.168111194 140.266095500</gml:pos>
+</gml:Point>
+</pos>
+</RTwr>
+<RTwr gml:id="D8105_5049313032_1">
+<rID>50493-13032-i-1678</rID>
+<lfSpanFr gml:id="D8105_5049313032_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>8105</ftCode>
+<pos>
+<gml:Point gml:id="D8105_5049313032_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.203523000 140.260466000</gml:pos>
+</gml:Point>
+</pos>
+</RTwr>
+<RTwr gml:id="D8105_5049613029_1">
+<rID>50496-13029-i-1457</rID>
+<lfSpanFr gml:id="D8105_5049613029_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>8105</ftCode>
+<pos>
+<gml:Point gml:id="D8105_5049613029_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.196661028 140.274813389</gml:pos>
+</gml:Point>
+</pos>
+</RTwr>
+</Dataset>

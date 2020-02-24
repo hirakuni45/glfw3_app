@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Dataset xsi:schemaLocation="http://dkgd.gsi.go.jp/spec/2012/DKGD_GMLSchema DKGD_GMLSchema.xsd" 
+	xmlns:gml="http://www.opengis.net/gml/3.2" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns="http://dkgd.gsi.go.jp/spec/2012/DKGD_GMLSchema"
+    gml:id="Dataset1">
+  <gml:description>数値地図（国土基本情報）メタデータ ID=nmDKGD-Meta19-0531.xml</gml:description>
+  <gml:name>数値地図（国土基本情報）（GML版）</gml:name>
+
+<TrfSbl gml:id="D291_5049613023_1">
+<rID>50496-13023-i-1244</rID>
+<lfSpanFr gml:id="D291_5049613023_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>2901</ftCode>
+<pos>
+<gml:Point gml:id="D291_5049613023_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.183068376 140.267695955</gml:pos>
+</gml:Point>
+</pos>
+<type>国道番号</type>
+<nRNo>355</nRNo>
+</TrfSbl>
+<TrfSbl gml:id="D291_5049613023_2">
+<rID>50496-13023-i-1245</rID>
+<lfSpanFr gml:id="D291_5049613023_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>2901</ftCode>
+<pos>
+<gml:Point gml:id="D291_5049613023_2-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.178132886 140.267008330</gml:pos>
+</gml:Point>
+</pos>
+<type>国道番号</type>
+<nRNo>6</nRNo>
+</TrfSbl>
+<TrfSbl gml:id="D291_5049613026_1">
+<rID>50496-13026-i-2025</rID>
+<lfSpanFr gml:id="D291_5049613026_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>2901</ftCode>
+<pos>
+<gml:Point gml:id="D291_5049613026_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.185076939 140.273828511</gml:pos>
+</gml:Point>
+</pos>
+<type>国道番号</type>
+<nRNo>355</nRNo>
+</TrfSbl>
+<TrfSbl gml:id="D291_5049913026_1">
+<rID>50499-13026-i-1383</rID>
+<lfSpanFr gml:id="D291_5049913026_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>2901</ftCode>
+<pos>
+<gml:Point gml:id="D291_5049913026_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.185549287 140.278411072</gml:pos>
+</gml:Point>
+</pos>
+<type>国道番号</type>
+<nRNo>6</nRNo>
+</TrfSbl>
+<TrfSbl gml:id="D291_5050213026_1">
+<rID>50502-13026-i-1396</rID>
+<lfSpanFr gml:id="D291_5050213026_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>2901</ftCode>
+<pos>
+<gml:Point gml:id="D291_5050213026_1-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.187452752 140.289795578</gml:pos>
+</gml:Point>
+</pos>
+<type>国道番号</type>
+<nRNo>355</nRNo>
+</TrfSbl>
+<TrfSbl gml:id="D291_5050213026_2">
+<rID>50502-13026-i-1397</rID>
+<lfSpanFr gml:id="D291_5050213026_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>2901</ftCode>
+<pos>
+<gml:Point gml:id="D291_5050213026_2-g" srsName="fguuid:jgd2011.bl">
+<gml:pos>36.190174110 140.288945620</gml:pos>
+</gml:Point>
+</pos>
+<type>国道番号</type>
+<nRNo>6</nRNo>
+</TrfSbl>
+</Dataset>

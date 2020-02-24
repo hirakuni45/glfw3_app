@@ -1,0 +1,3973 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Dataset xsi:schemaLocation="http://dkgd.gsi.go.jp/spec/2012/DKGD_GMLSchema DKGD_GMLSchema.xsd" 
+	xmlns:gml="http://www.opengis.net/gml/3.2" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns="http://dkgd.gsi.go.jp/spec/2012/DKGD_GMLSchema"
+    gml:id="Dataset1">
+  <gml:description>数値地図（国土基本情報）メタデータ ID=nmDKGD-Meta19-0531.xml</gml:description>
+  <gml:name>数値地図（国土基本情報）（GML版）</gml:name>
+
+<AdmBdry gml:id="D12_5049013023_1">
+<rID>50490-13023-i-1114</rID>
+<lfSpanFr gml:id="D12_5049013023_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1212</ftCode>
+<loc>
+<gml:Curve gml:id="D12_5049013023_1-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.178938806 140.255051944
+ 36.178930083 140.254955861
+ 36.178669528 140.254707250
+ 36.178853139 140.254421972
+ 36.178442028 140.253953083
+ 36.178667306 140.253638639
+ 36.178548694 140.253506972
+ 36.178442028 140.253528917
+ 36.178205083 140.253755583
+ 36.178079528 140.253908639
+ 36.177712306 140.254355861
+ 36.177570361 140.254692250
+ 36.177597861 140.254817528
+ 36.177676194 140.254926139
+ 36.177701750 140.255072806
+ 36.177694806 140.255181972
+ 36.177629528 140.255321139
+ 36.177083417 140.255457528
+ 36.177066750 140.255503917
+ 36.177422306 140.255942528
+ 36.177534806 140.256235306
+ 36.177617861 140.256644472
+ 36.177821750 140.256980028
+ 36.177867583 140.257055333
+ 36.177920083 140.257141722
+ 36.177629528 140.257580611
+ 36.177647306 140.257668111
+ 36.177844250 140.257831444
+ 36.177950917 140.257838667
+ 36.178087306 140.257714500
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>市区町村界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013023_2">
+<rID>50490-13023-i-1115</rID>
+<lfSpanFr gml:id="D12_5049013023_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1212</ftCode>
+<loc>
+<gml:Curve gml:id="D12_5049013023_2-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.179388361 140.257054278
+ 36.180145917 140.257832833
+ 36.180534889 140.258333333
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>市区町村界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013023_3">
+<rID>50490-13023-i-1116</rID>
+<lfSpanFr gml:id="D12_5049013023_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1212</ftCode>
+<loc>
+<gml:Curve gml:id="D12_5049013023_3-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.183332028 140.255532444
+ 36.183172306 140.255548417
+ 36.183056472 140.255533139
+ 36.182336194 140.255437833
+ 36.181318972 140.255141167
+ 36.179411472 140.254771972
+ 36.179263139 140.255065028
+ 36.179374528 140.255349222
+ 36.179044528 140.255772556
+ 36.178775639 140.255511972
+ 36.178878972 140.255248083
+ 36.178942028 140.255087528
+ 36.178938806 140.255051944
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>市区町村界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013023_4">
+<rID>50490-13023-i-1117</rID>
+<lfSpanFr gml:id="D12_5049013023_4-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1212</ftCode>
+<loc>
+<gml:Curve gml:id="D12_5049013023_4-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.178087306 140.257714500
+ 36.178152306 140.257707278
+ 36.178561194 140.258007000
+ 36.178644250 140.258021722
+ 36.178691194 140.257941167
+ 36.178738694 140.257677833
+ 36.178726750 140.257356167
+ 36.178833417 140.257180611
+ 36.179040917 140.256946722
+ 36.179165361 140.256946722
+ 36.179354806 140.257019778
+ 36.179388361 140.257054278
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>市区町村界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013023_5">
+<rID>50490-13023-i-1119</rID>
+<lfSpanFr gml:id="D12_5049013023_5-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1212</ftCode>
+<loc>
+<gml:Curve gml:id="D12_5049013023_5-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.183333333 140.255532306
+ 36.183332028 140.255532444
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>市区町村界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013023_6">
+<rID>50490-13023-i-1231</rID>
+<lfSpanFr gml:id="D12_5049013023_6-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049013023_6-2">
+<gml:timePosition>2010-03-11</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049013023_6-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.180228411 140.258333333
+ 36.180227985 140.258332727
+ 36.180080356 140.258154607
+ 36.180191749 140.257953207
+ 36.180037634 140.257723134
+ 36.179991683 140.257591923
+ 36.179954388 140.257485329
+ 36.179820358 140.257233465
+ 36.179690143 140.257150940
+ 36.179530779 140.257155528
+ 36.179471219 140.257100620
+ 36.179237597 140.256848334
+ 36.179160641 140.256716846
+ 36.179050857 140.256489797
+ 36.178949780 140.256298148
+ 36.179065794 140.256012282
+ 36.178669569 140.255864294
+ 36.178622558 140.255905286
+ 36.178539204 140.256028571
+ 36.178247555 140.255898712
+ 36.178264519 140.256122590
+ 36.178270492 140.256294492
+ 36.178251929 140.256548196
+ 36.178226861 140.256755506
+ 36.178161791 140.257008958
+ 36.178031865 140.257455831
+ 36.177819797 140.257378201
+ 36.177748453 140.257519780
+ 36.177643472 140.257819373
+ 36.177259688 140.257468005
+ 36.177047967 140.257292216
+ 36.177204652 140.256771788
+ 36.177365918 140.256840914
+ 36.177529424 140.256276941
+ 36.177372670 140.256180603
+ 36.177410438 140.255949906
+ 36.177144777 140.255785726
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013023_7">
+<rID>50490-13023-i-1232</rID>
+<lfSpanFr gml:id="D12_5049013023_7-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049013023_7-2">
+<gml:timePosition>2010-03-11</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049013023_7-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.177144777 140.255785726
+ 36.176870195 140.255621165
+ 36.177001887 140.255310710
+ 36.177240381 140.255434832
+ 36.177499215 140.254800331
+ 36.177309437 140.254662908
+ 36.177593932 140.254290568
+ 36.177787452 140.254005007
+ 36.177961343 140.253765032
+ 36.178110889 140.253886675
+ 36.178220986 140.254026450
+ 36.178649692 140.254165263
+ 36.178866278 140.254240020
+ 36.179177939 140.254318175
+ 36.179547076 140.254429325
+ 36.179728300 140.254487549
+ 36.180468944 140.254625261
+ 36.180902377 140.254701294
+ 36.181227372 140.254754845
+ 36.181439705 140.254783332
+ 36.181674082 140.254822723
+ 36.181996904 140.254879042
+ 36.182094126 140.254912361
+ 36.182202146 140.254924948
+ 36.182276516 140.254946914
+ 36.182361525 140.255018412
+ 36.182426373 140.255056561
+ 36.182502838 140.255097551
+ 36.182604679 140.255150240
+ 36.182722639 140.255206350
+ 36.182836748 140.255255770
+ 36.182941227 140.255301358
+ 36.183037348 140.255339786
+ 36.183125726 140.255376393
+ 36.183233003 140.255395314
+ 36.183333333 140.255414089
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013023_8">
+<rID>50490-13023-i-1233</rID>
+<lfSpanFr gml:id="D12_5049013023_8-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049013023_8-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049013023_8-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.178874226 140.255795022
+ 36.179228091 140.255278973
+ 36.179107735 140.255160595
+ 36.179200838 140.255032913
+ 36.179418359 140.254663320
+ 36.179450078 140.254434919
+ 36.180379400 140.254612886
+ 36.180828359 140.254733138
+ 36.181195266 140.254735105
+ 36.181445090 140.254764128
+ 36.181896871 140.254876171
+ 36.182366933 140.255043902
+ 36.182690538 140.255210625
+ 36.182874910 140.255296333
+ 36.182992204 140.255336764
+ 36.183129664 140.255384197
+ 36.183143390 140.255387919
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013023_9">
+<rID>50490-13023-i-1234</rID>
+<lfSpanFr gml:id="D12_5049013023_9-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049013023_9-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049013023_9-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.183143390 140.255387919
+ 36.183163902 140.255393481
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013023_10">
+<rID>50490-13023-i-1235</rID>
+<lfSpanFr gml:id="D12_5049013023_10-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049013023_10-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049013023_10-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.183163902 140.255393481
+ 36.183200348 140.255403366
+ 36.183333333 140.255432334
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013023_11">
+<rID>50490-13023-i-1236</rID>
+<lfSpanFr gml:id="D12_5049013023_11-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049013023_11-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049013023_11-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.177460582 140.255787423
+ 36.177464588 140.255801563
+ 36.177462630 140.255820229
+ 36.177434540 140.255990279
+ 36.177418681 140.256066012
+ 36.177478499 140.256073782
+ 36.177569592 140.256106734
+ 36.177630180 140.256177097
+ 36.177555816 140.256561790
+ 36.177617407 140.256654393
+ 36.177637700 140.256701304
+ 36.177738634 140.256958985
+ 36.177716421 140.256986210
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013023_12">
+<rID>50490-13023-i-1237</rID>
+<lfSpanFr gml:id="D12_5049013023_12-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049013023_12-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049013023_12-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.177688900 140.257019941
+ 36.177510156 140.257239013
+ 36.177497549 140.257235833
+ 36.177371556 140.257132321
+ 36.177355996 140.257173925
+ 36.177331240 140.257267397
+ 36.177311333 140.257315204
+ 36.177209042 140.257542438
+ 36.177209357 140.257555114
+ 36.177297436 140.257624959
+ 36.177384303 140.257731483
+ 36.177541296 140.257582029
+ 36.177573405 140.257626449
+ 36.177535971 140.257736749
+ 36.177514070 140.257838241
+ 36.177725257 140.257910085
+ 36.177807436 140.257661508
+ 36.177638317 140.257519186
+ 36.177692316 140.257439879
+ 36.177791982 140.257546030
+ 36.177808102 140.257549674
+ 36.177884310 140.257459593
+ 36.177890273 140.257455623
+ 36.177899916 140.257455675
+ 36.177911434 140.257460851
+ 36.177934371 140.257473981
+ 36.177943556 140.257476365
+ 36.177951850 140.257475743
+ 36.177961050 140.257473569
+ 36.177977588 140.257461207
+ 36.177990056 140.257452715
+ 36.178003855 140.257450010
+ 36.178022690 140.257450668
+ 36.178041496 140.257459218
+ 36.178058935 140.257472430
+ 36.178071757 140.257491176
+ 36.178079980 140.257510454
+ 36.178083607 140.257529817
+ 36.178084420 140.257554723
+ 36.178083844 140.257589961
+ 36.178187343 140.257505140
+ 36.178209775 140.257532944
+ 36.178265106 140.257611506
+ 36.178374735 140.257780633
+ 36.178498356 140.257612765
+ 36.178532385 140.257573038
+ 36.178556724 140.257546489
+ 36.178759475 140.257328464
+ 36.178664734 140.257104053
+ 36.178911686 140.256976981
+ 36.179013685 140.257289814
+ 36.179108487 140.257268424
+ 36.179128306 140.257219949
+ 36.179126661 140.257201041
+ 36.179009634 140.256932485
+ 36.178918841 140.256763348
+ 36.178905529 140.256730258
+ 36.178848116 140.256552407
+ 36.178622010 140.256569977
+ 36.178541277 140.256767650
+ 36.178397293 140.256628577
+ 36.178524976 140.256407589
+ 36.178643714 140.256192555
+ 36.178759273 140.256265217
+ 36.178852694 140.256149656
+ 36.178934118 140.256215796
+ 36.178986001 140.256275553
+ 36.179058493 140.256394787
+ 36.179097240 140.256473704
+ 36.179104945 140.256512323
+ 36.179129253 140.256621625
+ 36.179152003 140.256687339
+ 36.179191869 140.256755592
+ 36.179342903 140.256965298
+ 36.179401600 140.257035209
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013023_13">
+<rID>50490-13023-i-1238</rID>
+<lfSpanFr gml:id="D12_5049013023_13-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049013023_13-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049013023_13-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.177716421 140.256986210
+ 36.177688900 140.257019941
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013023_14">
+<rID>50490-13023-i-1239</rID>
+<lfSpanFr gml:id="D12_5049013023_14-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049013023_14-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049013023_14-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.179401600 140.257035209
+ 36.179444006 140.257098917
+ 36.179477745 140.257140900
+ 36.179503492 140.257174725
+ 36.179536189 140.257205695
+ 36.179562712 140.257224070
+ 36.179656922 140.257267936
+ 36.179771462 140.257322474
+ 36.179764943 140.257407152
+ 36.179947979 140.257564005
+ 36.180010360 140.257687745
+ 36.179908002 140.257781577
+ 36.180126755 140.258007107
+ 36.180188128 140.257881479
+ 36.180458426 140.257982775
+ 36.180513388 140.258012421
+ 36.180546880 140.258048178
+ 36.180581841 140.258101397
+ 36.180640129 140.258184648
+ 36.180674681 140.258150148
+ 36.180682194 140.258141073
+ 36.180754923 140.258243857
+ 36.180688089 140.258333333
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013023_15">
+<rID>50490-13023-i-1240</rID>
+<lfSpanFr gml:id="D12_5049013023_15-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049013023_15-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049013023_15-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.178874226 140.255795022
+ 36.178820601 140.255871331
+ 36.178677711 140.255830319
+ 36.178697216 140.255794071
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013023_16">
+<rID>50490-13023-i-1241</rID>
+<lfSpanFr gml:id="D12_5049013023_16-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049013023_16-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049013023_16-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.178391100 140.256850220
+ 36.178321170 140.256974910
+ 36.178246993 140.256949719
+ 36.178179392 140.257052632
+ 36.178247386 140.257169284
+ 36.178222436 140.257215730
+ 36.178301066 140.257332439
+ 36.178509591 140.257010833
+ 36.178391100 140.256850220
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013023_17">
+<rID>50490-13023-i-1242</rID>
+<lfSpanFr gml:id="D12_5049013023_17-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049013023_17-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049013023_17-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.178697216 140.255794071
+ 36.178901751 140.255427636
+ 36.178863035 140.255390853
+ 36.178809312 140.255213801
+ 36.178824293 140.255156962
+ 36.178918077 140.255194041
+ 36.178959323 140.255178031
+ 36.179000578 140.255133561
+ 36.179090342 140.254904472
+ 36.179083906 140.254863749
+ 36.179049455 140.254818872
+ 36.178873838 140.254729550
+ 36.178839894 140.254770946
+ 36.178443257 140.254637525
+ 36.178484701 140.254385611
+ 36.178523509 140.254396269
+ 36.178564132 140.254377698
+ 36.178675502 140.254411646
+ 36.178741143 140.254224563
+ 36.178563647 140.254105882
+ 36.178221082 140.253947964
+ 36.178070850 140.253892797
+ 36.177939205 140.253934893
+ 36.177916205 140.253965231
+ 36.177825783 140.254099819
+ 36.177737410 140.254241532
+ 36.177688475 140.254316867
+ 36.177661792 140.254369640
+ 36.177631946 140.254424621
+ 36.177603927 140.254498287
+ 36.177594665 140.254517804
+ 36.177476862 140.254672588
+ 36.177445260 140.254714218
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013023_18">
+<rID>50490-13023-i-1243</rID>
+<lfSpanFr gml:id="D12_5049013023_18-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049013023_18-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049013023_18-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.177445260 140.254714218
+ 36.177687855 140.254876716
+ 36.177478910 140.255319163
+ 36.177378304 140.255248474
+ 36.177256479 140.255444702
+ 36.177035892 140.255303221
+ 36.176963621 140.255504272
+ 36.177115647 140.255586576
+ 36.177276624 140.255661368
+ 36.177417888 140.255678025
+ 36.177460582 140.255787423
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013026_1">
+<rID>50490-13026-i-781</rID>
+<lfSpanFr gml:id="D12_5049013026_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1212</ftCode>
+<loc>
+<gml:Curve gml:id="D12_5049013026_1-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.188442833 140.250008972
+ 36.188421472 140.250274528
+ 36.188270361 140.250718417
+ 36.188011472 140.251304528
+ 36.187716472 140.251845917
+ 36.187417861 140.252268972
+ 36.187262028 140.252657306
+ 36.187111194 140.253047861
+ 36.186629250 140.253873139
+ 36.186460917 140.254163139
+ 36.186212306 140.254592306
+ 36.185618389 140.256017028
+ 36.185492444 140.256356778
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>市区町村界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013026_2">
+<rID>50490-13026-i-782</rID>
+<lfSpanFr gml:id="D12_5049013026_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1212</ftCode>
+<loc>
+<gml:Curve gml:id="D12_5049013026_2-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.185492444 140.256356778
+ 36.185230056 140.257064528
+ 36.185130889 140.257086194
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>市区町村界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013026_3">
+<rID>50490-13026-i-783</rID>
+<lfSpanFr gml:id="D12_5049013026_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1212</ftCode>
+<loc>
+<gml:Curve gml:id="D12_5049013026_3-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.185130889 140.257086194
+ 36.185107833 140.257091194
+ 36.184697833 140.256993417
+ 36.184350333 140.256817583
+ 36.184303389 140.256793972
+ 36.184045639 140.256663139
+ 36.184008694 140.256644528
+ 36.184302028 140.255937306
+ 36.184385361 140.255493139
+ 36.184295917 140.255437861
+ 36.184218139 140.255444806
+ 36.184139250 140.255451750
+ 36.183333333 140.255532306
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>市区町村界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013026_4">
+<rID>50490-13026-i-785</rID>
+<lfSpanFr gml:id="D12_5049013026_4-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1212</ftCode>
+<loc>
+<gml:Curve gml:id="D12_5049013026_4-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.188443556 140.250000000
+ 36.188442833 140.250008972
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>市区町村界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013026_5">
+<rID>50490-13026-i-808</rID>
+<lfSpanFr gml:id="D12_5049013026_5-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049013026_5-2">
+<gml:timePosition>2010-03-11</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049013026_5-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.188264868 140.251061666
+ 36.188292256 140.250832548
+ 36.188335122 140.250584387
+ 36.188386958 140.250322599
+ 36.188431952 140.250109918
+ 36.188442447 140.250000000
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013026_6">
+<rID>50490-13026-i-809</rID>
+<lfSpanFr gml:id="D12_5049013026_6-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049013026_6-2">
+<gml:timePosition>2010-03-11</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049013026_6-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.185756146 140.255832026
+ 36.185794982 140.255707378
+ 36.185828553 140.255592818
+ 36.185973638 140.255241596
+ 36.186116372 140.254917600
+ 36.186169822 140.254814154
+ 36.186358559 140.254607700
+ 36.186507183 140.254504763
+ 36.186751399 140.254257801
+ 36.186787050 140.254192394
+ 36.186807669 140.253993264
+ 36.186914778 140.253726442
+ 36.186957223 140.253625604
+ 36.187133129 140.253299109
+ 36.187233524 140.253070385
+ 36.187307207 140.252876986
+ 36.187394434 140.252599047
+ 36.187526219 140.252234066
+ 36.187608670 140.252084296
+ 36.187688664 140.251967423
+ 36.187890762 140.251752913
+ 36.188039698 140.251559911
+ 36.188148693 140.251396715
+ 36.188199955 140.251274129
+ 36.188264868 140.251061666
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013026_7">
+<rID>50490-13026-i-810</rID>
+<lfSpanFr gml:id="D12_5049013026_7-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049013026_7-2">
+<gml:timePosition>2010-03-11</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049013026_7-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.185281087 140.255829471
+ 36.185413887 140.255868987
+ 36.185639330 140.255911226
+ 36.185685835 140.255911476
+ 36.185745754 140.255865324
+ 36.185756146 140.255832026
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013026_8">
+<rID>50490-13026-i-811</rID>
+<lfSpanFr gml:id="D12_5049013026_8-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049013026_8-2">
+<gml:timePosition>2010-03-11</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049013026_8-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.183333333 140.255414089
+ 36.183382247 140.255423243
+ 36.183463226 140.255436575
+ 36.183512316 140.255444954
+ 36.183560608 140.255449995
+ 36.183637908 140.255458526
+ 36.183738456 140.255468627
+ 36.183826854 140.255473995
+ 36.183939573 140.255482716
+ 36.184039950 140.255490260
+ 36.184146912 140.255496282
+ 36.184244766 140.255503590
+ 36.184260711 140.255505788
+ 36.184291490 140.255518628
+ 36.184317677 140.255530220
+ 36.184397175 140.255579678
+ 36.184631426 140.255654649
+ 36.185153060 140.255791204
+ 36.185281087 140.255829471
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013026_9">
+<rID>50490-13026-i-812</rID>
+<lfSpanFr gml:id="D12_5049013026_9-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049013026_9-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049013026_9-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.185778383 140.255532734
+ 36.185754888 140.255592522
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013026_10">
+<rID>50490-13026-i-813</rID>
+<lfSpanFr gml:id="D12_5049013026_10-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049013026_10-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049013026_10-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.185754888 140.255592522
+ 36.185732634 140.255649155
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013026_11">
+<rID>50490-13026-i-814</rID>
+<lfSpanFr gml:id="D12_5049013026_11-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049013026_11-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049013026_11-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.185732634 140.255649155
+ 36.185696408 140.255741339
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013026_12">
+<rID>50490-13026-i-815</rID>
+<lfSpanFr gml:id="D12_5049013026_12-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049013026_12-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049013026_12-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.185696408 140.255741339
+ 36.185660973 140.255831514
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013026_13">
+<rID>50490-13026-i-816</rID>
+<lfSpanFr gml:id="D12_5049013026_13-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049013026_13-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049013026_13-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.183333333 140.255432334
+ 36.183399198 140.255446682
+ 36.183584768 140.255473805
+ 36.183710184 140.255486264
+ 36.183883290 140.255494754
+ 36.183966182 140.255502538
+ 36.184077911 140.255511032
+ 36.184125676 140.255511955
+ 36.184304758 140.255513141
+ 36.184228494 140.255823811
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013026_14">
+<rID>50490-13026-i-817</rID>
+<lfSpanFr gml:id="D12_5049013026_14-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049013026_14-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049013026_14-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.188965478 140.250000000
+ 36.188916669 140.250108265
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013026_15">
+<rID>50490-13026-i-818</rID>
+<lfSpanFr gml:id="D12_5049013026_15-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049013026_15-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049013026_15-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.185660973 140.255831514
+ 36.185412246 140.256460796
+ 36.185340306 140.256644079
+ 36.185326217 140.256779755
+ 36.185319434 140.256786389
+ 36.184963692 140.256710759
+ 36.184749276 140.257016351
+ 36.184739746 140.257009628
+ 36.184756534 140.256875636
+ 36.184699935 140.256849425
+ 36.184674523 140.256619256
+ 36.184664813 140.256434201
+ 36.184585925 140.256645018
+ 36.184095927 140.256202887
+ 36.184124186 140.256137887
+ 36.184154756 140.256057224
+ 36.184186622 140.255966229
+ 36.184226669 140.255830138
+ 36.184228494 140.255823811
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013026_16">
+<rID>50490-13026-i-819</rID>
+<lfSpanFr gml:id="D12_5049013026_16-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049013026_16-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049013026_16-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.188916669 140.250108265
+ 36.188889679 140.250172053
+ 36.188866236 140.250200615
+ 36.188547369 140.250353359
+ 36.188327031 140.250475050
+ 36.188118248 140.250617147
+ 36.187970306 140.251067660
+ 36.187981605 140.251213261
+ 36.188018252 140.251326753
+ 36.188069745 140.251440714
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013026_17">
+<rID>50490-13026-i-820</rID>
+<lfSpanFr gml:id="D12_5049013026_17-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049013026_17-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049013026_17-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.188069745 140.251440714
+ 36.188141585 140.251599702
+ 36.188216262 140.251765542
+ 36.188232349 140.251830227
+ 36.188227263 140.251892797
+ 36.188210677 140.251945188
+ 36.188169645 140.252003452
+ 36.187957120 140.252235363
+ 36.187900936 140.252296437
+ 36.187869687 140.252314727
+ 36.187833615 140.252320650
+ 36.187795051 140.252317443
+ 36.187775176 140.252304994
+ 36.187742850 140.252271022
+ 36.187725482 140.252263258
+ 36.187500030 140.252300525
+ 36.187476030 140.252307847
+ 36.187351515 140.252578471
+ 36.187298556 140.252748078
+ 36.187184516 140.253115486
+ 36.187089483 140.253382931
+ 36.187083375 140.253402689
+ 36.186958840 140.253502585
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013026_18">
+<rID>50490-13026-i-821</rID>
+<lfSpanFr gml:id="D12_5049013026_18-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049013026_18-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049013026_18-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.186958840 140.253502585
+ 36.186562224 140.253820729
+ 36.186432544 140.254098547
+ 36.186129991 140.254377662
+ 36.185862509 140.254627721
+ 36.185896652 140.254837149
+ 36.186117351 140.254972418
+ 36.186157651 140.255006345
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013026_19">
+<rID>50490-13026-i-822</rID>
+<lfSpanFr gml:id="D12_5049013026_19-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049013026_19-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049013026_19-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.186157651 140.255006345
+ 36.186187264 140.255031275
+ 36.186185863 140.255121770
+ 36.186136173 140.255232240
+ 36.186015941 140.255335598
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049013026_20">
+<rID>50490-13026-i-823</rID>
+<lfSpanFr gml:id="D12_5049013026_20-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049013026_20-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049013026_20-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.186015941 140.255335598
+ 36.185888107 140.255445490
+ 36.185778383 140.255532734
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313020_1">
+<rID>50493-13020-i-1070</rID>
+<lfSpanFr gml:id="D12_5049313020_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1212</ftCode>
+<loc>
+<gml:Curve gml:id="D12_5049313020_1-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.174998667 140.265715833
+ 36.174835333 140.265753417
+ 36.174740611 140.265885083
+ 36.174726722 140.266019250
+ 36.174725333 140.266031472
+ 36.174758389 140.266124250
+ 36.174815889 140.266286194
+ 36.174880333 140.266467028
+ 36.174785083 140.266666667
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>市区町村界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313020_2">
+<rID>50493-13020-i-1072</rID>
+<lfSpanFr gml:id="D12_5049313020_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1212</ftCode>
+<loc>
+<gml:Curve gml:id="D12_5049313020_2-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.175000000 140.265715528
+ 36.174998667 140.265715833
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>市区町村界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313020_3">
+<rID>50493-13020-i-1165</rID>
+<lfSpanFr gml:id="D12_5049313020_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313020_3-2">
+<gml:timePosition>2010-03-11</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313020_3-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.174973939 140.265599382
+ 36.174989373 140.265593241
+ 36.175000000 140.265590907
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313020_4">
+<rID>50493-13020-i-1166</rID>
+<lfSpanFr gml:id="D12_5049313020_4-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313020_4-2">
+<gml:timePosition>2010-03-11</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313020_4-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.174971384 140.266305941
+ 36.175000000 140.266294545
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313020_5">
+<rID>50493-13020-i-1167</rID>
+<lfSpanFr gml:id="D12_5049313020_5-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313020_5-2">
+<gml:timePosition>2010-03-11</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313020_5-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.175000000 140.265916906
+ 36.174972935 140.265877404
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313020_6">
+<rID>50493-13020-i-1168</rID>
+<lfSpanFr gml:id="D12_5049313020_6-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313020_6-2">
+<gml:timePosition>2010-03-11</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313020_6-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.174972935 140.265877404
+ 36.174920037 140.265800296
+ 36.174832145 140.265655186
+ 36.174973939 140.265599382
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313020_7">
+<rID>50493-13020-i-1169</rID>
+<lfSpanFr gml:id="D12_5049313020_7-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313020_7-2">
+<gml:timePosition>2010-03-11</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313020_7-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.174681249 140.266666667
+ 36.174723377 140.266572152
+ 36.174807009 140.266375293
+ 36.174857756 140.266349226
+ 36.174971384 140.266305941
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313020_8">
+<rID>50493-13020-i-1170</rID>
+<lfSpanFr gml:id="D12_5049313020_8-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313020_8-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313020_8-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.174970996 140.266413214
+ 36.174953215 140.266454974
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313020_9">
+<rID>50493-13020-i-1171</rID>
+<lfSpanFr gml:id="D12_5049313020_9-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313020_9-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313020_9-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.174953215 140.266454974
+ 36.174929817 140.266509925
+ 36.174915718 140.266538054
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313020_10">
+<rID>50493-13020-i-1172</rID>
+<lfSpanFr gml:id="D12_5049313020_10-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313020_10-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313020_10-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.174915718 140.266538054
+ 36.174878252 140.266612803
+ 36.174846868 140.266666667
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313020_11">
+<rID>50493-13020-i-1173</rID>
+<lfSpanFr gml:id="D12_5049313020_11-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313020_11-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313020_11-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.174972770 140.265922758
+ 36.175000000 140.265976199
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313020_12">
+<rID>50493-13020-i-1174</rID>
+<lfSpanFr gml:id="D12_5049313020_12-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313020_12-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313020_12-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.175000000 140.266357561
+ 36.174970996 140.266413214
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313020_13">
+<rID>50493-13020-i-1175</rID>
+<lfSpanFr gml:id="D12_5049313020_13-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313020_13-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313020_13-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.175000000 140.265636089
+ 36.174973779 140.265643625
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313020_14">
+<rID>50493-13020-i-1176</rID>
+<lfSpanFr gml:id="D12_5049313020_14-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313020_14-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313020_14-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.174973779 140.265643625
+ 36.174948586 140.265656604
+ 36.174918518 140.265671780
+ 36.174851538 140.265725661
+ 36.174848972 140.265737541
+ 36.174848937 140.265746990
+ 36.174865868 140.265775654
+ 36.174972770 140.265922758
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_1">
+<rID>50493-13023-i-561</rID>
+<lfSpanFr gml:id="D12_5049313023_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1212</ftCode>
+<loc>
+<gml:Curve gml:id="D12_5049313023_1-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.180541861 140.258342306
+ 36.180691472 140.258534806
+ 36.180957833 140.258798417
+ 36.181376722 140.259209528
+ 36.181572000 140.259420917
+ 36.181671167 140.259528139
+ 36.181418944 140.259976472
+ 36.181083667 140.260394528
+ 36.180627833 140.260658694
+ 36.180100056 140.260964806
+ 36.181125056 140.261505639
+ 36.181893389 140.261928444
+ 36.182030056 140.262003722
+ 36.182162000 140.262076222
+ 36.182758944 140.262166778
+ 36.182763667 140.262175944
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>市区町村界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_2">
+<rID>50493-13023-i-562</rID>
+<lfSpanFr gml:id="D12_5049313023_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1212</ftCode>
+<loc>
+<gml:Curve gml:id="D12_5049313023_2-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.182763667 140.262175944
+ 36.182788667 140.262225389
+ 36.182403667 140.262795667
+ 36.182086444 140.263470111
+ 36.181962000 140.263631222
+ 36.181918667 140.263633722
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>市区町村界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_3">
+<rID>50493-13023-i-563</rID>
+<lfSpanFr gml:id="D12_5049313023_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1212</ftCode>
+<loc>
+<gml:Curve gml:id="D12_5049313023_3-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.181918667 140.263633722
+ 36.181831722 140.263638444
+ 36.181292556 140.263557889
+ 36.179654500 140.266498722
+ 36.179550194 140.266666667
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>市区町村界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_4">
+<rID>50493-13023-i-564</rID>
+<lfSpanFr gml:id="D12_5049313023_4-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1212</ftCode>
+<loc>
+<gml:Curve gml:id="D12_5049313023_4-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.177335750 140.266666667
+ 36.176646167 140.265908417
+ 36.176435333 140.265648694
+ 36.176265333 140.265438972
+ 36.175978389 140.265490361
+ 36.175744583 140.265544167
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>市区町村界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_5">
+<rID>50493-13023-i-565</rID>
+<lfSpanFr gml:id="D12_5049313023_5-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1212</ftCode>
+<loc>
+<gml:Curve gml:id="D12_5049313023_5-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.175744583 140.265544167
+ 36.175000000 140.265715528
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>市区町村界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_6">
+<rID>50493-13023-i-566</rID>
+<lfSpanFr gml:id="D12_5049313023_6-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1212</ftCode>
+<loc>
+<gml:Curve gml:id="D12_5049313023_6-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.180534889 140.258333333
+ 36.180541861 140.258342306
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>市区町村界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_7">
+<rID>50493-13023-i-654</rID>
+<lfSpanFr gml:id="D12_5049313023_7-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313023_7-2">
+<gml:timePosition>2010-03-11</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313023_7-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.179725328 140.265953812
+ 36.179816551 140.265801117
+ 36.179902774 140.266332556
+ 36.180117871 140.266219120
+ 36.180681007 140.265892035
+ 36.181184270 140.265597301
+ 36.181448043 140.265456892
+ 36.181740726 140.265297519
+ 36.181620284 140.264931089
+ 36.181475853 140.264493709
+ 36.181338100 140.264053477
+ 36.181229142 140.263575382
+ 36.180929221 140.263317148
+ 36.180618233 140.263053409
+ 36.180291811 140.262770577
+ 36.180009403 140.262528898
+ 36.179259541 140.261872555
+ 36.178955219 140.261608863
+ 36.178785861 140.261484873
+ 36.178973871 140.261333369
+ 36.179102495 140.261254915
+ 36.179388374 140.261106389
+ 36.179660833 140.260955120
+ 36.180186360 140.260706839
+ 36.180383910 140.260584066
+ 36.180623492 140.260477751
+ 36.180877744 140.260402200
+ 36.180966285 140.260367217
+ 36.181039733 140.260318699
+ 36.181114021 140.260262070
+ 36.181183744 140.260196411
+ 36.181223254 140.260111465
+ 36.181184818 140.260021872
+ 36.181095970 140.259991261
+ 36.181034256 140.259933670
+ 36.181008040 140.259829802
+ 36.180986260 140.259745080
+ 36.180786529 140.259290959
+ 36.180571015 140.258915912
+ 36.180401781 140.258603931
+ 36.180305017 140.258442316
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_8">
+<rID>50493-13023-i-655</rID>
+<lfSpanFr gml:id="D12_5049313023_8-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313023_8-2">
+<gml:timePosition>2010-03-11</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313023_8-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.180305017 140.258442316
+ 36.180228411 140.258333333
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_9">
+<rID>50493-13023-i-656</rID>
+<lfSpanFr gml:id="D12_5049313023_9-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313023_9-2">
+<gml:timePosition>2010-03-11</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313023_9-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.175000000 140.265590907
+ 36.175195301 140.265548017
+ 36.175359229 140.265502562
+ 36.175485475 140.265459568
+ 36.175642852 140.265381283
+ 36.175844610 140.265267777
+ 36.176094720 140.265241916
+ 36.176264459 140.265409268
+ 36.176577785 140.265648446
+ 36.176725578 140.265752980
+ 36.176952133 140.265511322
+ 36.177289710 140.265174779
+ 36.177430551 140.265382884
+ 36.177557894 140.265634717
+ 36.177799600 140.266113634
+ 36.177628065 140.266418296
+ 36.177956034 140.266666667
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_10">
+<rID>50493-13023-i-657</rID>
+<lfSpanFr gml:id="D12_5049313023_10-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313023_10-2">
+<gml:timePosition>2010-03-11</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313023_10-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.179202960 140.266666667
+ 36.179275714 140.266591134
+ 36.179032796 140.266472397
+ 36.179238883 140.266084318
+ 36.179535990 140.266321530
+ 36.179675940 140.266052928
+ 36.179725328 140.265953812
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_11">
+<rID>50493-13023-i-658</rID>
+<lfSpanFr gml:id="D12_5049313023_11-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313023_11-2">
+<gml:timePosition>2010-03-11</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313023_11-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.175000000 140.266294545
+ 36.175161920 140.266230064
+ 36.175047707 140.265986536
+ 36.175000000 140.265916906
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_12">
+<rID>50493-13023-i-659</rID>
+<lfSpanFr gml:id="D12_5049313023_12-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313023_12-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313023_12-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.181236088 140.260107070
+ 36.181157949 140.260201607
+ 36.181113439 140.260248281
+ 36.181066347 140.260285936
+ 36.180987503 140.260331200
+ 36.180903260 140.260374212
+ 36.180791222 140.260426967
+ 36.180626529 140.260485328
+ 36.180518479 140.260531878
+ 36.180399307 140.260588263
+ 36.180262207 140.260667895
+ 36.180241971 140.260681349
+ 36.180059672 140.260773188
+ 36.179998741 140.260799537
+ 36.179915080 140.260830878
+ 36.179808751 140.260874880
+ 36.179699399 140.260932540
+ 36.179398705 140.261090659
+ 36.179216858 140.261182275
+ 36.179062311 140.261251249
+ 36.179021380 140.261279820
+ 36.178826602 140.261458858
+ 36.178874653 140.261505924
+ 36.178981665 140.261598334
+ 36.179056428 140.261661109
+ 36.179344776 140.261905370
+ 36.180328660 140.262749321
+ 36.180700149 140.263081762
+ 36.181092140 140.263401755
+ 36.181154408 140.263454904
+ 36.181248967 140.263551255
+ 36.181666477 140.264172873
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_13">
+<rID>50493-13023-i-660</rID>
+<lfSpanFr gml:id="D12_5049313023_13-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313023_13-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313023_13-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.181666477 140.264172873
+ 36.181683134 140.264197674
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_14">
+<rID>50493-13023-i-661</rID>
+<lfSpanFr gml:id="D12_5049313023_14-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313023_14-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313023_14-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.181683134 140.264197674
+ 36.181997652 140.264656444
+ 36.181943461 140.264762986
+ 36.181737729 140.264704045
+ 36.181310110 140.264961133
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_15">
+<rID>50493-13023-i-662</rID>
+<lfSpanFr gml:id="D12_5049313023_15-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313023_15-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313023_15-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.181310110 140.264961133
+ 36.181068696 140.265106272
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_16">
+<rID>50493-13023-i-663</rID>
+<lfSpanFr gml:id="D12_5049313023_16-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313023_16-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313023_16-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.181068696 140.265106272
+ 36.181002294 140.265149933
+ 36.180982448 140.265170570
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_17">
+<rID>50493-13023-i-664</rID>
+<lfSpanFr gml:id="D12_5049313023_17-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313023_17-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313023_17-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.180982448 140.265170570
+ 36.180306680 140.265873299
+ 36.180070011 140.265297229
+ 36.179998244 140.265422802
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_18">
+<rID>50493-13023-i-665</rID>
+<lfSpanFr gml:id="D12_5049313023_18-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313023_18-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313023_18-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.177631481 140.266410803
+ 36.177601813 140.266388296
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_19">
+<rID>50493-13023-i-666</rID>
+<lfSpanFr gml:id="D12_5049313023_19-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313023_19-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313023_19-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.177601813 140.266388296
+ 36.177048811 140.265968759
+ 36.177031714 140.265961106
+ 36.176903932 140.266130046
+ 36.176728226 140.265818251
+ 36.176543878 140.265653374
+ 36.176069843 140.265242113
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_20">
+<rID>50493-13023-i-667</rID>
+<lfSpanFr gml:id="D12_5049313023_20-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313023_20-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313023_20-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.177801683 140.266539929
+ 36.177631481 140.266410803
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_21">
+<rID>50493-13023-i-668</rID>
+<lfSpanFr gml:id="D12_5049313023_21-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313023_21-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313023_21-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.177853557 140.266579284
+ 36.177801683 140.266539929
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_22">
+<rID>50493-13023-i-669</rID>
+<lfSpanFr gml:id="D12_5049313023_22-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313023_22-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313023_22-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.180800310 140.259737676
+ 36.180787794 140.259754589
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_23">
+<rID>50493-13023-i-670</rID>
+<lfSpanFr gml:id="D12_5049313023_23-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313023_23-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313023_23-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.180787794 140.259754589
+ 36.180759868 140.259792323
+ 36.180788528 140.259893648
+ 36.180929702 140.259935327
+ 36.180929327 140.259952433
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_24">
+<rID>50493-13023-i-671</rID>
+<lfSpanFr gml:id="D12_5049313023_24-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313023_24-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313023_24-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.180688089 140.258333333
+ 36.180504073 140.258579693
+ 36.180499498 140.258599123
+ 36.180580322 140.258757205
+ 36.180600360 140.258799672
+ 36.180650326 140.258891217
+ 36.180707999 140.258994921
+ 36.180771540 140.259096434
+ 36.180815623 140.259169604
+ 36.180849803 140.259239606
+ 36.180884805 140.259306501
+ 36.180896607 140.259333024
+ 36.180894507 140.259340795
+ 36.180868684 140.259379122
+ 36.180863426 140.259387654
+ 36.180857467 140.259390401
+ 36.180828735 140.259385131
+ 36.180814841 140.259389169
+ 36.180797569 140.259405196
+ 36.180783527 140.259425353
+ 36.180780204 140.259447570
+ 36.180779754 140.259472582
+ 36.180780307 140.259494487
+ 36.180783448 140.259523743
+ 36.180844274 140.259678271
+ 36.180800310 140.259737676
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_25">
+<rID>50493-13023-i-672</rID>
+<lfSpanFr gml:id="D12_5049313023_25-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313023_25-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313023_25-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.180929327 140.259952433
+ 36.180928517 140.259989462
+ 36.180886402 140.260046933
+ 36.181063014 140.260210096
+ 36.181210011 140.260059141
+ 36.181244215 140.260097238
+ 36.181236088 140.260107070
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_26">
+<rID>50493-13023-i-673</rID>
+<lfSpanFr gml:id="D12_5049313023_26-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313023_26-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313023_26-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.179998244 140.265422802
+ 36.179921168 140.265557668
+ 36.179706878 140.265946818
+ 36.179808734 140.266043432
+ 36.179837854 140.266066049
+ 36.179884051 140.266076865
+ 36.179877440 140.266210348
+ 36.179930643 140.266252442
+ 36.179908226 140.266370051
+ 36.179905088 140.266415281
+ 36.179903430 140.266474972
+ 36.179904452 140.266590820
+ 36.179908665 140.266646986
+ 36.179909891 140.266666667
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_27">
+<rID>50493-13023-i-674</rID>
+<lfSpanFr gml:id="D12_5049313023_27-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313023_27-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313023_27-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.179315661 140.266635156
+ 36.179316745 140.266659508
+ 36.179313222 140.266666667
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_28">
+<rID>50493-13023-i-675</rID>
+<lfSpanFr gml:id="D12_5049313023_28-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313023_28-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313023_28-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.179315661 140.266635156
+ 36.179180918 140.266461095
+ 36.179229481 140.266390991
+ 36.179202175 140.266365160
+ 36.179029529 140.266204676
+ 36.179105178 140.266071353
+ 36.179204643 140.266056893
+ 36.179313030 140.266142092
+ 36.179457709 140.266260509
+ 36.179626148 140.266388063
+ 36.179466162 140.266666667
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_29">
+<rID>50493-13023-i-676</rID>
+<lfSpanFr gml:id="D12_5049313023_29-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313023_29-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313023_29-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.177991404 140.266666667
+ 36.177894601 140.266610422
+ 36.177853557 140.266579284
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_30">
+<rID>50493-13023-i-677</rID>
+<lfSpanFr gml:id="D12_5049313023_30-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313023_30-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313023_30-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.175000000 140.265976199
+ 36.175069334 140.266112273
+ 36.175101722 140.266302658
+ 36.175017180 140.266327871
+ 36.175004213 140.266349477
+ 36.175000000 140.266357561
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_31">
+<rID>50493-13023-i-678</rID>
+<lfSpanFr gml:id="D12_5049313023_31-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313023_31-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313023_31-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.176069843 140.265242113
+ 36.176041216 140.265233063
+ 36.176014459 140.265230025
+ 36.175990557 140.265234896
+ 36.175718905 140.265410604
+ 36.175536361 140.265494755
+ 36.175431151 140.265527859
+ 36.175366097 140.265547512
+ 36.175057850 140.265624078
+ 36.175008695 140.265633590
+ 36.175000000 140.265636089
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049313023_32">
+<rID>50493-13023-i-679</rID>
+<lfSpanFr gml:id="D12_5049313023_32-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049313023_32-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049313023_32-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.177691533 140.265865352
+ 36.177736271 140.266005561
+ 36.177757568 140.266097505
+ 36.177752819 140.266114933
+ 36.177738665 140.266115967
+ 36.177711402 140.266103032
+ 36.177521030 140.265959352
+ 36.177361261 140.265851528
+ 36.177145381 140.265707598
+ 36.177031969 140.265616483
+ 36.176976545 140.265565040
+ 36.176845335 140.265435585
+ 36.176646498 140.265239390
+ 36.176804557 140.265072060
+ 36.176681696 140.264926199
+ 36.176755493 140.264831332
+ 36.176971187 140.265051964
+ 36.177017479 140.265011532
+ 36.177069025 140.265088521
+ 36.177165087 140.264992776
+ 36.177489901 140.265494936
+ 36.177625203 140.265739365
+ 36.177691533 140.265865352
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049613020_1">
+<rID>50496-13020-i-800</rID>
+<lfSpanFr gml:id="D12_5049613020_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1212</ftCode>
+<loc>
+<gml:Curve gml:id="D12_5049613020_1-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.173423250 140.273565889
+ 36.173100889 140.274139000
+ 36.172898389 140.274419000
+ 36.172425333 140.274599278
+ 36.171804194 140.275000000
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>市区町村界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049613020_2">
+<rID>50496-13020-i-801</rID>
+<lfSpanFr gml:id="D12_5049613020_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1212</ftCode>
+<loc>
+<gml:Curve gml:id="D12_5049613020_2-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.174780806 140.266675639
+ 36.174287000 140.267710639
+ 36.174080056 140.268144528
+ 36.173638944 140.269082861
+ 36.173355056 140.269518139
+ 36.173742000 140.269858139
+ 36.174898667 140.270943167
+ 36.173774778 140.272940944
+ 36.173423250 140.273565889
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>市区町村界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049613020_3">
+<rID>50496-13020-i-802</rID>
+<lfSpanFr gml:id="D12_5049613020_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1212</ftCode>
+<loc>
+<gml:Curve gml:id="D12_5049613020_3-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.174785083 140.266666667
+ 36.174780806 140.266675639
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>市区町村界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049613020_4">
+<rID>50496-13020-i-834</rID>
+<lfSpanFr gml:id="D12_5049613020_4-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049613020_4-2">
+<gml:timePosition>2010-03-11</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049613020_4-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.174903994 140.271177652
+ 36.174621479 140.270920619
+ 36.174345847 140.270678967
+ 36.174194470 140.270545059
+ 36.173998368 140.270367106
+ 36.173805670 140.270195063
+ 36.173489849 140.269901613
+ 36.173268364 140.269714627
+ 36.173120420 140.269577742
+ 36.173274205 140.269397843
+ 36.173447630 140.269195486
+ 36.173538044 140.269092382
+ 36.173589832 140.269028083
+ 36.173716881 140.268838918
+ 36.173794543 140.268698058
+ 36.173961803 140.268307017
+ 36.174064399 140.268075584
+ 36.174188451 140.267793243
+ 36.174254297 140.267654761
+ 36.174401753 140.267305627
+ 36.174532412 140.267014983
+ 36.174596345 140.266857148
+ 36.174681249 140.266666667
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049613020_5">
+<rID>50496-13020-i-835</rID>
+<lfSpanFr gml:id="D12_5049613020_5-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049613020_5-2">
+<gml:timePosition>2010-03-11</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049613020_5-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.172435048 140.275000000
+ 36.172775257 140.274803386
+ 36.172957242 140.274506157
+ 36.173167193 140.274152612
+ 36.173515210 140.273556945
+ 36.173779261 140.273098758
+ 36.173878287 140.272933899
+ 36.174080816 140.272587530
+ 36.174251792 140.272292452
+ 36.174401820 140.272032162
+ 36.174523312 140.271836077
+ 36.174746812 140.271447576
+ 36.174886393 140.271209236
+ 36.174903994 140.271177652
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049613020_6">
+<rID>50496-13020-i-836</rID>
+<lfSpanFr gml:id="D12_5049613020_6-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049613020_6-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049613020_6-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.174846868 140.266666667
+ 36.174766428 140.266804725
+ 36.174667739 140.267002946
+ 36.174547979 140.267245739
+ 36.174446405 140.267444052
+ 36.174351020 140.267650849
+ 36.174334701 140.267677217
+ 36.174311725 140.267699990
+ 36.174261368 140.267742844
+ 36.174126030 140.268055692
+ 36.173927832 140.268527937
+ 36.173842467 140.268729672
+ 36.173784679 140.268833068
+ 36.173737264 140.268909287
+ 36.173692331 140.268972291
+ 36.173574425 140.269125711
+ 36.173334086 140.269412738
+ 36.173155505 140.269620513
+ 36.173446167 140.269868577
+ 36.173614487 140.270027810
+ 36.173777101 140.270169892
+ 36.173989734 140.270362278
+ 36.174215856 140.270562743
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049613020_7">
+<rID>50496-13020-i-837</rID>
+<lfSpanFr gml:id="D12_5049613020_7-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049613020_7-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049613020_7-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.172405554 140.274974771
+ 36.172375871 140.274988199
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049613020_8">
+<rID>50496-13020-i-838</rID>
+<lfSpanFr gml:id="D12_5049613020_8-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049613020_8-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049613020_8-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.172375871 140.274988199
+ 36.172349784 140.275000000
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049613020_9">
+<rID>50496-13020-i-839</rID>
+<lfSpanFr gml:id="D12_5049613020_9-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049613020_9-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049613020_9-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.174215856 140.270562743
+ 36.174850903 140.271129554
+ 36.174898882 140.271170731
+ 36.174360003 140.272104965
+ 36.173903079 140.272883013
+ 36.173379783 140.273792076
+ 36.172792598 140.274793590
+ 36.172654447 140.274862180
+ 36.172405554 140.274974771
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049613023_1">
+<rID>50496-13023-i-941</rID>
+<lfSpanFr gml:id="D12_5049613023_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1212</ftCode>
+<loc>
+<gml:Curve gml:id="D12_5049613023_1-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.179544611 140.266675667
+ 36.179069500 140.267440667
+ 36.178992833 140.267564000
+ 36.178865611 140.267828444
+ 36.178701444 140.268169000
+ 36.178555889 140.268009000
+ 36.177572278 140.266926778
+ 36.177343917 140.266675667
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>市区町村界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049613023_2">
+<rID>50496-13023-i-942</rID>
+<lfSpanFr gml:id="D12_5049613023_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1212</ftCode>
+<loc>
+<gml:Curve gml:id="D12_5049613023_2-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.179550194 140.266666667
+ 36.179544611 140.266675667
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>市区町村界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049613023_3">
+<rID>50496-13023-i-943</rID>
+<lfSpanFr gml:id="D12_5049613023_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1212</ftCode>
+<loc>
+<gml:Curve gml:id="D12_5049613023_3-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.177343917 140.266675667
+ 36.177335750 140.266666667
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>市区町村界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049613023_4">
+<rID>50496-13023-i-1008</rID>
+<lfSpanFr gml:id="D12_5049613023_4-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049613023_4-2">
+<gml:timePosition>2010-03-11</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049613023_4-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.177956034 140.266666667
+ 36.177965663 140.266673959
+ 36.178162036 140.266827902
+ 36.178250521 140.266759130
+ 36.178541275 140.267033215
+ 36.178691917 140.267197135
+ 36.178872411 140.267380343
+ 36.179037152 140.267111104
+ 36.179152816 140.266928864
+ 36.179250895 140.266724737
+ 36.179158013 140.266713331
+ 36.179202960 140.266666667
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049613023_5">
+<rID>50496-13023-i-1009</rID>
+<lfSpanFr gml:id="D12_5049613023_5-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049613023_5-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049613023_5-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.179917013 140.266780996
+ 36.179919412 140.266914974
+ 36.179817937 140.266986787
+ 36.179785377 140.266993166
+ 36.179623782 140.267041302
+ 36.179627463 140.267095130
+ 36.179658058 140.267133209
+ 36.179670306 140.267285027
+ 36.179828436 140.267148379
+ 36.179856347 140.267117624
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049613023_6">
+<rID>50496-13023-i-1010</rID>
+<lfSpanFr gml:id="D12_5049613023_6-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049613023_6-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049613023_6-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.179856347 140.267117624
+ 36.179866985 140.267105901
+ 36.179946976 140.266968822
+ 36.179991298 140.266974736
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049613023_7">
+<rID>50496-13023-i-1011</rID>
+<lfSpanFr gml:id="D12_5049613023_7-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049613023_7-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049613023_7-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.179991298 140.266974736
+ 36.180031742 140.266981074
+ 36.180022375 140.267106314
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049613023_8">
+<rID>50496-13023-i-1012</rID>
+<lfSpanFr gml:id="D12_5049613023_8-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049613023_8-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049613023_8-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.180022375 140.267106314
+ 36.180014030 140.267217887
+ 36.179964064 140.267252470
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049613023_9">
+<rID>50496-13023-i-1013</rID>
+<lfSpanFr gml:id="D12_5049613023_9-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049613023_9-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049613023_9-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.179964064 140.267252470
+ 36.179736277 140.267410128
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049613023_10">
+<rID>50496-13023-i-1014</rID>
+<lfSpanFr gml:id="D12_5049613023_10-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049613023_10-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049613023_10-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.179909891 140.266666667
+ 36.179917013 140.266780996
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049613023_11">
+<rID>50496-13023-i-1015</rID>
+<lfSpanFr gml:id="D12_5049613023_11-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049613023_11-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049613023_11-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.179313222 140.266666667
+ 36.179231032 140.266833688
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049613023_12">
+<rID>50496-13023-i-1016</rID>
+<lfSpanFr gml:id="D12_5049613023_12-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049613023_12-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049613023_12-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.179231032 140.266833688
+ 36.179204115 140.266825091
+ 36.179018075 140.267127452
+ 36.178932457 140.267250491
+ 36.178792283 140.267381234
+ 36.178578352 140.267570267
+ 36.178505652 140.267387321
+ 36.178415933 140.267199614
+ 36.178367936 140.267100361
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049613023_13">
+<rID>50496-13023-i-1017</rID>
+<lfSpanFr gml:id="D12_5049613023_13-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049613023_13-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049613023_13-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.179466162 140.266666667
+ 36.179441392 140.266709802
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049613023_14">
+<rID>50496-13023-i-1018</rID>
+<lfSpanFr gml:id="D12_5049613023_14-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049613023_14-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049613023_14-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.179441392 140.266709802
+ 36.179408376 140.266767296
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049613023_15">
+<rID>50496-13023-i-1019</rID>
+<lfSpanFr gml:id="D12_5049613023_15-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049613023_15-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049613023_15-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.178359820 140.267083579
+ 36.178311357 140.266983365
+ 36.178231991 140.266848632
+ 36.178190475 140.266789816
+ 36.178163880 140.266766879
+ 36.177991404 140.266666667
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049613023_16">
+<rID>50496-13023-i-1020</rID>
+<lfSpanFr gml:id="D12_5049613023_16-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049613023_16-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049613023_16-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.178367936 140.267100361
+ 36.178359820 140.267083579
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049613023_17">
+<rID>50496-13023-i-1021</rID>
+<lfSpanFr gml:id="D12_5049613023_17-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049613023_17-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049613023_17-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.179736277 140.267410128
+ 36.179710798 140.267427441
+ 36.179668603 140.267406641
+ 36.179671505 140.267302377
+ 36.179532024 140.267266810
+ 36.179522541 140.267048636
+ 36.179506078 140.266965611
+ 36.179485266 140.266913689
+ 36.179444762 140.266824194
+ 36.179408376 140.266767296
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049913020_1">
+<rID>50499-13020-i-545</rID>
+<lfSpanFr gml:id="D12_5049913020_1-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1212</ftCode>
+<loc>
+<gml:Curve gml:id="D12_5049913020_1-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.171790250 140.275009000
+ 36.171470333 140.275215389
+ 36.171511167 140.275388444
+ 36.171558361 140.275587889
+ 36.171648639 140.275970389
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>市区町村界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049913020_2">
+<rID>50499-13020-i-546</rID>
+<lfSpanFr gml:id="D12_5049913020_2-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1212</ftCode>
+<loc>
+<gml:Curve gml:id="D12_5049913020_2-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.171648639 140.275970389
+ 36.171650861 140.275979833
+ 36.171599472 140.276064833
+ 36.170823361 140.276447333
+ 36.170765861 140.276469833
+ 36.170732528 140.276480667
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>市区町村界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049913020_3">
+<rID>50499-13020-i-547</rID>
+<lfSpanFr gml:id="D12_5049913020_3-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1212</ftCode>
+<loc>
+<gml:Curve gml:id="D12_5049913020_3-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.170732528 140.276480667
+ 36.170546972 140.276540944
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>市区町村界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049913020_4">
+<rID>50499-13020-i-548</rID>
+<lfSpanFr gml:id="D12_5049913020_4-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1212</ftCode>
+<loc>
+<gml:Curve gml:id="D12_5049913020_4-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.170546972 140.276540944
+ 36.170333361 140.276610111
+ 36.169853944 140.276769556
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>市区町村界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049913020_5">
+<rID>50499-13020-i-549</rID>
+<lfSpanFr gml:id="D12_5049913020_5-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1212</ftCode>
+<loc>
+<gml:Curve gml:id="D12_5049913020_5-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.169853944 140.276769556
+ 36.169391167 140.276968444
+ 36.169102000 140.277121500
+ 36.168572556 140.277447889
+ 36.168225056 140.277600944
+ 36.167741167 140.277684278
+ 36.167443111 140.277849278
+ 36.167335889 140.277908722
+ 36.167178667 140.278061778
+ 36.167089222 140.278064833
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>市区町村界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049913020_6">
+<rID>50499-13020-i-550</rID>
+<lfSpanFr gml:id="D12_5049913020_6-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1212</ftCode>
+<loc>
+<gml:Curve gml:id="D12_5049913020_6-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.167089222 140.278064833
+ 36.166881167 140.278072028
+ 36.166666667 140.278146944
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>市区町村界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049913020_7">
+<rID>50499-13020-i-551</rID>
+<lfSpanFr gml:id="D12_5049913020_7-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>25000</orgGILvl>
+<ftCode>1212</ftCode>
+<loc>
+<gml:Curve gml:id="D12_5049913020_7-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.171804194 140.275000000
+ 36.171790250 140.275009000
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>市区町村界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049913020_8">
+<rID>50499-13020-i-560</rID>
+<lfSpanFr gml:id="D12_5049913020_8-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049913020_8-2">
+<gml:timePosition>2010-03-11</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049913020_8-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.168170321 140.277599461
+ 36.168235025 140.277601605
+ 36.168322865 140.277611327
+ 36.168370626 140.277613375
+ 36.168452646 140.277588162
+ 36.168527344 140.277544455
+ 36.168615520 140.277487929
+ 36.168655936 140.277453254
+ 36.168699361 140.277409370
+ 36.168751666 140.277352641
+ 36.168811549 140.277294177
+ 36.168940050 140.277202976
+ 36.169038694 140.277142840
+ 36.169303076 140.277011943
+ 36.169447872 140.276950290
+ 36.169656838 140.276888886
+ 36.169746306 140.276872829
+ 36.169889604 140.276825838
+ 36.169995569 140.276784196
+ 36.170074795 140.276734954
+ 36.170286810 140.276653447
+ 36.170383785 140.276630095
+ 36.170512054 140.276601362
+ 36.170585208 140.276585322
+ 36.170677616 140.276578396
+ 36.170737410 140.276543828
+ 36.170859806 140.276494940
+ 36.170944856 140.276478857
+ 36.171025373 140.276470084
+ 36.171156692 140.276421136
+ 36.171231336 140.276392210
+ 36.171346430 140.276319271
+ 36.171452484 140.276253727
+ 36.171609443 140.276144228
+ 36.171731954 140.276064104
+ 36.171817128 140.276014894
+ 36.171952953 140.275965970
+ 36.172026134 140.275942481
+ 36.172142785 140.275838424
+ 36.172154764 140.275816369
+ 36.172013483 140.275317346
+ 36.172187062 140.275149132
+ 36.172242382 140.275105312
+ 36.172426074 140.275005186
+ 36.172435048 140.275000000
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049913020_9">
+<rID>50499-13020-i-561</rID>
+<lfSpanFr gml:id="D12_5049913020_9-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049913020_9-2">
+<gml:timePosition>2010-03-11</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049913020_9-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.166846336 140.277961346
+ 36.166956198 140.277938181
+ 36.167062137 140.277903876
+ 36.167241230 140.277853424
+ 36.167408351 140.277799125
+ 36.167502399 140.277762976
+ 36.167683093 140.277694080
+ 36.167808457 140.277646991
+ 36.167911414 140.277614449
+ 36.168039740 140.277594944
+ 36.168170321 140.277599461
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049913020_10">
+<rID>50499-13020-i-562</rID>
+<lfSpanFr gml:id="D12_5049913020_10-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049913020_10-2">
+<gml:timePosition>2010-03-11</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049913020_10-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.166666667 140.278003338
+ 36.166696587 140.277997402
+ 36.166786082 140.277974011
+ 36.166846336 140.277961346
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049913020_11">
+<rID>50499-13020-i-563</rID>
+<lfSpanFr gml:id="D12_5049913020_11-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049913020_11-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049913020_11-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.172043692 140.275215803
+ 36.171957747 140.275278570
+ 36.171851386 140.275378796
+ 36.171701375 140.275486224
+ 36.171582595 140.275556811
+ 36.171409788 140.275637876
+ 36.171272778 140.275690573
+ 36.170834730 140.275842621
+ 36.170317624 140.276023234
+ 36.170026938 140.276126199
+ 36.170023171 140.276218550
+ 36.169406358 140.276794879
+ 36.169253066 140.276916905
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049913020_12">
+<rID>50499-13020-i-564</rID>
+<lfSpanFr gml:id="D12_5049913020_12-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049913020_12-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049913020_12-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.169253066 140.276916905
+ 36.169238584 140.276928433
+ 36.169183936 140.276960805
+ 36.169101218 140.277004024
+ 36.169037647 140.277036456
+ 36.168991392 140.277045845
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049913020_13">
+<rID>50499-13020-i-565</rID>
+<lfSpanFr gml:id="D12_5049913020_13-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049913020_13-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049913020_13-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.168991392 140.277045845
+ 36.168716366 140.277101671
+ 36.168668192 140.277113737
+ 36.168604368 140.277141389
+ 36.168282847 140.277271517
+ 36.168168217 140.277316444
+ 36.167896114 140.277414614
+ 36.167724891 140.277481453
+ 36.167487234 140.277550804
+ 36.167285136 140.277607464
+ 36.166797173 140.277802784
+ 36.166666667 140.277851906
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049913020_14">
+<rID>50499-13020-i-566</rID>
+<lfSpanFr gml:id="D12_5049913020_14-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049913020_14-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049913020_14-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.172349784 140.275000000
+ 36.172171378 140.275080705
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049913020_15">
+<rID>50499-13020-i-567</rID>
+<lfSpanFr gml:id="D12_5049913020_15-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049913020_15-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049913020_15-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.172171378 140.275080705
+ 36.172151772 140.275089574
+ 36.172137098 140.275096824
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049913020_16">
+<rID>50499-13020-i-568</rID>
+<lfSpanFr gml:id="D12_5049913020_16-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049913020_16-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049913020_16-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.172137098 140.275096824
+ 36.172026083 140.275151674
+ 36.172031502 140.275171410
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+<AdmBdry gml:id="D12_5049913020_17">
+<rID>50499-13020-i-569</rID>
+<lfSpanFr gml:id="D12_5049913020_17-1">
+<gml:timePosition>2014-12-25</gml:timePosition>
+</lfSpanFr>
+<tmpFlg>0</tmpFlg>
+<orgGILvl>2500</orgGILvl>
+<ftCode>1203</ftCode>
+<devDate gml:id="D12_5049913020_17-2">
+<gml:timePosition>2009-02-23</gml:timePosition>
+</devDate>
+<loc>
+<gml:Curve gml:id="D12_5049913020_17-g" srsName="fguuid:jgd2011.bl">
+<gml:segments>
+<gml:LineStringSegment>
+<gml:posList>
+ 36.172031502 140.275171410
+ 36.172043692 140.275215803
+</gml:posList>
+</gml:LineStringSegment>
+</gml:segments>
+</gml:Curve>
+</loc>
+<type>郡市・東京都の区界</type>
+</AdmBdry>
+</Dataset>
