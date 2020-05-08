@@ -68,14 +68,13 @@ PSOURCES	=	main.cpp \
 				src/ringbuffer.cpp \
 				src/sawtooth.cpp \
 				src/sin.cpp \
-				src/synth_unit.cpp
-
-#				src/wavout.cc
-#				src/test_filter.cc
-#				src/test_neon.cc
-#				src/test_ringbuffer.cc
-#				src/android_glue.cc
-#				src/main.cc
+				src/synth_unit.cpp \
+				midi/Binasc.cpp \
+				midi/MidiEvent.cpp \
+				midi/MidiEventList.cpp \
+				midi/MidiFile.cpp \
+				midi/MidiMessage.cpp \
+				midi/Options.cpp
 
 # platform switcher (Windows, Linux, OS-X)
 ifeq ($(OS),Windows_NT)
@@ -129,7 +128,7 @@ OPTLIBS += 	glfw3 pthread \
 			png jpeg openjp2 \
 			freetype \
 			mad tag \
-			z
+			z winmm
 
 INC_SYS		=	$(LOCAL_INC_PATH) \
 				$(LOCAL_INC_PATH)/freetype2 \
@@ -138,7 +137,7 @@ INC_SYS		=	$(LOCAL_INC_PATH) \
 INC_LIB		=
 LIBDIR		=	$(LOCAL_LIB_PATH)
 
-PINC_APP	=	. ../common ./src
+PINC_APP	=	. ../common ./src ./midi
 CINC_APP	=	. ../common
 
 INC_S	=	$(addprefix -isystem , $(INC_SYS))
@@ -181,7 +180,9 @@ endif
 # -Wuninitialized -Wunused -Werror -Wshadow
 CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
 			-Wformat
-CPWARN	=	-Wall -Werror -Wno-unused-private-field
+CPWARN	=	-Wall -Werror \
+			-Wno-unused-private-field \
+			-Wno-unused-variable
 
 OBJECTS	=	$(addprefix $(BUILD)/,$(patsubst %.cpp,%.o,$(PSOURCES))) \
 			$(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(CSOURCES)))
