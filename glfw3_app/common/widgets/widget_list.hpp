@@ -209,12 +209,17 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	リストを再構築
+			@param[in]	spos	開始位置
 		*/
 		//-----------------------------------------------------------------//
-		void build()
+		void build(uint32_t spos = 0)
 		{
 			auto* m = get_menu();
 			m->build(param_.init_list_);
+
+			menu_->select(spos);
+			menu_->enable(false);
+			param_.text_param_.set_text(menu_->get_select_text());
 		}
 
 
@@ -279,6 +284,13 @@ namespace gui {
 
 			if(get_selected()) {  // 「ボタン選択」で内包メニューを有効にする。
 				menu_->enable();
+			}
+
+			// メニュー数が多い場合にスクロールホイールでオフセットする。
+			if(menu_ != nullptr) {
+				if(menu_->get_focus()) {
+
+				}
 			}
 ///			menu_->at_rect().org.y = -menu_->get_select_pos() * get_param().rect_.size.y;
 		}

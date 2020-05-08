@@ -77,6 +77,8 @@ namespace gui {
 
 		uint32_t			id_;
 
+		vtx::ipos			org_;
+
 		widget_label* build_menu_(const widget::param& wp, widget_label::param& wp_, widget::plate_param::round_style sty)
 		{
 			wp_.plate_param_.round_radius_ = param_.plate_param_.round_radius_;
@@ -133,7 +135,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_menu(widget_director& wd, const widget::param& wp, const param& p) :
 			widget(wp), wd_(wd), param_(p),
-			list_(), id_(0)
+			list_(), id_(0), org_(0)
 		{ }
 
 
@@ -400,6 +402,7 @@ namespace gui {
 			param_.init_list_ = list;
 			destroy_();
 			build_list_();
+			at_rect().org.y = org_.y;
 			at_rect().size.y = list_.size() * param_.base_height_;
 		}
 
@@ -422,6 +425,8 @@ namespace gui {
 
 			build_list_();
 			at_rect().size.y = list_.size() * param_.base_height_;
+
+			org_ = at_rect().org;  // 基準位置をセーブしておく
 		}
 
 
@@ -463,23 +468,22 @@ namespace gui {
 				++n;
 			}
 
-			// ・list_limit_ は、表示するラベルの制限を行う
-			// ・スクロール・ダイアルで、リストのスクロールを行う
-#if 0
-			if(select_pos_ < 0) {
+			// メニューが画面の下に隠れる場合
+			auto scy = gl::core::get_instance().get_rect().size.y;
+			if(scy < (org_.y + at_param().rect_.size.y)) {
+				// スクロール・ダイアルで、リストのスクロールを行う
 				const vtx::spos& scr = wd_.get_scroll();
 				if(get_focus() && scr.y != 0) {
-					int pos = param_.select_pos_;
-					pos += scr.y;
-					if(pos < 0) {
-						pos = 0;
-					} else if(pos >= static_cast<int>(list_.size())) {
-						pos = list_.size() - 1;
+					auto y = get_rect().org.y;
+					y += scr.y * param_.base_height_;
+					if(org_.y < y) {
+						y = org_.y;
+					} else if(y < (scy - get_rect().size.y - param_.base_height_)) {
+						y = scy - get_rect().size.y - param_.base_height_;
 					}
-					param_.select_pos_ = pos;
+					at_rect().org.y = y;
 				}
 			}
-#endif
 		}
 
 
