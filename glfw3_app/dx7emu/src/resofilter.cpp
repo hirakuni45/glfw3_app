@@ -57,7 +57,7 @@ ResoFilter::ResoFilter() {
 }
 
 int32_t compute_alpha(int32_t logf) {
-  return min(1 << 24, Freqlut::lookup(logf));
+  return min(static_cast<int32_t>(1 << 24), Freqlut::lookup(logf));
 }
 
 // Some really generic 4x4 matrix multiplication operations, suitable
@@ -108,12 +108,12 @@ static void matcopy(float *dst, const float *src, int n) {
 
 void dump_matrix(const float a[20]) {
   for (int row = 0; row < 5; row++) {
-    printf("%s[", row == 0 ? "[" : " ");
+    utils::format("%s[") % (row == 0 ? "[" : " ");
     for (int col = 0; col < 5; col++) {
       float x = row == 0 ? (col == 0 ? 1.0 : 0.0) : a[col * 4 + (row - 1)];
-      printf("%6f ", x);
+      utils::format("%6f ") % x;
     }
-    printf("]%s\n", row == 4 ? "]" : "");
+    utils::format("]%s\n") % (row == 4 ? "]" : "");
   }
 }
 

@@ -34,17 +34,6 @@
 #include "synth_unit.h"
 #include "aligned_buf.h"
 
-char epiano[] = {
-  95, 29, 20, 50, 99, 95, 0, 0, 41, 0, 19, 0, 115, 24, 79, 2, 0,
-  95, 20, 20, 50, 99, 95, 0, 0, 0, 0, 0, 0, 3, 0, 99, 2, 0,
-  95, 29, 20, 50, 99, 95, 0, 0, 0, 0, 0, 0, 59, 24, 89, 2, 0,
-  95, 20, 20, 50, 99, 95, 0, 0, 0, 0, 0, 0, 59, 8, 99, 2, 0,
-  95, 50, 35, 78, 99, 75, 0, 0, 0, 0, 0, 0, 59, 28, 58, 28, 0,
-  96, 25, 25, 67, 99, 75, 0, 0, 0, 0, 0, 0, 83, 8, 99, 2, 0,
-  
-  94, 67, 95, 60, 50, 50, 50, 50, 4, 6, 34, 33, 0, 0, 56, 24,
-  69, 46, 80, 73, 65, 78, 79, 32, 49, 32
-};
 
 void SynthUnit::Init(double sample_rate) {
   Freqlut::init(sample_rate);
@@ -55,42 +44,22 @@ void SynthUnit::Init(double sample_rate) {
   PitchEnv::init(sample_rate);
 }
 
-SynthUnit::SynthUnit(RingBuffer *ring_buffer) {
-  ring_buffer_ = ring_buffer;
-  for (int note = 0; note < max_active_notes; ++note) {
-    active_note_[note].dx7_note = new Dx7Note;
-    active_note_[note].keydown = false;
-    active_note_[note].sustained = false;
-    active_note_[note].live = false;
-  }
-  input_buffer_index_ = 0;
-  memcpy(patch_data_, epiano, sizeof(epiano));
-  ProgramChange(0);
-  current_note_ = 0;
-  filter_control_[0] = 258847126;
-  filter_control_[1] = 0;
-  filter_control_[2] = 0;
-  controllers_.values_[kControllerPitch] = 0x2000;
-  sustain_ = false;
-  extra_buf_size_ = 0;
-}
-
 // Transfer as many bytes as possible from ring buffer to input buffer.
 // Note that this implementation has a fair amount of copying - we'd probably
 // do it a bit differently if it were bulk data, but in this case we're
 // optimizing for simplicity of implementation.
 void SynthUnit::TransferInput() {
-  size_t bytes_available = ring_buffer_->BytesAvailable();
+  size_t bytes_available = ring_buffer_.BytesAvailable();
   int bytes_to_read = min(bytes_available,
       sizeof(input_buffer_) - input_buffer_index_);
   if (bytes_to_read > 0) {
-    ring_buffer_->Read(bytes_to_read, input_buffer_ + input_buffer_index_);
+    ring_buffer_.Read(bytes_to_read, input_buffer_ + input_buffer_index_);
     input_buffer_index_ += bytes_to_read;
   }
 }
 
 void SynthUnit::ConsumeInput(int n_input_bytes) {
-  if (n_input_bytes < input_buffer_index_) {
+  if (static_cast<uint32_t>(n_input_bytes) < input_buffer_index_) {
     memmove(input_buffer_, input_buffer_ + n_input_bytes,
         input_buffer_index_ - n_input_bytes);
   }
@@ -133,7 +102,7 @@ int SynthUnit::ProcessMidiMessage(const uint8_t *buf, int buf_size) {
           if (sustain_) {
             active_note_[note].sustained = true;
           } else {
-            active_note_[note].dx7_note->keyup();
+            active_note_[note].dx7_note.keyup();
           }
           active_note_[note].keydown = false;
         }
@@ -151,7 +120,7 @@ int SynthUnit::ProcessMidiMessage(const uint8_t *buf, int buf_size) {
         active_note_[note_ix].keydown = true;
         active_note_[note_ix].sustained = sustain_;
         active_note_[note_ix].live = true;
-        active_note_[note_ix].dx7_note->init(unpacked_patch_, buf[1], buf[2]);
+        active_note_[note_ix].dx7_note.init(unpacked_patch_, buf[1], buf[2]);
       }
       return 3;
     }
@@ -173,7 +142,7 @@ int SynthUnit::ProcessMidiMessage(const uint8_t *buf, int buf_size) {
         if (!sustain_) {
           for (int note = 0; note < max_active_notes; note++) {
             if (active_note_[note].sustained && !active_note_[note].keydown) {
-              active_note_[note].dx7_note->keyup();
+              active_note_[note].dx7_note.keyup();
               active_note_[note].sustained = false;
             }
           }
@@ -208,6 +177,15 @@ int SynthUnit::ProcessMidiMessage(const uint8_t *buf, int buf_size) {
         // TODO: check checksum?
         memcpy(patch_data_, buf + 6, 4096);
         ProgramChange(current_patch_);
+/// utils::format("Load Patch Data\n");
+#if 0
+		for(int i = 0; i < 32; ++i) {
+			char tmp[11];
+			memcpy(tmp, patch_data_ + i * 128 + 128 - 10, 10);
+			tmp[10] = 0;
+			utils::format("%2d: '%s'\n") % i % tmp;
+		}
+#endif
         return 4104;
       }
       return 0;
@@ -248,17 +226,17 @@ void SynthUnit::GetSamples(int n_samples, int16_t *buffer) {
     return;
   }
 
-  for (; i < n_samples; i += N) {
-    AlignedBuf<int32_t, N> audiobuf;
-    AlignedBuf<int32_t, N> audiobuf2;
-    for (int j = 0; j < N; ++j) {
+  for (; i < n_samples; i += SYNTH_N) {
+    AlignedBuf<int32_t, SYNTH_N> audiobuf;
+    AlignedBuf<int32_t, SYNTH_N> audiobuf2;
+    for (int j = 0; j < SYNTH_N; ++j) {
       audiobuf.get()[j] = 0;
     }
     int32_t lfovalue = lfo_.getsample();
     int32_t lfodelay = lfo_.getdelay();
     for (int note = 0; note < max_active_notes; ++note) {
       if (active_note_[note].live) {
-        active_note_[note].dx7_note->compute(audiobuf.get(), lfovalue, lfodelay,
+        active_note_[note].dx7_note.compute(audiobuf.get(), lfovalue, lfodelay,
           &controllers_);
       }
     }
@@ -266,7 +244,7 @@ void SynthUnit::GetSamples(int n_samples, int16_t *buffer) {
     int32_t *bufs2[] = { audiobuf2.get() };
     filter_.process(bufs, filter_control_, filter_control_, bufs2);
     int jmax = n_samples - i;
-    for (int j = 0; j < N; ++j) {
+    for (int j = 0; j < SYNTH_N; ++j) {
       int32_t val = audiobuf2.get()[j] >> 4;
       int clip_val = val < -(1 << 24) ? 0x8000 : val >= (1 << 24) ? 0x7fff :
         val >> 9;

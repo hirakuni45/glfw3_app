@@ -19,7 +19,7 @@
 
 /// using namespace std;
 
-void Env::init(const int r[4], const int l[4], int32_t ol, int rate_scaling) {
+void Env::init(const int r[4], const int l[4], int ol, int rate_scaling) {
   for (int i = 0; i < 4; i++) {
     rates_[i] = r[i];
     levels_[i] = l[i];
@@ -96,7 +96,7 @@ void Env::advance(int newix) {
     int qrate = (rates_[ix_] * 41) >> 6;
     qrate += rate_scaling_;
     qrate = min(qrate, 63);
-    inc_ = (4 + (qrate & 3)) << (2 + LG_N + (qrate >> 2));
+    inc_ = (4 + (qrate & 3)) << (2 + SYNTH_LG_N + (qrate >> 2));
   }
 }
 

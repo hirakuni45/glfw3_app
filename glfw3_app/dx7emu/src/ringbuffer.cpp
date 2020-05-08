@@ -13,9 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+// for glfw3_app
+#ifdef WIN32
 #include <time.h>
-#include <string.h>
+#else
+// for RX C++ framework
+#include "common/delay.hpp"
+#endif
+
+#include <cstring>
 
 #include "synth.h"
 #include "ringbuffer.h"
@@ -36,9 +42,9 @@ int RingBuffer::WriteBytesAvailable() {
 int RingBuffer::Read(int size, uint8_t *bytes) {
   int rd_ix = rd_ix_;
   SynthMemoryBarrier();  // read barrier, make sure data is committed before ix
-  unsigned int fragment_size = min((unsigned int)size, kBufSize - rd_ix);
+  auto fragment_size = min(static_cast<uint32_t>(size), static_cast<uint32_t>(kBufSize - rd_ix));
   memcpy(bytes, buf_ + rd_ix, fragment_size);
-  if (size > fragment_size) {
+  if (static_cast<uint32_t>(size) > fragment_size) {
     memcpy(bytes + fragment_size, buf_, size - fragment_size);
   }
   SynthMemoryBarrier();  // full barrier, make sure read commits before updating
@@ -53,10 +59,14 @@ void RingBuffer::Write(const uint8_t *bytes, int size) {
     int wr_ix = wr_ix_;
     unsigned int space_available = (rd_ix - wr_ix - 1) & (kBufSize - 1);
     if (space_available == 0) {
+#ifdef WIN32
       struct timespec sleepTime;
       sleepTime.tv_sec = 0;
-      sleepTime.tv_nsec = 1000000;
-      nanosleep(&sleepTime, NULL);
+      sleepTime.tv_nsec = 1000'000;
+      nanosleep(&sleepTime, nullptr);
+#else
+		utils::delay::micro_second(1000);
+#endif
     } else {
       unsigned int wr_size = min(remaining, space_available);
       unsigned int fragment_size = min(wr_size, kBufSize - wr_ix);

@@ -31,7 +31,7 @@ class FmCore {
   void compute(int32_t *output, FmOpParams *params, int algorithm,
                int32_t *fb_buf, int32_t feedback_gain);
  private:
-  AlignedBuf<int32_t, N>buf_[2];
+  AlignedBuf<int32_t, SYNTH_N>buf_[2];
 };
 
 #endif  // __FM_CORE_H

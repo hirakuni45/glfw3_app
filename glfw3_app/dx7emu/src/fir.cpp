@@ -19,6 +19,7 @@
 #include <cstdio> // for debugging, remove
 #include <cstdlib>
 
+#include "synth.h"
 #include "aligned_buf.h"
 #include "fir.h"
 
@@ -32,68 +33,14 @@ void *malloc_aligned(size_t alignment, size_t nbytes) {
 ///  int status = posix_memalign(&result, alignment, nbytes);
 ///  return status == 0 ? result : 0;
 ///	return aligned_alloc(alignment, nbytes);
+#ifdef WIN32
 	return _aligned_malloc(nbytes, alignment);
+#else
+	return malloc(nbytes);
+#endif
 }
 #endif
 
-SimpleFirFilter::SimpleFirFilter(const float *kernel, size_t nk) : nk(nk) {
-  k = (float *)malloc(nk * sizeof(k[0]));
-  for (size_t i = 0; i < nk; i++) {
-    k[i] = kernel[nk - i - 1];
-  }
-}
-
-SimpleFirFilter::~SimpleFirFilter() {
-  free(k);
-}
-
-void SimpleFirFilter::process(const float *in, float *out, size_t n) {
-  for (size_t i = 0; i < n; i++) {
-    float y = 0;
-    for (size_t j = 0; j < nk; j++) {
-      y += k[j] * in[i + j];
-    }
-    out[i] = y;
-  }
-}
-
-HalfRateFirFilter::HalfRateFirFilter(const float *kernel, size_t nk, size_t n) : nk(nk) {
-  float k0[kMaxNk / 2];
-  float k1[kMaxNk / 2];
-  size_t n2 = n >> 1;
-  size_t nk2 = nk >> 1;
-  // probably better to do fewer allocations and just set up pointers...
-  y0 = (float *)malloc_aligned(16, n2 * sizeof(y0[0]));
-  y1 = (float *)malloc_aligned(16, n2 * sizeof(y1[0]));
-  y2 = (float *)malloc_aligned(16, n2 * sizeof(y2[0]));
-  i0 = (float *)malloc_aligned(16, (n2 + nk2) * sizeof(i0[0]));
-  i1 = (float *)malloc_aligned(16, (n2 + nk2) * sizeof(i1[0]));
-  i2 = (float *)malloc_aligned(16, (n2 + nk2) * sizeof(i2[0]));
-  k2 = (float *)malloc_aligned(16, nk2 * sizeof(k2[0]));
-  for (size_t i = 0; i < nk2; i++) {
-    float b0 = kernel[i * 2];
-    float b2 = kernel[i * 2 + 1];
-    k0[i] = b0;
-    k1[i] = b0 + b2;
-    k2[i] = b2;
-  }
-  f0 = new SimpleFirFilter(k0, nk2);
-  f1 = new SimpleFirFilter(k1, nk2);
-  f2 = new SimpleFirFilter(k2, nk2);
-}
-
-HalfRateFirFilter::~HalfRateFirFilter() {
-  free(k2);
-  delete i0;
-  delete i1;
-  delete i2;
-  delete y0;
-  delete y1;
-  delete y2;
-  delete f0;
-  delete f1;
-  delete f2;
-}
 
 extern "C"
 void neon_halfrate_split(const float *in, float *buf0, float *buf1, float *buf2, size_t n);
@@ -208,7 +155,7 @@ SseFirFilter::~SseFirFilter() {
 
 void printvec(__m128 v) {
   float *f = (float *)&v;
-  printf("[%f %f %f %f]\n", f[0], f[1], f[2], f[3]);
+  utils::format("[%f %f %f %f]\n") % f[0] % f[1] % f[2] % f[3];
 }
 
 void SseFirFilter::process(const float *in1, float *out, size_t n) {

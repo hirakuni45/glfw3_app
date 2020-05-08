@@ -20,7 +20,7 @@
 int PitchEnv::unit_;
 
 void PitchEnv::init(double sample_rate) {
-  unit_ = N * (1 << 24) / (21.3 * sample_rate) + 0.5;
+  unit_ = SYNTH_N * (1 << 24) / (21.3 * sample_rate) + 0.5;
 }
 
 static uint8_t ratetab[] = {
