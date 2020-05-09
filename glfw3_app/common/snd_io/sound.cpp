@@ -232,7 +232,7 @@ namespace al {
 
 		qt.start_ = true;
 
-		static const uint32_t pcm_size = 512;
+		static const uint32_t pcm_size = 2048;
 		audio aif;
 		aif = al::create_audio(al::audio_format::PCM16_STEREO);
 		aif->create(44100, pcm_size);
@@ -269,9 +269,9 @@ namespace al {
 				++qt.frame_;
 			}
 #ifdef __APPLE__
-			usleep(4000);	// 4ms くらいの時間待ち
+			usleep(8000);	// 8ms くらいの時間待ち
 #else
-			usleep(5000);	// 5ms くらいの時間待ち
+			usleep(10000);	// 10ms くらいの時間待ち
 #endif
 		}
 

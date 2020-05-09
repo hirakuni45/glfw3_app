@@ -378,7 +378,12 @@ namespace al {
 ///				std::cout << "Queue buffer: " << qn << std::endl;
 			}
 			if(n == 0) {
+				bh = 0;
 				alGenBuffers(1, &bh);
+				if(bh == 0) {
+std::cout << "alGenBuffers NG!" << std::endl;
+					return 0;
+				}
 			} else {
 				alGetSourcei(ssh, AL_BUFFERS_PROCESSED, &n);
 				if(n != 0) {
@@ -387,7 +392,12 @@ namespace al {
 				} else {
 					alGetSourcei(ssh, AL_BUFFERS_QUEUED, &n);
 					if(n < queue_max_) {
+						bh = 0;
 						alGenBuffers(1, &bh);
+						if(bh == 0) {
+std::cout << "alGenBuffers NG!" << std::endl;
+							return 0;
+						}
 					} else {
 						static uint32_t cnt = 0;
 ///						std::cout << "No handle: " << cnt << std::endl;
