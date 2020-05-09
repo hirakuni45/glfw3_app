@@ -54,10 +54,10 @@ namespace app {
 
 		gl::texfb				texfb_;
 
-		static const int sys_width_  = 320;
-		static const int sys_height_ = 240;
+		static const int sys_width_   = 320;
+		static const int sys_height_  = 200;
 		static const int sample_rate_ = 44100;
-		static const int audio_len_ = sample_rate_ / 60;
+		static const int audio_len_   = sample_rate_ / 60;
 
 		uint8_t			fb_[sys_width_ * sys_height_ * 4];
 
