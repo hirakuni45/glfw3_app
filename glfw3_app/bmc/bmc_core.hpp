@@ -289,10 +289,8 @@ namespace app {
 			utils::format("Copyright (C) 2013/2018, Hiramatsu Kunihito\n");
 			utils::format("Version %3.2f\n") % version_;
 			utils::format("usage:\n");
-			string cm;
-			const char* p = strrchr(cmd, '\\');
-			if(p) { cm = p + 1; }
-			cout << "    " << cm << " [options] in-file [out-file]" << endl;
+			auto c = utils::get_file_base(cmd);
+			cout << "    " << c << " [options] in-file [out-file]" << endl;
 			cout << "    -preview,-pre     preview image (OpenGL)" << endl;
 			cout << "    -header bits      output width,height" << endl;
 			cout << "    -text             text base output" << endl;
