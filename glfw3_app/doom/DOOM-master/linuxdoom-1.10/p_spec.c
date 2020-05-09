@@ -1231,43 +1231,43 @@ int EV_DoDonut(line_t*	line)
 // After the map has been loaded, scan for specials
 //  that spawn thinkers
 //
-short		numlinespecials;
-line_t*		linespeciallist[MAXLINEANIMS];
+short numlinespecials;
+line_t* linespeciallist[MAXLINEANIMS];
 
 
 // Parses command line parameters.
 void P_SpawnSpecials (void)
 {
-    sector_t*	sector;
-    int		i;
-    int		episode;
-
-    episode = 1;
+    int episode = 1;
     if (W_CheckNumForName("texture2") >= 0) {
 		episode = 2;
 	}
 
     // See if -TIMER needs to be used.
     levelTimer = false;
+
+	{
+		int i = M_CheckParm("-avg");
+    	if (i && deathmatch) {
+			levelTimer = true;
+			levelTimeCount = 20 * 60 * 35;
+    	}
+	}
 	
-    i = M_CheckParm("-avg");
-    if (i && deathmatch) {
-		levelTimer = true;
-		levelTimeCount = 20 * 60 * 35;
-    }
-	
-    i = M_CheckParm("-timer");
-    if (i && deathmatch) {
-		int	time;
-		time = atoi(myargv[i+1]) * 60 * 35;
-		levelTimer = true;
-		levelTimeCount = time;
-    }
+	{
+    	int i = M_CheckParm("-timer");
+	    if (i && deathmatch) {
+			int	time;
+			time = atoi(myargv[i+1]) * 60 * 35;
+			levelTimer = true;
+			levelTimeCount = time;
+		}
+	}
 
 printf("P_SpawnSpecials: Pass0\n");
     //	Init special SECTORs.
-    sector = sectors;
-    for (i = 0; i < numsectors; i++, sector++) {
+	sector_t* sector = sectors;
+    for (int i = 0; i < numsectors; i++, sector++) {
 		if (!sector->special) {
 	    	continue;
 		}
@@ -1332,7 +1332,7 @@ printf("P_SpawnSpecials: Pass1\n");
     
     //	Init line EFFECTs
     numlinespecials = 0;
-    for (i = 0; i < numlines; i++) {
+    for (int i = 0; i < numlines; i++) {
 		switch(lines[i].special)
 		{
 		case 48:
@@ -1344,17 +1344,16 @@ printf("P_SpawnSpecials: Pass1\n");
     }
 
 printf("P_SpawnSpecials: Pass2\n");
-Z_CheckHeap();
     //	Init other misc stuff
-    for (i = 0; i < MAXCEILINGS; i++) {
+    for (int i = 0; i < MAXCEILINGS; i++) {
 		activeceilings[i] = NULL;
 	}
 printf("P_SpawnSpecials: Pass3\n");
-    for (i = 0; i < MAXPLATS; i++) {
+    for (int i = 0; i < MAXPLATS; i++) {
 		activeplats[i] = NULL;
 	}
 printf("P_SpawnSpecials: Pass4\n");
-    for (i = 0; i < MAXBUTTONS; i++) {
+    for (int i = 0; i < MAXBUTTONS; i++) {
 		memset(&buttonlist[i], 0, sizeof(button_t));
 	}
 printf("P_SpawnSpecials: Pass5\n");

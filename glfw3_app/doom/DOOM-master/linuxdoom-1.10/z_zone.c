@@ -126,16 +126,16 @@ void Z_Free (void* ptr)
 	
     block = (memblock_t *) ( (byte *)ptr - sizeof(memblock_t));
 
-    if (block->id != ZONEID)
-	I_Error ("Z_Free: freed a pointer without ZONEID");
-		
-    if (block->user > (void **)0x100)
-    {
-	// smaller values are not pointers
-	// Note: OS-dependend?
+    if (block->id != ZONEID) {
+		I_Error ("Z_Free: freed a pointer without ZONEID");
+	}
+
+    if (block->user > (void **)0x100) {
+		// smaller values are not pointers
+		// Note: OS-dependend?
 	
-	// clear the user's mark
-	*block->user = 0;
+		// clear the user's mark
+		*block->user = 0;
     }
 
     // mark as free
@@ -145,30 +145,30 @@ void Z_Free (void* ptr)
 	
     other = block->prev;
 
-    if (!other->user)
-    {
-	// merge with previous free block
-	other->size += block->size;
-	other->next = block->next;
-	other->next->prev = other;
+    if (!other->user) {
+		// merge with previous free block
+		other->size += block->size;
+		other->next = block->next;
+		other->next->prev = other;
 
-	if (block == mainzone->rover)
-	    mainzone->rover = other;
+		if (block == mainzone->rover) {
+		    mainzone->rover = other;
+		}
 
-	block = other;
+		block = other;
     }
 	
     other = block->next;
-    if (!other->user)
-    {
-	// merge the next free block onto the end
-	block->size += other->size;
-	block->next = other->next;
-	block->next->prev = block;
+    if (!other->user) {
+		// merge the next free block onto the end
+		block->size += other->size;
+		block->next = other->next;
+		block->next->prev = block;
 
-	if (other == mainzone->rover)
-	    mainzone->rover = block;
-    }
+		if (other == mainzone->rover) {
+			mainzone->rover = block;
+		}
+	}
 }
 
 

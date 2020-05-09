@@ -582,24 +582,18 @@ void P_GroupLines (void)
 //
 void P_SetupLevel ( int episode, int map, int playermask, skill_t skill )
 {
-    int		i;
-    char	lumpname[9];
-    int		lumpnum;
-	
-    totalkills = totalitems = totalsecret = wminfo.maxfrags = 0;
-    wminfo.partime = 180;
-    for (i=0 ; i<MAXPLAYERS ; i++)
-    {
-	players[i].killcount = players[i].secretcount 
-	    = players[i].itemcount = 0;
-    }
+	totalkills = totalitems = totalsecret = wminfo.maxfrags = 0;
+	wminfo.partime = 180;
+	for (int i=0; i < MAXPLAYERS; i++) {
+		players[i].killcount = players[i].secretcount = players[i].itemcount = 0;
+	}
 
-    // Initial height of PointOfView
-    // will be set by player think.
-    players[consoleplayer].viewz = 1; 
+	// Initial height of PointOfView
+	// will be set by player think.
+	players[consoleplayer].viewz = 1; 
 
-    // Make sure all sounds are stopped before Z_FreeTags.
-    S_Start ();			
+	// Make sure all sounds are stopped before Z_FreeTags.
+	S_Start ();			
     
 #if 0 // UNUSED
     if (debugfile) {
@@ -613,76 +607,72 @@ void P_SetupLevel ( int episode, int map, int playermask, skill_t skill )
 		Z_FreeTags(PU_LEVEL, PU_PURGELEVEL - 1);
 	}
 
-    // UNUSED W_Profile ();
-    P_InitThinkers ();
+	// UNUSED W_Profile ();
+	P_InitThinkers ();
 
-    // if working with a devlopment map, reload it
-    W_Reload ();			
+	// if working with a devlopment map, reload it
+	W_Reload ();			
 
-    // find map name
-    if ( gamemode == commercial)
-    {
-	if (map<10)
-	    sprintf (lumpname,"map0%i", map);
-	else
-	    sprintf (lumpname,"map%i", map);
-    }
-    else
-    {
-	lumpname[0] = 'E';
-	lumpname[1] = '0' + episode;
-	lumpname[2] = 'M';
-	lumpname[3] = '0' + map;
-	lumpname[4] = 0;
-    }
+	// find map name
+	char lumpname[9];
+	if ( gamemode == commercial) {
+		if (map<10) {
+			sprintf (lumpname,"map0%i", map);
+		} else {
+			sprintf (lumpname,"map%i", map);
+		}
+	} else {
+		lumpname[0] = 'E';
+		lumpname[1] = '0' + episode;
+		lumpname[2] = 'M';
+		lumpname[3] = '0' + map;
+		lumpname[4] = 0;
+	}
 
-    lumpnum = W_GetNumForName (lumpname);
-	
+	int lumpnum = W_GetNumForName (lumpname);	
     leveltime = 0;
 
-    // note: most of this ordering is important	
-    P_LoadBlockMap (lumpnum+ML_BLOCKMAP);
-    P_LoadVertexes (lumpnum+ML_VERTEXES);
-    P_LoadSectors (lumpnum+ML_SECTORS);
-    P_LoadSideDefs (lumpnum+ML_SIDEDEFS);
+	// note: most of this ordering is important	
+	P_LoadBlockMap (lumpnum+ML_BLOCKMAP);
+	P_LoadVertexes (lumpnum+ML_VERTEXES);
+	P_LoadSectors (lumpnum+ML_SECTORS);
+	P_LoadSideDefs (lumpnum+ML_SIDEDEFS);
 
-    P_LoadLineDefs (lumpnum+ML_LINEDEFS);
-    P_LoadSubsectors (lumpnum+ML_SSECTORS);
-    P_LoadNodes (lumpnum+ML_NODES);
-    P_LoadSegs (lumpnum+ML_SEGS);
+	P_LoadLineDefs (lumpnum+ML_LINEDEFS);
+	P_LoadSubsectors (lumpnum+ML_SSECTORS);
+	P_LoadNodes (lumpnum+ML_NODES);
+	P_LoadSegs (lumpnum+ML_SEGS);
 
-    rejectmatrix = W_CacheLumpNum (lumpnum+ML_REJECT,PU_LEVEL);
-    P_GroupLines ();
+	rejectmatrix = W_CacheLumpNum (lumpnum+ML_REJECT,PU_LEVEL);
+	P_GroupLines ();
 
-    bodyqueslot = 0;
-    deathmatch_p = deathmatchstarts;
-    P_LoadThings (lumpnum+ML_THINGS);
+	bodyqueslot = 0;
+	deathmatch_p = deathmatchstarts;
+	P_LoadThings (lumpnum+ML_THINGS);
 
-    // if deathmatch, randomly spawn the active players
-    if (deathmatch)
-    {
-	for (i=0 ; i<MAXPLAYERS ; i++)
-	    if (playeringame[i])
-	    {
-		players[i].mo = NULL;
-		G_DeathMatchSpawnPlayer (i);
-	    }
-			
+	// if deathmatch, randomly spawn the active players
+	if (deathmatch) {
+		for (int i=0 ; i<MAXPLAYERS ; i++) {
+			if (playeringame[i]) {
+				players[i].mo = NULL;
+				G_DeathMatchSpawnPlayer (i);
+			}
+		}
     }
 
-    // clear special respawning que
-    iquehead = iquetail = 0;		
+	// clear special respawning que
+	iquehead = iquetail = 0;		
 printf("SetupLevel Pass0\n");
-Z_CheckHeap();
-    // set up world state
-    P_SpawnSpecials ();
+	// set up world state
+	P_SpawnSpecials ();
 printf("SetupLevel Pass1\n");
-    // build subsector connect matrix
-    //	UNUSED P_ConnectSubsectors ();
+	// build subsector connect matrix
+	//	UNUSED P_ConnectSubsectors ();
 printf("SetupLevel Pass2\n");
-    // preload graphics
-    if (precache)
-	R_PrecacheLevel ();
+	// preload graphics
+	if (precache) {
+		R_PrecacheLevel ();
+	}
 
     //printf ("free memory: 0x%x\n", Z_FreeMemory());
 printf("SetupLevel Pass3\n");
