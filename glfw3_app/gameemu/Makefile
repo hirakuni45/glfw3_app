@@ -69,6 +69,10 @@ PSOURCES	=	main.cpp \
 				widgets/widget_director.cpp \
 				widgets/widget_utils.cpp \
 				widgets/widget_filer.cpp \
+				src/devices/cpu/z80/z80.cpp \
+				src/devices/machine/gen_latch.cpp \
+				src/devices/machine/watchdog.cpp \
+				src/devices/sound/samples.cpp \
 				src/emu/config.cpp \
 				src/emu/ioport.cpp \
 				src/emu/tilemap.cpp \

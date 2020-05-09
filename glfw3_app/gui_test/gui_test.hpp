@@ -41,7 +41,8 @@ namespace app {
 		utils::director<core>&	director_;
 
 		gui::widget_button*		dialog_open_;
-		gui::widget_button*		filer_open_;
+		gui::widget_button*		filer_open1_;
+		gui::widget_button*		filer_open2_;
 		gui::widget_button*		menu_open_;
 		gui::widget_button*		menu_ins_;
 		gui::widget_button*		menu_era_;
@@ -114,7 +115,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		gui_test(utils::director<core>& d) : director_(d),
 			dialog_open_(nullptr),
-			filer_open_(nullptr),
+			filer_open1_(nullptr), filer_open2_(nullptr),
 			menu_open_(nullptr), menu_ins_(nullptr), menu_era_(nullptr),
 			check_(nullptr),
 			slider_(nullptr),
@@ -223,12 +224,29 @@ namespace app {
 				dialog2_->enable(false);
 			}
 
+			if(1) { // ボタンのテスト（OS 依存ファイラー開始ボタン）
+				widget::param wp(vtx::irect(30, 150, 150, 40));
+				widget_button::param wp_("Filer1");
+				filer_open1_ = wd.add_widget<widget_button>(wp, wp_);
+				filer_open1_->at_local_param().text_param_.set_alias("ファイラー１");
+				filer_open1_->at_local_param().text_param_.alias_enable_ = true;
+				filer_open1_->at_local_param().select_func_ = [=](uint32_t id) {
+					gl::core& core = gl::core::get_instance();
+					auto cp = core.get_current_path();
+///					sel_dir_.open("テスト・フォルダを選択", cp);
+					sel_file_.open("*.*", false, cp);
+				};
+			}
+
 			if(1) { // ボタンのテスト（ファイラー開始ボタン）
-				widget::param wp(vtx::irect(30, 150, 100, 40));
-				widget_button::param wp_("Filer");
-				filer_open_ = wd.add_widget<widget_button>(wp, wp_);
-				filer_open_->at_local_param().text_param_.set_alias("ファイラー");
-				filer_open_->at_local_param().text_param_.alias_enable_ = true;
+				widget::param wp(vtx::irect(200, 150, 150, 40));
+				widget_button::param wp_("Filer2");
+				filer_open2_ = wd.add_widget<widget_button>(wp, wp_);
+				filer_open2_->at_local_param().text_param_.set_alias("ファイラー２");
+				filer_open2_->at_local_param().text_param_.alias_enable_ = true;
+				filer_open2_->at_local_param().select_func_ = [=](uint32_t id) {
+					filer_->enable(!filer_->get_state(gui::widget::state::ENABLE));
+				};
 			}
 
 			if(1) { // ボタンのテスト（メニュー開始ボタン）
@@ -570,17 +588,6 @@ namespace app {
 				}
 			}
 
-			if(filer_open_) {
-				if(filer_open_->get_selected()) {
-					gl::core& core = gl::core::get_instance();
-					auto cp = core.get_current_path();
-///					sel_dir_.open("テスト・フォルダを選択", cp);
-					sel_file_.open("*.*", false, cp);
-					if(filer_) {
-///						filer_->enable(!filer_->get_state(gui::widget::state::ENABLE));
-					}
-				}
-			}
 			if(sel_file_.state()) {
 				std::cout << sel_file_.get() << std::endl;
 			}
