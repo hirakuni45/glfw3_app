@@ -24,8 +24,9 @@
 
 #include "utils/format.hpp"
 
-#include "synth_unit.h"
+#include "dx7.hpp"
 #include "MidiFile.h"
+#include "midi2text.hpp"
 
 namespace app {
 
@@ -59,8 +60,12 @@ namespace app {
 		typedef snd::midi_file_io MIDI_FILE;
 		MIDI_FILE		midi_file_;
 
-		RingBuffer		ring_buffer_;
-		SynthUnit		synth_unit_;
+		NOTES			notes_;
+		uint32_t		midi_pos_;
+		uint32_t		midi_frame_;
+		NOTES			ring_;
+
+		synth::DX7		dx7_;
 
 		void keys_()
 		{
@@ -87,31 +92,31 @@ namespace app {
 				uint8_t tmp[2];
 				tmp[0] = 0xc0;
 				tmp[1] = 0;
-				ring_buffer_.Write(tmp, sizeof(tmp));								
+				dx7_.at_msg().Write(tmp, sizeof(tmp));								
 			}
 			if(dev.get_positive(gl::device::key::_1)) {
 				uint8_t tmp[2];
 				tmp[0] = 0xc0;
 				tmp[1] = 1;
-				ring_buffer_.Write(tmp, sizeof(tmp));								
+				dx7_.at_msg().Write(tmp, sizeof(tmp));								
 			}
 			if(dev.get_positive(gl::device::key::_2)) {
 				uint8_t tmp[2];
 				tmp[0] = 0xc0;
 				tmp[1] = 2;
-				ring_buffer_.Write(tmp, sizeof(tmp));								
+				dx7_.at_msg().Write(tmp, sizeof(tmp));								
 			}
 			if(dev.get_positive(gl::device::key::_3)) {
 				uint8_t tmp[2];
 				tmp[0] = 0xc0;
 				tmp[1] = 3;
-				ring_buffer_.Write(tmp, sizeof(tmp));								
+				dx7_.at_msg().Write(tmp, sizeof(tmp));								
 			}
 			if(dev.get_positive(gl::device::key::_9)) {
 				uint8_t tmp[2];
 				tmp[0] = 0xc0;
 				tmp[1] = 9;
-				ring_buffer_.Write(tmp, sizeof(tmp));								
+				dx7_.at_msg().Write(tmp, sizeof(tmp));								
 			}
 		}
 
@@ -177,6 +182,14 @@ namespace app {
 			smf::MidiFile midi_file;
 			midi_file.read(filename);
 
+			notes_.clear();
+			convertMidiFileToText(midi_file, notes_);
+
+			midi_pos_ = 0;
+			midi_frame_ = 0;
+			ring_.resize(16);  // 16 同時発音
+
+#if 0
 			// マスタートラックのテンポを元に、全MIDIイベントの時間(秒)を計算
 			midi_file.doTimeAnalysis();
 
@@ -198,6 +211,61 @@ namespace app {
 					}
 				}
 			}
+#endif
+		}
+
+
+		void service_midi_notes_()
+		{
+			if(midi_pos_ >= notes_.size()) {
+				return;
+			}
+			// ノートOFFの処理
+			for(auto& t : ring_) {
+				if(t.count == 0) continue;
+				else {
+					t.count--;
+					if(t.count == 0) {
+						uint8_t key[3];
+						key[0] = 0x80;  // note-off
+						key[1] = t.key;
+						key[2] = t.velo;
+						dx7_.at_msg().Write(key, 3);
+					}
+				}
+			}
+
+			// 同じフレームのノートを集めて発音
+			uint32_t ofs = 0;
+			for(uint32_t i = 0; i < 32; ++i) {
+				auto p = midi_pos_ + i;
+				if(p >= notes_.size()) break;
+				auto& t = notes_[p];
+				if(t.frame == midi_frame_) {
+					for(auto& r : ring_) {
+						if(r.count == 0) {
+							r = t;
+							uint8_t key[3];
+							key[0] = 0x90;  // note-on
+							key[1] = t.key;
+							key[2] = t.velo;
+							dx7_.at_msg().Write(key, 3);
+							++ofs;
+							break;
+						}
+					}
+				}
+			}
+			for(uint32_t i = 0; i < ofs; ++i) {
+				if(notes_[midi_pos_ + i].frame > midi_frame_) {
+					ofs = i;
+					break;
+				}
+			}
+			midi_pos_ += ofs;
+			if(notes_.size() > midi_pos_) {
+				++midi_frame_;
+			}
 		}
 
 	public:
@@ -215,7 +283,7 @@ namespace app {
 			key_back_{ false }, key_{ false },
 			midi_num_(0), midi_in_(),
 			midi_file_(),
-			ring_buffer_(), synth_unit_(ring_buffer_)
+			dx7_()
 			{ }
 
 
@@ -268,16 +336,16 @@ namespace app {
 						if(fin.open(file, "rb")) {
 							uint8_t tmp[4096 + 8];
 							if(fin.read(tmp, sizeof(tmp)) == sizeof(tmp)) {
-								ring_buffer_.Write(tmp, sizeof(tmp));
+								dx7_.at_msg().Write(tmp, sizeof(tmp));
 								{  // データを処理させる。
 									const uint32_t len = 44100 / 60;
 									int16_t tmp[len];
-									synth_unit_.GetSamples(len, tmp);
+									dx7_.GetSamples(len, tmp);
 								}
 								prog_list_->at_local_param().init_list_.clear();
 								for(int i = 0; i < 32; ++i) {
 									char tmp[11];
-									synth_unit_.get_patch_name(i, tmp, sizeof(tmp));
+									dx7_.get_patch_name(i, tmp, sizeof(tmp));
 									char str[32];
 									utils::sformat("%2d: '%s'\n", str, sizeof(str)) % i % tmp;
 									terminal_core_->output(str);
@@ -348,7 +416,7 @@ namespace app {
 					uint8_t tmp[2];
 					tmp[0] = 0xc0;
 					tmp[1] = pos;
-					ring_buffer_.Write(tmp, sizeof(tmp));
+					dx7_.at_msg().Write(tmp, sizeof(tmp));
 				};
 			}
 
@@ -372,7 +440,7 @@ namespace app {
 				overtone_[i]->load(pre);
 			}
 
-			SynthUnit::Init(44'100);
+			dx7_.Init(44'100);
 		}
 
 
@@ -389,6 +457,7 @@ namespace app {
 ///			const gl::device& dev = core.get_device();
 
 			midi_file_.service();
+			service_midi_notes_();
 
 			update_midi_input_();
 
@@ -398,12 +467,12 @@ namespace app {
 				if(key_[i] && !key_back_[i]) {
 					uint8_t key[3] = { 0x90, 0x3C, 0x7F };
 					key[1] = 0x3C + i;
-					ring_buffer_.Write(key, 3);
+					dx7_.at_msg().Write(key, 3);
 				}
 				if(!key_[i] && key_back_[i]) {
 					uint8_t key[3] = { 0x80, 0x3C, 0x7F };
 					key[1] = 0x3C + i;
-					ring_buffer_.Write(key, 3);
+					dx7_.at_msg().Write(key, 3);
 				}
 			}
 
@@ -411,12 +480,12 @@ namespace app {
 				if(piano_keys_[i]->get_select_in()) {
 					uint8_t key[3] = { 0x90, 0x3C, 0x7F };
 					key[1] = 24+i;
-					ring_buffer_.Write(key, 3);
+					dx7_.at_msg().Write(key, 3);
 				}
 				if(piano_keys_[i]->get_select_out()) {
 					uint8_t key[3] = { 0x80, 0x3C, 0x7F };
 					key[1] = 24+i;
-					ring_buffer_.Write(key, 3);
+					dx7_.at_msg().Write(key, 3);
 				}
 			}
 
@@ -430,12 +499,12 @@ namespace app {
 						uint8_t key[3] = { 0x90, 0x3C, 0x7F };
 						key[1] = t.note;
 						key[2] = t.velocity;
-						ring_buffer_.Write(key, 3);
+						dx7_.at_msg().Write(key, 3);
 					} else {
 						uint8_t key[3] = { 0x80, 0x3C, 0x7F };
 						key[1] = t.note;
 						key[2] = t.velocity;
-						ring_buffer_.Write(key, 3);
+						dx7_.at_msg().Write(key, 3);
 					}
 					fifo.get_go();
 				}
@@ -455,7 +524,7 @@ namespace app {
 			{
 				const uint32_t len = 44100 / 60;
 				int16_t tmp[len];
-				synth_unit_.GetSamples(len, tmp);
+				dx7_.GetSamples(len, tmp);
 
 				al::audio aif(new al::audio_sto16);
 				aif->create(44100, len);

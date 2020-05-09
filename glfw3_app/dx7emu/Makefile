@@ -19,6 +19,7 @@ CSOURCES	=	minizip/ioapi.c \
 #				src/miniz/miniz.c
 
 PSOURCES	=	main.cpp \
+				midi2text.cpp \
 				core/glcore.cpp \
 				core/device.cpp \
 				gl_fw/glfonts.cpp \
@@ -60,15 +61,12 @@ PSOURCES	=	main.cpp \
 				src/fm_core.cpp \
 				src/fm_op_kernel.cpp \
 				src/freqlut.cpp \
-				src/lfo.cpp \
 				src/log2.cpp \
 				src/patch.cpp \
 				src/pitchenv.cpp \
 				src/resofilter.cpp \
-				src/ringbuffer.cpp \
 				src/sawtooth.cpp \
 				src/sin.cpp \
-				src/synth_unit.cpp \
 				midi/Binasc.cpp \
 				midi/MidiEvent.cpp \
 				midi/MidiEventList.cpp \
