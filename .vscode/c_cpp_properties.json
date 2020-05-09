@@ -1,22 +1,23 @@
 {
     "configurations": [
         {
-            "name": "Win32",
+            "name": "Mingw64 clang",
+            "compilerPath": "C:/msys64/mingw64/bin",
+            "compileCommands": "",
             "includePath": [
-                "C:/msys64/mingw64/x86_64-w64-mingw32/include",
-                "C:/msys64/mingw64/lib/clang/5.0.1/include",
-                "C:/msys64/mingw64/include/c++/7.3.0/backward",
-                "C:/msys64/mingw64/include/c++/7.3.0/x86_64-w64-mingw32",
-                "C:/msys64/mingw64/include/c++/7.3.0",
-                ".",
-                "${workspaceFolder}",
-                "${workspaceFolder}/glfw3_app/common"
+                "${workspaceFolder}/glfw3_app/common",
+		"C:/msys64/mingw64/include",
+		"C:/msys64/mingw64/include/c++/9.2.0",
+		"C:/msys64/mingw64/include/c++/9.2.0/x86_64-w64-mingw32",
+		"C:/msys64/mingw64/include/c++/9.2.0/backward",
+		"C:/msys64/mingw64/lib/clang/9.0.0/include",
+		"C:/msys64/mingw64/x86_64-w64-mingw32/include",
+                "${currentFolder}/**"
             ],
             "defines": [
                 "__GNUC__",
                 "HAVE_STDINT_H", "BOOST_USE_WINDOWS_H",
                 "WIN32",
-                "_DEBUG",
                 "UNICODE",
                 "_UNICODE"
             ],

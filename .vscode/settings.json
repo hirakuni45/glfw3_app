@@ -1,6 +1,17 @@
 {
+    "terminal.integrated.shell.windows": "C:\\msys64\\usr\\bin\\bash.exe",
+    "terminal.integrated.env.windows": {
+        "MSYSTEM": "MINGW64",
+        "CHERE_INVOKING": "1"
+    },
+    "terminal.integrated.shellArgs.windows": [
+        "--login"
+    ],
+    "terminal.integrated.cursorStyle": "line",
+    "git.path": "C:\\msys64\\usr\\bin\\git.exe",
     "git.ignoreLimitWarning": true,
     "files.associations": {
         "iostream": "cpp"
     }
+    
 }
