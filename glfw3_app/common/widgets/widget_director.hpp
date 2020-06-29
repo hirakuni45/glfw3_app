@@ -18,6 +18,7 @@
 #include "img_io/paint.hpp"
 #include "img_io/img_files.hpp"
 #include "utils/keyboard.hpp"
+#include "utils/format.hpp"
 
 namespace gui {
 

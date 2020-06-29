@@ -15,7 +15,6 @@
 //=====================================================================//
 #include "widgets/widget_director.hpp"
 #include "widgets/widget_label.hpp"
-#include "utils/format.hpp"
 
 namespace gui {
 

@@ -14,7 +14,6 @@
 #include "utils/vmath.hpp"
 #include "utils/string_utils.hpp"
 #include "gl_fw/glutils.hpp"
-#include "utils/format.hpp"
 
 namespace gui {
 

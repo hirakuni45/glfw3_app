@@ -186,8 +186,8 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	選択位置の取得
-			@return 選択位置
+			@brief	数値の取得
+			@return 数値
 		*/
 		//-----------------------------------------------------------------//
 		int get_select_pos() const { return param_.sel_pos_; }
@@ -286,12 +286,16 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void update() override
 		{
-			if(!initial_ && param_.select_func_ != nullptr) {
-				initial_ = true;
-				auto t = param_.select_func_(state::initial, param_.sel_pos_, param_.sel_pos_);
-				if(!t.empty()) {
-					param_.text_param_.set_text(t);
+			if(!initial_) {
+				std::string itx;
+				if(param_.select_func_ != nullptr) {
+					itx = param_.select_func_(state::initial, param_.sel_pos_, param_.sel_pos_);
 				}
+				if(itx.empty()) {  // 関数が設定されていない場合の標準的な数値変換
+					itx = (boost::format("%d") % param_.sel_pos_).str();
+				}
+				param_.text_param_.set_text(itx);
+				initial_ = true;
 			}
 
 			state st = state::none;
@@ -372,11 +376,15 @@ namespace gui {
 		{
 			if(!get_enable()) return;
 
-		   	if(param_.select_func_ != nullptr && state_ != state::none) {
-	   			auto t = param_.select_func_(state_, sel_pos_, param_.sel_pos_);
-   				if(!t.empty()) {
-					param_.text_param_.set_text(t);
+			if(state_ != state::none) {
+				std::string rtx;
+				if(param_.select_func_ != nullptr) {
+					rtx = param_.select_func_(state_, sel_pos_, param_.sel_pos_);
 				}
+   				if(rtx.empty()) {  // 関数が設定されていない場合の標準的な数値変換
+					rtx = (boost::format("%d") % param_.sel_pos_).str();
+				}
+				param_.text_param_.set_text(rtx);
 				state_ = state::none;
 			}
 			sel_pos_ = param_.sel_pos_;

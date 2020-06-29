@@ -13,8 +13,6 @@
 #include "core/glcore.hpp"
 #include <utility>
 
-#include "utils/format.hpp"
-
 namespace gui {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
