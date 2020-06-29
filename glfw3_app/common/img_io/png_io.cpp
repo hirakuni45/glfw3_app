@@ -53,9 +53,9 @@ namespace img {
 
 		size_t s = fout->write(buf, 1, size);
 		if(s != size) {
-			const char* text = boost::io::str(boost::format("png_io_write_func: error (%d/%d)")
-				% static_cast<int>(s) % static_cast<int>(size)).c_str();
-			png_error(png_ptr, text);
+			auto str = (boost::format("png_io_write_func: error (%d/%d)")
+				% static_cast<int>(s) % static_cast<int>(size)).str();
+			png_error(png_ptr, str.c_str());
 		}
 	}
 
