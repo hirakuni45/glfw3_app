@@ -1,0 +1,38 @@
+// カラーバー生成
+// ARIB STD-B28 V1.0に準拠のマルチフォーマットカラーバー
+// サイズ宣言
+size 1920 1080
+// カラー定義 R G B
+color gray40    0.4 0.4 0.4
+color white75   0.75 0.75 0.75
+color yellow75  0.75 0.75 0
+color cyan75    0 0.75 0.75
+color green75   0 0.75 0
+color magenta75 0.75 0 0.75
+color red75     0.75 0 0
+color blue75    0 0 0.75
+color cyan100   0 1 1
+color white100  1 1 1
+color gray50    0.5 0.5 0.5
+color blue100   0 0 1
+color yello100  1 1 0
+color red100    1 0 0
+color white10   0.1 0.1 0.1
+color block     0 0 0
+color white15   0.15 0.15 0.15
+
+// 描画シーケンス
+// box(color, org_x, org_y, size_x, size_y)
+// grayscale_h(color_org, color_end, org_x, org_y, size_x, size_y)
+box gray40       0  0 240 314
+box white75    240  0 206 314
+box yello75    446  0 206 314
+box cyan75     652  0 206 314
+box green75    858  0 206 314
+box magenta75 1064  0 206 314
+box red75     1270  0 206 314
+box blue75    1476  0 204 314
+box gray40    1680  0 240 314
+
+// セーブ形式（png, bmp, jpeg）
+output png
