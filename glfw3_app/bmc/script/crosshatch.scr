@@ -1,0 +1,29 @@
+// クロスハッチ生成
+// サイズ宣言
+size 1920 1080
+// カラー定義 R G B
+color gray40    0.4 0.4 0.4
+color white75   0.75 0.75 0.75
+color yellow75  0.75 0.75 0
+color cyan75    0 0.75 0.75
+color green75   0 0.75 0
+color magenta75 0.75 0 0.75
+color red75     0.75 0 0
+color blue75    0 0 0.75
+color yello75   0.75 0.75 0
+color cyan100   0 1 1
+color white100  1 1 1
+color gray50    0.5 0.5 0.5
+color blue100   0 0 1
+color yello100  1 1 0
+color red100    1 0 0
+color white10   0.1 0.1 0.1
+color black     0 0 0
+color white15   0.15 0.15 0.15
+
+// 描画シーケンス
+// grid(color, x, y, grid_x, grid_y, grid_num_x, grid_num_y, line_width_x, line_width_y) 
+grid white100 8 4 95 89 20 12 4 4
+
+// セーブ形式（png, bmp, jpeg）
+output png

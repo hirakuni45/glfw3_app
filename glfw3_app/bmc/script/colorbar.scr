@@ -11,6 +11,7 @@ color green75   0 0.75 0
 color magenta75 0.75 0 0.75
 color red75     0.75 0 0
 color blue75    0 0 0.75
+color yello75   0.75 0.75 0
 color cyan100   0 1 1
 color white100  1 1 1
 color gray50    0.5 0.5 0.5
@@ -18,21 +19,33 @@ color blue100   0 0 1
 color yello100  1 1 0
 color red100    1 0 0
 color white10   0.1 0.1 0.1
-color block     0 0 0
+color black     0 0 0
 color white15   0.15 0.15 0.15
 
 // 描画シーケンス
 // box(color, org_x, org_y, size_x, size_y)
 // grayscale_h(color_org, color_end, org_x, org_y, size_x, size_y)
-box gray40       0  0 240 314
-box white75    240  0 206 314
-box yello75    446  0 206 314
-box cyan75     652  0 206 314
-box green75    858  0 206 314
-box magenta75 1064  0 206 314
-box red75     1270  0 206 314
-box blue75    1476  0 204 314
-box gray40    1680  0 240 314
+box gray40       0    0  240  678
+box white75    240    0  206  678
+box yello75    446    0  206  678
+box cyan75     652    0  206  678
+box green75    858    0  206  678
+box magenta75 1064    0  206  678
+box red75     1270    0  206  678
+box blue75    1476    0  204  678
+box gray40    1680    0  240  678
+box cyan100      0  678  240   88
+box white100   240  678  206   88
+box white75    446  678 1234   88
+box blue100   1680  678  240   88
+box yello100     0  766  240   88
+box_scale_h black white100 240 766 1440 88
+box red100    1680  766  240   88
+box white15      0  854  240  226
+box black      240  854  206  226
+box white100   446  854  412  226
+box black      858  854  822  226
+box white15   1680  854  240  226
 
 // セーブ形式（png, bmp, jpeg）
 output png
