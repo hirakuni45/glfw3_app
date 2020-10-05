@@ -16,6 +16,8 @@
 #include "utils/arith.hpp"
 #include "utils/format.hpp"
 
+#include "script_img.hpp"
+
 namespace app {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -40,6 +42,7 @@ namespace app {
 				inverse,	///< 画像反転
 				dither,		///< ディザリング
 				compress4,	///< RLE4 圧縮フォーマット
+				script,		///< 描画スクリプトファイル
 
 				limit_
 			};
@@ -272,7 +275,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		bmc_core() :
 			header_size_(0), clip_(0),
-			version_(0.85f), bdf_num_(0), bdf_pages_(0), bdf_fsize_(0) { }
+			version_(0.90f), bdf_num_(0), bdf_pages_(0), bdf_fsize_(0) { }
 
 
 		//-----------------------------------------------------------------//
@@ -302,6 +305,7 @@ namespace app {
 			cout << "    -inverse          inverse mono color" << endl;
 			cout << "    -dither           ditherring" << endl;
 			cout << "    -compress4        RLE4 compress" << endl;
+			cout << "    -script           SCRIPT file input" << endl;
 			cout << "    -verbose          verbose" << endl;
 			cout << endl;
 		}
@@ -338,6 +342,7 @@ namespace app {
 					else if(s == "-inverse") option_.set(option::inverse);
 					else if(s == "-dither") option_.set(option::dither);
 					else if(s == "-compress4") option_.set(option::compress4);
+					else if(s == "-script") option_.set(option::script);
 					else {
 						no_err = false;
 						cerr << "Option error: '" << s << "'" << endl;
@@ -415,6 +420,23 @@ namespace app {
 
 				bitmap_convert_(bdf);
 
+			} else if(option_[option::script]) { // スクリプト・ファイルの場合
+				script::image simg;
+
+				if(!simg.open(inp_fname_)) {
+					cerr << "Can't decode SCRIPT file: '" << inp_fname_ << "'" << endl;
+					return false;
+				}
+
+				simg.create();
+
+				if(!simg.save(out_fname_)) {
+					cerr << "Can't save SCRIPT/output file: '" << out_fname_ << "'" << endl;
+					return false;
+				}
+
+				return true;
+				
 			} else { // 通常の画像ファイル
 				img::img_files	imfs;
 
