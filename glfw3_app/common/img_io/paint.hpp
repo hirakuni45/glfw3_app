@@ -3,7 +3,7 @@
 /*!	@file
 	@brief	汎用ペイント・クラス（ヘッダー）
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2020 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
@@ -259,12 +259,57 @@ namespace img {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	「fore」カラーで線を描画
-			@param[in]	xy0	始点
-			@param[in]	xy1	終点
+			@param[in]	org	始点
+			@param[in]	end	終点
 		*/
 		//-----------------------------------------------------------------//
-		void line(const vtx::spos& xy0, const vtx::spos& xy1) {
-			line(xy0.x, xy0.y, xy1.x, xy1.y);
+		void line(const vtx::spos& org, const vtx::spos& end)
+		{
+			line(org.x, org.y, end.x, end.y);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	「fore」カラーで水平線を描画
+			@param[in]	org		始点
+			@param[in]	len		長さ
+			@param[in]	lw		線幅
+		*/
+		//-----------------------------------------------------------------//
+		void line_holizontal(const vtx::spos& org, uint16_t len, uint16_t lw = 1)
+		{
+			auto pos = org;
+			for(uint16_t l = 0; l < lw; ++l) {
+				pos.x = org.x;
+				for(uint16_t i = 0; i < len; ++i) {
+					plot(pos, fore_color_);
+					++pos.x;
+				}
+				++pos.y;
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	「fore」カラーで水垂直線を描画
+			@param[in]	org		始点
+			@param[in]	len		長さ
+			@param[in]	lw		線幅
+		*/
+		//-----------------------------------------------------------------//
+		void line_vertical(const vtx::spos& org, uint16_t len, uint16_t lw = 1)
+		{
+			auto pos = org;
+			for(uint16_t l = 0; l < lw; ++l) {
+				pos.y = org.y;
+				for(uint16_t i = 0; i < len; ++i) {
+					plot(pos, fore_color_);
+					++pos.y;
+				}
+				++pos.x;
+			}
 		}
 
 
@@ -303,11 +348,82 @@ namespace img {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	「fore」カラーで矩形領域を描画
+			@param[in]	area	描画エリア
+			@param[in]	i		「Intensity」を考慮する場合「true」
+		*/
+		//-----------------------------------------------------------------//
+		void fill_rect(const vtx::srect& area, bool i = false)
+		{
+			fill_rect(area.org.x, area.org.y, area.end_x(), area.end_y(), i);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	「fore」カラーで矩形領域を描画
 			@param[in]	i	「Intensity」を考慮する場合「true」
 		*/
 		//-----------------------------------------------------------------//
 		void fill_rect(bool i = false) {
 			fill_rect(0, 0, get_size().x, get_size().y, i);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	「fore」カラーから「back」カラーで矩形領域を描画（水平）
+			@param[in]	rect	描画領域
+		*/
+		//-----------------------------------------------------------------//
+		void fill_rect_scale_h(const vtx::srect& rect)
+		{
+			auto fc = fore_color_;
+			auto bc = back_color_;
+			float gain = 1.0f;
+			float gainadd = 1.0f / static_cast<float>(rect.size.x - 1);
+			auto pos = rect.org;
+			push_fore_color();
+			for(int x = 0; x < rect.size.x; ++x) {
+				uint8_t s = static_cast<uint8_t>(gain * 256.0f);
+				fore_color_.r = ((fc.r * (256 - s)) + bc.r * s) >> 8;
+				fore_color_.g = ((fc.g * (256 - s)) + bc.g * s) >> 8;
+				fore_color_.b = ((fc.b * (256 - s)) + bc.b * s) >> 8;
+				line_vertical(pos, rect.size.y);
+				++pos.x;
+				gain += gainadd;
+			}
+			pop_fore_color();
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	グリッドを描画
+			@param[in]	org		開始位置
+			@param[in]	gs		グリッドサイズ
+			@param[in]	num		グリッド個数
+			@param[in]	lw		線幅
+		*/
+		//-----------------------------------------------------------------//
+		void draw_grid(const vtx::spos& org, const vtx::spos& gs, const vtx::spos& num, const vtx::spos& lw)
+		{
+			vtx::spos size(gs.x * num.x + lw.x, gs.y * num.y + lw.y);
+			{
+				auto pos = org;
+				for(short x = 0; x < num.x; ++x) {
+					line_vertical(pos, size.y, lw.x);
+					pos.x += gs.x;
+				}
+				line_vertical(pos, size.y, lw.x);
+			}
+			{
+				auto pos = org;
+				for(short y = 0; y < num.y; ++y) {
+					line_holizontal(pos, size.x, lw.y);
+					pos.y += gs.y;
+				}
+				line_holizontal(pos, size.x, lw.y);
+			}
 		}
 
 
@@ -372,8 +488,6 @@ namespace img {
 			}
 			return w;
 		}
-
 	};
-
 }
 
