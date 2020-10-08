@@ -54,19 +54,11 @@ PSOURCES	=	main.cpp \
 				widgets/widget_director.cpp \
 				widgets/widget_utils.cpp \
 				widgets/widget_filer.cpp \
-				src/dx7note.cpp \
-				src/env.cpp \
-				src/exp2.cpp \
 				src/fir.cpp \
 				src/fm_core.cpp \
 				src/fm_op_kernel.cpp \
-				src/freqlut.cpp \
-				src/log2.cpp \
-				src/patch.cpp \
-				src/pitchenv.cpp \
 				src/resofilter.cpp \
 				src/sawtooth.cpp \
-				src/sin.cpp \
 				midi/Binasc.cpp \
 				midi/MidiEvent.cpp \
 				midi/MidiEventList.cpp \

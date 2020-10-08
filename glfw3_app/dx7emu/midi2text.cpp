@@ -43,10 +43,12 @@ int main(int argc, char* argv[]) {
 // convertMidiFileToText --
 //
 
-void convertMidiFileToText(MidiFile& midifile, NOTES& notes)
+void convertMidiFileToText(MidiFile& midifile, int tem, NOTES& notes)
 {
-   midifile.absoluteTicks();
-   midifile.joinTracks();
+	tempo = static_cast<double>(tem);
+
+	midifile.absoluteTicks();
+	midifile.joinTracks();
 
    vector<double> ontimes(128);
    vector<int> onvelocities(128);
@@ -81,9 +83,11 @@ void convertMidiFileToText(MidiFile& midifile, NOTES& notes)
 		t.count = (offtime - ontimes[key]) * 60;  // frame rate
 		t.key = key;
 		t.velo = onvelocities[key];
+		t.sustain = midifile[0][i].isSustainOn();
 		notes.push_back(t);
-///		utils::format("Frame: %u, Len: %u, %02X, %02X\n") % t.frame % t.count
-///			% static_cast<uint16_t>(t.key) % static_cast<uint16_t>(t.velo);
+		utils::format("Frame: %u, Len: %u, %c %02X, %02X\n") % t.frame % t.count
+			% (t.sustain ? 'S' : '-')
+			% static_cast<uint16_t>(t.key) % static_cast<uint16_t>(t.velo);
 //         cout << "note\t" << ontimes[key]
 //              << "\t" << offtime - ontimes[key]
 //              << "\t" << key << "\t" << onvelocities[key] << endl;

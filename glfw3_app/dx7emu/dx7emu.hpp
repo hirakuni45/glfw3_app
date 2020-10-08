@@ -16,6 +16,7 @@
 #include "widgets/widget_filer.hpp"
 #include "widgets/widget_slider.hpp"
 #include "widgets/widget_list.hpp"
+#include "widgets/widget_spinbox.hpp"
 #include "widgets/widget_frame.hpp"
 #include "widgets/widget_terminal.hpp"
 
@@ -50,6 +51,8 @@ namespace app {
 		gui::widget_terminal*	terminal_core_;
 
 		gui::widget_list*		prog_list_;
+
+		gui::widget_spinbox*	tempo_;
 
 		bool			key_back_[13];
 		bool			key_[13];
@@ -183,7 +186,7 @@ namespace app {
 			midi_file.read(filename);
 
 			notes_.clear();
-			convertMidiFileToText(midi_file, notes_);
+			convertMidiFileToText(midi_file, tempo_->get_select_pos(), notes_);
 
 			midi_pos_ = 0;
 			midi_frame_ = 0;
@@ -279,7 +282,7 @@ namespace app {
 			piano_keys_{ nullptr },
 			overtone_{ nullptr },
 			terminal_frame_(nullptr), terminal_core_(nullptr),
-			prog_list_(nullptr),
+			prog_list_(nullptr), tempo_(nullptr),
 			key_back_{ false }, key_{ false },
 			midi_num_(0), midi_in_(),
 			midi_file_(),
@@ -386,6 +389,11 @@ namespace app {
 				}
 			}
 
+			{  // テンポ設定
+				widget::param wp(vtx::irect(10, 400, 150, 40), 0);
+				widget_spinbox::param wp_(10, 60, 150);
+				tempo_ = wd.add_widget<widget_spinbox>(wp, wp_);
+			}
 
 			{ // 鍵盤
 				for(int i = 0; i < key_octave; ++i) {
@@ -422,6 +430,10 @@ namespace app {
 
 			// プリファレンスの取得
 			sys::preference& pre = director_.at().preference_;
+
+			if(tempo_ != nullptr) {
+				tempo_->load(pre);
+			}
 
 			if(midi_list_ != nullptr) {
 				midi_list_->load(pre);
@@ -581,6 +593,10 @@ namespace app {
 
 			if(midi_list_ != nullptr) {
 				midi_list_->save(pre);
+			}
+
+			if(tempo_ != nullptr) {
+				tempo_->save(pre);
 			}
 		}
 	};
