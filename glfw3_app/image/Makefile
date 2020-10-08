@@ -1,24 +1,13 @@
-#-----------------------------------------------#
-# Application Binary Build Makefile             #
-#-----------------------------------------------#
+# -*- tab-width : 4 -*-
+#=======================================================================
+#   @file
+#   @brief  glfw_app
+#   @author 平松邦仁 (hira@rvf-rc45.net)
+#	@copyright	Copyright (C) 2019 Kunihito Hiramatsu @n
+#				Released under the MIT license @n
+#				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
+#=======================================================================
 TARGET		=	image
-
-ifeq ($(OS),Windows_NT)
-FEXT	=	.exe
-ICON_RC =
-SYSTEM := WIN
-else
-  UNAME := $(shell uname -s)
-  ifeq ($(UNAME),Linux)
-    SYSTEM := LINUX
-  endif
-  ifeq ($(UNAME),Darwin)
-    SYSTEM := OSX
-	OSX_VER := $(shell sw_vers -productVersion | sed 's/^\([0-9]*.[0-9]*\).[0-9]*/\1/')
-  endif
-FEXT	=
-ICON_RC =
-endif
 
 # 'debug' or 'release'
 BUILD		=	release
@@ -29,10 +18,8 @@ CSOURCES	=	minizip/ioapi.c \
 				minizip/unzip.c
 
 PSOURCES	=	main.cpp \
-				img_main.cpp \
 				core/glcore.cpp \
 				core/device.cpp \
-				core/ftimg.cpp \
 				gl_fw/glfonts.cpp \
 				gl_fw/glmobj.cpp \
 				gl_fw/glutils.cpp \
@@ -68,36 +55,70 @@ PSOURCES	=	main.cpp \
 
 #				snd_io/aac_io.cpp
 
+# platform switcher (Windows, Linux, OS-X)
+ifeq ($(OS),Windows_NT)
+    FEXT	= .exe
+#    ICON_RC = icon.rc
+    SYSTEM := WIN
+	CPP_VER := -std=c++17
+    LOCAL_INC_PATH := /mingw64/include
+    LOCAL_LIB_PATH := /mingw64/lib
+	OPTLIBS = opengl32 glew32 openal glfw3
+	CPMM	=	g++
+	CCMM	=	gcc
+	CFLAGS  = -DWIN32
+	PFLAGS  = -DWIN32 -DBOOST_USE_WINDOWS_H
+	LFLAGS =
+else
+  FEXT	=
+  ICON_RC =
+  UNAME := $(shell uname -s)
+  ifeq ($(UNAME),Linux)
+    SYSTEM := LINUX
+	CPP_VER := -std=c++17
+	CFLAGS =
+	PFLAGS =
+	LFLAGS =
+  endif
+  ifeq ($(UNAME),Darwin)
+    SYSTEM := OSX
+	OSX_VER := $(shell sw_vers -productVersion | sed 's/^\([0-9]*.[0-9]*\).[0-9]*/\1/')
+	CPP_VER := -std=c++14
+	CFLAGS =
+	PFLAGS =
+	LFLAGS = -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk \
+		-Wl,-search_paths_first -Wl,-headerpad_max_install_names \
+		-framework AGL -framework Cocoa -framework OpenGL -framework IOKit \
+		-framework CoreFoundation -framework CoreVideo -framework OpenAL
+    LOCAL_INC_PATH := /opt/local/include
+    LOCAL_LIB_PATH := /opt/local/lib
+    OPTLIBS = glfw GLEW
+  else
+    LOCAL_INC_PATH := /usr/local/include
+    LOCAL_LIB_PATH := /usr/local/lib
+  endif
+  CPMM	=	clang++
+  CCMM	=	clang
+endif
+
+
+# build openjpeg any version path
+OPENJPEG_PATH := $(shell ls -d $(LOCAL_INC_PATH)/openjpeg*)
+
 STDLIBS		=
 
-ifeq ($(SYSTEM),WIN)
-LOCAL_PATH	=	/mingw64
-OPTLIBS		=	opengl32 glfw3 glew32 \
-				pthread \
-				png turbojpeg jpeg openjp2 \
-				freetype \
-				mad faad tag \
-				z openal
-else
-LOCAL_PATH	=	/usr/local
-OPTLIBS		=	glfw3 GLEW \
-				pthread \
-				png turbojpeg openjp2 \
-				freetype \
-				mad faad mp4ff tag \
-				z
-endif
+OPTLIBS += 	pthread \
+			png jpeg openjp2 \
+			freetype \
+			mad tag \
+			z
 
-INC_SYS		=	$(LOCAL_PATH)/include \
-				$(LOCAL_PATH)/include/freetype2 \
-				$(LOCAL_PATH)/include/openjpeg-2.3 \
-				$(LOCAL_PATH)/include/taglib
+INC_SYS		=	$(LOCAL_INC_PATH) \
+				$(LOCAL_INC_PATH)/freetype2 \
+				$(OPENJPEG_PATH) \
+				$(LOCAL_INC_PATH)/taglib
 INC_LIB		=
-LIBDIR		=	$(LOCAL_PATH)/lib
-ifeq ($(SYSTEM),OSX)
-INC_SYS		+=	$(LOCAL_PATH)/opt/jpeg-turbo/include
-LIBDIR		+=	$(LOCAL_PATH)/opt/jpeg-turbo/lib
-endif
+LIBDIR		=	$(LOCAL_LIB_PATH)
 
 PINC_APP	=	. ../common
 CINC_APP	=	. ../common

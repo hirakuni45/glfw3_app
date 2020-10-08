@@ -55,7 +55,7 @@ namespace app {
 		term_->output('\n');
 	}
 
-
+#if 0
 	//-----------------------------------------------------------------//
 	/*!
 		@brief  初期化
@@ -447,4 +447,5 @@ namespace app {
 		if(scale_3x_) scale_3x_->save(pre);
 		if(info_) info_->save(pre);
 	}
+#endif
 }
