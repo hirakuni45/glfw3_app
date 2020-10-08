@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright 2012 Google Inc.
  * 
@@ -13,9 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef __SYNTH_H
-#define __SYNTH_H
 
 // This may not be present on MSVC.
 // See http://stackoverflow.com/questions/126279/c99-stdint-h-header-and-ms-visual-studio
@@ -81,4 +79,3 @@ static inline bool hasNeon() {
 }
 #endif
 
-#endif  // __SYNTH_H
