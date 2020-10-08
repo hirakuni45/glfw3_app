@@ -419,7 +419,12 @@ namespace gui {
 		}
 		fonts.pop_font_face();
 #ifdef WIN32
-		fonts.install_font_type("meiryo.ttc", "meiryo");
+		{
+			std::string me = "meiryo.ttc";
+			if(!fonts.install_font_type(me, "meiryo")) {
+				std::cerr << boost::format("Can't find font file: '%s'") % me << std::endl; 
+			}
+		}
 #endif
 		fonts.set_font_size(20);
 		fonts.set_clip_size(core.get_rect().size);

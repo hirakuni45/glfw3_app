@@ -241,10 +241,15 @@ void get_metrics(uint32_t code)
 			}
 #endif
 
+			if(!utils::probe_file(path)) {
+				std::cerr << "Can't find: '" << path << "'" << std::endl;
+				return false;
+			}
+
 			FT_Face face;
 			FT_Error error = FT_New_Face(library_, utils::system_path(path).c_str(), 0, &face);
 			if(error) {
-				std::cerr << "ftimg install error: '" << path << "'" << std::endl;
+				std::cerr << "ftimg error(FT_New_Face): '" << path << "'" << std::endl;
 				current_face_ = face_map_.end();
 				return false;
 			}
