@@ -17,11 +17,12 @@
 #ifndef SYNTH_RESOFILTER_H_
 #define SYNTH_RESOFILTER_H_
 
-#include "module.h"
+#include "module.hpp"
+#include "aligned_buf.h"
 
 #define USE_MATRIX
 
-class ResoFilter : Module {
+class ResoFilter : synth::Module {
  public:
   ResoFilter();
 

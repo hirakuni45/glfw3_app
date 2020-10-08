@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright 2012 Google Inc.
  * 
@@ -14,7 +15,9 @@
  * limitations under the License.
  */
 
-class Sawtooth : Module {
+#include "module.hpp"
+
+class Sawtooth : synth::Module {
  public:
   Sawtooth();
 

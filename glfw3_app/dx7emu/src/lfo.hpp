@@ -18,7 +18,7 @@
 // Low frequency oscillator, compatible with DX7
 
 #include "synth.h"
-#include "sin.h"
+#include "sin.hpp"
 
 namespace synth {
 

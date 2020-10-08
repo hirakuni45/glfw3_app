@@ -16,9 +16,8 @@
 
 #include <math.h>
 
-#include "module.h"
 #include "sawtooth.h"
-#include "exp2.h"
+#include "exp2.hpp"
 
 static const double M_PI = 3.1415926535897932384626433832795;
 
@@ -175,7 +174,7 @@ void Sawtooth::process(const int32_t **inbufs, const int32_t *control_in,
   int32_t logf = control_last[0];
   int32_t *obuf = outbufs[0];
   int32_t actual_logf = logf + sawtooth_freq_off;
-  int f = Exp2::lookup(actual_logf);
+  int f = synth::Exp2::lookup(actual_logf);
   int32_t p = phase;
   // choose a strategy based on the frequency
   if (actual_logf < LOW_FREQ_LIMIT - (1 << (SLICE_SHIFT - SLICE_EXTRA))) {

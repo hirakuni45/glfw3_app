@@ -16,15 +16,15 @@
  */
 #include "synth.h"
 #include "controllers.h"
-#include "dx7note.h"
 #include "lfo.hpp"
 #include "ringbuffer.hpp"
 #include "resofilter.h"
-#include "freqlut.h"
-#include "sin.h"
-#include "exp2.h"
-#include "pitchenv.h"
-#include "patch.h"
+#include "dx7note.hpp"
+#include "freqlut.hpp"
+#include "sin.hpp"
+#include "exp2.hpp"
+#include "pitchenv.hpp"
+#include "patch.hpp"
 
 namespace synth {
 
@@ -91,20 +91,26 @@ namespace synth {
 		int16_t		extra_buf_[SYNTH_N];
 		uint32_t	extra_buf_size_;
 
+		PitchEnv	pitch_env_;
+
 	public:
 		DX7() :
 			ring_buffer_(), active_note_{}, current_note_(0),
 			input_buffer_{ 0 }, input_buffer_index_(0),
 			patch_data_{ 0 }, current_patch_(0), unpacked_patch_{ 0 },
-			lfo_()
+			lfo_(),
+//			controllers_(),
+			filter_(), filter_control_{ 258847126, 0, 0 }, sustain_(false),
+
+			pitch_env_()
 		{
 			memcpy(patch_data_, epiano_, sizeof(epiano_));
 			ProgramChange(0);
-			filter_control_[0] = 258847126;
-			filter_control_[1] = 0;
-			filter_control_[2] = 0;
 			controllers_.values_[kControllerPitch] = 0x2000;
-			sustain_ = false;
+//			filter_control_[0] = 258847126;
+//			filter_control_[1] = 0;
+//			filter_control_[2] = 0;
+//			sustain_ = false;
 			extra_buf_size_ = 0;
 		}
 
@@ -240,7 +246,7 @@ namespace synth {
 		{
 			current_patch_ = p;
 			const uint8_t *patch = patch_data_ + 128 * current_patch_;
-			UnpackPatch((const char *)patch, unpacked_patch_);
+			Patch::Unpack((const char *)patch, unpacked_patch_);
 			lfo_.reset(unpacked_patch_ + 137);
 		}
 

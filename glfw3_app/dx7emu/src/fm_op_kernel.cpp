@@ -18,7 +18,7 @@
 
 #include "synth.h"
 
-#include "sin.h"
+#include "sin.hpp"
 #include "fm_op_kernel.h"
 
 #ifdef HAVE_NEON_INTRINSICS
@@ -166,14 +166,14 @@ void FmOpKernel::compute(int32_t *output, const int32_t *input,
     if (add) {
       for (int i = 0; i < SYNTH_N; i++) {
         gain += dgain;
-        int32_t y = Sin::lookup(phase + input[i]);
+        int32_t y = synth::Sin::lookup(phase + input[i]);
         output[i] += ((int64_t)y * (int64_t)gain) >> 24;
         phase += freq;
       }
     } else {
       for (int i = 0; i < SYNTH_N; i++) {
         gain += dgain;
-        int32_t y = Sin::lookup(phase + input[i]);
+        int32_t y = synth::Sin::lookup(phase + input[i]);
         output[i] = ((int64_t)y * (int64_t)gain) >> 24;
         phase += freq;
       }
@@ -196,14 +196,14 @@ void FmOpKernel::compute_pure(int32_t *output, int32_t phase0, int32_t freq,
     if (add) {
       for (int i = 0; i < SYNTH_N; i++) {
         gain += dgain;
-        int32_t y = Sin::lookup(phase);
+        int32_t y = synth::Sin::lookup(phase);
         output[i] += ((int64_t)y * (int64_t)gain) >> 24;
         phase += freq;
       }
     } else {
       for (int i = 0; i < SYNTH_N; i++) {
         gain += dgain;
-        int32_t y = Sin::lookup(phase);
+        int32_t y = synth::Sin::lookup(phase);
         output[i] = ((int64_t)y * (int64_t)gain) >> 24;
         phase += freq;
       }
@@ -361,7 +361,7 @@ void FmOpKernel::compute_fb(int32_t *output, int32_t phase0, int32_t freq,
       gain += dgain;
       int32_t scaled_fb = (y0 + y) >> (fb_shift + 1);
       y0 = y;
-      y = Sin::lookup(phase + scaled_fb);
+      y = synth::Sin::lookup(phase + scaled_fb);
       y = ((int64_t)y * (int64_t)gain) >> 24;
       output[i] += y;
       phase += freq;
@@ -371,7 +371,7 @@ void FmOpKernel::compute_fb(int32_t *output, int32_t phase0, int32_t freq,
       gain += dgain;
       int32_t scaled_fb = (y0 + y) >> (fb_shift + 1);
       y0 = y;
-      y = Sin::lookup(phase + scaled_fb);
+      y = synth::Sin::lookup(phase + scaled_fb);
       y = ((int64_t)y * (int64_t)gain) >> 24;
       output[i] = y;
       phase += freq;
