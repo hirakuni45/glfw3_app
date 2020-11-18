@@ -289,7 +289,7 @@ namespace app {
 			using namespace std;
 
 			utils::format("BitMap Converter\n");
-			utils::format("Copyright (C) 2013/2018, Hiramatsu Kunihito\n");
+			utils::format("Copyright (C) 2013/2020, Hiramatsu Kunihito\n");
 			utils::format("Version %3.2f\n") % version_;
 			utils::format("usage:\n");
 			auto c = utils::get_file_base(cmd);
@@ -305,7 +305,7 @@ namespace app {
 			cout << "    -inverse          inverse mono color" << endl;
 			cout << "    -dither           ditherring" << endl;
 			cout << "    -compress4        RLE4 compress" << endl;
-			cout << "    -script           SCRIPT file input" << endl;
+			cout << "    -script           render SCRIPT file input" << endl;
 			cout << "    -verbose          verbose" << endl;
 			cout << endl;
 		}
