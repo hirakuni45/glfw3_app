@@ -75,6 +75,9 @@ namespace app {
 		wp_.text_param_.placement_.hpt = vtx::placement::holizontal::CENTER;
 		if(font.empty()) wp_.text_param_.placement_.vpt = vtx::placement::vertical::CENTER;
 		else wp_.text_param_.placement_.vpt = vtx::placement::vertical::BOTTOM;
+
+		wp_.text_param_.placement_.vpt = vtx::placement::vertical::CENTER;
+
 		wp_.plate_param_.resizeble_ = true;
 		wp_.shift_param_.every_ = true;
 		wp_.shift_param_.org_wait_frame_ = 60 * 4;
