@@ -48,6 +48,8 @@ namespace gui {
 				echo_(true), auto_fit_(true) { }
 		};
 
+	private:
+
 		widget_director&	wd_;
 
 		param				param_;
