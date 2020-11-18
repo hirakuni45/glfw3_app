@@ -1,12 +1,12 @@
 #pragma once
 //=====================================================================//
 /*!	@file
-	@brief	OpenGL テクスチャー・フレーム・バッファ・クラス（ヘッダー）@n
+	@brief	OpenGL テクスチャー・フレーム・バッファ・クラス @n
 			テクスチャーを２枚初期化して、それをダブルバッファとして@n
 			使い、ビットマップの動画表示などを行う。@n
 			24(RGB)、32(RGBA) ビットの表示モードに対応。
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2020 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
@@ -32,7 +32,7 @@ namespace gl {
 		enum class IMAGE {
 			INDEXED,	///< 8 ビットのインデックスドカラー
 			GRAY,		///< 8 ビットのグレースケール
-			RGBA4444,	///< RGBA4444 16 ビットカラー画像
+			RGB565,		///< RGB565 16 ビットカラー画像
 			RGB,		///< RGB 24 ビットカラー画像
 			RGBA,		///< RGBA 32 ビットカラー画像
 			BGR,		///< BGR 24 ビットカラー画像（BGR オーダー）
@@ -251,6 +251,7 @@ namespace gl {
 		{
 			glMatrixMode(GL_TEXTURE);
 			glLoadIdentity();
+// glScalef(1.0f / 256.0f, 1.0f / 256.0f, 1.0f);
 			glMatrixMode(GL_PROJECTION);
 			glLoadIdentity();
 			glOrthof(static_cast<float>(x), static_cast<float>(w),
@@ -345,7 +346,11 @@ namespace gl {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief		テクスチャー・フレーム・バッファ・レンダリング @n
-						※RGBA8 の場合には変換が起こらない為高速
+						※RGBA8 の場合には変換が起こらない為高速 @n
+						殆どの OpenGL ドライバーの実装では、内部は常にRGBA(32) @n
+						で行っており、最終的な変換を行う為、DST 形式が RGB(24) @n
+						を選択する事で変換が二度起こり、パフォーマンスを悪化 @n
+						させると考えられる。
 			@param[in]	srct	ソース・イメージのタイプ（RGB、RGBA、BGR）
 			@param[in]	img		ソース・イメージのポインター
 			@param[in]	alpha	24 -> 32 ビットフォーマット変換時のアルファ値
@@ -356,15 +361,14 @@ namespace gl {
 			if(img == 0) return;
 
 			// GL_RGB 又は、GL_RGBA への変換（必要な場合）
-			uint8_t* dst = 0;
+			std::vector<uint8_t> dst;
 			GLuint src_type = GL_RGBA;
 			if(tex_depth_ == 4) {
 			} else if(tex_depth_ == 8) {
 			} else if(tex_depth_ == 16) {		// RGBA4
-			} else if(tex_depth_ == 24) {		// RGB8
+			} else if(tex_depth_ == 24) {		// DST: RGB8(24)
 				src_type = GL_RGB;
 				if(srct == IMAGE::GRAY) {
-					std::vector<uint8_t> dst;
 					dst.resize(disp_size_.x * disp_size_.y * 3);
 					const uint8_t* im = static_cast<const uint8_t*>(img);
 					for(int y = 0; y < disp_size_.y; ++y) {
@@ -379,7 +383,6 @@ namespace gl {
 				} else if(srct == IMAGE::RGB) {
 					// 変換の必要無し
 				} else if(srct == IMAGE::RGBA) {
-					dst = new uint8_t[disp_size_.x * disp_size_.y * 3];
 					const uint8_t* im = static_cast<const uint8_t*>(img);
 					for(int y = 0; y < disp_size_.y; ++y) {
 						uint8_t* p = &dst[y * disp_size_.x * 3];
@@ -391,7 +394,6 @@ namespace gl {
 						}
 					}
 				} else if(srct == IMAGE::BGR) {
-					std::vector<uint8_t> dst;
 					dst.resize(disp_size_.x * disp_size_.y * 3);
 					const uint8_t* im = static_cast<const uint8_t*>(img);
 					for(int y = 0; y < disp_size_.y; ++y) {
@@ -403,10 +405,25 @@ namespace gl {
 							p += 3;
 						}
 					}
+				} else if(srct == IMAGE::RGB565) {
+					dst.resize(disp_size_.x * disp_size_.y * 3);
+					const uint16_t* im = static_cast<const uint16_t*>(img);
+					for(int y = 0; y < disp_size_.y; ++y) {
+						uint8_t* p = &dst[y * disp_size_.x * 3];
+						for(int x = 0; x < disp_size_.x; ++x) {
+							auto v = *im++;
+							auto r = (v & 0b1111'1000'0000'0000);
+							p[0] = r | (r >> 5) | (r >> 10);
+							auto g = (v & 0b0000'0111'1110'0000) << 5;
+							p[1] = g | (g >> 6) | (g >> 12);
+							auto b = (v & 0b0000'0000'0001'1111) << 11;
+							p[2] = b | (b >> 5) | (b >> 10);
+							p += 3;
+						}
+					}					
 				}
-			} else if(tex_depth_ == 32) {		// RGBA8
+			} else if(tex_depth_ == 32) {		// DST: RGBA8(32)
 				if(srct == IMAGE::GRAY) {
-					std::vector<uint8_t> dst;
 					dst.resize(disp_size_.x * disp_size_.y * 4);
 					const uint8_t* im = static_cast<const uint8_t*>(img);
 					for(int y = 0; y < disp_size_.y; ++y) {
@@ -420,7 +437,6 @@ namespace gl {
 						}
 					}
 				} else if(srct == IMAGE::RGB) {
-					std::vector<uint8_t> dst;
 					dst.resize(disp_size_.x * disp_size_.y * 4);
 					const uint8_t* im = static_cast<const uint8_t*>(img);
 					for(int y = 0; y < disp_size_.y; ++y) {
@@ -435,7 +451,6 @@ namespace gl {
 				} else if(srct == IMAGE::RGBA) {
 					// 変換不要
 				} else if(srct == IMAGE::BGR) {
-					std::vector<uint8_t> dst;
 					dst.resize(disp_size_.x * disp_size_.y * 4);
 					const uint8_t* im = static_cast<const uint8_t*>(img);
 					for(int y = 0; y < disp_size_.y; ++y) {
@@ -448,12 +463,29 @@ namespace gl {
 							p += 4;
 						}
 					}
+				} else if(srct == IMAGE::RGB565) {
+					dst.resize(disp_size_.x * disp_size_.y * 4);
+					const uint16_t* im = static_cast<const uint16_t*>(img);
+					for(int y = 0; y < disp_size_.y; ++y) {
+						uint8_t* p = &dst[y * disp_size_.x * 4];
+						for(int x = 0; x < disp_size_.x; ++x) {
+							auto v = *im++;
+							auto r = (v & 0b1111'1000'0000'0000);
+							p[0] = r | (r >> 5) | (r >> 10);
+							auto g = (v & 0b0000'0111'1110'0000) << 5;
+							p[1] = g | (g >> 6) | (g >> 12);
+							auto b = (v & 0b0000'0000'0001'1111) << 11;
+							p[2] = b | (b >> 5) | (b >> 10);
+							p[3] = alpha;
+							p += 4;
+						}
+					}
 				}
 			}
 
 			const void* src;
-			if(dst) {
-				src = dst;
+			if(dst.size() > 0) {
+				src = &dst[0];
 			} else {
 				src = img;
 			}
