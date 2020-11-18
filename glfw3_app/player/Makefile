@@ -21,7 +21,6 @@ PSOURCES	=	main.cpp \
 				player.cpp \
 				core/glcore.cpp \
 				core/device.cpp \
-				gl_fw/glfonts.cpp \
 				gl_fw/glmobj.cpp \
 				gl_fw/glutils.cpp \
 				gl_fw/glterminal.cpp \
