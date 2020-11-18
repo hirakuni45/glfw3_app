@@ -29,16 +29,18 @@ endif
 # 'debug' or 'release'
 BUILD		=	release
 
-VPATH		=	../common
+VPATH		=	../common ./RX
 
 CSOURCES	=	minizip/ioapi.c \
 				minizip/unzip.c
 
 PSOURCES	=	main.cpp \
+				RX/GUI_sample/gui_main.cpp \
+				RX/graphics/font8x16.cpp \
+				RX/graphics/kfont16.cpp \
+				RX/graphics/color.cpp \
 				core/glcore.cpp \
 				core/device.cpp \
-				core/ftimg.cpp \
-				gl_fw/glfonts.cpp \
 				gl_fw/glmobj.cpp \
 				gl_fw/glutils.cpp \
 				gl_fw/glterminal.cpp \
@@ -102,7 +104,7 @@ INC_SYS		+=	$(LOCAL_PATH)/opt/jpeg-turbo/include
 LIBDIR		+=	$(LOCAL_PATH)/opt/jpeg-turbo/lib
 endif
 
-PINC_APP	=	. ../common
+PINC_APP	=	. ../common ./RX
 CINC_APP	=	. ../common
 
 INC_S	=	$(addprefix -isystem , $(INC_SYS))
@@ -131,7 +133,7 @@ CPMM	=	clang++
 CCMM	=	clang
 endif
 
-POPT	=	-O2 -std=c++14
+POPT	=	-O2 -std=c++17
 COPT	=	-O2
 LOPT	=
 
@@ -168,7 +170,7 @@ endif
 # -Wuninitialized -Wunused -Werror -Wshadow
 CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
 			-Wformat
-CPWARN	=	-Wall -Werror -Wno-unused-private-field
+CPWARN	=	-Wall -Werror -Wno-unused-private-field -Wno-unused-variable
 
 OBJECTS	=	$(addprefix $(BUILD)/,$(patsubst %.cpp,%.o,$(PSOURCES))) \
 			$(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(CSOURCES)))
