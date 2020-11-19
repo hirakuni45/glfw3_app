@@ -251,6 +251,23 @@ namespace utils {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief  文字参照 const @n
+					※範囲外ではテンポラリを返す（例外を投げない）
+			@param[in]	pos	配列位置
+			@return 文字
+		*/
+		//-----------------------------------------------------------------//
+		const char& operator [] (uint32_t pos) const noexcept {
+			if(pos >= SIZE) {
+				static char tmp = 0;
+				return tmp;
+			}
+			return str_[pos];
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief  クラス一致比較
 			@param[in]	th		文字列クラス
 			@return 同じなら「true」
