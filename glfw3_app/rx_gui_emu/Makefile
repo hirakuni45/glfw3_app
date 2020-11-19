@@ -34,8 +34,9 @@ VPATH		=	../common ./RX
 CSOURCES	=	minizip/ioapi.c \
 				minizip/unzip.c
 
+# 				RX/GUI_sample/gui_main.cpp
 PSOURCES	=	main.cpp \
-				RX/GUI_sample/gui_main.cpp \
+				RX/CALC_app/calc_gui.cpp \
 				RX/graphics/font8x16.cpp \
 				RX/graphics/kfont16.cpp \
 				RX/graphics/color.cpp \

@@ -22,11 +22,28 @@
 
 #include "utils/format.hpp"
 
+#include "utils/sjis_utf16.hpp"
+
 namespace gui_emu {
 	const void* get_fbp();
 	void set_pos(const vtx::spos& pos);
 	void setup_gui();
-	void update_gui(); 
+	void update_gui();
+}
+
+namespace {
+	std::string rx_stdout_;
+}
+
+
+void rx_putchar(char ch)
+{
+	rx_stdout_ += ch;
+}
+
+uint16_t ff_uni2oem(uint16_t code)
+{
+	return utils::utf16_to_sjis(code);
 }
 
 namespace app {
@@ -135,6 +152,9 @@ namespace app {
 
 			lcd_core_->at_fb().rendering(gl::texfb::IMAGE::RGB565, gui_emu::get_fbp());
 			lcd_core_->at_fb().flip();
+
+			terminal_core_->output(rx_stdout_);
+			rx_stdout_.clear();
 
 			gui::widget_director& wd = director_.at().widget_director_;
 

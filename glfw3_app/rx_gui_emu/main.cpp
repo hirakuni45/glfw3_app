@@ -12,8 +12,8 @@ typedef app::rx_gui_emu start_app;
 static const char* window_key_ = { "application/window" };
 static const char* app_title_ = { "RX GUI Emulator" };
 static const vtx::spos start_pos_(10, 50);
-static const vtx::spos start_size_(1024, 768);
-static const vtx::spos limit_size_(1024, 768);
+static const vtx::spos start_size_(640, 480);
+static const vtx::spos limit_size_(640, 480);
 
 int main(int argc, char** argv)
 {
