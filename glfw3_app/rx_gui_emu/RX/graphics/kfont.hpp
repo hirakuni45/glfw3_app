@@ -23,6 +23,8 @@ extern "C" {
 };
 #endif
 
+extern uint16_t ff_uni2oem(uint16_t code);
+
 namespace graphics {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -182,8 +184,8 @@ namespace graphics {
 
 			if(fatfs_get_mount() == 0) return nullptr;
 #endif
-///			uint32_t lin = sjis_to_liner_(ff_uni2oem(code, FF_CODE_PAGE));
-			uint32_t lin = sjis_to_liner_(code);
+//			uint32_t lin = sjis_to_liner_(ff_uni2oem(code, FF_CODE_PAGE));
+			uint32_t lin = sjis_to_liner_(ff_uni2oem(code));
 
 			if(lin == 0xffff) {
 				return nullptr;
