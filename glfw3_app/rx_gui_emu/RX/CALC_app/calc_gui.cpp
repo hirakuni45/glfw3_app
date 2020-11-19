@@ -164,31 +164,38 @@ namespace {
 
 	typedef utils::fixed_string<512> OUTSTR;
 
-	OUTSTR conv_cha_(const STR& inp)
+
+	void conv_cha_(char ch, OUTSTR& out)
 	{
-		OUTSTR tmp;
-		for(uint32_t i = 0; i < inp.size(); ++i) {
-			auto ch = inp[i];
-			switch(ch) {
-			case '0': tmp += "０"; break;
-			case '1': tmp += "１"; break;
-			case '2': tmp += "２"; break;
-			case '3': tmp += "３"; break;
-			case '4': tmp += "４"; break;
-			case '5': tmp += "５"; break;
-			case '6': tmp += "６"; break;
-			case '7': tmp += "７"; break;
-			case '8': tmp += "８"; break;
-			case '9': tmp += "９"; break;
-			case '+': tmp += "＋"; break;
-			case '-': tmp += "－"; break;
-			case '/': tmp += "÷"; break;
-			case '*': tmp += "×"; break;
-			default:
-				tmp += ch; break;
-			}
+		switch(ch) {
+		case '0': out += "０"; break;
+		case '1': out += "１"; break;
+		case '2': out += "２"; break;
+		case '3': out += "３"; break;
+		case '4': out += "４"; break;
+		case '5': out += "５"; break;
+		case '6': out += "６"; break;
+		case '7': out += "７"; break;
+		case '8': out += "８"; break;
+		case '9': out += "９"; break;
+		case '+': out += "＋"; break;
+		case '-': out += "－"; break;
+		case '/': out += "÷"; break;
+		case '*': out += "×"; break;
+		default:
+			out += ch; break;
 		}
-		return tmp;
+	}
+
+
+	OUTSTR conv_str_(const char* str)
+	{
+		OUTSTR out;
+		char ch;
+		while((ch = *str++) != 0) {
+			conv_cha_(ch, out);
+		}
+		return out;
 	}
 
 
@@ -200,13 +207,14 @@ namespace {
 				auto x = cur_pos_.x;
 				if(x > 0) --x;
 				render_.fill_box(vtx::srect(6 + x * 16, 6 + cur_pos_.y * 20, 16, 16));
-				cur_pos_.x = cbuff_.size();
-				return;
+			} else {
+				OUTSTR tmp;
+				conv_cha_(cbuff_.back(), tmp);
+				render_.set_fore_color(DEF_COLOR::White);
+				render_.draw_text(vtx::spos(6 + cur_pos_.x * 16, 6 + cur_pos_.y * 20),
+					tmp.c_str());
 			}
 			cur_pos_.x = cbuff_.size();
-			auto tmp = conv_cha_(cbuff_);
-			render_.set_fore_color(DEF_COLOR::White);
-			render_.draw_text(vtx::spos(6, 6 + cur_pos_.y * 20), tmp.c_str());
 		}
 	}
 
@@ -217,7 +225,7 @@ namespace {
 		auto ans = arith_.get();
 		char tmp[20];
 		utils::sformat("%7.6f\n", tmp, sizeof(tmp)) % ans;
-		auto out = conv_cha_(tmp);
+		auto out = conv_str_(tmp);
 		render_.set_back_color(DEF_COLOR::Darkgray);
 		render_.set_fore_color(DEF_COLOR::White);
 		render_.draw_text(vtx::spos(6, 6 + 20 * 3), out.c_str(), false, true);
