@@ -12,6 +12,7 @@
 */
 //=====================================================================//
 #include "common/vtx.hpp"
+#include "common/format.hpp"
 
 namespace imath {
 

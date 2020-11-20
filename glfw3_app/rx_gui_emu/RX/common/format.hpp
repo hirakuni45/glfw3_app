@@ -30,6 +30,9 @@
 			! 2019/02/02 19:42- 符号文字カウントの不具合修正。@n
 			+ 2020/02/04 05:23- std::string 型追加。@n
 			+ 2020/04/25 07:45- stdout_buffered_chaout に、操作位置を返すメソッド pos() を追加。
+			! 2020/11/20 07:44- sformat 時の nega_ フラグの初期化漏れ
+			! 2020/11/20 07:44- nega_ 符号表示の順番、不具合
+			! 2020/11/20 16:59- uint 型を削除
     @author 平松邦仁 (hira@rvf-rc45.net)
 	@copyright	Copyright (C) 2013, 2020 Kunihito Hiramatsu @n
 				Released under the MIT license @n
@@ -42,10 +45,9 @@
 #include <cstring>
 #include <string>
 
-void rx_putchar(char ch);
-
 // 最終的な出力として putchar を使う場合有効にする（通常は write [stdout] 関数）
 #define USE_PUTCHAR
+void rx_putchar(char ch);
 
 // float を無効にする場合（８ビット系マイコンでのメモリ節約用）
 // #define NO_FLOAT_FORM
@@ -219,7 +221,7 @@ namespace utils {
 			if(pos_ == 0) return;
 
 #ifdef USE_PUTCHAR
-			for(uint i = 0; i < pos_; ++i) {
+			for(uint16_t i = 0; i < pos_; ++i) {
 				rx_putchar(buff_[i]);
 			}
 #else
@@ -372,7 +374,7 @@ namespace utils {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class base_format {
 	public:
-		static const uint16_t VERSION = 90;		///< バージョン番号（整数）
+		static const uint16_t VERSION = 93;		///< バージョン番号（整数）
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
@@ -556,7 +558,10 @@ namespace utils {
 
 		void out_str_(const char* str, char sign, uint16_t n)
 		{
-			if(nega_) { str_(str); }
+			if(nega_) {
+				if(sign != 0) { chaout_(sign); }
+				str_(str);
+			}
 
 			auto num = num_;
 			if(sign != 0 && num > 0) { num--; } 
@@ -574,10 +579,10 @@ namespace utils {
 						--spc;
 						chaout_(' ');
 					}
-					if(sign != 0) { chaout_(sign); }
+					if(!nega_ && sign != 0) { chaout_(sign); }
 				}
 			} else {
-				if(sign != 0) { chaout_(sign); }
+				if(!nega_ && sign != 0) { chaout_(sign); }
 			}
 
 			if(!nega_) { str_(str); }
@@ -882,7 +887,7 @@ namespace utils {
 			num_(0), point_(0),
 			bitlen_(0),
 			error_(error::none),
-			mode_(mode::NONE), zerosupp_(false), sign_(false)
+			mode_(mode::NONE), zerosupp_(false), sign_(false), nega_(false)
 		{
 			if(!chaout_.set(buff, size)) {
 				error_ = error::out_null;
