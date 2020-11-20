@@ -150,8 +150,13 @@ namespace app {
 
 			gui_emu::update_gui();
 
-			lcd_core_->at_fb().rendering(gl::texfb::IMAGE::RGB565, gui_emu::get_fbp());
-			lcd_core_->at_fb().flip();
+			{
+				const void* p = gui_emu::get_fbp();
+				if(p != nullptr) {
+					lcd_core_->at_fb().rendering(gl::texfb::IMAGE::RGB565, p);
+					lcd_core_->at_fb().flip();
+				}
+			}
 
 			terminal_core_->output(rx_stdout_);
 			rx_stdout_.clear();
