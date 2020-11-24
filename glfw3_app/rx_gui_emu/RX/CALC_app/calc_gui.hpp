@@ -3,7 +3,8 @@
 /*! @file
     @brief  GUI 関数電卓・クラス @n
 			RX65N Envision Kit @n
-			RX72N Envision Kit
+			RX72N Envision Kit @n
+			rx_gui_emu
     @author 平松邦仁 (hira@rvf-rc45.net)
 	@copyright	Copyright (C) 2020 Kunihito Hiramatsu @n
 				Released under the MIT license @n
@@ -28,6 +29,10 @@
 #include "common/format.hpp"
 #include "common/basic_arith.hpp"
 #include "common/fixed_string.hpp"
+
+#include "common/mpfr.hpp"
+#include "calc_func.hpp"
+#include "calc_symbol.hpp"
 
 namespace app {
 
@@ -142,14 +147,14 @@ namespace app {
 		typedef gui::simple_dialog<RENDER, TOUCH> DIALOG;
 		DIALOG	dialog_;
 
-		typedef gui::widget_director<RENDER, TOUCH, 40> WIDD;
+		typedef gui::widget_director<RENDER, TOUCH, 60> WIDD;
 		WIDD	widd_;
 
-		static const int16_t BTN_W = 38;
+		static const int16_t BTN_W = 41;
 		static const int16_t BTN_H = 38;
-		static const int16_t ORG_X = 10;
+		static const int16_t ORG_X = 8;
 		static const int16_t ORG_Y = 94;
-		static const int16_t SPC_X = 44;
+		static const int16_t SPC_X = 47;
 		static const int16_t SPC_Y = 44;
 
 		constexpr int16_t LOC_X(int16_t x)
@@ -182,12 +187,36 @@ namespace app {
 		BUTTON	add_;
 		BUTTON	sub_;
 
-		BUTTON	poi_;
-		BUTTON	pin_;
-		BUTTON	pot_;
-		BUTTON	equ_;
+		BUTTON	poi_;  // .
+		BUTTON	pin_;  // (
+		BUTTON	pot_;  // )
+		BUTTON	equ_;  // =
 
-		typedef utils::basic_arith<float> ARITH;
+		BUTTON	sin_;
+		BUTTON	cos_;
+		BUTTON	tan_;
+		BUTTON	pai_;
+
+		BUTTON	sqr_;   // x^x
+		BUTTON	sqrt_;  // √
+		BUTTON	log_;
+		BUTTON	ln_;
+
+		BUTTON	fc_;
+		BUTTON	angt_;
+
+		// 数値クラス
+		typedef mpfr::value<50> NVAL;
+
+		typedef utils::calc_def CDEF;
+
+		typedef utils::calc_symbol<NVAL> SYMBOL;
+		SYMBOL	symbol_;
+
+		typedef utils::calc_func<NVAL> FUNC;
+		FUNC	func_;
+
+		typedef utils::basic_arith<NVAL, SYMBOL, FUNC> ARITH;
 		ARITH	arith_;
 
 		typedef utils::fixed_string<128> STR;
@@ -195,6 +224,10 @@ namespace app {
 
 		static const int16_t limit_ = 3;
 		vtx::spos	cur_pos_;
+
+		bool	fc_mode_;
+
+		CDEF::ATYPE	atype_;
 
 		void clear_win_()
 		{
@@ -209,7 +242,7 @@ namespace app {
 
 		void conv_cha_(char ch, OUTSTR& out)
 		{
-			switch(ch) {
+			switch(static_cast<uint8_t>(ch)) {
 			case '0': out += "０"; break;
 			case '1': out += "１"; break;
 			case '2': out += "２"; break;
@@ -224,8 +257,16 @@ namespace app {
 			case '-': out += "－"; break;
 			case '/': out += "÷"; break;
 			case '*': out += "×"; break;
+			case '?': out += "？"; break;
+			case static_cast<uint8_t>(SYMBOL::NAME::PI): out += "π"; break;
+			case static_cast<uint8_t>(FUNC::NAME::SIN): out += "sin"; break;
+			case static_cast<uint8_t>(FUNC::NAME::COS): out += "cos"; break;
+			case static_cast<uint8_t>(FUNC::NAME::TAN): out += "tan"; break;
 			default:
-				out += ch; break;
+				if(ch >= 0) {
+					out += ch;
+				}
+				break;
 			}
 		}
 
@@ -263,15 +304,22 @@ namespace app {
 
 		void update_ans_()
 		{
-			arith_.analize(cbuff_.c_str());
-			auto ans = arith_.get();
-			char tmp[20];
-			utils::sformat("%7.6f", tmp, sizeof(tmp)) % ans;
-			utils::format("%s\n") % tmp;
+			if(cbuff_.empty()) return;
+
+			auto ok = arith_.analize(cbuff_.c_str());
+			char tmp[29+1];
+			if(ok) {
+				auto ans = arith_();
+				ans(tmp, sizeof(tmp));
+				utils::format("=%s\n") % tmp;
+			} else {
+				utils::sformat("?", tmp, sizeof(tmp));
+			}
 			auto out = conv_str_(tmp);
-			render_.set_back_color(DEF_COLOR::Darkgray);
+			render_.set_fore_color(DEF_COLOR::Darkgray);
+			render_.fill_box(vtx::srect(6, 6 + 20 * 3, 480 - 12, 20));
 			render_.set_fore_color(DEF_COLOR::White);
-			render_.draw_text(vtx::spos(6, 6 + 20 * 3), out.c_str(), false, true);
+			render_.draw_text(vtx::spos(6, 6 + 20 * 3), out.c_str());
 			cbuff_.clear();
 			cur_pos_.y++;
 			if(cur_pos_.y >= limit_) {
@@ -303,27 +351,44 @@ namespace app {
 #endif
 			dialog_(render_, touch_),
 			widd_(render_, touch_),
-			no0_(vtx::srect(LOC_X(0), LOC_Y(3), BTN_W, BTN_H), "０"),
-			no1_(vtx::srect(LOC_X(0), LOC_Y(2), BTN_W, BTN_H), "１"),
-			no2_(vtx::srect(LOC_X(1), LOC_Y(2), BTN_W, BTN_H), "２"),
-			no3_(vtx::srect(LOC_X(2), LOC_Y(2), BTN_W, BTN_H), "３"),
-			no4_(vtx::srect(LOC_X(0), LOC_Y(1), BTN_W, BTN_H), "４"),
-			no5_(vtx::srect(LOC_X(1), LOC_Y(1), BTN_W, BTN_H), "５"),
-			no6_(vtx::srect(LOC_X(2), LOC_Y(1), BTN_W, BTN_H), "６"),
-			no7_(vtx::srect(LOC_X(0), LOC_Y(0), BTN_W, BTN_H), "７"),
-			no8_(vtx::srect(LOC_X(1), LOC_Y(0), BTN_W, BTN_H), "８"),
-			no9_(vtx::srect(LOC_X(2), LOC_Y(0), BTN_W, BTN_H), "９"),
-			del_(vtx::srect(LOC_X(3), LOC_Y(0), BTN_W, BTN_H), "DEL"),
-			ac_ (vtx::srect(LOC_X(4), LOC_Y(0), BTN_W, BTN_H), "AC"),
-			mul_(vtx::srect(LOC_X(3), LOC_Y(1), BTN_W, BTN_H), "×"),
-			div_(vtx::srect(LOC_X(4), LOC_Y(1), BTN_W, BTN_H), "÷"),
-			add_(vtx::srect(LOC_X(3), LOC_Y(2), BTN_W, BTN_H), "＋"),
-			sub_(vtx::srect(LOC_X(4), LOC_Y(2), BTN_W, BTN_H), "－"),
-			poi_(vtx::srect(LOC_X(1), LOC_Y(3), BTN_W, BTN_H), "・"),
-			pin_(vtx::srect(LOC_X(2), LOC_Y(3), BTN_W, BTN_H), "（"),
-			pot_(vtx::srect(LOC_X(3), LOC_Y(3), BTN_W, BTN_H), "）"),
-			equ_(vtx::srect(LOC_X(4), LOC_Y(3), BTN_W, BTN_H), "＝"),
-			arith_(), cbuff_(), cur_pos_(0)
+			no0_(vtx::srect(LOC_X(5), LOC_Y(3), BTN_W, BTN_H), "０"),
+			no1_(vtx::srect(LOC_X(5), LOC_Y(2), BTN_W, BTN_H), "１"),
+			no2_(vtx::srect(LOC_X(6), LOC_Y(2), BTN_W, BTN_H), "２"),
+			no3_(vtx::srect(LOC_X(7), LOC_Y(2), BTN_W, BTN_H), "３"),
+			no4_(vtx::srect(LOC_X(5), LOC_Y(1), BTN_W, BTN_H), "４"),
+			no5_(vtx::srect(LOC_X(6), LOC_Y(1), BTN_W, BTN_H), "５"),
+			no6_(vtx::srect(LOC_X(7), LOC_Y(1), BTN_W, BTN_H), "６"),
+			no7_(vtx::srect(LOC_X(5), LOC_Y(0), BTN_W, BTN_H), "７"),
+			no8_(vtx::srect(LOC_X(6), LOC_Y(0), BTN_W, BTN_H), "８"),
+			no9_(vtx::srect(LOC_X(7), LOC_Y(0), BTN_W, BTN_H), "９"),
+			del_(vtx::srect(LOC_X(8), LOC_Y(0), BTN_W, BTN_H), "DEL"),
+			ac_ (vtx::srect(LOC_X(9), LOC_Y(0), BTN_W, BTN_H), "AC"),
+			mul_(vtx::srect(LOC_X(8), LOC_Y(1), BTN_W, BTN_H), "×"),
+			div_(vtx::srect(LOC_X(9), LOC_Y(1), BTN_W, BTN_H), "÷"),
+			add_(vtx::srect(LOC_X(8), LOC_Y(2), BTN_W, BTN_H), "＋"),
+			sub_(vtx::srect(LOC_X(9), LOC_Y(2), BTN_W, BTN_H), "－"),
+			poi_(vtx::srect(LOC_X(6), LOC_Y(3), BTN_W, BTN_H), "・"),
+			pin_(vtx::srect(LOC_X(7), LOC_Y(3), BTN_W, BTN_H), "（"),
+			pot_(vtx::srect(LOC_X(8), LOC_Y(3), BTN_W, BTN_H), "）"),
+			equ_(vtx::srect(LOC_X(9), LOC_Y(3), BTN_W, BTN_H), "＝"),
+
+			sin_(vtx::srect(LOC_X(4), LOC_Y(0), BTN_W, BTN_H), "sin"),
+			cos_(vtx::srect(LOC_X(4), LOC_Y(1), BTN_W, BTN_H), "cos"),
+			tan_(vtx::srect(LOC_X(4), LOC_Y(2), BTN_W, BTN_H), "tan"),
+			pai_(vtx::srect(LOC_X(4), LOC_Y(3), BTN_W, BTN_H), "π"),
+
+			sqr_ (vtx::srect(LOC_X(3), LOC_Y(0), BTN_W, BTN_H), "X^X"),
+			sqrt_(vtx::srect(LOC_X(3), LOC_Y(1), BTN_W, BTN_H), "√"),
+
+			log_(vtx::srect(LOC_X(2), LOC_Y(0), BTN_W, BTN_H), "log"),
+			ln_ (vtx::srect(LOC_X(2), LOC_Y(1), BTN_W, BTN_H), "ln"),
+
+			fc_ (vtx::srect(LOC_X(0), LOC_Y(0), BTN_W, BTN_H), "FC"),
+			angt_(vtx::srect(LOC_X(0), LOC_Y(1), BTN_W, BTN_H), "Deg"),
+
+			symbol_(), func_(), arith_(symbol_, func_),
+			cbuff_(), cur_pos_(0),
+			fc_mode_(false), atype_(CDEF::ATYPE::Deg)
 		{ }
 
 
@@ -472,8 +537,10 @@ namespace app {
 			no9_.at_select_func() = [=](uint32_t id) { cbuff_ += '9'; };
 
 			del_.enable();
+			del_.set_base_color(graphics::def_color::Orange);
 			del_.at_select_func() = [=](uint32_t id) { cbuff_.pop_back(); };
 			ac_.enable();
+			ac_.set_base_color(graphics::def_color::Orange);
 			ac_.at_select_func() = [=](uint32_t id) { clear_win_(); };
 
 			mul_.enable();
@@ -494,6 +561,69 @@ namespace app {
 
 			equ_.enable();
 			equ_.at_select_func() = [=](uint32_t id) { update_ans_(); };
+
+			sin_.enable();
+			sin_.at_select_func() = [=](uint32_t id) {
+				cbuff_ += static_cast<char>(FUNC::NAME::SIN);
+				cbuff_ += '(';
+			};
+			cos_.enable();
+			cos_.at_select_func() = [=](uint32_t id) {
+				cbuff_ += static_cast<char>(FUNC::NAME::COS);
+				cbuff_ += '(';
+			};
+			tan_.enable();
+			tan_.at_select_func() = [=](uint32_t id) {
+				cbuff_ += static_cast<char>(FUNC::NAME::TAN);
+				cbuff_ += '(';
+			};
+			pai_.enable();
+			pai_.at_select_func() = [=](uint32_t id) {
+				cbuff_ += static_cast<char>(SYMBOL::NAME::PI);
+			};
+
+
+			sqrt_.enable();
+			sqrt_.at_select_func() = [=](uint32_t id) {
+				cbuff_ += static_cast<char>(FUNC::NAME::SQRT);
+				cbuff_ += '(';
+			};
+
+			log_.enable();
+			log_.at_select_func() = [=](uint32_t id) {
+				cbuff_ += static_cast<char>(FUNC::NAME::LOG);
+				cbuff_ += '(';
+			};
+			ln_.enable();
+			ln_.at_select_func() = [=](uint32_t id) {
+				cbuff_ += static_cast<char>(FUNC::NAME::LN);
+				cbuff_ += '(';
+			};
+
+
+			fc_.enable();  // 機能キー
+			fc_.set_base_color(graphics::def_color::SafeColor);
+			fc_.at_select_func() = [=](uint32_t id) { fc_mode_ = !fc_mode_; };
+
+			angt_.enable();  // 角度タイプ
+			angt_.set_base_color(graphics::def_color::SafeColor);
+			angt_.at_select_func() = [=](uint32_t id) {
+				switch(atype_) {
+				case CDEF::ATYPE::Deg:
+					atype_ = CDEF::ATYPE::Rad;
+					angt_.set_title("Rad");
+					break;
+				case CDEF::ATYPE::Rad:
+					atype_ = CDEF::ATYPE::Grad;
+					angt_.set_title("Grad");
+					break;
+				case CDEF::ATYPE::Grad:
+					atype_ = CDEF::ATYPE::Deg;
+					angt_.set_title("Deg");
+					break;
+				}
+				func_.set_atype(atype_);
+			};
 
 			clear_win_();
 		}
