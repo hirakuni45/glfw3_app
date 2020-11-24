@@ -126,6 +126,7 @@ namespace utils {
 						error_.set(error::symbol_fatal);
 					}
 				}
+				if(minus) { nval = -nval; }
 				return nval;
 			}
 
@@ -134,11 +135,13 @@ namespace utils {
 			} else {
 				uint32_t idx = 0;
 				while(ch_ != 0) {
-					if(ch_ == '+') break;
+					if(ch_ == ' ' || ch_ == '\t') continue;
+					else if(ch_ == '+') break;
 					else if(ch_ == '-') break;
 					else if(ch_ == '*') break;
 					else if(ch_ == '/') break;
 					else if(ch_ == ')') break;
+					else if(ch_ == '^') break;
 					else if((ch_ >= '0' && ch_ <= '9') || ch_=='.' || ch_=='e' || ch_=='E') {
 						tmp[idx] = ch_;
 						idx++;
@@ -162,7 +165,7 @@ namespace utils {
 
 		auto factor_()
 		{
-			NVAL v(0.0);
+			NVAL v(0);
 			if(ch_ == '(') {
 				ch_ = *tx_++;
 				v = expression_();
@@ -173,6 +176,11 @@ namespace utils {
 				}
 			} else {
 				v = number_();
+				if(ch_ == '^') {  // べき乗
+					ch_ = *tx_++;
+					auto n = number_();
+					v.pow(n);
+				}
 			}
 			return v;
 		}

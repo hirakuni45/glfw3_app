@@ -148,6 +148,12 @@ namespace mpfr {
 		}
 
 
+		void pow(const value& n) noexcept
+		{
+			mpfr_pow(t_, t_, n.t_, rnd_);
+		}
+
+
 		bool operator == (int v) const noexcept
 		{
 			return mpfr_cmp_si(t_, v) == 0;
@@ -212,9 +218,14 @@ namespace mpfr {
 		value operator * (const value& th) const noexcept { return value(*this) *= th; }
 		value operator / (const value& th) const noexcept { return value(*this) /= th; }
 
-		void operator() (char* out, uint32_t len) noexcept
+
+		void operator() (int upn, char* out, uint32_t len) noexcept
 		{
-			mpfr_snprintf(out, len, "%.50RNf", t_);
+			char form[16];
+			utils::sformat("%%.%dRNf", form, sizeof(form)) % upn;
+			mpfr_snprintf(out, len, form, t_);
+//			mpfr_snprintf(out, len, "%.50RNf", t_);
+//			mpfr_snprintf(out, len, "%10.5RNE", t_);
 		}
 
 
@@ -225,6 +236,12 @@ namespace mpfr {
 			return out;
 		}
 
+		static value asin(const value& in)
+		{
+			value out;
+			mpfr_asin(out.t_, in.t_, out.get_rnd());
+			return out;
+		}
 
 		static value cos(const value& in)
 		{
@@ -233,6 +250,12 @@ namespace mpfr {
 			return out;
 		}
 
+		static value acos(const value& in)
+		{
+			value out;
+			mpfr_acos(out.t_, in.t_, out.get_rnd());
+			return out;
+		}
 
 		static value tan(const value& in)
 		{
@@ -241,6 +264,12 @@ namespace mpfr {
 			return out;
 		}
 
+		static value atan(const value& in)
+		{
+			value out;
+			mpfr_atan(out.t_, in.t_, out.get_rnd());
+			return out;
+		}
 
 		static value log10(const value& in)
 		{
