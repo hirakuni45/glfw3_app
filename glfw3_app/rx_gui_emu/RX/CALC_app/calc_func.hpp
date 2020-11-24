@@ -21,8 +21,39 @@ namespace utils {
     */
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	template <class NVAL>
-    class calc_func : public calc_def {
+    class calc_func {
+	public:
+		//=============================================================//
+		/*!
+			@brief	関数 (0xC0 to 0xFF)、定義
+		*/
+		//=============================================================//
+		enum class NAME : uint8_t {
+			SIN = 0xC0,		///< sin(x)
+			COS,			///< cos(x)
+			TAN,			///< tan(x)
+			ASIN,			///< asin(x)
+			ACOS,			///< acos(x)
+			ATAN,			///< atan(x)
 
+			SQRT,			///< sqrt(x)
+			LOG,			///< log(x)
+			LN,				///< ln(x)
+		};
+
+
+		//=============================================================//
+		/*!
+			@brief  角度表現定義
+		*/
+		//=============================================================//
+		enum class ATYPE : uint8_t {
+			Deg,	///< Deg 度数法 (360)
+			Rad,	///< Rad 弧度法 (2pai)
+			Grad	///< 具ラード (400)
+		};
+
+	private:
 		NVAL	pai_;
 		NVAL	rad_;
 		NVAL	grad_;
@@ -31,8 +62,6 @@ namespace utils {
 		ATYPE	atype_;
 
 	public:
-		typedef calc_def::NAME NAME;
-
 		//-------------------------------------------------------------//
 		/*!
 			@brief  コンストラクタ
@@ -50,7 +79,7 @@ namespace utils {
 			@return ラジアン（2 x pai)
 		*/
 		//-------------------------------------------------------------//
-		NVAL conv_rad(const NVAL& in) noexcept
+		NVAL conv_to_rad(const NVAL& in) noexcept
 		{
 			switch(atype_) {
 			case ATYPE::Deg:
@@ -59,6 +88,19 @@ namespace utils {
 				return in;
 			case ATYPE::Grad:
 				return in / grad_ * c2_ * NVAL::get_pi();
+			}
+		}
+
+
+		NVAL conv_rad_to(const NVAL& in) noexcept
+		{
+			switch(atype_) {
+			case ATYPE::Deg:
+				return in / (c2_ * NVAL::get_pi()) * rad_; 
+			case ATYPE::Rad:
+				return in;
+			case ATYPE::Grad:
+				return in / (c2_ * NVAL::get_pi()) * grad_; 
 			}
 		}
 
@@ -83,6 +125,43 @@ namespace utils {
 
 		//-------------------------------------------------------------//
 		/*!
+			@brief  関数文字列の取得
+			@param[in]	name	関数名
+		*/
+		//-------------------------------------------------------------//
+		const char* get_name(NAME name) const
+		{
+			switch(name) {
+			case NAME::SIN:  return "sin";
+			case NAME::COS:  return "cos";
+			case NAME::TAN:  return "tan";
+			case NAME::ASIN:  return "asin";
+			case NAME::ACOS:  return "acos";
+			case NAME::ATAN:  return "atan";
+			case NAME::SQRT: return "sqrt";
+			case NAME::LOG:  return "log";
+			case NAME::LN:   return "ln";
+			default:
+				break;
+			}
+			return "";
+		}
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief  関数文字列の取得
+			@param[in]	name	関数名
+		*/
+		//-------------------------------------------------------------//
+		uint32_t get_name_size(NAME name) const
+		{
+			return strlen(get_name(name)) * 8;
+		}
+
+
+		//-------------------------------------------------------------//
+		/*!
 			@brief	  関数機能
 			@param[in]	name	関数名
 			@param[in]	in		入力
@@ -95,22 +174,43 @@ namespace utils {
 			switch(name) {
 			case NAME::SIN:
 				{
-					auto a = conv_rad(in);
+					auto a = conv_to_rad(in);
 					out = NVAL::sin(a);
 				}
 				break;
 			case NAME::COS:
 				{
-					auto a = conv_rad(in);
+					auto a = conv_to_rad(in);
 					out = NVAL::cos(a);
 				}
 				break;
 			case NAME::TAN:
 				{
-					auto a = conv_rad(in);
+					auto a = conv_to_rad(in);
 					out = NVAL::tan(a);
 				}
 				break;
+			case NAME::ASIN:
+				{
+					auto a = NVAL::asin(in);
+					out = conv_rad_to(a);
+				}
+				break;
+			case NAME::ACOS:
+				{
+					auto a = NVAL::acos(in);
+					out = conv_rad_to(a);
+				}
+				break;
+			case NAME::ATAN:
+				{
+					auto a = NVAL::atan(in);
+					out = conv_rad_to(a);
+				}
+				break;
+
+
+
 			case NAME::SQRT:
 				{
 					out = NVAL::sqrt(in);
