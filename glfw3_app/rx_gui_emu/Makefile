@@ -83,7 +83,7 @@ OPTLIBS		=	opengl32 glfw3 glew32 \
 				png turbojpeg jpeg openjp2 \
 				freetype \
 				mad tag \
-				z openal
+				z openal mpfr gmp
 else
 LOCAL_PATH	=	/usr/local
 OPTLIBS		=	glfw3 GLEW \
