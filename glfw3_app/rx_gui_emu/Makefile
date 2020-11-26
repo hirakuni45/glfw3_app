@@ -239,4 +239,15 @@ bin_zip:
 	rm -f $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip
 	zip $(TARGET)_$(shell date +%Y%m%d%H)_bin.zip *.exe *.dll
 
+copy:
+	cp RX/common/basic_arith.hpp /d/Git/RX/common/.
+	cp RX/common/mpfr.hpp /d/Git/RX/common/.
+	cp RX/CALC_app/calc_gui.hpp /d/Git/RX/CALC_sample/.
+	cp RX/CALC_app/calc_func.hpp /d/Git/RX/CALC_sample/.
+	cp RX/CALC_app/calc_symbol.hpp /d/Git/RX/CALC_sample/.
+	cp RX/graphics/color.[hc]pp /d/Git/RX/graphics/.
+	cp RX/graphics/button.hpp /d/Git/RX/graphics/.
+	cp RX/graphics/widget.hpp /d/Git/RX/graphics/.
+	cp RX/graphics/widget_director.hpp /d/Git/RX/graphics/.
+
 -include $(DEPENDS)
