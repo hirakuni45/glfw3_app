@@ -34,6 +34,8 @@
 #include "calc_func.hpp"
 #include "calc_symbol.hpp"
 
+#include "resource.hpp"
+
 namespace app {
 
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -44,6 +46,10 @@ namespace app {
     class calc_gui {
 	public:
 		static const uint32_t CALC_NUM = 250;  ///< 250 桁
+
+		static const uint32_t ANS_NUM = 100;
+		static const int16_t  DISP_OFS_X = 4;
+		static const int16_t  DISP_OFS_Y = 6;
 
 		static const int16_t LCD_X = 480;
 		static const int16_t LCD_Y = 272;
@@ -199,7 +205,7 @@ namespace app {
 		BUTTON	tan_;
 		BUTTON	pai_;
 
-		BUTTON	sqr_;   // x^x
+		BUTTON	sqr_;   // x^2
 		BUTTON	sqrt_;  // √
 		BUTTON	pow_;	// x^y
 
@@ -233,6 +239,7 @@ namespace app {
 		ARITH	arith_;
 
 		typedef utils::fixed_string<256> STR;
+		STR			cbackup_;
 		STR			cbuff_;
 		uint32_t	cbuff_pos_;
 		uint32_t	del_len_;
@@ -341,21 +348,21 @@ namespace app {
 					if(del_len_ > 0) {
 						auto x = cur_pos_.x - del_len_;
 						render_.set_fore_color(DEF_COLOR::Darkgray);
-						render_.fill_box(vtx::srect(6 + x, 6 + cur_pos_.y * 20, del_len_, 16));
+						render_.fill_box(vtx::srect(DISP_OFS_X + x, DISP_OFS_Y + cur_pos_.y * 20, del_len_, 16));
 						cur_pos_.x -= del_len_;
 						del_len_ = 0;
 					}
 				} else {
 					render_.set_fore_color(DEF_COLOR::White);
 					auto i = cbuff_pos_;
-					int x = cur_pos_.x + 6;
+					int x = cur_pos_.x + DISP_OFS_X;
 					while(i < cbuff_.size()) {
 						OUTSTR tmp;
 						conv_cha_(cbuff_[i], tmp);
-						x = render_.draw_text(vtx::spos(x, 6 + cur_pos_.y * 20), tmp.c_str());
+						x = render_.draw_text(vtx::spos(x, DISP_OFS_Y + cur_pos_.y * 20), tmp.c_str());
 						++i;
 					}
-					cur_pos_.x = x - 6;
+					cur_pos_.x = x - DISP_OFS_X;
 				}
 				cbuff_pos_ = cbuff_.size();
 			}
@@ -375,14 +382,15 @@ namespace app {
 		// 答え表示
 		void draw_ans_(const NVAL& in, bool ok)
 		{
-			char tmp[30+1];
+			char tmp[ANS_NUM+1];
 			if(ok) {
 				NVAL ans = in;
 				if(shift_ != 0) {
 					auto exp = NVAL::exp10(NVAL(shift_));
 					ans *= exp;
 				}
-				ans(50, tmp, sizeof(tmp));
+				ans(ANS_NUM, tmp, sizeof(tmp));
+				// zero supless
 				auto l = strlen(tmp);
 				while(l > 0) {
 					--l;
@@ -399,16 +407,16 @@ namespace app {
 
 			auto out = conv_str_(tmp);
 			render_.set_fore_color(DEF_COLOR::Darkgray);
-			render_.round_box(vtx::srect(0, 6 + 20 * 3, 480, 20), 6, false, true);
+			render_.round_box(vtx::srect(0, DISP_OFS_Y + 20 * 3, 480, 20), 6, false, true);
 			render_.set_fore_color(DEF_COLOR::White);
-			render_.draw_text(vtx::spos(6, 6 + 20 * 3), out.c_str());
+			render_.draw_text(vtx::spos(DISP_OFS_X, DISP_OFS_Y + 20 * 3), out.c_str());
 			if(shift_ != 0) {  // exp 表示
 				render_.set_fore_color(DEF_COLOR::Black);
-				render_.fill_box(vtx::srect(480 - 6 - 24 - 2, 6 + 20 * 3, 32, 20));
+				render_.fill_box(vtx::srect(480 - DISP_OFS_X - 24 - 2, DISP_OFS_Y + 20 * 3, 32, 20));
 				char tmp[8];
 				utils::sformat("%+d", tmp, sizeof(tmp)) % -shift_;
 				render_.set_fore_color(DEF_COLOR::White);
-				render_.draw_text(vtx::spos(480 - 6 - 24, 6 + 20 * 3 + 1), tmp);
+				render_.draw_text(vtx::spos(480 - DISP_OFS_X - 24, DISP_OFS_Y + 20 * 3 + 1), tmp);
 			}
 		}
 
@@ -416,7 +424,10 @@ namespace app {
 		// 答え表示
 		void update_equ_()
 		{
-			if(cbuff_.empty()) return;
+			if(cbuff_.empty()) {
+				cbuff_ = cbackup_;
+				return;
+			}
 
 			// 括弧が開いていたら自動で閉じる
 			while(nest_ > 0) { cbuff_ += ')'; nest_--; }
@@ -431,13 +442,14 @@ namespace app {
 			parse_cbuff_(cmd);
 			utils::format("%s\n") % cmd.c_str();
 
+			cbackup_ = cbuff_;
 			cbuff_.clear();
 			cur_pos_.x = 0;
 			cur_pos_.y++;
 			if(cur_pos_.y >= limit_) {
-				render_.move(vtx::srect(6, 6 + 20, 480 - 12, 20 * 2), vtx::spos(6, 6));
+				render_.move(vtx::srect(DISP_OFS_X, DISP_OFS_Y + 20, 480 - DISP_OFS_X * 2, 20 * 2), vtx::spos(DISP_OFS_X, DISP_OFS_Y));
 				render_.set_fore_color(DEF_COLOR::Darkgray);
-				render_.fill_box(vtx::srect(6, 6 + 20 * 2, 480 - 12, 20));
+				render_.fill_box(vtx::srect(DISP_OFS_X, DISP_OFS_Y + 20 * 2, 480 - DISP_OFS_X * 2, 20));
 				cur_pos_.y = limit_ - 1;
 			}
 			shift_ = 0;
@@ -506,13 +518,13 @@ namespace app {
 			tan_(vtx::srect(LOC_X(4), LOC_Y(2), BTN_W, BTN_H), "tan"),
 			pai_(vtx::srect(LOC_X(4), LOC_Y(3), BTN_W, BTN_H), "π"),
 
-			sqr_ (vtx::srect(LOC_X(3), LOC_Y(0), BTN_W, BTN_H), "X^2"),
+			sqr_ (vtx::srect(LOC_X(3), LOC_Y(0), BTN_W, BTN_H)),
 			sqrt_(vtx::srect(LOC_X(3), LOC_Y(1), BTN_W, BTN_H), "√"),
-			pow_ (vtx::srect(LOC_X(3), LOC_Y(2), BTN_W, BTN_H), "X^Y"),
+			pow_ (vtx::srect(LOC_X(3), LOC_Y(2), BTN_W, BTN_H)),
 
 			log_(vtx::srect(LOC_X(2), LOC_Y(0), BTN_W, BTN_H), "log"),
 			ln_ (vtx::srect(LOC_X(2), LOC_Y(1), BTN_W, BTN_H), "ln"),
-			inv_(vtx::srect(LOC_X(2), LOC_Y(2), BTN_W, BTN_H), "X^-1"),
+			inv_(vtx::srect(LOC_X(2), LOC_Y(2), BTN_W, BTN_H)),
 
 			fc_ (vtx::srect(LOC_X(0), LOC_Y(0), BTN_W, BTN_H), "FC"),
 			angt_(vtx::srect(LOC_X(0), LOC_Y(1), BTN_W, BTN_H), "Deg"),
@@ -528,7 +540,7 @@ namespace app {
 			sym_out_ (vtx::srect(LOC_X(1), LOC_Y(2), BTN_W, BTN_H), "Rcl"),
 
 			symbol_(), func_(), arith_(symbol_, func_),
-			cbuff_(), cbuff_pos_(0), del_len_(0), cur_pos_(0),
+			cbackup_(), cbuff_(), cbuff_pos_(0), del_len_(0), cur_pos_(0),
 			fc_mode_(false), nest_(0), symbol_idx_(0), shift_(0)
 		{ }
 
@@ -697,9 +709,12 @@ namespace app {
 				} else if(code == ')') {
 					del_len_ = 8;
 					nest_++;
+				} else if(code == '.') {
+					del_len_ = 8;
 				} else if(code >= '0' && code <= '9') {
 					del_len_ = 16;
-				} else if(code == '+' || code == '-' || code == '*' || code == '/' || code == '^') {
+				} else if(code == '+' || code == '-' || code == '*' || code == '/'
+					|| code == '^') {
 					del_len_ = 16;
 				} else if(code >= 0x80 && code < 0xc0) {
 					del_len_ = symbol_.get_name_size(static_cast<SYMBOL::NAME>(code));
@@ -802,6 +817,7 @@ namespace app {
 			};
 
 			sqr_.enable();
+			sqr_.set_mobj(resource::bitmap::x_2_);
 			sqr_.at_select_func() = [=](uint32_t id) {
 				cbuff_ += '^';
 				cbuff_ += '2';
@@ -812,6 +828,7 @@ namespace app {
 				cbuff_ += '('; nest_++;
 			};
 			pow_.enable();
+			pow_.set_mobj(resource::bitmap::x_y_);
 			pow_.at_select_func() = [=](uint32_t id) {
 				cbuff_ += '^';
 			};
@@ -827,6 +844,7 @@ namespace app {
 				cbuff_ += '('; nest_++;
 			};
 			inv_.enable();
+			inv_.set_mobj(resource::bitmap::x_m1_);
 			inv_.at_select_func() = [=](uint32_t id) {
 				cbuff_ += '^';
 				cbuff_ += '-';
