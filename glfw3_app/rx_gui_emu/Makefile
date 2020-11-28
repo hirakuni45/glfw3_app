@@ -37,6 +37,7 @@ CSOURCES	=	minizip/ioapi.c \
 # 				RX/GUI_sample/gui_main.cpp
 PSOURCES	=	main.cpp \
 				RX/CALC_app/calc_gui.cpp \
+				RX/CALC_app/resource.cpp \
 				RX/graphics/font8x16.cpp \
 				RX/graphics/kfont16.cpp \
 				RX/graphics/color.cpp \
@@ -245,6 +246,8 @@ copy:
 	cp RX/CALC_app/calc_gui.hpp /d/Git/RX/CALC_sample/.
 	cp RX/CALC_app/calc_func.hpp /d/Git/RX/CALC_sample/.
 	cp RX/CALC_app/calc_symbol.hpp /d/Git/RX/CALC_sample/.
+	cp RX/CALC_app/resource.[hc]pp /d/Git/RX/CALC_sample/.
+	cp -r RX/CALC_app/resource /d/Git/RX/CALC_sample/. 
 	cp RX/graphics/color.[hc]pp /d/Git/RX/graphics/.
 	cp RX/graphics/button.hpp /d/Git/RX/graphics/.
 	cp RX/graphics/widget.hpp /d/Git/RX/graphics/.
