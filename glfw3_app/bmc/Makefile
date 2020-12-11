@@ -221,7 +221,8 @@ endif
 run:
 #	./$(TARGET) -size 48,96 -text -header 8 -c_style nmb96_0 font_96.png aaa.h
 #	./$(TARGET) -script script/colorbar.scr colorbar.png
-	./$(TARGET) -script script/crosshatch.scr crosshatch.png
+#	./$(TARGET) -script script/crosshatch.scr crosshatch.png
+	./$(TARGET) -script script/brightness.scr brightness.png
 
 clean:
 	rm -rf $(BUILD) $(TARGET)$(FEXT)
