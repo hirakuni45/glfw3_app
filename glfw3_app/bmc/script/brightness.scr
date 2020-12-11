@@ -1,0 +1,63 @@
+// ブライトネスの生成
+// サイズ宣言
+size 1920 1080
+// カラー定義 R G B
+color gray40    0.4 0.4 0.4
+color white75   0.75 0.75 0.75
+color yellow75  0.75 0.75 0
+color cyan75    0 0.75 0.75
+color green75   0 0.75 0
+color magenta75 0.75 0 0.75
+color red75     0.75 0 0
+color blue75    0 0 0.75
+color yello75   0.75 0.75 0
+color cyan100   0 1 1
+color white100  1 1 1
+color gray50    0.5 0.5 0.5
+color blue100   0 0 1
+color yello100  1 1 0
+color red100    1 0 0
+color green100  0 1 0
+color magenta100 1 0 1
+color white10   0.1 0.1 0.1
+color black     0 0 0
+color white15   0.15 0.15 0.15
+
+// 描画シーケンス
+// box(color, org_x, org_y, size_x, size_y)
+// box_scale_h(color_org, color_end, org_x, org_y, size_x, size_y)
+box_scale_h black red100         0    0 1920 40
+box_scale_h red100 black         0   40 1920 40
+box_scale_h white100 red100      0   80 1920 40
+box_scale_h red100 white100      0  120 1920 40
+
+box_scale_h black green100       0  160 1920 40
+box_scale_h green100 black       0  200 1920 40
+box_scale_h white100 green100    0  240 1920 40
+box_scale_h green100 white100    0  280 1920 40
+
+box_scale_h black blue100        0  320 1920 40
+box_scale_h blue100 black        0  360 1920 40
+box_scale_h white100 blue100     0  400 1920 40
+box_scale_h blue100 white100     0  440 1920 40
+
+box_scale_h black cyan100        0  480 1920 40
+box_scale_h cyan100 black        0  520 1920 40
+box_scale_h white100 cyan100     0  560 1920 40
+box_scale_h cyan100 white100     0  600 1920 40
+
+box_scale_h black yello100       0  640 1920 40
+box_scale_h yello100 black       0  680 1920 40
+box_scale_h white100 yello100    0  720 1920 40
+box_scale_h yello100 white100    0  760 1920 40
+
+box_scale_h black magenta100     0  800 1920 40
+box_scale_h magenta100 black     0  840 1920 40
+box_scale_h white100 magenta100  0  880 1920 40
+box_scale_h magenta100 white100  0  920 1920 40
+
+box_scale_h black white100       0  960 1920 60
+box_scale_h white100 black       0 1020 1920 60
+
+// セーブ形式（png, bmp, jpeg）
+output png
