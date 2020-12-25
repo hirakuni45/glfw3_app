@@ -327,9 +327,9 @@ namespace utils {
 	size_t file_io::get_file_size()
 	{
 		size_t pos = tell();
-		seek(0, seek::end);
+		seek(0, SEEK::END);
 		size_t size = tell();
-		seek(pos, seek::set);
+		seek(pos, SEEK::SET);
 		return size;
 	}
 

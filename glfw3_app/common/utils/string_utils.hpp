@@ -956,4 +956,62 @@ namespace utils {
 		return str;
 	}
 
+
+	struct str {
+
+		static bool oemc_to_utf8(const char* src, char* dst, uint32_t len) noexcept {
+			auto a = sjis_to_utf8(src);
+			if(a.size() < len) {
+				strncpy(dst, a.c_str(), len);
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+
+		static uint32_t utf16_to_utf8(uint16_t code, char* dst, uint32_t dsz) noexcept {
+            uint32_t len = 0;
+            if(code < 0x0080) {
+                if(dsz >= 1) {
+                    *dst++ = code;
+                    len = 1;
+                }
+            } else if(code >= 0x0080 && code <= 0x07ff) {
+                if(dsz >= 2) {
+                    *dst++ = 0xc0 | ((code >> 6) & 0x1f);
+                    *dst++ = 0x80 | (code & 0x3f);
+                    len = 2;
+                }
+            } else if(code >= 0x0800) {
+                if(dsz >= 3) {
+                    *dst++ = 0xe0 | ((code >> 12) & 0x0f);
+                    *dst++ = 0x80 | ((code >> 6) & 0x3f);
+                    *dst++ = 0x80 | (code & 0x3f);
+                    len = 3;
+                }
+            }
+            return len;
+		}
+
+
+        static bool utf16_to_utf8(const uint16_t* src, char* dst, uint32_t dsz) noexcept
+        {
+            if(dsz <= 1) return false;
+
+            uint16_t code;
+            while((code = *src++) != 0) {
+                auto len = utf16_to_utf8(code, dst, dsz);
+                if(dsz > len) {
+                    dsz -= len;
+                    dst += len;
+                } else {
+                    break;
+                }
+            }
+            *dst = 0;
+            return dsz >= 1;
+        }
+
+	};
 }

@@ -143,12 +143,10 @@ namespace utils {
 			@brief	seek タイプ
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		struct seek {
-			enum type {
-				set = SEEK_SET,	///< 先頭からのオフセット
-				cur = SEEK_CUR,	///< 現在位置からのオフセット
-				end = SEEK_END	///< 終端からのオフセット
-			};
+		enum class SEEK {
+			SET = SEEK_SET,	///< 先頭からのオフセット
+			CUR = SEEK_CUR,	///< 現在位置からのオフセット
+			END = SEEK_END	///< 終端からのオフセット
 		};
 
 	private:
@@ -424,20 +422,20 @@ namespace utils {
 			@return	正常なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool seek(size_t offset, seek::type stp) {
+		bool seek(size_t offset, SEEK stp) {
 			if(fp_) {
-				if(fseek(fp_, offset, stp) == 0) return true;
+				if(fseek(fp_, offset, static_cast<int>(stp)) == 0) return true;
 				else return false;
 			} else {
 				size_t pos = fpos_;
 				switch(stp) {
-				case seek::set:
+				case SEEK::SET:
 					pos = offset;
 					break;
-				case seek::cur:
+				case SEEK::CUR:
 					pos += offset;
 					break;
-				case seek::end:
+				case SEEK::END:
 					pos = size_ + offset;
 					break;
 				default:
@@ -452,6 +450,7 @@ namespace utils {
 				}
 			}
 		}
+		bool seek(SEEK stp, size_t offset) { return seek(offset, stp); }
 
 
 		//-----------------------------------------------------------------//
