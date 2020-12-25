@@ -103,7 +103,7 @@ namespace img {
 
 		bool read_info(img::img_info& fo)
 		{
-			if(!fio_.seek(offset_, utils::file_io::seek::set)) {
+			if(!fio_.seek(offset_, utils::file_io::SEEK::SET)) {
 				return false;
 			}
 
@@ -222,7 +222,7 @@ namespace img {
 			if(n == 0) return false;
 
 			if(!fio_.seek(offset_ + HEADER_SIZE + info_.id_length,
-				utils::file_io::seek::set)) {
+				utils::file_io::SEEK::SET)) {
 				return false;
 			}
 
@@ -348,7 +348,7 @@ namespace img {
 		{
 			uint32_t n = info_.clut_num * info_.clut_depth / 8;
 			if(!fio_.seek(offset_ + HEADER_SIZE + info_.id_length + n,
-				utils::file_io::seek::set)) {
+				utils::file_io::SEEK::SET)) {
 				return false;
 			}
 
@@ -567,7 +567,7 @@ namespace img {
 		img::img_info fo;
 		bool f = tga_.read_info(fo);
 
-		fin.seek(pos, utils::file_io::seek::set);
+		fin.seek(pos, utils::file_io::SEEK::SET);
 
 		return f;
 	}
@@ -588,7 +588,7 @@ namespace img {
 		tga tga_(fin);
 		bool f = tga_.read_info(fo);
 
-		fin.seek(pos, utils::file_io::seek::set);
+		fin.seek(pos, utils::file_io::SEEK::SET);
 		return f;
 	}
 

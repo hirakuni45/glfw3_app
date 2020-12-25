@@ -245,7 +245,7 @@ namespace img {
 		unsigned char sig[2];
 		long pos = fin.tell();
 		size_t l = fin.read(sig, 1, 2);
-		fin.seek(pos, utils::file_io::seek::set);
+		fin.seek(pos, utils::file_io::SEEK::SET);
 		if(l == 2) {
 			if(sig[0] == 0xff && sig[1] == 0xd8) {
 				return true;
@@ -287,7 +287,7 @@ namespace img {
 		// ファイルの情報ヘッダの読込み
 		error_code_ = 0;
 		jpeg_read_header(&cinfo, TRUE);
-		fin.seek(pos, utils::file_io::seek::set);
+		fin.seek(pos, utils::file_io::SEEK::SET);
 
 		if(error_code_) {
 ///			std::endl << "JPEG decode error: 'header'(" << static_cast<int>(error_code_) << ")" << std::endl; 

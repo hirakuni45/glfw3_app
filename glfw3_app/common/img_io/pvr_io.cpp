@@ -67,7 +67,7 @@ namespace img {
 		bool probe(utils::file_io& fin) {
 			long pos = fin.tell();
 			bool f = get(fin);
-			fin.seek(pos, utils::file_io::seek::set);
+			fin.seek(pos, utils::file_io::SEEK::SET);
 			return f;
 		}
 	};

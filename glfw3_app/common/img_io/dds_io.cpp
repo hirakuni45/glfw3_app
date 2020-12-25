@@ -1286,7 +1286,7 @@ void tx_compress_dxtn(GLint srccomps, GLint width, GLint height, const GLubyte *
 		}
 
 		if(skip) {
-			if(!fin.seek(skip, utils::file_io::seek::cur)) {
+			if(!fin.seek(skip, utils::file_io::SEEK::CUR)) {
 				return false;
 			}
 		}

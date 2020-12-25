@@ -92,7 +92,7 @@ namespace img {
 
 		long pos = fin.tell();
 		size_t l = fin.read(sig, 1, PNG_BYTES_TO_CHECK);
-		fin.seek(pos, utils::file_io::seek::set);
+		fin.seek(pos, utils::file_io::SEEK::SET);
 		if(l == PNG_BYTES_TO_CHECK) {
 			if(png_check_sig(sig, PNG_BYTES_TO_CHECK)) {
 				return true;
@@ -115,20 +115,20 @@ namespace img {
 		long pos = fin.tell();
 
 		if(probe(fin) == false) {
-			fin.seek(pos, utils::file_io::seek::set);
+			fin.seek(pos, utils::file_io::SEEK::SET);
 			return false;
 		}
 
 		//	png_ptr 構造体を確保・初期化します
 		png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, err_func_);
 		if(png_ptr == NULL) {
-			fin.seek(pos, utils::file_io::seek::set);
+			fin.seek(pos, utils::file_io::SEEK::SET);
 			return false;
 		}
 		//  info_ptr 構造体を確保・初期化します
 		png_infop info_ptr = png_create_info_struct(png_ptr);
 		if(info_ptr == NULL) {
-			fin.seek(pos, utils::file_io::seek::set);
+			fin.seek(pos, utils::file_io::SEEK::SET);
 			return false;
 		}
 
@@ -167,7 +167,7 @@ namespace img {
 
 		png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
 
-		fin.seek(pos, utils::file_io::seek::set);
+		fin.seek(pos, utils::file_io::SEEK::SET);
 
 		return true;
 	}

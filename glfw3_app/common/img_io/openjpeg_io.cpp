@@ -87,7 +87,7 @@ namespace img {
 	OPJ_OFF_T wstrm_skip_(OPJ_OFF_T skip, void* p_user_data)
 	{
 		utils::file_io* fio = static_cast<utils::file_io*>(p_user_data);
-		bool f = fio->seek(skip, utils::file_io::seek::cur);
+		bool f = fio->seek(skip, utils::file_io::SEEK::CUR);
 		if(f) return skip;
 		else return 0;
 	}
@@ -96,7 +96,7 @@ namespace img {
 	OPJ_BOOL wstrm_seek_(OPJ_OFF_T seek_pos, void* p_user_data)
 	{
 		utils::file_io* fio = static_cast<utils::file_io*>(p_user_data);
-		bool f = fio->seek(seek_pos, utils::file_io::seek::set);
+		bool f = fio->seek(seek_pos, utils::file_io::SEEK::SET);
 		if(f) return OPJ_TRUE;
 		else return OPJ_FALSE;
 	}
@@ -294,7 +294,7 @@ namespace img {
 		unsigned char sig[4];
 		long pos = fin.tell();
 		size_t l = fin.read(sig, 1, 4);
-		fin.seek(pos, utils::file_io::seek::set);
+		fin.seek(pos, utils::file_io::SEEK::SET);
 
 		CODEC_FORMAT form = OPJ_CODEC_UNKNOWN;
 		if(l == 4) {

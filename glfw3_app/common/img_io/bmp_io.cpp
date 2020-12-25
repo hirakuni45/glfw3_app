@@ -594,7 +594,7 @@ namespace img {
 		bmp_info bmp;
 		long pos = fin.tell();
 		bool ret = read_header_bmp(fin, bmp);
-		fin.seek(pos, utils::file_io::seek::set);
+		fin.seek(pos, utils::file_io::SEEK::SET);
 		return ret;
 	}
 
@@ -610,7 +610,7 @@ namespace img {
 	bool bmp_io::info(utils::file_io& fin, img::img_info& fo)
 	{
 		long pos = fin.tell();
-		fin.seek(pos, utils::file_io::seek::set);
+		fin.seek(pos, utils::file_io::SEEK::SET);
 
 		bmp_info bmp;
 		if(!read_header_bmp(fin, bmp)) {
@@ -677,7 +677,7 @@ namespace img {
 		long pos = fin.tell();
 		bmp_info bmp;
 		if(!read_header_bmp(fin, bmp)) {
-			fin.seek(pos, utils::file_io::seek::set);
+			fin.seek(pos, utils::file_io::SEEK::SET);
 			return false;
 		}
 
@@ -702,7 +702,7 @@ namespace img {
 				bmp.skip = bmp.skip % bmp.palette_size;
 			}
 			if(clutnum == 0) {
-				fin.seek(pos, utils::file_io::seek::set);
+				fin.seek(pos, utils::file_io::SEEK::SET);
 				return false;
 			}
 		} else {
@@ -713,7 +713,7 @@ namespace img {
 			unsigned char rgbq[RGBQUAD_SIZE];
 			for(int i = 0; i < clutnum; ++i) {
 				if(fin.read(rgbq, bmp.palette_size, 1) != 1) {
-					fin.seek(pos, utils::file_io::seek::set);
+					fin.seek(pos, utils::file_io::SEEK::SET);
 					return false;
 				}
 				img::rgba8 c;
@@ -729,7 +729,7 @@ namespace img {
 		while(i < bmp.skip) {
 			char c;
 			if(!fin.get_char(c)) {
-				fin.seek(pos, utils::file_io::seek::set);
+				fin.seek(pos, utils::file_io::SEEK::SET);
 				return false;
 			}
 			i++;
@@ -756,7 +756,7 @@ namespace img {
 		}
 		if(!f) {
 			img_ = nullptr;
-			fin.seek(pos, utils::file_io::seek::set);
+			fin.seek(pos, utils::file_io::SEEK::SET);
 		}
 
 		return f;
