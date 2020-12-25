@@ -440,13 +440,22 @@ namespace app {
 		if(tag_serial_ != tag.serial_) {
 			gui::set_widget_text(album_pad_, tag.get_album());
 			gui::set_widget_text(title_pad_, tag.get_title());
-			std::string s = "T:" + tag.get_track();
+			std::string s;
+			if(!tag.get_year().empty()) {
+				s += "Y:" + tag.get_year();
+			}
 			if(!tag.get_disc().empty()) {
+				if(!s.empty()) s += ' '; 
 				s += "D:" + tag.get_disc();
 			}
-///			if(!tag.date_.empty() && tag.date_ != "0") {
-///				s += " : " + tag.date_;
-///			}
+			if(!tag.get_track().empty()) {
+				if(!s.empty()) s += ' '; 
+				s += "T:" + tag.get_track();
+			}
+			if(!tag.get_date().empty()) {
+				if(!s.empty()) s += " : "; 
+				s += tag.get_date();
+			}
 			gui::set_widget_text(other_pad_, s);
 			s = tag.get_artist();
 			if(!tag.get_writer().empty()) {
