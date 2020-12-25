@@ -109,13 +109,12 @@ STDLIBS		=
 OPTLIBS += 	pthread \
 			png jpeg openjp2 \
 			freetype \
-			mad tag \
+			mad \
 			z
 
 INC_SYS		=	$(LOCAL_INC_PATH) \
 				$(LOCAL_INC_PATH)/freetype2 \
-				$(OPENJPEG_PATH) \
-				$(LOCAL_INC_PATH)/taglib
+				$(OPENJPEG_PATH)
 INC_LIB		=
 LIBDIR		=	$(LOCAL_LIB_PATH)
 

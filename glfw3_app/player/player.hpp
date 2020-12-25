@@ -78,6 +78,9 @@ namespace app {
 		gui::widget* create_image_button_(const std::string& file, const vtx::spos& pos);
 		gui::widget_label* create_text_pad_(const vtx::spos& size, const std::string& text,
 			const std::string& font = "", bool proportional = true);
+
+		bool setup_apic_(const sound::tag_t::apic_t& apic, const std::string& file);
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!

@@ -1,7 +1,7 @@
 //=====================================================================//
 /*! @file
 	@brief  player クラス @n
-			Copyright 2017 Kunihito Hiramatsu
+			Copyright 2017, 2020 Kunihito Hiramatsu
 	@author 平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
@@ -82,6 +82,29 @@ namespace app {
 		wp_.shift_param_.every_ = true;
 		wp_.shift_param_.org_wait_frame_ = 60 * 4;
 		return wd.add_widget<widget_label>(wp, wp_);
+	}
+
+
+	bool player::setup_apic_(const sound::tag_t::apic_t& apic, const std::string& file)
+	{
+		if(apic.len_ == 0) {
+			return false;
+		}
+
+		img::img_files imgs;
+		utils::file_io fin;
+		if(!fin.open(file, "rb")) {
+			return false;
+		}
+		fin.seek(utils::file_io::SEEK::SET, apic.ofs_);
+		bool ret = imgs.load(fin, apic.ext_);
+		if(ret) {
+			img::shared_img sig = imgs.get_image();
+			const img::i_img* im = sig.get();
+			jacket_ = mobj_.install(im);
+		}
+		fin.close();
+		return ret;
 	}
 
 
@@ -413,47 +436,34 @@ namespace app {
 		}
 
 		// 曲の情報を取得して表示
-		const al::tag& tag = sound.get_tag_stream();
+		const auto& tag = sound.get_tag_stream();
 		if(tag_serial_ != tag.serial_) {
-
-			gui::set_widget_text(album_pad_, tag.album_);
-			gui::set_widget_text(title_pad_, tag.title_);
-			std::string s = tag.track_;
-			if(s == "0") s.clear();
-			if(!s.empty()) {
-				if(!tag.total_tracks_.empty()) {
-					s += " / " + tag.total_tracks_;
-				}
+			gui::set_widget_text(album_pad_, tag.get_album());
+			gui::set_widget_text(title_pad_, tag.get_title());
+			std::string s = "T:" + tag.get_track();
+			if(!tag.get_disc().empty()) {
+				s += "D:" + tag.get_disc();
 			}
-			if(!tag.disc_.empty() && tag.disc_ != "0") {
-				s += " : " + tag.disc_;
-				if(!tag.total_discs_.empty()) {
-					s += " / " + tag.total_discs_;
-				}
-			}
-			if(!tag.date_.empty() && tag.date_ != "0") {
-				s += " : " + tag.date_;
-			}
+///			if(!tag.date_.empty() && tag.date_ != "0") {
+///				s += " : " + tag.date_;
+///			}
 			gui::set_widget_text(other_pad_, s);
-			s = tag.artist_;
-			if(!tag.writer_.empty()) {
-				s += " / " + tag.writer_;
+			s = tag.get_artist();
+			if(!tag.get_writer().empty()) {
+				s += " / " + tag.get_writer();
 			}
 			gui::set_widget_text(artist_pad_, s);
 
 			// ジャケット画像の取得とテクスチャーへの登録
 			mobj_.destroy();
 			mobj_.initialize();
-			img::shared_img sig = tag.decode_image();
-   			if(sig) {
-				const img::i_img* im = sig.get();
-				jacket_ = mobj_.install(im);
-			} else {
+			if(!setup_apic_(tag.get_apic(), sound.get_file_stream())) {
 				const std::string& curp = core.get_current_path();
 				if(wd.at_img_files().load(curp + "/res/NoImage.png")) {
 					jacket_ = mobj_.install(wd.at_img_files().get_image().get()); 
 				}
 			}
+
 			// 演奏ファイル名を取得して、ファイラーのフォーカスを設定
 			{ 
 				filer_->focus_file(sound.get_file_stream());
@@ -490,7 +500,7 @@ namespace app {
 						tag_wait_ = false;
 					}
 				} else if(files_step_ < files_.size()) {
-					const al::tag& t = sound.get_tag_info();
+					const auto& t = sound.get_tag_info();
 					if(t.serial_ == tag_info_serial_) {
 						if(!tag_wait_) {
 							const std::string fn = files_[files_step_];
@@ -503,16 +513,16 @@ namespace app {
 						using namespace std;
 						const string p = utils::get_file_name(files_[files_step_]);
 						// 75% 一致しない場合
-						if(utils::compare(p, t.title_) < 0.75f) {
-							if(t.title_.empty()) {
+						if(utils::compare(p, t.get_title()) < 0.75f) {
+							if(t.get_title().empty()) {
 								filer_->set_alias(p, p);
-							} if(!t.track_.empty()) {
+							} if(!t.get_track().empty()) {
 								string n;
-								auto pos = t.track_.find('/');
+								auto pos = t.get_track().find('/');
 								if(pos != string::npos) {
-									n = t.track_.substr(0, pos);
+									n = t.get_track().substr(0, pos);
 								} else {
-									n = t.track_;
+									n = t.get_track();
 								}
 								if(n.size() == 1) {
 									if(n[0] == '0') n.clear();
@@ -521,9 +531,9 @@ namespace app {
 									}
 								}
 								if(!n.empty()) n += ' ';
-								filer_->set_alias(p, n + t.title_);
+								filer_->set_alias(p, n + t.get_title());
 							} else {
-								filer_->set_alias(p, t.title_);
+								filer_->set_alias(p, t.get_title());
 							}
 						}
 						++files_step_;
