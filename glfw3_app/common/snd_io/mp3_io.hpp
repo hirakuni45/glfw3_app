@@ -78,7 +78,7 @@ namespace al {
 
 		img::img_files	img_files_;
 
-		tag				tag_;
+		sound::tag_t	tag_;
 
 		std::vector<uint32_t>	seek_points_;
 
@@ -155,7 +155,7 @@ namespace al {
 			@return タグを返す
 		*/
 		//-----------------------------------------------------------------//
-		const tag& get_tag() const override { return tag_; }
+		const sound::tag_t& get_tag() const override { return tag_; }
 
 
 		//-----------------------------------------------------------------//

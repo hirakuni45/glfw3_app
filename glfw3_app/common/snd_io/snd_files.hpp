@@ -33,7 +33,7 @@ namespace al {
 		audio			aif_;
 
 		snd_file::snd_io	stream_;
-		tag				tag_;
+		sound::tag_t		tag_;
 
 		static uint32_t	tag_serial_;
 
@@ -241,7 +241,7 @@ namespace al {
 			@return タグを返す
 		*/
 		//-----------------------------------------------------------------//
-		const tag& get_tag() const { return tag_; }
+		const auto& get_tag() const { return tag_; }
 
 
 		//-----------------------------------------------------------------//

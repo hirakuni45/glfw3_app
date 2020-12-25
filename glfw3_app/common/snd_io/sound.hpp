@@ -97,7 +97,7 @@ namespace al {
 			pthread_mutex_t			sync_;
 			uint32_t				fph_cnt_;
 			std::string				fph_;
-			tag						tag_;
+			::sound::tag_t			tag_;
 
 			sstream_t() : audio_io_(0), slot_(0),
 						  root_(), file_(), state_(stream_state::STALL),
@@ -116,7 +116,7 @@ namespace al {
 			utils::fifo<std::string, 2> path_;
 			volatile bool		loop_;
 			pthread_mutex_t		sync_;
-			tag					tag_;
+			::sound::tag_t		tag_;
 			tag_info() : loop_(true) { }
 		};
 
@@ -163,7 +163,7 @@ namespace al {
 		pthread_t			pth_;
 		volatile uint32_t	stream_fph_cnt_;
 		std::string			stream_fph_;
-		tag					stream_tag_;
+		::sound::tag_t		stream_tag_;
 
 		audio_io::slot_handle	stream_slot_;
 		bool					stream_start_;
@@ -172,7 +172,7 @@ namespace al {
 		tag_info				tag_info_;
 		volatile uint32_t		tag_serial_;
 		bool					tag_thread_;
-		tag						tag_;
+		::sound::tag_t			tag_;
 
 		queue_t			queue_t_;
 		bool			queue_start_;
@@ -646,7 +646,7 @@ namespace al {
 			@return タグ
 		 */
 		//-----------------------------------------------------------------//
-		const tag& get_tag_stream() const {
+		const auto& get_tag_stream() const {
 			return stream_tag_;
 		}
 
@@ -779,7 +779,7 @@ namespace al {
 			@return タグ情報
 		 */
 		//-----------------------------------------------------------------//
-		const tag& get_tag_info() const { return tag_; }
+		const auto& get_tag_info() const { return tag_; }
 
 
 		//-----------------------------------------------------------------//

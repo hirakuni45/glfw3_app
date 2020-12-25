@@ -64,7 +64,7 @@ namespace al {
 
 		audio		   	audio_source_;
 
-		tag				tag_;
+		sound::tag_t	tag_;
 
 		bool parse_header_(utils::file_io& fin);
 		bool create_wav_(utils::file_io& fout, const audio src);
@@ -113,7 +113,7 @@ namespace al {
 		bool probe(utils::file_io& fin) override {
 			long pos = fin.tell();
 			bool f = parse_header_(fin);
-			fin.seek(pos, utils::file_io::seek::set);
+			fin.seek(pos, utils::file_io::SEEK::SET);
 			return f;
 		}
 
@@ -136,7 +136,7 @@ namespace al {
 			@return タグを返す
 		*/
 		//-----------------------------------------------------------------//
-		const tag& get_tag() const override {
+		const sound::tag_t& get_tag() const override {
 			return tag_;
 		}
 

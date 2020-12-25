@@ -300,7 +300,7 @@ namespace al {
 				if(!f) {
 					uint32_t n = t.tag_.serial_;
 					t.tag_.clear();
-					t.tag_.title_ = utils::get_file_name(path);
+					t.tag_.at_title() = utils::get_file_name(path);
 					t.tag_.serial_ = n + 1;
 				}
 				if(t.path_.length()) {

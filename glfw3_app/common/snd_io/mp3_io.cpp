@@ -10,15 +10,8 @@
 #include "mp3_io.hpp"
 #include "pcm.hpp"
 #include "img_io/img_utils.hpp"
-#include <boost/format.hpp>
 
-#include <iostream>
-
-#include <mpegfile.h>
-#include <id3v2tag.h>
-#include <id3v2header.h>
-#include <id3v1tag.h>
-#include <apetag.h>
+#include "snd_io/id3_mgr.hpp"
 
 namespace al {
 
@@ -435,7 +428,7 @@ namespace al {
 	}
 #endif
 
-
+#if 0
 	static std::string convert_string_(const TagLib::String& s)
 	{
 		std::string tmp;
@@ -457,6 +450,7 @@ namespace al {
 	{
 		return (boost::format("%d") % static_cast<int>(n)).str();
 	}
+#endif
 
 #if 0
 	static std::string convert_string_(const TagLib::StringList& list)
@@ -487,127 +481,19 @@ namespace al {
 
 		// 現在のファイル位置を覚えておく
 		uint32_t pos = fin.tell();
-		uint32_t ofs = 0;
 		tag_.clear();
-		// 一旦クローズ
-		fin.close();
 
-		using namespace TagLib;
-#ifdef WIN32
-		utils::wstring ws;
-		utils::utf8_to_utf16(fin.get_path(), ws);
-		MPEG::File f(reinterpret_cast<const wchar_t*>(ws.c_str()));
-#else
-		MPEG::File f(fin.get_path().c_str());
-#endif
-		ID3v1::Tag* v1 = f.ID3v1Tag();
-	   	if(v1) {
-   			tag_.title_  = convert_string_(v1->title()); 
-   			tag_.artist_ = convert_string_(v1->artist());
-	   		tag_.album_  = convert_string_(v1->album());
-			tag_.track_ = convert_string_(v1->track());
-			tag_.date_ = convert_string_(v1->year());
-			id3v1_ = true;
-		}
-		ID3v2::Tag* v2 = f.ID3v2Tag();
-		if(v2) {
-			ofs = v2->header()->tagSize();
-			{
-				std::string s = convert_string_(v2->title());
-				if(!s.empty()) tag_.title_ = s;
-			} 
-
-			{
-				std::string s = convert_string_(v2->artist());
-				if(!s.empty()) tag_.artist_ = s; 
-			}
-
-			{
-				std::string s = convert_string_(v2->album());
-				if(!s.empty()) tag_.album_ = s;
-			}
-
-			const ID3v2::FrameListMap& map = v2->frameListMap();
-			typedef ID3v2::FrameListMap::ConstIterator const_it;
-			for(const_it cit = map.begin(); cit != map.end(); ++cit) {
-				std::string key = convert_string_(cit->first);
-				const ID3v2::FrameList& list = cit->second;
-				typedef ID3v2::FrameList::ConstIterator const_it;
-				std::string tmp;
-				for(const_it cit = list.begin(); cit != list.end(); ++cit) {
-					std::string s = convert_string_((*cit)->toString());
-///					std::cout << key << ": '" << s << "'" << std::endl;
-					tmp += s;
-				}
-				if(key == "TDRC") tag_.date_ = tmp;
-				else if(key == "TPE2") tag_.writer_ = tmp;
-				else if(key == "TPOS") tag_.disc_ = tmp;
-				else if(key == "TRCK") tag_.track_ = tmp;
-				else if(key == "TIT3") {
-					if(tag_.title_.empty()) tag_.title_ = tmp;
-				}
-			}
-
-			// ジャケット画像
-			const_it acit = map.find("APIC");
-			if(static_cast<uint8_t>(st) & static_cast<uint8_t>(info_state::apic) && acit != map.end()) {
-				const ID3v2::FrameList& list = acit->second;
-				typedef ID3v2::FrameList::ConstIterator const_it;
-				for(const_it cit = list.begin(); cit != list.end(); ++cit) {
-//					size_t fsize = (*cit)->size();
-//					std::cout << (*cit)->toString() << std::endl;
-//					std::cout << "Frame size: " << static_cast<int>(fsize) << std::endl;
-					const ByteVector& image = (*cit)->render();
-//					std::cout << "Render size: " << static_cast<int>(image.size()) << std::endl;
-					int skip = 11;
-					const char* p = image.data();
-					// mime type
-					std::string mime;
-					while(p[skip] != 0) {
-						mime += p[skip];
-						++skip;
-					}
-					++skip;
-					tag_.image_mime_ = mime;
-
-					tag_.image_cover_ = p[skip];
-					skip += 1;	// picture type (cover)
-
-					// discription
-					std::string dscrp;
-					while(p[skip] != 0) {
-						dscrp += p[skip];
-						++skip;
-					}
-					++skip;
-					tag_.image_dscrp_ = dscrp;
-
-					int len = image.size();
-					if(len > skip) {
-						len -= skip;
-						p += skip;		
-						tag_.image_ = utils::shared_array_u8(new utils::array_u8);
-						tag_.image_->copy(p, len);
-						break;
-					}
-				}
-			}
-		}
-		// tag 情報が無い場合、ファイル名を曲名としておく
-		if(tag_.title_.empty()) {
-			tag_.title_ = utils::get_file_base(utils::get_file_name(fin.get_path()));
-		}
-		tag_.update();
-		fin.re_open();
-
-		if(!fin.is_open()) {
+		sound::id3_mgr id3;
+		if(!id3.parse(fin)) {
+			fin.seek(pos, file_io::SEEK::SET);
 			return false;
 		}
+		auto ser = tag_.serial_;
+		tag_ = id3.get_tag();
+		tag_.serial_ = ser + 1;
 
-		if(ofs) {
-			fin.seek(ofs, file_io::seek::set);
-		} else {
-			fin.seek(pos, file_io::seek::set);
+		if(tag_.get_title().empty()) {
+			tag_.at_title() = utils::get_file_base(utils::get_file_name(fin.get_path()));
 		}
 
 		if((static_cast<uint8_t>(st) & static_cast<uint8_t>(info_state::time)) == 0) {
@@ -746,7 +632,7 @@ namespace al {
 		mad_frame_finish(&frame);
 		mad_stream_finish(&stream);
 
-		fin.seek(pos, file_io::seek::set);
+		fin.seek(pos, file_io::SEEK::SET);
 
 // std::cout << boost::format("error: %d\n") % error;
 // std::cout << boost::format("frame: %d\n") % frame_cnt;
@@ -784,7 +670,7 @@ namespace al {
 		mp3_info_.reset();
 		bool f = analize_frame_(fin, info, mp3_info_, info_state::all);
 		if(f) {
-			fin.seek(info.header_size, file_io::seek::set);
+			fin.seek(info.header_size, file_io::SEEK::SET);
 
 			audio aif;
 			if(info.chanels == 1) {
@@ -841,7 +727,7 @@ namespace al {
 		offset_ = 0;
 
 		if(info(fi, inf)) {
-			fi.seek(inf.header_size, file_io::seek::set);
+			fi.seek(inf.header_size, file_io::SEEK::SET);
 			start_pos_ = fi.tell();
 
 			mad_stream_init(&mad_stream_);
@@ -904,7 +790,7 @@ namespace al {
 		if(offset != 0 && (offset_ + samples) != offset) {	// seek を検出
 			uint32_t n = offset / 1152;
 			if(n < seek_points_.size()) {
-				fin.seek(seek_points_[n], utils::file_io::seek::set);
+				fin.seek(seek_points_[n], utils::file_io::SEEK::SET);
 				output_pos_ = 1152 * n;
 			} else {
 				// seek error...

@@ -1,79 +1,299 @@
 #pragma once
 //=====================================================================//
 /*!	@file
-	@brief	音楽タグ
+	@brief	Audio タグ・クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2018, 2019 Kunihito Hiramatsu @n
 				Released under the MIT license @n
-				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
+				https://github.com/hirakuni45/RX/blob/master/LICENSE
 */
 //=====================================================================//
+#ifdef EMBEDED
+#include "common/fixed_string.hpp"
+#else
 #include <string>
-#include "utils/array.hpp"
-#include "img_io/img_files.hpp"
+#endif
 
-namespace al {
+namespace sound {
 
-	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
-		@brief	タグ・クラス
+		@brief	音楽・タグ情報
 	*/
-	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	struct tag {
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	struct tag_t {
+
 		volatile uint32_t		serial_;		///< タグのＩＤ
 
-		std::string		title_;			///< タイトル
-		std::string		artist_;		///< アーティスト
-		std::string		writer_;		///< ライター
-		std::string		album_;			///< アルバム
-		std::string		track_;			///< トラック
-		std::string		total_tracks_;	///< トータル・トラック
-		std::string		disc_;			///< ディスク
-		std::string		total_discs_;	///< トータル・ディスク
-		std::string		date_;			///< 日付
+#ifdef EMBEDED
+		typedef utils::fixed_string<128> STR128;
+		typedef utils::fixed_string<8> STR8;
+#else
+		typedef std::string STR128;
+		typedef std::string STR8;
+#endif
 
-		std::string		image_mime_;	///< 画像形式
-		char			image_cover_;	///< 画像カバー
-		std::string		image_dscrp_;	///< 画像ディスクリプター
+	private:
+		STR128	album_;		///< アルバム名
+		STR128	title_;		///< タイトル（曲名）
+		STR128	artist_;	///< アーティスト
+		STR128	writer_;	///< ライター
+		STR8	year_;		///< リリース年
+		STR8	date_;		///< リリース日付
+		STR8	disc_;		///< ディスク番号
+		STR8	track_;		///< トラック番号
+		STR128	comment_;	///< コメント
 
-		utils::shared_array_u8	image_;
+	public:
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	画像情報
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		struct apic_t {
+			uint8_t		typ_;
+			char		ext_[4];
+			uint32_t	ofs_;
+			uint32_t	len_;
 
-		tag() : serial_(0), image_cover_(0) { }
+			apic_t() : typ_(0), ext_{ 0 }, ofs_(0), len_(0) { }
 
-		void clear() {
+			apic_t& operator = (const apic_t& t) noexcept {
+				typ_ = t.typ_;
+				std::memcpy(ext_, t.ext_, sizeof(ext_));
+				ofs_ = t.ofs_;
+				len_ = t.len_;
+				return *this;
+			}
+		};
+	private:
+		apic_t	apic_;
+
+	public:
+		//-------------------------------------------------------------//
+		/*!
+			@brief	コンストラクター
+		*/
+		//-------------------------------------------------------------//
+		tag_t() noexcept : serial_(0), apic_() { clear(); }
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief	クリア
+		*/
+		//-------------------------------------------------------------//
+		void clear() noexcept
+		{
+			album_.clear();
 			title_.clear();
 			artist_.clear();
 			writer_.clear();
-			album_.clear();
-			track_.clear();
-			total_tracks_.clear();
-			disc_.clear();
-			total_discs_.clear();
+			year_.clear();
 			date_.clear();
-			image_ = nullptr;
+			disc_.clear();
+			track_.clear();
+			comment_.clear();
+			apic_ = apic_t();
 		}
 
 
-		void reset() {
-			serial_ = 0;
-			clear();
+		//-------------------------------------------------------------//
+		/*!
+			@brief	アルバムへの参照
+			@return アルバム
+		*/
+		//-------------------------------------------------------------//
+		auto& at_album() noexcept { return album_; }
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief	アルバムへの参照 (RO)
+			@return アルバム
+		*/
+		//-------------------------------------------------------------//
+		const auto& get_album() const noexcept { return album_; }
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief	タイトルへの参照
+			@return タイトル
+		*/
+		//-------------------------------------------------------------//
+		auto& at_title() noexcept { return title_; }
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief	タイトルへの参照 (RO)
+			@return タイトル
+		*/
+		//-------------------------------------------------------------//
+		const auto& get_title() const noexcept { return title_; }
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief	アーティストへの参照
+			@return アーティスト
+		*/
+		//-------------------------------------------------------------//
+		auto& at_artist() noexcept { return artist_; }
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief	アーティストへの参照 (RO)
+			@return アーティスト
+		*/
+		//-------------------------------------------------------------//
+		const auto& get_artist() const noexcept { return artist_; }
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief	ライターへの参照
+			@return ライター
+		*/
+		//-------------------------------------------------------------//
+		auto& at_writer() noexcept { return writer_; }
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief	ライターへの参照 (RO)
+			@return ライター
+		*/
+		//-------------------------------------------------------------//
+		const auto& get_writer() const noexcept { return writer_; }
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief	年への参照
+			@return 年
+		*/
+		//-------------------------------------------------------------//
+		auto& at_year() noexcept { return year_; }
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief	年への参照 (RO)
+			@return 年
+		*/
+		//-------------------------------------------------------------//
+		const auto& get_year() const noexcept { return year_; }
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief	日付への参照
+			@return 日付
+		*/
+		//-------------------------------------------------------------//
+		auto& at_date() noexcept { return date_; }
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief	日付への参照 (RO)
+			@return 日付
+		*/
+		//-------------------------------------------------------------//
+		const auto& get_date() const noexcept { return date_; }
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief	ディスクへの参照
+			@return ディスク
+		*/
+		//-------------------------------------------------------------//
+		auto& at_disc() noexcept { return disc_; }
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief	ディスクへの参照 (RO)
+			@return ディスク
+		*/
+		//-------------------------------------------------------------//
+		const auto& get_disc() const noexcept { return disc_; }
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief	トラックへの参照
+			@return トラック
+		*/
+		//-------------------------------------------------------------//
+		auto& at_track() noexcept { return track_; }
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief	トラックへの参照 (RO)
+			@return トラック
+		*/
+		//-------------------------------------------------------------//
+		const auto& get_track() const noexcept { return track_; }
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief	コメントへの参照
+			@return コメント
+		*/
+		//-------------------------------------------------------------//
+		auto& at_comment() noexcept { return comment_; }
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief	コメントへの参照 (RO)
+			@return コメント
+		*/
+		//-------------------------------------------------------------//
+		const auto& get_comment() const noexcept { return comment_; }
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief	アルバム画像情報への参照
+			@return アルバム画像情報
+		*/
+		//-------------------------------------------------------------//
+		auto& at_apic() noexcept { return apic_; }
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief	アルバム画像情報への参照 (RO)
+			@return アルバム画像情報
+		*/
+		//-------------------------------------------------------------//
+		const auto& get_apic() const noexcept { return apic_; }
+
+
+		//-------------------------------------------------------------//
+		/*!
+			@brief	コピー・オペレーター
+		*/
+		//-------------------------------------------------------------//
+		tag_t& operator = (const tag_t& ths) noexcept {
+			serial_ = ths.serial_;
+			album_  = ths.album_;
+			title_  = ths.title_;
+			artist_ = ths.artist_;
+			writer_ = ths.writer_;
+			year_   = ths.year_;
+			disc_   = ths.disc_;
+			track_  = ths.track_;
+			apic_   = ths.apic_;
+			return *this;
 		}
-
-
-		void update() { ++serial_; }
-
-
-		img::shared_img decode_image() const {
-			if(image_) {
-				utils::file_io fmem;
-				fmem.open(image_->get(), image_->size());
-				img::img_files imgs;
-				if(imgs.load(fmem)) {
-					return imgs.get_image();
-				}
-			}
-			return img::shared_img();
-		}
-
 	};
 }

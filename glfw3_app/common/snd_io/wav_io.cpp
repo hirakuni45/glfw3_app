@@ -71,7 +71,7 @@ namespace al {
 	bool wav_io::parse_header_(file_io& fin)
 	{
 		tag_.clear();
-		tag_.title_ = utils::get_file_base(fin.get_path());
+		tag_.at_title() = utils::get_file_base(fin.get_path());
 
 		type_ = wf_null;
 		memset(&ext_, 0, sizeof(wave_format_extensible));
@@ -175,11 +175,11 @@ for(auto code : ls) {
 std::cout << std::endl;
 #endif
 #endif
-							if(strncmp(tag.szChunkName, "IART", 4) == 0) tag_.artist_ = t;
-							else if(strncmp(tag.szChunkName, "INAM", 4) == 0) tag_.title_ = t;
-							else if(strncmp(tag.szChunkName, "IPRD", 4) == 0) tag_.album_ = t;
-							else if(strncmp(tag.szChunkName, "ICRD", 4) == 0) tag_.date_ = t;
-							else if(strncmp(tag.szChunkName, "IPRT", 4) == 0) tag_.track_ = t;
+							if(strncmp(tag.szChunkName, "IART", 4) == 0) tag_.at_artist() = t;
+							else if(strncmp(tag.szChunkName, "INAM", 4) == 0) tag_.at_title() = t;
+							else if(strncmp(tag.szChunkName, "IPRD", 4) == 0) tag_.at_album() = t;
+							else if(strncmp(tag.szChunkName, "ICRD", 4) == 0) tag_.at_date()  = t;
+							else if(strncmp(tag.szChunkName, "IPRT", 4) == 0) tag_.at_track() = t;
 							else {
 							}
 						}
@@ -189,7 +189,7 @@ std::cout << std::endl;
 			}
 			riff_num_++;
 			ofs += rc.ulChunkSize;
-			fin.seek(ofs, file_io::seek::set);
+			fin.seek(ofs, file_io::SEEK::SET);
 		}
 
 		if(data_size_ > 0 && data_offset_ != 0 && ((type_ == wf_ex) || (type_ == wf_ext))) {
@@ -296,7 +296,7 @@ std::cout << std::endl;
 		long start_offset = fin.tell();
 		bool f = parse_header_(fin);
 		info.header_size = fin.tell() - start_offset;
-		fin.seek(start_offset, utils::file_io::seek::set);
+		fin.seek(start_offset, utils::file_io::SEEK::SET);
 		if(f) {
 			info.type = audio_format::NONE;
 			if(ext_.format.channels == 1) {
@@ -382,7 +382,7 @@ std::cout << std::endl;
 			} else {
 			}
 			if(aif) {
-				if(!fin.seek(data_offset_, utils::file_io::seek::set)) {
+				if(!fin.seek(data_offset_, utils::file_io::SEEK::SET)) {
 					return false;
 				}
 				aif->create(ext_.format.samples_per_sec,
@@ -439,7 +439,7 @@ std::cout << std::endl;
 
 			if(stream_) {
 				stream_->create(inf.frequency, size);
-				fi.seek(inf.header_size, utils::file_io::seek::set);
+				fi.seek(inf.header_size, utils::file_io::SEEK::SET);
 				return true;
 			}
 		}
@@ -464,7 +464,7 @@ std::cout << std::endl;
 			return 0;
 		}
 
-		if(!fin.seek(data_offset_ + offset * stream_blocks_, utils::file_io::seek::set)) {
+		if(!fin.seek(data_offset_ + offset * stream_blocks_, utils::file_io::SEEK::SET)) {
 			return 0;
 		}
 
