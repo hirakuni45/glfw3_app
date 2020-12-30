@@ -264,7 +264,7 @@ namespace gl {
 		@return 正常終了したら「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool core::initialize(int argc, char** argv)
+	bool core::initialize(int argc, char** argv) noexcept
 	{
 		utils::init_utf16_to_sjis();
 
@@ -356,7 +356,7 @@ namespace gl {
 		@return 正常終了したら「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool core::setup(const vtx::srect& rect, const std::string& title, bool fullscreen)
+	bool core::setup(const vtx::srect& rect, const std::string& title, bool fullscreen) noexcept
 	{
 		rect_ = rect;
 		limit_size_ = rect_.size / 3;
@@ -461,7 +461,7 @@ namespace gl {
 		@param[in]	title	タイトル文字列
 	*/
 	//-----------------------------------------------------------------//
-	void core::set_title(const std::string& title)
+	void core::set_title(const std::string& title) noexcept
 	{
 		if(!title.empty()) {
 			if(title_ != title) {
@@ -478,7 +478,7 @@ namespace gl {
 		@param[in]	flag	全画面の場合「true」
 	*/
 	//-----------------------------------------------------------------//
-	void core::full_screen(bool flag)
+	void core::full_screen(bool flag) noexcept
 	{
 		if(flag) {
 			full_screen_ = true;
@@ -493,7 +493,7 @@ namespace gl {
 		@brief	毎フレーム・サービス
 	*/
 	//-----------------------------------------------------------------//
-	void core::service()
+	void core::service() noexcept
 	{
 		if(window_ == nullptr) return;
 
@@ -559,7 +559,7 @@ namespace gl {
 		@brief	フレーム・フリップ
 	*/
 	//-----------------------------------------------------------------//
-	void core::flip_frame()
+	void core::flip_frame() noexcept
 	{
 #ifdef WIN32
 		// ソフト同期
@@ -603,7 +603,7 @@ namespace gl {
 		@brief	廃棄プロセス
 	*/
 	//-----------------------------------------------------------------//
-	void core::destroy()
+	void core::destroy() noexcept
 	{
 		if(window_) {
 			glfwDestroyWindow(window_);

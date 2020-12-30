@@ -11,6 +11,7 @@
 #include <string>
 #include <thread>
 #include <future>
+#include <functional>
 #include <unistd.h>
 #include "utils/singleton_policy.hpp"
 #include "core/device.hpp"
@@ -31,6 +32,8 @@ namespace gl {
 	public:
 		static device::bits_t	bits_;
 		static device::locator	locator_;
+
+		typedef std::function< void(uint32_t id, const utils::strings& ss) > recv_files_func;
 
 	private:
 		std::string		current_path_;
@@ -53,6 +56,7 @@ namespace gl {
 
 		int				recv_files_id_;
 		utils::strings	recv_files_path_;
+		recv_files_func	recv_files_func_;
 
 		utils::lstring	recv_text_;
 
@@ -103,9 +107,9 @@ namespace gl {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		core() : window_(0),
+		core() noexcept : window_(0),
 				 best_size_(0), limit_size_(0), size_(0), rect_(0), psize_(0), dpi_(0),
-				 recv_files_id_(0), recv_files_path_(),
+				 recv_files_id_(0), recv_files_path_(), recv_files_func_(),
 				 title_(),
 #ifdef __APPLE__
 				 sync_count_(0),
@@ -137,7 +141,7 @@ namespace gl {
 			@return 正常終了したら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool initialize(int argc, char** argv);
+		bool initialize(int argc, char** argv) noexcept;
 
 
 		//-----------------------------------------------------------------//
@@ -146,7 +150,7 @@ namespace gl {
 			@return	最大解像度
 		*/
 		//-----------------------------------------------------------------//
-		const vtx::spos& get_best_size() const { return best_size_; }
+		const vtx::spos& get_best_size() const noexcept { return best_size_; }
 
 
 		//-----------------------------------------------------------------//
@@ -155,7 +159,7 @@ namespace gl {
 			@param[in]	size	最小解像度
 		*/
 		//-----------------------------------------------------------------//
-		void set_limit_size(const vtx::spos& size) { limit_size_ = size; }
+		void set_limit_size(const vtx::spos& size) noexcept { limit_size_ = size; }
 
 
 		//-----------------------------------------------------------------//
@@ -164,7 +168,7 @@ namespace gl {
 			@return	最小解像度
 		*/
 		//-----------------------------------------------------------------//
-		const vtx::spos& get_limit_size() const { return limit_size_; }
+		const vtx::spos& get_limit_size() const noexcept { return limit_size_; }
 
 
 		//-----------------------------------------------------------------//
@@ -173,7 +177,7 @@ namespace gl {
 			@return	解像度
 		*/
 		//-----------------------------------------------------------------//
-		const vtx::spos& get_size() const { return size_; }
+		const vtx::spos& get_size() const noexcept { return size_; }
 
 
 		//-----------------------------------------------------------------//
@@ -182,7 +186,7 @@ namespace gl {
 			@return	スクリーンの物理サイズ
 		*/
 		//-----------------------------------------------------------------//
-		const vtx::spos& get_physical_size() const { return psize_; }
+		const vtx::spos& get_physical_size() const noexcept { return psize_; }
 
 
 		//-----------------------------------------------------------------//
@@ -191,7 +195,7 @@ namespace gl {
 			@return	DPI
 		*/
 		//-----------------------------------------------------------------//
-		const vtx::fpos& get_dpi() const { return dpi_; }
+		const vtx::fpos& get_dpi() const noexcept { return dpi_; }
 
 
 		//-----------------------------------------------------------------//
@@ -200,7 +204,7 @@ namespace gl {
 			@return	DPI scale
 		*/
 		//-----------------------------------------------------------------//
-		float get_dpi_scale() const { return scale_; }
+		float get_dpi_scale() const noexcept { return scale_; }
 
 
 		//-----------------------------------------------------------------//
@@ -209,7 +213,7 @@ namespace gl {
 			@return	配置
 		*/
 		//-----------------------------------------------------------------//
-		const vtx::srect& get_rect() const { return rect_; }
+		const vtx::srect& get_rect() const noexcept { return rect_; }
 
 
 		//-----------------------------------------------------------------//
@@ -218,7 +222,7 @@ namespace gl {
 			@return	コマンド・パス
 		*/
 		//-----------------------------------------------------------------//
-		const utils::strings& get_command_path() const { return command_path_; }
+		const utils::strings& get_command_path() const noexcept { return command_path_; }
 
 
 		//-----------------------------------------------------------------//
@@ -228,7 +232,7 @@ namespace gl {
 			@param[in] path 受信ファイルパス
 		*/
 		//-----------------------------------------------------------------//
-		void set_recv_files(int num, const char** path) {
+		void set_recv_files(int num, const char** path) noexcept {
 			++recv_files_id_;
 			recv_files_path_.clear();
 			for(int i = 0; i < num; ++i) {
@@ -236,7 +240,19 @@ namespace gl {
 				utils::code_conv(std::string(path[i]), '\\', '/', file);
 				recv_files_path_.push_back(file);
 			}
+			if(recv_files_func_ != nullptr) {
+				recv_files_func_(recv_files_id_, recv_files_path_);
+			}
 		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ファイル受信関数の設定
+			@param[in] func	ファイル受信関数
+		*/
+		//-----------------------------------------------------------------//
+		void set_recv_files_func(recv_files_func func) noexcept { recv_files_func_ = func; }
 
 
 		//-----------------------------------------------------------------//
@@ -245,7 +261,7 @@ namespace gl {
 			@return	ファイル受信 ID
 		*/
 		//-----------------------------------------------------------------//
-		int get_recv_files_id() const { return recv_files_id_; }
+		int get_recv_files_id() const noexcept { return recv_files_id_; }
 
 
 		//-----------------------------------------------------------------//
@@ -254,7 +270,7 @@ namespace gl {
 			@return	ファイル受信 path
 		*/
 		//-----------------------------------------------------------------//
-		const utils::strings& get_recv_files_path() const { return recv_files_path_; }
+		const utils::strings& get_recv_files_path() const noexcept { return recv_files_path_; }
 
 
 		//-----------------------------------------------------------------//
@@ -263,7 +279,7 @@ namespace gl {
 			@return キーボード文字列
 		*/
 		//-----------------------------------------------------------------//
-		const utils::lstring& get_recv_text() const { return recv_text_; }
+		const utils::lstring& get_recv_text() const noexcept { return recv_text_; }
 
 
 		//-----------------------------------------------------------------//
@@ -272,7 +288,7 @@ namespace gl {
 			@return キーボード文字列
 		*/
 		//-----------------------------------------------------------------//
-		utils::lstring& at_recv_text() { return recv_text_; }
+		utils::lstring& at_recv_text() noexcept { return recv_text_; }
 
 
 		//-----------------------------------------------------------------//
@@ -281,7 +297,7 @@ namespace gl {
 			@return	平均フレームレート
 		*/
 		//-----------------------------------------------------------------//
-		float get_frame_rate() const { return (1.0 / frame_time_); }
+		float get_frame_rate() const noexcept { return (1.0 / frame_time_); }
 
 
 		//-----------------------------------------------------------------//
@@ -290,7 +306,7 @@ namespace gl {
 			@return	平均 CPU クロック(GHz)
 		*/
 		//-----------------------------------------------------------------//
-		float get_cpu_clock() const { return cpu_ghz_; }
+		float get_cpu_clock() const noexcept { return cpu_ghz_; }
 
 
 		//-----------------------------------------------------------------//
@@ -299,7 +315,7 @@ namespace gl {
 			@return	「true」の場合、終了
 		*/
 		//-----------------------------------------------------------------//
-		bool get_exit_signal() const { return exit_signal_; }
+		bool get_exit_signal() const noexcept { return exit_signal_; }
 
 
 		//-----------------------------------------------------------------//
@@ -311,7 +327,7 @@ namespace gl {
 			@return 正常終了したら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool setup(const vtx::srect& rect, const std::string& title, bool fullscreen);
+		bool setup(const vtx::srect& rect, const std::string& title, bool fullscreen) noexcept;
 
 
 		//-----------------------------------------------------------------//
@@ -320,7 +336,7 @@ namespace gl {
 			@param[in]	title	タイトル文字列
 		*/
 		//-----------------------------------------------------------------//
-		void set_title(const std::string& title);
+		void set_title(const std::string& title) noexcept;
 
 
 		//-----------------------------------------------------------------//
@@ -338,7 +354,7 @@ namespace gl {
 			@param[in]	flag	全画面の場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		void full_screen(bool flag = true);
+		void full_screen(bool flag = true) noexcept;
 
 
 		//-----------------------------------------------------------------//
@@ -347,7 +363,7 @@ namespace gl {
 			@return 全画面なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool is_full_screen() const { return full_screen_; }
+		bool is_full_screen() const noexcept { return full_screen_; }
 
 
 		//-----------------------------------------------------------------//
@@ -365,7 +381,7 @@ namespace gl {
 			@return ファイル・パス
 		*/
 		//-----------------------------------------------------------------//
-		const std::string& get_current_path() const { return current_path_; }
+		const std::string& get_current_path() const noexcept { return current_path_; }
 
 
 		//-----------------------------------------------------------------//
@@ -373,7 +389,7 @@ namespace gl {
 			@brief	フレーム・サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service();
+		void service() noexcept;
 
 
 		//-----------------------------------------------------------------//
@@ -381,7 +397,7 @@ namespace gl {
 			@brief	フレーム・フリップ
 		*/
 		//-----------------------------------------------------------------//
-		void flip_frame();
+		void flip_frame() noexcept;
 
 
 		//-----------------------------------------------------------------//
@@ -389,7 +405,7 @@ namespace gl {
 			@brief	廃棄プロセス
 		*/
 		//-----------------------------------------------------------------//
-		void destroy();
+		void destroy() noexcept;
 
 
 		//-----------------------------------------------------------------//
@@ -398,7 +414,7 @@ namespace gl {
 			@return デバイス・クラス（const）
 		*/
 		//-----------------------------------------------------------------//
-		const device& get_device() const { return device_; }
+		const device& get_device() const noexcept { return device_; }
 
 
 		//-----------------------------------------------------------------//
@@ -407,7 +423,7 @@ namespace gl {
 			@return デバイス・クラス
 		*/
 		//-----------------------------------------------------------------//
-		device& at_device() { return device_; }
+		device& at_device() noexcept { return device_; }
 
 
 		//-----------------------------------------------------------------//
@@ -416,7 +432,7 @@ namespace gl {
 			@return デバイス・クラス
 		*/
 		//-----------------------------------------------------------------//
-		fonts& at_fonts() { return fonts_; }
+		fonts& at_fonts() noexcept { return fonts_; }
 
 
 		//-----------------------------------------------------------------//
@@ -425,8 +441,7 @@ namespace gl {
 			@return 日本語キーボードの場合「true」が返る
 		*/
 		//-----------------------------------------------------------------//
-		bool keyboard_japan() const { return keyboard_jp_; }
-
+		bool keyboard_japan() const noexcept { return keyboard_jp_; }
 	};
 }
 
