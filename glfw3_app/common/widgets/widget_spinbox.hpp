@@ -3,7 +3,7 @@
 /*!	@file
 	@brief	GUI widget スピン・ボックス・クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2018 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2020 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -61,9 +61,13 @@ namespace gui {
 			int					page_step_;	///< ページ移動数(page_div_ が０の場合）
 
 			bool				scroll_ctrl_;	///< スクロール・コントロール（マウスのダイアル）
-			bool				accel_;			///< ボタンのアクセル・コントロール
-			uint16_t			accel_delay_;	///< アクセルが利くまでの遅延
-			uint16_t			accel_inter_;	///< アクセル時のインターバル（速度）
+
+			bool				accel_btn_;			///< ボタンのアクセル・コントロール
+			uint16_t			accel_btn_delay_;	///< アクセルが利くまでの遅延
+			uint16_t			accel_btn_inter_;	///< アクセル時のインターバル（速度）
+			bool				accel_key_;			///< キーのアクセルコントロール
+			uint16_t			accel_key_delay_;	///< アクセルが利くまでの遅延
+			uint16_t			accel_key_inter_;	///< アクセル時のインターバル（速度）
 
 			param(int min = 0, int sel = 0, int max = 0) :
 				plate_param_(), color_param_(widget_director::default_spinbox_color_),
@@ -73,7 +77,8 @@ namespace gui {
 				min_pos_(min), sel_pos_(sel), max_pos_(max),
 				page_div_(0), page_step_((max - min) / 10),
 				scroll_ctrl_(true),
-				accel_(true), accel_delay_(35), accel_inter_(10)
+				accel_btn_(true), accel_btn_delay_(30), accel_btn_inter_(5),
+				accel_key_(true), accel_key_delay_(30), accel_key_inter_(5)
 				{ }
 		};
 
@@ -88,7 +93,8 @@ namespace gui {
 
 		bool		initial_;
 
-		uint16_t	delay_cnt_;
+		uint16_t	delay_btn_cnt_;
+		uint16_t	delay_key_cnt_;
 
 		int			sel_pos_;
 
@@ -111,6 +117,31 @@ namespace gui {
 			return st;
 		}
 
+
+		bool service_key_accel_() noexcept
+		{
+			if(param_.accel_key_) {
+				++delay_key_cnt_;
+				if(delay_key_cnt_ >= param_.accel_key_delay_) {
+					delay_key_cnt_ -= param_.accel_key_inter_;
+					return true;
+				}
+			}
+			return false;
+		}
+
+
+		void setup_title_()
+		{
+			std::string tmp;
+			if(param_.select_func_ != nullptr) {
+				tmp = param_.select_func_(state_, sel_pos_, param_.sel_pos_);
+			} else {
+				tmp = (boost::format("%d") % param_.sel_pos_).str();
+			}
+			param_.text_param_.set_text(tmp);
+		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -119,8 +150,9 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_spinbox(widget_director& wd, const widget::param& bp, const param& p) :
 			widget(bp), wd_(wd), param_(p), objh_(0), up_objh_(0), dn_objh_(0),
-		    initial_(false), delay_cnt_(0), sel_pos_(0),
-			state_(state::none) { }
+		    initial_(false), delay_btn_cnt_(0), delay_key_cnt_(0), sel_pos_(0),
+			state_(state::initial)
+		{ }
 
 
 		//-----------------------------------------------------------------//
@@ -199,11 +231,13 @@ namespace gui {
 			@param[in]	pos	設定位置
 		*/
 		//-----------------------------------------------------------------//
-		void set_select_pos(int pos) {
+		void set_select_pos(int pos)
+		{
 			if(param_.min_pos_ <= pos && pos <= param_.max_pos_) { 
 				param_.sel_pos_ = pos;
 			}
-			exec();
+			initial_ = false;			
+//			exec();
 		}
 
 
@@ -240,10 +274,10 @@ namespace gui {
 		void initialize() override
 		{
 			// ボタンは標準的に固定、サイズ固定、選択時拡大
-			at_param().state_.set(widget::state::SERVICE);
-			at_param().state_.set(widget::state::POSITION_LOCK);
-			at_param().state_.set(widget::state::SIZE_LOCK);
-			at_param().state_.set(widget::state::MOVE_STALL);
+			set_state(widget::state::SERVICE);
+			set_state(widget::state::POSITION_LOCK);
+			set_state(widget::state::SIZE_LOCK);
+			set_state(widget::state::MOVE_STALL);
 			at_param().action_.set(widget::action::SELECT_SCALE);
 
 			using namespace img;
@@ -287,14 +321,7 @@ namespace gui {
 		void update() override
 		{
 			if(!initial_) {
-				std::string itx;
-				if(param_.select_func_ != nullptr) {
-					itx = param_.select_func_(state::initial, param_.sel_pos_, param_.sel_pos_);
-				}
-				if(itx.empty()) {  // 関数が設定されていない場合の標準的な数値変換
-					itx = (boost::format("%d") % param_.sel_pos_).str();
-				}
-				param_.text_param_.set_text(itx);
+				setup_title_();
 				initial_ = true;
 			}
 
@@ -302,24 +329,20 @@ namespace gui {
 			int d = 0;
 			if(get_selected()) {
 				st = get_button_state_(d);
-				delay_cnt_ = 0;
+				delay_btn_cnt_ = 0;
 			} else if(get_focus() && param_.scroll_ctrl_) {
 				if(get_select()) {
 					st = get_button_state_(d);
 					if(st == state::inc || st == state::dec) {
-						++delay_cnt_;
-						if(delay_cnt_ >= param_.accel_delay_) {
-							if(delay_cnt_ > param_.accel_inter_) {
-								delay_cnt_ -= param_.accel_inter_;
-							} else {
-								delay_cnt_ = 0;
-							}
+						++delay_btn_cnt_;
+						if(delay_btn_cnt_ >= param_.accel_btn_delay_) {
+							delay_btn_cnt_ -= param_.accel_btn_inter_;
 						} else {
 							st = state::none;
 						}
 					}
 				} else {
-					delay_cnt_ = 0;
+					delay_btn_cnt_ = 0;
 					const vtx::spos& scr = wd_.get_scroll();
 					if(scr.y != 0) {
 						d = -scr.y;
@@ -336,18 +359,35 @@ namespace gui {
 				if(param_.page_div_ != 0) {
 					step = (param_.max_pos_ - param_.min_pos_) / param_.page_div_;
 				}
-				if(dev.get_positive(gl::device::key::PAGE_UP)) {
+				bool trg = false;
+				bool lvl = false;
+				if(dev.get_level(gl::device::key::PAGE_UP)) {
+					lvl = true;
 					d =  step;
 					st = state::inc;
-				} else if(dev.get_positive(gl::device::key::PAGE_DOWN)) {
+					if(dev.get_positive(gl::device::key::PAGE_UP)) trg = true;
+				} else if(dev.get_level(gl::device::key::PAGE_DOWN)) {
+					lvl = true;
 					d = -step;
 					st = state::dec;
-				} else if(dev.get_positive(gl::device::key::UP)) {
+					if(dev.get_positive(gl::device::key::PAGE_DOWN)) trg = true;
+				} else if(dev.get_level(gl::device::key::UP)) {
+					lvl = true;
 					d = step > 0 ?  1 : 0;
 					st = state::inc;
-				} else if(dev.get_positive(gl::device::key::DOWN)) {
+					if(dev.get_positive(gl::device::key::UP)) trg = true;
+				} else if(dev.get_level(gl::device::key::DOWN)) {
+					lvl = true;
 					d = step > 0 ? -1 : 0;
 					st = state::dec;
+					if(dev.get_positive(gl::device::key::DOWN)) trg = true;
+				}
+				if(lvl) {
+					if(!trg && !service_key_accel_()) {
+						st = state::none;
+					}
+				} else {
+					delay_key_cnt_ = 0;
 				}
 			}
 
@@ -377,14 +417,7 @@ namespace gui {
 			if(!get_enable()) return;
 
 			if(state_ != state::none) {
-				std::string rtx;
-				if(param_.select_func_ != nullptr) {
-					rtx = param_.select_func_(state_, sel_pos_, param_.sel_pos_);
-				}
-   				if(rtx.empty()) {  // 関数が設定されていない場合の標準的な数値変換
-					rtx = (boost::format("%d") % param_.sel_pos_).str();
-				}
-				param_.text_param_.set_text(rtx);
+				setup_title_();
 				state_ = state::none;
 			}
 			sel_pos_ = param_.sel_pos_;
