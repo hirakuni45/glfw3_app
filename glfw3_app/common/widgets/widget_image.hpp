@@ -25,6 +25,7 @@ namespace gui {
 	struct widget_image : public widget {
 
 		typedef widget_image value_type;
+		typedef std::function< void(const vtx::irect& clip) > render_func_type;
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
@@ -38,8 +39,13 @@ namespace gui {
 			vtx::fpos	offset_;					///< 描画オフセット
 			vtx::fpos	scale_;						///< 描画スケール
 			bool		linear_;					///< リニアフィルター
-			param(const img::i_img* image = nullptr) : image_(image),
-				mobj_handle_(0), offset_(0.0f), scale_(1.0f), linear_(true) { }
+
+			render_func_type	render_func_;
+
+			param(const img::i_img* image = nullptr) noexcept : image_(image),
+				mobj_handle_(0), offset_(0.0f), scale_(1.0f), linear_(true),
+				render_func_()
+			{ }
 		};
 
 	private:
@@ -213,7 +219,7 @@ namespace gui {
 						int sx = vsz.x / siz.x;
 						int sy = vsz.y / siz.y;
 						glViewport(wp.clip_.org.x * sx,
-								   vsz.y - wp.clip_.org.y * sy - wp.clip_.size.y * sy,
+							vsz.y - wp.clip_.org.y * sy - wp.clip_.size.y * sy,
 							wp.clip_.size.x * sx, wp.clip_.size.y * sy);
 							mo.setup_matrix(wp.clip_.size.x, wp.clip_.size.y);
 					}
@@ -223,6 +229,19 @@ namespace gui {
 			}
 			glPopMatrix();
 
+			if(param_.render_func_ != nullptr) {
+				glPushMatrix();
+				float sc = core.get_dpi_scale();
+				const widget::param& wp = get_param();
+				float sx = sc;
+				float sy = sc;
+				glViewport(
+					wp.clip_.org.x * sx, vsz.y - wp.clip_.org.y * sy - wp.clip_.size.y * sy - 1,
+					wp.clip_.size.x * sx, wp.clip_.size.y * sy);
+				wd_.at_mobj().setup_matrix(wp.clip_.size.x - 1, wp.clip_.size.y - 1);
+				param_.render_func_(wp.clip_);
+				glPopMatrix();
+			}
 			glViewport(0, 0, vsz.x, vsz.y);
 		}
 
