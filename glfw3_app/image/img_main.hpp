@@ -57,6 +57,8 @@ namespace app {
 		gui::widget_spinbox*	crop_oy_;
 		gui::widget_spinbox*	crop_sx_;
 		gui::widget_spinbox*	crop_sy_;
+		gui::widget_text*		crop_ex_;
+		gui::widget_text*		crop_ey_;
 		gui::widget_button*		crop_;
 
 		gui::widget_frame*		info_;
@@ -89,6 +91,7 @@ namespace app {
 
 		typedef std::tuple<const std::string, const img::shared_img> save_t;
 
+
 		bool save_task_(save_t t) noexcept
 		{
 			img::img_files imfs;
@@ -96,10 +99,12 @@ namespace app {
 			return imfs.save(std::get<0>(t));
 		}
 
+
 		void create_new_image_(const vtx::spos& size) noexcept
 		{
 
 		}
+
 
 		void image_info_(const std::string& file, const img::i_img* img) noexcept
 		{
@@ -136,6 +141,7 @@ namespace app {
 			term_->output(s);
 		}
 
+
 		gui::widget* init_view_(gui::widget_director& wd) noexcept
 		{
 			using namespace gui;
@@ -155,6 +161,14 @@ namespace app {
 			view_ = wd.add_widget<widget_spinbox>(wp, wp_);
 
 			return view;
+		}
+
+
+		gui::widget* init_resize_(gui::widget_director& wd) noexcept
+		{
+			using namespace gui;
+
+			return nullptr;
 		}
 
 
@@ -205,6 +219,13 @@ namespace app {
 				crop_sx_ = wd.add_widget<widget_spinbox>(wp, wp_);
 			}
 			{
+				widget::param wp(vtx::irect(160, 20+50*2, 60, 40), crop);
+             	widget_text::param wp_;
+				wp_.text_param_.set_text("512");
+				wp_.text_param_.placement_.vpt = vtx::placement::vertical::CENTER;
+				crop_ex_ = wd.add_widget<widget_text>(wp, wp_);
+			}
+			{
 				widget::param wp(vtx::irect(0, 20+50*3, 30, 40), crop);
              	widget_text::param wp_;
 				wp_.text_param_.set_text("H:");
@@ -216,6 +237,13 @@ namespace app {
 				widget_spinbox::param wp_(0, 512, 512);
 				wp_.page_step_ = 5;
 				crop_sy_ = wd.add_widget<widget_spinbox>(wp, wp_);
+			}
+			{
+				widget::param wp(vtx::irect(160, 20+50*3, 60, 40), crop);
+             	widget_text::param wp_;
+				wp_.text_param_.set_text("512");
+				wp_.text_param_.placement_.vpt = vtx::placement::vertical::CENTER;
+				crop_ey_ = wd.add_widget<widget_text>(wp, wp_);
 			}
 			{ // クロップボタン
 				widget::param wp(vtx::irect(110, 20+50*4, 100, 40), crop);
@@ -295,6 +323,49 @@ namespace app {
 			image_->at_local_param().mobj_handle_ = img_handle_;
 		}
 
+
+		void update_func_() noexcept
+		{
+			gui::widget_director& wd = director_.at().widget_director_;
+
+			if(func_->get_select_pos() == 2) {
+
+				// クロップサイズの更新
+				if(src_image_.get() != nullptr) {
+					auto img = src_image_.get();
+					int w = img->get_size().x - crop_ox_->get_select_pos();
+					if(crop_sx_->get_select_pos() > w) {
+						crop_sx_->set_select_pos(w);
+					}
+					int h = img->get_size().y - crop_oy_->get_select_pos();
+					if(crop_sy_->get_select_pos() > h) {
+						crop_sy_->set_select_pos(h);
+					}
+
+					int ex = crop_ox_->get_select_pos() + crop_sx_->get_select_pos();
+					ex--;
+					crop_ex_->set_text((boost::format("%d") % ex).str());
+					int ey = crop_oy_->get_select_pos() + crop_sy_->get_select_pos();
+					ey--;
+					crop_ey_->set_text((boost::format("%d") % ey).str());
+				}
+
+				// クロップボタンの有効無効
+				{
+					bool ena = true;
+					if(src_image_.get() == nullptr) ena = false;
+					else {
+						auto img = src_image_.get();
+						if(crop_ox_->get_select_pos() == 0
+							&& crop_oy_->get_select_pos() == 0
+							&& crop_sx_->get_select_pos() == img->get_size().x
+							&& crop_sy_->get_select_pos() == img->get_size().y) ena = false;
+					}
+					wd.stall(crop_, !ena);
+				}
+			}
+		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -310,7 +381,7 @@ namespace app {
 			func_(nullptr),
 			view_(nullptr),
 			crop_ox_(nullptr), crop_oy_(nullptr), crop_sx_(nullptr), crop_sy_(nullptr),
-			crop_(nullptr),
+			crop_ex_(nullptr), crop_ey_(nullptr), crop_(nullptr),
 			info_(nullptr), term_(nullptr),
 			dialog_(nullptr), dialog_yes_no_(nullptr), dialog_new_(nullptr),
 			img_handle_(0), dd_id_(0), load_id_(0), save_id_(0),
@@ -612,19 +683,7 @@ namespace app {
 			load_->set_state(gui::widget::state::STALL, load_stall);
 			save_->set_state(gui::widget::state::STALL, save_stall);
 
-			// クロップボタンの有効無効
-			{
-				bool ena = true;
-				if(src_image_.get() == nullptr) ena = false;
-				else {
-					auto img = src_image_.get();
-					if(crop_ox_->get_select_pos() == 0
-						&& crop_oy_->get_select_pos() == 0
-						&& crop_sx_->get_select_pos() == img->get_size().x
-						&& crop_sy_->get_select_pos() == img->get_size().y) ena = false;
-				}
-				wd.stall(crop_, !ena);
-			}
+			update_func_();
 
 			wd.update();
 
