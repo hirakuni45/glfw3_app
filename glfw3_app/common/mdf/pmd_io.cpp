@@ -345,7 +345,7 @@ namespace mdf {
 	{
 		size_t pos = fio.tell();
 		bool f = probe_(fio);
-		fio.seek(pos, utils::file_io::seek::set);
+		fio.seek(pos, utils::file_io::SEEK::SET);
 		return f;
 	}
 
