@@ -27,7 +27,7 @@ namespace img {
 	//-----------------------------------------------------------------//
 	static i_img* copy_image(const i_img* src, bool opt = false)
 	{
-		if(src == 0) return 0;
+		if(src == nullptr) return 0;
 		i_img* dst = 0;
 		switch(src->get_type()) {
 		case IMG::INDEXED8:
@@ -93,19 +93,20 @@ namespace img {
 		@brief	RGBA8 イメージへコピーする
 		@param[in]	isrc	ソースのイメージインターフェース
 		@param[in]	rect	ソース画像領域
-		@param[in]	idst	コピー先 RGBA8 イメージ（リファレンス）
-		@param[in]	pos	コピー先位置
+		@param[out]	idst	コピー先 RGBA8 イメージ（リファレンス）
+		@param[in]	ofs		コピー先オフセット
 	*/
 	//-----------------------------------------------------------------//
-	static void copy_to_rgba8(const i_img* isrc, const vtx::srect& rect, img_rgba8& idst, const vtx::spos& pos)
+	static void copy_to_rgba8(const i_img* isrc, const vtx::srect& rect, img_rgba8& idst, const vtx::spos& ofs)
 	{
-		if(isrc == 0) return;
+		if(isrc == nullptr) return;
+
 		vtx::spos p;
 		for(p.y = 0; p.y < rect.size.y; ++p.y) {
 			for(p.x = 0; p.x < rect.size.x; ++p.x) {
 				rgba8 c;
 				isrc->get_pixel(rect.org + p, c);
-				idst.put_pixel(pos + p, c);
+				idst.put_pixel(ofs + p, c);
 			}
 		}
 	}
