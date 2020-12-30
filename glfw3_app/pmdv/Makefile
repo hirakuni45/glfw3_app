@@ -1,6 +1,12 @@
-#-----------------------------------------------#
-# Application Binary Build Makefile             #
-#-----------------------------------------------#
+# -*- tab-width : 4 -*-
+#=======================================================================
+#   @file
+#   @brief  glfw_app
+#   @author 平松邦仁 (hira@rvf-rc45.net)
+#	@copyright	Copyright (C) 2019 Kunihito Hiramatsu @n
+#				Released under the MIT license @n
+#				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
+#=======================================================================
 TARGET		=	pmdv
 
 ifeq ($(OS),Windows_NT)
@@ -31,7 +37,6 @@ CSOURCES	=	minizip/ioapi.c \
 PSOURCES	=	main.cpp \
 				core/glcore.cpp \
 				core/device.cpp \
-				gl_fw/glfonts.cpp \
 				gl_fw/glmobj.cpp \
 				gl_fw/glterminal.cpp \
 				gl_fw/glcamera.cpp \
@@ -54,7 +59,6 @@ PSOURCES	=	main.cpp \
 				img_io/openjpeg_io.cpp \
 				img_io/pvr_io.cpp \
 				img_io/img_files.cpp \
-				img_io/img_utils.cpp \
 				snd_io/audio_io.cpp \
 				snd_io/pcm.cpp \
 				snd_io/wav_io.cpp \
@@ -78,7 +82,7 @@ OPTLIBS		=	opengl32 glu32 glfw3 glew32 \
 				pthread \
 				png turbojpeg jpeg openjp2 \
 				freetype \
-				mad tag \
+				mad \
 				z openal
 else
 LOCAL_PATH	=	/usr/local
@@ -86,7 +90,7 @@ OPTLIBS		=	glfw3 GLEW \
 				pthread \
 				png turbojpeg openjp2 \
 				freetype \
-				mad faad mp4ff tag \
+				mad \
 				z
 endif
 
@@ -132,7 +136,7 @@ CPMM	=	clang++
 CCMM	=	clang
 endif
 
-POPT	=	-O2 -std=c++14
+POPT	=	-O2 -std=c++17
 COPT	=	-O2
 LOPT	=
 
@@ -169,7 +173,8 @@ endif
 # -Wuninitialized -Wunused -Werror -Wshadow
 CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
 			-Wformat
-CPWARN	=	-Wall -Werror -Wno-unused-private-field
+CPWARN	=	-Wall -Werror -Wno-unused-private-field \
+			-Wno-unused-function
 
 OBJECTS	=	$(addprefix $(BUILD)/,$(patsubst %.cpp,%.o,$(PSOURCES))) \
 			$(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(CSOURCES)))
