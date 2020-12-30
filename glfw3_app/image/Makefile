@@ -20,7 +20,6 @@ CSOURCES	=	minizip/ioapi.c \
 PSOURCES	=	main.cpp \
 				core/glcore.cpp \
 				core/device.cpp \
-				gl_fw/glfonts.cpp \
 				gl_fw/glmobj.cpp \
 				gl_fw/glutils.cpp \
 				gl_fw/glterminal.cpp \
@@ -41,7 +40,6 @@ PSOURCES	=	main.cpp \
 				img_io/openjpeg_io.cpp \
 				img_io/pvr_io.cpp \
 				img_io/img_files.cpp \
-				img_io/img_utils.cpp \
 				snd_io/audio_io.cpp \
 				snd_io/pcm.cpp \
 				snd_io/wav_io.cpp \
@@ -83,7 +81,7 @@ else
   ifeq ($(UNAME),Darwin)
     SYSTEM := OSX
 	OSX_VER := $(shell sw_vers -productVersion | sed 's/^\([0-9]*.[0-9]*\).[0-9]*/\1/')
-	CPP_VER := -std=c++14
+	CPP_VER := -std=c++17
 	CFLAGS =
 	PFLAGS =
 	LFLAGS = -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk \
@@ -149,7 +147,7 @@ CPMM	=	clang++
 CCMM	=	clang
 endif
 
-POPT	=	-O2 -std=c++14
+POPT	=	-O2 -std=c++17
 COPT	=	-O2
 LOPT	=
 
