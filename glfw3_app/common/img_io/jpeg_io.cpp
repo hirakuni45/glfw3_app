@@ -273,7 +273,7 @@ namespace img {
 		struct jpeg_error_mgr errmgr;
 
 		long pos = fin.tell();
-
+std::cout << "info: " << pos << std::endl;
 		// エラーのハンドリング
 		cinfo.err = jpeg_std_error(&errmgr);
 		errmgr.error_exit = error_exit_task;
@@ -366,11 +366,15 @@ namespace img {
 		// file_io クラス設定
 		fio_jpeg_file_io_src(&cinfo, &fin);
 
+{
+auto pos = fin.tell();
+std::cout << "Info: " << pos << std::endl;
+}
 		// ファイルの情報ヘッダの読込み
 		error_code_ = 0;
 		jpeg_read_header(&cinfo, TRUE);
 		if(error_code_) {
-			std::cout << "JPEG decode error: 'header'(" << error_code_ << ")" << std::endl; 
+			std::cout << "JPEG decode error: 'header' (" << error_code_ << ")" << std::endl; 
 			jpeg_destroy_decompress(&cinfo);
 			return false;
 		}
@@ -379,7 +383,7 @@ namespace img {
 		error_code_ = 0;
 		jpeg_start_decompress(&cinfo);
 		if(error_code_) {
-			std::cout << "JPEG decode error: 'decompress'(" << error_code_ << ")" << std::endl;
+			std::cout << "JPEG decode error: 'decompress' (" << error_code_ << ")" << std::endl;
 			jpeg_finish_decompress(&cinfo);
 			jpeg_destroy_decompress(&cinfo);
 			return false;
