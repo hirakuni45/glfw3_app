@@ -15,10 +15,16 @@
 #include "widgets/widget_filer.hpp"
 #include "widgets/widget_frame.hpp"
 #include "widgets/widget_image.hpp"
+#include "widgets/widget_view.hpp"
 #include "widgets/widget_terminal.hpp"
+#include "widgets/widget_spinbox.hpp"
+#include "widgets/widget_list.hpp"
+#include "widgets/widget_sheet.hpp"
 #include "widgets/widget_utils.hpp"
+
 #include "img_io/bdf_io.hpp"
 #include "gl_fw/glmobj.hpp"
+
 #include <tuple>
 #include "core/glcore.hpp"
 #include <boost/lexical_cast.hpp>
@@ -44,18 +50,20 @@ namespace app {
 		gui::widget_button*		new_;
 		gui::widget_button*		load_;
 		gui::widget_button*		save_;
-		gui::widget_radio*		scale_fit_;
-		gui::widget_radio*		scale_1x_;
-		gui::widget_radio*		scale_2x_;
-		gui::widget_radio*		scale_3x_;
-		gui::widget_button*		scale_;
+
+		gui::widget_sheet*		func_;
+		gui::widget_spinbox*	view_;
+		gui::widget_spinbox*	crop_ox_;
+		gui::widget_spinbox*	crop_oy_;
+		gui::widget_spinbox*	crop_sx_;
+		gui::widget_spinbox*	crop_sy_;
+		gui::widget_button*		crop_;
 
 		gui::widget_frame*		info_;
 		gui::widget_terminal*	term_;
 
 		gui::widget_dialog*		dialog_;
 		gui::widget_dialog*		dialog_yes_no_;
-		gui::widget_dialog*		dialog_scale_;
 		gui::widget_dialog*		dialog_new_;
 
 		gl::mobj			mobj_;
@@ -77,21 +85,23 @@ namespace app {
 
 		std::string		start_path_;
 
+		float			image_scale_;
+
 		typedef std::tuple<const std::string, const img::shared_img> save_t;
 
-		bool save_task_(save_t t)
+		bool save_task_(save_t t) noexcept
 		{
 			img::img_files imfs;
 			imfs.set_image(std::get<1>(t));
 			return imfs.save(std::get<0>(t));
 		}
 
-		void create_new_image_(const vtx::spos& size)
+		void create_new_image_(const vtx::spos& size) noexcept
 		{
 
 		}
 
-		void image_info_(const std::string& file, const img::i_img* img)
+		void image_info_(const std::string& file, const img::i_img* img) noexcept
 		{
 			std::string s;
 			if(!file.empty()) {
@@ -103,6 +113,16 @@ namespace app {
 			term_->output(s);
 			s = "H: " + boost::lexical_cast<std::string>(img->get_size().y) + '\n';
 			term_->output(s);
+
+			crop_ox_->at_local_param().max_pos_ = img->get_size().x;
+			crop_ox_->set_select_pos(0);
+			crop_oy_->at_local_param().max_pos_ = img->get_size().y;
+			crop_oy_->set_select_pos(0);
+			crop_sx_->at_local_param().max_pos_ = img->get_size().x;
+			crop_sx_->set_select_pos(img->get_size().x);
+			crop_sy_->at_local_param().max_pos_ = img->get_size().y;
+			crop_sy_->set_select_pos(img->get_size().y);
+
 			img::IMG::type t = img->get_type();
 			if(t == img::IMG::INDEXED8) {
 				term_->output("INDEXED8\n");
@@ -114,26 +134,188 @@ namespace app {
 			}
 			s = "C: " + boost::lexical_cast<std::string>(img->count_color()) + '\n';
 			term_->output(s);
-			term_->output('\n');
+		}
+
+		gui::widget* init_view_(gui::widget_director& wd) noexcept
+		{
+			using namespace gui;
+
+			widget::param wpr(vtx::irect(10, 20, 0, 0));
+			widget_null::param wpr_;
+			widget* view = wd.add_widget<widget_null>(wpr, wpr_);
+			{
+				widget::param wp(vtx::irect(0, 20, 70, 40), view);
+				widget_text::param wp_;
+				wp_.text_param_.set_text("Scale:");
+				wp_.text_param_.placement_.vpt = vtx::placement::vertical::CENTER;
+				wd.add_widget<widget_text>(wp, wp_);
+			}
+			widget::param wp(vtx::irect(80, 20+50*0, 110, 40), view);
+			widget_spinbox::param wp_(0, 0, 10);
+			view_ = wd.add_widget<widget_spinbox>(wp, wp_);
+
+			return view;
+		}
+
+
+		gui::widget* init_crop_(gui::widget_director& wd) noexcept
+		{
+			using namespace gui;
+
+			widget::param wpr(vtx::irect(10, 20, 0, 0));
+			widget_null::param wpr_;
+			widget* crop = wd.add_widget<widget_null>(wpr, wpr_);
+			{
+				widget::param wp(vtx::irect(0, 20+50*0, 30, 40), crop);
+				widget_text::param wp_;
+				wp_.text_param_.set_text("X:");
+				wp_.text_param_.placement_.vpt = vtx::placement::vertical::CENTER;
+				wd.add_widget<widget_text>(wp, wp_);
+			}
+			{
+				widget::param wp(vtx::irect(30, 20+50*0, 120, 40), crop);
+				widget_spinbox::param wp_(0, 0, 512);
+				wp_.page_step_ = 5;
+				crop_ox_ = wd.add_widget<widget_spinbox>(wp, wp_);
+			}
+			{
+				widget::param wp(vtx::irect(0, 20+50*1, 30, 40), crop);
+				widget_text::param wp_;
+				wp_.text_param_.set_text("Y:");
+				wp_.text_param_.placement_.vpt = vtx::placement::vertical::CENTER;
+   	           	wd.add_widget<widget_text>(wp, wp_);
+			}
+			{
+				widget::param wp(vtx::irect(30, 20+50*1, 120, 40), crop);
+				widget_spinbox::param wp_(0, 0, 512);
+				wp_.page_step_ = 5;
+				crop_oy_ = wd.add_widget<widget_spinbox>(wp, wp_);
+			}
+			{
+				widget::param wp(vtx::irect(0, 20+50*2, 30, 40), crop);
+				widget_text::param wp_;
+				wp_.text_param_.set_text("W:");
+				wp_.text_param_.placement_.vpt = vtx::placement::vertical::CENTER;
+  	            	wd.add_widget<widget_text>(wp, wp_);
+			}
+			{
+				widget::param wp(vtx::irect(30, 20+50*2, 120, 40), crop);
+				widget_spinbox::param wp_(0, 512, 512);
+				wp_.page_step_ = 5;
+				crop_sx_ = wd.add_widget<widget_spinbox>(wp, wp_);
+			}
+			{
+				widget::param wp(vtx::irect(0, 20+50*3, 30, 40), crop);
+             	widget_text::param wp_;
+				wp_.text_param_.set_text("H:");
+				wp_.text_param_.placement_.vpt = vtx::placement::vertical::CENTER;
+				wd.add_widget<widget_text>(wp, wp_);
+			}
+			{
+				widget::param wp(vtx::irect(30, 20+50*3, 120, 40), crop);
+				widget_spinbox::param wp_(0, 512, 512);
+				wp_.page_step_ = 5;
+				crop_sy_ = wd.add_widget<widget_spinbox>(wp, wp_);
+			}
+			{ // クロップボタン
+				widget::param wp(vtx::irect(110, 20+50*4, 100, 40), crop);
+				widget_button::param wp_("Crop");
+				crop_ = wd.add_widget<widget_button>(wp, wp_);
+				crop_->at_local_param().select_func_ = [=](uint32_t id) {
+					auto src = src_image_.get();
+					if(src == nullptr) return;
+
+					vtx::spos org(crop_ox_->get_select_pos(), crop_oy_->get_select_pos());
+					vtx::spos siz(crop_sx_->get_select_pos(), crop_sy_->get_select_pos());
+					vtx::srect r(org, siz);					
+					auto* dst = new img::img_rgba8;
+					dst->create(r.size, src->test_alpha());
+					img::copy_to_rgba8(src, r, *dst, vtx::spos(0));
+					src_image_ = img::shared_img(dst);
+
+					term_->output("Crop:\n");
+					std::string s;
+					image_info_(s, dst);
+
+					setup_src_image_();
+				};
+			}
+			return crop;
+		}
+
+
+		void cursor_render_(const vtx::irect& clip) noexcept
+		{
+			static uint16_t stp_idx = 0;
+			static uint16_t stp_spd = 0;
+			static const uint16_t stp_pat[4] = {
+				0b1100110011001100,
+				0b0110011001100110,
+				0b0011001100110011,
+				0b1001100110011001
+			};
+
+			gui::widget_director& wd = director_.at().widget_director_;
+
+			if(func_->get_select_pos() == 2) {
+				glDisable(GL_TEXTURE_2D);
+				gl::glColor(wd.get_color());
+
+				glPushMatrix();
+				glScalef(image_scale_, image_scale_, image_scale_);
+				gl::glTranslatei(
+					image_->get_local_param().offset_.x,
+					image_->get_local_param().offset_.y, 0);
+				glLineStipple(4, stp_pat[stp_idx & 3]);
+				stp_spd++;
+				if(stp_spd >= 4) {
+					stp_idx++;
+					stp_spd = 0;
+				}
+				glEnable(GL_LINE_STIPPLE);
+				glLineWidth(2.0f);
+				vtx::spos org(crop_ox_->get_select_pos(), crop_oy_->get_select_pos());
+				vtx::spos siz(crop_sx_->get_select_pos(), crop_sy_->get_select_pos());
+				gl::draw_line_rectangle(org, siz);
+				glDisable(GL_LINE_STIPPLE);
+				glPopMatrix();
+
+				glEnable(GL_TEXTURE_2D);
+			}
+        }
+
+
+		void setup_src_image_() noexcept
+		{
+			image_offset_.set(0.0f);
+			mobj_.destroy();
+			mobj_.initialize();
+			img_handle_ = mobj_.install(src_image_.get());
+			image_->at_local_param().mobj_ = mobj_;
+			image_->at_local_param().mobj_handle_ = img_handle_;
 		}
 
 	public:
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  コンストラクター
+			@param[in]	d	シーン・ディレクターの参照
 		*/
 		//-----------------------------------------------------------------//
-		img_main(utils::director<core>& d) :
+		img_main(utils::director<core>& d) noexcept :
 			director_(d),
-			load_ctx_(0), save_ctx_(0), 
-			frame_(0), image_(0),
-			tools_(0), new_(0), load_(0), save_(0),
-			scale_fit_(0), scale_1x_(0), scale_2x_(0), scale_3x_(0),
-			scale_(0),
-			info_(0), term_(0),
-			dialog_(0), dialog_yes_no_(0), dialog_scale_(0), dialog_new_(0),
+			load_ctx_(nullptr), save_ctx_(nullptr), 
+			frame_(nullptr), image_(nullptr),
+			tools_(nullptr), new_(nullptr), load_(nullptr), save_(nullptr),
+			func_(nullptr),
+			view_(nullptr),
+			crop_ox_(nullptr), crop_oy_(nullptr), crop_sx_(nullptr), crop_sy_(nullptr),
+			crop_(nullptr),
+			info_(nullptr), term_(nullptr),
+			dialog_(nullptr), dialog_yes_no_(nullptr), dialog_new_(nullptr),
 			img_handle_(0), dd_id_(0), load_id_(0), save_id_(0),
-			image_offset_(0.0f), save_dialog_(false)
+			image_offset_(0.0f), src_image_(), save_dialog_(false), start_path_(),
+			image_scale_(1.0f)
 		{ }
 
 
@@ -166,6 +348,9 @@ namespace app {
 			{ // 画像ファイル表示イメージ
 				widget::param wp(vtx::irect(0, 0, 256, 256), frame_);
 				widget_image::param wp_;
+				wp_.render_func_ = [=](const vtx::irect& clip) {
+					cursor_render_(clip);
+				};
 				image_ = wd.add_widget<widget_image>(wp, wp_);
 				image_->set_state(widget::state::CLIP_PARENTS);
 				image_->set_state(widget::state::RESIZE_ROOT);
@@ -174,7 +359,7 @@ namespace app {
 			}
 
 			{ // 機能ツールパレット
-				widget::param wp(vtx::irect(10, 10, 130, 350));
+				widget::param wp(vtx::irect(10, 10, 250, 500));
 				widget_frame::param wp_;
 				tools_ = wd.add_widget<widget_frame>(wp, wp_);
 				tools_->set_state(widget::state::SIZE_LOCK);
@@ -188,39 +373,46 @@ namespace app {
 				widget::param wp(vtx::irect(10, 10+50*1, 100, 40), tools_);
 				widget_button::param wp_("load");
 				load_ = wd.add_widget<widget_button>(wp, wp_);
+				load_->at_local_param().select_func_ = [=](uint32_t id) {
+					if(load_ctx_ != nullptr) {
+						bool f = load_ctx_->get_state(gui::widget::state::ENABLE);
+						load_ctx_->enable(!f);
+					}
+				};
 			}
+
 			{ // セーブ起動ボタン
 				widget::param wp(vtx::irect(10, 10+50*2, 100, 40), tools_);
 				widget_button::param wp_("save");
 				save_ = wd.add_widget<widget_button>(wp, wp_);
+				save_->at_local_param().select_func_ = [=](uint32_t id) {
+					if(save_ctx_ != nullptr) {
+						bool f = save_ctx_->get_state(gui::widget::state::ENABLE);
+						save_ctx_->enable(!f);
+					}
+				};
 			}
+
 			short ofs = 160;
-			{ // スケール FIT
-				widget::param wp(vtx::irect(10, ofs+30*0, 90, 30), tools_);
-				widget_radio::param wp_("fit");
-				wp_.check_ = true;
-				scale_fit_ = wd.add_widget<widget_radio>(wp, wp_);
+			{  // 機能選択
+				widget* view = init_view_(wd);
+				widget* resize;
+				{  // resize sheet
+                    widget::param wpr(vtx::irect(10, 20, 0, 0));
+                    widget_null::param wpr_;
+                    resize = wd.add_widget<widget_null>(wpr, wpr_);
+
+				}
+				widget* crop = init_crop_(wd);
+
+                widget::param wp(vtx::irect(10, ofs, 230, 300), tools_);
+                widget_sheet::param wp_;
+                wp_.sheets_.emplace_back("View",   view);
+                wp_.sheets_.emplace_back("Resize", resize);
+                wp_.sheets_.emplace_back("Crop",   crop);
+                func_ = wd.add_widget<widget_sheet>(wp, wp_);
 			}
-			{ // スケール 1X
-				widget::param wp(vtx::irect(10, ofs+30*1, 90, 30), tools_);
-				widget_radio::param wp_("1x");
-				scale_1x_ = wd.add_widget<widget_radio>(wp, wp_);
-			}
-			{ // スケール 2X
-				widget::param wp(vtx::irect(10, ofs+30*2, 90, 30), tools_);
-				widget_radio::param wp_("2x");
-				scale_2x_ = wd.add_widget<widget_radio>(wp, wp_);
-			}
-			{ // スケール 3X
-				widget::param wp(vtx::irect(10, ofs+30*3, 90, 30), tools_);
-				widget_radio::param wp_("3x");
-				scale_3x_ = wd.add_widget<widget_radio>(wp, wp_);
-			}
-			{ // スケーラーボタン
-				widget::param wp(vtx::irect(10, ofs+30*4+10, 100, 40), tools_);
-				widget_button::param wp_("scale");
-				scale_ = wd.add_widget<widget_button>(wp, wp_);
-			}
+
 
 			{ // ターミナル
 				{
@@ -262,12 +454,6 @@ namespace app {
 				dialog_yes_no_ = wd.add_widget<widget_dialog>(wp, wp_);
 				dialog_yes_no_->enable(false);
 			}
-			{ // ダイアログ(scale)
-				widget::param wp(vtx::irect(10, 30, 450, 200));
-				widget_dialog::param wp_(widget_dialog::style::CANCEL_OK);
-				dialog_scale_ = wd.add_widget<widget_dialog>(wp, wp_);
-				dialog_scale_->enable(false);
-			}
 			{ // ダイアログ(new)
 				widget::param wp(vtx::irect(10, 30, 450, 200));
 				widget_dialog::param wp_(widget_dialog::style::CANCEL_OK);
@@ -279,15 +465,13 @@ namespace app {
 
 			// プリファレンスの取得
 			sys::preference& pre = director_.at().preference_;
-			if(load_ctx_) load_ctx_->load(pre);
-			if(save_ctx_) save_ctx_->load(pre);
-			if(frame_) frame_->load(pre);
-			if(tools_) tools_->load(pre, false, false);
-			if(scale_fit_) scale_fit_->load(pre);
-			if(scale_1x_) scale_1x_->load(pre);
-			if(scale_2x_) scale_2x_->load(pre);
-			if(scale_3x_) scale_3x_->load(pre);
-			if(info_) info_->load(pre);
+			if(load_ctx_ != nullptr) load_ctx_->load(pre);
+			if(save_ctx_ != nullptr) save_ctx_->load(pre);
+			if(frame_ != nullptr) frame_->load(pre);
+			if(tools_ != nullptr) tools_->load(pre, false, false);
+			if(view_ != nullptr) view_->load(pre);
+///			if(mode_ != nullptr) mode_->load(pre);
+			if(info_ != nullptr) info_->load(pre);
 
 			// コマンドラインの取得
 			{
@@ -328,34 +512,8 @@ namespace app {
 					img_handle_ = mobj_.install(src_image_.get());
 					image_->at_local_param().mobj_ = mobj_;
 					image_->at_local_param().mobj_handle_ = img_handle_;
-
 ///					bool f = dialog_new_->get_state(gui::widget::state::ENABLE);
 ///					dialog_new_->enable(!f);
-				}
-			}
-
-			if(load_) {
-				if(load_->get_selected()) {
-					if(load_ctx_) {
-						bool f = load_ctx_->get_state(gui::widget::state::ENABLE);
-						load_ctx_->enable(!f);
-					}
-				}
-			}
-
-			if(save_) {
-				if(save_->get_selected()) {
-					if(save_ctx_) {
-						bool f = save_ctx_->get_state(gui::widget::state::ENABLE);
-						save_ctx_->enable(!f);
-					}
-				}
-			}
-
-			if(scale_) {
-				if(scale_->get_selected()) {
-					bool f = dialog_scale_->get_state(gui::widget::state::ENABLE);
-					dialog_scale_->enable(!f);
 				}
 			}
 
@@ -366,7 +524,7 @@ namespace app {
 				start_path_.clear();
 			}
 
-			// D&D 取得のパス
+			// D & D 取得のパス
 			int id = core.get_recv_files_id();
 			if(dd_id_ != id) {
 				dd_id_ = id;
@@ -379,7 +537,7 @@ namespace app {
 			bool load_stall = false;
 			bool save_stall = false;
 
-			if(load_ctx_) {
+			if(load_ctx_ != nullptr) {
 				if(load_ctx_->get_state(gui::widget::state::ENABLE)) {
 					save_stall = true;
 				}
@@ -399,34 +557,27 @@ namespace app {
 					src_image_ = imf.get_image();
 					term_->output("Ld: " + load_ctx_->get_file() + "\n");
 					image_info_(load_ctx_->get_file(), src_image_.get());
-					image_offset_.set(0.0f);
 					frame_->at_local_param().text_param_.set_text(imfn);
-					mobj_.destroy();
-					mobj_.initialize();
-					img_handle_ = mobj_.install(imf.get_image().get());
-					image_->at_local_param().mobj_ = mobj_;
-					image_->at_local_param().mobj_handle_ = img_handle_;
+					setup_src_image_();
 				}
 			}
 
 			// frame 内 image のサイズを設定
-			if(frame_ && image_) {
+			if(frame_ != nullptr && image_ != nullptr) {
 				if(!image_->get_local_param().mobj_handle_) {
 					save_stall = true;
 				}
 
 				float s = 1.0f;
-				if(scale_fit_->get_check()) {
+				auto n = view_->get_select_pos();
+				if(n == 0) {
 					vtx::fpos is = mobj_.get_size(img_handle_);
 					vtx::fpos ss = image_->at_rect().size;
 					vtx::fpos sc = ss / is;
 					if(sc.x < sc.y) s = sc.x; else s = sc.y;
 					image_->at_local_param().offset_ = 0.0f;
 				} else {
-					if(scale_1x_->get_check()) s = 1.0f;
- 					else if(scale_2x_->get_check()) s = 2.0f;
- 					else if(scale_3x_->get_check()) s = 3.0f;
-
+					s = static_cast<float>(n);
 					if(image_->get_select_in()) {
 						image_offset_ = image_->get_local_param().offset_;
 					}
@@ -436,9 +587,10 @@ namespace app {
 					}
 				}
 				image_->at_local_param().scale_ = s;
+				image_scale_ = s;
 			}
 
-			if(save_ctx_) {
+			if(save_ctx_ != nullptr) {
 				if(save_ctx_->get_state(gui::widget::state::ENABLE)) {
 					load_stall = true;
 				}
@@ -459,6 +611,20 @@ namespace app {
 
 			load_->set_state(gui::widget::state::STALL, load_stall);
 			save_->set_state(gui::widget::state::STALL, save_stall);
+
+			// クロップボタンの有効無効
+			{
+				bool ena = true;
+				if(src_image_.get() == nullptr) ena = false;
+				else {
+					auto img = src_image_.get();
+					if(crop_ox_->get_select_pos() == 0
+						&& crop_oy_->get_select_pos() == 0
+						&& crop_sx_->get_select_pos() == img->get_size().x
+						&& crop_sy_->get_select_pos() == img->get_size().y) ena = false;
+				}
+				wd.stall(crop_, !ena);
+			}
 
 			wd.update();
 
@@ -526,15 +692,13 @@ namespace app {
 		void destroy() override
 		{
 			sys::preference& pre = director_.at().preference_;
-			if(load_ctx_) load_ctx_->save(pre);
-			if(save_ctx_) save_ctx_->save(pre);
-			if(frame_) frame_->save(pre);
-			if(tools_) tools_->save(pre);
-			if(scale_fit_) scale_fit_->save(pre);
-			if(scale_1x_) scale_1x_->save(pre);
-			if(scale_2x_) scale_2x_->save(pre);
-			if(scale_3x_) scale_3x_->save(pre);
-			if(info_) info_->save(pre);
+			if(load_ctx_ != nullptr) load_ctx_->save(pre);
+			if(save_ctx_ != nullptr) save_ctx_->save(pre);
+			if(frame_ != nullptr) frame_->save(pre);
+			if(tools_ != nullptr) tools_->save(pre);
+			if(view_ != nullptr) view_->save(pre);
+///			if(mode_ != nullptr) mode_->save(pre);
+			if(info_ != nullptr) info_->save(pre);
 		}
 	};
 
