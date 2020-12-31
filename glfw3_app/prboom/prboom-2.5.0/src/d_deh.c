@@ -54,7 +54,7 @@
 #define TRUE 1
 #define FALSE 0
 
-#ifndef HAVE_STRLWR
+#ifdef HAVE_STRLWR
 #include <ctype.h>
 
 static char* strlwr(char* str)
