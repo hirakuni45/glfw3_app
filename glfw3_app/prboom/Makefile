@@ -79,8 +79,10 @@ CSOURCES	=	minizip/ioapi.c \
 				$(DOOM_PATH)/src/s_sound.c \
 				$(DOOM_PATH)/src/z_zone.c \
 				$(DOOM_PATH)/src/info.c \
-				$(DOOM_PATH)/src/sounds.c \
-				$(DOOM_PATH)/src/i_main.c
+				$(DOOM_PATH)/src/sounds.c
+
+
+# $(DOOM_PATH)/src/i_main.c
 
 PSOURCES	=	main.cpp \
 				core/glcore.cpp \
@@ -176,8 +178,7 @@ OPTLIBS += 	pthread \
 
 INC_SYS		=	$(LOCAL_INC_PATH) \
 				$(LOCAL_INC_PATH)/freetype2 \
-				$(OPENJPEG_PATH) \
-				$(LOCAL_INC_PATH)/taglib
+				$(OPENJPEG_PATH)
 INC_LIB		=
 LIBDIR		=	$(LOCAL_LIB_PATH)
 
@@ -207,7 +208,7 @@ COPT	=	-O2
 LOPT	=
 
 PFLAGS +=	-DHAVE_STDINT_H
-CFLAGS +=	-DNORMALUNIX
+CFLAGS +=	-DHAVE_CONFIG_H
 
 ifeq ($(BUILD),debug)
 	POPT += -g
