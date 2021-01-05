@@ -31,7 +31,10 @@ namespace graphics {
 	share_color const def_color::White   = { 255, 255, 255 };
 
 	share_color const def_color::Orange       = { 255, 165,   0 };  // オレンジ
-	share_color const def_color::SafeColor    = {  51, 204, 255 };  // セーフカラー（水色）
+	share_color const def_color::SafeColor    = {  51, 204, 255 };  // セーフカラー（水色系）
 	share_color const def_color::EmeraldGreen = {   0, 164, 116 };
 	share_color const def_color::LightPink    = { 255, 182, 193 };
+
+	share_color const def_color::DarkSafeColor  = { 23, 54, 64 };
+	share_color const def_color::LightSafeColor = { 23+23/2, 54+54/2, 64+64/2 };
 }

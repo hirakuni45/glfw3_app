@@ -30,6 +30,9 @@ namespace gui {
 		enum class ID : uint8_t {
 			GROUP,		///< グループ
 			FRAME,		///< フレーム
+			BOX,		///< ボックス（シンプルな単型）
+			TEXT,		///< テキスト
+			TEXTBOX,	///< テキスト・ボックス
 			DIALOG,		///< ダイアログ
 			BUTTON,		///< ボタン
 			CHECK,		///< チェック・ボタン
@@ -71,6 +74,30 @@ namespace gui {
 				positive_(false), level_(false), negative_(false) { }
 		};
 
+
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	水平配置型
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		enum class H_ALIGNMENT : uint8_t {
+			LEFT,	///< 左
+			CENTER,	///< 中央
+			RIGHT,	///< 右
+		};
+
+
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	垂直配置型
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		enum class V_ALIGNMENT : uint8_t {
+			TOP,	///< 上
+			CENTER,	///< 中央
+			BOTTOM,	///< 下
+		};
+
 	private:
 
 		widget*		parents_;	///< 親
@@ -90,6 +117,8 @@ namespace gui {
 
 		touch_state	touch_state_;
 
+		bool		update_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -105,7 +134,7 @@ namespace gui {
 			location_(loc), title_(title), mobj_(nullptr),
 			base_color_(graphics::def_color::White), font_color_(graphics::def_color::White),
 			state_(STATE::DISABLE), focus_(false), touch_(false),
-			touch_state_(fexp)
+			touch_state_(fexp), update_(false)
 		{ } 
 
 
@@ -138,7 +167,7 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	タッチ判定を更新
+			@brief	タッチ判定を更新（通常毎フレーム呼ばれる）
 			@param[in]	pos		判定位置
 			@param[in]	num		タッチ数
 		*/
@@ -239,11 +268,22 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	タイトル更新前処理
+		*/
+		//-----------------------------------------------------------------//
+		virtual void update_title() noexcept { }
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	モーションオブジェクトの設定
 			@param[in]	mobj	モーションオブジェクト
 		*/
 		//-----------------------------------------------------------------//
-		void set_mobj(const void* mobj) noexcept { mobj_ = mobj; }
+		void set_mobj(const void* mobj) noexcept {
+			mobj_ = mobj;
+			set_update();			
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -261,7 +301,10 @@ namespace gui {
 			@param[in]	color	カラー
 		*/
 		//-----------------------------------------------------------------//
-		void set_base_color(const graphics::share_color& color) noexcept { base_color_ = color; }
+		void set_base_color(const graphics::share_color& color) noexcept {
+			base_color_ = color;
+			set_update();
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -270,7 +313,15 @@ namespace gui {
 			@return ベースカラー
 		*/
 		//-----------------------------------------------------------------//
-		const auto& get_base_color() const noexcept { return base_color_; }
+		auto get_base_color() const noexcept {
+			if(state_ == STATE::STALL) {
+				graphics::share_color sh(0, 0, 0);
+				sh.set_color(base_color_.rgba8, 96);
+				return sh;
+			} else {
+				return base_color_;
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -279,7 +330,10 @@ namespace gui {
 			@param[in]	color	カラー
 		*/
 		//-----------------------------------------------------------------//
-		void set_font_color(const graphics::share_color& color) noexcept { font_color_ = color; }
+		void set_font_color(const graphics::share_color& color) noexcept {
+			font_color_ = color;
+			set_update();
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -288,7 +342,34 @@ namespace gui {
 			@return フォントカラー
 		*/
 		//-----------------------------------------------------------------//
-		const auto& get_font_color() const noexcept { return font_color_; }
+		auto get_font_color() const noexcept
+		{
+			if(state_ == STATE::STALL) {
+				graphics::share_color sh(0, 0, 0);
+				sh.set_color(font_color_.rgba8, 96);
+				return sh;
+			} else {
+				return font_color_;
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	「更新」の設定
+			@param[in]	update	更新をしない場合「false」
+		*/
+		//-----------------------------------------------------------------//
+		void set_update(bool update = true) noexcept { update_ = update; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	「更新」の取得
+			@return	「更新」
+		*/
+		//-----------------------------------------------------------------//
+		auto get_update() const noexcept { return update_; }
 
 
 		//-----------------------------------------------------------------//
@@ -297,10 +378,7 @@ namespace gui {
 			@param[in]	state	ステート
 		*/
 		//-----------------------------------------------------------------//
-		void set_state(STATE state) noexcept
-		{
-			state_ = state;
-		}
+		void set_state(STATE state) noexcept { state_ = state; }
 
 
 		//-----------------------------------------------------------------//

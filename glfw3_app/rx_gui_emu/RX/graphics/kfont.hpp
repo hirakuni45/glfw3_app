@@ -9,9 +9,7 @@
 */
 //=====================================================================//
 #include <cstdint>
-#ifdef CASH_FONT
 #include "ff14/source/ff.h"
-#endif
 #include "common/vtx.hpp"
 
 // 漢字フォントデータをＳＤカード上に置いて、キャッシュアクセスする場合有効にする
@@ -22,8 +20,6 @@ extern "C" {
 	int fatfs_get_mount();
 };
 #endif
-
-extern uint16_t ff_uni2oem(uint16_t code);
 
 namespace graphics {
 
@@ -184,8 +180,7 @@ namespace graphics {
 
 			if(fatfs_get_mount() == 0) return nullptr;
 #endif
-//			uint32_t lin = sjis_to_liner_(ff_uni2oem(code, FF_CODE_PAGE));
-			uint32_t lin = sjis_to_liner_(ff_uni2oem(code));
+			uint32_t lin = sjis_to_liner_(ff_uni2oem(code, FF_CODE_PAGE));
 
 			if(lin == 0xffff) {
 				return nullptr;

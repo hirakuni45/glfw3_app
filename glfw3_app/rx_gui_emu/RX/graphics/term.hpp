@@ -27,8 +27,6 @@ namespace gui {
 	private:
 		uint8_t		code_[SX * SY];
 
-		vtx::spos	pos_;
-
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -38,7 +36,7 @@ namespace gui {
 		*/
 		//-----------------------------------------------------------------//
 		term(const vtx::srect& loc = vtx::srect(0), const char* str = nullptr) noexcept :
-			widget(loc, str), code_{ 0x20 }, pos_(0)
+			widget(loc, str), code_{ 0x20 }
 		{
 			insert_widget(this);
 		}
@@ -109,37 +107,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void enable(bool ena = true) override
 		{
-			if(ena) set_state(STATE::ENABLE);
-			else set_state(STATE::DISABLE);
 		}
 
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	描画
-			@param[in]	rdr		描画インスタンス
-		*/
-		//-----------------------------------------------------------------//
-		template<class RDR>
-		void draw(RDR& rdr) noexcept
-		{
-#if 0
-			auto r = vtx::srect(get_final_position(), get_location().size);
-			rdr.set_fore_color(graphics::def_color::White);
-			rdr.round_box(r, round_radius);
-			if(get_touch_state().level_) {
-				rdr.set_fore_color(graphics::def_color::Silver);
-			} else {
-				rdr.set_fore_color(graphics::def_color::Darkgray);
-			}
-			r.org  += frame_width;
-			r.size -= frame_width * 2;
-			rdr.round_box(r, round_radius - frame_width);
-
-			rdr.set_fore_color(graphics::def_color::White);
-			auto sz = rdr.at_font().get_text_size(get_title());
-			rdr.draw_text(r.org + (r.size - sz) / 2, get_title());
-#endif
-		}
 	};
 }

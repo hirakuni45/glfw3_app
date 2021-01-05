@@ -11,10 +11,15 @@
 #include <cstdint>
 #include "graphics/bmp_in.hpp"
 #include "graphics/picojpeg_in.hpp"
-#include "graphics/png_in.hpp"
 
 // PNG のロードを有効にする場合
 #define ENABLE_PNG
+// TGA のロードを有効にする場合
+// #define ENABLE_TGA
+
+#ifdef ENABLE_PNG
+#include "graphics/png_in.hpp"
+#endif
 
 namespace img {
 
@@ -43,6 +48,7 @@ namespace img {
 			BMP,
 			JPEG,
 			PNG,
+			TGA,
 		};
 		TYPE		type_;
 
@@ -83,6 +89,34 @@ namespace img {
 #endif
 			type_(TYPE::NONE) { }
 
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	BMP コンテキストへの参照
+			@return BMP コンテキスト
+		*/
+		//-----------------------------------------------------------------//
+		auto& at_bmp() noexcept { return bmp_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	JPEG コンテキストへの参照
+			@return JPEG コンテキスト
+		*/
+		//-----------------------------------------------------------------//
+		auto& at_jpeg() noexcept { return jpeg_; }
+
+
+#ifdef ENABLE_PNG
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	PNG コンテキストへの参照
+			@return PNG コンテキスト
+		*/
+		//-----------------------------------------------------------------//
+		auto& at_png() noexcept { return png_; }
+#endif
 
 		//-----------------------------------------------------------------//
 		/*!

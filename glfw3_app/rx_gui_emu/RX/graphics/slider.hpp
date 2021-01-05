@@ -171,6 +171,19 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	スライダー・レシオを設定（移動量を正規化した値 0.0 to 1.0）
+			@param	ratio	スライダー・レシオ
+		*/
+		//-----------------------------------------------------------------//
+		void set_ratio(float ratio) noexcept {
+			if(ratio >= 0.0f && ratio <= 1.0f) {
+				ratio_ = ratio;
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	リード・オンリー（表示のみ）の設定
 			@param[in]	ena		リード・オンリーを無効にする場合「false」
 		*/
@@ -198,13 +211,16 @@ namespace gui {
 		{
 			auto org = get_final_position();
 			auto r = vtx::srect(org, get_location().size);
-			rdr.set_fore_color(graphics::def_color::White);
+			rdr.set_fore_color(get_base_color());
 			rdr.round_box(r, round_radius);
-			if(!read_only_ && get_touch_state().level_) {
-				rdr.set_fore_color(graphics::def_color::Silver);
-			} else {
-				rdr.set_fore_color(graphics::def_color::Darkgray);
+			uint8_t inten = 64;
+			if(!read_only_ && get_touch_state().level_) {  // 0.75
+				inten = 192;
 			}
+			graphics::share_color sh(0, 0, 0);
+			sh.set_color(get_base_color().rgba8, inten);
+			rdr.set_fore_color(sh);
+
 			r.org  += frame_width;
 			r.size -= frame_width * 2;
 			rdr.round_box(r, round_radius - frame_width);

@@ -15,6 +15,8 @@
 #include "common/circle.hpp"
 #include "common/vtx.hpp"
 
+#include <cmath>
+
 namespace graphics {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -31,7 +33,7 @@ namespace graphics {
 		GLC&		glc_;
 
 	public:
-		static const uint16_t VERSION = 100;
+		static const uint16_t VERSION = 111;
 
 //		typedef typename device::glcdc_def::pix<GLC::PXT>::type T;
 		typedef uint16_t T;
@@ -41,7 +43,7 @@ namespace graphics {
 		typedef GLC glc_type;
 		typedef FONT font_type;
 
-		static const int16_t line_offset = (((GLC::width * sizeof(T)) + 63) & 0x7fc0) / sizeof(T);
+///		static const int16_t line_offset = (((GLC::width * sizeof(T)) + 63) & 0x7fc0) / sizeof(T);
 
 	private:
 		T*			fb_;
@@ -95,7 +97,9 @@ namespace graphics {
 			fore_color_(255, 255, 255), back_color_(0, 0, 0),
 			clip_(0, 0, GLC::width, GLC::height),
 			stipple_(-1), stipple_mask_(1), ofs_(0)
-		{ fb_ = static_cast<T*>(glc_.get_fbp()); }
+		{
+			fb_ = static_cast<T*>(glc_.get_fbp());
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -238,6 +242,25 @@ namespace graphics {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	点を描画する（ストライプを伴った描画を行わない）
+			@param[in]	pos	開始点を指定
+			@param[in]	c	カラー
+            @return 範囲内なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool fast_plot(const vtx::spos& pos, T c) noexcept
+		{
+			if(pos.x < clip_.org.x) return false;
+			if(pos.y < clip_.org.y) return false;
+			if(pos.x >= clip_.end_x()) return false;
+			if(pos.y >= clip_.end_y()) return false;
+			fb_[pos.y * GLC::line_width + pos.x] = c;
+			return true;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	点を描画する
 			@param[in]	pos	開始点を指定
 			@param[in]	c	カラー
@@ -253,27 +276,7 @@ namespace graphics {
 			if((stipple_ & m) == 0) {
 				return false;
 			}
-			if(static_cast<uint16_t>(pos.x) >= static_cast<uint16_t>(clip_.size.x)) return false;
-			if(static_cast<uint16_t>(pos.y) >= static_cast<uint16_t>(clip_.size.y)) return false;
-			fb_[pos.y * line_offset + pos.x] = c;
-			return true;
-		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	点を描画する
-			@param[in]	pos	開始点を指定
-			@param[in]	c	カラー
-            @return 範囲内なら「true」
-		*/
-		//-----------------------------------------------------------------//
-		bool fast_plot(const vtx::spos& pos, T c) noexcept
-		{
-			if(static_cast<uint16_t>(pos.x) >= static_cast<uint16_t>(clip_.size.x)) return false;
-			if(static_cast<uint16_t>(pos.y) >= static_cast<uint16_t>(clip_.size.y)) return false;
-			fb_[pos.y * line_offset + pos.x] = c;
-			return true;
+			return fast_plot(pos, c);
 		}
 
 
@@ -288,7 +291,7 @@ namespace graphics {
 		{
 			if(static_cast<uint16_t>(pos.x) >= static_cast<uint16_t>(GLC::width)) return -1;
 			if(static_cast<uint16_t>(pos.y) >= static_cast<uint16_t>(GLC::height)) return -1;
-			return fb_[pos.y * line_offset + pos.x];
+			return fb_[pos.y * GLC::line_width + pos.x];
 		}
 
 
@@ -297,25 +300,51 @@ namespace graphics {
 			@brief	水平ラインを描画
 			@param[in]	y	開始位置Ｘ（小数４ビット）
 			@param[in]	x	開始位置Ｙ（小数４ビット）
-			@param[in]	w	水平幅
+			@param[in]	w	水平幅（小数４ビット）
 		*/
 		//-----------------------------------------------------------------//
 		void line_h(int16_t y, int16_t x, int16_t w) noexcept
 		{
-			if(w < 16) return;
-			if(static_cast<uint16_t>(y) >= static_cast<uint16_t>(GLC::height)) return;
-			if(x < 0) {  // クリッピング
+			if(w == 0) return;
+
+			if(y < (clip_.org.y << 4) || y >= (clip_.end_y() << 4)) return;
+			if(x < (clip_.org.x << 4)) {  // クリッピング
 				w += x;
-				x = 0;
-			} else if(static_cast<uint16_t>(x) >= static_cast<uint16_t>(GLC::width << 4)) {
+				x = clip_.org.x << 4;
+			} else if(x < (clip_.org.x << 4) || x >= (clip_.end_x() << 4)) {
 				return;
 			}
-			if(static_cast<uint16_t>(x + w) >= static_cast<uint16_t>(GLC::width << 4)) {
-				w = (GLC::width << 4) - x;
+			if((x + w) >= (clip_.end_x() << 4)) {
+				w = (clip_.end_x() << 4) - x;
 			}
-			uint16_t* out = &fb_[y * line_offset + (x >> 4)];
-			for(int16_t i = 0; i < w; i += 16) {
+			uint16_t* out = &fb_[(y >> 4) * GLC::line_width + (x >> 4)];
+			auto end = x + w;
+			if(w < 16) {
+				auto alpha = w | (w << 4);
+				auto c = share_color::blend(fore_color_.rgba8.unit, alpha, back_color_.rgba8.unit);
+				*out++ = share_color::to_565(c.r, c.g, c.b);				
+				return;
+			}
+			if((x & 15) != 0) {
+				uint8_t alpha = 16 - (x & 15);
+				alpha |= alpha << 4;  // 0 to 255
+				auto c = share_color::blend(fore_color_.rgba8.unit, alpha, back_color_.rgba8.unit);
+				*out++ = share_color::to_565(c.r, c.g, c.b);
+				x += 16;
+			}
+			int16_t i;
+			for(i = x; i < (end - 16); i += 16) {
 				*out++ = fore_color_.rgb565;
+			}
+			{
+				uint8_t alpha = (i & 15);
+				if(alpha != 0) {
+					alpha |= alpha << 4;  // 0 to 255
+					auto c = share_color::blend(fore_color_.rgba8.unit, alpha, back_color_.rgba8.unit);
+					*out = share_color::to_565(c.r, c.g, c.b);
+				} else {
+					*out = fore_color_.rgb565;
+				}
 			}
 		}
 
@@ -341,10 +370,10 @@ namespace graphics {
 			if(static_cast<uint16_t>(y + h) >= static_cast<uint16_t>(GLC::height)) {
 				h = GLC::height - y;
 			}
-			uint16_t* out = &fb_[y * line_offset + x];
+			uint16_t* out = &fb_[y * GLC::line_width + x];
 			for(int16_t i = 0; i < h; ++i) {
 				*out = fore_color_.rgb565;
-				out += line_offset;
+				out += GLC::line_width;
 			}
 		}
 
@@ -360,7 +389,7 @@ namespace graphics {
 			if(rect.size.x <= 0 || rect.size.y <= 0) return;
 
 			for(int16_t yy = rect.org.y; yy < (rect.org.y + rect.size.y); ++yy) {
-				line_h(yy, rect.org.x << 4, rect.size.x << 4);
+				line_h(yy << 4, rect.org.x << 4, rect.size.x << 4);
 			}
 		}
 
@@ -395,7 +424,7 @@ namespace graphics {
 			}
 #if 0
 			for(auto y = 0; y < GLC::height; ++y) {
-				T* p = &fb_[line_offset * y];
+				T* p = &fb_[GLC::line_width * y];
 				for(auto x = 0; x < GLC::width; ++x) {
 					*p++ = c;
 				}
@@ -462,10 +491,10 @@ namespace graphics {
 		//-----------------------------------------------------------------//
 		void frame(const vtx::srect& rect) noexcept
 		{
-			line_h(rect.org.y,  rect.org.x << 4, rect.size.x << 4);
-			line_h(rect.org.y + rect.size.y - 1, rect.org.x << 4, rect.size.x << 4);
-			line_v(rect.org.x, (rect.org.y  + 1) << 4, (rect.size.y - 2) << 4);
-			line_v(rect.org.x + rect.size.x - 1, (rect.org.y + 1) << 4, (rect.size.y - 2) << 4);
+			line_h(rect.org.y << 4,  rect.org.x << 4, rect.size.x << 4);
+			line_h((rect.org.y + rect.size.y - 1) << 4, rect.org.x << 4, rect.size.x << 4);
+			line_v(rect.org.x, (rect.org.y  + 1), (rect.size.y - 2));
+			line_v((rect.org.x + rect.size.x - 1), (rect.org.y + 1), (rect.size.y - 2));
 		}
 
 
@@ -484,10 +513,10 @@ namespace graphics {
 			} 
 			auto cen = rect.org + rad;
 			auto ofs = rect.size - (rad * 2 - 2);
-			line_h(rect.org.y, cen.x << 4, ofs.x << 4);
-			line_h(rect.org.y + rect.size.y - 1, cen.x << 4, ofs.x << 4);
-			line_v(rect.org.x, cen.y << 4, ofs.y << 4);
-			line_v(rect.org.x + rect.size.x - 1, cen.y << 4, ofs.y << 4);
+			line_h(rect.org.y << 4, cen.x << 4, ofs.x << 4);
+			line_h((rect.org.y + rect.size.y - 1) << 4, cen.x << 4, ofs.x << 4);
+			line_v(rect.org.x, cen.y, ofs.y);
+			line_v(rect.org.x + rect.size.x - 1, cen.y, ofs.y);
 			vtx::spos pos(0, rad);
 			int16_t p = (5 - rad * 4) / 4;
 			circle_offset_(cen, pos, ofs);
@@ -519,41 +548,69 @@ namespace graphics {
 				if(rect.size.x < rect.size.y) rad = rect.size.x / 2;
 				else rad = rect.size.y / 2;
 			}
-			auto cn = rect.org + rad;
-			auto of = rect.size - (rad * 2);
+//			auto cn = rect.org + rad;
+//			auto of = rect.size - (rad * 2);
+			auto sz = rect.size.y;
 			{
 				auto yy = rect.org.y;
-				auto sz = rect.size.y;
 				if(up) { sz -= rad; yy += rad; }
-				if(dn) sz -= rad;
+				if(dn) { sz -= rad; }
 				fill_box(vtx::srect(rect.org.x, yy, rect.size.x, sz));
 			}
-			vtx::spos po(0, rad);
-			int16_t p = (5 - rad * 4) / 4;
+
+			if(!up && !dn) return;
+
+			auto yu = rect.org.y << 4;
+			if(up) sz += rad;
+			if(dn) sz += rad;
+			auto yd = (rect.org.y + sz) << 4;
+			auto org = rect.org.x << 4;
+			auto len = (rect.size.x - rad - rad) << 4;
+			for(int16_t i = 0; i < rad; ++i) {
+				float rr = (rad - i - 1) << 4;
+				rr *= rr;
+				float radf = rad << 4;
+				radf *= radf;
+				auto l = static_cast<int16_t>(vtx::fsqrt(radf - rr));
+				int16_t w = len + (l + l);
+				if(up) {
+					line_h(yu, org + (rad << 4) - l, w);
+					yu += 16;
+				}
+				if(dn) {
+					yd -= 16;
+					line_h(yd, org + (rad << 4) - l, w);
+				}
+			}
+#if 0
+			vtx::spos po(0, rad << 4);
+			int16_t p = (5 - (rad << 4) * 4) / 4;
 			of -= 1;
-///			line_h(cen.y, cen.x - pos.y, pos.y + pos.y + ofs.x + 1);
+			cn *= 16;
+			of *= 16;
 			while(po.x < po.y) {
-				po.x++;
+				po.x += 16;
 				if(p < 0) {
-					p += 2 * po.x + 1;
+					p += 2 * po.x + 16;
 				} else {
 					// x` = x - 1
 					if(up) {
-						line_h(cn.y - po.y, (cn.x - po.x + 1) << 4, (po.x + po.x + of.x - 1) << 4);
+						line_h(cn.y - po.y, cn.x - po.x + 1, po.x + po.x + of.x - 16);
 					}
 					if(dn) {
-						line_h(cn.y + po.y + of.y, (cn.x - po.x + 1) << 4, (po.x + po.x + of.x - 1) << 4);
+						line_h(cn.y + po.y + of.y, cn.x - po.x + 16, po.x + po.x + of.x - 16);
 					}
-					po.y--;
-					p += 2 * (po.x - po.y) + 1;
+					po.y -= 16;
+					p += 2 * (po.x - po.y) + 16;
 				}
 				if(up) {
-					line_h(cn.y - po.x,        (cn.x - po.y) << 4, (po.y + po.y + of.x + 1) << 4);
+					line_h(cn.y - po.x, cn.x - po.y, po.y + po.y + of.x + 16);
 				}
 				if(dn) {
-					line_h(cn.y + po.x + of.y, (cn.x - po.y) << 4, (po.y + po.y + of.x + 1) << 4);
+					line_h(cn.y + po.x + of.y, cn.x - po.y, po.y + po.y + of.x + 16);
 				}
 			}
+#endif
 		}
 
 
@@ -624,20 +681,20 @@ namespace graphics {
 			int16_t x = 0;
 			int16_t y = rad;
 			int16_t p = (5 - rad * 4) / 4;
-			line_h(cen.y, (cen.x - y) << 4, (y + y + 1) << 4);
+			line_h(cen.y << 4, (cen.x - y) << 4, (y + y + 1) << 4);
 			while(x < y) {
 				x++;
 				if(p < 0) {
 					p += 2 * x + 1;
 				} else {
 					// x` = x - 1
-					line_h(cen.y - y, (cen.x - x + 1) << 4, (x + x - 1) << 4);
-					line_h(cen.y + y, (cen.x - x + 1) << 4, (x + x - 1) << 4);
+					line_h((cen.y - y) << 4, (cen.x - x + 1) << 4, (x + x - 1) << 4);
+					line_h((cen.y + y) << 4, (cen.x - x + 1) << 4, (x + x - 1) << 4);
 					y--;
 					p += 2 * (x - y) + 1;
 				}
-				line_h(cen.y - x, (cen.x - y) << 4, (y + y + 1) << 4);
-				line_h(cen.y + x, (cen.x - y) << 4, (y + y + 1) << 4);
+				line_h((cen.y - x) << 4, (cen.x - y) << 4, (y + y + 1) << 4);
+				line_h((cen.y + x) << 4, (cen.x - y) << 4, (y + y + 1) << 4);
 			}
 		}
 
@@ -651,13 +708,13 @@ namespace graphics {
 		void scroll(int16_t h) noexcept
 		{
 			if(h > 0) {
-				for(int32_t i = 0; i < (line_offset * (GLC::height - h)); ++i) {
-					fb_[i] = fb_[i + (line_offset * h)];
+				for(int32_t i = 0; i < (GLC::line_width * (GLC::height - h)); ++i) {
+					fb_[i] = fb_[i + (GLC::line_width * h)];
 				}
 			} else if(h < 0) {
 				h = -h;
-				for(int32_t i = (line_offset * (GLC::height - h)) - 1; i >= 0; --i) {
-					fb_[i + (line_offset * h)] = fb_[i];
+				for(int32_t i = (GLC::line_width * (GLC::height - h)) - 1; i >= 0; --i) {
+					fb_[i + (GLC::line_width * h)] = fb_[i];
 				}
 			}			
 		}
@@ -673,8 +730,8 @@ namespace graphics {
 		void move(const vtx::srect& src, const vtx::spos& dst) noexcept
 		{
 			for(int16_t y = 0; y < src.size.y; ++y) {
-				auto* d = &fb_[dst.x + (dst.y + y) * line_offset];
-				const auto* s = &fb_[src.org.x + (src.org.y + y) * line_offset];
+				auto* d = &fb_[dst.x + (dst.y + y) * GLC::line_width];
+				const auto* s = &fb_[src.org.x + (src.org.y + y) * GLC::line_width];
 				for(int16_t x = src.org.x; x < src.end_x(); ++x) {
 					*d++ = *s++;
 				}
@@ -764,17 +821,17 @@ namespace graphics {
 		//-----------------------------------------------------------------//
 		void draw_font_utf16(const vtx::spos& pos, uint16_t code, bool back) noexcept
 		{
-			if(pos.y <= -FONT::height || pos.y >= GLC::height) {
+			if(pos.y <= (clip_.org.y - FONT::height) || pos.y >= clip_.end_y()) {
 				return;
 			}
 			if(code < 0x80) {
-				if(pos.x <= -FONT::a_type::width || pos.x >= GLC::width) {
+				if(pos.x <= (clip_.org.x - FONT::a_type::width) || pos.x >= clip_.end_x()) {
 					return;
 				}
 				vtx::spos ssz(FONT::a_type::width, FONT::a_type::height);
 				draw_bitmap(pos, FONT::a_type::get(code), ssz, back);
 			} else {
-				if(pos.x <= -FONT::k_type::width || pos.x >= GLC::width) {
+				if(pos.x <= (clip_.org.x - FONT::k_type::width) || pos.x >= clip_.end_x()) {
 					return;
 				}
 				auto p = font_.at_kfont().get(code);
