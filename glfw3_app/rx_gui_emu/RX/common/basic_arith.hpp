@@ -17,6 +17,94 @@ namespace utils {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
+		@brief	数値オブジェクトクラス
+		@param[in]	T	基本型
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	template <typename T>
+	class basic_value {
+
+		T	value_;
+
+	public:
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  コンストラクター
+			@param[in]	value	初期値
+		*/
+		//-----------------------------------------------------------------//
+		explicit basic_value(T value = static_cast<T>(0)) noexcept : value_(value) { }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  値をを取得
+			@return 値
+		*/
+		//-----------------------------------------------------------------//
+		T get() noexcept { return value_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  交換
+			@param[in]	th	交換クラス
+		*/
+		//-----------------------------------------------------------------//
+		void swap(basic_value& th) noexcept
+		{
+			std::swap(value_, th.value_);
+		}
+
+//		bool operator == (int v) const noexcept { return mpfr_cmp_si(t_, v) == 0; }
+//		bool operator != (int v) const noexcept { return mpfr_cmp_si(t_, v) != 0; }
+//		bool operator == (long v) const noexcept { return mpfr_cmp_si(t_, v) == 0; }
+//		bool operator != (long v) const noexcept { return mpfr_cmp_si(t_, v) != 0; }
+//		bool operator == (double v) const noexcept { return mpfr_cmp_d(t_, v) == 0; }
+//		bool operator != (double v) const noexcept { return mpfr_cmp_d(t_, v) != 0; }
+
+		const basic_value operator - () noexcept
+		{
+			basic_value tmp(*this);
+			tmp.value_ = -tmp.value_;
+			return tmp;
+		}
+
+#if 0
+		value& operator += (const value& th) noexcept
+		{
+			mpfr_add(t_, t_, th.t_, rnd_);
+			return *this;
+		}
+
+		value& operator -= (const value& th) noexcept
+		{
+			mpfr_sub(t_, t_, th.t_, rnd_);
+			return *this;
+		}
+
+		value& operator *= (const value& th) noexcept
+		{
+			mpfr_mul(t_, t_, th.t_, rnd_);
+			return *this;
+		}
+
+		value& operator /= (const value& th) noexcept
+		{
+			mpfr_div(t_, t_, th.t_, rnd_);
+			return *this;
+		}
+
+		value operator + (const value& th) const noexcept { return value(*this) += th; }
+		value operator - (const value& th) const noexcept { return value(*this) -= th; }
+		value operator * (const value& th) const noexcept { return value(*this) *= th; }
+		value operator / (const value& th) const noexcept { return value(*this) /= th; }
+#endif
+	};
+
+
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
 		@brief	Arithmetic クラス
 		@param[in]	NVAL	基本型
 		@param[in]	SYMBOL	変数クラス

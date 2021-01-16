@@ -26,6 +26,8 @@ namespace mpfr {
 		mpfr_t		t_;
 		mpfr_rnd_t	rnd_;
 
+		static uint32_t ref_count_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -35,6 +37,7 @@ namespace mpfr {
 		//-----------------------------------------------------------------//
 		value(mpfr_rnd_t rnd = MPFR_RNDN) noexcept : t_(), rnd_(rnd) {
 			mpfr_init2(t_, num);
+			++ref_count_;
 		}
 
 
@@ -48,6 +51,7 @@ namespace mpfr {
 		{
 			mpfr_init2(t_, num);
 			mpfr_set(t_, t.t_, rnd_);
+			++ref_count_;
 		}
 
 
@@ -61,6 +65,7 @@ namespace mpfr {
 		explicit value(int iv, mpfr_rnd_t rnd = MPFR_RNDN) noexcept : rnd_(rnd) {
 			mpfr_init2(t_, num);
 			mpfr_set_si(t_, iv, rnd);
+			++ref_count_;
 		}
 
 
@@ -74,6 +79,7 @@ namespace mpfr {
 		explicit value(float iv, mpfr_rnd_t rnd = MPFR_RNDN) noexcept : rnd_(rnd) {
 			mpfr_init2(t_, num);
 			mpfr_set_flt(t_, iv, rnd);
+			++ref_count_;
 		}
 
 
@@ -87,6 +93,7 @@ namespace mpfr {
 		explicit value(double iv, mpfr_rnd_t rnd = MPFR_RNDN) noexcept : rnd_(rnd) {
 			mpfr_init2(t_, num);
 			mpfr_set_d(t_, iv, rnd);
+			++ref_count_;
 		}
 
 
@@ -100,6 +107,7 @@ namespace mpfr {
 		explicit value(const char* iv, mpfr_rnd_t rnd = MPFR_RNDN) noexcept : rnd_(rnd) {
 			mpfr_init2(t_, num);
 			mpfr_set_str(t_, iv, 10, rnd);
+			++ref_count_;
 		}
 
 
@@ -108,7 +116,13 @@ namespace mpfr {
 			@brief  デストラクター
 		*/
 		//-----------------------------------------------------------------//
-		~value() { mpfr_clear(t_); }
+		~value() {
+			mpfr_clear(t_);
+			--ref_count_;
+			if(ref_count_ == 0) {
+				mpfr_free_cache();
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -168,16 +182,82 @@ namespace mpfr {
 		}
 
 
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  整数部と小数部の分離
+			@param[in]	src	ソース
+			@param[out]	iop	整数部
+			@param[out]	fop	小数部
+		*/
+		//-----------------------------------------------------------------//
+		static void fmod(const value& src, value& iop, value& fop)
+		{
+			mpfr_modf(iop.t_, fop.t_, src.t_, fop.get_rnd());
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  整数除算(x/y)における余り
+			@param[in]	x	分子
+			@param[in]	y	分母
+			@param[out]	m	余り
+		*/
+		//-----------------------------------------------------------------//
+		static void mod(const value& x, const value& y, value& m)
+		{
+			mpfr_fmod(m.t_, x.t_, y.t_, m.get_rnd());
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	数値文字列の入力
+			@param[in]	str		数値文字列
+		*/
+		//-----------------------------------------------------------------//
 		void assign(const char* str) noexcept
 		{
 			mpfr_set_str(t_, str, 10, rnd_);
 		}
 
 
-		// べき乗
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	絶対値
+			@param[in]	in	入力
+			@return	in に対する絶対値
+		*/
+		//-----------------------------------------------------------------//
+		static value abs(const value& in) noexcept
+		{
+			value out;
+			mpfr_abs(out.t_, in.t_, in.rnd_);
+			return out;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	べき乗 (this = this ^ n)
+			@param[in]	n	n 乗
+		*/
+		//-----------------------------------------------------------------//
 		void pow(const value& n) noexcept
 		{
 			mpfr_pow(t_, t_, n.t_, rnd_);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  交換
+			@param[in]	th	交換クラス
+		*/
+		//-----------------------------------------------------------------//
+		void swap(value& th) noexcept
+		{
+			mpfr_swap(t_, th.t_);
 		}
 
 
@@ -209,6 +289,7 @@ namespace mpfr {
 			mpfr_neg(tmp.t_, tmp.t_, rnd_);
 			return tmp;
 		}
+
 
 		value& operator += (const value& th) noexcept
 		{
@@ -254,10 +335,15 @@ namespace mpfr {
 			utils::sformat("%%.%dRNf", form, sizeof(form)) % upn;
 			mpfr_snprintf(out, len, form, t_);
 //			mpfr_snprintf(out, len, "%.50RNf", t_);
-//			mpfr_snprintf(out, len, "%10.5RNE", t_);
 		}
 
 
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  三角関数 sin
+			@param[in]	in	角度
+		*/
+		//-----------------------------------------------------------------//
 		static value sin(const value& in)
 		{
 			value out;
@@ -265,10 +351,25 @@ namespace mpfr {
 			return out;
 		}
 
+
 		static value asin(const value& in)
 		{
 			value out;
 			mpfr_asin(out.t_, in.t_, out.get_rnd());
+			return out;
+		}
+
+		static value sinh(const value& in)
+		{
+			value out;
+			mpfr_sinh(out.t_, in.t_, out.get_rnd());
+			return out;
+		}
+
+		static value asinh(const value& in)
+		{
+			value out;
+			mpfr_asinh(out.t_, in.t_, out.get_rnd());
 			return out;
 		}
 
@@ -286,6 +387,20 @@ namespace mpfr {
 			return out;
 		}
 
+		static value cosh(const value& in)
+		{
+			value out;
+			mpfr_cosh(out.t_, in.t_, out.get_rnd());
+			return out;
+		}
+
+		static value acosh(const value& in)
+		{
+			value out;
+			mpfr_acosh(out.t_, in.t_, out.get_rnd());
+			return out;
+		}
+
 		static value tan(const value& in)
 		{
 			value out;
@@ -297,6 +412,27 @@ namespace mpfr {
 		{
 			value out;
 			mpfr_atan(out.t_, in.t_, out.get_rnd());
+			return out;
+		}
+
+		static value tanh(const value& in)
+		{
+			value out;
+			mpfr_tanh(out.t_, in.t_, out.get_rnd());
+			return out;
+		}
+
+		static value atanh(const value& in)
+		{
+			value out;
+			mpfr_atanh(out.t_, in.t_, out.get_rnd());
+			return out;
+		}
+
+		static value eint(const value& in)  // 指数積分
+		{
+			value out;
+			mpfr_eint(out.t_, in.t_, out.get_rnd());
 			return out;
 		}
 
@@ -331,4 +467,7 @@ namespace mpfr {
 			return out;
 		}
 	};
+
+	// テンプレート関数、実態の定義
+	template<uint32_t num> uint32_t value<num>::ref_count_;
 }
