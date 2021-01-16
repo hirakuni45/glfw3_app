@@ -1,7 +1,9 @@
 #pragma once
 //=====================================================================//
 /*! @file
-    @brief  A/D 変換、キャプチャー制御クラス
+    @brief  A/D 変換、キャプチャー制御クラス @n
+			最大サンプルレート 2MHz (RX65N/RX72N) @n
+			※「GLFW_SIM」を有効にする事で、キャプチャー動作をシュミレートする。
     @author 平松邦仁 (hira@rvf-rc45.net)
     @copyright  Copyright (C) 2018, 2020 Kunihito Hiramatsu @n
                 Released under the MIT license @n
@@ -12,30 +14,11 @@
 #include "common/renesas.hpp"
 #endif
 
-namespace utils {
+#include "render_base.hpp"
+#include "common/vtx.hpp"
+#include "common/string_utils.hpp"
 
-	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	/*!
-		@brief  キャプチャー・データ構造体
-	*/
-	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	struct capture_data {
-		uint16_t	ch0_;
-		uint16_t	ch1_;
-		capture_data() : ch0_(0), ch1_(0) { }
-	};
-
-
-	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	/*!
-		@brief  キャプチャー・トリガー
-	*/
-	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	enum class capture_trigger : uint8_t {
-		NONE,		///< 何もしない
-		SINGLE,		///< シングル取り込み
-	};
-
+namespace dsos {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
@@ -43,7 +26,9 @@ namespace utils {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	template <uint32_t CAPN>
-	class capture {
+	class capture : public render_base {
+
+		typedef vtx::spos DATA;
 
 #ifndef GLFW_SIM
 		typedef device::S12AD  ADC0;
@@ -60,40 +45,145 @@ namespace utils {
 	public:
 		static const uint32_t CAP_NUM = CAPN;
 
-	private:
-		static capture_data				data_[CAPN];
-
-		static volatile uint16_t		pos_;
-		static volatile capture_trigger	trigger_;
-
-#ifndef GLFW_SIM
-		class tpu_task {
+		// キャプチャー・タスク
+		class cap_task {
 		public:
+			DATA				data_[CAPN];
+
+			volatile uint32_t	tic_;
+			volatile uint16_t	pos_;
+			uint16_t	count_;
+			volatile TRG_MODE	trg_mode_;
+			volatile uint16_t	trg_pos_;
+
+			DATA	min_;
+			DATA	max_;
+			DATA	cmp_;
+			DATA	dlt_;
+			DATA	back_;
+
+#ifdef GLFW_SIM
+			DATA	adv_;
+#endif
+
+			cap_task() noexcept :
+				data_ { { 2048, 2048 } }, tic_(0), pos_(0), count_(0),
+				trg_mode_(TRG_MODE::NONE), trg_pos_(0),
+				min_(4096 - 1), max_(0), cmp_(100), dlt_(10), back_(0)
+			{ }
+
 			void operator() ()
 			{
-				switch(trigger_) {
-				case capture_trigger::NONE:
-					ADC0::ADCSR = ADC0::ADCSR.ADCS.b(0b01) | ADC0::ADCSR.ADST.b();
-					ADC1::ADCSR = ADC1::ADCSR.ADCS.b(0b01) | ADC1::ADCSR.ADST.b();
+#ifndef GLFW_SIM
+				DATA t(ADC0::ADDR(ADC_CH0), ADC1::ADDR(ADC_CH1));
+				t.x -= 2048;
+				t.y -= 2048;
+				ADC0::ADCSR = ADC0::ADCSR.ADCS.b(0b01) | ADC0::ADCSR.ADST.b();
+				ADC1::ADCSR = ADC1::ADCSR.ADCS.b(0b01) | ADC1::ADCSR.ADST.b();
+#else
+				DATA t = adv_;
+#endif
+				switch(trg_mode_) {
+				case TRG_MODE::NONE:
 					break;
-				case capture_trigger::SINGLE:
-					data_[pos_].ch0_ = ADC0::ADDR(ADC_CH0);
-					data_[pos_].ch1_ = ADC1::ADDR(ADC_CH1);
-					ADC0::ADCSR = ADC0::ADCSR.ADCS.b(0b01) | ADC0::ADCSR.ADST.b();
-					ADC1::ADCSR = ADC1::ADCSR.ADCS.b(0b01) | ADC1::ADCSR.ADST.b();
+				case TRG_MODE::ONE:
+				case TRG_MODE::RUN:
+					data_[pos_] = t;
 					++pos_;
-					if(pos_ >= CAPN) {
-						trigger_ = capture_trigger::NONE;
+					pos_ &= CAPN - 1;
+					if(pos_ == (CAPN - 1)) {
+						if(trg_mode_ == TRG_MODE::ONE) {
+							trg_mode_ = TRG_MODE::NONE;
+						}
+						trg_pos_ = pos_;
+						pos_ = 0;
+						++tic_;
 					}
+					break;
+				case TRG_MODE::CH0_POS:
+					data_[pos_] = t;
+					dlt_ += t - back_;
+					back_ = t;
+					++pos_;
+					pos_ &= CAPN - 1;
+					if(count_ > 0) {
+						count_--;
+						if(count_ == 0) {
+							trg_mode_ = TRG_MODE::NONE;
+							++tic_;
+						}
+					} else if(dlt_.x > cmp_.x) {
+						trg_pos_ = pos_;
+						count_ = CAPN / 2;
+					}
+					break;
+				case TRG_MODE::CH1_POS:
+					data_[pos_] = t;
+					dlt_ += t - back_;
+					back_ = t;
+					++pos_;
+					pos_ &= CAPN - 1;
+					if(count_ > 0) {
+						count_--;
+						if(count_ == 0) {
+							trg_mode_ = TRG_MODE::NONE;
+							++tic_;
+						}
+					} else if(dlt_.y > cmp_.y) {
+						trg_pos_ = pos_;
+						count_ = CAPN / 2;
+					}
+					break;
+				case TRG_MODE::CH0_NEG:
+					data_[pos_] = t;
+					dlt_ += t - back_;
+					back_ = t;
+					++pos_;
+					pos_ &= CAPN - 1;
+					if(count_ > 0) {
+						count_--;
+						if(count_ == 0) {
+							trg_mode_ = TRG_MODE::NONE;
+							++tic_;
+						}
+					} else if(dlt_.x < cmp_.x) {
+						trg_pos_ = pos_;
+						count_ = CAPN / 2;
+					}
+					break;
+				case TRG_MODE::CH1_NEG:
+					data_[pos_] = t;
+					dlt_ += t - back_;
+					back_ = t;
+					++pos_;
+					pos_ &= CAPN - 1;
+					if(count_ > 0) {
+						count_--;
+						if(count_ == 0) {
+							trg_mode_ = TRG_MODE::NONE;
+							++tic_;
+						}
+					} else if(dlt_.y > cmp_.y) {
+						trg_pos_ = pos_;
+						count_ = CAPN / 2;
+					}
+					break;
+				default:
+					break;
 				}
 			}
 		};
 
-		typedef device::tpu_io<device::TPU0, tpu_task> TPU0;
+	private:
+
+#ifndef GLFW_SIM
+		typedef device::tpu_io<device::TPU0, cap_task> TPU0;
 		TPU0        tpu0_;
+#else
+		cap_task	cap_task_;
 #endif
 
-		bool		start_cap_;
+		uint32_t	samplerate_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -101,7 +191,7 @@ namespace utils {
 			@brief  コンストラクタ
 		*/
 		//-----------------------------------------------------------------//
-		capture() noexcept : start_cap_(false) { }
+		capture() noexcept : samplerate_(2'000'000) { }
 
 
 		//-----------------------------------------------------------------//
@@ -110,8 +200,9 @@ namespace utils {
 			@param[in]	freq	サンプリング周波数
 		*/
 		//-----------------------------------------------------------------//
-		void set_samplerate(uint32_t freq)
+		void set_samplerate(uint32_t freq) noexcept
 		{
+			samplerate_ = freq;
 #ifndef GLFW_SIM
 			uint8_t intr_level = 5;
 			if(!tpu0_.start(freq, intr_level)) {
@@ -119,6 +210,15 @@ namespace utils {
 			}
 #endif
 		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  サンプルレートの取得
+			@return	サンプリング周波数
+		*/
+		//-----------------------------------------------------------------//
+		auto get_samplerate() const noexcept { return samplerate_; }
 
 
 		//-----------------------------------------------------------------//
@@ -131,6 +231,7 @@ namespace utils {
 		bool start(uint32_t freq) noexcept
 		{
 			set_samplerate(freq);
+
 #ifndef GLFW_SIM
 			{  // A/D 設定
 				device::power_mgr::turn(ADC0::PERIPHERAL);
@@ -169,24 +270,66 @@ namespace utils {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief  キャプチャー・タスク参照
+			@return キャプチャー・タスク
+		*/
+		//-----------------------------------------------------------------//
+#ifdef GLFW_SIM
+		auto& at_cap_task() noexcept { return cap_task_; }
+#else
+		auto& at_cap_task() noexcept { return tpu0_.at_task(); }
+#endif
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  キャプチャー・タスク参照(RO)
+			@return キャプチャー・タスク
+		*/
+		//-----------------------------------------------------------------//
+#ifdef GLFW_SIM
+		const auto& get_cap_task() const noexcept { return cap_task_; }
+#else
+		const auto& get_cap_task() const noexcept { return tpu0_.get_task(); }
+#endif
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief  トリガー設定
 			@param[in]	trg		トリガー種別
 		*/
 		//-----------------------------------------------------------------//
-		void set_trigger(capture_trigger trigger) noexcept
+		const char* get_trigger_str() noexcept
 		{
-			pos_ = 0;
-			trigger_ = trigger;
+			static char tmp[16];
+			auto pos = static_cast<uint32_t>(get_cap_task().trg_mode_);
+			utils::str::get_word(TRG_MODE_STR, pos, tmp, sizeof(tmp), ',');
+			return tmp;
 		}
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief  トリガー取得
-			@return トリガー
+			@brief  トリガー設定
+			@param[in]	trg		トリガー種別
 		*/
 		//-----------------------------------------------------------------//
-		capture_trigger  get_trigger() const noexcept { return trigger_; }
+		void set_trigger(TRG_MODE trg_mode) noexcept
+		{
+			at_cap_task().pos_ = 0;
+			at_cap_task().dlt_ = 0;
+			at_cap_task().count_ = 0;
+			at_cap_task().trg_mode_ = trg_mode;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  タスク・カウンタの取得
+			@return タスク・カウンタ
+		*/
+		//-----------------------------------------------------------------//
+		auto get_capture_tic() const noexcept { return get_cap_task().tic_; }
 
 
 		//-----------------------------------------------------------------//
@@ -194,14 +337,9 @@ namespace utils {
 			@brief  波形を取得
 		*/
 		//-----------------------------------------------------------------//
-		const capture_data& get(uint32_t pos) noexcept
+		const auto& get(uint32_t pos) noexcept
 		{
-			return data_[pos & (CAPN - 1)];
+			return at_cap_task().data_[(pos + get_cap_task().trg_pos_) & (CAPN - 1)];
 		}
 	};
-
-	template <uint32_t CAPN> capture_data capture<CAPN>::data_[CAPN];
-	template <uint32_t CAPN> volatile uint16_t capture<CAPN>::pos_ = 0;
-	template <uint32_t CAPN>
-	volatile capture_trigger capture<CAPN>::trigger_ = capture_trigger::NONE;
 }
