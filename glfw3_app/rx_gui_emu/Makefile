@@ -34,10 +34,12 @@ VPATH		=	../common ./RX
 CSOURCES	=	minizip/ioapi.c \
 				minizip/unzip.c
 
-# 				RX/GUI_sample/gui_main.cpp
+#				RX/CALC_app/calc_gui.cpp
+#				RX/CALC_app/resource.cpp
+
 PSOURCES	=	main.cpp \
-				RX/CALC_app/calc_gui.cpp \
-				RX/CALC_app/resource.cpp \
+				RX/DSOS_app/dso_gui.cpp \
+				RX/DSOS_app/resource.cpp \
 				RX/graphics/font8x16.cpp \
 				RX/graphics/kfont16.cpp \
 				RX/graphics/color.cpp \
@@ -63,7 +65,6 @@ PSOURCES	=	main.cpp \
 				img_io/openjpeg_io.cpp \
 				img_io/pvr_io.cpp \
 				img_io/img_files.cpp \
-				img_io/img_utils.cpp \
 				snd_io/audio_io.cpp \
 				snd_io/pcm.cpp \
 				snd_io/wav_io.cpp \
@@ -83,7 +84,7 @@ OPTLIBS		=	opengl32 glfw3 glew32 \
 				pthread \
 				png turbojpeg jpeg openjp2 \
 				freetype \
-				mad tag \
+				mad \
 				z openal mpfr gmp
 else
 LOCAL_PATH	=	/usr/local
@@ -91,14 +92,13 @@ OPTLIBS		=	glfw3 GLEW \
 				pthread \
 				png turbojpeg openjp2 \
 				freetype \
-				mad tag \
-				z
+				mad \
+				z mpfr gmp
 endif
 
 INC_SYS		=	$(LOCAL_PATH)/include \
 				$(LOCAL_PATH)/include/freetype2 \
-				$(LOCAL_PATH)/include/openjpeg-2.3 \
-				$(LOCAL_PATH)/include/taglib
+				$(LOCAL_PATH)/include/openjpeg-2.3
 INC_LIB		=
 LIBDIR		=	$(LOCAL_PATH)/lib
 ifeq ($(SYSTEM),OSX)
@@ -172,7 +172,10 @@ endif
 # -Wuninitialized -Wunused -Werror -Wshadow
 CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
 			-Wformat
-CPWARN	=	-Wall -Werror -Wno-unused-private-field -Wno-unused-variable
+CPWARN	=	-Wall -Werror \
+			-Wno-unused-private-field \
+			-Wno-unused-variable \
+			-Wno-unused-function
 
 OBJECTS	=	$(addprefix $(BUILD)/,$(patsubst %.cpp,%.o,$(PSOURCES))) \
 			$(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(CSOURCES)))
@@ -251,6 +254,7 @@ copy:
 	cp RX/graphics/color.[hc]pp /d/Git/RX/graphics/.
 	cp RX/graphics/button.hpp /d/Git/RX/graphics/.
 	cp RX/graphics/widget.hpp /d/Git/RX/graphics/.
+	cp RX/graphics/graphics.hpp /d/Git/RX/graphics/.
 	cp RX/graphics/widget_director.hpp /d/Git/RX/graphics/.
 
 -include $(DEPENDS)
