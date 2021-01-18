@@ -366,10 +366,6 @@ std::cout << "info: " << pos << std::endl;
 		// file_io クラス設定
 		fio_jpeg_file_io_src(&cinfo, &fin);
 
-{
-auto pos = fin.tell();
-std::cout << "Info: " << pos << std::endl;
-}
 		// ファイルの情報ヘッダの読込み
 		error_code_ = 0;
 		jpeg_read_header(&cinfo, TRUE);
