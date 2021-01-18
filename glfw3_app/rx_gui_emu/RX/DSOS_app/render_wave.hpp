@@ -67,9 +67,11 @@ namespace dsos {
 		int16_t		trg_org_;
 		int16_t		trg_pos_;
 
+		CH_MULT		ch0_mult_;
 		CH_MODE		ch0_mode_;
-		CH_MODE		ch1_mode_;
 		CH_VOLT		ch0_volt_;
+		CH_MULT		ch1_mult_;
+		CH_MODE		ch1_mode_;
 		CH_VOLT		ch1_volt_;
 		TRG_MODE	trg_mode_;
 		SMP_MODE	smp_mode_;
@@ -159,9 +161,9 @@ namespace dsos {
 		}
 
 
-		void make_rate_(int16_t val, int32_t unit_ms, char* str, uint32_t len)
+		void make_rate_(int16_t val, int32_t unit_us, char* str, uint32_t len)
 		{
-			int32_t n = val * unit_ms / GRID;
+			int32_t n = val * unit_us / GRID;
 			int32_t div = 1;
 			const char* units = "us";
 			if(std::abs(n) >= 1000) {
@@ -169,10 +171,28 @@ namespace dsos {
 				n /= div;
 				units = "ms";
 			}
-			int32_t m = std::abs(val * unit_ms * 100 / div / GRID) % 100;
-			utils::sformat("%d.%d %s", str, len) % n % m % units;
+			int32_t m = std::abs(val * unit_us * 100 / div / GRID) % 100;
+			utils::sformat("%d.%d%s", str, len) % n % m % units;
 		}
 
+
+		void make_freq_(int16_t val, int32_t unit_us, char* str, uint32_t len)
+		{
+			if(val == 0) {
+				str[0] = 0;
+				return;
+			}
+			auto a = 1.0f / (static_cast<float>(val * unit_us) / static_cast<float>(GRID) * 1e-6);
+			if(a < 1000.0f) {
+				utils::sformat("%3.2fHz", str, len) % a;
+			} else if(a < 1e6) {
+				a *= 1e-3;
+				utils::sformat("%2.1fKHz", str, len) % a;
+			} else {
+				a *= 1e-6;
+				utils::sformat("%2.1fMHz", str, len) % a;
+			}
+		}
 
 	public:
 		//-----------------------------------------------------------------//
@@ -190,8 +210,8 @@ namespace dsos {
 			ch0_vorg_(272/2), ch0_vpos_(272/2),
 			ch1_vorg_(272/2), ch1_vpos_(272/2),
 			trg_org_(272/2), trg_pos_(272/2),
-			ch0_mode_(CH_MODE::AC), ch1_mode_(CH_MODE::AC),
-			ch0_volt_(CH_VOLT::_5V), ch1_volt_(CH_VOLT::_5V),
+			ch0_mult_(CH_MULT::X1), ch0_mode_(CH_MODE::AC), ch0_volt_(CH_VOLT::_5V),
+			ch1_mult_(CH_MULT::X1), ch1_mode_(CH_MODE::AC), ch1_volt_(CH_VOLT::_5V),
 			trg_mode_(TRG_MODE::NONE),
 			smp_mode_(SMP_MODE::_1us),
 			measere_(MEASERE::OFF),
@@ -200,6 +220,24 @@ namespace dsos {
 			touch_down_(false), touch_num_(0),
 			area_(AREA::NONE)
 		{ }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  CH0 倍率設定
+			@param[in]	mult	チャネル倍率型
+		*/
+		//-----------------------------------------------------------------//
+		void set_ch0_mult(CH_MULT mult) noexcept { ch0_mult_ = mult; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  CH1 倍率設定
+			@param[in]	mult	チャネル倍率型
+		*/
+		//-----------------------------------------------------------------//
+		void set_ch1_mult(CH_MULT mult) noexcept { ch1_mult_ = mult; }
 
 
 		//-----------------------------------------------------------------//
@@ -345,6 +383,9 @@ namespace dsos {
 				char tmp[16];
 				make_rate_(d, get_smp_rate(smp_mode_), tmp, sizeof(tmp));
 				auto x = render_.draw_text(vtx::spos(0, 0), tmp);
+				make_freq_(d, get_smp_rate(smp_mode_), tmp, sizeof(tmp));
+				x += 8;
+				x = render_.draw_text(vtx::spos(x, 0), tmp);
 			}
 		}
 
@@ -362,14 +403,14 @@ namespace dsos {
 				render_.set_fore_color(DEF_COLOR::Black);
 				render_.fill_box(vtx::srect(0, 272 - 16 + 1, 240, 15));
 				render_.set_fore_color(CH0_COLOR);
-				utils::sformat("0: %s, %s/div", tmp, sizeof(tmp))
+				utils::sformat("0.%s: %s, %s/div", tmp, sizeof(tmp)) % get_ch_mult_str(ch0_mult_)
 					% get_ch_mode_str(ch0_mode_) % get_ch_volt_str(ch0_volt_);
 				render_.draw_text(vtx::spos(0, 272 - 16 + 1), tmp);
 			} else {
 				render_.set_fore_color(DEF_COLOR::Black);
 				render_.fill_box(vtx::srect(240, 272 - 16 + 1, 240, 15));
 				render_.set_fore_color(CH1_COLOR);
-				utils::sformat("1: %s, %s/div", tmp, sizeof(tmp))
+				utils::sformat("1.%s: %s, %s/div", tmp, sizeof(tmp)) % get_ch_mult_str(ch1_mult_)
 					% get_ch_mode_str(ch1_mode_) % get_ch_volt_str(ch1_volt_);
 				render_.draw_text(vtx::spos(240, 272 - 16 + 1), tmp);
 			}
@@ -509,26 +550,30 @@ namespace dsos {
 				render_.line(vtx::spos(0, trg_pos_), vtx::spos(440-14, trg_pos_));
 			}
 
+			auto sr = static_cast<float>(get_smp_rate(smp_mode_) * 1e-6
+				/ static_cast<float>(GRID));
+			auto step = sr / (1.0f / static_cast<float>(capture_.get_samplerate()));
+			int32_t istep = static_cast<int32_t>(step * 65536.0f);
+			int32_t pos = 0;
+			auto iofs = static_cast<int16_t>(static_cast<float>(time_pos_) * step);
 			for(int16_t x = 0; x < (440 - 1); ++x) {
-				int16_t p0 = time_pos_ + x;
-				int16_t p1 = time_pos_ + x + 1;
-				if(p1 >= static_cast<int16_t>(CAPTURE::CAP_NUM)) {
-					break;
-				}
+				int16_t p0 = iofs + (pos >> 16);
+				int16_t p1 = iofs + ((pos + istep) >> 16);
+				pos += istep;
 				const auto& d0 = capture_.get(p0);
 				const auto& d1 = capture_.get(p1);
 				if(ch0_mode_ != CH_MODE::OFF) {
 					int16_t ofs = ch0_vpos_;
 					int16_t y0 = d0.x;
 			y0 /= -17;
-					int16_t y1 = d1.y;
+					int16_t y1 = d1.x;
 			y1 /= -17;
 					render_.set_fore_color(CH0_COLOR);
 					render_.line(vtx::spos(x, ofs + y0), vtx::spos(x + 1, ofs + y1));
 				}
 				if(ch1_mode_ != CH_MODE::OFF) {
 					int16_t ofs = ch1_vpos_;
-					int16_t y0 = d0.x;
+					int16_t y0 = d0.y;
 			y0 /= -17;
 					int16_t y1 = d1.y;
 			y1 /= -17;

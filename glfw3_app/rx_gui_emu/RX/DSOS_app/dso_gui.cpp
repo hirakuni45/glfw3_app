@@ -100,18 +100,21 @@ namespace gui_sim {
 	}
 
 
-	void injection_capture(uint32_t smpl, uint32_t freq)
+	void injection_capture(uint32_t freq)
 	{
-		static uint32_t phase = 0;
-		auto& cap = capture_.at_cap_task();
-		auto unit = (static_cast<float>(smpl) / static_cast<float>(freq));
+		static int32_t count = 0;
+		auto smpl = capture_.get_samplerate();
+		auto& capture = capture_.at_cap_task();
+		auto unit = static_cast<float>(smpl) / static_cast<float>(freq);
 		for(uint32_t i = 0; i < 256; ++i) {
-			auto a = vtx::radian_f_ * (static_cast<float>(phase) / unit);
-			cap.adv_.x = static_cast<int16_t>(sinf(a) * 1024.0f);
-			cap.adv_.y = static_cast<int16_t>(cosf(a) * 1024.0f);
-			cap();
-			++phase;
-			phase %= static_cast<uint32_t>(unit);
+			auto a = static_cast<float>(count % static_cast<int32_t>(unit)) / unit;
+			capture.adv_.x = static_cast<int16_t>(sinf(a * vtx::radian_f_) * 1024.0f);
+			capture.adv_.y = static_cast<int16_t>(cosf(a * vtx::radian_f_) * 1024.0f);
+			capture();
+			++count;
+			if(count >= CAPTURE::CAP_NUM) {
+				count = 0;
+			}
 		}
 	}
 }
