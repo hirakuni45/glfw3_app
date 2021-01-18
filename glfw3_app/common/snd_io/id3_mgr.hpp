@@ -142,6 +142,8 @@ namespace sound {
 					strcpy(tag_.at_apic().ext_, "png");
 				} else if(strcmp(tmp, "image/bmp") == 0) {
 					strcpy(tag_.at_apic().ext_, "bmp");
+				} else {
+					return false;
 				}
 				if(fin.read(&tag_.at_apic().typ_, 1) != 1) {
 					return false;
@@ -163,7 +165,6 @@ namespace sound {
 			if(!ret) {
 				utils::format("APIC ID3 skip text error\n");
 			}
-utils::format("APIC org: %06X\n") % fin.tell();
 			tag_.at_apic().ofs_ = fin.tell();
 			tag_.at_apic().len_ = len;
 			fin.seek(utils::file_io::SEEK::CUR, len);
