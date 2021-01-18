@@ -24,15 +24,20 @@
 
 #include "utils/sjis_utf16.hpp"
 
-namespace gui_emu {
+namespace gui_sim {
+
 	const void* get_fbp();
-	void set_pos(const vtx::spos& pos);
+	void set_pos(const vtx::spos& pos, bool touch);
 	void setup_gui();
 	void update_gui();
+	void injection_capture(uint32_t freq);
+
 }
 
 namespace {
+
 	std::string rx_stdout_;
+
 }
 
 
@@ -41,10 +46,16 @@ void rx_putchar(char ch)
 	rx_stdout_ += ch;
 }
 
-uint16_t ff_uni2oem(uint16_t code)
-{
-	return utils::utf16_to_sjis(code);
+
+extern "C" {
+
+	WCHAR ff_uni2oem (DWORD uni, WORD cp)
+	{
+		return utils::utf16_to_sjis(uni);
+	}
+
 }
+
 
 namespace app {
 
@@ -131,7 +142,7 @@ namespace app {
 				terminal_frame_->load(pre);
 			}
 
-			gui_emu::setup_gui();
+			gui_sim::setup_gui();
 		}
 
 
@@ -142,16 +153,23 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void update()
 		{
-			if(lcd_core_->get_local_param().ms_level_) {
+			// 疑似的に波形を生成
+			gui_sim::injection_capture(10'000);
+
+			// マウスの操作を、ファーストタッチに似せる～
+			if(lcd_core_->get_local_param().ms_positive_ || lcd_core_->get_local_param().ms_level_) {
 				const auto& p = lcd_core_->get_local_param().ms_pos_;
-// utils::format("%d, %d\n") % p.x % p.y;
-				gui_emu::set_pos(vtx::spos(p.x, p.y));
+				gui_sim::set_pos(vtx::spos(p.x, p.y), true);
+			}
+			if(lcd_core_->get_local_param().ms_negative_) {
+				const auto& p = lcd_core_->get_local_param().ms_pos_;
+				gui_sim::set_pos(vtx::spos(p.x, p.y), false);
 			}
 
-			gui_emu::update_gui();
+			gui_sim::update_gui();
 
 			{
-				const void* p = gui_emu::get_fbp();
+				const void* p = gui_sim::get_fbp();
 				if(p != nullptr) {
 					lcd_core_->at_fb().rendering(gl::texfb::IMAGE::RGB565, p);
 					lcd_core_->at_fb().flip();
