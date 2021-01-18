@@ -34,6 +34,12 @@ namespace utils {
 			ASIN,			///< asin(x)
 			ACOS,			///< acos(x)
 			ATAN,			///< atan(x)
+			SINH,			///< sinh(x)
+			COSH,			///< cosh(x)
+			TANH,			///< tanh(x)
+			ASINH,			///< asinh(x)
+			ACOSH,			///< acosh(x)
+			ATANH,			///< atanh(x)
 
 			SQRT,			///< sqrt(x)
 			LOG,			///< log(x)
@@ -51,7 +57,7 @@ namespace utils {
 		enum class ATYPE : uint8_t {
 			Deg,	///< Deg 度数法 (360)
 			Rad,	///< Rad 弧度法 (2pai)
-			Grad	///< 具ラード (400)
+			Grad	///< グラード (400)
 		};
 
 	private:
@@ -141,6 +147,12 @@ namespace utils {
 			case NAME::ASIN:  return "asin";
 			case NAME::ACOS:  return "acos";
 			case NAME::ATAN:  return "atan";
+			case NAME::SINH:  return "sinh";
+			case NAME::COSH:  return "cosh";
+			case NAME::TANH:  return "tanh";
+			case NAME::ASINH: return "asinh";
+			case NAME::ACOSH: return "acosh";
+			case NAME::ATANH: return "atanh";
 			case NAME::SQRT: return "sqrt";
 			case NAME::LOG:  return "log";
 			case NAME::LN:   return "ln";
@@ -212,8 +224,42 @@ namespace utils {
 					out = conv_rad_to(a);
 				}
 				break;
-
-
+			case NAME::SINH:
+				{
+					auto a = conv_to_rad(in);
+					out = NVAL::sinh(a);
+				}
+				break;
+			case NAME::COSH:
+				{
+					auto a = conv_to_rad(in);
+					out = NVAL::cosh(a);
+				}
+				break;
+			case NAME::TANH:
+				{
+					auto a = conv_to_rad(in);
+					out = NVAL::tanh(a);
+				}
+				break;
+			case NAME::ASINH:
+				{
+					auto a = conv_to_rad(in);
+					out = NVAL::asinh(a);
+				}
+				break;
+			case NAME::ACOSH:
+				{
+					auto a = conv_to_rad(in);
+					out = NVAL::acosh(a);
+				}
+				break;
+			case NAME::ATANH:
+				{
+					auto a = conv_to_rad(in);
+					out = NVAL::atanh(a);
+				}
+				break;
 
 			case NAME::SQRT:
 				{
