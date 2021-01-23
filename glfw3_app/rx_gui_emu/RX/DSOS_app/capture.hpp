@@ -185,13 +185,18 @@ namespace dsos {
 
 		uint32_t	samplerate_;
 
+		float		volt_gain_[2];
+
+		TRG_MODE	trg_mode_;
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  コンストラクタ
 		*/
 		//-----------------------------------------------------------------//
-		capture() noexcept : samplerate_(2'000'000) { }
+		capture() noexcept : samplerate_(2'000'000), volt_gain_{ VOLT_DIV_L, VOLT_DIV_L },
+			trg_mode_(TRG_MODE::NONE) { }
 
 
 		//-----------------------------------------------------------------//
@@ -219,6 +224,32 @@ namespace dsos {
 		*/
 		//-----------------------------------------------------------------//
 		auto get_samplerate() const noexcept { return samplerate_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  電圧ゲインの設定
+			@param[in]	ch		チャネル
+			@param[in]	gain	電圧ゲイン
+		*/
+		//-----------------------------------------------------------------//
+		void set_voltage_gain(uint32_t ch, float gain) noexcept {
+			bool cap = false;
+			if(volt_gain_[ch & 1] != gain) {
+				cap = true;
+			}
+			volt_gain_[ch & 1] = gain;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  電圧ゲインの取得
+			@param[in]	ch		チャネル
+			@return 電圧ゲイン
+		*/
+		//-----------------------------------------------------------------//
+		auto get_voltage_gain(uint32_t ch) const noexcept { return volt_gain_[ch & 1]; }
 
 
 		//-----------------------------------------------------------------//
@@ -319,8 +350,18 @@ namespace dsos {
 			at_cap_task().pos_ = 0;
 			at_cap_task().dlt_ = 0;
 			at_cap_task().count_ = 0;
+			trg_mode_ = trg_mode;
 			at_cap_task().trg_mode_ = trg_mode;
 		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  トリガー型を取得
+			@return トリガー型
+		*/
+		//-----------------------------------------------------------------//
+		auto get_trg_mode() const noexcept { return trg_mode_; }
 
 
 		//-----------------------------------------------------------------//

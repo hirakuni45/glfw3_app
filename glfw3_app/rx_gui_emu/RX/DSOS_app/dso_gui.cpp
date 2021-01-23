@@ -8,6 +8,7 @@
 */
 //=====================================================================//
 #include <cmath>
+#include <limits>
 
 #define GLFW_SIM
 #include "dso_gui.hpp"
@@ -100,17 +101,23 @@ namespace gui_sim {
 	}
 
 
-	void injection_capture(uint32_t freq)
+	void injection_capture(uint32_t freq, float pp)
 	{
 		static int32_t count = 0;
 		auto smpl = capture_.get_samplerate();
-		auto& capture = capture_.at_cap_task();
+		auto& task = capture_.at_cap_task();
 		auto unit = static_cast<float>(smpl) / static_cast<float>(freq);
-		for(uint32_t i = 0; i < 256; ++i) {
+		float vgain0 = pp / capture_.get_voltage_gain(0) * 2048.0f;
+		float vgain1 = pp / capture_.get_voltage_gain(1) * 2048.0f;
+		for(uint32_t i = 0; i < 512; ++i) {
 			auto a = static_cast<float>(count % static_cast<int32_t>(unit)) / unit;
-			capture.adv_.x = static_cast<int16_t>(sinf(a * vtx::radian_f_) * 1024.0f);
-			capture.adv_.y = static_cast<int16_t>(cosf(a * vtx::radian_f_) * 1024.0f);
-			capture();
+			task.adv_.x = static_cast<int16_t>(sinf(a * vtx::radian_f_) * vgain0);
+			task.adv_.y = static_cast<int16_t>(cosf(a * vtx::radian_f_) * vgain1);
+			if(task.adv_.x < -2048) task.adv_.x = -2048;
+			else if(task.adv_.x > 2047) task.adv_.x = 2047;
+			if(task.adv_.y < -2048) task.adv_.y = -2048;
+			else if(task.adv_.y > 2047) task.adv_.y = 2047;
+			task();
 			++count;
 			if(count >= CAPTURE::CAP_NUM) {
 				count = 0;
