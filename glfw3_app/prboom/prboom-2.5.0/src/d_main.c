@@ -168,7 +168,7 @@ void D_PostEvent(event_t *ev)
 // The screens to wipe between are already stored, this just does the timing
 // and screen updating
 
-static void D_Wipe(void)
+static void D_Wipe(int width, int height, byte *rgba)
 {
   boolean done;
   int wipestart = I_GetTime () - 1;
@@ -187,7 +187,7 @@ static void D_Wipe(void)
       done = wipe_ScreenWipe(tics);
       I_UpdateNoBlit();
       M_Drawer();                   // menu is drawn even on top of wipes
-      I_FinishUpdate();             // page flip or blit buffer
+      I_FinishUpdate(width, height, rgba);    // page flip or blit buffer
     }
   while (!done);
 }
@@ -202,7 +202,7 @@ gamestate_t    wipegamestate = GS_DEMOSCREEN;
 extern boolean setsizeneeded;
 extern int     showMessages;
 
-void D_Display (void)
+void D_Display (int dst_width, int dst_height, byte* dst_rgba)
 {
   static boolean inhelpscreensstate   = false;
   static boolean isborderstate        = false;
@@ -304,11 +304,11 @@ void D_Display (void)
 
   // normal update
   if (!wipe || (V_GetMode() == VID_MODEGL))
-    I_FinishUpdate ();              // page flip or blit buffer
+    I_FinishUpdate (dst_width, dst_height, dst_rgba);    // page flip or blit buffer
   else {
     // wipe update
     wipe_EndScreen();
-    D_Wipe();
+    D_Wipe(dst_width, dst_height, dst_rgba);
   }
 
   I_EndDisplay();
@@ -335,9 +335,10 @@ static const char *auto_shot_fname;
 //  calls I_GetTime, I_StartFrame, and I_StartTic
 //
 
-static void D_DoomLoop(void)
+// void D_DoomLoop(void)
+void doom_frame(int dst_width, int dst_height, byte* dst_rgba)
 {
-  for (;;)
+//  for (;;)
     {
       WasRenderedInTryRunTics = false;
       // frame syncronous IO operations
@@ -371,7 +372,7 @@ static void D_DoomLoop(void)
       )
         {
         // Update display, next frame, with current state.
-        D_Display();
+        D_Display(dst_width, dst_height, dst_rgba);
       }
 
       // CPhipps - auto screenshot
@@ -1644,7 +1645,7 @@ void D_DoomMain(void)
 {
   D_DoomMainSetup(); // CPhipps - setup out of main execution stack
 
-  D_DoomLoop ();  // never returns
+//  D_DoomLoop ();  // never returns
 }
 
 //

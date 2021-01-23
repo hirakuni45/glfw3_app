@@ -52,7 +52,7 @@ void I_ShutdownGraphics(void);
 void I_SetPalette(int pal); /* CPhipps - pass down palette number */
 
 void I_UpdateNoBlit (void);
-void I_FinishUpdate (void);
+void I_FinishUpdate (int width, int height, byte* rgba);
 
 int I_ScreenShot (const char *fname);
 

@@ -205,6 +205,7 @@ static int I_ConPrintString (const char *outline)
 
 void I_ConTextAttr(unsigned char a)
 {
+#if 0
   int r,g,b,col;
   HDC conDC;
 
@@ -226,10 +227,12 @@ void I_ConTextAttr(unsigned char a)
   if (a & BACKGROUND_BLUE) b=col;
   SetBkColor(conDC, PALETTERGB(r,g,b));
   ReleaseDC(con_hWnd,conDC);
+#endif
 }
 
 void I_UpdateConsole(void)
 {
+#if 0
   MSG msg;
 
   UpdateWindow(con_hWnd);
@@ -240,6 +243,7 @@ void I_UpdateConsole(void)
   }
   if (should_exit)
     exit(0);
+#endif
 }
 
 static void Init_Console(void)
@@ -251,6 +255,7 @@ static void Init_Console(void)
 
 int Init_ConsoleWin(void)
 {
+#if 0
     HDC conDC;
     WNDCLASS wndclass;
     TEXTMETRIC metrics;
@@ -311,6 +316,7 @@ int Init_ConsoleWin(void)
     ReleaseDC(con_hWnd,conDC);
     ShowWindow(con_hWnd, SW_SHOW);
     UpdateWindow(con_hWnd);
+#endif
     return TRUE;
 }
 

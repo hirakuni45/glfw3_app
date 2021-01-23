@@ -337,7 +337,7 @@ void gld_Init(int width, int height)
   lprintf(LO_INFO,"GL_EXTENSIONS:\n");
   {
     char ext_name[256];
-    const char *extensions = glGetString(GL_EXTENSIONS);
+    const char *extensions = (const char*)glGetString(GL_EXTENSIONS);
     const char *rover = extensions;
     const char *p = rover;
 
@@ -359,7 +359,7 @@ void gld_Init(int width, int height)
     }
   }
 
-  gld_InitExtensions(glGetString(GL_EXTENSIONS));
+  gld_InitExtensions((const char*)glGetString(GL_EXTENSIONS));
   //gl_shared_texture_palette = false;
   gld_InitPalettedTextures();
 
@@ -768,7 +768,8 @@ void gld_Finish(void)
 {
   gld_Set2DMode();
   glFinish();
-  SDL_GL_SwapBuffers();
+///  SDL_GL_SwapBuffers();
+///	SDL_GL_SwapWindow(NULL);
 }
 
 /*****************
@@ -1841,8 +1842,8 @@ void gld_EndDrawScene(void)
   glDisable(GL_FOG);
   gld_Set2DMode();
 
-  if (viewangleoffset <= 1024<<ANGLETOFINESHIFT ||
-    viewangleoffset >=-1024<<ANGLETOFINESHIFT)
+  if (viewangleoffset <= (1024 << ANGLETOFINESHIFT) ||
+    viewangleoffset >= -(1024 << ANGLETOFINESHIFT))
   { // don't draw on side views
     R_DrawPlayerSprites();
   }

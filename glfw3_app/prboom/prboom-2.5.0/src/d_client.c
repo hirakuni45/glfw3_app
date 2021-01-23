@@ -454,7 +454,7 @@ static void CheckQueuedPackets(void)
 }
 #endif // HAVE_NET
 
-void TryRunTics (void)
+void TryRunTics (int width, int height, byte *rgba)
 {
   int runtics;
   int entertime = I_GetTime();
@@ -496,7 +496,7 @@ void TryRunTics (void)
             movement_smooth && gamestate==wipegamestate)
         {
           isExtraDDisplay = true;
-          D_Display();
+          D_Display(width, height, rgba);
           isExtraDDisplay = false;
         }
       }
