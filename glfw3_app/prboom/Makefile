@@ -16,8 +16,6 @@ VPATH		=	../common prboom-2.5.0
 
 DOOM_PATH	=	prboom-2.5.0
 
-# 				$(DOOM_PATH)/src/i_sound.c
-#				$(DOOM_PATH)/src/i_video.c
 #				$(DOOM_PATH)/src/i_net.c
 #				$(DOOM_PATH)/src/d_net.c
 #				$(DOOM_PATH)/src/m_fixed.c
@@ -25,6 +23,12 @@ DOOM_PATH	=	prboom-2.5.0
 
 CSOURCES	=	minizip/ioapi.c \
 				minizip/unzip.c \
+				$(DOOM_PATH)/src/GLFW/i_system.c \
+				$(DOOM_PATH)/src/GLFW/i_video.c \
+				$(DOOM_PATH)/src/GLFW/i_sound.c \
+				$(DOOM_PATH)/src/GLFW/i_joy.c \
+				$(DOOM_PATH)/src/GLFW/i_main.c \
+				$(DOOM_PATH)/src/GLFW/lprintf.c \
 				$(DOOM_PATH)/src/mmus2mid.c \
 				$(DOOM_PATH)/src/am_map.c \
 				$(DOOM_PATH)/src/g_game.c \
@@ -32,7 +36,6 @@ CSOURCES	=	minizip/ioapi.c \
 				$(DOOM_PATH)/src/r_demo.c \
 				$(DOOM_PATH)/src/r_segs.c \
 				$(DOOM_PATH)/src/hu_lib.c \
-				$(DOOM_PATH)/src/lprintf.c \
 				$(DOOM_PATH)/src/p_plats.c \
 				$(DOOM_PATH)/src/r_sky.c \
 				$(DOOM_PATH)/src/d_deh.c \
@@ -91,11 +94,12 @@ CSOURCES	=	minizip/ioapi.c \
 				$(DOOM_PATH)/src/r_patch.c \
 				$(DOOM_PATH)/src/r_fps.c \
 				$(DOOM_PATH)/src/r_filter.c \
-				$(DOOM_PATH)/src/d_client.c \
-				$(DOOM_PATH)/src/gl_main.c \
+				$(DOOM_PATH)/src/w_memcache.c
+
+#				$(DOOM_PATH)/src/gl_main.c \
 				$(DOOM_PATH)/src/gl_texture.c \
-				$(DOOM_PATH)/src/w_memcache.c \
-				$(DOOM_PATH)/src/w_mmap.c
+#				$(DOOM_PATH)/src/d_client.c
+#				$(DOOM_PATH)/src/w_mmap.c
 
 PSOURCES	=	main.cpp \
 				core/glcore.cpp \
@@ -192,6 +196,9 @@ OPTLIBS += 	pthread \
 INC_SYS		=	$(LOCAL_INC_PATH) \
 				$(LOCAL_INC_PATH)/freetype2 \
 				$(OPENJPEG_PATH)
+
+# 				$(LOCAL_INC_PATH)/SDL2
+
 INC_LIB		=
 LIBDIR		=	$(LOCAL_LIB_PATH)
 

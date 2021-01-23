@@ -9,8 +9,8 @@
 
 #ifdef __cplusplus
 extern "C" {
-	int doom_main(int argc, char* argv[]);
-	void doom_keybits(uint32_t bits);
+//	int doom_main(int argc, char* argv[]);
+//	void doom_keybits(uint32_t bits);
 	void doom_frame(int width, int height, uint8_t* rgba);
 }
 #endif

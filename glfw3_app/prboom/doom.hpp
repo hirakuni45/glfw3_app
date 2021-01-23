@@ -299,7 +299,7 @@ namespace app {
 			strcpy(argv[1], "-quiet");
 			argv[2] = &tmp[16];
 			strcpy(argv[2], "DOOM1.WAD");
-			doom_main(3, argv);
+///			doom_main(3, argv);
 		}
 
 
@@ -348,7 +348,7 @@ namespace app {
 				keybits |= KEY_BITS_TAB;
 			}
 
-			doom_keybits(keybits);
+///			doom_keybits(keybits);
 			doom_frame(sys_width_, sys_height_, fb_);
 			texfb_.rendering(gl::texfb::IMAGE::RGBA, (const char*)&fb_[0]);
 			texfb_.flip();
