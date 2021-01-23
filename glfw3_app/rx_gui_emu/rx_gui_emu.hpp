@@ -30,7 +30,7 @@ namespace gui_sim {
 	void set_pos(const vtx::spos& pos, bool touch);
 	void setup_gui();
 	void update_gui();
-	void injection_capture(uint32_t freq);
+	void injection_capture(uint32_t freq, float ppvolt);
 
 }
 
@@ -154,7 +154,9 @@ namespace app {
 		void update()
 		{
 			// 疑似的に波形を生成
-			gui_sim::injection_capture(10'000);
+			int32_t freq = 10'000;
+			float ppvolt = 3.0f;
+			gui_sim::injection_capture(freq, ppvolt);
 
 			// マウスの操作を、ファーストタッチに似せる～
 			if(lcd_core_->get_local_param().ms_positive_ || lcd_core_->get_local_param().ms_level_) {
