@@ -45,8 +45,8 @@ namespace dsos {
 		typedef gui::button BUTTON;
 		BUTTON		ch0_btn_;
 		BUTTON		ch1_btn_;
-		BUTTON		trg_btn_;
 		BUTTON		smp_btn_;
+		BUTTON		trg_btn_;
 		BUTTON		mes_btn_;
 		BUTTON		opt_btn_;
 
@@ -65,6 +65,7 @@ namespace dsos {
 		uint8_t		smp_unit_;
 		uint8_t		smp_fine_;
 
+		uint32_t	trg_update_;
 
 		void side_button_stall_(BUTTON& mybtn, bool stall) noexcept
 		{
@@ -115,7 +116,7 @@ namespace dsos {
 				p = SMP_FINE4_STR;
 				break;
 			case 5:
-				p = SMP_FINE4_STR;
+				p = SMP_FINE5_STR;
 				break;
 			default:
 				break;
@@ -124,7 +125,7 @@ namespace dsos {
 		}
 
 
-		void setup_ch0_()
+		void setup_ch0_() noexcept
 		{
 //			auto mult = static_cast<CH_MULT>(ch0_mult_menu_.get_select_pos());
 //			render_wave_.set_ch0_mult(mult);
@@ -135,7 +136,7 @@ namespace dsos {
 		}
 
 
-		void setup_ch1_()
+		void setup_ch1_() noexcept
 		{
 //			auto mult = static_cast<CH_MULT>(ch1_mult_menu_.get_select_pos());
 //			render_wave_.set_ch1_mult(mult);
@@ -143,6 +144,13 @@ namespace dsos {
 			render_wave_.set_ch1_mode(mode);
 			auto vol = static_cast<CH_VOLT>(ch1_volt_menu_.get_select_pos());
 			render_wave_.set_ch1_volt(vol);
+		}
+
+
+		void exec_trigger_() noexcept
+		{
+			auto trg = static_cast<TRG_MODE>(trg_menu_.get_select_pos());
+			capture_.set_trg_mode(trg, render_wave_.get_trg_value());
 		}
 
 	public:
@@ -161,8 +169,8 @@ namespace dsos {
 			render_wave_(render_, touch_, capture_),
 			ch0_btn_(vtx::srect(442, 16+BTN_GRID*0, BTN_SIZE, BTN_SIZE), "CH0"),
 			ch1_btn_(vtx::srect(442, 16+BTN_GRID*1, BTN_SIZE, BTN_SIZE), "CH1"),
-			trg_btn_(vtx::srect(442, 16+BTN_GRID*2, BTN_SIZE, BTN_SIZE), "Trg"),
-			smp_btn_(vtx::srect(442, 16+BTN_GRID*3, BTN_SIZE, BTN_SIZE), "Smp"),
+			smp_btn_(vtx::srect(442, 16+BTN_GRID*2, BTN_SIZE, BTN_SIZE), "Smp"),
+			trg_btn_(vtx::srect(442, 16+BTN_GRID*3, BTN_SIZE, BTN_SIZE), "Trg"),
 			mes_btn_(vtx::srect(442, 16+BTN_GRID*4, BTN_SIZE, BTN_SIZE), "Mes"),
 			opt_btn_(vtx::srect(442, 16+BTN_GRID*5, BTN_SIZE, BTN_SIZE), "Opt"),
 //			ch0_mult_menu_(vtx::srect(442-90*3, 16, 80, 0), CAPTURE::CH_MULT_STR),
@@ -174,8 +182,9 @@ namespace dsos {
 			trg_menu_(vtx::srect(442-100, 16, 90, 0), CAPTURE::TRG_MODE_STR),
 			smp_unit_menu_(vtx::srect(442-90*2, 16, 80, 0), SMP_UNIT_STR, false),
 			smp_fine_menu_(vtx::srect(442-90*1, 16, 80, 0), ""),
-			mes_menu_(vtx::srect(442-90*1, 16, 80, 0), MES_MODE_STR),
-			smp_unit_(0), smp_fine_(0)
+			mes_menu_(vtx::srect(442-100*1, 16, 90, 0), MES_MODE_STR),
+			smp_unit_(0), smp_fine_(0),
+			trg_update_(0)
 		{ }
 
 
@@ -212,18 +221,6 @@ namespace dsos {
 				}
 			};
 
-			trg_btn_.set_base_color(TRG_COLOR);
-			trg_btn_.enable();
-			trg_btn_.at_select_func() = [=](uint32_t id) {
-				bool ena = trg_menu_.get_state() == WIDGET::STATE::ENABLE;
-				trg_menu_.enable(!ena);
-				side_button_stall_(trg_btn_, !ena);
-				if(ena) {  // メニューを閉じる瞬間
-					auto trg = static_cast<TRG_MODE>(trg_menu_.get_select_pos());
-					capture_.set_trg_mode(trg);
-				}
-			};
-
 			smp_btn_.set_base_color(SMP_COLOR);
 			smp_btn_.enable();
 			smp_btn_.at_select_func() = [=](uint32_t id) {
@@ -238,6 +235,19 @@ namespace dsos {
 					render_wave_.set_smp_mode(smp);
 				}
 			};
+
+
+			trg_btn_.set_base_color(TRG_COLOR);
+			trg_btn_.enable();
+			trg_btn_.at_select_func() = [=](uint32_t id) {
+				bool ena = trg_menu_.get_state() == WIDGET::STATE::ENABLE;
+				trg_menu_.enable(!ena);
+				side_button_stall_(trg_btn_, !ena);
+				if(ena) {  // メニューを閉じる瞬間
+					exec_trigger_();
+				}
+			};
+
 
 			mes_btn_.set_base_color(MES_COLOR);
 			mes_btn_.enable();
@@ -276,7 +286,7 @@ namespace dsos {
 			};
 
 			capture_tic_ = capture_.get_capture_tic();
-			capture_.set_trg_mode(TRG_MODE::ONE);
+			capture_.set_trg_mode(TRG_MODE::ONE, 0);
 		}
 
 
@@ -289,6 +299,15 @@ namespace dsos {
 		void update() noexcept
 		{
 			widd_.update();
+
+			if(trg_update_ != render_wave_.get_trg_update()) {
+				trg_update_ = render_wave_.get_trg_update();
+				auto trg = static_cast<TRG_MODE>(trg_menu_.get_select_pos());
+				if(trg == CAPTURE::TRG_MODE::CH0_POS || trg == CAPTURE::TRG_MODE::CH0_NEG
+					|| trg == CAPTURE::TRG_MODE::CH1_POS || trg == CAPTURE::TRG_MODE::CH1_NEG) {
+						exec_trigger_();
+				}
+			}
 
 			uint32_t n = 0;
 			if(ch0_mode_menu_.get_state() == gui::widget::STATE::ENABLE) {
@@ -310,7 +329,7 @@ namespace dsos {
 				// 波形をキャプチャーしたら描画
 				auto tic = capture_.get_capture_tic();
 				if(tic != capture_tic_) {
-					
+
 				}
 				if(f || tic != capture_tic_) {
 					capture_tic_ = tic;
