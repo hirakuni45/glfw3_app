@@ -22,7 +22,6 @@ PSOURCES	=	main.cpp \
 				midi2text.cpp \
 				core/glcore.cpp \
 				core/device.cpp \
-				gl_fw/glfonts.cpp \
 				gl_fw/glmobj.cpp \
 				gl_fw/glutils.cpp \
 				gl_fw/glterminal.cpp \
@@ -43,7 +42,6 @@ PSOURCES	=	main.cpp \
 				img_io/openjpeg_io.cpp \
 				img_io/pvr_io.cpp \
 				img_io/img_files.cpp \
-				img_io/img_utils.cpp \
 				snd_io/audio_io.cpp \
 				snd_io/pcm.cpp \
 				snd_io/wav_io.cpp \
@@ -172,7 +170,8 @@ CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
 			-Wformat
 CPWARN	=	-Wall -Werror \
 			-Wno-unused-private-field \
-			-Wno-unused-variable
+			-Wno-unused-variable \
+			-Wno-unused-function
 
 OBJECTS	=	$(addprefix $(BUILD)/,$(patsubst %.cpp,%.o,$(PSOURCES))) \
 			$(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(CSOURCES)))
