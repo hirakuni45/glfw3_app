@@ -26,8 +26,12 @@
 #include "utils/format.hpp"
 
 #include "dx7.hpp"
-#include "MidiFile.h"
-#include "midi2text.hpp"
+
+#include "MD_MIDIFile.h"
+
+extern void put_fifo(const uint8_t* org, uint32_t len);
+extern uint32_t get_count_fifo();
+extern void get_fifo(uint8_t* org, uint32_t len);
 
 namespace app {
 
@@ -60,15 +64,15 @@ namespace app {
 		uint32_t		midi_num_;
 		snd::midi_io	midi_in_;
 
-		typedef snd::midi_file_io MIDI_FILE;
-		MIDI_FILE		midi_file_;
-
-		NOTES			notes_;
+//		NOTES			notes_;
 		uint32_t		midi_pos_;
 		uint32_t		midi_frame_;
-		NOTES			ring_;
+//		NOTES			ring_;
 
 		synth::DX7		dx7_;
+
+		MD_MIDIFile		mdf_;
+		bool			midifile_;
 
 		void keys_()
 		{
@@ -181,16 +185,15 @@ namespace app {
 
 		void parse_midi_(const std::string& filename)
 		{
+#if 0
 			// MIDIファイルをパース
 			smf::MidiFile midi_file;
 			midi_file.read(filename);
 
-			notes_.clear();
-			convertMidiFileToText(midi_file, tempo_->get_select_pos(), notes_);
-
 			midi_pos_ = 0;
 			midi_frame_ = 0;
 			ring_.resize(16);  // 16 同時発音
+#endif
 
 #if 0
 			// マスタートラックのテンポを元に、全MIDIイベントの時間(秒)を計算
@@ -220,6 +223,7 @@ namespace app {
 
 		void service_midi_notes_()
 		{
+#if 0
 			if(midi_pos_ >= notes_.size()) {
 				return;
 			}
@@ -269,7 +273,86 @@ namespace app {
 			if(notes_.size() > midi_pos_) {
 				++midi_frame_;
 			}
+#endif
 		}
+
+
+		static void midiCallback_(midi_event *pev)
+		{
+#if USE_MIDI
+  if ((pev->data[0] >= 0x80) && (pev->data[0] <= 0xe0))
+  {
+    Serial.write(pev->data[0] | pev->channel);
+    Serial.write(&pev->data[1], pev->size-1);
+  }
+  else
+    Serial.write(pev->data, pev->size);
+#endif
+			if((pev->data[0] >= 0x80) && (pev->data[0] <= 0xe0)) {
+				uint8_t tmp = pev->data[0] | pev->channel;
+				put_fifo(&tmp, 1);
+				put_fifo(&pev->data[1], pev->size - 1);
+			} else {
+				put_fifo(pev->data, pev->size);
+			}
+
+//			dx7ptr_->at_msg().Write(pev->data, pev->size);
+
+#if 0
+			utils::format("T: %d") % static_cast<int>(pev->track);
+			utils::format(", Ch: %d\n") % static_cast<int>(pev->channel+1);
+			for (uint8_t i=0; i<pev->size; i++) {
+				if(i == 0) {
+					utils::format("  %d") % static_cast<uint8_t>(pev->data[i]);
+				} else {
+					utils::format(", %d") % static_cast<uint8_t>(pev->data[i]);
+				}
+			}
+			utils::format("\n");
+#endif
+		}
+
+
+		static void sysexCallback_(sysex_event *pev)
+		{
+#if 0
+			utils::format("T: %d") % static_cast<int>(pev->track);
+			for (uint8_t i=0; i<pev->size; i++) {
+				utils::format("%d,") % static_cast<int>(pev->data[i]);
+			}
+			utils::format("\n");
+#endif
+		}
+
+
+		static uint32_t millis()
+		{
+			return micros() / 1000;
+		}
+
+
+		static void tickMetronome(uint32_t tempo)
+		{
+			static uint32_t lastBeatTime = 0;
+			static bool  inBeat = false;
+			uint16_t  beatTime;
+
+			beatTime = 60000 / tempo;
+			if (!inBeat) {
+				if ((millis() - lastBeatTime) >= beatTime) {
+					lastBeatTime = millis();
+					// digitalWrite(BEAT_LED, HIGH);
+					inBeat = true;
+				}
+			} else {
+				if ((millis() - lastBeatTime) >= 100)       // keep the flash on for 100ms only
+				{
+					// digitalWrite(BEAT_LED, LOW);
+					inBeat = false;
+				}
+			}
+		}
+
 
 	public:
 		//-----------------------------------------------------------------//
@@ -285,8 +368,8 @@ namespace app {
 			prog_list_(nullptr), tempo_(nullptr),
 			key_back_{ false }, key_{ false },
 			midi_num_(0), midi_in_(),
-			midi_file_(),
-			dx7_()
+			dx7_(),
+			mdf_(), midifile_(false)
 			{ }
 
 
@@ -352,6 +435,7 @@ namespace app {
 									char str[32];
 									utils::sformat("%2d: '%s'\n", str, sizeof(str)) % i % tmp;
 									terminal_core_->output(str);
+									utils::format("%s") % str;
 									prog_list_->at_local_param().init_list_.push_back(tmp);
 								}
 								prog_list_->build();
@@ -359,11 +443,12 @@ namespace app {
 							fin.close();
 						}
 					} else if(utils::no_capital_strcmp(utils::get_file_ext(file), "MID") == 0) {
-						parse_midi_(file);
-						// setup midi file
-//						if(!midi_file_.open(file.c_str())) {
-//							utils::format("MIDI-file fail: '%s'\n") % file.c_str();
-//						}
+						auto state = mdf_.load(file.c_str());
+				    	if(state != MD_MIDIFile::E_OK) {
+							utils::format("MIDI input file error: '%s'\n") % file.c_str();
+						} else {
+							midifile_ = true;
+						}
 					}
 				};
 			}
@@ -453,6 +538,10 @@ namespace app {
 			}
 
 			dx7_.Init(44'100);
+
+			mdf_.begin(nullptr);
+			mdf_.setMidiHandler(midiCallback_);
+			mdf_.setSysexHandler(sysexCallback_);
 		}
 
 
@@ -468,7 +557,6 @@ namespace app {
 ///	   		gl::core& core = gl::core::get_instance();
 ///			const gl::device& dev = core.get_device();
 
-			midi_file_.service();
 			service_midi_notes_();
 
 			update_midi_input_();
@@ -521,6 +609,25 @@ namespace app {
 					fifo.get_go();
 				}
 			}
+
+			if(midifile_) {
+			    if(!mdf_.isEOF()) {
+					if(mdf_.getNextEvent()) {
+        				tickMetronome(mdf_.getTempo());
+    				}
+				} else {
+					mdf_.close();
+					midifile_ = false;
+				}
+
+				auto len = get_count_fifo();
+				if(len > 0) {
+					uint8_t tmp[256];
+					get_fifo(tmp, len);
+					dx7_.at_msg().Write(tmp, len);
+				}
+			}
+
 
 			al::sound& sound = director_.at().sound_;
 

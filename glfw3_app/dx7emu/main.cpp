@@ -10,11 +10,41 @@
 
 typedef app::dx7emu start_app;
 
+#include "utils/fixed_fifo.hpp"
+
 static const char* window_key_ = { "application/window" };
 static const char* app_title_ = { "DX7 Emulator" };
 static const vtx::spos start_pos_(10, 40);
 static const vtx::spos start_size_(160*4, 144*4);
 static const vtx::spos limit_size_(160, 144);
+
+static uint32_t microsec_ = 0;
+
+typedef utils::fixed_fifo<uint8_t, 1024> FIFO;
+static FIFO fifo_;
+
+void put_fifo(const uint8_t* org, uint32_t len)
+{
+	for(uint32_t i = 0; i < len; ++i) {
+		fifo_.put(org[i]);
+	}
+} 
+
+uint32_t get_count_fifo() { return fifo_.length(); }
+
+void get_fifo(uint8_t* org, uint32_t len)
+{
+	for(uint32_t i = 0; i < len; ++i) {
+		org[i] = fifo_.get();
+	}
+} 
+
+
+uint32_t micros()
+{
+	return microsec_;
+}
+
 
 int main(int argc, char** argv)
 {
@@ -65,6 +95,8 @@ int main(int argc, char** argv)
 		director.render();
 
 		core.flip_frame();
+
+		microsec_ += 16667;
 
 		director.at().sound_.service();
 	}

@@ -19,7 +19,6 @@ CSOURCES	=	minizip/ioapi.c \
 #				src/miniz/miniz.c
 
 PSOURCES	=	main.cpp \
-				midi2text.cpp \
 				core/glcore.cpp \
 				core/device.cpp \
 				gl_fw/glmobj.cpp \
@@ -57,12 +56,9 @@ PSOURCES	=	main.cpp \
 				src/fm_op_kernel.cpp \
 				src/resofilter.cpp \
 				src/sawtooth.cpp \
-				midi/Binasc.cpp \
-				midi/MidiEvent.cpp \
-				midi/MidiEventList.cpp \
-				midi/MidiFile.cpp \
-				midi/MidiMessage.cpp \
-				midi/Options.cpp
+				MD_MIDI/MD_MIDIHelper.cpp \
+				MD_MIDI/MD_MIDITrack.cpp \
+				MD_MIDI/MD_MIDIFile.cpp
 
 # platform switcher (Windows, Linux, OS-X)
 ifeq ($(OS),Windows_NT)
@@ -125,7 +121,7 @@ INC_SYS		=	$(LOCAL_INC_PATH) \
 INC_LIB		=
 LIBDIR		=	$(LOCAL_LIB_PATH)
 
-PINC_APP	=	. ../common ./src ./midi
+PINC_APP	=	. ../common ./src ./MD_MIDI
 CINC_APP	=	. ../common
 
 INC_S	=	$(addprefix -isystem , $(INC_SYS))
