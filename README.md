@@ -17,8 +17,8 @@ GLFW application
 ### 開発環境（Windows）
    
  - Windows では、事前に MSYS2 環境をインストールしておきます。
- - MSYS2 には、msys2、mingw32、mingw64 と３つの異なった環境がありますが、この   
-   プロジェクトでは、mingw64 環境で行います。 
+ - MSYS2 には、msys2、mingw32、mingw64、clang64、ucrt64 と複数の異なった環境がありますが、この   
+   プロジェクトでは、clang64 環境で行います。 
    
  - msys2 のアップグレード
  - アップグレードの方法がバージョンアップに伴い変更になる場合等あります、詳しくは、   
@@ -48,22 +48,17 @@ GLFW application
    pacman -S tar
    pacman -S zip
    pacman -S unzip
-   pacman -S mingw-w64-x86_64-gcc
-   pacman -S mingw-w64-x86_64-clang
-   pacman -S mingw-w64-x86_64-clang-tools-extra
-   pacman -S mingw-w64-x86_64-boost   
-   pacman -S mingw-w64-x86_64-glfw
-   pacman -S mingw-w64-x86_64-openal
-   pacman -S mingw-w64-x86_64-freetype
-   pacman -S mingw-w64-x86_64-glew
-   pacman -S mingw-w64-x86_64-libjpeg-turbo
-   pacman -S mingw-w64-x86_64-openjpeg2
-   pacman -S mingw-w64-x86_64-libpng
-   pacman -S mingw-w64-x86_64-faad2
-   pacman -S mingw-w64-x86_64-libmad
-   pacman -S mingw-w64-x86_64-taglib
-   pacman -S mingw-w64-x86_64-ffmpeg
-   pacman -S mingw-w64-x86_64-bullet
+   pacman -S mingw-w64-clang-x86_64-clang
+   pacman -S mingw-w64-clang-x86_64-boost
+   pacman -S mingw-w64-clang-x86_64-glfw
+   pacman -S mingw-w64-clang-x86_64-freetype
+   pacman -S mingw-w64-clang-x86_64-glew
+   pacman -S mingw-w64-clang-x86_64-libjpeg-turbo
+   pacman -S mingw-w64-clang-x86_64-openjpeg2
+   pacman -S mingw-w64-clang-x86_64-libpng
+   pacman -S mingw-w64-clang-x86_64-faad2
+   pacman -S mingw-w64-clang-x86_64-libmad
+   pacman -S mingw-w64-clang-x86_64-ffmpeg
 ```
 
 ・好みのテキストエディターをインストール。   
@@ -72,7 +67,9 @@ GLFW application
 ```
   pacman -S emacs
 ```
-  
+
+・最近は、テキストエディターより、VSCode が便利です。
+
 ### 開発環境（OS-X）
 
 ・macports をインストール、各種ライブラリーをインストールして下さい。  
@@ -89,9 +86,7 @@ GLFW application
    sudo port install libpng
    sudo port install faad2
    sudo port install libmad
-   sudo port install taglib
    sudo port install ffmpeg
-   sudo port install bullet
 ```
    
 ### 開発環境（Ubuntu）
@@ -128,20 +123,20 @@ mintty では、日本語と英字を美しく表示できるように、日本�
 ※「Term」設定で、「xterm-256color」にしている情報がありますが、間違いです、   
 サポートされていません、バックスペースが正しく動かなくなるので、設定しないで下さい。   
 ```
+# mintty Settings
+BoldAsFont=no
+FontHeight=11
+
+Columns=110
+Rows=40
 Locale=ja_JP
 Charset=UTF-8
-BoldAsFont=no
-Font=MyricaM M
-FontHeight=12
-FontSmoothing=full
-Columns=100
-Rows=30
-Transparency=medium
-Term=xterm
-RightClickAction=paste
-OpaqueWhenFocused=no
-PgUpDnScroll=yes
-CursorType=block
+Term=xterm-256color
+
+CopyOnSelect=yes
+BackspaceSendsBS=yes
+
+IMECursorColour=255,0,0
 ```
    
 ### 全体のソース・コード取得

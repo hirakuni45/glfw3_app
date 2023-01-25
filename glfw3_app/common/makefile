@@ -6,7 +6,7 @@ ifeq ($(OS),Windows_NT)
 	CPP_VER := -std=c++17
     LOCAL_INC_PATH := /clang64/include
     LOCAL_LIB_PATH :=
-	OPTLIBS = opengl32 glew32 openal glfw3 \
+	OPTLIBS = opengl32 glu32 glew32 openal glfw3 \
 			  comdlg32 hid setupapi ksguid
 	CPMM	=	g++
 	CCMM	=	gcc
@@ -15,7 +15,6 @@ ifeq ($(OS),Windows_NT)
 	LFLAGS =
 else
   FEXT	=
-  ICON_RC =
   UNAME := $(shell uname -s)
   ifeq ($(UNAME),Linux)
     SYSTEM := LINUX
@@ -58,8 +57,9 @@ OPTLIBS += 	pthread \
 			z
 
 INC_SYS		=	$(LOCAL_INC_PATH)/freetype2 \
-				$(OPENJPEG_PATH)
-INC_LIB		=
+				$(OPENJPEG_PATH) \
+				$(INC_USR)
+INC_LIB		=	$(LIB_USR)
 LIBDIR		=	$(LOCAL_LIB_PATH)
 
 PINC_APP	=	. ../common
