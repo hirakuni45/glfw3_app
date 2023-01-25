@@ -11,7 +11,7 @@
 #include "utils/string_utils.hpp"
 
 // windows のマクロを廃棄
-#undef DELETE
+// #undef DELETE
 
 namespace sys {
 
@@ -36,7 +36,7 @@ namespace sys {
 				DOWN  = 'S' - 0x40,
 				UP    = 'T' - 0x40,
 				ESC   = 0x1b,
-				DELETE = 0x7f,
+				DEL   = 0x7f,
 			};
 		};
 

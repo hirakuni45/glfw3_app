@@ -1,9 +1,10 @@
 # -*- tab-width : 4 -*-
 #=======================================================================
 #   @file
-#   @brief  glfw_app
+#   @brief  glfw_app @n
+#			target:Windows:MSYS2: clan64
 #   @author 平松邦仁 (hira@rvf-rc45.net)
-#	@copyright	Copyright (C) 2019 Kunihito Hiramatsu @n
+#	@copyright	Copyright (C) 2019, 2023 Kunihito Hiramatsu @n
 #				Released under the MIT license @n
 #				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 #=======================================================================
@@ -35,7 +36,6 @@ CSOURCES	=	minizip/ioapi.c \
 				minizip/unzip.c
 
 PSOURCES	=	main.cpp \
-				bmc_main.cpp \
 				core/glcore.cpp \
 				core/device.cpp \
 				gl_fw/glmobj.cpp \
@@ -50,6 +50,7 @@ PSOURCES	=	main.cpp \
 				utils/file_info.cpp \
 				utils/files.cpp \
 				utils/keyboard.cpp \
+				img_io/img_files.cpp \
 				img_io/paint.cpp \
 				img_io/bmp_io.cpp \
 				img_io/tga_io.cpp \
@@ -58,8 +59,6 @@ PSOURCES	=	main.cpp \
 				img_io/jpeg_io.cpp \
 				img_io/openjpeg_io.cpp \
 				img_io/pvr_io.cpp \
-				img_io/img_files.cpp \
-				img_io/img_utils.cpp \
 				snd_io/audio_io.cpp \
 				snd_io/pcm.cpp \
 				snd_io/wav_io.cpp \
@@ -75,35 +74,67 @@ PSOURCES	=	main.cpp \
 
 STDLIBS		=
 
-ifeq ($(SYSTEM),WIN)
-LOCAL_PATH	=	/mingw64
-OPTLIBS		=	opengl32 glfw3 glew32 \
-				pthread \
-				png turbojpeg jpeg openjp2 \
-				freetype \
-				mad tag \
-				z openal
-# 				mad faad mp4ff tag
+# platform switcher (Windows, Linux, OS-X)
+ifeq ($(OS),Windows_NT)
+    FEXT	= .exe
+    ICON_RC =
+    SYSTEM := WIN
+	CPP_VER := -std=c++17
+    LOCAL_INC_PATH := /clang64/include
+    LOCAL_LIB_PATH :=
+	OPTLIBS = opengl32 glew32 openal glfw3
+	CPMM	=	clang++
+	CCMM	=	clang
+	CFLAGS  = -DWIN32
+	PFLAGS  = -DWIN32 -DBOOST_USE_WINDOWS_H
+	LFLAGS =
 else
-LOCAL_PATH	=	/usr/local
-OPTLIBS		=	glfw3 GLEW \
-				pthread \
-				png turbojpeg openjp2 \
-				freetype \
-				mad faad mp4ff tag \
-				z
+  FEXT	=
+  ICON_RC =
+  UNAME := $(shell uname -s)
+  ifeq ($(UNAME),Linux)
+    SYSTEM := LINUX
+	CPP_VER := -std=c++17
+	CFLAGS =
+	PFLAGS =
+	LFLAGS =
+  endif
+  ifeq ($(UNAME),Darwin)
+    SYSTEM := OSX
+	OSX_VER := $(shell sw_vers -productVersion | sed 's/^\([0-9]*.[0-9]*\).[0-9]*/\1/')
+	CPP_VER := -std=c++14
+	CFLAGS =
+	PFLAGS =
+	LFLAGS = -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk \
+		-Wl,-search_paths_first -Wl,-headerpad_max_install_names \
+		-framework AGL -framework Cocoa -framework OpenGL -framework IOKit \
+		-framework CoreFoundation -framework CoreVideo -framework OpenAL
+    LOCAL_INC_PATH := /opt/local/include
+    LOCAL_LIB_PATH := /opt/local/lib
+    OPTLIBS = glfw GLEW
+  else
+    LOCAL_INC_PATH := /usr/local/include
+    LOCAL_LIB_PATH := /usr/local/lib
+  endif
+  CPMM	=	clang++
+  CCMM	=	clang
 endif
 
-INC_SYS		=	$(LOCAL_PATH)/include \
-				$(LOCAL_PATH)/include/freetype2 \
-				$(LOCAL_PATH)/include/openjpeg-2.3 \
-				$(LOCAL_PATH)/include/taglib
+# build openjpeg any version path
+OPENJPEG_PATH := $(shell ls -d $(LOCAL_INC_PATH)/openjpeg*)
+
+STDLIBS		=
+
+OPTLIBS += 	pthread \
+			png jpeg openjp2 \
+			freetype \
+			mad \
+			z
+
+INC_SYS		=	$(LOCAL_INC_PATH)/freetype2 \
+				$(LOCAL_INC_PATH)/$(OPENJPEG_PATH)
 INC_LIB		=
-LIBDIR		=	$(LOCAL_PATH)/lib
-ifeq ($(SYSTEM),OSX)
-INC_SYS		+=	$(LOCAL_PATH)/opt/jpeg-turbo/include
-LIBDIR		+=	$(LOCAL_PATH)/opt/jpeg-turbo/lib
-endif
+LIBDIR		=	$(LOCAL_LIB_PATH)
 
 PINC_APP	=	. ../common
 CINC_APP	=	. ../common
@@ -126,25 +157,12 @@ CC	=	clang
 LK	=	clang++
 RC	=	windres
 
-ifeq ($(SYSTEM),WIN)
-CPMM	=	g++
-CCMM	=	gcc
-else
-CPMM	=	clang++
-CCMM	=	clang
-endif
-
-POPT	=	-O2 -std=c++14
+POPT	=	-O2 $(CPP_VER)
 COPT	=	-O2
 LOPT	=
 
-PFLAGS	=	-DHAVE_STDINT_H
-CFLAGS	=
-
-ifeq ($(SYSTEM),WIN)
-	PFLAGS += -DWIN32 -DBOOST_USE_WINDOWS_H
-	CFLAGS += -DWIN32
-endif
+PFLAGS +=	-DHAVE_STDINT_H
+CFLAGS +=
 
 ifeq ($(BUILD),debug)
 	POPT += -g
@@ -158,20 +176,13 @@ ifeq ($(BUILD),release)
 	CFLAGS += -DNDEBUG
 endif
 
-# 	-static-libgcc -static-libstdc++
-ifeq ($(SYSTEM),WIN)
-LFLAGS =
-endif
-ifeq ($(SYSTEM),OSX)
-LFLAGS	=	-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX$(OSX_VER).sdk \
-			-Wl,-search_paths_first -Wl,-headerpad_max_install_names \
-			-framework AGL -framework Cocoa -framework OpenGL -framework IOKit -framework CoreFoundation -framework CoreVideo -framework OpenAL
-endif
-
 # -Wuninitialized -Wunused -Werror -Wshadow
 CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
 			-Wformat
-CPWARN	=	-Wall -Werror -Wno-unused-private-field
+CPWARN	=	-Wall -Werror -Wno-unused-private-field \
+			-Wno-unused-variable \
+			-Wno-unused-function \
+			-Wno-unused-but-set-variable
 
 OBJECTS	=	$(addprefix $(BUILD)/,$(patsubst %.cpp,%.o,$(PSOURCES))) \
 			$(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(CSOURCES)))

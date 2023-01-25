@@ -35,6 +35,7 @@ namespace app {
 				header,		///< サイズヘッダー出力
 				text,		///< テキストベース出力
 				c_style,	///< C スタイルのテキスト出力
+				cpp_style,	///< C++ スタイルのテキスト出力
 				offset,		///< オフセット
 				size,		///< サイズ
 				bdf,		///< BDF ファイル入力
@@ -222,6 +223,13 @@ namespace app {
 						label = "static const uint8_t " + ss[0] + "[] " + ss[1] + " = {\n";
 					}
 					fio.put(label);
+				} else if(option_[option::cpp_style]) {
+					if(ss.size() == 1) {
+						label = "static constexpr uint8_t " + ss[0] + "[] = {\n";
+					} else if(ss.size() == 2) {
+						label = "static constexpr uint8_t " + ss[0] + "[] " + ss[1] + " = {\n";
+					}
+					fio.put(label);
 				}
 				for(uint32_t i = 0; i < bits_.byte_size(); ++i) {
 					if((i % 16) == 0) {
@@ -235,7 +243,7 @@ namespace app {
 						fio.put("\n");
 					}
 				}
-				if(option_[option::c_style]) {
+				if(option_[option::c_style] || option_[option::cpp_style]) {
 					fio.put(" };");
 				}
 				fio.put("\n");
@@ -275,7 +283,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		bmc_core() :
 			header_size_(0), clip_(0),
-			version_(0.90f), bdf_num_(0), bdf_pages_(0), bdf_fsize_(0) { }
+			version_(1.05f), bdf_num_(0), bdf_pages_(0), bdf_fsize_(0) { }
 
 
 		//-----------------------------------------------------------------//
@@ -297,7 +305,8 @@ namespace app {
 			cout << "    -preview,-pre     preview image (OpenGL)" << endl;
 			cout << "    -header bits      output width,height" << endl;
 			cout << "    -text             text base output" << endl;
-			cout << "    -c_style symbol   C style table output" << endl;
+			cout << "    -c_style symbol   C style table output (const)" << endl;
+			cout << "    -cpp_style symbol C++ style table output (constexpr)" << endl;
 			cout << "    -offset x,y       offset location" << endl;
 			cout << "    -size x,y         clipping size" << endl;
 			cout << "    -bdf              BDF file input" << endl;
@@ -335,6 +344,7 @@ namespace app {
 					else if(s == "-header") { option_.set(option::header); header = true; }
 					else if(s == "-text") option_.set(option::text);
 					else if(s == "-c_style") { option_.set(option::c_style); symbol = true; }
+					else if(s == "-cpp_style") { option_.set(option::cpp_style); symbol = true; }
 					else if(s == "-offset") { option_.set(option::offset); offset = true; }
 					else if(s == "-size") { option_.set(option::size); size = true; }
 					else if(s == "-bdf") option_.set(option::bdf);
@@ -474,6 +484,9 @@ namespace app {
 				}
 				if(option_[option::c_style]) {
 					cout << "C-Style output symbol: '" << symbol_ << "'" << endl; 
+				}
+				if(option_[option::cpp_style]) {
+					cout << "C++-Style output symbol: '" << symbol_ << "'" << endl; 
 				}
 				if(option_[option::offset]) {
 					cout << "Offset: " << static_cast<int>(clip_.org.x) << " ,"

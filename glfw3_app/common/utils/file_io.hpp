@@ -787,11 +787,11 @@ namespace utils {
 			int fd = -1;
 			if(open_) {
 				if(fp_) {
-#ifdef __USE_MINGW_ANSI_STDIO
-					fd = fp_->_file;
-#else
+// #ifdef __USE_MINGW_ANSI_STDIO
+//					fd = fp_->_file;
+// #else
 					fd = fileno(fp_);
-#endif
+// #endif
 				}
 			}
 			return fd;

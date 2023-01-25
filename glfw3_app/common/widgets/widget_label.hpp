@@ -314,7 +314,7 @@ namespace gui {
 							param_.text_in_ = false;
 							continue;
 						}
-						if(ch == sys::keyboard::ctrl::DELETE) {
+						if(ch == sys::keyboard::ctrl::DEL) {
 							if(param_.text_in_pos_ < param_.text_param_.text_.size()) {
 								param_.text_param_.text_.erase(param_.text_in_pos_, 1);
 							}
