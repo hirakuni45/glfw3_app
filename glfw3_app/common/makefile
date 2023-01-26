@@ -1,7 +1,6 @@
 # platform switcher (Windows, Linux, OS-X)
 ifeq ($(OS),Windows_NT)
     FEXT	= .exe
-#    ICON_RC = icon.rc
     SYSTEM := WIN
 	CPP_VER := -std=c++17
     LOCAL_INC_PATH := /clang64/include
@@ -10,26 +9,26 @@ ifeq ($(OS),Windows_NT)
 			  comdlg32 hid setupapi ksguid
 	CPMM	=	g++
 	CCMM	=	gcc
-	CFLAGS  = -DWIN32
-	PFLAGS  = -DWIN32 -DBOOST_USE_WINDOWS_H
-	LFLAGS =
+	CFLAGS  += -DWIN32
+	PFLAGS  += -DWIN32 -DBOOST_USE_WINDOWS_H
+	LFLAGS	+=
 else
   FEXT	=
   UNAME := $(shell uname -s)
   ifeq ($(UNAME),Linux)
     SYSTEM := LINUX
 	CPP_VER := -std=c++17
-	CFLAGS = -DWIN32
-	PFLAGS = -DWIN32 -DBOOST_USE_WINDOWS_H
-	LFLAGS =
+	CFLAGS +=
+	PFLAGS +=
+	LFLAGS +=
   endif
   ifeq ($(UNAME),Darwin)
     SYSTEM := OSX
 	OSX_VER := $(shell sw_vers -productVersion | sed 's/^\([0-9]*.[0-9]*\).[0-9]*/\1/')
 	CPP_VER := -std=c++17
-	CFLAGS =
-	PFLAGS =
-	LFLAGS = -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk \
+	CFLAGS +=
+	PFLAGS +=
+	LFLAGS += -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk \
 		-Wl,-search_paths_first -Wl,-headerpad_max_install_names \
 		-framework AGL -framework Cocoa -framework OpenGL -framework IOKit \
 		-framework CoreFoundation -framework CoreVideo -framework OpenAL
@@ -48,16 +47,15 @@ endif
 # build openjpeg any version path
 OPENJPEG_PATH := $(shell ls -r -d $(LOCAL_INC_PATH)/openjpeg*)
 
-STDLIBS		=
-
 OPTLIBS += 	pthread \
 			png jpeg openjp2 \
 			freetype \
 			mad \
 			z
 
-INC_SYS		=	$(LOCAL_INC_PATH)/freetype2 \
-				$(OPENJPEG_PATH) \
+# 
+
+INC_SYS		=	$(LOCAL_INC_PATH)/freetype2 $(OPENJPEG_PATH) \
 				$(INC_USR)
 INC_LIB		=	$(LIB_USR)
 LIBDIR		=	$(LOCAL_LIB_PATH)
@@ -132,7 +130,7 @@ endif
 
 all: $(BUILD) $(TARGET)$(FEXT)
 
-$(TARGET)$(FEXT): $(OBJECTS) $(ICON_OBJ) Makefile
+$(TARGET)$(FEXT): $(OBJECTS) $(ICON_OBJ) Makefile ../common/makefile
 	$(LK) $(LFLAGS) $(LIBS) $(OBJECTS) $(ICON_OBJ) $(LIBN) -o $(TARGET)$(FEXT)
 
 $(BUILD)/%.o : %.c
@@ -146,13 +144,13 @@ $(BUILD)/%.o : %.cpp
 $(ICON_OBJ): $(ICON_RC)
 	$(RC) -i $< -o $@
 
-$(BUILD)/%.d : %.c
+$(BUILD)/%.d : %.c Makefile ../common/makefile
 	mkdir -p $(dir $@); \
 	$(CCMM) -MM -DDEPEND_ESCAPE $(COPT) $(CFLAGS) $(CINCS) $< \
 	| sed 's/$(notdir $*)\.o:/$(subst /,\/,$(patsubst %.d,%.o,$@) $@):/' > $@ ; \
 	[ -s $@ ] || rm -f $@
 
-$(BUILD)/%.d : %.cpp
+$(BUILD)/%.d : %.cpp Makefile ../common/makefile
 	mkdir -p $(dir $@); \
 	$(CPMM) -MM -DDEPEND_ESCAPE $(POPT) $(PFLAGS) $(PINCS) $< \
 	| sed 's/$(notdir $*)\.o:/$(subst /,\/,$(patsubst %.d,%.o,$@) $@):/' > $@ ; \

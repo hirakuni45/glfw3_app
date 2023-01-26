@@ -1,30 +1,44 @@
 {
     "configurations": [
         {
-            "name": "CLANG64 clang",
-            "compilerPath": "C:/msys64/clang64/bin",
-            "compileCommands": "",
+            "name": "Win32",
             "includePath": [
-		"C:/msys64/clang64/include",
-		"C:/msys64/clang64/include/c++/9.2.0",
-		"C:/msys64/clang64/include/c++/9.2.0/x86_64-w64-mingw32",
-		"C:/msys64/clang64/include/c++/9.2.0/backward",
-		"C:/msys64/clang64/lib/clang/9.0.0/include",
-		"C:/msys64/clang64/x86_64-w64-mingw32/include",
-                "${workspaceFolder}/glfw3_app/common",
-                "${currentFolder}/**"
+                "${workspaceRoot}",
+                "C:/msys64/clang64/include",
+                "C:/msys64/clang64/include/**",
+                "C:/msys64/clang64",
+                "C:/msys64/clang64/include/c++/v1",
+                "C:/msys64/clang64/lib/clang/15.0.4/include",
+                "C:/msys64/clang64/lib/clang/15.0.4/include/**",
+                "${workspaceFolder}/**",
+                "C:/msys64/clang64/bin",
+                "C:/msys64",
+                "D:/Git/glfw_app/glfw_app/common"
             ],
             "defines": [
-                "__GNUC__",
-                "HAVE_STDINT_H", "BOOST_USE_WINDOWS_H",
-                "WIN32",
+                "_DEBUG",
                 "UNICODE",
                 "_UNICODE"
             ],
-            "windowsSdkVersion": "8.1",
-            "cStandard": "c11",
+            "windowsSdkVersion": "10.0.19041.0",
+            "compilerPath": "C:/msys64/clang64/bin/clang++.exe",
+            "cStandard": "c17",
             "cppStandard": "c++17",
-            "intelliSenseMode": "clang-x64"
+            "intelliSenseMode": "clang-x64",
+            "browse": {
+                "path": [
+                    "C:/msys64/clang64/include",
+                    "C:/msys64/clang64/include/**",
+                    "C:/msys64/clang64/include/c++/v1",
+                    "C:/msys64/clang64/lib/clang/15.0.4/include",
+                    "C:/msys64/clang64/lib/clang/15.0.4/include/**",
+                    "${workspaceRoot}",
+                    "C:/msys64/clang64/bin",
+                    "C:/msys64",
+                    "D:/Git/glfw_app/glfw_app/common"
+                ],"limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            }
         }
     ],
     "version": 4
