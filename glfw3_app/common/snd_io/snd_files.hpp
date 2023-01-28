@@ -3,22 +3,26 @@
 /*!	@file
 	@brief	各種サウンドファイル統合的に扱う（ヘッダー）
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
 //=====================================================================//
 #include <memory>
 #include "i_snd_io.hpp"
+#include "wav_io.hpp"
+#include "mp3_io.hpp"
+// #include "aac_io.hpp"
 
 namespace al {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
-		@brief	画像ファイルを汎用的に扱うクラス
+		@brief	音楽ファイルを汎用的に扱うクラス
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	class snd_files {
+	template <class _>
+	class snd_files_t {
 
 		struct snd_file {
 			typedef std::shared_ptr<i_snd_io>  snd_io;
@@ -32,13 +36,51 @@ namespace al {
 
 		audio			aif_;
 
-		snd_file::snd_io	stream_;
+		typename snd_file::snd_io	stream_;
 		sound::tag_t		tag_;
 
-		static uint32_t	tag_serial_;
+		static uint32_t		tag_serial_;
 
-		void add_sound_fileio_context_(snd_file::snd_io sio, const std::string& exts);
-		void initialize_(const std::string& etxs);
+		static bool check_file_exts_(const std::string& exts, const std::string& ext)
+		{
+			utils::strings ss = utils::split_text(exts, ",");
+			for(const std::string& s : ss) {
+				if(utils::no_capital_strcmp(ext, s) == 0) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+
+		void add_sound_fileio_context_(typename snd_file::snd_io sio, const std::string& exts)
+		{
+			if(sio) {
+				sio->initialize();
+				utils::strings ss = utils::split_text(exts, ",");
+				for(const std::string& s : ss) {
+					if(check_file_exts_(sio->get_file_ext(), s)) {
+						snd_file sd;
+						sd.sio = sio;
+						sd.ext = sio->get_file_ext();
+						sndios_.push_back(sd);
+						return;
+					}
+				}
+			}
+		}
+
+
+		void initialize_(const std::string& exts)
+		{
+			exts_ = exts;
+
+			add_sound_fileio_context_(typename snd_file::snd_io(new wav_io), exts);
+//			add_sound_fileio_context_(snd_file::snd_io(new aac_io), exts);
+
+			// MP3 はタグが、前、後、にあるのか不明な為、検出が難しい為、最後に調べる。
+			add_sound_fileio_context_(typename snd_file::snd_io(new mp3_io), exts);
+		}
 
 	public:
 		//-----------------------------------------------------------------//
@@ -47,8 +89,8 @@ namespace al {
 			@param[in]	exts	拡張子
 		*/
 		//-----------------------------------------------------------------//
-		snd_files(const std::string& exts = "wav,mp3,aac,m4a") :
-			aif_(0), stream_(0)
+		snd_files_t(const std::string& exts = "wav,mp3,aac,m4a") :
+			aif_(0), stream_(0), tag_()
 			{ initialize_(exts); }
 
 
@@ -57,7 +99,7 @@ namespace al {
 			@brief	デストラクター
 		*/
 		//-----------------------------------------------------------------//
-		~snd_files() { }
+		~snd_files_t() { }
 
 
 		//-----------------------------------------------------------------//
@@ -103,7 +145,30 @@ namespace al {
 			@return サウンド・ファイルとして認識出来ない場合は「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool probe(utils::file_io& fin, const std::string& ext = "") const;
+		bool probe(utils::file_io& fin, const std::string& ext = "") const
+		{
+			size_t n = sndios_.size();
+			if(!ext.empty()) {
+				for(size_t i = 0; i < n; ++i) {
+					const snd_file& io = sndios_[i];
+					if(check_file_exts_(io.ext, ext)) {
+						if(io.sio->probe(fin)) return true;
+						else n = i;
+						break;
+					}
+				}
+			}
+			for(size_t i = 0; i < n; ++i) {
+				if(n != i) {
+					const snd_file& io = sndios_[i];
+					if(io.sio->probe(fin)) {
+						return true;
+					}
+				}
+			}
+
+			return false;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -136,7 +201,38 @@ namespace al {
 		//-----------------------------------------------------------------//
 		bool info(utils::file_io& fin, audio_info& fo,
 				  i_snd_io::info_state st = i_snd_io::info_state::all,
-				  const std::string& ext = 0);
+				  const std::string& ext = 0)
+		{
+			size_t n = sndios_.size();
+			if(!ext.empty()) {
+				for(size_t i = 0; i < sndios_.size(); ++i) {
+					snd_file& io = sndios_[i];
+					if(check_file_exts_(io.ext, ext)) {
+						if(io.sio->info(fin, fo, st)) {
+							tag_ = io.sio->get_tag();
+							// snd_files のタグ更新シリアルを上書き
+							++tag_serial_;
+							tag_.serial_ = tag_serial_;
+							return true;
+						} else n = i;
+						break;
+					}
+				}
+			}
+			for(size_t i = 0; i < sndios_.size(); ++i) {
+				if(n != i) {
+					snd_file& io = sndios_[i];
+					if(io.sio->info(fin, fo, st)) {
+						tag_ = io.sio->get_tag();
+						// snd_files のタグ更新シリアルを上書き
+						++tag_serial_;
+						tag_.serial_ = tag_serial_;
+						return true;
+					}
+				}
+			}
+			return false;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -169,7 +265,34 @@ namespace al {
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool load(utils::file_io& fin, const std::string& ext, const std::string& opt = "");
+		bool load(utils::file_io& fin, const std::string& ext, const std::string& opt = "")
+		{
+			aif_ = 0;
+			size_t n = sndios_.size();
+			if(!ext.empty()) {
+				for(size_t i = 0; i < sndios_.size(); ++i) {
+					snd_file& io = sndios_[i];
+					if(check_file_exts_(io.ext, ext)) {
+						if(io.sio->load(fin, opt)) {
+							aif_ = io.sio->get_audio();
+							return true;
+						}
+						n = i;
+						break;
+					}
+				}
+			}
+			for(size_t i = 0; i < sndios_.size(); ++i) {
+				if(n != i) {
+					snd_file& io = sndios_[i];
+					if(io.sio->load(fin, opt)) {
+						aif_ = io.sio->get_audio();
+						return true;
+					}
+				}
+			}
+			return false;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -200,7 +323,21 @@ namespace al {
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool save(utils::file_io& fout, const std::string& ext, const std::string& opt = "");
+		bool save(utils::file_io& fout, const std::string& ext, const std::string& opt = "")
+		{
+			if(!ext.empty() && aif_) {
+				for(size_t i = 0; i < sndios_.size(); ++i) {
+					snd_file& io = sndios_[i];
+					if(check_file_exts_(io.ext, ext)) {
+						io.sio->set_audio(aif_);
+						if(io.sio->save(fout, opt)) {
+							return true;
+						}
+					}
+				}
+			}
+			return false;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -232,7 +369,43 @@ namespace al {
 			@return 成功なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool open_stream(utils::file_io& fin, int size, audio_info& inf, const std::string& ext = "");
+		bool open_stream(utils::file_io& fin, int size, audio_info& inf, const std::string& ext = "")
+		{
+			stream_ = 0;
+			size_t n = sndios_.size();
+			if(!ext.empty()) {
+				for(size_t i = 0; i < sndios_.size(); ++i) {
+					snd_file& io = sndios_[i];
+					if(check_file_exts_(io.ext, ext)) {
+						if(io.sio->open_stream(fin, size, inf)) {
+							tag_ = io.sio->get_tag();
+							// snd_files のタグ更新シリアルを上書き
+							++tag_serial_;
+							tag_.serial_ = tag_serial_;
+							stream_ = io.sio;
+							return true;
+						}
+						n = i;
+						break;
+					}
+				}
+			}
+
+			for(size_t i = 0; i < sndios_.size(); ++i) {
+				if(n != i) {
+					snd_file& io = sndios_[i];
+					if(io.sio->open_stream(fin, size, inf)) {
+						tag_ = io.sio->get_tag();
+						// snd_files のタグ更新シリアルを上書き
+						++tag_serial_;
+						tag_.serial_ = tag_serial_;
+						stream_ = io.sio;
+						return true;
+					}
+				}
+			}
+			return false;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -250,7 +423,14 @@ namespace al {
 			@return ストリーム用オーディオ
 		*/
 		//-----------------------------------------------------------------//
-		const audio get_stream();
+		const audio get_stream()
+		{
+			if(stream_) {
+				return stream_->get_stream();
+			} else {
+				return 0;
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -262,7 +442,14 @@ namespace al {
 			@return 読み込んだサンプル数
 		*/
 		//-----------------------------------------------------------------//
-		size_t read_stream(utils::file_io& fin, size_t offset, size_t samples);
+		size_t read_stream(utils::file_io& fin, size_t offset, size_t samples)
+		{
+			if(stream_) {
+				return stream_->read_stream(fin, offset, samples);
+			} else {
+				return 0;
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -270,7 +457,13 @@ namespace al {
 			@brief	ストリームをクローズ
 		*/
 		//-----------------------------------------------------------------//
-		void close_stream();
+		void close_stream()
+		{
+			if(stream_) {
+				stream_->close_stream();
+				stream_ = 0;
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -291,5 +484,7 @@ namespace al {
 		void set_audio(const audio aif) { aif_ = aif; }
 
 	};
+	template <class _> uint32_t snd_files_t<_>::tag_serial_ = 0;
 
+	typedef snd_files_t<void> snd_files;
 }

@@ -3,7 +3,7 @@
 /*!	@file
 	@brief	各種画像ファイル統合的に扱う（ヘッダー）
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
@@ -11,6 +11,14 @@
 #include <memory>
 #include "img_io/i_img_io.hpp"
 #include "utils/file_io.hpp"
+#include "img_io/jpeg_io.hpp"
+#include "img_io/png_io.hpp"
+#include "img_io/bmp_io.hpp"
+#include "img_io/tga_io.hpp"
+#include "img_io/pvr_io.hpp"
+/// #include "img_io/dds_io.hpp"
+#include "img_io/openjpeg_io.hpp"
+#include <boost/foreach.hpp>
 
 namespace img {
 
@@ -32,8 +40,46 @@ namespace img {
 
 		shared_img	img_;
 
-		void add_image_file_io_context_(img_file::img_io, const std::string& exts);
-		void initialize_(const std::string& exts);
+		static bool check_file_exts_(const std::string& exts, const std::string& ext)
+		{
+			utils::strings ss = utils::split_text(exts, ",");
+			BOOST_FOREACH(std::string& s, ss) {
+				if(utils::no_capital_strcmp(ext, s) == 0) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+
+		void add_image_file_io_context_(img_file::img_io imi, const std::string& exts)
+		{
+			if(imi) {
+				utils::strings ss = utils::split_text(exts, ",");
+				BOOST_FOREACH(std::string& s, ss) {
+					if(check_file_exts_(imi->get_file_ext(), s)) {
+						img_file io;
+						io.igf = imi;
+						io.ext = imi->get_file_ext();
+						imgios_.push_back(io);
+						return;
+					}
+				}
+			}
+		}
+
+
+		void initialize_(const std::string& exts)
+		{
+			add_image_file_io_context_(img_file::img_io(new bmp_io), exts);
+			add_image_file_io_context_(img_file::img_io(new png_io), exts);
+			add_image_file_io_context_(img_file::img_io(new jpeg_io), exts);
+			add_image_file_io_context_(img_file::img_io(new openjpeg_io), exts);
+			add_image_file_io_context_(img_file::img_io(new pvr_io), exts);
+			// TGA フォーマットはシグネチュアが無いので、最後に評価する事
+			add_image_file_io_context_(img_file::img_io(new tga_io), exts);
+		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -87,7 +133,27 @@ namespace img {
 			@return 画像ファイルとして認識出来ない場合は「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool probe(utils::file_io& fin, const std::string& ext = "");
+		bool probe(utils::file_io& fin, const std::string& ext = "")
+		{
+			size_t n = imgios_.size();
+			if(!ext.empty()) {
+				for(size_t i = 0; i < imgios_.size(); ++i) {
+					img_file& io = imgios_[i];
+					if(check_file_exts_(io.ext, ext)) {
+						if(io.igf->probe(fin)) return true;
+						else n = i;
+						break;
+					}
+				}
+			}
+			for(size_t i = 0; i < imgios_.size(); ++i) {
+				if(n != i) {
+					img_file& io = imgios_[i];
+					if(io.igf->probe(fin)) return true;
+				}
+			}
+			return false;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -137,7 +203,30 @@ namespace img {
 			@return 画像ファイルとして認識出来ない場合は「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool info(utils::file_io& fin, img::img_info& fo, const std::string& ext = "");
+		bool info(utils::file_io& fin, img::img_info& fo, const std::string& ext = "")
+		{
+			size_t n = imgios_.size();
+			if(!ext.empty()) {
+				for(size_t i = 0; i < imgios_.size(); ++i) {
+					img_file& io = imgios_[i];
+					if(check_file_exts_(io.ext, ext)) {
+						if(io.igf->info(fin, fo)) return true;
+						else n = i;
+						break;
+					}
+				}
+			}
+
+			for(size_t i = 0; i < imgios_.size(); ++i) {
+				if(n != i) {
+					img_file& io = imgios_[i];
+///					std::cout << io.ext << std::endl;
+					if(io.igf->info(fin, fo)) return true;
+				}
+			}
+
+			return false;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -189,7 +278,35 @@ namespace img {
 			@return オープン出来ない場合は、「false」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(utils::file_io& fin, const std::string& ext = "", const std::string& opt = "");
+		bool load(utils::file_io& fin, const std::string& ext = "", const std::string& opt = "")
+		{
+			img_ = nullptr;
+			size_t n = imgios_.size();
+			if(!ext.empty()) {
+				for(size_t i = 0; i < imgios_.size(); ++i) {
+					img_file& io = imgios_[i];
+					if(check_file_exts_(io.ext, ext)) {
+						if(io.igf->load(fin, opt)) {
+							img_ = io.igf->get_image();
+							return true;
+						}
+						n = i;
+						break;
+					}
+				}
+			}
+
+			for(size_t i = 0; i < imgios_.size(); ++i) {
+				if(n != i) {
+					img_file& io = imgios_[i];
+					if(io.igf->load(fin, opt)) {
+						img_ = io.igf->get_image();
+						return true;
+					}
+				}
+			}
+			return false;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -241,7 +358,23 @@ namespace img {
 			@return 成功なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(utils::file_io& fout, const std::string& ext, const std::string& opt = "");
+		bool save(utils::file_io& fout, const std::string& ext, const std::string& opt = "")
+		{
+			if(!ext.empty() && img_ != nullptr) {
+				for(size_t i = 0; i < imgios_.size(); ++i) {
+					img_file& io = imgios_[i];
+					if(check_file_exts_(io.ext, ext)) {
+						io.igf->set_image(img_);
+						if(io.igf->save(fout, opt)) {
+							return true;
+						} else {
+							return false;
+						}
+					}
+				}
+			}
+			return false;
+		}
 
 
 		//-----------------------------------------------------------------//

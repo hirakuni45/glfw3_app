@@ -3,15 +3,13 @@
 /*!	@file
 	@brief	キーボード入力を扱うクラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2018 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
 //=====================================================================//
 #include "utils/string_utils.hpp"
-
-// windows のマクロを廃棄
-// #undef DELETE
+#include "core/glcore.hpp"
 
 namespace sys {
 
@@ -51,6 +49,24 @@ namespace sys {
 		int			last_key_idx_;
 		bool		repeat_enable_;
 		char		last_char_;
+
+		struct key_t {
+			gl::device::key	key_type;
+			char	normal_code;
+			char	shift_code;
+		};
+
+		static constexpr key_t key_type_tbls_[] = {
+			{ gl::device::key::ESCAPE,        0x1b, 0x1b },
+			{ gl::device::key::BACKSPACE,     0x08, 0x08 },
+			{ gl::device::key::DEL,           0x7f, 0x7f },
+			{ gl::device::key::TAB,           0x09, 0x09 },
+			{ gl::device::key::ENTER,         0x0d, 0x0d },
+			{ gl::device::key::RIGHT,         'Q'-0x40, 'Q'-0x40 },
+			{ gl::device::key::LEFT,          'R'-0x40, 'R'-0x40 },
+			{ gl::device::key::DOWN,          'S'-0x40, 'S'-0x40 },
+			{ gl::device::key::UP,            'T'-0x40, 'T'-0x40 },
+		};
 
 	public:
 		//-----------------------------------------------------------------//
@@ -104,7 +120,28 @@ namespace sys {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service();
+		void service()
+		{
+			using namespace gl;
+
+			core& core = core::get_instance();
+
+			input_.clear();
+
+			if(!core.get_recv_text().empty()) {
+				input_ += core.get_recv_text();
+				core.at_recv_text().clear();
+			}
+
+			const device& dev = core.get_device();
+			const key_t* tbl = key_type_tbls_;
+			for(int i = 0; i < (sizeof(key_type_tbls_) / sizeof(key_t)); ++i) {
+				const key_t& t = tbl[i];
+				if(dev.get_positive(t.key_type)) {
+					input_ += t.normal_code;
+				}
+			}
+		}
 
 
 		//-----------------------------------------------------------------//

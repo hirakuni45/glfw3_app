@@ -1,10 +1,10 @@
 #pragma once
 //=====================================================================//
 /*!	@file
-	@brief	ディレクトリー情報取得クラス（ヘッダー）@n
+	@brief	ディレクトリー情報取得クラス @n
 			ディレクトリー情報取得をスレッドにて並行して行う
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -15,6 +15,7 @@
 #include "utils/file_info.hpp"
 #include "utils/string_utils.hpp"
 #include <pthread.h>
+#include <unistd.h>
 
 namespace utils {
 
@@ -42,11 +43,66 @@ namespace utils {
 		file_t		file_t_;
 		pthread_t	pth_;
 
-		void start_();
-		void end_();
+		static void sleep_(uint32_t ms)
+		{
+			usleep(ms * 1000);
+#if 0
+			struct timespec in;
+			in.tv_sec = 0;
+			in.tv_nsec = ms * 1000 * 1000;
+			struct timespec out;
+			out.tv_sec = 0;
+			out.tv_nsec = 0;
+			nanosleep(&in, &out);
+#endif
+		}
 
-		static void sleep_(uint32_t ms);
-		static void* task_(void* in);
+		static void* task_(void* in)
+		{
+			file_t& t = *(static_cast<file_t*>(in));
+
+			volatile uint32_t idx = t.idx_;
+			while(t.loop_) {
+				if(idx != t.idx_) {
+					pthread_mutex_lock(&t.sync_);
+					t.infos_.clear();
+					if(t.filter_.empty()) {
+						t.infos_ = create_file_list(t.path_);
+					} else {
+						auto fis = create_file_list(t.path_);
+						t.infos_ = filter_file_infos(fis, t.filter_);
+					}
+					idx = t.idx_;
+					++t.ans_;
+					pthread_mutex_unlock(&t.sync_);
+				} else {
+					sleep_(10);
+				}
+			}
+
+			return nullptr;
+		}
+
+		void start_()
+		{
+			if(init_ == 0) {
+				pthread_mutex_init(&file_t_.sync_, nullptr);
+				pthread_create(&pth_, nullptr, task_, &file_t_);
+			}
+			++init_;
+		}
+
+		void end_()
+		{
+			if(init_) {
+				--init_;
+				if(init_ == 0) {
+					file_t_.loop_ = false;
+					pthread_join(pth_, nullptr);
+					pthread_mutex_destroy(&file_t_.sync_);
+				}
+			}
+		}
 
 	public:
 		//-----------------------------------------------------------------//
