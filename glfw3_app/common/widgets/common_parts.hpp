@@ -15,7 +15,7 @@
 
 namespace gui {
 
-	void create_round_frame(img::paint& pa, const widget::plate_param& pp,
+	static void create_round_frame(img::paint& pa, const widget::plate_param& pp,
 		const widget::color_param& cp, const vtx::ipos& size);
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
