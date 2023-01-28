@@ -402,4 +402,67 @@ namespace gui {
 			return false;
 		}
 	};
+
+
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief  ターミナル出力ファンクタ
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	template <class _>
+	class term_chaout_t {
+		static widget*	output_;
+
+		std::string		buff_;
+
+		char*		out_;
+		uint16_t	len_;
+		uint16_t	pos_;
+
+	public:
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	コンストラクター
+		*/
+		//-----------------------------------------------------------------//
+		term_chaout_t(char* out = nullptr, uint16_t len = 0) : out_(out), len_(len), pos_(0) { } 
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ターミナル出力の設定
+		*/
+		//-----------------------------------------------------------------//
+		static void set_output(widget* w) { output_ = w; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	format 出力、標準オペレーターの実装
+			@param[in]	ch	出力キャラクター
+		*/
+		//-----------------------------------------------------------------//
+		void operator() (char ch)
+		{
+			if(output_ != nullptr && output_->type() == get_type_id<widget_terminal>()) {
+
+				buff_ += ch;
+
+				widget_terminal* term = static_cast<widget_terminal*>(output_);
+
+				if(ch == '\n' || ch == 0) {
+					term->output(buff_);
+					buff_.clear();
+				} else if(buff_.size() >= 64) {
+					term->output(buff_);
+					buff_.clear();
+				}
+			}
+		}
+	};
+	template <class _> widget* term_chaout_t<_>::output_ = nullptr;
+
+	typedef term_chaout_t<void> term_chaout;
+
+	typedef utils::basic_format<term_chaout> format;
 }

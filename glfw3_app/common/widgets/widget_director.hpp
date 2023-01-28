@@ -585,4 +585,36 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void clear_error_report() { error_list_.clear(); }
 	};
+
+
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief	画像を作成
+		@param[in]	wd		Widget ディレクター
+		@param[in]	file	画像ファイル名
+		@param[in]	rect	位置と大きさ（サイズ０指定で画像サイズで作成）
+		@param[in]	parents	ペアレント
+		@return 画像ボタン
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	template <class WIDGET>
+	WIDGET* create_image(widget_director& wd, const std::string& file,
+		const vtx::irect& rect = vtx::irect(0), widget* parents = 0) {
+		using namespace gui;
+
+		WIDGET* w;
+		widget::param wp(rect, parents);
+		if(wd.at_img_files().load(file)) {
+			typename WIDGET::param wp_;
+			wp_.image_ = wd.at_img_files().get_image().get();
+			w = wd.add_widget<WIDGET>(wp, wp_);
+		} else {
+			wd.add_error_report("Can't load: " + file);
+			typename WIDGET::param wp_("X");
+			// ロード出来ない場合の仮の大きさ
+			wp.rect_.size.set(32, 32);
+			w = wd.add_widget<WIDGET>(wp, wp_);
+		}
+		return w;
+	}
 }
