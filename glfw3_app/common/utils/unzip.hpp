@@ -4,7 +4,7 @@
 	@brief	unzip クラス（ヘッダー）@n
 			zlib minizip/unzip.c を利用
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -14,8 +14,10 @@
 #include <string>
 #include <time.h>
 #include <boost/unordered_map.hpp>
+#include <boost/foreach.hpp>
 #include "minizip/unzip.h"
 #include "utils/file_io.hpp"
+#include "utils/string_utils.hpp"
 
 namespace utils {
 
@@ -65,7 +67,44 @@ namespace utils {
 			@return エラーが無ければ「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool open(const std::string& archive);
+		bool open(const std::string& archive)
+		{
+			close();
+
+			hnd_ = unzOpen(archive.c_str());
+			if(hnd_ == 0) {
+				return false;
+			}
+
+			do {
+				file_info fi;
+				char fn[2048];
+				fn[0] = 0;
+				if(unzGetCurrentFileInfo(hnd_, &fi.info_, fn, sizeof(fn), NULL, 0, NULL, 0) != UNZ_OK) {
+					break;
+				}
+				const char* p = strrchr(fn, '/');
+				if(p != 0 && p[1] == 0) {	// 最後の文字が「/」で終わる場合はアーカイブに含めない
+					dirs_.push_back(fn);
+				} else {
+					fi.ofs_ = unzGetOffset(hnd_);
+					fi.path_ = fn;
+
+					zmap::iterator it = zmap_.find(fn);
+					if(it == zmap_.end()) {
+						zmap::value_type stb(fn, files_.size());
+						zmap_.insert(stb);
+						files_.push_back(fi);
+					} else {
+						files_[it->second] = fi;
+					}
+				}
+			} while(unzGoToNextFile(hnd_) != UNZ_END_OF_LIST_OF_FILE) ;
+
+			zname_ = archive;
+
+			return true;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -83,7 +122,14 @@ namespace utils {
 			@return ファイル数を返す
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t file_count() const;
+		uint32_t file_count() const
+		{
+			if(hnd_) {
+				return static_cast<uint32_t>(files_.size());
+			} else {
+				return 0;
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -181,7 +227,21 @@ namespace utils {
 			@return エラーが無ければ「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool get_file(uint32_t index, char* buff);
+		bool get_file(uint32_t index, char* buff)
+		{
+			if(index < static_cast<uint32_t>(files_.size())) {
+				unzSetOffset(hnd_, files_[index].ofs_);
+
+				if(unzOpenCurrentFile(hnd_) != UNZ_OK) return false;
+
+				size_t sz = get_filesize(index);
+				unzReadCurrentFile(hnd_, buff, sz);
+				unzCloseCurrentFile(hnd_);
+
+				return true;
+			}
+			return false;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -192,7 +252,28 @@ namespace utils {
 			@return エラーが無ければ「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool create_file(uint32_t index, const std::string& filename);
+		bool create_file(uint32_t index, const std::string& filename)
+		{
+			if(index < static_cast<uint32_t>(files_.size())) {
+				unzSetOffset(hnd_, files_[index].ofs_);
+
+				if(unzOpenCurrentFile(hnd_) != UNZ_OK) return false;
+
+				utils::file_io fout;
+				fout.open(filename, "wb");
+
+				char buff[4096];
+				uLong sz;
+				while((sz = unzReadCurrentFile(hnd_, buff, sizeof(buff))) > 0) {
+					fout.write(buff, 1, sz);
+				}
+				unzCloseCurrentFile(hnd_);
+				fout.close();
+
+				return true;
+			}
+			return false;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -202,7 +283,12 @@ namespace utils {
 			@return 見つからない場合、負の値
 		*/
 		//-----------------------------------------------------------------//
-		int32_t find(const std::string& key);
+		int32_t find(const std::string& key)
+		{
+			zmap::const_iterator cit = zmap_.find(key);
+			if(cit == zmap_.end()) return -1;
+			return static_cast<int32_t>(cit->second);
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -223,7 +309,17 @@ namespace utils {
 			@brief	アーカイブを閉じる
 		*/
 		//-----------------------------------------------------------------//
-		void close();
+		void close()
+		{
+			if(hnd_) {
+				unzClose(hnd_);
+				hnd_ = 0;
+			}
+			dirs_.clear();
+			files_.clear();
+			zname_.clear();
+			zmap_.clear();
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -231,8 +327,9 @@ namespace utils {
 			@brief	廃棄
 		*/
 		//-----------------------------------------------------------------//
-		void destroy();
-
+		void destroy()
+		{
+			close();
+		}
 	};
-
 }
