@@ -1,0 +1,14 @@
+# mintty Settings
+BoldAsFont=no
+FontHeight=11
+
+Columns=110
+Rows=40
+Locale=ja_JP
+Charset=UTF-8
+Term=xterm-256color
+
+CopyOnSelect=yes
+BackspaceSendsBS=yes
+
+IMECursorColour=255,0,0
