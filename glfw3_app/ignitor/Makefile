@@ -24,47 +24,37 @@ CSOURCES	=	minizip/ioapi.c \
 PSOURCES	=	main.cpp \
 				core/glcore.cpp \
 				core/device.cpp \
-				gl_fw/glmobj.cpp \
-				gl_fw/glutils.cpp \
-				gl_fw/glterminal.cpp \
-				utils/vtx.cpp \
-				utils/vmath.cpp \
-				utils/sjis_utf16.cpp \
-				utils/string_utils.cpp \
-				utils/file_io.cpp \
-				utils/file_info.cpp \
-				utils/files.cpp \
-				utils/keyboard.cpp \
-				img_io/paint.cpp \
-				img_io/bmp_io.cpp \
-				img_io/tga_io.cpp \
-				img_io/dds_io.cpp \
-				img_io/png_io.cpp \
-				img_io/jpeg_io.cpp \
-				img_io/openjpeg_io.cpp \
-				img_io/pvr_io.cpp \
-				img_io/img_files.cpp \
-				widgets/common_parts.cpp \
 				widgets/widget_director.cpp \
-				widgets/widget_utils.cpp \
 				widgets/widget_filer.cpp
-
-#				snd_io/audio_io.cpp \
-				snd_io/pcm.cpp \
-				snd_io/wav_io.cpp \
-				snd_io/mp3_io.cpp \
-				snd_io/snd_files.cpp \
-				snd_io/sound.cpp
-#				snd_io/aac_io.cpp
-#				img_io/pdf_in.cpp
 
 # PNG_FILES	=	graviton.png
 
+# C++ version
+CPP_VER		=	-std=c++17
+
+# C++ include path for application
+PINC_APP	=	. ../common
+# C include path for application
+CINC_APP	=	. ../common
+
+# User include path
+INC_USR		=
+# User(optional) link library
 ifeq ($(OS),Windows_NT)
-	PFLAGS = -DWIN32_LEAN_AND_MEAN -DB_ID=$(BUILD_ID)
+LIBS_USR	=	ws2_32 wsock32
+else
+LIBS_USR	=
 endif
 
-STDLIBS		=	ws2_32 wsock32
+# User library path 
+LIB_DIR_USR	=
+# cmpiler flags (-Dxxx)
+CFLAGS		=
+ifeq ($(OS),Windows_NT)
+	PFLAGS = -DWIN32_LEAN_AND_MEAN -DB_ID=$(BUILD_ID)
+else
+PFLAGS		=
+endif
 
 -include $(VPATH)/makefile
 
