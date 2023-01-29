@@ -170,5 +170,3 @@ int32_t Sin::compute(int32_t phase) {
 	template <class _> int32_t Sin_<_>::sintab_[SIN_N_SAMPLES + 1];
 	#endif
 }
-
-

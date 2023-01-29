@@ -25,7 +25,8 @@
 
 #include "utils/format.hpp"
 
-#include "dx7.hpp"
+// #include "dx7.hpp"
+#include "fmsynth.h"
 
 #include "MD_MIDIFile.h"
 
@@ -69,7 +70,8 @@ namespace app {
 		uint32_t		midi_frame_;
 //		NOTES			ring_;
 
-		synth::DX7		dx7_;
+//		synth::DX7		dx7_;
+		fmsynth_t*		fm_;
 
 		MD_MIDIFile		mdf_;
 		bool			midifile_;
@@ -99,31 +101,31 @@ namespace app {
 				uint8_t tmp[2];
 				tmp[0] = 0xc0;
 				tmp[1] = 0;
-				dx7_.at_msg().Write(tmp, sizeof(tmp));								
+//				dx7_.at_msg().Write(tmp, sizeof(tmp));								
 			}
 			if(dev.get_positive(gl::device::key::_1)) {
 				uint8_t tmp[2];
 				tmp[0] = 0xc0;
 				tmp[1] = 1;
-				dx7_.at_msg().Write(tmp, sizeof(tmp));								
+//				dx7_.at_msg().Write(tmp, sizeof(tmp));								
 			}
 			if(dev.get_positive(gl::device::key::_2)) {
 				uint8_t tmp[2];
 				tmp[0] = 0xc0;
 				tmp[1] = 2;
-				dx7_.at_msg().Write(tmp, sizeof(tmp));								
+//				dx7_.at_msg().Write(tmp, sizeof(tmp));								
 			}
 			if(dev.get_positive(gl::device::key::_3)) {
 				uint8_t tmp[2];
 				tmp[0] = 0xc0;
 				tmp[1] = 3;
-				dx7_.at_msg().Write(tmp, sizeof(tmp));								
+//				dx7_.at_msg().Write(tmp, sizeof(tmp));								
 			}
 			if(dev.get_positive(gl::device::key::_9)) {
 				uint8_t tmp[2];
 				tmp[0] = 0xc0;
 				tmp[1] = 9;
-				dx7_.at_msg().Write(tmp, sizeof(tmp));								
+//				dx7_.at_msg().Write(tmp, sizeof(tmp));								
 			}
 		}
 
@@ -368,7 +370,8 @@ namespace app {
 			prog_list_(nullptr), tempo_(nullptr),
 			key_back_{ false }, key_{ false },
 			midi_num_(0), midi_in_(),
-			dx7_(),
+//			dx7_(),
+			fm_(nullptr),
 			mdf_(), midifile_(false)
 			{ }
 
@@ -422,16 +425,16 @@ namespace app {
 						if(fin.open(file, "rb")) {
 							uint8_t tmp[4096 + 8];
 							if(fin.read(tmp, sizeof(tmp)) == sizeof(tmp)) {
-								dx7_.at_msg().Write(tmp, sizeof(tmp));
+//								dx7_.at_msg().Write(tmp, sizeof(tmp));
 								{  // データを処理させる。
 									const uint32_t len = 44100 / 60;
 									int16_t tmp[len];
-									dx7_.GetSamples(len, tmp);
+//									dx7_.GetSamples(len, tmp);
 								}
 								prog_list_->at_local_param().init_list_.clear();
 								for(int i = 0; i < 32; ++i) {
 									char tmp[11];
-									dx7_.get_patch_name(i, tmp, sizeof(tmp));
+//									dx7_.get_patch_name(i, tmp, sizeof(tmp));
 									char str[32];
 									utils::sformat("%2d: '%s'\n", str, sizeof(str)) % i % tmp;
 									terminal_core_->output(str);
@@ -505,11 +508,11 @@ namespace app {
 				widget::param wp(vtx::irect(10 + 120 + 20, 10, 200, 40), 0);
 				widget_list::param wp_("DX7 Program");
 				prog_list_ = wd.add_widget<widget_list>(wp, wp_);
-				prog_list_->at_local_param().select_func_ = [this](const std::string& file, uint32_t pos) {
+				prog_list_->at_local_param().select_func_ = [=](const std::string& file, uint32_t pos) {
 					uint8_t tmp[2];
 					tmp[0] = 0xc0;
 					tmp[1] = pos;
-					dx7_.at_msg().Write(tmp, sizeof(tmp));
+//					dx7_.at_msg().Write(tmp, sizeof(tmp));
 				};
 			}
 
@@ -537,7 +540,8 @@ namespace app {
 				overtone_[i]->load(pre);
 			}
 
-			dx7_.Init(44'100);
+			fm_ = fmsynth_new(44100.0f, 16);
+//			dx7_.Init(44'100);
 
 			mdf_.begin(nullptr);
 			mdf_.setMidiHandler(midiCallback_);
@@ -567,12 +571,12 @@ namespace app {
 				if(key_[i] && !key_back_[i]) {
 					uint8_t key[3] = { 0x90, 0x3C, 0x7F };
 					key[1] = 0x3C + i;
-					dx7_.at_msg().Write(key, 3);
+//					dx7_.at_msg().Write(key, 3);
 				}
 				if(!key_[i] && key_back_[i]) {
 					uint8_t key[3] = { 0x80, 0x3C, 0x7F };
 					key[1] = 0x3C + i;
-					dx7_.at_msg().Write(key, 3);
+//					dx7_.at_msg().Write(key, 3);
 				}
 			}
 
@@ -580,12 +584,14 @@ namespace app {
 				if(piano_keys_[i]->get_select_in()) {
 					uint8_t key[3] = { 0x90, 0x3C, 0x7F };
 					key[1] = 24+i;
-					dx7_.at_msg().Write(key, 3);
+//					dx7_.at_msg().Write(key, 3);
+					fmsynth_note_on(fm_, 36+i, 127);
 				}
 				if(piano_keys_[i]->get_select_out()) {
 					uint8_t key[3] = { 0x80, 0x3C, 0x7F };
 					key[1] = 24+i;
-					dx7_.at_msg().Write(key, 3);
+//					dx7_.at_msg().Write(key, 3);
+					fmsynth_note_off(fm_, 36+i);
 				}
 			}
 
@@ -596,15 +602,17 @@ namespace app {
 //					utils::format("S: %02X, N: %d, V: %d\n") % static_cast<uint16_t>(t.status)
 //						% static_cast<uint16_t>(t.note) % static_cast<uint16_t>(t.velocity);
 					if(t.velocity != 0) {
-						uint8_t key[3] = { 0x90, 0x3C, 0x7F };
-						key[1] = t.note;
-						key[2] = t.velocity;
-						dx7_.at_msg().Write(key, 3);
+//						uint8_t key[3] = { 0x90, 0x3C, 0x7F };
+//						key[1] = t.note;
+//						key[2] = t.velocity;
+//						dx7_.at_msg().Write(key, 3);
+						fmsynth_note_on(fm_, t.note, 127);
 					} else {
-						uint8_t key[3] = { 0x80, 0x3C, 0x7F };
-						key[1] = t.note;
-						key[2] = t.velocity;
-						dx7_.at_msg().Write(key, 3);
+//						uint8_t key[3] = { 0x80, 0x3C, 0x7F };
+//						key[1] = t.note;
+//						key[2] = t.velocity;
+//						dx7_.at_msg().Write(key, 3);
+						fmsynth_note_off(fm_, t.note);
 					}
 					fifo.get_go();
 				}
@@ -624,7 +632,7 @@ namespace app {
 				if(len > 0) {
 					uint8_t tmp[256];
 					get_fifo(tmp, len);
-					dx7_.at_msg().Write(tmp, len);
+//					dx7_.at_msg().Write(tmp, len);
 				}
 			}
 
@@ -642,15 +650,22 @@ namespace app {
 ///			sound.queue_audio(piano_.get_wav());
 			{
 				const uint32_t len = 44100 / 60;
-				int16_t tmp[len];
-				dx7_.GetSamples(len, tmp);
+//				int16_t tmp[len];
+//				dx7_.GetSamples(len, tmp);
+				float left[len];
+				float right[len];
+				memset(left, 0, sizeof(left));
+      			memset(right, 0, sizeof(right));
+				fmsynth_render(fm_, left, right, len);
 
 				al::audio aif(new al::audio_sto16);
 				aif->create(44100, len);
 				for(uint32_t i = 0; i < len; ++i) {
 					al::pcm16_s w;
-					w.l = tmp[i];
-					w.r = tmp[i];
+//					w.l = tmp[i];
+//					w.r = tmp[i];
+					w.l = left[i] * 32767.0f;
+					w.r = right[i] * 32767.0f;
 					aif->put(i, w); 
 				}
 				al::sound& sound = director_.at().sound_;
@@ -683,6 +698,8 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void destroy()
 		{
+			fmsynth_free(fm_);
+
 			sys::preference& pre = director_.at().preference_;
 
 			for(int i = 0; i < 8; ++i) {

@@ -14,23 +14,26 @@ using namespace std;
 // タイトルの表示と簡単な説明
 static void title(const char *cmd)
 {
-	char	*p;
 	char	buff[256];
 
-	p = strrchr(cmd, '\\');
+	const char* p = strrchr(cmd, '\\');
 	if(p != NULL) {
 		strcpy(buff, p+1);
 	} else {
 		p = strrchr(cmd, '/');
-		if(p != NULL) {
+		if(p != nullptr) {
 			strcpy(buff, p+1);
 		} else {
 			strcpy(buff, cmd);
 		}
 	}
 
-	p = strrchr(buff, '.');
-	if(p != NULL) *p = 0;
+	{
+		auto p = strrchr(buff, '.');
+		if(p != nullptr) {
+			*p = 0;
+		}
+	}
 
 	cout << "Create C-source data array" << endl;
 	cout << "Copyright (C) 2007, Hiramatsu Kunihito" << endl;
