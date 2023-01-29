@@ -12,12 +12,12 @@
 #include <cstdio>
 #include <memory>
 #include <cstring>
+#include "utils/string_utils.hpp"
+#include "utils/format.hpp"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
 #include <unistd.h>
-#include "utils/string_utils.hpp"
-#include "utils/format.hpp"
 
 #ifdef WIN32
 #include <windows.h>
@@ -214,7 +214,7 @@ namespace utils {
 		return probe_file(ls, dir);
 	}
 
-#if 0
+
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	ファイルのサイズを返す
@@ -232,7 +232,7 @@ namespace utils {
 		}
 		return fsz;
 	}
-#endif
+
 
 	//-----------------------------------------------------------------//
 	/*!

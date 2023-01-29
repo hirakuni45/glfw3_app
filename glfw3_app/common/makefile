@@ -1,8 +1,16 @@
+# -*- tab-width : 4 -*-
+#=======================================================================
+#	glfw3_app makefile (shear makefile) @n
+#		Windows: MSYS2/CLANG64
+#   @author 平松邦仁 (hira@rvf-rc45.net)
+#	@copyright	Copyright (C) 2023 Kunihito Hiramatsu @n
+#				Released under the MIT license @n
+#				https://github.com/hirakuni45/RX/blob/master/LICENSE
+#=======================================================================
 # platform switcher (Windows, Linux, OS-X)
 ifeq ($(OS),Windows_NT)
     FEXT	= .exe
     SYSTEM := WIN
-	CPP_VER := -std=c++17
     LOCAL_INC_PATH := /clang64/include
     LOCAL_LIB_PATH :=
 	OPTLIBS = opengl32 glu32 glew32 openal glfw3 \
@@ -17,7 +25,6 @@ else
   UNAME := $(shell uname -s)
   ifeq ($(UNAME),Linux)
     SYSTEM := LINUX
-	CPP_VER := -std=c++17
 	CFLAGS +=
 	PFLAGS +=
 	LFLAGS +=
@@ -25,7 +32,6 @@ else
   ifeq ($(UNAME),Darwin)
     SYSTEM := OSX
 	OSX_VER := $(shell sw_vers -productVersion | sed 's/^\([0-9]*.[0-9]*\).[0-9]*/\1/')
-	CPP_VER := -std=c++17
 	CFLAGS +=
 	PFLAGS +=
 	LFLAGS += -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk \
@@ -43,7 +49,6 @@ else
   CCMM	=	clang
 endif
 
-
 # build openjpeg any version path
 OPENJPEG_PATH := $(shell ls -r -d $(LOCAL_INC_PATH)/openjpeg*)
 
@@ -51,17 +56,11 @@ OPTLIBS += 	pthread \
 			png jpeg openjp2 \
 			freetype \
 			mad \
-			z
+			z $(LIBS_USR)
 
-# 
-
-INC_SYS		=	$(LOCAL_INC_PATH)/freetype2 $(OPENJPEG_PATH) \
-				$(INC_USR)
-INC_LIB		=	$(LIB_USR)
-LIBDIR		=	$(LOCAL_LIB_PATH)
-
-PINC_APP	=	. ../common
-CINC_APP	=	. ../common
+STDLIBS		=
+INC_SYS		=	$(LOCAL_INC_PATH)/freetype2 $(OPENJPEG_PATH) $(INC_USR)
+LIBDIR		=	$(LOCAL_LIB_PATH) $(LIB_DIR_USR)
 
 INC_S	=	$(addprefix -isystem , $(INC_SYS))
 INC_L	=	$(addprefix -isystem , $(INC_LIB))
