@@ -3,6 +3,7 @@
 *.pre
 release/
 */*/*.exe
+.vscode/*.log
 glfw3_app/bmc/fonts/
 glfw3_app/bmc/shino/
 glfw3_app/common/libvgm-master/
