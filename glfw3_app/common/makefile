@@ -72,6 +72,17 @@ LIBS	=	$(addprefix -L, $(LIBDIR))
 LIBN	=	$(addprefix -l, $(STDLIBS))
 LIBN	+=	$(addprefix -l, $(OPTLIBS))
 
+# -Wuninitialized -Wunused -Werror -Wshadow
+CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
+			-Wformat
+CPWARN	=	-Wall -Werror -Wno-unused-private-field \
+			-Wno-unused-variable \
+			-Wno-unused-function \
+			-Wno-unused-but-set-variable
+
+CCWARN	+=	$(USR_CCWAN)
+CPWARN	+=	$(USR_CPWAN)
+
 #
 # Compiler, Linker Options, Resource_compiler
 #
@@ -106,14 +117,6 @@ ifeq ($(BUILD),release)
 	PFLAGS += -DNDEBUG
 	CFLAGS += -DNDEBUG
 endif
-
-# -Wuninitialized -Wunused -Werror -Wshadow
-CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
-			-Wformat
-CPWARN	=	-Wall -Werror -Wno-unused-private-field \
-			-Wno-unused-variable \
-			-Wno-unused-function \
-			-Wno-unused-but-set-variable
 
 OBJECTS	=	$(addprefix $(BUILD)/,$(patsubst %.cpp,%.o,$(PSOURCES))) \
 			$(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(CSOURCES)))
