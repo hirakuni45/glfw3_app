@@ -12,13 +12,13 @@
 #include <functional>
 #include <iostream>
 #include <boost/unordered_set.hpp>
-#include "widgets/widget.hpp"
-#include "widgets/common_parts.hpp"
 #include "gl_fw/glmobj.hpp"
 #include "img_io/paint.hpp"
 #include "img_io/img_files.hpp"
 #include "utils/keyboard.hpp"
 #include "utils/format.hpp"
+#include "widgets/widget.hpp"
+#include "widgets/common_parts.hpp"
 
 namespace gui {
 

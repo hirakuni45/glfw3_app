@@ -15,7 +15,7 @@
 // タイトルの表示と簡単な説明
 static void title(const char *cmd)
 {
-	char	*p;
+	const char	*p;
 	char	buff[256];
 
 	p = strrchr(cmd, '\\');
@@ -31,7 +31,7 @@ static void title(const char *cmd)
 	}
 
 	p = strrchr(buff, '.');
-	if(p != nullptr) *p = 0;
+	if(p != nullptr) buff[p - buff] = 0;
 
 	using namespace std;
 	cout << "Source and Header Compose" << endl;

@@ -45,7 +45,12 @@ CINC_APP	=	. ../common ./libfmsynth/include
 # User include path
 INC_USR		=
 # User(optional) link library
+ifeq ($(OS),Windows_NT)
 LIBS_USR	=	winmm
+else
+LIBS_USR	=
+endif
+
 # User library path 
 LIB_DIR_USR	=
 # cmpiler flags (-Dxxx)

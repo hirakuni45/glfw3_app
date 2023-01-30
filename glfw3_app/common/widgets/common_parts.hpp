@@ -15,9 +15,6 @@
 
 namespace gui {
 
-	static void create_round_frame(img::paint& pa, const widget::plate_param& pp,
-		const widget::color_param& cp, const vtx::ipos& size);
-
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
 		@brief	widget 共通パーツ・クラス
@@ -67,7 +64,11 @@ namespace gui {
 			@return	描画ハンドル
 		*/
 		//-----------------------------------------------------------------//
-		gl::mobj::handle add(const share_t& k)
+		gl::mobj::handle add(const share_t& k);
+		// この実装は、widget_director.cpp 内にある。
+		// 「widget_utils/create_round_frame」は、「widget_director」のインスタンスが必要で、インクルードが入れ子になってしまう。
+		// その回避策として・・
+#if 0
 		{
 			gl::mobj::handle h = get(k);
 			if(h == 0) {
@@ -86,5 +87,6 @@ namespace gui {
 // std::cout << static_cast<int>(h) << std::endl;
 			return h;
 		}
+#endif
 	};
 }

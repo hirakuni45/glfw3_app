@@ -1,7 +1,7 @@
 #pragma once
 //=====================================================================//
 /*!	@file
-	@brief	GUI widget ユーティリティー（ヘッダー）
+	@brief	GUI widget ユーティリティー
     @author 平松邦仁 (hira@rvf-rc45.net)
 	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
 				Released under the MIT license @n
@@ -625,5 +625,4 @@ namespace gui {
 	}
 #endif
 #endif
-
 }

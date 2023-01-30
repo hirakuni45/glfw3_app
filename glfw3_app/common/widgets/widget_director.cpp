@@ -1133,4 +1133,25 @@ namespace gui {
 			++id;
 		}
 	}
+
+
+		gl::mobj::handle common_parts::add(const share_t& k)
+		{
+			gl::mobj::handle h = get(k);
+			if(h == 0) {
+				img::paint pa;
+				create_round_frame(pa, k.plate_param_, k.color_param_, k.size_);
+				if(k.plate_param_.resizeble_) {
+// std::cout << "grid: " << static_cast<int>(k.plate_param_.grid_.x) << ", " << static_cast<int>(k.plate_param_.grid_.y) << std::endl;
+// std::cout << "size: " << static_cast<int>(pa.get_size().x) << ", " << static_cast<int>(pa.get_size().y) << std::endl;
+					h = mobj_.install(&pa, k.size_, k.plate_param_.grid_);
+				} else {
+					h = mobj_.install(&pa);
+				}
+				std::pair<share_t, handle> t(k, h);
+				share_map_.insert(t);
+			}
+// std::cout << static_cast<int>(h) << std::endl;
+			return h;
+		}
 }
