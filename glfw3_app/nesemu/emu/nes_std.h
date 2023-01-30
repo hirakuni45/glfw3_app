@@ -12,11 +12,17 @@
 #define  HOST_LITTLE_ENDIAN
 
 #ifdef __GNUC__
+#ifndef INLINE
 #define  INLINE      static inline
+#endif
 #elif defined(WIN32)
+#ifndef INLINE
 #define  INLINE      static __inline
+#endif
 #else /* crapintosh? */
+#ifndef INLINE
 #define  INLINE      static
+#endif
 #endif
 
 /* quell stupid compiler warnings */
