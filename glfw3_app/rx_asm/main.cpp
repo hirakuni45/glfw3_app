@@ -15,15 +15,15 @@
 // タイトルの表示と簡単な説明
 static void title(const char *cmd)
 {
-	char	*p;
+	const char	*p;
 	char	tmp[128];
 
 	p = strrchr(cmd, '\\');
-	if(p != NULL) {
+	if(p != nullptr) {
 		strcpy(tmp, p + 1);
 	} else {
 		p = strrchr(cmd, '/');
-		if(p != NULL) {
+		if(p != nullptr) {
 			strcpy(tmp, p+1);
 		} else {
 			strcpy(tmp, cmd);
@@ -31,7 +31,7 @@ static void title(const char *cmd)
 	}
 
 	p = strrchr(tmp, '.');
-	if(p != NULL) *p = 0;
+	if(p != nullptr) tmp[p - tmp] = 0;
 
 	utils::format("RX Assembler\n");
 	utils::format("Copyright (C) 2020, Hiramatsu Kunihito\n");
@@ -50,7 +50,7 @@ static void title(const char *cmd)
 //-----------------------------------------------------------------//
 int main(int argc, char *argv[])
 {
-	char*	fname = NULL;
+	char*	fname = nullptr;
 	bool	opterr = false;
 
 	for(int i = 1; i < argc; ++i) {

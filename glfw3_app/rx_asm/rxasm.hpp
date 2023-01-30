@@ -53,7 +53,7 @@ utils::format("Pass1: %d lines\n") % lno;
 		// 最終的なバイナリー出力
 		bool pass2_(utils::file_io& fin)
 		{
-			fin.seek(0, utils::file_io::seek::set);
+			fin.seek(0, utils::file_io::SEEK::SET);
 			uint32_t lno = 0;
 			while(!fin.eof()) {
 				++lno;
