@@ -88,7 +88,7 @@ LIBS_USR	=
 LIB_DIR_USR	=
 # cmpiler flags (-Dxxx)
 CFLAGS		=
-PFLAGS		=
+PFLAGS		=	-Wno-delete-incomplete
 
 -include $(VPATH)/makefile
 
