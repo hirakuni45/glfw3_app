@@ -73,12 +73,12 @@ void* TextureLoader::Load( const EFK_CHAR* path )
 			GL_UNSIGNED_BYTE,
 			EffekseerRenderer::PngTextureLoader::GetData().data());
 		
-		/* ƒ~ƒbƒvƒ}ƒbƒv‚Ì¶¬ */
+		/* ï¿½~ï¿½bï¿½vï¿½}ï¿½bï¿½vï¿½Ìï¿½ï¿½ï¿½ */
 		GLExt::glGenerateMipmap(GL_TEXTURE_2D);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 
-		return (void*)texture;
+		return reinterpret_cast<void*>(texture);
 	}
 	return NULL;
 }

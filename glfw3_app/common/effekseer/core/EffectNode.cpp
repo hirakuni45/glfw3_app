@@ -29,13 +29,13 @@ namespace Effekseer
 //----------------------------------------------------------------------------------
 EffectNode::EffectNode( Effect* effect, unsigned char*& pos )
 	: m_effect		( effect )
-	, IsRendered		( true )
-	, SoundType			( ParameterSoundType_None )
-	, RenderingOrder	( RenderingOrder_FirstCreatedInstanceIsFirst )
 	, m_userData		( NULL )
+	, IsRendered		( true )
 	, TranslationFCurve	( NULL )
 	, RotationFCurve	( NULL )
 	, ScalingFCurve		( NULL )
+	, SoundType			( ParameterSoundType_None )
+	, RenderingOrder	( RenderingOrder_FirstCreatedInstanceIsFirst )
 {
 }
 
@@ -81,7 +81,7 @@ void EffectNode::LoadParameter(unsigned char*& pos, EffectNode* parent, Setting*
 			memcpy( &TranslationFixed, pos, size );
 			pos += size;
 
-			// –³Œø‰»
+			// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			if( TranslationFixed.Position.X == 0.0f &&
 				TranslationFixed.Position.Y == 0.0f &&
 				TranslationFixed.Position.Z == 0.0f )
@@ -115,7 +115,7 @@ void EffectNode::LoadParameter(unsigned char*& pos, EffectNode* parent, Setting*
 			pos += TranslationFCurve->Load( pos, m_effect->GetVersion() );
 		}
 
-		/* ˆÊ’uŠg‘åˆ— */
+		/* ï¿½Ê’uï¿½gï¿½åˆï¿½ï¿½ */
 		if( m_effect->GetVersion() >= 8 )
 		{
 			if( TranslationType == ParameterTranslationType_Fixed )
@@ -149,7 +149,7 @@ void EffectNode::LoadParameter(unsigned char*& pos, EffectNode* parent, Setting*
 		memcpy( &LocationAbs.type, pos, sizeof(int) );
 		pos += sizeof(int);
 
-		/* â‘ÎˆÊ’u */
+		/* ï¿½ï¿½ÎˆÊ’u */
 		if( LocationAbs.type == LocationAbsParameter::None )
 		{
 			memcpy( &size, pos, sizeof(int) );
@@ -167,7 +167,7 @@ void EffectNode::LoadParameter(unsigned char*& pos, EffectNode* parent, Setting*
 			pos += size;
 		}
 
-		/* â‘ÎˆÊ’uŠg‘åˆ— */
+		/* ï¿½ï¿½ÎˆÊ’uï¿½gï¿½åˆï¿½ï¿½ */
 		if( m_effect->GetVersion() >= 8 )
 		{
 			if( LocationAbs.type == LocationAbsParameter::None )
@@ -190,7 +190,7 @@ void EffectNode::LoadParameter(unsigned char*& pos, EffectNode* parent, Setting*
 			memcpy( &RotationFixed, pos, size );
 			pos += size;
 
-			// –³Œø‰»
+			// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			if( RotationFixed.Position.X == 0.0f &&
 				RotationFixed.Position.Y == 0.0f &&
 				RotationFixed.Position.Z == 0.0f )
@@ -251,7 +251,7 @@ void EffectNode::LoadParameter(unsigned char*& pos, EffectNode* parent, Setting*
 			memcpy( &ScalingFixed, pos, size );
 			pos += size;
 
-			// –³Œø‰»
+			// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			if( ScalingFixed.Position.X == 1.0f &&
 				ScalingFixed.Position.Y == 1.0f &&
 				ScalingFixed.Position.Z == 1.0f )
@@ -304,10 +304,10 @@ void EffectNode::LoadParameter(unsigned char*& pos, EffectNode* parent, Setting*
 			ScalingFCurve->Z.SetDefaultValue( 1.0f );
 		}
 
-		/* ¶¬ˆÊ’u */
+		/* ï¿½ï¿½ï¿½ï¿½ï¿½Ê’u */
 		GenerationLocation.load( pos );
 
-		/* ¶¬ˆÊ’uŠg‘åˆ—*/
+		/* ï¿½ï¿½ï¿½ï¿½ï¿½Ê’uï¿½gï¿½åˆï¿½ï¿½*/
 		if( m_effect->GetVersion() >= 8 && 
 			(this->CommonValues.ScalingBindType == BindType_NotBind || parent->GetType() == EFFECT_NODE_TYPE_ROOT))
 		{
@@ -328,7 +328,7 @@ void EffectNode::LoadParameter(unsigned char*& pos, EffectNode* parent, Setting*
 			}		
 		}
 
-		// ‰EèŒn¶èŒn•ÏŠ·
+		// ï¿½Eï¿½ï¿½nï¿½ï¿½ï¿½ï¿½nï¿½ÏŠï¿½
 		if( setting->GetCoordinateSystem() == COORDINATE_SYSTEM_LH )
 		{
 			// Translation
@@ -428,7 +428,7 @@ void EffectNode::LoadParameter(unsigned char*& pos, EffectNode* parent, Setting*
 		
 		if( m_effect->GetVersion() >= 1)
 		{
-			// ƒTƒEƒ“ƒh
+			// ï¿½Tï¿½Eï¿½ï¿½ï¿½h
 			memcpy( &SoundType, pos, sizeof(int) );
 			pos += sizeof(int);
 			if( SoundType == ParameterSoundType_Use )
@@ -451,7 +451,7 @@ void EffectNode::LoadParameter(unsigned char*& pos, EffectNode* parent, Setting*
 		}
 	}
 
-	// ƒm[ƒh
+	// ï¿½mï¿½[ï¿½h
 	int nodeCount = 0;
 	memcpy( &nodeCount, pos, sizeof(int) );
 	pos += sizeof( int );

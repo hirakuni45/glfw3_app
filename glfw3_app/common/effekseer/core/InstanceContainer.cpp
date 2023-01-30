@@ -40,8 +40,8 @@ void InstanceContainer::operator delete( void* p, Manager* pManager )
 //----------------------------------------------------------------------------------
 InstanceContainer::InstanceContainer( Manager* pManager, EffectNode* pEffectNode, InstanceGlobal* pGlobal, int ChildrenCount )
 	: m_pManager		( pManager )
-	, m_pGlobal			( pGlobal )
 	, m_pEffectNode	( pEffectNode )
+	, m_pGlobal			( pGlobal )
 	, m_Children		( NULL )
 	, m_ChildrenCount	( ChildrenCount )
 	, m_headGroups		( NULL )
@@ -98,7 +98,7 @@ void InstanceContainer::SetChild( int num, InstanceContainer* pContainter )
 //----------------------------------------------------------------------------------
 void InstanceContainer::RemoveInvalidGroups()
 {
-	/* ÅŒã‚É‘¶Ý‚·‚é—LŒø‚ÈƒOƒ‹[ƒv */
+	/* ï¿½ÅŒï¿½É‘ï¿½ï¿½Ý‚ï¿½ï¿½ï¿½Lï¿½ï¿½ï¿½ÈƒOï¿½ï¿½ï¿½[ï¿½v */
 	InstanceGroup* tailGroup = NULL;
 
 	for( InstanceGroup* group = m_headGroups; group != NULL; )
@@ -170,13 +170,13 @@ InstanceGroup* InstanceContainer::GetFirstGroup() const
 //----------------------------------------------------------------------------------
 void InstanceContainer::Update( bool recursive, float deltaFrame, bool shown )
 {
-	// XV
+	// ï¿½Xï¿½V
 	for( InstanceGroup* group = m_headGroups; group != NULL; group = group->NextUsedByContainer )
 	{
 		group->Update( deltaFrame, shown );
 	}
 	
-	// ”jŠü
+	// ï¿½jï¿½ï¿½
 	RemoveInvalidGroups();
 
 	if( recursive )
@@ -240,7 +240,7 @@ void InstanceContainer::Draw( bool recursive )
 {
 	if( m_pEffectNode->GetType() != EFFECT_NODE_TYPE_ROOT && m_pEffectNode->GetType() != EFFECT_NODE_TYPE_NONE )
 	{
-		/* ŒÂ”Œv‘ª */
+		/* ï¿½Âï¿½ï¿½vï¿½ï¿½ */
 		int32_t count = 0;
 		{
 			for( InstanceGroup* group = m_headGroups; group != NULL; group = group->NextUsedByContainer )
@@ -260,7 +260,7 @@ void InstanceContainer::Draw( bool recursive )
 
 		if( count > 0 )
 		{
-			/* •`‰æ */
+			/* ï¿½`ï¿½ï¿½ */
 			m_pEffectNode->BeginRendering(count, m_pManager);
 
 			for( InstanceGroup* group = m_headGroups; group != NULL; group = group->NextUsedByContainer )

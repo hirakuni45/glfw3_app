@@ -84,25 +84,25 @@ class Model;
 typedef	int	Handle;
 
 /**
-	@brief	ƒƒ‚ƒŠŠm•ÛŠÖ”
+	@brief	ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½mï¿½ÛŠÖï¿½
 */
 typedef void* ( EFK_STDCALL *MallocFunc ) ( unsigned int size );
 
 /**
-	@brief	ƒƒ‚ƒŠ”jŠüŠÖ”
+	@brief	ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½jï¿½ï¿½ï¿½Öï¿½
 */
 typedef	void ( EFK_STDCALL *FreeFunc ) ( void* p, unsigned int size );
 
 /**
-	@brief	ƒ‰ƒ“ƒ_ƒ€ŠÖ”
+	@brief	ï¿½ï¿½ï¿½ï¿½ï¿½_ï¿½ï¿½ï¿½Öï¿½
 */
 typedef	int ( EFK_STDCALL *RandFunc ) (void);
 
 /**
-	@brief	ƒGƒtƒFƒNƒg‚ÌƒCƒ“ƒXƒ^ƒ“ƒX”jŠü‚ÌƒR[ƒ‹ƒoƒbƒNƒCƒxƒ“ƒg
-	@param	manager	[in]	Š‘®‚µ‚Ä‚¢‚éƒ}ƒl[ƒWƒƒ[
-	@param	handle	[in]	ƒGƒtƒFƒNƒg‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚Ìƒnƒ“ƒhƒ‹
-	@param	isRemovingManager	[in]	ƒ}ƒl[ƒWƒƒ[‚ğ”jŠü‚µ‚½‚Æ‚«‚ÉƒGƒtƒFƒNƒg‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚ğ”jŠü‚µ‚Ä‚¢‚é‚©
+	@brief	ï¿½Gï¿½tï¿½Fï¿½Nï¿½gï¿½ÌƒCï¿½ï¿½ï¿½Xï¿½^ï¿½ï¿½ï¿½Xï¿½jï¿½ï¿½ï¿½ï¿½ï¿½ÌƒRï¿½[ï¿½ï¿½ï¿½oï¿½bï¿½Nï¿½Cï¿½xï¿½ï¿½ï¿½g
+	@param	manager	[in]	ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½ï¿½}ï¿½lï¿½[ï¿½Wï¿½ï¿½ï¿½[
+	@param	handle	[in]	ï¿½Gï¿½tï¿½Fï¿½Nï¿½gï¿½ÌƒCï¿½ï¿½ï¿½Xï¿½^ï¿½ï¿½ï¿½Xï¿½Ìƒnï¿½ï¿½ï¿½hï¿½ï¿½
+	@param	isRemovingManager	[in]	ï¿½}ï¿½lï¿½[ï¿½Wï¿½ï¿½ï¿½[ï¿½ï¿½jï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ‚ï¿½ï¿½ÉƒGï¿½tï¿½Fï¿½Nï¿½gï¿½ÌƒCï¿½ï¿½ï¿½Xï¿½^ï¿½ï¿½ï¿½Xï¿½ï¿½jï¿½ï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½é‚©
 */
 typedef	void ( EFK_STDCALL *EffectInstanceRemovingCallback ) ( Manager* manager, Handle handle, bool isRemovingManager );
 
@@ -115,28 +115,28 @@ typedef	void ( EFK_STDCALL *EffectInstanceRemovingCallback ) ( Manager* manager,
 //
 //----------------------------------------------------------------------------------
 /**
-	@brief	ƒAƒ‹ƒtƒ@ƒuƒŒƒ“ƒh
+	@brief	ï¿½Aï¿½ï¿½ï¿½tï¿½@ï¿½uï¿½ï¿½ï¿½ï¿½ï¿½h
 */
 enum eAlphaBlend
 {
 	/// <summary>
-	/// •s“§–¾
+	/// ï¿½sï¿½ï¿½ï¿½ï¿½
 	/// </summary>
 	ALPHA_BLEND_OPACITY = 0,
 	/// <summary>
-	/// “§–¾
+	/// ï¿½ï¿½ï¿½ï¿½
 	/// </summary>
 	ALPHA_BLEND_BLEND = 1,
 	/// <summary>
-	/// ‰ÁZ
+	/// ï¿½ï¿½ï¿½Z
 	/// </summary>
 	ALPHA_BLEND_ADD = 2,
 	/// <summary>
-	/// Œ¸Z
+	/// ï¿½ï¿½ï¿½Z
 	/// </summary>
 	ALPHA_BLEND_SUB = 3,
 	/// <summary>
-	/// æZ
+	/// ï¿½ï¿½Z
 	/// </summary>
 	ALPHA_BLEND_MUL = 4,
 
@@ -191,7 +191,7 @@ enum eCoordinateSystem
 //
 //----------------------------------------------------------------------------------
 /**
-	@brief	Å‘å’læ“¾
+	@brief	ï¿½Å‘ï¿½lï¿½æ“¾
 */
 template <typename T,typename U>
 T Max( T t, U u )
@@ -204,7 +204,7 @@ T Max( T t, U u )
 }
 
 /**
-	@brief	Å¬’læ“¾
+	@brief	ï¿½Åï¿½ï¿½lï¿½æ“¾
 */
 template <typename T,typename U>
 T Min( T t, U u )
@@ -217,7 +217,7 @@ T Min( T t, U u )
 }
 
 /**
-	@brief	”ÍˆÍ“à’læ“¾
+	@brief	ï¿½ÍˆÍ“ï¿½ï¿½lï¿½æ“¾
 */
 template <typename T,typename U,typename V>
 T Clamp( T t, U max_, V min_ )
@@ -263,11 +263,11 @@ inline void SinCos(float x, float& s, float& c)
 //
 //----------------------------------------------------------------------------------
 /**
-	@brief	•¶šƒR[ƒh‚ğ•ÏŠ·‚·‚éB(UTF16 -> UTF8)
-	@param	dst	[out]	o—Í”z—ñ‚Ìæ“ªƒ|ƒCƒ“ƒ^
-	@param	dst_size	[in]	o—Í”z—ñ‚Ì’·‚³
-	@param	src			[in]	“ü—Í”z—ñ‚Ìæ“ªƒ|ƒCƒ“ƒ^
-	@return	•¶š”
+	@brief	ï¿½ï¿½ï¿½ï¿½ï¿½Rï¿½[ï¿½hï¿½ï¿½ÏŠï¿½ï¿½ï¿½ï¿½ï¿½B(UTF16 -> UTF8)
+	@param	dst	[out]	ï¿½oï¿½Í”zï¿½ï¿½Ìæ“ªï¿½|ï¿½Cï¿½ï¿½ï¿½^
+	@param	dst_size	[in]	ï¿½oï¿½Í”zï¿½ï¿½Ì’ï¿½ï¿½ï¿½
+	@param	src			[in]	ï¿½ï¿½ï¿½Í”zï¿½ï¿½Ìæ“ªï¿½|ï¿½Cï¿½ï¿½ï¿½^
+	@return	ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 */
 inline int32_t ConvertUtf16ToUtf8( int8_t* dst, int32_t dst_size, const int16_t* src )
 {
@@ -307,11 +307,11 @@ inline int32_t ConvertUtf16ToUtf8( int8_t* dst, int32_t dst_size, const int16_t*
 }
 
 /**
-	@brief	•¶šƒR[ƒh‚ğ•ÏŠ·‚·‚éB(UTF8 -> UTF16)
-	@param	dst	[out]	o—Í”z—ñ‚Ìæ“ªƒ|ƒCƒ“ƒ^
-	@param	dst_size	[in]	o—Í”z—ñ‚Ì’·‚³
-	@param	src			[in]	“ü—Í”z—ñ‚Ìæ“ªƒ|ƒCƒ“ƒ^
-	@return	•¶š”
+	@brief	ï¿½ï¿½ï¿½ï¿½ï¿½Rï¿½[ï¿½hï¿½ï¿½ÏŠï¿½ï¿½ï¿½ï¿½ï¿½B(UTF8 -> UTF16)
+	@param	dst	[out]	ï¿½oï¿½Í”zï¿½ï¿½Ìæ“ªï¿½|ï¿½Cï¿½ï¿½ï¿½^
+	@param	dst_size	[in]	ï¿½oï¿½Í”zï¿½ï¿½Ì’ï¿½ï¿½ï¿½
+	@param	src			[in]	ï¿½ï¿½ï¿½Í”zï¿½ï¿½Ìæ“ªï¿½|ï¿½Cï¿½ï¿½ï¿½^
+	@return	ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 */
 inline int32_t ConvertUtf8ToUtf16( int16_t* dst, int32_t dst_size, const int8_t* src )
 {
@@ -331,22 +331,22 @@ inline int32_t ConvertUtf8ToUtf16( int16_t* dst, int32_t dst_size, const int8_t*
 		{
 			break;
 		}
-		// UTF8‚©‚çUTF16‚É•ÏŠ·
+		// UTF8ï¿½ï¿½ï¿½ï¿½UTF16ï¿½É•ÏŠï¿½
 		code = (uint8_t)c0 >> 4;
 		if (code <= 7)
 		{
-			// 8bit•¶š
+			// 8bitï¿½ï¿½ï¿½ï¿½
 			wc = c0;
 		} 
 		else if (code >= 12 && code <= 13)
 		{
-			// 16bit•¶š
+			// 16bitï¿½ï¿½ï¿½ï¿½
 			c1 = *src++;
 			wc = ((c0 & 0x1F) << 6) | (c1 & 0x3F);
 		} 
 		else if (code == 14)
 		{
-			// 24bit•¶š
+			// 24bitï¿½ï¿½ï¿½ï¿½
 			c1 = *src++;
 			c2 = *src++;
 			wc = ((c0 & 0x0F) << 12) | ((c1 & 0x3F) << 6) | (c2 & 0x3F);
