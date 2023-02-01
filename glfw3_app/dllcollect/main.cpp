@@ -68,7 +68,7 @@ static void help_(const std::string& cmd)
 
 	auto s = true_path_(cmd);
 
-	cout << "DLL collect copy" << endl;
+	cout << "DLL collect copy (msys64/clang64)" << endl;
 	cout << "Copyright (C) 2015, Hiramatsu Kunihito" << endl;
 	cout << "Version " << boost::format("%1.2f") % version_ << endl;
 	cout << "usage:" << endl;
@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
 	}
 
 	auto exe = true_path_(argv[1]);
-	std::string dll_path("c:/msys64/mingw64/bin");
+	std::string dll_path("c:/msys64/clang64/bin");
 	std::string dir_name("dlls");
 	
 	if(scan_dll_(exe, dll_path, dll_set_)) {

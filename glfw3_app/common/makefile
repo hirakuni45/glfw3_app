@@ -56,7 +56,7 @@ OPTLIBS += 	pthread \
 			png jpeg openjp2 \
 			freetype \
 			mad \
-			z $(LIBS_USR)
+			z $(LIBS_USR) 
 
 STDLIBS		=
 INC_SYS		=	$(LOCAL_INC_PATH)/freetype2 $(OPENJPEG_PATH) $(INC_USR)
