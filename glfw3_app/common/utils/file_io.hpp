@@ -1,8 +1,9 @@
 #pragma once
 //=====================================================================//
 /*!	@file
-	@brief	ファイル入出力関連、ユーティリティー（ヘッダー）@n
-			文字列のコード変換など
+	@brief	ファイル入出力関連、ユーティリティー @n
+			文字列のコード変換など @n
+			WIN32 に依存する実装は、追い出してある（device.cpp）を参照。
     @author 平松邦仁 (hira@rvf-rc45.net)
 	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
 				Released under the MIT license @n
@@ -19,134 +20,53 @@
 #include <dirent.h>
 #include <unistd.h>
 
-#ifdef WIN32
-#include <windows.h>
-#endif
-
 namespace utils {
 
 	//-----------------------------------------------------------------//
 	/*!
 		@brief	システム・ファイル・パスに変換 @n
-				※WIN32 で、ファイルパスのマルチバイト表現が、@n
-				ロケールにより変化する場合に対応
+				※WIN32 で、ファイルパスのマルチバイト表現が、 @n
+				ロケールにより変化する場合に対応 @n
+				※実装は、device.cpp に存在
 		@param[in]	path	ファイル名
 		@return システムに依存したファイルパス
 	*/
 	//-----------------------------------------------------------------//
-	static std::string system_path(const std::string& path)
-	{
-#ifdef WIN32
-		auto ws = utils::utf8_to_utf16(path);
-		auto l = WideCharToMultiByte(CP_ACP, 0, (LPCWSTR)ws.c_str(), ws.size(), NULL, 0, NULL, NULL);
-		if(l <= 0) {
-			return std::string();
-		}
-		char buff[l + 1];
-		WideCharToMultiByte(CP_ACP, 0, (LPCWSTR)ws.c_str(), ws.size(), buff, l, NULL, NULL);
-		buff[l] = 0;
-		return std::string(buff);
-#else
-		return path;
-#endif
-	}
+	std::string system_path(const std::string& path);
 
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	UTF-32 対応のファイルオープン
+		@brief	UTF-32 対応のファイルオープン @n
+				※実装は、device.cpp に存在
 		@param[in]	fn	ファイル名
 		@param[in]	md	オープンモード
 		@return オープンできれば、ファイル構造体のポインターを返す
 	*/
 	//-----------------------------------------------------------------//
-	static std::FILE* wfopen(const utils::lstring& fn, const std::string& md)
-	{
-		std::FILE* fp = 0;
-#ifdef WIN32
-		wchar_t* wsm = new wchar_t[md.size() + 1];
-		for(uint32_t i = 0; i < md.size(); ++i) {
-			wsm[i] = md[i];
-		}
-		wsm[md.size()] = 0;
-		wchar_t* wfn = new wchar_t[fn.size() + 1];
-		for(uint32_t i = 0; i < fn.size(); ++i) {
-			wfn[i] = fn[i];
-		}
-		wfn[fn.size()] = 0;
-		fp = _wfopen(wfn, wsm);
-		delete[] wfn;
-		delete[] wsm;
-#else
-		std::string s;
-		utils::utf32_to_utf8(fn, s);
-		fp = fopen(s.c_str(), md.c_str());
-#endif
-#ifndef NDEBUG
-		if(fp == 0) {
-			std::string s;
-			utils::utf32_to_utf8(fn, s);
-			std::string tt;
-			if(strchr(md.c_str(), 'w')) tt = "output";
-			else tt = "input";
-			std::cerr << boost::format("Can't open %1% file (file_io::wfopen): '%2%'") % tt % s << std::endl;
-		}
-#endif
-		return fp;
-	}
+	std::FILE* wfopen(const utils::lstring& fn, const std::string& md);
 
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	ディレクトリーを作成する（UTF8）
+		@brief	ディレクトリーを作成する（UTF8） @n
+				※実装は、device.cpp に存在
 		@param[in]	dir	ディレクトリー名
 		@return 作成出来たら「true」
 	*/
 	//-----------------------------------------------------------------//
-	static bool create_directory(const std::string& dir)
-	{
-		bool ret = true;
-#ifdef WIN32
-		utils::wstring ws;
-		utf8_to_utf16(dir, ws);
-		if(_wmkdir((const wchar_t*)ws.c_str()) != 0) ret = false;
-#else
-		mode_t t = S_IRWXU | (S_IRGRP | S_IXGRP) | (S_IROTH | S_IXOTH);
-		if(mkdir(dir.c_str(), t) != 0) ret = false;
-#endif
-		return ret;
-	}
+	bool create_directory(const std::string& dir);
 
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	ディレクトリーか調べる（UTF8）
+		@brief	ディレクトリーか調べる（UTF8） @n
+				※実装は、device.cpp に存在
 		@param[in]	fn	ファイル名
 		@return ディレクトリーなら「true」
 	*/
 	//-----------------------------------------------------------------//
-	static bool is_directory(const std::string& fn)
-	{
-#ifdef WIN32
-		struct _stat st;
-		wchar_t* wfn = new wchar_t[fn.size() + 1];
-		for(uint32_t i = 0; i < fn.size(); ++i) {
-			wfn[i] = fn[i];
-		}
-		wfn[fn.size()] = 0;
-		int ret = _wstat(wfn, &st);
-		delete[] wfn;
-		if(ret == 0) {
-			return S_ISDIR(st.st_mode) != 0;
-		}
-#else
-		struct stat st;
-		if(stat(fn.c_str(), &st) == 0) {
-			return S_ISDIR(st.st_mode) != 0;
-		}
-#endif
-		return false;
-	}
+	bool is_directory(const std::string& fn);
 
 
 	//-----------------------------------------------------------------//
@@ -165,50 +85,26 @@ namespace utils {
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	ファイルの検査（UTF32)
+		@brief	ファイルの検査（UTF-32) @n
+				※実装は、device.cpp に存在
 		@param[in]	fn	ファイル名
 		@param[in]	dir	「true」ならディレクトリーとして検査
 		@return ファイルが有効なら「true」
 	*/
 	//-----------------------------------------------------------------//
-	static bool probe_file(const utils::lstring& fn, bool dir = false)
-	{
-#ifdef WIN32
-		struct _stat st;
-		wchar_t* wfn = new wchar_t[fn.size() + 1];
-		for(uint32_t i = 0; i < fn.size(); ++i) {
-			wfn[i] = fn[i];
-		}
-		wfn[fn.size()] = 0;
-		int ret = _wstat(wfn, &st);
-		delete[] wfn;
-		if(ret == 0) {
-#else
-		std::string s;
-		utf32_to_utf8(fn, s);
-		struct stat st;
-		if(stat(s.c_str(), &st) == 0) {
-#endif
-			if(dir) {
-				bool d = S_ISDIR(st.st_mode);
-				if(d) return true;
-			} else {
-				return true;
-			}
-		}
-		return false;
-	}
+	bool probe_file(const utils::lstring& fn, bool dir = false);
 
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	ファイルの検査
+		@brief	ファイルの検査 (UTF-8)
 		@param[in]	fn	ファイル名
 		@param[in]	dir	「true」ならディレクトリーとして検査
 		@return ファイルが有効なら「true」
 	*/
 	//-----------------------------------------------------------------//
-	inline bool probe_file(const std::string& fn, bool dir = false) {
+	inline bool probe_file(const std::string& fn, bool dir = false)
+	{
 		utils::lstring ls;
 		utils::utf8_to_utf32(fn, ls);
 		return probe_file(ls, dir);
@@ -217,7 +113,7 @@ namespace utils {
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	ファイルのサイズを返す
+		@brief	ファイルのサイズを返す (UTF-8)
 		@param[in]	fn	ファイル名
 		@return ファイルサイズ
 	*/
@@ -236,21 +132,13 @@ namespace utils {
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	ファイルを消去
+		@brief	ファイルを消去 (UTF-8) @n
+				※実装は、device.cpp に存在
 		@param[in]	fn	ファイル名
 		@return 成功なら「true」
 	*/
 	//-----------------------------------------------------------------//
-	static bool remove_file(const std::string& fn)
-	{
-#ifdef WIN32
-		auto fname = utf8_to_sjis(fn);
-//		std::cout << fname << std::endl;
-		return remove(fname.c_str()) == 0;
-#else
-		return remove(fn.c_str()) == 0;
-#endif
-	}
+	bool remove_file(const std::string& fn);
 
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
