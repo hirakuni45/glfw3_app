@@ -65,6 +65,7 @@ namespace img {
 		void initialize()
 		{
 			context_ = fz_new_context(NULL, NULL, FZ_STORE_UNLIMITED);
+std::cout << "Open step 0" << std::endl;
 		}
 
 
@@ -77,32 +78,33 @@ namespace img {
 		//-----------------------------------------------------------------//
 		bool open(const std::string& filename)
 		{
+std::cout << "Open step 1" << std::endl;
 			close();
-
+std::cout << "Open step 2" << std::endl;
 			document_ = fz_open_document(context_, filename.c_str());
-			if(document_ == 0) {
+			if(document_ == nullptr) {
 				return false;
 			}
-
+std::cout << "Open step 3" << std::endl;
 			// パスワードが必要な場合
-			char* password = 0;
+			char* password = nullptr;
 			if (fz_needs_password(context_, document_)) {
 				if (!fz_authenticate_password(context_, document_, password)) {
 					fz_drop_document(context_, document_);
 					return false;
 				}
 			}
-
+std::cout << "Open step 4" << std::endl;
 			// ドキュメントのページ数を取得
 			page_count_ = fz_count_pages(context_, document_);
 			page_no_ = 0;
 			page_current_ = -1;
-
+std::cout << "Open step 5" << std::endl;
 			outline_ = fz_load_outline(context_, document_);
-			if(outline_) {
+			if(outline_ != nullptr) {
 				doctitle_ = outline_->title;
 			}
-// std::cout << boost::format("PDF Pages: %d\n") % page_count_;
+std::cout << boost::format("PDF Pages: %d\n") % page_count_;
 
 			return true;
 		}
@@ -174,6 +176,7 @@ namespace img {
 		//-----------------------------------------------------------------//
 		bool render(const vtx::spos& size)
 		{
+return true;
 			if(document_ == 0 || page_count_ <= 0) {
 				return false;
 			}
@@ -250,15 +253,16 @@ namespace img {
 		//-----------------------------------------------------------------//
 		void close()
 		{
-			if(outline_) {
+			if(outline_ != nullptr) {
 				fz_drop_outline(context_, outline_);
 				outline_ = nullptr;
 			}
 
-			if(document_) {
+			if(document_ != nullptr) {
 				fz_drop_document(context_, document_);
 				document_ = nullptr;
 			}
+			page_count_ = 0;
 		}
 
 
@@ -286,7 +290,7 @@ namespace img {
 			@return 画像のインターフェース・クラス
 		*/
 		//-----------------------------------------------------------------//
-		const i_img* get_image_if() const { return &img_; }
+		const i_img* get_image() const { return &img_; }
 
 
 		//-----------------------------------------------------------------//
