@@ -5,15 +5,17 @@ GLFW application
 
 ## glfw_app の概要
 
-・glfw ライブラリーを使って動作するアプリケーションと、OpenGL ベースの GUI フレームワークとユーティリティー類です。  
-・img_io 画像ファイルの入出力や、画像の操作を網羅するモジュールです。  
-・snd_io 音楽ファイルの入出力や、OpenAL を使った音の再生を行うモジュールです。  
-・utils 文字列の操作、二次元、三次元、四次元ベクトル、行列を扱う数学クラスなどがあります。  
-・gl_fw OpenGL API 関係の C++ ラッパーなど。
-・core glfw API 関係の C++ ラッパー、フォントの描画関連など。
-・widgets GUI フレームワークなど
-・av ffmpeg API 関係の C++ ラッパー
+- glfw ライブラリーを使って動作するアプリケーションと、OpenGL ベースの GUI フレームワークとユーティリティー類です。  
+- img_io 画像ファイルの入出力や、画像の操作を網羅するモジュールです。  
+- snd_io 音楽ファイルの入出力や、OpenAL を使った音の再生を行うモジュールです。  
+- utils 文字列の操作、二次元、三次元、四次元ベクトル、行列を扱う数学クラスなどがあります。  
+- gl_fw OpenGL API 関係の C++ ラッパーなど。
+- core glfw API 関係の C++ ラッパー、フォントの描画関連など。
+- widgets GUI フレームワークなど
+- av ffmpeg API 関係の C++ ラッパー
    
+---
+
 ### 開発環境（Windows）
    
  - Windows では、事前に MSYS2 環境をインストールしておきます。
@@ -36,8 +38,6 @@ GLFW application
  - アップデートは、複数回行われ、その際、コンソールの指示に従う事。   
  ※複数回、コンソールを開きなおす必要があるかもしれない。
  - clang でのコンパイル時は、「clang-tools-extra」を別途インストールする必要があるようです。
- - 「openjpeg2」関係は、バージョンアップに伴い、ディレクトリー名が更新されているので   
-   それに合わせて、パスを修正する必要があります。
  - 「faad2」はバージョンアップに伴い、同梱されていた「mp4ff」ライブラリが無くなっている為   
    AAC 関係のコーデックがコンパイル出来なくなり、とりあえず、リンクから外しました。
 
@@ -61,14 +61,15 @@ GLFW application
    pacman -S mingw-w64-clang-x86_64-ffmpeg
 ```
 
-・好みのテキストエディターをインストール。   
+- 好みのテキストエディターをインストール。   
 ※自分の場合は「emacs」、最近、コンソールベースで使え、日本語も正しく   
-表示（mintty 設定を参照）できます。   
+表示（mintty 設定を参照）できます。
+
 ```
   pacman -S emacs
 ```
 
-・最近は、テキストエディターより、VSCode が便利です。
+- 最近は、マルチプラットホームで使え、インテリセンスも使えるので [VSCode](https://code.visualstudio.com/) がお勧め。
 
 ### 開発環境（OS-X）
 
@@ -105,13 +106,14 @@ GUI フレームワークでは、「Inconsolata」の OTF フォントを使っ
 <a href="http://levien.com/type/myfonts/inconsolata.html" target="_blank">Inconsolata OTF font</a>   
    
 ※Linux 環境では、apt−get 等でインストールできます。
+
 ```
    sudo apt-get install fonts-inconsolata
 ```
-
+   
 ### コンソールの設定（mintty の設定）
    
-・コンソールフォントのインストール   
+コンソールフォントのインストール（必要なら・・）   
 mintty では、日本語と英字を美しく表示できるように、日本語フォントを   
 インストールしておきます。   
 お勧めは「Myrica M」ですが、他にも色々あるので、好みのフォントを   
@@ -140,43 +142,50 @@ IMECursorColour=255,0,0
 ```
    
 ### 全体のソース・コード取得
+
 ```
    git clone git://github.com/hirakuni45/glfw3_app.git
 ```
 
 ### コンパイル方法
-・各ディレクトリーに移動後、「make」を行なう。   
-・従属規則は自動で生成される。   
 
-#### 便利ツール   
+- 各ディレクトリーに移動後、「make」を行なう。   
+- 従属規則は自動で生成される。   
 
-・dllcollect  --->  mingw64 DLL 収集プログラム   
+#### コンソールアプリ   
+
+- dllcollect  --->  clang64 DLL 収集プログラム   
+- 実行ファイルに必要な、DLL を「dlls」ディレクトリーに全てコピーする。
+- この DLL とアプリケーション(.EXE）を合わせて配布が可能。
+
 ```
    dllcollect 「実行ファイル」 
 ```
-実行ファイルに必要な、DLL を「dlls」ディレクトリーに全てコピーする。   
-   
-・bmc  --->  ビットマップ変換   
-・iod_make  --->  組み込みマイコン向け、I/O デバイスクラステンプレート生成サポート   
+
+- bmc  --->  ビットマップ変換   
 
 #### アプリケーション   
 
-・gui_test  --->  GUI 描画、操作、テスト用   
-・player  --->  音楽再生プレイヤー   
+- gui_test  --->  GUI 描画、操作、テスト用   
+- player  --->  音楽再生プレイヤー  
+
 ![player アプリ](player.png)   
    
-・image  --->  画像ビューアー   
+- image  --->  画像ビューアー   
+
 ![image アプリ](image.png)        
    
-・vplayer  --->  動画再生プレイヤー(ffmpeg)   
-・spinv  --->  スペースインベーダーエミュレーター（ROM イメージ別途必要）   
+- nesemu ---> NES エミュレータ（ROM イメージ別途必要）
+![image アプリ](nesemu.png)        
+
+- spinv  --->  スペースインベーダーエミュレーター（ROM イメージ別途必要）
+
 ![spinv アプリ](spinv.png)   
    
-・pmdv  --->  MMD プレイヤー 
+- pmdv  --->  MMD プレイヤー 
+
 ![pmdv アプリ](pmdv.png)     
    
-・effv  --->  effekseer プレイヤー   
-
 ---
 License
 
