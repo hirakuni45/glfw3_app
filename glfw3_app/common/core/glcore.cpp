@@ -9,8 +9,6 @@
 //=====================================================================//
 #ifdef WIN32
 #include <windows.h>
-// windows で define されているので無効にする。
-// #undef DELETE
 #endif
 #include <iostream>
 #include <thread>
