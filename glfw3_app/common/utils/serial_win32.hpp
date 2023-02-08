@@ -1,10 +1,10 @@
 #pragma once
 //=====================================================================//
 /*!	@file
-	@brief	シリアルＩ／Ｏ（WIN32）@n
+	@brief	WIN32-API を利用するシリアルＩ／Ｏ @n
 			※要ライブラリ： hid setupapi ksguid
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2018 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2018, 2023 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -14,6 +14,7 @@
 #include <setupapi.h>
 #include <string>
 #include <vector>
+#include "utils/string_utils.hpp"
 
 namespace device {
 
@@ -121,7 +122,7 @@ namespace device {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	ポート・リストを作成
-			@return 成功なら「true」
+			@return 成功なら「true」（何も無い場合「false」）
 		*/
 		//-----------------------------------------------------------------//
 		bool create_list()
@@ -143,23 +144,21 @@ namespace device {
 				// COM ポート名の取得
 				HKEY key = SetupDiOpenDevRegKey(hi, &data, DICS_FLAG_GLOBAL, 0, DIREG_DEV, KEY_QUERY_VALUE);
 				if(key) {
-					BYTE name[256];
+					char name[256];
 					DWORD type = 0;
 					DWORD size = sizeof(name);
-					RegQueryValueExA(key, "PortName", NULL, &type, name, &size);
-					t.port = reinterpret_cast<const char*>(name);
+					RegQueryValueExA(key, "PortName", NULL, &type, reinterpret_cast<BYTE*>(name), &size);
+					t.port = name;
 				}
 
 				//	デバイスの情報を取得
 				DWORD dt = 0;
-				PBYTE ptr = nullptr;
 				DWORD size = 0;
-				SetupDiGetDeviceRegistryProperty(hi, &data, SPDRP_DEVICEDESC, &dt, ptr, size, &size);
+				SetupDiGetDeviceRegistryPropertyW(hi, &data, SPDRP_DEVICEDESC, &dt, nullptr, size, &size);
 				if(size > 0) {
-					ptr = new BYTE[size];
-					SetupDiGetDeviceRegistryProperty(hi, &data, SPDRP_DEVICEDESC, &dt, ptr, size, &size);
-					t.info = reinterpret_cast<const char*>(ptr);
-					delete[] ptr;
+					uint16_t tmp[size];
+					SetupDiGetDeviceRegistryPropertyW(hi, &data, SPDRP_DEVICEDESC, &dt, reinterpret_cast<BYTE*>(tmp), size, &size);
+					utils::utf16_to_utf8(tmp, t.info);
 				}
 				++idx;
 				name_list_.push_back(t);
