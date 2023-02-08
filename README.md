@@ -16,7 +16,7 @@ GLFW application
    
 ---
 
-### 開発環境（Windows）
+## 開発環境（Windows）
    
  - Windows では、事前に MSYS2 環境をインストールしておきます。
  - MSYS2 には、msys2、mingw32、mingw64、clang64、ucrt64 と複数の異なった環境がありますが、この   
@@ -71,7 +71,9 @@ GLFW application
 
 - 最近は、マルチプラットホームで使え、インテリセンスも使えるので [VSCode](https://code.visualstudio.com/) がお勧め。
 
-### 開発環境（OS-X）
+---
+
+## 開発環境（OS-X）
 
 ・macports をインストール、各種ライブラリーをインストールして下さい。  
    
@@ -89,15 +91,19 @@ GLFW application
    sudo port install libmad
    sudo port install ffmpeg
 ```
-   
-### 開発環境（Ubuntu）
+
+---
+
+## 開発環境（Ubuntu）
 
 Linux 環境は、複数あるので、ここでは「Ubuntu 16.04 LTS」環境の場合を書いておきます。
 ```
    sudo apt-get install xxx
 ```
-   
-### フォントのインストール
+
+---
+
+## フォントのインストール
 
 GUI フレームワークでは、「Inconsolata」の OTF フォントを使っています。   
 ダウンロードして、インストールして下さい。   
@@ -110,13 +116,15 @@ GUI フレームワークでは、「Inconsolata」の OTF フォントを使っ
 ```
    sudo apt-get install fonts-inconsolata
 ```
-   
-### コンソールの設定（mintty の設定）
+
+---
+
+## コンソールの設定（mintty の設定）
    
 コンソールフォントのインストール（必要なら・・）   
 mintty では、日本語と英字を美しく表示できるように、日本語フォントを   
 インストールしておきます。   
-お勧めは「Myrica M」ですが、他にも色々あるので、好みのフォントを   
+お勧めは「MyricaM」ですが、他にも色々あるので、好みのフォントを   
 インストールできます、その場合、「.minttyrc」のフォント設定を修正します。   
    
 <a href="https://myrica.estable.jp/myricamhistry/" target="_blank">Myrica M</a>   
@@ -127,10 +135,11 @@ mintty では、日本語と英字を美しく表示できるように、日本�
 ```
 # mintty Settings
 BoldAsFont=no
-FontHeight=11
+Font=MyricaM M
+FontHeight=12
 
 Columns=110
-Rows=40
+Rows=36
 Locale=ja_JP
 Charset=UTF-8
 Term=xterm-256color
@@ -140,31 +149,36 @@ BackspaceSendsBS=yes
 
 IMECursorColour=255,0,0
 ```
-   
-### 全体のソース・コード取得
+
+---
+
+## 全体のソース・コード取得
 
 ```
    git clone git://github.com/hirakuni45/glfw3_app.git
 ```
 
-### コンパイル方法
+---
+
+## コンパイル方法
 
 - 各ディレクトリーに移動後、「make」を行なう。   
-- 従属規則は自動で生成される。   
+- 従属規則は自動で生成されます。
+- 「make strip」とする事で、アプリ起動時に作成される、コンソールウィンドウを作らなくなります。
 
-#### コンソールアプリ   
+### コンソールアプリケーション
 
 - dllcollect  --->  clang64 DLL 収集プログラム   
 - 実行ファイルに必要な、DLL を「dlls」ディレクトリーに全てコピーする。
-- この DLL とアプリケーション(.EXE）を合わせて配布が可能。
+- この DLL とアプリケーション(.exe）を合わせて配布が可能。
 
 ```
-   dllcollect 「実行ファイル」 
+   dllcollect 「実行ファイル名」 
 ```
 
-- bmc  --->  ビットマップ変換   
+- bmc  --->  ビットマップ変換
 
-#### アプリケーション   
+### GUI アプリケーション
 
 - gui_test  --->  GUI 描画、操作、テスト用   
 - player  --->  音楽再生プレイヤー  

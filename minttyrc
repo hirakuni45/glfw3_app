@@ -1,9 +1,10 @@
 # mintty Settings
 BoldAsFont=no
-FontHeight=11
+Font=MyricaM M
+FontHeight=12
 
 Columns=110
-Rows=40
+Rows=36
 Locale=ja_JP
 Charset=UTF-8
 Term=xterm-256color
