@@ -18,7 +18,8 @@ VPATH		=	../common
 
 CSOURCES	=
 
-PSOURCES	=	main.cpp
+PSOURCES	=	main.cpp \
+				core/device.cpp
 
 # C++ version
 CPP_VER		=	-std=c++17
