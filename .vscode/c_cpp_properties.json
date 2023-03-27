@@ -36,9 +36,11 @@
                     "C:/msys64/clang64/bin",
                     "C:/msys64",
                     "D:/Git/glfw_app/glfw_app/common"
-                ],"limitSymbolsToIncludedHeaders": true,
+                ],
+                "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
-            }
+            },
+            "configurationProvider": "ms-vscode.makefile-tools"
         }
     ],
     "version": 4

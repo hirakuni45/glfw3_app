@@ -164,7 +164,7 @@ strip:
 endif
 
 run:
-	./$(TARGET)
+	./$(TARGET) $(RUN_PARA)
 
 clean:
 	rm -rf $(BUILD) $(TARGET)$(FEXT)
