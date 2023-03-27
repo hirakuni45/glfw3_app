@@ -138,10 +138,14 @@ namespace al {
 					for(int s = 0; s < num; ++s) {
 						for(int sb = 0; sb < 32; ++sb) {
 							frame.sbsample[ch][s][sb] =
+#ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-register"
+#endif
 								mad_f_mul(frame.sbsample[ch][s][sb], subband_filter_[sb]);
+#ifdef __clang__
 #pragma clang diagnostic pop
+#endif
 						}
 					}
 				}
@@ -149,10 +153,14 @@ namespace al {
 				for(int s = 0; s < num; ++s) {
 					for(int sb = 0; sb < 32; ++sb) {
 						frame.sbsample[0][s][sb] =
+#ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-register"
+#endif
 							mad_f_mul(frame.sbsample[0][s][sb], subband_filter_[sb]);
+#ifdef __clang__
 #pragma clang diagnostic pop
+#endif
 					}
 				}
 			}
