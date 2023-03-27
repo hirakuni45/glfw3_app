@@ -35,9 +35,9 @@ CINC_APP	=	. ../common
 INC_USR		=
 # User(optional) link library
 ifeq ($(OS),Windows_NT)
-LIBS_USR	=	mupdf mupdf-third jbig2dec gumbo
+LIBS_USR	=	mupdf mupdf-third harfbuzz jbig2dec gumbo
 else
-LIBS_USR	=	mupdf mupdf-third jbig2dec gumbo
+LIBS_USR	=	mupdf mupdf-third harfbuzz jbig2dec gumbo
 endif
 
 # User library path 

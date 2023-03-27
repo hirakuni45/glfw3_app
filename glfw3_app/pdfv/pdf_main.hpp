@@ -633,14 +633,11 @@ namespace app {
 					dialog_->enable();
 				} else {
 					pdf_in_.render(vtx::spos(512, 512));
-std::cout << boost::format("PDF: %d pages") % pdf_in_.get_page_limit() << std::endl;
-#if 0
 					src_image_ = pdf_in_.get_image();
 					term_->output("Ld: " + load_ctx_->get_file() + "\n");
 					image_info_(load_ctx_->get_file(), src_image_.get());
 					frame_->at_local_param().text_param_.set_text(imfn);
 					setup_src_image_();
-#endif
 				}
 #if 0
 				if(!imf.load(imfn)) {
