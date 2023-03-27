@@ -441,11 +441,11 @@ namespace img {
 			unsigned char* lines[1];
 			lines[0] = &line[0];
 			vtx::spos pos;
-			for(pos.y = 0; pos.y < cinfo.image_height; ++pos.y) {
+			for(pos.y = 0; pos.y < static_cast<short>(cinfo.image_height); ++pos.y) {
 				jpeg_read_scanlines(&cinfo, (JSAMPLE**)lines, 1);
 				unsigned char* p = &line[0];
 				if(cinfo.output_components == 4) {
-					for(pos.x = 0; pos.x < cinfo.image_width; ++pos.x) {
+					for(pos.x = 0; pos.x < static_cast<short>(cinfo.image_width); ++pos.x) {
 						img::rgba8 c;
 						c.r = *p++;
 						c.g = *p++;
@@ -454,7 +454,7 @@ namespace img {
 						img_->put_pixel(pos, c);
 					}
 				} else if(cinfo.output_components == 3) {
-					for(pos.x = 0; pos.x < cinfo.image_width; ++pos.x) {
+					for(pos.x = 0; pos.x < static_cast<short>(cinfo.image_width); ++pos.x) {
 						img::rgba8 c;
 						c.r = *p++;
 						c.g = *p++;
@@ -463,7 +463,7 @@ namespace img {
 						img_->put_pixel(pos, c);
 					}
 				} else if(cinfo.output_components == 1) {
-					for(pos.x = 0; pos.x < cinfo.image_width; ++pos.x) {
+					for(pos.x = 0; pos.x < static_cast<short>(cinfo.image_width); ++pos.x) {
 						img::rgba8 c;
 						c.b = c.g = c.r = *p++;
 						c.a = 255;
@@ -573,7 +573,7 @@ namespace img {
 			row_pointer[0] = (JSAMPLE *)tmp;
 			vtx::spos pos;
 			pos.y = 0;
-			while(cinfo.next_scanline < h) {
+			while(static_cast<short>(cinfo.next_scanline) < h) {
 				unsigned char* p = tmp;
 				for(pos.x = 0; pos.x < w; ++pos.x) {
 					rgba8 c;

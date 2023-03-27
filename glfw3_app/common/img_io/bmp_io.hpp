@@ -59,9 +59,9 @@ namespace img {
 		static constexpr uint32_t B5H_DPROFILEDATA	=	112;	/* DWORD        bV5ProfileData;  */
 		static constexpr uint32_t B5H_DPROFILESIZE	=	116;	/* DWORD        bV5ProfileSize;  */
 		static constexpr uint32_t B5H_DRESERVED		=	120;	/* DWORD        bV5Reserved;     */
-		static constexpr uint32_t INFOHED_SIZE		=	40;		/* sizeof(BITMAPINFOHEADER)      */
-		static constexpr uint32_t BMPV4HED_SIZE		=	108;	/* sizeof(BITMAPV4HEADER)        */
-		static constexpr uint32_t BMPV5HED_SIZE		=	124;	/* sizeof(BITMAPV5HEADER)        */
+		static constexpr int32_t INFOHED_SIZE		=	40;		/* sizeof(BITMAPINFOHEADER)      */
+		static constexpr int32_t BMPV4HED_SIZE		=	108;	/* sizeof(BITMAPV4HEADER)        */
+		static constexpr int32_t BMPV5HED_SIZE		=	124;	/* sizeof(BITMAPV5HEADER)        */
 
 		/* BITMAPCOREHEADER */
 		static constexpr uint32_t BCH_DSIZE			=	0;		/* DWORD  bcSize;                */
@@ -69,7 +69,7 @@ namespace img {
 		static constexpr uint32_t BCH_WHEIGHT		=	6;		/* WORD   bcHeight;              */
 		static constexpr uint32_t BCH_WPLANES		=	8;		/* WORD   bcPlanes;              */
 		static constexpr uint32_t BCH_WBITCOUNT		=	10;		/* WORD   bcBitCount;            */
-		static constexpr uint32_t COREHED_SIZE		=	12;		/* sizeof(BITMAPCOREHEADER)      */
+		static constexpr int32_t COREHED_SIZE		=	12;		/* sizeof(BITMAPCOREHEADER)      */
 
 		/* RGBQUAD */
 		static constexpr uint32_t RGBQ_BLUE			=	0;		/* BYTE   rgbBlue;     */
