@@ -3,15 +3,13 @@
 /*!	@file
 	@brief	PDF ファイル（入力のみ）を扱うクラス（ヘッダー）
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
 //=====================================================================//
 #include <string>
-extern "C" {
 #include <mupdf/fitz.h>
-};
 #include "img_io/i_img_io.hpp"
 #include "img_io/img_rgba8.hpp"
 
@@ -36,7 +34,20 @@ namespace img {
 		int				page_no_;
 		int				page_current_;
 
-		img_rgba8		img_;
+		shared_img		img_;
+
+		std::string convert_win32_path_(const std::string& path)
+		{
+			std::string p;
+			for(auto ch : path) {
+				if(ch == '/') {
+					p += '\\';
+				} else {
+					p += ch;
+				}
+			}
+			return p;
+		}
 
 	public:
 		//-----------------------------------------------------------------//
@@ -44,7 +55,7 @@ namespace img {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		pdf_in() : context_(nullptr), document_(nullptr), outline_(nullptr),
+		pdf_in() noexcept : context_(nullptr), document_(nullptr), outline_(nullptr),
 				   rotation_(0.0f), size_(0),
 				   page_count_(0), page_no_(0), page_current_(0) { }
 
@@ -62,10 +73,8 @@ namespace img {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize()
+		void initialize() noexcept
 		{
-			context_ = fz_new_context(NULL, NULL, FZ_STORE_UNLIMITED);
-std::cout << "Open step 0" << std::endl;
 		}
 
 
@@ -76,16 +85,23 @@ std::cout << "Open step 0" << std::endl;
 			@return 正常にオープンできれば「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool open(const std::string& filename)
+		bool open(const std::string& filename) noexcept
 		{
-std::cout << "Open step 1" << std::endl;
+			if(context_ == nullptr) {
+				context_ = fz_new_context(NULL, NULL, FZ_STORE_UNLIMITED);
+			}
+
+			fz_try(context_)
+				fz_register_document_handlers(context_);
+			fz_catch(context_)
+
 			close();
-std::cout << "Open step 2" << std::endl;
+
 			document_ = fz_open_document(context_, filename.c_str());
 			if(document_ == nullptr) {
 				return false;
 			}
-std::cout << "Open step 3" << std::endl;
+
 			// パスワードが必要な場合
 			char* password = nullptr;
 			if (fz_needs_password(context_, document_)) {
@@ -94,17 +110,16 @@ std::cout << "Open step 3" << std::endl;
 					return false;
 				}
 			}
-std::cout << "Open step 4" << std::endl;
+
 			// ドキュメントのページ数を取得
 			page_count_ = fz_count_pages(context_, document_);
 			page_no_ = 0;
 			page_current_ = -1;
-std::cout << "Open step 5" << std::endl;
+
 			outline_ = fz_load_outline(context_, document_);
 			if(outline_ != nullptr) {
 				doctitle_ = outline_->title;
 			}
-std::cout << boost::format("PDF Pages: %d\n") % page_count_;
 
 			return true;
 		}
@@ -117,7 +132,8 @@ std::cout << boost::format("PDF Pages: %d\n") % page_count_;
 			@return 正常にオープンできれば「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool open(const utils::wstring& filename) {
+		bool open(const utils::wstring& filename) noexcept
+		{
 			std::string s;
 			utils::utf16_to_utf8(filename, s);
 			return open(s);
@@ -130,7 +146,7 @@ std::cout << boost::format("PDF Pages: %d\n") % page_count_;
 			@return タイトル
 		*/
 		//-----------------------------------------------------------------//
-		const std::string& get_document_title() const { return doctitle_; }
+		const std::string& get_document_title() const noexcept { return doctitle_; }
 
 
 		//-----------------------------------------------------------------//
@@ -139,7 +155,7 @@ std::cout << boost::format("PDF Pages: %d\n") % page_count_;
 			@param[in]	page	設定ページ
 		*/
 		//-----------------------------------------------------------------//
-		void set_page(int page) { if(page >= 0 && page < page_count_) page_no_ = page; }
+		void set_page(int page) noexcept { if(page >= 0 && page < page_count_) page_no_ = page; }
 
 
 		//-----------------------------------------------------------------//
@@ -148,7 +164,7 @@ std::cout << boost::format("PDF Pages: %d\n") % page_count_;
 			@return 現在のページ
 		*/
 		//-----------------------------------------------------------------//
-		int get_page() const { return page_no_; }
+		int get_page() const noexcept { return page_no_; }
 
 
 		//-----------------------------------------------------------------//
@@ -156,7 +172,7 @@ std::cout << boost::format("PDF Pages: %d\n") % page_count_;
 			@brief	前ページ
 		*/
 		//-----------------------------------------------------------------//
-		void prev_page() { --page_no_; if(page_no_ < 0) page_no_ = 0; }
+		void prev_page() noexcept { --page_no_; if(page_no_ < 0) page_no_ = 0; }
 
 
 		//-----------------------------------------------------------------//
@@ -164,7 +180,7 @@ std::cout << boost::format("PDF Pages: %d\n") % page_count_;
 			@brief	次ページ
 		*/
 		//-----------------------------------------------------------------//
-		void next_page() { ++page_no_; if(page_no_ >= page_count_) page_no_ = page_count_ - 1; }
+		void next_page() noexcept { ++page_no_; if(page_no_ >= page_count_) page_no_ = page_count_ - 1; }
 
 
 		//-----------------------------------------------------------------//
@@ -174,10 +190,9 @@ std::cout << boost::format("PDF Pages: %d\n") % page_count_;
 			@return 正常終了なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool render(const vtx::spos& size)
+		bool render(const vtx::spos& size) noexcept
 		{
-return true;
-			if(document_ == 0 || page_count_ <= 0) {
+			if(document_ == nullptr || page_count_ <= 0) {
 				return false;
 			}
 
@@ -207,7 +222,6 @@ return true;
 			float zoom = 1.0f;
 			float zoomx = static_cast<float>(size.x) / xx;
 			float zoomy = static_cast<float>(size.y) / yy;
-// std::cout << boost::format("Scale: %f, %f\n") % zoomx % zoomy;
 			if((zoomx * xx) > static_cast<float>(size.x)) {
 				zoom = zoomx;
 			} else {
@@ -224,21 +238,21 @@ return true;
 				int h = bbox.y1 - bbox.y0;
 // std::cout << boost::format("size: %d, %d\n") % w % h;
 				// fz_device_rgb ---> RGBA
-				img_.create(vtx::spos(w, h), true);
+				auto im = new img_rgba8;
+				im->create(vtx::spos(w, h), true);
 
-				fz_separations* seps = fz_new_separations(context_, 0);
-				int alpha = 255;
+				int alpha = 1;
 				int stride = w * 4;
-				fz_pixmap* pix = fz_new_pixmap_with_data(context_, fz_device_rgb(context_), w, h, seps, alpha, stride,
-					reinterpret_cast<unsigned char*>(img_.at_image()));
+				auto rgba = reinterpret_cast<unsigned char*>(im->at_image());
+				fz_pixmap* pix = fz_new_pixmap_with_data(context_, fz_device_rgb(context_), w, h, NULL, alpha, stride, rgba);
 				fz_clear_pixmap_with_value(context_, pix, 0xff);
 
 				fz_device *dev = fz_new_draw_device(context_, mat, pix);
 				fz_run_page(context_, page, dev, mat, NULL);
-				fz_drop_device(context_, dev);
 
+				img_ = shared_img(im);
+				fz_drop_device(context_, dev);
 				fz_drop_pixmap(context_, pix);
-				fz_drop_separations(context_, seps);
 			}
 			fz_drop_page(context_, page);
 
@@ -251,7 +265,7 @@ return true;
 			@brief	PDF をクローズする
 		*/
 		//-----------------------------------------------------------------//
-		void close()
+		void close() noexcept
 		{
 			if(outline_ != nullptr) {
 				fz_drop_outline(context_, outline_);
@@ -272,7 +286,7 @@ return true;
 			@return 最大ページ数
 		*/
 		//-----------------------------------------------------------------//
-		int get_page_limit() const { return page_count_; }
+		int get_page_limit() const noexcept { return page_count_; }
 
 
 		//-----------------------------------------------------------------//
@@ -281,7 +295,7 @@ return true;
 			@return 画像のコンテキスト
 		*/
 		//-----------------------------------------------------------------//
-		img::img_rgba8& at_img_rgba8() { return img_; }
+//		img::img_rgba8& at_img_rgba8() noexcept { return img_; }
 
 
 		//-----------------------------------------------------------------//
@@ -290,7 +304,7 @@ return true;
 			@return 画像のインターフェース・クラス
 		*/
 		//-----------------------------------------------------------------//
-		const i_img* get_image() const { return &img_; }
+		const shared_img get_image() const noexcept { return img_; }
 
 
 		//-----------------------------------------------------------------//
@@ -298,12 +312,14 @@ return true;
 			@brief	廃棄
 		*/
 		//-----------------------------------------------------------------//
-		void destroy()
+		void destroy() noexcept
 		{
 			close();
 
-			fz_drop_context(context_);
-			context_ = 0;
+			if(context_ != nullptr) {
+				fz_drop_context(context_);
+			}
+			context_ = nullptr;
 		}
 	};
 }
