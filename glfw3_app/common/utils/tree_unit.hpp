@@ -1,10 +1,14 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
-	@brief	階層的構造を管理するテンプレート・クラス
+	@brief	階層的構造を管理するテンプレート・クラス @n
+			ファイルパス名をハンドルととして、ツリー状の構造を管理する。
 	@author	平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2023 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #ifndef NDEBUG
 #include <iostream>
 #endif
@@ -27,12 +31,12 @@ namespace utils {
 	template <class T>
 	struct tree_unit {
 
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
-			@brief	ツリー・ユニット型@n
+			@brief	ツリー・ユニット型 @n
 					「T」型のユーザー定義をアトリビュート情報として付加
 		*/
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct unit_t {
 			T				value;	///< ユーザー利用データ
 
@@ -47,7 +51,7 @@ namespace utils {
 
 		public:
 #ifndef NDEBUG
-			void list_all() const {
+			void list_all() const noexcept {
 				value.list_all();
 			}
 #endif
@@ -86,7 +90,7 @@ namespace utils {
 		typedef std::stack<std::string>		string_stack;
 		string_stack	stack_path_;
 
-		bool install_(const std::string& key, const T& value)
+		bool install_(const std::string& key, const T& value) noexcept
 		{
 			std::string fpath;
 			if(!create_full_path(key, fpath)) {
@@ -127,7 +131,7 @@ namespace utils {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		tree_unit() : serial_id_(0) { }
+		tree_unit() noexcept : serial_id_(0) { }
 
 
 		//-----------------------------------------------------------------//
@@ -135,7 +139,7 @@ namespace utils {
 			@brief	デストラクター
 		*/
 		//-----------------------------------------------------------------//
-		~tree_unit() { clear(); }
+		~tree_unit() noexcept { clear(); }
 
 
 		//-----------------------------------------------------------------//
@@ -144,7 +148,7 @@ namespace utils {
 			@return シリアルID
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t get_serial_id() const { return serial_id_; }
+		uint32_t get_serial_id() const noexcept { return serial_id_; }
 
 
 		//-----------------------------------------------------------------//
@@ -153,7 +157,8 @@ namespace utils {
 			@param[in]	all	全てをクリアする場合は「true」
 		*/
 		//-----------------------------------------------------------------//
-		void clear(bool all = true) {
+		void clear(bool all = true) noexcept
+		{
 			unit_map_.clear();
 			current_path_.clear();
 			if(all) serial_id_ = 0;
@@ -168,7 +173,7 @@ namespace utils {
 			@return エラーが無ければ「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool create_full_path(const std::string& name, std::string& fullpath) const
+		bool create_full_path(const std::string& name, std::string& fullpath) const noexcept
 		{
 			if(name.empty()) return false;
 			if(name[0] == '/') {
@@ -190,7 +195,7 @@ namespace utils {
 			@return 成功したら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool install(const std::string& key, const T& value)
+		bool install(const std::string& key, const T& value) noexcept
 		{
 			return install_(key, value);
 		}
@@ -203,7 +208,7 @@ namespace utils {
 			@return 成功したら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool erase(const std::string& key)
+		bool erase(const std::string& key) noexcept
 		{
 			std::string fpath;
 			if(!create_full_path(key, fpath)) {
@@ -242,7 +247,7 @@ namespace utils {
 			@brief	カレントのパスを退避
 		*/
 		//-----------------------------------------------------------------//
-		void push_current_path()
+		void push_current_path() noexcept
 		{
 			stack_path_.push(current_path_);
 		}
@@ -253,7 +258,7 @@ namespace utils {
 			@brief	カレントのパスを復帰
 		*/
 		//-----------------------------------------------------------------//
-		void pop_current_path()
+		void pop_current_path() noexcept
 		{
 			if(!stack_path_.empty()) {
 				current_path_ = stack_path_.top();
@@ -267,7 +272,7 @@ namespace utils {
 			@brief	カレントのパスをクリア
 		*/
 		//-----------------------------------------------------------------//
-		void clear_current_path()
+		void clear_current_path() noexcept
 		{
 			current_path_.clear();
 		}
@@ -280,7 +285,7 @@ namespace utils {
 			@return 正常なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool set_current_path(const std::string& path)
+		bool set_current_path(const std::string& path) noexcept
 		{
 			if(path.empty()) {
 				return false;
@@ -303,7 +308,7 @@ namespace utils {
 			@return カレントパス
 		*/
 		//-----------------------------------------------------------------//
-		const std::string& get_current_path() const { return current_path_; }
+		const std::string& get_current_path() const noexcept { return current_path_; }
 
 
 		//-----------------------------------------------------------------//
@@ -313,7 +318,7 @@ namespace utils {
 			@return 正常なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool make_directory(const std::string& name)
+		bool make_directory(const std::string& name) noexcept
 		{
 			T value;
 			return install_(name, value);
@@ -327,7 +332,8 @@ namespace utils {
 			@return ユニットがあれば「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool find(const std::string& key) const {
+		bool find(const std::string& key) const noexcept
+		{
 			std::string fullpath;
 			if(!create_full_path(key, fullpath)) {
 				return false;
@@ -349,7 +355,7 @@ namespace utils {
 			@return ユニット・オプショナル型を返す
 		*/
 		//-----------------------------------------------------------------//
-		optional_const_ref get(const std::string& key) const
+		optional_const_ref get(const std::string& key) const noexcept
 		{
 			std::string fpath;
 			if(!create_full_path(key, fpath)) {
@@ -372,7 +378,7 @@ namespace utils {
 			@return ディレクトリーなら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool is_directory(const std::string& key) const
+		bool is_directory(const std::string& key) const noexcept
 		{
 			std::string fpath;
 			if(!create_full_path(key, fpath)) {
@@ -396,7 +402,7 @@ namespace utils {
 			@param[in]	id_sort	ID 順（登録順）でソートする場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		void create_list(const std::string& root, unit_map_its& list, bool id_sort = false)
+		void create_list(const std::string& root, unit_map_its& list, bool id_sort = false) noexcept
 		{
 			if(unit_map_.empty()) {
 				list.clear();
@@ -453,7 +459,7 @@ namespace utils {
 			@return key の参照
 		*/
 		//-----------------------------------------------------------------//
-		const std::string& get_key(unit_map_cit cit) const { return cit->first; }
+		const std::string& get_key(unit_map_cit cit) const noexcept { return cit->first; }
 
 
 		//-----------------------------------------------------------------//
@@ -463,7 +469,7 @@ namespace utils {
 			@return unit の参照
 		*/
 		//-----------------------------------------------------------------//
-		const unit_t& get_unit(unit_map_cit cit) const { return cit->second; }
+		const unit_t& get_unit(unit_map_cit cit) const noexcept { return cit->second; }
 
 
 		//-----------------------------------------------------------------//
@@ -473,7 +479,7 @@ namespace utils {
 			@return ディレクトリーなら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool is_directory(unit_map_cit cit) const
+		bool is_directory(unit_map_cit cit) const noexcept
 		{
 			if(cit != unit_map_.end()) {
 				return !(cit->second.is_childs_empty());
@@ -489,7 +495,7 @@ namespace utils {
 			@brief	デバッグ用、全リスト表示
 		*/
 		//-----------------------------------------------------------------//
-		void list(const std::string& root = "") const
+		void list(const std::string& root = "") const noexcept
 		{
 			unit_map_cits cits;
 			create_list(root, cits);
@@ -531,7 +537,8 @@ namespace utils {
 			@brief	swap
 		*/
 		//-----------------------------------------------------------------//
-		void swap(tree_unit& src) {
+		void swap(tree_unit& src) noexcept
+		{
 			unit_map_.swap(src.unit_map_);
 			std::swap(serial_id_, src.serial_id_);
 			current_path_.swap(src.current_path_);
@@ -544,7 +551,8 @@ namespace utils {
 			@brief	＝オペレーター
 		*/
 		//-----------------------------------------------------------------//
-		tree_unit& operator = (const tree_unit& src) {
+		tree_unit& operator = (const tree_unit& src) noexcept
+		{
 			unit_map_ = src.unit_map_;
 			serial_id_ = src.serial_id_;
 			current_path_ = src.current_path_;
