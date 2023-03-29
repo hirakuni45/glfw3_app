@@ -430,7 +430,7 @@ namespace gui {
 			@param[in]	sym		シンボル
 		*/
 		//-----------------------------------------------------------------//
-		widget(const param& para, const std::string& sym = "") :
+		widget(const param& para, const std::string& sym = "") noexcept :
 			param_(para), symbol_(sym),
 			serial_(0), mark_(false)
 			{ }
@@ -450,7 +450,7 @@ namespace gui {
 			@return 基本パラメーターの参照
 		*/
 		//-----------------------------------------------------------------//
-		const param& get_param() const { return param_; }
+		const param& get_param() const noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -459,7 +459,7 @@ namespace gui {
 			@return 基本パラメーターの参照
 		*/
 		//-----------------------------------------------------------------//
-		param& at_param() { return param_; }
+		param& at_param() noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -468,7 +468,7 @@ namespace gui {
 			@return 領域の参照
 		*/
 		//-----------------------------------------------------------------//
-		const vtx::irect& get_rect() const { return param_.rect_; }
+		const vtx::irect& get_rect() const noexcept { return param_.rect_; }
 
 
 		//-----------------------------------------------------------------//
@@ -477,7 +477,7 @@ namespace gui {
 			@return 領域の参照
 		*/
 		//-----------------------------------------------------------------//
-		vtx::irect& at_rect() { return param_.rect_; }
+		vtx::irect& at_rect() noexcept { return param_.rect_; }
 
 
 		//-----------------------------------------------------------------//
@@ -486,7 +486,7 @@ namespace gui {
 			@param[in]	f	フラグ
 		*/
 		//-----------------------------------------------------------------//
-		void set_mark(bool f = true) { mark_ = f; }
+		void set_mark(bool f = true) noexcept { mark_ = f; }
 
 
 		//-----------------------------------------------------------------//
@@ -495,7 +495,7 @@ namespace gui {
 			@return	マーク状態
 		*/
 		//-----------------------------------------------------------------//
-		bool get_mark() const { return mark_; }
+		bool get_mark() const noexcept { return mark_; }
 
 
 		//-----------------------------------------------------------------//
@@ -583,7 +583,7 @@ namespace gui {
 			@param[in]	f	不許可の場合「false」
 		*/
 		//-----------------------------------------------------------------//
-		void set_stall(bool f = true, STALL_GROUP stg = STALL_GROUP::_0) {
+		void set_stall(bool f = true, STALL_GROUP stg = STALL_GROUP::_0) noexcept {
 			if(f) {
 				param_.stall_group_ |=  (1 << static_cast<uint32_t>(stg));
 			} else {
@@ -600,7 +600,7 @@ namespace gui {
 			@param[in]	f	不許可の場合「false」
 		*/
 		//-----------------------------------------------------------------//
-		void set_state(state::type t, bool f = true) { param_.state_[t] = f; }
+		void set_state(state::type t, bool f = true) noexcept { param_.state_[t] = f; }
 
 
 		//-----------------------------------------------------------------//
@@ -610,7 +610,7 @@ namespace gui {
 			@return	許可なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool get_state(state::type t) const { return param_.state_[t]; }
+		bool get_state(state::type t) const noexcept { return param_.state_[t]; }
 
 
 		//-----------------------------------------------------------------//
@@ -620,7 +620,7 @@ namespace gui {
 			@param[in]	f	不許可の場合「false」
 		*/
 		//-----------------------------------------------------------------//
-		void set_action(action::type t, bool f = true) { param_.action_[t] = f; }
+		void set_action(action::type t, bool f = true) noexcept { param_.action_[t] = f; }
 
 
 		//-----------------------------------------------------------------//
@@ -630,7 +630,7 @@ namespace gui {
 			@return	許可なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool get_action(action::type t) const { return param_.action_[t]; }
+		bool get_action(action::type t) const noexcept { return param_.action_[t]; }
 
 
 		//-----------------------------------------------------------------//
@@ -639,7 +639,7 @@ namespace gui {
 			@return 許可の状態
 		*/
 		//-----------------------------------------------------------------//
-		bool get_enable() const {
+		bool get_enable() const noexcept {
 			return get_state(state::ENABLE);
 		}
 
@@ -650,7 +650,7 @@ namespace gui {
 			@return ストールの状態
 		*/
 		//-----------------------------------------------------------------//
-		bool get_stall() const {
+		bool get_stall() const noexcept {
 			return get_state(state::STALL);
 		}
 
@@ -661,7 +661,7 @@ namespace gui {
 			@return 状態
 		*/
 		//-----------------------------------------------------------------//
-		bool get_focus_in() const {
+		bool get_focus_in() const noexcept {
 			return !get_state(state::BEFORE_FOCUS) && get_state(state::IS_FOCUS);
 		}
 
@@ -672,7 +672,7 @@ namespace gui {
 			@return 状態
 		*/
 		//-----------------------------------------------------------------//
-		bool get_focus() const {
+		bool get_focus() const noexcept {
 			return get_state(state::IS_FOCUS);
 		}
 
@@ -683,7 +683,7 @@ namespace gui {
 			@return 状態
 		*/
 		//-----------------------------------------------------------------//
-		bool get_focus_out() const {
+		bool get_focus_out() const noexcept {
 			return get_state(state::BEFORE_FOCUS) && !get_state(state::IS_FOCUS);
 		}
 
@@ -694,7 +694,7 @@ namespace gui {
 			@return 状態
 		*/
 		//-----------------------------------------------------------------//
-		bool get_select_in() const {
+		bool get_select_in() const noexcept {
 			return !get_state(state::BEFORE_SELECT) && get_state(state::IS_SELECT);
 		}
 
@@ -705,7 +705,7 @@ namespace gui {
 			@return 状態
 		*/
 		//-----------------------------------------------------------------//
-		bool get_select() const {
+		bool get_select() const noexcept {
 			return get_state(state::IS_SELECT);
 		}
 
@@ -716,7 +716,7 @@ namespace gui {
 			@return 状態
 		*/
 		//-----------------------------------------------------------------//
-		bool get_select_out() const {
+		bool get_select_out() const noexcept {
 			return get_state(state::BEFORE_SELECT) && !get_state(state::IS_SELECT);
 		}
 
@@ -727,7 +727,7 @@ namespace gui {
 			@return 状態
 		*/
 		//-----------------------------------------------------------------//
-		bool get_selected() const {
+		bool get_selected() const noexcept {
 			return get_focus() && get_select_out();
 		}
 
@@ -738,7 +738,7 @@ namespace gui {
 			@param[in] シンボル
 		*/
 		//-----------------------------------------------------------------//
-		void set_symbol(const std::string& sym) { symbol_ = sym; }
+		void set_symbol(const std::string& sym) noexcept { symbol_ = sym; }
 
 
 		//-----------------------------------------------------------------//
@@ -747,7 +747,7 @@ namespace gui {
 			@return シンボル
 		*/
 		//-----------------------------------------------------------------//
-		const std::string& get_symbol() const { return symbol_; }
+		const std::string& get_symbol() const noexcept { return symbol_; }
 
 
 		//-----------------------------------------------------------------//
@@ -756,7 +756,7 @@ namespace gui {
 			@param[in] シリアル番号
 		*/
 		//-----------------------------------------------------------------//
-		void set_serial(uint32_t serial) { serial_ = serial; }
+		void set_serial(uint32_t serial) noexcept { serial_ = serial; }
 
 
 		//-----------------------------------------------------------------//
@@ -765,8 +765,7 @@ namespace gui {
 			@return シリアル番号
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t get_serial() const { return serial_; }
-
+		uint32_t get_serial() const noexcept { return serial_; }
 	};
 
 	typedef std::vector<widget*> widgets;
