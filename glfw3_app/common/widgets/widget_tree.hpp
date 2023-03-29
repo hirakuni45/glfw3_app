@@ -45,17 +45,20 @@ namespace gui {
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
-			@brief	ツリー・データベースのユニット
+			@brief	ツリー・データベースのユニット構造体
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct value {
 			widget_check*	w_;
+			std::string		title_;
 			std::string		data_;
 
-			value() : w_(0), data_()
+			value() noexcept : w_(0), title_(), data_()
 			{ }
 		};
 		typedef utils::tree_unit<value>	tree_unit;
+
+		typedef std::function<void (tree_unit::unit_map_it it)> select_func_type;
 
 	private:
 		widget_director&	wd_;
@@ -68,7 +71,7 @@ namespace gui {
 		gl::mobj::handle	h_;
 
 		tree_unit			tree_unit_;
-		uint32_t			serial_id_;
+		uint32_t			tree_id_;
 		tree_unit::unit_map_its	tree_unit_its_;
 
 		vtx::fpos			speed_;
@@ -77,6 +80,7 @@ namespace gui {
 
 		uint32_t			select_id_;
 		tree_unit::unit_map_it	select_it_;
+		select_func_type	select_func_;
 
 		struct root_t {
 			vtx::ipos			pos;
@@ -84,8 +88,7 @@ namespace gui {
 		};
 		std::vector<root_t>	roots_;
 
-
-		void create_()
+		void create_() noexcept
 		{
 			vtx::irect r;
 			r.org.set(0);
@@ -98,9 +101,15 @@ namespace gui {
 				if(!it->second.value.w_) {
 					gl::core& core = gl::core::get_instance();
 					gl::fonts& fonts = core.at_fonts();
-					r.size.x = fonts.get_width(utils::get_file_name(it->first)) + r.size.y + 8;
+					std::string text;
+					if(it->second.value.title_.empty()) {
+						text = utils::get_file_name(it->first);
+					} else {
+						text = it->second.value.title_;
+					}
+					r.size.x = fonts.get_width(text) + r.size.y + 8;
 					widget::param wp(r, this);
-					widget_check::param wp_(utils::get_file_name(it->first));
+					widget_check::param wp_(text);
 					wp_.type_ = widget_check::style::MINUS_PLUS;
 					widget_check* w = wd_.add_widget<widget_check>(wp, wp_);
 					w->set_state(widget::state::POSITION_LOCK);
@@ -135,10 +144,10 @@ namespace gui {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		widget_tree(widget_director& wd, const widget::param& bp, const param& p) :
+		widget_tree(widget_director& wd, const widget::param& bp, const param& p) noexcept :
 			widget(bp), wd_(wd), param_(p),
 			vr_(0), r_(0), v_(0), h_(0),
-			tree_unit_(), serial_id_(0),
+			tree_unit_(), tree_id_(0),
 			speed_(0.0f), offset_(0.0f), position_(0.0f), select_id_(0), select_it_()
 			{ }
 
@@ -156,7 +165,7 @@ namespace gui {
 			@brief	型を取得
 		*/
 		//-----------------------------------------------------------------//
-		type_id type() const override { return get_type_id<value_type>(); }
+		type_id type() const noexcept override { return get_type_id<value_type>(); }
 
 
 		//-----------------------------------------------------------------//
@@ -165,7 +174,7 @@ namespace gui {
 			@return widget 型の基本名称
 		*/
 		//-----------------------------------------------------------------//
-		const char* type_name() const override { return "tree"; }
+		const char* type_name() const noexcept override { return "tree"; }
 
 
 		//-----------------------------------------------------------------//
@@ -174,7 +183,7 @@ namespace gui {
 			@return ハイブリッド・ウィジェットの場合「true」を返す。
 		*/
 		//-----------------------------------------------------------------//
-		bool hybrid() const override { return true; }
+		bool hybrid() const noexcept override { return true; }
 
 
 		//-----------------------------------------------------------------//
@@ -183,7 +192,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		const param& get_local_param() const { return param_; }
+		const param& get_local_param() const noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -192,7 +201,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		param& at_local_param() { return param_; }
+		param& at_local_param() noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -201,7 +210,7 @@ namespace gui {
 			@param[in]	f	無効にする場合「false」
 		*/
 		//-----------------------------------------------------------------//
-		void enable(bool f = true) { wd_.enable(this, f, true); }
+		void enable(bool f = true) noexcept { wd_.enable(this, f, true); }
 
 
 		//-----------------------------------------------------------------//
@@ -210,7 +219,7 @@ namespace gui {
 			@return ツリー
 		*/
 		//-----------------------------------------------------------------//
-		tree_unit& at_tree_unit() { return tree_unit_; }
+		tree_unit& at_tree_unit() noexcept { return tree_unit_; }
 
 
 		//-----------------------------------------------------------------//
@@ -219,7 +228,7 @@ namespace gui {
 			@return 選択 ID
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t get_select_id() const { return select_id_; }
+		uint32_t get_select_id() const noexcept { return select_id_; }
 
 
 		//-----------------------------------------------------------------//
@@ -228,7 +237,16 @@ namespace gui {
 			@return 選択メニュー
 		*/
 		//-----------------------------------------------------------------//
-		tree_unit::unit_map_it get_select_it() const { return select_it_; }
+		auto get_select_it() const noexcept { return select_it_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	選択メニュー関数の登録
+			@param[in]	func	選択メニュー関数
+		*/
+		//-----------------------------------------------------------------//
+		void set_select_func(select_func_type func) noexcept { select_func_ = func; }
 
 
 		//-----------------------------------------------------------------//
@@ -236,7 +254,7 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() override
+		void initialize() noexcept override
 		{
 			at_param().state_.set(widget::state::SIZE_LOCK);
 			at_param().state_.set(widget::state::RESIZE_H_ENABLE, false);
@@ -259,7 +277,7 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() override
+		void update() noexcept override
 		{
 			if(get_param().parents_ && get_state(widget::state::AREA_ROOT)) {
 				if(get_param().parents_->type() == get_type_id<widget_frame>()) {
@@ -300,17 +318,17 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override
+		void service() noexcept override
 		{
 			if(!get_state(widget::state::ENABLE)) {
 				return;
 			}
 
 			// ツリーが更新されたら、アイテムを作り直す
-			if(tree_unit_.get_serial_id() != serial_id_) {
+			if(tree_unit_.get_serial_id() != tree_id_) {
 				create_();
 				tree_unit_.create_list("", tree_unit_its_);
-				serial_id_ = tree_unit_.get_serial_id();
+				tree_id_ = tree_unit_.get_serial_id();
 			}
 
 			roots_.clear();
@@ -429,7 +447,7 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render() override
+		void render() noexcept override
 		{
 			using namespace gl;
 			core& core = core::get_instance();
@@ -464,7 +482,7 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(sys::preference& pre) override
+		bool save(sys::preference& pre) noexcept override
 		{
 			std::string path;
 			path += '/';
@@ -490,7 +508,7 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre) override
+		bool load(const sys::preference& pre) noexcept override
 		{
 			std::string path;
 			path += '/';
@@ -513,7 +531,8 @@ namespace gui {
 			@brief	構造のクリア
 		*/
 		//-----------------------------------------------------------------//
-		void clear() {
+		void clear() noexcept
+		{
 			destroy_();
 			tree_unit_.clear();
 			tree_unit_its_.clear();
@@ -521,5 +540,4 @@ namespace gui {
 		}
 
 	};
-
 }
