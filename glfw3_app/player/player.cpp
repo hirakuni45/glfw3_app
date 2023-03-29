@@ -8,6 +8,7 @@
 #include <boost/lexical_cast.hpp>
 #include "player.hpp"
 #include "core/glcore.hpp"
+#include "core/device.hpp"
 #include "widgets/widget_utils.hpp"
 #include "widgets/widget_null.hpp"
 #include "widgets/widget_button.hpp"
@@ -16,11 +17,11 @@
 
 namespace app {
 
-	static const char* resume_path_ = { "/player/resume" };
-	static const char* volume_path_ = { "/player/volume" };
-	static const char* remain_pos_path_  = { "/player/remain/position" };
-	static const char* remain_type_path_ = { "/player/remain/type" };
-	static const char* remain_file_path_ = { "/player/remain/file" };
+	static constexpr const char* resume_path_ = { "/player/resume" };
+	static constexpr const char* volume_path_ = { "/player/volume" };
+	static constexpr const char* remain_pos_path_  = { "/player/remain/position" };
+	static constexpr const char* remain_type_path_ = { "/player/remain/type" };
+	static constexpr const char* remain_file_path_ = { "/player/remain/file" };
 
 	void player::sound_play_(const std::string& file)
 	{
@@ -355,6 +356,9 @@ namespace app {
 			- (resume_play_->get_rect().size.x / 2);
 		resume_play_->at_rect().org.y = btofsy - resume_play_->get_rect().size.y / 2;
 
+		const gl::device& dev = core.get_device();
+		bool spc_key = dev.get_negative(gl::device::key::SPACE);
+
 		// ボタンの状態を設定
 		wd.enable(play_btn_, false);
 		wd.enable(pause_btn_, false);
@@ -373,7 +377,7 @@ namespace app {
 			ff_btn_->set_state(gui::widget::state::STALL, false);
 			seek_handle_->set_state(gui::widget::state::STALL, false);
 			wd.enable(pause_btn_);
-			if(pause_btn_->get_selected()) {
+			if(spc_key || pause_btn_->get_selected()) {
 				sound.pause_stream();
 			}
 			state = " (playing)";
@@ -383,7 +387,7 @@ namespace app {
 			rew_btn_->set_state(gui::widget::state::STALL, false);
 			ff_btn_->set_state(gui::widget::state::STALL, false);
 			seek_handle_->set_state(gui::widget::state::STALL, false);
-			if(play_btn_->get_selected()) {
+			if(spc_key || play_btn_->get_selected()) {
 				sound.pause_stream(false);
 			}
 			state = " (pause)";
