@@ -3,7 +3,7 @@
 /*!	@file
 	@brief	GUI widget_check クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2018 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -51,7 +51,7 @@ namespace gui {
 
 			select_func_type	select_func_;	///< セレクト関数
 
-			param(const std::string& text = "", bool check = false) :
+			param(const std::string& text = "", bool check = false) noexcept :
 				type_(style::CHECKED),
 				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255),
 				vtx::placement(vtx::placement::holizontal::LEFT,
@@ -79,7 +79,7 @@ namespace gui {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		widget_check(widget_director& wd, const widget::param& bp, const param& p) :
+		widget_check(widget_director& wd, const widget::param& bp, const param& p) noexcept :
 			widget(bp), wd_(wd), param_(p),
 			obj_state_(false), ena_h_(0), dis_h_(0), check_(p.check_)
 		{ }
@@ -98,7 +98,7 @@ namespace gui {
 			@brief	型を取得
 		*/
 		//-----------------------------------------------------------------//
-		type_id type() const override { return get_type_id<value_type>(); }
+		type_id type() const noexcept override { return get_type_id<value_type>(); }
 
 
 		//-----------------------------------------------------------------//
@@ -107,7 +107,7 @@ namespace gui {
 			@return widget 型の基本名称
 		*/
 		//-----------------------------------------------------------------//
-		const char* type_name() const override { return "check"; }
+		const char* type_name() const noexcept override { return "check"; }
 
 
 		//-----------------------------------------------------------------//
@@ -116,7 +116,7 @@ namespace gui {
 			@return ハイブリッド・ウィジェットの場合「true」を返す。
 		*/
 		//-----------------------------------------------------------------//
-		bool hybrid() const override { return false; }
+		bool hybrid() const noexcept override { return false; }
 
 
 		//-----------------------------------------------------------------//
@@ -125,7 +125,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		const param& get_local_param() const { return param_; }
+		const param& get_local_param() const noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -134,7 +134,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		param& at_local_param() { return param_; }
+		param& at_local_param() noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -143,7 +143,7 @@ namespace gui {
 			@return チェックなら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool get_check() const { return param_.check_; }
+		bool get_check() const noexcept { return param_.check_; }
 
 
 		//-----------------------------------------------------------------//
@@ -152,7 +152,7 @@ namespace gui {
 			@param[in]	f	非選択状態の場合「false」
 		*/
 		//-----------------------------------------------------------------//
-		void set_check(bool f = true) { param_.check_ = f; }
+		void set_check(bool f = true) noexcept { param_.check_ = f; }
 
 
 		//-----------------------------------------------------------------//
@@ -160,7 +160,8 @@ namespace gui {
 			@brief	実行（ボタンを押して、登録関数が実行）
 		*/
 		//-----------------------------------------------------------------//
-		void exec() {
+		void exec() noexcept
+		{
 			param_.init_func_ = true;
 		}
 
@@ -170,7 +171,7 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() override {
+		void initialize() noexcept override {
 			// ボタンは標準的に固定
 			at_param().state_.set(widget::state::SERVICE);
 			at_param().state_.set(widget::state::POSITION_LOCK);
@@ -192,7 +193,7 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() override
+		void update() noexcept override
 		{
 			if(get_select()) {
 				obj_state_ = !param_.check_;
@@ -210,7 +211,7 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override
+		void service() noexcept override
 		{
 			bool dofunc = param_.init_func_;
 			if(get_state(state::ENABLE)) {
@@ -234,7 +235,7 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render() override
+		void render() noexcept override
 		{
 			using namespace gl;
 			core& core = core::get_instance();
@@ -293,7 +294,7 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(sys::preference& pre) override {
+		bool save(sys::preference& pre) noexcept override {
 			std::string path;
 			path += '/';
 			path += wd_.create_widget_name(this);
@@ -311,7 +312,7 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre) override {
+		bool load(const sys::preference& pre) noexcept override {
 			std::string path;
 			path += '/';
 			path += wd_.create_widget_name(this);

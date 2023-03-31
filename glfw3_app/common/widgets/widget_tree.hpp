@@ -25,26 +25,6 @@ namespace gui {
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
-			@brief	widget_tree パラメーター
-		*/
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		struct param {
-			color_param	color_param_;	///< カラー・パラメーター
-
-			short		height_;		///< ユニットの高さ
-
-			bool		single_;		///< シングル選択の場合「true」
-
-			param() :
-				color_param_(widget_director::default_tree_color_),
-				height_(28),
-				single_(true)
-			{ }
-		};
-
-
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		/*!
 			@brief	ツリー・データベースのユニット構造体
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -59,6 +39,26 @@ namespace gui {
 		typedef utils::tree_unit<value>	tree_unit;
 
 		typedef std::function<void (tree_unit::unit_map_it it)> select_func_type;
+
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	widget_tree パラメーター
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		struct param {
+			color_param	color_param_;	///< カラー・パラメーター
+
+			short		height_;		///< ユニットの高さ
+			bool		single_;		///< シングル選択の場合「true」
+			select_func_type	select_func_;
+
+			param() :
+				color_param_(widget_director::default_tree_color_),
+				height_(28),
+				single_(true),
+				select_func_()
+			{ }
+		};
 
 	private:
 		widget_director&	wd_;
@@ -80,7 +80,6 @@ namespace gui {
 
 		uint32_t			select_id_;
 		tree_unit::unit_map_it	select_it_;
-		select_func_type	select_func_;
 
 		struct root_t {
 			vtx::ipos			pos;
@@ -97,7 +96,7 @@ namespace gui {
 			tree_unit::unit_map_its its;
 			tree_unit_.create_list("", its);
 
-			BOOST_FOREACH(tree_unit::unit_map_it it, its) {
+			for(auto it : its) {
 				if(!it->second.value.w_) {
 					gl::core& core = gl::core::get_instance();
 					gl::fonts& fonts = core.at_fonts();
@@ -242,15 +241,6 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	選択メニュー関数の登録
-			@param[in]	func	選択メニュー関数
-		*/
-		//-----------------------------------------------------------------//
-		void set_select_func(select_func_type func) noexcept { select_func_ = func; }
-
-
-		//-----------------------------------------------------------------//
-		/*!
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
@@ -288,7 +278,7 @@ namespace gui {
 
 			if(param_.single_) {
 				widget_check* sel = 0;
-				BOOST_FOREACH(tree_unit::unit_map_it it, tree_unit_its_) {
+				for(auto it : tree_unit_its_) {
 					widget_check* w = it->second.value.w_;
 					if(w == 0) continue;
 					if(tree_unit_.is_directory(it)) continue;
@@ -298,7 +288,7 @@ namespace gui {
 					}
 				}
 				if(sel) {
-					BOOST_FOREACH(tree_unit::unit_map_it it, tree_unit_its_) {
+					for(auto it : tree_unit_its_) {
 						widget_check* w = it->second.value.w_;
 						if(w == 0) continue;
 						if(tree_unit_.is_directory(it)) continue;
@@ -333,7 +323,7 @@ namespace gui {
 
 			roots_.clear();
 			vtx::spos pos(0);
-			BOOST_FOREACH(tree_unit::unit_map_it it, tree_unit_its_) {
+			for(auto it : tree_unit_its_) {
 				widget_check* w = it->second.value.w_;
 				if(w == 0) continue;
 				bool draw = true;
@@ -434,7 +424,7 @@ namespace gui {
 			}
 
 			short ofsy = position_.y;
-			BOOST_FOREACH(tree_unit::unit_map_it it, tree_unit_its_) {
+			for(auto it : tree_unit_its_) {
 				widget_check* w = it->second.value.w_;
 				if(w == 0) continue;
 				w->at_rect().org.y += ofsy;
@@ -457,7 +447,7 @@ namespace gui {
 
 			// 各部品のルートを描画
 			if(wp.clip_.size.x > 0 && wp.clip_.size.y > 0) { 
-				BOOST_FOREACH(const root_t& r, roots_) {
+				for(const auto& r : roots_) {
 					glPushMatrix();
 					const vtx::spos& mosz = wd_.at_mobj().get_size(r.h);
 					vtx::spos ofs(0, (wp.rect_.size.y - mosz.y) / 2);
@@ -491,7 +481,7 @@ namespace gui {
 			int err = 0;
 			tree_unit::unit_map_its its;
 			tree_unit_.create_list("", its);
-			BOOST_FOREACH(tree_unit::unit_map_it it, its) {
+			for(auto it : its) {
 				widget_check* w = it->second.value.w_;
 				if(w == 0) continue;
 ///				const vtx::spos& pos = w->get_rect().org;
@@ -517,7 +507,7 @@ namespace gui {
 			int err = 0;
 			tree_unit::unit_map_its its;
 			tree_unit_.create_list("", its);
-			BOOST_FOREACH(tree_unit::unit_map_it it, its) {
+			for(auto it : its) {
 				widget_check* w = it->second.value.w_;
 				if(w == 0) continue;			
 			}

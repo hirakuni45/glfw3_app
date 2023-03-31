@@ -131,7 +131,7 @@ namespace gui {
 		}
 
 
-		void setup_title_()
+		void setup_title_() noexcept
 		{
 			std::string tmp;
 			if(param_.select_func_ != nullptr) {
@@ -148,7 +148,7 @@ namespace gui {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		widget_spinbox(widget_director& wd, const widget::param& bp, const param& p) :
+		widget_spinbox(widget_director& wd, const widget::param& bp, const param& p) noexcept :
 			widget(bp), wd_(wd), param_(p), objh_(0), up_objh_(0), dn_objh_(0),
 		    initial_(false), delay_btn_cnt_(0), delay_key_cnt_(0), sel_pos_(0),
 			state_(state::initial)
@@ -168,7 +168,7 @@ namespace gui {
 			@brief	型を取得
 		*/
 		//-----------------------------------------------------------------//
-		type_id type() const override { return get_type_id<value_type>(); }
+		type_id type() const noexcept override { return get_type_id<value_type>(); }
 
 
 		//-----------------------------------------------------------------//
@@ -177,7 +177,7 @@ namespace gui {
 			@return widget 型の基本名称
 		*/
 		//-----------------------------------------------------------------//
-		const char* type_name() const override { return "spinbox"; }
+		const char* type_name() const noexcept override { return "spinbox"; }
 
 
 		//-----------------------------------------------------------------//
@@ -186,7 +186,7 @@ namespace gui {
 			@return ハイブリッド・ウィジェットの場合「true」を返す。
 		*/
 		//-----------------------------------------------------------------//
-		bool hybrid() const override { return true; }
+		bool hybrid() const noexcept override { return true; }
 
 
 		//-----------------------------------------------------------------//
@@ -195,7 +195,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		const param& get_local_param() const { return param_; }
+		const param& get_local_param() const noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -204,7 +204,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		param& at_local_param() { return param_; }
+		param& at_local_param() noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -213,7 +213,7 @@ namespace gui {
 			@return 選択テキスト
 		*/
 		//-----------------------------------------------------------------//
-		std::string get_select_text() const { return param_.text_param_.get_text(); }
+		std::string get_select_text() const noexcept { return param_.text_param_.get_text(); }
 
 
 		//-----------------------------------------------------------------//
@@ -222,22 +222,71 @@ namespace gui {
 			@return 数値
 		*/
 		//-----------------------------------------------------------------//
-		int get_select_pos() const { return param_.sel_pos_; }
+		int get_select_pos() const noexcept { return param_.sel_pos_; }
 
 
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	選択位置の設定
-			@param[in]	pos	設定位置
+			@param[in]	pos		設定位置
 		*/
 		//-----------------------------------------------------------------//
-		void set_select_pos(int pos)
+		void set_select_pos(int pos) noexcept
 		{
 			if(param_.min_pos_ <= pos && pos <= param_.max_pos_) { 
 				param_.sel_pos_ = pos;
 			}
-			initial_ = false;			
-//			exec();
+			initial_ = false;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	最小値の取得
+			@return 数値
+		*/
+		//-----------------------------------------------------------------//
+		int get_select_min() const noexcept { return param_.min_pos_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	選択位置の最小値を設定
+			@param[in]	pos	設定位置
+		*/
+		//-----------------------------------------------------------------//
+		void set_select_min(int pos) noexcept
+		{
+			param_.min_pos_ = pos;
+			if(param_.sel_pos_ < pos) {
+				param_.sel_pos_ = pos;
+			}
+			initial_ = false;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	最大値の取得
+			@return 数値
+		*/
+		//-----------------------------------------------------------------//
+		int get_select_max() const noexcept { return param_.max_pos_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	選択位置の最大値を設定
+			@param[in]	pos	設定位置
+		*/
+		//-----------------------------------------------------------------//
+		void set_select_max(int pos) noexcept
+		{
+			param_.max_pos_ = pos;
+			if(param_.sel_pos_ > pos) {
+				param_.sel_pos_ = pos;
+			}
+			initial_ = false;
 		}
 
 
@@ -247,7 +296,7 @@ namespace gui {
 			@param[in]	st	ステート（標準では「選択」値の変化はしない）
 		*/
 		//-----------------------------------------------------------------//
-		void exec(state st = state::select)
+		void exec(state st = state::select) noexcept
 		{
 			++param_.id_;
 			switch(st) {
@@ -271,7 +320,7 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() override
+		void initialize() noexcept override
 		{
 			// ボタンは標準的に固定、サイズ固定、選択時拡大
 			set_state(widget::state::SERVICE);
@@ -318,7 +367,7 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() override
+		void update() noexcept override
 		{
 			if(!initial_) {
 				setup_title_();
@@ -412,7 +461,7 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override
+		void service() noexcept override
 		{
 			if(!get_enable()) return;
 
@@ -429,7 +478,7 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render() override
+		void render() noexcept override
 		{
 			if(objh_ == 0) return;
 
@@ -468,7 +517,8 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(sys::preference& pre) override {
+		bool save(sys::preference& pre) noexcept override
+		{
 			std::string path;
 			path += '/';
 			path += wd_.create_widget_name(this);
@@ -486,7 +536,8 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre) override {
+		bool load(const sys::preference& pre) noexcept override
+		{
 			std::string path;
 			path += '/';
 			path += wd_.create_widget_name(this);
@@ -498,5 +549,4 @@ namespace gui {
 			return err == 0;
 		}
 	};
-
 }
