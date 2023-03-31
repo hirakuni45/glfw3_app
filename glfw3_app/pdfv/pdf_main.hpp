@@ -48,10 +48,11 @@ namespace app {
 
 		gui::widget_filer*		load_ctx_;
 
-		gui::widget_frame*		tools_;
+		gui::widget_frame*		tool_frame_;
 		gui::widget_button*		load_;
 		gui::widget_list*		scale_;
 		gui::widget_spinbox*	page_;
+		gui::widget_list*		rotate_;
 		gui::widget_check*		term_;
 
 		gui::widget_frame*		img_frame_;
@@ -169,6 +170,24 @@ namespace app {
 			}
 		}
 
+		float get_document_rotate_()
+		{
+			switch(rotate_->get_select_pos()) {
+			case 0:
+				return 0.0f;
+			case 1:
+				return 90.0f;
+			case 2:
+				return 180.0f;
+			case 3:
+				return 270.0f;
+			case 4:
+				return 45.0f;
+			default:
+				return 0.0f;
+			}
+		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -179,7 +198,8 @@ namespace app {
 		pdf_main(utils::director<core>& d) noexcept :
 			director_(d),
 			load_ctx_(nullptr),
-			tools_(nullptr), load_(nullptr), scale_(nullptr), page_(nullptr),
+			tool_frame_(nullptr),
+			load_(nullptr), scale_(nullptr), page_(nullptr), rotate_(nullptr),
 			term_(nullptr),
 			img_frame_(nullptr), img_core_(nullptr),
 			tree_frame_(nullptr), tree_core_(nullptr),
@@ -204,7 +224,7 @@ namespace app {
 			@brief  初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() override
+		void initialize() noexcept override
 		{
 			gl::core& core = gl::core::get_instance();
 
@@ -228,13 +248,13 @@ namespace app {
 			}
 
 			{ // 機能ツールパレット
-				widget::param wp(vtx::irect(10, 10, 300, 210));
+				widget::param wp(vtx::irect(10, 10, 300, 260));
 				widget_frame::param wp_;
-				tools_ = wd.add_widget<widget_frame>(wp, wp_);
-				tools_->set_state(widget::state::SIZE_LOCK);
+				tool_frame_ = wd.add_widget<widget_frame>(wp, wp_);
+				tool_frame_->set_state(widget::state::SIZE_LOCK);
 			}
 			{ // ロード起動ボタン
-				widget::param wp(vtx::irect(10, 10+50*0, 100, 40), tools_);
+				widget::param wp(vtx::irect(10, 10+50*0, 100, 40), tool_frame_);
 				widget_button::param wp_("load");
 				load_ = wd.add_widget<widget_button>(wp, wp_);
 				load_->at_local_param().select_func_ = [=](uint32_t id) {
@@ -245,7 +265,7 @@ namespace app {
 				};
 			}
 			{  // スケール・リスト
-				widget::param wp(vtx::irect(10, 10+50*1, 200, 40), tools_);
+				widget::param wp(vtx::irect(10, 10+50*1, 200, 40), tool_frame_);
 				widget_list::param wp_("Fit");
 				wp_.init_list_.push_back("Fit");
 				wp_.init_list_.push_back("1.00");
@@ -258,7 +278,7 @@ namespace app {
 				scale_ = wd.add_widget<widget_list>(wp, wp_);
 			}
 			{  // ページ操作
-				widget::param wp(vtx::irect(10, 10+50*2, 200, 40), tools_);
+				widget::param wp(vtx::irect(10, 10+50*2, 200, 40), tool_frame_);
 				widget_spinbox::param wp_(1, 1, 1);
 				page_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				page_->at_local_param().select_func_ = [=](widget_spinbox::state st, int before, int newpos) {
@@ -268,8 +288,21 @@ namespace app {
 					return (boost::format("%d / %d") % newpos % page_->get_select_max()).str();
 				};
 			}
+			{  // 回転・リスト
+				widget::param wp(vtx::irect(10, 10+50*3, 200, 40), tool_frame_);
+				widget_list::param wp_("0");
+				wp_.init_list_.push_back("0");
+				wp_.init_list_.push_back("90");
+				wp_.init_list_.push_back("180");
+				wp_.init_list_.push_back("270");
+				wp_.init_list_.push_back("45");
+				wp_.select_func_ = [=](const std::string& text, uint32_t pos) {
+					pdf_redraw_ = true;
+				};
+				rotate_ = wd.add_widget<widget_list>(wp, wp_);
+			}
 			{  // ターミナル、有効、無効
-				widget::param wp(vtx::irect(10, 10+50*3, 130, 40), tools_);
+				widget::param wp(vtx::irect(10, 10+50*4, 130, 40), tool_frame_);
 				widget_check::param wp_("Terminal");
 				term_ = wd.add_widget<widget_check>(wp, wp_);
 			}
@@ -333,7 +366,7 @@ namespace app {
 			sys::preference& pre = director_.at().preference_;
 			if(load_ctx_ != nullptr) load_ctx_->load(pre);
 			if(img_frame_ != nullptr) img_frame_->load(pre);
-			if(tools_ != nullptr) tools_->load(pre, false, false);
+			if(tool_frame_ != nullptr) tool_frame_->load(pre, false, false);
 			if(tree_frame_ != nullptr) tree_frame_->load(pre);
 			if(term_frame_ != nullptr) term_frame_->load(pre);
 
@@ -355,7 +388,7 @@ namespace app {
 			@brief  アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() override
+		void update() noexcept override
 		{
 			gl::core& core = gl::core::get_instance();
 
@@ -434,7 +467,7 @@ namespace app {
 				default:
 					break; 
 				}
-				a.rotation = 0.0f;
+				a.rotation = get_document_rotate_();
 				if(pdf_in_.render(a)) {
 					src_image_ = pdf_in_.get_image();
 					term_core_->output("Ld: " + load_ctx_->get_file() + "\n");
@@ -470,7 +503,7 @@ namespace app {
 			@brief  レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render() override
+		void render() noexcept override
 		{
 			director_.at().widget_director_.service();
 			director_.at().widget_director_.render();
@@ -482,12 +515,12 @@ namespace app {
 			@brief  廃棄
 		*/
 		//-----------------------------------------------------------------//
-		void destroy() override
+		void destroy() noexcept override
 		{
 			sys::preference& pre = director_.at().preference_;
 			if(load_ctx_ != nullptr) load_ctx_->save(pre);
 			if(img_frame_ != nullptr) img_frame_->save(pre);
-			if(tools_ != nullptr) tools_->save(pre);
+			if(tool_frame_ != nullptr) tool_frame_->save(pre);
 			if(tree_frame_ != nullptr) tree_frame_->save(pre);
 			if(term_frame_ != nullptr) term_frame_->save(pre);
 		}
