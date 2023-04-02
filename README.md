@@ -58,7 +58,12 @@ GLFW application
    pacman -S mingw-w64-clang-x86_64-libpng
    pacman -S mingw-w64-clang-x86_64-faad2
    pacman -S mingw-w64-clang-x86_64-libmad
+   pacman -S mingw-w64-clang-x86_64-zlib
    pacman -S mingw-w64-clang-x86_64-ffmpeg
+   pacman -S mingw-w64-clang-x86_64-mupdf-libmupdf
+   pacman -S mingw-w64-clang-x86_64-gumbo-parser
+   pacman -S mingw-w64-clang-x86_64-jbig2dec
+   pacman -S mingw-w64-clang-x86_64-harfbuzz
 ```
 
 - 好みのテキストエディターをインストール。   
@@ -86,10 +91,15 @@ GLFW application
    sudo port install glew
    sudo port install libjpeg-turbo
    sudo port install openjpeg
+   sudo port install zlib
    sudo port install libpng
    sudo port install faad2
    sudo port install libmad
    sudo port install ffmpeg
+   sudo port install mupdf-libmupdf
+   sudo port install gumbo-parser
+   sudo port install jbig2dec
+   sudo port install harfbuzz
 ```
 
 ---
@@ -178,27 +188,37 @@ IMECursorColour=255,0,0
 
 - bmc  --->  ビットマップ変換
 
-### GUI アプリケーション
+### サンプル・アプリケーション
 
-- gui_test  --->  GUI 描画、操作、テスト用   
-- player  --->  音楽再生プレイヤー  
+- gui_test  --->  GUI 描画、操作、テスト用
 
+---
+
+- player  --->  音楽再生プレイヤー
 ![player アプリ](player.png)   
-   
-- image  --->  画像ビューアー   
 
+---
+
+- image  --->  画像ビューアー
 ![image アプリ](image.png)        
    
 - nesemu ---> NES エミュレータ（ROM イメージ別途必要）
 ![image アプリ](nesemu.png)        
 
+---
+
 - spinv  --->  スペースインベーダーエミュレーター（ROM イメージ別途必要）
+![pdfv アプリ](pdfv_app.png)
 
-![spinv アプリ](spinv.png)   
-   
+---
+
+- pdfv  ---> Mupdf ライブラリを使った PDF ビューア
+![spinv アプリ](spinv.png)
+
+---
+
 - pmdv  --->  MMD プレイヤー 
-
-![pmdv アプリ](pmdv.png)     
+![pmdv アプリ](pmdv.png)
    
 ---
 License
