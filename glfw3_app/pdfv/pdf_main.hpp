@@ -35,14 +35,40 @@
 
 namespace app {
 
+	struct pdf_base {
+		struct pair_list_t {
+			const char* str;
+			float		factor;
+			constexpr pair_list_t(const char* s, float f) : str(s), factor(f) { }
+		};
+	};
+
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
 		@brief  img メイン・クラス
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	class pdf_main : public utils::i_scene {
+	class pdf_main : public utils::i_scene, pdf_base {
 
 		static constexpr int CAPTION_HEIGHT = 28;
+
+		static constexpr pair_list_t scale_list_[] = {
+			{ "Fit", 0.0f },  // scale factor 0 is fit
+			{ "100 %", 1.0f },
+			{ "125 %", 1.25f },
+			{ "150 %", 1.5f },
+			{ "175 %", 1.75f },
+			{ "200 %", 2.0f },
+			{ "300 %", 3.0f },
+		};
+
+		static constexpr pair_list_t rotate_list_[] = {
+			{ "0",     0.0f },
+			{ "90",   90.0f },
+			{ "180", 180.0f },
+			{ "270", 270.0f },
+			{ "45",   45.0f },
+		};
 
 		utils::director<core>&	director_;
 
@@ -170,23 +196,6 @@ namespace app {
 			}
 		}
 
-		float get_document_rotate_()
-		{
-			switch(rotate_->get_select_pos()) {
-			case 0:
-				return 0.0f;
-			case 1:
-				return 90.0f;
-			case 2:
-				return 180.0f;
-			case 3:
-				return 270.0f;
-			case 4:
-				return 45.0f;
-			default:
-				return 0.0f;
-			}
-		}
 
 	public:
 		//-----------------------------------------------------------------//
@@ -266,12 +275,10 @@ namespace app {
 			}
 			{  // スケール・リスト
 				widget::param wp(vtx::irect(10, 10+50*1, 200, 40), tool_frame_);
-				widget_list::param wp_("Fit");
-				wp_.init_list_.push_back("Fit");
-				wp_.init_list_.push_back("1.00");
-				wp_.init_list_.push_back("1.25");
-				wp_.init_list_.push_back("1.50");
-				wp_.init_list_.push_back("2.00");
+				widget_list::param wp_(scale_list_[0].str);
+				for(auto t : scale_list_) {
+					wp_.init_list_.push_back(t.str);
+				};
 				wp_.select_func_ = [=](const std::string& text, uint32_t pos) {
 					pdf_redraw_ = true;
 				};
@@ -290,12 +297,10 @@ namespace app {
 			}
 			{  // 回転・リスト
 				widget::param wp(vtx::irect(10, 10+50*3, 200, 40), tool_frame_);
-				widget_list::param wp_("0");
-				wp_.init_list_.push_back("0");
-				wp_.init_list_.push_back("90");
-				wp_.init_list_.push_back("180");
-				wp_.init_list_.push_back("270");
-				wp_.init_list_.push_back("45");
+				widget_list::param wp_(rotate_list_[0].str);
+				for(auto t : rotate_list_) {
+					wp_.init_list_.push_back(t.str);
+				}
 				wp_.select_func_ = [=](const std::string& text, uint32_t pos) {
 					pdf_redraw_ = true;
 				};
@@ -443,31 +448,15 @@ namespace app {
 			if(redraw > 0) {
 				pdf_in_.set_page(page_->get_select_pos() - 1);
 				img::pdf_in::area_t a(1.0f);
-				switch(scale_->get_select_pos()) {
-				case 0:  // FIT
+				const auto& t = scale_list_[scale_->get_select_pos()];
+				if(t.factor == 0.0f) {
 					a.atype = img::pdf_in::area_type::FIT;
 					a.size = img_core_->at_rect().size;
-					break;
-				case 1: // 1x
+				} else {
 					a.atype = img::pdf_in::area_type::ZOOM;
-					a.zoom = 1.0f;
-					break;
-				case 2:  // 1.25x
-					a.atype = img::pdf_in::area_type::ZOOM;
-					a.zoom = 1.25f;
-					break;
-				case 3:  // 1.5x
-					a.atype = img::pdf_in::area_type::ZOOM;
-					a.zoom = 1.5f;
-					break;
-				case 4:
-					a.atype = img::pdf_in::area_type::ZOOM;
-					a.zoom = 2.0f;
-					break;
-				default:
-					break; 
+					a.zoom = t.factor;
 				}
-				a.rotation = get_document_rotate_();
+				a.rotation = rotate_list_[rotate_->get_select_pos()].factor;
 				if(pdf_in_.render(a)) {
 					src_image_ = pdf_in_.get_image();
 					term_core_->output("Ld: " + load_ctx_->get_file() + "\n");
