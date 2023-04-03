@@ -3,7 +3,7 @@
 /*!	@file
 	@brief	モトローラーＳフォーマット入出力 @n
 			256 バイト毎に、データ管理を行うので、どのようなロケーションに配置 @n
-			されたデータ列であっても、柔軟に対応出来る。
+			されたデータ列であっても、効率良くデータを保持出来る。
     @author 平松邦仁 (hira@rvf-rc45.net)
 	@copyright	Copyright (C) 2016, 2023 Kunihito Hiramatsu @n
 				Released under the MIT license @n
@@ -412,7 +412,7 @@ namespace utils {
 			@return エリア・マップ
 		*/
 		//-----------------------------------------------------------------//
-		areas create_area_map() const noexcept
+		auto create_area_map() const noexcept
 		{
 			areas as;
 			for(const auto& m : memory_map_) {
@@ -468,7 +468,7 @@ namespace utils {
 			@return 実行アドレス
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t get_exec() const noexcept { return exec_; }
+		auto get_exec() const noexcept { return exec_; }
 
 
 		//-----------------------------------------------------------------//
@@ -486,7 +486,7 @@ namespace utils {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	ページメモリーの取得
+			@brief	ページメモリーの参照を取得
 			@param[in]	address	ベースとなるアドレス
 			@return ページメモリー @n
 					無効なページの場合、内部データは全て 0xff となっている。
@@ -494,7 +494,7 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		const array& get_memory(uint32_t address) const noexcept
 		{
-			memory_map::const_iterator cit = memory_map_.find(address & PAGE_MASK);
+			const auto cit = memory_map_.find(address & PAGE_MASK);
 			if(cit == memory_map_.end()) {
 				return fill_array_;
 			}

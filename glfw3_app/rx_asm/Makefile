@@ -44,6 +44,8 @@ LIB_DIR_USR	=
 CFLAGS		=
 PFLAGS		=
 
+RUN_PARA	=	led_sample.mot
+
 -include $(VPATH)/makefile
 
 -include $(DEPENDS)

@@ -11,12 +11,19 @@
 #include <cstring>
 #include "utils/format.hpp"
 
+#include "motsx_io.hpp"
+
 #include "rxasm.hpp"
 #include "symbol.hpp"
 
 #include "rxdisasm.hpp"
 
 namespace {
+
+	utils::motsx_io		motsx_;
+
+	renesas::rxdisasm	dis_;
+
 	// タイトルの表示と簡単な説明
 	void title(const char *cmd)
 	{
@@ -69,6 +76,7 @@ namespace {
 
 		0x03, 0x03, 0x03,
 	};
+
 }
 
 //-----------------------------------------------------------------//
@@ -81,27 +89,18 @@ namespace {
 //-----------------------------------------------------------------//
 int main(int argc, char *argv[])
 {
-	renesas::rxdisasm dis_;
-
-	uint32_t len = 0;
-	while(len < sizeof(rx_bin_)) {
-		std::string out;
-		auto step = dis_.disasm(&rx_bin_[len], out);
-		if(step == 0 || out.empty()) break;
-
-		std::cout << out << std::endl;
-		len += step;
-	}
-
-return 0;
-
-	char*	fname = nullptr;
-	bool	opterr = false;
-
+	std::string	fname;
+	bool opterr = false;
+	bool verbose = false;
 	for(int i = 1; i < argc; ++i) {
 		char* p = argv[i];
 		if(p[0] == '-') {
-//			opterr = true;
+			auto s = std::string(&p[1]);
+			if(s == "verbose") {
+				verbose = true;
+			} else {
+				opterr = true;	
+			}
 		} else {
 			fname = p;
 		}
@@ -113,14 +112,39 @@ return 0;
 		return 1;
 	}
 
-	if(fname == nullptr) {
+	if(fname.empty()) {
 		title(argv[0]);
 		return 1;
 	}
 
+	if(!motsx_.load(fname)) {
+		utils::format("MOT file load error: '%s'") % fname;
+		return 1;
+	}
+
+	motsx_.list_area_map("");
+
+
+
+
+
+	uint32_t len = 0;
+	while(len < sizeof(rx_bin_)) {
+		std::string nimo;
+		std::string adrm;
+		auto step = dis_.disasm(&rx_bin_[len], nimo, adrm);
+		if(step == 0 || nimo.empty()) break;
+
+		std::cout << nimo << "\t" << adrm << std::endl;
+		len += step;
+	}
+
+return 0;
+
+
 	renesas::rxasm rxasm;
 
-	rxasm.assemble(fname);
+	rxasm.assemble(fname.c_str());
 
 	return 0;
 }
