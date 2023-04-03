@@ -1,13 +1,13 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	GUI widget スピン・ボックス・クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2020 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include "widgets/widget_director.hpp"
 #include "widgets/widget_utils.hpp"
 
@@ -24,18 +24,29 @@ namespace gui {
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
-			@brief	widget_spinbox ステート
+			@brief	widget_spinbox ステート型
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		enum class state {
 			none,	///< 何もしない
 			initial,///< 初期化
-			inc,	///< インクリメント
-			select,	///< セレクト
-			dec,	///< デクリメント
+			inc,	///< 進む
+			select,	///< 選択
+			dec,	///< 戻る
 		};
 
-
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	選択関数型 @n
+					数字を表示する場合、「newpos」の値を文字列に変換して戻す。
+					Ex: @n
+					  (boost::format("%d") % newpos).str();
+			@param[in]	st		ステート
+			@param[in]	before	整数、変更前の値
+			@param[in]	newpos	整数、変更後の値
+			@return 表示する文字列を返す
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		typedef std::function< std::string (state st, int before, int newpos) > select_func_type;
 
 
@@ -69,7 +80,7 @@ namespace gui {
 			uint16_t			accel_key_delay_;	///< アクセルが利くまでの遅延
 			uint16_t			accel_key_inter_;	///< アクセル時のインターバル（速度）
 
-			param(int min = 0, int sel = 0, int max = 0) :
+			param(int min = 0, int sel = 0, int max = 0) noexcept :
 				plate_param_(), color_param_(widget_director::default_spinbox_color_),
 				text_param_("", img::rgba8(255, 255), img::rgba8(0, 255)),
 				image_(0), handle_(0), id_(0),
@@ -100,7 +111,7 @@ namespace gui {
 
 		state		state_;
 
-		state get_button_state_(int& d) const
+		state get_button_state_(int& d) const noexcept
 		{
 			state st = state::none;
 			auto x = get_param().in_point_.x;
@@ -191,7 +202,7 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	個別パラメーターへの取得(ro)
+			@brief	個別パラメーターの取得
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
@@ -200,7 +211,7 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	個別パラメーターへの取得
+			@brief	個別パラメーターの参照
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
@@ -544,7 +555,6 @@ namespace gui {
 
 			int err = 0;
 			if(!pre.get_integer(path + "/selector", param_.sel_pos_)) ++err;
-// std::cout << param_.sel_pos_ << std::endl;
 			initial_ = false;
 			return err == 0;
 		}

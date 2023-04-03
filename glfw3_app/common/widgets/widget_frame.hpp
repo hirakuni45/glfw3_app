@@ -5,7 +5,7 @@
 			・ベースとなるウィンドウを描画する。 @n
 			・描画領域の管理など
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -25,8 +25,8 @@ namespace gui {
 		typedef widget_frame value_type;
 
 		typedef std::function< void() > update_func_type;
-		typedef std::function< void() > render_func_type;
 		typedef std::function< void() > service_func_type;
+		typedef std::function< void() > render_func_type;
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
@@ -39,11 +39,16 @@ namespace gui {
 			text_param		text_param_;	///< テキスト描画のパラメータ
 			shift_param		shift_param_;	///< テキスト描画のパラメータ
 
-			param(const std::string& text = "") :
+			update_func_type	update_func_;
+			service_func_type	service_func_;
+			render_func_type	render_func_;
+
+			param(const std::string& text = "") noexcept :
 				plate_param_(),
 				color_param_(widget_director::default_frame_color_),
 				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255)),
-				shift_param_()
+				shift_param_(),
+				update_func_(), service_func_(), render_func_()
 			{ }
 		};
 
@@ -77,7 +82,7 @@ namespace gui {
 			@brief	型を取得
 		*/
 		//-----------------------------------------------------------------//
-		type_id type() const { return get_type_id<value_type>(); }
+		type_id type() const noexcept { return get_type_id<value_type>(); }
 
 
 		//-----------------------------------------------------------------//
@@ -86,7 +91,7 @@ namespace gui {
 			@return widget 型の基本名称
 		*/
 		//-----------------------------------------------------------------//
-		const char* type_name() const { return "frame"; }
+		const char* type_name() const noexcept { return "frame"; }
 
 
 		//-----------------------------------------------------------------//
@@ -95,7 +100,7 @@ namespace gui {
 			@return ハイブリッド・ウィジェットの場合「true」を返す。
 		*/
 		//-----------------------------------------------------------------//
-		bool hybrid() const { return false; }
+		bool hybrid() const noexcept { return false; }
 
 
 		//-----------------------------------------------------------------//
@@ -104,7 +109,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		const param& get_local_param() const { return param_; }
+		const param& get_local_param() const noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -113,16 +118,17 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		param& at_local_param() { return param_; }
+		param& at_local_param() noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	有効・無効の設定
+			@brief	有効・無効の設定 @n
+					自分の子も連動する。
 			@param[in]	f	無効にする場合「false」
 		*/
 		//-----------------------------------------------------------------//
-		void enable(bool f = true) { wd_.enable(this, f, true); }
+		void enable(bool f = true) noexcept { wd_.enable(this, f, true); }
 
 
 		//-----------------------------------------------------------------//
@@ -131,7 +137,8 @@ namespace gui {
 			@param[in]	size	描画領域
 		*/
 		//-----------------------------------------------------------------//
-		void set_draw_area(const vtx::ipos& size) {
+		void set_draw_area(const vtx::ipos& size) noexcept
+		{
 			short ofs = param_.plate_param_.frame_width_;
 			at_rect().size.x = size.x + ofs * 2;
 			at_rect().size.y = size.y + ofs * 2 + param_.plate_param_.caption_width_;
@@ -144,7 +151,8 @@ namespace gui {
 			@param[out]	area	描画領域の参照
 		*/
 		//-----------------------------------------------------------------//
-		vtx::irect get_draw_area() const {
+		vtx::irect get_draw_area() const noexcept
+		{
 			vtx::irect area;
 			short ofs = param_.plate_param_.frame_width_;
 			area.org.set(ofs, ofs + param_.plate_param_.caption_width_);
@@ -159,7 +167,7 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize()
+		void initialize() noexcept
 		{
 			// 標準的設定（自由な大きさの変更）
 			at_param().state_.set(widget::state::SIZE_LOCK, false);
@@ -184,10 +192,13 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update()
+		void update() noexcept
 		{
 			param_.shift_param_.size_ = get_rect().size.x - param_.plate_param_.frame_width_ * 2;
 			shift_text_update(get_param(), param_.text_param_, param_.shift_param_);
+			if(param_.update_func_ != nullptr) {
+				param_.update_func_();
+			}
 		}
 
 
@@ -196,7 +207,12 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() { }
+		void service() noexcept
+		{
+			if(param_.service_func_ != nullptr) {
+				param_.service_func_();
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -204,15 +220,19 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render()
+		void render() noexcept
 		{
-			if(objh_ == 0) return;
+			if(objh_ != 0) {
 
-			wd_.at_mobj().resize(objh_, get_param().rect_.size);
-			glEnable(GL_TEXTURE_2D);
-			wd_.at_mobj().draw(objh_, gl::mobj::attribute::normal, vtx::spos(0));
+				wd_.at_mobj().resize(objh_, get_param().rect_.size);
+				glEnable(GL_TEXTURE_2D);
+				wd_.at_mobj().draw(objh_, gl::mobj::attribute::normal, vtx::spos(0));
 
-			shift_text_render(wd_, get_param(), param_.text_param_, param_.plate_param_);
+				shift_text_render(wd_, get_param(), param_.text_param_, param_.plate_param_);
+			}
+			if(param_.render_func_ != nullptr) {
+				param_.render_func_();
+			}
 		}
 
 
@@ -223,7 +243,7 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(sys::preference& pre)
+		bool save(sys::preference& pre) noexcept
 		{
 			std::string path;
 			path += '/';
@@ -246,7 +266,7 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre, bool w_ena, bool h_ena)
+		bool load(const sys::preference& pre, bool w_ena, bool h_ena) noexcept
 		{
 			std::string path;
 			path += '/';
@@ -279,7 +299,7 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre)
+		bool load(const sys::preference& pre) noexcept
 		{
 			return load(pre, true, true);
 		}
