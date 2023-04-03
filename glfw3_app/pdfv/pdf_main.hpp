@@ -92,7 +92,6 @@ namespace app {
 
 		gui::widget_dialog*		dialog_;
 		gui::widget_dialog*		dialog_yes_no_;
-		gui::widget_dialog*		dialog_new_;
 
 		gl::mobj			mobj_;
 		gl::mobj::handle	img_handle_;
@@ -213,7 +212,7 @@ namespace app {
 			img_frame_(nullptr), img_core_(nullptr),
 			tree_frame_(nullptr), tree_core_(nullptr),
 			term_frame_(nullptr), term_core_(nullptr),
-			dialog_(nullptr), dialog_yes_no_(nullptr), dialog_new_(nullptr),
+			dialog_(nullptr), dialog_yes_no_(nullptr),
 			img_handle_(0), dd_id_(0), load_id_(0),
 			image_offset_(0.0f), src_image_(), start_path_(),
 			pdf_in_(), pdf_redraw_(false)
@@ -241,7 +240,7 @@ namespace app {
 			widget_director& wd = director_.at().widget_director_;
 
 			{ // 画像ファイル表示用フレーム
-				widget::param wp(vtx::irect(30, 30, 256, 256));
+				widget::param wp(vtx::irect(315, 10, 256, 256));
 				widget_frame::param wp_;
 				wp_.plate_param_.set_caption(CAPTION_HEIGHT);
 				img_frame_ = wd.add_widget<widget_frame>(wp, wp_);
@@ -314,7 +313,7 @@ namespace app {
 
 			{  // ツリー
 				{
-					widget::param wp(vtx::irect(20, 400, 200, 200));
+					widget::param wp(vtx::irect(10, 275, 300, 200));
 					widget_frame::param wp_;
 					wp_.plate_param_.set_caption(CAPTION_HEIGHT);
 					tree_frame_ = wd.add_widget<widget_frame>(wp, wp_);
@@ -331,7 +330,7 @@ namespace app {
 
 			{ // ターミナル
 				{
-					widget::param wp(vtx::irect(10, 320, 9*14-8, 18*16+28));
+					widget::param wp(vtx::irect(10, 400, 9*14-8, 18*16+28));
 					widget_frame::param wp_;
 					wp_.plate_param_.set_caption(CAPTION_HEIGHT);
 					term_frame_ = wd.add_widget<widget_frame>(wp, wp_);
@@ -445,7 +444,28 @@ namespace app {
 				pdf_redraw_ = false;
 				++redraw;
 			}
-			if(redraw > 0) {
+			if(pdf_in_.is_document()) {  // フレーム上での操作
+				if(img_frame_->get_focus()) {
+					const auto& scr = wd.get_scroll();  // スクロールホイールでページを移動
+					auto p = page_->get_select_pos();
+					int d = 0;
+					d = -scr.y;
+					const auto& dev = core.get_device();
+					if(dev.get_positive(gl::device::key::UP)) {
+						d = 1;
+					} else if(dev.get_positive(gl::device::key::DOWN)) {
+						d = -1;
+					}
+					p += d;
+					if(p < 1) p = 1;
+					else if(p > pdf_in_.get_page_limit()) p = pdf_in_.get_page_limit();
+					if(p != page_->get_select_pos()) {
+						page_->set_select_pos(p);
+						++redraw;
+					}
+				}
+			}
+			if(pdf_in_.is_document() && redraw > 0) {
 				pdf_in_.set_page(page_->get_select_pos() - 1);
 				img::pdf_in::area_t a(1.0f);
 				const auto& t = scale_list_[scale_->get_select_pos()];
@@ -514,5 +534,4 @@ namespace app {
 			if(term_frame_ != nullptr) term_frame_->save(pre);
 		}
 	};
-
 }
