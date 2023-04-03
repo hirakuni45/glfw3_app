@@ -22,7 +22,6 @@ PSOURCES	=	main.cpp \
 				basic_gui.cpp \
 				core/glcore.cpp \
 				core/device.cpp \
-				widgets/common_parts.cpp \
 				widgets/widget_director.cpp \
 				widgets/widget_filer.cpp
 

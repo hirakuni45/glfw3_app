@@ -10,13 +10,16 @@ RED=`tput setaf 1`
 GREEN=`tput setaf 2`
 PINK=`tput setaf 5`
 LIGHTBLUE=`tput setaf 6`
+YELLO=`tput setaf 3`
 NOCOLOR=`tput sgr0`
 
 # make clean
 if [[ $1 = "clean" ]]; then
   for file in `ls -d *`
   do
-    if [ -e "${file}/Makefile" ]; then
+    if [ ${file} == "common" ]; then
+	  echo "${YELLO}common: pass... (not project)" "${NOCOLOR}"
+    elif [ -e "${file}/Makefile" ]; then
       cd "${file}"
       echo "${GREEN}Clean project: " ${file} "${NOCOLOR}"
       make clean >& /dev/null
@@ -33,7 +36,9 @@ fi
 # make
 for file in `ls -d *`
 do
-  if [ -e "${file}/Makefile" ]; then
+  if [ ${file} == "common" ]; then
+    echo "${YELLO}common: pass... (not project)" "${NOCOLOR}"
+  elif [ -e "${file}/Makefile" ]; then
 	echo "${PINK}Start project: " ${file} "${NOCOLOR}"
     cd "${file}"
     make > /dev/null

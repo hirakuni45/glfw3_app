@@ -17,7 +17,8 @@ VPATH		=	../common
 CSOURCES	=	minizip/ioapi.c \
 				minizip/unzip.c
 
-PSOURCES	=	main.cpp
+PSOURCES	=	main.cpp \
+				core/device.cpp
 
 # C++ version
 CPP_VER		=	-std=c++17

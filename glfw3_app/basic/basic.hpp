@@ -356,7 +356,7 @@ namespace interpreter {
 				utils::format("Syntax error: %s\n") % t.str;
 		   		return 0;
 		   	}
-		   	if(val == 0 && val > 65535) {
+		   	if(val == 0 || val > 65535) {
 				utils::format("Overflow: %d\n") % val; 
 		   		return 0;
 		   	}
