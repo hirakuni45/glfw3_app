@@ -14,7 +14,7 @@
 #include "utils/director.hpp"
 #include "widgets/widget.hpp"
 
-#include "ncftp.hpp"
+// #include "ncftp.hpp"
 
 namespace seeda {
 
@@ -27,7 +27,7 @@ namespace seeda {
 
 		utils::director<app::core>&	director_;
 
-		utils::ncftp	ftp_;
+//		utils::ncftp	ftp_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -46,7 +46,7 @@ namespace seeda {
 		void initialize()
 		{
 
-			ftp_.start("192.168.3.6");
+//			ftp_.start("192.168.3.6");
 
 
 		}

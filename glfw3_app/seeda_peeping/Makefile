@@ -23,9 +23,9 @@ PSOURCES	=	main.cpp \
 CPP_VER		=	-std=c++17
 
 # C++ include path for application
-PINC_APP	=	. ../common
+PINC_APP	=	. ../common ./libncftp
 # C include path for application
-CINC_APP	=	. ../common
+CINC_APP	=	. ../common ./libncftp
 
 # User include path
 INC_USR		=
