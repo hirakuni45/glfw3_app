@@ -26,7 +26,6 @@ PSOURCES	=	main.cpp \
 				src/Audio.cpp \
 				src/Cartridge.cpp \
 				src/CommonMemoryRule.cpp \
-				src/GearboyCore.cpp \
 				src/Input.cpp \
 				src/IORegistersMemoryRule.cpp \
 				src/MBC1MemoryRule.cpp \
@@ -47,6 +46,7 @@ PSOURCES	=	main.cpp \
 				src/audio/Gb_Apu_State.cpp \
 				src/audio/Gb_Oscs.cpp \
 				src/audio/Multi_Buffer.cpp
+#				src/GearboyCore.cpp
 
 # C++ version
 CPP_VER		=	-std=c++17

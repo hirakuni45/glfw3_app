@@ -262,8 +262,9 @@ void GearboyCore::ResetROMPreservingRAM(bool forceDMG)
     {
         Log("Resetting preserving RAM...");
 
-        using namespace std;
-        stringstream stream;
+//      using namespace std;
+//      stringstream stream;
+        OSTREAM stream;
 
         m_pMemory->GetCurrentRule()->SaveRam(stream);
 

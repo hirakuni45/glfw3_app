@@ -74,13 +74,15 @@ namespace app {
 		struct gb_t {
 			uint16_t		rgb565_[GAMEBOY_WIDTH * GAMEBOY_HEIGHT];
 			int16_t			audio_[AUDIO_BUFFER_SIZE];
-			GearboyCore		core_;
+//			GearboyCore		core_;
 
 			uint32_t		audio_len_;
 
-			gb_t() : core_(), audio_len_(0) { }
+//			gb_t() : core_(), audio_len_(0) { }
+			gb_t() : audio_len_(0) { }
 
-			void init() { core_.Init(); }
+//			void init() { core_.Init(); }
+			void init() {  }
 
 			void clear_fb() {
 				for(uint32_t i = 0; i < (GAMEBOY_WIDTH * GAMEBOY_HEIGHT); ++i) {
@@ -101,9 +103,9 @@ namespace app {
 //					utils::format("%08b\n") % static_cast<uint16_t>(keypad);
 //					kp_ = keypad;
 				}
-				core_.KeySet(keypad);
+///				core_.KeySet(keypad);
 				int sampleCount = 0;
-				core_.RunToVBlank(rgb565_, audio_, &sampleCount);
+///				core_.RunToVBlank(rgb565_, audio_, &sampleCount);
 				if(audio_len_ != sampleCount) {
 					std::cout << sampleCount << std::endl;
 				}
@@ -264,10 +266,10 @@ namespace app {
 				widget_filer::param wp_(core.get_current_path(), "");
 				wp_.select_file_func_ = [=](const std::string& fn) {
 					auto ct = Cartridge::CartridgeTypes::CartridgeNoMBC;
-					if(gb_.core_.LoadROM(fn.c_str(), 0, ct)) {
-						file_ = fn;
-						play_ = true;
-					}
+///					if(gb_.core_.LoadROM(fn.c_str(), 0, ct)) {
+///						file_ = fn;
+///						play_ = true;
+///					}
 				};
 				filer_ = wd.add_widget<widget_filer>(wp, wp_);
 				filer_->enable(false);
