@@ -1,13 +1,13 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	GUI widget_button クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include "widgets/widget_director.hpp"
 #include "widgets/widget_utils.hpp"
 
@@ -24,11 +24,11 @@ namespace gui {
 
 		typedef std::function< void(uint32_t id) > select_func_type;
 
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	widget_button パラメーター
 		*/
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
 			plate_param		plate_param_;	///< 平面描画パラメーター
 			color_param		color_param_;	///< 頂点カラーで変調する場合のパラメーター
@@ -39,7 +39,7 @@ namespace gui {
 
 			select_func_type	select_func_;	///< セレクト関数
 
-			param(const std::string& text = "") :
+			param(const std::string& text = "") noexcept :
 				plate_param_(), color_param_(widget_director::default_button_color_),
 				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255)),
 				image_(0), handle_(0), id_(0),
@@ -63,7 +63,7 @@ namespace gui {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		widget_button(widget_director& wd, const widget::param& bp, const param& p) :
+		widget_button(widget_director& wd, const widget::param& bp, const param& p) noexcept :
 			widget(bp), wd_(wd), param_(p), objh_(0), id_(0), exec_(false) { }
 
 
@@ -80,7 +80,7 @@ namespace gui {
 			@brief	型を取得
 		*/
 		//-----------------------------------------------------------------//
-		type_id type() const override { return get_type_id<value_type>(); }
+		type_id type() const noexcept override { return get_type_id<value_type>(); }
 
 
 		//-----------------------------------------------------------------//
@@ -89,7 +89,7 @@ namespace gui {
 			@return widget 型の基本名称
 		*/
 		//-----------------------------------------------------------------//
-		const char* type_name() const override { return "button"; }
+		const char* type_name() const noexcept override { return "button"; }
 
 
 		//-----------------------------------------------------------------//
@@ -98,7 +98,7 @@ namespace gui {
 			@return ハイブリッド・ウィジェットの場合「true」を返す。
 		*/
 		//-----------------------------------------------------------------//
-		bool hybrid() const override { return false; }
+		bool hybrid() const noexcept override { return false; }
 
 
 		//-----------------------------------------------------------------//
@@ -107,7 +107,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		const param& get_local_param() const { return param_; }
+		const param& get_local_param() const noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -116,7 +116,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		param& at_local_param() { return param_; }
+		param& at_local_param() noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -125,7 +125,8 @@ namespace gui {
 			@param[in]	text	テキスト
 		*/
 		//-----------------------------------------------------------------//
-		void set_text(const std::string& text) {
+		void set_text(const std::string& text) noexcept
+		{
 			param_.text_param_.set_text(text);
 		}
 
@@ -135,7 +136,8 @@ namespace gui {
 			@brief	実行（ボタンを押して、登録関数が実行）
 		*/
 		//-----------------------------------------------------------------//
-		void exec() {
+		void exec() noexcept
+		{
 			exec_ = true;
 			++param_.id_;			
 		}
@@ -146,7 +148,7 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() override
+		void initialize() noexcept override
 		{
 			// ボタンは標準的に固定、サイズ固定、選択時拡大
 			at_param().state_.set(widget::state::SERVICE);
@@ -191,7 +193,7 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() override
+		void update() noexcept override
 		{
 			if(get_selected()) {
 				++param_.id_;
@@ -204,7 +206,7 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override
+		void service() noexcept override
 		{
 			if(exec_) {
 				exec_ = false;
@@ -226,7 +228,7 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render() override
+		void render() noexcept override
 		{
 			if(objh_ == 0) return;
 
@@ -245,7 +247,8 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(sys::preference& pre) override {
+		bool save(sys::preference& pre) noexcept override
+		{
 			return true;
 		}
 
@@ -257,7 +260,8 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre) override {
+		bool load(const sys::preference& pre) noexcept override
+		{
 			return true;
 		}
 	};

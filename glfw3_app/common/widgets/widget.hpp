@@ -1,13 +1,13 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	GUI widget 基底クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2018 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <vector>
 #include <string>
 #include <bitset>
@@ -40,24 +40,24 @@ namespace gui {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct widget {
 
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	カラー・パラメーター
 		*/
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct color_param {
 			img::rgba8		fore_color_;			///< 前面色
 			img::rgba8		back_color_;			///< 背景色
 			img::paint::intensity_rect	inten_rect_;
 			bool			ir_enable_;
 			explicit color_param(const img::rgba8& fc = img::rgba8(255),
-				const img::rgba8& bc = img::rgba8(0)) :
+				const img::rgba8& bc = img::rgba8(0)) noexcept :
 				fore_color_(fc), back_color_(bc), inten_rect_(), ir_enable_(false)
 			{ }
 
-			void swap_color() { fore_color_.swap(back_color_); }
+			void swap_color() noexcept { fore_color_.swap(back_color_); }
 
-			size_t hash() const {
+			size_t hash() const noexcept {
 				size_t h = fore_color_.hash();
 				h ^= back_color_.hash();
 				h ^= inten_rect_.hash();
@@ -65,7 +65,7 @@ namespace gui {
 				return h;
 			}
 
-			bool operator == (const color_param& c) const {
+			bool operator == (const color_param& c) const noexcept {
 				return c.fore_color_ == fore_color_ &&
 					c.back_color_ == back_color_ &&
 					c.inten_rect_ == inten_rect_ &&
@@ -97,12 +97,13 @@ namespace gui {
 			vtx::ipos	grid_;			///< リサイズ・グリッド
 			bool		resizeble_;		///< リサイズが可能な場合
 
-			plate_param(short rr = 8, short fw = 4) : round_style_(round_style::ALL),
+			plate_param(short rr = 8, short fw = 4) noexcept :
+				round_style_(round_style::ALL),
 				round_radius_(rr), frame_width_(fw), caption_width_(0),
 				grid_(16), resizeble_(false)
 			{ }
 
-			void set_caption(short width) {
+			void set_caption(short width) noexcept {
 				if(width <= 0) return;
 				caption_width_ = width;
 				// アンチエリアスを解消する為の隙間を取る
@@ -111,7 +112,7 @@ namespace gui {
 				grid_.y = g;
 			}
 
-			size_t hash() const {
+			size_t hash() const noexcept {
 				size_t h = grid_.hash();
 				boost::hash_combine(h, round_style_);
 				boost::hash_combine(h, round_radius_);
@@ -121,7 +122,7 @@ namespace gui {
 				return h;
 			}
 
-			bool operator == (const plate_param& pp) const {
+			bool operator == (const plate_param& pp) const noexcept {
 				return pp.round_style_ == round_style_ &&
 					pp.round_radius_ == round_radius_ &&
 					pp.frame_width_ == frame_width_ &&
@@ -153,7 +154,7 @@ namespace gui {
 
 			int				cursor_;		///< カーソル位置反転表示（エリアスは無効になる）
 
-			text_param() :
+			text_param() noexcept :
 				text_(), font_(), font_size_(20), proportional_(true),
 				alias_enable_(false), alias_(),
 				fore_color_(255, 255), shadow_color_(0, 255),
@@ -166,30 +167,30 @@ namespace gui {
 				const img::rgba8& fc, const img::rgba8& sc,
 				const vtx::placement& pl = vtx::placement(
 				vtx::placement::holizontal::CENTER,
-				vtx::placement::vertical::CENTER)) :
+				vtx::placement::vertical::CENTER)) noexcept :
 					text_(), font_(), font_size_(20), proportional_(true),
 					alias_enable_(false), alias_(),
 					fore_color_(fc), shadow_color_(sc), shadow_offset_(1),
 					placement_(pl),
 					offset_(0), cursor_(-1) { utils::utf8_to_utf32(text, text_); }
 
-			void set_text(const std::string& text) {
+			void set_text(const std::string& text) noexcept {
 				text_.clear();
 				utils::utf8_to_utf32(text, text_);
 			}
 
-			std::string get_text() const {
+			std::string get_text() const noexcept {
 				std::string s;
 				utils::utf32_to_utf8(text_, s);
 				return s;
 			}
 
-			void set_alias(const std::string& alias) {
+			void set_alias(const std::string& alias) noexcept {
 				alias_.clear();
 				utils::utf8_to_utf32(alias, alias_);
 			}
 
-			const std::string get_alias() const {
+			const std::string get_alias() const noexcept {
 				std::string s;
 				utils::utf32_to_utf8(alias_, s);
 				return s;
@@ -212,7 +213,7 @@ namespace gui {
 			uint16_t	org_wait_frame_;	///< シフト先頭の場合の待ちフレーム
 			uint16_t	org_wait_count_;	///< シフト先頭の場合の待ちカウンタ
 
-			shift_param(bool ena = true) :
+			shift_param(bool ena = true) noexcept :
 				enable_(ena), every_(false), size_(0),
 				offset_(0.0f), speed_(0.5f),
 				hold_frame_(2 * 60),
@@ -239,13 +240,13 @@ namespace gui {
 			};
 
 			direction	direction_;		///< 方向性
-			float		position_;		///< 位置
+			float		position_;		///< 位置（0.0 to 1.0）
 			float		handle_ratio_;	///< ハンドル割合
 			float		grid_;			///< グリッド
 			float		step_;			///< ステップ
 			bool		accelerator_;	///< アクセレーターを有効にする場合
 			bool		handle_resize_;	///< ハンドル・リサイズ
-			slider_param(float pos = 0.0f, direction dir = direction::HOLIZONTAL) :
+			slider_param(float pos = 0.0f, direction dir = direction::HOLIZONTAL) noexcept :
 				direction_(dir), position_(pos),
 				handle_ratio_(0.1f), grid_(0.0f), step_(0.1f),
 				accelerator_(true), handle_resize_(true)
@@ -387,7 +388,7 @@ namespace gui {
 			vtx::ipos			resize_pos_;	///< リサイズ位置
 			vtx::ipos			resize_ref_;	///< リサイズ基準サイズ
 			vtx::ipos			speed_;			///< 慣性速度
-			vtx::ipos			in_point_;		///< 内包ポイント
+			vtx::ipos			in_point_;		///< マウス内包ポイント（領域 org からの距離）
 			uint32_t			hold_frame_;	///< ホールド・フレーム
 			uint32_t			holded_frame_;	///< ホールドしてたフレーム
 			widget*				parents_;		///< 親ウィジェット
@@ -396,7 +397,7 @@ namespace gui {
 			PRE_GROUP			pre_group_;		///< プリファレンス・グループ
 			uint32_t			stall_group_;	///< ストール・グループ
 
-			param(const vtx::irect& r = vtx::irect(0), widget* parents = nullptr) :
+			param(const vtx::irect& r = vtx::irect(0), widget* parents = nullptr) noexcept :
 				rect_(r), clip_(r), rpos_(r.org),
 				move_org_(0), move_pos_(0),
 				resize_sign_(0), resize_min_(16 * 3), resize_org_(0), resize_pos_(0), resize_ref_(0),
@@ -543,7 +544,8 @@ namespace gui {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	サービス処理
+			@brief	サービス処理 @n
+					全てのアップデートが完了してから呼ばれる
 		*/
 		//-----------------------------------------------------------------//
 		virtual void service() = 0;
