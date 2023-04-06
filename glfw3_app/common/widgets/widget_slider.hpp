@@ -1,13 +1,13 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	GUI Widget スライダー・クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2018 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <bitset>
 #include "core/glcore.hpp"
 #include "widgets/widget_director.hpp"
@@ -24,13 +24,20 @@ namespace gui {
 
 		typedef widget_slider value_type;
 
-		typedef std::function< void(float) > select_func_type;
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	選択関数型
+			@param[in]	val		ハンドル位置（0.0 to 1.0）
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		typedef std::function<void (float val)> select_func_type;
 
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	widget_slider パラメーター
 		*/
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
 			widget::plate_param		plate_param_;	///< プレートパラメーター
 			widget::color_param		color_param_;	///< カラーパラメーター
@@ -40,19 +47,20 @@ namespace gui {
 			const img::i_img*		hand_image_;	///< ハンドル画像を使う場合
 
 			bool					hand_ctrl_;		///< ハンドル・コントロール
+			bool					area_ctrl_;		///< エリア・コントロール（ハンドル外をクリックした時にハンドルが移動する）
 			bool					scroll_ctrl_;	///< スクロール・コントロール（マウスのダイアル）
 			bool					select_fin_;	///< 選択が完了した場合に呼び出す
 			float					scroll_gain_;	///< スクロール・ゲイン
 
-			select_func_type		select_func_;
+			select_func_type		select_func_;	///< 選択完了関数
 
 			param(float pos = 0.0f,
-				slider_param::direction dir = slider_param::direction::HOLIZONTAL) :
+				slider_param::direction dir = slider_param::direction::HOLIZONTAL) noexcept :
 				plate_param_(),
 				color_param_(widget_director::default_slider_color_),
 				slider_param_(pos, dir),
 				base_image_(0), hand_image_(0),
-				hand_ctrl_(true), scroll_ctrl_(true), select_fin_(false),
+				hand_ctrl_(true), area_ctrl_(true), scroll_ctrl_(true), select_fin_(false),
 				scroll_gain_(0.01f),
 				select_func_(nullptr)
 				{ }
@@ -73,7 +81,7 @@ namespace gui {
 
 		float               position_;
 
-		void update_offset_()
+		void update_offset_() noexcept
 		{
 			const slider_param& sp = param_.slider_param_;
 			if(sp.direction_ == slider_param::direction::HOLIZONTAL) {
@@ -87,11 +95,38 @@ namespace gui {
 			}		
 		}
 
-		void update_position_()
+		float get_ratio_(const vtx::spos& ref) noexcept
+		{
+			const slider_param& sp = param_.slider_param_;
+			auto fw = param_.plate_param_.frame_width_;
+			float ratio = param_.slider_param_.position_;
+			if(sp.direction_ == slider_param::direction::HOLIZONTAL) {
+				short sz = get_rect().size.x - fw * 2;
+				short ofs;
+				if(param_.hand_image_) {
+					ofs = wd_.at_mobj().get_size(hand_h_).x;
+				} else {
+					ofs = sz * sp.handle_ratio_;
+				}
+				ratio = static_cast<float>(ref.x) / static_cast<float>(sz - ofs);
+			} else if(sp.direction_ == slider_param::direction::VERTICAL) {
+				short sz = get_rect().size.y - fw * 2;
+				short ofs;
+				if(param_.hand_image_) {
+					ofs = wd_.at_mobj().get_size(hand_h_).y;
+				} else {
+					ofs = sz * sp.handle_ratio_;
+				}
+				ratio = static_cast<float>(ref.y) / static_cast<float>(sz - ofs);
+			}
+			return ratio;
+		}
+
+		void update_position_() noexcept
 		{
 			const slider_param& sp = param_.slider_param_;
 			const vtx::spos& size = get_rect().size;
-			short fw = param_.plate_param_.frame_width_;
+			auto fw = param_.plate_param_.frame_width_;
 			if(sp.direction_ == slider_param::direction::HOLIZONTAL) {
 				short sz = size.x - fw * 2;
 				short ofs;
@@ -139,7 +174,7 @@ namespace gui {
 			@brief	型を取得
 		*/
 		//-----------------------------------------------------------------//
-		type_id type() const override { return get_type_id<value_type>(); }
+		type_id type() const noexcept override { return get_type_id<value_type>(); }
 
 
 		//-----------------------------------------------------------------//
@@ -148,7 +183,7 @@ namespace gui {
 			@return widget 型の基本名称
 		*/
 		//-----------------------------------------------------------------//
-		const char* type_name() const override { return "slider"; }
+		const char* type_name() const noexcept override { return "slider"; }
 
 
 		//-----------------------------------------------------------------//
@@ -157,7 +192,7 @@ namespace gui {
 			@return ハイブリッド・ウィジェットの場合「true」を返す。
 		*/
 		//-----------------------------------------------------------------//
-		bool hybrid() const override { return false; }
+		bool hybrid() const noexcept override { return false; }
 
 
 		//-----------------------------------------------------------------//
@@ -166,7 +201,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		const param& get_local_param() const { return param_; }
+		const param& get_local_param() const noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -175,7 +210,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		param& at_local_param() { return param_; }
+		param& at_local_param() noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -184,7 +219,7 @@ namespace gui {
 			@return スライダーパラメーター
 		*/
 		//-----------------------------------------------------------------//
-		const slider_param& get_slider_param() const { return param_.slider_param_; }
+		const slider_param& get_slider_param() const noexcept { return param_.slider_param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -193,7 +228,7 @@ namespace gui {
 			@return スライダーパラメーター
 		*/
 		//-----------------------------------------------------------------//
-		slider_param& at_slider_param() { return param_.slider_param_; }
+		slider_param& at_slider_param() noexcept { return param_.slider_param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -202,7 +237,7 @@ namespace gui {
 			@return スライダー位置
 		*/
 		//-----------------------------------------------------------------//
-		float get_position() const { return param_.slider_param_.position_; }
+		float get_position() const noexcept { return param_.slider_param_.position_; }
 
 
 		//-----------------------------------------------------------------//
@@ -211,7 +246,7 @@ namespace gui {
 			@return スライダー位置
 		*/
 		//-----------------------------------------------------------------//
-		float& at_position() { return param_.slider_param_.position_; }
+		float& at_position() noexcept { return param_.slider_param_.position_; }
 
 
 		//-----------------------------------------------------------------//
@@ -219,7 +254,7 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() override
+		void initialize() noexcept override
 		{
 			// 標準的設定
 			at_param().state_.set(widget::state::SERVICE);
@@ -287,40 +322,19 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() override
+		void update() noexcept override
 		{
 			update_offset_();
 
 			const slider_param& sp = param_.slider_param_;
-			short fw = param_.plate_param_.frame_width_;
 			if(get_focus() && param_.hand_ctrl_) {
 				if(get_select()) {
 					if(get_select_in()) {
 						ref_position_ = sp.position_;
 						ref_point_ = get_param().in_point_;
 					}
-					const vtx::spos size = get_rect().size;
-					float ratio = 0.0f;
-					vtx::spos ref = get_param().in_point_ - ref_point_;
-					if(sp.direction_ == slider_param::direction::HOLIZONTAL) {
-						short sz = size.x - fw * 2;
-						short ofs;
-						if(param_.hand_image_) {
-							ofs = wd_.at_mobj().get_size(hand_h_).x;
-						} else {
-							ofs = sz * sp.handle_ratio_;
-						}
-						ratio = static_cast<float>(ref.x) / static_cast<float>(sz - ofs);
-					} else if(sp.direction_ == slider_param::direction::VERTICAL) {
-						short sz = size.y - fw * 2;
-						short ofs;
-						if(param_.hand_image_) {
-							ofs = wd_.at_mobj().get_size(hand_h_).y;
-						} else {
-							ofs = sz * sp.handle_ratio_;
-						}
-						ratio = static_cast<float>(ref.y) / static_cast<float>(sz - ofs);
-					}
+					auto ref = get_param().in_point_ - ref_point_;
+					auto ratio = get_ratio_(ref);
 					ratio += ref_position_;
 					if(ratio < 0.0f) ratio = 0.0f;
 					else if(ratio > 1.0f) ratio = 1.0f;
@@ -329,8 +343,27 @@ namespace gui {
 						ratio = ((step + 1) / 2) * sp.grid_;
 					}
 					param_.slider_param_.position_ = ratio;
-				} else {	
-					if(param_.scroll_ctrl_) {
+				} else {
+					if(param_.area_ctrl_ && get_select_out()) {  // クリックした位置に移動
+						auto d = ref_point_ - get_param().in_point_;
+						if((std::abs(d.x) + std::abs(d.y)) <= 1) {
+							auto fw = param_.plate_param_.frame_width_;
+							auto ratio = param_.slider_param_.position_;
+							if(sp.direction_ == slider_param::direction::HOLIZONTAL) {
+								auto hw = wd_.at_mobj().get_size(hand_h_).x;
+								auto sz = get_rect().size.x;
+								ratio = static_cast<float>(get_param().in_point_.x - fw - hw / 2) / static_cast<float>(sz - fw * 2 - hw);
+							} else if(sp.direction_ == slider_param::direction::VERTICAL) {
+								auto hw = wd_.at_mobj().get_size(hand_h_).y;
+								auto sz = get_rect().size.y;
+								ratio = static_cast<float>(get_param().in_point_.y - fw - hw / 2) / static_cast<float>(sz - fw * 2 - hw);
+							}
+							if(ratio < 0.0f) ratio = 0.0f;
+							else if(ratio > 1.0f) ratio = 1.0f;
+							param_.slider_param_.position_ = ratio;
+						}
+					}
+					if(param_.scroll_ctrl_) {  // スクロールホイール制御
 						const vtx::spos& scr = wd_.get_scroll();
 						float ratio = param_.slider_param_.position_;
 						if(scr.y != 0) {
@@ -350,7 +383,7 @@ namespace gui {
 					}
 				}
 			}
-			if(get_focus()) {
+			if(get_focus()) {  // キーボードによる制御
 				gl::core& core = gl::core::get_instance();
 				const gl::device& dev = core.get_device();
 				float& pos = param_.slider_param_.position_;
@@ -386,7 +419,7 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override
+		void service() noexcept override
 		{
 			if(!get_state(state::ENABLE)) {
 				return;
@@ -416,7 +449,7 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render() override
+		void render() noexcept override
 		{
 			if(base_h_ == 0) return;
 
@@ -452,7 +485,8 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(sys::preference& pre) override {
+		bool save(sys::preference& pre) noexcept override
+		{
 			std::string path;
 			path += '/';
 			path += wd_.create_widget_name(this);
@@ -470,14 +504,14 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre) override {
+		bool load(const sys::preference& pre) noexcept override
+		{
 			std::string path;
 			path += '/';
 			path += wd_.create_widget_name(this);
 
 			int err = 0;
 			if(!pre.get_real(path + "/level", param_.slider_param_.position_)) ++err;
-
 			return err == 0;
 		}
 	};
