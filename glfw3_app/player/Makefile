@@ -20,7 +20,6 @@ CSOURCES	=	minizip/ioapi.c \
 				minizip/unzip.c
 
 PSOURCES	=	main.cpp \
-				player.cpp \
 				core/glcore.cpp \
 				core/device.cpp \
 				widgets/widget_director.cpp \
