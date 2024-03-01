@@ -409,9 +409,9 @@ namespace gui {
 		@brief  ターミナル出力ファンクタ
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	template <class _>
-	class term_chaout_t {
-		static widget*	output_;
+	class term_chaout {
+
+		static inline widget*	output_;
 
 		std::string		buff_;
 
@@ -425,7 +425,7 @@ namespace gui {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		term_chaout_t(char* out = nullptr, uint16_t len = 0) : out_(out), len_(len), pos_(0) { } 
+		term_chaout(char* out = nullptr, uint16_t len = 0) : out_(out), len_(len), pos_(0) { } 
 
 
 		//-----------------------------------------------------------------//
@@ -460,9 +460,5 @@ namespace gui {
 			}
 		}
 	};
-	template <class _> widget* term_chaout_t<_>::output_ = nullptr;
-
-	typedef term_chaout_t<void> term_chaout;
-
 	typedef utils::basic_format<term_chaout> format;
 }
