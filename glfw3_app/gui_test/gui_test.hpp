@@ -25,6 +25,7 @@
 #include "widgets/widget_image.hpp"
 #include "widgets/widget_terminal.hpp"
 #include "widgets/widget_progress.hpp"
+#include "widgets/widget_toggle.hpp"
 #include "widgets/widget_spinbox.hpp"
 #include "widgets/widget_view.hpp"
 #include "widgets/widget_sheet.hpp"
@@ -49,6 +50,7 @@ namespace app {
 		gui::widget_check*		check_;
 		gui::widget_slider*		slider_;
 		gui::widget_progress*	progress_;
+		gui::widget_toggle*		toggle_;
 		gui::widget_dialog*		dialog_;
 		gui::widget_button*		dialog2_open_;
 		gui::widget_dialog*		dialog2_;
@@ -118,7 +120,8 @@ namespace app {
 			filer_open1_(nullptr), filer_open2_(nullptr),
 			menu_open_(nullptr), menu_ins_(nullptr), menu_era_(nullptr),
 			check_(nullptr),
-			slider_(nullptr),
+			slider_(nullptr), progress_(nullptr),
+			toggle_(nullptr),
 			dialog_(nullptr), dialog2_open_(nullptr), dialog2_(nullptr),
 			image_(nullptr),
 			label_(nullptr),
@@ -349,6 +352,15 @@ namespace app {
 				widget_arrow::param wp_(widget_arrow::direction::down);
 				wp_.master_ = arrow_up_;
 				arrow_dn_ = wd.add_widget<widget_arrow>(wp, wp_);
+			}
+
+			if(1) {  // トグルスイッチのテスト
+				widget::param wp(vtx::irect(30, 700, 0, 0));
+				widget_toggle::param wp_("機能");
+				toggle_ = wd.add_widget<widget_toggle>(wp, wp_);
+				toggle_->at_local_param().select_func_ = [=](bool f) {
+					std::cout << "Toggle: " << static_cast<int>(f) << std::endl;
+				};				
 			}
 
 			if(1) {  // シート（プロパティーシート）のテスト
