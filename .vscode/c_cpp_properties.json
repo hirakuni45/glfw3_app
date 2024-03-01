@@ -13,7 +13,7 @@
                 "${workspaceFolder}/**",
                 "C:/msys64/clang64/bin",
                 "C:/msys64",
-                "D:/Git/glfw_app/glfw_app/common"
+                "D:/Git/glfw3_app/glfw3_app/common"
             ],
             "defines": [
                 "_DEBUG",
@@ -35,7 +35,7 @@
                     "${workspaceRoot}",
                     "C:/msys64/clang64/bin",
                     "C:/msys64",
-                    "D:/Git/glfw_app/glfw_app/common"
+                    "D:/Git/glfw3_app/glfw3_app/common"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
