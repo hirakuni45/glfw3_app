@@ -56,6 +56,18 @@ namespace img {
 			}
 		};
 
+//		typedef struct fz_outline
+//		{
+//			int refs;
+//			char *title;
+//			char *uri;
+//			fz_location page;
+//			float x, y;
+//			struct fz_outline *next;
+//			struct fz_outline *down;
+//			int is_open;
+//		} fz_outline;
+
 		typedef std::vector<fz_outline*> OUTLINES;
 
 	private:
@@ -89,6 +101,31 @@ namespace img {
 				p = p->next;
 			}
 		}
+
+#if 0
+struct fz_page
+{
+    int refs;
+    fz_document *doc; /* reference to parent document */
+    int chapter; /* chapter number */
+    int number; /* page number in chapter */
+    int incomplete; /* incomplete from progressive loading; don't cache! */
+    fz_page_drop_page_fn *drop_page;
+    fz_page_bound_page_fn *bound_page;
+    fz_page_run_page_fn *run_page_contents;
+    fz_page_run_page_fn *run_page_annots;
+    fz_page_run_page_fn *run_page_widgets;
+    fz_page_load_links_fn *load_links;
+    fz_page_page_presentation_fn *page_presentation;
+    fz_page_control_separation_fn *control_separation;
+    fz_page_separation_disabled_fn *separation_disabled;
+    fz_page_separations_fn *separations;
+    fz_page_uses_overprint_fn *overprint;
+    fz_page_create_link_fn *create_link;
+    fz_page_delete_link_fn *delete_link;
+    fz_page **prev, *next; /* linked list of currently open pages */
+};
+#endif
 
 	public:
 		//-----------------------------------------------------------------//
@@ -226,6 +263,9 @@ namespace img {
 			}
 			return false;
 		}
+
+
+// fz_link_dest fz_resolve_link_dest(fz_context *ctx, fz_document *doc, const char *uri);
 
 
 		//-----------------------------------------------------------------//
@@ -366,7 +406,8 @@ namespace img {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	レンダリングされたビットマップを取得
+			@brief	レンダリングされたビットマップを取得 @n
+					事前に「render」にて、ビットマップを描画する。
 			@return 画像のインターフェース・クラス
 		*/
 		//-----------------------------------------------------------------//
