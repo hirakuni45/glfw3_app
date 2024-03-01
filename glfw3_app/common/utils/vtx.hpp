@@ -200,13 +200,13 @@ namespace vtx {
 		T	x;
 		T	y;
 
-		inline vertex2() { }
-		inline vertex2(const spos& v) : x(v.x), y(v.y) { }
-		inline vertex2(const ipos& v) : x(v.x), y(v.y) { }
-		inline vertex2(const fpos& v) : x(v.x), y(v.y) { }
-		inline vertex2(const dpos& v) : x(v.x), y(v.y) { }
-		explicit inline vertex2(T c) : x(c), y(c) { }
-		inline vertex2(T xx, T yy) : x(xx), y(yy) { }
+		vertex2() { }
+		constexpr vertex2(const spos& v) : x(v.x), y(v.y) { }
+		constexpr vertex2(const ipos& v) : x(v.x), y(v.y) { }
+		constexpr vertex2(const fpos& v) : x(v.x), y(v.y) { }
+		constexpr vertex2(const dpos& v) : x(v.x), y(v.y) { }
+		explicit constexpr vertex2(T c) : x(c), y(c) { }
+		constexpr vertex2(T xx, T yy) : x(xx), y(yy) { }
 
 		inline const T* getXY() const { return &x; }
 
@@ -346,13 +346,13 @@ namespace vtx {
 		T	y;
 		T	z;
 
-		inline vertex3() { }
-		inline vertex3(const svtx& v) : x(v.x), y(v.y), z(v.z) { }
-		inline vertex3(const ivtx& v) : x(v.x), y(v.y), z(v.z) { }
-		inline vertex3(const fvtx& v) : x(v.x), y(v.y), z(v.z) { }
-		inline vertex3(const dvtx& v) : x(v.x), y(v.y), z(v.z) { }
-		explicit inline vertex3(T c) : x(c), y(c), z(c) { }
-		explicit inline vertex3(T xx, T yy, T zz = static_cast<T>(0)) : x(xx), y(yy), z(zz) { }
+		vertex3() { }
+		constexpr vertex3(const svtx& v) : x(v.x), y(v.y), z(v.z) { }
+		constexpr vertex3(const ivtx& v) : x(v.x), y(v.y), z(v.z) { }
+		constexpr vertex3(const fvtx& v) : x(v.x), y(v.y), z(v.z) { }
+		constexpr vertex3(const dvtx& v) : x(v.x), y(v.y), z(v.z) { }
+		explicit constexpr vertex3(T c) : x(c), y(c), z(c) { }
+		explicit constexpr vertex3(T xx, T yy, T zz = static_cast<T>(0)) : x(xx), y(yy), z(zz) { }
 
 		inline const T* getXYZ() const { return &x; }
 
@@ -505,11 +505,11 @@ namespace vtx {
 		T	z;
 		T	w;
 
-		inline vertex4() { }
-		explicit inline vertex4(T c) : x(c), y(c), z(c), w(c) { }
-		explicit inline vertex4(T xx, T yy, T zz, T ww = static_cast<T>(1)) : x(xx), y(yy), z(zz), w(ww) { }
-		inline vertex4(const vertex3<T>& v) : x(v.x), y(v.y), z(v.z), w(static_cast<T>(1)) { }
-		inline vertex4(const vertex4& v) : x(v.x), y(v.y), z(v.z), w(v.w) { }
+		vertex4() { }
+		explicit constexpr vertex4(T c) : x(c), y(c), z(c), w(c) { }
+		explicit constexpr vertex4(T xx, T yy, T zz, T ww = static_cast<T>(1)) : x(xx), y(yy), z(zz), w(ww) { }
+		constexpr vertex4(const vertex3<T>& v) : x(v.x), y(v.y), z(v.z), w(static_cast<T>(1)) { }
+		constexpr vertex4(const vertex4& v) : x(v.x), y(v.y), z(v.z), w(v.w) { }
 
 		inline const T* getXYZW() const { return &x; }
 
