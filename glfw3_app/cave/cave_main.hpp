@@ -45,7 +45,33 @@ namespace app {
 			@brief  初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize();
+		void initialize()
+		{
+			auto& core = gl::core::get_instance();
+
+			using namespace gui;
+			auto& wd = director_.at().widget_director_;
+
+			{	// ターミナルの作成
+				{
+					widget::param wp(vtx::irect(10, 10, 400, 300));
+					widget_frame::param wp_;
+					wp_.plate_param_.set_caption(20);
+					terminal_frame_ = wd.add_widget<widget_frame>(wp, wp_);
+				}
+				{
+					widget::param wp(vtx::irect(0), terminal_frame_);
+					widget_terminal::param wp_;
+					terminal_core_ = wd.add_widget<widget_terminal>(wp, wp_);
+				}
+			}
+
+			// プリファレンスの取得
+			auto& pre = director_.at().preference_;
+			if(terminal_frame_ != nullptr) {
+				terminal_frame_->load(pre);
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -53,7 +79,13 @@ namespace app {
 			@brief  アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update();
+		void update()
+		{
+			auto& wd = director_.at().widget_director_;
+
+
+			wd.update();
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -61,7 +93,11 @@ namespace app {
 			@brief  レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render();
+		void render()
+		{
+			director_.at().widget_director_.service();
+			director_.at().widget_director_.render();
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -69,8 +105,13 @@ namespace app {
 			@brief  廃棄
 		*/
 		//-----------------------------------------------------------------//
-		void destroy();
+		void destroy()
+		{
+			auto& pre = director_.at().preference_;
 
+			if(terminal_frame_) {
+				terminal_frame_->save(pre);
+			}
+		}
 	};
-
 }

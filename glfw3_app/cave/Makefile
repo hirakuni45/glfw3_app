@@ -4,7 +4,7 @@
 #   @brief  glfw_app @n
 #			target:Windows:MSYS2: clan64
 #   @author 平松邦仁 (hira@rvf-rc45.net)
-#	@copyright	Copyright (C) 2023 Kunihito Hiramatsu @n
+#	@copyright	Copyright (C) 2023, 2024 Kunihito Hiramatsu @n
 #				Released under the MIT license @n
 #				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 #=======================================================================
@@ -19,7 +19,6 @@ CSOURCES	=	minizip/ioapi.c \
 				minizip/unzip.c
 
 PSOURCES	=	main.cpp \
-				cave_main.cpp \
 				core/glcore.cpp \
 				core/device.cpp \
 				widgets/widget_director.cpp \

@@ -9,15 +9,15 @@
 
 typedef app::cave_main start_app;
 
-static const char* app_title_ = { "Cave Adventure" };
-static const char* window_key_ = { "application/window" };
-static const vtx::spos start_pos_(10, 40);
-static const vtx::spos start_size_(800, 600);
-static const vtx::spos limit_size_(800, 600);
+static constexpr char app_title_[] = "Cave Adventure";
+static constexpr char window_key_[] = "application/window";
+static constexpr vtx::spos start_pos_(10, 40);
+static constexpr vtx::spos start_size_(800, 600);
+static constexpr vtx::spos limit_size_(800, 600);
 
 int main(int argc, char** argv)
 {
-	gl::core& core = gl::core::get_instance();
+	auto& core = gl::core::get_instance();
 
 	if(!core.initialize(argc, argv)) {
 		std::cerr << "glcore initialize error." << std::endl;
