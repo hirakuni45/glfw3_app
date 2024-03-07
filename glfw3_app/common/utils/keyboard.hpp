@@ -25,19 +25,18 @@ namespace sys {
 			@brief	制御コード
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		struct ctrl {
-			enum type {
+		struct CTRL {
+			enum {
 				BS    = 0x08,
-				CR    = 0x0d,
+				CR    = 0x0D,
 				RIGHT = 'Q' - 0x40,
 				LEFT  = 'R' - 0x40,
 				DOWN  = 'S' - 0x40,
 				UP    = 'T' - 0x40,
-				ESC   = 0x1b,
-				DEL   = 0x7f,
+				ESC   = 0x1B,
+				DEL   = 0x7F,
 			};
 		};
-
 
 	private:
 		utils::lstring	input_;
@@ -66,6 +65,7 @@ namespace sys {
 			{ gl::device::key::LEFT,          'R'-0x40, 'R'-0x40 },
 			{ gl::device::key::DOWN,          'S'-0x40, 'S'-0x40 },
 			{ gl::device::key::UP,            'T'-0x40, 'T'-0x40 },
+//			{ gl::device::key::INSERT,        0x09, 0x09 },
 		};
 
 	public:
@@ -152,6 +152,4 @@ namespace sys {
 		//-----------------------------------------------------------------//
 		const utils::lstring& input() const { return input_; }
 	};
-
 }
-
