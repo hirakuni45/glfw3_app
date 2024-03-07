@@ -314,30 +314,30 @@ namespace gui {
 							param_.text_in_ = false;
 							continue;
 						}
-						if(ch == sys::keyboard::ctrl::DEL) {
+						if(ch == sys::keyboard::CTRL::DEL) {
 							if(param_.text_in_pos_ < param_.text_param_.text_.size()) {
 								param_.text_param_.text_.erase(param_.text_in_pos_, 1);
 							}
 						} else if(ch < 0x20) {
-							if(ch == sys::keyboard::ctrl::BS) {
+							if(ch == sys::keyboard::CTRL::BS) {
 								if(param_.text_in_pos_) {
 									--param_.text_in_pos_;
 									param_.text_param_.text_.erase(param_.text_in_pos_, 1);
 								}
-							} else if(ch == sys::keyboard::ctrl::CR) {
+							} else if(ch == sys::keyboard::CTRL::CR) {
 								if(param_.text_in_pos_ < param_.text_param_.text_.size()) {
 									param_.text_param_.text_.erase(param_.text_in_pos_);
 								}
 								param_.text_param_.offset_.x = 0;
 								param_.text_in_ = false;
-							} else if(ch == sys::keyboard::ctrl::ESC) {
+							} else if(ch == sys::keyboard::CTRL::ESC) {
 								param_.text_param_.offset_.x = 0;
 								param_.text_in_ = false;
-							} else if(ch == sys::keyboard::ctrl::RIGHT) {
+							} else if(ch == sys::keyboard::CTRL::RIGHT) {
 								if(param_.text_in_pos_ < param_.text_param_.text_.size()) {
 									++param_.text_in_pos_;
 								}
-							} else if(ch == sys::keyboard::ctrl::LEFT) {
+							} else if(ch == sys::keyboard::CTRL::LEFT) {
 								if(param_.text_in_pos_) {
 									--param_.text_in_pos_;
 								}

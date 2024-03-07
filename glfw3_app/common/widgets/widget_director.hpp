@@ -145,7 +145,7 @@ namespace gui {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		widget_director() :
+		widget_director() noexcept :
 			img_files_(),
 			mobj_(), common_parts_(mobj_),
 			serial_{ 0, 5000, 10000, 15000, 20000, 25000, 30000, 35000 },
@@ -176,7 +176,7 @@ namespace gui {
 			@return 共通画像構造体の参照
 		*/
 		//-----------------------------------------------------------------//
-		const share_img& get_share_image() const { return share_img_; }
+		const share_img& get_share_image() const noexcept { return share_img_; }
 
 
 		//-----------------------------------------------------------------//
@@ -211,7 +211,7 @@ namespace gui {
 			@param[in]	child	子も不許可にする場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		void enable(widget* root, bool flag = true, bool child = false)
+		void enable(widget* root, bool flag = true, bool child = false) noexcept
 		{
 			if(root == nullptr) return;
 
@@ -239,7 +239,7 @@ namespace gui {
 			@param[in]	child	子も不許可にする場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		void stall(widget* root, bool flag = true, bool child = false)
+		void stall(widget* root, bool flag = true, bool child = false) noexcept
 		{
 			if(root == nullptr) return;
 
@@ -262,7 +262,31 @@ namespace gui {
 			@param[in]	w	ウィジェット
 		*/
 		//-----------------------------------------------------------------//
-		bool del_widget(widget* w);
+		bool del_widget(widget* w)
+		{
+			if(w == nullptr) return false;
+
+			widgets ws;
+			for(auto ww : widgets_) {
+				if(ww != w) {
+					ws.push_back(ww);
+				}
+			}
+			widgets_ = ws;
+
+			if(select_widget_ == w) select_widget_ = nullptr;
+			if(move_widget_ == w) move_widget_ = nullptr;
+			if(resize_l_widget_ == w) resize_l_widget_ = nullptr;
+			if(resize_r_widget_ == w) resize_r_widget_ = nullptr;
+			if(top_widget_ == w) top_widget_ = nullptr;
+			if(focus_widget_ == w) focus_widget_ = nullptr;
+
+			del_mark_.insert(w);
+
+			delete w;
+
+			return true;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -272,7 +296,15 @@ namespace gui {
 			@param[out]	ws	ウィジェット列
 		*/
 		//-----------------------------------------------------------------//
-		void parents_widget(widget* pw, widgets& ws);
+		void parents_widget(widget* pw, widgets& ws) noexcept
+		{
+			for(auto w : widgets_) {
+				if(w->get_param().parents_ == pw) {
+					ws.push_back(w);
+					parents_widget(w, ws);
+				}
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -282,7 +314,7 @@ namespace gui {
 			@return		ウィジェット列
 		*/
 		//-----------------------------------------------------------------//
-		widgets parents_widget(widget* pw)
+		widgets parents_widget(widget* pw) noexcept
 		{
 			widgets ws;
 			parents_widget(pw, ws);
@@ -295,7 +327,12 @@ namespace gui {
 			@brief	マーキングをリセットする
 		*/
 		//-----------------------------------------------------------------//
-		void reset_mark();
+		void reset_mark() noexcept
+		{
+			for(auto w : widgets_) {
+				w->set_mark(false);
+			}
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -305,7 +342,18 @@ namespace gui {
 			@return ルート・ウィジェット
 		*/
 		//-----------------------------------------------------------------//
-		widget* root_widget(widget* w) const;
+		widget* root_widget(widget* w) const noexcept
+		{
+			if(w == nullptr) return nullptr;
+
+			do {
+				if(w->get_param().parents_ == nullptr) {
+					break;
+				}
+				w = w->get_param().parents_;
+			} while(w) ;
+			return w;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -314,7 +362,28 @@ namespace gui {
 			@param[in]	w	ウィジェット
 		*/
 		//-----------------------------------------------------------------//
-		void top_widget(widget* w);
+		void top_widget(widget* w) noexcept
+		{
+			if(w == nullptr) return;
+
+			reset_mark();
+			widgets ws;
+			ws.push_back(w);
+			parents_widget(w, ws);
+			for(auto cw : ws) {
+				cw->set_mark();
+			}
+			widgets wss;
+			for(auto cw : widgets_) {
+				if(!cw->get_mark()) {
+					wss.push_back(cw);
+				}
+			}
+			for(auto cw : ws) {
+				wss.push_back(cw);
+			}
+			widgets_ = wss;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -323,7 +392,7 @@ namespace gui {
 			@return 前面移動ウィジェット
 		*/
 		//-----------------------------------------------------------------//
-		widget* get_move_widget() const { return move_widget_; }
+		widget* get_move_widget() const noexcept { return move_widget_; }
 
 
 		//-----------------------------------------------------------------//
@@ -332,7 +401,7 @@ namespace gui {
 			@return トップ・ウィジェット
 		*/
 		//-----------------------------------------------------------------//
-		widget* get_top_widget() const { return top_widget_; }
+		widget* get_top_widget() const noexcept { return top_widget_; }
 
 
 		//-----------------------------------------------------------------//
@@ -341,7 +410,7 @@ namespace gui {
 			@return フォーカス・ウィジェット
 		*/
 		//-----------------------------------------------------------------//
-		widget* get_focus_widget() const { return focus_widget_; }
+		widget* get_focus_widget() const noexcept { return focus_widget_; }
 
 
 		//-----------------------------------------------------------------//
@@ -350,7 +419,7 @@ namespace gui {
 			@param[in]	w	フォーカス・ウィジェット
 		*/
 		//-----------------------------------------------------------------//
-		void set_focus_widget(widget* w) { focus_widget_ = w; }
+		void set_focus_widget(widget* w) noexcept { focus_widget_ = w; }
 
 
 		//-----------------------------------------------------------------//
@@ -359,7 +428,7 @@ namespace gui {
 			@return スクロール
 		*/
 		//-----------------------------------------------------------------//
-		const vtx::ipos& get_scroll() const { return scroll_; }
+		const vtx::ipos& get_scroll() const noexcept { return scroll_; }
 
 
 		//-----------------------------------------------------------------//
@@ -368,7 +437,7 @@ namespace gui {
 			@return 位置
 		*/
 		//-----------------------------------------------------------------//
-		const vtx::ipos& get_positive_pos() const { return position_positive_; }
+		const vtx::ipos& get_positive_pos() const noexcept { return position_positive_; }
 
 
 		//-----------------------------------------------------------------//
@@ -377,7 +446,7 @@ namespace gui {
 			@return 位置
 		*/
 		//-----------------------------------------------------------------//
-		const vtx::ipos& get_level_pos() const { return position_level_; }
+		const vtx::ipos& get_level_pos() const noexcept { return position_level_; }
 
 
 		//-----------------------------------------------------------------//
@@ -386,7 +455,7 @@ namespace gui {
 			@return 位置
 		*/
 		//-----------------------------------------------------------------//
-		const vtx::ipos& get_negative_pos() const { return position_negative_; }
+		const vtx::ipos& get_negative_pos() const noexcept { return position_negative_; }
 
 
 		//-----------------------------------------------------------------//
@@ -435,7 +504,8 @@ namespace gui {
 			@brief	T.S.C の設定
 		*/
 		//-----------------------------------------------------------------//
-		void set_TSC() const {
+		void set_TSC() const noexcept
+		{
 			glTranslatef(position_.x, position_.y, position_.z);
 			glScalef(scale_, scale_, 1.0f);
 			glColor4f(color_.r, color_.g, color_.b, color_.a);
@@ -448,7 +518,7 @@ namespace gui {
 			@return カレント・カラー
 		*/
 		//-----------------------------------------------------------------//
-		const img::rgbaf& get_color() const { return color_; }
+		const img::rgbaf& get_color() const noexcept { return color_; }
 
 
 		//-----------------------------------------------------------------//
@@ -457,7 +527,7 @@ namespace gui {
 			@return イメージ・ファイルス
 		*/
 		//-----------------------------------------------------------------//
-		img::img_files& at_img_files() { return img_files_; }
+		img::img_files& at_img_files() noexcept { return img_files_; }
 
 
 		//-----------------------------------------------------------------//
@@ -466,7 +536,7 @@ namespace gui {
 			@return モーション・オブジェクト
 		*/
 		//-----------------------------------------------------------------//
-		gl::mobj& at_mobj() { return mobj_; }
+		gl::mobj& at_mobj() noexcept { return mobj_; }
 
 
 		//-----------------------------------------------------------------//
@@ -475,7 +545,8 @@ namespace gui {
 			@return ハンドル
 		*/
 		//-----------------------------------------------------------------//
-		gl::mobj::handle share_add(const share_t& key) {
+		gl::mobj::handle share_add(const share_t& key) noexcept
+		{
 			return common_parts_.add(key);
 		}
 
@@ -486,7 +557,8 @@ namespace gui {
 			@return ハンドル
 		*/
 		//-----------------------------------------------------------------//
-		gl::mobj::handle share_get(const share_t& key) {
+		gl::mobj::handle share_get(const share_t& key) noexcept
+		{
 			return common_parts_.get(key);
 		}
 
@@ -506,7 +578,7 @@ namespace gui {
 			@return 共通部品構造体の参照
 		*/
 		//-----------------------------------------------------------------//
-		const common_parts& get_common_parts() const { return common_parts_; }
+		const common_parts& get_common_parts() const noexcept { return common_parts_; }
 
 
 		//-----------------------------------------------------------------//
@@ -516,7 +588,7 @@ namespace gui {
 			@return widget 固有の文字列
 		*/
 		//-----------------------------------------------------------------//
-		std::string create_widget_name(const widget* w) const
+		std::string create_widget_name(const widget* w) const noexcept
 		{
 			if(w == nullptr) return "";
 
@@ -547,7 +619,7 @@ namespace gui {
 			@return キーボード
 		*/
 		//-----------------------------------------------------------------//
-		const sys::keyboard& get_keyboard() const { return keyboard_; }
+		const sys::keyboard& get_keyboard() const noexcept { return keyboard_; }
 
 
 		//-----------------------------------------------------------------//
@@ -556,7 +628,7 @@ namespace gui {
 			@return キーボード
 		*/
 		//-----------------------------------------------------------------//
-		sys::keyboard& at_keyboard() { return keyboard_; }
+		sys::keyboard& at_keyboard() noexcept { return keyboard_; }
 
 
 		//-----------------------------------------------------------------//
@@ -565,7 +637,8 @@ namespace gui {
 			@param[in]	msg	エラーレポート文
 		*/
 		//-----------------------------------------------------------------//
-		void add_error_report(const std::string& msg) {
+		void add_error_report(const std::string& msg) noexcept
+		{
 			error_list_.push_back(msg);
 		}
 
@@ -576,7 +649,7 @@ namespace gui {
 			@return	エラーレポート
 		*/
 		//-----------------------------------------------------------------//
-		const utils::strings& get_error_report() const { return error_list_; }
+		const utils::strings& get_error_report() const noexcept { return error_list_; }
 
 
 		//-----------------------------------------------------------------//
@@ -584,7 +657,7 @@ namespace gui {
 			@brief	エラーレポートを消去
 		*/
 		//-----------------------------------------------------------------//
-		void clear_error_report() { error_list_.clear(); }
+		void clear_error_report() noexcept { error_list_.clear(); }
 	};
 
 

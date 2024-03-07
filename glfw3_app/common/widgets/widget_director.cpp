@@ -160,121 +160,6 @@ namespace gui {
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	ウィジェットの削除
-		@param[in]	w	ウィジェット
-	*/
-	//-----------------------------------------------------------------//
-	bool widget_director::del_widget(widget* w)
-	{
-		if(w == nullptr) return false;
-
-		widgets ws;
-		for(auto ww : widgets_) {
-			if(ww != w) {
-				ws.push_back(ww);
-			}
-		}
-		widgets_ = ws;
-
-		if(select_widget_ == w) select_widget_ = nullptr;
-		if(move_widget_ == w) move_widget_ = nullptr;
-		if(resize_l_widget_ == w) resize_l_widget_ = nullptr;
-		if(resize_r_widget_ == w) resize_r_widget_ = nullptr;
-		if(top_widget_ == w) top_widget_ = nullptr;
-		if(focus_widget_ == w) focus_widget_ = nullptr;
-
-		del_mark_.insert(w);
-
-		delete w;
-
-		return true;
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	ペアレンツ・ウィジェットの収集
-		@param[in]	pw	ペアレンツ・ウィジェット
-		@param[out]	ws	ウィジェット列
-	*/
-	//-----------------------------------------------------------------//
-	void widget_director::parents_widget(widget* pw, widgets& ws)
-	{
-		for(auto w : widgets_) {
-			if(w->get_param().parents_ == pw) {
-				ws.push_back(w);
-				parents_widget(w, ws);
-			}
-		}
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	ルート・ウィジェットを返す
-		@param[in]	w	基準ウィジェット
-		@return ルート・ウィジェット
-	*/
-	//-----------------------------------------------------------------//
-	widget* widget_director::root_widget(widget* w) const
-	{
-		if(w == nullptr) return nullptr;
-
-		do {
-			if(w->get_param().parents_ == nullptr) {
-				break;
-			}
-			w = w->get_param().parents_;
-		} while(w) ;
-		return w;
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	マーキングをリセットする
-	*/
-	//-----------------------------------------------------------------//
-	void widget_director::reset_mark()
-	{
-		for(auto w : widgets_) {
-			w->set_mark(false);
-		}
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
-		@brief	最前面にする
-		@param[in]	w	ウィジェット
-	*/
-	//-----------------------------------------------------------------//
-	void widget_director::top_widget(widget* w)
-	{
-		if(w == nullptr) return;
-
-		reset_mark();
-		widgets ws;
-		ws.push_back(w);
-		parents_widget(w, ws);
-		for(auto cw : ws) {
-			cw->set_mark();
-		}
-		widgets wss;
-		for(auto cw : widgets_) {
-			if(!cw->get_mark()) {
-				wss.push_back(cw);
-			}
-		}
-		for(auto cw : ws) {
-			wss.push_back(cw);
-		}
-		widgets_ = wss;
-	}
-
-
-	//-----------------------------------------------------------------//
-	/*!
 		@brief	初期化
 	*/
 	//-----------------------------------------------------------------//
@@ -731,8 +616,9 @@ namespace gui {
 					}
 					if(!caption) {
 						auto r = w->get_param().clip_;
-						r.org  += 8;
-						r.size -= 16;
+						int xy = 6;
+						r.org  += xy;   // フレーム幅の多少の余裕
+						r.size -= xy * 2;
 						if(!r.is_focus(msp)) {
 							if(w->get_state(widget::state::SIZE_LOCK)) continue;
 							resize_l_widget_ = w;

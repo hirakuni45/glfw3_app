@@ -443,7 +443,7 @@ namespace gui {
 			if(get_focus()) {
 				const utils::lstring& ins = wd_.get_keyboard().input();
 				for(uint32_t ch : ins) {
-					if(ch == sys::keyboard::ctrl::ESC) {
+					if(ch == sys::keyboard::CTRL::ESC) {
 						wd_.enable(this, false, true);
 						break;
 					}
