@@ -203,31 +203,47 @@ namespace utils {
 				}
 				break;
 			case 0x08:  // Back Space
-				if(pos_.x > 0) --pos_.x;
+				if(pos_.x > 0) {
+					auto& l = lines_[pos_.y];
+					--pos_.x;
+					if(pos_.x < l.size()) {
+						l.erase(l.begin() + pos_.x);
+					}
+				}
 				break;
 			case 0x7f:  // DEL
 				{
 					auto& l = lines_[pos_.y];
 					if(pos_.x < l.size()) {
-						l.pop_back();
+						l.erase(l.begin() + pos_.x);
 					}
 				}
 				break;
 			case 0x11:  // Right
-				{
-					auto& l = lines_[pos_.y];
-					if(pos_.x < l.size()) {
-						++pos_.x;
-					}
+				if(pos_.x < lines_[pos_.y].size()) {
+					++pos_.x;
 				}
 				break;
 			case 0x12:  // Left
 				if(pos_.x > 0) --pos_.x;
 				break;
 			case 0x13:  // Down
-				nl_();
+				if(pos_.y < (lines_.size() - 1)) {
+					++pos_.y;
+					auto& l = lines_[pos_.y];
+					if(l.size() <= pos_.x) {
+						pos_.x = l.size();
+					}
+				}
 				break;
 			case 0x14:  // Up
+				if(pos_.y > 0) {
+					pos_.y--;
+					auto& l = lines_[pos_.y];
+					if(l.size() <= pos_.x) {
+						pos_.x = l.size();
+					}
+				}
 				break;
 			default:
 				if(cha < 0x20) {
