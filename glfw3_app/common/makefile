@@ -78,7 +78,9 @@ CCWARN	=	-Wimplicit -Wreturn-type -Wswitch \
 CPWARN	=	-Wall -Werror -Wno-unused-private-field \
 			-Wno-unused-variable \
 			-Wno-unused-function \
-			-Wno-unused-but-set-variable
+			-Wno-unused-but-set-variable \
+			-Wno-vla-cxx-extension \
+			-Wno-deprecated-declarations
 
 CCWARN	+=	$(USR_CCWAN)
 CPWARN	+=	$(USR_CPWAN)
