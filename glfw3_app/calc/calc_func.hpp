@@ -10,7 +10,7 @@
 //=====================================================================//
 #include <cmath>
 #include <cstring>
-#include "fixed_string.hpp"
+#include "common/fixed_string.hpp"
 
 namespace utils {
 
@@ -275,7 +275,8 @@ namespace utils {
 					return it.first;
 				}
 			}
-			return typename MAP::key_type("");
+			static typename MAP::key_type t;
+			return t;
 		}
 
 

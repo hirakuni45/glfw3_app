@@ -15,21 +15,35 @@
 #include "widgets/widget_fb.hpp"
 #include "widgets/widget_terminal.hpp"
 #include "utils/format.hpp"
-
-#include "calc_cmd.hpp"
-
 #include <string>
 
-#if 0
+#define EMU
+
+#ifdef EMU
+#include "calc_cmd.hpp"
+
 namespace gui_sim {
 
 	const void* get_fbp();
 	void set_pos(const vtx::spos& pos, bool touch);
 	void setup_gui();
 	void update_gui();
+	app::calc_cmd& at_calc_cmd();
 
 }
 #endif
+
+static inline std::function<void (const char* str)> output_func_;
+
+void sci_puts(const char* str)
+{
+	if(output_func_ != nullptr) {
+		if(str != nullptr) {
+			output_func_(str);
+		}
+	}
+}
+
 
 namespace app {
 
@@ -42,8 +56,6 @@ namespace app {
 
 		gui::widget_frame*		terminal_frame_;
 		gui::widget_terminal*	terminal_core_;
-
-		app::calc_cmd	calc_cmd_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -120,6 +132,15 @@ namespace app {
 				auto& t = terminal_core_->at_terminal();
 				t.enable_crlf();
 			}
+
+			output_func_ = [=](const char* str) {
+				if(terminal_core_ != nullptr) {
+					terminal_core_->at_terminal().output(str);
+				}
+			};
+#ifdef EMU
+			gui_sim::setup_gui();
+#endif
 		}
 
 
@@ -132,7 +153,7 @@ namespace app {
 		{
 			auto& wd = director_.at().widget_director_;
 
-#if 0
+#ifdef EMU
 			// マウスの操作を、ファーストタッチに似せる～
 			if(lcd_core_->get_local_param().ms_positive_ || lcd_core_->get_local_param().ms_level_) {
 				const auto& p = lcd_core_->get_local_param().ms_pos_;
@@ -162,10 +183,9 @@ namespace app {
 					t.output('\n');
 
 					auto s = t.get_last_text();
-					if(!s.empty() && s[0] >= 0x20 && s[0] <= 0x7f) {
-						calc_cmd_.service(s.c_str(), [=](const char* str) {
-							terminal_core_->at_terminal().output(str);
-						} );
+					if(!s.empty() && s[0] >= 0x20 && s[0] < 0x7f) {
+						gui_sim::at_calc_cmd().set_out(sci_puts);
+						gui_sim::at_calc_cmd()(s.c_str());
 					}
 				}
 			}
@@ -186,6 +206,12 @@ namespace app {
 		}
 
 
+		auto get_terminal_core() noexcept
+		{
+			return terminal_core_;
+		}
+
+
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  廃棄
@@ -195,10 +221,10 @@ namespace app {
 		{
 			auto& pre = director_.at().preference_;
 
-			if(terminal_frame_) {
+			if(terminal_frame_ != nullptr) {
 				terminal_frame_->save(pre);
 			}
-			if(lcd_frame_) {
+			if(lcd_frame_ != nullptr) {
 				lcd_frame_->save(pre);
 			}
 		}
