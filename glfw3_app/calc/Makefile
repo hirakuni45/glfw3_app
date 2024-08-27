@@ -22,7 +22,9 @@ PSOURCES	=	main.cpp \
 				core/glcore.cpp \
 				core/device.cpp \
 				widgets/widget_director.cpp \
-				widgets/widget_filer.cpp
+				widgets/widget_filer.cpp \
+				graphics/kfont16.cpp \
+				calc_gui.cpp
 
 # C++ version
 CPP_VER		=	-std=c++17
