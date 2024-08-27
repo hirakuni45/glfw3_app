@@ -1,9 +1,9 @@
 #pragma once
 //=====================================================================//
 /*!	@file
-	@brief	JPEG 画像を扱うクラス
+	@brief	JPEG/JFIF 画像を扱うクラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2024 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
@@ -24,12 +24,6 @@ extern "C" {
 
 namespace img {
 
-	template <class _>
-	struct jpeg_io_holder_t {
-		static int	error_code_;
-	};
-	template <class _> int jpeg_io_holder_t<_>::error_code_ = 0;
-
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
 		@brief	JPEG 画像クラス
@@ -42,7 +36,7 @@ namespace img {
 		uint32_t	prgl_ref_;
 		uint32_t	prgl_pos_;
 
-		typedef jpeg_io_holder_t<void> HOLDER;
+		static inline int	error_code_ = 0;
 
 		static constexpr size_t INPUT_BUF_SIZE = 4096;
 
@@ -233,7 +227,7 @@ namespace img {
 
 		static void error_exit_task(jpeg_common_struct *st)
 		{
-			HOLDER::error_code_ = 1;
+			error_code_ = 1;
 		}
 
 
@@ -260,7 +254,7 @@ namespace img {
 			@return ファイル拡張子の文字列
 		*/
 		//-----------------------------------------------------------------//
-		const char* get_file_ext() const override { return "jpg,jpeg"; }
+		const char* get_file_ext() const override { return "jpg,jpeg,jfif"; }
 
 
 		//-----------------------------------------------------------------//
@@ -315,12 +309,12 @@ namespace img {
 			fio_jpeg_file_io_src(&cinfo, &fin);
 
 			// ファイルの情報ヘッダの読込み
-			HOLDER::error_code_ = 0;
+			error_code_ = 0;
 			jpeg_read_header(&cinfo, TRUE);
 			fin.seek(pos, utils::file_io::SEEK::SET);
 
-			if(HOLDER::error_code_) {
-///				std::endl << "JPEG decode error: 'header'(" << static_cast<int>(HOLDER::error_code_) << ")" << std::endl; 
+			if(error_code_ != 0) {
+///				std::endl << "JPEG decode error: 'header'(" << error_code_ << ")" << std::endl; 
 				jpeg_destroy_decompress(&cinfo);
 				return false;
 			}
@@ -397,19 +391,19 @@ namespace img {
 			fio_jpeg_file_io_src(&cinfo, &fin);
 
 			// ファイルの情報ヘッダの読込み
-			HOLDER::error_code_ = 0;
+			error_code_ = 0;
 			jpeg_read_header(&cinfo, TRUE);
-			if(HOLDER::error_code_) {
-				std::cout << "JPEG decode error: 'header' (" << HOLDER::error_code_ << ")" << std::endl; 
+			if(error_code_ != 0) {
+				std::cout << "JPEG decode error: 'header' (" << error_code_ << ")" << std::endl; 
 				jpeg_destroy_decompress(&cinfo);
 				return false;
 			}
 
 			// 解凍の開始
-			HOLDER::error_code_ = 0;
+			error_code_ = 0;
 			jpeg_start_decompress(&cinfo);
-			if(HOLDER::error_code_) {
-				std::cout << "JPEG decode error: 'decompress' (" << HOLDER::error_code_ << ")" << std::endl;
+			if(error_code_ != 0) {
+				std::cout << "JPEG decode error: 'decompress' (" << error_code_ << ")" << std::endl;
 				jpeg_finish_decompress(&cinfo);
 				jpeg_destroy_decompress(&cinfo);
 				return false;
