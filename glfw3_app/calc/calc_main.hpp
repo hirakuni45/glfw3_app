@@ -26,6 +26,7 @@ namespace gui_sim {
 
 	const void* get_fbp();
 	void set_pos(const vtx::spos& pos, bool touch);
+	void start_gui();
 	void setup_gui();
 	void update_gui();
 	app::calc_cmd& at_calc_cmd();
@@ -139,6 +140,7 @@ namespace app {
 				}
 			};
 #ifdef EMU
+			gui_sim::start_gui();
 			gui_sim::setup_gui();
 #endif
 		}

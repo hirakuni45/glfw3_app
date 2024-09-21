@@ -1,34 +1,45 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	テキスト表示と制御 @n
 			クリッピングされた描画と、位置の管理などを行う @n
-			描画領域より大きなテキスト描画を行う場合は、自動でスクロールを行う。@n
+			描画領域より大きなテキスト描画を行う場合は、自動でスクロールを行う。 @n
 			現状の実装では、複数行はサポートしない。
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2020 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2020, 2024 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/RX/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include "gui/widget.hpp"
 
 namespace gui {
 
-	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
 		@brief	テキスト・クラス
 	*/
-	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct text : public widget {
 
 		typedef text value_type;
+
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	スクロール型
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		enum class SCROLL : uint8_t {
+			AUTO,	///< 自動スクロール
+			DRAG,	///< ドラッグ制御
+		};
 
 	private:
 
 		static constexpr uint16_t	SCROLL_SPEED_FRAME = 3;		///< 標準スクロール速度
 		static constexpr uint16_t	SCROLL_WAIT_FRAME = 60 * 6;	///< 標準ホールド時間
 
+		SCROLL		scroll_;
 		bool		enable_scroll_;
 		int16_t		text_draw_h_;
 		int16_t		scroll_h_;
@@ -42,11 +53,12 @@ namespace gui {
 			@brief	コンストラクター
 			@param[in]	loc		ロケーション
 			@param[in]	str		初期文字列
+			@param[in]	scroll	スクロール型
 		*/
 		//-----------------------------------------------------------------//
-		text(const vtx::srect& loc = vtx::srect(0), const char* str = nullptr) noexcept :
+		text(const vtx::srect& loc = vtx::srect(0), const char* str = nullptr, SCROLL scroll = SCROLL::AUTO) noexcept :
 			widget(loc, str),
-			enable_scroll_(true), text_draw_h_(0), scroll_h_(0),
+			scroll_(scroll), enable_scroll_(true), text_draw_h_(0), scroll_h_(0),
 			scroll_speed_(SCROLL_SPEED_FRAME), scroll_delay_(0), scroll_wait_(SCROLL_WAIT_FRAME)
 		{
 			set_base_color(graphics::def_color::Gray);
@@ -101,23 +113,32 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void update_touch(const vtx::spos& pos, uint16_t num) noexcept override
 		{
-			if(enable_scroll_ && text_draw_h_ > get_location().size.x) {
-				if(scroll_wait_ > 0) {
-					scroll_wait_--;
-				} else {
-					++scroll_delay_;
-					if(scroll_delay_ >= scroll_speed_) {
-						scroll_delay_ = 0;
-						++scroll_h_;
-						if(scroll_h_ == 0) {
-							scroll_wait_ = SCROLL_WAIT_FRAME;
+			switch(scroll_) {
+			case SCROLL::AUTO:
+				if(enable_scroll_ && text_draw_h_ > get_location().size.x) {
+					if(scroll_wait_ > 0) {
+						scroll_wait_--;
+					} else {
+						++scroll_delay_;
+						if(scroll_delay_ >= scroll_speed_) {
+							scroll_delay_ = 0;
+							++scroll_h_;
+							if(scroll_h_ == 0) {
+								scroll_wait_ = SCROLL_WAIT_FRAME;
+							}
+							set_update();
+							if(scroll_h_ > text_draw_h_) {
+								scroll_h_ = -get_location().size.x;
+							}					
 						}
-						set_update();
-						if(scroll_h_ > text_draw_h_) {
-							scroll_h_ = -get_location().size.x;
-						}					
 					}
 				}
+				break;
+			case SCROLL::DRAG:
+				if(text_draw_h_ > get_location().size.x) {
+					
+				}
+				break;
 			}
 		}
 

@@ -3,7 +3,7 @@
 /*!	@file
 	@brief	ダイアログ表示と制御
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2020, 2022 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2020, 2024 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/RX/blob/master/LICENSE
 */
@@ -33,8 +33,8 @@ namespace gui {
 			@param[in]	str		フレーム・タイトル
 		*/
 		//-----------------------------------------------------------------//
-		dialog(const vtx::srect& loc = vtx::srect(0), const char* str = "") noexcept :
-			widget(loc, str), caption_height_(0)
+		dialog(const vtx::srect& loc = vtx::srect(0), const char* str = nullptr) noexcept :
+			widget(loc, str), caption_height_(str != nullptr ? DEF_DIALOG_CAPTION_HEIGHT : 0)
 		{
 			insert_widget(this);
 		}

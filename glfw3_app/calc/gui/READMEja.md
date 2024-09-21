@@ -40,7 +40,7 @@ GUI Widgets フレームワーク
 |[slider.hpp](./slider.hpp)|Widget スライダー|
 |[menu.hpp](./menu.hpp)|Widget メニュー|
 |[spinbox.hpp](./spinbox.hpp)|Widget スピンボックス|
-|[toggle.hpp](./spinbox.hpp)|Widget トグルスイッチ|
+|[toggle.hpp](./toggle.hpp)|Widget トグルスイッチ|
 |[progress.hpp](./spinbox.hpp)|Widget プログレスバー|
 |[filer.hpp](./filer.hpp)|ファイル選択クラス|
 |[key_asc.hpp](./key_asc.hpp)|ASCII ソフトキーボード|

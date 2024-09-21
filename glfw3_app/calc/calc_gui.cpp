@@ -31,6 +31,11 @@ namespace gui_sim {
 		gui_.at_touch().set_pos(pos);		
 	}
 
+	void start_gui()
+	{
+		gui_.start();
+	}
+
 	void setup_gui()
 	{
 		gui_.setup();

@@ -212,7 +212,9 @@ namespace gui {
 					rdr.round_box(r, DEF_BUTTON_ROUND_RADIUS - DEF_BUTTON_FRAME_WIDTH);
 				}
 				break;
-			default:
+			case STYLE::ROUND_SHADOW:
+
+
 				break;
 			}
 
