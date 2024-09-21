@@ -1468,5 +1468,141 @@ namespace utils {
             return dsz >= 1;
         }
 
+
+        //-----------------------------------------------------------------//
+        /*!
+            @brief  文字列中の「単語」数を取得 @n
+					※バックスラッシュによる除外を行う
+			@param[in]	src		ソース
+			@param[in]	sch		単語分離キャラクタ
+			@return ワード数を返す
+        */
+        //-----------------------------------------------------------------//
+		static uint32_t get_words(const char* src, char sch = ' ') noexcept
+		{
+			if(src == nullptr) return 0;
+
+			uint32_t n = 0;
+			char bc = sch;
+			bool bsc = false;
+			while(1) {
+				char ch = *src++;
+				if(ch == '\\') {
+					bsc = true;
+					continue;
+				} else if(bsc) {
+					bsc = false;
+				} else {
+					if(ch == 0) break;
+					if(bc == sch && ch != sch) { 
+						++n;
+					}
+					bc = ch;
+				}
+			}
+			return n;
+		}
+
+
+        //-----------------------------------------------------------------//
+        /*!
+            @brief  ワードを取得 @n
+					※バックスラッシュによる除外を行う
+			@param[in]	src	ソース
+			@param[in]	argc	ワード位置
+			@param[out]	dst		ワード文字列格納ポインター
+			@param[in]	size	ワード文字列サイズ
+			@param[in]	sch		分離キャラクタ
+			@return 取得できたら「true」を返す
+        */
+        //-----------------------------------------------------------------//
+		static bool get_word(const char* src, uint32_t argc, char* dst, uint32_t dstlen,
+			char sch = ' ') noexcept 
+		{
+			if(src == nullptr || dst == nullptr || dstlen == 0) return false;
+
+			uint32_t n = 0;
+			char bc = sch;
+			bool bsc = false;
+			bool out = false;
+			while(1) {
+				char ch = *src++;
+				if(ch == '\\') {
+					bsc = true;
+					continue;
+				} else if(bsc) {
+					bsc = false;
+				} else {
+					if(bc == sch && ch != sch) {
+						if(n == argc) {
+							out = true;
+						}
+						++n;
+					} else if(bc != sch && ch == sch) {
+						if(out) {
+							break;
+						}
+					}
+					if(ch == 0) break;
+					bc = ch;
+				}
+				if(out && dstlen > 1) {
+					*dst++ = ch;
+					dstlen--;
+				}
+			}
+			*dst = 0;
+			return out;
+		}
+
+
+        //-----------------------------------------------------------------//
+        /*!
+            @brief  ワードを比較
+			@param[in]	src	ソース
+			@param[in]	argc	ワード位置
+			@param[in]	key		比較文字列
+			@param[in]	sch		分離キャラクタ
+			@return マッチした場合「true」
+        */
+        //-----------------------------------------------------------------//
+		static bool cmp_word(const char* src, uint32_t argc, const char* key, char sch = ' ') noexcept
+		{
+			if(src == nullptr || key == nullptr) return false;
+
+			uint32_t n = 0;
+			char bc = sch;
+			bool bsc = false;
+			bool out = false;
+			while(1) {
+				char ch = *src++;
+				if(ch == '\\') {
+					bsc = true;
+					continue;
+				} else if(bsc) {
+					bsc = false;
+				} else {
+					if(bc == sch && ch != sch) {
+						if(n == argc) {
+							out = true;
+						}
+						++n;
+					} else if(bc != sch && ch == sch) {
+						if(out) {
+							break;
+						}
+					}
+					if(ch == 0) break;
+					bc = ch;
+				}
+				if(out) {
+					if(ch != *key) return false;
+					++key; 
+				}
+			}
+			if(*key == 0) return true;
+			else return false;
+		}
+
 	};
 }
