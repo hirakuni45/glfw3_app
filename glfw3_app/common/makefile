@@ -13,6 +13,9 @@ ifeq ($(OS),Windows_NT)
     SYSTEM := WIN
     LOCAL_INC_PATH := /clang64/include
     LOCAL_LIB_PATH :=
+	MP4FF_PATH := ../libraries/inc
+	MP4FF_LIB_PATH := ../libraries/lib
+	MP4FF_LIB := faad mp4ff
 	OPTLIBS = opengl32 glu32 glew32 openal glfw3 \
 			  comdlg32 hid setupapi ksguid
 	CPMM	=	clang++
@@ -55,12 +58,12 @@ OPENJPEG_PATH := $(shell ls -r -d $(LOCAL_INC_PATH)/openjpeg*)
 OPTLIBS += 	pthread \
 			png jpeg openjp2 \
 			freetype \
-			mad \
+			mad $(MP4FF_LIB)\
 			z $(LIBS_USR) 
 
 STDLIBS		=
-INC_SYS		=	$(LOCAL_INC_PATH)/freetype2 $(OPENJPEG_PATH) $(INC_USR)
-LIBDIR		=	$(LOCAL_LIB_PATH) $(LIB_DIR_USR)
+INC_SYS		=	$(LOCAL_INC_PATH)/freetype2 $(OPENJPEG_PATH) $(MP4FF_PATH) $(INC_USR)
+LIBDIR		=	$(LOCAL_LIB_PATH) $(MP4FF_LIB_PATH) $(LIB_DIR_USR)
 
 INC_S	=	$(addprefix -isystem , $(INC_SYS))
 INC_L	=	$(addprefix -isystem , $(INC_LIB))

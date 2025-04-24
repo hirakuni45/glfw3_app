@@ -35,16 +35,16 @@ PINC_APP	=	. ../common
 CINC_APP	=	. ../common
 
 # User include path
-INC_USR		=	../libraries/inc
+INC_USR		=
 # User(optional) link library
 ifeq ($(OS),Windows_NT)
-LIBS_USR	=	faad mp4ff
+LIBS_USR	=
 else
-LIBS_USR	=	faad mp4ff
+LIBS_USR	=
 endif
 
 # User library path 
-LIB_DIR_USR	=	../libraries/lib
+LIB_DIR_USR	=
 # cmpiler flags (-Dxxx)
 CFLAGS		=
 PFLAGS		=
