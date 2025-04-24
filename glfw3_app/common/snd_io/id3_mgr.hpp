@@ -149,7 +149,7 @@ namespace sound {
 					return false;
 				}
 				len--;
-				utils::format("APIC V2.3: '%s'\n") % tmp;
+///				utils::format("APIC V2.3: '%s'\n") % tmp;
 			} else {
 				if(fin.read(tag_.at_apic().ext_, 3) != 3) {
 					return false;
@@ -159,7 +159,7 @@ namespace sound {
 					return false;
 				}
 				len--;
-				utils::format("APIC V2.2: '%s'\n") % tag_.get_apic().ext_;
+///				utils::format("APIC V2.2: '%s'\n") % tag_.get_apic().ext_;
 			}
 			auto ret = skip_text_(code, fin, len);
 			if(!ret) {
@@ -167,6 +167,7 @@ namespace sound {
 			}
 			tag_.at_apic().ofs_ = fin.tell();
 			tag_.at_apic().len_ = len;
+/// utils::format("ofs: %d, len: %d\n") % fin.tell() % len;
 			fin.seek(utils::file_io::SEEK::CUR, len);
 			return ret;
 		}

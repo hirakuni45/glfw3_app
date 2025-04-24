@@ -1,9 +1,9 @@
 #pragma once
 //=====================================================================//
 /*!	@file
-	@brief	各種サウンドファイル統合的に扱う（ヘッダー）
+	@brief	各種サウンドファイル統合的に扱う
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2025 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -12,7 +12,7 @@
 #include "i_snd_io.hpp"
 #include "wav_io.hpp"
 #include "mp3_io.hpp"
-// #include "aac_io.hpp"
+#include "aac_io.hpp"
 
 namespace al {
 
@@ -21,8 +21,7 @@ namespace al {
 		@brief	音楽ファイルを汎用的に扱うクラス
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	template <class _>
-	class snd_files_t {
+	class snd_files {
 
 		struct snd_file {
 			typedef std::shared_ptr<i_snd_io>  snd_io;
@@ -39,7 +38,7 @@ namespace al {
 		typename snd_file::snd_io	stream_;
 		sound::tag_t		tag_;
 
-		static uint32_t		tag_serial_;
+		static inline uint32_t	tag_serial_;
 
 		static bool check_file_exts_(const std::string& exts, const std::string& ext)
 		{
@@ -76,7 +75,9 @@ namespace al {
 			exts_ = exts;
 
 			add_sound_fileio_context_(typename snd_file::snd_io(new wav_io), exts);
-//			add_sound_fileio_context_(snd_file::snd_io(new aac_io), exts);
+
+			// +AAC codec
+			add_sound_fileio_context_(typename snd_file::snd_io(new aac_io), exts);
 
 			// MP3 はタグが、前、後、にあるのか不明な為、検出が難しい為、最後に調べる。
 			add_sound_fileio_context_(typename snd_file::snd_io(new mp3_io), exts);
@@ -89,7 +90,7 @@ namespace al {
 			@param[in]	exts	拡張子
 		*/
 		//-----------------------------------------------------------------//
-		snd_files_t(const std::string& exts = "wav,mp3,aac,m4a") :
+		snd_files(const std::string& exts = "wav,mp3,aac,m4a") :
 			aif_(0), stream_(0), tag_()
 			{ initialize_(exts); }
 
@@ -99,12 +100,12 @@ namespace al {
 			@brief	デストラクター
 		*/
 		//-----------------------------------------------------------------//
-		~snd_files_t() { }
+		~snd_files() { }
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	サポートしている画像フォーマットの数を返す
+			@brief	サポートしているフォーマットの数を返す
 			@return フォーマット数
 		*/
 		//-----------------------------------------------------------------//
@@ -113,7 +114,7 @@ namespace al {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	サポートしている画像フォーマットの拡張子を返す
+			@brief	サポートしているフォーマットの拡張子を返す
 			@param[in]	n	ｎ番目のファイルフォーマットの拡張子
 			@return 拡張子（小文字）
 		*/
@@ -129,7 +130,7 @@ namespace al {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	サポートしている画像フォーマットの拡張子を返す
+			@brief	サポートしているフォーマットの拡張子を返す
 			@param[in]	n	ｎ番目のファイルフォーマットの拡張子
 			@return 拡張子（小文字）
 		*/
@@ -484,7 +485,4 @@ namespace al {
 		void set_audio(const audio aif) { aif_ = aif; }
 
 	};
-	template <class _> uint32_t snd_files_t<_>::tag_serial_ = 0;
-
-	typedef snd_files_t<void> snd_files;
 }
