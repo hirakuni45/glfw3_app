@@ -3,7 +3,7 @@
 #	glfw3_app makefile (shear makefile) @n
 #		Windows: MSYS2/CLANG64
 #   @author 平松邦仁 (hira@rvf-rc45.net)
-#	@copyright	Copyright (C) 2023 Kunihito Hiramatsu @n
+#	@copyright	Copyright (C) 2023, 2025 Kunihito Hiramatsu @n
 #				Released under the MIT license @n
 #				https://github.com/hirakuni45/RX/blob/master/LICENSE
 #=======================================================================
@@ -15,8 +15,8 @@ ifeq ($(OS),Windows_NT)
     LOCAL_LIB_PATH :=
 	OPTLIBS = opengl32 glu32 glew32 openal glfw3 \
 			  comdlg32 hid setupapi ksguid
-	CPMM	=	g++
-	CCMM	=	gcc
+	CPMM	=	clang++
+	CCMM	=	clang
 	CFLAGS  += -DWIN32
 	PFLAGS  += -DWIN32 -DBOOST_USE_WINDOWS_H
 	LFLAGS	+=
