@@ -534,6 +534,7 @@ namespace app {
 			// 曲の情報を取得して表示
 			const auto& tag = sound.get_tag_stream();
 			if(tag_serial_ != tag.serial_) {
+/// utils::format("tag to widget: %d\n") % tag.serial_;
 				gui::set_widget_text(album_pad_, tag.get_album());
 				gui::set_widget_text(title_pad_, tag.get_title());
 				std::string s;
@@ -579,7 +580,7 @@ namespace app {
 			// ファイラーが有効で、マウス操作が無い状態が５秒続いたら、
 			// ※スクロール・ダイアルの操作
 			// 演奏ファイルパスへフォーカスする
-   			if(filer_->get_state(gui::widget::state::ENABLE)) {
+			if(filer_->get_state(gui::widget::state::ENABLE)) {
 				const vtx::spos& msp = core.get_device().get_locator().get_cursor();
 				const vtx::spos& scr = core.get_device().get_locator().get_scroll();
 				if(msp == mouse_pos_ && scr == mouse_scr_) {
