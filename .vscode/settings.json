@@ -81,7 +81,12 @@
 		"unordered_map": "cpp",
 		"unordered_set": "cpp",
 		"variant": "cpp",
-		"vector": "cpp"
+		"vector": "cpp",
+		"charconv": "c",
+		"chrono": "c",
+		"format": "c",
+		"functional": "c",
+		"utility": "c"
 	}
     
 }

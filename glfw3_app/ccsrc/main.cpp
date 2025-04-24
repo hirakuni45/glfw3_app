@@ -5,6 +5,34 @@
 	@author	平松邦仁( hira@rvf-rc45.net )
 */
 //=====================================================================//
+#if 0
+#include <iostream>
+#include <functional>
+
+int run(std::function<int (int n)> func)  // コールバック関数を受け付ける
+{
+    return func(10);  // コールバック関数を実行
+}
+
+int aaa(int n)
+{
+  return n * 2 + 1;
+}
+
+int main()
+{
+  auto a = run([](int n) {  // コールバック関数の中身をラムダ式で直接記述
+    n *= 100;
+    n += 99;
+    return n;
+  } );
+  std::cout << a << std::endl;
+
+  auto b = run(aaa);  // 関数「aaa」を実行する場合
+  std::cout << b << std::endl;
+}
+
+#else
 #include <iostream>
 #include <cstring>
 #include "utils/format.hpp"
@@ -127,5 +155,4 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
-
-/* ---- End Of File "main.cpp" ----- */
+#endif

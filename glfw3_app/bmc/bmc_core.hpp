@@ -34,8 +34,8 @@ namespace app {
 				verbose,	///< 詳細なメッセージ出力
 				header,		///< サイズヘッダー出力
 				text,		///< テキストベース出力
-				c_style,	///< C スタイルのテキスト出力
-				cpp_style,	///< C++ スタイルのテキスト出力
+				c_style,	///< C99 スタイルのテキスト出力
+				cpp_style,	///< C++11 スタイルのテキスト出力
 				offset,		///< オフセット
 				size,		///< サイズ
 				bdf,		///< BDF ファイル入力
@@ -297,7 +297,7 @@ namespace app {
 			using namespace std;
 
 			utils::format("BitMap Converter\n");
-			utils::format("Copyright (C) 2013/2020, Hiramatsu Kunihito\n");
+			utils::format("Copyright (C) 2013, 2020, Hiramatsu Kunihito\n");
 			utils::format("Version %3.2f\n") % version_;
 			utils::format("usage:\n");
 			auto c = utils::get_file_base(cmd);

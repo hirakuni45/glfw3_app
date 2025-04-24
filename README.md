@@ -26,14 +26,14 @@ GLFW application
  - アップグレードの方法がバージョンアップに伴い変更になる場合等あります、詳しくは、   
    MSYS2 のホームページを参照の事。
 
-```
-   pacman -Syu
+```shell
+   pacman -Suy
 ```
 
- - コンソールを開きなおす。（コンソールを開きなおすように、メッセージが表示されるはずです）
+ - コンソールを開きなおすようメッセージが表示されるので、[Y]を入力
 
-```
-   pacman -Su
+```shell
+   pacman -Suy
 ```
  - アップデートは、複数回行われ、その際、コンソールの指示に従う事。   
  ※複数回、コンソールを開きなおす必要があるかもしれない。
@@ -41,7 +41,7 @@ GLFW application
  - 「faad2」はバージョンアップに伴い、同梱されていた「mp4ff」ライブラリが無くなっている為   
    AAC 関係のコーデックがコンパイル出来なくなり、とりあえず、リンクから外しました。
 
-```
+```shell
    pacman -S gcc
    pacman -S make
    pacman -S git
@@ -70,7 +70,7 @@ GLFW application
 ※自分の場合は「emacs」、最近、コンソールベースで使え、日本語も正しく   
 表示（mintty 設定を参照）できます。
 
-```
+```shell
   pacman -S emacs
 ```
 
@@ -82,7 +82,7 @@ GLFW application
 
 ・macports をインストール、各種ライブラリーをインストールして下さい。  
    
-```
+```shell
    sudo port install clang
    sudo port install boost
    sudo port install glfw
@@ -107,7 +107,7 @@ GLFW application
 ## 開発環境（Ubuntu）
 
 Linux 環境は、複数あるので、ここでは「Ubuntu 16.04 LTS」環境の場合を書いておきます。
-```
+```shell
    sudo apt-get install xxx
 ```
 
@@ -123,7 +123,7 @@ GUI フレームワークでは、「Inconsolata」の OTF フォントを使っ
    
 ※Linux 環境では、apt−get 等でインストールできます。
 
-```
+```shell
    sudo apt-get install fonts-inconsolata
 ```
 
@@ -164,7 +164,7 @@ IMECursorColour=255,0,0
 
 ## 全体のソース・コード取得
 
-```
+```shell
    git clone git://github.com/hirakuni45/glfw3_app.git
 ```
 
@@ -182,7 +182,7 @@ IMECursorColour=255,0,0
 - 実行ファイルに必要な、DLL を「dlls」ディレクトリーに全てコピーする。
 - この DLL とアプリケーション(.exe）を合わせて配布が可能。
 
-```
+```shell
    dllcollect 「実行ファイル名」 
 ```
 
