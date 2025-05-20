@@ -1,13 +1,13 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	GUI widget_label クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2025 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include "widgets/widget_director.hpp"
 #include "widgets/widget_utils.hpp"
 #include "core/glcore.hpp"
@@ -26,11 +26,11 @@ namespace gui {
 
 		typedef std::function<void (const std::string&)> select_func_type;
 
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	Widget label パラメーター
 		*/
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
 			plate_param	plate_param_;			///< プレート・パラメーター
 			color_param	color_param_;			///< カラーパラメーター
@@ -58,7 +58,7 @@ namespace gui {
 			*/
 			//-------------------------------------------------------------//
 			param(const std::string& text = "", bool ro = true) :
-				plate_param_(),
+				plate_param_(0, 2),
 				color_param_(widget_director::default_label_color_),
 				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255),
 				vtx::placement(vtx::placement::holizontal::LEFT,

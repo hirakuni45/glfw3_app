@@ -3,9 +3,9 @@
 /*! @file
     @brief  波形描画テンプレート・クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2018 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2025 Kunihito Hiramatsu @n
 				Released under the MIT license @n
-				https://github.com/hirakuni45/RX/blob/master/LICENSE
+				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
 //=====================================================================//
 #include <vector>
@@ -429,7 +429,7 @@ namespace view {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  レンダリング（レガシー）
-   			@param[in]	size	描画サイズ（ピクセル）
+			@param[in]	size	描画サイズ（ピクセル）
 			@param[in]	step	時間軸ステップ（65536を1.0）
 		*/
 		//-----------------------------------------------------------------//
@@ -510,7 +510,7 @@ namespace view {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  レンダリング
-   			@param[in]	size	描画サイズ（ピクセル）
+			@param[in]	size	描画サイズ（ピクセル）
 			@param[in]	wsmp	波形メモリのサンプリング周期
 			@param[in]	gsmp	グリッドのサンプリング周期
 		*/

@@ -1,13 +1,13 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	OpenAL オーディオ入出力
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2025 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <string>
 #include <vector>
 #include <cmath>
@@ -51,6 +51,8 @@ namespace al {
 		typedef ALuint	slot_handle;
 
 	private:
+		ALCdevice*	cap_device_;
+
 		ALCdevice*	device_;
 		ALCcontext*	context_;
 
@@ -140,7 +142,7 @@ namespace al {
 		static void printDevices(ALCenum which, const char* kind)
 		{
 			const char *s = alcGetString(NULL, which);
-			checkForErrors();
+//			checkForErrors();
 
 			std::cout << boost::format("Available %sdevices:\n") % kind;
 			while(*s != '\0') {
@@ -179,14 +181,26 @@ namespace al {
 			printChar('\n', width);
 		}
 
+		static auto create_device_list(ALCenum which)
+		{
+			utils::strings ss;
+			const char* s = alcGetString(NULL, which);
+			while(*s != '\0') {
+				ss.push_back(s);
+				while(*s++ != '\0') ;
+			}
+			return ss;
+		}
 
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		audio_io() : device_(nullptr), context_(nullptr),
-					queue_max_(0), init_(false), destroy_(false) { }
+		audio_io() noexcept :
+			cap_device_(nullptr), device_(nullptr), context_(nullptr),
+			queue_max_(0), init_(false), destroy_(false)
+		{ }
 
 
 		//-----------------------------------------------------------------//
@@ -199,37 +213,116 @@ namespace al {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	オーディオ標準出力デバイス名を取得
+			@return オーディオ標準出力デバイス名
+		*/
+		//-----------------------------------------------------------------//
+		std::string get_def_output_name() const noexcept
+		{
+			auto ss = create_device_list(ALC_ALL_DEVICES_SPECIFIER);
+			return ss[0];
+//			return alcGetString(NULL, ALC_DEFAULT_DEVICE_SPECIFIER);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	オーディオ出力デバイス名を取得
+			@return オーディオ出力デバイス名
+		*/
+		//-----------------------------------------------------------------//
+		utils::strings get_output_name() const noexcept
+		{
+			return create_device_list(ALC_ALL_DEVICES_SPECIFIER);
+		} 
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	オーディオ標準入力デバイス名を取得
+			@return オーディオ標準入力デバイス名
+		*/
+		//-----------------------------------------------------------------//
+		std::string get_def_input_name() const noexcept
+		{
+			return alcGetString(NULL, ALC_CAPTURE_DEFAULT_DEVICE_SPECIFIER);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	オーディオ入力デバイス名を取得
+			@return オーディオ入力デバイス名
+		*/
+		//-----------------------------------------------------------------//
+		utils::strings get_input_name() const noexcept
+		{
+			return create_device_list(ALC_CAPTURE_DEVICE_SPECIFIER);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ドライバー・オープン
+			@param[in]	input	入力デバイス名
+			@param[in]	output	出力デバイス名
+			@param[in]	srate	サンプリングレート
+			@param[in]	capnum	キャプチャーリングバッファサイズ
+			@return 正常なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool open(const char* input, const char* output, uint32_t srate, uint32_t capnum = 2048) noexcept
+		{
+			int err = 0;
+			cap_device_ = alcCaptureOpenDevice(input, srate, AL_FORMAT_STEREO16, capnum);
+			if(cap_device_ != nullptr) {
+				// utils::format("CapDev: Open OK...\n");
+			} else {
+				++err;
+				utils::format("Capture device: Open error: '%s'\n") % input;
+			}
+
+			device_ = alcOpenDevice(output);
+			if(device_ == nullptr) {
+				ALenum error = alGetError();
+				if(error != AL_NO_ERROR) {
+					++err;
+					utils::format("Playback device: Open error: '%s'\n") % output;
+				}
+			}
+
+			if(device_ != nullptr) {
+				context_ = alcCreateContext(device_, NULL);
+				if(context_ == nullptr) {
+					ALCenum error = alcGetError(device_);
+					if(error != ALC_NO_ERROR) {
+						++err;
+						utils::format("Create context error\n");
+					}
+				}
+				alcMakeContextCurrent(context_);
+			}
+
+			return err == 0;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	初期化
 			@param[in]	qmax	キューバッファの最大数（通常６４）
 		*/
 		//-----------------------------------------------------------------//
-		void initialize(int qmax = 64)
+		void initialize(int qmax = 64) noexcept
 		{
 			queue_max_ = qmax;
 
 			if(init_) return;
 
-			device_ = alcOpenDevice(nullptr);
-			if(device_ == nullptr) {
-				ALenum error = alGetError();
-				if(error != AL_NO_ERROR) {
-					std::cout << "OpenAL error: alcOpenDevice" << std::endl;
-				// die("AL", (const char*)alGetString(error));
-				}
-				return;
-			}
-
-			context_ = alcCreateContext(device_, nullptr);
-			if(context_ == nullptr) {
-				ALCenum error = alcGetError(device_);
-				if(error != ALC_NO_ERROR) {
-				// die("ALC", (const char*)alcGetString(device, error));
-				}
-				return;
-			}
-			alcMakeContextCurrent(context_);
-			init_ = true;
-			destroy_ = false;
+			if(open(NULL, NULL, 48'000)) {
+				init_ = true;
+				destroy_ = false;
+			}			
 		}
 
 
@@ -238,7 +331,8 @@ namespace al {
 			@brief	コンテキストの情報を表示（OpenAL）
 		*/
 		//-----------------------------------------------------------------//
-		void context_info() const {
+		void context_info() const noexcept
+		{
 			std::cout << boost::format("vendor string: %s\n") % alGetString(AL_VENDOR);
 			std::cout << boost::format("renderer string: %s\n") % alGetString(AL_RENDERER);
 			std::cout << boost::format("version string: %s\n") % alGetString(AL_VERSION);
@@ -250,7 +344,7 @@ namespace al {
 			@brief	ALC の情報を表示
 		*/
 		//-----------------------------------------------------------------//
-		void alc_info() const
+		void alc_info() const noexcept
 		{
 			if(alcIsExtensionPresent(NULL, (const ALCchar*)"ALC_ENUMERATION_EXT") == AL_TRUE) {
 				if(alcIsExtensionPresent(NULL, (const ALCchar*)"ALC_ENUMERATE_ALL_EXT") == AL_TRUE) {
@@ -291,7 +385,7 @@ namespace al {
 			@return	波形・ハンドルを返す
 		*/
 		//-----------------------------------------------------------------//
-		wave_handle create_wave(const audio aif)
+		wave_handle create_wave(const audio aif) noexcept
 		{
 			if(aif == 0) return 0;
 
@@ -313,7 +407,8 @@ namespace al {
 			@param[in]	wh	波形ハンドル
 		*/
 		//-----------------------------------------------------------------//
-		void destroy_wave(wave_handle wh) {
+		void destroy_wave(wave_handle wh) noexcept
+		{
 			alDeleteBuffers(1, &wh);
 		}
 
@@ -325,7 +420,8 @@ namespace al {
 			@return スロット・ハンドルを返す。
 		*/
 		//-----------------------------------------------------------------//
-		slot_handle create_slot(wave_handle wh) {
+		slot_handle create_slot(wave_handle wh) noexcept
+		{
 			slot_handle sh;
 			alGenSources(1, &sh);
 			if(wh) {
@@ -341,7 +437,8 @@ namespace al {
 			@param[in]	sh	スロット・ハンドル
 		*/
 		//-----------------------------------------------------------------//
-		void set_loop(slot_handle sh, bool flag = true) {
+		void set_loop(slot_handle sh, bool flag = true) noexcept
+		{
 			if(flag) {
 				alSourcei(sh, AL_LOOPING, AL_TRUE);
 			} else {
@@ -357,7 +454,10 @@ namespace al {
 			@param[in]	gain	ゲイン値（0.0 to 1.0)
 		*/
 		//-----------------------------------------------------------------//
-		void set_gain(slot_handle sh, float gain) { alSourcef(sh, AL_GAIN, gain); }
+		void set_gain(slot_handle sh, float gain) noexcept
+		{
+			alSourcef(sh, AL_GAIN, gain);
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -367,7 +467,8 @@ namespace al {
 							※「０」の場合は、全スロット
 		*/
 		//-----------------------------------------------------------------//
-		bool play(slot_handle sh) {
+		bool play(slot_handle sh) noexcept
+		{
 			bool ret = true;
 			if(sh) {
 				alSourcePlay(sh);
@@ -385,7 +486,8 @@ namespace al {
 							※「０」の場合は、全スロット
 		*/
 		//-----------------------------------------------------------------//
-		bool pause(slot_handle sh) {
+		bool pause(slot_handle sh) noexcept
+		{
 			bool ret = true;
 			if(sh) {
 				alSourcePause(sh);
@@ -403,7 +505,8 @@ namespace al {
 							※「０」の場合は、全スロット
 		*/
 		//-----------------------------------------------------------------//
-		bool stop(slot_handle sh) {
+		bool stop(slot_handle sh) noexcept
+		{
 			bool ret = true;
 			if(sh) {
 				alSourceStop(sh);
@@ -421,7 +524,8 @@ namespace al {
 							※「０」の場合は、全スロット
 		*/
 		//-----------------------------------------------------------------//
-		bool rewind(slot_handle sh) {
+		bool rewind(slot_handle sh) noexcept
+		{
 			bool ret = true;
 			if(sh) {
 				alSourceRewind(sh);
@@ -432,7 +536,8 @@ namespace al {
 		}
 
 
-		bool get_slot_init(slot_handle sh) const {
+		bool get_slot_init(slot_handle sh) const noexcept
+		{
 			if(sh == 0) {
 				return false;
 			}
@@ -449,7 +554,8 @@ namespace al {
 			@return	「true」なら演奏中
 		*/
 		//-----------------------------------------------------------------//
-		bool get_slot_status(slot_handle sh) const {
+		bool get_slot_status(slot_handle sh) const noexcept
+		{
 			if(sh == 0) {
 				return false;
 			}
@@ -465,7 +571,8 @@ namespace al {
 			@param[in]	h	スロット・ハンドル
 		*/
 		//-----------------------------------------------------------------//
-		void destroy_slot(slot_handle h) {
+		void destroy_slot(slot_handle h) noexcept
+		{
 			alDeleteSources(1, &h);
 		}
 
@@ -478,7 +585,8 @@ namespace al {
 			@return	成功したら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool set_wave(slot_handle sh, wave_handle wh) {
+		bool set_wave(slot_handle sh, wave_handle wh) noexcept
+		{
 			if(sh != 0 && wh != 0) {
 				alSourcei(sh, AL_BUFFER, wh);
 //				std::cout << boost::format("set_wave: slot: %d, wave: %d\n") % sh % wh;
@@ -494,7 +602,7 @@ namespace al {
 			@param[in]	ssh	ストリーム・スロット・ハンドル
 		*/
 		//-----------------------------------------------------------------//
-		void purge_stream(slot_handle ssh)
+		void purge_stream(slot_handle ssh) noexcept
 		{
 			if(ssh) {
 				alSourceStop(ssh);
@@ -517,7 +625,7 @@ namespace al {
 			@param[in]	ssh	ストリーム・スロット・ハンドル
 		*/
 		//-----------------------------------------------------------------//
-		void sync_stream(slot_handle ssh)
+		void sync_stream(slot_handle ssh) noexcept
 		{
 			if(ssh) {
 				ALint n;
@@ -539,7 +647,7 @@ namespace al {
 			@return 有効な、バッファがあれば、そのハンドルを返す。（「０」なら無効）
 		*/
 		//-----------------------------------------------------------------//
-		wave_handle status_stream(slot_handle ssh)
+		wave_handle status_stream(slot_handle ssh) noexcept
 		{
 			ALint state;
 			alGetSourcei(ssh, AL_SOURCE_STATE, &state);
@@ -595,7 +703,8 @@ std::cout << "alGenBuffers NG!" << std::endl;
 							※常に、同じ構成を与える必要がある。
 		*/
 		//-----------------------------------------------------------------//
-		void queue_stream(slot_handle ssh, wave_handle bh, const audio aif) {
+		void queue_stream(slot_handle ssh, wave_handle bh, const audio aif) noexcept
+		{
 			if(ssh == 0 || bh == 0 || aif == 0) return;
 
 			set_buffer_(bh, aif);
@@ -618,7 +727,8 @@ std::cout << "alGenBuffers NG!" << std::endl;
 			@param[in]	ena	「false」ならポーズ解除
 		*/
 		//-----------------------------------------------------------------//
-		void pause_stream(slot_handle ssh, bool ena = true) {
+		void pause_stream(slot_handle ssh, bool ena = true) noexcept
+		{
 			if(ssh == 0) return;
 
 			if(ena) {
@@ -633,18 +743,109 @@ std::cout << "alGenBuffers NG!" << std::endl;
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	キャプチャー開始
+			@return 開始出来たら「true」を返す
+		*/
+		//-----------------------------------------------------------------//
+		bool start_capture() noexcept
+		{
+			if(cap_device_ == nullptr) {
+				return false;
+			}
+			alcCaptureStart(cap_device_);
+			auto id = alcGetError(cap_device_);
+			return id == ALC_NO_ERROR;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	キャプチャー停止
+			@return 成功なら「true」を返す
+		*/
+		//-----------------------------------------------------------------//
+		bool stop_capture() noexcept
+		{
+			if(cap_device_ == nullptr) {
+				return false;
+			}
+			alcCaptureStop(cap_device_);
+			auto id = alcGetError(cap_device_);
+			return id == ALC_NO_ERROR;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	キャプチャー数の取得
+			@return キャプチャー数（バイト数）
+		*/
+		//-----------------------------------------------------------------//
+		uint32_t num_capture() noexcept
+		{
+			if(cap_device_ == nullptr) {
+				return 0;
+			}
+			alcGetError(cap_device_);
+			static ALint num = 0;
+			alcGetIntegerv(cap_device_, ALC_CAPTURE_SAMPLES, 1, &num);
+			if(alcGetError(cap_device_) != ALC_NO_ERROR) {
+				utils::format("num_capture: NG...\n");
+			}
+
+			if(num < 0) return 0;
+
+			return static_cast<uint32_t>(num);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	キャプチャーの取得
+			@param[in]	num		キャプチャーするバイト数
+			@param[in]	wavs	波形バッファ
+			@return 成功なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool get_capture(uint32_t num, pcm16_s_waves& wavs) noexcept
+		{
+			if(cap_device_ == nullptr) {
+				return false;
+			}
+
+			ALshort buffer[num * 2];
+			alcCaptureSamples(cap_device_, buffer, num);
+
+			wavs.resize(num);
+			for(uint32_t i = 0; i < num; ++i) {
+				wavs[i].l = buffer[i * 2 + 0];
+				wavs[i].r = buffer[i * 2 + 1];
+			}
+			return true;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	廃棄
 		*/
 		//-----------------------------------------------------------------//
-		void destroy()
+		void destroy() noexcept
 		{
 			if(destroy_) return;
 
 			purge_stream(0);
 
-			alcMakeContextCurrent(nullptr);
 			alcDestroyContext(context_);
 			alcCloseDevice(device_);
+
+			if(cap_device_ != nullptr) {
+				stop_capture();
+
+				alcCaptureCloseDevice(cap_device_);
+				cap_device_ = nullptr;
+			}
+
 			destroy_ = true;
 			init_ = true;
 		}
@@ -656,7 +857,7 @@ std::cout << "alGenBuffers NG!" << std::endl;
 			@return	エラーメッセージ
 		*/
 		//-----------------------------------------------------------------//
-		const std::string& get_error_message() const { return error_message_; }
+		const std::string& get_error_message() const noexcept { return error_message_; }
 
 
 		//-----------------------------------------------------------------//
@@ -665,7 +866,7 @@ std::cout << "alGenBuffers NG!" << std::endl;
 			@param[in]	sh	スロット・ハンドル
 		*/
 		//-----------------------------------------------------------------//
-		void print_slots(slot_handle sh) const
+		void print_slots(slot_handle sh) const noexcept
 		{
 			std::string stt;
 			ALint status;

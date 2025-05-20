@@ -1,13 +1,13 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	効果音、BGM クラス（ヘッダー）
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2025 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <vector>
 #include <string>
 #include <memory>
@@ -105,10 +105,10 @@ namespace al {
 			::sound::tag_t			tag_;
 
 			sstream_t() : audio_io_(0), slot_(0),
-						  root_(), file_(), state_(stream_state::STALL),
-						  start_(false), finsh_(false),
-						  pos_(0), len_(0), time_(0), etime_(0),
-						  open_err_(0), fph_cnt_(0), fph_(), tag_() { }
+				root_(), file_(), state_(stream_state::STALL),
+				start_(false), finsh_(false),
+				pos_(0), len_(0), time_(0), etime_(0),
+				open_err_(0), fph_cnt_(0), fph_(), tag_() { }
 		};
 
 
@@ -514,10 +514,10 @@ namespace al {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		sound() : slot_max_(0), stream_fph_cnt_(0),
-				  stream_slot_(0), stream_start_(false),
-				  tag_serial_(0), tag_thread_(false),
-				  queue_start_(false)
+		sound() noexcept : slot_max_(0), stream_fph_cnt_(0),
+			stream_slot_(0), stream_start_(false),
+			tag_serial_(0), tag_thread_(false),
+			queue_start_(false)
 		{
 			ses_.push_back(0);
 		}
@@ -533,11 +533,19 @@ namespace al {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief	audio_io の参照
+		*/
+		//-----------------------------------------------------------------//
+		al::audio_io& at_audio_io() noexcept { return audio_io_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief	初期化
 			@param[in]	slot_max	最大スロット数（同時発音数）
 		 */
 		//-----------------------------------------------------------------//
-		void initialize(int slot_max)
+		void initialize(int slot_max) noexcept
 		{
 			audio_io_.initialize();
 
@@ -949,7 +957,7 @@ namespace al {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	オーディオをキューイング（ストリーム）
-			@param[in]	waves	wave-block
+			@param[in]	waves	wave-block（モノラル）
 			@return 「queue」出来たら「true」
 		 */
 		//-----------------------------------------------------------------//
@@ -1106,7 +1114,7 @@ namespace al {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	サウンド関係、マイフレームサービス@n
+			@brief	サウンド関係、マイフレームサービス @n
 					※毎フレームサービスする事。(1/60 間隔で呼び出される事を想定）
 		 */
 		//-----------------------------------------------------------------//
@@ -1193,7 +1201,7 @@ namespace al {
 		{
 			if(queue_start_) {
 				queue_t_.exit_ = true;
- 				pthread_join(queue_pth_ , nullptr);
+				pthread_join(queue_pth_ , nullptr);
 				pthread_mutex_destroy(&queue_t_.sync_);
 			}
 
