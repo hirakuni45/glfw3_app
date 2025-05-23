@@ -28,8 +28,8 @@ namespace app {
 
 	class piano_sim : public utils::i_scene {
 
-		static const uint32_t sample_rate = 44100;
-		static const uint32_t key_octave = 6;
+		static constexpr uint32_t sample_rate = 44100;
+		static constexpr uint32_t key_octave = 6;
 
 		utils::director<core>&	director_;
 
@@ -44,7 +44,6 @@ namespace app {
 
 		gui::widget_frame*		terminal_frame_;
 		gui::widget_terminal*	terminal_core_;
-
 
 #if 0
 			void reberb_(float delay, float gain)

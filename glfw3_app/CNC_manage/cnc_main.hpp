@@ -3,7 +3,7 @@
 /*! @file
     @brief  CNC メイン・クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2018 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2018, 2024 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/RX/blob/master/LICENSE
 */
@@ -50,6 +50,15 @@ namespace app {
 		gui::widget_frame*		terminal_frame_;
 		gui::widget_terminal*	terminal_core_;
 
+		gui::widget_frame*		root_;
+		gui::widget_label*		pos_x_;
+		gui::widget_label*		pos_y_;
+		gui::widget_label*		pos_z_;
+		gui::widget_label*		rpm_;
+		gui::widget_button*		sel_x_;
+		gui::widget_button*		sel_y_;
+		gui::widget_button*		sel_z_;
+
 		gl::camera				camera_;
 
 		typedef device::serial_win32 SERIAL;
@@ -69,12 +78,13 @@ namespace app {
 		uint32_t				count_;
 
 		// ターミナル、行入力
-		void term_enter_(const utils::lstring& text) {
+		void term_enter_(const utils::lstring& text) noexcept
+		{
 			auto s = utils::utf32_to_utf8(text);
 		}
 
 
-		std::string get_line_()
+		std::string get_line_() noexcept
 		{
 			std::string line;
 			if(fifo_.empty()) {
@@ -96,6 +106,39 @@ namespace app {
 			return line;
 		}
 
+		gui::widget_label* create_text_pad_(gui::widget* root, const vtx::ipos& org, const vtx::ipos& size, const std::string& text,
+			const std::string& font = "", bool proportional = true) noexcept
+		{
+			using namespace gui;
+			widget_director& wd = director_.at().widget_director_;
+
+			widget::param wp(vtx::irect(org, size), root);
+			widget_label::param wp_(text);
+			wp_.color_param_ = widget_director::default_slider_color_;
+			wp_.color_param_select_ = widget_director::default_slider_color_;
+			if(!font.empty()) {
+				wp_.text_param_.font_ = font;
+				wp_.text_param_.font_size_ = 50;
+			}
+			wp_.text_param_.proportional_ = proportional;
+			wp_.text_param_.placement_.hpt = vtx::placement::holizontal::CENTER;
+			if(font.empty()) {
+				wp_.text_param_.placement_.vpt = vtx::placement::vertical::CENTER;
+			} else {
+				wp_.text_param_.placement_.vpt = vtx::placement::vertical::BOTTOM;
+			}
+
+			wp_.text_param_.placement_.vpt = vtx::placement::vertical::CENTER;
+
+			wp_.plate_param_.resizeble_ = true;
+			wp_.plate_param_.round_style_ = widget::plate_param::round_style::NONE;
+			wp_.plate_param_.frame_width_ = 0;
+
+			wp_.shift_param_.every_ = true;
+			wp_.shift_param_.org_wait_frame_ = 60 * 4;
+			return wd.add_widget<widget_label>(wp, wp_);
+		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -106,6 +149,9 @@ namespace app {
 			menu_(nullptr),
 			ports_(nullptr), baud_(nullptr), connect_(nullptr), carib_(nullptr),
 			terminal_frame_(nullptr), terminal_core_(nullptr),
+			root_(nullptr),
+			pos_x_(nullptr), pos_y_(nullptr), pos_z_(nullptr), rpm_(nullptr),
+			sel_x_(nullptr), sel_y_(nullptr), sel_z_(nullptr),
 			serial_(), serial_list_(), fifo_(),
 			raw_(), ref_min_(), ref_max_(0), ref_count_(0), gv_(), count_(0)
 		{ }
@@ -121,6 +167,17 @@ namespace app {
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
 			gl::core& core = gl::core::get_instance();
+
+			// digital font の読み込み
+			auto& fonts = core.at_fonts();
+			auto cf = fonts.get_font_type();
+			auto fp = core.get_current_path();
+			fp += "/resource/digitalism.ttf";
+			if(!fonts.install_font_type(fp, "digital")) {
+				std::cerr << "Can't install TTF font: '" << fp << "'" << std::endl;
+			}
+			// fonts.set_spaceing(6);
+			fonts.set_font_type(cf);
 
 			int menu_width  = 200;
 			int menu_height = 320;
@@ -209,6 +266,32 @@ namespace app {
 				}
 			}
 
+			{
+				int root_width  = 800;
+				int root_height = 500;
+				{
+					widget::param wp(vtx::irect(200, 10, root_width, root_height));
+					widget_frame::param wp_;
+					wp_.plate_param_.set_caption(12);
+					root_ = wd.add_widget<widget_frame>(wp, wp_);
+				}
+				int pos_w = 300;
+				int pos_h = 60;
+				pos_x_ = create_text_pad_(root_, vtx::ipos(20, 20), vtx::ipos(pos_w, pos_h), "X:+0.00000", "digital", false);
+				pos_y_ = create_text_pad_(root_, vtx::ipos(20, 20+80), vtx::ipos(pos_w, pos_h), "Y:+0.00000", "digital", false);
+				pos_z_ = create_text_pad_(root_, vtx::ipos(20, 20+80*2), vtx::ipos(pos_w, pos_h), "Z:+0.00000", "digital", false);
+				rpm_   = create_text_pad_(root_, vtx::ipos(20, 20+80*3), vtx::ipos(pos_w, pos_h), "0000", "digital", false);
+
+//				widget::param wp(vtx::irect(10, 25 + 55 * 2, 150, 40), menu_);
+//				widget_button::param wp_("X");
+//				sel_x_ = wd.add_widget<widget_button>(wp, wp_);
+
+				{
+
+
+				}
+			}
+
 			// プリファレンスのロード
 			sys::preference& pre = director_.at().preference_;
 
@@ -221,6 +304,10 @@ namespace app {
 			if(terminal_frame_ != nullptr) {
 				terminal_frame_->load(pre);
 			}
+			if(root_ != nullptr) {
+				root_->load(pre);
+			}
+
 			if(ports_ != nullptr) ports_->load(pre);
 		}
 
@@ -360,6 +447,9 @@ namespace app {
 
 			if(ports_ != nullptr) ports_->save(pre);
 
+			if(root_ != nullptr) {
+				root_->save(pre);
+			}
 			if(terminal_frame_ != nullptr) {
 				terminal_frame_->save(pre);
 			}

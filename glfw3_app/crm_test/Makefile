@@ -37,7 +37,7 @@ CINC_APP	=	. ../common
 # User include path
 INC_USR		=
 # User(optional) link library
-LIBS_USR	=	boost_system-mt ws2_32 wsock32
+LIBS_USR	=	ws2_32 wsock32
 # User library path 
 LIB_DIR_USR	=
 # cmpiler flags (-Dxxx)

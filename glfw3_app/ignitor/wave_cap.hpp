@@ -797,7 +797,7 @@ namespace app {
 				info_.sample_org_ = static_cast<double>(sta) * tu;
 				double org = static_cast<double>(sta) / static_cast<double>(grid) * tu;
 				double end = static_cast<double>(fin) / static_cast<double>(grid) * tu;
- 				info_.sample_width_ = end - org;
+				info_.sample_width_ = end - org;
 				for(uint32_t i = 0; i < 4; ++i) {
 					if(!get_ch(i).ena_->get_check()) continue;
 					auto a = waves_.get(i, sample_param_.rate, org);

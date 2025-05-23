@@ -37,7 +37,8 @@ CINC_APP	=	. ../common
 INC_USR		=
 # User(optional) link library
 ifeq ($(OS),Windows_NT)
-LIBS_USR	=	boost_system-mt ws2_32 wsock32
+# LIBS_USR	=	boost_system-mt ws2_32 wsock32
+LIBS_USR	=	ws2_32 wsock32
 else
 LIBS_USR	=
 endif
