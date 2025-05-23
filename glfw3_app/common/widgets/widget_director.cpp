@@ -580,8 +580,8 @@ namespace gui {
 		bool select_trigger = false;
 		for(auto w : widgets_) {
 			if(!w->get_state(widget::state::ENABLE) ||
-			  w->get_state(widget::state::STALL) ||
-			  w->get_state(widget::state::SYSTEM_STALL)) {
+					w->get_state(widget::state::STALL) ||
+					w->get_state(widget::state::SYSTEM_STALL)) {
 				w->set_state(widget::state::BEFORE_FOCUS, false);
 				w->set_state(widget::state::FOCUS, false);
 				w->set_state(widget::state::IS_FOCUS, false);
@@ -928,7 +928,7 @@ namespace gui {
 				}
 			}
 			if((w->get_select() && w->get_focus())
-			   || w->get_state(widget::state::SELECTED)) {
+				|| w->get_state(widget::state::SELECTED)) {
 				if(pa.action_[widget::action::SELECT_HIGHLIGHT]) {
 					i = 1.0f;
 				}

@@ -1,16 +1,16 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	GUI widget_list クラス @n
-			このクラスは、DROP_DOWN 等に相当するクラスで、「widget_menu」@n
-			を内包する。@n
+			このクラスは、DROP_DOWN 等に相当するクラスで、「widget_menu」 @n
+			を内包する。 @n
 			メニューの直接操作は、widget_menu のポインター経由で行う。
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2025 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include "widgets/widget_director.hpp"
 #include "widgets/widget_menu.hpp"
 
@@ -29,11 +29,11 @@ namespace gui {
 
 		typedef std::function<void (const std::string& select_text, uint32_t select_pos)> select_func_type;
 
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	widget_list パラメーター
 		*/
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
 			plate_param	plate_param_;	///< 平面描画パラメーター
 			color_param	color_param_;	///< カラー・パラメーター
@@ -264,9 +264,13 @@ namespace gui {
 				if(!wp_.init_list_.empty()) {
 					param_.text_param_.set_text(wp_.init_list_[0]);
 				}
+				wp_.select_func_ = [=](const std::string& text, uint32_t pos) {
+					enable_ = false;  // メニューを選択したら、メニューを閉じる
+				};
 				menu_ = wd_.add_widget<widget_menu>(wp, wp_);
 				menu_->select(0);  // 初期位置は、先頭にしとく
 				menu_->enable(false);
+				enable_ = false;
 			}
 		}
 
@@ -284,6 +288,7 @@ namespace gui {
 
 			if(get_selected()) {  // 「ボタン選択」で内包メニューを有効にする。
 				menu_->enable();
+				enable_ = true;
 			}
 
 			// メニュー数が多い場合にスクロールホイールでオフセットする。
@@ -303,10 +308,8 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		void service() override
 		{
-			bool ena = enable_;
-			enable_ = get_state(state::ENABLE);
-
-			if(!ena && enable_) {  // 全体が許可の場合は、メニューをオフラインにする
+			// 実際のメニューが表示状態で、内部「enable_」が非表示の場合、強制的に非表示にする
+			if(menu_->get_state(state::ENABLE) && !enable_) {
 				menu_->enable(false);
 			}
 
