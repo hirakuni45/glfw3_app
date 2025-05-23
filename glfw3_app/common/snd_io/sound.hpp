@@ -543,11 +543,13 @@ namespace al {
 		/*!
 			@brief	初期化
 			@param[in]	slot_max	最大スロット数（同時発音数）
+			@param[in]	inp_rate	オーディオ入力サンプリングレート
+			@param[in]	inp_buff	オーディオ入力バッファ数
 		 */
 		//-----------------------------------------------------------------//
-		void initialize(int slot_max) noexcept
+		void initialize(int slot_max, uint32_t inp_rate = 0, uint32_t inp_buff = 0) noexcept
 		{
-			audio_io_.initialize();
+			audio_io_.initialize(inp_rate, inp_buff);
 
 			slot_max_ = slot_max;
 			for(int i = 0; i < slot_max; ++i) {

@@ -266,20 +266,22 @@ namespace al {
 			@brief	ドライバー・オープン
 			@param[in]	input	入力デバイス名
 			@param[in]	output	出力デバイス名
-			@param[in]	srate	サンプリングレート
-			@param[in]	capnum	キャプチャーリングバッファサイズ
+			@param[in]	srate	キャプチャー・サンプリングレート
+			@param[in]	capnum	キャプチャー・リングバッファサイズ
 			@return 正常なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool open(const char* input, const char* output, uint32_t srate, uint32_t capnum = 2048) noexcept
+		bool open(const char* input, const char* output, uint32_t srate, uint32_t capnum) noexcept
 		{
 			int err = 0;
-			cap_device_ = alcCaptureOpenDevice(input, srate, AL_FORMAT_STEREO16, capnum);
-			if(cap_device_ != nullptr) {
-				// utils::format("CapDev: Open OK...\n");
-			} else {
-				++err;
-				utils::format("Capture device: Open error: '%s'\n") % input;
+			if(srate > 0 && capnum > 0) {
+				cap_device_ = alcCaptureOpenDevice(input, srate, AL_FORMAT_STEREO16, capnum);
+				if(cap_device_ != nullptr) {
+					// utils::format("CapDev: Open OK...\n");
+				} else {
+					++err;
+					utils::format("Capture device: Open error: '%s'\n") % input;
+				}
 			}
 
 			device_ = alcOpenDevice(output);
@@ -310,16 +312,18 @@ namespace al {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	初期化
+			@param[in]	srate	キャプチャー・サンプリングレート
+			@param[in]	capnum	キャプチャー・リングバッファサイズ
 			@param[in]	qmax	キューバッファの最大数（通常６４）
 		*/
 		//-----------------------------------------------------------------//
-		void initialize(int qmax = 64) noexcept
+		void initialize(uint32_t srate = 0, uint32_t capnum = 0, int qmax = 64) noexcept
 		{
 			queue_max_ = qmax;
 
 			if(init_) return;
 
-			if(open(NULL, NULL, 48'000)) {
+			if(open(NULL, NULL, srate, capnum)) {
 				init_ = true;
 				destroy_ = false;
 			}			
