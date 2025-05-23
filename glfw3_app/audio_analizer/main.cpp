@@ -15,8 +15,8 @@ typedef app::aan_main start_app;
 static constexpr char app_title_[] = "Audio Analizer";
 static constexpr char window_key_[] = "application/window";
 static constexpr vtx::spos start_pos_(10, 40);
-static constexpr vtx::spos start_size_(1280, 1024);
-static constexpr vtx::spos limit_size_(1920, 1600);
+static constexpr vtx::spos start_size_(800, 600);
+static constexpr vtx::spos limit_size_(800, 600);
 
 int main(int argc, char** argv)
 {
@@ -44,7 +44,10 @@ int main(int argc, char** argv)
 	}
 	core.set_limit_size(limit_size_);
 
-	director.at().sound_.initialize(16);
+	uint32_t qbuf_num = 16;
+	uint32_t cap_sample_rate = 48'000;
+	uint32_t cap_buffer_num = 2048;
+	director.at().sound_.initialize(qbuf_num, cap_sample_rate, cap_buffer_num);
 
 	director.at().widget_director_.initialize();
 

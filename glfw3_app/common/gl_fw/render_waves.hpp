@@ -287,7 +287,7 @@ namespace view {
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		render_waves() : ch_{ }, div_(0.0), gain_{ 1.0f }, win_size_(0),
+		render_waves() noexcept : ch_{ }, div_(0.0), gain_{ 1.0f }, win_size_(0),
 			smooth_before_(false), smooth_(true) { }
 
 
@@ -297,7 +297,7 @@ namespace view {
 			@param[in]	ena	不許可の場合「false」
 		*/
 		//-----------------------------------------------------------------//
-		void enable_smooth(bool ena = true) { smooth_ = ena; }
+		void enable_smooth(bool ena = true) noexcept { smooth_ = ena; }
 
 
 		//-----------------------------------------------------------------//
@@ -306,7 +306,7 @@ namespace view {
 			@return 波形の最大数
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t size() const { return LIMIT; }
+		uint32_t size() const noexcept { return LIMIT; }
 
 
 		//-----------------------------------------------------------------//
@@ -316,7 +316,7 @@ namespace view {
 			@return パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		const chr_param& get_param(uint32_t ch) const
+		const chr_param& get_param(uint32_t ch) const noexcept
 		{
 			if(ch >= CHN) {
 				static chr_param p;
@@ -333,7 +333,7 @@ namespace view {
 			@return パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		chr_param& at_param(uint32_t ch)
+		chr_param& at_param(uint32_t ch) noexcept
 		{
 			if(ch >= CHN) {
 				static chr_param p;
@@ -345,11 +345,28 @@ namespace view {
 
 		//-----------------------------------------------------------------//
 		/*!
+			@brief  UNITS を参照
+			@param[in]	ch	チャネル
+			@return ユニット
+		*/
+		//-----------------------------------------------------------------//
+		auto& at_units(uint32_t ch) noexcept
+		{
+			if(ch >= CHN) {
+				static UNITS u;
+				return u;
+			}
+			return ch_[ch].units_;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
 			@brief  情報パラメーターを取得
 			@return 情報パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		const info_param& get_info() const {
+		const info_param& get_info() const noexcept {
 			return info_;
 		}
 
@@ -360,7 +377,7 @@ namespace view {
 			@return 情報パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		info_param& at_info() {
+		info_param& at_info() noexcept {
 			return info_;
 		}
 
@@ -370,7 +387,7 @@ namespace view {
 			@brief  波形生成
 		*/
 		//-----------------------------------------------------------------//
-		void create_buffer()
+		void create_buffer() noexcept
 		{
 			for(uint32_t i = 0; i < CHN; ++i) {
 				ch_[i].units_.clear();
@@ -391,7 +408,7 @@ namespace view {
 			@return １周期に必要なサンプリング数
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t build_sin(uint32_t ch, double smp, double frq, double gain)
+		uint32_t build_sin(uint32_t ch, double smp, double frq, double gain) noexcept
 		{
 			if(ch >= CHN) return 0;
 
@@ -402,8 +419,33 @@ namespace view {
 				ch_[ch].units_[i] = 32768 + static_cast<UNIT>(sin(2.0 * vtx::get_pi<double>() * a)
 					* gain * 32767.0);
 				a += dt;
+				if(a >= 1.0) a -= 1.0;
 			}
 			return static_cast<uint32_t>(t);
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  テスト波形生成２
+			@param[in]	ch		チャネル
+			@param[in]	smp		サンプルレート[S]
+			@param[in]	frq		周波数 [Hz]
+			@param[in]	gain	ゲイン（1.0 で、最大振幅）
+		*/
+		//-----------------------------------------------------------------//
+		void build_sin2(uint32_t ch, double smp, double frq, double gain) noexcept
+		{
+			if(ch >= CHN) return;
+
+			double dt = frq / smp;
+			double a = 0.0;
+			for(uint32_t i = 0; i < ch_[ch].units_.size(); ++i) {
+				ch_[ch].units_[i] = 32768 + static_cast<UNIT>(sin(2.0 * vtx::get_pi<double>() * a)
+					* gain * 32767.0);
+				a += dt;
+				if(a >= 1.0) a -= 1.0;
+			}
 		}
 
 
@@ -416,7 +458,7 @@ namespace view {
 			@param[in]	ofs		オフセット
 		*/
 		//-----------------------------------------------------------------//
-		void copy(uint32_t ch, const UNIT* src, uint32_t len, uint32_t ofs = 0)
+		void copy(uint32_t ch, const UNIT* src, uint32_t len, uint32_t ofs = 0) noexcept
 		{
 			for(uint32_t i = 0; i < len; ++i) {
 				uint16_t w = *src++;
@@ -430,10 +472,10 @@ namespace view {
 		/*!
 			@brief  レンダリング（レガシー）
 			@param[in]	size	描画サイズ（ピクセル）
-			@param[in]	step	時間軸ステップ（65536を1.0）
+			@param[in]	step	時間軸ステップ（65536 を 1.0 ピクセル）
 		*/
 		//-----------------------------------------------------------------//
-		void render(const vtx::ipos& size, uint32_t tstep)
+		void render(const vtx::ipos& size, uint32_t tstep) noexcept
 		{
 			bool update_win = win_size_ != size;
 			win_size_ = size;
@@ -515,7 +557,7 @@ namespace view {
 			@param[in]	gsmp	グリッドのサンプリング周期
 		*/
 		//-----------------------------------------------------------------//
-		void render(const vtx::ipos& size, double wsmp, double gsmp)
+		void render(const vtx::ipos& size, double wsmp, double gsmp) noexcept
 		{
 			double a = gsmp / static_cast<double>(info_.grid_step_);
 			uint32_t step = static_cast<uint32_t>(a / wsmp * 65536.0);
@@ -531,7 +573,7 @@ namespace view {
 			@return 波形値
 		*/
 		//-----------------------------------------------------------------//
-		UNIT get(uint32_t ch, int32_t idx) const
+		UNIT get(uint32_t ch, int32_t idx) const noexcept
 		{
 			if(ch >= CHN) return 0;
 
@@ -551,7 +593,7 @@ namespace view {
 			@return 正規化された値
 		*/
 		//-----------------------------------------------------------------//
-		static float normalize(UNIT w)
+		static float normalize(UNIT w) noexcept
 		{
 			int32_t v = w;
 			v -= 32768;
@@ -569,7 +611,7 @@ namespace view {
 			@return 波形値
 		*/
 		//-----------------------------------------------------------------//
-		float get(uint32_t ch, double rate, double org) const
+		float get(uint32_t ch, double rate, double org) const noexcept
 		{
 			if(ch >= CHN) return 0.0f;
 
@@ -605,7 +647,7 @@ namespace view {
 			@param[in]	k		係数
 		*/
 		//-----------------------------------------------------------------//
-		void filter(uint32_t ch, float k)
+		void filter(uint32_t ch, float k) noexcept
 		{
 			if(ch_[ch].units_.empty()) return;
 
@@ -628,7 +670,7 @@ namespace view {
 			@return 波形位置
 		*/
 		//-----------------------------------------------------------------//
-		int32_t convert_index(double wsmp, double gsmp, int32_t pos) const
+		int32_t convert_index(double wsmp, double gsmp, int32_t pos) const noexcept
 		{
 			double grid = static_cast<double>(info_.grid_step_);
 			return static_cast<double>(pos) / grid * gsmp / wsmp;
@@ -646,7 +688,7 @@ namespace view {
 			@return 解析結果
 		*/
 		//-----------------------------------------------------------------//
-		analize_param analize(uint32_t ch, double rate, double org, double len, double step) const
+		analize_param analize(uint32_t ch, double rate, double org, double len, double step) const noexcept
 		{
 			analize_param a;
 			if(ch >= CHN || step <= 0.0) return a;
@@ -693,7 +735,7 @@ namespace view {
 		*/
 		//-----------------------------------------------------------------//
 		double scan(uint32_t ch, double wsmp,
-			double org, double scs, double len, float slope) const
+			double org, double scs, double len, float slope) const noexcept
 		{
 			if(ch >= CHN) return 0.0;
 
@@ -776,7 +818,7 @@ if(ch == 0) {
 		*/
 		//-----------------------------------------------------------------//
 		double measure_org(double wsmp, double org, double scs, double len,
-			const measure_param& param) const
+			const measure_param& param) const noexcept
 		{
 			return scan(param.org_ch_, wsmp, org, scs, len, param.org_slope_);
 		}
@@ -794,7 +836,7 @@ if(ch == 0) {
 		*/
 		//-----------------------------------------------------------------//
 		double measure_fin(double wsmp, double org, double scs, double len,
-			const measure_param& param) const
+			const measure_param& param) const noexcept
 		{
 			return scan(param.fin_ch_, wsmp, org, scs, len, param.fin_slope_);
 		}
@@ -807,7 +849,7 @@ if(ch == 0) {
 			@return 成功なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(const std::string& path)
+		bool save(const std::string& path) noexcept
 		{
 			utils::file_io fio;
 
@@ -833,7 +875,7 @@ if(ch == 0) {
 			@return 成功なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const std::string& path)
+		bool load(const std::string& path) noexcept
 		{
 			utils::file_io fio;
 
