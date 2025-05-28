@@ -40,7 +40,7 @@ namespace gui {
 			@brief	選択関数型 @n
 					数字を表示する場合、「newpos」の値を文字列に変換して戻す。
 					Ex: @n
-					  (boost::format("%d") % newpos).str();
+						(boost::format("%d") % newpos).str();
 			@param[in]	st		ステート
 			@param[in]	before	整数、変更前の値
 			@param[in]	newpos	整数、変更後の値
@@ -161,7 +161,7 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_spinbox(widget_director& wd, const widget::param& bp, const param& p) noexcept :
 			widget(bp), wd_(wd), param_(p), objh_(0), up_objh_(0), dn_objh_(0),
-		    initial_(false), delay_btn_cnt_(0), delay_key_cnt_(0), sel_pos_(0),
+			initial_(false), delay_btn_cnt_(0), delay_key_cnt_(0), sel_pos_(0),
 			state_(state::initial)
 		{ }
 
