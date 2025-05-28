@@ -1,5 +1,5 @@
 #pragma once
-//=========================================================================//
+//=============================================================================//
 /*! @file
     @brief  オシロスコープ・クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
@@ -7,62 +7,63 @@
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
-//=========================================================================//
+//=============================================================================//
 #include <vector>
 #include "gl_fw/glutils.hpp"
 
 namespace view {
 
-	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
 		@brief  oscilloscope template class
 		@param[in]	UNIT	波形値の型
 		@param[in]	LIMIT	最大波形数
 		@param[in]	CHN		チャネル数
 	*/
-	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	template <typename UNIT, uint32_t LIMIT, uint32_t CHN>
 	class oscilloscope {
 	public:
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief  解析結果パラメーター
 		*/
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct analize_param {
 			float		min_;		///< 最小値
 			float		max_;		///< 最大値
 			float		median_;	///< Median
 			float		average_;	///< 平均
 
-			analize_param() : min_(1.0f), max_(-1.0f), median_(0.0f), average_(0.0f) { }
+			analize_param() noexcept : min_(1.0f), max_(-1.0f), median_(0.0f), average_(0.0f) { }
 		};
 
 
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief  計測パラメーター
 		*/
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct measure_param {
 			uint32_t	org_ch_;	///< 開始チャネル
 			float		org_slope_;	///< 開始スロープ割合（負なら立下り）
 			uint32_t	fin_ch_;	///< 終端チャネル
 			float		fin_slope_;	///< 終端スロープ割合（負なら立下り）
 			float		lo_filter_;	///< ローパスフィルター係数（1.0ならフィルター無し）	
-			measure_param() : org_ch_(0), org_slope_(0.0f), fin_ch_(0), fin_slope_(0.0f),
+			measure_param() noexcept : org_ch_(0), org_slope_(0.0f), fin_ch_(0), fin_slope_(0.0f),
 				lo_filter_(1.0f) { }
 		};
 
 
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief  チャネル描画パラメーター
 		*/
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct chr_param {
 			img::rgba8	color_;			///< 描画色
 			vtx::ipos	offset_;		///< オフセット（ピクセル）
+			int32_t		unit_offset_;	///< ユニットからの読出しオフセット
 			int32_t		volt_max_;		///< 整数の最大値 16ビットの整数の場合、32767
 			float		volt_scale_;	///< 最大値の電圧[V]（volt_max_ に相当する電圧）
 			float		volt_grid_;		///< グリッド辺りの電圧
@@ -71,19 +72,19 @@ namespace view {
 			bool		render_;	///< 描画しない場合「false」
 			bool		ground_;	///< GND 電位表示
 
-			chr_param() : color_(img::rgba8(255, 255)),
-				offset_(0), volt_max_(32767), volt_scale_(2.0f), volt_grid_(0.25f),
+			chr_param() noexcept : color_(img::rgba8(255, 255)),
+				offset_(0), unit_offset_(0), volt_max_(32767), volt_scale_(2.0f), volt_grid_(0.25f),
 				update_(false), render_(true),
 				ground_(false)
 			{ }
 		};
 
 
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief  インフォメーション描画パラメーター
 		*/
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		class info_param {
 		public:
 			img::rgba8	grid_color_;	///< グリッド・カラー
@@ -104,7 +105,7 @@ namespace view {
 			bool		volt_enable_[CHN];	///< 電圧軸有効
 
 			img::rgba8	trig_color_;	///< トリガー軸カラー
-			int32_t		trig_pos_;		///< トリガー軸位置（時間軸）
+			int32_t		trig_pos_;		///< トリガー軸位置（トリガー電圧）
 			bool		trig_enable_;	///< トリガー軸有効
 
 			img::rgba8	delay_color_;	///< ディレイ軸カラー
@@ -124,7 +125,7 @@ namespace view {
 
 			uint32_t	count_;
 
-			static void rotate_(uint16_t& bits) {
+			static void rotate_(uint16_t& bits) noexcept {
 				auto mod = bits & 0x8000;
 				bits <<= 1;
 				if(mod) bits |= 1;
@@ -139,7 +140,7 @@ namespace view {
 				time_org_(0), time_len_(0),
 				time_stipple_(0b1110110011101100), time_enable_(true),
 
-				volt_color_{ img::rgba8(128, 255, 128, 192) },
+				volt_color_{ img::rgba8(192, 255, 192, 192) },
 				volt_org_{0}, volt_len_{0},
 				volt_stipple_(0b1110110011101100), volt_enable_{true},
 
@@ -147,22 +148,22 @@ namespace view {
 				trig_pos_(0), trig_enable_(true),
 
 				delay_color_(img::rgba8(190, 255, 140, 192)),
-				delay_pos_(0), delay_enable_(true),
+				delay_pos_(0), delay_enable_(false),
 
 				meas_color_{ img::rgba8(255, 195, 128, 192) },
-				meas_pos_{ 0 }, meas_enable_{ true },
+				meas_pos_{ 0 }, meas_enable_{ false },
 
 				grid_(), time_(), volt_(), size_(), count_(0)
 			{ }
 
 
-			void build(const vtx::ipos& size)
+			void build(const vtx::ipos& size) noexcept
 			{
 				if(size == size_) return;
 				size_ = size;
 
 				grid_.clear();
-				for(int h = 0; h < size.x; h += grid_step_) {  // |||
+				for(int h = 0; h < size.x; h += grid_step_) {
 					grid_.push_back(vtx::spos(h, 0));
 					grid_.push_back(vtx::spos(h, size.y));
 				}
@@ -185,11 +186,11 @@ namespace view {
 
 				trig_.clear();
 				trig_.push_back(vtx::spos(0, 0));
-				trig_.push_back(vtx::spos(0, size.y));
+				trig_.push_back(vtx::spos(size.x, 0));
 			}
 
 
-			void render()
+			void render() noexcept
 			{
 				glEnable(GL_LINE_STIPPLE);
 				glLineWidth(1.0f);
@@ -224,7 +225,7 @@ namespace view {
 				if(trig_enable_) {
 					glLineStipple(1, time_stipple_);
 					glPushMatrix();
-					gl::glTranslate(trig_pos_, 0);
+					gl::glTranslate(0, trig_pos_);
 					gl::glColor(trig_color_);
 					gl::draw_lines(trig_);
 					glPopMatrix();
@@ -278,7 +279,6 @@ namespace view {
 		info_param	info_;
 
 		ch_t		ch_[CHN];
-		double		div_;
 
 		float		volt_scale_[CHN];
 		float		volt_grid_[CHN];
@@ -299,7 +299,7 @@ namespace view {
 			sample_rate_(48'000),
 			time_grid_(100e-6),
 			info_(),
-			ch_{ }, div_(0.0), volt_scale_{ 4.0f }, volt_grid_{ 0.25f }, win_size_(0),
+			ch_{ }, volt_scale_{ 4.0f }, volt_grid_{ 0.25f }, win_size_(0),
 			smooth_before_(false), smooth_(true) { }
 
 
@@ -428,8 +428,7 @@ namespace view {
 			double dt = frq / smp;
 			double a = 0.0;
 			for(uint32_t i = 0; i < ch_[ch].units_.size(); ++i) {
-				ch_[ch].units_[i] = static_cast<UNIT>(sin(2.0 * vtx::get_pi<double>() * a)
-					* gain * 32767.0);
+				ch_[ch].units_[i] = static_cast<UNIT>(sin(2.0 * vtx::get_pi<double>() * a) * gain * 32767.0);
 				a += dt;
 				if(a >= 1.0) a -= 1.0;
 			}
@@ -476,7 +475,6 @@ namespace view {
 					}
 				}
 
-				int mod_x = 0;
 				if(update || t.param_.update_) {
 					float gain = t.param_.volt_scale_ / t.param_.volt_grid_ * static_cast<float>(info_.grid_step_) / static_cast<float>(t.param_.volt_max_); 
 					int32_t tsc = t.param_.offset_.x * tstep;
@@ -486,6 +484,7 @@ namespace view {
 						int32_t sz = t.units_.size();
 						if(-(sz / 2) <= idx && idx < (sz / 2)) {
 							if(idx < 0) idx += sz;
+							idx += t.param_.unit_offset_;
 							float v = static_cast<float>(t.units_[idx % sz]);
 							if(smooth_) {
 								if(tstep < 65536) {  // 補完する
@@ -507,9 +506,12 @@ namespace view {
 
 				if(!t.lines_.empty()) {
 					glPushMatrix();
-					gl::glTranslate(mod_x, t.param_.offset_.y);
+					gl::glTranslate(0, t.param_.offset_.y);
 					gl::glColor(t.param_.color_);
 					gl::draw_line_strip(t.lines_);
+					if(t.param_.ground_) {
+						gl::draw_line(vtx::spos(0, 0), vtx::spos(size.x, 0));
+					}
 					glPopMatrix();
 				}
 			}
@@ -523,95 +525,73 @@ namespace view {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief  レンダリング
-			@param[in]	size	描画サイズ（ピクセル）
-			@param[in]	wsmp	波形メモリのサンプリング周期
-			@param[in]	gsmp	グリッドのサンプリング周期
-		*/
-		//-----------------------------------------------------------------//
-		void render(const vtx::ipos& size, double wsmp, double gsmp) noexcept
-		{
-			double a = gsmp / static_cast<double>(info_.grid_step_);
-			uint32_t step = static_cast<uint32_t>(a / wsmp * 65536.0);
-			render(size, step);
-		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief  波形値の取得
+			@brief  中間電圧値を検出
 			@param[in]	ch		チャネル
-			@param[in]	idx		サンプリング位置
-			@return 波形値
+			@param[in]	org		開始位置
+			@param[in]	len		スキャン長
+			@return 中間電圧値
 		*/
 		//-----------------------------------------------------------------//
-		UNIT get(uint32_t ch, int32_t idx) const noexcept
+		UNIT scan_trigger_voltage(uint32_t ch, int32_t org, uint32_t len) noexcept
 		{
-			if(ch >= CHN) return 0;
-
-			const ch_t& t = ch_[ch];
-			uint32_t sz = t.units_.size();
-			while(idx < 0) {
-				idx += sz;
+			ch_t& t = ch_[ch];
+			auto size = t.units_.size();
+			while(org < 0) { org += size; }
+			UNIT min, max;
+			min = max = t.units_[org % size];
+			for(uint32_t i = 0; i < len; ++i) {
+				auto v = t.units_[(org + i) % size];
+				if(min > v) min = v;
+				if(max < v) max = v;
 			}
-			return t.units_[idx % sz];
+			return (min + max) / 2;
 		}
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief  正規化
-			@param[in]	w	元の値
-			@return 正規化された値
-		*/
-		//-----------------------------------------------------------------//
-		static float normalize(UNIT w) noexcept
-		{
-			int32_t v = w;
-			v -= 32768;
-			if(v == -32768) v = -32767;
-			return static_cast<float>(v) / 32767.0f;
-		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief  波形の取得（正規化波形）
+			@brief  トリガー位置検出
 			@param[in]	ch		チャネル
-			@param[in]	rate	サンプルレート
-			@param[in]	org		取得時間		
-			@return 波形値
+			@param[in]	org		開始位置
+			@param[in]	len		スキャン長
+			@param[in]	th		閾値
+			@param[in]	edge	立ち上がりの場合「true」、立下りの場合「false」
+			@param[out]	pos		トリガー位置
+			@return トリガー条件を満たした場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		float get(uint32_t ch, double rate, double org) const noexcept
+		bool find_trigger_position(uint32_t ch, int32_t org, uint32_t len, UNIT th, bool edge, uint32_t& pos) noexcept
 		{
-			if(ch >= CHN) return 0.0f;
-
-			const ch_t& t = ch_[ch];
-			int32_t sz = t.units_.size();
-			int32_t idx = static_cast<uint32_t>(org / rate);
-			int32_t idxorg = idx;
-			if(idx < 0) {
-				idx += sz;
-				if(idx < 0) {
-					return 0.0f ;
+			ch_t& t = ch_[ch];
+			auto size = t.units_.size();
+			while(org < 0) { org += size; }
+			auto v0 = t.units_[org % size];
+			bool step = false;
+			uint32_t i0 = org % size;
+			for(uint32_t i = 0; i < len; ++i) {
+				auto idx = (org + i) % size;
+				auto v1 = t.units_[idx];
+				if(edge) {
+					if(step && th < v1) {
+						pos = i0;
+						return true;
+					}
+					if(v0 < th) step = true;
+				} else {
+					if(step && th > v1) {
+						pos = i0;
+						return true;
+					}
+					if(v0 > th) step = true;
 				}
+				v0 = v1;
+				i0 = idx;
 			}
-
-			auto a = normalize(t.units_[idx % sz]);
-			if(smooth_) {
-				float umod = (org - (static_cast<double>(idxorg) * rate)) / rate;
-				++idx;
-				float b = 0.0f;
-				if(idx < sz) {
-					b = normalize(t.units_[idx]);
-					a += (b - a) * umod;
-				}
-			}
-			return a;
+			return false;
 		}
 
 
+#if 0
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  単純ローパス・フィルター
@@ -630,22 +610,6 @@ namespace view {
 				v = a;
 				w = static_cast<UNIT>((a + d) * 32767.0f) + 32768;
 			}
-		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief  波形位置の変換
-			@param[in]	wsmp	波形メモリのサンプリング周期
-			@param[in]	gsmp	グリッドのサンプリング周期
-			@param[in]	pos		位置（ピクセル）
-			@return 波形位置
-		*/
-		//-----------------------------------------------------------------//
-		int32_t convert_index(double wsmp, double gsmp, int32_t pos) const noexcept
-		{
-			double grid = static_cast<double>(info_.grid_step_);
-			return static_cast<double>(pos) / grid * gsmp / wsmp;
 		}
 
 
@@ -865,5 +829,6 @@ if(ch == 0) {
 
 			return true;
 		}
+#endif
 	};
 }

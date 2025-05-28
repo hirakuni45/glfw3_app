@@ -10,6 +10,8 @@
 #=======================================================================
 TARGET		=	audio_analizer
 
+BUILD_ID	=	$(shell date +%Y%m%d%H)
+
 # 'debug' or 'release'
 BUILD		=	release
 
@@ -40,7 +42,7 @@ LIBS_USR	=
 LIB_DIR_USR	=
 # cmpiler flags (-Dxxx)
 CFLAGS		=
-PFLAGS		=
+PFLAGS		=	-DBUILD_ID=$(BUILD_ID)
 
 -include $(VPATH)/makefile
 
