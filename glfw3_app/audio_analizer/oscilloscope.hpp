@@ -72,6 +72,7 @@ namespace view {
 			bool		render_;	///< 描画しない場合「false」
 			bool		ground_;	///< GND 電位表示
 
+			// +-2.0V 入力
 			chr_param() noexcept : color_(img::rgba8(255, 255)),
 				offset_(0), unit_offset_(0), volt_max_(32767), volt_scale_(2.0f), volt_grid_(0.25f),
 				update_(false), render_(true),

@@ -172,7 +172,6 @@ namespace app {
 		{
 		}
 
-
 		void render_view_(const vtx::irect& clip) noexcept
 		{
 			glDisable(GL_TEXTURE_2D);
@@ -204,11 +203,9 @@ namespace app {
 			wave_size_ = clip.size;
 		}
 
-
 		void service_view_() noexcept
 		{
 		}
-
 
 		gui::widget* setup_channel_(uint32_t chi, const std::string& chs) noexcept
 		{
@@ -289,7 +286,6 @@ namespace app {
 			return base;
 		}
 
-
 		void trigger_func_() noexcept
 		{
 			auto ch = trig_ch_->get_select_pos();
@@ -312,7 +308,6 @@ namespace app {
 				}
 			}
 		}
-
 
 		gui::widget* setup_time_() noexcept
 		{
@@ -629,7 +624,7 @@ namespace app {
 				wp_.style_ = widget_dialog::style::OK;
 				about_dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
 				auto s = (boost::format("Audio Analizer\nVersion %d.%02d\n") % (VERSION / 100) % (VERSION % 100)).str();
-				int bid = BUILD_ID;  // Makefile で指定
+				int bid = BUILD_ID;  // 環境変数として Makefile で指定
 				s += (boost::format("Build: %d\n") % bid).str();
 				s += "Copyright 2025 Kunihito Hiramatu\n";
 				s += "All Rights Reserved.";
@@ -724,9 +719,9 @@ namespace app {
 					if(f) {
 						auto ret = sound.at_audio_io().start_capture();
 						if(ret) {
-							utils::format("Start capture OK...\n");
+							terminal_core_->at_terminal().output("Start capture OK...\n");
 						} else {
-							utils::format("Start capture NG...\n");
+							terminal_core_->at_terminal().output("Start capture NG...\n");
 						}
 					} else {
 						sound.at_audio_io().stop_capture();
@@ -831,8 +826,8 @@ namespace app {
 
 			info_ = true;
 
-			waves_.build_sin(0, SAMPLE_RATE, 1000.0, 1.0);
-			waves_.build_sin(1, SAMPLE_RATE,  500.0, 0.75);
+//			waves_.build_sin(0, SAMPLE_RATE, 1000.0, 1.0);
+//			waves_.build_sin(1, SAMPLE_RATE,  500.0, 0.75);
 		}
 
 
@@ -869,11 +864,10 @@ namespace app {
 
 			// サンプルレートに対応するバッファ長
 			uint32_t wlen = (SAMPLE_RATE / 60);
-			uint32_t mod = 16;
-			if(sound.get_queue_audio_length() < mod) {
-				wlen += mod;
-			}
-
+//			uint32_t mod = 16;
+//			if(sound.get_queue_audio_length() < mod) {
+//				wlen += mod;
+//			}
 			tone_.service(wlen, 1.0f);
 			sound.queue_audio(tone_.get_audio());
 

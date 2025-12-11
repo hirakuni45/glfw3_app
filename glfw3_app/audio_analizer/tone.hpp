@@ -87,11 +87,8 @@ namespace utils {
 				type_ = WAVE_TYPE::NONE;
 			}
 
-			void ring(WAVE_TYPE type, double frq) noexcept
+			void set_freq(double frq) noexcept
 			{
-				type_ = type;
-				frq_ = frq;
-				angle_ = 0.0;
 				step_ = frq / static_cast<double>(SRT);
 				if(type_ == WAVE_TYPE::SIN_P || type_ == WAVE_TYPE::COS_P || type_ == WAVE_TYPE::SIN_N || type_ == WAVE_TYPE::COS_N) {
 					step_ *= vtx::radian_d_;
@@ -99,6 +96,14 @@ namespace utils {
 				} else {
 					limit_ = 1.0;
 				}
+			}
+
+			void ring(WAVE_TYPE type, double frq) noexcept
+			{
+				type_ = type;
+				frq_ = frq;
+				angle_ = 0.0;
+				set_freq(frq);
 			}
 
 			auto get_type() const noexcept { return type_; }
@@ -191,7 +196,7 @@ namespace utils {
 			@brief  発音
 			@param[in]	slot	スロット・インデックス
 			@param[in]	type	波形タイプ
-			@param[in]	ch		チャネル
+			@param[in]	ch		チャネル (L, R, L+R)
 			@param[in]	freq	周波数
 			@return 発音したら「true」
 		*/
@@ -206,25 +211,29 @@ namespace utils {
 			return true;
 		}
 
-#if 0
-		//-----------------------------------------------------------------//
-		/*!
-			@brief  
-			@param[in]	slot	スロット・インデックス
-		*/
-		//-----------------------------------------------------------------//
-		void set_volume(uint32_t slot, float vol) noexcept
-		{
-			if(slot >= SLOT) return;
-
-			vol_[slot] = vol;
-		}
-#endif
 
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  ボリュームの設定
 			@param[in]	slot	スロット・インデックス
+			@param[in]	freq	周波数
+		*/
+		//-----------------------------------------------------------------//
+		bool set_freq(uint32_t slot, double freq) noexcept
+		{
+			if(slot >= SLOT) return false;
+
+			slot_[slot].set_freq(freq);
+
+			return true;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  ボリュームの設定
+			@param[in]	slot	スロット・インデックス
+			@param[in]	vol		ボリューム（最大 1.0）
 		*/
 		//-----------------------------------------------------------------//
 		void set_volume(uint32_t slot, float vol) noexcept
