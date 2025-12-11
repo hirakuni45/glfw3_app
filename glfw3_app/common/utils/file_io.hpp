@@ -44,7 +44,7 @@ namespace utils {
 		@return オープンできれば、ファイル構造体のポインターを返す
 	*/
 	//-----------------------------------------------------------------//
-	std::FILE* wfopen(const utils::lstring& fn, const std::string& md);
+	std::FILE* wfopen(const std::u32string& fn, const std::string& md);
 
 
 	//-----------------------------------------------------------------//
@@ -76,7 +76,7 @@ namespace utils {
 		@return ディレクトリーなら「true」
 	*/
 	//-----------------------------------------------------------------//
-	inline bool is_directory(const utils::lstring& fn) {
+	inline bool is_directory(const std::u32string& fn) {
 		std::string s;
 		utils::utf32_to_utf8(fn, s);
 		return is_directory(s);
@@ -92,7 +92,7 @@ namespace utils {
 		@return ファイルが有効なら「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool probe_file(const utils::lstring& fn, bool dir = false);
+	bool probe_file(const std::u32string& fn, bool dir = false);
 
 
 	//-----------------------------------------------------------------//
@@ -105,7 +105,7 @@ namespace utils {
 	//-----------------------------------------------------------------//
 	inline bool probe_file(const std::string& fn, bool dir = false)
 	{
-		utils::lstring ls;
+		std::u32string ls;
 		utils::utf8_to_utf32(fn, ls);
 		return probe_file(ls, dir);
 	}
@@ -240,7 +240,7 @@ namespace utils {
 			fpath_ = filename;
 			mode_ = mode;
 
-			utils::lstring lfn;
+			std::u32string lfn;
 			utf8_to_utf32(fpath_, lfn);
 
 			fp_ = wfopen(lfn, mode);
@@ -263,7 +263,7 @@ namespace utils {
 			@return	正常なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool open(const utils::lstring& filename, const std::string& mode) {
+		bool open(const std::u32string& filename, const std::string& mode) {
 			std::string s;
 			utils::utf32_to_utf8(filename, s);
 			return open(s, mode);
@@ -574,7 +574,7 @@ namespace utils {
 			@return	読み込んだ数
 		*/
 		//-----------------------------------------------------------------//
-		size_t get(utils::wstring& pad, uint32_t size = 0, uint16_t term = 0) {
+		size_t get(std::wstring& pad, uint32_t size = 0, uint16_t term = 0) {
 			if(size == 0) {
 				uint32_t n = 0;
 				while(1) {

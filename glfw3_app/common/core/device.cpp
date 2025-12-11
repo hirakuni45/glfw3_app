@@ -38,7 +38,7 @@ namespace utils {
 	}
 
 
-	std::FILE* wfopen(const utils::lstring& fn, const std::string& md)
+	std::FILE* wfopen(const std::u32string& fn, const std::string& md)
 	{
 		std::FILE* fp = 0;
 #ifdef WIN32
@@ -78,7 +78,7 @@ namespace utils {
 	{
 		bool ret = true;
 #ifdef WIN32
-		utils::wstring ws;
+		std::wstring ws;
 		utf8_to_utf16(dir, ws);
 		if(_wmkdir((const wchar_t*)ws.c_str()) != 0) ret = false;
 #else
@@ -113,7 +113,7 @@ namespace utils {
 	}
 
 
-	bool probe_file(const utils::lstring& fn, bool dir)
+	bool probe_file(const std::u32string& fn, bool dir)
 	{
 #ifdef WIN32
 		struct _stat st;

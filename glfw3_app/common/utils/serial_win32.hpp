@@ -156,7 +156,7 @@ namespace device {
 				DWORD size = 0;
 				SetupDiGetDeviceRegistryPropertyW(hi, &data, SPDRP_DEVICEDESC, &dt, nullptr, size, &size);
 				if(size > 0) {
-					uint16_t tmp[size];
+					wchar_t tmp[size];
 					SetupDiGetDeviceRegistryPropertyW(hi, &data, SPDRP_DEVICEDESC, &dt, reinterpret_cast<BYTE*>(tmp), size, &size);
 					utils::utf16_to_utf8(tmp, t.info);
 				}

@@ -251,7 +251,7 @@ namespace gui {
 	{
 		gl::core& core = gl::core::get_instance();
 
-		utils::lstring ls;
+		std::u32string ls;
 		if(tp.alias_enable_ && tp.cursor_ < 0) {
 			ls = tp.alias_;
 		} else {
@@ -289,7 +289,7 @@ namespace gui {
 	{
 		gl::core& core = gl::core::get_instance();
 
-		utils::lstring ls;
+		std::u32string ls;
 		if(tp.alias_enable_ && tp.cursor_ < 0) {
 			ls = tp.alias_;
 		} else {

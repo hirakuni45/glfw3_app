@@ -3,7 +3,7 @@
 /*!	@file
 	@brief	文字列操作ユーティリティー @n
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2025 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -22,25 +22,17 @@ namespace utils {
 	typedef std::string::iterator						string_it;
 	typedef std::string::const_iterator					string_cit;
 
-	typedef std::basic_string<uint16_t>					wstring;
-	typedef std::basic_string<uint16_t>::iterator		wstring_it;
-	typedef std::basic_string<uint16_t>::const_iterator	wstring_cit;
-
-	typedef std::basic_string<uint32_t>					lstring;
-	typedef std::basic_string<uint32_t>::iterator		lstring_it;
-	typedef std::basic_string<uint32_t>::const_iterator	lstring_cit;
-
 	typedef std::vector<std::string>					strings;
 	typedef std::vector<std::string>::iterator			strings_it;
 	typedef std::vector<std::string>::const_iterator	strings_cit;
 
-	typedef std::vector<wstring>						wstrings;
-	typedef std::vector<wstring>::iterator				wstrings_it;
-	typedef std::vector<wstring>::const_iterator		wstrings_cit;
+	typedef std::vector<std::wstring>					wstrings;
+	typedef std::vector<std::wstring>::iterator			wstrings_it;
+	typedef std::vector<std::wstring>::const_iterator	wstrings_cit;
 
-	typedef std::vector<lstring>						lstrings;
-	typedef std::vector<lstring>::iterator				lstrings_it;
-	typedef std::vector<lstring>::const_iterator		lstrings_cit;
+	typedef std::vector<std::u32string>					lstrings;
+	typedef std::vector<std::u32string>::iterator		lstrings_it;
+	typedef std::vector<std::u32string>::const_iterator	lstrings_cit;
 
 
 	//-----------------------------------------------------------------//
@@ -53,8 +45,8 @@ namespace utils {
 	template <class T>
 	inline size_t string_strlenT(const T& src) { return src.size(); }
 	inline size_t string_strlen(const std::string& src) { return string_strlenT(src); }
-	inline size_t string_strlen(const wstring& src) { return string_strlenT(src); }
-	inline size_t string_strlen(const lstring& src) { return string_strlenT(src); }
+	inline size_t string_strlen(const std::wstring& src) { return string_strlenT(src); }
+	inline size_t string_strlen(const std::u32string& src) { return string_strlenT(src); }
 
 
 	//-----------------------------------------------------------------//
@@ -71,9 +63,9 @@ namespace utils {
 		if(idx == T::npos) return nullptr;
 		else return &src[idx];
 	}
-	inline const char* string_strchr(const string& src, char ch) { return string_strchrT(src, ch); }
-	inline const uint16_t* string_strchr(const wstring& src, uint16_t ch) { return string_strchrT(src, ch); }
-	inline const uint32_t* string_strchr(const lstring& src, uint32_t ch) { return string_strchrT(src, ch); }
+	inline const auto* string_strchr(const string& src, char ch) { return string_strchrT(src, ch); }
+	inline const auto* string_strchr(const std::wstring& src, uint16_t ch) { return string_strchrT(src, ch); }
+	inline const auto* string_strchr(const std::u32string& src, uint32_t ch) { return string_strchrT(src, ch); }
 
 
 	//-----------------------------------------------------------------//
@@ -90,9 +82,9 @@ namespace utils {
 		if(idx == T::npos) return 0;
 		else return &src[idx];
 	}
-	inline const char* string_strrchr(const std::string& src, char ch) { return string_strrchrT(src, ch); }
-	inline const uint16_t* string_strrchr(const wstring& src, uint16_t ch) { return string_strrchrT(src, ch); }
-	inline const uint32_t* string_strrchr(const lstring& src, uint32_t ch) { return string_strrchrT(src, ch); }
+	inline const auto* string_strrchr(const std::string& src, char ch) { return string_strrchrT(src, ch); }
+	inline const auto* string_strrchr(const std::wstring& src, uint16_t ch) { return string_strrchrT(src, ch); }
+	inline const auto* string_strrchr(const std::u32string& src, uint32_t ch) { return string_strrchrT(src, ch); }
 
 
 	//-----------------------------------------------------------------//
@@ -109,9 +101,9 @@ namespace utils {
 	}
 	inline int string_strcmp(const std::string& srca, const std::string& srcb) {
 		return string_strcmpT(srca, srcb); }
-	inline int string_strcmp(const wstring& srca, const wstring& srcb) {
+	inline int string_strcmp(const std::wstring& srca, const std::wstring& srcb) {
 		return string_strcmpT(srca, srcb); }
-	inline int string_strcmp(const lstring& srca, const lstring& srcb) {
+	inline int string_strcmp(const std::u32string& srca, const std::u32string& srcb) {
 		return string_strcmpT(srca, srcb); }
 
 
@@ -130,9 +122,9 @@ namespace utils {
 	}
 	inline int string_strncmp(const std::string& srca, const std::string& srcb, std::string::size_type n) {
 		return string_strncmpT(srca, srcb, n); }
-	inline int string_strncmp(const wstring& srca, const wstring& srcb, wstring::size_type n) {
+	inline int string_strncmp(const std::wstring& srca, const std::wstring& srcb, std::wstring::size_type n) {
 		return string_strncmpT(srca, srcb, n); }
-	inline int string_strncmp(const lstring& srca, const lstring& srcb, lstring::size_type n) {
+	inline int string_strncmp(const std::u32string& srca, const std::u32string& srcb, std::u32string::size_type n) {
 		return string_strncmpT(srca, srcb, n); }
 
 
@@ -316,10 +308,10 @@ namespace utils {
 	inline int no_capital_strcmp(const std::string& srca, const std::string& srcb) {
 		return no_capital_strcmpT(srca, srcb);
 	}
-	inline int no_capital_strcmp(const wstring& srca, const wstring& srcb) {
+	inline int no_capital_strcmp(const std::wstring& srca, const std::wstring& srcb) {
 		return no_capital_strcmpT(srca, srcb);
 	}
-	inline int no_capital_strcmp(const lstring& srca, const lstring& srcb) {
+	inline int no_capital_strcmp(const std::u32string& srca, const std::u32string& srcb) {
 		return no_capital_strcmpT(srca, srcb);
 	}
 
@@ -332,7 +324,7 @@ namespace utils {
 		@return 変換エラーが無ければ「true」
 	*/
 	//-----------------------------------------------------------------//
-	static bool utf8_to_utf16(const std::string& src, wstring& dst) noexcept
+	static bool utf8_to_utf16(const std::string& src, std::wstring& dst) noexcept
 	{
 		if(src.empty()) return true;
 
@@ -371,8 +363,8 @@ namespace utils {
 		@return	UTF-16
 	*/
 	//-----------------------------------------------------------------//
-	inline wstring utf8_to_utf16(const std::string& src) noexcept {
-		wstring dst;
+	static inline std::wstring utf8_to_utf16(const std::string& src) noexcept {
+		std::wstring dst;
 		utf8_to_utf16(src, dst);
 		return dst;
 	}
@@ -386,7 +378,7 @@ namespace utils {
 		@return 変換が正常なら「true」
 	*/
 	//-----------------------------------------------------------------//
-	static bool utf8_to_utf32(const std::string& src, lstring& dst) noexcept
+	static bool utf8_to_utf32(const std::string& src, std::u32string& dst) noexcept
 	{
 		if(src.empty()) return false;
 
@@ -428,8 +420,8 @@ namespace utils {
 		@return	UTF-32
 	*/
 	//-----------------------------------------------------------------//
-	inline lstring utf8_to_utf32(const std::string& src) noexcept {
-		lstring dst;
+	inline auto utf8_to_utf32(const std::string& src) noexcept {
+		std::u32string dst;
 		utf8_to_utf32(src, dst);
 		return dst;
 	}
@@ -443,7 +435,7 @@ namespace utils {
 		@return 変換が正常なら「true」
 	*/
 	//-----------------------------------------------------------------//
-	static bool utf16_to_utf8(const wstring& src, std::string& dst) noexcept
+	static bool utf16_to_utf8(const std::wstring& src, std::string& dst) noexcept
 	{
 		if(src.empty()) return false;
 
@@ -473,7 +465,7 @@ namespace utils {
 		@return	UTF-8
 	*/
 	//-----------------------------------------------------------------//
-	inline std::string utf16_to_utf8(const wstring& src) noexcept {
+	inline std::string utf16_to_utf8(const std::wstring& src) noexcept {
 		std::string dst;
 		utf16_to_utf8(src, dst);
 		return dst;
@@ -488,7 +480,7 @@ namespace utils {
 		@return 変換が正常なら「true」
 	*/
 	//-----------------------------------------------------------------//
-	inline bool utf16_to_utf32(const wstring& src, lstring& dst) noexcept {
+	inline bool utf16_to_utf32(const std::wstring& src, std::u32string& dst) noexcept {
 		for(auto ch : src) {
 			dst += ch;
 		}
@@ -503,8 +495,8 @@ namespace utils {
 		@return	UTF-32
 	*/
 	//-----------------------------------------------------------------//
-	inline lstring utf16_to_utf32(const wstring& src) noexcept {
-		lstring dst;
+	inline auto utf16_to_utf32(const std::wstring& src) noexcept {
+		std::u32string dst;
 		utf16_to_utf32(src, dst);
 		return dst;
 	}
@@ -518,7 +510,7 @@ namespace utils {
 		@return 変換が正常なら「true」
 	*/
 	//-----------------------------------------------------------------//
-	static bool utf32_to_utf8(const lstring& src, std::string& dst) noexcept
+	static bool utf32_to_utf8(const std::u32string& src, std::string& dst) noexcept
 	{
 		if(src.empty()) return false;
 
@@ -566,7 +558,7 @@ namespace utils {
 		@return	UTF-8
 	*/
 	//-----------------------------------------------------------------//
-	inline std::string utf32_to_utf8(const lstring& src) noexcept {
+	inline std::string utf32_to_utf8(const std::u32string& src) noexcept {
 		std::string dst;
 		utf32_to_utf8(src, dst);
 		return dst;
@@ -584,7 +576,7 @@ namespace utils {
 	static bool sjis_to_utf8(const std::string& src, std::string& dst) noexcept
 	{
 		if(src.empty()) return false;
-		wstring ws;
+		std::wstring ws;
 		uint16_t wc = 0;
 		for(auto ch : src) {
 			uint8_t c = static_cast<uint8_t>(ch);
@@ -632,7 +624,7 @@ namespace utils {
 		@return 変換が正常なら「true」
 	*/
 	//-----------------------------------------------------------------//
-	static bool sjis_to_utf16(const std::string& src, wstring& dst) noexcept
+	static bool sjis_to_utf16(const std::string& src, std::wstring& dst) noexcept
 	{
 		if(src.empty()) return false;
 		std::string tmp;
@@ -649,8 +641,8 @@ namespace utils {
 		@return	UTF-16（追記）
 	*/
 	//-----------------------------------------------------------------//
-	inline wstring sjis_to_utf16(const std::string& src) noexcept {
-		wstring dst;
+	inline std::wstring sjis_to_utf16(const std::string& src) noexcept {
+		std::wstring dst;
 		sjis_to_utf16(src, dst);
 		return dst;
 	}
@@ -668,7 +660,7 @@ namespace utils {
 	{
 		if(src.empty()) return false;
 
-		wstring ws;
+		std::wstring ws;
 		utf8_to_utf16(src, ws);
 		for(auto wc : ws) {
 			uint16_t ww = utf16_to_sjis(wc);
@@ -705,7 +697,7 @@ namespace utils {
 		@return 変換が正常なら「true」
 	*/
 	//-----------------------------------------------------------------//
-	static bool utf16_to_sjis(const wstring& src, std::string& dst) noexcept
+	static bool utf16_to_sjis(const std::wstring& src, std::string& dst) noexcept
 	{
 		if(src.empty()) return false;
 
@@ -724,7 +716,7 @@ namespace utils {
 		@return 変換が正常なら「true」
 	*/
 	//-----------------------------------------------------------------//
-	inline std::string utf16_to_sjis(const wstring& src) noexcept {
+	inline std::string utf16_to_sjis(const std::wstring& src) noexcept {
 		std::string dst;
 		utf16_to_sjis(src, dst);
 		return dst;
@@ -773,8 +765,8 @@ namespace utils {
 		@return	文字列
 	*/
 	//-----------------------------------------------------------------//
-	inline wstring strings_to_string(const wstrings& src, bool crlf) noexcept {
-		wstring dst;
+	inline std::wstring strings_to_string(const wstrings& src, bool crlf) noexcept {
+		std::wstring dst;
 		for(const auto& ws : src) {
 			dst += ws;
 			if(crlf) dst += '\n';
@@ -893,11 +885,11 @@ namespace utils {
 		int limit = 0) noexcept {
 		return split_textT<strings>(src, list, inhc, limit);
 	}
-	inline wstrings split_text(const wstring& src, const wstring& list, const wstring& inhc = wstring(),
+	inline wstrings split_text(const std::wstring& src, const std::wstring& list, const std::wstring& inhc = std::wstring(),
 		int limit = 0) noexcept {
 		return split_textT<wstrings>(src, list, inhc, limit);
 	}
-	inline lstrings split_text(const lstring& src, const lstring& list, const lstring& inhc = lstring(),
+	inline lstrings split_text(const std::u32string& src, const std::u32string& list, const std::u32string& inhc = std::u32string(),
 		int limit = 0) noexcept {
 		return split_textT<lstrings>(src, list, inhc, limit);
 	}
@@ -1004,19 +996,19 @@ namespace utils {
 		@return 変換された文字数
 	*/
 	//-----------------------------------------------------------------//
-	static int string_conv(const lstring& src, lstring& dst)
+	static int string_conv(const std::u32string& src, std::u32string& dst)
 	{
 		if(src.empty()) return 0;
 
-		static const lstring tbl = {
+		static const std::u32string tbl = {
 			0x0009, ' ',	/// TAB ---> SPACE
 			0x3000, ' ',	/// 全角スペース ---> SPACE
 		};
 
-		lstring s;
+		std::u32string s;
 		int n = code_convs(src, tbl, s);
 
-		lstring spc = { ' ' };
+		std::u32string spc = { ' ' };
 		lstrings ss = split_text(s, spc);
 
 		for(const auto& l : ss) {
@@ -1035,16 +1027,16 @@ namespace utils {
 		@return 正確に一致したら 1.0 を返す
 	*/
 	//-----------------------------------------------------------------//
-	static float compare(const lstring& srca, const lstring& srcb)
+	static float compare(const std::u32string& srca, const std::u32string& srcb)
 	{
 		if(srca.empty() || srcb.empty()) return 0.0f;
 
-		lstring a;
+		std::u32string a;
 		string_conv(srca, a);
-		lstring b;
+		std::u32string b;
 		string_conv(srcb, b);
 
-		lstring spcs = { ' ' };
+		std::u32string spcs = { ' ' };
 		lstrings aa = split_text(a, spcs);
 		lstrings bb = split_text(b, spcs);
 
@@ -1082,9 +1074,9 @@ namespace utils {
 	*/
 	//-----------------------------------------------------------------//
 	inline float compare(const std::string& srca, const std::string& srcb) {
-		lstring a;
+		std::u32string a;
 		utf8_to_utf32(srca, a);
-		lstring b;
+		std::u32string b;
 		utf8_to_utf32(srcb, b);
 		return compare(a, b);
 	}
@@ -1162,7 +1154,7 @@ namespace utils {
 	) {
 		return get_file_nameT(src, bks);
 	}
-	inline wstring get_file_name(const wstring& src, bool bks =
+	inline std::wstring get_file_name(const std::wstring& src, bool bks =
 #ifdef WIN32
 		true
 #else
@@ -1171,7 +1163,7 @@ namespace utils {
 	) {
 		return get_file_nameT(src, bks);
 	}
-	inline lstring get_file_name(const lstring& src, bool bks =
+	inline auto get_file_name(const std::u32string& src, bool bks =
 #ifdef WIN32
 		true
 #else
@@ -1229,11 +1221,11 @@ namespace utils {
 	inline std::string get_file_ext(const std::string& src) {
 		return get_file_extT<std::string>(src);
 	}
-	inline wstring get_file_ext(const wstring& src) {
-		return get_file_extT<wstring>(src);
+	inline std::wstring get_file_ext(const std::wstring& src) {
+		return get_file_extT<std::wstring>(src);
 	}
-	inline lstring get_file_ext(const lstring& src) {
-		return get_file_extT<lstring>(src);
+	inline std::u32string get_file_ext(const std::u32string& src) {
+		return get_file_extT<std::u32string>(src);
 	}
 
 

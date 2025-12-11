@@ -37,7 +37,7 @@ namespace gui {
 			text_param	text_param_;			///< テキスト描画のパラメーター
 			color_param	color_param_select_;	///< 選択時のカラーパラメーター
 
-			utils::lstring	before_text_;	///< 以前のテキスト
+			std::u32string	before_text_;	///< 以前のテキスト
 
 			bool		read_only_;		///< 読み出し専用の場合
 			bool		text_in_;		///< テキスト入力状態
@@ -308,7 +308,7 @@ namespace gui {
 			if(focus_) {
 				if(!param_.read_only_ && param_.text_in_) {
 					bool text_in = param_.text_in_;
-					const utils::lstring& ins = wd_.get_keyboard().input();
+					const auto& ins = wd_.get_keyboard().input();
 					for(uint32_t ch : ins) {
 						if(param_.text_in_limit_ > 0 && param_.text_in_limit_ <= param_.text_in_pos_) {
 							param_.text_in_ = false;
@@ -367,7 +367,7 @@ namespace gui {
 						fonts.set_font_type(param_.text_param_.font_);
 					}
 					fonts.enable_proportional(param_.text_param_.proportional_);
-					utils::lstring ls = param_.text_param_.text_;
+					auto ls = param_.text_param_.text_;
 					if(param_.text_in_pos_ < ls.size()) {
 						ls.erase(param_.text_in_pos_);
 					}

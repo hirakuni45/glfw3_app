@@ -182,7 +182,7 @@ namespace al {
 							// 「RIFFINFO_」の定型文字列ならスキップ
 							if(strncmp(t.c_str(), "RIFFINFO_", 9) == 0) ;
 							else if(!t.empty()) {  // UTF-8 のはずなのに SJIS の場合を想定した変換
-								utils::wstring ws;
+								std::wstring ws;
 								uint16_t wc = 0;
 								uint16_t sjis = 0;
 								for(auto c : utils::utf8_to_utf16(t)) {

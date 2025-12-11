@@ -906,7 +906,7 @@ namespace gl {
 		 */
 		//-----------------------------------------------------------------//
 		int draw(const vtx::ipos& pos, const std::string& text, int limit = 0, int cursor = -1) {
-			utils::lstring ls;
+			std::u32string ls;
 			utils::utf8_to_utf32(text, ls);
 			return draw(pos, ls, limit, cursor);
 		}
@@ -922,9 +922,9 @@ namespace gl {
 			@return	描画幅を返す（複数行の場合、最大値）
 		 */
 		//-----------------------------------------------------------------//
-		int draw(const vtx::ipos& pos, const utils::wstring& text, int limit = 0, int cursor = -1)
+		int draw(const vtx::ipos& pos, const std::wstring& text, int limit = 0, int cursor = -1)
 		{
-			utils::lstring ls;
+			std::u32string ls;
 			utils::utf16_to_utf32(text, ls);
 			return draw(pos, ls, limit, cursor);
 		}
@@ -940,7 +940,7 @@ namespace gl {
 			@return	描画幅を返す（複数行の場合、最大値）
 		 */
 		//-----------------------------------------------------------------//
-		int draw(const vtx::ipos& pos, const utils::lstring& text, int limit = 0, int cursor = -1)
+		int draw(const vtx::ipos& pos, const std::u32string& text, int limit = 0, int cursor = -1)
 		{
 			int x = pos.x;
 			int y = pos.y;
@@ -997,7 +997,7 @@ namespace gl {
 		 */
 		//-----------------------------------------------------------------//
 		int get_width(const std::string& text) {
-			utils::lstring ls;
+			std::u32string ls;
 			utils::utf8_to_utf32(text, ls);
 			return get_width(ls);
 		}
@@ -1010,8 +1010,8 @@ namespace gl {
 			@return	フォントの幅を返す
 		 */
 		//-----------------------------------------------------------------//
-		int get_width(const utils::wstring& text) {
-			utils::lstring ls;
+		int get_width(const std::wstring& text) {
+			std::u32string ls;
 			utils::utf16_to_utf32(text, ls);
 			return get_width(ls);
 		}
@@ -1024,7 +1024,7 @@ namespace gl {
 			@return	フォントの幅を返す
 		 */
 		//-----------------------------------------------------------------//
-		int get_width(const utils::lstring& text)
+		int get_width(const std::u32string& text)
 		{
 			int len = 0;
 			int lenmax = 0;
@@ -1077,7 +1077,7 @@ namespace gl {
 		 */
 		//-----------------------------------------------------------------//
 		vtx::ipos get_size(const std::string& s) {
-			utils::lstring ls;
+			std::u32string ls;
 			utils::utf8_to_utf32(s, ls);
 			return get_size(ls);
 		}
@@ -1090,8 +1090,8 @@ namespace gl {
 			@return	大きさを返す
 		 */
 		//-----------------------------------------------------------------//
-		vtx::ipos get_size(const utils::wstring& s) {
-			utils::lstring ls;
+		vtx::ipos get_size(const std::wstring& s) {
+			std::u32string ls;
 			utils::utf16_to_utf32(s, ls);
 			return get_size(ls);
 		}
@@ -1104,7 +1104,7 @@ namespace gl {
 			@return	大きさを返す
 		 */
 		//-----------------------------------------------------------------//
-		vtx::ipos get_size(const utils::lstring& s)
+		vtx::ipos get_size(const std::u32string& s)
 		{
 			vtx::ipos size(0, 0);
 			vtx::ipos tmp(0, face_->info_.size);
@@ -1135,7 +1135,7 @@ namespace gl {
 		//-----------------------------------------------------------------//
 		vtx::ipos get_size(const utils::wstrings& wss) {
 			vtx::ipos size(0, 0);
-			BOOST_FOREACH(const utils::wstring& ws, wss) {
+			BOOST_FOREACH(const auto& ws, wss) {
 				vtx::ipos s = get_size(ws);
 				size += s;
 			}

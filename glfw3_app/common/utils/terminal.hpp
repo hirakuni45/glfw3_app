@@ -288,7 +288,7 @@ namespace utils {
 			@param[in]	str	文字列
 		*/
 		//-----------------------------------------------------------------//
-		void output(const utils::lstring& str) noexcept
+		void output(const std::u32string& str) noexcept
 		{
 			for(auto lch : str) {
 				output(lch);
@@ -393,9 +393,9 @@ namespace utils {
 			@return ラスト・テキスト
 		*/
 		//-----------------------------------------------------------------//
-		lstring get_last_text32() const noexcept
+		auto get_last_text32() const noexcept
 		{
-			lstring ls;
+			std::u32string ls;
 			for(auto ch : last_) {
 				ls += ch.cha_;
 			}

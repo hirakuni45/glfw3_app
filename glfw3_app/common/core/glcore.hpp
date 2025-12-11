@@ -58,7 +58,7 @@ namespace gl {
 		utils::strings	recv_files_path_;
 		recv_files_func	recv_files_func_;
 
-		utils::lstring	recv_text_;
+		std::u32string	recv_text_;
 
 		std::string		title_;
 
@@ -279,7 +279,7 @@ namespace gl {
 			@return キーボード文字列
 		*/
 		//-----------------------------------------------------------------//
-		const utils::lstring& get_recv_text() const noexcept { return recv_text_; }
+		const auto& get_recv_text() const noexcept { return recv_text_; }
 
 
 		//-----------------------------------------------------------------//
@@ -288,7 +288,7 @@ namespace gl {
 			@return キーボード文字列
 		*/
 		//-----------------------------------------------------------------//
-		utils::lstring& at_recv_text() noexcept { return recv_text_; }
+		auto& at_recv_text() noexcept { return recv_text_; }
 
 
 		//-----------------------------------------------------------------//

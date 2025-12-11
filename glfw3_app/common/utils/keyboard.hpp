@@ -39,7 +39,7 @@ namespace sys {
 		};
 
 	private:
-		utils::lstring	input_;
+		std::u32string	input_;
 
 		uint32_t	repeat_delay_;
 		uint32_t	repeat_delay_cnt_;
@@ -150,6 +150,6 @@ namespace sys {
 			@return 入力されたキーの値
 		*/
 		//-----------------------------------------------------------------//
-		const utils::lstring& input() const { return input_; }
+		const auto& input() const { return input_; }
 	};
 }

@@ -76,7 +76,7 @@ namespace mdf {
 			if(utf8) {
 				if(!fio.get(t, len)) return false;
 			} else {
-				utils::wstring tmp;
+				std::wstring tmp;
 				if(!fio.get(tmp, len / 2)) return false;
 				utils::utf16_to_utf8(tmp, t);
 			}
@@ -88,7 +88,7 @@ namespace mdf {
 				if(!fio.put(static_cast<uint32_t>(t.size()))) return false;
 				if(!fio.put(t)) return false;
 			} else {
-				utils::wstring ws;
+				std::wstring ws;
 				utils::utf8_to_utf16(t, ws);
 				if(!fio.put(static_cast<uint32_t>(ws.size()))) return false;
 				if(!fio.put(ws)) return false;

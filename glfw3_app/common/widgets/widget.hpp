@@ -139,12 +139,12 @@ namespace gui {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct text_param {
-			utils::lstring	text_;			///< テキスト
+			std::u32string	text_;			///< テキスト
 			std::string		font_;			///< フォントセット
 			short			font_size_;		///< フォントサイズ
 			bool			proportional_;	///< プロポーショナル・フォントの場合「true」
 			bool			alias_enable_;	///< テキストの別名を有効にする
-			utils::lstring	alias_;			///< テキストの別名（置き換え用）
+			std::u32string	alias_;			///< テキストの別名（置き換え用）
 
 			img::rgba8		fore_color_;	///< テキスト色
 			img::rgba8		shadow_color_;	///< 影色

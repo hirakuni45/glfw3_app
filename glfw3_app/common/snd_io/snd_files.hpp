@@ -1,5 +1,5 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	各種サウンドファイル統合的に扱う
     @author 平松邦仁 (hira@rvf-rc45.net)
@@ -7,7 +7,7 @@
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <memory>
 #include "i_snd_io.hpp"
 #include "wav_io.hpp"
@@ -201,8 +201,8 @@ namespace al {
 		*/
 		//-----------------------------------------------------------------//
 		bool info(utils::file_io& fin, audio_info& fo,
-				  i_snd_io::info_state st = i_snd_io::info_state::all,
-				  const std::string& ext = 0)
+					i_snd_io::info_state st = i_snd_io::info_state::all,
+					const std::string& ext = "")
 		{
 			size_t n = sndios_.size();
 			if(!ext.empty()) {
@@ -246,7 +246,7 @@ namespace al {
 		*/
 		//-----------------------------------------------------------------//
 		bool info(const std::string& filename, audio_info& fo,
-				  i_snd_io::info_state st = i_snd_io::info_state::all) {
+					i_snd_io::info_state st = i_snd_io::info_state::all) {
 			bool f = false;
 			utils::file_io fin;
 			if(fin.open(filename, "rb")) {

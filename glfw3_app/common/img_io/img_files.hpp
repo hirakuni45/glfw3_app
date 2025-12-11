@@ -181,7 +181,7 @@ namespace img {
 			@return 画像ファイルとして認識出来ない場合は「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool probe(const utils::wstring& filename) {
+		bool probe(const std::wstring& filename) {
 			std::string s;
 			utils::utf16_to_utf8(filename, s);
 			bool f = false;
@@ -256,7 +256,7 @@ namespace img {
 			@return 画像ファイルとして認識出来ない場合は「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool info(const utils::wstring& filename, img::img_info& fo) {
+		bool info(const std::wstring& filename, img::img_info& fo) {
 			std::string s;
 			utils::utf16_to_utf8(filename, s);
 			bool f = false;
@@ -336,7 +336,7 @@ namespace img {
 			@return 成功なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const utils::wstring& filename, const std::string& opt = "") {
+		bool load(const std::wstring& filename, const std::string& opt = "") {
 			std::string s;
 			utils::utf16_to_utf8(filename, s);
 			bool f = false;
@@ -404,7 +404,7 @@ namespace img {
 			@return 成功なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(const utils::wstring& filename, const std::string& opt = "") {
+		bool save(const std::wstring& filename, const std::string& opt = "") {
 			std::string s;
 			utils::utf16_to_utf8(filename, s);
 			return save(s, opt);

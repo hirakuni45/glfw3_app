@@ -546,7 +546,7 @@ namespace gui {
 			acc_key_ = 0;
 			if(param_.new_file_ && wd_.get_focus_widget() == (*cit).base) ;
 			else if(wd_.get_focus_widget() == this || wd_.get_focus_widget() == wd_.root_widget(this)) {
-				const utils::lstring& ins = wd_.get_keyboard().input();
+				const std::u32string& ins = wd_.get_keyboard().input();
 				if(!ins.empty()) {
 					auto ch = ins.back();
 					if(ch >= 'a' && ch <= 'z') ch -= 0x20;

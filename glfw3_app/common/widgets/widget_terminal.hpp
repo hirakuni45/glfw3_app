@@ -25,7 +25,7 @@ namespace gui {
 		typedef widget_terminal value_type;
 
 		typedef std::function< void(uint32_t ch) > input_func_type;
-		typedef std::function< void(const utils::lstring& line) > enter_func_type;
+		typedef std::function< void(const std::u32string& line) > enter_func_type;
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!

@@ -877,7 +877,7 @@ namespace mtx {
 		//-----------------------------------------------------------------//
 		matrix4<T> operator * (const matrix4<T>& srcm) const {
 			matrix4<T> t;
-			matmul4(t(), m_, srcm.m);
+			matmul4(t(), m_, srcm.m_);
 			return t;
 		}
 

@@ -224,9 +224,9 @@ namespace gl {
 			@param[in]	st	UTF-32 文字コード郡
 		*/
 		//-----------------------------------------------------------------//
-		void puts(const utils::lstring& st) {
+		void puts(const std::u32string& st) {
 			uint32_t ch;
-			const uint32_t* p = st.c_str();
+			const auto* p = st.c_str();
 			while((ch = *p++) != 0) {
 				put(ch);
 			}

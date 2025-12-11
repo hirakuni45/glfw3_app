@@ -159,7 +159,7 @@ namespace utils {
 		if(root.empty()) return false;
 
 #ifdef WIN32
-		utils::wstring wsr;
+		std::wstring wsr;
 		utf8_to_utf16(root, wsr);
 		if(!wsr.empty()) {
 			// driver latter convert
@@ -183,7 +183,7 @@ namespace utils {
 			struct _wdirent* ent;
 			while((ent = _wreaddir(dir)) != 0) {
 				struct _stat st;
-				utils::wstring fn;
+				std::wstring fn;
 				utf8_to_utf16(root, fn);
 				fn += '/';
 				{
@@ -200,7 +200,7 @@ namespace utils {
 				wfn[fn.size()] = 0;
 				if(ent->d_namlen > 0 && _wstat(wfn, &st) == 0) {
 					bool d = S_ISDIR(st.st_mode);
-					wstring ws;
+					std::wstring ws;
 					wchar_t wch;
 					wchar_t* p = ent->d_name;
 					while((wch = *p++) != 0) {

@@ -328,7 +328,7 @@ namespace img {
 			if(size_.x <= 0 || size_.y <= 0) return;
 
 			idx8* dst = &img_[0];
-			memset(dst, c.i, size_.x * size_.y);
+			memset((void*)dst, c.i, size_.x * size_.y);
 		}
 
 

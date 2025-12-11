@@ -758,7 +758,7 @@ namespace img {
 		*/
 		//-----------------------------------------------------------------//
 		int get_text_width(const std::string& txt) {
-			utils::lstring ls;
+			std::u32string ls;
 			utils::utf8_to_utf32(txt, ls);
 			int w = 0;
 			BOOST_FOREACH(uint32_t lc, ls) {
@@ -810,7 +810,7 @@ namespace img {
 		*/
 		//-----------------------------------------------------------------//
 		int draw_text(const vtx::spos& pos, const std::string& txt) {
-			utils::lstring ls;
+			std::u32string ls;
 			utils::utf8_to_utf32(txt, ls);
 			int w = 0;
 			vtx::spos p = pos;
