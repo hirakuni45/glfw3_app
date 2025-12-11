@@ -138,7 +138,7 @@ namespace app {
 				{
 					widget::param wp(vtx::irect(0), terminal_frame_);
 					widget_terminal::param wp_;
-					wp_.enter_func_ = [=](const utils::lstring& text) {
+					wp_.enter_func_ = [=](const std::u32string& text) {
 						// term_enter_(text);
 					};
 					terminal_core_ = wd.add_widget<widget_terminal>(wp, wp_);

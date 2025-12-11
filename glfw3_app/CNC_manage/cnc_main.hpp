@@ -78,7 +78,7 @@ namespace app {
 		uint32_t				count_;
 
 		// ターミナル、行入力
-		void term_enter_(const utils::lstring& text) noexcept
+		void term_enter_(const std::u32string& text) noexcept
 		{
 			auto s = utils::utf32_to_utf8(text);
 		}
@@ -258,7 +258,7 @@ namespace app {
 				{
 					widget::param wp(vtx::irect(0), terminal_frame_);
 					widget_terminal::param wp_;
-					wp_.enter_func_ = [=](const utils::lstring& text) {
+					wp_.enter_func_ = [=](const std::u32string& text) {
 						term_enter_(text);
 					};
 					terminal_core_ = wd.add_widget<widget_terminal>(wp, wp_);

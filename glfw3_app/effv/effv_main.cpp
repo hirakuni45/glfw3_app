@@ -155,11 +155,11 @@ namespace app {
 ///			std::cout << filer_->get_file() << std::endl;
 
 			// エフェクトの読込
-			utils::wstring path;
+			std::wstring path;
 //			utils::utf8_to_utf16("/Users/hira/glfw3_app/glfw3_app/effv/test.efk", path);
 //			utils::utf8_to_utf16("/Users/hira/glfw3_app/glfw3_app/effv/dmg_inferno_ek.efk", path);
 			utils::utf8_to_utf16(filer_->get_file(), path);
-			effect_ = Effekseer::Effect::Create(manager_, path.c_str());
+			effect_ = Effekseer::Effect::Create(manager_, (const uint16_t*)path.c_str());
 			if(effect_ == nullptr) {
 				std::cout << "Can't open effekseer file..." << std::endl;
 			} else {

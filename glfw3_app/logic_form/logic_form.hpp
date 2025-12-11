@@ -363,7 +363,7 @@ namespace app {
 		}
 
 		// ターミナル、行入力
-		void term_enter_(const utils::lstring& text) {
+		void term_enter_(const std::u32string& text) {
 			auto s = utils::utf32_to_utf8(text);
 			project_.logic_edit_.command(s);
 ///			std::cout << s << std::endl;
@@ -493,7 +493,7 @@ namespace app {
 				{
 					widget::param wp(vtx::irect(0), terminal_frame_);
 					widget_terminal::param wp_;
-					wp_.enter_func_ = [this](const utils::lstring& text) {
+					wp_.enter_func_ = [this](const std::u32string& text) {
 						term_enter_(text);
 					};
 					terminal_core_ = wd.add_widget<widget_terminal>(wp, wp_);
