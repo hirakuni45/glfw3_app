@@ -408,7 +408,8 @@ namespace gui {
 				ofs.y = npy;
 				vtx::ipos pos;
 				for(pos.y = 0; pos.y < limit.y; ++pos.y) {
-					for(pos.x = 0; pos.x < limit.x; ++pos.x) {
+					pos.x = 0;
+					while(pos.x < limit.x) {
 						const auto& t = terminal_.get_char(pos + ofs);
 						img::rgba8 fc = t.fc_;
 						fc *= cf.r;
@@ -444,6 +445,11 @@ namespace gui {
 						if(cha > 0x7f) {
 							fonts.push_font_face();
 							fonts.set_font_type(param_.font_);
+						}
+						if(terminal_.test_wide(cha)) {
+							pos.x += 2;
+						} else {
+							++pos.x;
 						}
 					}
 					chs.y += param_.height_;

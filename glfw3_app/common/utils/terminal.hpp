@@ -1,9 +1,11 @@
 #pragma once
 //=========================================================================//
 /*!	@file
-	@brief	ターミナル・クラス（ヘッダー）
+	@brief	ターミナル・クラス @n
+			VT100 を模倣したクラス、エスケープシーケンスなど @n
+			※現状では、完全な互換性を実装していないので注意
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2024 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2025 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -12,6 +14,7 @@
 #include <vector>
 #include <deque>
 #include <functional>
+#include <algorithm>
 #include "img_io/img.hpp"
 #include "utils/vtx.hpp"
 #include "utils/string_utils.hpp"
@@ -21,21 +24,46 @@ namespace utils {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
-		@brief	ターミナル・クラス
+		@brief	ターミナル・クラス (VT100 エスケープシーケンスの一部)
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct terminal {
 
+		static constexpr int default_lines_ = 150;		///< 標準、最大行数
+		static constexpr int default_width_ = 80;		///< 標準、最大横幅
+
+		static constexpr img::rgba8 color8_nom_[8] = {
+			{   4,   4,   4 },  // Black
+			{ 240,   4,   4 },  // Red
+			{   4, 240,   4 },  // Green
+			{ 240, 240,   4 },	// Yellow
+			{   4,   4, 240 },	// Blue
+			{ 240,   4, 240 },	// Magenta
+			{   4, 240, 240 },	// Cyan
+			{ 240, 240, 240 }	// White
+		};
+		static constexpr img::rgba8 color8_str_[8] = {
+			{   0,   0,   0 },  // Black
+			{ 255,   0,   0 },  // Red
+			{   0, 255,   0 },  // Green
+			{ 255, 255,   0 },	// Yellow
+			{   0,   0, 255 },	// Blue
+			{ 255,   0, 255 },	// Magenta
+			{   0, 255, 255 },	// Cyan
+			{ 255, 255, 255 }	// White
+		};
+		static constexpr uint32_t esc_number_max_ = 16;
+
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
-			@brief	文字トランク
+			@brief	文字コンテナ
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct cha_t {
-			uint32_t	cha_;
-			img::rgba8	fc_;
-			img::rgba8	bc_;
-			bool		select_;
+			uint32_t	cha_;		///< キャラクターコード (UTF-32)
+			img::rgba8	fc_;		///< 文字カラー
+			img::rgba8	bc_;		///< 背景カラー
+			bool		select_;	///< 文字選択
 
 			cha_t(uint32_t cha = 0,
 				  const img::rgba8& fc = img::rgba8(255, 255, 255, 255),
@@ -50,10 +78,13 @@ namespace utils {
 		typedef std::function< void (uint32_t ch) > output_func;
 
 	private:
+		img::rgba8	fore_color_;
+		img::rgba8	back_color_;
+
 		cha_t		cha_;
 
 		lines		lines_;
-		uint32_t	max_;
+		vtx::ipos	limit_;
 
 		vtx::ipos	pos_;
 
@@ -61,13 +92,25 @@ namespace utils {
 
 		bool		auto_crlf_;
 		bool		insert_;
+		bool		swap_color_;
 
 		line		last_;
 
 		output_func	output_func_;
 
-		void nl_() {
-			if(lines_.size() >= max_) {
+		enum class ESC_MODE {
+			NONE,
+			FIRST,
+			DECIMAL,
+		};
+		ESC_MODE	esc_mode_;
+		uint32_t	esc_number_cnt_;
+		uint32_t	esc_number_idx_;
+		uint32_t	esc_number_[esc_number_max_];
+
+		void new_line_() noexcept
+		{
+			if(lines_.size() >= limit_.y) {
 				lines_.pop_front();
 			} else {
 				++pos_.y;
@@ -77,18 +120,299 @@ namespace utils {
 			lines_.push_back(l);
 		}
 
-		void bl_() {  // back line
+		int count_cha_(const line& l) const noexcept
+		{
+			if(l.empty()) return 0;
+
+			int n = 0;
+			for(const auto& ch : l) {
+				if(test_wide(ch.cha_)) n += 2;
+				else n++;
+			}
+			return n;
+		}
+
+		int count_index_(const line& l, int x) const noexcept
+		{
+			if(l.empty()) return 0;
+
+			int idx = 0;
+			int n = 0;
+			while(n < x) {
+				if(test_wide(l[idx].cha_)) { n += 2; }
+				else { ++n; }
+				++idx;
+			}
+			return idx;
+		}
+
+		void putchar_() noexcept
+		{
+			int step = 1;
+			if(test_wide(cha_.cha_)) {
+				step = 2;
+				if((pos_.x + step) >= limit_.x) {
+					new_line_();
+					pos_.x = 0;
+				}
+			}
+
+			line& l = lines_[pos_.y];
+			auto idx = count_index_(l, pos_.x);
+			if(idx < l.size()) {
+				if(insert_) {
+					l.insert(l.begin() + idx, cha_);
+				} else {
+					l[idx] = cha_;
+					pos_.x += step;
+				}
+			} else {
+				l.push_back(cha_);
+				pos_.x += step;
+			}
+
+			if(count_cha_(l) >= limit_.x) {
+				new_line_();
+				pos_.x = 0;
+			}
+		}
+
+		const auto& get_char_(const vtx::ipos& pos) const noexcept
+		{
+			if(pos.y < 0 || pos.y >= lines_.size()) return tmp_;
+
+			const auto& l = lines_[pos.y];
+			if(l.empty()) {
+				return tmp_;
+			}
+
+			int n = 0;
+			int x = 0;
+			while(x < pos.x) {
+				if(test_wide(l[n].cha_)) {
+					x += 2;
+				} else {
+					++x;
+				}
+				++n;
+				if(n >= l.size()) {
+					return tmp_;
+				}
+			}
+			return l[n];
+		}		
+
+		void right_() noexcept
+		{
+			if(pos_.x < count_cha_(lines_[pos_.y])) {
+				if(test_wide(get_char_(pos_).cha_)) {
+					pos_.x += 2;
+				} else {
+					++pos_.x;
+				}
+				if(pos_.x >= limit_.x) {
+					pos_.x = 0;
+					down_();
+				}
+			}
+		}
+
+		void left_() noexcept
+		{
+			if(pos_.x > 0) {
+				auto& l = lines_[pos_.y];
+				auto idx = count_index_(l, pos_.x);
+				if(idx > 0) --idx;
+				if(test_wide(l[idx].cha_)) {
+					pos_.x -= 2;
+				} else {
+					pos_.x -= 1;
+				}
+			}
+		}
+
+		void down_() noexcept
+		{
+			if(pos_.y < (lines_.size() - 1)) {
+				++pos_.y;
+				auto& l = lines_[pos_.y];
+				if(l.size() <= pos_.x) {
+					pos_.x = l.size();
+				}
+			}
+		}
+
+		void up_() noexcept
+		{
+			if(pos_.y > 0) {
+				pos_.y--;
+				auto& l = lines_[pos_.y];
+				if(l.size() <= pos_.x) {
+					pos_.x = l.size();
+				}
+			}
+		}
+
+		void esc_m_() noexcept
+		{
+			enum class set_color {
+				none,
+				fore_color_sel,
+				fore_indexed,
+				fore_r,
+				fore_g,
+				fore_b,
+				back_color_sel,
+				back_indexed,
+				back_r,
+				back_g,
+				back_b,
+			};
+			auto color_mode = set_color::none;
+
+			for(uint32_t i = 0; i < esc_number_idx_; ++i) {
+
+				auto n = esc_number_[i];
+
+				bool conti = false;
+				switch(color_mode) {
+				case set_color::fore_color_sel:
+					if(n == 2) color_mode = set_color::fore_r;
+					else if(n == 5) color_mode = set_color::fore_indexed;
+					conti = true;
+					break;
+				case set_color::fore_r:
+					fore_color_.r = std::clamp<uint32_t>(n, 0, 255);
+					color_mode = set_color::fore_g;
+					conti = true;
+					break;
+				case set_color::fore_g:
+					fore_color_.g = std::clamp<uint32_t>(n, 0, 255);
+					color_mode = set_color::fore_b;
+					conti = true;
+					break;
+				case set_color::fore_b:
+					fore_color_.b = std::clamp<uint32_t>(n, 0, 255);
+					color_mode = set_color::none;
+					conti = true;
+					break;
+				case set_color::fore_indexed:
+					// auto idx = std::clamp<uint32_t>(n, 0, 255);
+					color_mode = set_color::none;
+					conti = true;
+					break;
+				case set_color::back_color_sel:
+					if(n == 2) color_mode = set_color::back_r;
+					else if(n == 5) color_mode = set_color::back_indexed;
+					conti = true;
+					break;
+				case set_color::back_r:
+					back_color_.r = std::clamp<uint32_t>(n, 0, 255);
+					color_mode = set_color::back_g;
+					conti = true;
+					break;
+				case set_color::back_g:
+					back_color_.g = std::clamp<uint32_t>(n, 0, 255);
+					color_mode = set_color::back_b;
+					conti = true;
+					break;
+				case set_color::back_b:
+					back_color_.b = std::clamp<uint32_t>(n, 0, 255);
+					color_mode = set_color::none;
+					conti = true;
+					break;
+				case set_color::back_indexed:
+					// auto idx = std::clamp<uint32_t>(n, 0, 255);
+					color_mode = set_color::none;
+					conti = true;
+					break;
+				default:
+					break;
+				}
+				if(conti) {
+					continue;
+				}
+
+				if(n == 0) {
+					fore_color_.set(255, 255, 255);
+					back_color_.set(0, 0, 0);
+					swap_color_ = false;
+				} else if(n == 7) {
+					swap_color_ = !swap_color_;
+				} else if(n == 38) {
+					color_mode = set_color::fore_color_sel;
+				} else if(n == 48) {
+					color_mode = set_color::back_color_sel;
+				} else if(n == 39) {
+					fore_color_.set(255, 255, 255);
+				} else if(n == 49) {
+					back_color_.set(0, 0, 0);
+				} else if(n >= 30 && n <= 37) {
+					n -= 30;
+					fore_color_ = color8_nom_[n];
+				} else if(n >= 40 && n <= 47) {
+					n -= 40;
+					back_color_ = color8_nom_[n];
+				} else if(n >= 90 && n <= 97) {
+					n -= 90;
+					fore_color_ = color8_str_[n];
+				} else if(n >= 100 && n <= 107) {
+					n -= 100;
+					back_color_ = color8_str_[n];
+				}
+			}
+		}
+
+		void esc_A2T_(uint32_t cha) noexcept
+		{
+			if(cha == 'G') {
+
+				return;
+			}
+
+			uint32_t n = esc_number_[0];
+			if(n == 0) n = 1;
+			for(uint32_t i = 0; i < n; ++i) {
+				switch(cha) {
+				case 'A':
+					up_();
+					break;
+				case 'B':
+					down_();
+					break;
+				case 'C':
+					right_();
+					break;
+				case 'D':
+					left_();
+					break;
+				case 'E':
+					down_();
+					pos_.x = 0;
+					break;
+				case 'F':
+					up_();
+					pos_.x = 0;
+					break;
+				}
+			}
 		}
 
 	public:
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	コンストラクター
-			@param[in]	max	最大ライン数
+			@param[in]	hl	最大ライン数
+			@param[in]	wl	最大横幅
 		*/
 		//-----------------------------------------------------------------//
-		terminal(uint32_t max = 150) noexcept : cha_(), lines_(), max_(max), pos_(0), tmp_(' '),
-			auto_crlf_(false), insert_(true), last_(), output_func_(nullptr)
+		terminal(int hl = default_lines_, int wl = default_width_) noexcept :
+			fore_color_(img::rgba8(255, 255, 255, 255)),
+			back_color_(img::rgba8(  0,   0,   0, 255)),
+			cha_(), lines_(), limit_(wl, hl), pos_(0), tmp_(' '),
+			auto_crlf_(false), insert_(true), swap_color_(false),
+			last_(), output_func_(nullptr),
+			esc_mode_(ESC_MODE::NONE), esc_number_cnt_(0), esc_number_idx_(0), esc_number_{ 0 }
 		{
 			line l;
 			lines_.push_back(l);
@@ -101,6 +425,18 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		~terminal() { }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ワイド・キャラクターコードを判定
+			@return ワイド・キャラクターコードなら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool test_wide(uint32_t cha) const noexcept
+		{
+			return cha >= 0x100;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -123,7 +459,7 @@ namespace utils {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	消去
+			@brief	全面消去
 		*/
 		//-----------------------------------------------------------------//
 		void clear() noexcept
@@ -139,6 +475,7 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	ライン・クリア
+			@param[in]	all		ライン全体を消去の場合「true」
 		*/
 		//-----------------------------------------------------------------//
 		void clear_line(bool all = true) noexcept
@@ -192,12 +529,64 @@ namespace utils {
 			if(output_func_ != nullptr) output_func_(cha);
 
 			cha_.cha_ = cha;
+			if(swap_color_) {
+				cha_.bc_ = fore_color_;
+				cha_.fc_ = back_color_;
+			} else {
+				cha_.fc_ = fore_color_;
+				cha_.bc_ = back_color_;
+			}
+
+			switch(esc_mode_) {
+			case ESC_MODE::FIRST:
+				if(cha == '[') {
+					esc_mode_ = ESC_MODE::DECIMAL;
+					esc_number_cnt_ = 0;
+					esc_number_idx_ = 0;
+					esc_number_[esc_number_idx_] = 0;
+				} else {
+					esc_mode_ = ESC_MODE::NONE;
+				}
+				return;
+			case ESC_MODE::DECIMAL:
+				if(cha >= '0' && cha <= '9') {
+					esc_number_[esc_number_idx_] *= 10;
+					esc_number_[esc_number_idx_] += cha - '0';
+					++esc_number_cnt_;
+				} else if(cha == 'm') {
+					if(esc_number_cnt_ > 0) {
+						++esc_number_idx_;
+					} 
+					esc_m_();
+					esc_mode_ = ESC_MODE::NONE;
+				} else if(cha == ';') {
+					if(esc_number_cnt_ > 0) {
+						++esc_number_idx_;
+					}
+					esc_number_cnt_ = 0;
+					if(esc_number_idx_ >= esc_number_max_) esc_number_idx_ = esc_number_max_ - 1; 
+					esc_number_[esc_number_idx_] = 0;
+				} else if(cha >= 'A' && cha <= 'T') {
+					if(esc_number_cnt_ > 0) {
+						++esc_number_idx_;
+					}
+					esc_A2T_(cha);
+					esc_mode_ = ESC_MODE::NONE;
+				} else {
+					esc_mode_ = ESC_MODE::NONE;
+				}
+				return;
+			case ESC_MODE::NONE:
+			default:
+				break;
+			}
+
 			switch(cha) {
 			case '\r':  // CR
 				pos_.x = 0;
 				break;
 			case '\n':  // LF
-				nl_();
+				new_line_();
 				if(auto_crlf_) {
 					pos_.x = 0;
 				}
@@ -211,56 +600,35 @@ namespace utils {
 					}
 				}
 				break;
+			case 0x1b:  // ESC
+				esc_mode_ = ESC_MODE::FIRST;
+				break;
 			case 0x7f:  // DEL
 				{
 					auto& l = lines_[pos_.y];
-					if(pos_.x < l.size()) {
-						l.erase(l.begin() + pos_.x);
+					auto idx = count_index_(l, pos_.x);
+					if(idx < l.size()) {
+						l.erase(l.begin() + idx);
 					}
 				}
 				break;
-			case 0x11:  // Right
-				if(pos_.x < lines_[pos_.y].size()) {
-					++pos_.x;
-				}
+			case 0x11:
+				right_();
 				break;
-			case 0x12:  // Left
-				if(pos_.x > 0) --pos_.x;
+			case 0x12:
+				left_();
 				break;
-			case 0x13:  // Down
-				if(pos_.y < (lines_.size() - 1)) {
-					++pos_.y;
-					auto& l = lines_[pos_.y];
-					if(l.size() <= pos_.x) {
-						pos_.x = l.size();
-					}
-				}
+			case 0x13:
+				down_();
 				break;
-			case 0x14:  // Up
-				if(pos_.y > 0) {
-					pos_.y--;
-					auto& l = lines_[pos_.y];
-					if(l.size() <= pos_.x) {
-						pos_.x = l.size();
-					}
-				}
+			case 0x14:
+				up_();
 				break;
 			default:
 				if(cha < 0x20) {
-//				std::cout << boost::format("%02X") % cha << std::endl << std::flush;
+//					std::cout << boost::format("%02X") % cha << std::endl << std::flush;
 				} else {
-					line& l = lines_[pos_.y];
-					if(pos_.x < l.size()) {
-						if(insert_) {
-							l.insert(l.begin() + pos_.x, cha_);
-						} else {
-							l[pos_.x] = cha_;
-							++pos_.x;
-						}
-					} else {
-						l.push_back(cha_);
-						pos_.x = l.size();
-					}
+					putchar_();
 				}
 				break;
 			}
@@ -295,7 +663,7 @@ namespace utils {
 			}
 		}
 
-
+#if 0
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	フォア・カラーの設定
@@ -330,7 +698,7 @@ namespace utils {
 				}
 			}
 		}
-
+#endif
 
 		//-----------------------------------------------------------------//
 		/*!
@@ -440,12 +808,9 @@ namespace utils {
 			@return キャラクター
 		*/
 		//-----------------------------------------------------------------//
-		const cha_t& get_char(const vtx::ipos& pos) const noexcept
+		const auto& get_char(const vtx::ipos& pos) const noexcept
 		{
-			if(pos.y >= lines_.size()) return tmp_;
-			const auto& l = lines_[pos.y];
-			if(pos.x >= l.size()) return tmp_;
-			return l[pos.x]; 
+			return get_char_(pos);
 		}		
 	};
 }

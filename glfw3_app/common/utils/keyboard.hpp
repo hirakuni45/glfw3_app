@@ -1,13 +1,13 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	キーボード入力を扱うクラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2025 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include "utils/string_utils.hpp"
 #include "core/glcore.hpp"
 
@@ -117,7 +117,9 @@ namespace sys {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	サービス
+			@brief	サービス @n
+					上方（glfw3 フレームワーク）からエコーされるキーボードの状態 @n
+					をスキャンして、キー入力として反映する。
 		*/
 		//-----------------------------------------------------------------//
 		void service()
@@ -134,6 +136,15 @@ namespace sys {
 			}
 
 			const device& dev = core.get_device();
+			{  // CTRL コードは特別なケアが必要、ALT コードは未設定
+				auto left_ctrl = dev.get_level(gl::device::key::LEFT_CONTROL);
+				auto right_ctrl = dev.get_level(gl::device::key::RIGHT_CONTROL);
+				if(left_ctrl || right_ctrl) {
+					for(auto i = static_cast<int>(gl::device::key::A); i <= static_cast<int>(gl::device::key::Z); ++i) {
+						if(dev.get_positive(static_cast<gl::device::key>(i))) input_ += 'A' - 0x40 + i - static_cast<int>(gl::device::key::A);
+					}
+				}
+			}
 			const key_t* tbl = key_type_tbls_;
 			for(int i = 0; i < (sizeof(key_type_tbls_) / sizeof(key_t)); ++i) {
 				const key_t& t = tbl[i];
