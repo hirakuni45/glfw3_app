@@ -1,5 +1,5 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	文字列操作ユーティリティー @n
     @author 平松邦仁 (hira@rvf-rc45.net)
@@ -7,7 +7,7 @@
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <iostream>
 #include <string>
 #include <vector>
@@ -18,22 +18,9 @@
 
 namespace utils {
 
-	typedef std::string									string;
-	typedef std::string::iterator						string_it;
-	typedef std::string::const_iterator					string_cit;
-
-	typedef std::vector<std::string>					strings;
-	typedef std::vector<std::string>::iterator			strings_it;
-	typedef std::vector<std::string>::const_iterator	strings_cit;
-
-	typedef std::vector<std::wstring>					wstrings;
-	typedef std::vector<std::wstring>::iterator			wstrings_it;
-	typedef std::vector<std::wstring>::const_iterator	wstrings_cit;
-
-	typedef std::vector<std::u32string>					lstrings;
-	typedef std::vector<std::u32string>::iterator		lstrings_it;
-	typedef std::vector<std::u32string>::const_iterator	lstrings_cit;
-
+	typedef std::vector<std::string>		strings;
+	typedef std::vector<std::wstring>		wstrings;
+	typedef std::vector<std::u32string>		lstrings;
 
 	//-----------------------------------------------------------------//
 	/*!
@@ -63,7 +50,7 @@ namespace utils {
 		if(idx == T::npos) return nullptr;
 		else return &src[idx];
 	}
-	inline const auto* string_strchr(const string& src, char ch) { return string_strchrT(src, ch); }
+	inline const auto* string_strchr(const std::string& src, char ch) { return string_strchrT(src, ch); }
 	inline const auto* string_strchr(const std::wstring& src, uint16_t ch) { return string_strchrT(src, ch); }
 	inline const auto* string_strchr(const std::u32string& src, uint32_t ch) { return string_strchrT(src, ch); }
 
@@ -145,7 +132,7 @@ namespace utils {
 
 	static bool string_to_hex(const std::string& src, std::vector<uint32_t>& dst, const std::string& spc = " ,:")
 	{
-		string s;
+		std::string s;
 		for(auto ch : src) {
 			if(string_strchr(spc, ch) != nullptr) {
 				uint32_t v;
@@ -185,7 +172,7 @@ namespace utils {
 	static bool string_to_int(const std::string& src, std::vector<int32_t>& dst, const std::string& spc = " ,:")
 	{
 		try {
-			string s;
+			std::string s;
 			for(auto ch : src) {
 				if(string_strchr(spc, ch) != nullptr) {
 					int32_t v = boost::lexical_cast<int32_t>(s);
@@ -220,7 +207,7 @@ namespace utils {
 	static bool string_to_float(const std::string& src, std::vector<float>& dst, const std::string& spc = " ,:")
 	{
 		try {
-			string s;
+			std::string s;
 			for(auto ch : src) {
 				if(string_strchr(spc, ch) != nullptr) {
 					float v = boost::lexical_cast<float>(s);
@@ -465,7 +452,7 @@ namespace utils {
 		@return	UTF-8
 	*/
 	//-----------------------------------------------------------------//
-	inline std::string utf16_to_utf8(const std::wstring& src) noexcept {
+	inline auto utf16_to_utf8(const std::wstring& src) noexcept {
 		std::string dst;
 		utf16_to_utf8(src, dst);
 		return dst;
@@ -558,7 +545,7 @@ namespace utils {
 		@return	UTF-8
 	*/
 	//-----------------------------------------------------------------//
-	inline std::string utf32_to_utf8(const std::u32string& src) noexcept {
+	inline auto utf32_to_utf8(const std::u32string& src) noexcept {
 		std::string dst;
 		utf32_to_utf8(src, dst);
 		return dst;
@@ -609,7 +596,7 @@ namespace utils {
 		@return	UTF-8
 	*/
 	//-----------------------------------------------------------------//
-	inline std::string sjis_to_utf8(const std::string& src) noexcept {
+	inline auto sjis_to_utf8(const std::string& src) noexcept {
 		std::string dst;
 		sjis_to_utf8(src, dst);
 		return dst;
@@ -641,7 +628,7 @@ namespace utils {
 		@return	UTF-16（追記）
 	*/
 	//-----------------------------------------------------------------//
-	inline std::wstring sjis_to_utf16(const std::string& src) noexcept {
+	inline auto sjis_to_utf16(const std::string& src) noexcept {
 		std::wstring dst;
 		sjis_to_utf16(src, dst);
 		return dst;
@@ -682,7 +669,7 @@ namespace utils {
 		@return	Shift-JIS 出力
 	*/
 	//-----------------------------------------------------------------//
-	inline std::string utf8_to_sjis(const std::string& src) noexcept {
+	inline auto utf8_to_sjis(const std::string& src) noexcept {
 		std::string dst;
 		utf8_to_sjis(src, dst);
 		return dst;
@@ -716,7 +703,7 @@ namespace utils {
 		@return 変換が正常なら「true」
 	*/
 	//-----------------------------------------------------------------//
-	inline std::string utf16_to_sjis(const std::wstring& src) noexcept {
+	inline auto utf16_to_sjis(const std::wstring& src) noexcept {
 		std::string dst;
 		utf16_to_sjis(src, dst);
 		return dst;
@@ -730,7 +717,7 @@ namespace utils {
 		@return	文字列リスト
 	*/
 	//-----------------------------------------------------------------//
-	inline strings strings_to_strings(const wstrings& src) noexcept {
+	inline auto strings_to_strings(const wstrings& src) noexcept {
 		strings dst;
 		for(const auto& ws : src) {
 			auto tmp = utf16_to_utf8(ws);
@@ -747,7 +734,7 @@ namespace utils {
 		@return	文字列リスト
 	*/
 	//-----------------------------------------------------------------//
-	inline wstrings strings_to_strings(const strings& src) noexcept {
+	inline auto strings_to_strings(const strings& src) noexcept {
 		wstrings dst;
 		for(const auto& s : src) {
 			auto tmp = utf8_to_utf16(s);
@@ -765,7 +752,7 @@ namespace utils {
 		@return	文字列
 	*/
 	//-----------------------------------------------------------------//
-	inline std::wstring strings_to_string(const wstrings& src, bool crlf) noexcept {
+	inline auto strings_to_string(const wstrings& src, bool crlf) noexcept {
 		std::wstring dst;
 		for(const auto& ws : src) {
 			dst += ws;
@@ -783,7 +770,7 @@ namespace utils {
 		@param[out]	dst		出力文字列
 	*/
 	//-----------------------------------------------------------------//
-	inline std::string strings_to_string(const strings& src, bool crlf) noexcept {
+	inline auto strings_to_string(const strings& src, bool crlf) noexcept {
 		std::string dst;
 		for(const auto& s : src) {
 			dst += s;
@@ -824,7 +811,7 @@ namespace utils {
 		@return 取り除かれた文字列
 	*/
 	//-----------------------------------------------------------------//
-	inline std::string strip_char(const std::string& src, const std::string& list) {
+	inline auto strip_char(const std::string& src, const std::string& list) {
 		std::string ans;
 		strip_char(src, list, ans);
 		return ans;
@@ -881,15 +868,15 @@ namespace utils {
 		return dst;
 	}
 
-	inline strings split_text(const std::string& src, const std::string& list, const std::string& inhc = "",
+	inline auto split_text(const std::string& src, const std::string& list, const std::string& inhc = "",
 		int limit = 0) noexcept {
 		return split_textT<strings>(src, list, inhc, limit);
 	}
-	inline wstrings split_text(const std::wstring& src, const std::wstring& list, const std::wstring& inhc = std::wstring(),
+	inline auto split_text(const std::wstring& src, const std::wstring& list, const std::wstring& inhc = std::wstring(),
 		int limit = 0) noexcept {
 		return split_textT<wstrings>(src, list, inhc, limit);
 	}
-	inline lstrings split_text(const std::u32string& src, const std::u32string& list, const std::u32string& inhc = std::u32string(),
+	inline auto split_text(const std::u32string& src, const std::u32string& list, const std::u32string& inhc = std::u32string(),
 		int limit = 0) noexcept {
 		return split_textT<lstrings>(src, list, inhc, limit);
 	}
@@ -906,7 +893,8 @@ namespace utils {
 	*/
 	//-----------------------------------------------------------------//
 	template <class ST, class DT>
-	int code_conv(const ST& src, typename ST::value_type a, typename ST::value_type b, DT& dst) {
+	int code_conv(const ST& src, typename ST::value_type a, typename ST::value_type b, DT& dst) noexcept
+	{
 		int n = 0;
 		for(auto ch : src) {
 			if(ch == a) { ch = b; n++; }
@@ -925,10 +913,11 @@ namespace utils {
 		@return 変換後の文字列
 	*/
 	//-----------------------------------------------------------------//
-	inline std::string code_conv(const std::string& src, char a, char b) {
+	inline auto code_conv(const std::string& src, char a, char b) noexcept
+	{
 		std::string dst;
 		code_conv(src, a, b, dst);
-	    return dst;
+		return dst;
 	}
 
 
@@ -941,11 +930,12 @@ namespace utils {
 		@return 変換後の文字列
 	*/
 	//-----------------------------------------------------------------//
-	inline std::string code_conv(const std::string& src, const std::string& a, const std::string& b) {
+	inline auto code_conv(const std::string& src, const std::string& a, const std::string& b) noexcept
+	{
 		if(a.empty() || b.empty()) return src;
-		if(src.empty() || src.size() < a.size()) return "";
-  
- 		std::string ans;
+		if(src.empty() || src.size() < a.size()) return std::string("");
+
+		std::string ans;
 		std::string::size_type pos = 0;
 		do {
 			auto n = src.find(a, pos);
@@ -971,7 +961,8 @@ namespace utils {
 	*/
 	//-----------------------------------------------------------------//
 	template <class STR>
-	int code_convs(const STR& src, const STR& tbl, STR& dst) {
+	int code_convs(const STR& src, const STR& tbl, STR& dst) noexcept
+	{
 		int n = 0;
 		uint32_t tsz = tbl.size();
 		if(tsz & 1) --tsz;
@@ -996,7 +987,7 @@ namespace utils {
 		@return 変換された文字数
 	*/
 	//-----------------------------------------------------------------//
-	static int string_conv(const std::u32string& src, std::u32string& dst)
+	static int string_conv(const std::u32string& src, std::u32string& dst) noexcept
 	{
 		if(src.empty()) return 0;
 
@@ -1027,7 +1018,7 @@ namespace utils {
 		@return 正確に一致したら 1.0 を返す
 	*/
 	//-----------------------------------------------------------------//
-	static float compare(const std::u32string& srca, const std::u32string& srcb)
+	static float compare(const std::u32string& srca, const std::u32string& srcb) noexcept
 	{
 		if(srca.empty() || srcb.empty()) return 0.0f;
 
@@ -1073,7 +1064,8 @@ namespace utils {
 		@return 正確に一致したら 1.0 を返す
 	*/
 	//-----------------------------------------------------------------//
-	inline float compare(const std::string& srca, const std::string& srcb) {
+	inline float compare(const std::string& srca, const std::string& srcb) noexcept
+	{
 		std::u32string a;
 		utf8_to_utf32(srca, a);
 		std::u32string b;
@@ -1089,7 +1081,7 @@ namespace utils {
 		@return フル・パスなら「true」
 	*/
 	//-----------------------------------------------------------------//
-	static bool probe_full_path(const std::string& path)
+	static bool probe_full_path(const std::string& path) noexcept
 	{
 		if(path.empty()) return false;
 
@@ -1123,7 +1115,8 @@ namespace utils {
 	*/
 	//-----------------------------------------------------------------//
 	template <class T>
-	inline T get_file_nameT(const T& src, bool bks) {
+	inline T get_file_nameT(const T& src, bool bks) noexcept
+	{
 		if(src.empty()) return T();
 		const typename T::value_type* p = string_strrchr(src, '/');
 		if(p != nullptr) {
@@ -1182,7 +1175,7 @@ namespace utils {
 		@return ベース名
 	*/
 	//-----------------------------------------------------------------//
-	inline std::string get_file_base(const std::string& src, bool bks =
+	inline auto get_file_base(const std::string& src, bool bks =
 #ifdef WIN32
 		true
 #else
@@ -1202,7 +1195,8 @@ namespace utils {
 	*/
 	//-----------------------------------------------------------------//
 	template <class T>
-	inline T get_file_extT(const T& src) {
+	inline T get_file_extT(const T& src) noexcept
+	{
 		T s;
 		if(src.empty()) return s;
 		auto p = string_strrchr(src, '.');
@@ -1218,13 +1212,13 @@ namespace utils {
 		return s;
 	}
 
-	inline std::string get_file_ext(const std::string& src) {
+	inline std::string get_file_ext(const std::string& src) noexcept {
 		return get_file_extT<std::string>(src);
 	}
-	inline std::wstring get_file_ext(const std::wstring& src) {
+	inline std::wstring get_file_ext(const std::wstring& src) noexcept {
 		return get_file_extT<std::wstring>(src);
 	}
-	inline std::u32string get_file_ext(const std::u32string& src) {
+	inline std::u32string get_file_ext(const std::u32string& src) noexcept {
 		return get_file_extT<std::u32string>(src);
 	}
 
@@ -1236,7 +1230,8 @@ namespace utils {
 		@return	ファイルパス
 	*/
 	//-----------------------------------------------------------------//
-	inline std::string get_file_path(const std::string& src) {
+	inline auto get_file_path(const std::string& src) noexcept
+	{
 		return src.substr(0, src.find_last_of('/'));
 	}
 
@@ -1248,7 +1243,8 @@ namespace utils {
 		@return	出力パス
 	*/
 	//-----------------------------------------------------------------//
-	inline std::string strip_last_of_delimita_path(const std::string& src) {
+	inline auto strip_last_of_delimita_path(const std::string& src) noexcept
+	{
 		std::string dst;
 		if(!src.empty() && src[src.size() - 1] == '/') {
 			dst = src.substr(0, src.size() - 1);
@@ -1266,7 +1262,7 @@ namespace utils {
 		@return 戻ったパス
 	*/
 	//-----------------------------------------------------------------//
-	static std::string previous_path(const std::string& src)
+	static auto previous_path(const std::string& src) noexcept
 	{
 		std::string dst;
 		if(src.empty()) {
@@ -1294,7 +1290,7 @@ namespace utils {
 		@return 合成パス（エラーならempty）
 	*/
 	//-----------------------------------------------------------------//
-	static std::string append_path(const std::string& src, const std::string& add)
+	static auto append_path(const std::string& src, const std::string& add) noexcept
 	{
 		if(src.empty() || add.empty()) return std::string();
 		std::string dst;
@@ -1321,7 +1317,7 @@ namespace utils {
 		@return 出力パス
 	*/
 	//-----------------------------------------------------------------//
-	static std::string convert_delimiter(const std::string& src, char org_ch, char cnv_ch)
+	static auto convert_delimiter(const std::string& src, char org_ch, char cnv_ch) noexcept
 	{
 		char back = 0;
 		std::string dst;
@@ -1347,7 +1343,7 @@ namespace utils {
 		@return リスト
 	*/
 	//-----------------------------------------------------------------//
-	static strings ext_filter_path(const strings& src, const std::string& ext, bool cap = true) noexcept
+	static auto ext_filter_path(const strings& src, const std::string& ext, bool cap = true) noexcept
 	{
 		strings dst;
 		strings exts = split_text(ext, ",");
@@ -1395,7 +1391,7 @@ namespace utils {
 		@return 生成文字列
 	*/
 	//-----------------------------------------------------------------//
-	inline std::string add_string(const std::string& ref, uint32_t cnt) {
+	inline auto add_string(const std::string& ref, uint32_t cnt) {
 		std::string str;
 		for(uint32_t i = 0; i < cnt; ++i) {
 			str += ref;

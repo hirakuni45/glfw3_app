@@ -224,7 +224,7 @@ namespace utils {
 					unit_map_.erase(it);
 					push_current_path();
 					current_path_ = fpath;
-					for(strings_cit cit = t.keys.begin(); cit != t.keys.end(); ++cit) {
+					for(const auto cit = t.keys.begin(); cit != t.keys.end(); ++cit) {
 						const std::string& key = *cit;
 						std::string fpath;
 						if(!create_full_path(key, fpath)) {

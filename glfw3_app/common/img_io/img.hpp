@@ -168,8 +168,8 @@ namespace img {
 		u8	r,g,b,a;
 
 		rgba8() { }
-		rgba8(u8 v, u8 a_ = 255) : r(v), g(v), b(v), a(a_) { }
-		rgba8(u8 cr, u8 cg, u8 cb, u8 ca = 255) : r(cr), g(cg), b(cb), a(ca) { }
+		constexpr rgba8(u8 v, u8 a_ = 255) : r(v), g(v), b(v), a(a_) { }
+		constexpr rgba8(u8 cr, u8 cg, u8 cb, u8 ca = 255) : r(cr), g(cg), b(cb), a(ca) { }
 		void set(u8 cr, u8 cg, u8 cb, u8 ca = 255) { r = cr; g = cg; b = cb; a = ca; }
 		void mod(u8 m) {
 			u16 mm = static_cast<u16>(m) + 1;

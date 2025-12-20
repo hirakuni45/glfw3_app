@@ -507,7 +507,17 @@ namespace app {
 					widget::param wp(vtx::irect(0), terminal_frame_);
 					widget_terminal::param wp_;
 					terminal_core_ = wd.add_widget<widget_terminal>(wp, wp_);
+					terminal_core_->output(0x1b);
+					terminal_core_->output('[');
+					terminal_core_->output("34m");
 					terminal_core_->output("漢字");
+					terminal_core_->output(0x1b);
+					terminal_core_->output('[');
+					terminal_core_->output("45m");
+					terminal_core_->output("の表示");
+					terminal_core_->output(0x1b);
+					terminal_core_->output('[');
+					terminal_core_->output("0m");
 				}
 			}
 
