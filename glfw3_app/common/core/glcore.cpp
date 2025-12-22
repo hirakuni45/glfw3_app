@@ -82,12 +82,15 @@ namespace gl {
 
 	static void key_callback_(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
-		bool kv;
-		if(action == GLFW_PRESS) kv = true;
-		else if(action == GLFW_RELEASE) kv = false;
-		else {
-			// とりあえず REPEAT は無視する。
-			return;
+		bool kv = false;
+		if(action == GLFW_PRESS) {
+			kv = true;
+			core::bits_.reset(device::key::STATE_REPEAT);
+		} else if(action == GLFW_RELEASE) {
+			kv = false;
+			core::bits_.reset(device::key::STATE_REPEAT);
+		} else if(action == GLFW_REPEAT) {
+			core::bits_.set(device::key::STATE_REPEAT);
 		}
 
 		auto ofs = device::key::count_;
@@ -132,15 +135,42 @@ namespace gl {
 		case GLFW_KEY_KP_ADD:        ofs = device::key::KP_ADD;        break;
 		case GLFW_KEY_KP_ENTER:      ofs = device::key::KP_ENTER;      break;
 		case GLFW_KEY_KP_EQUAL:      ofs = device::key::KP_EQUAL;      break;
-		case GLFW_KEY_LEFT_SHIFT:    ofs = device::key::LEFT_SHIFT;    break;
-		case GLFW_KEY_LEFT_CONTROL:  ofs = device::key::LEFT_CONTROL;  break;
-		case GLFW_KEY_LEFT_ALT:      ofs = device::key::LEFT_ALT;      break;
-		case GLFW_KEY_LEFT_SUPER:    ofs = device::key::LEFT_SUPER;    break;
-		case GLFW_KEY_RIGHT_SHIFT:   ofs = device::key::RIGHT_SHIFT;   break;
-		case GLFW_KEY_RIGHT_CONTROL: ofs = device::key::RIGHT_CONTROL; break;
-		case GLFW_KEY_RIGHT_ALT:     ofs = device::key::RIGHT_ALT;     break;
-		case GLFW_KEY_RIGHT_SUPER:   ofs = device::key::RIGHT_SUPER;   break;
-		case GLFW_KEY_MENU:          ofs = device::key::MENU;          break;
+		case GLFW_KEY_LEFT_SHIFT:
+			ofs = device::key::LEFT_SHIFT;
+			core::bits_.reset(device::key::STATE_REPEAT);
+			break;
+		case GLFW_KEY_LEFT_CONTROL:
+			ofs = device::key::LEFT_CONTROL;
+			core::bits_.reset(device::key::STATE_REPEAT);
+			break;
+		case GLFW_KEY_LEFT_ALT:
+			ofs = device::key::LEFT_ALT;
+			core::bits_.reset(device::key::STATE_REPEAT);
+			break;
+		case GLFW_KEY_LEFT_SUPER:
+			ofs = device::key::LEFT_SUPER;
+			core::bits_.reset(device::key::STATE_REPEAT);
+			break;
+		case GLFW_KEY_RIGHT_SHIFT:
+			ofs = device::key::RIGHT_SHIFT;
+			core::bits_.reset(device::key::STATE_REPEAT);
+			break;
+		case GLFW_KEY_RIGHT_CONTROL:
+			ofs = device::key::RIGHT_CONTROL;
+			core::bits_.reset(device::key::STATE_REPEAT);
+			break;
+		case GLFW_KEY_RIGHT_ALT:
+			ofs = device::key::RIGHT_ALT;
+			core::bits_.reset(device::key::STATE_REPEAT);
+			break;
+		case GLFW_KEY_RIGHT_SUPER:
+			ofs = device::key::RIGHT_SUPER;
+			core::bits_.reset(device::key::STATE_REPEAT);
+			break;
+		case GLFW_KEY_MENU:
+			ofs = device::key::MENU;
+			core::bits_.reset(device::key::STATE_REPEAT);
+			break;
 		default:
 			if(GLFW_KEY_A <= key && key <= GLFW_KEY_Z) {
 				auto d = key - GLFW_KEY_A;
@@ -151,6 +181,7 @@ namespace gl {
 			} else if(GLFW_KEY_F1 <= key && key <= GLFW_KEY_F25) {
 				auto d = key - GLFW_KEY_F1;
 				ofs = static_cast<device::key>(d + static_cast<int>(device::key::F1));
+				core::bits_.reset(device::key::STATE_REPEAT);
 			} else if(GLFW_KEY_KP_0 <= key && key <= GLFW_KEY_KP_9) {
 				auto d = key - GLFW_KEY_KP_0;
 				ofs = static_cast<device::key>(d + static_cast<int>(device::key::KP_0));
@@ -161,10 +192,6 @@ namespace gl {
 			core::bits_.set(ofs, kv);
 		}
 
-//		if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-//			glfwSetWindowShouldClose(window, GL_TRUE);
-//		}
-
 		if(mods & GLFW_MOD_SHIFT) core::bits_.set(device::key::SHIFT);
 		else core::bits_.reset(device::key::SHIFT);
 		if(mods & GLFW_MOD_CONTROL) core::bits_.set(device::key::CONTROL);
@@ -173,12 +200,16 @@ namespace gl {
 		else core::bits_.reset(device::key::ALT);
 		if(mods & GLFW_MOD_SUPER) core::bits_.set(device::key::SUPER);
 		else core::bits_.reset(device::key::SUPER);
+		if(mods & GLFW_MOD_CAPS_LOCK) core::bits_.set(device::key::STATE_CAPS_LOCK);
+		else core::bits_.reset(device::key::STATE_CAPS_LOCK);
+		if(mods & GLFW_MOD_NUM_LOCK) core::bits_.set(device::key::STATE_NUM_LOCK);
+		else core::bits_.reset(device::key::STATE_NUM_LOCK);
 	}
 
 
 	static void mouse_button_callback_(GLFWwindow* window, int button, int action, int mods)
 	{
-		bool v;
+		bool v = false;
 		if(action == GLFW_PRESS) v = true;
 		else if(action == GLFW_RELEASE) v = false;
 
@@ -248,10 +279,10 @@ namespace gl {
 	}
 
 
-	static void char_callback_(GLFWwindow* window, unsigned int code)
-	{
-		core::get_instance().at_recv_text() += code;
-	}
+//	static void char_callback_(GLFWwindow* window, unsigned int code)
+//	{
+//		core::get_instance().at_recv_text() += code;
+//	}
 
 
 	//-----------------------------------------------------------------//
@@ -374,7 +405,11 @@ namespace gl {
 			}
 		}
 
+		glfwSetInputMode(window_, GLFW_LOCK_KEY_MODS, GLFW_TRUE);  // key_callback で、CAPS_LOCK, NUM_LOCK の状態を取得する。
 		glfwSetKeyCallback(window_, key_callback_);
+
+//		glfwSetCharCallback(window_, char_callback_);  // 文字を取得するコールバック設定（UTF-32でコードが返る）
+
 		glfwSetMouseButtonCallback(window_, mouse_button_callback_);
 		glfwSetCursorPosCallback(window_, cursor_callback_);
 		glfwSetCursorEnterCallback(window_, cursor_enter_callback_);
@@ -429,15 +464,15 @@ namespace gl {
 #ifdef WIN32
 			int n = GetKeyboardType(0);
 			if(n == 7) keyboard_jp_ = true;
-			if(GetKeyState(VK_CAPITAL)) {
-				bits_.set(device::key::CAPS_LOCK);
-			}
-			if(GetKeyState(VK_SCROLL)) {
-				bits_.set(device::key::SCROLL_LOCK);
-			}
-			if(GetKeyState(VK_NUMLOCK)) {
-				bits_.set(device::key::NUM_LOCK);
-			}
+//			if(GetKeyState(VK_CAPITAL)) {
+//				bits_.set(device::key::CAPS_LOCK);
+//			}
+//			if(GetKeyState(VK_SCROLL)) {
+//				bits_.set(device::key::SCROLL_LOCK);
+//			}
+//			if(GetKeyState(VK_NUMLOCK)) {
+//				bits_.set(device::key::NUM_LOCK);
+//			}
 #endif
 		}
 
@@ -445,9 +480,6 @@ namespace gl {
 		start_sync_();
 		scale_ = static_cast<float>(get_size().x) / static_cast<float>(get_rect().size.x);
 #endif
-
-		// 文字を取得するコールバック設定（UTF-32でコードが返る）
-		glfwSetCharCallback(window_, char_callback_);
 
 		return true;
 	}
@@ -604,6 +636,7 @@ namespace gl {
 	void core::destroy() noexcept
 	{
 		if(window_) {
+			glfwSetInputMode(window_, GLFW_LOCK_KEY_MODS, GLFW_FALSE);  // CAPS_LOCK の状態を戻す。
 			glfwDestroyWindow(window_);
 			window_ = 0;
 

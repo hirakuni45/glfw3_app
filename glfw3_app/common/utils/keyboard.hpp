@@ -13,12 +13,28 @@
 
 namespace sys {
 
+	struct keyboard_def {
+		struct key_t {
+			gl::device::key	key_type;
+			char	normal_code;
+			char	shift_code;
+			char	ctrl_code;
+
+			constexpr key_t(gl::device::key k = gl::device::key::NONE, char n = 0, char s = 0, char c = 0) noexcept :
+				key_type(k),
+				normal_code(n),
+				shift_code(s),
+				ctrl_code(c)
+			{ }
+		};
+	};
+
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
 		@brief	キーボード・クラス
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	struct keyboard {
+	struct keyboard : public keyboard_def {
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
@@ -40,32 +56,67 @@ namespace sys {
 
 	private:
 		std::u32string	input_;
+		bool			repeat_enable_;
+		uint32_t		last_char_;
 
-		uint32_t	repeat_delay_;
-		uint32_t	repeat_delay_cnt_;
-		uint32_t	repeat_cycle_;
-		uint32_t	repeat_cycle_cnt_;
-		int			last_key_idx_;
-		bool		repeat_enable_;
-		char		last_char_;
-
-		struct key_t {
-			gl::device::key	key_type;
-			char	normal_code;
-			char	shift_code;
-		};
-
-		static constexpr key_t key_type_tbls_[] = {
-			{ gl::device::key::ESCAPE,        0x1b, 0x1b },
-			{ gl::device::key::BACKSPACE,     0x08, 0x08 },
-			{ gl::device::key::DEL,           0x7f, 0x7f },
-			{ gl::device::key::TAB,           0x09, 0x09 },
-			{ gl::device::key::ENTER,         0x0d, 0x0d },
-			{ gl::device::key::RIGHT,         'Q'-0x40, 'Q'-0x40 },
-			{ gl::device::key::LEFT,          'R'-0x40, 'R'-0x40 },
-			{ gl::device::key::DOWN,          'S'-0x40, 'S'-0x40 },
-			{ gl::device::key::UP,            'T'-0x40, 'T'-0x40 },
-//			{ gl::device::key::INSERT,        0x09, 0x09 },
+		static constexpr key_t key_tbls_[] = {
+			{ gl::device::key::SPACE,		' ',  ' ',  ' '  },
+			{ gl::device::key::APOSTROPHE,	'\'', '"',  0    },	/* ' */
+			{ gl::device::key::COMMA,		',',  '<',  0    },	/* , */
+			{ gl::device::key::MINUS,		'-',  '_',  0    },	/* - */
+			{ gl::device::key::PERIOD,		'.',  '>',  0    },	/* . */
+			{ gl::device::key::SLASH,		'/',  '?',  0    },	/* / */
+			{ gl::device::key::_0,			'0',  ')',  0    },
+			{ gl::device::key::_1,			'1',  '!',  0    },
+			{ gl::device::key::_2,			'2',  '@',  0    },
+			{ gl::device::key::_3,			'3',  '#',  0    },
+			{ gl::device::key::_4,			'4',  '$',  0    },
+			{ gl::device::key::_5,			'5',  '%',  0    },
+			{ gl::device::key::_6,			'6',  '^',  0    },
+			{ gl::device::key::_7,			'7',  '&',  0    },
+			{ gl::device::key::_8,			'8',  '*',  0    },
+			{ gl::device::key::_9,			'9',  '(',  0    },
+			{ gl::device::key::SEMICOLON,	';',  ':',  0    },	/* ; */
+			{ gl::device::key::EQUAL,		'=',  '+',  0    },	/* = */
+			{ gl::device::key::A,			'A',  'a',  'A' - 0x40  },
+			{ gl::device::key::B,			'B',  'b',  'B' - 0x40  },
+			{ gl::device::key::C,			'C',  'c',  'C' - 0x40  },
+			{ gl::device::key::D,			'D',  'd',  'D' - 0x40  },
+			{ gl::device::key::E,			'E',  'e',  'E' - 0x40  },
+			{ gl::device::key::F,			'F',  'f',  'F' - 0x40  },
+			{ gl::device::key::G,			'G',  'g',  'G' - 0x40  },
+			{ gl::device::key::H,			'H',  'h',  'H' - 0x40  },
+			{ gl::device::key::I,			'I',  'i',  'I' - 0x40  },
+			{ gl::device::key::J,			'J',  'j',  'J' - 0x40  },
+			{ gl::device::key::K,			'K',  'k',  'K' - 0x40  },
+			{ gl::device::key::L,			'L',  'l',  'L' - 0x40  },
+			{ gl::device::key::M,			'M',  'm',  'M' - 0x40  },
+			{ gl::device::key::N,			'N',  'n',  'N' - 0x40  },
+			{ gl::device::key::O,			'O',  'o',  'O' - 0x40  },
+			{ gl::device::key::P,			'P',  'p',  'P' - 0x40  },
+			{ gl::device::key::Q,			'Q',  'q',  'Q' - 0x40  },
+			{ gl::device::key::R,			'R',  'r',  'R' - 0x40  },
+			{ gl::device::key::S,			'S',  's',  'S' - 0x40  },
+			{ gl::device::key::T,			'T',  't',  'T' - 0x40  },
+			{ gl::device::key::U,			'U',  'u',  'U' - 0x40  },
+			{ gl::device::key::V,			'V',  'v',  'V' - 0x40  },
+			{ gl::device::key::W,			'W',  'w',  'W' - 0x40  },
+			{ gl::device::key::X,			'X',  'x',  'X' - 0x40  },
+			{ gl::device::key::Y,			'Y',  'y',  'Y' - 0x40  },
+			{ gl::device::key::Z,			'Z',  'z',  'Z' - 0x40  },
+			{ gl::device::key::LEFT_BRACKET,'[',  '{',  0  },	/* [ */
+			{ gl::device::key::BACKSLASH,	'\\', '|',  0  },	/* \ */
+			{ gl::device::key::RIGHT_BRACKET,']', '}',  0  },	/* ] */
+			{ gl::device::key::GRAVE_ACCENT,'`',  '~',  0  },	/* ` */
+			{ gl::device::key::RIGHT,		'Q'-0x40, 'Q'-0x40, 'Q'-0x40 },
+			{ gl::device::key::LEFT,		'R'-0x40, 'R'-0x40, 'R'-0x40 },
+			{ gl::device::key::DOWN,		'S'-0x40, 'S'-0x40, 'S'-0x40 },
+			{ gl::device::key::UP,			'T'-0x40, 'T'-0x40, 'T'-0x40 },
+			{ gl::device::key::ESCAPE,		0x1b,  0x1b,  0x1b  },
+			{ gl::device::key::BACKSPACE,	0x08,  0x08,  0x08  },
+			{ gl::device::key::DEL,			0x7f,  0x7f,  0x7f  },
+			{ gl::device::key::TAB,			0x09,  0x09,  0x09  },
+			{ gl::device::key::ENTER,		0x0d,  0x0d,  0x0d  },
 		};
 
 	public:
@@ -74,9 +125,8 @@ namespace sys {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		keyboard() : input_(),
-			repeat_delay_(60), repeat_delay_cnt_(0),
-			repeat_cycle_(3), repeat_cycle_cnt_(0), last_key_idx_(-1), repeat_enable_(true),
+		keyboard() noexcept : input_(),
+			repeat_enable_(true),
 			last_char_(0) { }
 
 
@@ -94,62 +144,66 @@ namespace sys {
 			@param[in]	f	不許可の場合「false」
 		*/
 		//-----------------------------------------------------------------//
-		void repeat_enable(bool f = true) { repeat_enable_ = f; }
+		void repeat_enable(bool f = true) noexcept { repeat_enable_ = f; }
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	リピート・遅延の設定
-			@param[in]	frame	フレーム数
-		*/
-		//-----------------------------------------------------------------//
-		void repeat_delay(uint32_t frame) { repeat_delay_ = frame; }
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	リピート・サイクルの設定
-			@param[in]	frame	フレーム数
-		*/
-		//-----------------------------------------------------------------//
-		void repeat_cycle(uint32_t frame) { repeat_cycle_ = frame; }
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	サービス @n
+			@brief	サービス（毎フレーム呼び出す） @n
 					上方（glfw3 フレームワーク）からエコーされるキーボードの状態 @n
 					をスキャンして、キー入力として反映する。
 		*/
 		//-----------------------------------------------------------------//
-		void service()
+		void service() noexcept
 		{
 			using namespace gl;
 
-			core& core = core::get_instance();
+			auto& core = core::get_instance();
 
 			input_.clear();
-
+#if 0
 			if(!core.get_recv_text().empty()) {
-				input_ += core.get_recv_text();
+				// キーのサービスは独自に行うので、glfw3 フレームワークからのキースキャンは無視する
+				// input_ += core.get_recv_text();
 				core.at_recv_text().clear();
 			}
-
-			const device& dev = core.get_device();
-			{  // CTRL コードは特別なケアが必要、ALT コードは未設定
-				auto left_ctrl = dev.get_level(gl::device::key::LEFT_CONTROL);
-				auto right_ctrl = dev.get_level(gl::device::key::RIGHT_CONTROL);
-				if(left_ctrl || right_ctrl) {
-					for(auto i = static_cast<int>(gl::device::key::A); i <= static_cast<int>(gl::device::key::Z); ++i) {
-						if(dev.get_positive(static_cast<gl::device::key>(i))) input_ += 'A' - 0x40 + i - static_cast<int>(gl::device::key::A);
+#endif
+			const auto& dev = core.get_device();
+			// 通常キーのスキャン
+			auto l_shift = dev.get_level(device::key::LEFT_SHIFT);
+			auto r_shift = dev.get_level(device::key::RIGHT_SHIFT);
+			bool shift = l_shift | r_shift;
+			bool shift_a2z = shift;
+			if(!dev.get_level(device::key::STATE_CAPS_LOCK)) {
+				shift_a2z = !shift_a2z;
+			}
+			auto l_ctrl  = dev.get_level(device::key::LEFT_CONTROL);
+			auto r_ctrl  = dev.get_level(device::key::RIGHT_CONTROL);
+			bool ctrl = l_ctrl | r_ctrl;
+			if(dev.get_level(device::key::STATE_REPEAT)) {
+				if(repeat_enable_ && last_char_ < 256) {
+					input_ += last_char_;
+				}
+			} else {
+				for(auto& t : key_tbls_) {
+					if(dev.get_positive(t.key_type)) {
+						if(ctrl) {
+							input_ += t.ctrl_code;
+						} else {
+							auto s = shift;
+							if(t.normal_code >= 'A' && t.normal_code <= 'Z') {
+								s = shift_a2z;
+							}
+							if(s) {
+								input_ += t.shift_code;
+							} else {
+								input_ += t.normal_code;
+							}
+						}
 					}
 				}
-			}
-			const key_t* tbl = key_type_tbls_;
-			for(int i = 0; i < (sizeof(key_type_tbls_) / sizeof(key_t)); ++i) {
-				const key_t& t = tbl[i];
-				if(dev.get_positive(t.key_type)) {
-					input_ += t.normal_code;
+				if(!input_.empty()) {
+					last_char_ = input_.back();
 				}
 			}
 		}
@@ -161,6 +215,6 @@ namespace sys {
 			@return 入力されたキーの値
 		*/
 		//-----------------------------------------------------------------//
-		const auto& input() const { return input_; }
+		const auto& input() const noexcept { return input_; }
 	};
 }

@@ -50,109 +50,112 @@ namespace gl {
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
-			@brief	key type
+			@brief	key type @n
+					- glfw3: "Keyboard key tokens"
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		enum class key {
-			MOUSE_LEFT,			///< mouse button left
-			MOUSE_MIDDLE,		///< mouse button middle
-			MOUSE_RIGHT,		///< mouse button right
-			MOUSE_FOCUS = 8,	///< mouse focus
+			NONE,					///< none
 
-			GAME_UP    = 12,	///< game up
-			GAME_DOWN  = 13,	///< game down
-			GAME_RIGHT = 14,	///< game right
-			GAME_LEFT  = 15,	///< game left
-			GAME_0     = 16,	///< game 0
-			GAME_1     = 17,	///< game 1
-			GAME_2     = 18,	///< game 2
-			GAME_3     = 19,	///< game 3
-			GAME_4     = 20,	///< game 4
-			GAME_5     = 21,	///< game 5
-			GAME_6     = 22,	///< game 6
-			GAME_7     = 23,	///< game 7
-			GAME_8     = 24,	///< game 8
-			GAME_9     = 25,	///< game 9
-			GAME_10    = 26,	///< game 10
-			GAME_11    = 27,	///< game 11
-			GAME_12    = 28,	///< game 12
-			GAME_13    = 29,	///< game 13
-			GAME_14    = 30,	///< game 14
-			GAME_15    = 31,	///< game 15
+			MOUSE_LEFT,				///< mouse button left
+			MOUSE_MIDDLE,			///< mouse button middle
+			MOUSE_RIGHT,			///< mouse button right
+			MOUSE_FOCUS		= 8,	///< mouse focus
 
-			SPACE       = 32,
-			APOSTROPHE  = 39,	/* ' */
-			COMMA       = 44,	/* , */
-			MINUS       = 45,	/* - */
-			PERIOD      = 46,	/* . */
-			SLASH       = 47,	/* / */
-			_0          = 48,
-			_1          = 49,
-			_2          = 50,
-			_3          = 51,
-			_4          = 52,
-			_5          = 53,
-			_6          = 54,
-			_7          = 55,
-			_8          = 56,
-			_9          = 57,
-			SEMICOLON   = 59,	/* ; */
-			EQUAL       = 61,	/* = */
+			GAME_UP			= 12,	///< game up
+			GAME_DOWN		= 13,	///< game down
+			GAME_RIGHT		= 14,	///< game right
+			GAME_LEFT		= 15,	///< game left
+			GAME_0			= 16,	///< game 0
+			GAME_1			= 17,	///< game 1
+			GAME_2			= 18,	///< game 2
+			GAME_3			= 19,	///< game 3
+			GAME_4			= 20,	///< game 4
+			GAME_5			= 21,	///< game 5
+			GAME_6			= 22,	///< game 6
+			GAME_7			= 23,	///< game 7
+			GAME_8			= 24,	///< game 8
+			GAME_9			= 25,	///< game 9
+			GAME_10			= 26,	///< game 10
+			GAME_11			= 27,	///< game 11
+			GAME_12			= 28,	///< game 12
+			GAME_13			= 29,	///< game 13
+			GAME_14			= 30,	///< game 14
+			GAME_15			= 31,	///< game 15
 
-			A             = 65,
-			B             = 66,
-			C             = 67,
-			D             = 68,
-			E             = 69,
-			F             = 70,
-			G             = 71,
-			H             = 72,
-			I             = 73,
-			J             = 74,
-			K             = 75,
-			L             = 76,
-			M             = 77,
-			N             = 78,
-			O             = 79,
-			P             = 80,
-			Q             = 81,
-			R             = 82,
-			S             = 83,
-			T             = 84,
-			U             = 85,
-			V             = 86,
-			W             = 87,
-			X             = 88,
-			Y             = 89,
-			Z             = 90,
-			LEFT_BRACKET  = 91,		/* [ */
-			BACKSLASH     = 92,		/* \ */
-			RIGHT_BRACKET = 93,		/* ] */
-			GRAVE_ACCENT  = 96,		/* ` */
+			SPACE			= 32,
+			APOSTROPHE		= 39,	/* ' */
+			COMMA			= 44,	/* , */
+			MINUS			= 45,	/* - */
+			PERIOD			= 46,	/* . */
+			SLASH			= 47,	/* / */
+			_0				= 48,
+			_1				= 49,
+			_2				= 50,
+			_3				= 51,
+			_4				= 52,
+			_5				= 53,
+			_6				= 54,
+			_7				= 55,
+			_8				= 56,
+			_9				= 57,
+			SEMICOLON		= 59,	/* ; */
+			EQUAL			= 61,	/* = */
 
-			WORLD_1 = 161,			/* non-US #1 */
-			WORLD_2 = 162,			/* non-US #2 */
+			A				= 65,
+			B				= 66,
+			C				= 67,
+			D				= 68,
+			E				= 69,
+			F				= 70,
+			G				= 71,
+			H				= 72,
+			I				= 73,
+			J				= 74,
+			K				= 75,
+			L				= 76,
+			M				= 77,
+			N				= 78,
+			O				= 79,
+			P				= 80,
+			Q				= 81,
+			R				= 82,
+			S				= 83,
+			T				= 84,
+			U				= 85,
+			V				= 86,
+			W				= 87,
+			X				= 88,
+			Y				= 89,
+			Z				= 90,
+			LEFT_BRACKET	= 91,	/* [ */
+			BACKSLASH		= 92,	/* \ */
+			RIGHT_BRACKET	= 93,	/* ] */
+			GRAVE_ACCENT	= 96,	/* ` */
 
-			ESCAPE    = 256,
-			ENTER     = 257,
-			TAB       = 258,
-			BACKSPACE = 259,
-			INSERT    = 260,
-			DEL       = 261,
-			RIGHT     = 262,
-			LEFT      = 263,
-			DOWN      = 264,
-			UP        = 265,
-			PAGE_UP   = 266,
-			PAGE_DOWN = 267,
-			HOME      = 268,
-			END       = 269,
+			WORLD_1			= 161,	/* non-US #1 */
+			WORLD_2			= 162,	/* non-US #2 */
 
-			CAPS_LOCK    = 280,
-			SCROLL_LOCK  = 281,
-			NUM_LOCK     = 282,
-			PRINT_SCREEN = 283,
-			PAUSE        = 284,
+			ESCAPE			= 256,
+			ENTER			= 257,
+			TAB				= 258,
+			BACKSPACE		= 259,
+			INSERT			= 260,
+			DEL				= 261,
+			RIGHT			= 262,
+			LEFT			= 263,
+			DOWN			= 264,
+			UP				= 265,
+			PAGE_UP			= 266,
+			PAGE_DOWN		= 267,
+			HOME			= 268,
+			END				= 269,
+
+			CAPS_LOCK		= 280,
+			SCROLL_LOCK		= 281,
+			NUM_LOCK		= 282,
+			PRINT_SCREEN	= 283,
+			PAUSE			= 284,
 
 			F1  = 290,
 			F2  = 291,
@@ -213,8 +216,9 @@ namespace gl {
 			MENU,
 
 			STATE_CAPS_LOCK,	///< CAPS LOCK の状態
-			STATE_SCROLL_LOCK,	///< SCROLL LOCK の状態
 			STATE_NUM_LOCK,		///< NUM LOCK の状態
+			STATE_SCROLL_LOCK,	///< SCROLL LOCK の状態
+			STATE_REPEAT,		///< Repeat の状態
 
 			count_
 		};
@@ -329,70 +333,12 @@ namespace gl {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	サービス@n
+			@brief	デバイス系（キーボード、マウス、ジョイスティック）・サービス @n
 					サンプリングと状態の作成
 			@param[in]	bits	スイッチの状態
 			@param[in]	poss	位置情報
 		*/
 		//-----------------------------------------------------------------//
 		void service(const bits_t& bits, const locator& poss);
-#if 0
-		{
-			bits_t b = bits;
-			int joy = GLFW_JOYSTICK_1;  // first JOY-STICK
-			if(glfwJoystickPresent(joy) == GL_TRUE) {
-				int count;
-				const unsigned char* hats = glfwGetJoystickHats(joy, &count);
-				if((hats[0] & GLFW_HAT_UP) != 0) {
-					b.set(key::GAME_UP);
-				}
-				if((hats[0] & GLFW_HAT_DOWN) != 0) {
-					b.set(key::GAME_DOWN);
-				}
-				if((hats[0] & GLFW_HAT_LEFT) != 0) {
-					b.set(key::GAME_LEFT);
-				}
-				if((hats[0] & GLFW_HAT_RIGHT) != 0) {
-					b.set(key::GAME_RIGHT);
-				}
-//				const float* axes = glfwGetJoystickAxes(joy, &count);
-//				for(int i = 0; i < count; ++i) {
-//					if(i == 1) {
-//						if(axes[i] > 0.5f) b.set(key::GAME_UP);
-//						else if(axes[i] < -0.5f) b.set(key::GAME_DOWN);
-//					} else if(i == 0) {
-//						if(axes[i] > 0.5f) b.set(key::GAME_RIGHT);
-//						else if(axes[i] < -0.5f) b.set(key::GAME_LEFT);
-//					}
-//				}
-				const unsigned char* bl = glfwGetJoystickButtons(joy, &count);
-				if(count > 16) count = 16;
-				for(int i = 0; i < count; ++i) {
-					if(bl[i] != 0) b.set(static_cast<key>(static_cast<int>(key::GAME_0) + i));
-				}
-			}
-
-			b.set(key::STATE_CAPS_LOCK, level_.test(key::STATE_CAPS_LOCK));
-			b.set(key::STATE_SCROLL_LOCK, level_.test(key::STATE_SCROLL_LOCK));
-			b.set(key::STATE_NUM_LOCK, level_.test(key::STATE_NUM_LOCK));
-
-			positive_ =  b & ~level_;
-			negative_ = ~b &  level_;
-
-			if(positive_.test(key::CAPS_LOCK)) {
-				b.flip(key::STATE_CAPS_LOCK);
-			}
-			if(positive_.test(key::SCROLL_LOCK)) {
-				b.flip(key::STATE_SCROLL_LOCK);
-			}
-			if(positive_.test(key::NUM_LOCK)) {
-				b.flip(key::STATE_NUM_LOCK);
-			}
-
-			level_ = b;
-
-			locator_ = poss;
-		}
-#endif
 	};
 }

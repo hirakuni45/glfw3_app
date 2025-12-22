@@ -58,7 +58,7 @@ namespace gl {
 		utils::strings	recv_files_path_;
 		recv_files_func	recv_files_func_;
 
-		std::u32string	recv_text_;
+//		std::u32string	recv_text_;
 
 		std::string		title_;
 
@@ -272,7 +272,7 @@ namespace gl {
 		//-----------------------------------------------------------------//
 		const utils::strings& get_recv_files_path() const noexcept { return recv_files_path_; }
 
-
+#if 0
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	キーボード文字列の取得
@@ -289,7 +289,7 @@ namespace gl {
 		*/
 		//-----------------------------------------------------------------//
 		auto& at_recv_text() noexcept { return recv_text_; }
-
+#endif
 
 		//-----------------------------------------------------------------//
 		/*!

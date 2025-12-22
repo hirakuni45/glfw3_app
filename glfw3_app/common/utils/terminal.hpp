@@ -3,7 +3,7 @@
 /*!	@file
 	@brief	ターミナル・クラス @n
 			VT100 を模倣したクラス、エスケープシーケンスなど @n
-			※現状では、完全な互換性を実装していないので注意
+			※現状では、完全な互換性を実装していない（作業中）
     @author 平松邦仁 (hira@rvf-rc45.net)
 	@copyright	Copyright (C) 2017, 2025 Kunihito Hiramatsu @n
 				Released under the MIT license @n
@@ -20,6 +20,147 @@
 #include "utils/string_utils.hpp"
 #include "utils/format.hpp"
 
+/* VT100 (ANSI) Escape code list:
+Name                  Description                            Esc Code
+setnl LMN             Set new line mode                      ^[[20h
+setappl DECCKM        Set cursor key to application          ^[[?1h
+setansi DECANM        Set ANSI (versus VT52)                 none
+setcol DECCOLM        Set number of columns to 132           ^[[?3h
+setsmooth DECSCLM     Set smooth scrolling                   ^[[?4h
+setrevscrn DECSCNM    Set reverse video on screen            ^[[?5h
+setorgrel DECOM       Set origin to relative                 ^[[?6h
+setwrap DECAWM        Set auto-wrap mode                     ^[[?7h
+setrep DECARM         Set auto-repeat mode                   ^[[?8h
+setinter DECINLM      Set interlacing mode                   ^[[?9h
+
+setlf LMN             Set line feed mode                     ^[[20l
+setcursor DECCKM      Set cursor key to cursor               ^[[?1l
+setvt52 DECANM        Set VT52 (versus ANSI)                 ^[[?2l
+resetcol DECCOLM      Set number of columns to 80            ^[[?3l
+setjump DECSCLM       Set jump scrolling                     ^[[?4l
+setnormscrn DECSCNM   Set normal video on screen             ^[[?5l
+setorgabs DECOM       Set origin to absolute                 ^[[?6l
+resetwrap DECAWM      Reset auto-wrap mode                   ^[[?7l
+resetrep DECARM       Reset auto-repeat mode                 ^[[?8l
+resetinter DECINLM    Reset interlacing mode                 ^[[?9l
+
+altkeypad DECKPAM     Set alternate keypad mode              ^[=
+numkeypad DECKPNM     Set numeric keypad mode                ^[>
+
+setukg0               Set United Kingdom G0 character set    ^[(A
+setukg1               Set United Kingdom G1 character set    ^[)A
+setusg0               Set United States G0 character set     ^[(B
+setusg1               Set United States G1 character set     ^[)B
+setspecg0             Set G0 special chars. & line set       ^[(0
+setspecg1             Set G1 special chars. & line set       ^[)0
+setaltg0              Set G0 alternate character ROM         ^[(1
+setaltg1              Set G1 alternate character ROM         ^[)1
+setaltspecg0          Set G0 alt char ROM and spec. graphics ^[(2
+setaltspecg1          Set G1 alt char ROM and spec. graphics ^[)2
+
+setss2 SS2            Set single shift 2                     ^[N
+setss3 SS3            Set single shift 3                     ^[O
+
+modesoff SGR0         Turn off character attributes          ^[[m
+modesoff SGR0         Turn off character attributes          ^[[0m
+bold SGR1             Turn bold mode on                      ^[[1m
+lowint SGR2           Turn low intensity mode on             ^[[2m
+underline SGR4        Turn underline mode on                 ^[[4m
+blink SGR5            Turn blinking mode on                  ^[[5m
+reverse SGR7          Turn reverse video on                  ^[[7m
+invisible SGR8        Turn invisible text mode on            ^[[8m
+
+setwin DECSTBM        Set top and bottom line#s of a window  ^[[<v>;<v>r
+
+cursorup(n) CUU       Move cursor up n lines                 ^[[<n>A
+cursordn(n) CUD       Move cursor down n lines               ^[[<n>B
+cursorrt(n) CUF       Move cursor right n lines              ^[[<n>C
+cursorlf(n) CUB       Move cursor left n lines               ^[[<n>D
+cursorhome            Move cursor to upper left corner       ^[[H
+cursorhome            Move cursor to upper left corner       ^[[;H
+cursorpos(v,h) CUP    Move cursor to screen location v,h     ^[[<v>;<h>H
+hvhome                Move cursor to upper left corner       ^[[f
+hvhome                Move cursor to upper left corner       ^[[;f
+hvpos(v,h) CUP        Move cursor to screen location v,h     ^[[<v>;<h>f
+index IND             Move/scroll window up one line         ^[D
+revindex RI           Move/scroll window down one line       ^[M
+nextline NEL          Move to next line                      ^[E
+savecursor DECSC      Save cursor position and attributes    ^[7
+restorecursor DECSC   Restore cursor position and attributes ^[8
+
+tabset HTS            Set a tab at the current column        ^[H
+tabclr TBC            Clear a tab at the current column      ^[[g
+tabclr TBC            Clear a tab at the current column      ^[[0g
+tabclrall TBC         Clear all tabs                         ^[[3g
+
+dhtop DECDHL          Double-height letters, top half        ^[#3
+dhbot DECDHL          Double-height letters, bottom half     ^[#4
+swsh DECSWL           Single width, single height letters    ^[#5
+dwsh DECDWL           Double width, single height letters    ^[#6
+
+cleareol EL0          Clear line from cursor right           ^[[K
+cleareol EL0          Clear line from cursor right           ^[[0K
+clearbol EL1          Clear line from cursor left            ^[[1K
+clearline EL2         Clear entire line                      ^[[2K
+
+cleareos ED0          Clear screen from cursor down          ^[[J
+cleareos ED0          Clear screen from cursor down          ^[[0J
+clearbos ED1          Clear screen from cursor up            ^[[1J
+clearscreen ED2       Clear entire screen                    ^[[2J
+
+devstat DSR           Device status report                   ^[5n
+termok DSR               Response: terminal is OK            ^[0n
+termnok DSR              Response: terminal is not OK        ^[3n
+
+getcursor DSR         Get cursor position                    ^[6n
+cursorpos CPR            Response: cursor is at v,h          ^[<v>;<h>R
+
+ident DA              Identify what terminal type            ^[[c
+ident DA              Identify what terminal type (another)  ^[[0c
+gettype DA               Response: terminal type code n      ^[[?1;<n>0c
+
+reset RIS             Reset terminal to initial state        ^[c
+
+align DECALN          Screen alignment display               ^[#8
+testpu DECTST         Confidence power up test               ^[[2;1y
+testlb DECTST         Confidence loopback test               ^[[2;2y
+testpurep DECTST      Repeat power up test                   ^[[2;9y
+testlbrep DECTST      Repeat loopback test                   ^[[2;10y
+
+ledsoff DECLL0        Turn off all four leds                 ^[[0q
+led1 DECLL1           Turn on LED #1                         ^[[1q
+led2 DECLL2           Turn on LED #2                         ^[[2q
+led3 DECLL3           Turn on LED #3                         ^[[3q
+led4 DECLL4           Turn on LED #4                         ^[[4q
+
+#
+#  All codes below are for use in VT52 compatibility mode.
+#
+
+setansi               Enter/exit ANSI mode (VT52)            ^[<
+
+altkeypad             Enter alternate keypad mode            ^[=
+numkeypad             Exit alternate keypad mode             ^[>
+
+setgr                 Use special graphics character set     ^[F
+resetgr               Use normal US/UK character set         ^[G
+
+cursorup              Move cursor up one line                ^[A
+cursordn              Move cursor down one line              ^[B
+cursorrt              Move cursor right one char             ^[C
+cursorlf              Move cursor left one char              ^[D
+cursorhome            Move cursor to upper left corner       ^[H
+cursorpos(v,h)        Move cursor to v,h location            ^[<v><h>
+revindex              Generate a reverse line-feed           ^[I
+
+cleareol              Erase to end of current line           ^[K
+cleareos              Erase to end of screen                 ^[J
+
+ident                 Identify what the terminal is          ^[Z
+identresp             Correct response to ident              ^[/Z
+
+*/
+
 namespace utils {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -29,10 +170,11 @@ namespace utils {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct terminal {
 
-		static constexpr int default_lines_ = 150;		///< 標準、最大行数
-		static constexpr int default_width_ = 80;		///< 標準、最大横幅
+		static constexpr int default_lines_  = 150;		///< 標準、最大行数
+		static constexpr int default_width_  = 80;		///< 標準、最大横幅（132 文字バージョンもある）
+		static constexpr int default_height_ = 24;		///< 標準、最大高さ
 
-		static constexpr img::rgba8 color8_nom_[8] = {
+		static constexpr img::rgba8 color8_nom_[8] = {  ///< 標準カラー
 			{   4,   4,   4 },  // Black
 			{ 240,   4,   4 },  // Red
 			{   4, 240,   4 },  // Green
@@ -42,7 +184,7 @@ namespace utils {
 			{   4, 240, 240 },	// Cyan
 			{ 240, 240, 240 }	// White
 		};
-		static constexpr img::rgba8 color8_str_[8] = {
+		static constexpr img::rgba8 color8_str_[8] = {  ///< 強調カラー
 			{   0,   0,   0 },  // Black
 			{ 255,   0,   0 },  // Red
 			{   0, 255,   0 },  // Green
@@ -52,7 +194,7 @@ namespace utils {
 			{   0, 255, 255 },	// Cyan
 			{ 255, 255, 255 }	// White
 		};
-		static constexpr uint32_t esc_number_max_ = 16;
+		static constexpr uint32_t esc_number_max_ = 16;  ///< エスケープシーケンスで数字トークンを受け取る最大数 
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
@@ -65,9 +207,9 @@ namespace utils {
 			img::rgba8	bc_;		///< 背景カラー
 			bool		select_;	///< 文字選択
 
-			cha_t(uint32_t cha = 0,
-				  const img::rgba8& fc = img::rgba8(255, 255, 255, 255),
-				  const img::rgba8& bc = img::rgba8(  0,   0,   0, 255)) noexcept :
+			constexpr cha_t(uint32_t cha = 0,
+				const img::rgba8& fc = img::rgba8(255, 255, 255, 255),
+				const img::rgba8& bc = img::rgba8(  0,   0,   0, 255)) noexcept :
 				cha_(cha), fc_(fc), bc_(bc), select_(false)
 				{ }
 		};
@@ -88,7 +230,7 @@ namespace utils {
 
 		vtx::ipos	pos_;
 
-		cha_t		tmp_;
+		cha_t		spc_;
 
 		bool		auto_crlf_;
 		bool		insert_;
@@ -158,6 +300,11 @@ namespace utils {
 			}
 
 			line& l = lines_[pos_.y];
+			if(l.empty()) {
+				if(pos_.x > 0) {
+					l.assign(pos_.x, ' ');
+				}
+			}
 			auto idx = count_index_(l, pos_.x);
 			if(idx < l.size()) {
 				if(insert_) {
@@ -177,13 +324,13 @@ namespace utils {
 			}
 		}
 
-		const auto& get_char_(const vtx::ipos& pos) const noexcept
+		const auto& getchar_(const vtx::ipos& pos) const noexcept
 		{
-			if(pos.y < 0 || pos.y >= lines_.size()) return tmp_;
+			if(pos.y < 0 || pos.y >= lines_.size()) return spc_;
 
 			const auto& l = lines_[pos.y];
 			if(l.empty()) {
-				return tmp_;
+				return spc_;
 			}
 
 			int n = 0;
@@ -196,7 +343,7 @@ namespace utils {
 				}
 				++n;
 				if(n >= l.size()) {
-					return tmp_;
+					return spc_;
 				}
 			}
 			return l[n];
@@ -205,7 +352,7 @@ namespace utils {
 		void right_() noexcept
 		{
 			if(pos_.x < count_cha_(lines_[pos_.y])) {
-				if(test_wide(get_char_(pos_).cha_)) {
+				if(test_wide(getchar_(pos_).cha_)) {
 					pos_.x += 2;
 				} else {
 					++pos_.x;
@@ -214,6 +361,9 @@ namespace utils {
 					pos_.x = 0;
 					down_();
 				}
+			} else {
+				cha_ = spc_;
+				putchar_();
 			}
 		}
 
@@ -221,6 +371,9 @@ namespace utils {
 		{
 			if(pos_.x > 0) {
 				auto& l = lines_[pos_.y];
+				while(l.size() < pos_.x) {
+					l.push_back(spc_);
+				}
 				auto idx = count_index_(l, pos_.x);
 				if(idx > 0) --idx;
 				if(test_wide(l[idx].cha_)) {
@@ -236,9 +389,11 @@ namespace utils {
 			if(pos_.y < (lines_.size() - 1)) {
 				++pos_.y;
 				auto& l = lines_[pos_.y];
-				if(l.size() <= pos_.x) {
-					pos_.x = l.size();
+				while(l.size() < pos_.x) {
+					l.push_back(spc_);
 				}
+			} else {
+				new_line_();
 			}
 		}
 
@@ -247,8 +402,8 @@ namespace utils {
 			if(pos_.y > 0) {
 				pos_.y--;
 				auto& l = lines_[pos_.y];
-				if(l.size() <= pos_.x) {
-					pos_.x = l.size();
+				while(l.size() < pos_.x) {
+					l.push_back(spc_);
 				}
 			}
 		}
@@ -365,13 +520,41 @@ namespace utils {
 
 		void esc_A2T_(uint32_t cha) noexcept
 		{
-			if(cha == 'G') {
-
+			if(cha == 'H') {  // move to cursor
+				if(esc_number_idx_ >= 2) {
+					auto y = esc_number_[0];
+					if(y >= limit_.y) {
+						y = limit_.y - 1;
+					}
+					if(y <= pos_.y) {
+						pos_.y = y;
+					} else {
+						while(pos_.y < y) {
+							down_();
+						}
+					}
+					auto x = esc_number_[1];
+					if(x >= limit_.x) {
+						x = limit_.x - 1;
+					}
+					if(x <= pos_.x) {
+						pos_.x = x;
+					} else {
+						while(pos_.x < x) {
+							right_();
+						}
+					}
+				} else {
+					pos_.x = 0;
+					pos_.y = 0;
+				}
 				return;
 			}
 
-			uint32_t n = esc_number_[0];
-			if(n == 0) n = 1;
+			uint32_t n = 1;
+			if(esc_number_idx_ >= 1) {
+				n = esc_number_[0];
+			}
 			for(uint32_t i = 0; i < n; ++i) {
 				switch(cha) {
 				case 'A':
@@ -386,6 +569,7 @@ namespace utils {
 				case 'D':
 					left_();
 					break;
+#if 0
 				case 'E':
 					down_();
 					pos_.x = 0;
@@ -394,7 +578,17 @@ namespace utils {
 					up_();
 					pos_.x = 0;
 					break;
+#endif
+				default:
+					break;
 				}
+			}
+		}
+
+		void esc_getcursorpos_() noexcept
+		{
+			if(esc_number_idx_ == 1 && esc_number_[0] == 6) {
+
 			}
 		}
 
@@ -409,8 +603,8 @@ namespace utils {
 		terminal(int hl = default_lines_, int wl = default_width_) noexcept :
 			fore_color_(img::rgba8(255, 255, 255, 255)),
 			back_color_(img::rgba8(  0,   0,   0, 255)),
-			cha_(), lines_(), limit_(wl, hl), pos_(0), tmp_(' '),
-			auto_crlf_(false), insert_(true), swap_color_(false),
+			cha_(), lines_(), limit_(wl, hl), pos_(0), spc_(' '),
+			auto_crlf_(false), insert_(false), swap_color_(false),
 			last_(), output_func_(nullptr),
 			esc_mode_(ESC_MODE::NONE), esc_number_cnt_(0), esc_number_idx_(0), esc_number_{ 0 }
 		{
@@ -571,6 +765,10 @@ namespace utils {
 						++esc_number_idx_;
 					}
 					esc_A2T_(cha);
+					esc_mode_ = ESC_MODE::NONE;
+				} else if(cha == 'n') {
+					// ESC [ 6 n というエスケープシーケンスを利用してターミナル上のカーソル位置を取得
+					esc_getcursorpos_();
 					esc_mode_ = ESC_MODE::NONE;
 				} else {
 					esc_mode_ = ESC_MODE::NONE;
@@ -810,7 +1008,7 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		const auto& get_char(const vtx::ipos& pos) const noexcept
 		{
-			return get_char_(pos);
+			return getchar_(pos);
 		}		
 	};
 }
