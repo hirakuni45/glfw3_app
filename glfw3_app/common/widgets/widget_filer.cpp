@@ -551,7 +551,7 @@ namespace gui {
 					auto ch = ins.back();
 					if(ch >= 'a' && ch <= 'z') ch -= 0x20;
 					if(ch == 0x1b || ch == '\r' ||
-					   ch == sys::keyboard::CTRL::UP || ch == sys::keyboard::CTRL::DOWN) {
+					   ch == sys::keyboard::KEY_UP || ch == sys::keyboard::KEY_DOWN) {
 						acc_key_ = ch;
 						acc_cnt_ = 0;
 					} else if((ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z')) {
@@ -652,7 +652,7 @@ namespace gui {
 						break;
 					}
 				}
-			} else if(acc_key_ == sys::keyboard::CTRL::UP || acc_key_ == sys::keyboard::CTRL::DOWN) {
+			} else if(acc_key_ == sys::keyboard::KEY_UP || acc_key_ == sys::keyboard::KEY_DOWN) {
 				if(focus_path_.empty()) {
 					focus_path_ = center_[0].name->get_text();
 					focus_(focus_path_);
@@ -664,7 +664,7 @@ namespace gui {
 						}
 						++n;
 					}
-					if(acc_key_ == sys::keyboard::CTRL::UP) --n;
+					if(acc_key_ == sys::keyboard::KEY_UP) --n;
 					else ++n;
 					if(n < center_.size()) {
 						focus_path_ = center_[n].name->get_text();
