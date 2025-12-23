@@ -33,7 +33,7 @@ namespace app {
 			al::sound& sound = director_.at().sound_;
 
 			static const char* sounds[] = {
-    			"Ufo", "Walk1", "Walk2", "Walk3",
+				"Ufo", "Walk1", "Walk2", "Walk3",
 				"Walk4", "Shot", "UfoHit", "BaseHit", "InvHit"
 			};
 			utils::unzip zip;
@@ -76,8 +76,8 @@ namespace app {
 			uint32_t c = 0xFFFFFFFF;
         	if( i >=  32 && i <  64 ) c = 0xFFFF0000; // Red
         	if( i >= 184 && i < 240 ) c = 0xFF00FF00; // Green
-        	scan_line_color_.push_back(c);
-    	}
+			scan_line_color_.push_back(c);
+		}
 
 		fb_.reserve(InvadersMachine::ScreenWidth * InvadersMachine::ScreenHeight);
 
@@ -139,7 +139,7 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void spinv::update()
 	{
-   		gl::core& core = gl::core::get_instance();
+		gl::core& core = gl::core::get_instance();
 
 		const gl::device& dev = core.get_device();
 
@@ -166,7 +166,7 @@ namespace app {
 
 		// Left
 		if(dev.get_positive(gl::device::key::LEFT)) {
-   		 	spinv_.fireEvent( InvadersMachine::KeyLeftDown);
+			spinv_.fireEvent( InvadersMachine::KeyLeftDown);
 		}
 		if(dev.get_positive(gl::device::key::GAME_LEFT)) {
 			spinv_.fireEvent( InvadersMachine::KeyLeftDown);
@@ -183,7 +183,7 @@ namespace app {
 			spinv_.fireEvent( InvadersMachine::KeyRightDown);
 		}
 		if(dev.get_positive(gl::device::key::GAME_RIGHT)) {
-    		spinv_.fireEvent( InvadersMachine::KeyRightDown);
+			spinv_.fireEvent( InvadersMachine::KeyRightDown);
 		}
 		if(dev.get_negative(gl::device::key::RIGHT)) {
 			spinv_.fireEvent( InvadersMachine::KeyRightUp);
@@ -261,7 +261,7 @@ namespace app {
 
 		spinv_.step();
 
-    	const unsigned char* video = spinv_.getVideo();
+		const unsigned char* video = spinv_.getVideo();
 		if(video) {
 			for(int y = 0; y < InvadersMachine::ScreenHeight; ++y) {
 				uint32_t c = scan_line_color_[y];
@@ -272,8 +272,8 @@ namespace app {
 						fb_[y * InvadersMachine::ScreenWidth + x] = 0;
 					}
 					++video;
-    	    	}
-    		}
+				}
+			}
 		}
 
 		texfb_.rendering(gl::texfb::IMAGE::RGBA, (const char*)&fb_[0]);
@@ -291,7 +291,7 @@ namespace app {
 	//-----------------------------------------------------------------//
 	void spinv::render()
 	{
-   		gl::core& core = gl::core::get_instance();
+		gl::core& core = gl::core::get_instance();
 
 		const vtx::spos& siz = core.get_rect().size;
 
