@@ -1,7 +1,10 @@
 #pragma once
 //=========================================================================//
 /*!	@file
-	@brief	キーボード入力を扱うクラス
+	@brief	キーボード入力を扱うクラス @n
+			glfw3 フレームワークで、キースイッチに対応するビットを生成している @n
+			対応するビットは、「押した瞬間」、「離した瞬間」、「押している状態」など @n
+			を生成している。
     @author 平松邦仁 (hira@rvf-rc45.net)
 	@copyright	Copyright (C) 2017, 2025 Kunihito Hiramatsu @n
 				Released under the MIT license @n
@@ -36,23 +39,15 @@ namespace sys {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct keyboard : public keyboard_def {
 
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		/*!
-			@brief	制御コード
-		*/
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-		struct CTRL {
-			enum {
-				BS    = 0x08,
-				CR    = 0x0D,
-				RIGHT = 'Q' - 0x40,
-				LEFT  = 'R' - 0x40,
-				DOWN  = 'S' - 0x40,
-				UP    = 'T' - 0x40,
-				ESC   = 0x1B,
-				DEL   = 0x7F,
-			};
-		};
+		static constexpr uint32_t KEY_CR  = 0x0D;
+		static constexpr uint32_t KEY_BS  = 0x08;
+		static constexpr uint32_t KEY_TAB = 0x09;
+		static constexpr uint32_t KEY_ESC = 0x1B;
+		static constexpr uint32_t KEY_RIGHT = 'Q' - 0x40;
+		static constexpr uint32_t KEY_LEFT  = 'R' - 0x40;
+		static constexpr uint32_t KEY_DOWN  = 'S' - 0x40;
+		static constexpr uint32_t KEY_UP    = 'T' - 0x40;
+		static constexpr uint32_t KEY_DEL = 0x7F;
 
 	private:
 		std::u32string	input_;
@@ -104,9 +99,9 @@ namespace sys {
 			{ gl::device::key::X,			'X',  'x',  'X' - 0x40  },
 			{ gl::device::key::Y,			'Y',  'y',  'Y' - 0x40  },
 			{ gl::device::key::Z,			'Z',  'z',  'Z' - 0x40  },
-			{ gl::device::key::LEFT_BRACKET,'[',  '{',  0  },	/* [ */
-			{ gl::device::key::BACKSLASH,	'\\', '|',  0  },	/* \ */
-			{ gl::device::key::RIGHT_BRACKET,']', '}',  0  },	/* ] */
+			{ gl::device::key::LEFT_BRACKET,'[',  '{',  '[' - 0x40  },	/* [ (0x5B) */
+			{ gl::device::key::BACKSLASH,	'\\', '|',  '\\' - 0x40 },	/* \ (0x5C) */
+			{ gl::device::key::RIGHT_BRACKET,']', '}',  ']' - 0x40  },	/* ] (0x5D) */
 			{ gl::device::key::GRAVE_ACCENT,'`',  '~',  0  },	/* ` */
 			{ gl::device::key::RIGHT,		'Q'-0x40, 'Q'-0x40, 'Q'-0x40 },
 			{ gl::device::key::LEFT,		'R'-0x40, 'R'-0x40, 'R'-0x40 },
@@ -125,9 +120,11 @@ namespace sys {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		keyboard() noexcept : input_(),
+		keyboard() noexcept :
+			input_(),
 			repeat_enable_(true),
-			last_char_(0) { }
+			last_char_(0)
+		{ }
 
 
 		//-----------------------------------------------------------------//
@@ -140,11 +137,11 @@ namespace sys {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	リピートの許可
+			@brief	リピートの許可（初期「有効」）
 			@param[in]	f	不許可の場合「false」
 		*/
 		//-----------------------------------------------------------------//
-		void repeat_enable(bool f = true) noexcept { repeat_enable_ = f; }
+		void enable_repeat(bool f = true) noexcept { repeat_enable_ = f; }
 
 
 		//-----------------------------------------------------------------//
@@ -161,15 +158,9 @@ namespace sys {
 			auto& core = core::get_instance();
 
 			input_.clear();
-#if 0
-			if(!core.get_recv_text().empty()) {
-				// キーのサービスは独自に行うので、glfw3 フレームワークからのキースキャンは無視する
-				// input_ += core.get_recv_text();
-				core.at_recv_text().clear();
-			}
-#endif
+
 			const auto& dev = core.get_device();
-			// 通常キーのスキャン
+
 			auto l_shift = dev.get_level(device::key::LEFT_SHIFT);
 			auto r_shift = dev.get_level(device::key::RIGHT_SHIFT);
 			bool shift = l_shift | r_shift;
@@ -188,7 +179,10 @@ namespace sys {
 				for(auto& t : key_tbls_) {
 					if(dev.get_positive(t.key_type)) {
 						if(ctrl) {
-							input_ += t.ctrl_code;
+							auto c = t.ctrl_code;
+							if(c != 0) {
+								input_ += c;
+							}
 						} else {
 							auto s = shift;
 							if(t.normal_code >= 'A' && t.normal_code <= 'Z') {
