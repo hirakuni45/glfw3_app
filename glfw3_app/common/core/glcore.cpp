@@ -83,6 +83,7 @@ namespace gl {
 	static void key_callback_(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
 		bool kv = false;
+		bool rp = false;
 		if(action == GLFW_PRESS) {
 			kv = true;
 			core::bits_.reset(device::key::STATE_REPEAT);
@@ -91,6 +92,7 @@ namespace gl {
 			core::bits_.reset(device::key::STATE_REPEAT);
 		} else if(action == GLFW_REPEAT) {
 			core::bits_.set(device::key::STATE_REPEAT);
+			rp = true;
 		}
 
 		auto ofs = device::key::count_;
@@ -189,7 +191,9 @@ namespace gl {
 			break;
 		}
 		if(ofs != device::key::count_) {
-			core::bits_.set(ofs, kv);
+			if(!rp) {
+				core::bits_.set(ofs, kv);
+			}
 		}
 
 		if(mods & GLFW_MOD_SHIFT) core::bits_.set(device::key::SHIFT);
