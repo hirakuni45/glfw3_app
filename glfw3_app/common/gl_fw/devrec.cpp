@@ -63,6 +63,4 @@ namespace gl {
 		m_record.clear();
 		return true;
 	}
-
-
 }

@@ -1,13 +1,13 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	OpenGL フォント・クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2020 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2025 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <vector>
 #include <map>
 #include <stack>
@@ -52,8 +52,8 @@ namespace gl {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class fonts {
 
-		static const int texture_page_width  = 256;	///< テクスチャーページの幅
-		static const int texture_page_height = 256;	///< テクスチャーページの高さ
+		static constexpr int texture_page_width  = 256;	///< テクスチャーページの幅
+		static constexpr int texture_page_height = 256;	///< テクスチャーページの高さ
 
 		struct tex_map {
 			GLuint	id;		///< テクスチャー ID
@@ -140,7 +140,7 @@ namespace gl {
 		vtx::irect	clip_;
 
 
-		int font_width_(uint32_t code, int fw, int fh)
+		int font_width_(uint32_t code, int fw, int fh) noexcept
 		{
 			int fow = 0;
 			// 等幅フォントで英数字の場合
@@ -162,8 +162,7 @@ namespace gl {
 			return fow;
 		}
 
-
-		bool allocate_font_texture_(int width, int height, tex_map& tmap)
+		bool allocate_font_texture_(int width, int height, tex_map& tmap) noexcept
 		{
 			int w;
 			if(width > height) w = width; else w = height;
@@ -207,14 +206,14 @@ namespace gl {
 			return true;
 		}
 
-
 	public:
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		fonts() : face_(0),
+		fonts() noexcept :
+			face_(0),
 			fore_color_(255, 255, 255, 255), back_color_(0, 0, 0, 255),
 			setup_(false),
 			render_back_(false), h_flip_(false), v_flip_(false), ccw_(false),
@@ -237,7 +236,7 @@ namespace gl {
 			@param[in]	alias	フォント別名
 		*/
 		//-----------------------------------------------------------------//
-		void initialize(const std::string& fpath, const std::string& alias)
+		void initialize(const std::string& fpath, const std::string& alias) noexcept
 		{
 			install_font_type(fpath, alias);
 
@@ -254,7 +253,7 @@ namespace gl {
 			@return 正常なら「true」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool install_font_type(const std::string& ttfname, const std::string& alias = "")
+		bool install_font_type(const std::string& ttfname, const std::string& alias = "") noexcept
 		{
 			bool f = img::ftimg::get_instance().install_font_type(ttfname, alias);
 			if(!f) {
@@ -285,7 +284,7 @@ namespace gl {
 			@return 正常なら「true」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool set_font_type(const std::string& alias)
+		bool set_font_type(const std::string& alias) noexcept
 		{
 			face_map::iterator it = face_map_.find(alias);
 			if(it == face_map_.end()) return false;
@@ -307,7 +306,7 @@ namespace gl {
 			@return フォントタイプの別名
 		*/
 		//-----------------------------------------------------------------//
-		const std::string& get_font_type() const
+		const std::string& get_font_type() const noexcept
 		{
 			return img::ftimg::get_instance().get_font();
 		}
@@ -319,7 +318,7 @@ namespace gl {
 			@param[in]	s	インストールするフォントの高さ
 		*/
 		//-----------------------------------------------------------------//
-		void set_font_size(int s)
+		void set_font_size(int s) noexcept
 		{
 			face_->info_.size = s;
 
@@ -348,7 +347,7 @@ namespace gl {
 			@return		フォントの高さ
 		*/
 		//-----------------------------------------------------------------//
-		int get_font_size() const { return face_->info_.size; }
+		int get_font_size() const noexcept { return face_->info_.size; }
 
 
 		//-----------------------------------------------------------------//
@@ -357,7 +356,7 @@ namespace gl {
 			@param[in]	spc	スペーシング
 		*/
 		//-----------------------------------------------------------------//
-		void set_spaceing(int spc) { face_->info_.spaceing = spc; }
+		void set_spaceing(int spc) noexcept { face_->info_.spaceing = spc; }
 
 
 		//-----------------------------------------------------------------//
@@ -366,7 +365,7 @@ namespace gl {
 			@return		スペーシング
 		*/
 		//-----------------------------------------------------------------//
-		int get_spaceing() const { return face_->info_.spaceing; }
+		int get_spaceing() const noexcept { return face_->info_.spaceing; }
 
 
 		//-----------------------------------------------------------------//
@@ -375,7 +374,7 @@ namespace gl {
 			@param[in]	f	「false」の場合無効
 		 */
 		//-----------------------------------------------------------------//
-		void enable_proportional(bool f = true) { face_->info_.proportional = f; }
+		void enable_proportional(bool f = true) noexcept { face_->info_.proportional = f; }
 
 
 		//-----------------------------------------------------------------//
@@ -384,7 +383,8 @@ namespace gl {
 			@param[in]	f	「false」の場合無効
 		 */
 		//-----------------------------------------------------------------//
-		void enable_antialias(bool f = true) {
+		void enable_antialias(bool f = true) noexcept
+		{
 			face_->info_.antialias = f;
 			img::ftimg::get_instance().set_antialias(f);
 		}
@@ -396,7 +396,7 @@ namespace gl {
 			@param[in]	flag	「false」の場合無効
 		 */
    		//-----------------------------------------------------------------//
-		void enable_center(bool f = true) { face_->info_.center = f; }
+		void enable_center(bool f = true) noexcept { face_->info_.center = f; }
 
 
 		//-----------------------------------------------------------------//
@@ -404,7 +404,8 @@ namespace gl {
 			@brief	フォント環境を退避
 		*/
 		//-----------------------------------------------------------------//
-		void push_font_face() {
+		void push_font_face() noexcept
+		{
 			font_face t;
 			t.type_ = get_font_type();
 			t.size_ = get_font_size();
@@ -417,7 +418,8 @@ namespace gl {
 			@brief	フォント環境を復帰
 		*/
 		//-----------------------------------------------------------------//
-		void pop_font_face() {
+		void pop_font_face() noexcept
+		{
 			if(!stack_face_.empty()) {
 				const font_face& t = stack_face_.top();
 				set_font_type(t.type_);
@@ -432,7 +434,7 @@ namespace gl {
 			@brief	標準的な描画前設定
 		*/
 		//-----------------------------------------------------------------//
-		void setup_matrix()
+		void setup_matrix() noexcept
 		{
 			if(setup_ == false) {
 				glMatrixMode(GL_TEXTURE);
@@ -455,7 +457,7 @@ namespace gl {
 			@param[in]	sch	スクリーンの高さ（ピクセル単位）
 		*/
 		//-----------------------------------------------------------------//
-		void setup_matrix(int scx, int scy, int scw, int sch)
+		void setup_matrix(int scx, int scy, int scw, int sch) noexcept
 		{
 			if(setup_ == false) {
 				glMatrixMode(GL_TEXTURE);
@@ -465,8 +467,8 @@ namespace gl {
 				glMatrixMode(GL_PROJECTION);
 				glLoadIdentity();
 				glOrthof(static_cast<float>(scx), static_cast<float>(scw),
-						 static_cast<float>(sch), static_cast<float>(scy),
-						 -1.0f, 1.0f);
+						static_cast<float>(sch), static_cast<float>(scy),
+						-1.0f, 1.0f);
 				glMatrixMode(GL_MODELVIEW);
 				glLoadIdentity();
 				setup_ = true;
@@ -481,7 +483,7 @@ namespace gl {
 			@param[in]	sch	スクリーンの高さ（ピクセル単位）
 		*/
 		//-----------------------------------------------------------------//
-		void setup_matrix(int scw, int sch) { setup_matrix(0, 0, scw, sch); }
+		void setup_matrix(int scw, int sch) noexcept { setup_matrix(0, 0, scw, sch); }
 
 
 		//-----------------------------------------------------------------//
@@ -490,7 +492,7 @@ namespace gl {
 			@param[in]	rect	開始位置、大きさ
 		*/
 		//-----------------------------------------------------------------//
-		void setup_matrix_with_clip(const vtx::irect& rect)
+		void setup_matrix_with_clip(const vtx::irect& rect) noexcept
 		{
 #if 0
 			int w = rect.size.x;
@@ -507,7 +509,7 @@ namespace gl {
 			@brief	描画後設定
 		*/
 		//-----------------------------------------------------------------//
-		void restore_matrix()
+		void restore_matrix() noexcept
 		{
 			if(setup_) {
 				glMatrixMode(GL_TEXTURE);
@@ -526,7 +528,7 @@ namespace gl {
 			@param[in]	flip	「true」を指定すると反転
 		*/
 		//-----------------------------------------------------------------//
-		void set_holizontal_flip(bool flip = true) { h_flip_ = flip; }
+		void set_holizontal_flip(bool flip = true) noexcept { h_flip_ = flip; }
 
 
 		//-----------------------------------------------------------------//
@@ -535,7 +537,7 @@ namespace gl {
 			@param[in]	flip	「true」を指定すると反転
 		*/
 		//-----------------------------------------------------------------//
-		void set_vertical_flip(bool flip = true) { v_flip_ = flip; }
+		void set_vertical_flip(bool flip = true) noexcept { v_flip_ = flip; }
 
 
 		//-----------------------------------------------------------------//
@@ -544,7 +546,7 @@ namespace gl {
 			@param[in]	c	カラー
 		*/
 		//-----------------------------------------------------------------//
-		void set_fore_color(const img::rgba8& c) { fore_color_ = c; }
+		void set_fore_color(const img::rgba8& c) noexcept { fore_color_ = c; }
 
 
 		//-----------------------------------------------------------------//
@@ -553,7 +555,7 @@ namespace gl {
 			@param[in]	c	カラー
 		*/
 		//-----------------------------------------------------------------//
-		void set_back_color(const img::rgba8& c) { back_color_ = c; }
+		void set_back_color(const img::rgba8& c) noexcept { back_color_ = c; }
 
 
 		//-----------------------------------------------------------------//
@@ -562,7 +564,7 @@ namespace gl {
 			@param[in]	f	「false」元に戻す。
 		*/
 		//-----------------------------------------------------------------//
-		void swap_color(bool f = true) { swap_color_ = f; }
+		void swap_color(bool f = true) noexcept { swap_color_ = f; }
 
 
 		//-----------------------------------------------------------------//
@@ -571,7 +573,7 @@ namespace gl {
 			@param[in]	value	無効にする場合「false」
 		*/
 		//-----------------------------------------------------------------//
-		void enable_back_color(bool value = true) { render_back_ = value; }
+		void enable_back_color(bool value = true) noexcept { render_back_ = value; }
 
 
 		//-----------------------------------------------------------------//
@@ -580,7 +582,7 @@ namespace gl {
 			@param[in]	clip	クリップ領域
 		*/
 		//-----------------------------------------------------------------//
-		void set_clip(vtx::irect& clip) { clip_ = clip; }
+		void set_clip(vtx::irect& clip) noexcept { clip_ = clip; }
 
 
 		//-----------------------------------------------------------------//
@@ -589,7 +591,7 @@ namespace gl {
 			@param[in]	org	開始位置
 		*/
 		//-----------------------------------------------------------------//
-		void set_clip_org(const vtx::ipos& org) { clip_.org = org; }
+		void set_clip_org(const vtx::ipos& org) noexcept { clip_.org = org; }
 
 
 		//-----------------------------------------------------------------//
@@ -598,7 +600,7 @@ namespace gl {
 			@param[in]	size	サイズ
 		*/
 		//-----------------------------------------------------------------//
-		void set_clip_size(const vtx::ipos& size) { clip_.size = size; }
+		void set_clip_size(const vtx::ipos& size) noexcept { clip_.size = size; }
 
 
 		//-----------------------------------------------------------------//
@@ -608,7 +610,7 @@ namespace gl {
 			@return 登録できたら、「fcode_map」のイテレーターを返す
 		*/
 		//-----------------------------------------------------------------//
-		fcode_map::iterator install_image(uint32_t code)
+		fcode_map::iterator install_image(uint32_t code) noexcept
 		{
 			const img::img_gray8& gray = img::ftimg::get_instance().get_img();
 			const vtx::spos& isz = gray.get_size();
@@ -617,7 +619,7 @@ namespace gl {
 			tmap.met = img::ftimg::get_instance().get_metrics();
 			float font_width = tmap.met.width + tmap.met.hori_x + 0.5f;
 			if(code == 0x20) {
- 				font_width = static_cast<float>(isz.y / 4);
+				font_width = static_cast<float>(isz.y / 4);
 			}
 			if(!allocate_font_texture_(static_cast<int>(font_width), isz.y, tmap)) {
 				return face_->fcode_map_.end();
@@ -636,8 +638,8 @@ namespace gl {
 				clrimg.resize(texture_page_width * texture_page_height);
 				glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 				glTexImage2D(GL_TEXTURE_2D, level,
-							 GL_ALPHA, texture_page_width, texture_page_height,
-							 0, GL_ALPHA, GL_UNSIGNED_BYTE, &clrimg[0]);
+							GL_ALPHA, texture_page_width, texture_page_height,
+							0, GL_ALPHA, GL_UNSIGNED_BYTE, &clrimg[0]);
 			}
 
 			{
@@ -658,7 +660,8 @@ namespace gl {
 			@return 登録できたら、「true」を返す。
 		*/
 		//-----------------------------------------------------------------//
-		bool install_font(uint32_t code) {
+		bool install_font(uint32_t code) noexcept
+		{
 			img::ftimg::get_instance().create_bitmap(face_->info_.size, code);
 			fcode_map::iterator it = install_image(code);
 			if(it == face_->fcode_map_.end()) return false;
@@ -672,7 +675,8 @@ namespace gl {
 			@param[in]	list	フォントのコード列
 		*/
 		//-----------------------------------------------------------------//
-		void install_font(const uint32_t* list) {
+		void install_font(const uint32_t* list) noexcept
+		{
 			uint32_t lc;
 			while((lc = *list++) != 0) {
 				install_font(lc);
@@ -686,7 +690,8 @@ namespace gl {
 			@param[in]	list	フォントのコード列
 		*/
 		//-----------------------------------------------------------------//
-		void install_font(const uint16_t* list) {
+		void install_font(const uint16_t* list) noexcept
+		{
 			uint16_t wc;
 			while((wc = *list++) != 0) {
 				install_font(wc);
@@ -700,7 +705,8 @@ namespace gl {
 			@param[in]	list	フォントのコード列
 		*/
 		//-----------------------------------------------------------------//
-		void install_font(const char* list) {
+		void install_font(const char* list) noexcept
+		{
 			uint8_t c;
 			while((c = static_cast<uint8_t>(*list++)) != 0) {
 				install_font(c);
@@ -714,7 +720,7 @@ namespace gl {
 			@param[in]	page	描画するテクスチャーページ
 		*/
 		//-----------------------------------------------------------------//
-		void draw_page(int page)
+		void draw_page(int page) noexcept
 		{
 			glEnable(GL_TEXTURE_2D);
 
@@ -746,7 +752,7 @@ namespace gl {
 			@return	フォントの幅を返す。
 		 */
 		//-----------------------------------------------------------------//
-		int draw(const vtx::ipos& pos, uint32_t code, bool inv = false)
+		int draw(const vtx::ipos& pos, uint32_t code, bool inv = false) noexcept
 		{
 			fcode_map::const_iterator cit = find_font_code(code);
 			if(cit == face_->fcode_map_.end()) {
@@ -789,7 +795,7 @@ namespace gl {
 				ut = clip.org.x - xt;
 				xt = clip.org.x;
 			}
- 			if(xt < clip_xe && clip_xe <= xe) {
+			if(xt < clip_xe && clip_xe <= xe) {
 				ue -= xe - clip_xe;
 				xe = clip_xe;
 			}
@@ -905,7 +911,8 @@ namespace gl {
 			@return	描画幅を返す（複数行の場合、最大値）
 		 */
 		//-----------------------------------------------------------------//
-		int draw(const vtx::ipos& pos, const std::string& text, int limit = 0, int cursor = -1) {
+		int draw(const vtx::ipos& pos, const std::string& text, int limit = 0, int cursor = -1) noexcept
+		{
 			std::u32string ls;
 			utils::utf8_to_utf32(text, ls);
 			return draw(pos, ls, limit, cursor);
@@ -922,7 +929,7 @@ namespace gl {
 			@return	描画幅を返す（複数行の場合、最大値）
 		 */
 		//-----------------------------------------------------------------//
-		int draw(const vtx::ipos& pos, const std::wstring& text, int limit = 0, int cursor = -1)
+		int draw(const vtx::ipos& pos, const std::wstring& text, int limit = 0, int cursor = -1) noexcept
 		{
 			std::u32string ls;
 			utils::utf16_to_utf32(text, ls);
@@ -940,7 +947,7 @@ namespace gl {
 			@return	描画幅を返す（複数行の場合、最大値）
 		 */
 		//-----------------------------------------------------------------//
-		int draw(const vtx::ipos& pos, const std::u32string& text, int limit = 0, int cursor = -1)
+		int draw(const vtx::ipos& pos, const std::u32string& text, int limit = 0, int cursor = -1) noexcept
 		{
 			int x = pos.x;
 			int y = pos.y;
@@ -976,7 +983,7 @@ namespace gl {
 			@return	フォントの幅を返す
 		 */
 		//-----------------------------------------------------------------//
-		int get_width(uint32_t code)
+		int get_width(uint32_t code) noexcept
 		{
 			fcode_map::const_iterator cit = find_font_code(code);
 			if(cit == face_->fcode_map_.end()) {
@@ -996,7 +1003,8 @@ namespace gl {
 			@return	フォントの幅を返す
 		 */
 		//-----------------------------------------------------------------//
-		int get_width(const std::string& text) {
+		int get_width(const std::string& text) noexcept
+		{
 			std::u32string ls;
 			utils::utf8_to_utf32(text, ls);
 			return get_width(ls);
@@ -1010,7 +1018,8 @@ namespace gl {
 			@return	フォントの幅を返す
 		 */
 		//-----------------------------------------------------------------//
-		int get_width(const std::wstring& text) {
+		int get_width(const std::wstring& text) noexcept
+		{
 			std::u32string ls;
 			utils::utf16_to_utf32(text, ls);
 			return get_width(ls);
@@ -1024,7 +1033,7 @@ namespace gl {
 			@return	フォントの幅を返す
 		 */
 		//-----------------------------------------------------------------//
-		int get_width(const std::u32string& text)
+		int get_width(const std::u32string& text) noexcept
 		{
 			int len = 0;
 			int lenmax = 0;
@@ -1046,7 +1055,7 @@ namespace gl {
 			@return	フォントの高さを返す
 		 */
 		//-----------------------------------------------------------------//
-		int get_height() const { return face_->info_.size; }
+		int get_height() const noexcept { return face_->info_.size; }
 
 
 		//-----------------------------------------------------------------//
@@ -1056,7 +1065,8 @@ namespace gl {
 			@return	フォントの高さを返す
 		 */
 		//-----------------------------------------------------------------//
-		int get_height(const std::string& text) const {
+		int get_height(const std::string& text) const noexcept
+		{
 			int h = face_->info_.size;
 			const char*p = text.c_str();
 			char c;
@@ -1076,7 +1086,8 @@ namespace gl {
 			@return	大きさを返す
 		 */
 		//-----------------------------------------------------------------//
-		vtx::ipos get_size(const std::string& s) {
+		vtx::ipos get_size(const std::string& s) noexcept
+		{
 			std::u32string ls;
 			utils::utf8_to_utf32(s, ls);
 			return get_size(ls);
@@ -1090,7 +1101,8 @@ namespace gl {
 			@return	大きさを返す
 		 */
 		//-----------------------------------------------------------------//
-		vtx::ipos get_size(const std::wstring& s) {
+		vtx::ipos get_size(const std::wstring& s) noexcept
+		{
 			std::u32string ls;
 			utils::utf16_to_utf32(s, ls);
 			return get_size(ls);
@@ -1104,7 +1116,7 @@ namespace gl {
 			@return	大きさを返す
 		 */
 		//-----------------------------------------------------------------//
-		vtx::ipos get_size(const std::u32string& s)
+		vtx::ipos get_size(const std::u32string& s) noexcept
 		{
 			vtx::ipos size(0, 0);
 			vtx::ipos tmp(0, face_->info_.size);
@@ -1133,7 +1145,8 @@ namespace gl {
 			@return	大きさを返す
 		 */
 		//-----------------------------------------------------------------//
-		vtx::ipos get_size(const utils::wstrings& wss) {
+		vtx::ipos get_size(const utils::wstrings& wss) noexcept
+		{
 			vtx::ipos size(0, 0);
 			BOOST_FOREACH(const auto& ws, wss) {
 				vtx::ipos s = get_size(ws);
@@ -1149,7 +1162,7 @@ namespace gl {
 			@param[in]	rect	描画位置と大きさ
 		 */
 		//-----------------------------------------------------------------//
-		void draw_back(const vtx::irect& rect)
+		void draw_back(const vtx::irect& rect) noexcept
 		{
 			glEnableClientState(GL_VERTEX_ARRAY);
 			glVertexPointer(2, GL_SHORT, 0, vertex_);
@@ -1182,7 +1195,7 @@ namespace gl {
 			@brief	リソースを廃棄する。
 		*/
 		//-----------------------------------------------------------------//
-		void destroy()
+		void destroy() noexcept
 		{
 			if(!pages_.empty()) {
 				glDeleteTextures(pages_.size(), &pages_[0]);
@@ -1191,4 +1204,3 @@ namespace gl {
 		}
 	};
 }
-

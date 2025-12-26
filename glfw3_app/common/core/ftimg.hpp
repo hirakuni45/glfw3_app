@@ -1,9 +1,9 @@
 #pragma once
 //=====================================================================//
 /*!	@file
-	@brief	フォントイメージを freetype2 で扱うクラス
+	@brief	FreeType2 でフォント画像イメージを扱うクラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2019 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2025 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
@@ -23,7 +23,7 @@ namespace img {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
-		@brief	フォントイメージ(Bitmap)クラス@n
+		@brief	フォントイメージ(Bitmap)クラス @n
 				※FreeType2 ライブラリーを使う。
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -34,9 +34,9 @@ namespace img {
 	public:
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
-			  @brief	フォントの測定基準構造体@n
-		                ・水平基準は、フォントのベースライン@n
-						・垂直基準は、フォントの中心
+			@brief	フォントの測定基準構造体@n
+					・水平基準は、フォントのベースライン@n
+					・垂直基準は、フォントの中心
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct metrics {
@@ -129,9 +129,9 @@ void get_metrics(uint32_t code)
 			@brief	コンストラクター
 		 */
 		//-----------------------------------------------------------------//
-		ftimg() : library_(),
-				  face_map_(), current_face_(face_map_.end()),
-				  matrix_(), metrics_(), gray_(), antialias_(false) { }
+		ftimg() noexcept : library_(),
+			face_map_(), current_face_(face_map_.end()),
+			matrix_(), metrics_(), gray_(), antialias_(false) { }
 
 		ftimg(const ftimg& fti);
 		ftimg& operator = (const ftimg& fti);
@@ -157,7 +157,8 @@ void get_metrics(uint32_t code)
 			@return エラーなら「false」
 		 */
 		//-----------------------------------------------------------------//
-		bool initialize(const std::string& root) {
+		bool initialize(const std::string& root) noexcept
+		{
 			root_path_ = root;
 			if(!root_path_.empty()) {
 				if(root_path_.back() != '/') root_path_ += '/';
@@ -202,7 +203,7 @@ void get_metrics(uint32_t code)
 			@return 成功した場合は「true」
 		 */
 		//-----------------------------------------------------------------//
-		bool install_font_type(const std::string& fontfile, const std::string& alias = "")
+		bool install_font_type(const std::string& fontfile, const std::string& alias = "") noexcept
 		{
 			if(fontfile.empty()) return false;
 
@@ -273,7 +274,8 @@ void get_metrics(uint32_t code)
 			@return 正常なら「true」
 		 */
 		//-----------------------------------------------------------------//
-		bool set_font(const std::string& alias) {
+		bool set_font(const std::string& alias) noexcept
+		{
 			face_map_it it = find_face_(alias);
 			if(it != face_map_.end()) {
 				current_face_ = it;
@@ -293,7 +295,8 @@ void get_metrics(uint32_t code)
 			@return フォントの別名を返す
 		 */
 		//-----------------------------------------------------------------//
-		const std::string& get_font() const {
+		const std::string& get_font() const noexcept
+		{
 			static std::string tmp;
 			if(current_face_ == face_map_.end()) return tmp;
 			return current_face_->first;
@@ -307,7 +310,8 @@ void get_metrics(uint32_t code)
 			@return フォントがインストール済みの場合は「true」
 		 */
 		//-----------------------------------------------------------------//
-		bool find_font(const std::string& alias) const {
+		bool find_font(const std::string& alias) const noexcept
+		{
 			face_map_cit cit = face_map_.find(alias);
 			if(cit != face_map_.end()) {
 				return true;
@@ -324,7 +328,8 @@ void get_metrics(uint32_t code)
 			@return 正常なら「true」
 		 */
 		//-----------------------------------------------------------------//
-		bool delete_font(const std::string& alias) {
+		bool delete_font(const std::string& alias) noexcept
+		{
 			face_map_it it = find_face_(alias);
 			if(it != face_map_.end()) {
 				FT_Done_Face(it->second.face_);
@@ -343,7 +348,7 @@ void get_metrics(uint32_t code)
 								「false」 を指定すると、アンチエリアスし無効
 		 */
 		//-----------------------------------------------------------------//
-		void set_antialias(bool value = true) { antialias_ = value; }
+		void set_antialias(bool value = true) noexcept { antialias_ = value; }
 
 
 		//-----------------------------------------------------------------//
@@ -353,7 +358,7 @@ void get_metrics(uint32_t code)
 			@param[in]	unicode	生成するビットマップの UNICODE
 		 */
 		//-----------------------------------------------------------------//
-		void create_bitmap(int size, uint32_t unicode)
+		void create_bitmap(int size, uint32_t unicode) noexcept
 		{
 			if(current_face_ == face_map_.end()) return;
 
@@ -459,7 +464,7 @@ void get_metrics(uint32_t code)
 			@return	ビットマップイメージの参照
 		 */
 		//-----------------------------------------------------------------//
-		const img_gray8& get_img() const { return gray_; }
+		const img_gray8& get_img() const noexcept { return gray_; }
 
 
 		//-----------------------------------------------------------------//
@@ -468,7 +473,7 @@ void get_metrics(uint32_t code)
 			@return	metrics 構造体
 		 */
 		//-----------------------------------------------------------------//
-		const metrics& get_metrics() const { return metrics_; }
+		const metrics& get_metrics() const noexcept { return metrics_; }
 
 	};
 
