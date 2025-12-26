@@ -55,63 +55,68 @@ namespace sys {
 		uint32_t		last_char_;
 
 		static constexpr key_t key_tbls_[] = {
-			{ gl::device::key::SPACE,		' ',  ' ',  ' '  },
-			{ gl::device::key::APOSTROPHE,	'\'', '"',  0    },	/* ' */
-			{ gl::device::key::COMMA,		',',  '<',  0    },	/* , */
-			{ gl::device::key::MINUS,		'-',  '_',  0    },	/* - */
-			{ gl::device::key::PERIOD,		'.',  '>',  0    },	/* . */
-			{ gl::device::key::SLASH,		'/',  '?',  0    },	/* / */
-			{ gl::device::key::_0,			'0',  ')',  0    },
-			{ gl::device::key::_1,			'1',  '!',  0    },
-			{ gl::device::key::_2,			'2',  '@',  0    },
-			{ gl::device::key::_3,			'3',  '#',  0    },
-			{ gl::device::key::_4,			'4',  '$',  0    },
-			{ gl::device::key::_5,			'5',  '%',  0    },
-			{ gl::device::key::_6,			'6',  '^',  0    },
-			{ gl::device::key::_7,			'7',  '&',  0    },
-			{ gl::device::key::_8,			'8',  '*',  0    },
-			{ gl::device::key::_9,			'9',  '(',  0    },
-			{ gl::device::key::SEMICOLON,	';',  ':',  0    },	/* ; */
-			{ gl::device::key::EQUAL,		'=',  '+',  0    },	/* = */
-			{ gl::device::key::A,			'A',  'a',  'A' - 0x40  },
-			{ gl::device::key::B,			'B',  'b',  'B' - 0x40  },
-			{ gl::device::key::C,			'C',  'c',  'C' - 0x40  },
-			{ gl::device::key::D,			'D',  'd',  'D' - 0x40  },
-			{ gl::device::key::E,			'E',  'e',  'E' - 0x40  },
-			{ gl::device::key::F,			'F',  'f',  'F' - 0x40  },
-			{ gl::device::key::G,			'G',  'g',  'G' - 0x40  },
-			{ gl::device::key::H,			'H',  'h',  'H' - 0x40  },
-			{ gl::device::key::I,			'I',  'i',  'I' - 0x40  },
-			{ gl::device::key::J,			'J',  'j',  'J' - 0x40  },
-			{ gl::device::key::K,			'K',  'k',  'K' - 0x40  },
-			{ gl::device::key::L,			'L',  'l',  'L' - 0x40  },
-			{ gl::device::key::M,			'M',  'm',  'M' - 0x40  },
-			{ gl::device::key::N,			'N',  'n',  'N' - 0x40  },
-			{ gl::device::key::O,			'O',  'o',  'O' - 0x40  },
-			{ gl::device::key::P,			'P',  'p',  'P' - 0x40  },
-			{ gl::device::key::Q,			'Q',  'q',  'Q' - 0x40  },
-			{ gl::device::key::R,			'R',  'r',  'R' - 0x40  },
-			{ gl::device::key::S,			'S',  's',  'S' - 0x40  },
-			{ gl::device::key::T,			'T',  't',  'T' - 0x40  },
-			{ gl::device::key::U,			'U',  'u',  'U' - 0x40  },
-			{ gl::device::key::V,			'V',  'v',  'V' - 0x40  },
-			{ gl::device::key::W,			'W',  'w',  'W' - 0x40  },
-			{ gl::device::key::X,			'X',  'x',  'X' - 0x40  },
-			{ gl::device::key::Y,			'Y',  'y',  'Y' - 0x40  },
-			{ gl::device::key::Z,			'Z',  'z',  'Z' - 0x40  },
-			{ gl::device::key::LEFT_BRACKET,'[',  '{',  '[' - 0x40  },	/* [ (0x5B) */
-			{ gl::device::key::BACKSLASH,	'\\', '|',  '\\' - 0x40 },	/* \ (0x5C) */
-			{ gl::device::key::RIGHT_BRACKET,']', '}',  ']' - 0x40  },	/* ] (0x5D) */
-			{ gl::device::key::GRAVE_ACCENT,'`',  '~',  0  },	/* ` */
-			{ gl::device::key::RIGHT,		'Q'-0x40, 'Q'-0x40, 'Q'-0x40 },
-			{ gl::device::key::LEFT,		'R'-0x40, 'R'-0x40, 'R'-0x40 },
-			{ gl::device::key::DOWN,		'S'-0x40, 'S'-0x40, 'S'-0x40 },
-			{ gl::device::key::UP,			'T'-0x40, 'T'-0x40, 'T'-0x40 },
-			{ gl::device::key::ESCAPE,		0x1b,  0x1b,  0x1b  },
-			{ gl::device::key::BACKSPACE,	0x08,  0x08,  0x08  },
-			{ gl::device::key::DEL,			0x7f,  0x7f,  0x7f  },
-			{ gl::device::key::TAB,			0x09,  0x09,  0x09  },
-			{ gl::device::key::ENTER,		0x0d,  0x0d,  0x0d  },
+			{ gl::device::key::SPACE,			' ',  ' ',  ' '  },
+			{ gl::device::key::APOSTROPHE,		'\'', '"',  0    },	/* ' */
+			{ gl::device::key::COMMA,			',',  '<',  0    },	/* , */
+			{ gl::device::key::MINUS,			'-',  '_',  0    },	/* - */
+			{ gl::device::key::PERIOD,			'.',  '>',  0    },	/* . */
+			{ gl::device::key::SLASH,			'/',  '?',  0    },	/* / */
+			{ gl::device::key::_0,				'0',  ')',  0    },
+			{ gl::device::key::_1,				'1',  '!',  0    },
+			{ gl::device::key::_2,				'2',  '@',  0    },
+			{ gl::device::key::_3,				'3',  '#',  0    },
+			{ gl::device::key::_4,				'4',  '$',  0    },
+			{ gl::device::key::_5,				'5',  '%',  0    },
+			{ gl::device::key::_6,				'6',  '^',  0    },
+			{ gl::device::key::_7,				'7',  '&',  0    },
+			{ gl::device::key::_8,				'8',  '*',  0    },
+			{ gl::device::key::_9,				'9',  '(',  0    },
+			{ gl::device::key::SEMICOLON,		';',  ':',  0    },	/* ; */
+			{ gl::device::key::EQUAL,			'=',  '+',  0    },	/* = */
+			{ gl::device::key::A,				'A',  'a',  'A' - 0x40  },
+			{ gl::device::key::B,				'B',  'b',  'B' - 0x40  },
+			{ gl::device::key::C,				'C',  'c',  'C' - 0x40  },
+			{ gl::device::key::D,				'D',  'd',  'D' - 0x40  },
+			{ gl::device::key::E,				'E',  'e',  'E' - 0x40  },
+			{ gl::device::key::F,				'F',  'f',  'F' - 0x40  },
+			{ gl::device::key::G,				'G',  'g',  'G' - 0x40  },
+			{ gl::device::key::H,				'H',  'h',  'H' - 0x40  },
+			{ gl::device::key::I,				'I',  'i',  'I' - 0x40  },
+			{ gl::device::key::J,				'J',  'j',  'J' - 0x40  },
+			{ gl::device::key::K,				'K',  'k',  'K' - 0x40  },
+			{ gl::device::key::L,				'L',  'l',  'L' - 0x40  },
+			{ gl::device::key::M,				'M',  'm',  'M' - 0x40  },
+			{ gl::device::key::N,				'N',  'n',  'N' - 0x40  },
+			{ gl::device::key::O,				'O',  'o',  'O' - 0x40  },
+			{ gl::device::key::P,				'P',  'p',  'P' - 0x40  },
+			{ gl::device::key::Q,				'Q',  'q',  'Q' - 0x40  },
+			{ gl::device::key::R,				'R',  'r',  'R' - 0x40  },
+			{ gl::device::key::S,				'S',  's',  'S' - 0x40  },
+			{ gl::device::key::T,				'T',  't',  'T' - 0x40  },
+			{ gl::device::key::U,				'U',  'u',  'U' - 0x40  },
+			{ gl::device::key::V,				'V',  'v',  'V' - 0x40  },
+			{ gl::device::key::W,				'W',  'w',  'W' - 0x40  },
+			{ gl::device::key::X,				'X',  'x',  'X' - 0x40  },
+			{ gl::device::key::Y,				'Y',  'y',  'Y' - 0x40  },
+			{ gl::device::key::Z,				'Z',  'z',  'Z' - 0x40  },
+			{ gl::device::key::LEFT_BRACKET,	'[',  '{',  '[' - 0x40  },	/* [ (0x5B) */
+			{ gl::device::key::BACKSLASH,		'\\', '|',  '\\' - 0x40 },	/* \ (0x5C) */
+			{ gl::device::key::RIGHT_BRACKET,	']', '}',  ']' - 0x40  },	/* ] (0x5D) */
+			{ gl::device::key::GRAVE_ACCENT,	'`',  '~',  0  },	/* ` */
+			{ gl::device::key::RIGHT,			KEY_RIGHT,	KEY_RIGHT,	KEY_RIGHT },
+			{ gl::device::key::LEFT,			KEY_LEFT,	KEY_LEFT,	KEY_LEFT  },
+			{ gl::device::key::DOWN,			KEY_DOWN,	KEY_DOWN,	KEY_DOWN  },
+			{ gl::device::key::UP,				KEY_UP,		KEY_UP,		KEY_UP    },
+			{ gl::device::key::ESCAPE,			KEY_ESC,	KEY_ESC,	KEY_ESC   },
+			{ gl::device::key::BACKSPACE,		KEY_BS,		KEY_BS,		KEY_BS    },
+			{ gl::device::key::TAB,				KEY_TAB,	KEY_TAB,	KEY_TAB   },
+			{ gl::device::key::ENTER,			KEY_CR,		KEY_CR,		KEY_CR    },
+			{ gl::device::key::DEL,				KEY_DEL,	KEY_DEL,	KEY_DEL   },
+			{ gl::device::key::HOME,			-128,  -128,  -128  },  // 0x80
+			{ gl::device::key::INSERT,			-127,  -127,  -127  },  // 0x81
+			{ gl::device::key::END,				-126,  -126,  -126  },  // 0x82
+			{ gl::device::key::PAGE_UP,			-125,  -125,  -125  },  // 0x83
+			{ gl::device::key::PAGE_DOWN,		-124,  -124,  -124  },  // 0x84
 		};
 
 	public:
