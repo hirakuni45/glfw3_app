@@ -1,9 +1,12 @@
 #pragma once
 //=========================================================================//
 /*!	@file
-	@brief	GUI Widget ターミナル
+	@brief	GUI Widget ターミナル @n
+			utils/terminal.hpp クラスで管理するの字列を描画する。 @n
+			文字コードは UTF-32 とする @n
+			キーボード入力されたコードは、utils/keyboard.hpp クラスが受け持つ
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2024 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2025 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -40,7 +43,7 @@ namespace gui {
 
 			uint32_t		font_width_;	///< フォント幅（初期化で設定される）
 			uint32_t		font_height_;	///< フォント高
-			uint32_t		height_;		///< 行の高さ
+			uint32_t		height_;		///< 行の高さ（フォント高より大きくする）
 
 			bool			echo_;			///< キー入力とエコー
 			bool			auto_fit_;	   	///< 等幅フォントに対するフレームの最適化
@@ -288,9 +291,9 @@ namespace gui {
 						}
 						auto sr = w->get_draw_area();
 						bool resize = false;
+						vtx::ipos ts(sr.size.x / param_.font_width_, sr.size.y / param_.height_);
 						if(param_.auto_fit_) {
-							vtx::ipos ss(sr.size.x / param_.font_width_,
-										 sr.size.y / param_.height_);
+							vtx::ipos ss = ts;
 							ss.x *= param_.font_width_;
 //							if(ss.x < w->get_param().resize_min_.x) {
 //								ss.x = w->get_param().resize_min_.x / param_.font_width_;
@@ -307,6 +310,7 @@ namespace gui {
 						if(sr.size != get_rect().size) resize = true;
 						at_rect() = sr;
 						if(resize) {
+							terminal_.set_limit(ts);
 						}
 					}
 				}
@@ -397,7 +401,10 @@ namespace gui {
 				vtx::ipos chs(rect.org);
 				auto ln = terminal_.get_line_num();
 				vtx::ipos ofs(0);
-				if(ln > limit.y) ofs.y = ln - limit.y;
+				if(ln > limit.y) {
+					ofs.y = ln - limit.y;
+				}
+				auto ofsy = ofs.y;
 				auto npy = ofs.y - scroll_ofs_.y;
 				if(npy < 0) {
 					npy = 0;
@@ -410,7 +417,7 @@ namespace gui {
 				for(pos.y = 0; pos.y < limit.y; ++pos.y) {
 					pos.x = 0;
 					while(pos.x < limit.x) {
-						const auto& t = terminal_.get_char(pos + ofs);
+						const auto& t = terminal_.get_char(pos + ofs, false);
 						img::rgba8 fc = t.fc_;
 						fc *= cf.r;
 						fc.alpha_scale(cf.a);
@@ -427,7 +434,7 @@ namespace gui {
 							bc.b += fc.b / 2;
 						}
 						fonts.set_back_color(bc);
-						if(focus_ && (pos + ofs) == terminal_.get_cursor()) {
+						if(focus_ && ofs.y == ofsy && pos == terminal_.get_cursor()) {
 							if((interval_ % 40) < 20) {
 								fonts.swap_color();
 							}

@@ -61,27 +61,27 @@ setaltspecg1          Set G1 alt char ROM and spec. graphics ^[)2
 setss2 SS2            Set single shift 2                     ^[N
 setss3 SS3            Set single shift 3                     ^[O
 
-modesoff SGR0         Turn off character attributes          ^[[m
-modesoff SGR0         Turn off character attributes          ^[[0m
+~ modesoff SGR0         Turn off character attributes          ^[[m
+~ modesoff SGR0         Turn off character attributes          ^[[0m
 bold SGR1             Turn bold mode on                      ^[[1m
-lowint SGR2           Turn low intensity mode on             ^[[2m
+~ lowint SGR2           Turn low intensity mode on             ^[[2m
 underline SGR4        Turn underline mode on                 ^[[4m
 blink SGR5            Turn blinking mode on                  ^[[5m
-reverse SGR7          Turn reverse video on                  ^[[7m
+~ reverse SGR7          Turn reverse video on                  ^[[7m
 invisible SGR8        Turn invisible text mode on            ^[[8m
 
 setwin DECSTBM        Set top and bottom line#s of a window  ^[[<v>;<v>r
 
-cursorup(n) CUU       Move cursor up n lines                 ^[[<n>A
-cursordn(n) CUD       Move cursor down n lines               ^[[<n>B
-cursorrt(n) CUF       Move cursor right n lines              ^[[<n>C
-cursorlf(n) CUB       Move cursor left n lines               ^[[<n>D
-cursorhome            Move cursor to upper left corner       ^[[H
-cursorhome            Move cursor to upper left corner       ^[[;H
-cursorpos(v,h) CUP    Move cursor to screen location v,h     ^[[<v>;<h>H
-hvhome                Move cursor to upper left corner       ^[[f
-hvhome                Move cursor to upper left corner       ^[[;f
-hvpos(v,h) CUP        Move cursor to screen location v,h     ^[[<v>;<h>f
+~ cursorup(n) CUU       Move cursor up n lines                 ^[[<n>A
+~ cursordn(n) CUD       Move cursor down n lines               ^[[<n>B
+~ cursorrt(n) CUF       Move cursor right n lines              ^[[<n>C
+~ cursorlf(n) CUB       Move cursor left n lines               ^[[<n>D
+~ cursorhome            Move cursor to upper left corner       ^[[H
+~ cursorhome            Move cursor to upper left corner       ^[[;H
+~ cursorpos(v,h) CUP    Move cursor to screen location v,h     ^[[<v>;<h>H
+~ hvhome                Move cursor to upper left corner       ^[[f
+~ hvhome                Move cursor to upper left corner       ^[[;f
+~ hvpos(v,h) CUP        Move cursor to screen location v,h     ^[[<v>;<h>f
 index IND             Move/scroll window up one line         ^[D
 revindex RI           Move/scroll window down one line       ^[M
 nextline NEL          Move to next line                      ^[E
@@ -165,34 +165,49 @@ namespace utils {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
-		@brief	ターミナル・クラス (VT100 エスケープシーケンスの一部)
+		@brief	ターミナル・クラス (VT100 エスケープシーケンスの一部を実装)
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct terminal {
 
-		static constexpr int default_lines_  = 150;		///< 標準、最大行数
 		static constexpr int default_width_  = 80;		///< 標準、最大横幅（132 文字バージョンもある）
 		static constexpr int default_height_ = 24;		///< 標準、最大高さ
+		static constexpr int default_lines_  = default_height_ * 3;	///< 標準、最大行数
 
-		static constexpr img::rgba8 color8_nom_[8] = {  ///< 標準カラー
-			{   4,   4,   4 },  // Black
-			{ 240,   4,   4 },  // Red
-			{   4, 240,   4 },  // Green
-			{ 240, 240,   4 },	// Yellow
-			{   4,   4, 240 },	// Blue
-			{ 240,   4, 240 },	// Magenta
-			{   4, 240, 240 },	// Cyan
-			{ 240, 240, 240 }	// White
-		};
-		static constexpr img::rgba8 color8_str_[8] = {  ///< 強調カラー
-			{   0,   0,   0 },  // Black
-			{ 255,   0,   0 },  // Red
-			{   0, 255,   0 },  // Green
-			{ 255, 255,   0 },	// Yellow
-			{   0,   0, 255 },	// Blue
-			{ 255,   0, 255 },	// Magenta
-			{   0, 255, 255 },	// Cyan
-			{ 255, 255, 255 }	// White
+		// 256 色とは、基本 16 色、RGB 216色(6 x 6 x 6 の立方体に配置)、および 24 レベルのグレースケール
+		static constexpr img::rgba8 color256_[256] = {
+			{  0,  0,  0}, {255,  0,  0}, {  0,255,  0}, {255,255,  0}, {  0,  0,255}, {255,  0,255}, {  0,255,255}, {255,255,255},  //   0 -   7
+			{128,128,128}, {128,  0,  0}, {  0,128,  0}, {128,128,  0}, {  0,  0,128}, {128,  0,128}, {  0,128,128}, {192,192,192},  //   8 -  15
+			{  0,  0,  0}, {  0,  0, 95}, {  0,  0,135}, {  0,  0,175}, {  0,  0,215}, {  0,  0,255}, {  0, 95,  0}, {  0, 95, 95},  //  16 -  23
+			{  0, 95,135}, {  0, 95,175}, {  0, 95,215}, {  0, 95,255}, {  0,135,  0}, {  0,135, 95}, {  0,135,135}, {  0,135,175},  //  24 -  31
+			{  0,135,215}, {  0,135,255}, {  0,175,  0}, {  0,175, 95}, {  0,175,135}, {  0,175,175}, {  0,175,215}, {  0,175,255},  //  32 -  39
+			{  0,215,  0}, {  0,215, 95}, {  0,215,135}, {  0,215,175}, {  0,215,215}, {  0,215,255}, {  0,255,  0}, {  0,255, 95},  //  40 -  47
+			{  0,255,135}, {  0,255,175}, {  0,255,215}, {  0,255,255}, { 95,  0,  0}, { 95,  0, 95}, { 95,  0,135}, { 95,  0,175},  //  48 -  55
+			{ 95,  0,215}, { 95,  0,255}, { 95, 95,  0}, { 95, 95, 95}, { 95, 95,135}, { 95, 95,175}, { 95, 95,215}, { 95, 95,255},  //  56 -  63
+			{ 95,135,  0}, { 95,135, 95}, { 95,135,135}, { 95,135,175}, { 95,135,215}, { 95,135,255}, { 95,175,  0}, { 95,175, 95},  //  64 -  71
+			{ 95,175,135}, { 95,175,175}, { 95,175,215}, { 95,175,255}, { 95,215,  0}, { 95,215, 95}, { 95,215,135}, { 95,215,175},  //  72 -  79
+			{ 95,215,215}, { 95,215,255}, { 95,255,  0}, { 95,255, 95}, { 95,255,135}, { 95,255,175}, { 95,255,215}, { 95,255,255},  //  80 -  87
+			{135,  0,  0}, {135,  0, 95}, {135,  0,135}, {135,  0,175}, {135,  0,215}, {135,  0,255}, {135, 95,  0}, {135, 95, 95},  //  88 -  95
+			{135, 95,135}, {135, 95,175}, {135, 95,215}, {135, 95,255}, {135,135,  0}, {135,135, 95}, {135,135,135}, {135,135,175},  //  96 - 103
+			{135,135,215}, {135,135,255}, {135,175,  0}, {135,175, 95}, {135,175,135}, {135,175,175}, {135,175,215}, {135,175,255},  // 104 - 111
+			{135,215,  0}, {135,215, 95}, {135,215,135}, {135,215,175}, {135,215,215}, {135,215,255}, {135,255,  0}, {135,255, 95},  // 112 - 119
+			{135,255,135}, {135,255,175}, {135,255,215}, {135,255,255}, {175,  0,  0}, {175,  0, 95}, {175,  0,135}, {175,  0,175},  // 120 - 127
+			{175,  0,215}, {175,  0,255}, {175, 95,  0}, {175, 95, 95}, {175, 95,135}, {175, 95,175}, {175, 95,215}, {175, 95,255},  // 128 - 135
+			{175,135,  0}, {175,135, 95}, {175,135,135}, {175,135,175}, {175,135,215}, {175,135,255}, {175,175,  0}, {175,175, 95},  // 136 - 143
+			{175,175,135}, {175,175,175}, {175,175,215}, {175,175,255}, {175,215,  0}, {175,215, 95}, {175,215,135}, {175,215,175},  // 144 - 151
+			{175,215,215}, {175,215,255}, {175,255,  0}, {175,255, 95}, {175,255,135}, {175,255,175}, {175,255,215}, {175,255,255},  // 152 - 159
+			{215,  0,  0}, {215,  0, 95}, {215,  0,135}, {215,  0,175}, {215,  0,215}, {215,  0,255}, {215, 95,  0}, {215, 95, 95},  // 160 - 167
+			{215, 95,135}, {215, 95,175}, {215, 95,215}, {215, 95,255}, {215,135,  0}, {215,135, 95}, {215,135,135}, {215,135,175},  // 168 - 175
+			{215,135,215}, {215,135,255}, {215,175,  0}, {215,175, 95}, {215,175,135}, {215,175,175}, {215,175,215}, {215,175,255},  // 176 - 183
+			{215,215,  0}, {215,215, 95}, {215,215,135}, {215,215,175}, {215,215,215}, {215,215,255}, {215,255,  0}, {215,255, 95},  // 184 - 191
+			{215,255,135}, {215,255,175}, {215,255,215}, {215,255,255}, {255,  0,  0}, {255,  0, 95}, {255,  0,135}, {255,  0,175},  // 192 - 199
+			{255,  0,215}, {255,  0,255}, {255, 95,  0}, {255, 95, 95}, {255, 95,135}, {255, 95,175}, {255, 95,215}, {255, 95,255},  // 200 - 207
+			{255,135,  0}, {255,135, 95}, {255,135,135}, {255,135,175}, {255,135,215}, {255,135,255}, {255,175,  0}, {255,175, 95},  // 208 - 215
+			{255,175,135}, {255,175,175}, {255,175,215}, {255,175,255}, {255,215,  0}, {255,215, 95}, {255,215,135}, {255,215,175},  // 216 - 223
+			{255,215,215}, {255,215,255}, {255,255,  0}, {255,255, 95}, {255,255,135}, {255,255,175}, {255,255,215}, {255,255,255},  // 224 - 231
+			{  8,  8,  8}, { 18, 18, 18}, { 28, 28, 28}, { 38, 38, 38}, { 48, 48, 48}, { 58, 58, 58}, { 68, 68, 68}, { 78, 78, 78},  // 232 - 239
+			{ 88, 88, 88}, { 98, 98, 98}, {108,108,108}, {118,118,118}, {128,128,128}, {138,138,138}, {148,148,148}, {158,158,158},  // 240 - 247
+			{168,168,168}, {178,178,178}, {188,188,188}, {198,198,198}, {208,208,208}, {218,218,218}, {228,228,228}, {238,238,238}   // 248 - 255
 		};
 		static constexpr uint32_t esc_number_max_ = 16;  ///< エスケープシーケンスで数字トークンを受け取る最大数 
 
@@ -227,7 +242,6 @@ namespace utils {
 
 		lines		lines_;
 		vtx::ipos	limit_;
-
 		vtx::ipos	pos_;
 
 		cha_t		spc_;
@@ -250,16 +264,64 @@ namespace utils {
 		uint32_t	esc_number_idx_;
 		uint32_t	esc_number_[esc_number_max_];
 
+		bool test_wide_(uint32_t cha) const noexcept
+		{
+			return cha >= 0x100;
+		}
+
+		auto conv_text_(const line& l) const noexcept
+		{
+			std::u32string ls;
+			for(auto ch : l) {
+				ls += ch.cha_;
+			}
+			return utils::utf32_to_utf8(ls);
+		}
+
+		uint32_t linepos_(int pos) const noexcept
+		{
+			uint32_t ofs = 0;
+			if(lines_.size() >= limit_.y) {
+				ofs = lines_.size() - limit_.y;
+			}
+			uint32_t i = ofs + pos;
+			if(i >= lines_.size()) {
+				i = lines_.size() - 1;
+			}
+			return i;
+		}
+
+		auto& at_line_(int pos) noexcept
+		{
+			return lines_[linepos_(pos)];
+		}
+
+		const auto& get_line_(int pos, bool real = true) const noexcept
+		{
+			uint32_t p = pos;
+			if(real) {
+				p = linepos_(pos);
+			} else {
+				if(lines_.size() <= pos) {
+					p = lines_.size() - 1;
+				}
+			}
+			return lines_[p];
+		}
+
 		void new_line_() noexcept
 		{
-			if(lines_.size() >= limit_.y) {
-				lines_.pop_front();
-			} else {
+			if(pos_.y < (limit_.y - 1)) {
 				++pos_.y;
 			}
+
 			last_ = lines_.back();
 			line l;
 			lines_.push_back(l);
+
+			if(lines_.size() > default_lines_) {
+				lines_.pop_front();
+			}
 		}
 
 		int count_cha_(const line& l) const noexcept
@@ -296,10 +358,11 @@ namespace utils {
 				if((pos_.x + step) >= limit_.x) {
 					new_line_();
 					pos_.x = 0;
+					return;
 				}
 			}
 
-			line& l = lines_[pos_.y];
+			auto& l = at_line_(pos_.y);
 			if(l.empty()) {
 				if(pos_.x > 0) {
 					l.assign(pos_.x, ' ');
@@ -309,6 +372,9 @@ namespace utils {
 			if(idx < l.size()) {
 				if(insert_) {
 					l.insert(l.begin() + idx, cha_);
+					if(count_cha_(l) > limit_.x) {
+						l.pop_back();
+					}
 				} else {
 					l[idx] = cha_;
 					pos_.x += step;
@@ -318,17 +384,19 @@ namespace utils {
 				pos_.x += step;
 			}
 
-			if(count_cha_(l) >= limit_.x) {
+			if(pos_.x >= limit_.x) {
 				new_line_();
 				pos_.x = 0;
 			}
 		}
 
-		const auto& getchar_(const vtx::ipos& pos) const noexcept
+		const auto& getchar_(const vtx::ipos& pos, bool real) const noexcept
 		{
-			if(pos.y < 0 || pos.y >= lines_.size()) return spc_;
+			if(pos.y < 0 || pos.y >= lines_.size() || pos.x < 0) {
+				return spc_;
+			}
 
-			const auto& l = lines_[pos.y];
+			const auto& l = get_line_(pos.y, real);
 			if(l.empty()) {
 				return spc_;
 			}
@@ -342,35 +410,69 @@ namespace utils {
 					++x;
 				}
 				++n;
-				if(n >= l.size()) {
-					return spc_;
-				}
+			}
+			if(n >= l.size()) {
+				return spc_;
 			}
 			return l[n];
 		}		
 
+		void up_() noexcept
+		{
+			if(pos_.y > 0) {
+				pos_.y--;
+				auto& l = at_line_(pos_.y);
+				auto n = count_cha_(l);
+				while(n < pos_.x) {
+					l.push_back(spc_);
+					++n;
+				}
+			}
+		}
+
+		void down_() noexcept
+		{
+			if(pos_.y < (limit_.y - 1)) {
+				++pos_.y;
+			}
+			if(pos_.y >= lines_.size()) {
+				line l;
+				lines_.push_back(l);
+			}
+			auto& l = at_line_(pos_.y);
+			auto n = count_cha_(l);
+			while(n < pos_.x) {
+				l.push_back(spc_);
+				++n;
+			}
+		}
+
 		void right_() noexcept
 		{
-			if(pos_.x < count_cha_(lines_[pos_.y])) {
-				if(test_wide(getchar_(pos_).cha_)) {
+			auto& l = at_line_(pos_.y);
+			auto len = count_cha_(l);
+			if(pos_.x < len) {
+				auto x = pos_.x;
+				if(test_wide(getchar_(pos_, true).cha_)) {
 					pos_.x += 2;
 				} else {
 					++pos_.x;
 				}
 				if(pos_.x >= limit_.x) {
-					pos_.x = 0;
-					down_();
+					pos_.x = x;
 				}
 			} else {
-				cha_ = spc_;
-				putchar_();
+				if(pos_.x < (limit_.x - 1)) {
+					++pos_.x;
+					l.push_back(spc_);
+				}
 			}
 		}
 
 		void left_() noexcept
 		{
 			if(pos_.x > 0) {
-				auto& l = lines_[pos_.y];
+				auto& l = at_line_(pos_.y);
 				while(l.size() < pos_.x) {
 					l.push_back(spc_);
 				}
@@ -384,31 +486,51 @@ namespace utils {
 			}
 		}
 
-		void down_() noexcept
+		void set_cursor_(const vtx::ipos& pos) noexcept
 		{
-			if(pos_.y < (lines_.size() - 1)) {
-				++pos_.y;
-				auto& l = lines_[pos_.y];
-				while(l.size() < pos_.x) {
-					l.push_back(spc_);
+			vtx::ipos np = pos;
+			if(np.x < 0) { np.x = 0; }
+			if(np.y < 0) { np.y = 0; }
+			if(np.x >= limit_.x) { np.x = limit_.x - 1; }
+			if(np.y >= limit_.y) { np.y = limit_.y - 1; }
+
+			if(np.y > pos_.y) {
+				while(np.y > pos_.y) {
+					down_();
 				}
-			} else {
-				new_line_();
+			} else if(np.y < pos_.y) {
+				while(np.y < pos_.y) {
+					up_();
+				}
+			}
+
+			if(np.x > pos_.x) {
+				while(np.x > pos_.x) {
+					right_();
+				}
+			} else if(np.x < pos_.x) {
+				while(np.x < pos_.x) {
+					left_();
+				}
 			}
 		}
 
-		void up_() noexcept
+		void clear_() noexcept
 		{
-			if(pos_.y > 0) {
-				pos_.y--;
-				auto& l = lines_[pos_.y];
-				while(l.size() < pos_.x) {
-					l.push_back(spc_);
-				}
+			auto n = limit_.y;
+			while(n > 0) {
+				if(lines_.size() == 0) break;
+				lines_.pop_back();
+				--n;
 			}
+
+			line l;
+			lines_.push_back(l);
+			pos_.set(0);
+			last_.clear();
 		}
 
-		void esc_m_() noexcept
+		void cmd_m_() noexcept
 		{
 			enum class set_color {
 				none,
@@ -426,7 +548,6 @@ namespace utils {
 			auto color_mode = set_color::none;
 
 			for(uint32_t i = 0; i < esc_number_idx_; ++i) {
-
 				auto n = esc_number_[i];
 
 				bool conti = false;
@@ -449,12 +570,12 @@ namespace utils {
 				case set_color::fore_b:
 					fore_color_.b = std::clamp<uint32_t>(n, 0, 255);
 					color_mode = set_color::none;
-					conti = true;
+					conti = false;
 					break;
 				case set_color::fore_indexed:
-					// auto idx = std::clamp<uint32_t>(n, 0, 255);
+					fore_color_ = color256_[std::clamp<uint32_t>(n, 0, 255)];
 					color_mode = set_color::none;
-					conti = true;
+					conti = false;
 					break;
 				case set_color::back_color_sel:
 					if(n == 2) color_mode = set_color::back_r;
@@ -474,12 +595,12 @@ namespace utils {
 				case set_color::back_b:
 					back_color_.b = std::clamp<uint32_t>(n, 0, 255);
 					color_mode = set_color::none;
-					conti = true;
+					conti = false;
 					break;
 				case set_color::back_indexed:
-					// auto idx = std::clamp<uint32_t>(n, 0, 255);
+					back_color_ = color256_[std::clamp<uint32_t>(n, 0, 255)];
 					color_mode = set_color::none;
-					conti = true;
+					conti = false;
 					break;
 				default:
 					break;
@@ -504,53 +625,34 @@ namespace utils {
 					back_color_.set(0, 0, 0);
 				} else if(n >= 30 && n <= 37) {
 					n -= 30;
-					fore_color_ = color8_nom_[n];
+					fore_color_ = color256_[8 + n];
 				} else if(n >= 40 && n <= 47) {
 					n -= 40;
-					back_color_ = color8_nom_[n];
+					back_color_ = color256_[8 + n];
 				} else if(n >= 90 && n <= 97) {
 					n -= 90;
-					fore_color_ = color8_str_[n];
+					fore_color_ = color256_[n];
 				} else if(n >= 100 && n <= 107) {
 					n -= 100;
-					back_color_ = color8_str_[n];
+					back_color_ = color256_[n];
 				}
 			}
 		}
 
-		void esc_A2T_(uint32_t cha) noexcept
+// hvhome                Move cursor to upper left corner       ^[[f
+// hvhome                Move cursor to upper left corner       ^[[;f
+// hvpos(v,h) CUP        Move cursor to screen location v,h     ^[[<v>;<h>f
+		void cmd_Hf_() noexcept
 		{
-			if(cha == 'H') {  // move to cursor
-				if(esc_number_idx_ >= 2) {
-					auto y = esc_number_[0];
-					if(y >= limit_.y) {
-						y = limit_.y - 1;
-					}
-					if(y <= pos_.y) {
-						pos_.y = y;
-					} else {
-						while(pos_.y < y) {
-							down_();
-						}
-					}
-					auto x = esc_number_[1];
-					if(x >= limit_.x) {
-						x = limit_.x - 1;
-					}
-					if(x <= pos_.x) {
-						pos_.x = x;
-					} else {
-						while(pos_.x < x) {
-							right_();
-						}
-					}
-				} else {
-					pos_.x = 0;
-					pos_.y = 0;
-				}
-				return;
+			if(esc_number_idx_ < 2) {
+				set_cursor_(vtx::ipos(0));
+			} else {
+				set_cursor_(vtx::ipos(esc_number_[1], esc_number_[0]));
 			}
+		}
 
+		void cmd_ABCD_(uint32_t cha) noexcept
+		{
 			uint32_t n = 1;
 			if(esc_number_idx_ >= 1) {
 				n = esc_number_[0];
@@ -569,26 +671,44 @@ namespace utils {
 				case 'D':
 					left_();
 					break;
-#if 0
-				case 'E':
-					down_();
-					pos_.x = 0;
-					break;
-				case 'F':
-					up_();
-					pos_.x = 0;
-					break;
-#endif
 				default:
 					break;
 				}
 			}
 		}
 
-		void esc_getcursorpos_() noexcept
+// cleareol EL0          Clear line from cursor right           ^[[K
+// cleareol EL0          Clear line from cursor right           ^[[0K
+// clearbol EL1          Clear line from cursor left            ^[[1K
+// clearline EL2         Clear entire line                      ^[[2K
+		void cmd_K_() noexcept
+		{
+			auto& l = at_line_(pos_.y);
+			if(esc_number_[0] == 0) {
+				
+			} else if(esc_number_[0] == 1) {
+			} else if(esc_number_[0] == 2) {
+			}
+		}
+
+// cleareos ED0          Clear screen from cursor down          ^[[J
+// cleareos ED0          Clear screen from cursor down          ^[[0J
+// clearbos ED1          Clear screen from cursor up            ^[[1J
+// clearscreen ED2       Clear entire screen                    ^[[2J
+		void cmd_J_() noexcept
+		{
+			if(esc_number_[0] == 0) {
+			} else if(esc_number_[0] == 1) {
+			} else if(esc_number_[0] == 2) {
+			}
+		}
+
+// getcursor DSR         Get cursor position                    ^[6n
+// cursorpos CPR            Response: cursor is at v,h          ^[<v>;<h>R
+		void cmd_getcursorpos_() noexcept
 		{
 			if(esc_number_idx_ == 1 && esc_number_[0] == 6) {
-
+				
 			}
 		}
 
@@ -601,10 +721,10 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		terminal(int hl = default_lines_, int wl = default_width_) noexcept :
-			fore_color_(img::rgba8(255, 255, 255, 255)),
-			back_color_(img::rgba8(  0,   0,   0, 255)),
+			fore_color_(img::rgba8(255, 255, 255)),
+			back_color_(img::rgba8(  0,   0,   0)),
 			cha_(), lines_(), limit_(wl, hl), pos_(0), spc_(' '),
-			auto_crlf_(false), insert_(false), swap_color_(false),
+			auto_crlf_(true), insert_(false), swap_color_(false),
 			last_(), output_func_(nullptr),
 			esc_mode_(ESC_MODE::NONE), esc_number_cnt_(0), esc_number_idx_(0), esc_number_{ 0 }
 		{
@@ -629,13 +749,23 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		bool test_wide(uint32_t cha) const noexcept
 		{
-			return cha >= 0x100;
+			return test_wide_(cha);
 		}
 
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	自動 CR/LF の許可／不許可
+			@brief	自動 CR/LF の取得
+			@return	自動 CR/LF
+		*/
+		//-----------------------------------------------------------------//
+		bool get_crlf() const noexcept { return auto_crlf_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	自動 CR/LF の許可／不許可 @n
+					標準的に「有効」
 			@param[in]	f	自動機能を無効にする場合「false」
 		*/
 		//-----------------------------------------------------------------//
@@ -644,11 +774,53 @@ namespace utils {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	insert モードの許可／不許可
+			@brief	自動 insert の取得
+			@return	自動 insert
+		*/
+		//-----------------------------------------------------------------//
+		bool get_insert() const noexcept { return insert_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	insert モードの許可／不許可 @n
+					標準的に「無効」
 			@param[in]	f	不許可にする場合「false」
 		*/
 		//-----------------------------------------------------------------//
 		void enable_insert(bool f = true) noexcept { insert_ = f; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	リミットの取得
+			@return	リミット
+		*/
+		//-----------------------------------------------------------------//
+		const auto& get_limit() const noexcept { return limit_; }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	リミットの指定
+			@param[in]	newl	新規のリミット値
+		*/
+		//-----------------------------------------------------------------//
+		void set_limit(const vtx::ipos& newl) noexcept
+		{
+			if(newl.y <= 0 || newl.x <= 0) return;
+
+			while((newl.y - 1) < pos_.y) {
+				if(lines_.empty()) break;
+				pos_.y--;
+				lines_.pop_back();
+			}
+			if(newl.x <= pos_.x) {
+				pos_.x = newl.x - 1; 
+			}
+
+			limit_ = newl;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -658,11 +830,7 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		void clear() noexcept
 		{
-			lines_.clear();
-			line l;
-			lines_.push_back(l);
-			pos_.set(0);
-			last_.clear();
+			clear_();
 		}
 
 
@@ -674,7 +842,7 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		void clear_line(bool all = true) noexcept
 		{
-			line& l = lines_[pos_.y];
+			line& l = at_line_(pos_.y);
 			if(all) l.clear();
 			else {
 				if(pos_.x < l.size()) {
@@ -751,24 +919,42 @@ namespace utils {
 					if(esc_number_cnt_ > 0) {
 						++esc_number_idx_;
 					} 
-					esc_m_();
+					cmd_m_();
+					esc_mode_ = ESC_MODE::NONE;
+				} else if(cha == 'H' || cha == 'f') {
+					if(esc_number_cnt_ > 0) {
+						++esc_number_idx_;
+					} 
+					cmd_Hf_();
+					esc_mode_ = ESC_MODE::NONE;
+				} else if(cha == 'K') {
+					if(esc_number_cnt_ > 0) {
+						++esc_number_idx_;
+					} 
+					cmd_K_();
+					esc_mode_ = ESC_MODE::NONE;
+				} else if(cha == 'J') {
+					if(esc_number_cnt_ > 0) {
+						++esc_number_idx_;
+					} 
+					cmd_J_();
 					esc_mode_ = ESC_MODE::NONE;
 				} else if(cha == ';') {
 					if(esc_number_cnt_ > 0) {
 						++esc_number_idx_;
 					}
-					esc_number_cnt_ = 0;
 					if(esc_number_idx_ >= esc_number_max_) esc_number_idx_ = esc_number_max_ - 1; 
 					esc_number_[esc_number_idx_] = 0;
-				} else if(cha >= 'A' && cha <= 'T') {
+					esc_number_cnt_ = 0;
+				} else if(cha >= 'A' && cha <= 'D') {
 					if(esc_number_cnt_ > 0) {
 						++esc_number_idx_;
 					}
-					esc_A2T_(cha);
+					cmd_ABCD_(cha);
 					esc_mode_ = ESC_MODE::NONE;
 				} else if(cha == 'n') {
 					// ESC [ 6 n というエスケープシーケンスを利用してターミナル上のカーソル位置を取得
-					esc_getcursorpos_();
+					cmd_getcursorpos_();
 					esc_mode_ = ESC_MODE::NONE;
 				} else {
 					esc_mode_ = ESC_MODE::NONE;
@@ -791,7 +977,7 @@ namespace utils {
 				break;
 			case 0x08:  // Back Space
 				if(pos_.x > 0) {
-					auto& l = lines_[pos_.y];
+					auto& l = at_line_(pos_.y);
 					--pos_.x;
 					if(pos_.x < l.size()) {
 						l.erase(l.begin() + pos_.x);
@@ -803,7 +989,7 @@ namespace utils {
 				break;
 			case 0x7f:  // DEL
 				{
-					auto& l = lines_[pos_.y];
+					auto& l = at_line_(pos_.y);
 					auto idx = count_index_(l, pos_.x);
 					if(idx < l.size()) {
 						l.erase(l.begin() + idx);
@@ -861,42 +1047,6 @@ namespace utils {
 			}
 		}
 
-#if 0
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	フォア・カラーの設定
-			@param[in]	pos		位置
-			@param[in]	col		カラー
-		*/
-		//-----------------------------------------------------------------//
-		void set_fore_color(const vtx::ipos& pos, const img::rgba8& col) noexcept
-		{
-			if(pos.y >= 0 && pos.y < lines_.size()) {
-				auto& l = lines_[pos.y];
-				if(pos.x >= 0 && pos.x < l.size()) {
-					l[pos.x].fc_ = col;
-				}
-			}
-		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	バック・カラーの設定
-			@param[in]	pos		位置
-			@param[in]	col		カラー
-		*/
-		//-----------------------------------------------------------------//
-		void set_back_color(const vtx::ipos& pos, const img::rgba8& col) noexcept
-		{
-			if(pos.y >= 0 && pos.y < lines_.size()) {
-				auto& l = lines_[pos.y];
-				if(pos.x >= 0 && pos.x < l.size()) {
-					l[pos.x].bc_ = col;
-				}
-			}
-		}
-#endif
 
 		//-----------------------------------------------------------------//
 		/*!
@@ -908,7 +1058,7 @@ namespace utils {
 		void set_select(const vtx::ipos& pos, bool ena = true) noexcept
 		{
 			if(pos.y >= 0 && pos.y < lines_.size()) {
-				auto& l = lines_[pos.y];
+				auto& l = at_line_(pos.y);
 				if(pos.x >= 0 && pos.x < l.size()) {
 					l[pos.x].select_ = ena;
 				}
@@ -1002,13 +1152,14 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	キャラクター・コンテナを取得
-			@param[in]	pos	キャラクター位置
+			@param[in]	pos		キャラクター位置
+			@param[in]	real	仮想エリアを取得する場合「false」
 			@return キャラクター
 		*/
 		//-----------------------------------------------------------------//
-		const auto& get_char(const vtx::ipos& pos) const noexcept
+		const auto& get_char(const vtx::ipos& pos, bool real = true) const noexcept
 		{
-			return getchar_(pos);
+			return getchar_(pos, real);
 		}		
 	};
 }
