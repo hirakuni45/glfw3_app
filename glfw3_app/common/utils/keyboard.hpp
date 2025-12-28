@@ -173,17 +173,26 @@ namespace sys {
 			if(!dev.get_level(device::key::STATE_CAPS_LOCK)) {
 				shift_a2z = !shift_a2z;
 			}
+
 			auto l_ctrl  = dev.get_level(device::key::LEFT_CONTROL);
 			auto r_ctrl  = dev.get_level(device::key::RIGHT_CONTROL);
 			bool ctrl = l_ctrl | r_ctrl;
+
+			auto l_alt  = dev.get_level(device::key::LEFT_ALT);
+			auto r_alt  = dev.get_level(device::key::RIGHT_ALT);
+			bool alt = l_alt | r_alt;
+
 			if(dev.get_level(device::key::STATE_REPEAT)) {
-				if(repeat_enable_ && last_char_ < 256) {
+				if(alt) ;
+				else if(repeat_enable_ && last_char_ < 256) {
 					input_ += last_char_;
 				}
 			} else {
 				for(auto& t : key_tbls_) {
 					if(dev.get_positive(t.key_type)) {
-						if(ctrl) {
+						if(alt) {
+
+						} else if(ctrl) {
 							auto c = t.ctrl_code;
 							if(c != 0) {
 								input_ += c;
