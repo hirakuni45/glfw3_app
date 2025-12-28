@@ -3,7 +3,8 @@
 /*!	@file
 	@brief	ターミナル・クラス @n
 			VT100 を模倣したクラス、エスケープシーケンスなど @n
-			※現状では、完全な互換性を実装していない（作業中）
+			※現状では、完全な互換性を実装していない（作業中） @n
+			TeraTerm の動作を基準とする
     @author 平松邦仁 (hira@rvf-rc45.net)
 	@copyright	Copyright (C) 2017, 2025 Kunihito Hiramatsu @n
 				Released under the MIT license @n
@@ -61,32 +62,32 @@ setaltspecg1          Set G1 alt char ROM and spec. graphics ^[)2
 setss2 SS2            Set single shift 2                     ^[N
 setss3 SS3            Set single shift 3                     ^[O
 
-~ modesoff SGR0         Turn off character attributes          ^[[m
-~ modesoff SGR0         Turn off character attributes          ^[[0m
++ modesoff SGR0         Turn off character attributes          ^[[m
++ modesoff SGR0         Turn off character attributes          ^[[0m
 bold SGR1             Turn bold mode on                      ^[[1m
-~ lowint SGR2           Turn low intensity mode on             ^[[2m
++ lowint SGR2           Turn low intensity mode on             ^[[2m
 underline SGR4        Turn underline mode on                 ^[[4m
 blink SGR5            Turn blinking mode on                  ^[[5m
-~ reverse SGR7          Turn reverse video on                  ^[[7m
++ reverse SGR7          Turn reverse video on                  ^[[7m
 invisible SGR8        Turn invisible text mode on            ^[[8m
 
 setwin DECSTBM        Set top and bottom line#s of a window  ^[[<v>;<v>r
 
-~ cursorup(n) CUU       Move cursor up n lines                 ^[[<n>A
-~ cursordn(n) CUD       Move cursor down n lines               ^[[<n>B
-~ cursorrt(n) CUF       Move cursor right n lines              ^[[<n>C
-~ cursorlf(n) CUB       Move cursor left n lines               ^[[<n>D
-~ cursorhome            Move cursor to upper left corner       ^[[H
-~ cursorhome            Move cursor to upper left corner       ^[[;H
-~ cursorpos(v,h) CUP    Move cursor to screen location v,h     ^[[<v>;<h>H
-~ hvhome                Move cursor to upper left corner       ^[[f
-~ hvhome                Move cursor to upper left corner       ^[[;f
-~ hvpos(v,h) CUP        Move cursor to screen location v,h     ^[[<v>;<h>f
-index IND             Move/scroll window up one line         ^[D
-revindex RI           Move/scroll window down one line       ^[M
-nextline NEL          Move to next line                      ^[E
-savecursor DECSC      Save cursor position and attributes    ^[7
-restorecursor DECSC   Restore cursor position and attributes ^[8
++ cursorup(n) CUU       Move cursor up n lines                 ^[[<n>A
++ cursordn(n) CUD       Move cursor down n lines               ^[[<n>B
++ cursorrt(n) CUF       Move cursor right n lines              ^[[<n>C
++ cursorlf(n) CUB       Move cursor left n lines               ^[[<n>D
++ cursorhome            Move cursor to upper left corner       ^[[H
++ cursorhome            Move cursor to upper left corner       ^[[;H
++ cursorpos(v,h) CUP    Move cursor to screen location v,h     ^[[<v>;<h>H
++ hvhome                Move cursor to upper left corner       ^[[f
++ hvhome                Move cursor to upper left corner       ^[[;f
++ hvpos(v,h) CUP        Move cursor to screen location v,h     ^[[<v>;<h>f
++ index IND             Move/scroll window up one line         ^[D
++ revindex RI           Move/scroll window down one line       ^[M
++ nextline NEL          Move to next line                      ^[E
++ savecursor DECSC      Save cursor position and attributes    ^[7
++ restorecursor DECSC   Restore cursor position and attributes ^[8
 
 tabset HTS            Set a tab at the current column        ^[H
 tabclr TBC            Clear a tab at the current column      ^[[g
@@ -98,10 +99,10 @@ dhbot DECDHL          Double-height letters, bottom half     ^[#4
 swsh DECSWL           Single width, single height letters    ^[#5
 dwsh DECDWL           Double width, single height letters    ^[#6
 
-cleareol EL0          Clear line from cursor right           ^[[K
-cleareol EL0          Clear line from cursor right           ^[[0K
-clearbol EL1          Clear line from cursor left            ^[[1K
-clearline EL2         Clear entire line                      ^[[2K
++ cleareol EL0          Clear line from cursor right           ^[[K
++ cleareol EL0          Clear line from cursor right           ^[[0K
++ clearbol EL1          Clear line from cursor left            ^[[1K
++ clearline EL2         Clear entire line                      ^[[2K
 
 cleareos ED0          Clear screen from cursor down          ^[[J
 cleareos ED0          Clear screen from cursor down          ^[[0J
@@ -112,8 +113,8 @@ devstat DSR           Device status report                   ^[5n
 termok DSR               Response: terminal is OK            ^[0n
 termnok DSR              Response: terminal is not OK        ^[3n
 
-getcursor DSR         Get cursor position                    ^[6n
-cursorpos CPR            Response: cursor is at v,h          ^[<v>;<h>R
++ getcursor DSR         Get cursor position                    ^[6n
++ cursorpos CPR            Response: cursor is at v,h          ^[<v>;<h>R
 
 ident DA              Identify what terminal type            ^[[c
 ident DA              Identify what terminal type (another)  ^[[0c
@@ -172,7 +173,10 @@ namespace utils {
 
 		static constexpr int default_width_  = 80;		///< 標準、最大横幅（132 文字バージョンもある）
 		static constexpr int default_height_ = 24;		///< 標準、最大高さ
+		static constexpr img::rgba8 default_fore_color_ = { 255, 255, 255 };
+		static constexpr img::rgba8 default_back_color_ = {   0,   0,   0 };
 		static constexpr int default_lines_  = default_height_ * 3;	///< 標準、最大行数
+		static constexpr uint32_t default_attr_level_ = 16;	///< アトリビュートのスタック長
 
 		// 256 色とは、基本 16 色、RGB 216色(6 x 6 x 6 の立方体に配置)、および 24 レベルのグレースケール
 		static constexpr img::rgba8 color256_[256] = {
@@ -234,23 +238,39 @@ namespace utils {
 
 		typedef std::function< void (uint32_t ch) > output_func;
 
-	private:
-		img::rgba8	fore_color_;
-		img::rgba8	back_color_;
+		struct attr_t {
+			vtx::ipos	cursor_pos_;
+			img::rgba8	fore_color_;
+			img::rgba8	back_color_;
+			bool		swap_color_;
 
+			attr_t() noexcept :
+				cursor_pos_(0),
+				fore_color_(default_fore_color_), back_color_(default_back_color_),
+				swap_color_(false)
+			{ }
+		};
+
+		typedef std::deque<attr_t> attrs;
+
+	private:
 		cha_t		cha_;
 
 		lines		lines_;
 		vtx::ipos	limit_;
 		vtx::ipos	pos_;
+		vtx::ipos	cursor_;
 
 		cha_t		spc_;
 
 		bool		auto_crlf_;
 		bool		insert_;
-		bool		swap_color_;
+
+		attr_t		attr_;
+		attrs		attrs_;
 
 		line		last_;
+		std::string	response_;
 
 		output_func	output_func_;
 
@@ -264,11 +284,6 @@ namespace utils {
 		uint32_t	esc_number_idx_;
 		uint32_t	esc_number_[esc_number_max_];
 
-		bool test_wide_(uint32_t cha) const noexcept
-		{
-			return cha >= 0x100;
-		}
-
 		auto conv_text_(const line& l) const noexcept
 		{
 			std::u32string ls;
@@ -276,6 +291,11 @@ namespace utils {
 				ls += ch.cha_;
 			}
 			return utils::utf32_to_utf8(ls);
+		}
+
+		bool test_wide_(uint32_t cha) const noexcept
+		{
+			return cha >= 0x100;
 		}
 
 		uint32_t linepos_(int pos) const noexcept
@@ -342,24 +362,28 @@ namespace utils {
 
 			int idx = 0;
 			int n = 0;
-			while(n < x) {
-				if(test_wide(l[idx].cha_)) { n += 2; }
-				else { ++n; }
+			while(n < x && idx < l.size()) {
+				if(test_wide(l[idx].cha_)) {
+					n += 2;
+					if(n > x) break;
+				} else {
+					++n;
+				}
 				++idx;
 			}
 			return idx;
 		}
 
-		void putchar_() noexcept
+		void put_char_() noexcept
 		{
 			int step = 1;
 			if(test_wide(cha_.cha_)) {
 				step = 2;
-				if((pos_.x + step) >= limit_.x) {
-					new_line_();
-					pos_.x = 0;
-					return;
-				}
+			}
+
+			if((pos_.x + step) > limit_.x) {
+				new_line_();
+				pos_.x = 0;
 			}
 
 			auto& l = at_line_(pos_.y);
@@ -383,14 +407,27 @@ namespace utils {
 				l.push_back(cha_);
 				pos_.x += step;
 			}
-
-			if(pos_.x >= limit_.x) {
-				new_line_();
-				pos_.x = 0;
-			}
 		}
 
-		const auto& getchar_(const vtx::ipos& pos, bool real) const noexcept
+		auto& at_char_(const vtx::ipos& pos) noexcept
+		{
+			if(pos.x < 0 || pos.y < 0) {
+				return spc_;
+			}
+			if(pos.y >= lines_.size()) {
+				return spc_;
+			}
+
+			auto& l = at_line_(pos.y);
+			auto idx = count_index_(l, pos.x);
+			if(idx >= l.size()) {
+				return spc_;
+			}
+
+			return l[idx];
+		}
+
+		const auto& get_char_(const vtx::ipos& pos, bool real) const noexcept
 		{
 			if(pos.y < 0 || pos.y >= lines_.size() || pos.x < 0) {
 				return spc_;
@@ -417,7 +454,7 @@ namespace utils {
 			return l[n];
 		}		
 
-		void up_() noexcept
+		void up_(bool scroll = false) noexcept
 		{
 			if(pos_.y > 0) {
 				pos_.y--;
@@ -427,13 +464,26 @@ namespace utils {
 					l.push_back(spc_);
 					++n;
 				}
+			} else if(scroll) {
+				auto n = 0;
+				bool out = false;
+				if(limit_.y <= lines_.size()) {
+					n = lines_.size() - limit_.y;
+					out = true;
+				}
+				line l;
+				lines_.insert(lines_.begin() + n, l);
+				if(out) { lines_.pop_back(); }
 			}
 		}
 
-		void down_() noexcept
+		void down_(bool scroll = false) noexcept
 		{
 			if(pos_.y < (limit_.y - 1)) {
 				++pos_.y;
+			} else if(scroll) {
+				auto n = lines_.size() - limit_.y;
+				lines_.erase(lines_.begin() + n);
 			}
 			if(pos_.y >= lines_.size()) {
 				line l;
@@ -453,7 +503,7 @@ namespace utils {
 			auto len = count_cha_(l);
 			if(pos_.x < len) {
 				auto x = pos_.x;
-				if(test_wide(getchar_(pos_, true).cha_)) {
+				if(test_wide(get_char_(pos_, true).cha_)) {
 					pos_.x += 2;
 				} else {
 					++pos_.x;
@@ -558,22 +608,22 @@ namespace utils {
 					conti = true;
 					break;
 				case set_color::fore_r:
-					fore_color_.r = std::clamp<uint32_t>(n, 0, 255);
+					attr_.fore_color_.r = std::clamp<uint32_t>(n, 0, 255);
 					color_mode = set_color::fore_g;
 					conti = true;
 					break;
 				case set_color::fore_g:
-					fore_color_.g = std::clamp<uint32_t>(n, 0, 255);
+					attr_.fore_color_.g = std::clamp<uint32_t>(n, 0, 255);
 					color_mode = set_color::fore_b;
 					conti = true;
 					break;
 				case set_color::fore_b:
-					fore_color_.b = std::clamp<uint32_t>(n, 0, 255);
+					attr_.fore_color_.b = std::clamp<uint32_t>(n, 0, 255);
 					color_mode = set_color::none;
 					conti = false;
 					break;
 				case set_color::fore_indexed:
-					fore_color_ = color256_[std::clamp<uint32_t>(n, 0, 255)];
+					attr_.fore_color_ = color256_[std::clamp<uint32_t>(n, 0, 255)];
 					color_mode = set_color::none;
 					conti = false;
 					break;
@@ -583,22 +633,22 @@ namespace utils {
 					conti = true;
 					break;
 				case set_color::back_r:
-					back_color_.r = std::clamp<uint32_t>(n, 0, 255);
+					attr_.back_color_.r = std::clamp<uint32_t>(n, 0, 255);
 					color_mode = set_color::back_g;
 					conti = true;
 					break;
 				case set_color::back_g:
-					back_color_.g = std::clamp<uint32_t>(n, 0, 255);
+					attr_.back_color_.g = std::clamp<uint32_t>(n, 0, 255);
 					color_mode = set_color::back_b;
 					conti = true;
 					break;
 				case set_color::back_b:
-					back_color_.b = std::clamp<uint32_t>(n, 0, 255);
+					attr_.back_color_.b = std::clamp<uint32_t>(n, 0, 255);
 					color_mode = set_color::none;
 					conti = false;
 					break;
 				case set_color::back_indexed:
-					back_color_ = color256_[std::clamp<uint32_t>(n, 0, 255)];
+					attr_.back_color_ = color256_[std::clamp<uint32_t>(n, 0, 255)];
 					color_mode = set_color::none;
 					conti = false;
 					break;
@@ -610,31 +660,31 @@ namespace utils {
 				}
 
 				if(n == 0) {
-					fore_color_.set(255, 255, 255);
-					back_color_.set(0, 0, 0);
-					swap_color_ = false;
+					attr_.fore_color_ = default_fore_color_;
+					attr_.back_color_ = default_back_color_;
+					attr_.swap_color_ = false;
 				} else if(n == 7) {
-					swap_color_ = !swap_color_;
+					attr_.swap_color_ = !attr_.swap_color_;
 				} else if(n == 38) {
 					color_mode = set_color::fore_color_sel;
 				} else if(n == 48) {
 					color_mode = set_color::back_color_sel;
 				} else if(n == 39) {
-					fore_color_.set(255, 255, 255);
+					attr_.fore_color_ = default_fore_color_;
 				} else if(n == 49) {
-					back_color_.set(0, 0, 0);
+					attr_.back_color_ = default_back_color_;
 				} else if(n >= 30 && n <= 37) {
 					n -= 30;
-					fore_color_ = color256_[8 + n];
+					attr_.fore_color_ = color256_[8 + n];
 				} else if(n >= 40 && n <= 47) {
 					n -= 40;
-					back_color_ = color256_[8 + n];
+					attr_.back_color_ = color256_[8 + n];
 				} else if(n >= 90 && n <= 97) {
 					n -= 90;
-					fore_color_ = color256_[n];
+					attr_.fore_color_ = color256_[n];
 				} else if(n >= 100 && n <= 107) {
 					n -= 100;
-					back_color_ = color256_[n];
+					attr_.back_color_ = color256_[n];
 				}
 			}
 		}
@@ -684,10 +734,39 @@ namespace utils {
 		void cmd_K_() noexcept
 		{
 			auto& l = at_line_(pos_.y);
-			if(esc_number_[0] == 0) {
-				
-			} else if(esc_number_[0] == 1) {
-			} else if(esc_number_[0] == 2) {
+			if(esc_number_[0] == 0) {  // right
+				auto i = count_index_(l, pos_.x);
+				auto x = pos_.x;
+				while(x < limit_.x) {
+					if(i < l.size()) {
+						l[i] = spc_;
+						++i;
+					} else {
+						l.push_back(spc_);
+					}
+					++x;
+				}
+			} else if(esc_number_[0] == 1) {  // left
+				uint32_t i = 0;
+				int x = 0;
+				while(x <= pos_.x) {
+					if(i < l.size()) {
+						if(!test_wide_(l[i].cha_)) {
+							++x;
+						}
+						l[i] = spc_;
+						++i;
+					} else {
+						l.push_back(spc_);
+						++x;
+					}
+				}
+			} else if(esc_number_[0] == 2) {  // all
+				line tmp;
+				l.swap(tmp);
+				for(auto x = 0; x < limit_.x; ++x) {
+					l.push_back(spc_);
+				}
 			}
 		}
 
@@ -705,10 +784,26 @@ namespace utils {
 
 // getcursor DSR         Get cursor position                    ^[6n
 // cursorpos CPR            Response: cursor is at v,h          ^[<v>;<h>R
-		void cmd_getcursorpos_() noexcept
+		void cmd_6n_() noexcept
 		{
 			if(esc_number_idx_ == 1 && esc_number_[0] == 6) {
-				
+				response_ = 0x1b;
+				response_ += (boost::format("%d;%dR") % pos_.y % pos_.x).str();
+			}
+		}
+
+		void save_attr_() noexcept
+		{
+			if(attrs_.size() < default_attr_level_) {
+				attrs_.push_back(attr_);
+			}
+		}
+
+		void restore_attr_() noexcept
+		{
+			if(!attrs_.empty()) {
+				attr_ = attrs_.back();
+				attrs_.pop_back();
 			}
 		}
 
@@ -721,11 +816,11 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		terminal(int hl = default_lines_, int wl = default_width_) noexcept :
-			fore_color_(img::rgba8(255, 255, 255)),
-			back_color_(img::rgba8(  0,   0,   0)),
-			cha_(), lines_(), limit_(wl, hl), pos_(0), spc_(' '),
-			auto_crlf_(true), insert_(false), swap_color_(false),
-			last_(), output_func_(nullptr),
+			cha_(), lines_(), limit_(wl, hl), pos_(0), cursor_(0), spc_(' '),
+			auto_crlf_(true), insert_(false),
+			attr_(), attrs_(),
+			last_(), response_(),
+			output_func_(nullptr),
 			esc_mode_(ESC_MODE::NONE), esc_number_cnt_(0), esc_number_idx_(0), esc_number_{ 0 }
 		{
 			line l;
@@ -755,8 +850,8 @@ namespace utils {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	自動 CR/LF の取得
-			@return	自動 CR/LF
+			@brief	自動 CR/LF 状態の取得
+			@return	自動 CR/LF 状態
 		*/
 		//-----------------------------------------------------------------//
 		bool get_crlf() const noexcept { return auto_crlf_; }
@@ -870,13 +965,25 @@ namespace utils {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	文字出力関数設定
+			@brief	出力関数設定
 			@param[in]	func	関数
 		*/
 		//-----------------------------------------------------------------//
 		void set_output_func(output_func func) noexcept
 		{
 			output_func_ = func;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	応答文字列を取得
+			@return 応答文字列
+		*/
+		//-----------------------------------------------------------------//
+		const auto& get_response() const noexcept
+		{
+			return response_;
 		}
 
 
@@ -891,21 +998,37 @@ namespace utils {
 			if(output_func_ != nullptr) output_func_(cha);
 
 			cha_.cha_ = cha;
-			if(swap_color_) {
-				cha_.bc_ = fore_color_;
-				cha_.fc_ = back_color_;
+			if(attr_.swap_color_) {
+				cha_.bc_ = attr_.fore_color_;
+				cha_.fc_ = attr_.back_color_;
 			} else {
-				cha_.fc_ = fore_color_;
-				cha_.bc_ = back_color_;
+				cha_.fc_ = attr_.fore_color_;
+				cha_.bc_ = attr_.back_color_;
 			}
 
 			switch(esc_mode_) {
 			case ESC_MODE::FIRST:
 				if(cha == '[') {
-					esc_mode_ = ESC_MODE::DECIMAL;
 					esc_number_cnt_ = 0;
 					esc_number_idx_ = 0;
 					esc_number_[esc_number_idx_] = 0;
+					esc_mode_ = ESC_MODE::DECIMAL;
+				} else if(cha == 'D') {
+					up_(true);
+					esc_mode_ = ESC_MODE::NONE;
+				} else if(cha == 'M') {
+					down_(true);
+					esc_mode_ = ESC_MODE::NONE;
+				} else if(cha == 'E') {
+					pos_.x = 0;
+					new_line_();
+					esc_mode_ = ESC_MODE::NONE;
+				} else if(cha == '7') {
+					save_attr_();
+					esc_mode_ = ESC_MODE::NONE;
+				} else if(cha == '8') {
+					restore_attr_();
+					esc_mode_ = ESC_MODE::NONE;
 				} else {
 					esc_mode_ = ESC_MODE::NONE;
 				}
@@ -953,8 +1076,7 @@ namespace utils {
 					cmd_ABCD_(cha);
 					esc_mode_ = ESC_MODE::NONE;
 				} else if(cha == 'n') {
-					// ESC [ 6 n というエスケープシーケンスを利用してターミナル上のカーソル位置を取得
-					cmd_getcursorpos_();
+					cmd_6n_();
 					esc_mode_ = ESC_MODE::NONE;
 				} else {
 					esc_mode_ = ESC_MODE::NONE;
@@ -978,9 +1100,15 @@ namespace utils {
 			case 0x08:  // Back Space
 				if(pos_.x > 0) {
 					auto& l = at_line_(pos_.y);
-					--pos_.x;
-					if(pos_.x < l.size()) {
-						l.erase(l.begin() + pos_.x);
+					if(l.size() > 0) {
+						--pos_.x;
+						auto idx = count_index_(l, pos_.x);
+						if(test_wide_(l[idx].cha_)) {
+							--pos_.x;
+						}
+						if(idx < l.size()) {
+							l.erase(l.begin() + idx);
+						}
 					}
 				}
 				break;
@@ -1012,7 +1140,7 @@ namespace utils {
 				if(cha < 0x20) {
 //					std::cout << boost::format("%02X") % cha << std::endl << std::flush;
 				} else {
-					putchar_();
+					put_char_();
 				}
 				break;
 			}
@@ -1057,10 +1185,15 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		void set_select(const vtx::ipos& pos, bool ena = true) noexcept
 		{
+			if(pos.x < 0 || pos.y < 0) {
+				return;
+			}
+
 			if(pos.y >= 0 && pos.y < lines_.size()) {
 				auto& l = at_line_(pos.y);
-				if(pos.x >= 0 && pos.x < l.size()) {
-					l[pos.x].select_ = ena;
+				auto idx = count_index_(l, pos.x);
+				if(idx < l.size()) {
+					l[idx].select_ = ena;
 				}
 			}
 		}
@@ -1072,7 +1205,13 @@ namespace utils {
 			@return カーソル位置
 		*/
 		//-----------------------------------------------------------------//
-		const vtx::ipos& get_cursor() const noexcept { return pos_; }
+		const vtx::ipos& get_cursor() noexcept {
+			cursor_ = pos_;
+			if(cursor_.x >= limit_.x) {
+				cursor_.x = limit_.x - 1;
+			}
+			return cursor_;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -1159,7 +1298,7 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		const auto& get_char(const vtx::ipos& pos, bool real = true) const noexcept
 		{
-			return getchar_(pos, real);
+			return get_char_(pos, real);
 		}		
 	};
 }
