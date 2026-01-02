@@ -5,6 +5,7 @@
             "includePath": [
                 "${workspaceRoot}",
                 "C:/msys64/clang64/include",
+				"C:/msys64/clang64/include/ncurses",
                 "C:/msys64/clang64/include/**",
                 "C:/msys64/clang64",
                 "C:/msys64/clang64/include/c++/v1",

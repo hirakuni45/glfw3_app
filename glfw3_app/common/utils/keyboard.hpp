@@ -4,7 +4,9 @@
 	@brief	キーボード入力を扱うクラス @n
 			glfw3 フレームワークで、キースイッチに対応するビットを生成している @n
 			対応するビットは、「押した瞬間」、「離した瞬間」、「押している状態」など @n
-			を生成している。
+			を生成している。 @n
+			フレーム毎にサービスを呼び出す事 @n
+			キーリピート、CAPSロック、インサート、スクロールロック、など、glfw3 から継承
     @author 平松邦仁 (hira@rvf-rc45.net)
 	@copyright	Copyright (C) 2017, 2025 Kunihito Hiramatsu @n
 				Released under the MIT license @n
@@ -39,15 +41,32 @@ namespace sys {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct keyboard : public keyboard_def {
 
-		static constexpr uint32_t KEY_CR  = 0x0D;
-		static constexpr uint32_t KEY_BS  = 0x08;
-		static constexpr uint32_t KEY_TAB = 0x09;
-		static constexpr uint32_t KEY_ESC = 0x1B;
-		static constexpr uint32_t KEY_RIGHT = 'Q' - 0x40;
-		static constexpr uint32_t KEY_LEFT  = 'R' - 0x40;
-		static constexpr uint32_t KEY_DOWN  = 'S' - 0x40;
-		static constexpr uint32_t KEY_UP    = 'T' - 0x40;
-		static constexpr uint32_t KEY_DEL = 0x7F;
+		static constexpr char KEY_CR  = 0x0D;
+		static constexpr char KEY_BS  = 0x08;
+		static constexpr char KEY_TAB = 0x09;
+		static constexpr char KEY_ESC = 0x1B;
+		static constexpr char KEY_RIGHT = 'Q' - 0x40;
+		static constexpr char KEY_LEFT  = 'R' - 0x40;
+		static constexpr char KEY_DOWN  = 'S' - 0x40;
+		static constexpr char KEY_UP    = 'T' - 0x40;
+		static constexpr char KEY_DEL   = 0x7F;
+		static constexpr char KEY_HOME      = -128;
+		static constexpr char KEY_INSERT    = -127;
+		static constexpr char KEY_END       = -126;
+		static constexpr char KEY_PAGE_UP   = -125;
+		static constexpr char KEY_PAGE_DOWN = -124;
+		static constexpr char KEY_F1        = -123;
+		static constexpr char KEY_F2        = -122;
+		static constexpr char KEY_F3        = -121;
+		static constexpr char KEY_F4        = -120;
+		static constexpr char KEY_F5        = -119;
+		static constexpr char KEY_F6        = -118;
+		static constexpr char KEY_F7        = -117;
+		static constexpr char KEY_F8        = -116;
+		static constexpr char KEY_F9        = -115;
+		static constexpr char KEY_F10       = -114;
+		static constexpr char KEY_F11       = -113;
+		static constexpr char KEY_F12       = -112;
 
 	private:
 		std::u32string	input_;
@@ -103,20 +122,32 @@ namespace sys {
 			{ gl::device::key::BACKSLASH,		'\\', '|',  '\\' - 0x40 },	/* \ (0x5C) */
 			{ gl::device::key::RIGHT_BRACKET,	']', '}',  ']' - 0x40  },	/* ] (0x5D) */
 			{ gl::device::key::GRAVE_ACCENT,	'`',  '~',  0  },	/* ` */
-			{ gl::device::key::RIGHT,			KEY_RIGHT,	KEY_RIGHT,	KEY_RIGHT },
-			{ gl::device::key::LEFT,			KEY_LEFT,	KEY_LEFT,	KEY_LEFT  },
-			{ gl::device::key::DOWN,			KEY_DOWN,	KEY_DOWN,	KEY_DOWN  },
-			{ gl::device::key::UP,				KEY_UP,		KEY_UP,		KEY_UP    },
-			{ gl::device::key::ESCAPE,			KEY_ESC,	KEY_ESC,	KEY_ESC   },
-			{ gl::device::key::BACKSPACE,		KEY_BS,		KEY_BS,		KEY_BS    },
-			{ gl::device::key::TAB,				KEY_TAB,	KEY_TAB,	KEY_TAB   },
-			{ gl::device::key::ENTER,			KEY_CR,		KEY_CR,		KEY_CR    },
-			{ gl::device::key::DEL,				KEY_DEL,	KEY_DEL,	KEY_DEL   },
-			{ gl::device::key::HOME,			-128,  -128,  -128  },  // 0x80
-			{ gl::device::key::INSERT,			-127,  -127,  -127  },  // 0x81
-			{ gl::device::key::END,				-126,  -126,  -126  },  // 0x82
-			{ gl::device::key::PAGE_UP,			-125,  -125,  -125  },  // 0x83
-			{ gl::device::key::PAGE_DOWN,		-124,  -124,  -124  },  // 0x84
+			{ gl::device::key::RIGHT,			KEY_RIGHT,		KEY_RIGHT,		KEY_RIGHT     },
+			{ gl::device::key::LEFT,			KEY_LEFT,		KEY_LEFT,		KEY_LEFT      },
+			{ gl::device::key::DOWN,			KEY_DOWN,		KEY_DOWN,		KEY_DOWN      },
+			{ gl::device::key::UP,				KEY_UP,			KEY_UP,			KEY_UP        },
+			{ gl::device::key::ESCAPE,			KEY_ESC,		KEY_ESC,		KEY_ESC       },
+			{ gl::device::key::BACKSPACE,		KEY_BS,			KEY_BS,			KEY_BS        },
+			{ gl::device::key::TAB,				KEY_TAB,		KEY_TAB,		KEY_TAB       },
+			{ gl::device::key::ENTER,			KEY_CR,			KEY_CR,			KEY_CR        },
+			{ gl::device::key::DEL,				KEY_DEL,		KEY_DEL,		KEY_DEL       },
+			{ gl::device::key::HOME,			KEY_HOME,		KEY_HOME,		KEY_HOME      },
+			{ gl::device::key::INSERT,			KEY_INSERT,		KEY_INSERT,		KEY_INSERT    },
+			{ gl::device::key::END,				KEY_END,		KEY_END,		KEY_END       },
+			{ gl::device::key::PAGE_UP,			KEY_PAGE_UP,	KEY_PAGE_UP,	KEY_PAGE_UP   },
+			{ gl::device::key::PAGE_DOWN,		KEY_PAGE_DOWN,	KEY_PAGE_DOWN,	KEY_PAGE_DOWN },
+			{ gl::device::key::F1,				KEY_F1,			KEY_F1,			KEY_F1        },
+			{ gl::device::key::F2,				KEY_F2,			KEY_F2,			KEY_F2        },
+			{ gl::device::key::F3,				KEY_F3,			KEY_F3,			KEY_F3        },
+			{ gl::device::key::F4,				KEY_F4,			KEY_F4,			KEY_F4        },
+			{ gl::device::key::F5,				KEY_F5,			KEY_F5,			KEY_F5        },
+			{ gl::device::key::F6,				KEY_F6,			KEY_F6,			KEY_F6        },
+			{ gl::device::key::F7,				KEY_F7,			KEY_F7,			KEY_F7        },
+			{ gl::device::key::F8,				KEY_F8,			KEY_F8,			KEY_F8        },
+			{ gl::device::key::F9,				KEY_F9,			KEY_F9,			KEY_F9        },
+			{ gl::device::key::F10,				KEY_F10,		KEY_F10,		KEY_F10       },
+			{ gl::device::key::F11,				KEY_F11,		KEY_F11,		KEY_F11       },
+			{ gl::device::key::F12,				KEY_F12,		KEY_F12,		KEY_F12       },
 		};
 
 	public:
@@ -214,6 +245,21 @@ namespace sys {
 					last_char_ = input_.back();
 				}
 			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	CAPS LOCK の状態を取得
+			@return CAPS LOCK の状態
+		*/
+		//-----------------------------------------------------------------//
+		bool get_caps_lock_state() const noexcept
+		{
+			using namespace gl;
+			auto& core = core::get_instance();
+			const auto& dev = core.get_device();
+			return dev.get_level(device::key::STATE_CAPS_LOCK);
 		}
 
 

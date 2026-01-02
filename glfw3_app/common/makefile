@@ -55,6 +55,8 @@ endif
 # build openjpeg any version path
 OPENJPEG_PATH := $(shell ls -r -d $(LOCAL_INC_PATH)/openjpeg*)
 
+NCURSES_PATH := $(LOCAL_INC_PATH)/ncurses
+
 OPTLIBS += 	pthread \
 			png jpeg openjp2 \
 			freetype \
@@ -62,7 +64,7 @@ OPTLIBS += 	pthread \
 			z $(LIBS_USR) 
 
 STDLIBS		=
-INC_SYS		=	$(LOCAL_INC_PATH)/freetype2 $(OPENJPEG_PATH) $(MP4FF_PATH) $(INC_USR)
+INC_SYS		=	$(LOCAL_INC_PATH)/freetype2 $(OPENJPEG_PATH) $(MP4FF_PATH) $(NCURSES_PATH) $(INC_USR)
 LIBDIR		=	$(LOCAL_LIB_PATH) $(MP4FF_LIB_PATH) $(LIB_DIR_USR)
 
 INC_S	=	$(addprefix -isystem , $(INC_SYS))

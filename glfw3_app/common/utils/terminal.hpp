@@ -19,7 +19,76 @@
 #include "img_io/img.hpp"
 #include "utils/vtx.hpp"
 #include "utils/string_utils.hpp"
+#include "utils/file_io.hpp"
 #include "utils/format.hpp"
+
+/* ASCII code table:
+NUL	0	DLE	16	SPACE	32	0	48
+(^@)	$00	(^P)	$10		$20		$30
+SOH	1	DC1	17	!	33	1	49
+(^A)	$01	(^Q)	$11		$21		$31
+STX	2	DC2	18	"	34	2	50
+(^B)	$02	(^R)	$12		$22		$32
+ETX	3	DC3	19	#	35	3	51
+(^C)	$03	(^S)	$13		$23		$33
+EOT	4	DC4	20	$	36	4	52
+(^D)	$04	(^T)	$14		$24		$34
+ENQ	5	NAK	21	%	37	5	53
+(^E)	$05	(^U)	$15		$25		$35
+ACK	6	SYN	22	&	38	6	54
+(^F)	$06	(^V)	$16		$26		$36
+BEL	7	ETB	23	'	39	7	55
+(^G)	$07	(^W)	$17		$27		$37
+BS	8	CAN	24	(	40	8	56
+(^H)	$08	(^X)	$18		$28		$38
+HT	9	EM	25	)	41	9	57
+(^I)	$09	(^Y)	$19		$29		$39
+LF	10	SUB	26	*	42	:	58
+(^J)	$0A	(^Z)	$1A		$2A		$3A
+VT	11	ESC	27	+	43	;	59
+(^K)	$0B	(^[)	$1B		$2B		$3B
+FF	12	FS	28	,	44	<	60
+(^L)	$0C	(^)	$1C		$2C		$3C
+CR	13	GS	29	-	45	=	61
+(^M)	$0D	(^])	$1D		$2D		$3D
+SO	14	RS	30	.	46	>	62
+(^N)	$0E	(^^)	$1E		$2E		$3E
+SI	15	US	31	/	47	?	63
+(^O)	$0F	(^_)	$1F		$2F		$3F
+
+@	64	P	80	`	96	p	112
+	$40		$50		$60		$70
+A	65	Q	81	a	97	q	113
+	$41		$51		$61		$71
+B	66	R	82	b	98	r	114
+	$42		$52		$62		$72
+C	67	S	83	c	99	s	115
+	$43		$53		$63		$73
+D	68	T	84	d	100	t	116
+	$44		$54		$64		$74
+E	69	U	85	e	101	u	117
+	$45		$55		$65		$75
+F	70	V	86	f	102	v	118
+	$46		$56		$66		$76
+G	71	W	87	g	103	w	119
+	$47		$57		$67		$77
+H	72	X	88	h	104	x	120
+	$48		$58		$68		$78
+I	73	Y	89	i	105	y	121
+	$49		$59		$69		$79
+J	74	Z	90	j	106	z	122
+	$4A		$5A		$6A		$7A
+K	75	[	91	k	107	{	123
+	$4B		$5B		$6B		$7B
+L	76	\	92	l	108	|	124
+	$4C		$5C		$6C		$7C
+M	77	]	93	m	109	}	125
+	$4D		$5D		$6D		$7D
+N	78	^	94	n	110	~	126
+	$4E		$5E		$6E		$7E
+O	79	-	95	o	111	DEL	127
+	$4F		$5F		$6F		$7F
+*/
 
 /* VT100 (ANSI) Escape code list:
 Name                  Description                            Esc Code
@@ -64,12 +133,12 @@ setss3 SS3            Set single shift 3                     ^[O
 
 + modesoff SGR0         Turn off character attributes          ^[[m
 + modesoff SGR0         Turn off character attributes          ^[[0m
-bold SGR1             Turn bold mode on                      ^[[1m
++ bold SGR1             Turn bold mode on                      ^[[1m
 + lowint SGR2           Turn low intensity mode on             ^[[2m
-underline SGR4        Turn underline mode on                 ^[[4m
-blink SGR5            Turn blinking mode on                  ^[[5m
++ underline SGR4        Turn underline mode on                 ^[[4m
++ blink SGR5            Turn blinking mode on                  ^[[5m
 + reverse SGR7          Turn reverse video on                  ^[[7m
-invisible SGR8        Turn invisible text mode on            ^[[8m
++ invisible SGR8        Turn invisible text mode on            ^[[8m
 
 setwin DECSTBM        Set top and bottom line#s of a window  ^[[<v>;<v>r
 
@@ -104,10 +173,10 @@ dwsh DECDWL           Double width, single height letters    ^[#6
 + clearbol EL1          Clear line from cursor left            ^[[1K
 + clearline EL2         Clear entire line                      ^[[2K
 
-cleareos ED0          Clear screen from cursor down          ^[[J
-cleareos ED0          Clear screen from cursor down          ^[[0J
-clearbos ED1          Clear screen from cursor up            ^[[1J
-clearscreen ED2       Clear entire screen                    ^[[2J
++ cleareos ED0          Clear screen from cursor down          ^[[J
++ cleareos ED0          Clear screen from cursor down          ^[[0J
++ clearbos ED1          Clear screen from cursor up            ^[[1J
++ clearscreen ED2       Clear entire screen                    ^[[2J
 
 devstat DSR           Device status report                   ^[5n
 termok DSR               Response: terminal is OK            ^[0n
@@ -171,12 +240,12 @@ namespace utils {
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct terminal {
 
-		static constexpr int default_width_  = 80;		///< 標準、最大横幅（132 文字バージョンもある）
-		static constexpr int default_height_ = 24;		///< 標準、最大高さ
-		static constexpr img::rgba8 default_fore_color_ = { 255, 255, 255 };
-		static constexpr img::rgba8 default_back_color_ = {   0,   0,   0 };
-		static constexpr int default_lines_  = default_height_ * 3;	///< 標準、最大行数
-		static constexpr uint32_t default_attr_level_ = 16;	///< アトリビュートのスタック長
+		static constexpr int DEFAULT_WIDTH  = 80;		///< 標準、最大横幅（132 文字バージョンもある）
+		static constexpr int DEFAULT_HEIGHT = 24;		///< 標準、最大高さ
+		static constexpr img::rgba8 DEFAULT_FORE_COLOR = { 255, 255, 255 };
+		static constexpr img::rgba8 DEFAULT_BACK_COLOR = {   0,   0,   0 };
+		static constexpr int DEFAULT_LINES = DEFAULT_HEIGHT * 3;	///< 標準、最大行数
+		static constexpr uint32_t DEFAULT_ATTR_LEVEL = 16;	///< アトリビュートのスタック長
 
 		// 256 色とは、基本 16 色、RGB 216色(6 x 6 x 6 の立方体に配置)、および 24 レベルのグレースケール
 		static constexpr img::rgba8 color256_[256] = {
@@ -221,15 +290,23 @@ namespace utils {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct cha_t {
-			uint32_t	cha_;		///< キャラクターコード (UTF-32)
-			img::rgba8	fc_;		///< 文字カラー
-			img::rgba8	bc_;		///< 背景カラー
-			bool		select_;	///< 文字選択
+			uint32_t	cha_;			///< キャラクターコード (UTF-32)
+			img::rgba8	fc_;			///< 文字カラー
+			img::rgba8	bc_;			///< 背景カラー
+			bool		bold_;			///< Bold 体
+			bool		underline_;		///< アンダーライン
+			bool		blinking_;		///< 点滅
+			bool		reverse_;		///< 反転
+			bool		invisible_;		///< 非表示
+
+			bool		select_;		///< 文字選択
 
 			constexpr cha_t(uint32_t cha = 0,
 				const img::rgba8& fc = img::rgba8(255, 255, 255, 255),
 				const img::rgba8& bc = img::rgba8(  0,   0,   0, 255)) noexcept :
-				cha_(cha), fc_(fc), bc_(bc), select_(false)
+				cha_(cha), fc_(fc), bc_(bc),
+				bold_(false), underline_(false), blinking_(false), reverse_(false), invisible_(false),
+				select_(false)
 				{ }
 		};
 
@@ -242,12 +319,16 @@ namespace utils {
 			vtx::ipos	cursor_pos_;
 			img::rgba8	fore_color_;
 			img::rgba8	back_color_;
-			bool		swap_color_;
+			bool		bold_;
+			bool		underline_;
+			bool		blinking_;
+			bool		reverse_;
+			bool		invisible_;
 
 			attr_t() noexcept :
 				cursor_pos_(0),
-				fore_color_(default_fore_color_), back_color_(default_back_color_),
-				swap_color_(false)
+				fore_color_(DEFAULT_FORE_COLOR), back_color_(DEFAULT_BACK_COLOR),
+				bold_(false), underline_(false), blinking_(false), reverse_(false), invisible_(false)
 			{ }
 		};
 
@@ -339,7 +420,7 @@ namespace utils {
 			line l;
 			lines_.push_back(l);
 
-			if(lines_.size() > default_lines_) {
+			if(lines_.size() > DEFAULT_LINES) {
 				lines_.pop_front();
 			}
 		}
@@ -660,19 +741,29 @@ namespace utils {
 				}
 
 				if(n == 0) {
-					attr_.fore_color_ = default_fore_color_;
-					attr_.back_color_ = default_back_color_;
-					attr_.swap_color_ = false;
+					attr_.fore_color_ = DEFAULT_FORE_COLOR;
+					attr_.back_color_ = DEFAULT_BACK_COLOR;
+					attr_.bold_ = false;
+					attr_.underline_ = false;
+					attr_.reverse_ = false;
+				} else if(n == 1) {
+					attr_.bold_ = true;
+				} else if(n == 4) {
+					attr_.underline_ = true;
+				} else if(n == 5) {
+					attr_.blinking_ = true;
 				} else if(n == 7) {
-					attr_.swap_color_ = !attr_.swap_color_;
+					attr_.reverse_ = true;
+				} else if(n == 8) {
+					attr_.invisible_ = true;
 				} else if(n == 38) {
 					color_mode = set_color::fore_color_sel;
 				} else if(n == 48) {
 					color_mode = set_color::back_color_sel;
 				} else if(n == 39) {
-					attr_.fore_color_ = default_fore_color_;
+					attr_.fore_color_ = DEFAULT_FORE_COLOR;
 				} else if(n == 49) {
-					attr_.back_color_ = default_back_color_;
+					attr_.back_color_ = DEFAULT_BACK_COLOR;
 				} else if(n >= 30 && n <= 37) {
 					n -= 30;
 					attr_.fore_color_ = color256_[8 + n];
@@ -727,6 +818,48 @@ namespace utils {
 			}
 		}
 
+		void clear_right_(line& l) noexcept
+		{
+			auto i = count_index_(l, pos_.x);
+			auto x = pos_.x;
+			while(x < limit_.x) {
+				if(i < l.size()) {
+					l[i] = spc_;
+					++i;
+				} else {
+					l.push_back(spc_);
+				}
+				++x;
+			}
+		}
+
+		void clear_left_(line& l) noexcept
+		{
+			uint32_t i = 0;
+			int x = 0;
+			while(x <= pos_.x) {
+				if(i < l.size()) {
+					if(!test_wide_(l[i].cha_)) {
+						++x;
+					}
+					l[i] = spc_;
+					++i;
+				} else {
+					l.push_back(spc_);
+					++x;
+				}
+			}
+		}
+
+		void clear_line_(line& l) noexcept
+		{
+			line tmp;
+			l.swap(tmp);
+			for(int x = 0; x < limit_.x; ++x) {
+				l.push_back(spc_);
+			}
+		}
+
 // cleareol EL0          Clear line from cursor right           ^[[K
 // cleareol EL0          Clear line from cursor right           ^[[0K
 // clearbol EL1          Clear line from cursor left            ^[[1K
@@ -735,38 +868,11 @@ namespace utils {
 		{
 			auto& l = at_line_(pos_.y);
 			if(esc_number_[0] == 0) {  // right
-				auto i = count_index_(l, pos_.x);
-				auto x = pos_.x;
-				while(x < limit_.x) {
-					if(i < l.size()) {
-						l[i] = spc_;
-						++i;
-					} else {
-						l.push_back(spc_);
-					}
-					++x;
-				}
+				clear_right_(l);
 			} else if(esc_number_[0] == 1) {  // left
-				uint32_t i = 0;
-				int x = 0;
-				while(x <= pos_.x) {
-					if(i < l.size()) {
-						if(!test_wide_(l[i].cha_)) {
-							++x;
-						}
-						l[i] = spc_;
-						++i;
-					} else {
-						l.push_back(spc_);
-						++x;
-					}
-				}
+				clear_left_(l);
 			} else if(esc_number_[0] == 2) {  // all
-				line tmp;
-				l.swap(tmp);
-				for(auto x = 0; x < limit_.x; ++x) {
-					l.push_back(spc_);
-				}
+				clear_line_(l);
 			}
 		}
 
@@ -777,8 +883,30 @@ namespace utils {
 		void cmd_J_() noexcept
 		{
 			if(esc_number_[0] == 0) {
+				for(auto y = pos_.y; y < limit_.y; ++y) {
+					if(y == pos_.y) {
+						auto& l = at_line_(y);
+						clear_right_(l);
+					} else {
+						if(y >= lines_.size()) {
+							line l;
+							lines_.push_back(l);
+						}
+						auto& l = at_line_(y);
+						clear_line_(l);
+					}
+				}
 			} else if(esc_number_[0] == 1) {
+				for(int y = 0; y < pos_.y; ++y) {
+					auto& l = at_line_(y);
+					clear_line_(l);
+				}
+				clear_left_(at_line_(pos_.y));
 			} else if(esc_number_[0] == 2) {
+				for(int y = 0; y < limit_.y; ++y) {
+					auto& l = at_line_(y);
+					clear_line_(l);
+				}
 			}
 		}
 
@@ -788,17 +916,21 @@ namespace utils {
 		{
 			if(esc_number_idx_ == 1 && esc_number_[0] == 6) {
 				response_ = 0x1b;
-				response_ += (boost::format("%d;%dR") % pos_.y % pos_.x).str();
+				char str[32];
+				utils::sformat("%d;%dR", str, sizeof(str)) % pos_.y % pos_.x;
+				response_ += str;
 			}
 		}
 
+// savecursor DECSC      Save cursor position and attributes    ^[7
 		void save_attr_() noexcept
 		{
-			if(attrs_.size() < default_attr_level_) {
+			if(attrs_.size() < DEFAULT_ATTR_LEVEL) {
 				attrs_.push_back(attr_);
 			}
 		}
 
+// restorecursor DECSC   Restore cursor position and attributes ^[8
 		void restore_attr_() noexcept
 		{
 			if(!attrs_.empty()) {
@@ -815,7 +947,7 @@ namespace utils {
 			@param[in]	wl	最大横幅
 		*/
 		//-----------------------------------------------------------------//
-		terminal(int hl = default_lines_, int wl = default_width_) noexcept :
+		terminal(int hl = DEFAULT_LINES, int wl = DEFAULT_WIDTH) noexcept :
 			cha_(), lines_(), limit_(wl, hl), pos_(0), cursor_(0), spc_(' '),
 			auto_crlf_(true), insert_(false),
 			attr_(), attrs_(),
@@ -997,14 +1129,14 @@ namespace utils {
 		{
 			if(output_func_ != nullptr) output_func_(cha);
 
-			cha_.cha_ = cha;
-			if(attr_.swap_color_) {
-				cha_.bc_ = attr_.fore_color_;
-				cha_.fc_ = attr_.back_color_;
-			} else {
-				cha_.fc_ = attr_.fore_color_;
-				cha_.bc_ = attr_.back_color_;
-			}
+			cha_.cha_       = cha;
+			cha_.fc_        = attr_.fore_color_;
+			cha_.bc_        = attr_.back_color_;
+			cha_.bold_      = attr_.bold_;
+			cha_.underline_ = attr_.underline_;
+			cha_.blinking_  = attr_.blinking_;
+			cha_.reverse_   = attr_.reverse_;
+			cha_.invisible_ = attr_.invisible_;
 
 			switch(esc_mode_) {
 			case ESC_MODE::FIRST:
@@ -1024,10 +1156,12 @@ namespace utils {
 					new_line_();
 					esc_mode_ = ESC_MODE::NONE;
 				} else if(cha == '7') {
+					attr_.cursor_pos_ = pos_;
 					save_attr_();
 					esc_mode_ = ESC_MODE::NONE;
 				} else if(cha == '8') {
 					restore_attr_();
+					pos_ = attr_.cursor_pos_;
 					esc_mode_ = ESC_MODE::NONE;
 				} else {
 					esc_mode_ = ESC_MODE::NONE;
@@ -1138,7 +1272,7 @@ namespace utils {
 				break;
 			default:
 				if(cha < 0x20) {
-//					std::cout << boost::format("%02X") % cha << std::endl << std::flush;
+//					utils::format("%02X\n") % cha;
 				} else {
 					put_char_();
 				}
@@ -1230,7 +1364,48 @@ namespace utils {
 			@return ライン
 		*/
 		//-----------------------------------------------------------------//
-		const line& get_line(uint32_t pos) const noexcept { return lines_[pos]; }
+		const line& get_line(uint32_t pos) const noexcept {
+			if(pos < lines_.size()) {
+				return lines_[pos];
+			} else {
+				static line l;
+				return l;
+			}
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ライン文字列を取得
+			@param[in]	pos	ライン位置
+			@return ライン
+		*/
+		//-----------------------------------------------------------------//
+		std::u32string get_line_text32(uint32_t pos) const noexcept
+		{
+			const auto& l = get_line(pos);
+			std::u32string t;
+			for(auto c : l) {
+				t += c.cha_;
+			}
+			return t;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ライン文字列を取得
+			@param[in]	pos	ライン位置
+			@return ライン
+		*/
+		//-----------------------------------------------------------------//
+		std::string get_line_text(uint32_t pos) const noexcept
+		{
+			auto t32 = get_line_text32(pos);
+			std::string t;
+			utils::utf32_to_utf8(t32, t);
+			return t;
+		}
 
 
 		//-----------------------------------------------------------------//
@@ -1299,6 +1474,75 @@ namespace utils {
 		const auto& get_char(const vtx::ipos& pos, bool real = true) const noexcept
 		{
 			return get_char_(pos, real);
-		}		
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	文字のセーブ
+			@param[in]	fn		ファイル名
+			@param[in]	all		画面内だけの場合「false」
+			@return 成功なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool save(const std::string& fn, bool all = true) const noexcept
+		{
+			utils::file_io fo;
+			if(!fo.open(fn, "wt")) {
+				return false;
+			}
+
+			uint32_t lim = 0;
+			if(!all) {
+				if(lines_.size() > DEFAULT_HEIGHT) {
+					lim = lines_.size() - DEFAULT_HEIGHT;
+				}
+			}
+			for(uint32_t pos = lim; pos < lines_.size(); ++pos) {
+				auto t = get_line_text32(pos);
+				if(!t.empty()) {
+					while(t.back() == ' ') {
+						t.pop_back();
+					}
+				}
+				t.push_back('\n');
+
+				std::string s;
+				utils::utf32_to_utf8(t, s);
+				if(!fo.write(s)) {
+					fo.close();
+					return false;
+				}
+			}
+
+			fo.close();
+
+			return true;
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	文字のロード
+			@param[in]	fn		ファイル名
+			@return 成功なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool load(const std::string& fn) noexcept
+		{
+			utils::file_io fi;
+			if(!fi.open(fn, "rb")) {
+				return false;
+			}
+
+			while(!fi.eof()) {
+				auto t = fi.get_line();
+				output(t);
+			}
+
+			fi.close();
+
+			return true;
+		}
 	};
 }

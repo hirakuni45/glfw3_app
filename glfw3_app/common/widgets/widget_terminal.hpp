@@ -232,7 +232,9 @@ namespace gui {
 			fonts.set_font_size(param_.font_height_);
 			fonts.enable_proportional(false);
 			fonts.set_spaceing(0);
-			param_.font_width_ = fonts.get_width('W');  // 基本の横幅
+			auto w0 = fonts.get_width('W');
+			auto w1 = fonts.get_width('M');
+			param_.font_width_ = w0 < w1 ? w1 : w0;  // 基本の横幅
 			fonts.pop_font_face();
 		}
 
@@ -417,12 +419,14 @@ namespace gui {
 				for(pos.y = 0; pos.y < limit.y; ++pos.y) {
 					pos.x = 0;
 					while(pos.x < limit.x) {
-						const auto& t = terminal_.get_char(pos + ofs, false);
-						img::rgba8 fc = t.fc_;
+						const auto& t = terminal_.get_char(pos + ofs, false); 
+						auto fc = t.fc_;
+						auto bc = t.bc_;
+						if(t.reverse_) {
+							std::swap(fc, bc);
+						}
 						fc *= cf.r;
 						fc.alpha_scale(cf.a);
-						fonts.set_fore_color(fc);
-						img::rgba8 bc = t.bc_;
 						bc *= cf.r;
 						bc.alpha_scale(cf.a);
 						if(t.select_) {
@@ -432,6 +436,11 @@ namespace gui {
 							bc.r += fc.r / 2;
 							bc.g += fc.g / 2;
 							bc.b += fc.b / 2;
+						}
+						if(t.invisible_) {
+							fonts.set_fore_color(bc);
+						} else {
+							fonts.set_fore_color(fc);
 						}
 						fonts.set_back_color(bc);
 						if(focus_ && ofs.y == ofsy && pos == terminal_.get_cursor()) {
@@ -445,9 +454,18 @@ namespace gui {
 							fonts.pop_font_face();
 						}
 						int fw = fonts.get_width(cha);
+						int fofs = 0;
+						if(param_.font_width_ < fw) {
+							if((param_.font_width_ * 2) > fw) {
+								fofs = (param_.font_width_ * 2 - fw) / 2;
+								fw = param_.font_width_ * 2;
+							}
+						}
 						vtx::irect br(chs, vtx::ipos(fw, param_.height_));
 						fonts.draw_back(br);
-						chs.x += fonts.draw(chs, cha);
+						chs.x += fofs;
+						fonts.draw(chs, cha);
+						chs.x += fw - fofs;
 						fonts.swap_color(false);
 						if(cha > 0x7f) {
 							fonts.push_font_face();

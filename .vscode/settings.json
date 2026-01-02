@@ -87,6 +87,7 @@
 		"format": "c",
 		"functional": "c",
 		"utility": "c"
-	}
+	},
+	"cmake.sourceDirectory": "D:/Git/glfw3_app/glfw3_app/rp2040-doom"
     
 }
