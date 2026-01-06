@@ -1,12 +1,12 @@
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	Graphics Library Core (for glfw3) 
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2018 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #ifdef WIN32
 #include <windows.h>
 #endif
@@ -14,6 +14,7 @@
 #include <thread>
 #include <chrono>
 #include <time.h>
+#include <algorithm>
 #include "core/glcore.hpp"
 #include "core/ftimg.hpp"
 #include "utils/file_io.hpp"
@@ -247,13 +248,13 @@ namespace gl {
 
 	static void cursor_callback_(GLFWwindow* window, double x, double y)
 	{
-///		std::cout << x << ", " << y << std::endl;
+//		std::cout << x << ", " << y << std::endl;
 #ifdef WIN32
 		vtx::spos pos(static_cast<vtx::spos::value_type>(x / locator_scale_),
-					  static_cast<vtx::spos::value_type>(y / locator_scale_));
+					static_cast<vtx::spos::value_type>(y / locator_scale_));
 #else
 		vtx::spos pos(static_cast<vtx::spos::value_type>(x),
-					  static_cast<vtx::spos::value_type>(y));
+					static_cast<vtx::spos::value_type>(y));
 #endif
 		core::locator_.set_cursor(pos);
 	}
@@ -261,7 +262,7 @@ namespace gl {
 	static void scroll_callback_(GLFWwindow* window, double x, double y)
 	{
 		vtx::fpos pos(static_cast<vtx::spos::value_type>(x),
-					  static_cast<vtx::spos::value_type>(y));
+					static_cast<vtx::spos::value_type>(y));
 		core::locator_.set_scroll(pos);
 	}
 
@@ -276,18 +277,15 @@ namespace gl {
 	}
 #endif
 
-
 	static void dropfile_callback_(GLFWwindow* window, int num, const char** path)
 	{
 		core::get_instance().set_recv_files(num, path);
 	}
 
-
 //	static void char_callback_(GLFWwindow* window, unsigned int code)
 //	{
 //		core::get_instance().at_recv_text() += code;
 //	}
-
 
 	//-----------------------------------------------------------------//
 	/*!
@@ -336,7 +334,7 @@ namespace gl {
 			command_path_.push_back(tmp);
 		}
 
-	    if (!glfwInit()) {
+		if (!glfwInit()) {
 			return false;
 		}
 
@@ -384,7 +382,7 @@ namespace gl {
 	/*!
 		@brief	セットアップ・プロセス
 		@param[in]	rect	描画領域と位置
-		@param[in]	title	タイトルの設定
+		@param[in]	title	メイン・ウィンドウのタイトル名
 		@param[in]	fullscreen	全画面の場合は「ture」
 		@return 正常終了したら「true」
 	*/
@@ -458,7 +456,7 @@ namespace gl {
 				soft_sync_ = true;
 //				std::cout << "wglSwapIntervalEXT: NO" << std::endl;
 			}
-	    } else {
+		} else {
 			soft_sync_ = true;
 //			std::cout << "WGL_EXT_swap_control: NO" << std::endl;
 		}
@@ -580,9 +578,9 @@ namespace gl {
         /* Poll for and process events */
         glfwPollEvents();
 
-   		glViewport(0, 0, size_.x, size_.y);
+		glViewport(0, 0, size_.x, size_.y);
 
-	 	if(glfwWindowShouldClose(window_)) {
+		if(glfwWindowShouldClose(window_)) {
 			exit_signal_ = true;
 		}
 	}
@@ -621,11 +619,22 @@ namespace gl {
 #endif
 #endif
 
-///		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+//		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 #ifdef __APPLE__
 		wait_sync_();
 #endif
 		glfwSwapBuffers(window_);
+
+		{
+			frame_time_pad_[frame_count_ & 7] = glfwGetTime();
+			auto dt = frame_time_pad_[frame_count_ & 7] - frame_time_pad_[(frame_count_ - 1) & 7];
+			auto fr = static_cast<uint32_t>((1.0 / dt) + 0.5);
+			frame_rate_pad_[frame_count_ & 7] = fr;
+			std::array<uint32_t, 8> tmp = frame_rate_pad_;
+			std::sort(tmp.begin(), tmp.end());
+			current_frame_rate_ = tmp[4];
+		}
+
 #ifdef __APPLE__
 		start_sync_();
 #endif
@@ -644,7 +653,7 @@ namespace gl {
 			glfwDestroyWindow(window_);
 			window_ = 0;
 
-		    glfwTerminate();
+			glfwTerminate();
 		}
 
 		fonts_.destroy();

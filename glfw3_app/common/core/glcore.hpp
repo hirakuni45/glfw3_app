@@ -1,17 +1,18 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	Graphics Library Core (for glfw3) 
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2018 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <string>
 #include <thread>
 #include <future>
 #include <functional>
+#include <array>
 #include <unistd.h>
 #include "utils/singleton_policy.hpp"
 #include "core/device.hpp"
@@ -21,7 +22,7 @@ namespace gl {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
-		@brief	Graphics Core (glfw3) Library クラス@n
+		@brief	Graphics Core (glfw3) Library クラス @n
 				※ハードウェアー依存の操作を扱う部分を集積したクラス。
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -72,6 +73,10 @@ namespace gl {
 		double		machine_cycle_;
 		double		cpu_ghz_;
 
+		std::array<double, 8>	frame_time_pad_;
+		std::array<uint32_t, 8>	frame_rate_pad_;
+		uint32_t	current_frame_rate_;
+
 		float		scale_;
 
 		bool		cpu_spd_enable_;
@@ -93,8 +98,8 @@ namespace gl {
 
 		void start_sync_() {
 			v_sync_wait_ = std::async(std::launch::async,
-									  wait_sync_task_,
-									  sync_count_);
+									wait_sync_task_,
+									sync_count_);
 		}
 
 		void wait_sync_() {
@@ -108,18 +113,20 @@ namespace gl {
 		*/
 		//-----------------------------------------------------------------//
 		core() noexcept : window_(0),
-				 best_size_(0), limit_size_(0), size_(0), rect_(0), psize_(0), dpi_(0),
-				 recv_files_id_(0), recv_files_path_(), recv_files_func_(),
-				 title_(),
+				best_size_(0), limit_size_(0), size_(0), rect_(0), psize_(0), dpi_(0),
+				recv_files_id_(0), recv_files_path_(), recv_files_func_(),
+				title_(),
 #ifdef __APPLE__
-				 sync_count_(0),
+				sync_count_(0),
 #endif
-				 frame_count_(0), frame_time_(0.0),
-				 machine_cycle_(0.0), cpu_ghz_(0.0),
-				 scale_(1.0f),
-				 cpu_spd_enable_(false), soft_sync_(false),
-				 exit_signal_(false), full_screen_(false), keyboard_jp_(false),
-				 scaled_(false) { }
+				frame_count_(0), frame_time_(0.0),
+				machine_cycle_(0.0), cpu_ghz_(0.0),
+				frame_time_pad_{ 0.0 }, frame_rate_pad_{ 0 }, current_frame_rate_(0),
+				scale_(1.0f),
+				cpu_spd_enable_(false), soft_sync_(false),
+				exit_signal_(false), full_screen_(false), keyboard_jp_(false),
+				scaled_(false)
+		{ }
 
 		core(const core& rhs);
 		core& operator = (const core& rhs);
@@ -142,6 +149,15 @@ namespace gl {
 		*/
 		//-----------------------------------------------------------------//
 		bool initialize(int argc, char** argv) noexcept;
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	カレント・フレーム・レートを返す
+			@return	カレント・フレーム・レート
+		*/
+		//-----------------------------------------------------------------//
+		auto get_current_frame_rate() const noexcept { return current_frame_rate_; }
 
 
 		//-----------------------------------------------------------------//
@@ -444,4 +460,3 @@ namespace gl {
 		bool keyboard_japan() const noexcept { return keyboard_jp_; }
 	};
 }
-

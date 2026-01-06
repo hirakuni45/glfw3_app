@@ -3,7 +3,7 @@
 /*!	@file
 	@brief	GUI widget_label クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2025 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -406,7 +406,9 @@ namespace gui {
 			text_param tp = param_.text_param_;
 			param_.text_param_.cursor_ = -1;
 			if(param_.text_in_ && focus_) {
-				if((interval_ % 40) < 20) {
+				auto& core = gl::core::get_instance();
+				auto th = core.get_current_frame_rate() * 40 / 60;
+				if((interval_ % th) < (th / 2)) {
 					if(param_.text_param_.text_.size() <= param_.text_in_pos_) {
 						param_.text_param_.cursor_ = param_.text_param_.text_.size();
 						tp.text_ += ' ';
@@ -428,7 +430,8 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(sys::preference& pre) override {
+		bool save(sys::preference& pre) override
+		{
 			std::string path;
 			path += '/';
 			path += wd_.create_widget_name(this);
@@ -446,7 +449,8 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre) override {
+		bool load(const sys::preference& pre) override
+		{
 			std::string path;
 			path += '/';
 			path += wd_.create_widget_name(this);

@@ -154,7 +154,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void initialize() override
 		{
-			gl::core& core = gl::core::get_instance();
+			auto& core = gl::core::get_instance();
 
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
@@ -552,9 +552,9 @@ namespace app {
 					widget::param wp(vtx::irect(0, lw * i, 400, lw));
 					widget_label::param wp_((boost::format("Item gpwql: %d") % i).str());
 					wp_.text_param_.placement_.hpt = vtx::placement::holizontal::LEFT;
-            		wp_.plate_param_.frame_width_ = 0;
-            		wp_.plate_param_.round_radius_ = 0;
-            		wp_.plate_param_.resizeble_ = true;
+					wp_.plate_param_.frame_width_ = 0;
+					wp_.plate_param_.round_radius_ = 0;
+					wp_.plate_param_.resizeble_ = true;
 					widget_label* w = wd.add_widget<widget_label>(wp, wp_);
 					wpt_.cell_.push_back(w);
 				}
@@ -665,6 +665,11 @@ namespace app {
 			}		
 
 			wd.update();
+
+			auto& core = gl::core::get_instance();
+			char str[32];
+			utils::sformat("GUI Test (%d Hz)", str, sizeof(str)) % core.get_current_frame_rate();
+			core.set_title(str);
 		}
 
 

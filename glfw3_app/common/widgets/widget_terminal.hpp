@@ -6,7 +6,7 @@
 			文字コードは UTF-32 とする @n
 			キーボード入力されたコードは、utils/keyboard.hpp クラスが受け持つ
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2025 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -444,7 +444,8 @@ namespace gui {
 						}
 						fonts.set_back_color(bc);
 						if(focus_ && ofs.y == ofsy && pos == terminal_.get_cursor()) {
-							if((interval_ % 40) < 20) {
+							auto th = core.get_current_frame_rate() * 40 / 60;
+							if((interval_ % th) < (th / 2)) {
 								fonts.swap_color();
 							}
 						}
