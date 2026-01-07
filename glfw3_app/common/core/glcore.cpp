@@ -626,13 +626,18 @@ namespace gl {
 		glfwSwapBuffers(window_);
 
 		{
-			frame_time_pad_[frame_count_ & 7] = glfwGetTime();
-			auto dt = frame_time_pad_[frame_count_ & 7] - frame_time_pad_[(frame_count_ - 1) & 7];
-			auto fr = static_cast<uint32_t>((1.0 / dt) + 0.5);
-			frame_rate_pad_[frame_count_ & 7] = fr;
-			std::array<uint32_t, 8> tmp = frame_rate_pad_;
-			std::sort(tmp.begin(), tmp.end());
-			current_frame_rate_ = tmp[4];
+			auto n = frame_count_ & 7;
+			frame_time_pad_[n] = glfwGetTime();
+			auto dt = frame_time_pad_[n] - frame_time_pad_[(n - 1) & 7];
+			if(dt > 0.0) {
+				auto fr = static_cast<uint32_t>((1.0 / dt) + 0.5);
+				frame_rate_pad_[n] = fr;
+				if(n == 7) {
+					std::array<uint32_t, 8> tmp = frame_rate_pad_;
+					std::sort(tmp.begin(), tmp.end());
+					current_frame_rate_ = tmp[4];
+				}
+			}
 		}
 
 #ifdef __APPLE__
