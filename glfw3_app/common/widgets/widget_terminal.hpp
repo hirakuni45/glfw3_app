@@ -443,27 +443,44 @@ namespace gui {
 							fonts.set_fore_color(fc);
 						}
 						fonts.set_back_color(bc);
-						if(focus_ && ofs.y == ofsy && pos == terminal_.get_cursor()) {
+						bool match_x = false;
+						bool wide_tail = false;
+						if(terminal_.test_wide(t.cha_)) {
+							wide_tail = (pos.x + 1) == terminal_.get_cursor().x;
+							match_x = pos.x == terminal_.get_cursor().x || wide_tail;
+						} else {
+							match_x = pos.x == terminal_.get_cursor().x;
+						}
+						bool match_y = pos.y == terminal_.get_cursor().y;
+						if(focus_ && ofs.y == ofsy && match_x && match_y) {
 							auto th = core.get_current_frame_rate() * 40 / 60;
 							if((interval_ % th) < (th / 2)) {
 								fonts.swap_color();
 							}
 						}
+
 						auto cha = t.cha_;
 						if(cha < 0x20) cha = 0x7F;  // 制御コードは DEL-char として扱う
-						if(cha > 0x7f) {
+						if(cha > 0x7f) {  // wide font
 							fonts.pop_font_face();
 						}
 						int fw = fonts.get_width(cha);
 						int fofs = 0;
+						bool cursor_tail = false;
 						if(param_.font_width_ < fw) {
 							if((param_.font_width_ * 2) > fw) {
 								fofs = (param_.font_width_ * 2 - fw) / 2;
 								fw = param_.font_width_ * 2;
 							}
+							if(match_y && wide_tail) cursor_tail = true;
 						}
 						vtx::irect br(chs, vtx::ipos(fw, param_.height_));
+						if(cursor_tail) {
+							br.org.x += fw / 2;
+							br.size.x /= 2;
+						}
 						fonts.draw_back(br);
+
 						chs.x += fofs;
 						fonts.draw(chs, cha);
 						chs.x += fw - fofs;
@@ -529,9 +546,9 @@ namespace gui {
 
 		std::string		buff_;
 
-		char*		out_;
-		uint16_t	len_;
-		uint16_t	pos_;
+		char*			out_;
+		uint16_t		len_;
+		uint16_t		pos_;
 
 	public:
 		//-----------------------------------------------------------------//
@@ -539,7 +556,7 @@ namespace gui {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		term_chaout(char* out = nullptr, uint16_t len = 0) : out_(out), len_(len), pos_(0) { } 
+		term_chaout(char* out = nullptr, uint16_t len = 0) noexcept : out_(out), len_(len), pos_(0) { } 
 
 
 		//-----------------------------------------------------------------//
@@ -547,7 +564,7 @@ namespace gui {
 			@brief	ターミナル出力の設定
 		*/
 		//-----------------------------------------------------------------//
-		static void set_output(widget* w) { output_ = w; }
+		static void set_output(widget* w) noexcept { output_ = w; }
 
 
 		//-----------------------------------------------------------------//
@@ -556,7 +573,7 @@ namespace gui {
 			@param[in]	ch	出力キャラクター
 		*/
 		//-----------------------------------------------------------------//
-		void operator() (char ch)
+		void operator() (char ch) noexcept
 		{
 			if(output_ != nullptr && output_->type() == get_type_id<widget_terminal>()) {
 
