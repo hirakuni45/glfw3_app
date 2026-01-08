@@ -58,7 +58,8 @@ namespace gui {
 			*/
 			//-------------------------------------------------------------//
 			param(const std::string& text = "", bool ro = true) :
-				plate_param_(0, 2),
+//				plate_param_(0, 2),
+				plate_param_(),
 				color_param_(widget_director::default_label_color_),
 				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255),
 				vtx::placement(vtx::placement::holizontal::LEFT,

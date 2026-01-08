@@ -37,6 +37,9 @@ namespace gl {
 		typedef std::function< void(uint32_t id, const utils::strings& ss) > recv_files_func;
 
 	private:
+		static constexpr uint32_t FRAME_RATE_PAD_SIZE = 8;	///< 2^n である事
+		static constexpr uint32_t FRAME_RATE_PAD_MASK = FRAME_RATE_PAD_SIZE - 1;
+
 		std::string		current_path_;
 		std::string		exec_path_;
 		utils::strings	command_path_;
@@ -59,8 +62,6 @@ namespace gl {
 		utils::strings	recv_files_path_;
 		recv_files_func	recv_files_func_;
 
-//		std::u32string	recv_text_;
-
 		std::string		title_;
 
 #ifdef __APPLE__
@@ -73,8 +74,9 @@ namespace gl {
 		double		machine_cycle_;
 		double		cpu_ghz_;
 
-		std::array<double, 8>	frame_time_pad_;
-		std::array<uint32_t, 8>	frame_rate_pad_;
+		std::array<double, FRAME_RATE_PAD_SIZE>	frame_time_pad_;
+		typedef std::array<uint32_t, FRAME_RATE_PAD_SIZE> frame_rate_pad; 
+		frame_rate_pad	frame_rate_pad_;
 		uint32_t	current_frame_rate_;
 
 		float		scale_;
@@ -288,24 +290,6 @@ namespace gl {
 		//-----------------------------------------------------------------//
 		const utils::strings& get_recv_files_path() const noexcept { return recv_files_path_; }
 
-#if 0
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	キーボード文字列の取得
-			@return キーボード文字列
-		*/
-		//-----------------------------------------------------------------//
-		const auto& get_recv_text() const noexcept { return recv_text_; }
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	キーボード文字列の参照
-			@return キーボード文字列
-		*/
-		//-----------------------------------------------------------------//
-		auto& at_recv_text() noexcept { return recv_text_; }
-#endif
 
 		//-----------------------------------------------------------------//
 		/*!
@@ -444,8 +428,8 @@ namespace gl {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	デバイス・クラスを参照
-			@return デバイス・クラス
+			@brief	フォント・クラスを参照
+			@return フォント・クラス
 		*/
 		//-----------------------------------------------------------------//
 		fonts& at_fonts() noexcept { return fonts_; }

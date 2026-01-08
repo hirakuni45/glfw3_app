@@ -610,7 +610,6 @@ namespace gl {
 				frame_time_ = wa;
 			}
 		}
-		frame_count_++;
 #if 0
 		if((frame_count_ % 60) == 0) {
 			int rate = static_cast<int>((1.0 / frame_time_) + 0.5);
@@ -618,6 +617,7 @@ namespace gl {
 		}
 #endif
 #endif
+		frame_count_++;
 
 //		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 #ifdef __APPLE__
@@ -626,16 +626,16 @@ namespace gl {
 		glfwSwapBuffers(window_);
 
 		{
-			auto n = frame_count_ & 7;
+			auto n = frame_count_ & FRAME_RATE_PAD_MASK;
 			frame_time_pad_[n] = glfwGetTime();
-			auto dt = frame_time_pad_[n] - frame_time_pad_[(n - 1) & 7];
+			auto dt = frame_time_pad_[n] - frame_time_pad_[(n - 1) & FRAME_RATE_PAD_MASK];
 			if(dt > 0.0) {
 				auto fr = static_cast<uint32_t>((1.0 / dt) + 0.5);
 				frame_rate_pad_[n] = fr;
-				if(n == 7) {
-					std::array<uint32_t, 8> tmp = frame_rate_pad_;
+				if(n == FRAME_RATE_PAD_MASK) {
+					auto tmp = frame_rate_pad_;
 					std::sort(tmp.begin(), tmp.end());
-					current_frame_rate_ = tmp[4];
+					current_frame_rate_ = tmp[FRAME_RATE_PAD_SIZE / 2];
 				}
 			}
 		}

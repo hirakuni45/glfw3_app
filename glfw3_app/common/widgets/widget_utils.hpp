@@ -1,13 +1,13 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	GUI widget ユーティリティー
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <string>
 #include "core/glcore.hpp"
 #include "utils/vmath.hpp"
@@ -483,8 +483,7 @@ namespace gui {
 		gl::core& core = gl::core::get_instance();
 		gl::fonts& fonts = core.at_fonts();
 
-		if(sp.every_ ||
-		  (sp.enable_ && bp.hold_frame_ >= sp.hold_frame_)) {
+		if(sp.every_ || (sp.enable_ && bp.hold_frame_ >= sp.hold_frame_)) {
 			if(!tp.font_.empty()) {
 				fonts.push_font_face();
 				fonts.set_font_type(tp.font_);
@@ -495,12 +494,13 @@ namespace gui {
 				fonts.pop_font_face();
 			}
 			if(sp.size_ < fw) {
-				if(sp.offset_ == 0 && sp.org_wait_count_) {
+				if(sp.offset_ == 0 && sp.org_wait_count_ > 0) {
 					--sp.org_wait_count_;
 				} else {
-					sp.offset_ -= sp.speed_;
+					auto fr = core.get_current_frame_rate();
+					sp.offset_ -= sp.speed_ * 60.0f / static_cast<float>(fr);
 					if(sp.offset_ == 0 && sp.org_wait_frame_) {
-						sp.org_wait_count_ = sp.org_wait_frame_;
+						sp.org_wait_count_ = sp.org_wait_frame_ * fr / 60;
 					}
 					if((static_cast<short>(sp.offset_) + fw) <= 0) {
 						sp.offset_ = sp.size_;
