@@ -1,10 +1,13 @@
 #pragma once
-//=====================================================================//
+//=============================================================================//
 /*! @file
-	@brief  img メイン関係
+	@brief  image クラス・メイン
 	@author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2020, 2026 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=============================================================================//
 #include "main.hpp"
 #include "utils/i_scene.hpp"
 #include "utils/director.hpp"
@@ -197,7 +200,7 @@ namespace app {
 				widget_text::param wp_;
 				wp_.text_param_.set_text("Y:");
 				wp_.text_param_.placement_.vpt = vtx::placement::vertical::CENTER;
-   	           	wd.add_widget<widget_text>(wp, wp_);
+				wd.add_widget<widget_text>(wp, wp_);
 			}
 			{
 				widget::param wp(vtx::irect(30, 20+50*1, 120, 40), crop);
@@ -210,7 +213,7 @@ namespace app {
 				widget_text::param wp_;
 				wp_.text_param_.set_text("W:");
 				wp_.text_param_.placement_.vpt = vtx::placement::vertical::CENTER;
-  	            	wd.add_widget<widget_text>(wp, wp_);
+				wd.add_widget<widget_text>(wp, wp_);
 			}
 			{
 				widget::param wp(vtx::irect(30, 20+50*2, 120, 40), crop);
@@ -220,14 +223,14 @@ namespace app {
 			}
 			{
 				widget::param wp(vtx::irect(160, 20+50*2, 60, 40), crop);
-             	widget_text::param wp_;
+				widget_text::param wp_;
 				wp_.text_param_.set_text("512");
 				wp_.text_param_.placement_.vpt = vtx::placement::vertical::CENTER;
 				crop_ex_ = wd.add_widget<widget_text>(wp, wp_);
 			}
 			{
 				widget::param wp(vtx::irect(0, 20+50*3, 30, 40), crop);
-             	widget_text::param wp_;
+				widget_text::param wp_;
 				wp_.text_param_.set_text("H:");
 				wp_.text_param_.placement_.vpt = vtx::placement::vertical::CENTER;
 				wd.add_widget<widget_text>(wp, wp_);
@@ -240,7 +243,7 @@ namespace app {
 			}
 			{
 				widget::param wp(vtx::irect(160, 20+50*3, 60, 40), crop);
-             	widget_text::param wp_;
+				widget_text::param wp_;
 				wp_.text_param_.set_text("512");
 				wp_.text_param_.placement_.vpt = vtx::placement::vertical::CENTER;
 				crop_ey_ = wd.add_widget<widget_text>(wp, wp_);
@@ -296,7 +299,9 @@ namespace app {
 					image_->get_local_param().offset_.y, 0);
 				glLineStipple(4, stp_pat[stp_idx & 3]);
 				stp_spd++;
-				if(stp_spd >= 4) {
+				auto& core = gl::core::get_instance();
+				uint16_t l = core.get_current_frame_rate() * 4 / 60;
+				if(stp_spd >= l) {
 					stp_idx++;
 					stp_spd = 0;
 				}
@@ -411,7 +416,7 @@ namespace app {
 			widget_director& wd = director_.at().widget_director_;
 
 			{ // 画像ファイル表示用フレーム
-				widget::param wp(vtx::irect(30, 30, 256, 256));
+				widget::param wp(vtx::irect(270, 10, 256, 256));
 				widget_frame::param wp_;
 				wp_.plate_param_.set_caption(30);
 				frame_ = wd.add_widget<widget_frame>(wp, wp_);
@@ -487,7 +492,7 @@ namespace app {
 
 			{ // ターミナル
 				{
-					widget::param wp(vtx::irect(10, 320, 9*14-8, 18*16+28));
+					widget::param wp(vtx::irect(10, 520, 250, 200));
 					widget_frame::param wp_;
 					wp_.plate_param_.set_caption(20);
 					info_ = wd.add_widget<widget_frame>(wp, wp_);
@@ -501,32 +506,32 @@ namespace app {
 			}
 
 			{ // load ファイラー本体
-				widget::param wp(vtx::irect(10, 30, 300, 200));
+				widget::param wp(vtx::irect(30, 30, 500, 300));
 				widget_filer::param wp_(core.get_current_path());
 				load_ctx_ = wd.add_widget<widget_filer>(wp, wp_);
 				load_ctx_->enable(false);
 			}
 			{ // save ファイラー本体
-				widget::param wp(vtx::irect(10, 30, 300, 200));
+				widget::param wp(vtx::irect(30, 30, 500, 300));
 				widget_filer::param wp_(core.get_current_path());
 				wp_.new_file_ = true;
 				save_ctx_ = wd.add_widget<widget_filer>(wp, wp_);
 				save_ctx_->enable(false);
 			}
 			{ // ダイアログ
-				widget::param wp(vtx::irect(10, 30, 450, 200));
+				widget::param wp(vtx::irect(30, 30, 450, 200));
 				widget_dialog::param wp_;
 				dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
 				dialog_->enable(false);
 			}
 			{ // ダイアログ(cancel/ok)
-				widget::param wp(vtx::irect(10, 30, 450, 200));
+				widget::param wp(vtx::irect(30, 30, 450, 200));
 				widget_dialog::param wp_(widget_dialog::style::CANCEL_OK);
 				dialog_yes_no_ = wd.add_widget<widget_dialog>(wp, wp_);
 				dialog_yes_no_->enable(false);
 			}
 			{ // ダイアログ(new)
-				widget::param wp(vtx::irect(10, 30, 450, 200));
+				widget::param wp(vtx::irect(30, 30, 450, 200));
 				widget_dialog::param wp_(widget_dialog::style::CANCEL_OK);
 				dialog_new_ = wd.add_widget<widget_dialog>(wp, wp_);
 				dialog_new_->enable(false);
@@ -621,8 +626,7 @@ namespace app {
 			if(!imfn.empty()) {
 				img::img_files& imf = wd.at_img_files();
 				if(!imf.load(imfn)) {
-					dialog_->set_text("Can't decode image file:\n '"
-								  + load_ctx_->get_file() + "'");
+					dialog_->set_text("Can't decode image file:\n '" + load_ctx_->get_file() + "'");
 					dialog_->enable();
 				} else {
 					src_image_ = imf.get_image();
@@ -669,8 +673,7 @@ namespace app {
 					save_id_ = save_ctx_->get_select_file_id();
 					const std::string& fn = save_ctx_->get_file();
 					if(utils::probe_file(fn)) {
-						dialog_yes_no_->set_text("Over write ?:\n'"
-												 + fn + "'");
+						dialog_yes_no_->set_text("Over write ?:\n'" + fn + "'");
 						dialog_yes_no_->enable();
 						save_dialog_ = true;
 					} else {
@@ -691,8 +694,7 @@ namespace app {
 			if(!save_file_name_.empty()) {
 				save_t t = std::make_tuple(save_file_name_, src_image_);
 				if(!save_task_(t)) {
-					dialog_->set_text("Can't encode image file:\n'"
-									  + save_file_name_ + "'");
+					dialog_->set_text("Can't encode image file:\n'" + save_file_name_ + "'");
 					dialog_->enable();
 				} else {
 					term_->output("Sv");
@@ -702,8 +704,7 @@ namespace app {
 #if 0
 				if(image_saver_.valid()) {
 					if(!image_saver_.get()) {
-						dialog_->set_text("Can't encode image file:\n'"
-									  + save_file_name_ + "'");
+						dialog_->set_text("Can't encode image file:\n'" + save_file_name_ + "'");
 						dialog_->enable();
 					} else {
 						term_->output("Sv");
