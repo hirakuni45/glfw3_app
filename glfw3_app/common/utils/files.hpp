@@ -1,14 +1,14 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	ディレクトリー情報取得クラス @n
 			ディレクトリー情報取得をスレッドにて並行して行う
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <iostream>
 #include <string>
 #include "utils/drive_info.hpp"
@@ -34,7 +34,10 @@ namespace utils {
 			std::string			path_;
 			std::string			filter_;
 			file_infos			infos_;
-			file_t() : loop_(true), idx_(0), ans_(0) { }
+			file_t() noexcept :
+				loop_(true), idx_(0), ans_(0),
+				sync_(), path_(), filter_(), infos_()
+			{ }
 		};
 
 		volatile uint32_t	ans_;
@@ -43,7 +46,7 @@ namespace utils {
 		file_t		file_t_;
 		pthread_t	pth_;
 
-		static void sleep_(uint32_t ms)
+		static void sleep_(uint32_t ms) noexcept
 		{
 			usleep(ms * 1000);
 #if 0
@@ -57,7 +60,7 @@ namespace utils {
 #endif
 		}
 
-		static void* task_(void* in)
+		static void* task_(void* in) noexcept
 		{
 			file_t& t = *(static_cast<file_t*>(in));
 
@@ -83,16 +86,17 @@ namespace utils {
 			return nullptr;
 		}
 
-		void start_()
+		void start_() noexcept
 		{
 			if(init_ == 0) {
 				pthread_mutex_init(&file_t_.sync_, nullptr);
 				pthread_create(&pth_, nullptr, task_, &file_t_);
 			}
 			++init_;
+			sleep_(1);
 		}
 
-		void end_()
+		void end_() noexcept
 		{
 			if(init_) {
 				--init_;
@@ -111,7 +115,7 @@ namespace utils {
 			@param[in]	path	パス
 		*/
 		//-----------------------------------------------------------------//
-		files() : ans_(0), init_(0) { start_(); }
+		files() noexcept : ans_(0), init_(0), file_t_(), pth_() { start_(); }
 
 
 		//-----------------------------------------------------------------//
@@ -129,7 +133,8 @@ namespace utils {
 			@param[in]	filter	拡張子フィルター
 		*/
 		//-----------------------------------------------------------------//
-		void set_path(const std::string& path, const std::string& filter = "") {
+		void set_path(const std::string& path, const std::string& filter = "") noexcept
+		{
 			if(path.empty()) return;
 
 			pthread_mutex_lock(&file_t_.sync_);
@@ -147,7 +152,7 @@ namespace utils {
 			@return ルートパス
 		*/
 		//-----------------------------------------------------------------//
-		const std::string& get_path() const { return file_t_.path_; }
+		const std::string& get_path() const noexcept { return file_t_.path_; }
 
 
 		//-----------------------------------------------------------------//
@@ -156,7 +161,7 @@ namespace utils {
 			@return 拡張子
 		*/
 		//-----------------------------------------------------------------//
-		const std::string& get_exts() const { return file_t_.filter_; }
+		const std::string& get_exts() const noexcept { return file_t_.filter_; }
 
 
 		//-----------------------------------------------------------------//
@@ -165,7 +170,7 @@ namespace utils {
 			@return ファイル情報取得なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool probe() { return ans_ != file_t_.ans_; }
+		bool probe() noexcept { return ans_ != file_t_.ans_; }
 
 
 		//-----------------------------------------------------------------//
@@ -174,7 +179,8 @@ namespace utils {
 			@return ファイル情報郡
 		*/
 		//-----------------------------------------------------------------//
-		const file_infos& get() {
+		const file_infos& get() noexcept
+		{
 			while(!probe()) {
 				sleep_(10);
 			}
