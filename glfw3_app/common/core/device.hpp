@@ -3,7 +3,7 @@
 /*!	@file
 	@brief	デバイス用ラッパークラス（ヘッダー）
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
@@ -31,15 +31,15 @@ namespace gl {
 			vtx::spos	cursor_;
 			vtx::spos	scroll_;
 		public:
-			locator() : scale_(1.0f), cursor_(0), scroll_(0) { }
+			locator() noexcept : scale_(1.0f), cursor_(0), scroll_(0) { }
 ///			void set_scale(const vtx::fpos& sc) { scale_ = sc; }
 ///			const vtx::fpos& get_scale() const { return scale_; }
-			void set_cursor(const vtx::spos& p) { cursor_ = p; }
-			void set_scroll(const vtx::spos& p) { scroll_ = p; }
-			void reset_scroll() { set_scroll(vtx::spos(0)); }
-			const vtx::spos& get_cursor() const { return cursor_; }
-			const vtx::spos& get_scroll() const { return scroll_; }
-			locator& operator = (const locator& src) {
+			void set_cursor(const vtx::spos& p) noexcept { cursor_ = p; }
+			void set_scroll(const vtx::spos& p) noexcept { scroll_ = p; }
+			void reset_scroll() noexcept { set_scroll(vtx::spos(0)); }
+			const vtx::spos& get_cursor() const noexcept { return cursor_; }
+			const vtx::spos& get_scroll() const noexcept { return scroll_; }
+			locator& operator = (const locator& src) noexcept {
 				scale_ = src.scale_;
 				cursor_ = src.cursor_;
 				scroll_ = src.scroll_;
@@ -233,16 +233,16 @@ namespace gl {
 			typedef std::bitset<static_cast<int>(key::count_)> value_type;
 			value_type value_;
 		public:
-			void set(key k, bool f = true) { value_.set(static_cast<size_t>(k), f); }
-			void reset(key k) { value_.reset(static_cast<size_t>(k)); }
-			bool test(key k) const { return value_.test(static_cast<size_t>(k)); }
-			void flip(key k) { value_.flip(static_cast<size_t>(k)); }
-			bits_t operator ~ () const {
+			void set(key k, bool f = true) noexcept { value_.set(static_cast<size_t>(k), f); }
+			void reset(key k) noexcept { value_.reset(static_cast<size_t>(k)); }
+			bool test(key k) const noexcept { return value_.test(static_cast<size_t>(k)); }
+			void flip(key k) noexcept { value_.flip(static_cast<size_t>(k)); }
+			bits_t operator ~ () const noexcept {
 				bits_t b;
 				b.value_ = ~value_;
 				return b;
 			}
-			bits_t operator & (const bits_t& t) {
+			bits_t operator & (const bits_t& t) noexcept {
 				bits_t b;
 				b.value_ = value_ & t.value_;
 				return b;
@@ -262,7 +262,7 @@ namespace gl {
 			@brief	device クラス・コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		device() : level_(), positive_(), negative_(), locator_() { }
+		device() noexcept : level_(), positive_(), negative_(), locator_() { }
 
 
 		//-----------------------------------------------------------------//
@@ -271,7 +271,7 @@ namespace gl {
 			@return bits クラスの参照
 		*/
 		//-----------------------------------------------------------------//
-		const bits_t& get_level() const { return level_; } 
+		const bits_t& get_level() const noexcept { return level_; } 
 
 
 		//-----------------------------------------------------------------//
@@ -281,7 +281,7 @@ namespace gl {
 			@return 値
 		*/
 		//-----------------------------------------------------------------//
-		bool get_level(key t) const { return level_.test(t); }
+		bool get_level(key t) const noexcept { return level_.test(t); }
 
 
 		//-----------------------------------------------------------------//
@@ -290,7 +290,7 @@ namespace gl {
 			@return bitsets クラスの参照
 		*/
 		//-----------------------------------------------------------------//
-		const bits_t& get_positive() const { return positive_; }
+		const bits_t& get_positive() const noexcept { return positive_; }
 
 
 		//-----------------------------------------------------------------//
@@ -300,7 +300,7 @@ namespace gl {
 			@return 値
 		*/
 		//-----------------------------------------------------------------//
-		bool get_positive(key t) const { return positive_.test(t); }
+		bool get_positive(key t) const noexcept { return positive_.test(t); }
 
 
 		//-----------------------------------------------------------------//
@@ -309,7 +309,7 @@ namespace gl {
 			@return bitsets クラスの参照
 		*/
 		//-----------------------------------------------------------------//
-		const bits_t& get_negative() const { return negative_; }
+		const bits_t& get_negative() const noexcept { return negative_; }
 
 
 		//-----------------------------------------------------------------//
@@ -319,7 +319,7 @@ namespace gl {
 			@return 値
 		*/
 		//-----------------------------------------------------------------//
-		bool get_negative(key t) const { return negative_.test(t); }
+		bool get_negative(key t) const noexcept { return negative_.test(t); }
 
 
 		//-----------------------------------------------------------------//
@@ -328,7 +328,7 @@ namespace gl {
 			@return 位置
 		*/
 		//-----------------------------------------------------------------//
-		const locator& get_locator() const { return locator_; }
+		const locator& get_locator() const noexcept { return locator_; }
 
 
 		//-----------------------------------------------------------------//
@@ -339,6 +339,6 @@ namespace gl {
 			@param[in]	poss	位置情報
 		*/
 		//-----------------------------------------------------------------//
-		void service(const bits_t& bits, const locator& poss);
+		void service(const bits_t& bits, const locator& poss) noexcept;
 	};
 }

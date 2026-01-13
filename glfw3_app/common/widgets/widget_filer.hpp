@@ -1,14 +1,14 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	GUI Widget ファイラー（ヘッダー）@n
 			ファイル選択を行う GUI モジュール
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <vector>
 #include <boost/unordered_map.hpp>
 #include <boost/optional.hpp>
@@ -72,6 +72,13 @@ namespace gui {
 		};
 
 	private:
+
+		static constexpr char NEW_FILE_TEXT[] = "New File...";
+		static constexpr float DEF_GAIN   = 0.85f;
+		static constexpr float SLIP_GAIN  = 0.5f;
+		static constexpr float SPEED_GAIN = 0.95f;
+		static constexpr float SPEED_MOVE = 38.0f;	/// 横スクロールの初期速度
+
 		widget_director&	wd_;
 
 		param				param_;
@@ -147,9 +154,9 @@ namespace gui {
 
 		std::string	focus_path_;
 
-		static const char* key_path_;
-		static const char* key_locate_;
-		static const char* key_size_;
+		static const char*	key_path_;
+		static const char*	key_locate_;
+		static const char*	key_size_;
 
 		char				acc_key_;
 		char				acc_key_ch_;
@@ -167,15 +174,83 @@ namespace gui {
 		void resize_files_(widget_files& wfs, short ofs, short width);
 		void update_files_info_(widget_files& wfs);
 		void update_files_alias_(widget_files& wfs);
-		void destroy_files_(widget_files& wfs);
 		void get_regist_state_();
 		void set_regist_state_();
 		void set_select_pos_(uint32_t pos);
-		void destroy_();
 		widget_file_copt scan_item_(const std::string& path) const;
 		bool focus_(const std::string& fn);
-		std::string make_path_(const std::string path);
-		void select_path_(const std::string& n);
+
+		void destroy_files_(widget_files& wfs) noexcept
+		{
+			// ラベル郡を破棄
+			for(const auto& wf : wfs) {
+				wd_.del_widget(wf.info);
+				wd_.del_widget(wf.name);
+				wd_.del_widget(wf.base);
+			}
+			wfs.clear();
+		}
+
+		std::string make_path_(const std::string path) noexcept
+		{
+			std::string fin;
+			if(utils::probe_full_path(path)) {
+				auto root = utils::get_file_path(path);
+				if(param_.path_ != root) {
+					return fin;
+				}
+				auto s = utils::get_file_name(path);
+				if(s.empty()) {
+					return fin;
+				}
+				fin = s;
+			} else {
+				fin = path;
+			}
+			return fin;
+		}
+
+		void select_path_(const std::string& n) noexcept
+		{
+			// 移動中は無視！
+			if(move_speed_ != 0.0f) return;
+
+			if(n == "..") {  // 一つ前に戻る
+				request_right_ = false;
+				move_speed_ =  SPEED_MOVE;
+			} else if(n.back() == '/') {
+				request_right_ = true;
+				move_speed_ = -SPEED_MOVE;
+				std::string ap;
+				if(n.size() > 2 && 'A' <= n[0] && n[0] <= 'Z' && n[1] == ':') {
+					param_.path_ = n;
+				} else {
+					ap = utils::append_path(param_.path_, n);
+					param_.path_ = utils::strip_last_of_delimita_path(ap);
+				}
+				file_infos_.clear();
+				fsc_path_.clear();
+				fsc_.set_path(param_.path_, param_.filter_);
+				fsc_wait_ = true;
+				destroy_files_(right_);
+			} else {
+				file_ = utils::append_path(param_.path_, n);
+				++select_file_id_;
+				enable(false);
+				if(param_.select_file_func_ != nullptr) {
+					param_.select_file_func_(file_);
+				}
+			}
+		}
+
+		void destroy_() noexcept
+		{
+			destroy_files_(left_);
+			destroy_files_(center_);
+			destroy_files_(right_);
+			wd_.del_widget(files_);
+			wd_.del_widget(main_);
+		}
 
 	public:
 		//-----------------------------------------------------------------//
@@ -183,7 +258,7 @@ namespace gui {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		widget_filer(widget_director& wd, const widget::param& bp, const param& p) :
+		widget_filer(widget_director& wd, const widget::param& bp, const param& p) noexcept :
 			widget(bp), wd_(wd), param_(p), objh_(0),
 			fsc_(), fsc_path_(), fsc_wait_(false),
 			info_(0), main_(0), files_(0),
@@ -210,7 +285,7 @@ namespace gui {
 			@brief	型を取得
 		*/
 		//-----------------------------------------------------------------//
-		type_id type() const override { return get_type_id<value_type>(); }
+		type_id type() const noexcept override { return get_type_id<value_type>(); }
 
 
 		//-----------------------------------------------------------------//
@@ -219,7 +294,7 @@ namespace gui {
 			@return widget 型の基本名称
 		*/
 		//-----------------------------------------------------------------//
-		const char* type_name() const override { return "filer"; }
+		const char* type_name() const noexcept override { return "filer"; }
 
 
 		//-----------------------------------------------------------------//
@@ -228,7 +303,7 @@ namespace gui {
 			@return ハイブリッド・ウィジェットの場合「true」を返す。
 		*/
 		//-----------------------------------------------------------------//
-		bool hybrid() const override { return true; }
+		bool hybrid() const noexcept override { return true; }
 
 
 		//-----------------------------------------------------------------//
@@ -237,7 +312,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		const param& get_local_param() const { return param_; }
+		const param& get_local_param() const noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -246,7 +321,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		param& at_local_param() { return param_; }
+		param& at_local_param() noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -255,7 +330,7 @@ namespace gui {
 			@return ファイラーの状態「true」なら有効
 		*/
 		//-----------------------------------------------------------------//
-		bool get_enable() const { return get_state(state::ENABLE); }
+		bool get_enable() const noexcept { return get_state(state::ENABLE); }
 
 
 		//-----------------------------------------------------------------//
@@ -264,7 +339,7 @@ namespace gui {
 			@param[in]	f	「false」を指定すると不許可
 		*/
 		//-----------------------------------------------------------------//
-		void enable(bool f = true) {
+		void enable(bool f = true) noexcept {
 			wd_.enable(this, f, true);
 		}
 
@@ -274,7 +349,7 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() override;
+		void initialize() noexcept override;
 
 
 		//-----------------------------------------------------------------//
@@ -282,7 +357,7 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() override;
+		void update() noexcept override;
 
 
 		//-----------------------------------------------------------------//
@@ -290,7 +365,7 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override;
+		void service() noexcept override;
 
 
 		//-----------------------------------------------------------------//
@@ -298,7 +373,7 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render() override
+		void render() noexcept override
 		{
 			if(objh_ == 0) return;
 
@@ -317,7 +392,7 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(sys::preference& pre) override
+		bool save(sys::preference& pre) noexcept override
 		{
 			std::string path;
 			path += '/';
@@ -338,7 +413,7 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre) override
+		bool load(const sys::preference& pre) noexcept override
 		{
 			std::string path;
 			path += '/';
@@ -352,16 +427,11 @@ namespace gui {
 				} else {
 					param_.path_ = "/";
 				}
-				file_infos_.clear();
-				fsc_path_.clear();
-				fsc_.set_path(param_.path_, param_.filter_);
-				fsc_wait_ = true;
-				destroy_files_(left_);
-				destroy_files_(center_);
-				destroy_files_(right_);
 			} else {
 				++err;
 			}
+
+			rescan_center();
 
 			vtx::ipos p;
 			if(pre.get_position(path + "/locate", p)) {
@@ -392,7 +462,7 @@ namespace gui {
 			@return ファイル選択 ID
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t get_select_file_id() const { return select_file_id_; }
+		uint32_t get_select_file_id() const noexcept { return select_file_id_; }
 
 
 		//-----------------------------------------------------------------//
@@ -401,7 +471,7 @@ namespace gui {
 			@return 「true」なら取得中、「false」で取得済み
 		*/
 		//-----------------------------------------------------------------//
-		bool get_file_state() const { return fsc_wait_; }
+		bool get_file_state() const noexcept { return fsc_wait_; }
 
 
 		//-----------------------------------------------------------------//
@@ -410,7 +480,7 @@ namespace gui {
 			@return 選択されたファイル
 		*/
 		//-----------------------------------------------------------------//
-		const std::string& get_file() const { return file_; }
+		const std::string& get_file() const noexcept { return file_; }
 
 
 		//-----------------------------------------------------------------//
@@ -420,7 +490,7 @@ namespace gui {
 			@return ファイル・リスト
 		*/
 		//-----------------------------------------------------------------//
-		utils::strings get_file_list(bool dir = false) const
+		utils::strings get_file_list(bool dir = false) const noexcept
 		{
 			utils::strings ss;
 			const widget_files& wfs = center_;
@@ -449,7 +519,7 @@ namespace gui {
 			@return 該当するファイルが無い場合「false」
 		*/
 		//-----------------------------------------------------------------//
-		bool focus_file(const std::string& path)
+		bool focus_file(const std::string& path) noexcept
 		{
 			focus_path_ = make_path_(path);
 			return focus_(focus_path_);
@@ -463,7 +533,7 @@ namespace gui {
 			@param[in]	alias	代替テキスト
 		*/
 		//-----------------------------------------------------------------//
-		void set_alias(const std::string& path, const std::string& alias)
+		void set_alias(const std::string& path, const std::string& alias) noexcept
 		{
 			widget_file_copt wfo = scan_item_(path);
 			if(wfo) {
@@ -482,7 +552,7 @@ namespace gui {
 			@param[in]	ena		無効にする場合「false」
 		*/
 		//-----------------------------------------------------------------//
-		void enable_alias(const std::string& path, bool ena = true)
+		void enable_alias(const std::string& path, bool ena = true) noexcept
 		{
 			widget_file_copt wfo = scan_item_(path);
 			if(wfo) {
@@ -499,12 +569,15 @@ namespace gui {
 			@brief	ファイル情報収集をやり直す
 		*/
 		//-----------------------------------------------------------------//
-		void rescan_center() {
+		void rescan_center() noexcept
+		{
 			file_infos_.clear();
 			fsc_path_.clear();
 			fsc_.set_path(param_.path_, param_.filter_);
 			fsc_wait_ = true;
+			destroy_files_(left_);
 			destroy_files_(center_);
+			destroy_files_(right_);
 		}
 	};
 }

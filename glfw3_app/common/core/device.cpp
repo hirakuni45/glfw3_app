@@ -3,7 +3,7 @@
 	@brief	デバイス用ラッパークラス @n
 			「windows.h」をインクルードする弊害が色々とあるので、このソースに集約している。
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
@@ -225,7 +225,7 @@ namespace gl {
 		@param[in]	poss	位置情報
 	*/
 	//-----------------------------------------------------------------//
-	void device::service(const bits_t& bits, const locator& poss)
+	void device::service(const bits_t& bits, const locator& poss) noexcept
 	{
 		bits_t b = bits;
 		int joy = GLFW_JOYSTICK_1;  // first JOY-STICK

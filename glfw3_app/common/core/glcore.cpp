@@ -464,17 +464,16 @@ namespace gl {
 
 		{  // Lock キーの初期状態を反映する
 #ifdef WIN32
-			int n = GetKeyboardType(0);
+//	0	キーボードの種類
+//	1	キーボード のサブタイプ
+//	2	キーボードのファンクション キーの数
+			auto n = GetKeyboardType(0);
+//	0x4	強化された 101 キーまたは 102 キーキーボード (および互換性)
+//	0x7	日本語キーボード
+//	0x8	韓国語キーボード
+//	0x51	不明な種類または HID キーボード
+//	※キーボード サブタイプは、OEM (Oem) に依存する元の機器メーカーの値です。
 			if(n == 7) keyboard_jp_ = true;
-//			if(GetKeyState(VK_CAPITAL)) {
-//				bits_.set(device::key::CAPS_LOCK);
-//			}
-//			if(GetKeyState(VK_SCROLL)) {
-//				bits_.set(device::key::SCROLL_LOCK);
-//			}
-//			if(GetKeyState(VK_NUMLOCK)) {
-//				bits_.set(device::key::NUM_LOCK);
-//			}
 #endif
 		}
 
