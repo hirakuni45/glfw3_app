@@ -3,7 +3,7 @@
 /*! @file
     @brief  オシロスコープ・クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2025 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2025, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
@@ -254,7 +254,8 @@ namespace view {
 				} else {
 					rotate_(time_stipple_);
 					rotate_(volt_stipple_);
-					count_ = 3;
+					auto& core = gl::core::get_instance();
+					count_ = core.get_current_frame_rate() * 3 / 60;
 				}
 				glLineWidth(1.0f);
 				glDisable(GL_LINE_STIPPLE);

@@ -2,7 +2,7 @@
 /*! @file
 	@brief  audio analizer main クラス
 	@author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2025 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2025, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
@@ -108,7 +108,7 @@ namespace app {
 
 		bool					info_;
 
-		void create_freq_list_(utils::strings& ss)
+		void create_freq_list_(utils::strings& ss) noexcept
 		{
 			for(auto t : FREQ_TABLE) {
 				if(t >= 1000) {
@@ -119,7 +119,7 @@ namespace app {
 			}
 		}
 
-		std::string create_time_scale_str_(float t, bool round = true)
+		std::string create_time_scale_str_(float t, bool round = true) noexcept
 		{
 			std::string s;
 			if(t < 1e-3f) {
@@ -138,14 +138,14 @@ namespace app {
 			return s;
 		}
 
-		void create_time_scale_list_(utils::strings& ss)
+		void create_time_scale_list_(utils::strings& ss) noexcept
 		{
 			for(auto t : TIME_SCALE_TABLE) {
 				ss.push_back(create_time_scale_str_(t));
 			}
 		}
 
-		void create_volt_scale_list_(utils::strings& ss)
+		void create_volt_scale_list_(utils::strings& ss) noexcept
 		{
 			for(auto t : VOLT_SCALE_TABLE) {
 				if(t < 0.1f) {
@@ -577,7 +577,7 @@ namespace app {
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		aan_main(utils::director<core>& d) :
+		aan_main(utils::director<core>& d) noexcept :
 			director_(d),
 			about_dialog_(nullptr), about_(nullptr), term_ena_(nullptr),
 			output_device_(nullptr), tone_ena_(nullptr),
@@ -609,7 +609,7 @@ namespace app {
 			@brief  初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize()
+		void initialize() noexcept
 		{
 			auto& core = gl::core::get_instance();
 
@@ -836,7 +836,7 @@ namespace app {
 			@brief  アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update()
+		void update() noexcept
 		{
 			auto& wd = director_.at().widget_director_;
 
@@ -910,7 +910,7 @@ namespace app {
 			@brief  レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render()
+		void render() noexcept
 		{
 			director_.at().widget_director_.service();
 			director_.at().widget_director_.render();
@@ -922,7 +922,7 @@ namespace app {
 			@brief  廃棄
 		*/
 		//-----------------------------------------------------------------//
-		void destroy()
+		void destroy() noexcept
 		{
 			auto& pre = director_.at().preference_;
 
