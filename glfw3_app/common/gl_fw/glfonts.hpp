@@ -3,7 +3,7 @@
 /*!	@file
 	@brief	OpenGL フォント・クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2025 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
@@ -50,8 +50,11 @@ namespace gl {
 		@brief	fonts クラス
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	class fonts {
+	struct fonts {
 
+		typedef img::ftimg FTIMG;
+
+	private:
 		static constexpr int texture_page_width  = 256;	///< テクスチャーページの幅
 		static constexpr int texture_page_height = 256;	///< テクスチャーページの高さ
 
@@ -61,7 +64,7 @@ namespace gl {
 			int		lcy;	///< ロケーションY
 			int		w;		///< フォントの幅
 			int		h;		///< フォントの高さ
-			img::ftimg::metrics	met;	///< フォントのメトリックス
+			FTIMG::metrics	met;	///< フォントのメトリックス
 		};
 
 		typedef boost::unordered_map<size_code_t, tex_map>	fcode_map;
@@ -250,12 +253,13 @@ namespace gl {
 			@brief	フォントをインストール
 			@param[in]	ttfname	TrueType フォントファイルのパス
 			@param[in]	alias	フォントの別名
+			@param[in]	style	フォント・スタイル
 			@return 正常なら「true」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool install_font_type(const std::string& ttfname, const std::string& alias = "") noexcept
+		bool install_font_type(const std::string& ttfname, const std::string& alias = "", FTIMG::STYLE style = FTIMG::STYLE::NONE) noexcept
 		{
-			bool f = img::ftimg::get_instance().install_font_type(ttfname, alias);
+			bool f = FTIMG::get_instance().install_font_type(ttfname, alias, style);
 			if(!f) {
 				std::cerr << "Install error: '" << ttfname << "'" << std::endl;
 				return false;
@@ -289,12 +293,12 @@ namespace gl {
 			face_map::iterator it = face_map_.find(alias);
 			if(it == face_map_.end()) return false;
 
-			if(!img::ftimg::get_instance().set_font(alias)) {
+			if(!FTIMG::get_instance().set_font(alias)) {
 				return false;
 			}
 
 			face_ = &it->second;
-			img::ftimg::get_instance().set_antialias(face_->info_.antialias);
+			FTIMG::get_instance().set_antialias(face_->info_.antialias);
 
 			return true;
 		}
@@ -308,7 +312,7 @@ namespace gl {
 		//-----------------------------------------------------------------//
 		const std::string& get_font_type() const noexcept
 		{
-			return img::ftimg::get_instance().get_font();
+			return FTIMG::get_instance().get_font();
 		}
 
 
@@ -386,7 +390,7 @@ namespace gl {
 		void enable_antialias(bool f = true) noexcept
 		{
 			face_->info_.antialias = f;
-			img::ftimg::get_instance().set_antialias(f);
+			FTIMG::get_instance().set_antialias(f);
 		}
 
 

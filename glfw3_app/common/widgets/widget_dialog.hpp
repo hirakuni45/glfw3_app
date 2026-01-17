@@ -3,7 +3,7 @@
 /*!	@file
 	@brief	GUI widget_dialog クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2025 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -55,7 +55,7 @@ namespace gui {
 
 			select_func_type	select_func_;
 
-			param(style s = style::OK) : plate_param_(),
+			param(style s = style::OK) noexcept : plate_param_(),
 				color_param_(widget_director::default_dialog_color_),
 				style_(s),
 				text_area_(vtx::ipos(8), vtx::ipos(0)),
@@ -86,7 +86,7 @@ namespace gui {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		widget_dialog(widget_director& wd, const widget::param& wp, const param& p) :
+		widget_dialog(widget_director& wd, const widget::param& wp, const param& p) noexcept :
 			widget(wp), wd_(wd), param_(p), objh_(0),
 			text_(0), ok_(0), cancel_(0)
 		{ }
@@ -105,7 +105,7 @@ namespace gui {
 			@brief	型を取得
 		*/
 		//-----------------------------------------------------------------//
-		type_id type() const override { return get_type_id<value_type>(); }
+		type_id type() const noexcept override { return get_type_id<value_type>(); }
 
 
 		//-----------------------------------------------------------------//
@@ -114,7 +114,7 @@ namespace gui {
 			@return widget 型の基本名称
 		*/
 		//-----------------------------------------------------------------//
-		const char* type_name() const override { return "dialog"; }
+		const char* type_name() const noexcept override { return "dialog"; }
 
 
 		//-----------------------------------------------------------------//
@@ -123,7 +123,7 @@ namespace gui {
 			@return ハイブリッド・ウィジェットの場合「true」を返す。
 		*/
 		//-----------------------------------------------------------------//
-		bool hybrid() const override { return true; }
+		bool hybrid() const noexcept override { return true; }
 
 
 		//-----------------------------------------------------------------//
@@ -132,7 +132,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		const param& get_local_param() const { return param_; }
+		const param& get_local_param() const noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -141,7 +141,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		param& at_local_param() { return param_; }
+		param& at_local_param() noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -151,7 +151,7 @@ namespace gui {
 			@param[in]	f	無効にする場合「false」
 		*/
 		//-----------------------------------------------------------------//
-		void enable(bool f = true)
+		void enable(bool f = true) noexcept
 		{
 			wd_.enable(this, f, true);
 			if(f) {
@@ -166,7 +166,8 @@ namespace gui {
 			@param[in]	text	文書
 		*/
 		//-----------------------------------------------------------------//
-		void set_text(const std::string& text) {
+		void set_text(const std::string& text) noexcept
+		{
 			if(text_) {
 				text_->at_local_param().text_param_.set_text(text);
 			}
@@ -179,7 +180,8 @@ namespace gui {
 			@return	文書
 		*/
 		//-----------------------------------------------------------------//
-		std::string get_text() const {
+		std::string get_text() const noexcept
+		{
 			std::string s;
 			if(text_) {
 				s = text_->get_local_param().text_param_.get_text();
@@ -194,7 +196,7 @@ namespace gui {
 			@return	Ok ボタン
 		*/
 		//-----------------------------------------------------------------//
-		widget_button* ok_button() { return ok_; }
+		widget_button* ok_button() noexcept { return ok_; }
 
 
 		//-----------------------------------------------------------------//
@@ -203,7 +205,7 @@ namespace gui {
 			@return	Cancel ボタン
 		*/
 		//-----------------------------------------------------------------//
-		widget_button* cancel_button() { return cancel_; }
+		widget_button* cancel_button() noexcept { return cancel_; }
 
 
 		//-----------------------------------------------------------------//
@@ -211,7 +213,7 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() override
+		void initialize() noexcept override
 		{
 			// 自由な大きさの変更を禁止
 			at_param().state_.set(widget::state::SIZE_LOCK);
@@ -273,7 +275,7 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() override
+		void update() noexcept override
 		{
 			if(param_.style_ == style::NONE) {
 				return;
@@ -303,7 +305,7 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override { }
+		void service() noexcept override { }
 
 
 		//-----------------------------------------------------------------//
@@ -311,7 +313,7 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render() override
+		void render() noexcept override
 		{
 			if(objh_ == 0) return;
 
@@ -328,7 +330,8 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(sys::preference& pre) override {
+		bool save(sys::preference& pre) noexcept override
+		{
 			std::string path;
 			path += '/';
 			path += wd_.create_widget_name(this);
@@ -347,7 +350,8 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre) override {
+		bool load(const sys::preference& pre) noexcept override
+		{
 			std::string path;
 			path += '/';
 			path += wd_.create_widget_name(this);

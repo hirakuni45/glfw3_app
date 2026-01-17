@@ -4,7 +4,7 @@
 	@brief	GUI widget_arrow クラス @n
 			※矢印ボタンクラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2018, 2025 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2018, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -64,7 +64,7 @@ namespace gui {
 
 			direction			dir_;
 
-			param(direction dir = direction::none) :
+			param(direction dir = direction::none) noexcept :
 				plate_param_(), color_param_(widget_director::default_button_color_),
 				image_(nullptr), handle_(0), id_(0),
 				level_(0), min_(0), max_(100), delay_(40), repeat_(6), master_(nullptr),
@@ -83,7 +83,7 @@ namespace gui {
 		int32_t				level_;
 		uint32_t			count_;
 
-	void update_level_()
+	void update_level_() noexcept
 	{
 		if(param_.master_ == nullptr) {
 			++param_.level_;
@@ -105,7 +105,7 @@ namespace gui {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		widget_arrow(widget_director& wd, const widget::param& bp, const param& p) :
+		widget_arrow(widget_director& wd, const widget::param& bp, const param& p) noexcept :
 			widget(bp), wd_(wd), param_(p), objh_(0), id_(0), level_(0), count_(0) { }
 
 
@@ -122,7 +122,7 @@ namespace gui {
 			@brief	型を取得
 		*/
 		//-----------------------------------------------------------------//
-		type_id type() const override { return get_type_id<value_type>(); }
+		type_id type() const noexcept override { return get_type_id<value_type>(); }
 
 
 		//-----------------------------------------------------------------//
@@ -131,7 +131,7 @@ namespace gui {
 			@return widget 型の基本名称
 		*/
 		//-----------------------------------------------------------------//
-		const char* type_name() const override { return "arrow"; }
+		const char* type_name() const noexcept override { return "arrow"; }
 
 
 		//-----------------------------------------------------------------//
@@ -140,7 +140,7 @@ namespace gui {
 			@return ハイブリッド・ウィジェットの場合「true」を返す。
 		*/
 		//-----------------------------------------------------------------//
-		bool hybrid() const override { return false; }
+		bool hybrid() const noexcept override { return false; }
 
 
 		//-----------------------------------------------------------------//
@@ -149,7 +149,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		const param& get_local_param() const { return param_; }
+		const param& get_local_param() const noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -158,7 +158,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		param& at_local_param() { return param_; }
+		param& at_local_param() noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -166,7 +166,7 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() override
+		void initialize() noexcept override
 		{
 			// ボタンは標準的に固定、サイズ固定、選択時拡大
 			at_param().state_.set(widget::state::SERVICE);
@@ -215,7 +215,7 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() override
+		void update() noexcept override
 		{
 			if(get_selected() && count_ < (param_.delay_ - param_.repeat_)) {				
 				++param_.id_;
@@ -239,7 +239,7 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override
+		void service() noexcept override
 		{
 			if(!get_state(state::ENABLE)) {
 				return;
@@ -265,7 +265,7 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render() override
+		void render() noexcept override
 		{
 			if(objh_ == 0) return;
 
@@ -285,7 +285,7 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(sys::preference& pre) override {
+		bool save(sys::preference& pre) noexcept override {
 			return true;
 		}
 
@@ -297,7 +297,7 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre) override {
+		bool load(const sys::preference& pre) noexcept override {
 			return true;
 		}
 
@@ -308,7 +308,7 @@ namespace gui {
 			@return レベル
 		*/
 		//-----------------------------------------------------------------//
-		int32_t get_level() const { return param_.level_; }
+		int32_t get_level() const noexcept { return param_.level_; }
 
 
 		//-----------------------------------------------------------------//
@@ -317,7 +317,8 @@ namespace gui {
 			@param[in]	level	レベル
 		*/
 		//-----------------------------------------------------------------//
-		void set_level(int32_t level) {
+		void set_level(int32_t level) noexcept
+		{
 			param_.level_ = level;
 			level_ = level;
 			count_ = 0;

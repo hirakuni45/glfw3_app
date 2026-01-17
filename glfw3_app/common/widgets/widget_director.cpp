@@ -57,7 +57,7 @@ namespace gui {
 	widget::color_param widget_director::default_sheet_color_;
 	widget::color_param widget_director::default_chip_color_;
 
-	void widget_director::message_widget_(widget* w, const std::string& s)
+	void widget_director::message_widget_(widget* w, const std::string& s) noexcept
 	{
 		std::string type;
 
@@ -100,7 +100,7 @@ namespace gui {
 	}
 
 
-	void make_clip_(widget* w)
+	void make_clip_(widget* w) noexcept
 	{
 		if(w->get_state(widget::state::CLIP_PARENTS)) {
 			final_clip(w, w->at_param().rpos_, w->at_param().clip_);
@@ -113,7 +113,7 @@ namespace gui {
 	}
 
 
-	void clip_widgets_(widgets& ws, bool check_mark = false)
+	void clip_widgets_(widgets& ws, bool check_mark = false) noexcept
 	{
 		for(auto w : ws) {
 			if(check_mark) {
@@ -125,7 +125,7 @@ namespace gui {
 	}
 
 
-	void widget_director::parents_widget_mark_(widget* root)
+	void widget_director::parents_widget_mark_(widget* root) noexcept
 	{
 		root->set_mark();
 		widgets ws;
@@ -136,7 +136,7 @@ namespace gui {
 	}
 
 
-	void widget_director::unselect_parents_(widget* root)
+	void widget_director::unselect_parents_(widget* root) noexcept
 	{
 		if(root == nullptr) return;
 
@@ -163,7 +163,7 @@ namespace gui {
 		@brief	初期化
 	*/
 	//-----------------------------------------------------------------//
-	void widget_director::initialize()
+	void widget_director::initialize() noexcept
 	{
 		using namespace gl;
 
@@ -306,6 +306,9 @@ namespace gui {
 #endif
 			if(!fonts.install_font_type(ff, "Inconsolata")) {
 				std::cerr << boost::format("Can't find font file: '%s'") % ff << std::endl; 
+			}
+			if(!fonts.install_font_type(ff, "InconsolataB", fonts::FTIMG::STYLE::BOLD)) {
+				std::cerr << boost::format("Can't find font file: '%s' (bold)") % ff << std::endl; 
 			}
 		}
 		fonts.pop_font_face();
@@ -475,7 +478,7 @@ namespace gui {
 		@return 操作があった場合「true」
 	*/
 	//-----------------------------------------------------------------//
-	bool widget_director::update()
+	bool widget_director::update() noexcept
 	{
 		{  // ダイアログがある場合の優先順位とストール処理
 			widget* dw = nullptr;
@@ -837,7 +840,7 @@ namespace gui {
 		@brief	サービス
 	*/
 	//-----------------------------------------------------------------//
-	void widget_director::service()
+	void widget_director::service() noexcept
 	{
 		// キーボードのサービス
 		keyboard_.service();
@@ -860,7 +863,7 @@ namespace gui {
 		@brief	レンダリング
 	*/
 	//-----------------------------------------------------------------//
-	void widget_director::render()
+	void widget_director::render() noexcept
 	{
 		core& core = core::get_instance();
 
@@ -969,7 +972,7 @@ namespace gui {
 		@brief	廃棄
 	*/
 	//-----------------------------------------------------------------//
-	void widget_director::destroy()
+	void widget_director::destroy() noexcept
 	{
 		// ハイブリッドから消去
 		widgets hyws;
@@ -996,7 +999,7 @@ namespace gui {
 		@param[in]	wd	widget_director
 	*/
 	//-----------------------------------------------------------------//
-	void widget_director::action_monitor()
+	void widget_director::action_monitor() noexcept
 	{
 		static int id = 0;
 		bool f = false;
@@ -1027,23 +1030,23 @@ namespace gui {
 	}
 
 
-		gl::mobj::handle common_parts::add(const share_t& k)
-		{
-			gl::mobj::handle h = get(k);
-			if(h == 0) {
-				img::paint pa;
-				create_round_frame(pa, k.plate_param_, k.color_param_, k.size_);
-				if(k.plate_param_.resizeble_) {
+	gl::mobj::handle common_parts::add(const share_t& k) noexcept
+	{
+		gl::mobj::handle h = get(k);
+		if(h == 0) {
+			img::paint pa;
+			create_round_frame(pa, k.plate_param_, k.color_param_, k.size_);
+			if(k.plate_param_.resizeble_) {
 // std::cout << "grid: " << static_cast<int>(k.plate_param_.grid_.x) << ", " << static_cast<int>(k.plate_param_.grid_.y) << std::endl;
 // std::cout << "size: " << static_cast<int>(pa.get_size().x) << ", " << static_cast<int>(pa.get_size().y) << std::endl;
-					h = mobj_.install(&pa, k.size_, k.plate_param_.grid_);
-				} else {
-					h = mobj_.install(&pa);
-				}
-				std::pair<share_t, handle> t(k, h);
-				share_map_.insert(t);
+				h = mobj_.install(&pa, k.size_, k.plate_param_.grid_);
+			} else {
+				h = mobj_.install(&pa);
 			}
-// std::cout << static_cast<int>(h) << std::endl;
-			return h;
+			std::pair<share_t, handle> t(k, h);
+			share_map_.insert(t);
 		}
+// std::cout << static_cast<int>(h) << std::endl;
+		return h;
+	}
 }

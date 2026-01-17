@@ -1,13 +1,13 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	FreeType2 でフォント画像イメージを扱うクラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2025 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <string>
 #include <map>
 #include <boost/unordered_map.hpp>
@@ -34,7 +34,20 @@ namespace img {
 	public:
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
-			@brief	フォントの測定基準構造体@n
+			@brief	フォント・スタイル
+		*/
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		enum class STYLE {
+			NONE,		///< 無し
+			BOLD,		///< ボールド体
+			ITALIC,		///< イタリック体
+			BOLD_ITALIC	///< ボールド、イタリック体
+		};
+
+
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		/*!
+			@brief	フォントの測定基準構造体 @n
 					・水平基準は、フォントのベースライン@n
 					・垂直基準は、フォントの中心
 		*/
@@ -48,6 +61,11 @@ namespace img {
 			float	hori_y;		///< 水平基準 Y 軸オフセット
 			float	vert_x;		///< 垂直基準 X 軸オフセット
 			float	vert_y;		///< 垂直基準 Y 軸オフセット
+
+			metrics() noexcept :
+				bitmap_w(0.0f), bitmap_h(0.0f), width(0.0f), height(0.0f),
+				hori_x(0.0f), hori_y(0.0f), vert_x(0.0f), vert_y(0.0f)
+				{ }
 		};
 
 	private:
@@ -59,14 +77,14 @@ namespace img {
 		struct atr_t {
 			short	offset_;
 			short	height_;
-			atr_t() : offset_(0), height_(0) { }
+			atr_t() noexcept : offset_(0), height_(0) { }
 		};
 		typedef std::map<int, atr_t>	atr_map;
 
 		struct face_t {
 			FT_Face		face_;
 			atr_map		atr_map_;
-			face_t(FT_Face face) : face_(face), atr_map_() { }
+			face_t(FT_Face face) noexcept : face_(face), atr_map_() { }
 		};
 		typedef std::pair<std::string, face_t>	face_pair;
 		typedef boost::unordered_map<std::string, face_t>	face_map;
@@ -198,12 +216,13 @@ void get_metrics(uint32_t code)
 		/*!
 			@brief	フォントをインストール
 			@param[in]	fontfile	フォント・ファイル名
-			@param[in]	alias		フォントの別名@n
+			@param[in]	alias		フォントの別名 @n
 						省略した場合、フォント・ファイル名と同一となる。
+			@param[in]	face		フォント・フェース
 			@return 成功した場合は「true」
 		 */
 		//-----------------------------------------------------------------//
-		bool install_font_type(const std::string& fontfile, const std::string& alias = "") noexcept
+		bool install_font_type(const std::string& fontfile, const std::string& alias = "", STYLE style = STYLE::NONE) noexcept
 		{
 			if(fontfile.empty()) return false;
 
@@ -247,13 +266,29 @@ void get_metrics(uint32_t code)
 				return false;
 			}
 
-			FT_Face face;
+			FT_Face face;  // is pointer
 			FT_Error error = FT_New_Face(library_, utils::system_path(path).c_str(), 0, &face);
 			if(error) {
 				std::cerr << "ftimg error(FT_New_Face): '" << path << "'" << std::endl;
 				current_face_ = face_map_.end();
 				return false;
 			}
+
+			switch(style) {
+			case STYLE::BOLD:
+				face->style_flags = FT_STYLE_FLAG_BOLD;
+				break;
+			case STYLE::ITALIC:
+				face->style_flags = FT_STYLE_FLAG_ITALIC;
+				break;
+			case STYLE::BOLD_ITALIC:
+				face->style_flags = FT_STYLE_FLAG_BOLD | FT_STYLE_FLAG_ITALIC;
+				break;
+			case STYLE::NONE:
+			default:
+				break;
+			}
+
 ///			cout << "ftimg install: " << path << ", " << static_cast<int>(face_) << endl;
 
 			face_t t(face);
@@ -417,6 +452,8 @@ void get_metrics(uint32_t code)
 				FT_Render_Glyph(slot, FT_RENDER_MODE_NORMAL);
 			}
 #endif
+//			FT_GlyphSlot_Embolden(slot);
+
 			FT_Bitmap* bitmap = &slot->bitmap;
 			metrics_.bitmap_w = static_cast<float>(bitmap->width);
 			metrics_.bitmap_h = static_cast<float>(bitmap->rows);

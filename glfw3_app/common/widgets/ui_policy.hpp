@@ -1,13 +1,13 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	ユーザー・インターフェース・ポリシー（ヘッダー）
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include "widgets/widget_director.hpp"
 
 namespace gui {
@@ -26,7 +26,7 @@ namespace gui {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		ui_policy(gui::widget_director& wd) : wd_(wd) { }
+		ui_policy(gui::widget_director& wd) noexcept : wd_(wd) { }
 
 
 		//-----------------------------------------------------------------//
@@ -42,7 +42,8 @@ namespace gui {
 			@brief	更新
 		*/
 		//-----------------------------------------------------------------//
-		void update() {
+		void update() noexcept
+		{
 
 		}
 	};

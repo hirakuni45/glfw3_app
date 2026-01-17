@@ -3,7 +3,7 @@
 /*!	@file
 	@brief	GUI widget 共通パーツ（ヘッダー）
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -37,7 +37,7 @@ namespace gui {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		common_parts(gl::mobj& mo) : mobj_(mo) { }
+		common_parts(gl::mobj& mo) noexcept : mobj_(mo) { }
 
 
 		//-----------------------------------------------------------------//
@@ -47,7 +47,8 @@ namespace gui {
 			@return	共有ハンドル
 		*/
 		//-----------------------------------------------------------------//
-		gl::mobj::handle get(const share_t& k) const {
+		gl::mobj::handle get(const share_t& k) const noexcept
+		{
 			gl::mobj::handle h = 0;
 			share_map_cit cit = share_map_.find(k);
 			if(cit != share_map_.end()) {
@@ -64,7 +65,7 @@ namespace gui {
 			@return	描画ハンドル
 		*/
 		//-----------------------------------------------------------------//
-		gl::mobj::handle add(const share_t& k);
+		gl::mobj::handle add(const share_t& k) noexcept;
 		// この実装は、widget_director.cpp 内にある。
 		// 「widget_utils/create_round_frame」は、「widget_director」のインスタンスが必要で、インクルードが入れ子になってしまう。
 		// その回避策として・・

@@ -36,7 +36,8 @@ namespace gui {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
-			std::string		font_;			///< ターミナル描画フォント
+			std::string		font_;			///< ターミナル描画フォント（ノーマル）
+			std::string		font_b_;		///< ターミナル描画フォント（bold）
 
 			img::rgba8		fore_color_;	///< フォント・フォア・カラー
 			img::rgba8		back_color_;	///< フォント・バック・カラー
@@ -53,7 +54,7 @@ namespace gui {
 			enter_func_type enter_func_;	///< 「Enter」時に呼ぶ関数
 
 			param() noexcept :
-				font_("Inconsolata"),
+				font_("Inconsolata"), font_b_("InconsolataB"),
 				fore_color_(img::rgba8(255, 255, 255, 255)),
 				back_color_(img::rgba8(  0,   0,   0, 255)),
 				font_width_(0), font_height_(18), height_(20),
@@ -229,6 +230,7 @@ namespace gui {
 
 			fonts.push_font_face();
 			fonts.set_font_type(param_.font_);
+//			fonts.set_font_type(param_.font_b_);
 			fonts.set_font_size(param_.font_height_);
 			fonts.enable_proportional(false);
 			fonts.set_spaceing(0);
@@ -266,6 +268,7 @@ namespace gui {
 			auto& fonts = core.at_fonts();
 			fonts.push_font_face();
 			fonts.set_font_type(param_.font_);
+//			fonts.set_font_type(param_.font_b_);
 			fonts.set_font_size(param_.font_height_);
 
 			if(get_param().parents_ && get_state(widget::state::AREA_ROOT)) {
@@ -383,6 +386,7 @@ namespace gui {
 
 				fonts.push_font_face();
 				fonts.set_font_type(param_.font_);
+//				fonts.set_font_type(param_.font_b_);
 				fonts.set_font_size(param_.font_height_);
 
 				vtx::irect clip_ = wp.clip_;

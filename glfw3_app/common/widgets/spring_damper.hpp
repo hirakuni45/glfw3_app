@@ -1,13 +1,13 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	spring damper class
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include "utils/vmath.hpp"
 
 namespace gui {
@@ -34,7 +34,7 @@ namespace gui {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		spring_damper() : position_(0.0f), offset_(0.0f), speed_(0.0f) { }
+		spring_damper() noexcept : position_(0.0f), offset_(0.0f), speed_(0.0f) { }
 
 
 		//-----------------------------------------------------------------//
@@ -49,7 +49,7 @@ namespace gui {
 			@return 更新位置
 		*/
 		//-----------------------------------------------------------------//
-		int32_t update(bool select_in, bool select, int32_t pos, int32_t scr, int32_t limit, int32_t drag)
+		int32_t update(bool select_in, bool select, int32_t pos, int32_t scr, int32_t limit, int32_t drag) noexcept
 		{
 			if(select_in) {  // 選択開始時
 				speed_ = 0.0f;

@@ -4,7 +4,7 @@
 	@brief	GUI widget_chip クラス @n
 			※「バルーンヘルプ」のようなＧＵＩ
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2018, 2025 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2018, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -58,7 +58,7 @@ namespace gui {
 
 			select_func_type	select_func_;	///< セレクト関数
 
-			param(const std::string& text = "") :
+			param(const std::string& text = "") noexcept :
 				plate_param_(15, 0), color_param_(widget_director::default_chip_color_),
 				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255)),
 				id_(0), skid_(10, 10), active_(0),
@@ -83,7 +83,7 @@ namespace gui {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		widget_chip(widget_director& wd, const widget::param& bp, const param& p) :
+		widget_chip(widget_director& wd, const widget::param& bp, const param& p) noexcept :
 			widget(bp), wd_(wd), param_(p), objh_(0), id_(0), ena_(false) { }
 
 
@@ -100,7 +100,7 @@ namespace gui {
 			@brief	型を取得
 		*/
 		//-----------------------------------------------------------------//
-		type_id type() const override { return get_type_id<value_type>(); }
+		type_id type() const noexcept override { return get_type_id<value_type>(); }
 
 
 		//-----------------------------------------------------------------//
@@ -109,7 +109,7 @@ namespace gui {
 			@return widget 型の基本名称
 		*/
 		//-----------------------------------------------------------------//
-		const char* type_name() const override { return "chip"; }
+		const char* type_name() const noexcept override { return "chip"; }
 
 
 		//-----------------------------------------------------------------//
@@ -118,7 +118,7 @@ namespace gui {
 			@return ハイブリッド・ウィジェットの場合「true」を返す。
 		*/
 		//-----------------------------------------------------------------//
-		bool hybrid() const override { return false; }
+		bool hybrid() const noexcept override { return false; }
 
 
 		//-----------------------------------------------------------------//
@@ -127,7 +127,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		const param& get_local_param() const { return param_; }
+		const param& get_local_param() const noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -136,7 +136,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		param& at_local_param() { return param_; }
+		param& at_local_param() noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -146,7 +146,7 @@ namespace gui {
 								「０」を指定すると、無効
 		*/
 		//-----------------------------------------------------------------//
-		void active(uint32_t time)
+		void active(uint32_t time) noexcept
 		{
 			if(time == 0) {
 				set_state(state::ENABLE, false);
@@ -163,7 +163,7 @@ namespace gui {
 			@param[in]	pos	位置
 		*/
 		//-----------------------------------------------------------------//
-		vtx::ipos& at_org() { return at_param().rect_.org; }
+		vtx::ipos& at_org() noexcept { return at_param().rect_.org; }
 
 
 		//-----------------------------------------------------------------//
@@ -173,7 +173,7 @@ namespace gui {
 			@param[in]	ofs	相対位置
 		*/
 		//-----------------------------------------------------------------//
-		void set_offset(widget* src, const vtx::ipos& ofs)
+		void set_offset(widget* src, const vtx::ipos& ofs) noexcept
 		{
 			if(src == nullptr) return;
 
@@ -195,7 +195,7 @@ namespace gui {
 			@param[in]	ot	オフセット・タイプ
 		*/
 		//-----------------------------------------------------------------//
-		void set_offset(widget* src, offset_type ot = offset_type::RIGHT_UP)
+		void set_offset(widget* src, offset_type ot = offset_type::RIGHT_UP) noexcept
 		{
 			vtx::ipos ofs(0);
 			switch(ot) {
@@ -229,7 +229,8 @@ namespace gui {
 			@param[in]	asz		サイズを自動設定しない場合「false」
 		*/
 		//-----------------------------------------------------------------//
-		void set_text(const std::string& text, bool asz = true) {
+		void set_text(const std::string& text, bool asz = true) noexcept
+		{
 			param_.text_param_.set_text(text);
 			if(asz) {
 				auto sz = get_text_size(param_.text_param_);
@@ -243,7 +244,7 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() override
+		void initialize() noexcept override
 		{
 			// サイズ固定
 			at_param().state_.set(widget::state::SERVICE);
@@ -280,7 +281,7 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() override
+		void update() noexcept override
 		{
 			if(!ena_ && get_enable()) {
 				if(param_.active_ == 0) {
@@ -307,7 +308,7 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override
+		void service() noexcept override
 		{
 			if(!get_state(state::ENABLE)) {
 				return;
@@ -327,7 +328,7 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render() override
+		void render() noexcept override
 		{
 			if(objh_ == 0) return;
 
@@ -346,7 +347,7 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(sys::preference& pre) override {
+		bool save(sys::preference& pre) noexcept override {
 			return true;
 		}
 
@@ -358,7 +359,7 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre) override {
+		bool load(const sys::preference& pre) noexcept override {
 			return true;
 		}
 	};

@@ -3,7 +3,7 @@
 /*!	@file
 	@brief	GUI Widget ディレクター（ヘッダー）
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2025 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -62,7 +62,7 @@ namespace gui {
 			gl::mobj::handle	V_line_;	  	///< 縦線（｜）
 			gl::mobj::handle	H_line_;		///< 横線（―）
 
-			share_img() : un_check_(0), to_check_(0),
+			share_img() noexcept : un_check_(0), to_check_(0),
 				un_radio_(0), to_radio_(0),
 				minus_box_(0), plus_box_(0),
 				up_box_(0), up_boxp_(0), down_box_(0), down_boxp_(0),
@@ -112,9 +112,9 @@ namespace gui {
 
 		uint32_t				render_num_ = 0;
 
-		void message_widget_(widget* w, const std::string& s);
-		void parents_widget_mark_(widget* root);
-		void unselect_parents_(widget* root);
+		void message_widget_(widget* w, const std::string& s) noexcept;
+		void parents_widget_mark_(widget* root) noexcept;
+		void unselect_parents_(widget* root) noexcept;
 
 	public:
 		static widget::color_param		default_frame_color_;
@@ -262,7 +262,7 @@ namespace gui {
 			@param[in]	w	ウィジェット
 		*/
 		//-----------------------------------------------------------------//
-		bool del_widget(widget* w)
+		bool del_widget(widget* w) noexcept
 		{
 			if(w == nullptr) return false;
 
@@ -463,7 +463,7 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize();
+		void initialize() noexcept;
 
 
 		//-----------------------------------------------------------------//
@@ -472,7 +472,7 @@ namespace gui {
 			@return 操作があった場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool update();
+		bool update() noexcept;
 
 
 		//-----------------------------------------------------------------//
@@ -480,7 +480,7 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service();
+		void service() noexcept;
 
 
 		//-----------------------------------------------------------------//
@@ -488,7 +488,7 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render();
+		void render() noexcept;
 
 
 		//-----------------------------------------------------------------//
@@ -496,7 +496,7 @@ namespace gui {
 			@brief	廃棄
 		*/
 		//-----------------------------------------------------------------//
-		void destroy();
+		void destroy() noexcept;
 
 
 		//-----------------------------------------------------------------//
@@ -569,7 +569,7 @@ namespace gui {
 			@param[in]	wd	widget_director
 		*/
 		//-----------------------------------------------------------------//
-		void action_monitor();
+		void action_monitor() noexcept;
 
 
 		//-----------------------------------------------------------------//
