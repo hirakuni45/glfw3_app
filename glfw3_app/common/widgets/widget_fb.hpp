@@ -1,14 +1,14 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	GUI Widget フレーム・バッファ @n
 			gl::texfb クラスをアタッチしている。
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2020 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2020, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include "widgets/widget_director.hpp"
 #include "widgets/widget_frame.hpp"
 #include "utils/terminal.hpp"
@@ -38,7 +38,7 @@ namespace gui {
 			bool		ms_positive_;	///< ボタントリガー（ON）
 			bool		ms_negative_;	///< ボタントリガー（OFF）
 
-			param() : ms_pos_(0), ms_level_(false), ms_positive_(false), ms_negative_(false)
+			param() noexcept : ms_pos_(0), ms_level_(false), ms_positive_(false), ms_negative_(false)
 			{ }
 		};
 
@@ -58,7 +58,7 @@ namespace gui {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		widget_fb(widget_director& wd, const widget::param& bp, const param& p) :
+		widget_fb(widget_director& wd, const widget::param& bp, const param& p) noexcept :
 			widget(bp), wd_(wd), param_(p), fb_(), focus_(false)
 		{ }
 
@@ -76,7 +76,7 @@ namespace gui {
 			@brief	型を取得
 		*/
 		//-----------------------------------------------------------------//
-		type_id type() const override { return get_type_id<value_type>(); }
+		type_id type() const noexcept override { return get_type_id<value_type>(); }
 
 
 		//-----------------------------------------------------------------//
@@ -85,7 +85,7 @@ namespace gui {
 			@return widget 型の基本名称
 		*/
 		//-----------------------------------------------------------------//
-		const char* type_name() const override { return "fb"; }
+		const char* type_name() const noexcept override { return "fb"; }
 
 
 		//-----------------------------------------------------------------//
@@ -94,7 +94,7 @@ namespace gui {
 			@return ハイブリッド・ウィジェットの場合「true」を返す。
 		*/
 		//-----------------------------------------------------------------//
-		bool hybrid() const override { return false; }
+		bool hybrid() const noexcept override { return false; }
 
 
 		//-----------------------------------------------------------------//
@@ -103,7 +103,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		const param& get_local_param() const { return param_; }
+		const param& get_local_param() const noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -112,7 +112,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		param& at_local_param() { return param_; }
+		param& at_local_param() noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -121,7 +121,7 @@ namespace gui {
 			@return フレームバッファ
 		*/
 		//-----------------------------------------------------------------//
-		auto& at_fb() { return fb_; }
+		auto& at_fb() noexcept { return fb_; }
 
 
 		//-----------------------------------------------------------------//
@@ -129,7 +129,7 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() override
+		void initialize() noexcept override
 		{
 			at_param().state_.set(widget::state::POSITION_LOCK);
 			at_param().state_.set(widget::state::SIZE_LOCK);
@@ -149,7 +149,7 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() override
+		void update() noexcept override
 		{
 			if(wd_.get_focus_widget() == this || wd_.get_focus_widget() == wd_.root_widget(this)) {
 				focus_ = true;
@@ -191,7 +191,7 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override
+		void service() noexcept override
 		{
 			if(!get_state(state::ENABLE)) {
 				focus_ = false;
@@ -205,7 +205,7 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render() override
+		void render() noexcept override
 		{
 			using namespace gl;
 			core& core = core::get_instance();
@@ -247,7 +247,7 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(sys::preference& pre) override {
+		bool save(sys::preference& pre) noexcept override {
 			return false;
 		}
 
@@ -259,7 +259,7 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre) override {
+		bool load(const sys::preference& pre) noexcept override {
 			return false;
 		}
 	};

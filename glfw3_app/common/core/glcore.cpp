@@ -338,6 +338,13 @@ namespace gl {
 			return false;
 		}
 
+#ifdef WIN32
+// OpenGL glBegin/glEnd/glVertex などのモダンな API を使わない現代的な描画を強制する
+//		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+//		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+//		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#endif
+
 		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
 		const GLFWvidmode* vm = glfwGetVideoMode(monitor);
 		best_size_.x  = vm->width;

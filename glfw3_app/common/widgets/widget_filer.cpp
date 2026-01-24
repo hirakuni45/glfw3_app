@@ -1,4 +1,4 @@
-//=========================================================================//
+//=============================================================================//
 /*!	@file
 	@brief	GUI Widget ファイラー
     @author 平松邦仁 (hira@rvf-rc45.net)
@@ -6,7 +6,7 @@
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
-//=========================================================================//
+//=============================================================================//
 #include "widgets/widget_utils.hpp"
 #include "widgets/widget_filer.hpp"
 #include <boost/lexical_cast.hpp>
@@ -15,7 +15,7 @@
 
 namespace gui {
 
-	void widget_filer::create_file_(widget_file& wf, const vtx::irect& rect, int ofs, const std::string& str)
+	void widget_filer::create_file_(widget_file& wf, const vtx::irect& rect, int ofs, const std::string& str) noexcept
 	{
 		{
 			widget::param wp(rect, files_);
@@ -66,7 +66,7 @@ namespace gui {
 		}
 	}
 
-	void widget_filer::create_files_(widget_files& wfs, int ofs)
+	void widget_filer::create_files_(widget_files& wfs, int ofs) noexcept
 	{
 		wfs.resize(file_infos_.size() + drv_.get_num() + (param_.new_file_ ? 1 : 0));
 		wfs.clear();
@@ -147,7 +147,7 @@ namespace gui {
 		}
 	}
 
-	widget_filer::widget_files_cit widget_filer::scan_select_in_file_(widget_files& wfs) const
+	widget_filer::widget_files_cit widget_filer::scan_select_in_file_(widget_files& wfs) const noexcept
 	{
 		for(widget_files_cit cit = wfs.begin(); cit != wfs.end(); ++cit) {
 			const widget_file& wf = *cit;
@@ -158,7 +158,7 @@ namespace gui {
 		return wfs.end();
 	}
 
-	widget_filer::widget_files_cit widget_filer::scan_select_file_(widget_files& wfs) const
+	widget_filer::widget_files_cit widget_filer::scan_select_file_(widget_files& wfs) const noexcept
 	{
 		for(widget_files_cit cit = wfs.begin(); cit != wfs.end(); ++cit) {
 			const widget_file& wf = *cit;
@@ -169,7 +169,7 @@ namespace gui {
 		return wfs.end();
 	}
 
-	widget_filer::widget_files_cit widget_filer::scan_selected_file_(widget_files& wfs) const
+	widget_filer::widget_files_cit widget_filer::scan_selected_file_(widget_files& wfs) const noexcept
 	{
 		for(widget_files_cit cit = wfs.begin(); cit != wfs.end(); ++cit) {
 			const widget_file& wf = *cit;
@@ -180,7 +180,7 @@ namespace gui {
 		return wfs.end();
 	}
 
-	void widget_filer::un_selected_(widget_files& wfs)
+	void widget_filer::un_selected_(widget_files& wfs) noexcept
 	{
 		for(auto& wf : wfs) {
 			wf.name->set_state(widget::state::SELECTED, false);
@@ -188,7 +188,7 @@ namespace gui {
 		}
 	}
 
-	void widget_filer::resize_files_(widget_files& wfs, short ofs, short width)
+	void widget_filer::resize_files_(widget_files& wfs, short ofs, short width) noexcept
 	{
 		for(widget_files_cit cit = wfs.begin(); cit != wfs.end(); ++cit) {
 			const widget_file& wf = *cit;
@@ -215,7 +215,7 @@ namespace gui {
 		}
 	}
 
-	void widget_filer::update_files_info_(widget_files& wfs)
+	void widget_filer::update_files_info_(widget_files& wfs) noexcept
 	{
 		for(widget_files_cit cit = wfs.begin(); cit != wfs.end(); ++cit) {
 			const widget_file& wf = *cit;
@@ -253,7 +253,7 @@ namespace gui {
 		}
 	}
 
-	void widget_filer::update_files_alias_(widget_files& wfs)
+	void widget_filer::update_files_alias_(widget_files& wfs) noexcept
 	{
 		for(widget_files_cit cit = wfs.begin(); cit != wfs.end(); ++cit) {
 			const widget_file& wf = *cit;
@@ -267,7 +267,7 @@ namespace gui {
 		}
 	}
 
-	void widget_filer::get_regist_state_()
+	void widget_filer::get_regist_state_() noexcept
 	{
 		// 選択位置の回復
 		file_map::iterator it = file_map_.find(param_.path_);
@@ -280,7 +280,7 @@ namespace gui {
 		}
 	}
 
-	void widget_filer::set_regist_state_()
+	void widget_filer::set_regist_state_() noexcept
 	{
 		// パスに紐づいた位置の記録
 		file_map::iterator it = file_map_.find(param_.path_);
@@ -293,14 +293,14 @@ namespace gui {
 		f.select_pos_ = select_pos_;
 	}
 
-	void widget_filer::set_select_pos_(uint32_t pos)
+	void widget_filer::set_select_pos_(uint32_t pos) noexcept
 	{
 		un_selected_(center_);
 		select_pos_ = pos;
 		set_regist_state_();
 	}
 
-	widget_filer::widget_file_copt widget_filer::scan_item_(const std::string& fn) const
+	widget_filer::widget_file_copt widget_filer::scan_item_(const std::string& fn) const noexcept
 	{
 		auto path = utils::strip_last_of_delimita_path(fn);
 
@@ -313,7 +313,7 @@ namespace gui {
 		return widget_file_copt();
 	}
 
-	bool widget_filer::focus_(const std::string& path)
+	bool widget_filer::focus_(const std::string& path) noexcept
 	{
 		auto fn = utils::strip_last_of_delimita_path(path);
 		uint32_t n = 0;

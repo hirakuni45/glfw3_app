@@ -1,25 +1,25 @@
 #pragma once
-//=====================================================================//
+//=============================================================================//
 /*!	@file
 	@brief	GUI widget_frame クラス @n
 			・ベースとなるウィンドウを描画する。 @n
 			・描画領域の管理など
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=============================================================================//
 #include "widgets/widget_director.hpp"
 #include "widgets/widget_utils.hpp"
 
 namespace gui {
 
-	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
 		@brief	GUI widget_frame クラス
 	*/
-	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct widget_frame : public widget {
 
 		typedef widget_frame value_type;
@@ -65,7 +65,7 @@ namespace gui {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		widget_frame(widget_director& wd, const widget::param& bp, const param& p) :
+		widget_frame(widget_director& wd, const widget::param& bp, const param& p) noexcept :
 			widget(bp), wd_(wd), param_(p), objh_(0) { }
 
 

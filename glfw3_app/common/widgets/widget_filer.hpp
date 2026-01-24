@@ -1,5 +1,5 @@
 #pragma once
-//=========================================================================//
+//=============================================================================//
 /*!	@file
 	@brief	GUI Widget ファイラー（ヘッダー）@n
 			ファイル選択を行う GUI モジュール
@@ -8,7 +8,7 @@
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
-//=========================================================================//
+//=============================================================================//
 #include <vector>
 #include <boost/unordered_map.hpp>
 #include <boost/optional.hpp>
@@ -22,11 +22,11 @@
 
 namespace gui {
 
-	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
 		@brief	GUI filer クラス（ファイル選択）
 	*/
-	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct widget_filer : public widget {
 
 		typedef widget_filer value_type;
@@ -59,7 +59,7 @@ namespace gui {
 			select_file_func_type	select_file_func_;	///< セレクト関数
 			cancel_file_func_type	cancel_file_func_;	///< 選択キャンセル関数
 
-			param(const std::string& path = "", const std::string& filter = "", bool new_file = false) :
+			param(const std::string& path = "", const std::string& filter = "", bool new_file = false) noexcept :
 				plate_param_(),
 				color_param_(widget_director::default_frame_color_),
 				text_param_(), shift_param_(),
@@ -165,20 +165,20 @@ namespace gui {
 		bool		back_directory_;
 		bool		center_update_;
 
-		void create_file_(widget_file& wf, const vtx::irect& rect, int ofs, const std::string& str);
-		void create_files_(widget_files& wfs, int ofs);
-		widget_files_cit scan_select_in_file_(widget_files& wfs) const;
-		widget_files_cit scan_select_file_(widget_files& wfs) const;
-		widget_files_cit scan_selected_file_(widget_files& wfs) const;
-		void un_selected_(widget_files& wfs);
-		void resize_files_(widget_files& wfs, short ofs, short width);
-		void update_files_info_(widget_files& wfs);
-		void update_files_alias_(widget_files& wfs);
-		void get_regist_state_();
-		void set_regist_state_();
-		void set_select_pos_(uint32_t pos);
-		widget_file_copt scan_item_(const std::string& path) const;
-		bool focus_(const std::string& fn);
+		void create_file_(widget_file& wf, const vtx::irect& rect, int ofs, const std::string& str) noexcept;
+		void create_files_(widget_files& wfs, int ofs) noexcept;
+		widget_files_cit scan_select_in_file_(widget_files& wfs) const noexcept;
+		widget_files_cit scan_select_file_(widget_files& wfs) const noexcept;
+		widget_files_cit scan_selected_file_(widget_files& wfs) const noexcept;
+		void un_selected_(widget_files& wfs) noexcept;
+		void resize_files_(widget_files& wfs, short ofs, short width) noexcept;
+		void update_files_info_(widget_files& wfs) noexcept;
+		void update_files_alias_(widget_files& wfs) noexcept;
+		void get_regist_state_() noexcept;
+		void set_regist_state_() noexcept;
+		void set_select_pos_(uint32_t pos) noexcept;
+		widget_file_copt scan_item_(const std::string& path) const noexcept;
+		bool focus_(const std::string& fn) noexcept;
 
 		void destroy_files_(widget_files& wfs) noexcept
 		{

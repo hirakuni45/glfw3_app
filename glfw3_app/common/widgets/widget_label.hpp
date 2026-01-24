@@ -57,7 +57,7 @@ namespace gui {
 				@param[in]	ro		テキスト変更の場合「false」
 			*/
 			//-------------------------------------------------------------//
-			param(const std::string& text = "", bool ro = true) :
+			param(const std::string& text = "", bool ro = true) noexcept :
 //				plate_param_(0, 2),
 				plate_param_(),
 				color_param_(widget_director::default_label_color_),
@@ -85,7 +85,7 @@ namespace gui {
 		gl::mobj::handle	select_objh_;
 
 
-		void build_obj_()
+		void build_obj_() noexcept
 		{
 			vtx::spos size;
 			if(param_.plate_param_.resizeble_) {
@@ -114,7 +114,7 @@ namespace gui {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		widget_label(widget_director& wd, const widget::param& bp, const param& p) :
+		widget_label(widget_director& wd, const widget::param& bp, const param& p) noexcept :
 			widget(bp), wd_(wd), param_(p), interval_(0), focus_(false),
 			objh_(0), select_objh_(0) { }
 
@@ -132,7 +132,7 @@ namespace gui {
 			@brief	型を取得
 		*/
 		//-----------------------------------------------------------------//
-		type_id type() const override { return get_type_id<value_type>(); }
+		type_id type() const noexcept override { return get_type_id<value_type>(); }
 
 
 		//-----------------------------------------------------------------//
@@ -141,7 +141,7 @@ namespace gui {
 			@return widget 型の基本名称
 		*/
 		//-----------------------------------------------------------------//
-		const char* type_name() const override { return "label"; }
+		const char* type_name() const noexcept override { return "label"; }
 
 
 		//-----------------------------------------------------------------//
@@ -150,7 +150,7 @@ namespace gui {
 			@return ハイブリッド・ウィジェットの場合「true」を返す。
 		*/
 		//-----------------------------------------------------------------//
-		bool hybrid() const override { return false; }
+		bool hybrid() const noexcept override { return false; }
 
 
 		//-----------------------------------------------------------------//
@@ -159,7 +159,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		const param& get_local_param() const { return param_; }
+		const param& get_local_param() const noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -168,7 +168,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		param& at_local_param() { return param_; }
+		param& at_local_param() noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -177,7 +177,8 @@ namespace gui {
 			@param[in]	text	テキスト
 		*/
 		//-----------------------------------------------------------------//
-		void set_text(const std::string& text) {
+		void set_text(const std::string& text) noexcept
+		{
 			param_.text_param_.set_text(text);
 			param_.text_in_pos_ = param_.text_param_.text_.size();
 		}
@@ -189,7 +190,8 @@ namespace gui {
 			@return	テキスト
 		*/
 		//-----------------------------------------------------------------//
-		std::string get_text() const {
+		std::string get_text() const noexcept
+		{
 			std::string s;
 			utils::utf32_to_utf8(param_.text_param_.text_, s);
 			return s;
@@ -202,7 +204,8 @@ namespace gui {
 			@param[in]	alias	テキスト
 		*/
 		//-----------------------------------------------------------------//
-		void set_alias(const std::string& alias) {
+		void set_alias(const std::string& alias) noexcept
+		{
 			param_.text_param_.set_alias(alias);
 			param_.text_param_.alias_enable_ = true;
 		}
@@ -214,7 +217,8 @@ namespace gui {
 			@return エイリアス・テキスト
 		*/
 		//-----------------------------------------------------------------//
-		const std::string get_alias() const {
+		const std::string get_alias() const noexcept
+		{
 			std::string s;
 			utils::utf32_to_utf8(param_.text_param_.alias_, s);
 			return s;
@@ -227,7 +231,8 @@ namespace gui {
 			@param[in]	ena		不許可にする場合「false」
 		*/
 		//-----------------------------------------------------------------//
-		void enable_alias(bool ena = true) {
+		void enable_alias(bool ena = true) noexcept
+		{
 			param_.text_param_.alias_enable_ = ena;
 		}
 
@@ -237,7 +242,7 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() override
+		void initialize() noexcept override
 		{
 			// 標準的に固定
 			at_param().state_.set(widget::state::POSITION_LOCK);
@@ -259,7 +264,7 @@ namespace gui {
 					※プレート・オブジェクトを再構築する
 		*/
 		//-----------------------------------------------------------------//
-		void build_plate() { build_obj_(); }
+		void build_plate() noexcept { build_obj_(); }
 
 
 		//-----------------------------------------------------------------//
@@ -267,7 +272,7 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() override
+		void update() noexcept override
 		{
 			if(param_.text_in_) return;
 
@@ -286,7 +291,7 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override
+		void service() noexcept override
 		{
 			if(!get_state(state::ENABLE)) {  // 不許可になったら、入力をオフラインにする。
 				param_.text_in_ = false;
@@ -393,7 +398,7 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render() override
+		void render() noexcept override
 		{
 			gl::mobj::handle h = objh_;
 			if(get_select() || get_state(widget::state::SELECTED)) {
@@ -431,7 +436,7 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(sys::preference& pre) override
+		bool save(sys::preference& pre) noexcept override
 		{
 			std::string path;
 			path += '/';
@@ -450,7 +455,7 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre) override
+		bool load(const sys::preference& pre) noexcept override
 		{
 			std::string path;
 			path += '/';
