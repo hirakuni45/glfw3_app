@@ -1,13 +1,13 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	GUI Widget プログレス・バー・クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <bitset>
 #include "core/glcore.hpp"
 #include "widgets/widget_director.hpp"
@@ -24,11 +24,11 @@ namespace gui {
 
 		typedef widget_progress value_type;
 
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	widget_progress パラメーター
 		*/
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct param {
 			widget::plate_param		plate_param_;	///< プレートパラメーター
 			widget::color_param		color_param_;	///< カラーパラメーター
@@ -38,7 +38,7 @@ namespace gui {
 			const img::i_img*		base_image_;	///< ベース画像を使う場合
 			const img::i_img*		hand_image_;	///< ハンドル画像を使う場合
 
-			param(float ratio = 0.0f) :
+			param(float ratio = 0.0f) noexcept :
 				plate_param_(),
 				color_param_(widget_director::default_progress_color_),
 				ratio_(ratio),
@@ -60,7 +60,7 @@ namespace gui {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		widget_progress(widget_director& wd, const widget::param& wp, const param& p) :
+		widget_progress(widget_director& wd, const widget::param& wp, const param& p) noexcept :
 			widget(wp), wd_(wd), param_(p),
 			base_h_(0), hand_h_(0)
 		{ }
@@ -79,7 +79,7 @@ namespace gui {
 			@brief	型を取得
 		*/
 		//-----------------------------------------------------------------//
-		type_id type() const override { return get_type_id<value_type>(); }
+		type_id type() const noexcept override { return get_type_id<value_type>(); }
 
 
 		//-----------------------------------------------------------------//
@@ -88,7 +88,7 @@ namespace gui {
 			@return widget 型の基本名称
 		*/
 		//-----------------------------------------------------------------//
-		const char* type_name() const override { return "progress"; }
+		const char* type_name() const noexcept override { return "progress"; }
 
 
 		//-----------------------------------------------------------------//
@@ -97,7 +97,7 @@ namespace gui {
 			@return ハイブリッド・ウィジェットの場合「true」を返す。
 		*/
 		//-----------------------------------------------------------------//
-		bool hybrid() const override { return false; }
+		bool hybrid() const noexcept override { return false; }
 
 
 		//-----------------------------------------------------------------//
@@ -106,7 +106,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		const param& get_local_param() const { return param_; }
+		const param& get_local_param() const noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -115,7 +115,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		param& at_local_param() { return param_; }
+		param& at_local_param() noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -124,7 +124,7 @@ namespace gui {
 			@param[in]	ratio	レシオ（進捗率）
 		*/
 		//-----------------------------------------------------------------//
-		void set_ratio(float ratio) { param_.ratio_ = ratio; }
+		void set_ratio(float ratio) noexcept { param_.ratio_ = ratio; }
 
 
 		//-----------------------------------------------------------------//
@@ -132,7 +132,7 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() override
+		void initialize() noexcept override
 		{
 			// 標準的設定
 			at_param().state_.set(widget::state::SERVICE);
@@ -180,7 +180,7 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() override { }
+		void update() noexcept override { }
 
 
 		//-----------------------------------------------------------------//
@@ -188,7 +188,7 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override { }
+		void service() noexcept override { }
 
 
 		//-----------------------------------------------------------------//
@@ -196,7 +196,7 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render() override
+		void render() noexcept override
 		{
 			if(base_h_ == 0) return;
 
@@ -237,7 +237,8 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(sys::preference& pre) override {
+		bool save(sys::preference& pre) noexcept override
+		{
 			std::string path;
 			path += '/';
 			path += wd_.create_widget_name(this);
@@ -255,7 +256,8 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre) override {
+		bool load(const sys::preference& pre) noexcept override
+		{
 			std::string path;
 			path += '/';
 			path += wd_.create_widget_name(this);

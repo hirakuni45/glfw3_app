@@ -1,13 +1,13 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	GUI widget_tree クラス（ヘッダー）
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include "widgets/widget_director.hpp"
 #include "widgets/widget_check.hpp"
 #include "utils/tree_unit.hpp"
@@ -23,11 +23,11 @@ namespace gui {
 
 		typedef widget_tree value_type;
 
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		/*!
 			@brief	ツリー・データベースのユニット構造体
 		*/
-		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct value {
 			widget_check*	w_;
 			std::string		title_;
@@ -52,7 +52,7 @@ namespace gui {
 			bool		single_;		///< シングル選択の場合「true」
 			select_func_type	select_func_;
 
-			param() :
+			param() noexcept :
 				color_param_(widget_director::default_tree_color_),
 				height_(28),
 				single_(true),
@@ -128,7 +128,7 @@ namespace gui {
 		}
 
 
-		void destroy_()
+		void destroy_() noexcept
 		{
 			tree_unit::unit_map_its its;
 			tree_unit_.create_list("", its);
@@ -528,6 +528,5 @@ namespace gui {
 			tree_unit_its_.clear();
 ///			select_it_ = tree_unit_.end();
 		}
-
 	};
 }

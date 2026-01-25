@@ -1,13 +1,13 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
-	@brief	GUI widget_table クラス（ヘッダー）
+	@brief	GUI widget_table クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
 	@copyright	Copyright (C) 2018 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include "widgets/widget_director.hpp"
 #include "widgets/widget_null.hpp"
 #include "widgets/widget_scrollbar.hpp"
@@ -44,7 +44,7 @@ namespace gui {
 			bool		scroll_bar_v_;	///< 垂直スクロール・バーによる制御
 			bool		scroll_ctrl_;	///< スクロール・コントロール（マウスのダイアル）
 
-			param() : cell_(), item_size_(0),
+			param() noexcept : cell_(), item_size_(0),
 				pos_(0), id_(0), select_func_(),
 				scroll_bar_h_(false), scroll_bar_v_(false), scroll_ctrl_(true)
 			{ }
@@ -73,7 +73,7 @@ namespace gui {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		widget_table(widget_director& wd, const widget::param& bp, const param& p) :
+		widget_table(widget_director& wd, const widget::param& bp, const param& p) noexcept :
 			widget(bp), wd_(wd), param_(p),
 			child_list_(),
 			base_(nullptr), scroll_h_(nullptr), scroll_v_(nullptr),
@@ -94,7 +94,7 @@ namespace gui {
 			@brief	型を取得
 		*/
 		//-----------------------------------------------------------------//
-		type_id type() const override { return get_type_id<value_type>(); }
+		type_id type() const noexcept override { return get_type_id<value_type>(); }
 
 
 		//-----------------------------------------------------------------//
@@ -103,7 +103,7 @@ namespace gui {
 			@return widget 型の基本名称
 		*/
 		//-----------------------------------------------------------------//
-		const char* type_name() const override { return "table"; }
+		const char* type_name() const noexcept override { return "table"; }
 
 
 		//-----------------------------------------------------------------//
@@ -112,7 +112,7 @@ namespace gui {
 			@return ハイブリッド・ウィジェットの場合「true」を返す。
 		*/
 		//-----------------------------------------------------------------//
-		bool hybrid() const override { return true; }
+		bool hybrid() const noexcept override { return true; }
 
 
 		//-----------------------------------------------------------------//
@@ -121,7 +121,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		const param& get_local_param() const { return param_; }
+		const param& get_local_param() const noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -130,7 +130,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		param& at_local_param() { return param_; }
+		param& at_local_param() noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -139,7 +139,7 @@ namespace gui {
 			@param[in]	f	無効にする場合「false」
 		*/
 		//-----------------------------------------------------------------//
-		void enable(bool f = true) { wd_.enable(this, f, true); }
+		void enable(bool f = true) noexcept { wd_.enable(this, f, true); }
 
 
 		//-----------------------------------------------------------------//
@@ -148,7 +148,7 @@ namespace gui {
 			@return 水平スクロールバー
 		*/
 		//-----------------------------------------------------------------//
-		widget_scrollbar* get_scrollbar_h() const { return scroll_h_; }
+		widget_scrollbar* get_scrollbar_h() const noexcept { return scroll_h_; }
 
 
 		//-----------------------------------------------------------------//
@@ -157,7 +157,7 @@ namespace gui {
 			@return 垂直スクロールバー
 		*/
 		//-----------------------------------------------------------------//
-		widget_scrollbar* get_scrollbar_v() const { return scroll_v_; }
+		widget_scrollbar* get_scrollbar_v() const noexcept { return scroll_v_; }
 
 
 		//-----------------------------------------------------------------//
@@ -165,7 +165,7 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() override
+		void initialize() noexcept override
 		{
 			at_param().state_.set(widget::state::SIZE_LOCK);
 			at_param().state_.set(widget::state::RESIZE_H_ENABLE, false);
@@ -239,7 +239,7 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() override
+		void update() noexcept override
 		{
 			if(get_focus()) {
 				if(param_.scroll_ctrl_) {
@@ -303,7 +303,7 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override
+		void service() noexcept override
 		{
 			if(!get_enable()) {
 				return;
@@ -326,7 +326,7 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render() override
+		void render() noexcept override
 		{
 		}
 
@@ -339,7 +339,7 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(sys::preference& pre) override
+		bool save(sys::preference& pre) noexcept override
 		{
 			std::string path;
 			path += '/';
@@ -359,7 +359,7 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre) override
+		bool load(const sys::preference& pre) noexcept override
 		{
 			std::string path;
 			path += '/';

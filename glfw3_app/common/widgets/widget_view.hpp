@@ -4,7 +4,7 @@
 	@brief	GUI Widget View クラス @n
 			カスタム描画・テンプレート
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2025 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -41,7 +41,9 @@ namespace gui {
 			render_func_type	render_func_;
 			service_func_type	service_func_;
 
-			param() { }
+			param() noexcept :
+			update_func_(), render_func_(), service_func_()
+			{ }
 		};
 
 	private:
@@ -55,7 +57,7 @@ namespace gui {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		widget_view(widget_director& wd, const widget::param& bp, const param& p) :
+		widget_view(widget_director& wd, const widget::param& bp, const param& p) noexcept :
 			widget(bp), wd_(wd), param_(p) { }
 
 
@@ -72,7 +74,7 @@ namespace gui {
 			@brief	型を取得
 		*/
 		//-----------------------------------------------------------------//
-		type_id type() const override { return get_type_id<value_type>(); }
+		type_id type() const noexcept override { return get_type_id<value_type>(); }
 
 
 		//-----------------------------------------------------------------//
@@ -81,7 +83,7 @@ namespace gui {
 			@return widget 型の基本名称
 		*/
 		//-----------------------------------------------------------------//
-		const char* type_name() const override { return "view"; }
+		const char* type_name() const noexcept override { return "view"; }
 
 
 		//-----------------------------------------------------------------//
@@ -90,7 +92,7 @@ namespace gui {
 			@return ハイブリッド・ウィジェットの場合「true」を返す。
 		*/
 		//-----------------------------------------------------------------//
-		bool hybrid() const override { return false; }
+		bool hybrid() const noexcept override { return false; }
 
 
 		//-----------------------------------------------------------------//
@@ -99,7 +101,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		const param& get_local_param() const { return param_; }
+		const param& get_local_param() const noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -108,7 +110,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		param& at_local_param() { return param_; }
+		param& at_local_param() noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -116,7 +118,7 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() override
+		void initialize() noexcept override
 		{
 			// 標準的に固定
 			at_param().state_.set(widget::state::POSITION_LOCK);
@@ -132,11 +134,11 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() override
+		void update() noexcept override
 		{
 			if(get_param().parents_ && get_state(widget::state::AREA_ROOT)) {
 				if(get_param().parents_->type() == get_type_id<widget_frame>() ||
-				   get_param().parents_->type() == get_type_id<widget_null>()) {
+					get_param().parents_->type() == get_type_id<widget_null>()) {
 					widget_frame* w = static_cast<widget_frame*>(at_param().parents_);
 					at_rect() = w->get_draw_area();
 				}
@@ -150,7 +152,7 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render() override
+		void render() noexcept override
 		{
 			using namespace gl;
 			core& core = core::get_instance();
@@ -180,7 +182,7 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override
+		void service() noexcept override
 		{
 			if(param_.service_func_ != nullptr) param_.service_func_();
 		}
@@ -193,7 +195,7 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(sys::preference& pre) override
+		bool save(sys::preference& pre) noexcept override
 		{
 			return true;
 		}
@@ -206,7 +208,7 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre) override
+		bool load(const sys::preference& pre) noexcept override
 		{
 			return true;
 		}

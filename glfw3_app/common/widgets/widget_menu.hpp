@@ -8,7 +8,7 @@
 			※あまりに巨大なメニューには向いていない。 @n
 			※メニューはテキストの集合なので、同じ文字列が許容される。
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2025 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -54,7 +54,7 @@ namespace gui {
 			select_func_type	select_func_;	///< セレクト関数
 			bool		load_func_;		///<	ロード時、セレクト関数を呼ばない場合 false
 
-			param(const std::string& text = "") :
+			param(const std::string& text = "") noexcept :
 				plate_param_(),
 				color_param_(widget_director::default_list_color_),
 				text_param_(text, img::rgba8(255, 255), img::rgba8(0, 255),
@@ -78,7 +78,7 @@ namespace gui {
 
 		vtx::ipos			org_;
 
-		widget_label* build_menu_(const widget::param& wp, widget_label::param& wp_, widget::plate_param::round_style sty)
+		widget_label* build_menu_(const widget::param& wp, widget_label::param& wp_, widget::plate_param::round_style sty) noexcept
 		{
 			wp_.plate_param_.round_radius_ = param_.plate_param_.round_radius_;
 			wp_.plate_param_.round_style_  = sty;
@@ -87,7 +87,7 @@ namespace gui {
 		}
 
 
-		void build_list_()
+		void build_list_() noexcept
 		{
 			widget::param wp(vtx::irect(vtx::ipos(0), vtx::ipos(get_rect().size.x, param_.base_height_)), this);
 			wp.pre_group_ = get_param().pre_group_;
@@ -118,7 +118,7 @@ namespace gui {
 		}
 
 
-		void destroy_()
+		void destroy_() noexcept
 		{
 			for(auto w : list_) {
 				wd_.del_widget(w);
@@ -132,7 +132,7 @@ namespace gui {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		widget_menu(widget_director& wd, const widget::param& wp, const param& p) :
+		widget_menu(widget_director& wd, const widget::param& wp, const param& p) noexcept :
 			widget(wp), wd_(wd), param_(p),
 			list_(), id_(0), org_(0)
 		{ }
@@ -151,7 +151,7 @@ namespace gui {
 			@brief	型を取得
 		*/
 		//-----------------------------------------------------------------//
-		type_id type() const override { return get_type_id<value_type>(); }
+		type_id type() const noexcept override { return get_type_id<value_type>(); }
 
 
 		//-----------------------------------------------------------------//
@@ -160,7 +160,7 @@ namespace gui {
 			@return widget 型の基本名称
 		*/
 		//-----------------------------------------------------------------//
-		const char* type_name() const override { return "menu"; }
+		const char* type_name() const noexcept override { return "menu"; }
 
 
 		//-----------------------------------------------------------------//
@@ -169,7 +169,7 @@ namespace gui {
 			@return ハイブリッド・ウィジェットの場合「true」を返す。
 		*/
 		//-----------------------------------------------------------------//
-		bool hybrid() const override { return true; }
+		bool hybrid() const noexcept override { return true; }
 
 
 		//-----------------------------------------------------------------//
@@ -178,7 +178,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		const param& get_local_param() const { return param_; }
+		const param& get_local_param() const noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -187,7 +187,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		param& at_local_param() { return param_; }
+		param& at_local_param() noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -196,7 +196,7 @@ namespace gui {
 			@param[in]	f	無効にする場合「false」
 		*/
 		//-----------------------------------------------------------------//
-		void enable(bool f = true) { wd_.enable(this, f, true); }
+		void enable(bool f = true) noexcept { wd_.enable(this, f, true); }
 
 
 		//-----------------------------------------------------------------//
@@ -205,7 +205,7 @@ namespace gui {
 			@return メニューのサイズ
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t size() const { return list_.size(); }
+		uint32_t size() const noexcept { return list_.size(); }
 
 
 		//-----------------------------------------------------------------//
@@ -213,7 +213,7 @@ namespace gui {
 			@brief	メニューの全クリア
 		*/
 		//-----------------------------------------------------------------//
-		void clear() { destroy_(); }
+		void clear() noexcept { destroy_(); }
 
 
 		//-----------------------------------------------------------------//
@@ -223,7 +223,7 @@ namespace gui {
 			@return 成功したら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool erase(uint32_t pos)
+		bool erase(uint32_t pos) noexcept
 		{
 			if(pos >= list_.size()) return false;
 
@@ -269,7 +269,7 @@ namespace gui {
 			@return 挿入できたら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool insert(const std::string& text, uint32_t pos)
+		bool insert(const std::string& text, uint32_t pos) noexcept
 		{
 			if(pos > list_.size()) return false;
 
@@ -322,7 +322,7 @@ namespace gui {
 			@return 挿入できたら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool push_back(const std::string& text) { return insert(text, list_.size()); }
+		bool push_back(const std::string& text) noexcept { return insert(text, list_.size()); }
 
 
 		//-----------------------------------------------------------------//
@@ -331,7 +331,7 @@ namespace gui {
 			@return 選択テキスト
 		*/
 		//-----------------------------------------------------------------//
-		std::string get_select_text() const { return param_.text_param_.get_text(); }
+		std::string get_select_text() const noexcept { return param_.text_param_.get_text(); }
 
 
 		//-----------------------------------------------------------------//
@@ -340,7 +340,7 @@ namespace gui {
 			@return 選択位置
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t get_select_pos() const { return param_.select_pos_; }
+		uint32_t get_select_pos() const noexcept { return param_.select_pos_; }
 
 
 		//-----------------------------------------------------------------//
@@ -350,7 +350,7 @@ namespace gui {
 			@return 成功の場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool select(const std::string& text)
+		bool select(const std::string& text) noexcept
 		{
 			int pos = 0;
 			for(widget_label* w : list_) {
@@ -375,7 +375,7 @@ namespace gui {
 			@return 成功の場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool select(uint32_t pos)
+		bool select(uint32_t pos) noexcept
 		{
 			if(pos < list_.size()) {
 				param_.text_param_.set_text(list_[pos]->get_local_param().text_param_.get_text());
@@ -396,7 +396,7 @@ namespace gui {
 			@param[in]	list	新メニューリスト
 		*/
 		//-----------------------------------------------------------------//
-		void build(const utils::strings& list)
+		void build(const utils::strings& list) noexcept
 		{
 			param_.init_list_ = list;
 			destroy_();
@@ -411,7 +411,7 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() override
+		void initialize() noexcept override
 		{
 			// 標準的に固定、リサイズ不可、サービス呼び出し、有効時最上位
 			at_param().state_.set(widget::state::SERVICE);
@@ -434,7 +434,7 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() override
+		void update() noexcept override
 		{
 			if(list_.empty()) {
 				return;
@@ -491,7 +491,7 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override
+		void service() noexcept override
 		{
 			if(!get_state(state::ENABLE)) {
 				return;
@@ -512,7 +512,7 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render() override { }
+		void render() noexcept override { }
 
 
 		//-----------------------------------------------------------------//
@@ -522,7 +522,8 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(sys::preference& pre) override {
+		bool save(sys::preference& pre) noexcept override
+		{
 			std::string path;
 			path += '/';
 			path += wd_.create_widget_name(this);
@@ -553,7 +554,8 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre) override {
+		bool load(const sys::preference& pre) noexcept override
+		{
 			std::string path;
 			path += '/';
 			path += wd_.create_widget_name(this);

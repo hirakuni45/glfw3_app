@@ -28,7 +28,7 @@ namespace gui {
 		@param[out]	pa		ペイントクラス
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	static void create_image_base(const img::i_img* image, const vtx::ipos& size, img::paint& pa)
+	static void create_image_base(const img::i_img* image, const vtx::ipos& size, img::paint& pa) noexcept
 	{
 		vtx::ipos s;
 		vtx::ipos o;
@@ -52,7 +52,7 @@ namespace gui {
 	}
 
 
-	static void mix_round_(img::paint& pa, const widget::color_param& cp, const widget::plate_param& pp)
+	static void mix_round_(img::paint& pa, const widget::color_param& cp, const widget::plate_param& pp) noexcept
 	{
 		if(pp.round_style_ == widget::plate_param::round_style::ALL) {
 			return;
@@ -107,7 +107,7 @@ namespace gui {
 		@param[in]	size	サイズ
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	static void create_round_frame(img::paint& pa, const widget::plate_param& pp, const widget::color_param& cp, const vtx::ipos& size)
+	static void create_round_frame(img::paint& pa, const widget::plate_param& pp, const widget::color_param& cp, const vtx::ipos& size) noexcept
 	{
 		pa.create(size, true);
 		pa.fill(img::rgba8(0, 0));
@@ -150,7 +150,7 @@ namespace gui {
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	template <class W>
-	void set_widget_text(W* w, const std::string& text) {
+	void set_widget_text(W* w, const std::string& text) noexcept {
 		w->at_local_param().text_param_.set_text(text);
 	}
 
@@ -162,7 +162,7 @@ namespace gui {
 		@param[out]	pos		位置を受け取る参照
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	static void final_position(const widget* root, vtx::ipos& pos)
+	static void final_position(const widget* root, vtx::ipos& pos) noexcept
 	{
 		pos.set(0);
 		while(root != 0) {
@@ -183,7 +183,7 @@ namespace gui {
 		@return クリップ内なら「true」
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	static bool final_clip(widget* root, vtx::ipos& org, vtx::irect& rect)
+	static bool final_clip(widget* root, vtx::ipos& org, vtx::irect& rect) noexcept
 	{
 		widgets ws;
 		vtx::irect sr(vtx::ipos(0), root->get_rect().size);
@@ -222,7 +222,7 @@ namespace gui {
 		@param[in]	ofs		描画オフセット
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	static void draw_mobj(widget_director& wd, gl::mobj::handle h, const vtx::irect& clip, const vtx::ipos& ofs = vtx::ipos(0))
+	static void draw_mobj(widget_director& wd, gl::mobj::handle h, const vtx::irect& clip, const vtx::ipos& ofs = vtx::ipos(0)) noexcept
 	{
 		gl::core& core = gl::core::get_instance();
 
@@ -247,7 +247,7 @@ namespace gui {
 		@return テキストのサイズ
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	static vtx::ipos get_text_size(const widget::text_param& tp)
+	static vtx::ipos get_text_size(const widget::text_param& tp) noexcept
 	{
 		gl::core& core = gl::core::get_instance();
 
@@ -285,7 +285,7 @@ namespace gui {
 		@param[in]	clip	描画エリア
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	static void draw_text(const widget::text_param& tp, const vtx::irect& rect, const vtx::irect& clip)
+	static void draw_text(const widget::text_param& tp, const vtx::irect& rect, const vtx::irect& clip) noexcept
 	{
 		gl::core& core = gl::core::get_instance();
 
@@ -361,7 +361,7 @@ namespace gui {
 		@param[in]	pp	プレート・パラメーター
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	static void render_text(widget_director& wd, gl::mobj::handle oh, const widget::param& wp, const widget::text_param& tp, const widget::plate_param& pp)
+	static void render_text(widget_director& wd, gl::mobj::handle oh, const widget::param& wp, const widget::text_param& tp, const widget::plate_param& pp) noexcept
 	{
 		gl::core& core = gl::core::get_instance();
 
@@ -418,7 +418,7 @@ namespace gui {
 		@return モーション・オブジェクトのハンドルを返す
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	static gl::mobj::handle frame_init(widget_director& wd, widget::param& wp, const widget::plate_param& pp, const widget::color_param& cp)
+	static gl::mobj::handle frame_init(widget_director& wd, widget::param& wp, const widget::plate_param& pp, const widget::color_param& cp) noexcept
 	{
 		vtx::ipos size;
 		if(pp.resizeble_) {
@@ -449,7 +449,7 @@ namespace gui {
 		@param[in]	ofs	描画オフセット
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	static void render_clipped_mobj(gl::mobj& mo, gl::mobj::handle moh, const vtx::irect& clip, const vtx::ipos& ofs)
+	static void render_clipped_mobj(gl::mobj& mo, gl::mobj::handle moh, const vtx::irect& clip, const vtx::ipos& ofs) noexcept
 	{
 		gl::core& core = gl::core::get_instance();
 
@@ -478,7 +478,7 @@ namespace gui {
 		@param[in]	sp	shift パラメーター
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	static void shift_text_update(const widget::param& bp, widget::text_param& tp, widget::shift_param& sp)
+	static void shift_text_update(const widget::param& bp, widget::text_param& tp, widget::shift_param& sp) noexcept
 	{
 		gl::core& core = gl::core::get_instance();
 		gl::fonts& fonts = core.at_fonts();
@@ -527,7 +527,7 @@ namespace gui {
 		@param[in]	pp	plate パラメーター
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	static void shift_text_render(widget_director& wd, const widget::param& bp, const widget::text_param& tp, const widget::plate_param& pp)
+	static void shift_text_render(widget_director& wd, const widget::param& bp, const widget::text_param& tp, const widget::plate_param& pp) noexcept
 	{
 		if(pp.caption_width_ <= 0) return;
 		if(tp.text_.empty()) return;
@@ -569,7 +569,7 @@ namespace gui {
 		@param[in]	color	描画カラー
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	static void draw_border(const vtx::srect& rect, const widget::color_param& color = widget_director::default_border_color_)
+	static void draw_border(const vtx::srect& rect, const widget::color_param& color = widget_director::default_border_color_) noexcept
 	{
 		vtx::srect r = rect;
 		vtx::spos o(0);

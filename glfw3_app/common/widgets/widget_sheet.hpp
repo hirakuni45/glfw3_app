@@ -4,7 +4,7 @@
 	@brief	GUI widget_sheet クラス @n
 			・プロパティーシートのような機能を提供する。
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2018, 2025 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2018, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -50,7 +50,7 @@ namespace gui {
 
 			bool			ext_title_;		///< 拡張されたタイトル表示
 
-			param() :
+			param() noexcept :
 				plate_param_(), color_param_(widget_director::default_sheet_color_),
 				text_param_("", img::rgba8(255, 255), img::rgba8(0, 255)),
 				shift_param_(),
@@ -93,7 +93,7 @@ namespace gui {
 			@param[in]	p	個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		widget_sheet(widget_director& wd, const widget::param& wp, const param& p) :
+		widget_sheet(widget_director& wd, const widget::param& wp, const param& p) noexcept :
 			widget(wp), wd_(wd), param_(p), objh_(0), id_(0), init_(false),
 			enable_(false)
 		{ }
@@ -112,7 +112,7 @@ namespace gui {
 			@brief	型を取得
 		*/
 		//-----------------------------------------------------------------//
-		type_id type() const override { return get_type_id<value_type>(); }
+		type_id type() const noexcept override { return get_type_id<value_type>(); }
 
 
 		//-----------------------------------------------------------------//
@@ -121,7 +121,7 @@ namespace gui {
 			@return widget 型の基本名称
 		*/
 		//-----------------------------------------------------------------//
-		const char* type_name() const override { return "sheet"; }
+		const char* type_name() const noexcept override { return "sheet"; }
 
 
 		//-----------------------------------------------------------------//
@@ -130,7 +130,7 @@ namespace gui {
 			@return ハイブリッド・ウィジェットの場合「true」を返す。
 		*/
 		//-----------------------------------------------------------------//
-		bool hybrid() const override { return true; }
+		bool hybrid() const noexcept override { return true; }
 
 
 		//-----------------------------------------------------------------//
@@ -139,7 +139,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		const param& get_local_param() const { return param_; }
+		const param& get_local_param() const noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -148,7 +148,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		param& at_local_param() { return param_; }
+		param& at_local_param() noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -157,7 +157,7 @@ namespace gui {
 			@return 選択位置
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t get_select_pos() const { return param_.index_; }
+		uint32_t get_select_pos() const noexcept { return param_.index_; }
 
 
 		//-----------------------------------------------------------------//
@@ -167,7 +167,7 @@ namespace gui {
 			@param[in]	root	ルート
 		*/
 		//-----------------------------------------------------------------//
-		void add(const std::string& title, widget* root)
+		void add(const std::string& title, widget* root) noexcept
 		{
 			if(root == nullptr) return;
 
@@ -185,7 +185,7 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() override
+		void initialize() noexcept override
 		{
 			// シート・ベース、標準設定
 			at_param().state_.set(widget::state::SERVICE);
@@ -223,7 +223,7 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() override
+		void update() noexcept override
 		{
 			if(param_.sheets_.empty()) return;
 
@@ -260,7 +260,7 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override
+		void service() noexcept override
 		{
 			bool ena = get_state(state::ENABLE);
 			if(!enable_ && ena) {
@@ -298,7 +298,7 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render() override
+		void render() noexcept override
 		{
 			if(objh_ == 0) return;
 
@@ -338,7 +338,7 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(sys::preference& pre) override
+		bool save(sys::preference& pre) noexcept override
 		{
 			std::string path;
 			path += '/';
@@ -358,7 +358,7 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre) override
+		bool load(const sys::preference& pre) noexcept override
 		{
 			std::string path;
 			path += '/';

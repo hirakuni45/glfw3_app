@@ -585,7 +585,8 @@ namespace gui {
 			@param[in]	f	不許可の場合「false」
 		*/
 		//-----------------------------------------------------------------//
-		void set_stall(bool f = true, STALL_GROUP stg = STALL_GROUP::_0) noexcept {
+		void set_stall(bool f = true, STALL_GROUP stg = STALL_GROUP::_0) noexcept
+		{
 			if(f) {
 				param_.stall_group_ |=  (1 << static_cast<uint32_t>(stg));
 			} else {
@@ -641,9 +642,7 @@ namespace gui {
 			@return 許可の状態
 		*/
 		//-----------------------------------------------------------------//
-		bool get_enable() const noexcept {
-			return get_state(state::ENABLE);
-		}
+		bool get_enable() const noexcept { return get_state(state::ENABLE); }
 
 
 		//-----------------------------------------------------------------//
@@ -652,9 +651,7 @@ namespace gui {
 			@return ストールの状態
 		*/
 		//-----------------------------------------------------------------//
-		bool get_stall() const noexcept {
-			return get_state(state::STALL);
-		}
+		bool get_stall() const noexcept { return get_state(state::STALL); }
 
 
 		//-----------------------------------------------------------------//
@@ -663,9 +660,7 @@ namespace gui {
 			@return 状態
 		*/
 		//-----------------------------------------------------------------//
-		bool get_focus_in() const noexcept {
-			return !get_state(state::BEFORE_FOCUS) && get_state(state::IS_FOCUS);
-		}
+		bool get_focus_in() const noexcept { return !get_state(state::BEFORE_FOCUS) && get_state(state::IS_FOCUS); }
 
 
 		//-----------------------------------------------------------------//
@@ -674,9 +669,7 @@ namespace gui {
 			@return 状態
 		*/
 		//-----------------------------------------------------------------//
-		bool get_focus() const noexcept {
-			return get_state(state::IS_FOCUS);
-		}
+		bool get_focus() const noexcept { return get_state(state::IS_FOCUS); }
 
 
 		//-----------------------------------------------------------------//
@@ -685,9 +678,7 @@ namespace gui {
 			@return 状態
 		*/
 		//-----------------------------------------------------------------//
-		bool get_focus_out() const noexcept {
-			return get_state(state::BEFORE_FOCUS) && !get_state(state::IS_FOCUS);
-		}
+		bool get_focus_out() const noexcept { return get_state(state::BEFORE_FOCUS) && !get_state(state::IS_FOCUS); }
 
 
 		//-----------------------------------------------------------------//
@@ -696,9 +687,7 @@ namespace gui {
 			@return 状態
 		*/
 		//-----------------------------------------------------------------//
-		bool get_select_in() const noexcept {
-			return !get_state(state::BEFORE_SELECT) && get_state(state::IS_SELECT);
-		}
+		bool get_select_in() const noexcept { return !get_state(state::BEFORE_SELECT) && get_state(state::IS_SELECT); }
 
 
 		//-----------------------------------------------------------------//
@@ -707,9 +696,7 @@ namespace gui {
 			@return 状態
 		*/
 		//-----------------------------------------------------------------//
-		bool get_select() const noexcept {
-			return get_state(state::IS_SELECT);
-		}
+		bool get_select() const noexcept { return get_state(state::IS_SELECT); }
 
 
 		//-----------------------------------------------------------------//
@@ -718,9 +705,7 @@ namespace gui {
 			@return 状態
 		*/
 		//-----------------------------------------------------------------//
-		bool get_select_out() const noexcept {
-			return get_state(state::BEFORE_SELECT) && !get_state(state::IS_SELECT);
-		}
+		bool get_select_out() const noexcept { return get_state(state::BEFORE_SELECT) && !get_state(state::IS_SELECT); }
 
 
 		//-----------------------------------------------------------------//
@@ -729,9 +714,7 @@ namespace gui {
 			@return 状態
 		*/
 		//-----------------------------------------------------------------//
-		bool get_selected() const noexcept {
-			return get_focus() && get_select_out();
-		}
+		bool get_selected() const noexcept { return get_focus() && get_select_out(); }
 
 
 		//-----------------------------------------------------------------//
@@ -784,21 +767,22 @@ namespace gui {
 		vtx::ipos	size_;
 		widget::color_param	color_param_;
 		widget::plate_param	plate_param_;
-		share_t() : size_(0), color_param_(), plate_param_() { }
+		share_t() noexcept : size_(0), color_param_(), plate_param_() { }
 
-		inline size_t hash() const {
+		inline size_t hash() const noexcept
+		{
 			size_t hs = size_.hash();
 			hs ^= color_param_.hash();
 			hs ^= plate_param_.hash();
 			return hs;
 		}
 
-		inline bool operator == (const share_t& k) const {
+		inline bool operator == (const share_t& k) const noexcept
+		{
 			return k.size_ == size_ &&
 				k.color_param_ == color_param_ &&
 				k.plate_param_ == plate_param_;
 		}
 	};
-	inline size_t hash_value(const share_t& k) { return k.hash(); }
-
+	inline size_t hash_value(const share_t& k) noexcept { return k.hash(); }
 }

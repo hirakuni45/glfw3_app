@@ -3,7 +3,7 @@
 /*!	@file
 	@brief	GUI Widget スクロール・バー・クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2018 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2018, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -65,7 +65,7 @@ namespace gui {
 
 			select_func_type	select_func_;
 
-			param(style st) : style_(st), handle_ratio_(0.25f),
+			param(style st) noexcept : style_(st), handle_ratio_(0.25f),
 				scroll_gain_(0.1f), scroll_step_(0.1f),
 				select_func_(nullptr)
 				{ }
@@ -86,7 +86,7 @@ namespace gui {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		widget_scrollbar(widget_director& wd, const widget::param& wp, const param& p) :
+		widget_scrollbar(widget_director& wd, const widget::param& wp, const param& p) noexcept :
 			widget(wp), wd_(wd), param_(p),
 			arrow_inc_(nullptr), slider_(nullptr), arrow_dec_(nullptr)
 		{ }
@@ -105,7 +105,7 @@ namespace gui {
 			@brief	型を取得
 		*/
 		//-----------------------------------------------------------------//
-		type_id type() const override { return get_type_id<value_type>(); }
+		type_id type() const noexcept override { return get_type_id<value_type>(); }
 
 
 		//-----------------------------------------------------------------//
@@ -114,7 +114,7 @@ namespace gui {
 			@return widget 型の基本名称
 		*/
 		//-----------------------------------------------------------------//
-		const char* type_name() const override { return "scrollbar"; }
+		const char* type_name() const noexcept override { return "scrollbar"; }
 
 
 		//-----------------------------------------------------------------//
@@ -123,7 +123,7 @@ namespace gui {
 			@return ハイブリッド・ウィジェットの場合「true」を返す。
 		*/
 		//-----------------------------------------------------------------//
-		bool hybrid() const override { return true; }
+		bool hybrid() const noexcept override { return true; }
 
 
 		//-----------------------------------------------------------------//
@@ -132,7 +132,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		const param& get_local_param() const { return param_; }
+		const param& get_local_param() const noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -141,7 +141,7 @@ namespace gui {
 			@return 個別パラメーター
 		*/
 		//-----------------------------------------------------------------//
-		param& at_local_param() { return param_; }
+		param& at_local_param() noexcept { return param_; }
 
 
 		//-----------------------------------------------------------------//
@@ -150,7 +150,7 @@ namespace gui {
 			@return スライダー
 		*/
 		//-----------------------------------------------------------------//
-		widget_slider* get_slider() const { return slider_; }
+		widget_slider* get_slider() const noexcept { return slider_; }
 
 
 		//-----------------------------------------------------------------//
@@ -158,7 +158,7 @@ namespace gui {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() override
+		void initialize() noexcept override
 		{
 			if(get_param().parents_ == nullptr) {  // 親が必ず必要
 				return;
@@ -179,7 +179,7 @@ namespace gui {
 				at_rect().size.x = bs.x;
 				at_rect().size.y = msz.y;
 				{
-	                widget::param wp(vtx::irect(0, 0, 0, 0), this);
+					widget::param wp(vtx::irect(0, 0, 0, 0), this);
 					wp.pre_group_ = get_param().pre_group_;
 					widget_arrow::param wp_(widget_arrow::direction::up);
 					arrow_inc_ = wd_.add_widget<widget_arrow>(wp, wp_);
@@ -199,7 +199,7 @@ namespace gui {
 					slider_ = wd_.add_widget<widget_slider>(wp, wp_);
 				}
 				{
-	                widget::param wp(vtx::irect(0, msz.y - bs.y, 0, 0), this);
+					widget::param wp(vtx::irect(0, msz.y - bs.y, 0, 0), this);
 					wp.pre_group_ = get_param().pre_group_;
 					widget_arrow::param wp_(widget_arrow::direction::down);
 					arrow_dec_ = wd_.add_widget<widget_arrow>(wp, wp_);
@@ -218,7 +218,7 @@ namespace gui {
 			@brief	アップデート
 		*/
 		//-----------------------------------------------------------------//
-		void update() override
+		void update() noexcept override
 		{
 		}
 
@@ -228,7 +228,7 @@ namespace gui {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service() override
+		void service() noexcept override
 		{
 			if(!get_enable()) {
 				return;
@@ -241,7 +241,7 @@ namespace gui {
 			@brief	レンダリング
 		*/
 		//-----------------------------------------------------------------//
-		void render() override
+		void render() noexcept override
 		{
 		}
 
@@ -253,7 +253,8 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(sys::preference& pre) override {
+		bool save(sys::preference& pre) noexcept override
+		{
 			return true;
 		}
 
@@ -265,7 +266,8 @@ namespace gui {
 			@return エラーが無い場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const sys::preference& pre) override {
+		bool load(const sys::preference& pre) noexcept override
+		{
 			return true;
 		}
 	};

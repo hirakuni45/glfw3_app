@@ -3,7 +3,7 @@
 /*!	@file
 	@brief	GUI Widget スライダー・クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -154,7 +154,7 @@ namespace gui {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		widget_slider(widget_director& wd, const widget::param& wp, const param& p) :
+		widget_slider(widget_director& wd, const widget::param& wp, const param& p) noexcept :
 			widget(wp), wd_(wd), param_(p), ref_position_(0.0f),
 			handle_offset_(0), base_h_(0), hand_h_(0),
 			position_(-1.0f)
