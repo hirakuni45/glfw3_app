@@ -61,8 +61,8 @@ namespace gui {
 				size_t h = fore_color_.hash();
 				h ^= back_color_.hash();
 				h ^= inten_rect_.hash();
-				boost::hash_combine(h, ir_enable_);
-				return h;
+				h ^= ir_enable_;
+				return std::hash<size_t>()(h);
 			}
 
 			bool operator == (const color_param& c) const noexcept {
@@ -114,11 +114,11 @@ namespace gui {
 
 			size_t hash() const noexcept {
 				size_t h = grid_.hash();
-				boost::hash_combine(h, round_style_);
-				boost::hash_combine(h, round_radius_);
-				boost::hash_combine(h, frame_width_);
-				boost::hash_combine(h, caption_width_);
-				boost::hash_combine(h, resizeble_);
+				h ^= std::hash<round_style>()(round_style_);
+				h ^= std::hash<short>()(round_radius_);
+				h ^= std::hash<short>()(frame_width_);
+				h ^= std::hash<short>()(caption_width_);
+				h ^= resizeble_;
 				return h;
 			}
 

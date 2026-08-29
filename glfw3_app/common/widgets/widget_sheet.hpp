@@ -9,6 +9,7 @@
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
 //=========================================================================//
+#include <format>
 #include "widgets/widget_director.hpp"
 
 namespace gui {
@@ -77,8 +78,8 @@ namespace gui {
 			if(param_.index_ < param_.sheets_.size()) {
 				auto s = param_.sheets_[param_.index_].title_;
 				if(param_.ext_title_) {
-					s += (boost::format(" (%d/%d)")
-						% (param_.index_ + 1) % param_.sheets_.size()).str();
+					s += std::format(" ({}/{})"
+						, (param_.index_ + 1), param_.sheets_.size());
 				}
 				param_.text_param_.set_text(s);
 			}

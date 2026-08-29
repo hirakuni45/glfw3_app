@@ -10,7 +10,7 @@
 */
 //=============================================================================//
 #include <vector>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include <boost/optional.hpp>
 #include "utils/files.hpp"
 #include "utils/drive_info.hpp"
@@ -124,7 +124,7 @@ namespace gui {
 		typedef std::vector<widget_file>::iterator widget_files_it;
 		typedef std::vector<widget_file>::const_iterator widget_files_cit;
 
-		typedef boost::unordered_map<std::string, uint32_t>	name_map;
+		typedef std::unordered_map<std::string, uint32_t>	name_map;
 
 		typedef boost::optional<const widget_file&>  widget_file_copt;
 
@@ -147,7 +147,7 @@ namespace gui {
 			file_t() : position_(0), select_pos_(0) { }
 		};
 
-		typedef boost::unordered_map<std::string, file_t>	file_map;
+		typedef std::unordered_map<std::string, file_t>	file_map;
 		file_map	file_map_;
 
 		uint32_t	select_file_id_;

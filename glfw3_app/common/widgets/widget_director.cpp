@@ -2,7 +2,7 @@
 /*!	@file
 	@brief	GUI widget ディレクター
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -10,7 +10,7 @@
 #include <iostream>
 #include <cstdio>
 #include <map>
-#include <boost/format.hpp>
+#include <format>
 #include "core/glcore.hpp"
 #include "gl_fw/gl_info.hpp"
 #include "widgets/widget_director.hpp"
@@ -96,7 +96,7 @@ namespace gui {
 			}
 		}
 
-		std::cout << boost::format("(%d:%s)%s: '%s'") % w->get_serial() % w->get_symbol() % s % type << std::endl;
+		std::cout << std::format("({}:{}){}: '{}'", w->get_serial(), w->get_symbol(), s, type) << std::endl;
 	}
 
 
@@ -305,10 +305,10 @@ namespace gui {
 			std::string ff = "Inconsolata.otf";
 #endif
 			if(!fonts.install_font_type(ff, "Inconsolata")) {
-				std::cerr << boost::format("Can't find font file: '%s'") % ff << std::endl; 
+				std::cerr << std::format("Can't find font file: '{}'", ff) << std::endl; 
 			}
 			if(!fonts.install_font_type(ff, "InconsolataB", fonts::FTIMG::STYLE::BOLD)) {
-				std::cerr << boost::format("Can't find font file: '%s' (bold)") % ff << std::endl; 
+				std::cerr << std::format("Can't find font file: '{}' (bold)", ff) << std::endl; 
 			}
 		}
 		fonts.pop_font_face();
@@ -316,7 +316,7 @@ namespace gui {
 		{
 			std::string me = "meiryo.ttc";
 			if(!fonts.install_font_type(me, "meiryo")) {
-				std::cerr << boost::format("Can't find font file: '%s'") % me << std::endl; 
+				std::cerr << std::format("Can't find font file: '{}'", me) << std::endl; 
 			}
 		}
 #endif
@@ -1024,7 +1024,7 @@ namespace gui {
 			}
 		}
 		if(f) {
-			std::cout << boost::format("(%d)\n") % id;
+			std::cout << std::format("({})\n", id);
 			++id;
 		}
 	}

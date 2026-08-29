@@ -11,7 +11,8 @@
 #include <vector>
 #include <functional>
 #include <iostream>
-#include <boost/unordered_set.hpp>
+#include <format>
+#include <unordered_set>
 #include "gl_fw/glmobj.hpp"
 #include "img_io/paint.hpp"
 #include "img_io/img_files.hpp"
@@ -104,7 +105,7 @@ namespace gui {
 
 		sys::keyboard			keyboard_;
 
-		boost::unordered_set<widget*>	del_mark_;
+		std::unordered_set<widget*>	del_mark_;
 
 		utils::strings			error_list_;
 
@@ -608,7 +609,7 @@ namespace gui {
 
 			std::string s = w->type_name();
 			s += '/';
-			s += (boost::format("%05d") % n).str();
+			s += std::format("{:>05}", n);
 			return s;
 		}
 

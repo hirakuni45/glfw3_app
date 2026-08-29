@@ -10,7 +10,7 @@
 #include "widgets/widget_utils.hpp"
 #include "widgets/widget_filer.hpp"
 #include <boost/lexical_cast.hpp>
-#include <boost/format.hpp>
+#include <format>
 #include <utility>
 
 namespace gui {
@@ -229,10 +229,10 @@ namespace gui {
 				std::string s;
 				s += ' ';
 				struct tm* t = localtime(&wf.time);
-				s += (boost::format("%02d:%02d ") % t->tm_hour % t->tm_min).str();
-				s += (boost::format("%d/%d ")
-					% (t->tm_mon + 1) % t->tm_mday).str();
-				s += (boost::format("%4d") % (t->tm_year + 1900)).str();
+				s += std::format("{:02}:{:02} ", t->tm_hour, t->tm_min);
+				s += std::format("{:>2}/{:>2} "
+					, (t->tm_mon + 1), t->tm_mday);
+				s += std::format("{:>4}", (t->tm_year + 1900));
 				wf.info->at_local_param().text_param_.set_text(s);
 			} else if(info_state_ == info_state::MODE) {
 				std::string s;
@@ -614,7 +614,8 @@ namespace gui {
 		// ドラッグアクションで、一つ前に戻る
 		if(back_directory_ && files_->get_select_out()) {
 			request_right_ = false;
-			move_speed_ =  SPEED_MOVE;
+			auto& core = gl::core::get_instance();
+			move_speed_ = 60.0f / static_cast<float>(core.get_current_frame_rate()) * SPEED_MOVE;
 			back_directory_ = false;
 		}
 

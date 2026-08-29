@@ -183,7 +183,7 @@ namespace gui {
 					wp.pre_group_ = get_param().pre_group_;
 					widget_arrow::param wp_(widget_arrow::direction::up);
 					arrow_inc_ = wd_.add_widget<widget_arrow>(wp, wp_);
-					arrow_inc_->at_local_param().select_func_ = [=](uint32_t level) {
+					arrow_inc_->at_local_param().select_func_ = [=, this](uint32_t level) {
 						float& pos = slider_->at_position();
 						pos -= param_.scroll_step_;
 						if(pos < 0.0f) pos = 0.0f;
@@ -203,7 +203,7 @@ namespace gui {
 					wp.pre_group_ = get_param().pre_group_;
 					widget_arrow::param wp_(widget_arrow::direction::down);
 					arrow_dec_ = wd_.add_widget<widget_arrow>(wp, wp_);
-					arrow_dec_->at_local_param().select_func_ = [=](uint32_t level) {
+					arrow_dec_->at_local_param().select_func_ = [=, this](uint32_t level) {
 						float& pos = slider_->at_position();
 						pos += param_.scroll_step_;
 						if(pos > 1.0f) pos = 1.0f;

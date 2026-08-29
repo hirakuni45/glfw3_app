@@ -1,19 +1,29 @@
 #pragma once
 //=========================================================================//
 /*!	@file
-	@brief	GUI widget 共通パーツ（ヘッダー）
+	@brief	GUI widget 共通パーツ
     @author 平松邦仁 (hira@rvf-rc45.net)
 	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
 //=========================================================================//
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include "gl_fw/glmobj.hpp"
 #include "img_io/paint.hpp"
 #include "widgets/widget.hpp"
 
 namespace gui {
+
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	/*!
+		@brief	widget 共通パーツ・ハッシュ関数定義
+	*/
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	struct common_parts_hash {
+		size_t operator() (const share_t& v) const { return v.hash(); }
+	};
+
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
@@ -25,8 +35,9 @@ namespace gui {
 	private:
 		gl::mobj&		mobj_;
 
+
 		typedef gl::mobj::handle handle;
-		typedef boost::unordered_map<share_t, handle>	share_map;
+		typedef std::unordered_map<share_t, handle, common_parts_hash>	share_map;
 		typedef share_map::iterator			share_map_it;
 		typedef share_map::const_iterator	share_map_cit;
 		share_map	share_map_;

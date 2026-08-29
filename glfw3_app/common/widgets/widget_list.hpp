@@ -265,7 +265,7 @@ namespace gui {
 				if(!wp_.init_list_.empty()) {
 					param_.text_param_.set_text(wp_.init_list_[0]);
 				}
-				wp_.select_func_ = [=](const std::string& text, uint32_t pos) {
+				wp_.select_func_ = [this](const std::string& text, uint32_t pos) {
 					enable_ = false;  // メニューを選択したら、メニューを閉じる
 				};
 				menu_ = wd_.add_widget<widget_menu>(wp, wp_);

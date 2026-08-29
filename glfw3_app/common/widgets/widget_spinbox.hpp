@@ -8,6 +8,7 @@
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
 //=========================================================================//
+#include <format>
 #include "widgets/widget_director.hpp"
 #include "widgets/widget_utils.hpp"
 
@@ -40,7 +41,7 @@ namespace gui {
 			@brief	選択関数型 @n
 					数字を表示する場合、「newpos」の値を文字列に変換して戻す。
 					Ex: @n
-						(boost::format("%d") % newpos).str();
+						std::format("{}", newpos);
 			@param[in]	st		ステート
 			@param[in]	before	整数、変更前の値
 			@param[in]	newpos	整数、変更後の値
@@ -148,7 +149,7 @@ namespace gui {
 			if(param_.select_func_ != nullptr) {
 				tmp = param_.select_func_(state_, sel_pos_, param_.sel_pos_);
 			} else {
-				tmp = (boost::format("%d") % param_.sel_pos_).str();
+				tmp = std::format("{}", param_.sel_pos_);
 			}
 			param_.text_param_.set_text(tmp);
 		}
