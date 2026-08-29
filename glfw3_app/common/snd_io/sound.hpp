@@ -3,7 +3,7 @@
 /*!	@file
 	@brief	効果音、BGM クラス（ヘッダー）
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2025 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -249,13 +249,13 @@ namespace al {
 					if(!sdf.open_stream(fin, stream_buff_size, ainfo)) {
 						sdf.close_stream();
 						fin.close();
-						++sst.open_err_;
+						sst.open_err_ = sst.open_err_ + 1;
 						++i;
 						continue;
 					}
 				} else {
 					fin.close();
-					++sst.open_err_;
+					sst.open_err_ = sst.open_err_ + 1;
 					++i;
 					continue;
 				}
@@ -401,7 +401,7 @@ namespace al {
 						qt.audio_io_->set_loop(h, false);
 						qt.audio_io_->queue_stream(qt.slot_, h, aif);
 					}
-					++qt.frame_;
+					qt.frame_ = qt.frame_ + 1;
 				}
 				if(qt.audio_.length() > 0) {
 					audio_io::wave_handle h = qt.audio_io_->status_stream(qt.slot_);
@@ -414,7 +414,7 @@ namespace al {
 						qt.audio_io_->set_loop(h, false);
 						qt.audio_io_->queue_stream(qt.slot_, h, aif);
 					}
-					++qt.frame_;
+					qt.frame_ = qt.frame_ + 1;
 				}
 #ifdef __APPLE__
 				usleep(8000);	// 8ms くらいの時間待ち

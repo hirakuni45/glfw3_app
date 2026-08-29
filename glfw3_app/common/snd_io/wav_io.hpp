@@ -1,19 +1,19 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	WAV 音声ファイルを扱うクラス（ヘッダー）
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <string>
 #include "i_snd_io.hpp"
 #include "pcm.hpp"
 #include "utils/sjis_utf16.hpp"
 
-#include <boost/format.hpp>
+#include <format>
 
 namespace al {
 
@@ -211,12 +211,12 @@ std::cout << tag.szChunkName[0] << tag.szChunkName[1] << tag.szChunkName[2] << t
 std::cout << ": " << t << std::endl;
 #if 0
 for(auto ch : t) {
-	std::cout << boost::format("%02X, ") % (static_cast<uint32_t>(ch) & 0xff);
+	std::cout << std::format("{:02X}, ", (static_cast<uint32_t>(ch) & 0xff));
 }
 std::cout << std::endl;
 auto ls = utils::utf8_to_utf32(t);
 for(auto code : ls) {
-	std::cout << boost::format("%08X, ") % static_cast<uint32_t>(code);
+	std::cout << std::format("{:08X}, ", static_cast<uint32_t>(code));
 }
 std::cout << std::endl;
 #endif

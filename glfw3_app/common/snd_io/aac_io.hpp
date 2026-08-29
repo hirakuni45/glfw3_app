@@ -478,14 +478,14 @@ namespace al {
 				char* item;
 				char* value;
 				if(mp4ff_meta_get_by_index(infile, k, &item, &value)) {
-					   if(std::string(item) == "cover") {
-						   size_t size = mp4ff_meta_get_item_size(infile, k);
-						   std::cout << boost::format("%s: (%d)\n") % item % size;
-					   } else {
-						   std::cout << boost::format("%s: %s\n") % item % value;
-					   }
+					if(std::string(item) == "cover") {
+						size_t size = mp4ff_meta_get_item_size(infile, k);
+						std::cout << boost::format("%s: (%d)\n") % item % size;
+					} else {
+						std::cout << boost::format("%s: %s\n") % item % value;
+					}
 					mp4ff_meta_free(infile, item, value);
-				   }
+				}
 			}
 			if (j > 0) std::cout << std::endl;
 	#endif
@@ -526,7 +526,7 @@ namespace al {
 					}
 	
 					if(!dt.useAacLength && !dt.initial && (idx < dt.samples / 2)
-					  && (dt.count != dt.frame_info.samples)) {
+						&& (dt.count != dt.frame_info.samples)) {
 						std::cout << "MP4 seems to have incorrect frame duration, using values from AAC data.\n";
 						dt.useAacLength = 1;
 						dt.count = dt.frame_info.samples;
@@ -534,7 +534,7 @@ namespace al {
 				}
 	
 				if(dt.initial && (dt.count < dt.framesize * dt.frame_info.channels)
-				  && (dt.frame_info.samples > dt.count)) {
+					&& (dt.frame_info.samples > dt.count)) {
 					dt.delay = dt.frame_info.samples - dt.count;
 				}
 			} else {
@@ -761,7 +761,7 @@ namespace al {
 				tag_.at_disc() += totaldiscs;
 			}
 
-			tag_.serial_++;
+			tag_.serial_ = tag_.serial_ + 1;
 	
 			return true;
 		}
