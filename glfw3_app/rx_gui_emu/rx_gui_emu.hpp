@@ -24,14 +24,19 @@
 
 #include "utils/sjis_utf16.hpp"
 
+// DSOS のシュミレーション
+// #define SIM_DSOS
+
 namespace gui_sim {
 
 	const void* get_fbp();
 	void set_pos(const vtx::spos& pos, bool touch);
 	void setup_gui();
 	void update_gui();
-	void injection_capture(uint32_t freq, float ppvolt, uint32_t num);
 
+#ifdef SIM_DSOS
+	void injection_capture(uint32_t freq, float ppvolt, uint32_t num);
+#endif
 }
 
 namespace {
@@ -153,11 +158,12 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void update()
 		{
+#ifdef SIM_DSOS
 			// 疑似的に波形を生成
 			int32_t freq = 10'000;
 			float ppvolt = 3.0f;
 			gui_sim::injection_capture(freq, ppvolt, 256);
-
+#endif
 			// マウスの操作を、ファーストタッチに似せる～
 			if(lcd_core_->get_local_param().ms_positive_ || lcd_core_->get_local_param().ms_level_) {
 				const auto& p = lcd_core_->get_local_param().ms_pos_;

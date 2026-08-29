@@ -12,6 +12,7 @@
 
 #include "capture.hpp"
 #include "render_wave.hpp"
+#include "refclk.hpp"
 
 namespace dsos {
 
@@ -66,6 +67,11 @@ namespace dsos {
 		uint8_t		smp_fine_;
 
 		uint32_t	trg_update_;
+
+		refclk		refclk_;
+
+		bool		widd_last_;
+		bool		wave_last_;
 
 		void side_button_stall_(BUTTON& mybtn, bool stall) noexcept
 		{
@@ -184,7 +190,8 @@ namespace dsos {
 			smp_fine_menu_(vtx::srect(442-90*1, 16, 80, 0), ""),
 			mes_menu_(vtx::srect(442-100*1, 16, 90, 0), MES_MODE_STR),
 			smp_unit_(0), smp_fine_(0),
-			trg_update_(0)
+			trg_update_(0),
+			refclk_(), widd_last_(false), wave_last_(false)
 		{ }
 
 
@@ -287,6 +294,9 @@ namespace dsos {
 
 			capture_tic_ = capture_.get_capture_tic();
 			capture_.set_trg_mode(TRG_MODE::ONE, 0);
+
+			// 基準波開始
+			refclk_.start();
 		}
 
 
@@ -298,7 +308,13 @@ namespace dsos {
 		//-----------------------------------------------------------------//
 		void update() noexcept
 		{
-			widd_.update();
+			widd_last_ = widd_.update();
+			// ダブルバッファ時の widget 管理のケア
+			if(render_.is_double_buffer()) {
+				if(!widd_last_) {
+					widd_.refresh();
+				}
+			}
 
 			if(trg_update_ != render_wave_.get_trg_update()) {
 				trg_update_ = render_wave_.get_trg_update();
@@ -331,10 +347,16 @@ namespace dsos {
 				if(f || tic != capture_tic_) {
 					capture_tic_ = tic;
 					render_wave_.update();
+					wave_last_ = true;
+				} else if(wave_last_) {
+					render_wave_.update();
+					wave_last_ = false;
 				}
 
 				render_wave_.update_info();
 			}
+
+			render_.flip();
 		}
 
 

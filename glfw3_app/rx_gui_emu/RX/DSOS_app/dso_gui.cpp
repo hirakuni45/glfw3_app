@@ -43,6 +43,10 @@ namespace {
 		void sync_vpos() { }
 
 		void* get_fbp() { return fb_; }
+
+		bool is_double_buffer() const { return false; }
+
+		void flip() { }
 	};
 	typedef glcdc_sim<LCD_X, LCD_Y> GLCDC;
 

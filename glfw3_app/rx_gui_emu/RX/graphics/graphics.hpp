@@ -59,38 +59,6 @@ namespace graphics {
 
 		vtx::spos	ofs_;
 
-
-		class scan_line {
-			vtx::spos	org_;
-			vtx::spos	end_;
-			int16_t		dx_;
-			int16_t		dy_;
-			vtx::spos	pos_;
-		public:
-
-			void init(const vtx::spos& org, const vtx::spos& end)
-			{
-				pos_ = org_ = org;
-				end_ = end;
-				dx_ = std::abs(end.x - org.x);
-				dy_ = std::abs(end.x - org.y);
-			}
-
-			bool step()
-			{
-				++pos_.y;
-				if(dx_ < dy_) {
-	
-				} else {
-
-				}
-				return pos_.y == end_.y;
-			}
-
-			auto get() const { return pos_.x; }
-		};
-
-
 		// 1/8 円を拡張して、全周に点を打つ
 		void circle_pset_(const vtx::spos& cen, const vtx::spos& pos) noexcept
 		{
@@ -174,6 +142,29 @@ namespace graphics {
 		void sync_frame(bool vsync = true) noexcept
 		{
 			if(vsync) glc_.sync_vpos();
+			fb_ = static_cast<T*>(glc_.get_fbp());
+		}
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief	ダブルバッファが有効か検査
+			@return ダブルバッファが有効なら「true」
+		*/
+		//-----------------------------------------------------------------//
+		bool is_double_buffer() const noexcept { return glc_.is_double_buffer(); }
+
+
+		//-----------------------------------------------------------------//
+		/*!
+			@brief  バッファの FLIP
+		*/
+		//-----------------------------------------------------------------//
+		void flip() noexcept
+		{
+			if(glc_.is_double_buffer()) {
+				glc_.flip();
+			}
 		}
 
 
@@ -402,10 +393,11 @@ namespace graphics {
 			if(static_cast<uint16_t>(y + h) >= static_cast<uint16_t>(GLC::height)) {
 				h = GLC::height - y;
 			}
-			uint16_t* out = &fb_[y * GLC::line_width + x];
+//			uint16_t* out = &fb_[y * GLC::line_width + x];
 			for(int16_t i = 0; i < h; ++i) {
-				*out = fore_color_.rgb565;
-				out += GLC::line_width;
+				plot(vtx::spos(x, y + i), fore_color_.rgb565);
+//				*out = fore_color_.rgb565;
+//				out += GLC::line_width;
 			}
 		}
 
@@ -727,48 +719,6 @@ namespace graphics {
 				}
 				line_h((cen.y - x) << 4, (cen.x - y) << 4, (y + y + 1) << 4);
 				line_h((cen.y + x) << 4, (cen.x - y) << 4, (y + y + 1) << 4);
-			}
-		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	ポリゴンを描画する（凸ポリゴン限定）
-			@param[in]	poss	位置（時計周りが正面）
-			@param[in]	num		頂点数（最低３つ）
-			@param[in]	back	裏ポリゴンを描画する場合「true」
-		*/
-		//-----------------------------------------------------------------//
-		void polygon(const vtx::spos* poss, uint32_t num, bool back = false) noexcept
-		{
-			if(num < 3) return;
-
-			int16_t min = poss[0].y;
-			int16_t max = poss[0].y;
-			uint32_t min_idx = 0;
-			uint32_t max_idx = 0; 
-			for(uint32_t i = 1; i < num; ++i) {
-				auto pos = poss[i].y;
-				if(min > pos) {
-					min = pos;
-					min_idx = i;
-				} else if(max < pos) {
-					max = pos;
-					max_idx = i;
-				}
-			}
-
-			auto d = max - min;
-			if(d == 0) return;
-			if(min_idx == max_idx) return;
-
-			const auto& org = poss[min_idx % num];
-			const auto& cw  = poss[(min_idx + 1) % num];
-			const auto& ccw = poss[(min_idx + num - 1) % num];
-
-			for(uint32_t i = 0; i < d; ++i) {
-
-
 			}
 		}
 

@@ -11,7 +11,7 @@
 				https://github.com/hirakuni45/RX/blob/master/LICENSE
 */
 //=====================================================================//
-#ifndef EMU
+#ifndef SIM
 #include "common/renesas.hpp"
 
 #include "common/fixed_fifo.hpp"
@@ -36,6 +36,8 @@
 
 #include "resource.hpp"
 
+#include "touch_sim.hpp"
+
 namespace app {
 
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -55,7 +57,7 @@ namespace app {
 		static const int16_t LCD_Y = 272;
 		static const auto PIX = graphics::pixel::TYPE::RGB565;
 
-#ifndef EMU
+#ifndef SIM
 		typedef utils::fixed_fifo<uint8_t, 64> RB64;
 		typedef utils::fixed_fifo<uint8_t, 64> SB64;
 #endif
@@ -77,7 +79,7 @@ namespace app {
 		typedef device::glcdc_mgr<device::GLCDC, LCD_X, LCD_Y, PIX> GLCDC;
 #endif
 
-#ifdef EMU
+#ifdef SIM
 		template <uint32_t LCDX, uint32_t LCDY>
 		class glcdc_emu {
 		public:
@@ -112,42 +114,11 @@ namespace app {
 		KFONT	kfont_;
 		FONT	font_;
 		RENDER	render_;
-#ifndef EMU
+#ifndef SIM
 		FT5206_I2C	ft5206_i2c_;
 		typedef chip::FT5206<FT5206_I2C> TOUCH;
 #else
-		class touch_emu {
-		public:
-
-			struct touch_t {
-				vtx::spos	pos;
-			};
-
-		private:
-			touch_t	touch_[4];
-			uint32_t	num_;
-
-		public:
-			touch_emu() : num_(0) { }
-
-			uint32_t get_touch_num() const { return num_; }
-
-			const auto& get_touch_pos(uint32_t idx) const {
-				if(idx >= 4) idx = 0;
-				return touch_[idx];
-			}
-
-			void update() { }
-
-			void set_pos(const vtx::spos& pos)
-			{
-				touch_[0].pos = pos;
-				num_ = 1;
-			}
-
-			void reset() { num_ = 0; }
-		};
-		typedef touch_emu TOUCH;
+		typedef chip::touch_sim TOUCH;
 #endif
 		TOUCH	touch_;
 		// RX65N Envision Kit: INT to P02(IRQ10), not use
@@ -479,14 +450,14 @@ namespace app {
 		*/
 		//-------------------------------------------------------------//
 		calc_gui() noexcept :
-#ifndef EMU
+#ifndef SIM
 			glcdc_(nullptr, reinterpret_cast<void*>(LCD_ORG)),
 #else
 			glcdc_(),
 #endif
 			afont_(), kfont_(), font_(afont_, kfont_),
 			render_(glcdc_, font_),
-#ifndef EMU
+#ifndef SIM
 			ft5206_i2c_(), touch_(ft5206_i2c_),
 #else
 			touch_(),
@@ -604,7 +575,7 @@ namespace app {
 		//-------------------------------------------------------------//
 		void start() noexcept
 		{
-#ifndef EMU
+#ifndef SIM
 			{  // GLCDC の初期化
 				LCD_DISP::DIR  = 1;
 				LCD_LIGHT::DIR = 1;

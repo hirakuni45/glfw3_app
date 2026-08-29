@@ -7,23 +7,23 @@
 				https://github.com/hirakuni45/RX/blob/master/LICENSE
 */
 //=====================================================================//
-#define EMU
+#define SIM
 #include "calc_gui.hpp"
 
 typedef app::calc_gui GUI;
 
 static GUI	gui_;
 
-namespace gui_emu {
+namespace gui_sim {
 
 	const void* get_fbp()
 	{
 		return gui_.at_glcdc().get_fbp();
 	}
 
-	void set_pos(const vtx::spos& pos)
+    void set_pos(const vtx::spos& pos, bool touch)
 	{
-		gui_.at_touch().set_pos(pos);
+		gui_.at_touch().set_pos(pos, touch);		
 	}
 
 	void setup_gui()
@@ -34,7 +34,7 @@ namespace gui_emu {
 	void update_gui()
 	{
 		gui_.update();
-		gui_.at_touch().reset();
+//		gui_.at_touch().reset();
 	}
 }
 

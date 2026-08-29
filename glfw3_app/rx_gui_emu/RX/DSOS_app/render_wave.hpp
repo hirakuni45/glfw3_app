@@ -106,8 +106,8 @@ namespace dsos {
 		};
 		AREA		area_;
 
-		uint16_t	cap_win_org_;
-		uint16_t	cap_win_end_;
+		int16_t		cap_win_org_;
+		int16_t		cap_win_end_;
 		vtx::spos	volt_min_[2];
 		vtx::spos	volt_max_[2];
 
@@ -385,25 +385,26 @@ namespace dsos {
 		void draw_grid(int16_t x, int16_t y, int16_t w, int16_t h, int16_t unit) noexcept
 		{
 			render_.set_fore_color(DEF_COLOR::Aqua);
+			render_.set_back_color(DEF_COLOR::Black);
 			for(int16_t i = x; i <= (x + w); i += unit) {
 				uint32_t mask;
 				if(i == x || i == (x + w)) {
 					mask = -1;
 				} else {
-					mask = 0b11000000110000001100000011000000;
+					mask = 0b00111111001111110011111100111111;
 				}
 				render_.set_stipple(mask);
-				render_.line(vtx::spos(i, y), vtx::spos(i, y + h));
+				render_.line_v(i, y, h);
 			}
 			for(int16_t i = y; i <= (y + h); i += unit) {
 				uint32_t mask;
 				if(i == y || i == (y + h)) {
 					mask = -1;
 				} else {
-					mask = 0b11000000110000001100000011000000;
+					mask = 0b00111111001111110011111100111111;
 				}
 				render_.set_stipple(mask);
-				render_.line(vtx::spos(x, i), vtx::spos(x + w, i));
+				render_.line_h(i, x, w);
 			}
 			render_.set_stipple();
 		}
@@ -420,6 +421,7 @@ namespace dsos {
 		{
 			render_.set_fore_color(DEF_COLOR::Black);
 			render_.fill_box(vtx::srect(0, 0, 480, 16));
+
 			render_.set_fore_color(DEF_COLOR::White);
 			switch(measere_) {
 			case MEASERE::OFF:
@@ -499,7 +501,6 @@ namespace dsos {
 					make_freq_(d, get_smp_rate(smp_mode_), tmp, sizeof(tmp));
 					x += 8;
 					x = render_.draw_text(vtx::spos(x, 0), tmp);
-					x += 8;
 				}
 				break;
 			case MEASERE::TIME_ABS:  // CH0 の電圧、計測ポイント０
@@ -511,7 +512,6 @@ namespace dsos {
 					make_freq_(d, get_smp_rate(smp_mode_), tmp, sizeof(tmp));
 					x += 8;
 					x = render_.draw_text(vtx::spos(x, 0), tmp);
-					x += 8;
 				}
 				break;
 			default:
@@ -524,21 +524,22 @@ namespace dsos {
 		/*!
 			@brief  チャネル情報描画
 			@param[in]	ch	チャネル
+			@return 情報更新があれば「true」
 		*/
 		//-----------------------------------------------------------------//
-		void draw_channel_info(uint32_t ch) noexcept
+		bool draw_channel_info(uint32_t ch) noexcept
 		{
 			char tmp[64];
 			if(ch == 0) {
 				render_.set_fore_color(DEF_COLOR::Black);
 				render_.fill_box(vtx::srect(0, 272 - 16 + 1, 240, 15));
+
 				render_.set_fore_color(CH0_COLOR);
-				if(ch_info_count_ < (60*4)) {
+				if(ch_info_count_ < (60*2*3)) {
 //				utils::sformat("0.%s: %s, %s/div", tmp, sizeof(tmp)) % get_ch_mult_str(ch0_mult_)
-					utils::sformat("0:%s,%s/div", tmp, sizeof(tmp))
+					utils::sformat("0:%s,%s/div ", tmp, sizeof(tmp))
 						% get_ch_mode_str(ch0_mode_) % get_ch_volt_str(ch0_volt_);
 					auto x = render_.draw_text(vtx::spos(0, 272 - 16 + 1), tmp);
-					x += 8;
 					make_freq_(wave_info0_.freq_, tmp, sizeof(tmp));
 					render_.draw_text(vtx::spos(x, 272 - 16 + 1), tmp);
 				} else {
@@ -548,13 +549,13 @@ namespace dsos {
 			} else {
 				render_.set_fore_color(DEF_COLOR::Black);
 				render_.fill_box(vtx::srect(240, 272 - 16 + 1, 240, 15));
+
 				render_.set_fore_color(CH1_COLOR);
-				if(ch_info_count_ < (60*4)) {
+				if(ch_info_count_ < (60*2*3)) {
 //				utils::sformat("1.%s: %s, %s/div", tmp, sizeof(tmp)) % get_ch_mult_str(ch1_mult_)
-					utils::sformat("1:%s,%s/div", tmp, sizeof(tmp))
+					utils::sformat("1:%s,%s/div ", tmp, sizeof(tmp))
 						% get_ch_mode_str(ch1_mode_) % get_ch_volt_str(ch1_volt_);
 					auto x = render_.draw_text(vtx::spos(240, 272 - 16 + 1), tmp);
-					x += 8;
 					make_freq_(wave_info1_.freq_, tmp, sizeof(tmp));
 					render_.draw_text(vtx::spos(x, 272 - 16 + 1), tmp);
 				} else {
@@ -563,9 +564,11 @@ namespace dsos {
 				}
 			}
 			++ch_info_count_;
-			if(ch_info_count_ >= (60*2*4)) {
+			if(ch_info_count_ >= (60*4*3)) {
 				ch_info_count_ = 0;
 			}
+
+			return true;
 		}
 
 
@@ -703,6 +706,7 @@ namespace dsos {
 		{
 			render_.set_fore_color(DEF_COLOR::Black);
 			render_.fill_box(vtx::srect(0, 16, 440, 240));
+
 			draw_grid(0, 16, 440, 240, CAPTURE::GRID);
 
 			if(touch_down_) {
@@ -777,7 +781,9 @@ namespace dsos {
 				if(tic != cap_tic_ || smp_mode_ != cur_smp_mode_) {
 					cap_tic_ = tic;
 					cur_smp_mode_ = smp_mode_;
-					capture_.analize(cap_win_org_, cap_win_end_, wave_info0_, wave_info1_);
+					// 見えている倍の領域をスキャン
+					auto end = cap_win_end_ + (cap_win_end_ - cap_win_org_);
+					capture_.analize(cap_win_org_, end, wave_info0_, wave_info1_);
 				}
 			}
 
@@ -838,12 +844,15 @@ namespace dsos {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief  チャネル情報関係、アップ・デート
+			@return 情報更新があれば「true」
 		*/
 		//-----------------------------------------------------------------//
-		void update_info() noexcept
+		bool update_info() noexcept
 		{
-			draw_channel_info(0);
-			draw_channel_info(1);
+			uint32_t n = 0;
+			if(draw_channel_info(0)) ++n;
+			if(draw_channel_info(1)) ++n;
+			return n != 0;
 		}
 
 

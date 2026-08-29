@@ -300,8 +300,8 @@ namespace dsos {
 			int16_t		min_;
 			int16_t		max_;
 
-			uint16_t	org_;
-			uint16_t	end_;
+			int32_t		org_;
+			int32_t		end_;
 
 			float		freq_;
 
@@ -325,21 +325,26 @@ namespace dsos {
 			}
 
 
-			void update(int16_t v, uint16_t pos) noexcept
+			void update(int16_t v, int32_t pos) noexcept
 			{
 				switch(step_) {
 				case 0:
+					if(v < thv_end_) {
+						++step_;
+					}
+					break;
+				case 1:
 					if(v > thv_org_) {
 						org_ = pos;
 						step_++;
 					}
 					break;
-				case 1:
+				case 2:
 					if(v < thv_end_) {
 						step_++;
 					}
 					break;
-				case 2:
+				case 3:
 					if(v > thv_org_) {
 						end_ = pos;
 						step_++;
@@ -351,7 +356,7 @@ namespace dsos {
 			}
 
 
-			bool probe() const noexcept { return step_ == 3; }
+			bool probe() const noexcept { return step_ == 4; }
 
 			bool build(uint32_t samplerate) noexcept
 			{
@@ -362,9 +367,7 @@ namespace dsos {
 				auto d = end_ - org_;
 				if(d == 0) return false;
 
-//				utils::format("%d, %d\n") % ch0.org_ % ch0.end_;
 				freq_ = static_cast<float>(samplerate) / static_cast<float>(d);
-//				utils::format("CH0 Freq: %3.2f\n") % ch0.freq_;
 
 				return true;
 			}
