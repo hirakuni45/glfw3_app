@@ -1,16 +1,16 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	各種頂点の定義と操作
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2025 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <vector>
-#include <boost/unordered_set.hpp>
-#include <boost/unordered_map.hpp>
+#include <unordered_set>
+#include <unordered_map>
 #include <cmath>
 #include <cfloat>
 
@@ -235,7 +235,7 @@ namespace vtx {
 		static inline T dot(const vertex2& a, const vertex2& b) { return a.x * b.x + a.y * b.y; }
 		static inline T cross(const vertex2& a, const vertex2& b) { return a.x * b.y - a.y * b.x; }
 
-		// Method necessary for using「boost/unordered_map」
+		// Method necessary for using「unordered_map」
 		inline bool operator == (const vertex2<T>& v) const {
 			if(x == v.x && y == v.y) return true;
 			else return false;
@@ -247,9 +247,8 @@ namespace vtx {
 		}
 
 		inline size_t hash() const {
-			size_t h = 0;
-			boost::hash_combine(h, x);
-			boost::hash_combine(h, y);
+			auto h = std::hash<T>()(x);
+			h ^= std::hash<T>()(y);
 			return h;
 		}
 
@@ -387,7 +386,7 @@ namespace vtx {
 			out.z = a.x * b.y - a.y * b.x;
 		}
 
-		// Method necessary for using「boost/unordered_map」
+		// Method necessary for using「unordered_map」
 		inline bool operator == (const vertex3& v) const {
 			if(x == v.x && y == v.y && z == v.z) return true;
 			else return false;
@@ -399,10 +398,9 @@ namespace vtx {
 		}
 
 		inline size_t hash() const {
-			size_t h = 0;
-			boost::hash_combine(h, x);
-			boost::hash_combine(h, y);
-			boost::hash_combine(h, z);
+			auto h = std::hash<T>()(x);
+			h ^= std::hash<T>()(y);
+			h ^= std::hash<T>()(z);
 			return h;
 		}
 
@@ -531,6 +529,7 @@ namespace vtx {
 		inline void mul(T xx, T yy, T zz, T ww = static_cast<T>(1)) { x *= xx; y *= yy; z *= zz; w *= ww; }
 		inline void div(T xx, T yy, T zz, T ww = static_cast<T>(1)) { x /= xx; y /= yy; z /= zz; w /= ww; }
 
+		// Method necessary for using「unordered_map」
 		inline bool operator == (const vertex4& v) const {
 			if(x == v.x && y == v.y && z == v.z && w == v.w) return true;
 			else return false;
@@ -541,13 +540,11 @@ namespace vtx {
 			else return true;
 		}
 
-		// Method necessary for using「boost/unordered_map」
 		inline size_t hash() const {
-			size_t h = 0;
-			boost::hash_combine(h, x);
-			boost::hash_combine(h, y);
-			boost::hash_combine(h, z);
-			boost::hash_combine(h, w);
+			auto h = std::hash<T>()(x);
+			h ^= std::hash<T>()(y);
+			h ^= std::hash<T>()(z);
+			h ^= std::hash<T>()(w);
 			return h;
 		}
 
@@ -624,13 +621,15 @@ namespace vtx {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
-		@brief	「boost/unordered_set, unordered_map」用ハッシュ値計算
-		@param[in]	v	ハッシュ・ソース座標
+		@brief	「unordered_set, unordered_map」用ハッシュ値計算
+		@param[in]	T	ハッシュ・ソース座標
 		@return		ハッシュ値を返す
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	template <class T>
-	inline size_t hash_value(const T& v) { return v.hash(); }
+	struct hash_value {
+		size_t operator() (const T& v) const { return v.hash(); }
+	};
 
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -1396,18 +1395,18 @@ namespace vtx {
 	}
 
 
-	typedef boost::unordered_set<fvtx>					fvtx_set;
-	typedef boost::unordered_set<fvtx>::iterator		fvtx_set_it;
-	typedef boost::unordered_set<fvtx>::const_iterator	fvtx_set_cit;
+	typedef std::unordered_set<fvtx, hash_value<fvtx>>					fvtx_set;
+	typedef std::unordered_set<fvtx, hash_value<fvtx>>::iterator		fvtx_set_it;
+	typedef std::unordered_set<fvtx, hash_value<fvtx>>::const_iterator	fvtx_set_cit;
 
-	typedef boost::unordered_set<dvtx>					dvtx_set;
-	typedef boost::unordered_set<dvtx>::iterator		dvtx_set_it;
-	typedef boost::unordered_set<dvtx>::const_iterator	dvtx_set_cit;
+	typedef std::unordered_set<dvtx, hash_value<fvtx>>					dvtx_set;
+	typedef std::unordered_set<dvtx, hash_value<fvtx>>::iterator		dvtx_set_it;
+	typedef std::unordered_set<dvtx, hash_value<fvtx>>::const_iterator	dvtx_set_cit;
 
 
 	//-----------------------------------------------------------------//
 	/*!
-		@brief	二つの頂点配列(std::vector)から、共有「する」、@n
+		@brief	二つの頂点配列(std::vector)から、共有「する」、 @n
 				「しない」頂点配列(std::vector)を生成
 		@param[in]	src_a	配列 A
 		@param[in]	src_b	配列 B

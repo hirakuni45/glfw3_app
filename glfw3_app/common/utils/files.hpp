@@ -76,7 +76,7 @@ namespace utils {
 						t.infos_ = filter_file_infos(fis, t.filter_);
 					}
 					idx = t.idx_;
-					++t.ans_;
+					t.ans_ = t.ans_ + 1;
 					pthread_mutex_unlock(&t.sync_);
 				} else {
 					sleep_(10);
@@ -141,7 +141,7 @@ namespace utils {
 			ans_ = file_t_.ans_;
 			file_t_.path_ = path;
 			file_t_.filter_ = filter;
-			++file_t_.idx_;
+			file_t_.idx_ = file_t_.idx_ + 1;
 			pthread_mutex_unlock(&file_t_.sync_);
 		}
 

@@ -1,15 +1,19 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	テキスト編集クラス
-	@author	平松邦仁 (hira@rvf-rc45.net)
+    @author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2025 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <string>
 #include <vector>
 #include <functional>
+#include "utils/terminal.hpp"
+#include "utils/string_utils.hpp"
 #include "utils/file_io.hpp"
-#include <iostream>
 
 namespace utils {
 
@@ -37,7 +41,8 @@ namespace utils {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		basic_text_edit() { }
+		basic_text_edit() noexcept
+		{ }
 
 
 		//-----------------------------------------------------------------//
@@ -47,7 +52,8 @@ namespace utils {
 			@return 成功なら[true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(file_io& fin) {
+		bool load(file_io& fin) noexcept
+		{
 			buffer_.clear();
 			while(!fin.eof()) {
 				buffer_.emplace_back(fin.get_line());
@@ -64,7 +70,8 @@ namespace utils {
 			@return 成功なら[true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const std::string& file) {
+		bool load(const std::string& file) noexcept
+		{
 			file_io fin;
 			if(!fin.open(file, "rb")) {
 				return false;
@@ -207,7 +214,8 @@ namespace utils {
 			@return 成功なら[true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(file_io& fout) {
+		bool save(file_io& fout) noexcept
+		{
 			for(auto s : buffer_) {
 				if(!fout.put_line(s, cr_)) {
 					break;
@@ -224,7 +232,8 @@ namespace utils {
 			@return 成功なら[true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(const std::string& file) {
+		bool save(const std::string& file) noexcept
+		{
 			file_io fout;
 			if(!fout.open(file, "wb")) {
 				return false;

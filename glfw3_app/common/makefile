@@ -106,7 +106,7 @@ CPMM	=	clang++
 CCMM	=	clang
 endif
 
-POPT	=	-O2 -std=c++17
+POPT	=	-O2 -std=c++20
 COPT	=	-O2
 LOPT	=
 

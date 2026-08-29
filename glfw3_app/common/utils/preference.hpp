@@ -1,5 +1,5 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	プリファレンス・クラス @n
 			・アプリケーションの状態を記録する（Maybe レジストリー）@n
@@ -7,17 +7,17 @@
 			・文字列（キー）に対応する値（整数、実数、文字列）をファイル @n
 			セーブ、ロードする場合に利用する。
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <string>
 #include <stack>
 #include <map>
 #include "utils/vtx.hpp"
 #include "utils/file_io.hpp"
-#include <boost/format.hpp>
+#include <format>
 
 namespace sys {
 
@@ -317,8 +317,8 @@ namespace sys {
 		//-----------------------------------------------------------------//
 		bool put_boolean(const std::string& key, bool v) {
 			std::string t;
-			if(v) t = boost::io::str( boost::format("%1%") % "1" );
-			else t = boost::io::str( boost::format("%1%") % "0" );
+			if(v) t = std::format("{}", "1");
+			else t = std::format("{}", "0");
 			value_t vt(vtype::boolean, t);
 			return put_(key, vt);
 		}
@@ -333,7 +333,7 @@ namespace sys {
 		*/
 		//-----------------------------------------------------------------//
 		bool put_integer(const std::string& key, int v) {
-			std::string t = boost::io::str( boost::format("%1%") % v );
+			std::string t = std::format("{}", v);
 			value_t vt(vtype::int32, t);
 			return put_(key, vt);
 		}
@@ -363,7 +363,7 @@ namespace sys {
 		*/
 		//-----------------------------------------------------------------//
 		bool put_position(const std::string& key, const vtx::ipos& pos) {
-			std::string t = boost::io::str( boost::format("%d,%d") % pos.x % pos.y );
+			std::string t = std::format("{},{}", pos.x, pos.y);
 			value_t vt(vtype::position_int32, t);
 			return put_(key, vt);
 		}
@@ -378,7 +378,7 @@ namespace sys {
 		*/
 		//-----------------------------------------------------------------//
 		bool put_position(const std::string& key, const vtx::fpos& pos) {
-			std::string t = boost::io::str( boost::format("%f,%f") % pos.x % pos.y );
+			std::string t = std::format("{},{}", pos.x, pos.y);
 			value_t vt(vtype::position_float32, t);
 			return put_(key, vt);
 		}

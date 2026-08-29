@@ -1,20 +1,20 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	ShiftJIS, UTF-16 変換 @n
 			ShiftJIS と UTF-16 の文字コード変換を独自に行うテーブル内蔵。
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <cstdint>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
 namespace utils {
 
-	typedef boost::unordered_map<uint16_t, uint16_t> utf16_to_sjis_map;
+	typedef std::unordered_map<uint16_t, uint16_t> utf16_to_sjis_map;
 	template <class _>
 	struct utf16_to_sjis_t {
 		static utf16_to_sjis_map  utf16_to_sjis_map_;
@@ -1273,7 +1273,7 @@ namespace utils {
 		case 0x8192: // return 0x00a3;
 		case 0x81ca: // return 0x00ac;
 		case 0x815c: // return 0x2014;
-///			std::cout << boost::format("SJIS: %04x") % sjis << std::endl;
+///			std::cout << std::format("SJIS: {:04x}", sjis) << std::endl;
 			break;
 		default:
 			break;

@@ -1,18 +1,17 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	ファイル情報クラス（ヘッダー）
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <vector>
 #include <string>
 #include <dirent.h>
-#include <boost/foreach.hpp>
-#include <boost/format.hpp>
+#include <format>
 #include <algorithm>
 #include <sys/stat.h>
 #include "utils/file_io.hpp"
@@ -252,7 +251,7 @@ namespace utils {
 	//-----------------------------------------------------------------//
 	static void create_format_file_infos(const file_infos& list, const std::string& format, utils::strings& dst)
 	{
-		BOOST_FOREACH(const file_info& fi, list) {
+		for(const file_info& fi : list) {
 			if(format.empty()) {
 				std::string s = fi.get_name();
 				if(fi.is_directory()) s += '/';
@@ -260,14 +259,14 @@ namespace utils {
 			} else {
 				std::string s;
 				char m = 0;
-				BOOST_FOREACH(char c, format) {
+				for(char c : format) {
 					if(m) {
 						if(c == '%') ;
 						else if(c == 's' || c == 'S') {
 							s += fi.get_name();
 							c = 0;
 						} else if(c == 'n') {
-							s += boost::io::str(boost::format("%d") % fi.get_size());
+							s += std::format("{}", fi.get_size());
 							c = 0;
 						} else if(c == '/') {
 							if(!fi.is_directory()) c = 0;

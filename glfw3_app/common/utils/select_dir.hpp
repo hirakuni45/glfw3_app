@@ -1,14 +1,14 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	フォルダ選択（WIN32) @n
 			※comdlg32.lib をリンクする。
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2018 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2018, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #ifdef WIN32
 #include <shlobj.h>
 #endif
@@ -60,20 +60,20 @@ namespace utils {
 
 		static int CALLBACK SHBrowseProc(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM lpData)
 		{
-    		if(uMsg == BFFM_INITIALIZED && lpData) {
+			if(uMsg == BFFM_INITIALIZED && lpData) {
 				//  デフォルトで選択させるパスの指定
 				SendMessage( hWnd, BFFM_SETSELECTION, TRUE, lpData);
-    		}
-    		return 0;
+			}
+			return 0;
 		}
 
 		static void SHFree(ITEMIDLIST* pidl)
 		{
 			IMalloc*  pMalloc;
-    		SHGetMalloc(&pMalloc);
-    		if(pMalloc != nullptr) {
-        		pMalloc->Free(pidl);
-        		pMalloc->Release();
+			SHGetMalloc(&pMalloc);
+			if(pMalloc != nullptr) {
+				pMalloc->Free(pidl);
+				pMalloc->Release();
 			}
 		}
 
@@ -104,7 +104,7 @@ namespace utils {
 #endif
 			pthread_mutex_lock(&t.sync_);
 			if(ret) {
-				++t.id_;
+				t.id_ = t.id_ + 1;
 				t.path_ = path;
 			}
 			pthread_mutex_unlock(&t.sync_);

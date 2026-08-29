@@ -10,7 +10,7 @@
 //=========================================================================//
 #include <string>
 #include <map>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include "utils/singleton_policy.hpp"
@@ -87,7 +87,7 @@ namespace img {
 			face_t(FT_Face face) noexcept : face_(face), atr_map_() { }
 		};
 		typedef std::pair<std::string, face_t>	face_pair;
-		typedef boost::unordered_map<std::string, face_t>	face_map;
+		typedef std::unordered_map<std::string, face_t>	face_map;
 		typedef face_map::iterator			face_map_it;
 		typedef face_map::const_iterator	face_map_cit;
 		face_map	face_map_;

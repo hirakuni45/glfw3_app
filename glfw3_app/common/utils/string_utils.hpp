@@ -3,7 +3,7 @@
 /*!	@file
 	@brief	文字列操作ユーティリティー @n
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2025 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -11,7 +11,6 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 #include "utils/sjis_utf16.hpp"
 #include "utils/mtx.hpp"

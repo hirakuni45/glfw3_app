@@ -1,20 +1,19 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	unzip クラス（ヘッダー）@n
 			zlib minizip/unzip.c を利用
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <iostream>
 #include <vector>
 #include <string>
+#include <unordered_map>
 #include <time.h>
-#include <boost/unordered_map.hpp>
-#include <boost/foreach.hpp>
 #include "minizip/unzip.h"
 #include "utils/file_io.hpp"
 #include "utils/string_utils.hpp"
@@ -41,7 +40,7 @@ namespace utils {
 
 		std::vector<std::string>	dirs_;
 
-		typedef boost::unordered_map<std::string, size_t>	zmap;
+		typedef std::unordered_map<std::string, size_t>	zmap;
 		zmap	zmap_;
 
 	public:

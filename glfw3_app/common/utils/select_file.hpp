@@ -75,7 +75,7 @@ namespace utils {
 			if(ret) {
 				t.path_ = szFile;
 			}
-			++t.id_;
+			t.id_ = t.id_ + 1;
 			pthread_mutex_unlock(&t.sync_);
 
 			return nullptr;

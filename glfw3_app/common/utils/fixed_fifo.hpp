@@ -1,13 +1,13 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	Fixed FIFO (first in first out) テンプレート
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2019 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <cstdint>
 
 namespace utils {
@@ -62,7 +62,7 @@ namespace utils {
             @brief  クリア
         */
         //-----------------------------------------------------------------//
-		inline void clear() noexcept { get_ = put_ = 0; }
+		inline void clear() noexcept { get_ = 0; put_ = 0; }
 
 
         //-----------------------------------------------------------------//
@@ -84,7 +84,7 @@ namespace utils {
         //-----------------------------------------------------------------//
 		inline void put_go() noexcept {
 			volatile uint16_t put = put_;
-			++put;
+			put = put + 1;
 			if(put >= SIZE) {
 				put = 0;
 			}
@@ -123,7 +123,7 @@ namespace utils {
         //-----------------------------------------------------------------//
 		inline void get_go() noexcept {
 			volatile uint16_t get = get_;
-			++get;
+			get = get + 1;
 			if(get >= SIZE) {
 				get = 0;
 			}
