@@ -1,13 +1,13 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*! @file
     @brief  CRM Test・アプリケーション・クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2018 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2018, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/RX/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include "main.hpp"
 #include "core/glcore.hpp"
 #include "utils/i_scene.hpp"
@@ -104,7 +104,7 @@ namespace app {
 				widget::param wp(vtx::irect(10 + 160, 20, 150, 40), menu_);
 				widget_button::param wp_("connect");
 				connect_ = wd.add_widget<widget_button>(wp, wp_);
-				connect_->at_local_param().select_func_ = [=](int id) {
+				connect_->at_local_param().select_func_ = [=, this](int id) {
 					const auto& port = ports_->get_select_text();
 					if(serial_.probe()) {
 						ports_->set_stall(false);
@@ -137,7 +137,7 @@ namespace app {
 				{
 					widget::param wp(vtx::irect(0), terminal_frame_);
 					widget_terminal::param wp_;
-					wp_.enter_func_ = [=](const std::u32string& text) {
+					wp_.enter_func_ = [=, this](const std::u32string& text) {
 						term_enter_(text);
 					};
 					terminal_core_ = wd.add_widget<widget_terminal>(wp, wp_);

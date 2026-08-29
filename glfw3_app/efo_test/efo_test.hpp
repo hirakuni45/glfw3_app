@@ -1,13 +1,13 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*! @file
     @brief  EFO Test・アプリケーション・クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/RX/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include "main.hpp"
 #include "core/glcore.hpp"
 #include "utils/i_scene.hpp"
@@ -29,6 +29,8 @@
 #include "utils/serial_win32.hpp"
 #include "utils/file_io.hpp"
 #include "utils/input.hpp"
+
+#include <format>
 
 namespace app {
 
@@ -185,8 +187,8 @@ namespace app {
 						auto c = fifo_.get();
 						auto b = fifo_.get();
 						auto a = fifo_.get();
-						auto s = (boost::format("Voltage: %d, Version %c%c.%c%c\n")
-							% static_cast<int>(ch) % a % b % c % d).str();
+						auto s = std::format("Voltage: {}, Version {}{}.{}{}\n"
+							, static_cast<int>(ch), a, b, c, d);
 						terminal_core_->output(s);
 					} else if(cmd == 0x01) {  // SINGLE data
 						uint16_t w = fifo_.get();
@@ -195,9 +197,9 @@ namespace app {
 						float a = static_cast<int16_t>(w);
 						a /= 32767.0f;
 						a *= 20.48f;
-						auto s = (boost::format("%d Value (ch%d): %4.2f [V] (%d)")
-							% autotest_count_ % static_cast<int>(ch)
-							% a % static_cast<int16_t>(w)).str();
+						auto s = std::format("{} Value (ch{}): {:4.2f} [V] ({})"
+							, autotest_count_, static_cast<int>(ch)
+							, a, static_cast<int16_t>(w));
 						s += '\n';
 						if(!autotest_fp_.is_open()) {
 							autotest_fp_.open("autotest.txt", "wb");
@@ -219,7 +221,7 @@ namespace app {
 						}
 						{
 							std::string s;
-							s = (boost::format("%d/%d") % autotest_fail_ % autotest_count_).str();
+							s = std::format("{}/{}", autotest_fail_, autotest_count_);
 							autotest_result_->set_text(s);
 						}
 						wave_task_ = wave_task::idle;
@@ -256,8 +258,8 @@ namespace app {
 						org[wave_pos_] = w;
 						++wave_pos_;
 						if(wave_pos_ >= wave_max_) {
-							auto s = (boost::format("Wave (ch%d): %d\n")
-								% wave_ch_ % wave_max_).str();
+							auto s = std::format("Wave (ch{}): {}\n"
+								, wave_ch_, wave_max_);
 							terminal_core_->output(s);
 							waves_.copy(0, wave_ch0_, 1024);
 							waves_.copy(1, wave_ch1_, 1024);
@@ -352,7 +354,7 @@ namespace app {
 				widget::param wp(vtx::irect(10, 20+40*1, btn_width, 30), menu_);
 				widget_button::param wp_("connect");
 				connect_ = wd.add_widget<widget_button>(wp, wp_);
-				connect_->at_local_param().select_func_ = [=](int id) {
+				connect_->at_local_param().select_func_ = [=, this](int id) {
 					const auto& port = ports_->get_select_text();
 					if(!port.empty()) {
 						if(serial_.open(port, 115200)) {
@@ -397,9 +399,9 @@ namespace app {
 				widget_spinbox::param wp_(-200, 0, 200);
 				ch1_pos_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				ch1_pos_->at_local_param().select_func_ =
-					[=](widget_spinbox::state st, int before, int newpos) {
+					[=, this](widget_spinbox::state st, int before, int newpos) {
 					waves_.at_param(0).offset_.y = newpos * 10;
-					return (boost::format("%d") % newpos).str();
+					return std::format("{}", newpos);
 				};
 			}
 			{	// CH2 Positon
@@ -407,9 +409,9 @@ namespace app {
 				widget_spinbox::param wp_(-200, 0, 200);
 				ch2_pos_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				ch2_pos_->at_local_param().select_func_ =
-					[=](widget_spinbox::state st, int before, int newpos) {
+					[=, this](widget_spinbox::state st, int before, int newpos) {
 					waves_.at_param(1).offset_.y = newpos * 10;
-					return (boost::format("%d") % newpos).str();
+					return std::format("{}", newpos);
 				};
 			}
 			{	// CH1 Gain
@@ -417,9 +419,9 @@ namespace app {
 				widget_spinbox::param wp_(0, 50, 100);
 				ch1_gain_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				ch1_gain_->at_local_param().select_func_ =
-					[=](widget_spinbox::state st, int before, int newpos) {
+					[=, this](widget_spinbox::state st, int before, int newpos) {
 		  			waves_.at_param(0).gain_ = static_cast<float>(newpos) * 0.01f / 10.0f;
-					return (boost::format("%d") % newpos).str();
+					return std::format("{}", newpos);
 				};
 			}
 			{	// CH2 Gain
@@ -427,9 +429,9 @@ namespace app {
 				widget_spinbox::param wp_(0, 50, 100);
 				ch2_gain_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				ch2_gain_->at_local_param().select_func_ =
-					[=](widget_spinbox::state st, int before, int newpos) {
+					[=, this](widget_spinbox::state st, int before, int newpos) {
 		  			waves_.at_param(1).gain_ = static_cast<float>(newpos) * 0.01f / 10.0f;
-					return (boost::format("%d") % newpos).str();
+					return std::format("{}", newpos);
 				};
 			}
 
@@ -437,7 +439,7 @@ namespace app {
 				widget::param wp(vtx::irect(10, 20+40*8, btn_width, 30), menu_);
 				widget_button::param wp_("single");
 				single_ = wd.add_widget<widget_button>(wp, wp_);
-				single_->at_local_param().select_func_ = [=](int id) {
+				single_->at_local_param().select_func_ = [=, this](int id) {
 					send_single_();
 				};
 			}
@@ -445,7 +447,7 @@ namespace app {
 				widget::param wp(vtx::irect(10, 20+40*9, btn_width, 30), menu_);
 				widget_button::param wp_("autotest");
 				autotest_ = wd.add_widget<widget_button>(wp, wp_);
-				autotest_->at_local_param().select_func_ = [=](int id) {
+				autotest_->at_local_param().select_func_ = [=, this](int id) {
 					bool f = autotest_enable_;
 					autotest_enable_ = !autotest_enable_;
 					if(!f && autotest_enable_) {
@@ -474,7 +476,7 @@ namespace app {
 				widget::param wp(vtx::irect(10, 20+40*14, btn_width, 30), menu_);
 				widget_button::param wp_("capture");
 				capture_ = wd.add_widget<widget_button>(wp, wp_);
-				capture_->at_local_param().select_func_ = [=](int fd) {
+				capture_->at_local_param().select_func_ = [=, this](int fd) {
 					char tmp[1];
 					tmp[0] = 'B';
 					serial_.write(tmp, sizeof(tmp));
@@ -499,7 +501,7 @@ namespace app {
 				widget::param wp(vtx::irect(10, 20+40*17, btn_width, 30), menu_);
 				widget_button::param wp_("trigger");
 				capture_ = wd.add_widget<widget_button>(wp, wp_);
-				capture_->at_local_param().select_func_ = [=](int fd) {
+				capture_->at_local_param().select_func_ = [=, this](int fd) {
 					char tmp[1];
 					if(slope_->get_select_pos() == 0) tmp[0] = 'q';
 					else tmp[0] = 'Q';
@@ -510,7 +512,7 @@ namespace app {
 				widget::param wp(vtx::irect(10, 20+40*18, btn_width, 30), menu_);
 				widget_button::param wp_("version");
 				single_ = wd.add_widget<widget_button>(wp, wp_);
-				single_->at_local_param().select_func_ = [=](int id) {
+				single_->at_local_param().select_func_ = [=, this](int id) {
 					char tmp[1];
 					tmp[0] = 0x21;
 					serial_.write(tmp, sizeof(tmp));
@@ -527,7 +529,7 @@ namespace app {
 				{
 					widget::param wp(vtx::irect(0), terminal_frame_);
 					widget_terminal::param wp_;
-					wp_.enter_func_ = [=](const std::u32string& text) {
+					wp_.enter_func_ = [=, this](const std::u32string& text) {
 						term_enter_(text);
 					};
 					terminal_core_ = wd.add_widget<widget_terminal>(wp, wp_);
@@ -535,7 +537,7 @@ namespace app {
 				}
 
 				// ロジック編集クラスの出力先の設定
-//				project_.logic_edit_.set_output([=](const std::string& s) {
+//				project_.logic_edit_.set_output([=, this](const std::string& s) {
 //					terminal_core_->output(s);
 //				}
 //				);
@@ -551,15 +553,15 @@ namespace app {
 				{
 					widget::param wp(vtx::irect(0, 50, 0, 0), view_frame_);
 					widget_view::param wp_;
-					wp_.update_func_ = [=]() {
+					wp_.update_func_ = [=, this]() {
 						update_view_();
 					};
-					wp_.render_func_ = [=](const vtx::irect& clip) {
+					wp_.render_func_ = [=, this](const vtx::irect& clip) {
 						render_view_(clip);
 					};
-					wp_.service_func_ = [=]() {
+///					wp_.service_func_ = [=, this]() {
 ///						service_view_();
-					};
+///					};
 					view_core_ = wd.add_widget<widget_view>(wp, wp_);
 				}
 			}

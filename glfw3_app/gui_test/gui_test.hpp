@@ -3,6 +3,9 @@
 	@brief  GUI Test クラス @n
 			GUI のテストと、描画サンプル
 	@author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2026 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/RX/blob/master/LICENSE
 */
 //=====================================================================//
 #include "main.hpp"
@@ -34,6 +37,8 @@
 
 #include "utils/select_file.hpp"
 #include "utils/select_dir.hpp"
+
+#include <format>
 
 namespace app {
 
@@ -170,7 +175,7 @@ namespace app {
 				for(int i = 0; i < 3; ++i) {
 					if(i == 2) wp_.check_ = true;
 					widget_radio* w = wd.add_widget<widget_radio>(wp, wp_);
-					w->at_local_param().select_func_ = [=](bool f, int n) {
+					w->at_local_param().select_func_ = [](bool f, int n) {
 						std::cout << "Radio button: " << static_cast<int>(f) << " (" << n << ")" << std::endl;
 					};
 					wp.rect_.org.y += 40;
@@ -233,7 +238,7 @@ namespace app {
 				filer_open1_ = wd.add_widget<widget_button>(wp, wp_);
 				filer_open1_->at_local_param().text_param_.set_alias("ファイラー１");
 				filer_open1_->at_local_param().text_param_.alias_enable_ = true;
-				filer_open1_->at_local_param().select_func_ = [=](uint32_t id) {
+				filer_open1_->at_local_param().select_func_ = [=, this](uint32_t id) {
 					gl::core& core = gl::core::get_instance();
 					auto cp = core.get_current_path();
 ///					sel_dir_.open("テスト・フォルダを選択", cp);
@@ -247,7 +252,7 @@ namespace app {
 				filer_open2_ = wd.add_widget<widget_button>(wp, wp_);
 				filer_open2_->at_local_param().text_param_.set_alias("ファイラー２");
 				filer_open2_->at_local_param().text_param_.alias_enable_ = true;
-				filer_open2_->at_local_param().select_func_ = [=](uint32_t id) {
+				filer_open2_->at_local_param().select_func_ = [=, this](uint32_t id) {
 					filer_->enable(!filer_->get_state(gui::widget::state::ENABLE));
 				};
 			}
@@ -280,7 +285,7 @@ namespace app {
 				widget::param wp(vtx::irect(30, 300, 150, 40));
 				widget_label::param wp_("Asdfg", false);
 				label_ = wd.add_widget<widget_label>(wp, wp_);
-				label_->at_local_param().select_func_ = [=](const std::string& t) {
+				label_->at_local_param().select_func_ = [](const std::string& t) {
 					std::cout << "Label: " << t << std::endl << std::flush;
 				};
 			}
@@ -289,7 +294,7 @@ namespace app {
 				widget::param wp(vtx::irect(20, 350, 150, 40));
 				widget_check::param wp_("Disable-g");
 				check_ = wd.add_widget<widget_check>(wp, wp_);
-				check_->at_local_param().select_func_ = [=](bool f) {
+				check_->at_local_param().select_func_ = [](bool f) {
 					std::cout << "Check: " << static_cast<int>(f) << std::endl;
 				};
 			}
@@ -301,7 +306,7 @@ namespace app {
 				wp_.init_list_.push_back("2nd");
 				wp_.init_list_.push_back("3rd");
 				wp_.init_list_.push_back("4th");
-				wp_.select_func_ = [=](const std::string& text, uint32_t pos) {
+				wp_.select_func_ = [](const std::string& text, uint32_t pos) {
 					utils::format("List Selected: '%s', (%d)\n") % text.c_str() % pos;
 				};
 				list_ = wd.add_widget<widget_list>(wp, wp_);
@@ -310,7 +315,7 @@ namespace app {
 			if(1) { // スライダーのテスト
 				widget::param wp(vtx::irect(30, 450, 180, 20));
 				widget_slider::param wp_;
-				wp_.select_func_ = [=] (float lvl) {
+				wp_.select_func_ = [=, this] (float lvl) {
 					if(progress_ != nullptr) {
 						progress_->set_ratio(lvl);
 					}
@@ -328,14 +333,14 @@ namespace app {
 				widget::param wp(vtx::irect(30, 550, 100, 40));
 				widget_spinbox::param wp_(1, 3, 50);
 				spinbox_ = wd.add_widget<widget_spinbox>(wp, wp_);
-				spinbox_->at_local_param().select_func_ = [=](widget_spinbox::state st, int before, int newpos) {
+				spinbox_->at_local_param().select_func_ = [](widget_spinbox::state st, int before, int newpos) {
 					std::cout << "SpinBox ";
 					if(st == widget_spinbox::state::initial) std::cout << "initial";
 					else if(st == widget_spinbox::state::inc) std::cout << "inc";
 					else if(st == widget_spinbox::state::dec) std::cout << "dec";
 					else std::cout << "select";
 					std::cout << ": " << newpos << std::endl;
-					return (boost::format("%d") % newpos).str();
+					return std::format("{}", newpos);
 				};
 			}
 
@@ -343,7 +348,7 @@ namespace app {
 				widget::param wp(vtx::irect(30, 600, 0, 0));
 				widget_arrow::param wp_(widget_arrow::direction::up);
 				arrow_up_ = wd.add_widget<widget_arrow>(wp, wp_);
-				arrow_up_->at_local_param().level_func_ = [=](uint32_t level) {
+				arrow_up_->at_local_param().level_func_ = [](uint32_t level) {
 					std::cout << "Arrow: " << level << std::endl;
 				};
 			}
@@ -358,7 +363,7 @@ namespace app {
 				widget::param wp(vtx::irect(30, 700, 0, 0));
 				widget_toggle::param wp_("機能");
 				toggle_ = wd.add_widget<widget_toggle>(wp, wp_);
-				toggle_->at_local_param().select_func_ = [=](bool f) {
+				toggle_->at_local_param().select_func_ = [](bool f) {
 					std::cout << "Toggle: " << static_cast<int>(f) << std::endl;
 				};				
 			}
@@ -407,7 +412,7 @@ namespace app {
 				widget::param wp(vtx::irect(300, 280, 100, 30));
 				widget_chip::param wp_("Help!");
 				chip_ = wd.add_widget<widget_chip>(wp, wp_);
-				chip_->at_local_param().select_func_ = [=](uint32_t id) {
+				chip_->at_local_param().select_func_ = [=, this](uint32_t id) {
 					chip_->at_org().x += 4;
 				};
 			}
@@ -421,7 +426,7 @@ namespace app {
 				wp_.init_list_.push_back("Second");
 				wp_.init_list_.push_back("Third");
 				wp_.init_list_.push_back("Force");
-				wp_.select_func_ = [=](const std::string& text, uint32_t pos) {
+				wp_.select_func_ = [](const std::string& text, uint32_t pos) {
 					utils::format("Menu Selected: '%s', (%d)\n") % text.c_str() % pos;
 				};
 				menu_ = wd.add_widget<widget_menu>(wp, wp_);
@@ -531,10 +536,10 @@ namespace app {
 				{
 					widget::param wp(vtx::irect(0), view_frame_);
 					widget_view::param wp_;
-					wp_.update_func_ = [=]() {
+					wp_.update_func_ = [=, this]() {
 						view_update_();
 					};
-					wp_.render_func_ = [=](const vtx::irect& clip) {
+					wp_.render_func_ = [=, this](const vtx::irect& clip) {
 						view_render_(clip);
 					};
 					view_core_ = wd.add_widget<widget_view>(wp, wp_);
@@ -550,7 +555,7 @@ namespace app {
 				static const int lw = 32;  // ラベルの高さ
 				for(uint32_t i = 0; i < 8; ++i) {
 					widget::param wp(vtx::irect(0, lw * i, 400, lw));
-					widget_label::param wp_((boost::format("Item gpwql: %d") % i).str());
+					widget_label::param wp_(std::format("Item gpwql: {}", i));
 					wp_.text_param_.placement_.hpt = vtx::placement::holizontal::LEFT;
 					wp_.plate_param_.frame_width_ = 0;
 					wp_.plate_param_.round_radius_ = 0;
@@ -637,7 +642,7 @@ namespace app {
 			if(menu_ins_) {
 				if(menu_ins_->get_selected() && menu_ != nullptr) {
 					++menu_ins_cnt_;
-					menu_->insert((boost::format("Ins-%d") % menu_ins_cnt_).str(), 4);
+					menu_->insert(std::format("Ins-{}", menu_ins_cnt_), 4);
 				}
 			}
 			if(menu_era_) {

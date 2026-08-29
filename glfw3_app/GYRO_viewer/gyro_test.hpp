@@ -3,7 +3,7 @@
 /*! @file
     @brief  GYROscope センサー・アプリケーション・クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2018 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2018, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/RX/blob/master/LICENSE
 */
@@ -140,17 +140,17 @@ namespace app {
 			{ // baud select
 				widget::param wp(vtx::irect(10, 25 + 55 * 1, 150, 40), menu_);
 				widget_list::param wp_;
-		   		wp_.init_list_.push_back("19200");
-		   		wp_.init_list_.push_back("38400");
-		   		wp_.init_list_.push_back("57600");
-		   		wp_.init_list_.push_back("115200");
+				wp_.init_list_.push_back("19200");
+				wp_.init_list_.push_back("38400");
+				wp_.init_list_.push_back("57600");
+				wp_.init_list_.push_back("115200");
 				baud_ = wd.add_widget<widget_list>(wp, wp_);
 			}
 			{ // コネクションボタン
 				widget::param wp(vtx::irect(10, 25 + 55 * 2, 150, 40), menu_);
 				widget_button::param wp_("connect");
 				connect_ = wd.add_widget<widget_button>(wp, wp_);
-				connect_->at_local_param().select_func_ = [=](int id) {
+				connect_->at_local_param().select_func_ = [=, this](int id) {
 					const auto& port = ports_->get_select_text();
 					if(serial_.probe()) {
 						ports_->set_stall(false);
@@ -163,7 +163,7 @@ namespace app {
 						if(!port.empty()) {
 							int b;
 							if((utils::input("%d", baud_->get_select_text().c_str())
-								 % b).status()) {
+								% b).status()) {
 								if(serial_.open(port, b)) {
 									connect_->set_text("close");
 									terminal_core_->output("Open Serialport: '" + port + "'\n");
@@ -184,7 +184,7 @@ namespace app {
 				widget_button::param wp_("carib");
 				carib_ = wd.add_widget<widget_button>(wp, wp_);
 				carib_->set_stall();
-				carib_->at_local_param().select_func_ = [=](int id) {
+				carib_->at_local_param().select_func_ = [=, this](int id) {
 					ref_min_.set(0);
 					ref_max_.set(0);
 					ref_count_ = 120;
@@ -201,7 +201,7 @@ namespace app {
 				{
 					widget::param wp(vtx::irect(0), terminal_frame_);
 					widget_terminal::param wp_;
-					wp_.enter_func_ = [=](const std::u32string& text) {
+					wp_.enter_func_ = [=, this](const std::u32string& text) {
 						term_enter_(text);
 					};
 					terminal_core_ = wd.add_widget<widget_terminal>(wp, wp_);

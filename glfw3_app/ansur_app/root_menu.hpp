@@ -69,7 +69,7 @@ namespace app {
 			terminal_frame_(nullptr), terminal_core_(nullptr),
 			cont_run_(nullptr),
 			cont_setting_dialog_(nullptr),
-		   	cont_connect_(nullptr), cont_setting_ip_{ nullptr },
+			cont_connect_(nullptr), cont_setting_ip_{ nullptr },
 
 			ip_{ 0 },
 
@@ -115,7 +115,7 @@ namespace app {
 				widget::param wp(vtx::irect(20, 20, 100, 40), frame_);
 				widget_button::param wp_("設定");
 				cont_run_ = wd.add_widget<widget_button>(wp, wp_);
-				cont_run_->at_local_param().select_func_ = [=](uint32_t id) {
+				cont_run_->at_local_param().select_func_ = [this](uint32_t id) {
 					cont_setting_dialog_->enable();
 				};			
 			}
@@ -123,8 +123,8 @@ namespace app {
 				widget::param wp(vtx::irect(20, 70, 100, 40), frame_);
 				widget_button::param wp_("設定");
 				list_ = wd.add_widget<widget_button>(wp, wp_);
-				list_->at_local_param().select_func_ = [=](uint32_t id) {
-				};			
+//				list_->at_local_param().select_func_ = [this](uint32_t id) {
+//				};			
 			}
 
 
@@ -154,7 +154,7 @@ namespace app {
 				widget_dialog::param wp_(widget_dialog::style::OK);
 				cont_setting_dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
 				cont_setting_dialog_->enable(false);
-				cont_setting_dialog_->at_local_param().select_func_ = [=](bool ok) {
+				cont_setting_dialog_->at_local_param().select_func_ = [this](bool ok) {
 					for(int i = 0; i < 4; ++i) {
 						const std::string& ip = cont_setting_ip_[i]->get_text();
 						int v = 0;

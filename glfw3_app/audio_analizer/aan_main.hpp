@@ -27,6 +27,8 @@
 #include "oscilloscope.hpp"
 #include "tone.hpp"
 
+#include <format>
+
 namespace app {
 
 	class aan_main : public utils::i_scene {
@@ -112,9 +114,9 @@ namespace app {
 		{
 			for(auto t : FREQ_TABLE) {
 				if(t >= 1000) {
-					ss.push_back((boost::format(" %2.1fKHz") % (static_cast<float>(t) / 1000.0f)).str());
+					ss.push_back(std::format(" {:2.1f}KHz", (static_cast<float>(t) / 1000.0f)));
 				} else {
-					ss.push_back((boost::format(" %dHz") % t).str());
+					ss.push_back(std::format(" {}Hz", t));
 				}
 			}
 		}
@@ -124,15 +126,15 @@ namespace app {
 			std::string s;
 			if(t < 1e-3f) {
 				if(round) {
-					s = (boost::format(" %dμS") % static_cast<int>(std::round(t * 1e6f))).str();
+					s = std::format(" {}μS", static_cast<int>(std::round(t * 1e6f)));
 				} else {
-					s = (boost::format(" %3.1fμS") % (t * 1e6f)).str();
+					s = std::format(" {:3.1f}μS", (t * 1e6f));
 				}
 			} else if(t >= 1e-3f && t < 1.0f) {
 				if(round) {
-					s = (boost::format(" %dmS") % static_cast<int>(std::round(t * 1e3f))).str();
+					s = std::format(" {}mS", static_cast<int>(std::round(t * 1e3f)));
 				} else {
-					s = (boost::format(" %3.2fmS") % (t * 1e3f)).str();
+					s = std::format(" {:3.2f}mS", (t * 1e3f));
 				}
 			}
 			return s;
@@ -149,9 +151,9 @@ namespace app {
 		{
 			for(auto t : VOLT_SCALE_TABLE) {
 				if(t < 0.1f) {
-					ss.push_back((boost::format(" %dmV") % static_cast<int>(std::round(t * 1e3f))).str());
+					ss.push_back(std::format(" {}mV", static_cast<int>(std::round(t * 1e3f))));
 				} else {
-					ss.push_back((boost::format(" %3.2fV") % t).str());
+					ss.push_back(std::format(" {:3.2f}V", t));
 				}
 			}
 		}
@@ -221,7 +223,7 @@ namespace app {
 				widget::param wp(vtx::irect(10, 10, 200, 40), base);
 				widget_check::param wp_(chs);
 				ch.ena_ = wd.add_widget<widget_check>(wp, wp_);
-				ch.ena_->at_local_param().select_func_ = [=](bool f) {
+				ch.ena_->at_local_param().select_func_ = [=, this](bool f) {
 					waves_.at_param(chi).render_ = f;
 				};
 			}
@@ -229,7 +231,7 @@ namespace app {
 				widget::param wp(vtx::irect(180, 10, 150, 40), base);
 				widget_check::param wp_("Ground");
 				ch.grd_ena_ = wd.add_widget<widget_check>(wp, wp_);
-				ch.grd_ena_->at_local_param().select_func_ = [=](bool f) {
+				ch.grd_ena_->at_local_param().select_func_ = [=, this](bool f) {
 					waves_.at_param(chi).ground_ = f;
 				};
 			}
@@ -237,7 +239,7 @@ namespace app {
 				widget::param wp(vtx::irect(10, 10+50, 160, 40), base);
 				widget_list::param wp_;
 				create_volt_scale_list_(wp_.init_list_);
-				wp_.select_func_ = [=](const std::string& text, uint32_t pos) {
+				wp_.select_func_ = [=, this](const std::string& text, uint32_t pos) {
 					waves_.at_param(chi).volt_grid_ = VOLT_SCALE_TABLE[pos];
 				};
 				ch.volt_ = wd.add_widget<widget_list>(wp, wp_);
@@ -246,9 +248,9 @@ namespace app {
 				widget::param wp(vtx::irect(180, 10+50, 160, 40), base);
 				widget_spinbox::param wp_(0, 0, wave_size_.y / VOLT_POS_STEP);
 				ch.pos_ = wd.add_widget<widget_spinbox>(wp, wp_);
-				ch.pos_->at_local_param().select_func_ = [=](widget_spinbox::state st, int before, int newpos) {
+				ch.pos_->at_local_param().select_func_ = [=, this](widget_spinbox::state st, int before, int newpos) {
 					waves_.at_param(chi).offset_.y = newpos * VOLT_POS_STEP;
-					return (boost::format("%d") % newpos).str();
+					return std::format("{}", newpos);
 				};
 			}
 			{
@@ -260,20 +262,20 @@ namespace app {
 				widget::param wp(vtx::irect(10, 10+50+50*2, 160, 40), base);
 				widget_spinbox::param wp_(0, 0, 400);
 				ch.mes_pos_ = wd.add_widget<widget_spinbox>(wp, wp_);
-				ch.mes_pos_->at_local_param().select_func_ = [=](widget_spinbox::state st, int before, int newpos) {
+				ch.mes_pos_->at_local_param().select_func_ = [=, this](widget_spinbox::state st, int before, int newpos) {
 					float v = VOLT_SCALE_TABLE[ch.volt_->get_select_pos()] / static_cast<float>(waves_.get_info().grid_step_);
 					v *= (ch.pos_->get_select_pos() * VOLT_POS_STEP) - newpos;
-					return (boost::format("%3.2fV") % v).str();
+					return std::format("{:3.2f}V", v);
 				};
 			}
 			{
 				widget::param wp(vtx::irect(180, 10+50+50*2, 160, 40), base);
 				widget_spinbox::param wp_(0, 0, 400);
 				ch.mes_len_ = wd.add_widget<widget_spinbox>(wp, wp_);
-				ch.mes_len_->at_local_param().select_func_ = [=](widget_spinbox::state st, int before, int newpos) {
+				ch.mes_len_->at_local_param().select_func_ = [=, this](widget_spinbox::state st, int before, int newpos) {
 					float v = VOLT_SCALE_TABLE[ch.volt_->get_select_pos()] / static_cast<float>(waves_.get_info().grid_step_);
 					v *= (ch.pos_->get_select_pos() * VOLT_POS_STEP) - (ch.mes_pos_->get_select_pos() + newpos);
-					return (boost::format("%3.2fV") % v).str();
+					return std::format("{:3.2f}V", v);
 				};
 			}
 			{
@@ -322,7 +324,7 @@ namespace app {
 				widget::param wp(vtx::irect(0, 20, 160, 40), base);
 				widget_list::param wp_;
 				create_time_scale_list_(wp_.init_list_);
-				wp_.select_func_ = [=](const std::string& text, uint32_t pos) {
+				wp_.select_func_ = [this](const std::string& text, uint32_t pos) {
 					auto t = TIME_SCALE_TABLE[pos];
 					waves_.set_time_grid(t);
 				};
@@ -337,7 +339,7 @@ namespace app {
 			{
 				widget::param wp(vtx::irect(170*2, 20+50, 150, 40), base);
 				widget_button::param wp_("Trigger");
-				wp_.select_func_ = [=](uint32_t id) {
+				wp_.select_func_ = [this](uint32_t id) {
 					trigger_func_();
 				};
 				trig_exec_ = wd.add_widget<widget_button>(wp, wp_);
@@ -347,8 +349,8 @@ namespace app {
 				widget_list::param wp_;
 				wp_.init_list_.push_back("CH0 (Left)");
 				wp_.init_list_.push_back("CH1 (Right)");
-				wp_.select_func_ = [=](const std::string& text, uint32_t pos) {
-				};
+//				wp_.select_func_ = [this](const std::string& text, uint32_t pos) {
+//				};
 				trig_ch_ = wd.add_widget<widget_list>(wp, wp_);
 			}
 			{
@@ -358,21 +360,21 @@ namespace app {
 				wp_.init_list_.push_back("Auto");
 				wp_.init_list_.push_back("Positive ↑");
 				wp_.init_list_.push_back("Negative ↓");
-				wp_.select_func_ = [=](const std::string& text, uint32_t pos) {
-				};
+//				wp_.select_func_ = [this](const std::string& text, uint32_t pos) {
+//				};
 				trig_type_ = wd.add_widget<widget_list>(wp, wp_);
 			}
 			{
 				widget::param wp(vtx::irect(170+170, 20+100, 150, 40), base);
 				widget_spinbox::param wp_(0, 0, wave_size_.y - 1);
 				trig_volt_ = wd.add_widget<widget_spinbox>(wp, wp_);
-				trig_volt_->at_local_param().select_func_ = [=](widget_spinbox::state st, int before, int newpos) {
+				trig_volt_->at_local_param().select_func_ = [this](widget_spinbox::state st, int before, int newpos) {
 					waves_.at_info().trig_pos_ = newpos;
 					auto chi = trig_ch_->get_select_pos();
 					auto v = waves_.get_param(chi).offset_.y - newpos;
 					auto pos = channel_[chi].volt_->get_select_pos();
 					auto t = VOLT_SCALE_TABLE[pos] / waves_.get_info().grid_step_ * v;
-					return (boost::format("%3.2fV") % t).str();
+					return std::format("{:3.2f}V", t);
 				};
 			}
 
@@ -380,29 +382,29 @@ namespace app {
 				widget::param wp(vtx::irect(0, 20+100+50, 200, 40), base);
 				widget_check::param wp_("Measure:");
 				time_mes_ena_ = wd.add_widget<widget_check>(wp, wp_);
-				time_mes_ena_->at_local_param().select_func_ = [=](bool f) {
-				};
+//				time_mes_ena_->at_local_param().select_func_ = [this](bool f) {
+//				};
 			}
 			{
 				widget::param wp(vtx::irect(0, 20+100+50*2, 160, 40), base);
 				widget_spinbox::param wp_(0, 0, 800);
 				time_mes_pos_ = wd.add_widget<widget_spinbox>(wp, wp_);
-				time_mes_pos_->at_local_param().select_func_ = [=](widget_spinbox::state st, int before, int newpos) {
+				time_mes_pos_->at_local_param().select_func_ = [this](widget_spinbox::state st, int before, int newpos) {
 					float v = TIME_SCALE_TABLE[time_scale_->get_select_pos()] / static_cast<float>(waves_.get_info().grid_step_);
 					v *= newpos;
 					auto s = create_time_scale_str_(v, false);
-					return (boost::format("%s") % s).str();
+					return std::format("{}", s);
 				};
 			}
 			{
 				widget::param wp(vtx::irect(170, 20+100+50*2, 160, 40), base);
 				widget_spinbox::param wp_(0, 0, 800);
 				time_mes_len_ = wd.add_widget<widget_spinbox>(wp, wp_);
-				time_mes_len_->at_local_param().select_func_ = [=](widget_spinbox::state st, int before, int newpos) {
+				time_mes_len_->at_local_param().select_func_ = [this](widget_spinbox::state st, int before, int newpos) {
 					float v = TIME_SCALE_TABLE[time_scale_->get_select_pos()] / static_cast<float>(waves_.get_info().grid_step_);
 					v *= newpos;
 					auto s = create_time_scale_str_(v, false);
-					return (boost::format("%s") % s).str();
+					return std::format("{}", s);
 				};
 			}
 			{
@@ -415,10 +417,10 @@ namespace app {
 				widget::param wp(vtx::irect(0, 20+100+50*4, 160, 40), base);
 				widget_spinbox::param wp_(-400, 0, 400);
 				time_offset_ = wd.add_widget<widget_spinbox>(wp, wp_);
-				time_offset_->at_local_param().select_func_ = [=](widget_spinbox::state st, int before, int newpos) {
+				time_offset_->at_local_param().select_func_ = [this](widget_spinbox::state st, int before, int newpos) {
 					waves_.at_param(0).offset_.x = newpos;
 					waves_.at_param(1).offset_.x = newpos;
-					return (boost::format("%d") % newpos).str();
+					return std::format("[]", newpos);
 				};
 			}
 
@@ -528,7 +530,7 @@ namespace app {
 				if(f) {
 					float v = VOLT_SCALE_TABLE[ch.volt_->get_select_pos()] / waves_.get_info().grid_step_;
 					v *= ch.mes_len_->get_select_pos();
-					auto s = (boost::format("%3.2fV") % v).str();
+					auto s = std::format("{:3.2f}V", v);
 					ch.mes_ans_->set_text(s);
 					ch.mes_pos_->exec();
 					ch.mes_len_->exec();
@@ -553,7 +555,7 @@ namespace app {
 					float v = TIME_SCALE_TABLE[time_scale_->get_select_pos()] / static_cast<float>(waves_.get_info().grid_step_);
 					v *= time_mes_len_->get_select_pos();
 					auto s = create_time_scale_str_(v, false);
-					s += (boost::format(" (%3.2fHz)") % (1.0f / v)).str();
+					s += std::format(" ({:3.2f}Hz)", (1.0f / v));
 					time_mes_ans_->set_text(s);
 				}
 				time_mes_pos_->set_select_max(wave_size_.x);
@@ -623,9 +625,9 @@ namespace app {
 				widget_dialog::param wp_;
 				wp_.style_ = widget_dialog::style::OK;
 				about_dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
-				auto s = (boost::format("Audio Analizer\nVersion %d.%02d\n") % (VERSION / 100) % (VERSION % 100)).str();
+				auto s = std::format("Audio Analizer\nVersion {}.{:02}\n", (VERSION / 100), (VERSION % 100));
 				int bid = BUILD_ID;  // 環境変数として Makefile で指定
-				s += (boost::format("Build: %d\n") % bid).str();
+				s += std::format("Build: {}\n", bid);
 				s += "Copyright 2025 Kunihito Hiramatu\n";
 				s += "All Rights Reserved.";
 				about_dialog_->set_text(s);
@@ -641,7 +643,7 @@ namespace app {
 				widget::param wp(vtx::irect(10, 60, 50, 40), nullptr);
 				widget_check::param wp_("0");
 				tone_ena_ = wd.add_widget<widget_check>(wp, wp_);
-				tone_ena_->at_local_param().select_func_ = [=](bool f) {
+				tone_ena_->at_local_param().select_func_ = [=, this](bool f) {
 					ring_(0);
 				};
 			}
@@ -659,7 +661,7 @@ namespace app {
 				wp_.init_list_.push_back("-SAW");
 				wp_.init_list_.push_back("+SQR");
 				wp_.init_list_.push_back("-SQR");
-				wp_.select_func_ = [=](const std::string& text, uint32_t pos) {
+				wp_.select_func_ = [=, this](const std::string& text, uint32_t pos) {
 					ring_(0);
 				};
 				tone_type_ = wd.add_widget<widget_list>(wp, wp_);
@@ -671,7 +673,7 @@ namespace app {
 				wp_.init_list_.push_back("L+R");
 				wp_.init_list_.push_back("LEFT");
 				wp_.init_list_.push_back("RIGHT");
-				wp_.select_func_ = [=](const std::string& text, uint32_t pos) {
+				wp_.select_func_ = [=, this](const std::string& text, uint32_t pos) {
 					ring_(0);
 				};
 				tone_ch_ = wd.add_widget<widget_list>(wp, wp_);
@@ -681,7 +683,7 @@ namespace app {
 				widget::param wp(vtx::irect(310, 60, 130, 40), 0);
 				widget_list::param wp_("");
 				create_freq_list_(wp_.init_list_);
-				wp_.select_func_ = [=](const std::string& text, uint32_t pos) {
+				wp_.select_func_ = [=, this](const std::string& text, uint32_t pos) {
 					auto freq = FREQ_TABLE[pos];
 					tone_.set_freq(0, freq);
 				};
@@ -691,9 +693,9 @@ namespace app {
 				widget::param wp(vtx::irect(450, 60+10, 180, 20));
 				widget_slider::param wp_;
 				wp_.slider_param_.grid_ = 0.1f;
-				wp_.select_func_ = [=] (float lvl) {
+				wp_.select_func_ = [=, this] (float lvl) {
 					tone_.set_volume(0, lvl);
-					auto s = (boost::format("%d%%") % static_cast<int>(lvl * 100.0f)).str();
+					auto s = std::format("{}%", static_cast<int>(lvl * 100.0f));
 					tone_val_->set_text(s);
 				};
 				tone_vol_ = wd.add_widget<widget_slider>(wp, wp_);
@@ -714,7 +716,7 @@ namespace app {
 				widget::param wp(vtx::irect(10, 180, 150, 40));
 				widget_check::param wp_("Capture");
 				input_ena_ = wd.add_widget<widget_check>(wp, wp_);
-				input_ena_->at_local_param().select_func_ = [=](bool f) {
+				input_ena_->at_local_param().select_func_ = [=, this](bool f) {
 					auto& sound = director_.at().sound_;
 					if(f) {
 						auto ret = sound.at_audio_io().start_capture();
@@ -732,7 +734,7 @@ namespace app {
 				widget::param wp(vtx::irect(10, 240, 150, 40));
 				widget_button::param wp_("About");
 				about_ = wd.add_widget<widget_button>(wp, wp_);
-				about_->at_local_param().select_func_ = [=](uint32_t id) {
+				about_->at_local_param().select_func_ = [=, this](uint32_t id) {
 					about_dialog_->enable();
 				};
 			}
@@ -740,7 +742,7 @@ namespace app {
 				widget::param wp(vtx::irect(10+160, 240, 150, 40), nullptr);
 				widget_check::param wp_("Terminal");
 				term_ena_ = wd.add_widget<widget_check>(wp, wp_);
-				term_ena_->at_local_param().select_func_ = [=](bool f) {
+				term_ena_->at_local_param().select_func_ = [=, this](bool f) {
 					terminal_frame_->enable(f);
 				};
 			}
@@ -772,13 +774,13 @@ namespace app {
 			{  // 波形描画ビュー 
 				widget::param wp(vtx::irect(0), wave_frame_);
 				widget_view::param wp_;
-				wp_.update_func_ = [=]() {
+				wp_.update_func_ = [=, this]() {
 					update_view_();
 				};
-				wp_.render_func_ = [=](const vtx::irect& clip) {
+				wp_.render_func_ = [=, this](const vtx::irect& clip) {
 					render_view_(clip);
 				};
-				wp_.service_func_ = [=]() {
+				wp_.service_func_ = [=, this]() {
 					service_view_();
 				};
 				wave_view_ = wd.add_widget<widget_view>(wp, wp_);
@@ -847,7 +849,7 @@ namespace app {
 					terminal_core_->at_terminal().output("Audio out:\n");
 					auto ss = sound.at_audio_io().get_output_name();
 					for(auto s : ss) {
-						auto str = (boost::format("  %s\n") % s).str();
+						auto str = std::format("  {}\n", s);
 						terminal_core_->at_terminal().output(str);
 					}
 				}
@@ -855,7 +857,7 @@ namespace app {
 					terminal_core_->at_terminal().output("Audio inp:\n");
 					auto ss = sound.at_audio_io().get_input_name();
 					for(auto s : ss) {
-						auto str = (boost::format("  %s\n") % s).str();
+						auto str = std::format("  {}\n", s);
 						terminal_core_->at_terminal().output(str);
 					}
 				}
