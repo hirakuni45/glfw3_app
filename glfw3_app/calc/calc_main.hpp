@@ -134,7 +134,7 @@ namespace app {
 				t.enable_crlf();
 			}
 
-			output_func_ = [=](const char* str) {
+			output_func_ = [=, this](const char* str) {
 				if(terminal_core_ != nullptr) {
 					terminal_core_->at_terminal().output(str);
 				}

@@ -34,6 +34,8 @@
 
 #include "common/fixed_string.hpp"
 
+#include "calc_graph.hpp"
+
 #include "resource.hpp"
 
 namespace app {
@@ -59,10 +61,7 @@ namespace app {
 		static constexpr int16_t LCD_Y = 272;
 		static constexpr auto PIX = graphics::pixel::TYPE::RGB565;
 
-		static constexpr int16_t DIALOG_MONEY_RATE_W = 100;
-		static constexpr int16_t DIALOG_MONEY_RATE_H = 60;
-
-		static constexpr uint32_t WIDGET_NUM = 64;
+		static constexpr uint32_t WIDGET_NUM = 40 + 20;
 
 		CALC_CMD&	calc_cmd_;
 
@@ -102,7 +101,7 @@ namespace app {
 #else
 		// ソフトウェアーレンダラー
 //		typedef graphics::render<GLCDC, FONT> RENDER;
-		// RX65N/RX72N DRW2D Engine
+		// ハードウェアーレンダラー, RX65N/RX72N DRW2D Engine
 		typedef device::drw2d_mgr<GLCDC, FONT> RENDER;
 #endif
 		// 標準カラーインスタンス
@@ -119,19 +118,19 @@ namespace app {
 		FT5206_I2C	ft5206_i2c_;
 		typedef chip::FT5206<FT5206_I2C> TOUCH;
 #else
-		class touch_emu {
-		public:
+		struct touch_emu {
 
 			struct touch_t {
 				vtx::spos	pos;
+				touch_t() noexcept : pos(0) { }
 			};
 
 		private:
-			touch_t	touch_[4];
+			touch_t		touch_[4];
 			uint32_t	num_;
 
 		public:
-			touch_emu() noexcept : num_(0) { }
+			touch_emu() noexcept : touch_{ }, num_(0) { }
 
 			uint32_t get_touch_num() const noexcept { return num_; }
 
@@ -149,6 +148,13 @@ namespace app {
 				num_ = 1;
 			}
 
+			void set_pos(const vtx::spos& p0, const vtx::spos& p1) noexcept
+			{
+				touch_[0].pos = p0;
+				touch_[1].pos = p1;
+				num_ = 2;
+			}
+
 			void reset() noexcept { num_ = 0; }
 		};
 		typedef touch_emu TOUCH;
@@ -163,14 +169,14 @@ namespace app {
 		typedef gui::widget_director<RENDER, TOUCH, WIDGET_NUM> WIDD;
 		WIDD	widd_;
 
-		static constexpr int16_t BTN_W = 41;	///< ボタン横幅
-		static constexpr int16_t BTN_2 = 47+41;	///< ２ワイドボタン横幅
-		static constexpr int16_t BTN_H = 38;	///< ボタン高さ
-		static constexpr int16_t ORG_X = 8;		///< 開始位置Ｘ
-		static constexpr int16_t ORG_Y = 94;	///< 開始位置Ｙ
-		static constexpr int16_t SPC_X = 47;	///< ボタン幅＋隙間
-		static constexpr int16_t SPC_2 = 47+47;	///< ２ワイドボタン幅＋隙間
-		static constexpr int16_t SPC_Y = 44;	///< ボタン高さ＋隙間
+		static constexpr int16_t BTN_W = 41;		///< ボタン横幅
+		static constexpr int16_t BTN_2 = 47 + 41;	///< ２ワイドボタン横幅
+		static constexpr int16_t BTN_H = 38;		///< ボタン高さ
+		static constexpr int16_t ORG_X = 8;			///< 開始位置Ｘ
+		static constexpr int16_t ORG_Y = 94;		///< 開始位置Ｙ
+		static constexpr int16_t SPC_X = 47;		///< ボタン幅＋隙間
+		static constexpr int16_t SPC_2 = 47 + 47;	///< ２ワイドボタン幅＋隙間
+		static constexpr int16_t SPC_Y = 44;		///< ボタン高さ＋隙間
 		static constexpr int16_t W2C_O = 41-3-1;	///< ２ワイドボタン中間オフセット（消去用）
 		static constexpr int16_t W2C_W = 3+6+3;		///< ２ワイドボタン中間幅（消去用）
 		static constexpr int16_t W2C_H = 38*3+3*2;	///< ２ワイドボタン中間高（消去用）
@@ -186,8 +192,15 @@ namespace app {
 		}
 
 		typedef gui::widget WIDGET;
-
+		typedef gui::group<5> GROUP5;
 		typedef gui::button BUTTON;
+		typedef gui::spinboxt SPINBOXT;
+		typedef gui::dialog DIALOG;
+		typedef gui::text TEXT;
+		typedef gui::key_10 KEY_10;
+
+		typedef utils::fixed_string<256> STR;
+
 		BUTTON	no0_;
 		BUTTON	no1_;
 		BUTTON	no2_;
@@ -202,23 +215,23 @@ namespace app {
 		BUTTON	del_;
 		BUTTON	ac_;
 
-		BUTTON	mul_;  // *
-		BUTTON	div_;  // /
-		BUTTON	add_;  // +
-		BUTTON	sub_;  // -
+		BUTTON	mul_;	// *
+		BUTTON	div_;	// /
+		BUTTON	add_;	// +
+		BUTTON	sub_;	// -
 
-		BUTTON	poi_;  // .
-		BUTTON	x10_;  // x10
-		BUTTON	ans_;  // ANS
-		BUTTON	equ_;  // =
+		BUTTON	poi_;	// .
+		BUTTON	x10_;	// x10
+		BUTTON	ans_;	// ANS
+		BUTTON	equ_;	// =
 
 		BUTTON	sin_;
 		BUTTON	cos_;
 		BUTTON	tan_;
 		BUTTON	pai_;
 
-		BUTTON	sqr_;   // x^2
-		BUTTON	sqrt_;  // √
+		BUTTON	sqr_;	// x^2
+		BUTTON	sqrt_;	// √
 		BUTTON	pow_;	// x^y
 
 		BUTTON	log_;
@@ -227,7 +240,7 @@ namespace app {
 
 		BUTTON	fc_;
 		BUTTON	angt_;
-		BUTTON	setup_;
+		BUTTON	config_;
 
 		BUTTON	sym_;
 		BUTTON	sym_in_;
@@ -235,17 +248,20 @@ namespace app {
 
 		BUTTON	left_;	// <-
 		BUTTON	right_;	// ->
-		BUTTON	pin_;  // (
-		BUTTON	pot_;  // )
+		BUTTON	pin_;	// (
+		BUTTON	pot_;	// )
 
-		typedef gui::spinboxt SPINBOXT;
 		SPINBOXT	uni_;
 		char		inp_item_[8 * 16];
 		SPINBOXT	inp_;
 		char		out_item_[8 * 16];
 		SPINBOXT	out_;
 
-		typedef utils::fixed_string<256> STR;
+		DIALOG		ten_key_;
+
+		char	money_str_[16];
+		TEXT	money_value_;
+
 		STR			cbackup_;
 		STR			cbuff_;
 		uint32_t	cbuff_pos_;
@@ -255,7 +271,7 @@ namespace app {
 		vtx::spos	cur_pos_;
 
 		enum class FC_MODE : uint8_t {
-			MODE0,	// sin, cos,tan
+			MODE0,	// sin, cos, tan
 			MODE1,	// asin, acos, atan
 			MODE2,	// ABCDEF,0x,0b,
 			MODE3,	// abs, unit..
@@ -275,6 +291,8 @@ namespace app {
 
 		int			shift_;
 
+		typedef calc_graph<RENDER, WIDD> GRAPH;
+		GRAPH		graph_;
 
 		void clear_win_() noexcept
 		{
@@ -577,6 +595,7 @@ namespace app {
 			case FC_MODE::MODE0:
 				widd_.enable(WIDGET::LAYER::_1);
 				widd_.enable(WIDGET::LAYER::_2, false);
+
 				sin_.set_title("sin");
 				sin_.set_base_color(graphics::def_color::EmeraldGreen);
 				cos_.set_title("cos");
@@ -686,6 +705,534 @@ namespace app {
 			out_.set_select_pos(unit.get_out().val);
 		}
 
+
+		void setup_() noexcept
+		{
+			no0_.set_layer(WIDGET::LAYER::_0);
+			no0_.at_select_func() = [=, this](uint32_t id) {
+				cbuff_ += '0';
+			};
+			no1_.set_layer(WIDGET::LAYER::_0);
+			no1_.at_select_func() = [=, this](uint32_t id) {
+				cbuff_ += '1';
+			};
+			no2_.set_layer(WIDGET::LAYER::_0);
+			no2_.at_select_func() = [=, this](uint32_t id) {
+				cbuff_ += '2';
+			};
+			no3_.set_layer(WIDGET::LAYER::_0);
+			no3_.at_select_func() = [=, this](uint32_t id) {
+				cbuff_ += '3';
+			};
+			no4_.set_layer(WIDGET::LAYER::_0);
+			no4_.at_select_func() = [=, this](uint32_t id) {
+				cbuff_ += '4';
+			};
+			no5_.set_layer(WIDGET::LAYER::_0);
+			no5_.at_select_func() = [=, this](uint32_t id) {
+				cbuff_ += '5';
+			};
+			no6_.set_layer(WIDGET::LAYER::_0);
+			no6_.at_select_func() = [=, this](uint32_t id) {
+				cbuff_ += '6';
+			};
+			no7_.set_layer(WIDGET::LAYER::_0);
+			no7_.at_select_func() = [=, this](uint32_t id) {
+				cbuff_ += '7';
+			};
+			no8_.set_layer(WIDGET::LAYER::_0);
+			no8_.at_select_func() = [=, this](uint32_t id) {
+				cbuff_ += '8';
+			};
+			no9_.set_layer(WIDGET::LAYER::_0);
+			no9_.at_select_func() = [=, this](uint32_t id) {
+				cbuff_ += '9';
+			};
+
+			del_.set_layer(WIDGET::LAYER::_0);
+			del_.set_base_color(graphics::def_color::Orange);
+			del_.at_select_func() = [=, this](uint32_t id) {
+				
+				if(cbuff_.empty()) return;
+
+				auto code = static_cast<uint8_t>(cbuff_.back());
+				cbuff_.pop_back();
+				if(code == '(') {
+					del_len_ = 8;
+					nest_--;
+					if(!cbuff_.empty()) {					
+						auto code = static_cast<uint8_t>(cbuff_.back());
+						if(code >= 0xc0) {
+							auto s = calc_cmd_.at_func().get_name(static_cast<typename FUNC::NAME>(code));
+							if(s.c_str() != nullptr) {
+								del_len_ += strlen(s.c_str()) * 8;
+							}
+							cbuff_.pop_back();
+						}
+					}
+				} else if(code == ')') {
+					del_len_ = 8;
+					nest_++;
+				} else if(code == '.' || code == '^') {
+					del_len_ = 8;
+				} else if(code >= '0' && code <= '9') {
+					del_len_ = 16;
+				} else if(code >= 'A' && code <= 'F') {
+					del_len_ = 16;
+				} else if(code == '+' || code == '-' || code == '*' || code == '/' || code == 'b' || code == 'x') {
+					del_len_ = 16;
+				} else if(code >= 0x80 && code < 0xc0) {
+					auto s = calc_cmd_.at_symbol().get_name(static_cast<typename SYMBOL::NAME>(code));
+					if(s.c_str() != nullptr) {
+						del_len_ = strlen(s.c_str()) * 8;
+					}
+				} else if(code >= 0xc0) {
+					auto s = calc_cmd_.at_func().get_name(static_cast<typename FUNC::NAME>(code));
+					if(s.c_str() != nullptr) {
+						del_len_ = strlen(s.c_str()) * 8;
+					}
+				} else {
+					del_len_ = 8;
+				}
+			};
+			ac_.set_layer(WIDGET::LAYER::_0);
+			ac_.set_base_color(graphics::def_color::Orange);
+			ac_.at_select_func() = [=, this](uint32_t id) { clear_win_(); };
+
+			mul_.set_layer(WIDGET::LAYER::_0);
+			mul_.at_select_func() = [=, this](uint32_t id) { cbuff_ += '*'; };
+			div_.set_layer(WIDGET::LAYER::_0);
+			div_.at_select_func() = [=, this](uint32_t id) { cbuff_ += '/'; };
+			add_.set_layer(WIDGET::LAYER::_0);
+			add_.at_select_func() = [=, this](uint32_t id) { cbuff_ += '+'; };
+			sub_.set_layer(WIDGET::LAYER::_0);
+			sub_.at_select_func() = [=, this](uint32_t id) { cbuff_ += '-'; };
+
+			poi_.set_layer(WIDGET::LAYER::_0);
+			poi_.at_select_func() = [=, this](uint32_t id) { cbuff_ += '.'; };
+
+			left_.set_layer(WIDGET::LAYER::_0);
+			left_.at_select_func()  = [=, this](uint32_t id) {
+				shift_++;
+				NVAL ans;
+				calc_cmd_.at_symbol()(SYMBOL::NAME::ANS, ans);
+				auto a = calc_cmd_.at_unit()(ans);
+				draw_ans_(a, true);
+			};
+
+			right_.set_layer(WIDGET::LAYER::_0);
+			right_.at_select_func() = [=, this](uint32_t id) {
+				shift_--;
+				NVAL ans;
+				calc_cmd_.at_symbol()(SYMBOL::NAME::ANS, ans);
+				auto a = calc_cmd_.at_unit()(ans);
+				draw_ans_(a, true);
+			};
+
+			pin_.set_layer(WIDGET::LAYER::_0);
+			pin_.at_select_func() = [=, this](uint32_t id) { cbuff_ += '('; nest_++; };
+			pot_.set_layer(WIDGET::LAYER::_0);
+			pot_.at_select_func() = [=, this](uint32_t id) { cbuff_ += ')'; nest_--; };
+
+			x10_.set_layer(WIDGET::LAYER::_0);
+			x10_.at_select_func() = [=, this](uint32_t id) {
+				cbuff_ += '*';
+				cbuff_ += static_cast<char>(FUNC::NAME::EXP10);
+				cbuff_ += '(';
+				nest_++;
+			};
+			ans_.set_layer(WIDGET::LAYER::_0);
+			ans_.at_select_func() = [=, this](uint32_t id) {
+				NVAL tmp;
+				calc_cmd_.at_symbol()(SYMBOL::NAME::ANS, tmp);
+				if(tmp != 0) {
+					cbuff_ += static_cast<char>(SYMBOL::NAME::ANS);
+				}
+			};
+
+			equ_.set_layer(WIDGET::LAYER::_0);
+			equ_.at_select_func() = [=, this](uint32_t id) { update_equ_(); };
+
+			sin_.set_layer(WIDGET::LAYER::_0);
+			sin_.set_base_color(graphics::def_color::EmeraldGreen);
+			sin_.at_select_func() = [=, this](uint32_t id) {
+				switch(fc_mode_) {
+				case FC_MODE::MODE0:
+					cbuff_ += static_cast<char>(FUNC::NAME::SIN);
+					cbuff_ += '(';
+					nest_++;
+					break;
+				case FC_MODE::MODE1:
+					cbuff_ += static_cast<char>(FUNC::NAME::ASIN);
+					cbuff_ += '(';
+					nest_++;
+					break;
+				case FC_MODE::MODE2:
+					cbuff_ += 'A';
+					break;
+				case FC_MODE::MODE3:
+					cbuff_ += static_cast<char>(FUNC::NAME::ABS);
+					cbuff_ += '(';
+					nest_++;
+					break;
+				}
+			};
+			cos_.set_layer(WIDGET::LAYER::_0);
+			cos_.set_base_color(graphics::def_color::EmeraldGreen);
+			cos_.at_select_func() = [=, this](uint32_t id) {
+				switch(fc_mode_) {
+				case FC_MODE::MODE0:
+					cbuff_ += static_cast<char>(FUNC::NAME::COS);
+					cbuff_ += '(';
+					nest_++;
+					break;
+				case FC_MODE::MODE1:
+					cbuff_ += static_cast<char>(FUNC::NAME::ACOS);
+					cbuff_ += '(';
+					nest_++;
+					break;
+				case FC_MODE::MODE2:
+					cbuff_ += 'B';
+					break;
+				case FC_MODE::MODE3:
+					cbuff_ += static_cast<char>(FUNC::NAME::RINT);
+					cbuff_ += '(';
+					nest_++;
+					break;
+				}
+			};
+			tan_.set_layer(WIDGET::LAYER::_0);
+			tan_.set_base_color(graphics::def_color::EmeraldGreen);
+			tan_.at_select_func() = [=, this](uint32_t id) {
+				switch(fc_mode_) {
+				case FC_MODE::MODE0:
+					cbuff_ += static_cast<char>(FUNC::NAME::TAN);
+					cbuff_ += '(';
+					nest_++;
+					break;
+				case FC_MODE::MODE1:
+					cbuff_ += static_cast<char>(FUNC::NAME::ATAN);
+					cbuff_ += '(';
+					nest_++;
+					break;
+				case FC_MODE::MODE2:
+					cbuff_ += 'C';
+					break;
+				case FC_MODE::MODE3:
+					cbuff_ += static_cast<char>(FUNC::NAME::FRAC);
+					cbuff_ += '(';
+					nest_++;
+					break;
+				}
+			};
+			pai_.set_layer(WIDGET::LAYER::_0);
+			pai_.set_base_color(graphics::def_color::LightPink);
+			pai_.at_select_func() = [=, this](uint32_t id) {
+				switch(fc_mode_) {
+				case FC_MODE::MODE0:
+					cbuff_ += static_cast<char>(SYMBOL::NAME::PI);
+					break;
+				case FC_MODE::MODE1:
+					cbuff_ += static_cast<char>(SYMBOL::NAME::LOG2);
+					break;
+				case FC_MODE::MODE2:
+					cbuff_ += static_cast<char>(SYMBOL::NAME::EULER);
+					break;
+				case FC_MODE::MODE3:
+					cbuff_ += static_cast<char>(FUNC::NAME::EINT);
+					cbuff_ += '(';
+					nest_++;
+					break;
+				}
+			};
+
+			sqr_.set_layer(WIDGET::LAYER::_1);
+			sqr_.set_base_color(graphics::def_color::EmeraldGreen);
+			sqr_.set_mobj(resource::bitmap::x_2);
+			sqr_.at_select_func() = [=, this](uint32_t id) {
+				switch(fc_mode_) {
+				case FC_MODE::MODE0:
+					cbuff_ += '^';
+					cbuff_ += '2';
+					break;
+				case FC_MODE::MODE1:
+					cbuff_ += static_cast<char>(FUNC::NAME::SINH);
+					cbuff_ += '(';
+					nest_++;
+					break;
+				case FC_MODE::MODE2:
+					cbuff_ += 'D';
+					break;
+				case FC_MODE::MODE3:
+					break;
+				}
+			};
+			sqrt_.set_layer(WIDGET::LAYER::_1);
+			sqrt_.set_base_color(graphics::def_color::EmeraldGreen);
+			sqrt_.at_select_func() = [=, this](uint32_t id) {
+				switch(fc_mode_) {
+				case FC_MODE::MODE0:
+					cbuff_ += static_cast<char>(FUNC::NAME::SQRT);
+					cbuff_ += '(';
+					nest_++;
+					break;
+				case FC_MODE::MODE1:
+					cbuff_ += static_cast<char>(FUNC::NAME::COSH);
+					cbuff_ += '(';
+					nest_++;
+					break;
+				case FC_MODE::MODE2:
+					cbuff_ += 'E';
+					break;
+				case FC_MODE::MODE3:
+					break;
+				}
+			};
+			pow_.set_layer(WIDGET::LAYER::_1);
+			pow_.set_base_color(graphics::def_color::EmeraldGreen);
+			pow_.set_mobj(resource::bitmap::x_y);
+			pow_.at_select_func() = [=, this](uint32_t id) {
+				switch(fc_mode_) {
+				case FC_MODE::MODE0:
+					cbuff_ += '^';
+					break;
+				case FC_MODE::MODE1:
+					cbuff_ += static_cast<char>(FUNC::NAME::TANH);
+					cbuff_ += '(';
+					nest_++;
+					break;
+				case FC_MODE::MODE2:
+					cbuff_ += 'F';
+					break;
+				case FC_MODE::MODE3:
+					break;
+				}
+			};
+
+			log_.set_layer(WIDGET::LAYER::_1);
+			log_.set_base_color(graphics::def_color::EmeraldGreen);
+			log_.at_select_func() = [=, this](uint32_t id) {
+				switch(fc_mode_) {
+				case FC_MODE::MODE0:
+					cbuff_ += static_cast<char>(FUNC::NAME::LOG);
+					cbuff_ += '(';
+					nest_++;
+					break;
+				case FC_MODE::MODE1:
+					cbuff_ += static_cast<char>(FUNC::NAME::ASINH);
+					cbuff_ += '(';
+					nest_++;
+					break;
+				case FC_MODE::MODE2:
+					cbuff_ += "0x";
+					break;
+				case FC_MODE::MODE3:
+					break;
+				}
+			};
+			ln_.set_layer(WIDGET::LAYER::_1);
+			ln_.set_base_color(graphics::def_color::EmeraldGreen);
+			ln_.at_select_func() = [=, this](uint32_t id) {
+				switch(fc_mode_) {
+				case FC_MODE::MODE0:
+					cbuff_ += static_cast<char>(FUNC::NAME::LN);
+					cbuff_ += '(';
+					nest_++;
+					break;
+				case FC_MODE::MODE1:
+					cbuff_ += static_cast<char>(FUNC::NAME::ACOSH);
+					cbuff_ += '(';
+					nest_++;
+					break;
+				case FC_MODE::MODE2:
+					cbuff_ += "0b";
+					break;
+				case FC_MODE::MODE3:
+					break;
+				}
+			};
+			inv_.set_layer(WIDGET::LAYER::_1);
+			inv_.set_base_color(graphics::def_color::EmeraldGreen);
+			inv_.set_mobj(resource::bitmap::x_m1);
+			inv_.at_select_func() = [=, this](uint32_t id) {
+				switch(fc_mode_) {
+				case FC_MODE::MODE0:
+					cbuff_ += "^-1";
+					break;
+				case FC_MODE::MODE1:
+					cbuff_ += static_cast<char>(FUNC::NAME::ATANH);
+					cbuff_ += '(';
+					nest_++;
+					break;
+				case FC_MODE::MODE2:
+					{
+						switch(out_mode_) {
+						case OUT_MODE::BIN:
+							out_mode_ = OUT_MODE::DEC;
+							break;
+						case OUT_MODE::DEC:
+							out_mode_ = OUT_MODE::HEX;
+							break;
+						case OUT_MODE::HEX:
+							out_mode_ = OUT_MODE::BIN;
+							break;
+						}
+						update_inv_();
+						NVAL ans;
+						calc_cmd_.at_symbol()(SYMBOL::NAME::ANS, ans);
+						draw_ans_(ans, true);
+					}
+					break;
+				case FC_MODE::MODE3:
+					break;
+				}
+			};
+
+			fc_.set_layer(WIDGET::LAYER::_0);  // 機能キー
+			fc_.set_base_color(graphics::def_color::Red);
+			fc_.at_select_func() = [=, this](uint32_t id) {
+				switch(fc_mode_) {
+				case FC_MODE::MODE0:
+					fc_mode_ = FC_MODE::MODE1;
+					fc_.set_title("FC1");
+					break;
+				case FC_MODE::MODE1:
+					fc_mode_ = FC_MODE::MODE2;
+					fc_.set_title("FC2");
+					break;
+				case FC_MODE::MODE2:
+					fc_mode_ = FC_MODE::MODE3;
+					fc_.set_title("FC3");
+					break;
+				case FC_MODE::MODE3:
+					fc_mode_ = FC_MODE::MODE0;
+					fc_.set_title("FC0");
+					break;
+				}
+				update_fc_();
+			};
+
+			angt_.set_layer(WIDGET::LAYER::_0);  // 角度タイプ
+			angt_.set_base_color(graphics::def_color::SafeColor);
+			angt_.at_select_func() = [=, this](uint32_t id) {
+				switch(calc_cmd_.at_func().get_atype()) {
+				case FUNC::ATYPE::Deg:
+					calc_cmd_.at_func().set_atype(FUNC::ATYPE::Rad);
+					angt_.set_title("Rad");
+					break;
+				case FUNC::ATYPE::Rad:
+					calc_cmd_.at_func().set_atype(FUNC::ATYPE::Grad);
+					angt_.set_title("Grad");
+					break;
+				case FUNC::ATYPE::Grad:
+					calc_cmd_.at_func().set_atype(FUNC::ATYPE::Deg);
+					angt_.set_title("Deg");
+					break;
+				}
+			};
+
+			config_.set_layer(WIDGET::LAYER::_0);  // 設定
+			config_.set_base_color(graphics::def_color::SafeColor);
+			config_.at_select_func() = [=, this](uint32_t id) {
+				widd_.enable(WIDGET::LAYER::_0, false);
+				widd_.enable(WIDGET::LAYER::_1, false);
+				widd_.enable(WIDGET::LAYER::_2, false);
+				graph_.start();
+			};
+
+			sym_.set_layer(WIDGET::LAYER::_0);  // シンボル変更
+			sym_.set_base_color(graphics::def_color::Turquoise);
+			sym_.at_select_func() = [=, this](uint32_t id) {
+				symbol_idx_++;
+				symbol_idx_ %= 10;
+				auto i = static_cast<typename SYMBOL::NAME>(static_cast<uint32_t>(SYMBOL::NAME::V0) + symbol_idx_);
+				static char tmp[4];
+				strcpy(tmp, calc_cmd_.at_symbol().get_name(i).c_str());
+				sym_.set_title(tmp);
+			};
+			sym_in_.set_layer(WIDGET::LAYER::_0);  // シンボル(in)
+			sym_in_.set_base_color(graphics::def_color::Turquoise);
+			sym_in_.at_select_func() = [=, this](uint32_t id) {
+				NVAL tmp;
+				calc_cmd_.at_symbol()(SYMBOL::NAME::ANS, tmp);
+				auto name = static_cast<typename SYMBOL::NAME>(
+					static_cast<uint32_t>(SYMBOL::NAME::V0) + symbol_idx_);
+				calc_cmd_.at_symbol().set_value(name, tmp);
+			};
+			sym_out_.set_layer(WIDGET::LAYER::_0);  // シンボル(out)
+			sym_out_.set_base_color(graphics::def_color::Turquoise);
+			sym_out_.at_select_func() = [=, this](uint32_t id) {
+				cbuff_ += static_cast<char>(
+					static_cast<uint32_t>(SYMBOL::NAME::V0) + symbol_idx_);
+			};
+
+			// unit 関係
+			uni_.set_layer(WIDGET::LAYER::_2);  // unit 選択
+			uni_.set_base_color(graphics::def_color::SafeColor);
+			uni_.at_select_func() = [=, this](SPINBOXT::TOUCH_AREA area, uint16_t pos, uint16_t num) {
+				if(area == SPINBOXT::TOUCH_AREA::RIGHT || area == SPINBOXT::TOUCH_AREA::LEFT) {
+					calc_cmd_.at_unit().set_type(static_cast<typename UNIT::TYPE>(pos));
+					update_uni_();
+				}
+			};
+			inp_.set_layer(WIDGET::LAYER::_2);  // input ボタン
+			inp_.set_base_color(graphics::def_color::SafeColor);
+			inp_.at_select_func() = [=, this](SPINBOXT::TOUCH_AREA area, uint16_t pos, uint16_t num) {
+				auto un = calc_cmd_.at_unit();
+				if(area == SPINBOXT::TOUCH_AREA::RIGHT || area == SPINBOXT::TOUCH_AREA::LEFT) {
+					typename UNIT::UNIT u;
+					u.val = pos;
+					un.set_inp(u);
+					NVAL ans;
+					calc_cmd_.at_symbol()(SYMBOL::NAME::ANS, ans);
+					auto a = un(ans);
+					draw_ans_(a, true);
+				} else if(area == SPINBOXT::TOUCH_AREA::C_HOLD) {
+					if(un.get_type() == UNIT::TYPE::MONEY) {
+						if(money_value_.get_state() != WIDGET::STATE::ENABLE) {
+							ten_key_.enable();
+//							strcpy(money_str_, un.get_rate(static_cast<typename UNIT::MONEY>(pos)));
+//							money_value_.set_update();
+						}
+					}
+				}
+			};
+			out_.set_layer(WIDGET::LAYER::_2);  // output ボタン
+			out_.set_base_color(graphics::def_color::SafeColor);
+			out_.at_select_func() = [=, this](SPINBOXT::TOUCH_AREA area, uint16_t pos, uint16_t num) {
+				auto un = calc_cmd_.at_unit();
+				if(area == SPINBOXT::TOUCH_AREA::RIGHT || area == SPINBOXT::TOUCH_AREA::LEFT) {
+					typename UNIT::UNIT u;
+					u.val = pos;
+					un.set_out(u);
+					NVAL ans;
+					calc_cmd_.at_symbol()(SYMBOL::NAME::ANS, ans);
+					auto a = un(ans);
+					draw_ans_(a, true);
+				} else if(area == SPINBOXT::TOUCH_AREA::C_HOLD) {
+					if(un.get_type() == UNIT::TYPE::MONEY) {
+						if(money_value_.get_state() != WIDGET::STATE::ENABLE) {
+							ten_key_.enable();
+//							strcpy(money_str_, un.get_rate(static_cast<typename UNIT::MONEY>(pos)));
+//							money_value_.set_update();
+						}
+					}
+				}
+			};
+
+			ten_key_.set_layer(WIDGET::LAYER::_2);
+			ten_key_.set_base_color(graphics::def_color::Gray);
+			ten_key_.enable(false);
+
+			money_value_.set_layer(WIDGET::LAYER::_2);
+			money_value_.enable(false);
+
+			widd_.enable(WIDGET::LAYER::_0);
+			widd_.enable(WIDGET::LAYER::_1);
+
+			clear_win_();
+		}
+
 	public:
 		//-------------------------------------------------------------//
 		/*!
@@ -745,7 +1292,8 @@ namespace app {
 
 			fc_   (vtx::srect(LOC_X(0), LOC_Y(0), BTN_W, BTN_H), "FC0"),
 			angt_ (vtx::srect(LOC_X(0), LOC_Y(1), BTN_W, BTN_H), "Deg"), // Deg, Grd, Rad
-			setup_(vtx::srect(LOC_X(0), LOC_Y(2), BTN_W, BTN_H), "＠"),
+
+			config_(vtx::srect(LOC_X(0), LOC_Y(2), BTN_W, BTN_H), "＠"),
 
 			sym_    (vtx::srect(LOC_X(1), LOC_Y(0), BTN_W, BTN_H), "V0"),
 			sym_in_ (vtx::srect(LOC_X(1), LOC_Y(1), BTN_W, BTN_H), "Min"),
@@ -756,15 +1304,21 @@ namespace app {
 			pin_  (vtx::srect(LOC_X(2), LOC_Y(3), BTN_W, BTN_H), "（"),
 			pot_  (vtx::srect(LOC_X(3), LOC_Y(3), BTN_W, BTN_H), "）"),
 
-			uni_  (vtx::srect(LOC_X(2), LOC_Y(0), BTN_2, BTN_H), "NIL,LENGTH,SPEED,WEIGHT,MONEY"),
+			uni_  (vtx::srect(LOC_X(2), LOC_Y(0), BTN_2, BTN_H), "NIL,LENGTH,SPEED,WEIGHT,VOLUME,MONEY"),
 			inp_item_{ 0 },
-			inp_  (vtx::srect(LOC_X(2), LOC_Y(1), BTN_2, BTN_H), ""),
+			inp_  (vtx::srect(LOC_X(2), LOC_Y(1), BTN_2, BTN_H)),
 			out_item_{ 0 },
-			out_  (vtx::srect(LOC_X(2), LOC_Y(2), BTN_2, BTN_H), ""),
+			out_  (vtx::srect(LOC_X(2), LOC_Y(2), BTN_2, BTN_H)),
+
+			ten_key_(vtx::srect(10, 10, 300, 200)),
+
+			money_str_{ 0 },
+			money_value_(vtx::srect(0, 0, 480, 24), money_str_),
 
 			cbackup_(), cbuff_(), cbuff_pos_(0), del_len_(0), cur_pos_(0),
 			fc_mode_(FC_MODE::MODE0), out_mode_(OUT_MODE::DEC),
-			nest_(0), symbol_idx_(0), shift_(0)
+			nest_(0), symbol_idx_(0), shift_(0),
+			graph_(render_, widd_)
 		{ }
 
 
@@ -775,7 +1329,8 @@ namespace app {
 			@return 正常なら「true」
 		*/
 		//-------------------------------------------------------------//
-		bool insert_widget(gui::widget* w) noexcept {
+		bool insert_widget(gui::widget* w) noexcept
+		{
 			return widd_.insert(w);
 		}
 
@@ -787,7 +1342,8 @@ namespace app {
 			@return 正常なら「true」
 		*/
 		//-------------------------------------------------------------//
-		void remove_widget(gui::widget* w) noexcept {
+		void remove_widget(gui::widget* w) noexcept
+		{
 			widd_.remove(w);
 		}
 
@@ -894,480 +1450,12 @@ namespace app {
 			@brief  GUI のセットアップ
 		*/
 		//-------------------------------------------------------------//
-		void setup() noexcept
-		{
-			no0_.set_layer(WIDGET::LAYER::_0);
-			no0_.at_select_func() = [=](uint32_t id) { cbuff_ += '0'; };
-			no1_.set_layer(WIDGET::LAYER::_0);
-			no1_.at_select_func() = [=](uint32_t id) { cbuff_ += '1'; };
-			no2_.set_layer(WIDGET::LAYER::_0);
-			no2_.at_select_func() = [=](uint32_t id) { cbuff_ += '2'; };
-			no3_.set_layer(WIDGET::LAYER::_0);
-			no3_.at_select_func() = [=](uint32_t id) { cbuff_ += '3'; };
-			no4_.set_layer(WIDGET::LAYER::_0);
-			no4_.at_select_func() = [=](uint32_t id) { cbuff_ += '4'; };
-			no5_.set_layer(WIDGET::LAYER::_0);
-			no5_.at_select_func() = [=](uint32_t id) { cbuff_ += '5'; };
-			no6_.set_layer(WIDGET::LAYER::_0);
-			no6_.at_select_func() = [=](uint32_t id) { cbuff_ += '6'; };
-			no7_.set_layer(WIDGET::LAYER::_0);
-			no7_.at_select_func() = [=](uint32_t id) { cbuff_ += '7'; };
-			no8_.set_layer(WIDGET::LAYER::_0);
-			no8_.at_select_func() = [=](uint32_t id) { cbuff_ += '8'; };
-			no9_.set_layer(WIDGET::LAYER::_0);
-			no9_.at_select_func() = [=](uint32_t id) { cbuff_ += '9'; };
-
-			del_.set_layer(WIDGET::LAYER::_0);
-			del_.set_base_color(graphics::def_color::Orange);
-			del_.at_select_func() = [=](uint32_t id) {
-				if(cbuff_.empty()) return;
-
-				auto code = static_cast<uint8_t>(cbuff_.back());
-				cbuff_.pop_back();
-				if(code == '(') {
-					del_len_ = 8;
-					nest_--;
-					if(!cbuff_.empty()) {					
-						auto code = static_cast<uint8_t>(cbuff_.back());
-						if(code >= 0xc0) {
-							auto s = calc_cmd_.at_func().get_name(static_cast<typename FUNC::NAME>(code));
-							if(s.c_str() != nullptr) {
-								del_len_ += strlen(s.c_str()) * 8;
-							}
-							cbuff_.pop_back();
-						}
-					}
-				} else if(code == ')') {
-					del_len_ = 8;
-					nest_++;
-				} else if(code == '.' || code == '^') {
-					del_len_ = 8;
-				} else if(code >= '0' && code <= '9') {
-					del_len_ = 16;
-				} else if(code >= 'A' && code <= 'F') {
-					del_len_ = 16;
-				} else if(code == '+' || code == '-' || code == '*' || code == '/' || code == 'b' || code == 'x') {
-					del_len_ = 16;
-				} else if(code >= 0x80 && code < 0xc0) {
-					auto s = calc_cmd_.at_symbol().get_name(static_cast<typename SYMBOL::NAME>(code));
-					if(s.c_str() != nullptr) {
-						del_len_ = strlen(s.c_str()) * 8;
-					}
-				} else if(code >= 0xc0) {
-					auto s = calc_cmd_.at_func().get_name(static_cast<typename FUNC::NAME>(code));
-					if(s.c_str() != nullptr) {
-						del_len_ = strlen(s.c_str()) * 8;
-					}
-				} else {
-					del_len_ = 8;
-				}
-			};
-			ac_.set_layer(WIDGET::LAYER::_0);
-			ac_.set_base_color(graphics::def_color::Orange);
-			ac_.at_select_func() = [=](uint32_t id) { clear_win_(); };
-
-			mul_.set_layer(WIDGET::LAYER::_0);
-			mul_.at_select_func() = [=](uint32_t id) { cbuff_ += '*'; };
-			div_.set_layer(WIDGET::LAYER::_0);
-			div_.at_select_func() = [=](uint32_t id) { cbuff_ += '/'; };
-			add_.set_layer(WIDGET::LAYER::_0);
-			add_.at_select_func() = [=](uint32_t id) { cbuff_ += '+'; };
-			sub_.set_layer(WIDGET::LAYER::_0);
-			sub_.at_select_func() = [=](uint32_t id) { cbuff_ += '-'; };
-
-			poi_.set_layer(WIDGET::LAYER::_0);
-			poi_.at_select_func() = [=](uint32_t id) { cbuff_ += '.'; };
-
-			left_.set_layer(WIDGET::LAYER::_0);
-			left_.at_select_func()  = [=](uint32_t id) {
-				shift_++;
-				NVAL ans;
-				calc_cmd_.at_symbol()(SYMBOL::NAME::ANS, ans);
-				auto a = calc_cmd_.at_unit()(ans);
-				draw_ans_(a, true);
-			};
-
-			right_.set_layer(WIDGET::LAYER::_0);
-			right_.at_select_func() = [=](uint32_t id) {
-				shift_--;
-				NVAL ans;
-				calc_cmd_.at_symbol()(SYMBOL::NAME::ANS, ans);
-				auto a = calc_cmd_.at_unit()(ans);
-				draw_ans_(a, true);
-			};
-
-			pin_.set_layer(WIDGET::LAYER::_0);
-			pin_.at_select_func() = [=](uint32_t id) { cbuff_ += '('; nest_++; };
-			pot_.set_layer(WIDGET::LAYER::_0);
-			pot_.at_select_func() = [=](uint32_t id) { cbuff_ += ')'; nest_--; };
-
-			x10_.set_layer(WIDGET::LAYER::_0);
-			x10_.at_select_func() = [=](uint32_t id) {
-				cbuff_ += '*';
-				cbuff_ += static_cast<char>(FUNC::NAME::EXP10);
-				cbuff_ += '(';
-				nest_++;
-			};
-			ans_.set_layer(WIDGET::LAYER::_0);
-			ans_.at_select_func() = [=](uint32_t id) {
-				NVAL tmp;
-				calc_cmd_.at_symbol()(SYMBOL::NAME::ANS, tmp);
-				if(tmp != 0) {
-					cbuff_ += static_cast<char>(SYMBOL::NAME::ANS);
-				}
-			};
-
-			equ_.set_layer(WIDGET::LAYER::_0);
-			equ_.at_select_func() = [=](uint32_t id) { update_equ_(); };
-
-			sin_.set_layer(WIDGET::LAYER::_0);
-			sin_.set_base_color(graphics::def_color::EmeraldGreen);
-			sin_.at_select_func() = [=](uint32_t id) {
-				switch(fc_mode_) {
-				case FC_MODE::MODE0:
-					cbuff_ += static_cast<char>(FUNC::NAME::SIN);
-					cbuff_ += '(';
-					nest_++;
-					break;
-				case FC_MODE::MODE1:
-					cbuff_ += static_cast<char>(FUNC::NAME::ASIN);
-					cbuff_ += '(';
-					nest_++;
-					break;
-				case FC_MODE::MODE2:
-					cbuff_ += 'A';
-					break;
-				case FC_MODE::MODE3:
-					cbuff_ += static_cast<char>(FUNC::NAME::ABS);
-					cbuff_ += '(';
-					nest_++;
-					break;
-				}
-			};
-			cos_.set_layer(WIDGET::LAYER::_0);
-			cos_.set_base_color(graphics::def_color::EmeraldGreen);
-			cos_.at_select_func() = [=](uint32_t id) {
-				switch(fc_mode_) {
-				case FC_MODE::MODE0:
-					cbuff_ += static_cast<char>(FUNC::NAME::COS);
-					cbuff_ += '(';
-					nest_++;
-					break;
-				case FC_MODE::MODE1:
-					cbuff_ += static_cast<char>(FUNC::NAME::ACOS);
-					cbuff_ += '(';
-					nest_++;
-					break;
-				case FC_MODE::MODE2:
-					cbuff_ += 'B';
-					break;
-				case FC_MODE::MODE3:
-					cbuff_ += static_cast<char>(FUNC::NAME::RINT);
-					cbuff_ += '(';
-					nest_++;
-					break;
-				}
-			};
-			tan_.set_layer(WIDGET::LAYER::_0);
-			tan_.set_base_color(graphics::def_color::EmeraldGreen);
-			tan_.at_select_func() = [=](uint32_t id) {
-				switch(fc_mode_) {
-				case FC_MODE::MODE0:
-					cbuff_ += static_cast<char>(FUNC::NAME::TAN);
-					cbuff_ += '(';
-					nest_++;
-					break;
-				case FC_MODE::MODE1:
-					cbuff_ += static_cast<char>(FUNC::NAME::ATAN);
-					cbuff_ += '(';
-					nest_++;
-					break;
-				case FC_MODE::MODE2:
-					cbuff_ += 'C';
-					break;
-				case FC_MODE::MODE3:
-					cbuff_ += static_cast<char>(FUNC::NAME::FRAC);
-					cbuff_ += '(';
-					nest_++;
-					break;
-				}
-			};
-			pai_.set_layer(WIDGET::LAYER::_0);
-			pai_.set_base_color(graphics::def_color::LightPink);
-			pai_.at_select_func() = [=](uint32_t id) {
-				switch(fc_mode_) {
-				case FC_MODE::MODE0:
-					cbuff_ += static_cast<char>(SYMBOL::NAME::PI);
-					break;
-				case FC_MODE::MODE1:
-					cbuff_ += static_cast<char>(SYMBOL::NAME::LOG2);
-					break;
-				case FC_MODE::MODE2:
-					cbuff_ += static_cast<char>(SYMBOL::NAME::EULER);
-					break;
-				case FC_MODE::MODE3:
-					cbuff_ += static_cast<char>(FUNC::NAME::EINT);
-					cbuff_ += '(';
-					nest_++;
-					break;
-				}
-			};
-
-			sqr_.set_layer(WIDGET::LAYER::_1);
-			sqr_.set_base_color(graphics::def_color::EmeraldGreen);
-			sqr_.set_mobj(resource::bitmap::x_2);
-			sqr_.at_select_func() = [=](uint32_t id) {
-				switch(fc_mode_) {
-				case FC_MODE::MODE0:
-					cbuff_ += '^';
-					cbuff_ += '2';
-					break;
-				case FC_MODE::MODE1:
-					cbuff_ += static_cast<char>(FUNC::NAME::SINH);
-					cbuff_ += '(';
-					nest_++;
-					break;
-				case FC_MODE::MODE2:
-					cbuff_ += 'D';
-					break;
-				case FC_MODE::MODE3:
-					break;
-				}
-			};
-			sqrt_.set_layer(WIDGET::LAYER::_1);
-			sqrt_.set_base_color(graphics::def_color::EmeraldGreen);
-			sqrt_.at_select_func() = [=](uint32_t id) {
-				switch(fc_mode_) {
-				case FC_MODE::MODE0:
-					cbuff_ += static_cast<char>(FUNC::NAME::SQRT);
-					cbuff_ += '(';
-					nest_++;
-					break;
-				case FC_MODE::MODE1:
-					cbuff_ += static_cast<char>(FUNC::NAME::COSH);
-					cbuff_ += '(';
-					nest_++;
-					break;
-				case FC_MODE::MODE2:
-					cbuff_ += 'E';
-					break;
-				case FC_MODE::MODE3:
-					break;
-				}
-			};
-			pow_.set_layer(WIDGET::LAYER::_1);
-			pow_.set_base_color(graphics::def_color::EmeraldGreen);
-			pow_.set_mobj(resource::bitmap::x_y);
-			pow_.at_select_func() = [=](uint32_t id) {
-				switch(fc_mode_) {
-				case FC_MODE::MODE0:
-					cbuff_ += '^';
-					break;
-				case FC_MODE::MODE1:
-					cbuff_ += static_cast<char>(FUNC::NAME::TANH);
-					cbuff_ += '(';
-					nest_++;
-					break;
-				case FC_MODE::MODE2:
-					cbuff_ += 'F';
-					break;
-				case FC_MODE::MODE3:
-					break;
-				}
-			};
-
-			log_.set_layer(WIDGET::LAYER::_1);
-			log_.set_base_color(graphics::def_color::EmeraldGreen);
-			log_.at_select_func() = [=](uint32_t id) {
-				switch(fc_mode_) {
-				case FC_MODE::MODE0:
-					cbuff_ += static_cast<char>(FUNC::NAME::LOG);
-					cbuff_ += '(';
-					nest_++;
-					break;
-				case FC_MODE::MODE1:
-					cbuff_ += static_cast<char>(FUNC::NAME::ASINH);
-					cbuff_ += '(';
-					nest_++;
-					break;
-				case FC_MODE::MODE2:
-					cbuff_ += "0x";
-					break;
-				case FC_MODE::MODE3:
-					break;
-				}
-			};
-			ln_.set_layer(WIDGET::LAYER::_1);
-			ln_.set_base_color(graphics::def_color::EmeraldGreen);
-			ln_.at_select_func() = [=](uint32_t id) {
-				switch(fc_mode_) {
-				case FC_MODE::MODE0:
-					cbuff_ += static_cast<char>(FUNC::NAME::LN);
-					cbuff_ += '(';
-					nest_++;
-					break;
-				case FC_MODE::MODE1:
-					cbuff_ += static_cast<char>(FUNC::NAME::ACOSH);
-					cbuff_ += '(';
-					nest_++;
-					break;
-				case FC_MODE::MODE2:
-					cbuff_ += "0b";
-					break;
-				case FC_MODE::MODE3:
-					break;
-				}
-			};
-			inv_.set_layer(WIDGET::LAYER::_1);
-			inv_.set_base_color(graphics::def_color::EmeraldGreen);
-			inv_.set_mobj(resource::bitmap::x_m1);
-			inv_.at_select_func() = [=](uint32_t id) {
-				switch(fc_mode_) {
-				case FC_MODE::MODE0:
-					cbuff_ += "^-1";
-					break;
-				case FC_MODE::MODE1:
-					cbuff_ += static_cast<char>(FUNC::NAME::ATANH);
-					cbuff_ += '(';
-					nest_++;
-					break;
-				case FC_MODE::MODE2:
-					{
-						switch(out_mode_) {
-						case OUT_MODE::BIN:
-							out_mode_ = OUT_MODE::DEC;
-							break;
-						case OUT_MODE::DEC:
-							out_mode_ = OUT_MODE::HEX;
-							break;
-						case OUT_MODE::HEX:
-							out_mode_ = OUT_MODE::BIN;
-							break;
-						}
-						update_inv_();
-						NVAL ans;
-						calc_cmd_.at_symbol()(SYMBOL::NAME::ANS, ans);
-						draw_ans_(ans, true);
-					}
-					break;
-				case FC_MODE::MODE3:
-					break;
-				}
-			};
-
-			fc_.set_layer(WIDGET::LAYER::_0);  // 機能キー
-			fc_.set_base_color(graphics::def_color::Red);
-			fc_.at_select_func() = [=](uint32_t id) {
-				switch(fc_mode_) {
-				case FC_MODE::MODE0:
-					fc_mode_ = FC_MODE::MODE1;
-					fc_.set_title("FC1");
-					break;
-				case FC_MODE::MODE1:
-					fc_mode_ = FC_MODE::MODE2;
-					fc_.set_title("FC2");
-					break;
-				case FC_MODE::MODE2:
-					fc_mode_ = FC_MODE::MODE3;
-					fc_.set_title("FC3");
-					break;
-				case FC_MODE::MODE3:
-					fc_mode_ = FC_MODE::MODE0;
-					fc_.set_title("FC0");
-					break;
-				}
-				update_fc_();
-			};
-
-			angt_.set_layer(WIDGET::LAYER::_0);  // 角度タイプ
-			angt_.set_base_color(graphics::def_color::SafeColor);
-			angt_.at_select_func() = [=](uint32_t id) {
-				switch(calc_cmd_.at_func().get_atype()) {
-				case FUNC::ATYPE::Deg:
-					calc_cmd_.at_func().set_atype(FUNC::ATYPE::Rad);
-					angt_.set_title("Rad");
-					break;
-				case FUNC::ATYPE::Rad:
-					calc_cmd_.at_func().set_atype(FUNC::ATYPE::Grad);
-					angt_.set_title("Grad");
-					break;
-				case FUNC::ATYPE::Grad:
-					calc_cmd_.at_func().set_atype(FUNC::ATYPE::Deg);
-					angt_.set_title("Deg");
-					break;
-				}
-			};
-
-			setup_.set_layer(WIDGET::LAYER::_0);  // 設定
-			setup_.set_base_color(graphics::def_color::SafeColor);
-			setup_.at_select_func() = [=](uint32_t id) {
-			};
-			sym_.set_layer(WIDGET::LAYER::_0);  // シンボル変更
-			sym_.set_base_color(graphics::def_color::Turquoise);
-			sym_.at_select_func() = [=](uint32_t id) {
-				symbol_idx_++;
-				symbol_idx_ %= 10;
-				auto i = static_cast<typename SYMBOL::NAME>(static_cast<uint32_t>(SYMBOL::NAME::V0) + symbol_idx_);
-				static char tmp[4];
-				strcpy(tmp, calc_cmd_.at_symbol().get_name(i).c_str());
-				sym_.set_title(tmp);
-			};
-			sym_in_.set_layer(WIDGET::LAYER::_0);  // シンボル(in)
-			sym_in_.set_base_color(graphics::def_color::Turquoise);
-			sym_in_.at_select_func() = [=](uint32_t id) {
-				NVAL tmp;
-				calc_cmd_.at_symbol()(SYMBOL::NAME::ANS, tmp);
-				auto name = static_cast<typename SYMBOL::NAME>(
-					static_cast<uint32_t>(SYMBOL::NAME::V0) + symbol_idx_);
-				calc_cmd_.at_symbol().set_value(name, tmp);
-			};
-			sym_out_.set_layer(WIDGET::LAYER::_0);  // シンボル(out)
-			sym_out_.set_base_color(graphics::def_color::Turquoise);
-			sym_out_.at_select_func() = [=](uint32_t id) {
-				cbuff_ += static_cast<char>(
-					static_cast<uint32_t>(SYMBOL::NAME::V0) + symbol_idx_);
-			};
-
-			// unit 関係
-			uni_.set_layer(WIDGET::LAYER::_2);  // unit 選択
-			uni_.set_base_color(graphics::def_color::SafeColor);
-			uni_.at_select_func() = [=](SPINBOXT::TOUCH_AREA area, uint16_t pos, uint16_t num) {
-				calc_cmd_.at_unit().set_type(static_cast<typename UNIT::TYPE>(pos));
-				update_uni_();
-			};
-			inp_.set_layer(WIDGET::LAYER::_2);  // input ボタン
-			inp_.set_base_color(graphics::def_color::SafeColor);
-			inp_.at_select_func() = [=](SPINBOXT::TOUCH_AREA area, uint16_t pos, uint16_t num) {
-				typename UNIT::UNIT u;
-				u.val = pos;
-				calc_cmd_.at_unit().set_inp(u);
-				NVAL ans;
-				calc_cmd_.at_symbol()(SYMBOL::NAME::ANS, ans);
-				auto a = calc_cmd_.at_unit()(ans);
-				draw_ans_(a, true);
-			};
-			out_.set_layer(WIDGET::LAYER::_2);  // output ボタン
-			out_.set_base_color(graphics::def_color::SafeColor);
-			out_.at_select_func() = [=](SPINBOXT::TOUCH_AREA area, uint16_t pos, uint16_t num) {
-				typename UNIT::UNIT u;
-				u.val = pos;
-				calc_cmd_.at_unit().set_out(u);
-				NVAL ans;
-				calc_cmd_.at_symbol()(SYMBOL::NAME::ANS, ans);
-				auto a = calc_cmd_.at_unit()(ans);
-				draw_ans_(a, true);
-			};
-
-			widd_.enable(WIDGET::LAYER::_0);
-			widd_.enable(WIDGET::LAYER::_1);
-
-			clear_win_();
-		}
+		void setup() noexcept { setup_(); }
 
 
 		//-------------------------------------------------------------//
 		/*!
-			@brief  アップデート
+			@brief  アップデート（メインループ）
 		*/
 		//-------------------------------------------------------------//
 		void update() noexcept
@@ -1376,7 +1464,9 @@ namespace app {
 			touch_.update();
 			widd_.update();
 
-			update_calc_();
+			if(!graph_.update()) {
+				update_calc_();
+			}
 		}
 	};
 }

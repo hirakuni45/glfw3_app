@@ -1,17 +1,18 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	Arithmetic テンプレート @n
 			- テキストの数式を展開して、計算結果を得る。 @n
 			- 0x, 0X で１６進数と認識する @n
 			- 0b, 0B で２進数と認識する @n
-			- A-Z、a-z、_ などがある場合、シンボル、又は関数と認識する
+			- A-Z、a-z、_ などがある場合、シンボル、又は関数と認識する @n
+			- べき乗の計算での順番は数学的な順序とは異なる
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2015, 2024 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2015, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/RX/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <cstdint>
 #include "bitset.hpp"
 
@@ -57,8 +58,8 @@ namespace utils {
 		SYMBOL&		symbol_;
 		FUNC&		func_;
 
-		const char*		tx_;
-		char			ch_;
+		const char*	tx_;
+		char		ch_;
 
 		error_t		error_;
 
@@ -81,7 +82,7 @@ namespace utils {
 		}
 
 
-		void func_sub_(typename FUNC::NAME fc, NVAL& nval)
+		void func_sub_(typename FUNC::NAME fc, NVAL& nval) noexcept
 		{
 			ch_ = *tx_++;
 			if(ch_ == '(') {
@@ -100,13 +101,20 @@ namespace utils {
 			}
 		}
 
-
-		NVAL number_() noexcept
+		bool check_nest_() noexcept
 		{
 			++nest_;
 			if(nest_ >= NEST_MAX) {
 				error_.set(error::nest_fatal);
+				return true;
+			} else {
+				return false;
 			}
+		}
+
+		NVAL number_() noexcept
+		{
+			check_nest_();
 
 			bool minus = false;
 
@@ -243,10 +251,8 @@ namespace utils {
 
 		auto factor_() noexcept
 		{
-			++nest_;
-			if(nest_ >= NEST_MAX) {
-				error_.set(error::nest_fatal);
-			}
+			check_nest_();
+
 			NVAL v(0);
 			if(ch_ == '(') {
 				ch_ = *tx_++;
@@ -256,6 +262,9 @@ namespace utils {
 				} else {
 					error_.set(error::fatal);
 				}
+			} else if(ch_ == '^') {
+				ch_ = *tx_++;
+				v = expression_();
 			} else {
 				v = number_();
 			}
@@ -265,16 +274,36 @@ namespace utils {
 
 		NVAL term_() noexcept
 		{
-			++nest_;
-			if(nest_ >= NEST_MAX) {
-				error_.set(error::nest_fatal);
-			}
+			check_nest_();
+
 			NVAL v = factor_();
 			while(error_() == 0) {
 				switch(ch_) {
 				case '*':
 					ch_ = *tx_++;
 					v *= factor_();
+					break;
+				case '/':
+					ch_ = *tx_++;
+#if 0
+					if(ch_ == '/') {
+						ch_ = *tx_++;
+						auto n = factor_();
+						if(n == 0) {
+							error_.set(error::zero_divide);
+							break;
+						}
+						v.mod(n);
+					} else {
+#endif
+					{
+						auto n = factor_();
+						if(n == 0) {
+							error_.set(error::zero_divide);
+							break;
+						}
+						v /= n;
+					}
 					break;
 #if 0
 				case '%':
@@ -287,24 +316,7 @@ namespace utils {
 					v %= tmp;
 					break;
 #endif
-				case '/':
-					ch_ = *tx_++;
-					if(ch_ == '/') {
-						ch_ = *tx_++;
-						auto tmp = factor_();
-						if(tmp == 0) {
-							error_.set(error::zero_divide);
-							break;
-						}
-					} else {
-						auto tmp = factor_();
-						if(tmp == 0) {
-							error_.set(error::zero_divide);
-							break;
-						}
-						v /= tmp;
-					}
-					break;
+				// べき乗
 				case '^':
 					ch_ = *tx_++;
 					{
@@ -343,10 +355,8 @@ namespace utils {
 
 		NVAL expression_() noexcept
 		{
-			++nest_;
-			if(nest_ >= NEST_MAX) {
-				error_.set(error::nest_fatal);
-			}
+			check_nest_();
+
 			NVAL v = term_();
 			while(error_() == 0) {
 				switch(ch_) {
@@ -359,15 +369,15 @@ namespace utils {
 					v -= term_();
 					break;
 #if 0
-				case '&':
+				case '&':  // and
 					ch_ = *tx_++;
 					v &= term_();
 					break;
-				case '^':
+				case '^':  // ex-or
 					ch_ = *tx_++;
 					v ^= term_();
 					break;
-				case '|':
+				case '|':  // or
 					ch_ = *tx_++;
 					v |= term_();
 					break;
@@ -396,7 +406,8 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	解析を開始 @n
-					高速化の場合、シンボル名、関数名は修飾コードを使う事が出来る。 @n
+					シンボル名、関数名は修飾コード(1バイトコード)を使う事が出来る。 @n
+					※修飾コードは、シンボル、関数クラスによる @n
 					※スペースは取り除く事
 			@param[in]	str		解析文字列
 			@return	文法にエラーがあった場合、「false」
@@ -438,7 +449,7 @@ namespace utils {
 		//-----------------------------------------------------------------//
 		const error_t& get_error() const noexcept { return error_; }
 
-
+#if 0
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	エラーメッセージを取得
@@ -452,7 +463,7 @@ namespace utils {
 			
 			return str;
 		}
-
+#endif
 
 		//-----------------------------------------------------------------//
 		/*!

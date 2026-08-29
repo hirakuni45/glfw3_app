@@ -180,6 +180,8 @@ namespace app {
 					unit_.set_type(UNIT::TYPE::SPEED);
 				} else if(STR::cmp_word(cmd, 1, "WEIGHT")) {
 					unit_.set_type(UNIT::TYPE::WEIGHT);
+				} else if(STR::cmp_word(cmd, 1, "VOLUME")) {
+					unit_.set_type(UNIT::TYPE::VOLUME);
 				} else if(STR::cmp_word(cmd, 1, "MONEY")) {
 					unit_.set_type(UNIT::TYPE::MONEY);
 				} else {
@@ -202,13 +204,16 @@ namespace app {
 				case UNIT::TYPE::WEIGHT:
 					out_func_("WEIGHT");
 					break;
+				case UNIT::TYPE::VOLUME:
+					out_func_("VOLUME");
+					break;
 				case UNIT::TYPE::MONEY:
 					out_func_("MONEY");
 					break;
 				default:
 					break;
 				}
-				out_func_(" (NIL, LENGTH, SPEED, WEIGHT, MONEY)\n");
+				out_func_(" (NIL, LENGTH, SPEED, WEIGHT, VOLUME, MONEY)\n");
 			}
 		}
 
@@ -397,9 +402,9 @@ namespace app {
 				out_func_("  Rad         0 to 2*PI\n");			// 角度法をラジアンへ
 				out_func_("  Grad        0 to 400\n");			// 角度法をグラジアンへ
 				out_func_("  Deg         0 to 360\n");			// 角度法をデグリへ
+				out_func_("  Bin         Binary mode\n");		// ２進表示モード
 				out_func_("  Dec         Decimal mode\n");		// １０進表示モード
 				out_func_("  Hex         Hexadecimal mode\n");	// １６進表示モード
-				out_func_("  Bin         Binary mode\n");		// ２進表示モード
 				out_func_("  Sep         Separate mode\n");		// セパレート表示モード(On/Off)１０進、３桁毎の表示
 				out_func_("  UnitType [type]  Set unit type\n");	// 単位変換の選択
 				out_func_("  UnitInp [unit]   Set input unit\n");	// 入力変換型の選択

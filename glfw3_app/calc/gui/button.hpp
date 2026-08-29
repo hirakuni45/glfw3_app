@@ -7,7 +7,7 @@
 			・select_id は、ボタンが押される度にインクリメントされる。 @n
 			・角がラウンドした四角、又は、円が選択可能。（円の場合、幅と高さを同じにする）
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2019, 2024 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2019, 2025 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/RX/blob/master/LICENSE
 */
@@ -213,8 +213,11 @@ namespace gui {
 				}
 				break;
 			case STYLE::ROUND_SHADOW:
+				{
 
 
+
+				}
 				break;
 			}
 

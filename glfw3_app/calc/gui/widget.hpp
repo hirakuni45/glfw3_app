@@ -3,14 +3,16 @@
 /*!	@file
 	@brief	Widget クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2019, 2022 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2019, 2024 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/RX/blob/master/LICENSE
 */
 //=====================================================================//
 #include "common/vtx.hpp"
 #include "graphics/color.hpp"
-// #include "common/file_io.hpp"
+#ifndef EMU
+#include "common/file_io.hpp"
+#endif
 
 namespace gui {
 
@@ -219,7 +221,7 @@ namespace gui {
 			parents_(nullptr), next_(nullptr),
 			location_(loc), title_(title), mobj_(nullptr),
 			base_color_(graphics::def_color::White), font_color_(graphics::def_color::White),
-			state_(STATE::DISABLE), focus_(false), touch_(false),
+			state_(STATE::ENABLE), focus_(false), touch_(false),
 			touch_state_(fexp), update_(false),
 			exec_request_(0), layer_(0)
 		{ } 
@@ -296,8 +298,9 @@ namespace gui {
 			@return 成功なら「true」
 		*/
 		//-----------------------------------------------------------------//
-//		virtual bool save(utils::file_io& fio) { return false; }
-
+#ifndef EMU
+		virtual bool save(utils::file_io& fio) { return false; }
+#endif
 
 		//-----------------------------------------------------------------//
 		/*!
@@ -306,8 +309,9 @@ namespace gui {
 			@return 成功なら「true」
 		*/
 		//-----------------------------------------------------------------//
-//		virtual bool load(utils::file_io& fio) { return false; }
-
+#ifndef EMU
+		virtual bool load(utils::file_io& fio) { return false; }
+#endif
 
 		//-----------------------------------------------------------------//
 		/*!
@@ -491,9 +495,17 @@ namespace gui {
 		/*!
 			@brief	レイヤーの設定
 			@param[in]	layer	レイヤー
+			@param[in]	ena		レイヤーをリセットする場合「false」
 		*/
 		//-----------------------------------------------------------------//
-		void set_layer(LAYER layer) noexcept { layer_ = 1 << static_cast<uint8_t>(layer); }
+		void set_layer(LAYER layer, bool ena = true) noexcept
+		{
+			if(ena) {
+				layer_ |= 1 << static_cast<uint8_t>(layer);
+			} else {
+				layer_ &= ~(1 << static_cast<uint8_t>(layer));
+			}
+		}
 
 
 		//-----------------------------------------------------------------//

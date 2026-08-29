@@ -28,11 +28,14 @@ namespace gui {
 
 		typedef spinboxt value_type;
 
-		// 横幅を三等分した領域
+		static constexpr uint8_t HOLD_TIME = 60 * 3;	///< 保持時間３秒（最大２５５フレーム）
+
+		// 横幅を三等分した領域型
 		enum class TOUCH_AREA : uint8_t {
 			LEFT,		///< 左側領域
 			CENTER,		///< 中心領域
 			RIGHT,		///< 右側領域
+			C_HOLD,		///< 中心領域保持
 		};
 
 		typedef std::function<void(TOUCH_AREA, uint16_t pos, uint16_t num)> SELECT_FUNC_TYPE;	///< 選択関数型
@@ -43,23 +46,27 @@ namespace gui {
 		TOUCH_AREA			area_;
 		vtx::spos			item_size_;
 		char				sch_;
+		uint8_t				hold_cnt_;
 		uint16_t			num_;
 		uint16_t			select_pos_;
+		uint32_t			count_;
 
 	public:
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	コンストラクター（整数版）
+			@brief	コンストラクター
 			@param[in]	loc		ロケーション
 			@param[in]	str		アイテム文字列
 			@param[in]	sch		セパレート・キャラクタを指定する場合
 		*/
 		//-----------------------------------------------------------------//
-		spinboxt(const vtx::srect& loc, const char* str, char sch = ',') noexcept :
-			widget(loc, str), select_func_(),
-			area_(TOUCH_AREA::CENTER),
+		spinboxt(const vtx::srect& loc, const char* str = nullptr, char sch = ',') noexcept :
+			widget(loc, str),
+			select_func_(), area_(TOUCH_AREA::CENTER),
 			item_size_(0),
-			sch_(sch), num_(utils::str::get_words(str, sch_)), select_pos_(0)
+			sch_(sch), hold_cnt_(0),
+			num_(utils::str::get_words(str, sch_)), select_pos_(0),
+			count_(0)
 		{
 			if(get_location().size.y <= 0) {
 				at_location().size.y = DEF_SPINBOXT_HEIGHT;
@@ -116,15 +123,40 @@ namespace gui {
 		void update_touch(const vtx::spos& pos, uint16_t num) noexcept override
 		{
 			update_touch_def(pos, num);
+			bool hold = false;
+			bool negative = false;
+			if(get_touch_state().level_) {
+				if(hold_cnt_ < HOLD_TIME) {
+					++hold_cnt_;
+				} else {
+					hold = true;
+				}
+			} else {
+				hold_cnt_ = 0;
+			}
 			if(get_touch_state().negative_) {
-				set_exec_request();
+				negative = true;
+			}
+			if(hold || negative) {
 				auto pos = get_touch_state().relative_.x;
 				if(pos <= (get_location().size.x / 3)) {
-					area_ = TOUCH_AREA::LEFT;
+					if(negative) {
+						set_exec_request();
+						area_ = TOUCH_AREA::LEFT;
+					}
 				} else if((get_location().size.x * 2 / 3) <= pos) {
-					area_ = TOUCH_AREA::RIGHT;
+					if(negative) {
+						set_exec_request();
+						area_ = TOUCH_AREA::RIGHT;
+					}
 				} else {
-					area_ = TOUCH_AREA::CENTER;
+					if(hold) {
+						set_exec_request();
+						area_ = TOUCH_AREA::C_HOLD;
+					} else if(negative) {
+						set_exec_request();
+						area_ = TOUCH_AREA::CENTER;
+					}
 				}
 			}
 		}

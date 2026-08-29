@@ -31,12 +31,12 @@ namespace gui {
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		enum class SCROLL : uint8_t {
 			AUTO,	///< 自動スクロール
-			DRAG,	///< ドラッグ制御
+			DRAG,	///< ドラッグ制御（工事中）
 		};
 
 	private:
 
-		static constexpr uint16_t	SCROLL_SPEED_FRAME = 3;		///< 標準スクロール速度
+		static constexpr uint16_t	SCROLL_SPEED_FRAME = 3;		///< 標準スクロール速度（フレーム／ピクセル）
 		static constexpr uint16_t	SCROLL_WAIT_FRAME = 60 * 6;	///< 標準ホールド時間
 
 		SCROLL		scroll_;

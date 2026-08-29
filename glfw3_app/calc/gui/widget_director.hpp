@@ -3,7 +3,7 @@
 /*!	@file
 	@brief	Widget ディレクター
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2019, 2024 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2019, 2025 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/RX/blob/master/LICENSE
 */
@@ -27,9 +27,13 @@
 #include "gui/toggle.hpp"
 #include "gui/progress.hpp"
 #include "gui/closebox.hpp"
-// #include "gui/filer.hpp"
+#ifndef EMU
+#include "gui/filer.hpp"
+#endif
 #include "gui/key_asc.hpp"
 #include "gui/key_10.hpp"
+
+#include "common/fixed_stack.hpp"
 
 namespace gui {
 
@@ -39,9 +43,10 @@ namespace gui {
 		@param[in]	RDR		レンダークラス
 		@param[in]	TOUCH	タッチクラス
 		@param[in]	WNUM	widget の最大管理数
+		@param[in]	DLVL	ダイアログ階層レベル
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-	template <class RDR, class TOUCH, uint32_t WNUM>
+	template <class RDR, class TOUCH, uint32_t WNUM, uint32_t DLVL = 4>
 	struct widget_director {
 
 		struct widget_t {
@@ -73,10 +78,14 @@ namespace gui {
 
 		widget*		current_;
 
+		uint8_t		current_layer_;
+
+		typedef utils::fixed_stack<dialog*, DLVL> DIALOG_PAD;
+		DIALOG_PAD	dialog_pad_;
 
 		// ipass 自分を含めない場合「false」
 		// 「子」のリストを作成
-		uint32_t create_childs_(widget* w, widget_t** list, uint32_t max, bool ipass)
+		uint32_t create_childs_(widget* w, widget_t** list, uint32_t max, bool ipass) noexcept
 		{
 			uint16_t idx = 0;
 			for(auto& t : widgets_) {
@@ -97,7 +106,7 @@ namespace gui {
 
 		// 領域に含まれる widget に描画を設定
 		// return: 描画数（widget 単位）
-		uint32_t redraw_overlap_widget_(widget* area)
+		uint32_t redraw_overlap_widget_(widget* area) noexcept
 		{
 			uint32_t cnt = 0;
 			for(auto& t : widgets_) {
@@ -123,7 +132,9 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		widget_director(RDR& rdr, TOUCH& touch) noexcept :
 			rdr_(rdr), touch_(touch), widgets_(),
-			back_color_(graphics::def_color::Black), current_(nullptr)
+			back_color_(graphics::def_color::Black), current_(nullptr),
+			current_layer_(1),
+			dialog_pad_()
 		{ }
 
 
@@ -233,31 +244,25 @@ namespace gui {
 		//-----------------------------------------------------------------//
 		/*!
 			@brief	該当するレイヤーを許可、不許可
-			@param[in]	bits	レイヤービット
-			@param[in]	ena		不許可の場合「false」
-		*/
-		//-----------------------------------------------------------------//
-		void enable(uint8_t bits, bool ena = true) noexcept
-		{
-			for(auto& t : widgets_) {
-				if(t.w_ == nullptr) continue;
-				if((t.w_->get_layer_bits() & bits) != 0) {
-					t.w_->enable(ena);
-				}
-			}
-		}
-
-
-		//-----------------------------------------------------------------//
-		/*!
-			@brief	該当するレイヤーを許可、不許可
 			@param[in]	layer	レイヤー
 			@param[in]	ena		不許可の場合「false」
 		*/
 		//-----------------------------------------------------------------//
 		void enable(widget::LAYER layer, bool ena = true) noexcept
 		{
-			enable(1 << static_cast<uint8_t>(layer), ena);
+			auto back = current_layer_;
+			if(ena) {
+				current_layer_ |= 1 << static_cast<uint8_t>(layer);
+			} else {
+				current_layer_ &= ~(1 << static_cast<uint8_t>(layer));
+			}
+			uint8_t bits = ~back & current_layer_;
+			for(auto& t : widgets_) {
+				if(t.w_ == nullptr) continue;
+				if((t.w_->get_layer_bits() & bits) != 0) {
+					t.w_->set_update();
+				}
+			}
 		}
 
 
@@ -307,6 +312,7 @@ namespace gui {
 				const auto& tp = touch_.get_touch_pos(0);
 				for(auto& t : widgets_) {
 					if(t.w_ == nullptr) continue;
+					if((t.w_->get_layer_bits() & current_layer_) == 0) continue;
 					if(!t.init_) {  // 初期化プロセス
 						t.w_->init();
 						t.init_ = true;
@@ -339,6 +345,7 @@ namespace gui {
 
 			for(auto& t : widgets_) {
 				if(t.w_ == nullptr) continue;
+				if((t.w_->get_layer_bits() & current_layer_) == 0) continue;
 				if(t.w_->get_state() == widget::STATE::ENABLE) {
 					const auto& ts = t.w_->get_touch_state();
 					if(ts.negative_ || t.exec_request_ != t.w_->get_exec_request()) {
@@ -376,6 +383,7 @@ namespace gui {
 			uint32_t dc = 0;
 			for(auto& t : widgets_) {
 				if(t.w_ == nullptr) continue;
+				if((t.w_->get_layer_bits() & current_layer_) == 0) continue;
 				if(t.w_->get_state() == widget::STATE::DISABLE) continue;
 				bool draw = false;
 				if(t.draw_) {
@@ -504,7 +512,7 @@ namespace gui {
 						w->draw(rdr_);
 					}
 					break;
-#if 0
+#ifndef EMU
 				case widget::ID::FILER:
 					{
 						auto* w = dynamic_cast<filer*>(t.w_);
