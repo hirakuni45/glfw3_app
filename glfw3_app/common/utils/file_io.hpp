@@ -5,7 +5,7 @@
 			文字列のコード変換など @n
 			WIN32 に依存する実装は、追い出してある（device.cpp）を参照。
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -371,7 +371,7 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		bool eof() const {
-			if(fp_) {
+			if(fp_ != nullptr) {
 				if(feof(fp_)) return true;
 				else return false;
 			} else {
@@ -388,7 +388,7 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		bool error() const {
-			if(fp_) {
+			if(fp_ != nullptr) {
 				if(ferror(fp_)) return true;
 				else return false;
 			} else {
@@ -403,7 +403,7 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		void reset_error() {
-			if(fp_) {
+			if(fp_ != nullptr) {
 				clearerr(fp_);
 			}
 		}
@@ -416,7 +416,7 @@ namespace utils {
 		*/
 		//-----------------------------------------------------------------//
 		size_t tell() const {
-			if(fp_) {
+			if(fp_ != nullptr) {
 				return ftell(fp_);
 			} else {
 				return fpos_;
@@ -432,10 +432,20 @@ namespace utils {
 			@return	正常なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool seek(size_t offset, SEEK stp) {
-			if(fp_) {
-				if(fseek(fp_, offset, static_cast<int>(stp)) == 0) return true;
-				else return false;
+		bool seek(size_t offset, SEEK stp)
+		{
+			if(fp_ != nullptr) {
+				int ofs = 0;
+				if(stp == SEEK::END) {
+					ofs = -static_cast<int>(offset);
+				} else {
+					ofs = static_cast<int>(offset);
+				}
+				if(fseek(fp_, ofs, static_cast<int>(stp)) == 0) {
+					return true;
+				} else {
+					return false;
+				}
 			} else {
 				size_t pos = fpos_;
 				switch(stp) {
@@ -446,7 +456,7 @@ namespace utils {
 					pos += offset;
 					break;
 				case SEEK::END:
-					pos = size_ + offset;
+					pos = size_ - offset;
 					break;
 				default:
 					return false;
