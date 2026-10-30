@@ -428,27 +428,21 @@ namespace utils {
 		/*!
 			@brief	ファイルの位置を変更する
 			@param[in]	offset	オフセット
-			@param[in]	stp	シーク・タイプ
+			@param[in]	org		開始位置番号
 			@return	正常なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool seek(size_t offset, SEEK stp)
+		bool seek(long offset, SEEK org)
 		{
 			if(fp_ != nullptr) {
-				int ofs = 0;
-				if(stp == SEEK::END) {
-					ofs = -static_cast<int>(offset);
-				} else {
-					ofs = static_cast<int>(offset);
-				}
-				if(fseek(fp_, ofs, static_cast<int>(stp)) == 0) {
+				if(fseek(fp_, offset, static_cast<int>(org)) == 0) {
 					return true;
 				} else {
 					return false;
 				}
 			} else {
-				size_t pos = fpos_;
-				switch(stp) {
+				long pos = static_cast<long>(fpos_);
+				switch(org) {
 				case SEEK::SET:
 					pos = offset;
 					break;
@@ -456,21 +450,20 @@ namespace utils {
 					pos += offset;
 					break;
 				case SEEK::END:
-					pos = size_ - offset;
+					pos = static_cast<long>(size_) + offset;
 					break;
 				default:
 					return false;
 					break;
 				}
-				if(pos <= size_) {
-					fpos_ = pos;
+				if(pos >= 0 && pos <= static_cast<long>(size_)) {
+					fpos_ = static_cast<size_t>(pos);
 					return true;
 				} else {
 					return false;
 				}
 			}
 		}
-		bool seek(SEEK stp, size_t offset) { return seek(offset, stp); }
 
 
 		//-----------------------------------------------------------------//

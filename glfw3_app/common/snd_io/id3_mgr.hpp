@@ -179,13 +179,13 @@ namespace sound {
 		utils::format("%02X, ") % static_cast<uint16_t>(tmp[i]);
 	}
 	utils::format("\n");
-	fin.seek(utils::file_io::SEEK::SET, org);
+	fin.seek(org, utils::file_io::SEEK::SET);
 }
 #endif
 			tag_.at_apic().ofs_ = org;
 			tag_.at_apic().len_ = len;
 // utils::format("ofs: %d, len: %d\n") % tag_.get_apic().ofs_ % tag_.get_apic().len_;
-			fin.seek(utils::file_io::SEEK::CUR, len);
+			fin.seek(len, utils::file_io::SEEK::CUR);
 			return ret;
 		}
 
@@ -243,7 +243,7 @@ namespace sound {
 				}
 				dst[len] = 0;
 			} else {
-				fin.seek(utils::file_io::SEEK::CUR, len);
+				fin.seek(len, utils::file_io::SEEK::CUR);
 				return false;
 			}
 
@@ -395,7 +395,7 @@ namespace sound {
 
 		bool parse_v1_(utils::file_io& fin) noexcept
 		{
-			if(!fin.seek(utils::file_io::SEEK::END, 128)) {
+			if(!fin.seek(-128, utils::file_io::SEEK::END)) {
 				return false;
 			}
 
@@ -460,23 +460,23 @@ namespace sound {
 
 			char tmp[10];
 			if(fin.read(tmp, 10) != 10) {
-				fin.seek(utils::file_io::SEEK::SET, org);
+				fin.seek(org, utils::file_io::SEEK::SET);
 				return false;
 			}
 			if(strncmp(tmp, "ID3", 3) != 0) {
-				fin.seek(utils::file_io::SEEK::SET, org);
+				fin.seek(org, utils::file_io::SEEK::SET);
 				return false;
 			}
 //			ver = get16_(&tmp[3]);
 //			flag = static_cast<uint8_t>(tmp[5]);
 			auto size = get_size_syncsafe_(&tmp[6]);
 
-			if(!fin.seek(utils::file_io::SEEK::SET, org + 10 + size)) {
-				fin.seek(utils::file_io::SEEK::SET, org);
+			if(!fin.seek(org + 10 + size, utils::file_io::SEEK::SET)) {
+				fin.seek(org, utils::file_io::SEEK::SET);
 				return false;
 			}
 
-			fin.seek(utils::file_io::SEEK::SET, org);
+			fin.seek(org, utils::file_io::SEEK::SET);
 			return true;
 		}
 
@@ -499,7 +499,7 @@ namespace sound {
 			org_pos_ = fin.tell();
 			char tmp[10];
 			if(fin.read(tmp, 10) != 10) {
-				fin.seek(utils::file_io::SEEK::SET, org_pos_);
+				fin.seek(org_pos_, utils::file_io::SEEK::SET);
 				std::cerr << "ID3 Parse read 10 error..." << std::endl;
 				return false;  // read error...
 			}
@@ -508,7 +508,7 @@ namespace sound {
 				// 無い場合ファイルの終端にV1があるかを検査
 				auto ret = parse_v1_(fin);
 				id3v1_ = ret;  // ID3 タグがあるのに、パースに失敗した場合「false」となる
-				fin.seek(utils::file_io::SEEK::SET, org_pos_);
+				fin.seek(org_pos_, utils::file_io::SEEK::SET);
 				return true;  // タグが何も無い場合でも、「true」で終わる。
 			}
 
@@ -525,7 +525,7 @@ namespace sound {
 
 			if(flag_ & 0b01000000) {  // EXT header
 				if(fin.read(tmp, 4) != 4) {
-					fin.seek(utils::file_io::SEEK::SET, org_pos_);
+					fin.seek(org_pos_, utils::file_io::SEEK::SET);
 					return false;
 				}
 				uint32_t size;
@@ -536,7 +536,7 @@ namespace sound {
 //					size = get_size_32_(&tmp[4]);
 					size = get_size_32_(tmp);
 				}
-				fin.seek(utils::file_io::SEEK::CUR, size - 4);
+				fin.seek(size - 4, utils::file_io::SEEK::CUR);
 			}
 
 			while(fin.tell() < (org + size_)) {
@@ -552,7 +552,7 @@ namespace sound {
 				}
 			}
 
-			if(!fin.seek(utils::file_io::SEEK::SET, org + size_)) {
+			if(!fin.seek(org + size_, utils::file_io::SEEK::SET)) {
 				return false;
 			}
 
