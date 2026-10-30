@@ -304,7 +304,8 @@ namespace al {
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const std::string& filename, const std::string& opt = "") {
+		bool load(const std::string& filename, const std::string& opt = "")
+		{
 			bool f = false;
 			utils::file_io fin;
 			if(fin.open(filename, "rb")) {

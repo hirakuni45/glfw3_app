@@ -4,7 +4,7 @@
 	@brief	MP3/ID3 タグ・デコード・クラス @n
 			※元は、RX マイコン用の実装
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2018, 2020 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2018, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/RX/blob/master/LICENSE
 */
@@ -53,7 +53,7 @@ namespace sound {
 
 		tag_t		tag_;
 
-		static ID scan_id_(char* id) noexcept
+		static ID scan_id_(const char* id) noexcept
 		{
 			if(strncmp(id, "TIT2", 4) == 0) return ID::TIT2;
 			if(strncmp(id, "TT2", 3) == 0) return ID::TIT2;
@@ -120,6 +120,7 @@ namespace sound {
 
 		bool set_apic_(utils::file_io& fin, uint32_t len, bool v2_3) noexcept
 		{
+			// テキストエンコーディング: 1バイト（0x00: ISO-8859-1, 0x01: UTF-16, 0x02: UTF-16BE, 0x03: UTF-8）
 			uint8_t code;
 			if(fin.read(&code, 1) != 1) {
 				return false;
@@ -127,6 +128,7 @@ namespace sound {
 			len--;
 
 			if(v2_3) {
+				// MIMEタイプ: 文字列（例: image/jpeg）。終端のNULL文字を含む。
 				char tmp[64];
 				if(!get_text64_(fin, tmp, len)) {
 					return false;
@@ -145,6 +147,7 @@ namespace sound {
 				} else {
 					return false;
 				}
+				// 画像タイプ: 1バイト（0x03: 表面カバーが一般的）
 				if(fin.read(&tag_.at_apic().typ_, 1) != 1) {
 					return false;
 				}
@@ -161,13 +164,27 @@ namespace sound {
 				len--;
 // utils::format("APIC V2.2: '%s'\n") % tag_.get_apic().ext_;
 			}
+			// 説明文: 文字列（エンコーディングに従う）。終端のNULL文字を含む。
 			auto ret = skip_text_(code, fin, len);
 			if(!ret) {
 				utils::format("APIC ID3 skip text error\n");
 			}
-			tag_.at_apic().ofs_ = fin.tell();
+			auto org = fin.tell();
+//			utils::format("ofs: %d, len: %d\n") % static_cast<int>(org) % len;
+#if 0
+{
+	uint8_t tmp[16];
+	fin.read(tmp, 16);
+	for(int i = 0; i < 16; ++i) {
+		utils::format("%02X, ") % static_cast<uint16_t>(tmp[i]);
+	}
+	utils::format("\n");
+	fin.seek(utils::file_io::SEEK::SET, org);
+}
+#endif
+			tag_.at_apic().ofs_ = org;
 			tag_.at_apic().len_ = len;
-// utils::format("ofs: %d, len: %d\n") % fin.tell() % len;
+// utils::format("ofs: %d, len: %d\n") % tag_.get_apic().ofs_ % tag_.get_apic().len_;
 			fin.seek(utils::file_io::SEEK::CUR, len);
 			return ret;
 		}
@@ -365,7 +382,6 @@ namespace sound {
 			if(!check_id_(tmp[2])) return false;
 
 			auto size = get_size_24_(&tmp[3]);
-
 			id = scan_id_(&tmp[0]);
 
 //			utils::format("ID: %c%c%c, ") % tmp[0] % tmp[1] % tmp[2];
@@ -384,23 +400,39 @@ namespace sound {
 			}
 
 			char tmp[128];
-			if(fin.read(tmp, 128) != 128) {
+			auto pos = fin.read(tmp, 128);
+			if(pos != 128) {
 				return false;
 			}
 			if(strncmp(tmp, "TAG", 3) != 0) {
+				// 終端にも何も無い場合
 				return false;
 			}
 
 			tag_.clear();
 
-			tag_.at_album() = &tmp[63];
-			tag_.at_title() = &tmp[3];
-			tag_.at_artist() = &tmp[33];
+			char tag[30+1];
+			tag[30] = 0;
+			strncpy(tag, &tmp[63], 30);
+			std::string s;
+			utils::sjis_to_utf8(tag, s);
+			tag_.at_album() = s;
 
-			tag_.at_comment() = &tmp[97];
+			strncpy(tag, &tmp[3], 30);
+			utils::sjis_to_utf8(tag, s);
+			tag_.at_title() = s;
 
-			tmp[93+4] = 0;
-			tag_.at_date() = &tmp[93];
+			strncpy(tag, &tmp[33], 30);
+			utils::sjis_to_utf8(tag, s);
+			tag_.at_artist() = s;
+
+			strncpy(tag, &tmp[97], 30);
+			utils::sjis_to_utf8(tag, s);
+			tag_.at_comment() = s;
+
+			tag[4] = 0;
+			strncpy(tag, &tmp[93], 4);
+			tag_.at_date() = tag;
 
 			return true;
 		}
@@ -468,20 +500,24 @@ namespace sound {
 			char tmp[10];
 			if(fin.read(tmp, 10) != 10) {
 				fin.seek(utils::file_io::SEEK::SET, org_pos_);
-				return false;
+				std::cerr << "ID3 Parse read 10 error..." << std::endl;
+				return false;  // read error...
 			}
-			if(strncmp(tmp, "ID3", 3) != 0) {
+
+			if(strncmp(tmp, "ID3", 3) != 0) {  // 先頭に ID3 があるか検査
+				// 無い場合ファイルの終端にV1があるかを検査
 				auto ret = parse_v1_(fin);
+				id3v1_ = ret;  // ID3 タグがあるのに、パースに失敗した場合「false」となる
 				fin.seek(utils::file_io::SEEK::SET, org_pos_);
-				if(ret) id3v1_ = true;
-				return ret;
+				return true;  // タグが何も無い場合でも、「true」で終わる。
 			}
+
+			// 以下、V2、V3 バージョンタグ～
 			tag_.clear();
 			uint32_t org = fin.tell();
 			ver_ = get16_(&tmp[3]);
 			flag_ = static_cast<uint8_t>(tmp[5]);
 			size_ = get_size_syncsafe_(&tmp[6]);
-
 ///			utils::format("FS: %d\n") % fin.get_file_size();
 
 ///			utils::format("ID3v2: Ver: %04X, Flag: %02X (%d)\n")

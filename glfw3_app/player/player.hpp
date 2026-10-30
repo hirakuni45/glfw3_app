@@ -90,7 +90,6 @@ namespace app {
 		void sound_play_(const std::string& file)
 		{
 			al::sound& sound = director_.at().sound_;
-
 			auto path = utils::get_file_path(file);
 			if(!sound.play_stream(path, utils::get_file_name(file))) {
 				std::string s = "Can't open input file:  " + path + '/' + file;
@@ -161,7 +160,12 @@ namespace app {
 			if(!fin.open(file, "rb")) {
 				return false;
 			}
-			fin.seek(utils::file_io::SEEK::SET, apic.ofs_);
+
+			if(!fin.seek(apic.ofs_, utils::file_io::SEEK::SET)) {
+				std::cerr << "SEEK error: " << apic.ofs_ << std::endl;
+				return false;
+			}
+
 			bool ret = imgs.load(fin, apic.ext_);
 			if(ret) {
 				img::shared_img sig = imgs.get_image();
@@ -235,7 +239,7 @@ namespace app {
 				filer_ = wd.add_widget<widget_filer>(wp, wp_);
 				filer_->enable(false);
 				filer_->at_local_param().select_file_func_ = [this](const std::string& file) {
-				   	sound_play_(file);
+					sound_play_(file);
 				};
 			}
 
@@ -299,7 +303,7 @@ namespace app {
 				if(wd.at_img_files().load(curp + "/res/slider_handle.png")) {
 					wp_.hand_image_ = wd.at_img_files().get_image().get();
 				}
-   				volume_ = wd.add_widget<widget_slider>(wp, wp_);
+				volume_ = wd.add_widget<widget_slider>(wp, wp_);
 				volume_->at_local_param().select_func_ = [this](float pos) {
 					// ストリームのゲイン(volume)を設定
 					al::sound& sound = director_.at().sound_;
@@ -312,11 +316,11 @@ namespace app {
 				if(wd.at_img_files().load(curp + "/res/piano.png")) {
 					wp_.image_ = wd.at_img_files().get_image().get();
 				}
-   				vol_min_img_ = wd.add_widget<widget_image>(wp, wp_);
+				vol_min_img_ = wd.add_widget<widget_image>(wp, wp_);
 				if(wd.at_img_files().load(curp + "/res/forte.png")) {
 					wp_.image_ = wd.at_img_files().get_image().get();
 				}
-   				vol_max_img_ = wd.add_widget<widget_image>(wp, wp_);
+				vol_max_img_ = wd.add_widget<widget_image>(wp, wp_);
 			}
 			{
 				widget::param wp(vtx::irect(0, 0, 120, 30), 0);
@@ -331,7 +335,7 @@ namespace app {
 				short h = 150;
 				widget::param wp(vtx::irect((scs.x - w) / 2, (scs.y - h) / 2, w, h));
 				widget_dialog::param wp_;
-   				wp_.style_ = widget_dialog::style::OK;
+				wp_.style_ = widget_dialog::style::OK;
 				error_dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
 				const utils::strings& ss = wd.get_error_report();
 				if(ss.empty()) {

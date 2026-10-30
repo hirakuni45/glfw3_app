@@ -266,12 +266,12 @@ namespace img {
 		//-----------------------------------------------------------------//
 		bool probe(utils::file_io& fin) override
 		{
-			unsigned char sig[2];
+			uint8_t sig[2];
 			long pos = fin.tell();
 			size_t l = fin.read(sig, 1, 2);
 			fin.seek(pos, utils::file_io::SEEK::SET);
 			if(l == 2) {
-				if(sig[0] == 0xff && sig[1] == 0xd8) {
+				if(sig[0] == 0xff && sig[1] == 0xD8) {
 					return true;
 				}
 			}

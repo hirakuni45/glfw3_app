@@ -3,7 +3,7 @@
 /*!	@file
 	@brief	MP3 ファイルを扱うクラス（ヘッダー）
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
@@ -11,6 +11,7 @@
 #include <string>
 #include <cmath>
 #include <mad.h>
+#include <format>
 #include "i_snd_io.hpp"
 #include "snd_io/pcm.hpp"
 #include "snd_io/id3_mgr.hpp"
@@ -303,9 +304,10 @@ namespace al {
 
 			sound::id3_mgr id3;
 			if(!id3.parse(fin)) {
+				// ID3 が無い場合、ファイル位置を戻して、MP3 のフレームを解析する
 				fin.seek(pos, utils::file_io::SEEK::SET);
-				return false;
 			}
+
 			auto ser = tag_.serial_;
 			tag_ = id3.get_tag();
 			tag_.serial_ = ser + 1;
@@ -430,7 +432,7 @@ namespace al {
 				++frame_cnt;
 			}
 
-// std::cout << boost::format("Frame: %d\n") % count;
+// std::cout << std::format("Frame: {}", count) << std::endl;
 // std::cout << boost::format("Recoverable frame level error: %d\n") % mp3info.recover_frame_error;
 // std::cout << boost::format("Unrecoverable frame level error: %d\n") % mp3info.unrecover_frame_error;
 
@@ -519,7 +521,8 @@ namespace al {
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool info(utils::file_io& fin, audio_info& info, info_state st = info_state::all) override {
+		bool info(utils::file_io& fin, audio_info& info, info_state st = info_state::all) override
+		{
 			return analize_frame_(fin, info, mp3_info_, st);
 		}
 
@@ -545,6 +548,7 @@ namespace al {
 		bool load(utils::file_io& fin, const std::string& opt = "") override
 		{
 			audio_info info;
+
 			mp3_info_.reset();
 			bool f = analize_frame_(fin, info, mp3_info_, info_state::all);
 			if(f) {
@@ -638,10 +642,12 @@ namespace al {
 					output_all_ = static_cast<int>(inf.samples);
 					output_buffer_->create(inf.frequency, output_max_);
 					output_buffer_->zero();
-//					std::cout << boost::format("Stream Sampling: %d [Hz]\n") % inf.frequency;
-//					std::cout << boost::format("Stream Samples:  %d\n") % inf.samples;
+//					std::cout << std::format("Stream Sampling: %d [Hz]\n") % inf.frequency;
+//					std::cout << std::format("Stream Samples:  %d\n") % inf.samples;
 					return true;
 				}
+			} else {
+				std::cerr << "File info false..." << std::endl;
 			}
 			return false;
 		}
