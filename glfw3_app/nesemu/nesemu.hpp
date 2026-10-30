@@ -13,8 +13,10 @@
 			「←」： LEFT-DIR @n
 			「F1」： Filer @n
 			「F4」： Log Terminal @n
-			Copyright 2017 Kunihito Hiramatsu
 	@author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2018 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/RX/blob/master/LICENSE
 */
 //=====================================================================//
 #include "main.hpp"
@@ -92,7 +94,7 @@ namespace app {
 
 		void pad_()
 		{
-	   		gl::core& core = gl::core::get_instance();
+			gl::core& core = gl::core::get_instance();
 
 			const gl::device& dev = core.get_device();
 
@@ -131,28 +133,28 @@ namespace app {
 			}
 
 			if(dev.get_level(gl::device::key::LEFT)) {
-   		 		inp_[0].data |= INP_PAD_LEFT;
+				inp_[0].data |= INP_PAD_LEFT;
 			}
 			if(dev.get_level(gl::device::key::GAME_LEFT)) {
-   		 		inp_[0].data |= INP_PAD_LEFT;
+				inp_[0].data |= INP_PAD_LEFT;
 			}
 			if(dev.get_level(gl::device::key::RIGHT)) {
-   		 		inp_[0].data |= INP_PAD_RIGHT;
+				inp_[0].data |= INP_PAD_RIGHT;
 			}
 			if(dev.get_level(gl::device::key::GAME_RIGHT)) {
-   		 		inp_[0].data |= INP_PAD_RIGHT;
+				inp_[0].data |= INP_PAD_RIGHT;
 			}
 			if(dev.get_level(gl::device::key::UP)) {
-   		 		inp_[0].data |= INP_PAD_UP;
+				inp_[0].data |= INP_PAD_UP;
 			}
 			if(dev.get_level(gl::device::key::GAME_UP)) {
-   		 		inp_[0].data |= INP_PAD_UP;
+				inp_[0].data |= INP_PAD_UP;
 			}
 			if(dev.get_level(gl::device::key::DOWN)) {
-   		 		inp_[0].data |= INP_PAD_DOWN;
+				inp_[0].data |= INP_PAD_DOWN;
 			}
 			if(dev.get_level(gl::device::key::GAME_DOWN)) {
-   		 		inp_[0].data |= INP_PAD_DOWN;
+				inp_[0].data |= INP_PAD_DOWN;
 			}
 		}
 
@@ -199,7 +201,7 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void initialize()
 		{
-	   		gl::core& core = gl::core::get_instance();
+			gl::core& core = gl::core::get_instance();
 
 			using namespace gui;
 			widget_director& wd = director_.at().widget_director_;
@@ -214,7 +216,7 @@ namespace app {
 				{
 					widget::param wp(vtx::irect(0), terminal_frame_);
 					widget_terminal::param wp_;
-					wp_.enter_func_ = [=] (const std::u32string& inp) {
+					wp_.enter_func_ = [this] (const std::u32string& inp) {
 						auto s = utils::utf32_to_utf8(inp);
 						tools_.command(s);
 					};
@@ -227,7 +229,7 @@ namespace app {
 			{  	// ファイラー
 				widget::param wp(vtx::irect(10, 10, 200, 200));
 				widget_filer::param wp_(core.get_current_path(), "");
-				wp_.select_file_func_ = [=](const std::string& fn) {
+				wp_.select_file_func_ = [this](const std::string& fn) {
 					if(nsfplay_.open(fn)) {
 						nes_file_ = "";
 						nsf_play_ = true;
@@ -272,7 +274,7 @@ namespace app {
 					widget::param wp(vtx::irect(110, 35+40*0, 90, 30), menu_frame_);
 					widget_button::param wp_("Save");
 					state_save_ = wd.add_widget<widget_button>(wp, wp_);
-					state_save_->at_local_param().select_func_ = [=](int id) {
+					state_save_->at_local_param().select_func_ = [this](int id) {
 						state_setslot(get_state_no_());
 						if(state_save() != 0) {
 							dialog_->set_text("Save state error");
@@ -287,7 +289,7 @@ namespace app {
 					widget::param wp(vtx::irect(110, 35+40*1, 90, 30), menu_frame_);
 					widget_button::param wp_("Load");
 					state_load_ = wd.add_widget<widget_button>(wp, wp_);
-					state_load_->at_local_param().select_func_ = [=](int id) {
+					state_load_->at_local_param().select_func_ = [this](int id) {
 						state_setslot(get_state_no_());
 						if(!nes_play_) {
 							dialog_->set_text("Load state error: 'NES file not load'");
@@ -302,7 +304,7 @@ namespace app {
 					widget::param wp(vtx::irect(10, 35+40*2, 90, 30), menu_frame_);
 					widget_button::param wp_("Reset");
 					nes_reset_ = wd.add_widget<widget_button>(wp, wp_);
-					nes_reset_->at_local_param().select_func_ = [=](int id) {
+					nes_reset_->at_local_param().select_func_ = [&](int id) {
 						nes_reset(HARD_RESET);
 					};
 				}

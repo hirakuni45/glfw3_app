@@ -1,9 +1,11 @@
 #pragma once
 //=====================================================================//
 /*! @file
-	@brief  Emulator Tools クラス @n
-			Copyright 2017 Kunihito Hiramatsu
+	@brief  Emulator Tools クラス
 	@author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/RX/blob/master/LICENSE
 */
 //=====================================================================//
 #include "widgets/widget_terminal.hpp"
