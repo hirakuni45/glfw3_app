@@ -208,9 +208,9 @@ namespace app {
 			static const double tbl[time_unit_size_] = {
 				100e-9, 250e-9, 500e-9,   1e-6,
 				2.5e-6,   5e-6,  10e-6,  25e-6,
-				 50e-6, 100e-6, 250e-6, 500e-6,
-				  1e-3, 2.5e-3,   5e-3,  10e-3,
-				 25e-3,  50e-3,  75e-3, 100e-3
+				50e-6, 100e-6, 250e-6, 500e-6,
+				1e-3, 2.5e-3,   5e-3,  10e-3,
+				25e-3,  50e-3,  75e-3, 100e-3
 			};
 			return tbl[idx % time_unit_size_];
 		}
@@ -280,7 +280,7 @@ namespace app {
 					widget::param wp(vtx::irect(10, 30, 80, 40), root_);
 					widget_check::param wp_((boost::format("CH%d") % (ch + 1)).str());
 					ena_ = wd.add_widget<widget_check>(wp, wp_);
-					ena_->at_local_param().select_func_ = [=](bool f) {
+					ena_->at_local_param().select_func_ = [&](bool f) {
 						waves_.at_param(ch).render_ = f;
 					};
 				}
@@ -294,7 +294,7 @@ namespace app {
 					widget_spinbox::param wp_(-20, 0, 20); // grid 数の倍
 					pos_ = wd.add_widget<widget_spinbox>(wp, wp_);
 					pos_->at_local_param().select_func_
-						= [=](widget_spinbox::state st, int before, int newpos) {
+						= [&](widget_spinbox::state st, int before, int newpos) {
 						int wy = share->get_param().rect_.size.y;
 						float a = static_cast<float>(-newpos)
 							/ static_cast<float>(wy * 2 / waves_.get_info().grid_step_);
@@ -306,7 +306,7 @@ namespace app {
 					widget_spinbox::param wp_(0, 0, (get_volt_scale_size_(ch) - 1));
 					scale_ = wd.add_widget<widget_spinbox>(wp, wp_);
 					scale_->at_local_param().select_func_
-						= [=](widget_spinbox::state st, int before, int newpos) {
+						= [&](widget_spinbox::state st, int before, int newpos) {
 						// グリッドに対する電圧表示
 						auto a = get_volt_scale_value_(ch, newpos);
 						static const char* unit[4] = { "A", "V", "V", "KV" };
@@ -325,7 +325,7 @@ namespace app {
 					widget_spinbox::param wp_(0, 0, 100);
 					org_ = wd.add_widget<widget_spinbox>(wp, wp_);
 					org_->at_local_param().select_func_
-						= [=](widget_spinbox::state st, int before, int newpos) {
+						= [&](widget_spinbox::state st, int before, int newpos) {
 						float a = static_cast<float>(-newpos) 
 							/ static_cast<float>(waves_.get_info().grid_step_)
 							* get_volt_scale_value_(ch, scale_->get_select_pos());
@@ -340,7 +340,7 @@ namespace app {
 					widget_spinbox::param wp_(0, 0, 100); // grid 数の倍
 					len_ = wd.add_widget<widget_spinbox>(wp, wp_);
 					len_->at_local_param().select_func_
-						= [=](widget_spinbox::state st, int before, int newpos) {
+						= [&](widget_spinbox::state st, int before, int newpos) {
 						// メジャーに対する電圧、電流表示
 						float a = static_cast<float>(-newpos) 
 							/ static_cast<float>(waves_.get_info().grid_step_)
@@ -521,7 +521,7 @@ namespace app {
 					widget::param wp(vtx::irect(10, 30, 140, 40), root_);
 					widget_check::param wp_("Enable");
 					ena_ = wd.add_widget<widget_check>(wp, wp_);
-					ena_->at_local_param().select_func_ = [=](bool f) {
+					ena_->at_local_param().select_func_ = [this](bool f) {
 						waves_.at_info().time_enable_ = f;
 					};
 				}
@@ -530,7 +530,7 @@ namespace app {
 					widget_spinbox::param wp_(0, 0, 100);
 					org_ = wd.add_widget<widget_spinbox>(wp, wp_);
 					org_->at_local_param().select_func_
-						= [=](widget_spinbox::state st, int before, int newpos) {
+						= [this](widget_spinbox::state st, int before, int newpos) {
 						float t = get_time_unit_(tbp_) * static_cast<float>(newpos)
 							/ waves_.get_info().grid_step_;
 						float a = t / get_time_unit_base_(tbp_);
@@ -542,7 +542,7 @@ namespace app {
 					widget_spinbox::param wp_(0, 0, 100);
 					len_ = wd.add_widget<widget_spinbox>(wp, wp_);
 					len_->at_local_param().select_func_
-						= [=](widget_spinbox::state st, int before, int newpos) {
+						= [this](widget_spinbox::state st, int before, int newpos) {
 						float t = get_time_unit_(tbp_) * static_cast<float>(newpos)
 							/ waves_.get_info().grid_step_;
 						float a = t / get_time_unit_base_(tbp_);
@@ -663,7 +663,7 @@ namespace app {
 					widget_spinbox::param wp_(0, 0, time_unit_size_ - 1);
 					scale_ = wd.add_widget<widget_spinbox>(wp, wp_);
 					scale_->at_local_param().select_func_
-						= [=](widget_spinbox::state st, int before, int newpos) {
+						= [this](widget_spinbox::state st, int before, int newpos) {
 						++id_;
 						float a = get_time_unit_(newpos) / get_time_unit_base_(newpos);
 						return (boost::format("%2.1f %s") % a % get_time_unit_str_(newpos)).str();
@@ -674,7 +674,7 @@ namespace app {
 					widget_spinbox::param wp_(-50, 0, 50);
 					offset_ = wd.add_widget<widget_spinbox>(wp, wp_);
 					offset_->at_local_param().select_func_
-						= [=](widget_spinbox::state st, int before, int newpos) {
+						= [this](widget_spinbox::state st, int before, int newpos) {
 						++id_;
 						float t = get_time_unit_(scale_->get_select_pos()) * newpos;
 						auto un = scale_->get_select_pos();
@@ -686,7 +686,7 @@ namespace app {
 					widget::param wp(vtx::irect(10 + 215, 95, 30, 30), root_);
 					widget_button::param wp_("R");
 					res_ofs_ = wd.add_widget<widget_button>(wp, wp_);
-					res_ofs_->at_local_param().select_func_ = [=](uint32_t id) {
+					res_ofs_->at_local_param().select_func_ = [this](uint32_t id) {
 						++id_;
 						offset_->set_select_pos(0);
 					};
@@ -695,7 +695,7 @@ namespace app {
 					widget::param wp(vtx::irect(10, 140, 140, 40), root_);
 					widget_check::param wp_("Trigger");
 					trg_gate_ = wd.add_widget<widget_check>(wp, wp_);
-					trg_gate_->at_local_param().select_func_ = [=](bool ena) {
+					trg_gate_->at_local_param().select_func_ = [this](bool ena) {
 						++id_;
 					};
 				}
@@ -1199,13 +1199,13 @@ namespace app {
 			{  // 波形描画ビュー 
 				widget::param wp(vtx::irect(0), frame_);
 				widget_view::param wp_;
-				wp_.update_func_ = [=]() {
+				wp_.update_func_ = [this]() {
 					update_view_();
 				};
-				wp_.render_func_ = [=](const vtx::irect& clip) {
+				wp_.render_func_ = [this](const vtx::irect& clip) {
 					render_view_(clip);
 				};
-				wp_.service_func_ = [=]() {
+				wp_.service_func_ = [this]() {
 					service_view_();
 				};
 				core_ = wd.add_widget<widget_view>(wp, wp_);
@@ -1221,7 +1221,7 @@ namespace app {
 				{
 					widget::param wp(vtx::irect(0), terminal_frame_);
 					widget_terminal::param wp_;
-					wp_.enter_func_ = [=](const std::u32string& text) {
+					wp_.enter_func_ = [](const std::u32string& text) {
 						// term_enter_(text);
 					};
 					terminal_core_ = wd.add_widget<widget_terminal>(wp, wp_);
@@ -1247,7 +1247,7 @@ namespace app {
 				widget::param wp(vtx::irect(140, 20, 80, 40), tools_);
 				widget_button::param wp_("Load");
 				load_ = wd.add_widget<widget_button>(wp, wp_);
-				load_->at_local_param().select_func_ = [=](uint32_t id) {
+				load_->at_local_param().select_func_ = [this](uint32_t id) {
 					std::string filter = "波形データ(*.";
 					filter += WAVE_DATA_EXT_;
 					filter += ")\t*.";
@@ -1260,7 +1260,7 @@ namespace app {
 				widget::param wp(vtx::irect(230, 20, 80, 40), tools_);
 				widget_button::param wp_("Save");
 				save_ = wd.add_widget<widget_button>(wp, wp_);
-				save_->at_local_param().select_func_ = [=](uint32_t id) {
+				save_->at_local_param().select_func_ = [this](uint32_t id) {
 					std::string filter = "波形データ(*.";
 					filter += WAVE_DATA_EXT_;
 					filter += ")\t*.";
@@ -1283,7 +1283,7 @@ namespace app {
 				wp_.init_list_.push_back("CH4 ↑");
 				wp_.init_list_.push_back("CH4 ↓");
 				org_trg_ = wd.add_widget<widget_list>(wp, wp_);
-				org_trg_->at_local_param().select_func_ = [=](const std::string& t, uint32_t p) {
+				org_trg_->at_local_param().select_func_ = [this](const std::string& t, uint32_t p) {
 					++meas_id_;
 				};
 			}
@@ -1292,7 +1292,7 @@ namespace app {
 				widget_spinbox::param wp_(0, 50, 100);
 				org_slope_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				org_slope_->at_local_param().select_func_ =
-					[=](widget_spinbox::state st, int before, int newpos) {
+					[this](widget_spinbox::state st, int before, int newpos) {
 					++meas_id_;
 					return (boost::format("%d") % newpos).str();
 				};
@@ -1310,7 +1310,7 @@ namespace app {
 				wp_.init_list_.push_back("CH4 ↑");
 				wp_.init_list_.push_back("CH4 ↓");
 				fin_trg_ = wd.add_widget<widget_list>(wp, wp_);
-				fin_trg_->at_local_param().select_func_ = [=](const std::string& t, uint32_t p) {
+				fin_trg_->at_local_param().select_func_ = [this](const std::string& t, uint32_t p) {
 					++meas_id_;
 				};
 			}
@@ -1319,7 +1319,7 @@ namespace app {
 				widget_spinbox::param wp_(0, 50, 100);
 				fin_slope_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				fin_slope_->at_local_param().select_func_ =
-					[=](widget_spinbox::state st, int before, int newpos) {
+					[this](widget_spinbox::state st, int before, int newpos) {
 					++meas_id_;
 					return (boost::format("%d") % newpos).str();
 				};
@@ -1332,7 +1332,7 @@ namespace app {
 				wp_.init_list_.push_back("CH3");
 				wp_.init_list_.push_back("CH4");
 				time_mesa_ch_ = wd.add_widget<widget_list>(wp, wp_);
-				time_mesa_ch_->at_local_param().select_func_ = [=](const std::string& t,
+				time_mesa_ch_->at_local_param().select_func_ = [this](const std::string& t,
 					uint32_t p) {
 					++meas_id_;
 				};
@@ -1344,7 +1344,7 @@ namespace app {
 				widget_spinbox::param wp_(-size_.x / grid * 4, 0, size_.x / grid * 4);
 				time_delay_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				time_delay_->at_local_param().select_func_ =
-					[=](widget_spinbox::state st, int before, int newpos) {
+					[this](widget_spinbox::state st, int before, int newpos) {
 					auto grid = waves_.get_info().grid_step_;
 					waves_.at_info().delay_pos_ = newpos * grid / 4
 						+ (-time_.offset_->get_select_pos() * grid);
@@ -1390,8 +1390,8 @@ namespace app {
 				wp_.init_list_.push_back("Min");
 				wp_.init_list_.push_back("Average");
 				mesa_type_ = wd.add_widget<widget_list>(wp, wp_);
-				mesa_type_->at_local_param().select_func_ = [=](const std::string& t, uint32_t p) {
-				};
+//				mesa_type_->at_local_param().select_func_ = [this](const std::string& t, uint32_t p) {
+//				};
 			}
 			{  // 計測フィルタ係数
 				widget::param wp(vtx::irect(10 + 150, 20 + 50, 110, 40), tools_);

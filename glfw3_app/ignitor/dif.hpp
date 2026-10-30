@@ -222,7 +222,7 @@ namespace app {
 				wp.pre_group_ = widget::PRE_GROUP::_1;
 				widget_button::param wp_(">");
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
-				exec_->at_local_param().select_func_ = [=](int n) {
+				exec_->at_local_param().select_func_ = [this](int n) {
 					run_(index_);
 				};
 			}

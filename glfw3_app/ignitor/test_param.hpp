@@ -124,7 +124,7 @@ namespace app {
 				widget_spinbox::param wp_(1, 1, 5);
 				retry_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				retry_->at_local_param().select_func_ =
-					[=](widget_spinbox::state st, int before, int newpos) {
+					[](widget_spinbox::state st, int before, int newpos) {
 					return (boost::format("%d") % newpos).str();
 				};
 			}
@@ -133,7 +133,7 @@ namespace app {
 				widget::param wp(vtx::irect(ofsx, ofsy, 90, 40), root);
 				widget_label::param wp_("0", false);
 				wait_ = wd.add_widget<widget_label>(wp, wp_);
-				wait_->at_local_param().select_func_ = [=](const std::string& str) {
+				wait_->at_local_param().select_func_ = [this](const std::string& str) {
 					wait_->set_text(tools::limitf(str, 0.0f, 10.0f, "%3.2f"));
 				};
 			}

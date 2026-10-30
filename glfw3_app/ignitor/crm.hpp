@@ -340,7 +340,7 @@ namespace app {
 				widget::param wp(vtx::irect(d_w - 85, ofsy, 30, 30), root);
 				widget_button::param wp_(">");
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
-				exec_->at_local_param().select_func_ = [=](int n) {
+				exec_->at_local_param().select_func_ = [this](int n) {
 					auto s = make_crm_param_();
 					crdd_id_ = client_.get_mod_status().crdd_id_;
 					crrd_id_ = client_.get_mod_status().crrd_id_;
@@ -356,7 +356,7 @@ namespace app {
 				widget::param wp(vtx::irect(d_w - 45, ofsy, 30, 30), root);
 				widget_check::param wp_;
 				all_ = wd.add_widget<widget_check>(wp, wp_);
-				all_->at_local_param().select_func_ = [=](bool ena) {
+				all_->at_local_param().select_func_ = [this](bool ena) {
 					if(!ena) {
 						tools::set_checks(sw_, false, 14);
 						startup();						
@@ -381,7 +381,7 @@ namespace app {
 				widget::param wp(vtx::irect(ofsx + 180, ofsy + 50, 100, 40), root);
 				widget_button::param wp_("校正");
 				run_refs_ = wd.add_widget<widget_button>(wp, wp_);
-				run_refs_->at_local_param().select_func_ = [=](uint32_t id) {
+				run_refs_->at_local_param().select_func_ = [this](uint32_t id) {
 					auto n = carib_type_->get_select_pos();
 					if(n >= 4) {  // 200mA
 						n = 3;
@@ -456,7 +456,7 @@ namespace app {
 				wp.pre_group_ = widget::PRE_GROUP::_5;
 				widget_button::param wp_("校正ロード");
 				carib_load_ = wd.add_widget<widget_button>(wp, wp_);
-				carib_load_->at_local_param().select_func_ = [=](uint32_t id) {
+				carib_load_->at_local_param().select_func_ = [this](uint32_t id) {
 					std::string filter = "校正データ(*.";
 					filter += CARIB_DATA_EXT_;
 					filter += ")\t*.";
@@ -470,7 +470,7 @@ namespace app {
 				wp.pre_group_ = widget::PRE_GROUP::_5;
 				widget_button::param wp_("校正セーブ");
 				carib_save_ = wd.add_widget<widget_button>(wp, wp_);
-				carib_save_->at_local_param().select_func_ = [=](uint32_t id) {
+				carib_save_->at_local_param().select_func_ = [this](uint32_t id) {
 					std::string filter = "校正データ(*.";
 					filter += CARIB_DATA_EXT_;
 					filter += ")\t*.";

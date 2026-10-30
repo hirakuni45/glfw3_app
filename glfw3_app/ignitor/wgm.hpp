@@ -168,7 +168,7 @@ namespace app {
 				wp_.init_list_.push_back("矩形波");
 				wp_.init_list_.push_back("三角波");
 				mode_ = wd.add_widget<widget_list>(wp, wp_);
-				mode_->at_local_param().select_func_ = [=](const std::string& str, uint32_t pos) {
+				mode_->at_local_param().select_func_ = [this](const std::string& str, uint32_t pos) {
 					if(pos == 0) {
 						duty_->set_stall(false);
 					} else {
@@ -181,7 +181,7 @@ namespace app {
 				wp.pre_group_ = pg;
 				widget_label::param wp_("1", false);
 				freq_ = wd.add_widget<widget_label>(wp, wp_);
-				freq_->at_local_param().select_func_ = [=](const std::string& str) {
+				freq_->at_local_param().select_func_ = [this](const std::string& str) {
 					freq_->set_text(tools::limitf(str, 1.0f, 100.0f, "%1.0f"));
 				};
 				{
@@ -199,7 +199,7 @@ namespace app {
 				wp.pre_group_ = pg;
 				widget_label::param wp_("0", false);
 				volt_ = wd.add_widget<widget_label>(wp, wp_);
-				volt_->at_local_param().select_func_ = [=](const std::string& str) {
+				volt_->at_local_param().select_func_ = [this](const std::string& str) {
 					volt_->set_text(tools::limitf(str, 0.0f, 14.0f, "%2.1f"));
 				};
 				{
@@ -217,7 +217,7 @@ namespace app {
 				wp.pre_group_ = pg;
 				widget_label::param wp_("0.1", false);
 				duty_ = wd.add_widget<widget_label>(wp, wp_);
-				duty_->at_local_param().select_func_ = [=](const std::string& str) {
+				duty_->at_local_param().select_func_ = [this](const std::string& str) {
 					duty_->set_text(tools::limitf(str, 0.1f, 100.0f, "%2.1f"));
 				};
 				{
@@ -244,7 +244,7 @@ namespace app {
 				wp.pre_group_ = pg;
 				widget_label::param wp_("0", false);
 				ivolt_ = wd.add_widget<widget_label>(wp, wp_);
-				ivolt_->at_local_param().select_func_ = [=](const std::string& str) {
+				ivolt_->at_local_param().select_func_ = [this](const std::string& str) {
 					ivolt_->set_text(tools::limitf(str, 0.0f, 14.0f, "%2.1f"));
 				};
 				{
@@ -263,7 +263,7 @@ namespace app {
 				wp.pre_group_ = pg;
 				widget_button::param wp_(">");
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
-				exec_->at_local_param().select_func_ = [=](int n) {
+				exec_->at_local_param().select_func_ = [this](int n) {
 					wgm_t t;
 					uint16_t sw = 0;
 					for(int i = 0; i < 5; ++i) {
@@ -297,7 +297,7 @@ namespace app {
 				wp.pre_group_ = pg;
 				widget_check::param wp_;
 				all_ = wd.add_widget<widget_check>(wp, wp_);
-				all_->at_local_param().select_func_ = [=](bool ena) {
+				all_->at_local_param().select_func_ = [this](bool ena) {
 					if(!ena) {
 						tools::set_checks(sw_, false, 5);
 						startup();

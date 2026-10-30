@@ -297,7 +297,7 @@ namespace app {
 				widget_spinbox::param wp_(1, 1, 1000);
 				csv_idx_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				csv_idx_->at_local_param().select_func_ =
-					[=](widget_spinbox::state st, int before, int newpos) {
+					[this](widget_spinbox::state st, int before, int newpos) {
 					index_ = newpos;
 					ena_ = false;
 					return (boost::format("%d") % newpos).str();
@@ -333,7 +333,7 @@ namespace app {
 					units_.push_back(t);
 				}
 				table_ = wd.add_widget<widget_table>(wpt, wpt_);
-				table_->at_local_param().select_func_ = [=](uint32_t pos, uint32_t id) {
+				table_->at_local_param().select_func_ = [this](uint32_t pos, uint32_t id) {
 					auto path = project_.get_image_path(pos);
 					if(utils::probe_file(path)) {
 						img::img_files imfs;

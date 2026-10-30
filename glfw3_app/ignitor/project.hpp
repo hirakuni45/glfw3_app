@@ -590,7 +590,7 @@ namespace app {
 				wp_.style_ = widget_dialog::style::CANCEL_OK;
 				name_dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
 				name_dialog_->enable(false);
-				name_dialog_->at_local_param().select_func_ = [=](bool ok) {
+				name_dialog_->at_local_param().select_func_ = [this](bool ok) {
 					if(ok) {
 						auto s = proj_name_->get_text();
 						if(s.empty()) {
@@ -637,7 +637,7 @@ namespace app {
 					widget::param wp(vtx::irect(330, 100, 160, 40), name_dialog_);
 					widget_button::param wp_("フォルダ選択");
 					proj_dir_ = wd.add_widget<widget_button>(wp, wp_);
-					proj_dir_->at_local_param().select_func_ = [=](uint32_t) {
+					proj_dir_->at_local_param().select_func_ = [this](uint32_t) {
 						sel_dir_.open("プロジェクト・フォルダ選択", proj_root_->get_text()); 
 					};
 				}

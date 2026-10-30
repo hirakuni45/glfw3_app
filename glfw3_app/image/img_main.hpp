@@ -252,7 +252,7 @@ namespace app {
 				widget::param wp(vtx::irect(110, 20+50*4, 100, 40), crop);
 				widget_button::param wp_("Crop");
 				crop_ = wd.add_widget<widget_button>(wp, wp_);
-				crop_->at_local_param().select_func_ = [=](uint32_t id) {
+				crop_->at_local_param().select_func_ = [this](uint32_t id) {
 					auto src = src_image_.get();
 					if(src == nullptr) return;
 
@@ -424,7 +424,7 @@ namespace app {
 			{ // 画像ファイル表示イメージ
 				widget::param wp(vtx::irect(0, 0, 256, 256), frame_);
 				widget_image::param wp_;
-				wp_.render_func_ = [=](const vtx::irect& clip) {
+				wp_.render_func_ = [this](const vtx::irect& clip) {
 					cursor_render_(clip);
 				};
 				image_ = wd.add_widget<widget_image>(wp, wp_);
@@ -449,7 +449,7 @@ namespace app {
 				widget::param wp(vtx::irect(10, 10+50*1, 100, 40), tools_);
 				widget_button::param wp_("load");
 				load_ = wd.add_widget<widget_button>(wp, wp_);
-				load_->at_local_param().select_func_ = [=](uint32_t id) {
+				load_->at_local_param().select_func_ = [this](uint32_t id) {
 					if(load_ctx_ != nullptr) {
 						bool f = load_ctx_->get_state(gui::widget::state::ENABLE);
 						load_ctx_->enable(!f);
@@ -461,7 +461,7 @@ namespace app {
 				widget::param wp(vtx::irect(10, 10+50*2, 100, 40), tools_);
 				widget_button::param wp_("save");
 				save_ = wd.add_widget<widget_button>(wp, wp_);
-				save_->at_local_param().select_func_ = [=](uint32_t id) {
+				save_->at_local_param().select_func_ = [this](uint32_t id) {
 					if(save_ctx_ != nullptr) {
 						bool f = save_ctx_->get_state(gui::widget::state::ENABLE);
 						save_ctx_->enable(!f);

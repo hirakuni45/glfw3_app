@@ -76,7 +76,7 @@ namespace app {
 		{
 			root_menu_.initialize();
 
-			director_.at().exit_func_ = [=]() {
+			director_.at().exit_func_ = [this]() {
 				if(!root_menu_exit_) {
 					root_menu_.exit();
 					root_menu_exit_ = true;

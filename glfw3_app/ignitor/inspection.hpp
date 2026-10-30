@@ -743,14 +743,14 @@ namespace app {
 				wp_.style_ = widget_dialog::style::OK;
 				dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
 				dialog_->enable(false);
-				dialog_->at_local_param().select_func_ = [=](bool ok) {
+				dialog_->at_local_param().select_func_ = [](bool ok) {
 				};
 			}
 			{	// 共有フレーム（プロパティシート）
 				widget::param wp(vtx::irect(5, 10, d_w - 10, 400), dialog_);
 				widget_sheet::param wp_;
 				sheet_ = wd.add_widget<widget_sheet>(wp, wp_);
-				sheet_->at_local_param().select_func_ = [=](uint32_t newidx, uint32_t id) {
+				sheet_->at_local_param().select_func_ = [this](uint32_t newidx, uint32_t id) {
 					bool c0 = false;
 					bool c1 = false;
 					bool c2 = false;
@@ -852,7 +852,7 @@ namespace app {
 				widget::param wp(vtx::irect(20, 480, 100, 40), dialog_);
 				widget_button::param wp_("ロード");
 				load_file_ = wd.add_widget<widget_button>(wp, wp_);
-				load_file_->at_local_param().select_func_ = [=](bool f) {
+				load_file_->at_local_param().select_func_ = [this](bool f) {
 					std::string filter = "単体テスト(*.";
 					filter += UNIT_EXT_;
 					filter += ")\t*.";
@@ -865,7 +865,7 @@ namespace app {
 				widget::param wp(vtx::irect(130, 480, 100, 40), dialog_);
 				widget_button::param wp_("セーブ");
 				save_file_ = wd.add_widget<widget_button>(wp, wp_);
-				save_file_->at_local_param().select_func_ = [=](bool f) {
+				save_file_->at_local_param().select_func_ = [this](bool f) {
 					std::string filter = "単体テスト(*.";
 					filter += UNIT_EXT_;
 					filter += ")\t*.";
@@ -890,7 +890,7 @@ namespace app {
 				wp.pre_group_ = widget::PRE_GROUP::_3;
 				widget_button::param wp_("All OFF");
 				all_off_ = wd.add_widget<widget_button>(wp, wp_);
-				all_off_->at_local_param().select_func_ = [=](bool f) {
+				all_off_->at_local_param().select_func_ = [this](bool f) {
 					icm_.reset_sw();
 					crm_.reset_sw();
 					dc2_.reset_sw();

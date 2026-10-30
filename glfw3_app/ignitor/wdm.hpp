@@ -381,7 +381,7 @@ namespace app {
 				widget_spinbox::param wp_(1, 1, 15);
 				window_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				window_->at_local_param().select_func_
-					= [=](widget_spinbox::state st, int before, int newpos) {
+					= [](widget_spinbox::state st, int before, int newpos) {
 					return (boost::format("%d") % newpos).str();
 				};
 			}
@@ -390,7 +390,7 @@ namespace app {
 				wp.pre_group_ = pg;
 				widget_label::param wp_("32768", false);
 				level_ = wd.add_widget<widget_label>(wp, wp_);
-				level_->at_local_param().select_func_ = [=](const std::string& str) {
+				level_->at_local_param().select_func_ = [this](const std::string& str) {
 					level_->set_text(tools::limiti(str, 1, 65534, "%d"));
 				};
 			}
@@ -399,7 +399,7 @@ namespace app {
 				wp.pre_group_ = pg;
 				widget_check::param wp_("ＶＡ");
 				cnv_ = wd.add_widget<widget_check>(wp, wp_);
-				cnv_->at_local_param().select_func_ = [=](bool f) {
+				cnv_->at_local_param().select_func_ = [this](bool f) {
 					if(f) {  // 数値から、電圧、電流に変換
 						level_->set_stall();
 						level_va_->set_stall(false);
@@ -415,7 +415,7 @@ namespace app {
 				wp.pre_group_ = pg;
 				widget_label::param wp_("0", false);
 				level_va_ = wd.add_widget<widget_label>(wp, wp_);
-				level_va_->at_local_param().select_func_ = [=](const std::string& str) {
+				level_va_->at_local_param().select_func_ = [this](const std::string& str) {
 					static const float vat[4] = { 32.768f, 655.36f, 16.384f, 65.536f };
 					auto n = ch_->get_select_pos();
 					auto g = get_gain_rate_(n);
@@ -437,7 +437,7 @@ namespace app {
 				wp.pre_group_ = pg;
 				widget_button::param wp_(">");
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
-				exec_->at_local_param().select_func_ = [=](int n) {
+				exec_->at_local_param().select_func_ = [this](int n) {
 					setup();
 //					auto s = build_wdm_(emu_path_);
 //					auto s = build_wdm_("TFALL.wad");

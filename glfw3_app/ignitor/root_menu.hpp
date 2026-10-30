@@ -308,7 +308,7 @@ namespace app {
 				widget::param wp(vtx::irect(ofs_x_, ofs_y_ + sph * 0, btn_w_, btn_h_));
 				widget_button::param wp_("新規プロジェクト");
 				new_project_ = wd.add_widget<widget_button>(wp, wp_);
-				new_project_->at_local_param().select_func_ = [=](uint32_t id) {
+				new_project_->at_local_param().select_func_ = [this](uint32_t id) {
 					project_.enable_name_dialog();
 				};
 				{
@@ -323,7 +323,7 @@ namespace app {
 				widget::param wp(vtx::irect(ofs_x_, ofs_y_ + sph * 1, btn_w_, btn_h_));
 				widget_button::param wp_("プロジェクト・ロード");
 				load_project_ = wd.add_widget<widget_button>(wp, wp_);
-				load_project_->at_local_param().select_func_ = [=](uint32_t id) {
+				load_project_->at_local_param().select_func_ = [this](uint32_t id) {
 					project_.open_load_file();
 				};
 				{
@@ -337,7 +337,7 @@ namespace app {
 				widget::param wp(vtx::irect(ofs_x_, ofs_y_ + sph * 2, btn_w_, btn_h_));
 				widget_button::param wp_("プロジェクト編集");
 				edit_project_ = wd.add_widget<widget_button>(wp, wp_);
-				edit_project_->at_local_param().select_func_ = [=](uint32_t id) {
+				edit_project_->at_local_param().select_func_ = [this](uint32_t id) {
 					project_.enable_edit_dialog();
 				};
 			}
@@ -345,7 +345,7 @@ namespace app {
 				widget::param wp(vtx::irect(ofs_x_, ofs_y_ + sph * 3, btn_w_, btn_h_));
 				widget_button::param wp_("プロジェクト・セーブ");
 				save_project_ = wd.add_widget<widget_button>(wp, wp_);
-				save_project_->at_local_param().select_func_ = [=](uint32_t id) {
+				save_project_->at_local_param().select_func_ = [this](uint32_t id) {
 					project_.open_save_file();
 				};
 			}
@@ -354,7 +354,7 @@ namespace app {
 				widget::param wp(vtx::irect(ofs_x_, ofs_y_ + sph * 4, btn_w_, btn_h_));
 				widget_button::param wp_("単体試験編集");
 				igni_settings_ = wd.add_widget<widget_button>(wp, wp_);
-				igni_settings_->at_local_param().select_func_ = [=](uint32_t id) {
+				igni_settings_->at_local_param().select_func_ = [this](uint32_t id) {
 					inspection_.get_dialog()->enable();
 				};
 			}
@@ -363,7 +363,7 @@ namespace app {
 				widget::param wp(vtx::irect(ofs_x_, ofs_y_ + sph * 5, btn_w_, btn_h_));
 				widget_button::param wp_("コントローラー設定");
 				cont_settings_ = wd.add_widget<widget_button>(wp, wp_);
-				cont_settings_->at_local_param().select_func_ = [=](uint32_t id) {
+				cont_settings_->at_local_param().select_func_ = [this](uint32_t id) {
 					cont_setting_dialog_->enable();
 				};
 			}
@@ -371,7 +371,7 @@ namespace app {
 				widget::param wp(vtx::irect(ofs_x_, ofs_y_ + sph * 6, btn_w_, btn_h_));
 				widget_check::param wp_("波形編集");
 				wave_edit_ = wd.add_widget<widget_check>(wp, wp_);
-				wave_edit_->at_local_param().select_func_ = [=](bool f) {
+				wave_edit_->at_local_param().select_func_ = [this](bool f) {
 					wave_cap_.enable(f);
 				};
 			}
@@ -379,7 +379,7 @@ namespace app {
 				widget::param wp(vtx::irect(ofs_x_, ofs_y_ + sph * 7, btn_w_, btn_h_));
 				widget_button::param wp_("検査開始");
 				run_ = wd.add_widget<widget_button>(wp, wp_);
-				run_->at_local_param().select_func_ = [=](uint32_t id) {
+				run_->at_local_param().select_func_ = [this](uint32_t id) {
 					task_ = task::start;
 				};
 			}
@@ -388,7 +388,7 @@ namespace app {
 				wp.pre_group_ = widget::PRE_GROUP::_4;
 				widget_button::param wp_("検査レポート表示");
 				disp_report_ = wd.add_widget<widget_button>(wp, wp_);
-				disp_report_->at_local_param().select_func_ = [=](uint32_t id) {
+				disp_report_->at_local_param().select_func_ = [this](uint32_t id) {
 					report_.get()->enable();
 				};
 			}
@@ -396,7 +396,7 @@ namespace app {
 				widget::param wp(vtx::irect(ofs_x_, ofs_y_ + sph * 9, btn_w_, btn_h_));
 				widget_button::param wp_("情報");
 				info_ = wd.add_widget<widget_button>(wp, wp_);
-				info_->at_local_param().select_func_ = [=](uint32_t id) {
+				info_->at_local_param().select_func_ = [this](uint32_t id) {
 					info_dialog_->enable();
 				};
 			}
@@ -411,7 +411,7 @@ namespace app {
 				widget_dialog::param wp_(widget_dialog::style::OK);
 				cont_setting_dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
 				cont_setting_dialog_->enable(false);
-				cont_setting_dialog_->at_local_param().select_func_ = [=](bool ok) {
+				cont_setting_dialog_->at_local_param().select_func_ = [this](bool ok) {
 					for(int i = 0; i < 4; ++i) {
 						const std::string& ip = cont_setting_ip_[i]->get_text();
 						int v = 0;
@@ -464,7 +464,7 @@ namespace app {
 					widget_list::param wp_;
 					cont_setting_serial_ = wd.add_widget<widget_list>(wp, wp_);
 					cont_setting_serial_->at_local_param().select_func_ =
-						[=](const std::string& str, uint32_t pos) {
+						[this](const std::string& str, uint32_t pos) {
 						if(serial_.probe()) {
 							serial_.close();
 						}
@@ -474,7 +474,7 @@ namespace app {
 					widget::param wp(vtx::irect(w - 110, 150, 100, 40), root);
 					widget_button::param wp_("exec");
 					cont_setting_exec_ = wd.add_widget<widget_button>(wp, wp_);
-					cont_setting_exec_->at_local_param().select_func_ = [=](uint32_t id) {
+					cont_setting_exec_->at_local_param().select_func_ = [this](uint32_t id) {
 						auto s = cont_setting_cmds_->get_text();
 						s += '\n';
 						client_.send_data(s);
@@ -530,7 +530,7 @@ namespace app {
 				widget_dialog::param wp_(widget_dialog::style::CANCEL_OK);
 				okc_dialog_ = wd.add_widget<widget_dialog>(wp, wp_);
 				okc_dialog_->enable(false);
-				okc_dialog_->at_local_param().select_func_ = [=](bool ok) {
+				okc_dialog_->at_local_param().select_func_ = [this](bool ok) {
 					if(ok) {
 						set_csv_();
 						task_ = task::sync;

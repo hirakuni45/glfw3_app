@@ -172,7 +172,7 @@ namespace app {
 				widget::param wp(vtx::irect(ofsx + 230, ofsy, 90, 40), root);
 				widget_label::param wp_("0", false);
 				voltage_ = wd.add_widget<widget_label>(wp, wp_);
-				voltage_->at_local_param().select_func_ = [=](const std::string& str) {
+				voltage_->at_local_param().select_func_ = [this](const std::string& str) {
 					voltage_->set_text(tools::limitf(str, 0.0f, 20.0f, "%3.1f"));
 				};
 			}
@@ -187,7 +187,7 @@ namespace app {
 				widget::param wp(vtx::irect(ofsx + 370, ofsy, 90, 40), root);
 				widget_label::param wp_("0", false);
 				current_ = wd.add_widget<widget_label>(wp, wp_);
-				current_->at_local_param().select_func_ = [=](const std::string& str) {
+				current_->at_local_param().select_func_ = [this](const std::string& str) {
 					current_->set_text(tools::limitf(str, 0.0f, 24.0f, "%4.2f"));
 				};
 			}
@@ -202,7 +202,7 @@ namespace app {
 				widget::param wp(vtx::irect(d_w - 85, ofsy, 30, 30), root);
 				widget_button::param wp_(">");
 				exec_ = wd.add_widget<widget_button>(wp, wp_);
-				exec_->at_local_param().select_func_ = [=](int n) {
+				exec_->at_local_param().select_func_ = [this](int n) {
 					dc1_t t;
 					uint16_t sw = 0;
 					for(uint32_t i = 0; i < 5; ++i) {
@@ -234,7 +234,7 @@ namespace app {
 				widget::param wp(vtx::irect(d_w - 45, ofsy, 30, 30), root);
 				widget_check::param wp_;
 				all_ = wd.add_widget<widget_check>(wp, wp_);
-				all_->at_local_param().select_func_ = [=](bool ena) {
+				all_->at_local_param().select_func_ = [this](bool ena) {
 					if(!ena) {  // オフラインは WGM の関係があり、遅延させる。
 						offline_ = 2;
 					}
