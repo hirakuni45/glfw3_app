@@ -3,7 +3,7 @@
 /*!	@file
 	@brief	pdfv メイン（GUI）
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2022, 2023 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2022, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
@@ -265,7 +265,7 @@ namespace app {
 				widget::param wp(vtx::irect(10, 10+50*0, 100, 40), tool_frame_);
 				widget_button::param wp_("load");
 				load_ = wd.add_widget<widget_button>(wp, wp_);
-				load_->at_local_param().select_func_ = [=](uint32_t id) {
+				load_->at_local_param().select_func_ = [this](uint32_t id) {
 					if(load_ctx_ != nullptr) {
 						bool f = load_ctx_->get_state(gui::widget::state::ENABLE);
 						load_ctx_->enable(!f);
@@ -278,7 +278,7 @@ namespace app {
 				for(auto t : scale_list_) {
 					wp_.init_list_.push_back(t.str);
 				};
-				wp_.select_func_ = [=](const std::string& text, uint32_t pos) {
+				wp_.select_func_ = [this](const std::string& text, uint32_t pos) {
 					pdf_redraw_ = true;
 				};
 				scale_ = wd.add_widget<widget_list>(wp, wp_);
@@ -287,7 +287,7 @@ namespace app {
 				widget::param wp(vtx::irect(10, 10+50*2, 200, 40), tool_frame_);
 				widget_spinbox::param wp_(1, 1, 1);
 				page_ = wd.add_widget<widget_spinbox>(wp, wp_);
-				page_->at_local_param().select_func_ = [=](widget_spinbox::state st, int before, int newpos) {
+				page_->at_local_param().select_func_ = [this](widget_spinbox::state st, int before, int newpos) {
 					if(st == widget_spinbox::state::inc || st == widget_spinbox::state::dec) {
 						pdf_redraw_ = true;
 					}
@@ -300,7 +300,7 @@ namespace app {
 				for(auto t : rotate_list_) {
 					wp_.init_list_.push_back(t.str);
 				}
-				wp_.select_func_ = [=](const std::string& text, uint32_t pos) {
+				wp_.select_func_ = [this](const std::string& text, uint32_t pos) {
 					pdf_redraw_ = true;
 				};
 				rotate_ = wd.add_widget<widget_list>(wp, wp_);

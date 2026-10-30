@@ -3,7 +3,7 @@
 #   @file
 #   @brief  glfw_app
 #   @author 平松邦仁 (hira@rvf-rc45.net)
-#	@copyright	Copyright (C) 2023 Kunihito Hiramatsu @n
+#	@copyright	Copyright (C) 2023, 2026 Kunihito Hiramatsu @n
 #				Released under the MIT license @n
 #				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 #=======================================================================
@@ -35,9 +35,9 @@ CINC_APP	=	. ../common
 INC_USR		=
 # User(optional) link library
 ifeq ($(OS),Windows_NT)
-LIBS_USR	=	mupdf mupdf-third harfbuzz jbig2dec gumbo
+LIBS_USR	=	mupdf harfbuzz jbig2dec gumbo
 else
-LIBS_USR	=	mupdf mupdf-third harfbuzz jbig2dec gumbo
+LIBS_USR	=	mupdf harfbuzz jbig2dec gumbo
 endif
 
 # User library path 
