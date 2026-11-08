@@ -3,7 +3,7 @@
 /*!	@file
 	@brief	イメージ・ユーティリティー
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
@@ -25,7 +25,7 @@ namespace img {
 		@return 作成したイメージインターフェースクラス
 	*/
 	//-----------------------------------------------------------------//
-	static i_img* copy_image(const i_img* src, bool opt = false)
+	static i_img* copy_image(const i_img* src, bool opt = false) noexcept
 	{
 		if(src == nullptr) return 0;
 		i_img* dst = 0;
@@ -97,7 +97,7 @@ namespace img {
 		@param[in]	ofs		コピー先オフセット
 	*/
 	//-----------------------------------------------------------------//
-	static void copy_to_rgba8(const i_img* isrc, const vtx::srect& rect, img_rgba8& idst, const vtx::spos& ofs)
+	static void copy_to_rgba8(const i_img* isrc, const vtx::srect& rect, img_rgba8& idst, const vtx::spos& ofs) noexcept
 	{
 		if(isrc == nullptr) return;
 
@@ -119,7 +119,7 @@ namespace img {
 		@param[in]	dst		コピー先 RGBA8 イメージ（リファレンス）
 	*/
 	//-----------------------------------------------------------------//
-	static bool copy_to_idx8_clut(const i_img* src, img_idx8& dst)
+	static bool copy_to_idx8_clut(const i_img* src, img_idx8& dst) noexcept
 	{
 		if(src->get_type() != IMG::INDEXED8) return false;
 		for(int i = 0; i < src->get_clut_max(); ++i) {
@@ -139,7 +139,7 @@ namespace img {
 		@return 同じなら「true」を返す
 	*/
 	//-----------------------------------------------------------------//
-	static bool match_idx8_clut(const i_img* src, img_idx8& dst)
+	static bool match_idx8_clut(const i_img* src, img_idx8& dst) noexcept
 	{
 		if(src->get_type() != IMG::INDEXED8) return false;
 		if(src->get_clut_max() < dst.get_clut_max()) return false;
@@ -164,7 +164,7 @@ namespace img {
 		@return コピーに成功したら「true」を返す。
 	*/
 	//-----------------------------------------------------------------//
-	static bool copy_to_idx8(const i_img* isrc, const vtx::srect& rect, img_idx8& idst, const vtx::spos& pos)
+	static bool copy_to_idx8(const i_img* isrc, const vtx::srect& rect, img_idx8& idst, const vtx::spos& pos) noexcept
 	{
 		if(isrc->get_type() != IMG::INDEXED8) return false;
 		vtx::spos p;
@@ -187,7 +187,8 @@ namespace img {
 		@param[in]	pos		コピー先位置
 	*/
 	//-----------------------------------------------------------------//
-	static void copy_to_rgba8(const i_img* isrc, img_rgba8& dst, const vtx::spos& pos = vtx::spos(0)) {
+	static void copy_to_rgba8(const i_img* isrc, img_rgba8& dst, const vtx::spos& pos = vtx::spos(0)) noexcept
+	{
 		if(isrc == 0) return;
 		copy_to_rgba8(isrc, vtx::srect(vtx::spos(0), isrc->get_size()), dst, pos);
 	}
@@ -202,7 +203,8 @@ namespace img {
 		@return コピーに成功したら「true」を返す。
 	*/
 	//-----------------------------------------------------------------//
-	static bool copy_to_idx8(const i_img* isrc, img_idx8& dst, const vtx::spos& pos = vtx::spos(0)) {
+	static bool copy_to_idx8(const i_img* isrc, img_idx8& dst, const vtx::spos& pos = vtx::spos(0)) noexcept
+	{
 		return copy_to_idx8(isrc, vtx::srect(vtx::spos(0), isrc->get_size()), dst, pos);
 	}
 
@@ -214,7 +216,7 @@ namespace img {
 		@param[out]	dst	リサイズイメージ
 	*/
 	//-----------------------------------------------------------------//
-	static void scale_50percent(const i_img* src, img_rgba8& dst)
+	static void scale_50percent(const i_img* src, img_rgba8& dst) noexcept
 	{
 		if(src == 0) return;
 
@@ -225,7 +227,7 @@ namespace img {
 		for(p.y = 0; p.y < size.y; p.y += 2) {
 			for(p.x = 0; p.x < size.x; p.x += 2) {
 				int	r, g, b, a;
-			  	rgba8	c;
+				rgba8	c;
 				src->get_pixel(p, c);
 				r = c.r; g = c.g; b = c.b; a = c.a;
 				src->get_pixel(vtx::spos(p.x + 1, p.y), c);
@@ -241,14 +243,14 @@ namespace img {
 	}
 
 
-	static const float pi_ = 3.14159265358979f;
+	static constexpr float pi_ = 3.14159265358979f;
 
-	static float sinc_(float l)
+	static float sinc_(float l) noexcept
 	{
 		return std::sin(pi_ * l) / (pi_ * l);
 	}
 
-	static float lanczos_(float d, float n)
+	static float lanczos_(float d, float n) noexcept
 	{
 		if(d == 0.0f) {
 			return 1.0f;
@@ -262,7 +264,7 @@ namespace img {
 	static float lanczos_tbl_[(12 + 1) * (12 + 1)];
 	static float lanczos_n_ = 0.0f;
 	// -3.0, -2.5, -2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0
-	static void init_lanczos_(float n)
+	static void init_lanczos_(float n) noexcept
 	{
 		if(lanczos_n_ == n) return;
 
@@ -281,7 +283,7 @@ namespace img {
 	}
 
 
-	static float lanczos_t_(float x, float y, float n)
+	static float lanczos_t_(float x, float y, float n) noexcept
 	{
 		int i = static_cast<int>(y * 2.0f);
 		i += 6;
@@ -295,7 +297,7 @@ namespace img {
 	}
 
 
-	static void color_div_(const rgbaf& col, float total, rgba8& c)
+	static void color_div_(const rgbaf& col, float total, rgba8& c) noexcept
 	{
 		rgbaf cc;
 		if(total != 0.0f) {
@@ -350,7 +352,7 @@ namespace img {
 		@param[in]	scale	スケール・ファクター
 	*/
 	//-----------------------------------------------------------------//
-	static void resize_image(const i_img* src, img_rgba8& dst, float scale)
+	static void resize_image(const i_img* src, img_rgba8& dst, float scale) noexcept
 	{
 		if(scale <= 0.0f) return;
 

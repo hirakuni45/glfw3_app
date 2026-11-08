@@ -1,5 +1,5 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	標準イメージを扱うテンプレートクラス
     @author 平松邦仁 (hira@rvf-rc45.net)
@@ -7,13 +7,12 @@
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <iostream>
 #include <vector>
 #include <algorithm>
-#include <boost/unordered_set.hpp>
-#include <boost/foreach.hpp>
-#include <boost/variant.hpp>
+#include <unordered_set>
+#include <variant>
 #include "utils/vtx.hpp"
 #include "img_io/img.hpp"
 
@@ -47,7 +46,7 @@ namespace img {
 		img_base() : size_(0), alpha_(false), img_(),
 			clut_limit_(0) {
 			clut_.resize(clutsize);
-std::cout << "Const: " << static_cast<int>(get_type()) << std::endl;
+// std::cout << "Const: " << static_cast<int>(get_type()) << std::endl;
 		}
 
 
@@ -57,7 +56,7 @@ std::cout << "Const: " << static_cast<int>(get_type()) << std::endl;
 		*/
 		//-----------------------------------------------------------------//
 		~img_base() {
-std::cout << "Destr: " << static_cast<int>(get_type()) << std::endl;
+// std::cout << "Destr: " << static_cast<int>(get_type()) << std::endl;
 		}
 
 
@@ -67,7 +66,7 @@ std::cout << "Destr: " << static_cast<int>(get_type()) << std::endl;
 			@return	イメージタイプ
 		*/
 		//-----------------------------------------------------------------//
-		IMG::type get_type() const { return BPX::type_; }
+		IMG::type get_type() const noexcept { return BPX::type_; }
 
 
 		//-----------------------------------------------------------------//
@@ -77,7 +76,8 @@ std::cout << "Destr: " << static_cast<int>(get_type()) << std::endl;
 			@param[in]	alpha	アルファチャネルを有効にする場合に「true」
 		*/
 		//-----------------------------------------------------------------//
-		void create(const vtx::spos& size, bool alpha = false) {
+		void create(const vtx::spos& size, bool alpha = false) noexcept
+		{
 			img_.clear();
 			size_ = size;
 			img_.resize(size_.x * size_.y);
@@ -93,7 +93,8 @@ std::cout << "Destr: " << static_cast<int>(get_type()) << std::endl;
 			@return 正常なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool put_clut(uint32_t idx, const rgba8& c) {
+		bool put_clut(uint32_t idx, const rgba8& c) noexcept
+		{
 			if(idx < clut_.size()) {
 				clut_[idx] = c;
 				return true;
@@ -110,7 +111,8 @@ std::cout << "Destr: " << static_cast<int>(get_type()) << std::endl;
 			@return 正常なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool get_clut(uint32_t idx, rgba8& c) const {
+		bool get_clut(uint32_t idx, rgba8& c) const noexcept
+		{
 			if(idx < clut_.size()) {
 				c = clut_[idx];
 				return true;
@@ -169,7 +171,8 @@ std::cout << "Destr: " << static_cast<int>(get_type()) << std::endl;
 			@return 領域なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool alpha_pixel(const vtx::spos& pos, rgba8& c) {
+		bool alpha_pixel(const vtx::spos& pos, rgba8& c) noexcept
+		{
 			if(img_.empty()) return false;
 			if(pos.x >= 0 && pos.x < size_.x && pos.y >= 0 && pos.y < size_.y) {
 				rgba8 s = img_[size_.x * pos.y + pos.x];
@@ -191,7 +194,7 @@ std::cout << "Destr: " << static_cast<int>(get_type()) << std::endl;
 			@return	イメージのサイズ
 		*/
 		//-----------------------------------------------------------------//
-		const vtx::spos& get_size() const { return size_; }
+		const vtx::spos& get_size() const noexcept { return size_; }
 
 
 		//-----------------------------------------------------------------//
@@ -200,7 +203,7 @@ std::cout << "Destr: " << static_cast<int>(get_type()) << std::endl;
 			@return	イメージ
 		*/
 		//-----------------------------------------------------------------//
-		const img_type& get_image() const { return img_; }
+		const img_type& get_image() const noexcept { return img_; }
 
 
 		//-----------------------------------------------------------------//
@@ -209,7 +212,7 @@ std::cout << "Destr: " << static_cast<int>(get_type()) << std::endl;
 			@return	イメージ
 		*/
 		//-----------------------------------------------------------------//
-		img_type& at_image() { return img_; }
+		img_type& at_image() noexcept { return img_; }
 
 
 		//-----------------------------------------------------------------//
@@ -218,7 +221,7 @@ std::cout << "Destr: " << static_cast<int>(get_type()) << std::endl;
 			@return	最大数
 		*/
 		//-----------------------------------------------------------------//
-		int get_clut_limit() const { return clut_limit_; }
+		int get_clut_limit() const noexcept { return clut_limit_; }
 
 
 		//-----------------------------------------------------------------//
@@ -227,7 +230,7 @@ std::cout << "Destr: " << static_cast<int>(get_type()) << std::endl;
 			@return	カラーテーブル
 		*/
 		//-----------------------------------------------------------------//
-		const clut_type& get_clut() const { return clut_; }
+		const clut_type& get_clut() const noexcept { return clut_; }
 
 
 		//-----------------------------------------------------------------//
@@ -236,7 +239,7 @@ std::cout << "Destr: " << static_cast<int>(get_type()) << std::endl;
 			@return	カラーテーブル
 		*/
 		//-----------------------------------------------------------------//
-		clut_type& at_clut() { return clut_; }
+		clut_type& at_clut() noexcept { return clut_; }
 
 
 		//-----------------------------------------------------------------//
@@ -245,7 +248,7 @@ std::cout << "Destr: " << static_cast<int>(get_type()) << std::endl;
 			@return	アルファ・チャネルが有効なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool test_alpha() const { return alpha_; }
+		bool test_alpha() const noexcept { return alpha_; }
 
 
 		//-----------------------------------------------------------------//
@@ -254,7 +257,7 @@ std::cout << "Destr: " << static_cast<int>(get_type()) << std::endl;
 			@return	「空」なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool empty() const { return img_.empty(); }
+		bool empty() const noexcept { return img_.empty(); }
 
 
 		//-----------------------------------------------------------------//
@@ -263,9 +266,10 @@ std::cout << "Destr: " << static_cast<int>(get_type()) << std::endl;
 			@return	利用している色数
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t count_color() const {
-			boost::unordered_set<BPX> n;
-			BOOST_FOREACH(const BPX& c, img_) {
+		uint32_t count_color() const noexcept
+		{
+			std::unordered_set<BPX> n;
+			for(const BPX& c : img_) {
 				n.insert(c);
 			}
 			return static_cast<uint32_t>(n.size());
@@ -317,7 +321,8 @@ std::cout << "Destr: " << static_cast<int>(get_type()) << std::endl;
 			@param[in]	src	ソース・コンテキスト
 		*/
 		//-----------------------------------------------------------------//
-		void swap(img_base& src) {
+		void swap(img_base& src) noexcept
+		{
 //			size_.swap(src.size_);
 			img_.swap(src.at_image());
 //			std::swap(alpha_, src.alpha_);
@@ -333,7 +338,8 @@ std::cout << "Destr: " << static_cast<int>(get_type()) << std::endl;
 			@param[in]	r	領域（省略すると全体）
 		*/
 		//-----------------------------------------------------------------//
-		void fill(const BPX& c, const vtx::srect& r = vtx::srect(vtx::spos(0), get_size())) {
+		void fill(const BPX& c, const vtx::srect& r = vtx::srect(vtx::spos(0), get_size())) noexcept
+		{
 			vtx::spos pos = r.org;
 			for(pos.y = 0; pos.y < r.end_y(); ++pos.y) {
 				for(pos.x = 0; pos.x < r.end_x(); ++pos.x) {
@@ -348,7 +354,8 @@ std::cout << "Destr: " << static_cast<int>(get_type()) << std::endl;
 			@brief	イメージを廃棄する
 		*/
 		//-----------------------------------------------------------------//
-		void destroy() {
+		void destroy() noexcept
+		{
 			size_.set(0);
 			alpha_ = false;
 			img_type().swap(img_);
@@ -364,6 +371,6 @@ std::cout << "Destr: " << static_cast<int>(get_type()) << std::endl;
 	typedef img_base<rgba8>   img_rgba8;
 	typedef img_base<rgba16>  img_rgba16;
 
-	typedef boost::variant<img_idx8, img_gray8, img_rgba8>  image8;
+	typedef std::variant<img_idx8, img_gray8, img_rgba8>  image8;
 }
 

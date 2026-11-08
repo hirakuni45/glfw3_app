@@ -12,7 +12,7 @@
 #include <map>
 #include <stack>
 #include <string>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include "core/ftimg.hpp"
 #include "gl_fw/gl_info.hpp"
 #include "img_io/i_img.hpp"
@@ -33,17 +33,28 @@ namespace gl {
 		size_code_t(uint32_t size = 0, uint32_t code = 0) : size_(size), code_(code) { }
 
 		inline size_t hash() const {
-			size_t h = 0;
-			boost::hash_combine(h, size_);
-			boost::hash_combine(h, code_);
+			size_t h = std::hash<uint32_t>()(size_);
+			h ^= std::hash<uint32_t>()(code_);
 			return h;
 		}
 		bool operator == (const size_code_t& t) const {
 			return (t.size_ == size_ && t.code_ == code_);
 		}
 	};
-	inline size_t hash_value(const size_code_t& t) { return t.hash(); }
+}
 
+//	inline size_t hash_value(const size_code_t& t) { return t.hash(); }
+
+namespace std {
+    template <>
+    struct hash<gl::size_code_t> {
+        size_t operator()(const gl::size_code_t& t) const {
+            return t.hash();
+        }
+    };
+}
+
+namespace gl {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
@@ -67,7 +78,7 @@ namespace gl {
 			FTIMG::metrics	met;	///< フォントのメトリックス
 		};
 
-		typedef boost::unordered_map<size_code_t, tex_map>	fcode_map;
+		typedef std::unordered_map<size_code_t, tex_map>	fcode_map;
 
 		// フォント基本環境
 		struct finfo_t {
@@ -957,7 +968,7 @@ namespace gl {
 			int y = pos.y;
 			int xx = x;
 			int n = 0;
-			BOOST_FOREACH(uint32_t code, text) {
+			for(uint32_t code : text) {
 				if(code < 32) {
 					if(code == '\n') {
 						x = pos.x;
@@ -1041,7 +1052,7 @@ namespace gl {
 		{
 			int len = 0;
 			int lenmax = 0;
-			BOOST_FOREACH(uint32_t lc, text) {
+			for(uint32_t lc : text) {
 				if(lc >= 0x20) {
 					len += get_width(lc);
 				} else if(lc == '\n') {
@@ -1124,7 +1135,7 @@ namespace gl {
 		{
 			vtx::ipos size(0, 0);
 			vtx::ipos tmp(0, face_->info_.size);
-			BOOST_FOREACH(uint32_t ch, s) {
+			for(uint32_t ch : s) {
 				if(ch >= 0x20) {
 					tmp.x += get_width(ch);
 				} else {
@@ -1152,7 +1163,7 @@ namespace gl {
 		vtx::ipos get_size(const utils::wstrings& wss) noexcept
 		{
 			vtx::ipos size(0, 0);
-			BOOST_FOREACH(const auto& ws, wss) {
+			for(const auto& ws : wss) {
 				vtx::ipos s = get_size(ws);
 				size += s;
 			}

@@ -1,13 +1,13 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	カラー・ルック・アップ・テーブル（ヘッダー）
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include "img.hpp"
 
 namespace img {
@@ -30,7 +30,7 @@ namespace img {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		img_clut() : clut_pos_(0), alpha_(true) { }
+		img_clut() noexcept : clut_pos_(0), alpha_(true) { }
 
 
 		//-----------------------------------------------------------------//
@@ -47,7 +47,7 @@ namespace img {
 			@return 容量
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t capacity() const { return NUM; }
+		uint32_t capacity() const noexcept { return NUM; }
 
 
 		//-----------------------------------------------------------------//
@@ -56,7 +56,7 @@ namespace img {
 			@return 要素数
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t size() const { return clut_pos_; }
+		uint32_t size() const noexcept { return clut_pos_; }
 
 
 		//-----------------------------------------------------------------//
@@ -64,7 +64,7 @@ namespace img {
 			@brief	カラーテーブルのクリア
 		*/
 		//-----------------------------------------------------------------//
-		void clear() { clut_pos_ = 0; }
+		void clear() noexcept { clut_pos_ = 0; }
 
 
 		//-----------------------------------------------------------------//
@@ -75,7 +75,7 @@ namespace img {
 			@return	カラー情報を返した場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		const COLOR& get_color(uint32_t pos) const { return clut_[pos]; }
+		const COLOR& get_color(uint32_t pos) const noexcept { return clut_[pos]; }
 
 
 		//-----------------------------------------------------------------//
@@ -86,7 +86,8 @@ namespace img {
 			@return	カラー情報を変更した場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool set_color(uint32_t pos, const COLOR& c) {
+		bool set_color(uint32_t pos, const COLOR& c) noexcept
+		{
 			if(pos < clut_pos_) {
 				clut_[pos] = c;
 				return true;
@@ -103,7 +104,8 @@ namespace img {
 			@return	適合するカラーがあった場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool lookup_color(const COLOR& c, int& pos) {
+		bool lookup_color(const COLOR& c, int& pos) noexcept
+		{
 			for(uint32_t i = 0; i < clut_pos_; ++i) {
 				if(clut_[i] == c) {
 					pos = i;
@@ -121,7 +123,8 @@ namespace img {
 			@return	追加出来た場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool add_color(const rgba8& c) {
+		bool add_color(const rgba8& c) noexcept
+		{
 			if(clut_pos_ < NUM) {
 				clut_[clut_pos_] = c;
 				clut_pos_++;

@@ -419,7 +419,7 @@ void get_metrics(uint32_t code)
 					if(offset < m.ofs) offset = m.ofs;
 				}
 				int height = 0;
-				BOOST_FOREACH(const met& m, mets) {
+				for(const met& m : mets) {
 					int l = offset - m.ofs + m.rows + 1;
 					if(height < l) height = l;
 				}

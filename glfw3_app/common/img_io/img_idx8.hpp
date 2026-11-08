@@ -1,16 +1,15 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	IDX8 イメージを扱うクラス（ヘッダー）
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <vector>
-#include <boost/unordered_set.hpp>
-#include <boost/foreach.hpp>
+#include <unordered_set>
 #include <set>
 #include "img_io/i_img.hpp"
 #include "img_io/img_clut.hpp"
@@ -45,7 +44,7 @@ namespace img {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		img_idx8() : size_(0), clut_max_(0), alpha_(false), color_map_(false) { }
+		img_idx8() noexcept : size_(0), clut_max_(0), alpha_(false), color_map_(false) { }
 
 
 		//-----------------------------------------------------------------//
@@ -62,7 +61,7 @@ namespace img {
 			@return	イメージタイプ
 		*/
 		//-----------------------------------------------------------------//
-		IMG::type get_type() const override { return IMG::INDEXED8; }
+		IMG::type get_type() const noexcept override { return IMG::INDEXED8; }
 
 
 		//-----------------------------------------------------------------//
@@ -72,7 +71,8 @@ namespace img {
 			@param[in]	alpha	アルファ・チャネルを有効にする場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		void create(const vtx::spos& size, bool alpha = false) override {
+		void create(const vtx::spos& size, bool alpha = false) noexcept override
+		{
 			destroy();
 			size_ = size;
 			clut_max_ = 0;
@@ -89,7 +89,8 @@ namespace img {
 			@return 正常なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool put_clut(int idx, const rgba8& c) override {
+		bool put_clut(int idx, const rgba8& c) noexcept override
+		{
 			if(idx >= 0 && idx < 256) {
 				if(idx >= clut_max_) clut_max_ = idx + 1;
 				clut_[idx] = c;
@@ -108,7 +109,8 @@ namespace img {
 			@return 正常なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool get_clut(int idx, rgba8& c) const override {
+		bool get_clut(int idx, rgba8& c) const noexcept override
+		{
 			if(idx >= 0 && idx < clut_max_) {
 				c = clut_[idx];
 				return true;
@@ -126,7 +128,8 @@ namespace img {
 			@return 領域なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool put_pixel(const vtx::spos& pos, const idx8& c) override {
+		bool put_pixel(const vtx::spos& pos, const idx8& c) noexcept override
+		{
 			if(img_.empty()) return false;
 			if(pos.x >= 0 && pos.x < size_.x && pos.y >= 0 && pos.y < size_.y) {
 				img_[size_.x * pos.y + pos.x] = c;
@@ -145,7 +148,8 @@ namespace img {
 			@return 領域なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool get_pixel(const vtx::spos& pos, idx8& c) const override {
+		bool get_pixel(const vtx::spos& pos, idx8& c) const noexcept override
+		{
 			if(img_.empty()) return false;
 			if(pos.x >= 0 && pos.x < size_.x && pos.y >= 0 && pos.y < size_.y) {
 				c  = img_[size_.x * pos.y + pos.x];
@@ -164,7 +168,7 @@ namespace img {
 			@return 領域なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool put_pixel(const vtx::spos& pos, const gray8& c) override { return false; }
+		bool put_pixel(const vtx::spos& pos, const gray8& c) noexcept override { return false; }
 
 
 		//-----------------------------------------------------------------//
@@ -175,7 +179,7 @@ namespace img {
 			@return 領域なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool get_pixel(const vtx::spos& pos, gray8& c) const override { return false; }
+		bool get_pixel(const vtx::spos& pos, gray8& c) const noexcept override { return false; }
 
 
 		//-----------------------------------------------------------------//
@@ -186,7 +190,7 @@ namespace img {
 			@return 領域なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool put_pixel(const vtx::spos& pos, const rgba8& c) override { return false; }
+		bool put_pixel(const vtx::spos& pos, const rgba8& c) noexcept override { return false; }
 
 
 		//-----------------------------------------------------------------//
@@ -196,7 +200,8 @@ namespace img {
 			@param[in]	c	描画されたカラーを受け取るリファレンス
 		*/
 		//-----------------------------------------------------------------//
-		bool get_pixel(const vtx::spos& pos, rgba8& c) const override {
+		bool get_pixel(const vtx::spos& pos, rgba8& c) const noexcept override
+		{
 			if(img_.empty()) return false;
 			if(pos.x >= 0 && pos.x < size_.x && pos.y >= 0 && pos.y < size_.y) {
 				idx8 idx  = img_[size_.x * pos.y + pos.x];
@@ -214,7 +219,7 @@ namespace img {
 			@return	イメージのポインター
 		*/
 		//-----------------------------------------------------------------//
-		const void* operator() () const override { return static_cast<const void*>(&img_[0]); }
+		const void* operator() () const noexcept override { return static_cast<const void*>(&img_[0]); }
 
 
 		//-----------------------------------------------------------------//
@@ -232,7 +237,7 @@ namespace img {
 			@return	イメージのサイズ
 		*/
 		//-----------------------------------------------------------------//
-		const vtx::spos& get_size() const override { return size_; }
+		const vtx::spos& get_size() const noexcept override { return size_; }
 
 
 		//-----------------------------------------------------------------//
@@ -241,7 +246,7 @@ namespace img {
 			@return	最大数
 		*/
 		//-----------------------------------------------------------------//
-		int get_clut_max() const override { return clut_max_; }
+		int get_clut_max() const noexcept override { return clut_max_; }
 
 
 		//-----------------------------------------------------------------//
@@ -250,7 +255,7 @@ namespace img {
 			@return	アルファ・チャネルが有効なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool test_alpha() const override { return alpha_; }
+		bool test_alpha() const noexcept override { return alpha_; }
 
 
 		//-----------------------------------------------------------------//
@@ -259,7 +264,7 @@ namespace img {
 			@return	「空」なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool empty() const override { return img_.empty(); }
+		bool empty() const noexcept override { return img_.empty(); }
 
 
 		//-----------------------------------------------------------------//
@@ -268,9 +273,10 @@ namespace img {
 			@return	利用している色数
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t count_color() const override {
-			boost::unordered_set<idx8> n;
-			BOOST_FOREACH(const idx8& c, img_) {
+		uint32_t count_color() const noexcept override
+		{
+			std::unordered_set<idx8> n;
+			for(const idx8& c : img_) {
 				n.insert(c);
 			}
 			return static_cast<uint32_t>(n.size());
@@ -282,7 +288,8 @@ namespace img {
 			@brief	オプティマイズ（使っているカラー番号を順番に並べなおす）
 		*/
 		//-----------------------------------------------------------------//
-		void index_optimize() {
+		void index_optimize() noexcept
+		{
 			std::set<idx8> n;
 			for(std::vector<idx8>::const_iterator cit = img_.begin(); cit != img_.end(); ++cit) {
 				n.insert(*cit);
@@ -315,7 +322,7 @@ namespace img {
 			@param[in]	src	ソース・コンテキスト
 		*/
 		//-----------------------------------------------------------------//
-		void swap(img_idx8& src) { *this = src; }
+		void swap(img_idx8& src) noexcept { *this = src; }
 
 
 		//-----------------------------------------------------------------//
@@ -324,7 +331,8 @@ namespace img {
 			@param[in]	c	塗りつぶすカラー
 		*/
 		//-----------------------------------------------------------------//
-		void fill(const idx8& c) {
+		void fill(const idx8& c) noexcept
+		{
 			if(size_.x <= 0 || size_.y <= 0) return;
 
 			idx8* dst = &img_[0];
@@ -337,12 +345,11 @@ namespace img {
 			@brief	イメージを廃棄する
 		*/
 		//-----------------------------------------------------------------//
-		void destroy() override {
+		void destroy() noexcept override
+		{
 			size_.set(0);
 			clut_max_ = 0;
 			std::vector<idx8>().swap(img_);
 		}
-
 	};
 }
-

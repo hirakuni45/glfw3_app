@@ -1,19 +1,19 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
-	@brief	OpenJPEG 画像を扱うクラス（ヘッダー）
+	@brief	OpenJPEG 画像を扱うクラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include "i_img_io.hpp"
 #include "img_rgba8.hpp"
 #define OPJ_STATIC
 #include <openjpeg.h>
 #include "utils/string_utils.hpp"
-#include <boost/lexical_cast.hpp>
+#include <charconv>
 #include <iostream>
 
 namespace img {
@@ -30,19 +30,19 @@ namespace img {
 		uint32_t	prgl_ref_;
 		uint32_t	prgl_pos_;
 
-		static void error_callback_(const char* msg, void* context)
+		static void error_callback_(const char* msg, void* context) noexcept
 		{
 			std::cerr << "[ERROR] " << msg;
 		}
 
 
-		static void warning_callback_(const char* msg, void* context)
+		static void warning_callback_(const char* msg, void* context) noexcept
 		{
 			std::cerr << "[WARNING] " << msg;
 		}
 
 
-		static void info_callback_(const char* msg, void* context)
+		static void info_callback_(const char* msg, void* context) noexcept
 		{
 //			std::cerr << "[INFO] " << msg;
 		}
@@ -55,7 +55,7 @@ namespace img {
 		};
 
 
-		static OPJ_SIZE_T strm_read_(void* p_buffer, OPJ_SIZE_T p_nb_bytes, void* p_user_data)
+		static OPJ_SIZE_T strm_read_(void* p_buffer, OPJ_SIZE_T p_nb_bytes, void* p_user_data) noexcept
 		{
 			stream_block* sb = static_cast<stream_block*>(p_user_data);
 			int len;
@@ -72,7 +72,7 @@ namespace img {
 			return len;
 		}
 
-		static OPJ_OFF_T strm_skip_(OPJ_OFF_T skip, void* p_user_data)
+		static OPJ_OFF_T strm_skip_(OPJ_OFF_T skip, void* p_user_data) noexcept
 		{
 			stream_block* sb = static_cast<stream_block*>(p_user_data);
 
@@ -83,7 +83,7 @@ namespace img {
 		}
 
 
-		static OPJ_BOOL strm_seek_(OPJ_OFF_T seek_pos, void* p_user_data)
+		static OPJ_BOOL strm_seek_(OPJ_OFF_T seek_pos, void* p_user_data) noexcept
 		{
 			stream_block* sb = static_cast<stream_block*>(p_user_data);
 
@@ -94,7 +94,7 @@ namespace img {
 		}
 
 
-		static OPJ_OFF_T wstrm_skip_(OPJ_OFF_T skip, void* p_user_data)
+		static OPJ_OFF_T wstrm_skip_(OPJ_OFF_T skip, void* p_user_data) noexcept
 		{
 			utils::file_io* fio = static_cast<utils::file_io*>(p_user_data);
 			bool f = fio->seek(skip, utils::file_io::SEEK::CUR);
@@ -103,7 +103,7 @@ namespace img {
 		}
 
 
-		static OPJ_BOOL wstrm_seek_(OPJ_OFF_T seek_pos, void* p_user_data)
+		static OPJ_BOOL wstrm_seek_(OPJ_OFF_T seek_pos, void* p_user_data) noexcept
 		{
 			utils::file_io* fio = static_cast<utils::file_io*>(p_user_data);
 			bool f = fio->seek(seek_pos, utils::file_io::SEEK::SET);
@@ -112,7 +112,7 @@ namespace img {
 		}
 
 
-		static OPJ_SIZE_T wstrm_write_(void* p_buffer, OPJ_SIZE_T p_nb_bytes, void* p_user_data)
+		static OPJ_SIZE_T wstrm_write_(void* p_buffer, OPJ_SIZE_T p_nb_bytes, void* p_user_data) noexcept
 		{
 			utils::file_io* fio = static_cast<utils::file_io*>(p_user_data);
 			size_t n = fio->write(p_buffer, p_nb_bytes);
@@ -120,12 +120,12 @@ namespace img {
 		}
 
 
-		static int int_ceildivpow2_(int a, int b)
+		static int int_ceildivpow2_(int a, int b) noexcept
 		{
 			return (a + (1 << b) - 1) >> b;
 		}
 
-		static void opj_image_to_rgba8_(opj_image_t* image, shared_img img)
+		static void opj_image_to_rgba8_(opj_image_t* image, shared_img img) noexcept
 		{
 			int w = image->comps[0].w;
 			int wr = int_ceildivpow2_(image->comps[0].w, image->comps[0].factor);
@@ -191,7 +191,7 @@ namespace img {
 		};
 
 
-		static bool decode_sub_(utils::file_io& fin, CODEC_FORMAT form, sub_t& t, bool all = true)
+		static bool decode_sub_(utils::file_io& fin, CODEC_FORMAT form, sub_t& t, bool all = true) noexcept
 		{
 			size_t sz;
 			if(all) {
@@ -246,7 +246,7 @@ namespace img {
 			return true;
 		}
 
-		bool decode_header_(utils::file_io& fin, CODEC_FORMAT form, img::img_info& fo)
+		bool decode_header_(utils::file_io& fin, CODEC_FORMAT form, img::img_info& fo) noexcept
 		{
 			sub_t t;
 			if(!decode_sub_(fin, form, t, false)) {
@@ -259,7 +259,7 @@ namespace img {
 			return true;
 		}
 
-		bool decode_(utils::file_io& fin, CODEC_FORMAT form, shared_img img, uint32_t& prgl_ref, uint32_t& prgl_pos)
+		bool decode_(utils::file_io& fin, CODEC_FORMAT form, shared_img img, uint32_t& prgl_ref, uint32_t& prgl_pos) noexcept
 		{
 			sub_t t;
 			if(!decode_sub_(fin, form, t)) {
@@ -294,7 +294,7 @@ namespace img {
 			return true;
 		}
 
-		CODEC_FORMAT probe_(utils::file_io& fin)
+		CODEC_FORMAT probe_(utils::file_io& fin) noexcept
 		{
 			unsigned char sig[4];
 			long pos = fin.tell();
@@ -318,7 +318,7 @@ namespace img {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		openjpeg_io() : prgl_ref_(0), prgl_pos_(0) { }
+		openjpeg_io() noexcept : prgl_ref_(0), prgl_pos_(0) { }
 
 
 		//-----------------------------------------------------------------//
@@ -335,7 +335,7 @@ namespace img {
 			@return ファイル拡張子の文字列
 		*/
 		//-----------------------------------------------------------------//
-		const char* get_file_ext() const override { return "j2k,jp2"; }
+		const char* get_file_ext() const noexcept override { return "j2k,jp2"; }
 
 
 		//-----------------------------------------------------------------//
@@ -345,7 +345,7 @@ namespace img {
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool probe(utils::file_io& fin) override
+		bool probe(utils::file_io& fin) noexcept override
 		{
 			return probe_(fin) != OPJ_CODEC_UNKNOWN;
 		}
@@ -359,7 +359,7 @@ namespace img {
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool info(utils::file_io& fin, img::img_info& fo) override
+		bool info(utils::file_io& fin, img::img_info& fo) noexcept override
 		{
 			CODEC_FORMAT form = probe_(fin);
 			if(form != OPJ_CODEC_UNKNOWN) {
@@ -378,7 +378,7 @@ namespace img {
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool load(utils::file_io& fin, const std::string& ext = "") override
+		bool load(utils::file_io& fin, const std::string& ext = "") noexcept override
 		{
 			CODEC_FORMAT form = probe_(fin);
 			if(form != OPJ_CODEC_UNKNOWN) {
@@ -399,7 +399,8 @@ namespace img {
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const std::string& filename, const std::string& opt = "") {
+		bool load(const std::string& filename, const std::string& opt = "") noexcept
+		{
 			utils::file_io fin;
 			if(fin.open(filename, "rb")) {
 				bool f = load(fin, opt);
@@ -418,7 +419,7 @@ namespace img {
 			@return エラーがあれば「false」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(utils::file_io& fout, const std::string& opt = "") override
+		bool save(utils::file_io& fout, const std::string& opt = "") noexcept override
 		{
 			if(!img_) return false;
 			const vtx::spos& size = img_->get_size();
@@ -442,13 +443,12 @@ namespace img {
 
 			// 品質パラメーター
 			float q = 0.75f;
+			// 0 to 100
 			if(!opt.empty()) {
-				try {
-					q = boost::lexical_cast<float>(opt);
-				} catch (boost::bad_lexical_cast&) {
-					q = 0.75f;
-				}
-		}
+				std::from_chars(opt.data(), opt.data() + opt.size(), q);
+			}
+			if(q < 0.0f) q = 0.0f;
+			else if(q > 1.0f) q = 1.0f;
 
 			opj_cparameters_t parameters;
 			opj_set_default_encoder_parameters(&parameters);
@@ -549,7 +549,8 @@ namespace img {
 			@return エラーがあれば「false」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(const std::string& fn, const std::string& opt = "") {
+		bool save(const std::string& fn, const std::string& opt = "") noexcept
+		{
 			utils::file_io out;
 			if(out.open(fn, "wb")) {
 				bool f = save(out, opt);
@@ -567,7 +568,7 @@ namespace img {
 			@return	イメージインターフェース
 		*/
 		//-----------------------------------------------------------------//
-		const shared_img get_image() const override { return img_; }
+		const shared_img get_image() const noexcept override { return img_; }
 
 
 		//-----------------------------------------------------------------//
@@ -576,7 +577,7 @@ namespace img {
 			@param[in]	img	イメージインターフェース
 		*/
 		//-----------------------------------------------------------------//
-		void set_image(shared_img img) override { img_ = img; }
+		void set_image(shared_img img) noexcept override { img_ = img; }
 
 
 		//-----------------------------------------------------------------//
@@ -585,10 +586,10 @@ namespace img {
 			@return 完了の場合 scale を返す
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t get_progless(uint32_t scale) const override {
+		uint32_t get_progless(uint32_t scale) const noexcept override
+		{
 			if(prgl_ref_ == 0) return 0;
 			return prgl_pos_ * scale / prgl_ref_;
 		} 
 	};
 }
-

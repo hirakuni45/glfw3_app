@@ -1,16 +1,15 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
-	@brief	RGBA8 イメージを扱うクラス（ヘッダー）
+	@brief	RGBA8 イメージを扱うクラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <vector>
-#include <boost/unordered_set.hpp>
-#include <boost/foreach.hpp>
+#include <unordered_set>
 #include "i_img.hpp"
 #include "img_idx8.hpp"
 #include "img_gray8.hpp"
@@ -39,7 +38,7 @@ namespace img {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		img_rgba8() : size_(0), alpha_(false) { }
+		img_rgba8() noexcept : size_(0), alpha_(false) { }
 
 
 		//-----------------------------------------------------------------//
@@ -56,7 +55,7 @@ namespace img {
 			@return	イメージタイプ
 		*/
 		//-----------------------------------------------------------------//
-		IMG::type get_type() const override { return IMG::FULL8; }
+		IMG::type get_type() const noexcept override { return IMG::FULL8; }
 
 
 		//-----------------------------------------------------------------//
@@ -66,7 +65,8 @@ namespace img {
 			@param[in]	alpha	アルファチャネルを有効にする場合に「true」
 		*/
 		//-----------------------------------------------------------------//
-		void create(const vtx::spos& size, bool alpha = false) override {
+		void create(const vtx::spos& size, bool alpha = false) noexcept override
+		{
 			img_.clear();
 			size_ = size;
 			img_.resize(size_.x * size_.y);
@@ -82,7 +82,7 @@ namespace img {
 			@return 正常なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool put_clut(int idx, const rgba8& c) override { return false; }
+		bool put_clut(int idx, const rgba8& c) noexcept override { return false; }
 
 
 		//-----------------------------------------------------------------//
@@ -93,7 +93,7 @@ namespace img {
 			@return 正常なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool get_clut(int idx, rgba8& c) const override { return false; }
+		bool get_clut(int idx, rgba8& c) const noexcept override { return false; }
 
 
 		//-----------------------------------------------------------------//
@@ -104,7 +104,7 @@ namespace img {
 			@return 領域なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool put_pixel(const vtx::spos& pos, const idx8& c) override { return false; }
+		bool put_pixel(const vtx::spos& pos, const idx8& c) noexcept override { return false; }
 
 
 		//-----------------------------------------------------------------//
@@ -115,7 +115,7 @@ namespace img {
 			@return 領域なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool get_pixel(const vtx::spos& pos, idx8& c) const override { return false; }
+		bool get_pixel(const vtx::spos& pos, idx8& c) const noexcept override { return false; }
 
 
 		//-----------------------------------------------------------------//
@@ -126,7 +126,7 @@ namespace img {
 			@return 領域なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool put_pixel(const vtx::spos& pos, const gray8& c) override { return false; }
+		bool put_pixel(const vtx::spos& pos, const gray8& c) noexcept override { return false; }
 
 
 		//-----------------------------------------------------------------//
@@ -137,7 +137,7 @@ namespace img {
 			@return 領域なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool get_pixel(const vtx::spos& pos, gray8& c) const override { return false; }
+		bool get_pixel(const vtx::spos& pos, gray8& c) const noexcept override { return false; }
 
 
 		//-----------------------------------------------------------------//
@@ -148,7 +148,8 @@ namespace img {
 			@return 領域なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool put_pixel(const vtx::spos& pos, const rgba8& c) override {
+		bool put_pixel(const vtx::spos& pos, const rgba8& c) noexcept override
+		{
 			if(img_.empty()) return false;
 			if(pos.x >= 0 && pos.x < size_.x && pos.y >= 0 && pos.y < size_.y) {
 				img_[size_.x * pos.y + pos.x] = c;
@@ -167,7 +168,8 @@ namespace img {
 			@return 領域なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool get_pixel(const vtx::spos& pos, rgba8& c) const override {
+		bool get_pixel(const vtx::spos& pos, rgba8& c) const noexcept override
+		{
 			if(img_.empty()) return false;
 			if(pos.x >= 0 && pos.x < size_.x && pos.y >= 0 && pos.y < size_.y) {
 				c  = img_[size_.x * pos.y + pos.x];
@@ -186,7 +188,8 @@ namespace img {
 			@return 領域なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool alpha_pixel(const vtx::spos& pos, rgba8& c) {
+		bool alpha_pixel(const vtx::spos& pos, rgba8& c) noexcept
+		{
 			if(img_.empty()) return false;
 			if(pos.x >= 0 && pos.x < size_.x && pos.y >= 0 && pos.y < size_.y) {
 				rgba8 s = img_[size_.x * pos.y + pos.x];
@@ -209,7 +212,8 @@ namespace img {
 			@return	イメージのポインター
 		*/
 		//-----------------------------------------------------------------//
-		const rgba8* get_img(int y = 0) const {
+		const rgba8* get_img(int y = 0) const noexcept
+		{
 			if(y >= 0 && y < size_.y) return &img_[size_.x * y]; else return 0;
 		}
 
@@ -220,7 +224,7 @@ namespace img {
 			@return	イメージのポインター
 		*/
 		//-----------------------------------------------------------------//
-		const void* operator() () const override { return static_cast<const void*>(&img_[0]); }
+		const void* operator() () const noexcept override { return static_cast<const void*>(&img_[0]); }
 
 
 		//-----------------------------------------------------------------//
@@ -230,7 +234,7 @@ namespace img {
 			@return	画像ポインター
 		*/
 		//-----------------------------------------------------------------//
-		rgba8* at_image(int n = 0) { return &img_[n]; }
+		rgba8* at_image(int n = 0) noexcept { return &img_[n]; }
 
 
 		//-----------------------------------------------------------------//
@@ -239,7 +243,7 @@ namespace img {
 			@return	イメージのサイズ
 		*/
 		//-----------------------------------------------------------------//
-		const vtx::spos& get_size() const override { return size_; }
+		const vtx::spos& get_size() const noexcept override { return size_; }
 
 
 		//-----------------------------------------------------------------//
@@ -248,7 +252,7 @@ namespace img {
 			@return	最大数
 		*/
 		//-----------------------------------------------------------------//
-		int get_clut_max() const override { return -1; }
+		int get_clut_max() const noexcept override { return -1; }
 
 
 		//-----------------------------------------------------------------//
@@ -257,7 +261,7 @@ namespace img {
 			@return	アルファ・チャネルが有効なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool test_alpha() const override { return alpha_; }
+		bool test_alpha() const noexcept override { return alpha_; }
 
 
 		//-----------------------------------------------------------------//
@@ -266,7 +270,7 @@ namespace img {
 			@return	「空」なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool empty() const override { return img_.empty(); }
+		bool empty() const noexcept override { return img_.empty(); }
 
 
 		//-----------------------------------------------------------------//
@@ -275,9 +279,10 @@ namespace img {
 			@return	利用している色数
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t count_color() const override {
-			boost::unordered_set<rgba8> n;
-			BOOST_FOREACH(const rgba8& c, img_) {
+		uint32_t count_color() const noexcept override
+		{
+			std::unordered_set<rgba8> n;
+			for(const rgba8& c : img_) {
 				n.insert(c);
 			}
 			return static_cast<uint32_t>(n.size());
@@ -292,7 +297,8 @@ namespace img {
 			@param[in]	rsrc	ソースの領域
 		*/
 		//-----------------------------------------------------------------//
-		void copy(const vtx::spos& dst, const img_rgba8& isrc, const vtx::srect& rsrc) {
+		void copy(const vtx::spos& dst, const img_rgba8& isrc, const vtx::srect& rsrc) noexcept
+		{
 			vtx::spos p;
 			for(p.y = 0; p.y < rsrc.size.y; ++p.y) {
 				for(p.x = 0; p.x < rsrc.size.x; ++p.x) {
@@ -311,7 +317,7 @@ namespace img {
 			@param[in]	src	ソースイメージ
 		*/
 		//-----------------------------------------------------------------//
-		void copy(const img_rgba8& src) { copy(vtx::spos(0), src, vtx::srect(vtx::spos(0), src.get_size())); }
+		void copy(const img_rgba8& src) noexcept { copy(vtx::spos(0), src, vtx::srect(vtx::spos(0), src.get_size())); }
 
 
 		//-----------------------------------------------------------------//
@@ -322,7 +328,8 @@ namespace img {
 			@param[in]	rsrc	ソースの領域
 		*/
 		//-----------------------------------------------------------------//
-		void copy(const vtx::spos& dst, const img_idx8& isrc, const vtx::srect& rsrc) {
+		void copy(const vtx::spos& dst, const img_idx8& isrc, const vtx::srect& rsrc) noexcept
+		{
 			vtx::spos p;
 			for(p.y = 0; p.y < rsrc.size.y; ++p.y) {
 				for(p.x = 0; p.x < rsrc.size.x; ++p.x) {
@@ -343,7 +350,8 @@ namespace img {
 			@param[in]	rsrc  	ソース領域
 		*/
 		//-----------------------------------------------------------------//
-		void copy(const vtx::spos& dst, const img_gray8& isrc, const vtx::srect& rsrc) {
+		void copy(const vtx::spos& dst, const img_gray8& isrc, const vtx::srect& rsrc) noexcept
+		{
 			vtx::spos p;
 			for(p.y = 0; p.y < rsrc.size.y; ++p.y) {
 				for(p.x = 0; p.x < rsrc.size.x; ++p.x) {
@@ -365,7 +373,7 @@ namespace img {
 			@param[in]	src	ソースイメージ
 		*/
 		//-----------------------------------------------------------------//
-		void copy(const img_gray8& src) { copy(vtx::spos(0), src, vtx::srect(vtx::spos(0), src.get_size())); }
+		void copy(const img_gray8& src) noexcept { copy(vtx::spos(0), src, vtx::srect(vtx::spos(0), src.get_size())); }
 
 
 		//-----------------------------------------------------------------//
@@ -376,7 +384,8 @@ namespace img {
 			@param[in]	rsrc	ソースの領域
 		*/
 		//-----------------------------------------------------------------//
-		void blend(const vtx::spos& pdst, const img_rgba8& isrc, const vtx::srect& rsrc) {
+		void blend(const vtx::spos& pdst, const img_rgba8& isrc, const vtx::srect& rsrc) noexcept
+		{
 			vtx::spos p;
 			for(p.y = 0; p.y < rsrc.size.y; ++p.y) {
 				for(p.x = 0; p.x < rsrc.size.x; ++p.x) {
@@ -404,7 +413,8 @@ namespace img {
 			@param[in]	src	ソース・コンテキスト
 		*/
 		//-----------------------------------------------------------------//
-		void swap(img_rgba8& src) {
+		void swap(img_rgba8& src) noexcept
+		{
 			img_rgba8* ptr = this;
 			*this = src;
 			src = *ptr;
@@ -417,7 +427,8 @@ namespace img {
 			@param[in]	c	塗る色
 		*/
 		//-----------------------------------------------------------------//
-		inline void fill(const rgba8& c) {
+		inline void fill(const rgba8& c) noexcept
+		{
 			for(size_t i = 0; i < img_.size(); ++i) {
 				img_[i] = c;
 			}
@@ -429,7 +440,8 @@ namespace img {
 			@brief	イメージを廃棄する
 		*/
 		//-----------------------------------------------------------------//
-		void destroy() override {
+		void destroy() noexcept override
+		{
 			size_.set(0);
 			alpha_ = false;
 			std::vector<rgba8>().swap(img_);
@@ -441,7 +453,8 @@ namespace img {
 			@brief	イメージインターフェースからのコピー
 		*/
 		//-----------------------------------------------------------------//
-		img_rgba8& operator = (const i_img* img) {
+		img_rgba8& operator = (const i_img* img) noexcept
+		{
 			if(img == 0) return *this;
 			create(img->get_size(), img->test_alpha());
 			vtx::spos p;
@@ -457,4 +470,3 @@ namespace img {
 		}
 	};
 }
-

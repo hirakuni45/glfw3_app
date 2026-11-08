@@ -7,6 +7,7 @@
 //=====================================================================//
 #include <time.h>
 #include "main.hpp"
+#include "utils/format.hpp"
 #include "utils/director.hpp"
 #include "widgets/widget_utils.hpp"
 #include "widgets/widget_filer.hpp"
@@ -106,18 +107,19 @@ namespace app {
 			gui::widget_label::param& pa = w->at_local_param();
 			time_t tt = t / 3600;
 			std::string s;
+			char tmp[8];
 			if(tt) {
-				s  = boost::lexical_cast<std::string>(tt / 10);
-				s += boost::lexical_cast<std::string>(tt % 10);
+				utils::sformat("%02d", tmp, sizeof(tmp)) % tt;
+				s += tmp;
 				s += ':';
 			}
 			tt = t / 60;
-			s += boost::lexical_cast<std::string>(tt / 10);
-			s += boost::lexical_cast<std::string>(tt % 10);
+			utils::sformat("%02d", tmp, sizeof(tmp)) % tt;
+			s += tmp;
 			s += ':';
 			tt = t % 60;
-			s += boost::lexical_cast<std::string>(tt / 10);
-			s += boost::lexical_cast<std::string>(tt % 10);
+			utils::sformat("%02d", tmp, sizeof(tmp)) % tt;
+			s += tmp;
 			pa.text_param_.set_text(s);
 		}
 

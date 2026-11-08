@@ -1,23 +1,22 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	OpenGL モーション・オブジェクト・クラス（ヘッダー）
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <vector>
+#include <iostream>
+#include <format>
 #include "gl_fw/gl_info.hpp"
 #include "gl_fw/glutils.hpp"
 #include "img_io/i_img.hpp"
 #include "img_io/img_rgba8.hpp"
 #include "img_io/img_utils.hpp"
 #include "utils/vtx.hpp"
-
-#include <boost/format.hpp>
-#include <iostream>
 
 namespace gl {
 
@@ -205,7 +204,7 @@ namespace gl {
 					char c;
 					if(tex_map_[j] & bits) c = '*';
 					else c = ' ';
-					ost << boost::format("%c") % c;
+					ost << std::format("{}", c);
 					i <<= 1;
 				}
 				ost << std::endl;
@@ -324,7 +323,7 @@ namespace gl {
 
 		void destroy_texture_page_(texture_mems& mems)
 		{
-			BOOST_FOREACH(texture_mem& txm, mems) {
+			for(texture_mem& txm : mems) {
 				GLuint id = txm.get_id();
 				glDeleteTextures(1, &id);
 			}
@@ -639,7 +638,7 @@ namespace gl {
 				glBindTexture(GL_TEXTURE_2D, id);
 				glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 				glTexImage2D(GL_TEXTURE_2D, level, internal_format_,
-							 size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, (*imf)());
+					size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, (*imf)());
 
 			} else if(imf->get_type() == img::IMG::INDEXED8) {
 				glGenTextures(1, &id);
@@ -649,9 +648,9 @@ namespace gl {
 				copy_to_rgba8(imf, im, vtx::spos(0));
 				glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 				glTexImage2D(GL_TEXTURE_2D, level, internal_format_,
-							   size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, im());
+					size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, im());
 			} else {
-				std::cout << boost::format("Install Texture No Type: %d") % static_cast<int>(imf->get_type()) << std::endl;
+				std::cout << std::format("Install Texture No Type: {}", static_cast<int>(imf->get_type())) << std::endl;
 			}
 			texture_pages_.push_back(id);
 			return id;

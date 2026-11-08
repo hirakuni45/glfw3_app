@@ -1,13 +1,13 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	BMP 画像を扱うクラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include "i_img_io.hpp"
 #include "img_idx8.hpp"
 #include "img_rgba8.hpp"
@@ -126,16 +126,16 @@ namespace img {
 		/*----------------------------------------------------------/
 		/	メモリから little-endien 形式 4バイト無符号整数を読む	/
 		/----------------------------------------------------------*/
-		static unsigned int mgetdwl(unsigned char *p)
+		static unsigned int mgetdwl(unsigned char *p) noexcept
 		{
 			return ((unsigned int)p[0]      ) + ((unsigned int)p[1] <<  8) +
-			       ((unsigned int)p[2] << 16) + ((unsigned int)p[3] << 24);
+					((unsigned int)p[2] << 16) + ((unsigned int)p[3] << 24);
 		}
 
 		/*----------------------------------------------------------/
 		/	メモリから little-endien 形式 2バイト無符号整数を読む	/
 		/----------------------------------------------------------*/
-		static unsigned int mgetwl(unsigned char *p)
+		static unsigned int mgetwl(unsigned char *p) noexcept
 		{
 			return ((unsigned int)p[0]) + ((unsigned int)p[1] << 8);
 		}
@@ -143,7 +143,7 @@ namespace img {
 		/*----------------------------------------------------------/
 		/	bmp ファイルヘッダーのみ展開して、情報を得る			/
 		/----------------------------------------------------------*/
-		static bool read_header_bmp(utils::file_io& fin, bmp_info& bmp)
+		static bool read_header_bmp(utils::file_io& fin, bmp_info& bmp) noexcept
 		{
 			unsigned char bfh[FILEHED_SIZE + BMPV5HED_SIZE];
 			unsigned char *const bih = bfh + FILEHED_SIZE;
@@ -247,8 +247,8 @@ namespace img {
 				}
 
 				if(bmp.depth == 32 && bmp.color_mask.b == 0x000000FF &&
-				    bmp.color_mask.g == 0x0000FF00 && bmp.color_mask.r == 0x00FF0000 &&
-				    (bmp.color_mask.a == 0xFF000000 || bmp.color_mask.a == 0x00000000)) {
+					bmp.color_mask.g == 0x0000FF00 && bmp.color_mask.r == 0x00FF0000 &&
+					(bmp.color_mask.a == 0xFF000000 || bmp.color_mask.a == 0x00000000)) {
 					bmp.compression = BI_RGB_;
 				}
 				break;
@@ -271,7 +271,7 @@ namespace img {
 			return true;
 		}
 
-		bool read_idx_(utils::file_io& fin, shared_img img, const bmp_info& bmp)
+		bool read_idx_(utils::file_io& fin, shared_img img, const bmp_info& bmp) noexcept
 		{
 			size_t stride = bmp.width * bmp.depth;
 			if(stride & 7) stride += 8;
@@ -315,7 +315,7 @@ namespace img {
 			return true;
 		}
 
-		bool read_rgb_(utils::file_io& fin, shared_img img, const bmp_info& bmp)
+		bool read_rgb_(utils::file_io& fin, shared_img img, const bmp_info& bmp) noexcept
 		{
 			int pads = bmp.depth / 8;
 			size_t stride = bmp.width * pads;
@@ -356,7 +356,7 @@ namespace img {
 		/*----------------------------------------------/
 		/	ビットマスクからシフトする回数を得る		/
 		/----------------------------------------------*/
-		static int shift_count(unsigned int mask)
+		static int shift_count(unsigned int mask) noexcept
 		{
 			int cnt = 0;
 			while(mask != 0) {
@@ -370,7 +370,7 @@ namespace img {
 		/*----------------------------------------------/
 		/	ビット数を数える							/
 		/----------------------------------------------*/
-		static int bits_count(unsigned int bits)
+		static int bits_count(unsigned int bits) noexcept
 		{
 			int		cnt = 0;
 			for(int i = 0; i < 32; ++i) {
@@ -381,7 +381,7 @@ namespace img {
 			return cnt;
 		}
 
-		bool read_bitfield_(utils::file_io& fin, shared_img img, const bmp_info& bmp)
+		bool read_bitfield_(utils::file_io& fin, shared_img img, const bmp_info& bmp) noexcept
 		{
 			volatile BGRA_PAD shift_cnt;
 			volatile BGRA_PAD bits_cnt;
@@ -462,7 +462,7 @@ namespace img {
 			return true;
 		}
 
-		bool decompress_rle_(utils::file_io& fin, shared_img img, const bmp_info& bmp)
+		bool decompress_rle_(utils::file_io& fin, shared_img img, const bmp_info& bmp) noexcept
 		{
 			size_t stride = bmp.width * bmp.depth;
 			if(stride & 7) stride += 8;
@@ -485,9 +485,9 @@ namespace img {
 			for( ; ; ) {
 				unsigned int reclen;
 				while(bfcnt < (reclen = 2) || (bfptr[0] == 0 && (
-					 (bfptr[1] == 2 && bfcnt < (reclen += 2)) || (bfptr[1] >= 3 &&
+						(bfptr[1] == 2 && bfcnt < (reclen += 2)) || (bfptr[1] >= 3 &&
 					  bfcnt < (reclen += (bfptr[1] * bmp.depth + 15) / 16 * 2))
-												   ))) {
+							))) {
 					if(bfptr != buf && bfcnt != 0) memmove(buf, bfptr, bfcnt);
 					size_t rd = fin.read(buf + bfcnt, 1, sizeof(buf) - bfcnt);
 					if(rd == 0) {
@@ -581,7 +581,7 @@ namespace img {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		bmp_io() : prgl_ref_(0), prgl_pos_(0) { }
+		bmp_io() noexcept : prgl_ref_(0), prgl_pos_(0) { }
 
 
 		//-----------------------------------------------------------------//
@@ -598,7 +598,7 @@ namespace img {
 			@return ファイル拡張子の文字列
 		*/
 		//-----------------------------------------------------------------//
-		const char* get_file_ext() const override { return "bmp"; }
+		const char* get_file_ext() const noexcept override { return "bmp"; }
 
 
 		//-----------------------------------------------------------------//
@@ -608,7 +608,7 @@ namespace img {
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool probe(utils::file_io& fin) override
+		bool probe(utils::file_io& fin) noexcept override
 		{
 			bmp_info bmp;
 			long pos = fin.tell();
@@ -626,7 +626,7 @@ namespace img {
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool info(utils::file_io& fin, img::img_info& fo) override
+		bool info(utils::file_io& fin, img::img_info& fo) noexcept override
 		{
 			long pos = fin.tell();
 			fin.seek(pos, utils::file_io::SEEK::SET);
@@ -691,7 +691,7 @@ namespace img {
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool load(utils::file_io& fin, const std::string& opt = "") override
+		bool load(utils::file_io& fin, const std::string& opt = "") noexcept override
 		{
 			long pos = fin.tell();
 			bmp_info bmp;
@@ -790,7 +790,7 @@ namespace img {
 			@return エラーがあれば「false」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(utils::file_io& fout, const std::string& opt = "") override
+		bool save(utils::file_io& fout, const std::string& opt = "") noexcept override
 		{
 			if(!img_) return false;
 			int w = img_->get_size().x;
@@ -811,7 +811,7 @@ namespace img {
 			@return	イメージインターフェース
 		*/
 		//-----------------------------------------------------------------//
-		const shared_img get_image() const override { return img_; }
+		const shared_img get_image() const noexcept override { return img_; }
 
 
 		//-----------------------------------------------------------------//
@@ -820,7 +820,7 @@ namespace img {
 			@param[in]	imf	イメージインターフェース
 		*/
 		//-----------------------------------------------------------------//
-		void set_image(shared_img img) override { img_ = img; }
+		void set_image(shared_img img) noexcept override { img_ = img; }
 
 
 		//-----------------------------------------------------------------//
@@ -829,7 +829,8 @@ namespace img {
 			@return 完了の場合 scale を返す
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t get_progless(uint32_t scale) const override {
+		uint32_t get_progless(uint32_t scale) const noexcept override
+		{
 			if(prgl_ref_ == 0) return 0;
 			return prgl_pos_ * scale / prgl_ref_;
 		} 

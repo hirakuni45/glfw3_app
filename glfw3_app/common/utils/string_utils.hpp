@@ -11,7 +11,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <boost/lexical_cast.hpp>
+#include <charconv>
 #include "utils/sjis_utf16.hpp"
 #include "utils/mtx.hpp"
 
@@ -159,82 +159,109 @@ namespace utils {
 
 	static bool string_to_int(const std::string& src, int32_t& dst)
 	{
-		try {
-			dst = boost::lexical_cast<int32_t>(src);
-		} catch(boost::bad_lexical_cast& bad) {
-			return false;
+		if(!src.empty()) {
+			int32_t result;
+			auto [ptr, ec] = std::from_chars(src.data(), src.data() + src.size(), result);
+			if(ec == std::errc{}) {
+				dst = result;
+			}
+			return ec == std::errc{};
 		}
-		return true;
+		return false;
 	}
 
 
 	static bool string_to_int(const std::string& src, std::vector<int32_t>& dst, const std::string& spc = " ,:")
 	{
-		try {
+		int err = 0;
+		if(!src.empty()) {
 			std::string s;
 			for(auto ch : src) {
 				if(string_strchr(spc, ch) != nullptr) {
-					int32_t v = boost::lexical_cast<int32_t>(s);
-					dst.push_back(v);
+					int32_t result;
+					auto [ptr, ec] = std::from_chars(src.data(), src.data() + src.size(), result);
+					if(ec == std::errc{}) {
+						dst.push_back(result);
+					} else {
+						++err;
+					}
 					s.clear();
 				} else {
 					s += ch;
 				}
 			}
 			if(!s.empty()) {
-				int32_t v = boost::lexical_cast<int32_t>(s);
-				dst.push_back(v);
+				int32_t result;
+				auto [ptr, ec] = std::from_chars(src.data(), src.data() + src.size(), result);
+				if(ec == std::errc{}) {
+					dst.push_back(result);
+				} else {
+					++err;
+				}
 			}
-		} catch(boost::bad_lexical_cast& bad) {
-			return false;
 		}
-		return true;
+		return err == 0;
 	}
 
 
 	static bool string_to_float(const std::string& src, float& dst)
 	{
-		try {
-			dst = boost::lexical_cast<float>(src);
-		} catch(boost::bad_lexical_cast& bad) {
-			return false;
+		if(!src.empty()) {
+			float result;
+			auto [ptr, ec] = std::from_chars(src.data(), src.data() + src.size(), result);
+			if(ec == std::errc{}) {
+				dst = result;
+			}
+			return ec == std::errc{};
 		}
-		return true;
+		return false;
 	}
 
 
 	static bool string_to_float(const std::string& src, std::vector<float>& dst, const std::string& spc = " ,:")
 	{
-		try {
+		int err = 0;
+		if(!src.empty()) {
 			std::string s;
 			for(auto ch : src) {
 				if(string_strchr(spc, ch) != nullptr) {
-					float v = boost::lexical_cast<float>(s);
-					dst.push_back(v);
+					float result;
+					auto [ptr, ec] = std::from_chars(src.data(), src.data() + src.size(), result);
+					if(ec == std::errc{}) {
+						dst.push_back(result);
+					} else {
+						++err;
+					}
 					s.clear();
 				} else {
 					s += ch;
 				}
 			}
 			if(!s.empty()) {
-				float v = boost::lexical_cast<float>(s);
-				dst.push_back(v);
+				float result;
+				auto [ptr, ec] = std::from_chars(src.data(), src.data() + src.size(), result);
+				if(ec == std::errc{}) {
+					dst.push_back(result);
+				} else {
+					++err;
+				}
 			}
-		} catch(boost::bad_lexical_cast& bad) {
-			return false;
 		}
-		return true;
+		return err == 0;
 	}
 
 
 	static bool string_to_double(const std::string& src, double& dst)
 	{
-		try {
-			dst = boost::lexical_cast<double>(src);
-		} catch(boost::bad_lexical_cast& bad) {
-			return false;
+		if(!src.empty()) {
+			double result;
+			auto [ptr, ec] = std::from_chars(src.data(), src.data() + src.size(), result);
+			if(ec == std::errc{}) {
+				dst = result;
+			}
+			return ec == std::errc{};
 		}
-		return true;
+		return false;
 	}
 
 
@@ -829,9 +856,9 @@ namespace utils {
 	//-----------------------------------------------------------------//
 	template <class SS>
 	SS split_textT(const typename SS::value_type& src,
-				   const typename SS::value_type& list,
-				   const typename SS::value_type& inhc,
-				   int limit = 0) noexcept
+				const typename SS::value_type& list,
+				const typename SS::value_type& inhc,
+				int limit = 0) noexcept
 	{
 		SS dst;
 		bool tab_back = true;

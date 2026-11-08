@@ -1,5 +1,5 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	画像ファイル入出力を扱うインターフェースクラス@n
 			・「フォーマット固有の拡張文字列」とは？@n
@@ -7,11 +7,11 @@
 			※仕様については、各クラスの説明を参照の事@n
 			※一例として「jpeg セーブ時の圧縮品質を設定する」など
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <string>
 #include "utils/file_io.hpp"
 #include "i_img.hpp"

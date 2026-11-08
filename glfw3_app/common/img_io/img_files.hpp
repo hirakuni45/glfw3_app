@@ -1,13 +1,13 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	各種画像ファイル統合的に扱う（ヘッダー）
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <memory>
 #include "img_io/i_img_io.hpp"
 #include "utils/file_io.hpp"
@@ -18,6 +18,7 @@
 #include "img_io/pvr_io.hpp"
 /// #include "img_io/dds_io.hpp"
 #include "img_io/openjpeg_io.hpp"
+#include "img_io/jxl_io.hpp"
 #include <boost/foreach.hpp>
 
 namespace img {
@@ -40,7 +41,7 @@ namespace img {
 
 		shared_img	img_;
 
-		static bool check_file_exts_(const std::string& exts, const std::string& ext)
+		static bool check_file_exts_(const std::string& exts, const std::string& ext) noexcept
 		{
 			utils::strings ss = utils::split_text(exts, ",");
 			BOOST_FOREACH(std::string& s, ss) {
@@ -52,7 +53,7 @@ namespace img {
 		}
 
 
-		void add_image_file_io_context_(img_file::img_io imi, const std::string& exts)
+		void add_image_file_io_context_(img_file::img_io imi, const std::string& exts) noexcept
 		{
 			if(imi) {
 				utils::strings ss = utils::split_text(exts, ",");
@@ -69,12 +70,13 @@ namespace img {
 		}
 
 
-		void initialize_(const std::string& exts)
+		void initialize_(const std::string& exts) noexcept
 		{
 			add_image_file_io_context_(img_file::img_io(new bmp_io), exts);
 			add_image_file_io_context_(img_file::img_io(new png_io), exts);
 			add_image_file_io_context_(img_file::img_io(new jpeg_io), exts);
 			add_image_file_io_context_(img_file::img_io(new openjpeg_io), exts);
+			add_image_file_io_context_(img_file::img_io(new jxl_io), exts);
 			add_image_file_io_context_(img_file::img_io(new pvr_io), exts);
 			// TGA フォーマットはシグネチュアが無いので、最後に評価する事
 			add_image_file_io_context_(img_file::img_io(new tga_io), exts);
@@ -86,7 +88,7 @@ namespace img {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		img_files(const std::string& exts = "bmp,png,jpg,jpeg,j2k,jp2,pvr,tga") {
+		img_files(const std::string& exts = "bmp,png,jpg,jpeg,jxl,2k,jp2,pvr,tga") noexcept {
 			initialize_(exts);
 		}
 
@@ -105,7 +107,7 @@ namespace img {
 			@return フォーマット数
 		*/
 		//-----------------------------------------------------------------//
-		int get_file_num() const { return static_cast<int>(imgios_.size()); }
+		int get_file_num() const noexcept { return static_cast<int>(imgios_.size()); }
 
 
 		//-----------------------------------------------------------------//
@@ -115,7 +117,8 @@ namespace img {
 			@return 拡張子（小文字）
 		*/
 		//-----------------------------------------------------------------//
-		const std::string& get_file_ext(size_t n) const {
+		const std::string& get_file_ext(size_t n) const noexcept
+		{
 			if(n < imgios_.size()) {
 				return imgios_[n].ext;
 			} else {
@@ -133,7 +136,7 @@ namespace img {
 			@return 画像ファイルとして認識出来ない場合は「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool probe(utils::file_io& fin, const std::string& ext = "")
+		bool probe(utils::file_io& fin, const std::string& ext = "") noexcept
 		{
 			size_t n = imgios_.size();
 			if(!ext.empty()) {
@@ -163,7 +166,8 @@ namespace img {
 			@return 画像ファイルとして認識出来ない場合は「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool probe(const std::string& filename) {
+		bool probe(const std::string& filename) noexcept
+		{
 			bool f = false;
 			utils::file_io fin;
 			if(fin.open(filename, "rb")) {
@@ -181,7 +185,8 @@ namespace img {
 			@return 画像ファイルとして認識出来ない場合は「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool probe(const std::wstring& filename) {
+		bool probe(const std::wstring& filename) noexcept
+		{
 			std::string s;
 			utils::utf16_to_utf8(filename, s);
 			bool f = false;
@@ -203,7 +208,7 @@ namespace img {
 			@return 画像ファイルとして認識出来ない場合は「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool info(utils::file_io& fin, img::img_info& fo, const std::string& ext = "")
+		bool info(utils::file_io& fin, img::img_info& fo, const std::string& ext = "") noexcept
 		{
 			size_t n = imgios_.size();
 			if(!ext.empty()) {
@@ -237,7 +242,8 @@ namespace img {
 			@return 画像ファイルとして認識出来ない場合は「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool info(const std::string& filename, img::img_info& fo) {
+		bool info(const std::string& filename, img::img_info& fo) noexcept
+		{
 			bool f = false;
 			utils::file_io fin;
 			if(fin.open(filename, "rb")) {
@@ -256,7 +262,8 @@ namespace img {
 			@return 画像ファイルとして認識出来ない場合は「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool info(const std::wstring& filename, img::img_info& fo) {
+		bool info(const std::wstring& filename, img::img_info& fo) noexcept
+		{
 			std::string s;
 			utils::utf16_to_utf8(filename, s);
 			bool f = false;
@@ -278,7 +285,7 @@ namespace img {
 			@return オープン出来ない場合は、「false」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(utils::file_io& fin, const std::string& ext = "", const std::string& opt = "")
+		bool load(utils::file_io& fin, const std::string& ext = "", const std::string& opt = "") noexcept
 		{
 			img_ = nullptr;
 			size_t n = imgios_.size();
@@ -317,7 +324,8 @@ namespace img {
 			@return 成功なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const std::string& filename, const std::string& opt = "") {
+		bool load(const std::string& filename, const std::string& opt = "") noexcept
+		{
 			bool f = false;
 			utils::file_io fin;
 			if(fin.open(filename, "rb")) {
@@ -336,7 +344,8 @@ namespace img {
 			@return 成功なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const std::wstring& filename, const std::string& opt = "") {
+		bool load(const std::wstring& filename, const std::string& opt = "") noexcept
+		{
 			std::string s;
 			utils::utf16_to_utf8(filename, s);
 			bool f = false;
@@ -358,7 +367,7 @@ namespace img {
 			@return 成功なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(utils::file_io& fout, const std::string& ext, const std::string& opt = "")
+		bool save(utils::file_io& fout, const std::string& ext, const std::string& opt = "") noexcept
 		{
 			if(!ext.empty() && img_ != nullptr) {
 				for(size_t i = 0; i < imgios_.size(); ++i) {
@@ -385,11 +394,12 @@ namespace img {
 			@return 成功なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(const std::string& filename, const std::string& opt = "") {
+		bool save(const std::string& filename, const std::string& opt = "") noexcept
+		{
 			bool f = false;
-   			utils::file_io fo;
+			utils::file_io fo;
 			if(fo.open(filename, "wb")) {
-   				f = save(fo, utils::get_file_ext(filename), opt);
+				f = save(fo, utils::get_file_ext(filename), opt);
 				fo.close();
 			}
 			return f;
@@ -404,7 +414,8 @@ namespace img {
 			@return 成功なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(const std::wstring& filename, const std::string& opt = "") {
+		bool save(const std::wstring& filename, const std::string& opt = "") noexcept
+		{
 			std::string s;
 			utils::utf16_to_utf8(filename, s);
 			return save(s, opt);
@@ -417,7 +428,7 @@ namespace img {
 			@return	イメージインターフェース
 		*/
 		//-----------------------------------------------------------------//
-		const shared_img get_image() const { return img_; }
+		const shared_img get_image() const noexcept { return img_; }
 
 
 		//-----------------------------------------------------------------//
@@ -426,9 +437,7 @@ namespace img {
 			@param[in]	img	イメージ・インターフェース
 		*/
 		//-----------------------------------------------------------------//
-		void set_image(shared_img img) { img_ = img; }
+		void set_image(shared_img img) noexcept { img_ = img; }
 
 	};
-
 }
-

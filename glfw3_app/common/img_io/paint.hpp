@@ -1,13 +1,13 @@
 #pragma once
-//=====================================================================//
+//=============================================================================//
 /*!	@file
 	@brief	汎用ペイント・クラス（ヘッダー）
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=============================================================================//
 /// #include <unistd.h>
 #include "img.hpp"
 #include "i_img.hpp"
@@ -20,11 +20,11 @@
 
 namespace img {
 
-	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
 		@brief	ペイント・クラス
 	*/
-	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class paint : public img_rgba8 {
 
 	public:
@@ -43,24 +43,24 @@ namespace img {
 				left_bottom(i), center_bottom(i), right_bottom(i) { }
 
 			void set(uint8_t a0, uint8_t b0, uint8_t c0,
-					 uint8_t a1, uint8_t b1, uint8_t c1,
-					 uint8_t a2, uint8_t b2, uint8_t c2) {
+					uint8_t a1, uint8_t b1, uint8_t c1,
+					uint8_t a2, uint8_t b2, uint8_t c2) {
 				left_top    = a0; center_top    = b0; right_top    = c0;
 				left_center = a1; center_center = b1; right_center = c1;
 				left_bottom = a2; center_bottom = b2; right_bottom = c2;
 			}
 
 			size_t hash() const {
-				size_t h = 0;
-				boost::hash_combine(h, left_top);
-				boost::hash_combine(h, center_top);
-				boost::hash_combine(h, right_top);
-				boost::hash_combine(h, left_center);
-				boost::hash_combine(h, center_center);
-				boost::hash_combine(h, right_center);
-				boost::hash_combine(h, left_bottom);
-				boost::hash_combine(h, center_bottom);
-				boost::hash_combine(h, right_bottom);
+				size_t h;
+				h  = std::hash<uint8_t>()(left_top);
+				h ^= std::hash<uint8_t>()(center_top);
+				h ^= std::hash<uint8_t>()(right_top);
+				h ^= std::hash<uint8_t>()(left_center);
+				h ^= std::hash<uint8_t>()(center_center);
+				h ^= std::hash<uint8_t>()(right_center);
+				h ^= std::hash<uint8_t>()(left_bottom);
+				h ^= std::hash<uint8_t>()(center_bottom);
+				h ^= std::hash<uint8_t>()(right_bottom);
 				return h;
 			}
 
@@ -314,16 +314,16 @@ namespace img {
 			if(alpha_blend_) {
 				rgba8 bc;
 				if(get_pixel(p, bc)) {
-					u16 a = static_cast<u16>(bc.a) + 1;
-					a *= 256 - static_cast<u16>(c.a);
+					auto a = static_cast<uint16_t>(bc.a) + 1;
+					a *= 256 - static_cast<uint16_t>(c.a);
 					a >>= 8;
-					u16 r = static_cast<u16>(bc.r) * a;
-					u16 g = static_cast<u16>(bc.g) * a;
-					u16 b = static_cast<u16>(bc.b) * a;
-					a = static_cast<u16>(c.a) + 1;
-					r += static_cast<u16>(c.r) * a;
-					g += static_cast<u16>(c.g) * a;
-					b += static_cast<u16>(c.b) * a;
+					auto r = static_cast<uint16_t>(bc.r) * a;
+					auto g = static_cast<uint16_t>(bc.g) * a;
+					auto b = static_cast<uint16_t>(bc.b) * a;
+					a = static_cast<uint16_t>(c.a) + 1;
+					r += static_cast<uint16_t>(c.r) * a;
+					g += static_cast<uint16_t>(c.g) * a;
+					b += static_cast<uint16_t>(c.b) * a;
 					put_pixel(p, rgba8(r >> 8, g >> 8, b >> 8, bc.a));
 					return true;
 				} else {
@@ -498,13 +498,13 @@ namespace img {
 					h_line_(fore_color_, spos(center.x - l, center.y + dy), len);
 				}
 				{
-					u16 gain = dx & 255;
-					short len = ln - l;
+					uint16_t gain = dx & 255;
+					int16_t len = ln - l;
 					if(len == 0) len = 1;
 					if(gain || len > 1) {
 						if(gain == 0) gain = 255;
 						rgba8 c = fore_color_;
-						c.a = (static_cast<u16>(fore_color_.a) * (gain + 1)) >> 8;
+						c.a = (static_cast<uint16_t>(fore_color_.a) * (gain + 1)) >> 8;
 						if(dy) {
 							h_line_gray_(c, spos(center.x - l - 1, center.y - dy), -len);
 							h_line_gray_(c, spos(center.x + l + 1, center.y - dy),  len);
@@ -761,7 +761,7 @@ namespace img {
 			std::u32string ls;
 			utils::utf8_to_utf32(txt, ls);
 			int w = 0;
-			BOOST_FOREACH(uint32_t lc, ls) {
+			for(uint32_t lc : ls) {
 				w += get_font_width(lc);
 			}
 			return w;
@@ -814,7 +814,7 @@ namespace img {
 			utils::utf8_to_utf32(txt, ls);
 			int w = 0;
 			vtx::spos p = pos;
-			BOOST_FOREACH(uint32_t lc, ls) {
+			for(uint32_t lc : ls) {
 				int chw = draw_font(p, lc);
 				w += chw;
 				p.x += chw;

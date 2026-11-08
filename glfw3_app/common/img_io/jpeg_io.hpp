@@ -1,20 +1,20 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	JPEG/JFIF 画像を扱うクラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2024 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include "i_img_io.hpp"
 #include "img_rgba8.hpp"
 #include "utils/file_io.hpp"
-#include <boost/lexical_cast.hpp>
 #include <iostream>
 #include <cstdio>
 #include <cstdlib>
+#include <charconv>
 
 extern "C" {
 #include <jpeglib.h>
@@ -237,7 +237,7 @@ namespace img {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		jpeg_io() : prgl_ref_(0), prgl_pos_(0) { }
+		jpeg_io() noexcept : prgl_ref_(0), prgl_pos_(0) { }
 
 
 		//-----------------------------------------------------------------//
@@ -254,7 +254,7 @@ namespace img {
 			@return ファイル拡張子の文字列
 		*/
 		//-----------------------------------------------------------------//
-		const char* get_file_ext() const override { return "jpg,jpeg,jfif"; }
+		const char* get_file_ext() const noexcept override { return "jpg,jpeg,jfif"; }
 
 
 		//-----------------------------------------------------------------//
@@ -264,7 +264,7 @@ namespace img {
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool probe(utils::file_io& fin) override
+		bool probe(utils::file_io& fin) noexcept override
 		{
 			uint8_t sig[2];
 			long pos = fin.tell();
@@ -287,7 +287,7 @@ namespace img {
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool info(utils::file_io& fin, img::img_info& fo) override
+		bool info(utils::file_io& fin, img::img_info& fo) noexcept override
 		{
 			if(!probe(fin)) {
 				return false;
@@ -370,7 +370,7 @@ namespace img {
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool load(utils::file_io& fin, const std::string& opt = "") override
+		bool load(utils::file_io& fin, const std::string& opt = "") noexcept override
 		{
 			// とりあえず、ヘッダーの検査
 			if(probe(fin) == false) {
@@ -488,7 +488,8 @@ namespace img {
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool load(const std::string& filename, const std::string& opt = "") {
+		bool load(const std::string& filename, const std::string& opt = "") noexcept
+		{
 			utils::file_io fin;
 			if(fin.open(filename, "rb")) {
 				bool f = load(fin, opt);
@@ -507,7 +508,7 @@ namespace img {
 			@return エラーがあれば「false」
 		*/
 		//-----------------------------------------------------------------//
-		bool save(utils::file_io& fout, const std::string& opt = "") override
+		bool save(utils::file_io& fout, const std::string& opt = "") noexcept override
 		{
 			if(!img_) return false;
 			if(img_->get_size().x == 0 || img_->get_size().y == 0) return false;
@@ -515,12 +516,10 @@ namespace img {
 			int q = 75;
 			// 0 to 100
 			if(!opt.empty()) {
-				try {
-					q = boost::lexical_cast<int>(opt);
-				} catch (boost::bad_lexical_cast&) {
-					q = 75;
-				}
+				std::from_chars(opt.data(), opt.data() + opt.size(), q);
 			}
+			if(q < 0) q = 0;
+			else if(q > 100) q = 100;
 
 			struct jpeg_compress_struct cinfo;
 			struct jpeg_error_mgr errmgr;
@@ -606,7 +605,7 @@ namespace img {
 			@return	イメージインターフェース
 		*/
 		//-----------------------------------------------------------------//
-		const shared_img get_image() const override { return img_; }
+		const shared_img get_image() const noexcept override { return img_; }
 
 
 		//-----------------------------------------------------------------//
@@ -615,7 +614,7 @@ namespace img {
 			@param[in]	img	イメージインターフェース
 		*/
 		//-----------------------------------------------------------------//
-		void set_image(shared_img img) override { img_ = img; }
+		void set_image(shared_img img) noexcept override { img_ = img; }
 
 
 		//-----------------------------------------------------------------//
@@ -624,7 +623,7 @@ namespace img {
 			@return 完了の場合 scale を返す
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t get_progless(uint32_t scale) const override {
+		uint32_t get_progless(uint32_t scale) const noexcept override {
 			if(prgl_ref_ == 0) return 0;
 			return prgl_pos_ * scale / prgl_ref_;
 		} 
