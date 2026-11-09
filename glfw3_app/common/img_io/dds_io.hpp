@@ -416,7 +416,7 @@ namespace img {
 			int mipmap_level = 0;
 			if(!ext.empty()) {
 				utils::strings ss = utils::split_text(ext, ",");
-				BOOST_FOREACH(const string& s, ss) {
+				for(const string& s : ss) {
 					int n = -1;
 					if(sscanf(s.c_str(), "multi:%d", &n) == 1) {
 						if(n > 0 && n < 6) {

@@ -303,12 +303,12 @@ namespace utils {
 			ss = utils::split_text(filter, ",");
 		}
 
-		BOOST_FOREACH(const file_info& f, src) {
+		for(const file_info& f : src) {
 			bool add = false;
 			if(f.is_directory() || ss.empty()) add = true;
 			else {
 				const std::string& n = f.get_name();
-				BOOST_FOREACH(const std::string& s, ss) {
+				for(const std::string& s : ss) {
 					const char* p = nullptr;
 					if(last) p = strrchr(n.c_str(), '.');
 					else p = strchr(n.c_str(), '.');
