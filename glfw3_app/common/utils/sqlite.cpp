@@ -5,7 +5,6 @@
 */
 //=====================================================================//
 #include "sqlite.hpp"
-#include <boost/foreach.hpp>
 #include <iostream>
 
 namespace sys {
@@ -158,7 +157,7 @@ namespace sys {
 	void sqlite::destroy()
 	{
 		if(m_db) {
-			BOOST_FOREACH(sqlite3_stmt* stp, m_db_stmts) {
+			for(sqlite3_stmt* stp : m_db_stmts) {
 				if(stp) sqlite3_finalize(stp);
 			}
 		}

@@ -11,7 +11,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
-#include <boost/format.hpp>
+#include <format>
 #include "gl_fw/gl_info.hpp"
 #include "utils/vtx.hpp"
 #include "img_io/img.hpp"
@@ -315,7 +315,7 @@ namespace gl {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		light() : enable_(false), light_num_(0) { }
+		light() noexcept : enable_(false), light_num_(0) { }
 
 
 		//-----------------------------------------------------------------//
@@ -332,7 +332,8 @@ namespace gl {
 			@param[in]	f	フラグ
 		*/
 		//-----------------------------------------------------------------//
-		void enable(bool f = true) {
+		void enable(bool f = true) noexcept
+		{
 			enable_ = f;
 			if(light_num_ != 0 && enable_) {
 				glEnable(GL_LIGHTING);
@@ -348,7 +349,8 @@ namespace gl {
 			@return ライトのハンドル
 		*/
 		//-----------------------------------------------------------------//
-		handle create() {
+		handle create() noexcept
+		{
 			handle h = light_envs_.size();
 			light_env env;
 			light_envs_.push_back(env);
@@ -363,7 +365,7 @@ namespace gl {
 			@param[in]	f	フラグ
 		*/
 		//-----------------------------------------------------------------//
-		void enable(handle h, bool f = true) { light_envs_[h].enable_ = f; }
+		void enable(handle h, bool f = true) noexcept { light_envs_[h].enable_ = f; }
 
 
 		//-----------------------------------------------------------------//
@@ -373,7 +375,8 @@ namespace gl {
 			@param[in]	pos	位置
 		*/
 		//-----------------------------------------------------------------//
-		void set_position(handle h, const vtx::fvtx& pos) {
+		void set_position(handle h, const vtx::fvtx& pos) noexcept
+		{
 			light_envs_[h].pos_.set(pos.x, pos.y, pos.z);
 		}
 
@@ -385,7 +388,8 @@ namespace gl {
 			@param[in]	col	ライト・カラー
 		*/
 		//-----------------------------------------------------------------//
-		void set_ambient_color(handle h, const img::rgbaf& col) {
+		void set_ambient_color(handle h, const img::rgbaf& col) noexcept
+		{
 			light_envs_[h].ambient_ = col;
 		}
 
@@ -397,7 +401,8 @@ namespace gl {
 			@param[in]	col	ライト・カラー
 		*/
 		//-----------------------------------------------------------------//
-		void set_diffuse_color(handle h, const img::rgbaf& col) {
+		void set_diffuse_color(handle h, const img::rgbaf& col) noexcept
+		{
 			light_envs_[h].diffuse_ = col;
 		}
 
@@ -409,7 +414,8 @@ namespace gl {
 			@param[in]	col	ライト・カラー
 		*/
 		//-----------------------------------------------------------------//
-		void set_specular_color(handle h, const img::rgbaf& col) {
+		void set_specular_color(handle h, const img::rgbaf& col) noexcept
+		{
 			light_envs_[h].specular_ = col;
 		}
 
@@ -420,7 +426,7 @@ namespace gl {
 			@param[in]	id	マテルアル ID
 		*/
 		//-----------------------------------------------------------------//
-		void set_material(material::type id) const
+		void set_material(material::type id) const noexcept
 		{
 			const light_material_& mte = light_material_tables_[id];
 			glMaterialfv(GL_FRONT, GL_AMBIENT,   mte.ambient_);
@@ -444,7 +450,7 @@ namespace gl {
 			@return	マテリアル ID
 		*/
 		//-----------------------------------------------------------------//
-		material::type lookup_material(const std::string& name) const
+		material::type lookup_material(const std::string& name) const noexcept
 		{
 			for(size_t i = 0; i < (sizeof(light_material_tables_) / sizeof(light_material_)); ++i) {
 				const light_material_& mte = light_material_tables_[i];
@@ -462,7 +468,8 @@ namespace gl {
 			@param[in]	name	マテルアル名
 		*/
 		//-----------------------------------------------------------------//
-		bool set_material(const std::string& name) const {
+		bool set_material(const std::string& name) const noexcept
+		{
 			material::type id = lookup_material(name);
 			if(id != material::type::none_) {
 				set_material(id);
@@ -478,7 +485,7 @@ namespace gl {
 			@brief	サービス
 		*/
 		//-----------------------------------------------------------------//
-		void service()
+		void service() noexcept
 		{
 			static constexpr GLenum light_idx[] = {
 				GL_LIGHT0, GL_LIGHT1, GL_LIGHT2, GL_LIGHT3,
@@ -506,11 +513,11 @@ namespace gl {
 			@brief	マテリアルの全リストを表示
 		*/
 		//-----------------------------------------------------------------//
-		void list_material() const
+		void list_material() const noexcept
 		{
 			for(size_t i = 0; i < (sizeof(light_material_tables_) / sizeof(light_material_)); ++i) {
 				const light_material_& mte = light_material_tables_[i];
-				std::cout << boost::format("(%d) '%s'") % i % mte.name_ << std::endl;
+				std::cout << std::format("({}) '{}'", i, mte.name_) << std::endl;
 			}
 		}
 	};

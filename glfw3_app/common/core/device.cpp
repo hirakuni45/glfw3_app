@@ -1,4 +1,4 @@
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	デバイス用ラッパークラス @n
 			「windows.h」をインクルードする弊害が色々とあるので、このソースに集約している。
@@ -7,12 +7,13 @@
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <GLFW/glfw3.h>
 #include <sys/stat.h>
 #include "core/device.hpp"
 #include "utils/string_utils.hpp"
 #include "utils/drive_info.hpp"
+#include <format>
 
 #ifdef WIN32
 #include <windows.h>
@@ -67,7 +68,7 @@ namespace utils {
 			std::string tt;
 			if(strchr(md.c_str(), 'w')) tt = "output";
 			else tt = "input";
-			std::cerr << boost::format("Can't open %1% file (file_io::wfopen): '%2%'") % tt % s << std::endl;
+			std::cerr << std::format("Can't open {} file (file_io::wfopen): '{}'", tt, s) << std::endl;
 		}
 #endif
 		return fp;

@@ -1,20 +1,18 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	OpenGL/ES 依存を吸収する為のヘッダー
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #define GLEW_STATIC
 #include <GL/glew.h>
 
 #define GLFW_INCLUDE_GLU
 #include <GLFW/glfw3.h>
-
-#include <boost/assert.hpp>
 
 namespace gl {
 

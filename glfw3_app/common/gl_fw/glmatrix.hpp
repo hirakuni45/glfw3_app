@@ -1,13 +1,13 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
-	@brief	OpenGL マトリックス・エミュレーター（ヘッダー）
+	@brief	OpenGL マトリックス・エミュレーター
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <stack>
 #include "utils/vtx.hpp"
 #include "utils/mtx.hpp"
@@ -448,12 +448,12 @@ namespace gl {
 		//-----------------------------------------------------------------//
 		void print_matrix() {
 			for(int i = 0; i < 4; ++i) {
-				std::cout << boost::format("(%d) %-1.5f, %-1.5f, %-1.5f, %-1.5f\n")
+				std::cout << std::format("({}) {:-1.5f}, {:-1.5f}, {:-1.5f}, {:-1.5f}\n",
 					% i
 					% acc_[mode_].m[0 * 4 + i]
 					% acc_[mode_].m[1 * 4 + i]
 					% acc_[mode_].m[2 * 4 + i]
-					% acc_[mode_].m[3 * 4 + i];
+					% acc_[mode_].m[3 * 4 + i]);
 			}
 		}
 #endif

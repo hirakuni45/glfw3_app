@@ -1,18 +1,18 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	PNG 画像を扱うクラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include "i_img_io.hpp"
 #include <png.h>
 #include "img_idx8.hpp"
 #include "img_rgba8.hpp"
-#include <boost/format.hpp>
+#include <format>
 
 namespace img {
 
@@ -44,8 +44,10 @@ namespace img {
 
 			size_t s = fin->read(buf, 1, size);
 			if(s != size) {
-				png_error(png_ptr, boost::io::str(boost::format("png_io_read_func: error (read size: %d, request: %d)")
-					% static_cast<int>(s) % static_cast<int>(size)).c_str());
+				std::string tmp = std::format("png_io_read_func: error (read size: {}, request: {})",
+					static_cast<int>(s), static_cast<int>(size));
+				png_error(png_ptr, tmp.c_str());
+				
 			}
 		}
 
@@ -64,8 +66,8 @@ namespace img {
 
 			size_t s = fout->write(buf, 1, size);
 			if(s != size) {
-				auto str = (boost::format("png_io_write_func: error (%d/%d)")
-					% static_cast<int>(s) % static_cast<int>(size)).str();
+				std::string str = std::format("png_io_write_func: error ({}/{})",
+					static_cast<int>(s), static_cast<int>(size));
 				png_error(png_ptr, str.c_str());
 			}
 		}

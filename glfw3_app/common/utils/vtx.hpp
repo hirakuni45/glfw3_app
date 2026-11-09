@@ -881,7 +881,7 @@ namespace vtx {
 				return false;
 			}
 		}
- 
+
 		void center(vertex2<T>& c) const { c = (org + size) / static_cast<T>(2); }
 		vertex2<T> center() const { return (org + size) / static_cast<T>(2); }
 		void end(vertex2<T>& e) const { e = org + size; }
@@ -1443,33 +1443,3 @@ namespace vtx {
 		return (s != dst.size());
 	}
 }	// namespace vtx
-
-namespace std {
-	template <>
-    struct hash<vtx::ipos> {
-        size_t operator()(const vtx::ipos& v) const {
-            return v.hash();
-        }
-    };
-
-	template <>
-    struct hash<vtx::ivtx> {
-        size_t operator()(const vtx::ivtx& v) const {
-            return v.hash();
-        }
-    };
-
-	template <>
-    struct hash<vtx::fpos> {
-        size_t operator()(const vtx::fpos& v) const {
-            return v.hash();
-        }
-    };
-
-	template <>
-    struct hash<vtx::fvtx> {
-        size_t operator()(const vtx::fvtx& v) const {
-            return v.hash();
-        }
-    };
-}

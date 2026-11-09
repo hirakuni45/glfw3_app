@@ -1,16 +1,17 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
-	@brief	DDS 画像を扱うクラス（ヘッダー）
+	@brief	DDS 画像を扱うクラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2023 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include "img_io/i_img_io.hpp"
 #include "img_io/img_idx8.hpp"
 #include "img_io/img_rgba8.hpp"
+// #include <format>
 
 namespace img {
 
@@ -67,11 +68,11 @@ namespace img {
 		static inline int8_t UBYTE_TO_CHAN(uint8_t b) { return b; }
 
 		static inline uint32_t EXP5TO8R(uint32_t packedcol) {
-   			return ((packedcol >> 8) & 0xf8) | ((packedcol >> 13) & 0x7);
+			return ((packedcol >> 8) & 0xf8) | ((packedcol >> 13) & 0x7);
 		}
 
 		static inline uint16_t EXP6TO8G(uint16_t packedcol) {
-   			return ((packedcol >> 3) & 0xfc) | ((packedcol >>  9) & 0x3);
+			return ((packedcol >> 3) & 0xfc) | ((packedcol >>  9) & 0x3);
 		}
 
 		static inline uint8_t EXP5TO8B(uint8_t packedcol) {
@@ -79,7 +80,7 @@ namespace img {
 		}
 
 		static inline uint8_t EXP4TO8(uint8_t col) {
-   			return col | (col << 4);
+			return col | (col << 4);
 		}
 
 		/* inefficient. To be efficient, it would be necessary to decode 16 pixels at once */
@@ -438,19 +439,19 @@ namespace img {
 			img::img_info fo;
 			make_info(ddsd, fo);
 #if 0
-			boost::format("load Mipmap: %d\n") % fo.mipmap_level;
-			boost::format("load Multi:  %d\n") % fo.multi_level;
+			std::format("load Mipmap: {}\n", fo.mipmap_level);
+			std::format("load Multi:  {}\n", fo.multi_level);
 
-			boost::format("sizeof: %d\n") % sizeof(DDSurfaceDesc);
-			boost::format("Size: %d\n") % ddsd.size);
-			boost::format("Flags: %d\n") % ddsd.flags;
-			boost::format("W/H: %d, %d\n") % ddsd.width % ddsd.height;
-			boost::format("Mipmap level: %d\n") % ddsd.mipMapLevels;
-			boost::format("Pitch: %d\n") % ddsd.pitch;
-			boost::format("Depth: %d\n") % ddsd.depth;
-			boost::format("Surfcae: %d\n") % ddsd.surface;
+			std::format("sizeof: {}\n", sizeof(DDSurfaceDesc);
+			std::format("Size: {}\n", ddsd.size);
+			std::format("Flags: {}\n", ddsd.flags);
+			std::format("W/H: {}, {}\n", ddsd.width, ddsd.height);
+			std::format("Mipmap level: {}\n", ddsd.mipMapLevels);
+			std::format("Pitch: {}\n", ddsd.pitch);
+			std::format("Depth: {}\n", ddsd.depth);
+			std::format("Surfcae: {}\n", ddsd.surface);
 
-			boost::format("Tex-Stage: %d\n") % ddsd.textureStage;
+			std::format("Tex-Stage: {}\n", ddsd.textureStage);
 
 			char fo[5];
 			const char* p = (const char *)&ddsd.format.fourCC;
@@ -459,14 +460,14 @@ namespace img {
 			fo[2] = p[2];
 			fo[3] = p[3];
 			fo[4] = 0;
-			boost::format("format: '%s'\n") % fo;
-			boost::format("Caps: %08X\n") % ddsd.caps.caps2;
+			std::format("format: '{}'\n", fo);
+			std::format("Caps: {:0X08}\n", ddsd.caps.caps2);
 
-			boost::format("BPP:   %d\n") % ddsd.format.bpp;
-			boost::format("MaskR: %08X\n") % ddsd.format.redMask;
-			boost::format("MaskG: %08X\n") % ddsd.format.greenMask;
-			boost::format("MaskB: %08X\n") % ddsd.format.blueMask;
-			boost::format("MaskA: %08X\n") % ddsd.format.alphaMask;
+			std::format("BPP:   {}\n", ddsd.format.bpp);
+			std::format("MaskR: {:0X08}\n", ddsd.format.redMask);
+			std::format("MaskG: {:0X08}\n", ddsd.format.greenMask);
+			std::format("MaskB: {:0X08}\n", ddsd.format.blueMask);
+			std::format("MaskA: {:0X08}\n", ddsd.format.alphaMask);
 #endif
 
 			enum {
@@ -541,7 +542,7 @@ namespace img {
 				}
 			}
 
-//			boost::format("%d, %d\n") % width % height;
+//			std::format("{}, {}\n", width, height);
 
 			switch(form) {
 			case form_RGBA:

@@ -1,7 +1,9 @@
 #pragma once
 //=========================================================================//
 /*!	@file
-	@brief	OpenGL フォント・クラス
+	@brief	OpenGL フォント・クラス @n
+			生成したフォントビットマップをテクスチャーとして管理する @n
+			１枚のテクスチャーに、フォントを並べて共有する
     @author 平松邦仁 (hira@rvf-rc45.net)
 	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
@@ -23,7 +25,7 @@ namespace gl {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
-		@brief	サイズ、コード
+		@brief	サイズ、コード・クラス
 	*/
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct size_code_t {
@@ -41,20 +43,12 @@ namespace gl {
 			return (t.size_ == size_ && t.code_ == code_);
 		}
 	};
-}
 
-//	inline size_t hash_value(const size_code_t& t) { return t.hash(); }
+	template <class T>
+	struct hash_value {
+		size_t operator() (const T& v) const { return v.hash(); }
+	};
 
-namespace std {
-    template <>
-    struct hash<gl::size_code_t> {
-        size_t operator()(const gl::size_code_t& t) const {
-            return t.hash();
-        }
-    };
-}
-
-namespace gl {
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
@@ -78,7 +72,7 @@ namespace gl {
 			FTIMG::metrics	met;	///< フォントのメトリックス
 		};
 
-		typedef std::unordered_map<size_code_t, tex_map>	fcode_map;
+		typedef std::unordered_map<size_code_t, tex_map, hash_value<size_code_t>>	fcode_map;
 
 		// フォント基本環境
 		struct finfo_t {

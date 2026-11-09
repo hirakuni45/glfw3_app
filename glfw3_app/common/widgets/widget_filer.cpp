@@ -9,8 +9,7 @@
 //=============================================================================//
 #include "widgets/widget_utils.hpp"
 #include "widgets/widget_filer.hpp"
-#include <boost/lexical_cast.hpp>
-#include <format>
+#include "utils/format.hpp"
 #include <utility>
 
 namespace gui {
@@ -223,7 +222,8 @@ namespace gui {
 				if(wf.dir) {
 					wf.info->at_local_param().text_param_.set_text(" -");
 				} else {
-					wf.info->at_local_param().text_param_.set_text(" " + boost::lexical_cast<std::string>(wf.size));
+					auto s = std::format("{}", wf.size);
+					wf.info->at_local_param().text_param_.set_text(" " + s);
 				}
 			} else if(info_state_ == info_state::TIME) {
 				std::string s;
@@ -238,7 +238,7 @@ namespace gui {
 				std::string s;
 				s += ' ';
 				uint32_t bit = 1 << 8;
-				static const char chmod[9]
+				static constexpr char chmod[9]
 					= { 'r', 'w', 'x', 'r', 'w', 'x', 'r', 'w', 'x' };
 				for(int i = 0; i < 9; ++i) {
 					if(wf.mode & bit) {
