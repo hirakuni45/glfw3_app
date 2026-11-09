@@ -1,16 +1,15 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
-	@brief	OpenGL ターミナル・クラス（ヘッダー）
+	@brief	OpenGL ターミナル・クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <vector>
 #include <cstring>
-#include <boost/foreach.hpp>
 #include "core/glcore.hpp"
 #include "img_io/img.hpp"
 #include "utils/vtx.hpp"
@@ -109,7 +108,7 @@ namespace gl {
 			c.fore_color = fore_color_;
 			c.back_color = back_color_;
 			c.atr = attribute_;
-			BOOST_FOREACH(code& cd, buff_) {
+			for(code& cd : buff_) {
 				cd = c;
 			}
 
@@ -153,7 +152,7 @@ namespace gl {
 				c.fore_color = fore_color_;
 				c.back_color = back_color_;
 				c.atr = attribute_;
-				BOOST_FOREACH(code& cd, buff_) {
+				for(code& cd : buff_) {
 					cd = c;
 				}
 			}

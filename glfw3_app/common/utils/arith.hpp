@@ -3,22 +3,24 @@
 /*!	@file
 	@brief	Arithmetic クラス @n
 			※テキストの数式を展開して、実計算結果を得る。 @n
-			簡易演算式解析 @n
-			Copyright 2017, 2023 Kunihito Hiramatsu
+			簡易演算式解析
 	@author	平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
 //=====================================================================//
 #include <string>
 #include <bitset>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
 namespace utils {
 
-	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
 		@brief	Arithmetic クラス
 	*/
-	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	struct arith {
 
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -66,8 +68,8 @@ namespace utils {
 			double	d_scale_;
 
 			value() : hex_value_(false), integer_(0), point_(false),
-					  float_(0.0f), f_scale_(1.0f),
-					  dbe_(false), double_(0.0), d_scale_(1.0) { }
+				float_(0.0f), f_scale_(1.0f),
+				dbe_(false), double_(0.0), d_scale_(1.0) { }
 
 			void sum(char c)
 			{
@@ -228,9 +230,9 @@ namespace utils {
 
 		value		value_;
 
-		typedef boost::unordered_map<std::string, value>					symbol_map;
-		typedef boost::unordered_map<std::string, value>::iterator			symbol_map_it;
-		typedef boost::unordered_map<std::string, value>::const_iterator	symbol_map_cit;
+		typedef std::unordered_map<std::string, value>					symbol_map;
+		typedef std::unordered_map<std::string, value>::iterator		symbol_map_it;
+		typedef std::unordered_map<std::string, value>::const_iterator	symbol_map_cit;
 		symbol_map	symbol_;
 
 		value number_()
@@ -530,7 +532,7 @@ namespace utils {
 			std::string s;
 
 			// スペースと TAB を除外
-			BOOST_FOREACH(char c, text) {
+			for(char c : text) {
 				if(c == ' ' || c == '\t') ;
 				else if(c < ' ') {
 					value_.error_.set(error::fatal);

@@ -682,7 +682,7 @@ namespace gui {
 					if(select_widget_->get_state(widget::state::SELECT_CHILDS)) {
 						widgets ws;
 						parents_widget(select_widget_, ws);
-						BOOST_FOREACH(widget* w, ws) {
+						for(widget* w : ws) {
 							if(w->get_state(widget::state::SELECT_PARENTS)) {
 								w->set_state(widget::state::SELECT);
 							}

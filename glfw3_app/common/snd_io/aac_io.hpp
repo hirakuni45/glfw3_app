@@ -5,13 +5,14 @@
 			FAAD(2) library, mp4ff library を利用する。 @n
 			mp4ff は、FAAD2 に含まれるライブラリで、独自に生成する必要がある。
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2025 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
 //=========================================================================//
 #include <string>
 #include <faad.h>
+#include <format>
 #include "mp4ff.h"
 #include "i_snd_io.hpp"
 #include "snd_io/pcm.hpp"
@@ -84,7 +85,7 @@ namespace al {
 		};
 
 
-		static int fill_buffer_(aac_buffer& b)
+		static int fill_buffer_(aac_buffer& b) noexcept
 		{
 			int bread;
 	
@@ -118,7 +119,7 @@ namespace al {
 		}
 
 
-		static void advance_buffer_(aac_buffer& b, int bytes)
+		static void advance_buffer_(aac_buffer& b, int bytes) noexcept
 		{
 			b.file_offset += bytes;
 			b.bytes_consumed = bytes;
@@ -132,7 +133,7 @@ namespace al {
 		};
 
 
-		static int adts_parse_(aac_buffer& b, int *bitrate, float *length)
+		static int adts_parse_(aac_buffer& b, int *bitrate, float *length) noexcept
 		{
 			int frames, frame_length;
 			int t_framelength = 0;
@@ -181,7 +182,7 @@ namespace al {
 		}
 	
 #if 0
-		static int FindAdtsSRIndex_(int sr)
+		static int FindAdtsSRIndex_(int sr) noexcept
 		{
 			for (int i = 0; i < 16; i++) {
 				if (sr == adts_sample_rates_[i]) return i;
@@ -239,7 +240,7 @@ namespace al {
 #endif
 
 
-		static audio decode_aac_file_(utils::file_io& fin)
+		static audio decode_aac_file_(utils::file_io& fin) noexcept
 		{
 			int old_format = 0;
 			int outputFormat = FAAD_FMT_16BIT;
@@ -361,12 +362,12 @@ namespace al {
 				std::cerr << "RAW\n\n";
 			break;
 			case 1:
-				std::cerr << boost::format("ADTS, %.3f sec, %d kbps, %d Hz\n\n")
-					% length % bitrate % samplerate;
+				std::cerr << std::format("ADTS, {:.3f} sec, {} kbps, {} Hz\n\n",
+					length, bitrate, samplerate);
 			break;
 			case 2:
-				std::cerr << boost::format("ADIF, %.3f sec, %d kbps, %d Hz\n\n")
-					% length % bitrate % samplerate;
+				std::cerr << std::format("ADIF, {:.3f} sec, {} kbps, {} Hz\n\n",
+					length, bitrate, samplerate);
 			break;
 			}
 #endif
@@ -385,8 +386,8 @@ namespace al {
 				percent = std::min(static_cast<int>((b.file_offset * 100) / fileread), 100);
 				if (percent > old_percent) {
 					old_percent = percent;
-					/// std::cerr << boost::format("%d%% decoding %s.") % percent % aacfile;
-					std::cerr << boost::format("%s\r") % percents;
+					/// std::cerr << std::format("{}% decoding {}.", percent, aacfile);
+					std::cerr << std::format("{}\r", percents);
 				}
 
 				if ((frameInfo.error == 0) && (frameInfo.samples > 0)) {
@@ -411,21 +412,21 @@ namespace al {
 		}
 
 
-		static uint32_t read_callback_(void* user_data, void* buffer, uint32_t length)
+		static uint32_t read_callback_(void* user_data, void* buffer, uint32_t length) noexcept
 		{
 			utils::file_io* fin = static_cast<utils::file_io*>(user_data);
 			if(fin) return fin->read(buffer, 1, length);
 			return 0;
 		}
 
-		static uint32_t seek_callback_(void* user_data, uint64_t position)
+		static uint32_t seek_callback_(void* user_data, uint64_t position) noexcept
 		{
 			utils::file_io* fin = static_cast<utils::file_io*>(user_data);
 			if(fin) return fin->seek(position, utils::file_io::SEEK::SET);
 			else return 0;
 		}
 
-		static int get_aac_track_(mp4ff_t *infile)
+		static int get_aac_track_(mp4ff_t *infile) noexcept
 		{
 			/* find AAC track */
 			int numTracks = mp4ff_total_tracks(infile);
@@ -452,9 +453,9 @@ namespace al {
 
 
 #if 0
-		static void list_mp4(mp4ff_t* infile, mp4AudioSpecificConfig& mp4ASC, int track)
+		static void list_mp4(mp4ff_t* infile, mp4AudioSpecificConfig& mp4ASC, int track) noexcept
 		{
-			   static const char* ot[] = {
+			static const char* ot[] = {
 				"NULL", "MAIN AAC", "LC AAC", "SSR AAC", "LTP AAC", "HE AAC"
 			};
 			long samples = mp4ff_num_samples(infile, track);
@@ -465,9 +466,9 @@ namespace al {
 			}
 			seconds = (float)samples * (float)(f - 1.0f) / (float)mp4ASC.samplingFrequency;
 	
-			std::cout << boost::format("%s\t%.3f secs, %d ch, %d Hz\n\n")
-				% (ot[(mp4ASC.objectTypeIndex > 5) ? 0 : mp4ASC.objectTypeIndex])
-				% seconds % mp4ASC.channelsConfiguration % mp4ASC.samplingFrequency;
+			std::cout << std::format("{}\t{:.3f} secs, {} ch, {} Hz\n\n",
+				(ot[(mp4ASC.objectTypeIndex > 5) ? 0 : mp4ASC.objectTypeIndex])
+				, seconds, mp4ASC.channelsConfiguration, mp4ASC.samplingFrequency);
 	
 	#define PRINT_MP4_METADATA
 	#ifdef PRINT_MP4_METADATA
@@ -480,9 +481,9 @@ namespace al {
 				if(mp4ff_meta_get_by_index(infile, k, &item, &value)) {
 					if(std::string(item) == "cover") {
 						size_t size = mp4ff_meta_get_item_size(infile, k);
-						std::cout << boost::format("%s: (%d)\n") % item % size;
+						std::cout << std::format("{}: ({})\n", item, size);
 					} else {
-						std::cout << boost::format("%s: %s\n") % item % value;
+						std::cout << std::format("{}: {}\n", item, value);
 					}
 					mp4ff_meta_free(infile, item, value);
 				}
@@ -493,14 +494,14 @@ namespace al {
 #endif
 
 
-		void destroy_mp4_(decode_mp4_t& dt)
+		void destroy_mp4_(decode_mp4_t& dt) noexcept
 		{
 			mp4ff_close(dt.infile);
 			NeAACDecClose(dt.h_decoder);
 		}
 
 
-		bool decode_audio_mp4_(decode_mp4_t& dt, uint32_t idx)
+		bool decode_audio_mp4_(decode_mp4_t& dt, uint32_t idx) noexcept
 		{
 			long dur = mp4ff_get_sample_duration(dt.infile, dt.track, idx);
 			unsigned char* tmp = 0;
@@ -547,7 +548,7 @@ namespace al {
 		}
 
 
-		bool decode_track_mp4_(utils::file_io& fin, decode_mp4_t& dt)
+		bool decode_track_mp4_(utils::file_io& fin, decode_mp4_t& dt) noexcept
 		{
 			dt.h_decoder = NeAACDecOpen();
 	
@@ -575,13 +576,13 @@ namespace al {
 				return false;
 			}
 	
-	/// std::cout << boost::format("Decode track: %d\n") % dt.track;
+	/// std::cout << std::format("Decode track: {}\n", dt.track);
 	
 			return true;
 		}
 
 
-		bool decode_mp4_param_(decode_mp4_t& dt)
+		bool decode_mp4_param_(decode_mp4_t& dt) noexcept
 		{
 			unsigned char* buffer = 0;
 			unsigned int buffer_size = 0;
@@ -614,7 +615,7 @@ namespace al {
 		}
 	
 
-		audio decode_mp4_file_(utils::file_io& fin)
+		audio decode_mp4_file_(utils::file_io& fin) noexcept
 		{
 			decode_mp4_t dt;
 			if(!decode_track_mp4_(fin, dt)) {
@@ -638,7 +639,7 @@ namespace al {
 			} else if(dt.channels == 2) {
 				aif = audio(new audio_sto16);
 			} else {
-				std::cout << boost::format("Can't decode chanel: %d\n") % dt.channels;
+				std::cout << std::format("Can't decode chanel: {}\n", dt.channels);
 				fflush(stdout);
 				NeAACDecClose(dt.h_decoder);
 				mp4ff_close(dt.infile);
@@ -646,9 +647,9 @@ namespace al {
 			}
 			aif->create(dt.samplerate, out_size);
 	
-	/// std::cout << boost::format("Chanels: %d\n") % channels);
-	/// std::cout << boost::format("Sample rate: %d [Hz]\n") % samplerate);
-	/// std::cout << boost::format("Samples: %d\n") % out_size);
+	/// std::cout << std::format("Chanels: {}\n", channels);
+	/// std::cout << std::format("Sample rate: {} [Hz]\n", samplerate);
+	/// std::cout << std::format("Samples: {}\n", out_size);
 	
 			dt.count = 0;
 			uint32_t pos = 0;
@@ -656,13 +657,13 @@ namespace al {
 				dt.delay = 0;
 				bool f = decode_audio_mp4_(dt, idx);
 				if(!f) {
-					std::cout << boost::format("Reading from MP4 file failed. (%d)\n") % dt.count;
+					std::cout << std::format("Reading from MP4 file failed. ({})\n", dt.count);
 					destroy_mp4_(dt);
 					return 0;
 				}
 	
 				if(dt.delay) {
-	/// std::cout << boost::format("Delay: %d\n") % dt.delay;
+	/// std::cout << std::format("Delay: {}\n", dt.delay);
 				}
 	
 				for(uint32_t i = 0; i < dt.count / dt.channels; ++i) {
@@ -689,7 +690,7 @@ namespace al {
 		}
 	
 
-		bool create_mp4_info_(utils::file_io& fin, decode_mp4_t& dt, audio_info& info, info_state st)
+		bool create_mp4_info_(utils::file_io& fin, decode_mp4_t& dt, audio_info& info, info_state st) noexcept
 		{
 			dt.no_gapless = false;
 			dt.initial = false;
@@ -772,7 +773,7 @@ namespace al {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		aac_io() : mp4_t_(), audio_(), stream_(), buffer_(),
+		aac_io() noexcept : mp4_t_(), audio_(), stream_(), buffer_(),
 			index_(0), stream_cnt_(0), buffer_cnt_(0) { }
 
 
@@ -789,7 +790,7 @@ namespace al {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() override { }
+		void initialize() noexcept override { }
 
 
 		//-----------------------------------------------------------------//
@@ -798,7 +799,7 @@ namespace al {
 			@return ファイル拡張子の文字列
 		*/
 		//-----------------------------------------------------------------//
-		const char* get_file_ext() const override { return "aac,m4a"; }
+		const char* get_file_ext() const noexcept override { return "aac,m4a"; }
 
 
 		//-----------------------------------------------------------------//
@@ -808,7 +809,7 @@ namespace al {
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool probe(utils::file_io& fin) override
+		bool probe(utils::file_io& fin) noexcept override
 		{
 			uint32_t pos = fin.tell();
 			bool ret = false;
@@ -843,7 +844,7 @@ namespace al {
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool info(utils::file_io& fin, audio_info& info, info_state st = info_state::all) override
+		bool info(utils::file_io& fin, audio_info& info, info_state st = info_state::all) noexcept override
 		{
 			long pos = fin.tell();
 			uint8_t header[8];
@@ -874,7 +875,7 @@ namespace al {
 			@return タグを返す
 		*/
 		//-----------------------------------------------------------------//
-		const sound::tag_t& get_tag() const override { return tag_; }
+		const sound::tag_t& get_tag() const noexcept override { return tag_; }
 
 
 		//-----------------------------------------------------------------//
@@ -885,7 +886,7 @@ namespace al {
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool load(utils::file_io& fin, const std::string& opt = "") override
+		bool load(utils::file_io& fin, const std::string& opt = "") noexcept override
 		{
 			long pos = fin.tell();
 			uint8_t header[8];
@@ -911,7 +912,7 @@ namespace al {
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool save(utils::file_io& fout, const std::string& opt = "") override
+		bool save(utils::file_io& fout, const std::string& opt = "") noexcept override
 		{
 			return false;
 		}
@@ -926,7 +927,7 @@ namespace al {
 			@return 成功なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool open_stream(utils::file_io& fi, int size, audio_info& info) override
+		bool open_stream(utils::file_io& fi, int size, audio_info& info) noexcept override
 		{
 			long pos = fi.tell();
 			uint8_t header[8];
@@ -984,7 +985,7 @@ namespace al {
 			@return ストリーム用オーディオ・インターフェース
 		*/
 		//-----------------------------------------------------------------//
-		const audio get_stream() const override { return stream_; }
+		const audio get_stream() const noexcept override { return stream_; }
 
 
 		//-----------------------------------------------------------------//
@@ -996,7 +997,7 @@ namespace al {
 			@return 読み込んだサンプル数
 		*/
 		//-----------------------------------------------------------------//
-		size_t read_stream(utils::file_io& fin, size_t offset, size_t samples) override
+		size_t read_stream(utils::file_io& fin, size_t offset, size_t samples) noexcept override
 		{
 			if(stream_cnt_) {
 				while(stream_cnt_ < stream_->get_samples()) {
@@ -1078,7 +1079,7 @@ namespace al {
 			@brief	ストリームをクローズ
 		*/
 		//-----------------------------------------------------------------//
-		void close_stream() override
+		void close_stream() noexcept override
 		{
 			destroy_mp4_(mp4_t_);
 		}
@@ -1089,7 +1090,7 @@ namespace al {
 			@return オーディオ・インターフェースクラス
 		*/
 		//-----------------------------------------------------------------//
-		const audio get_audio() const override { return audio_; }
+		const audio get_audio() const noexcept override { return audio_; }
 
 
 		//-----------------------------------------------------------------//
@@ -1098,7 +1099,7 @@ namespace al {
 			@param[in]	aif	イメージインターフェース
 		*/
 		//-----------------------------------------------------------------//
-		void set_audio(const audio aif) override { }
+		void set_audio(const audio aif) noexcept override { }
 
 
 		//-----------------------------------------------------------------//
@@ -1106,6 +1107,6 @@ namespace al {
 			@brief	廃棄
 		*/
 		//-----------------------------------------------------------------//
-		void destroy() override { }
+		void destroy() noexcept override { }
 	};
 }

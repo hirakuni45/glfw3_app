@@ -19,7 +19,6 @@
 /// #include "img_io/dds_io.hpp"
 #include "img_io/openjpeg_io.hpp"
 #include "img_io/jxl_io.hpp"
-#include <boost/foreach.hpp>
 
 namespace img {
 
@@ -44,7 +43,7 @@ namespace img {
 		static bool check_file_exts_(const std::string& exts, const std::string& ext) noexcept
 		{
 			utils::strings ss = utils::split_text(exts, ",");
-			BOOST_FOREACH(std::string& s, ss) {
+			for(std::string& s : ss) {
 				if(utils::no_capital_strcmp(ext, s) == 0) {
 					return true;
 				}
@@ -57,7 +56,7 @@ namespace img {
 		{
 			if(imi) {
 				utils::strings ss = utils::split_text(exts, ",");
-				BOOST_FOREACH(std::string& s, ss) {
+				for(std::string& s : ss) {
 					if(check_file_exts_(imi->get_file_ext(), s)) {
 						img_file io;
 						io.igf = imi;

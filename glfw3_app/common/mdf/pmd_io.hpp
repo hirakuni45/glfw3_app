@@ -3,7 +3,7 @@
 /*!	@file
 	@brief	PMD ファイルを扱うクラス（ヘッダー）
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
@@ -16,7 +16,7 @@
 #include "utils/quat.hpp"
 #include "utils/file_io.hpp"
 #include "mdf/surface.hpp"
-#include <boost/format.hpp>
+#include <format>
 
 namespace mdf {
 
@@ -372,9 +372,9 @@ namespace mdf {
 		//-----------------------------------------------------------------//
 		void get_info(std::string& info) const
 		{
-			info += (boost::format("Version: %1.3f\n") % version_).str();
-			info += (boost::format("Vertices: %d\n") % vertices_.size()).str();
-			info += (boost::format("Face: %d\n") % face_indices_.size()).str();
+			info += std::format("Version: {:1.3f}\n", version_);
+			info += std::format("Vertices: {}\n", vertices_.size());
+			info += std::format("Face: {}\n", face_indices_.size());
 		}
 
 

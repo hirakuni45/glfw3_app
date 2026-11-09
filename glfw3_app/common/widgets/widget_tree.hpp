@@ -132,7 +132,7 @@ namespace gui {
 		{
 			tree_unit::unit_map_its its;
 			tree_unit_.create_list("", its);
-			BOOST_FOREACH(tree_unit::unit_map_it it, its) {
+			for(tree_unit::unit_map_it it : its) {
 				wd_.del_widget(it->second.value.w_);
 			}
 		}
@@ -354,7 +354,7 @@ namespace gui {
 					w->at_rect().org = pos;
 #if 0
 					short x = 0;
-					BOOST_FOREACH(bool b, st) {
+					for(bool b : st) {
 						root_t r;
 						r.pos.x = x;
 						r.pos.y = pos.y;

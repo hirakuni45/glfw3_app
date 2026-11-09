@@ -35,7 +35,7 @@
 #include "snd_io/i_audio.hpp"
 #include "snd_io/pcm.hpp"
 #include <iostream>
-#include <boost/format.hpp>
+#include <format>
 
 namespace al {
 
@@ -62,7 +62,7 @@ namespace al {
 		bool	init_;
 		bool	destroy_;
 
-		bool set_buffer_(ALuint bh, const audio aif)
+		bool set_buffer_(ALuint bh, const audio aif) noexcept
 		{
 			ALsizei num = aif->get_samples();
 			ALenum format;
@@ -105,7 +105,7 @@ namespace al {
 		static constexpr int maxmimumWidth = 79;
 
 	public:
-		static void printChar(int c, int& width)
+		static void printChar(int c, int& width) noexcept
 		{
 			putchar(c);
 			width = ((c == '\n') ? 0 : ((width) + 1));
@@ -119,42 +119,42 @@ namespace al {
 		}
 
 
-		static void checkForErrors()
+		static void checkForErrors() noexcept
 		{
 			{
 				ALCdevice* device = alcGetContextsDevice(alcGetCurrentContext());
 				ALCenum error = alcGetError(device);
 				if(error != ALC_NO_ERROR) {
-					std::cout << boost::format("ALC error: '%s'\n")
-						% static_cast<const char*>(alcGetString(device, error));
+					std::cout << std::format("ALC error: '{}'\n",
+						static_cast<const char*>(alcGetString(device, error)));
 				}
 			}
 			{
 				ALenum error = alGetError();
 				if(error != AL_NO_ERROR) {
-					std::cout << boost::format("AL error: '%s'\n")
-						% static_cast<const char*>(alGetString(error));
+					std::cout << std::format("AL error: '{}'\n",
+						static_cast<const char*>(alGetString(error)));
 				}
 			}
 		}
 
 
-		static void printDevices(ALCenum which, const char* kind)
+		static void printDevices(ALCenum which, const char* kind) noexcept
 		{
 			const char *s = alcGetString(NULL, which);
 //			checkForErrors();
 
-			std::cout << boost::format("Available %sdevices:\n") % kind;
+			std::cout << std::format("Available {}devices:\n", kind);
 			while(*s != '\0') {
-				std::cout << boost::format("    %s\n") % s;
+				std::cout << std::format("    {}\n", s);
 				while(*s++ != '\0') ;
 			}
 		}
 
 
-		static void printExtensions(const char* header, char separator, const char* extensions)
+		static void printExtensions(const char* header, char separator, const char* extensions) noexcept
 		{
-			std::cout << boost::format("%s:\n") % header;
+			std::cout << std::format("{}:\n", header);
 			if(extensions == NULL || extensions[0] == '\0') return;
 
 			int width = 0, start = 0, end = 0;
@@ -181,7 +181,7 @@ namespace al {
 			printChar('\n', width);
 		}
 
-		static auto create_device_list(ALCenum which)
+		static auto create_device_list(ALCenum which) noexcept
 		{
 			utils::strings ss;
 			const char* s = alcGetString(NULL, which);
@@ -337,9 +337,9 @@ namespace al {
 		//-----------------------------------------------------------------//
 		void context_info() const noexcept
 		{
-			std::cout << boost::format("vendor string: %s\n") % alGetString(AL_VENDOR);
-			std::cout << boost::format("renderer string: %s\n") % alGetString(AL_RENDERER);
-			std::cout << boost::format("version string: %s\n") % alGetString(AL_VERSION);
+			std::cout << std::format("vendor string:   {}\n", alGetString(AL_VENDOR));
+			std::cout << std::format("renderer string: {}\n", alGetString(AL_RENDERER));
+			std::cout << std::format("version string:  {}\n", alGetString(AL_VERSION));
 		}
 
 
@@ -358,23 +358,23 @@ namespace al {
 					printDevices(ALC_CAPTURE_DEVICE_SPECIFIER, "capture ");
 				}
 			} else {
-				std::cout << boost::format("No device enumeration available\n");
+				std::cout << std::format("No device enumeration available\n");
 			}
 
 			ALCdevice* device = alcGetContextsDevice(alcGetCurrentContext());
 			checkForErrors();
 
-			std::cout << boost::format("Default device: %s\n")
-				% alcGetString(device, ALC_DEFAULT_DEVICE_SPECIFIER);
+			std::cout << std::format("Default device: {}\n",
+				alcGetString(device, ALC_DEFAULT_DEVICE_SPECIFIER));
 
-			std::cout << boost::format("Default capture device: %s\n")
-				% alcGetString(device, ALC_CAPTURE_DEFAULT_DEVICE_SPECIFIER);
+			std::cout << std::format("Default capture device: {}\n",
+				alcGetString(device, ALC_CAPTURE_DEFAULT_DEVICE_SPECIFIER));
 
 			ALCint major, minor;
 			alcGetIntegerv(device, ALC_MAJOR_VERSION, 1, &major);
 			alcGetIntegerv(device, ALC_MINOR_VERSION, 1, &minor);
 			checkForErrors();
-			std::cout << boost::format("ALC version: %d.%d\n") % static_cast<int>(major) % static_cast<int>(minor);
+			std::cout << std::format("ALC version: {}.{}\n", static_cast<int>(major), static_cast<int>(minor));
 
 			printExtensions("ALC extensions", ' ',
 				alcGetString(device, ALC_EXTENSIONS));
@@ -593,7 +593,7 @@ namespace al {
 		{
 			if(sh != 0 && wh != 0) {
 				alSourcei(sh, AL_BUFFER, wh);
-//				std::cout << boost::format("set_wave: slot: %d, wave: %d\n") % sh % wh;
+//				std::cout << std::format("set_wave: slot: {}, wave: {}\n", sh, wh);
 				return true;
 			}
 			return false;
@@ -890,7 +890,7 @@ std::cout << "alGenBuffers NG!" << std::endl;
 				break;
 			}
 
-			std::cout << boost::format("%u: '%s', ") % static_cast<unsigned int>(sh) % stt;
+			std::cout << std::format("{}: '{}', ", static_cast<unsigned int>(sh), stt);
 		}
 
 #if 0
@@ -900,7 +900,7 @@ std::cout << "alGenBuffers NG!" << std::endl;
 		@param[in]	filename	ファイル名
 	*/
 	//-----------------------------------------------------------------//
-	void audio_io::test_stream(const char* filename)
+	void audio_io::test_stream(const char* filename) noexcept
 	{
 		static const int numbuff = 16;
 		static const int bufsize = 4096;
@@ -952,7 +952,7 @@ std::cout << "alGenBuffers NG!" << std::endl;
 		wav.close_stream();
 		fin.close();
 
-		std::cout << boost::format("buffer: %d\n") % cnt;
+		std::cout << std::format("buffer: {}\n", cnt);
 	}
 #endif
 

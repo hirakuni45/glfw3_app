@@ -2,19 +2,19 @@
 /*!	@file
 	@brief	PMD ファイルを扱うクラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
 //=====================================================================//
-#include <iostream>
-#include <boost/foreach.hpp>
 #include "mdf/pmd_io.hpp"
 #include "utils/string_utils.hpp"
 #include "img_io/img_files.hpp"
 #include "gl_fw/gl_info.hpp"
 #include "gl_fw/glutils.hpp"
 #include "utils/quat.hpp"
+#include <ranges>
+#include <format>
 
 namespace mdf {
 
@@ -26,7 +26,7 @@ namespace mdf {
 			if(ch == 0) break;
 			if(static_cast<uint8_t>(ch) != 0xfd) {
 ///				uint32_t n = static_cast<uint8_t>(ch);
-///				std::cout << boost::format("%02X, ") % n;
+///				std::cout << std::format("{:0X02}, ",  n);
 				tmp += ch;
 			}
 		}
@@ -471,7 +471,7 @@ namespace mdf {
 			std::vector<vbo_t> vbos;
 			vbos.reserve(vertices_.size());
 			vbos.clear();
-			BOOST_FOREACH(pmd_vertex& v, vertices_) {
+			for(pmd_vertex& v : vertices_) {
 				vbo_t vbo;
 				vbo.uv = v.uv;
 				vbo.n = v.normal;			
@@ -501,11 +501,11 @@ namespace mdf {
 
 			uint32_t n = 0;
 			uint32_t in = 0;
-			BOOST_FOREACH(const pmd_material& m, materials_) {
+			for(const pmd_material& m : materials_) {
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idx_id_[n]);
 				glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-							 m.face_vert_count * sizeof(uint16_t),
-							 &ids[in], GL_STATIC_DRAW);
+					m.face_vert_count * sizeof(uint16_t),
+					&ids[in], GL_STATIC_DRAW);
 				in += m.face_vert_count;
 				++n;
 			}
@@ -518,12 +518,12 @@ namespace mdf {
 		
 		img::img_files imf;
 		uint32_t i = 0;
-		BOOST_FOREACH(pmd_material& m, materials_) {
+		for(pmd_material& m : materials_) {
 			std::string mats;
 			get_text_(m.texture_file_name, 20, mats);
 			if(!mats.empty()) {
 				std::string tfn;
-	   			size_t pos = mats.find_first_of('*');
+				size_t pos = mats.find_first_of('*');
 				if(std::string::npos != pos) {
 					tfn = mats.substr(0, pos);
 				} else {
@@ -540,7 +540,7 @@ namespace mdf {
 					int h = img->get_size().y;
 					glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 					glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA, w, h, border,
-								 GL_RGBA, GL_UNSIGNED_BYTE, (*img)());
+						GL_RGBA, GL_UNSIGNED_BYTE, (*img)());
 				}
 			}
 			++i;
@@ -599,7 +599,7 @@ namespace mdf {
 		glInterleavedArrays(GL_T2F_N3F_V3F, 0, 0);
 
 		uint32_t n = 0;
-		BOOST_FOREACH(const pmd_material& m, materials_) {
+		for(const pmd_material& m : materials_) {
 			glColor4f(m.diffuse_color[0], m.diffuse_color[1], m.diffuse_color[2], m.alpha);
 			if(tex_id_[n]) {
 				glEnable(GL_TEXTURE_2D);
@@ -610,10 +610,10 @@ namespace mdf {
 				} else {
 					edge = GL_REPEAT;
 				}
-       			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, edge);
-       			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, edge);
-       			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-       			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, edge);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, edge);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 			} else {
 				glDisable(GL_TEXTURE_2D);
 			}
@@ -656,7 +656,7 @@ namespace mdf {
 
 		glLineWidth(4.0f);
 
-		BOOST_FOREACH(const pmd_bone& bone, bones_) {
+		for(const pmd_bone& bone : bones_) {
 ///			glPushMatrix();
 ///			gl::glTranslate(bone.head_pos);
 ///			glCallList(bone_list_id_);
@@ -699,7 +699,7 @@ namespace mdf {
 			index = bone.parent_index_;
 		} while(index != 0xffff) ;
 
-		BOOST_REVERSE_FOREACH(uint16_t idx, ids) {
+		for(uint16_t idx : ids | std::views::reverse) {
 			const pmd_bone& bone = bones_[idx];
 			std::string s;
 			pmd_io::get_text_(bone.name_, sizeof(bone.name_), s);

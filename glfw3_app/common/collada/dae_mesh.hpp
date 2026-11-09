@@ -10,7 +10,6 @@
 #include <vector>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
-#include <boost/foreach.hpp>
 #include <boost/optional.hpp>
 
 #include "utils/verbose.hpp"
@@ -103,7 +102,7 @@ namespace collada {
 			if(!id.empty()) {
 				int ofs = 0;
 				if(id[0] == '#') ofs = 1;
-				BOOST_FOREACH(const source& src, sourceies_) {
+				for(const source& src : sourceies_) {
 					if(src.id_ == id.substr(ofs)) {
 						return boost::optional<const source&>(src);
 					} 
@@ -117,7 +116,7 @@ namespace collada {
 			if(!id.empty()) {
 				int ofs = 0;
 				if(id[0] == '#') ofs = 1;
-				BOOST_FOREACH(const vertice& ver, vertices_) {
+				for(const vertice& ver : vertices_) {
 					if(ver.id_ == id.substr(ofs)) {
 						return get_source(ver.input_.source_);
 					}

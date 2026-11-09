@@ -62,7 +62,7 @@ namespace img {
 
 		//-----------------------------------------------------------------//
 		/*!
-			@brief	JPEG XL ファイルか確認する
+			@brief	JPEG XL ファイルか確認する（先頭のシグネチュアのみ）
 			@param[in]	fin	file_io クラス
 			@return エラーなら「false」を返す
 		*/
@@ -70,9 +70,9 @@ namespace img {
 		bool probe(utils::file_io& fin) override
 		{
 			uint8_t sig[2];
-			long pos = fin.tell();
+			long org = fin.tell();
 			size_t l = fin.read(sig, 1, 2);
-			fin.seek(pos, utils::file_io::SEEK::SET);
+			fin.seek(org, utils::file_io::SEEK::SET);
 			if(l == 2) {
 				if(sig[0] == 0xff && sig[1] == 0x0A) {
 					return true;
@@ -95,6 +95,10 @@ namespace img {
 			if(!probe(fin)) {
 				return false;
 			}
+
+
+
+
 
 
 
@@ -153,6 +157,8 @@ namespace img {
 		{
 			if(!img_) return false;
 			if(img_->get_size().x == 0 || img_->get_size().y == 0) return false;
+
+
 
 
 

@@ -1,16 +1,15 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*!	@file
 	@brief	ディレクター・クラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017, 2018 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <vector>
 #include "utils/i_scene.hpp"
-#include <boost/foreach.hpp>
 
 namespace utils {
 
@@ -40,18 +39,20 @@ namespace utils {
 
 		uint32_t	frame_count_;
 
-		bool find_scene_(scenes& ss, const i_scene* is) const {
-			BOOST_FOREACH(i_scene* s, ss) {
+		bool find_scene_(scenes& ss, const i_scene* is) const noexcept
+		{
+			for(i_scene* s : ss) {
 				if(is == s) return true;
 			}
 			return false;
 		}
 
-		void destroy_() {
-			BOOST_FOREACH(i_scene* is, install_scenes_) {
+		void destroy_() noexcept
+		{
+			for(i_scene* is : install_scenes_) {
 				delete is;
 			}
-			BOOST_FOREACH(i_scene* is, current_scenes_) {
+			for(i_scene* is : current_scenes_) {
 				delete is;
 			}
 			scenes().swap(current_scenes_);
@@ -64,7 +65,7 @@ namespace utils {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		director() : current_scene_(0), frame_count_(0)
+		director() noexcept : current_scene_(0), frame_count_(0)
 		{ }
 
 
@@ -96,7 +97,8 @@ namespace utils {
 							※省略するとカレントのシーン
 		*/
 		//-----------------------------------------------------------------//
-		void erase_scene(i_scene* is = 0) {
+		void erase_scene(i_scene* is = 0) noexcept
+		{
 			if(is == 0) {
 				if(current_scene_) {
 					erase_scenes_.push_back(current_scene_);
@@ -113,7 +115,7 @@ namespace utils {
 			@return フレーム数
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t get_frame_count() const { return frame_count_; }
+		uint32_t get_frame_count() const noexcept { return frame_count_; }
 
 
 		//-----------------------------------------------------------------//
@@ -122,9 +124,10 @@ namespace utils {
 			@return	シーンを終了する場合「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool render() {
+		bool render() noexcept
+		{
 			if(!install_scenes_.empty()) {
-				BOOST_FOREACH(i_scene* is, install_scenes_) {
+				for(i_scene* is : install_scenes_) {
 					is->initialize();
 					current_scenes_.push_back(is);
 				}
@@ -132,20 +135,20 @@ namespace utils {
 			}
 
 			// アップデート処理
-			BOOST_FOREACH(i_scene* is, current_scenes_) {
+			for(i_scene* is : current_scenes_) {
 				current_scene_ = is;
 				is->update();
 			}
 
 			// レンダリング処理
-			BOOST_FOREACH(i_scene* is, current_scenes_) {
+			for(i_scene* is : current_scenes_) {
 				current_scene_ = is;
 				is->render();
 			}
 
 			if(!erase_scenes_.empty()) {
 				scenes ns;
-				BOOST_FOREACH(i_scene* is, erase_scenes_) {
+				for(i_scene* is : erase_scenes_) {
 					if(find_scene_(current_scenes_, is)) {
 						is->destroy();
 						delete is;
@@ -173,7 +176,7 @@ namespace utils {
 			@return コア
 		*/
 		//-----------------------------------------------------------------//
-		CORE& at() { return core_; }
+		CORE& at() noexcept { return core_; }
 
 
 		//-----------------------------------------------------------------//
@@ -182,7 +185,6 @@ namespace utils {
 			@return コア
 		*/
 		//-----------------------------------------------------------------//
-		const CORE& get() const { return core_; }
+		const CORE& get() const noexcept { return core_; }
 	};
 }
-

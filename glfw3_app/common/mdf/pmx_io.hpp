@@ -3,7 +3,7 @@
 /*!	@file
 	@brief	PMX ファイルを扱うクラス（ヘッダー）
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
@@ -12,7 +12,7 @@
 #include <string>
 #include <bitset>
 #include <vector>
-#include <boost/format.hpp>
+#include <format>
 #include "gl_fw/gllight.hpp"
 #include "utils/vtx.hpp"
 #include "utils/mtx.hpp"
@@ -162,7 +162,7 @@ namespace mdf {
 		*/
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 		struct pmx_vertex {
- 			vtx::fvtx	position_;
+			vtx::fvtx	position_;
 			vtx::fvtx	normal_;
 			vtx::fpos	uv_;
 			std::vector<vtx::fvtx4> appendix_uv_;
@@ -341,7 +341,7 @@ namespace mdf {
 				return true;
 			}
 			void list() {
-				std::cout << boost::format("Texure: '%s'") % name_ << std::endl;
+				std::cout << std::format("Texure: '{}'",  name_) << std::endl;
 				std::cout << "Normal Texture: " << static_cast<int>(normal_texture_index_) << std::endl;
 				std::cout << "Sphere Texture: " << static_cast<int>(sphere_texture_index_) << std::endl;
 				std::cout << "Toon   Texture: " << static_cast<int>(toon_texture_index_) << std::endl;
@@ -592,9 +592,9 @@ namespace mdf {
 		//-----------------------------------------------------------------//
 		void get_info(std::string& info) const
 		{
-			info += (boost::format("Version: %1.3f\n") % version_).str();
-			info += (boost::format("Vertices: %d\n") % vertices_.size()).str();
-			info += (boost::format("Face: %d\n") % faces_.size()).str();
+			info += std::format("Version: {:1.3f}\n", version_);
+			info += std::format("Vertices: {}\n", vertices_.size());
+			info += std::format("Face: {}\n", faces_.size());
 		}
 
 

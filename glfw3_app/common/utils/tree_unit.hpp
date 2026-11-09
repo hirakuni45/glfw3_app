@@ -4,7 +4,7 @@
 	@brief	階層的構造を管理するテンプレート・クラス @n
 			ファイルパス名をハンドルととして、ツリー状の構造を管理する。
 	@author	平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2023 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2023, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
@@ -17,7 +17,6 @@
 #include <vector>
 #include <unordered_set>
 #include <unordered_map>
-#include <boost/foreach.hpp>
 #include <boost/optional.hpp>
 #include "utils/string_utils.hpp"
 
@@ -426,7 +425,7 @@ namespace utils {
 					const typename unit_t::childs& ch = it->second.get_childs();
 					list.resize(ch.size());
 					list.clear();
-					BOOST_FOREACH(const std::string& s, ch) {
+					for(const std::string& s : ch) {
 						std::string path;
 						if(create_full_path(s, path)) {
 							it = unit_map_.find(path);
@@ -502,12 +501,12 @@ namespace utils {
 
 			// key の最大長さを探す
 			uint32_t ml = 0;
-			BOOST_FOREACH(unit_map_cit cit, cits) {
+			for(unit_map_cit cit : cits) {
 				const std::string& key = cit->first;
 				if(key.size() > ml) ml = key.size();				
 			}
 
-			BOOST_FOREACH(unit_map_cit cit, cits) {
+			for(unit_map_cit cit : cits) {
 				const unit_t& t = cit->second;
 				if(t.is_childs_empty()) {
 					std::cout << "- ";

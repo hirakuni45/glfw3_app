@@ -2,17 +2,18 @@
 /*!	@file
 	@brief	PMX ファイルを扱うクラス
     @author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2017 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
 //=====================================================================//
 #include "pmx_io.hpp"
 #include "img_io/img_files.hpp"
-#include <boost/format.hpp>
 #include "gl_fw/gl_info.hpp"
 #include "gl_fw/glutils.hpp"
 #include "utils/quat.hpp"
+#include <format>
+#include <ranges>
 
 namespace mdf {
 
@@ -200,7 +201,7 @@ namespace mdf {
 			std::vector<vbo_t> vbos;
 			vbos.resize(vertices_.size());
 			uint32_t i = 0;
-			BOOST_FOREACH(pmx_vertex& v, vertices_) {
+			for(pmx_vertex& v : vertices_) {
 				vbo_t& vbo = vbos[i];
 				vbo.uv = v.uv_;
 				vbo.n = v.normal_;			
@@ -230,7 +231,7 @@ namespace mdf {
 
 			uint32_t n = 0;
 			uint32_t in = 0;
-			BOOST_FOREACH(const pmx_material& m, materials_) {
+			for(const pmx_material& m : materials_) {
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idx_id_[n]);
 				glBufferData(GL_ELEMENT_ARRAY_BUFFER, m.face_num_ * idxes.unit_size(),
 					idxes.ptr(in), GL_STATIC_DRAW);
@@ -245,7 +246,7 @@ namespace mdf {
 			tex_id_.resize(textures_.size());
 			glGenTextures(tex_id_.size(), &tex_id_[0]);
 			uint32_t i = 0;
-			BOOST_FOREACH(const std::string& s, textures_) {
+			for(const std::string& s : textures_) {
 				std::string fn = current_path_ + '/' + s;
 				if(imf.load(fn)) {
 					const img::i_img* img = imf.get_image().get();
@@ -259,9 +260,9 @@ namespace mdf {
 // std::cout << w << ", " << h << std::endl;
 					glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 					glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA, w, h, border,
-								 GL_RGBA, GL_UNSIGNED_BYTE, (*img)());
+								GL_RGBA, GL_UNSIGNED_BYTE, (*img)());
 				} else {
-					std::cout << boost::format("Can't open texture: '%s'") % fn << std::endl;
+					std::cout << std::format("Can't open texture: '{}'", fn) << std::endl;
 				}
 				++i;
 			}
@@ -315,7 +316,7 @@ namespace mdf {
 		else return;
 
 		uint32_t n = 0;
-		BOOST_FOREACH(const pmx_material& m, materials_) {
+		for(const pmx_material& m : materials_) {
 			glColor4f(m.diffuse_.r, m.diffuse_.g, m.diffuse_.b, m.diffuse_.a);
 
 			bool tex = false;
@@ -328,21 +329,20 @@ namespace mdf {
 ///				} else {
 ///					edge = GL_REPEAT;
 ///				}
-       			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, edge);
-       			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, edge);
-       			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-       			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, edge);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, edge);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 				tex = true;
-			}
-			 else if(m.sphere_texture_index_ >= 0 && m.sphere_texture_index_ < tex_id_.size()) {
+			} else if(m.sphere_texture_index_ >= 0 && m.sphere_texture_index_ < tex_id_.size()) {
 				glEnable(GL_TEXTURE_2D);
 				glBindTexture(GL_TEXTURE_2D, tex_id_[m.sphere_texture_index_]);
 				GLenum edge;
 				edge = GL_CLAMP_TO_EDGE;
-       			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, edge);
-       			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, edge);
-       			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-       			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, edge);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, edge);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 				tex = true;
 			}
 			if(!tex) {
@@ -386,7 +386,7 @@ namespace mdf {
 		glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
 		glScalef(-1.0f, 1.0f, 1.0f);
 
-		BOOST_FOREACH(const pmx_bone& bone, bones_) {
+		for(const pmx_bone& bone : bones_) {
 			uint16_t idx = bone.parent_index_;
 			if(idx < bones_.size()) {
 				glPushMatrix();
@@ -435,7 +435,7 @@ namespace mdf {
 			ix = bone.parent_index_;
 		} while(ix >= 0) ;
 
-		BOOST_REVERSE_FOREACH(uint32_t idx, ids) {
+		for(int32_t idx : ids | std::views::reverse) {
 			const pmx_bone& bone = bones_[idx];
 			if(!bone.name_.empty()) {
 				path += '/';
@@ -445,4 +445,3 @@ namespace mdf {
 		return true;
 	}
 }
-

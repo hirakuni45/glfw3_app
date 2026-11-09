@@ -72,7 +72,7 @@ namespace collada {
 		}
 
 		int count = 0;
-		BOOST_FOREACH(const ptree::value_type& child, pt) {
+		for(const ptree::value_type& child : pt) {
 			const string& s = child.first.data();
 			if(s == "float_array") {
 				utils::string_to_float(child.second.data(), src.array_);
@@ -122,7 +122,7 @@ namespace collada {
 			return;
 		}
 
-		BOOST_FOREACH(const ptree::value_type& child, pt) {
+		for(const ptree::value_type& child : pt) {
 			input inp;
 			if(parse_input_(child, inp)) {
 				vert.input_ = inp;
@@ -169,7 +169,7 @@ namespace collada {
 		}
 
 		v.nest_down();
-		BOOST_FOREACH(const ptree::value_type& child, pt) {
+		for(const ptree::value_type& child : pt) {
 			input inp;
 			if(parse_input_(child, inp)) {
 				if(v()) {
@@ -226,7 +226,7 @@ namespace collada {
 		}
 
 		v.nest_down();
-		BOOST_FOREACH(const ptree::value_type& child, element.second) {
+		for(const ptree::value_type& child : element.second) {
 			parse_source_(v, child);
 			parse_vertices_(v, child);
 			parse_triangles_(v, child);

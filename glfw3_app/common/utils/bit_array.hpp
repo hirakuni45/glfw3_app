@@ -2,21 +2,22 @@
 //=====================================================================//
 /*!	@file
 	@brief	ビット・アレイ関係 @n
-			Copyright 2017 Kunihito Hiramatsu
-	@author	平松邦仁 (hira@rvf-rc45.net)
+	@author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2017, 2026 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw_app/blob/master/LICENSE
 */
 //=====================================================================//
 #include <vector>
-#include <boost/foreach.hpp>
 #include "utils/file_io.hpp"
 
 namespace utils {
 
-	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	/*!
 		@brief	bit_array クラス
 	*/
-	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 	class bit_array {
 
 		uint32_t	put_pos_;		///> put ビット位置
@@ -29,7 +30,7 @@ namespace utils {
 			@brief	bitio クラス・コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		bit_array() : put_pos_(0), get_pos_(0) { };
+		bit_array() noexcept : put_pos_(0), get_pos_(0) { };
 
 
 		//-----------------------------------------------------------------//
@@ -46,7 +47,8 @@ namespace utils {
 			@param[in]	val ビット情報
 		*/
 		//-----------------------------------------------------------------//
-		void put_bit(bool val) {
+		void put_bit(bool val) noexcept
+		{
 			if((put_pos_ & 7) == 0) {
 				array_.push_back(0);
 			}
@@ -65,7 +67,8 @@ namespace utils {
 			@param[in]	num 設定するビット数
 		*/
 		//-----------------------------------------------------------------//
-		void put_bits(uint32_t val, int num) {
+		void put_bits(uint32_t val, int num) noexcept
+		{
 			for(int i = 0; i < num; ++i) {
 				bool bit;
 				if(val & (1 << i)) bit = true; else bit = false;
@@ -80,7 +83,8 @@ namespace utils {
 			@return	true の場合は「１」、false の場合は「０」
 		*/
 		//-----------------------------------------------------------------//
-		bool get_bit() {
+		bool get_bit() noexcept
+		{
 			if(get_pos_ >= (array_.size() << 3)) {
 				return false;
 			}
@@ -98,7 +102,8 @@ namespace utils {
 			@return	読み込んだ値
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t get_bits(int num) {
+		uint32_t get_bits(int num) noexcept
+		{
 			uint32_t bits = 0;
 
 			for(int i = 0; i < num; ++i) {
@@ -114,7 +119,7 @@ namespace utils {
 			@param[in] bpos ビット位置
 		*/
 		//-----------------------------------------------------------------//
-		void set_pos(uint32_t bpos) { get_pos_ = bpos; }
+		void set_pos(uint32_t bpos) noexcept { get_pos_ = bpos; }
 
 
 		//-----------------------------------------------------------------//
@@ -122,7 +127,7 @@ namespace utils {
 			@brief	サイズを取得
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t size() const { return put_pos_; }
+		uint32_t size() const noexcept { return put_pos_; }
 
 
 		//-----------------------------------------------------------------//
@@ -130,7 +135,7 @@ namespace utils {
 			@brief	バイトサイズを取得
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t byte_size() const { return (put_pos_ + 7) >> 3; }
+		uint32_t byte_size() const noexcept { return (put_pos_ + 7) >> 3; }
 
 
 		//-----------------------------------------------------------------//
@@ -138,7 +143,7 @@ namespace utils {
 			@brief	クリア
 		*/
 		//-----------------------------------------------------------------//
-		void clear() { put_pos_ = get_pos_ = 0; array_.clear(); }
+		void clear() noexcept { put_pos_ = get_pos_ = 0; array_.clear(); }
 
 
 		//-----------------------------------------------------------------//
@@ -148,8 +153,9 @@ namespace utils {
 			@return		セーブしたバイト数
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t save_file(file_io& fout) {
-			BOOST_FOREACH(uint8_t ch, array_) {
+		uint32_t save_file(file_io& fout) noexcept
+		{
+			for(const uint8_t ch : array_) {
 				fout.put_char(ch);
 			}
 			return array_.size();
@@ -163,7 +169,8 @@ namespace utils {
 			@return		セーブしたバイト数
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t save_file(const std::string& fname) {
+		uint32_t save_file(const std::string& fname) noexcept
+		{
 			if(fname.empty() || array_.size() == 0) {
 				return 0;
 			}
@@ -187,7 +194,8 @@ namespace utils {
 			@return		ロードしたバイト数
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t load_file(file_io& fin) {
+		uint32_t load_file(file_io& fin) noexcept
+		{
 			array_.reserve(fin.get_file_size());
 			array_.clear();
 			char ch;
@@ -205,7 +213,8 @@ namespace utils {
 			@return		ロードしたバイト数
 		*/
 		//-----------------------------------------------------------------//
-		uint32_t load_file(const std::string& fname) {
+		uint32_t load_file(const std::string& fname) noexcept
+		{
 			if(fname.empty()) return 0;
 
 			file_io fin;
@@ -227,9 +236,9 @@ namespace utils {
 			@return		値
 		*/
 		//-----------------------------------------------------------------//
-		uint8_t get_byte(uint32_t idx) const {
+		uint8_t get_byte(uint32_t idx) const noexcept
+		{
 			return array_[idx];
 		}
-
 	};
 }

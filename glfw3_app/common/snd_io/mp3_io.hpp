@@ -94,7 +94,7 @@ namespace al {
 		 * Converts a sample from mad's fixed point number format to a signed		*
 		 * short (16 bits).															*
 		 ****************************************************************************/
-		static short MadFixedToSshort(mad_fixed_t v)
+		static short MadFixedToSshort(mad_fixed_t v) noexcept
 		{
 			/* A fixed point number is formed of the following bit pattern:
 			 *
@@ -127,7 +127,7 @@ namespace al {
 			return (signed short)(v >> (MAD_F_FRACBITS - 15));
 		}
 
-		void apply_filter_(mad_frame& frame)
+		void apply_filter_(mad_frame& frame) noexcept
 		{
 			/* There is two application loops, each optimized for the number
 			 * of audio channels to process. The first alternative is for
@@ -168,7 +168,7 @@ namespace al {
 		}
 
 
-		int fill_read_buffer_(utils::file_io& fin, mad_stream& strm)
+		int fill_read_buffer_(utils::file_io& fin, mad_stream& strm) noexcept
 		{
 			/* The input bucket must be filled if it becomes empty or if
 			 * it's the first execution of the loop.
@@ -236,7 +236,7 @@ namespace al {
 			}
 		}
 
-		bool decode_(utils::file_io& fin, audio out)
+		bool decode_(utils::file_io& fin, audio out) noexcept
 		{
 			mad_stream_init(&mad_stream_);
 			mad_frame_init(&mad_frame_);
@@ -292,7 +292,7 @@ namespace al {
 			return status;
 		}
 
-		bool analize_frame_(utils::file_io& fin, audio_info& info, mp3_info& mp3info, info_state st)
+		bool analize_frame_(utils::file_io& fin, audio_info& info, mp3_info& mp3info, info_state st) noexcept
 		{
 			if(!fin.is_open()) {
 				return false;
@@ -433,8 +433,8 @@ namespace al {
 			}
 
 // std::cout << std::format("Frame: {}", count) << std::endl;
-// std::cout << boost::format("Recoverable frame level error: %d\n") % mp3info.recover_frame_error;
-// std::cout << boost::format("Unrecoverable frame level error: %d\n") % mp3info.unrecover_frame_error;
+// std::cout << std::format("Recoverable frame level error: {}\n", mp3info.recover_frame_error);
+// std::cout << std::format("Unrecoverable frame level error: {}\n", mp3info.unrecover_frame_error);
 
 			if(error == 0 && frame_cnt > limit_frame && mp3info.unrecover_frame_error == 0) {
 				if(ch == 1) {
@@ -454,8 +454,8 @@ namespace al {
 
 			fin.seek(pos, utils::file_io::SEEK::SET);
 
-// std::cout << boost::format("error: %d\n") % error;
-// std::cout << boost::format("frame: %d\n") % frame_cnt;
+// std::cout << std::format("error: {}\n", error);
+// std::cout << std::format("frame: {}\n", frame_cnt);
 
 			if(error == 0 && frame_cnt > limit_frame && mp3info.unrecover_frame_error == 0) {
 				mp3info.frame_count = frame_cnt;
@@ -471,7 +471,7 @@ namespace al {
 			@brief	コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		mp3_io() : subband_filter_enable_(false), id3v1_(false) { }
+		mp3_io() noexcept : subband_filter_enable_(false), id3v1_(false) { }
 
 
 		//-----------------------------------------------------------------//
@@ -487,7 +487,7 @@ namespace al {
 			@brief	初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize() override { }
+		void initialize() noexcept override { }
 
 
 		//-----------------------------------------------------------------//
@@ -496,7 +496,7 @@ namespace al {
 			@return ファイル拡張子の文字列
 		*/
 		//-----------------------------------------------------------------//
-		const char* get_file_ext() const override { return "mp3"; }
+		const char* get_file_ext() const noexcept override { return "mp3"; }
 
 
 		//-----------------------------------------------------------------//
@@ -506,7 +506,7 @@ namespace al {
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool probe(utils::file_io& fin) override {
+		bool probe(utils::file_io& fin) noexcept override {
 			audio_info info;
 			return analize_frame_(fin, info, mp3_info_, info_state::none);
 		}
@@ -521,7 +521,7 @@ namespace al {
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool info(utils::file_io& fin, audio_info& info, info_state st = info_state::all) override
+		bool info(utils::file_io& fin, audio_info& info, info_state st = info_state::all) noexcept override
 		{
 			return analize_frame_(fin, info, mp3_info_, st);
 		}
@@ -534,7 +534,7 @@ namespace al {
 			@return タグを返す
 		*/
 		//-----------------------------------------------------------------//
-		const sound::tag_t& get_tag() const override { return tag_; }
+		const sound::tag_t& get_tag() const noexcept override { return tag_; }
 
 
 		//-----------------------------------------------------------------//
@@ -545,7 +545,7 @@ namespace al {
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool load(utils::file_io& fin, const std::string& opt = "") override
+		bool load(utils::file_io& fin, const std::string& opt = "") noexcept override
 		{
 			audio_info info;
 
@@ -561,8 +561,8 @@ namespace al {
 					aif = audio(new audio_sto16);
 				}
 				if(aif) {
-//					std::cout << boost::format("Sampling: %d [Hz]\n") % info.frequency;
-//					std::cout << boost::format("Samples:  %d\n") % info.samples;
+//					std::cout << std::format("Sampling: {} [Hz]\n", info.frequency);
+//					std::cout << std::format("Samples:  {}\n", info.samples);
 					aif->create(info.frequency, info.samples);
 
 					if(decode_(fin, aif)) {
@@ -584,7 +584,7 @@ namespace al {
 			@return エラーなら「false」を返す
 		*/
 		//-----------------------------------------------------------------//
-		bool save(utils::file_io& fout, const std::string& opt = "") override
+		bool save(utils::file_io& fout, const std::string& opt = "") noexcept override
 		{
 			return false;
 		}
@@ -599,7 +599,7 @@ namespace al {
 			@return 成功なら「true」
 		*/
 		//-----------------------------------------------------------------//
-		bool open_stream(utils::file_io& fi, int size, audio_info& inf) override
+		bool open_stream(utils::file_io& fi, int size, audio_info& inf) noexcept override
 		{
 			close_stream();
 
@@ -659,7 +659,7 @@ namespace al {
 			@return ストリーム用オーディオ
 		*/
 		//-----------------------------------------------------------------//
-		const audio get_stream() const override { return stream_; }
+		const audio get_stream() const noexcept override { return stream_; }
 
 
 		//-----------------------------------------------------------------//
@@ -671,7 +671,7 @@ namespace al {
 			@return 読み込んだサンプル数
 		*/
 		//-----------------------------------------------------------------//
-		size_t read_stream(utils::file_io& fin, size_t offset, size_t samples) override
+		size_t read_stream(utils::file_io& fin, size_t offset, size_t samples) noexcept override
 		{
 			if(stream_ == 0) return 0;
 
@@ -766,7 +766,7 @@ namespace al {
 			@brief	ストリームをクローズ
 		*/
 		//-----------------------------------------------------------------//
-		void close_stream() override
+		void close_stream() noexcept override
 		{
 			if(stream_) {
 				stream_ = 0;
@@ -784,7 +784,7 @@ namespace al {
 			@return オーディオ
 		*/
 		//-----------------------------------------------------------------//
-		const audio get_audio() const override { return audio_; }
+		const audio get_audio() const noexcept override { return audio_; }
 
 
 		//-----------------------------------------------------------------//
@@ -793,7 +793,7 @@ namespace al {
 			@param[in]	au	オーディオ
 		*/
 		//-----------------------------------------------------------------//
-		void set_audio(const audio au) override { }
+		void set_audio(const audio au) noexcept override { }
 
 
 		//-----------------------------------------------------------------//
@@ -801,7 +801,7 @@ namespace al {
 			@brief	廃棄
 		*/
 		//-----------------------------------------------------------------//
-		void destroy() override
+		void destroy() noexcept override
 		{
 			close_stream();
 		}
