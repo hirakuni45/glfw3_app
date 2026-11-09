@@ -5,7 +5,7 @@
 */
 //=====================================================================//
 #include <iostream>
-#include <boost/format.hpp>
+#include <format>
 #include "iod_make.hpp"
 #include "def_in.hpp"
 
@@ -73,7 +73,7 @@ int main(int argc, char** argv)
 
 	if(!out_file.empty()) {
 		if(!iod.save(out_file)) {
-			std::cerr << boost::format("Write error output file: '%1%'") % out_file << std::endl;
+			std::cerr << std::format("Write error output file: '{}'", out_file) << std::endl;
 		}
 	}
 }

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include <set>
-#include <boost/format.hpp>
+#include <format>
 #include <cstdio>
 #include <cstdlib>
 #include "utils/sjis_utf16.hpp"
@@ -70,7 +70,7 @@ static void help_(const std::string& cmd)
 
 	cout << "DLL collect copy (msys64/clang64)" << endl;
 	cout << "Copyright (C) 2015, Hiramatsu Kunihito" << endl;
-	cout << "Version " << boost::format("%1.2f") % version_ << endl;
+	cout << "Version " << std::format("{:1.2f}", version_) << endl;
 	cout << "usage:" << endl;
 	string cm;
 	auto n = s.rfind('/');

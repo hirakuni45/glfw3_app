@@ -9,7 +9,7 @@
 #include "pn_main.hpp"
 #include "core/glcore.hpp"
 #include "widgets/widget_utils.hpp"
-#include <boost/lexical_cast.hpp>
+#include <format>
 
 namespace app {
 
@@ -84,12 +84,12 @@ namespace app {
 		std::string s;
 		if(!file.empty()) {
 			size_t fsz = utils::get_file_size(file);
-			if(fsz > 0) s = ": " + boost::lexical_cast<std::string>(fsz) + '\n';
+			if(fsz > 0) s = ": " + std::format("{}", fsz) + '\n';
 			term_->output(s);
 		}
-		s = "W: " + boost::lexical_cast<std::string>(img->get_size().x) + '\n';
+		s = "W: " + std::format("{}", img->get_size().x) + '\n';
 		term_->output(s);
-		s = "H: " + boost::lexical_cast<std::string>(img->get_size().y) + '\n';
+		s = "H: " + std::format("{}", img->get_size().y) + '\n';
 		term_->output(s);
 		img::IMG::type t = img->get_type();
 		if(t == img::IMG::INDEXED8) {
@@ -100,7 +100,7 @@ namespace app {
 		if(img->test_alpha()) {
 			term_->output("Alpha\n");
 		}
-		s = "C: " + boost::lexical_cast<std::string>(img->count_color()) + '\n';
+		s = "C: " + std::format("{}", img->count_color()) + '\n';
 		term_->output(s);
 		term_->output('\n');
 	}

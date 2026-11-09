@@ -31,7 +31,7 @@
 
 #include <tuple>
 #include "core/glcore.hpp"
-#include <boost/lexical_cast.hpp>
+#include <format>
 
 namespace app {
 
@@ -116,12 +116,12 @@ namespace app {
 			std::string s;
 			if(!file.empty()) {
 				size_t fsz = utils::get_file_size(file);
-				if(fsz > 0) s = ": " + boost::lexical_cast<std::string>(fsz) + '\n';
+				if(fsz > 0) s = ": " + std::format("{}", fsz) + '\n';
 				term_core_->output(s);
 			}
-			s = "W: " + boost::lexical_cast<std::string>(img->get_size().x) + '\n';
+			s = "W: " + std::format("{}", img->get_size().x) + '\n';
 			term_core_->output(s);
-			s = "H: " + boost::lexical_cast<std::string>(img->get_size().y) + '\n';
+			s = "H: " + std::format("{}", img->get_size().y) + '\n';
 			term_core_->output(s);
 
 			img::IMG::type t = img->get_type();
@@ -133,7 +133,7 @@ namespace app {
 			if(img->test_alpha()) {
 				term_core_->output("Alpha\n");
 			}
-			s = "C: " + boost::lexical_cast<std::string>(img->count_color()) + '\n';
+			s = "C: " + std::format("{}", img->count_color()) + '\n';
 			term_core_->output(s);
 		}
 
@@ -158,7 +158,7 @@ namespace app {
 			t = base;
 			int n = 1;
 			while(n <= nest) {
-				t += (boost::format("/%04d") % n).str();
+				t += std::format("/{:04}", n);
 				++n;
 			}
 			return t;
@@ -173,7 +173,7 @@ namespace app {
 			for(auto t : pdf_in_.get_outlines()) {
 				if(t->title != nullptr) {
 					std::string path;
-					path = (boost::format("/%05d") % page).str();
+					path = std::format("/{:05}", page);
 					++page;
 					gui::widget_tree::value v;
 					v.title_ = t->title;
@@ -291,7 +291,7 @@ namespace app {
 					if(st == widget_spinbox::state::inc || st == widget_spinbox::state::dec) {
 						pdf_redraw_ = true;
 					}
-					return (boost::format("%d / %d") % newpos % page_->get_select_max()).str();
+					return std::format("{} / {}", newpos, page_->get_select_max());
 				};
 			}
 			{  // 回転・リスト

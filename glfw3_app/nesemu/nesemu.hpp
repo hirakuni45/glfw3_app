@@ -14,7 +14,7 @@
 			「F1」： Filer @n
 			「F4」： Log Terminal @n
 	@author 平松邦仁 (hira@rvf-rc45.net)
-	@copyright	Copyright (C) 2018 Kunihito Hiramatsu @n
+	@copyright	Copyright (C) 2018, 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
 				https://github.com/hirakuni45/RX/blob/master/LICENSE
 */
@@ -43,6 +43,7 @@
 #include "emu/nes/nes_pal.h"
 
 #include "emu/nsf/nsfplay.hpp"
+#include <format>
 
 namespace app {
 
@@ -266,7 +267,7 @@ namespace app {
 					widget::param wp(vtx::irect(10, 35, 90, 30), menu_frame_);
 					widget_spinbox::param wp_(0, 0, 9);
 					wp_.select_func_ = [=] (widget_spinbox::state st, int before, int newpos) {
-						return (boost::format("%d") % newpos).str();
+						return std::format("{}", newpos);
 					};
 					state_slot_ = wd.add_widget<widget_spinbox>(wp, wp_);
 				}

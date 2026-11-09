@@ -4,7 +4,6 @@
 	@author 平松邦仁 (hira@rvf-rc45.net)
 */
 //=====================================================================//
-#include <boost/lexical_cast.hpp>
 #include "open_ide.hpp"
 #include "core/glcore.hpp"
 

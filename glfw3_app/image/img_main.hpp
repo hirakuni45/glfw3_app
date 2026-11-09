@@ -30,7 +30,7 @@
 
 #include <tuple>
 #include "core/glcore.hpp"
-#include <boost/lexical_cast.hpp>
+#include <format>
 
 namespace app {
 
@@ -114,12 +114,12 @@ namespace app {
 			std::string s;
 			if(!file.empty()) {
 				size_t fsz = utils::get_file_size(file);
-				if(fsz > 0) s = ": " + boost::lexical_cast<std::string>(fsz) + '\n';
+				if(fsz > 0) s = ": " + std::format("{}", fsz) + '\n';
 				term_->output(s);
 			}
-			s = "W: " + boost::lexical_cast<std::string>(img->get_size().x) + '\n';
+			s = "W: " + std::format("{}", img->get_size().x) + '\n';
 			term_->output(s);
-			s = "H: " + boost::lexical_cast<std::string>(img->get_size().y) + '\n';
+			s = "H: " + std::format("{}", img->get_size().y) + '\n';
 			term_->output(s);
 
 			crop_ox_->at_local_param().max_pos_ = img->get_size().x;
@@ -140,7 +140,7 @@ namespace app {
 			if(img->test_alpha()) {
 				term_->output("Alpha\n");
 			}
-			s = "C: " + boost::lexical_cast<std::string>(img->count_color()) + '\n';
+			s = "C: " + std::format("{}", img->count_color()) + '\n';
 			term_->output(s);
 		}
 
@@ -349,10 +349,10 @@ namespace app {
 
 					int ex = crop_ox_->get_select_pos() + crop_sx_->get_select_pos();
 					ex--;
-					crop_ex_->set_text((boost::format("%d") % ex).str());
+					crop_ex_->set_text(std::format("{}", ex));
 					int ey = crop_oy_->get_select_pos() + crop_sy_->get_select_pos();
 					ey--;
-					crop_ey_->set_text((boost::format("%d") % ey).str());
+					crop_ey_->set_text(std::format("{}", ey));
 				}
 
 				// クロップボタンの有効無効
