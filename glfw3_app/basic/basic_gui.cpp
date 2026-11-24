@@ -7,6 +7,7 @@
 #include <iostream>
 #include "core/glcore.hpp"
 #include "basic_gui.hpp"
+// #include <format>
 
 static std::function< void(char) > output_ch_;
 static std::function< void(const char*) > output_puts_;
@@ -115,7 +116,7 @@ namespace app {
 					std::cout << "Error: " << std::endl;
 				}
 				terminal_core_->at_terminal().output(
-					(boost::format("%d\n") % arith()).str()
+					std::format("{}\n", arith()));
 				);
 #endif
 			}
