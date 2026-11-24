@@ -32,7 +32,7 @@ extern ANIME fontAnime, infoAnime, ifonAnime, info2Anime;
 extern short infoNumber, infoAnimeMax;
 extern int frameRate;
 extern char gamePauseEnable;
-extern unsigned int clutSave[], clutLupe[];
+extern uint32_t clutSave[], clutLupe[];
 extern char trialEnable, geEnable;
 extern char flashSegaEnable;
 extern char staffRollDebug;
@@ -713,11 +713,10 @@ static void EntryColorBars(void)
 
 void ServiceBrightClut(int top, int cnt)
 {
-	int	i;
-
-	for(i=0; i<cnt; ++i) {
-	clutBuff[top + i] = clutSave[i];
+	for(int i = 0; i < cnt; ++i) {
+		clutBuff[top + i] = clutSave[i];
 	}
+	int i;
 	if(brightTimer < 256) i = brightTimer ^ 255;
 	else i = brightTimer;
 	BrightColorTables(top, cnt, i & 255);

@@ -15,8 +15,8 @@ typedef app::nmp start_app;
 static const char* window_key_ = { "application/window" };
 static const char* app_title_ = { "Necronomicon Pinball" };
 static const vtx::spos start_pos_(10, 40);
-static const vtx::spos start_size_(800, 500);
-static const vtx::spos limit_size_(640, 400);
+static const vtx::spos start_size_(640, 448);
+static const vtx::spos limit_size_(640, 448);
 
 int main(int argc, char** argv)
 {

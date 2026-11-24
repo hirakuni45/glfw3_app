@@ -1,7 +1,7 @@
 #pragma once
 //=====================================================================//
 /*! @file
-	@brief  NECRONOMICON PINBALL メイン・ラップ・クラス
+	@brief  NECRONOMICON PINBALL glfw3_app メイン・クラス
 	@author 平松邦仁 (hira@rvf-rc45.net)
 	@copyright	Copyright (C) 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
@@ -26,6 +26,7 @@
 #include "utils/format.hpp"
 #include "utils/input.hpp"
 
+#include "src/saturn.h"
 #include "nmp_core.hpp"
 
 namespace app {
@@ -57,8 +58,8 @@ namespace app {
 
 		gl::texfb				texfb_;
 
-		static const int sys_width_   = 320;
-		static const int sys_height_  = 200;
+		static const int sys_width_   = 640;
+		static const int sys_height_  = 448;
 		static const int sample_rate_ = 44100;
 		static const int audio_len_   = sample_rate_ / 60;
 
@@ -67,7 +68,7 @@ namespace app {
 ///		emu::tools		tools_;
 
 
-		void pad_()
+		void pad_() noexcept
 		{
 			gl::core& core = gl::core::get_instance();
 
@@ -136,7 +137,7 @@ namespace app {
 			@brief  コンストラクター
 		*/
 		//-----------------------------------------------------------------//
-		nmp(utils::director<core>& d) : director_(d),
+		nmp(utils::director<core>& d) noexcept : director_(d),
 			terminal_frame_(nullptr), terminal_core_(nullptr), terminal_(false),
 			menu_frame_(nullptr), menu_(false),
 			volume_(nullptr),
@@ -157,7 +158,7 @@ namespace app {
 			@brief  初期化
 		*/
 		//-----------------------------------------------------------------//
-		void initialize()
+		void initialize() noexcept
 		{
 			gl::core& core = gl::core::get_instance();
 
@@ -293,18 +294,7 @@ namespace app {
 				volume_->load(pre);
 			}
 
-
-#if 0
-			static char* argv[3];
-			static char tmp[256];
-			argv[0] = &tmp[0];
-			strcpy(argv[0], "doom");
-			argv[1] = &tmp[16];
-			strcpy(argv[1], "-quiet");
-			argv[2] = &tmp[16];
-			strcpy(argv[2], "DOOM1.WAD");
-///			doom_main(3, argv);
-#endif
+			main_nmp(0);
 		}
 
 
@@ -354,49 +344,29 @@ namespace app {
 				keybits |= KEY_BITS_TAB;
 			}
 #endif
-///			doom_keybits(keybits);
-///			doom_frame(sys_width_, sys_height_, fb_);
-			texfb_.rendering(gl::texfb::IMAGE::RGBA, (const char*)&fb_[0]);
-			texfb_.flip();
-#if 0
-			if(nes_play_) {
+			EntryVsync();  // NMP API
+			ExitVsync();   // NMP API
+			ServiceTask();  // NMP API
 
-				// copy sound emulation
-				al::sound& sound = director_.at().sound_;
-				uint32_t len = audio_len_;
-				uint32_t mod = 16;
-				if(sound.get_queue_audio_length() < mod) {
-					len += mod;
-				}
-				al::sound::waves16 tmp;
-				tmp.resize(len);
-				apu_process(&tmp[0], len);
-				sound.queue_audio(tmp);
-
-				// copy video
-				if(nes_play_) {
-					auto nes = nes_getcontext();
-					bitmap_t* v = nes->vidbuf;
-					const rgb_t* lut = get_palette();
-					if(v != nullptr && lut != nullptr) {
-						for(int h = 0; h < nes_height_; ++h) {
-							const uint8_t* src = &v->data[h * v->pitch];
-							uint8_t* dst = &fb_[h * nes_width_ * 4];
-							for(int w = 0; w < nes_width_; ++w) {
-								auto idx = *src++;
-								idx &= 63;
-								*dst++ = lut[idx].r;  // R
-								*dst++ = lut[idx].g;  // G
-								*dst++ = lut[idx].b;  // B
-								*dst++ = 255;  // alpha
-							}
-						}
-						texfb_.rendering(gl::texfb::IMAGE::RGBA, (const char*)&fb_[0]);
+			{
+				uint8_t* src = get_VDP2_VRAM_TOP();
+				uint8_t* dst = fb_;
+				for(int y = 0; y < 448; ++y) {
+					const uint32_t* clut = GetCLUT();
+					for(int x = 0; x < 640; ++x) {
+						uint8_t idx = src[x];
+						*dst++ = (clut[idx]) & 0xff;
+						*dst++ = (clut[idx] >> 8) & 0xff;
+						*dst++ = (clut[idx] >> 16) & 0xff;
+						*dst++ = 255;
 					}
-					texfb_.flip();
+					src += 1024;
 				}
 			}
-#endif
+
+			texfb_.rendering(gl::texfb::IMAGE::RGBA, (const char*)&fb_[0]);
+			texfb_.flip();
+
 			// ストリームのゲイン(volume)を設定
 			if(volume_ != nullptr) {
 				auto vol = volume_->get_slider_param().position_;
@@ -450,9 +420,6 @@ namespace app {
 		//-----------------------------------------------------------------//
 		void destroy()
 		{
-///			emu::tools::set_terminal(nullptr);
-///			nes_destroy();
-
 			sys::preference& pre = director_.at().preference_;
 			if(filer_ != nullptr) {
 				filer_->save(pre);

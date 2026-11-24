@@ -1,10 +1,10 @@
 ﻿/*------------------------------------------------------/
-/							/
-/	ボール・シュミレーター装置依存部分（ＴＯＰ）	/
-/							/
-/	高解像画面モード（６４０Ｘ４４８）仕様		/
-/	ＢＧ：２５６色、ＭＯＢＪ：２５６		/
-/							/
+/														/
+/	ボール・シュミレーター装置依存部分（ＴＯＰ）			/
+/														/
+/	高解像画面モード（６４０Ｘ４４８）仕様					/
+/	ＢＧ：２５６色、ＭＯＢＪ：２５６						/
+/														/
 /------------------------------------------------------*/
 // #include <sega_xpt.h>
 // #include <sega_def.h>
@@ -19,6 +19,7 @@
 #include "cdfs.h"
 #include "task.h"
 #include "top.h"
+#include "mobj.h"
 
 #define CLUT_MAX	512
 #define SMPC_RECIVE_MAX	128
@@ -40,9 +41,7 @@ static void EntrySMPC(void);
 static void ServiceSMPC(void);
 
 static int TakePeriId(unsigned char *, int, unsigned char *);
-static void EntryVsync(void);
-static void ExitVsync(void);
-static void ServiceInputMethod(void);
+static void ServiceInputMethod(uint32_t padbits);
 
 static const unsigned short vramCycle[] = {
 	0xef44,0xffff,			/* V-RAM A0 */
@@ -63,16 +62,17 @@ static short msX, msY, msC;
 static short volWait = 0;
 static const char *soundGroupPtr;
 static char soundAreaNo;
+static uint32_t padLevelMaster;
 
-volatile unsigned int clutTransBit = 0;
-volatile unsigned int clutTransMask = 1;
+volatile uint32_t clutTransBit = 0;
+volatile uint32_t clutTransMask = 1;
 volatile unsigned short padLevel[2], padTriggerP[2], padTriggerN[2], padStatus[2];
 volatile unsigned short padOnlyLevel[2], padOnlyTriggerP[2], padOnlyTriggerN[2];
 volatile unsigned short mouseLevel, mouseTriggerP, mouseTriggerN;
 volatile unsigned short analogEna[2], analogX[2], analogY[2], analogL[2], analogR[2];
 volatile short mouseDx, mouseDy, mouseBl, mouseEna;
 volatile short mouseX, mouseY, mouseB, mouseT;
-volatile unsigned int vsyncCounter;
+volatile uint32_t vsyncCounter;
 volatile char slaveSync;
 
 char soundDrive = 0;
@@ -80,11 +80,14 @@ char soundSeq = 0;
 // short mxFlag = 0;
 short tvFrame;
 
-unsigned int clutBuff[CLUT_MAX];
+uint32_t clutBuff[CLUT_MAX];
+uint32_t clutHard[CLUT_MAX];
+const uint32_t *GetCLUT() { return clutHard; }
 
 void main_nmp(int no)
 {
 	tvFrame = SCREEN_NTSC_FRAME;
+	padLevelMaster = 0;
 
 	ReciveValues(no);
 	SetupScreenStyle(tvFrame);
@@ -166,10 +169,10 @@ void SetupScreenStyle(int type)
 /----------------------------------------------*/
 void ClearBackGroundScreen(void)
 {
-///	int	i, *p;
+	int	i, *p;
 
-///	p = (int *)(VDP2_VRAM_TOP);
-///	for(i=0; i<((1024*512)/4); ++i) *p++ = 0;
+	p = (int *)get_VDP2_VRAM_TOP();
+	for(i=0; i<((1024 * 512) / 4); ++i) *p++ = 0;
 }
 
 /*----------------------------------------------/
@@ -237,20 +240,18 @@ void SetCLUTs(int t, int s, const uint8_t *p)
 void BrightColorTables(int t, int s, int l)
 {
 	int	r, g, b, i, j, k;
-	unsigned char	*ptr;
 
 	j = t + s;
 	k = 0;
-	ptr = (unsigned char *)&clutBuff[t];
-	for(i=t; i<j; ++i)
-	{
-	ptr++;
-	b = *ptr++; g = *ptr++; r = *ptr++;
-	ptr -= 3;
-	*ptr++ = (b * l) >> 8;
-	*ptr++ = (g * l) >> 8;
-	*ptr++ = (r * l) >> 8;
-	k |= 1 << (i >> 4);
+	uint8_t *ptr = (uint8_t *)&clutBuff[t];
+	for(i = t; i < j; ++i) {
+		b = *ptr++; g = *ptr++; r = *ptr++;
+		ptr -= 3;
+		*ptr++ = (b * l) >> 8;
+		*ptr++ = (g * l) >> 8;
+		*ptr++ = (r * l) >> 8;
+		ptr++;
+		k |= 1 << (i >> 4);
 	}
 	clutTransBit |= k;
 }
@@ -447,8 +448,6 @@ return 1;
 /----------------------------------------------*/
 void SyncBlanking(void)
 {
-///	int	i, j, k;
-///	unsigned short	n, o, s, m;
 ///	unsigned char dt[16];
 
 /* SetSpeedLevel(620, 0);
@@ -457,130 +456,129 @@ void SyncBlanking(void)
 ///	SCL_DisplayFrame();
 ///	while(i == (volatile) vsyncCounter) ;
 
-#if 0
 	mouseEna = 0;
 	analogEna[0] = analogEna[1] = 0;
-	for(i=0; i<2; ++i)
+	uint16_t s, n;
+	for(int i = 0; i < 2; ++i)
 	{
-	if(i) j = SS_PEIDPL_2; else j = SS_PEIDPL_1;
-	s = n = 0;
-	for(k=0; k<6; ++k) {
-	if(analogEna[i]==0 && (TakePeriData(&dt[0],
-		smpcIdTbl[k] | j | SS_PEID_MULCON, &portLevel[0]))>=0) {
-		n |= ((dt[0] << 8) | dt[1]) ^ 0xffff;
-		analogX[i] = dt[2];
-		analogY[i] = dt[3];
-		analogR[i] = dt[4];
-		analogL[i] = dt[5];
-		analogEna[i] = 1;
-		s |= 4;
+		int j;
+		if(i) j = SS_PEIDPL_2; else j = SS_PEIDPL_1;
+		s = n = 0;
+///		for(int k=0; k<6; ++k) {
+///			if(analogEna[i]==0 && (TakePeriData(&dt[0],
+///				smpcIdTbl[k] | j | SS_PEID_MULCON, &portLevel[0]))>=0) {
+///				n |= ((dt[0] << 8) | dt[1]) ^ 0xffff;
+///				analogX[i] = dt[2];
+///				analogY[i] = dt[3];
+///				analogR[i] = dt[4];
+///				analogL[i] = dt[5];
+///				analogEna[i] = 1;
+///				s |= 4;
+///			} else if((TakePeriData(&dt[0], smpcIdTbl[k] | j | SS_PEID_6B, &portLevel[0]))>=0) {
+///				n |= ((dt[0] << 8) | dt[1]) ^ 0xffff;
+///				s |= 1;
+///			}
+///		}
+		n = padLevelMaster;
+///	if(mouseEna==0 && (TakePeriData(&dt[0], SS_PEIDPL_AT | j | SS_PEID_MOUSE, &portLevel[0]))>=0) {
+		s = 0;
+		if(mouseEna==0) {
+			uint16_t m = 0;
+			mouseEna |= 1;
+///			mouseBl = dt[0];
+///			mouseDx = dt[1];
+			mouseBl = 0;
+			mouseDx = 0;
+			if(mouseBl & 0x10) mouseDx |= 0xff00;
+///			mouseDy = dt[2];
+			mouseDy = 0;
+			if(mouseBl & 0x20) mouseDy |= 0xff00;
+			if(mouseBl & SATURN_MS_A) m |= SATURN_PAD_A;
+			if(mouseBl & SATURN_MS_B) m |= SATURN_PAD_B;
+			if(mouseBl & SATURN_MS_C) m |= SATURN_PAD_C;
+			if(mouseBl & SATURN_MS_START) m |= SATURN_PAD_START;
+			uint16_t o = mouseLevel;
+			mouseLevel = m;
+			mouseTriggerP = m & (o ^ 0xffff);
+			mouseTriggerN = o & (m ^ 0xffff);
+			s |= 2;
 		}
-	else if((TakePeriData(&dt[0],
-		smpcIdTbl[k] | j | SS_PEID_6B, &portLevel[0]))>=0) {
-		n |= ((dt[0] << 8) | dt[1]) ^ 0xffff;
-		s |= 1;
-		}
-	}
-	if(mouseEna==0 && (TakePeriData(&dt[0],
-		SS_PEIDPL_AT| j | SS_PEID_MOUSE, &portLevel[0]))>=0) {
-		m = 0;
-		mouseEna |= 1;
-		mouseBl = dt[0];
-		mouseDx = dt[1];
-		if(mouseBl & 0x10) mouseDx |= 0xff00;
-		mouseDy = dt[2];
-		if(mouseBl & 0x20) mouseDy |= 0xff00;
-		if(mouseBl & SATURN_MS_A) m |= SATURN_PAD_A;
-		if(mouseBl & SATURN_MS_B) m |= SATURN_PAD_B;
-		if(mouseBl & SATURN_MS_C) m |= SATURN_PAD_C;
-		if(mouseBl & SATURN_MS_START) m |= SATURN_PAD_START;
-		o = mouseLevel;
-		mouseLevel = m;
-		mouseTriggerP = m & (o ^ 0xffff);
-		mouseTriggerN = o & (m ^ 0xffff);
-		s |= 2;
-		}
-	o = padOnlyLevel[i];
-	padOnlyLevel[i] = n;
-	padOnlyTriggerP[i] = n & (o ^ 0xffff);
-	padOnlyTriggerN[i] = o & (n ^ 0xffff);
-	padStatus[i] = s;
-	padLevel[i] = padOnlyLevel[i];
-	padTriggerP[i] = padOnlyTriggerP[i];
-	padTriggerN[i] = padOnlyTriggerN[i];
+		uint16_t o = padOnlyLevel[i];
+		padOnlyLevel[i] = n;
+		padOnlyTriggerP[i] = n & (o ^ 0xffff);
+		padOnlyTriggerN[i] = o & (n ^ 0xffff);
+		padStatus[i] = s;
+		padLevel[i] = padOnlyLevel[i];
+		padTriggerP[i] = padOnlyTriggerP[i];
+		padTriggerN[i] = padOnlyTriggerN[i];
 	}
 
-	if(mouseEna)
-	{
-	padLevel[0] |= mouseLevel;
-	padTriggerP[0] |= mouseTriggerP;
-	padTriggerN[0] |= mouseTriggerN;
+	if(mouseEna) {
+		padLevel[0] |= mouseLevel;
+		padTriggerP[0] |= mouseTriggerP;
+		padTriggerN[0] |= mouseTriggerN;
+	} else {
+		mouseLevel = mouseTriggerP = mouseTriggerN = 0;
 	}
-	else mouseLevel = mouseTriggerP = mouseTriggerN = 0;
 
 	if((padStatus[0] & 7)==0) {
-	mouseEna = 0;
-	mouseLevel = mouseTriggerP = mouseTriggerN = 0;
-	for(i=0; i<2; ++i) {
-		analogEna[i] = 0;
-		analogX[i] = analogY[i] = analogL[i] = analogR[i] = 0;
-		padOnlyLevel[i] = padOnlyTriggerP[i] = padOnlyTriggerN[i] = 0;
-		padLevel[i] = padTriggerP[i] = padTriggerN[i] = 0;
+		mouseEna = 0;
+		mouseLevel = mouseTriggerP = mouseTriggerN = 0;
+		for(int i = 0; i < 2; ++i) {
+			analogEna[i] = 0;
+			analogX[i] = analogY[i] = analogL[i] = analogR[i] = 0;
+			padOnlyLevel[i] = padOnlyTriggerP[i] = padOnlyTriggerN[i] = 0;
+			padLevel[i] = padTriggerP[i] = padTriggerN[i] = 0;
 		}
 	}
-#endif
 /* SetSpeedLevel(620, 31);
 */
 }
 
-static void EntryVsync(void)
+void EntryVsync(uint32_t padbits)
 {
-#if 0
-	int	i, j;
-	unsigned int	b, *clut;
-
-	SCL_VblankStart();
-
+///	SCL_VblankStart();
+	padLevelMaster = padbits;
 /* Color Luck Up Service */
-	if(clutTransMask) {
-	j = 6;
-	b = 1;
-	clut = &clutBuff[0];
-	for(i=0; i<512; i+=16)
-		{
-		if(clutTransBit & b)
-			{ SCL_SetColRam(SCL_NBG0, i, i+16, clut);
-			clutTransBit ^= b;
-			j--; }
-		if(j==0) break;
-		clut += 16;
-		b += b;
+	if(clutTransMask != 0) {
+		int j = 6;
+		uint32_t b = 1;
+		const uint32_t *clut = &clutBuff[0];
+		uint32_t ofs = 0;
+		for(int i = 0; i < 512; i += 16) {
+			if(clutTransBit & b) {
+///				SCL_SetColRam(SCL_NBG0, i, i + 16, clut);
+				for(int l = 0; l < 16; ++l) clutHard[ofs + l] = clut[l];
+				clutTransBit ^= b;
+				j--;
+			}
+			if(j == 0) break;
+			clut += 16;
+			b += b;
+			ofs += 16;
 		}
 	}
 
-	ServiceInputMethod();
+	ServiceInputMethod(padbits);
 	ServiceSMPC();
-#endif
 }
 
-static void ExitVsync(void)
+void ExitVsync(void)
 {
-#if 0
-	int	i;
-	volatile char	*ptr;
+///	int	i;
+///	volatile char	*ptr;
 
-	SCL_VblankEnd();
+///	SCL_VblankEnd();
 	vsyncCounter++;
-	ptr = &slaveSync;
-	ptr += 0x20000000;
-	( *ptr )++;
-	ServiceAudioCD();
-	if(volWait!=0 && soundDrive!=0 && soundSeq!=0)
-	{
-	volWait--;
-	if(volWait==0) SND_SetTlVl(15);
-	}
-#endif
+///	ptr = &slaveSync;
+///	ptr += 0x20000000;
+///	( *ptr )++;
+///	ServiceAudioCD();
+///	if(volWait!=0 && soundDrive!=0 && soundSeq!=0)
+///	{
+///	volWait--;
+///	if(volWait==0) SND_SetTlVl(15);
+///	}
 }
 
 void PresetBGposition(int x, int y)
@@ -595,19 +593,16 @@ void PresetBGposition(int x, int y)
 /	マウス／ＰＡＤ・エミュレーション	/
 /						/
 /----------------------------------------------*/
-static void ServiceInputMethod(void)
+static void ServiceInputMethod(uint32_t padbits)
 {
-#if 0
-	int	i;
-	unsigned short	p;
-	unsigned char data[16];
-	short	x, y;
+///	int	i;
+///	unsigned char data[16];
 
-	if(mxFlag)
+//	if(mxFlag)
 	{
-	mouseB = 0;
-	if((TakePeriData(&data[0], SS_PEIDPL_AT|SS_PEIDPL_AP|SS_PEID_MOUSE, &portLevel[0]))>=0)
-		{
+		mouseB = 0;
+#if 0
+	if((TakePeriData(&data[0], SS_PEIDPL_AT|SS_PEIDPL_AP|SS_PEID_MOUSE, &portLevel[0]))>=0) {
 		p = data[0];
 		x = data[1];
 		y = data[2];
@@ -618,41 +613,44 @@ static void ServiceInputMethod(void)
 		if(p & SATURN_MS_A) mouseB |= MOUSE_LEFT_LEVEL;
 		if(p & SATURN_MS_B) mouseB |= MOUSE_MIDDLE_LEVEL;
 		if(p & SATURN_MS_C) mouseB |= MOUSE_RIGHT_LEVEL;
-		}
-	p = 0;
-	for(i=0; i<6; ++i)
-		{
-		if((TakePeriData(&data[0], smpcIdTbl[i]|SS_PEIDPL_AP|SS_PEID_6B, &portLevel[0]))>=0)
-							p |= ((data[0] << 8) + data[1]) ^ 0xffff;
-		}
-	if(p)	{
-		if(p & SATURN_DIR_ALL) mouseAcl++;
-		else mouseAcl = 0;
-		if(mouseAcl > 64) mouseAcl = 64;
-		x = mouseAcl / 8;
-		x++;
-		if(p & SATURN_DIR_RIGHT) mouseX += x;
-		else if(p & SATURN_DIR_LEFT) mouseX -= x;
-		if(p & SATURN_DIR_DOWN) mouseY += x;
-		else if(p & SATURN_DIR_UP) mouseY -= x;
-		if(p & (SATURN_PAD_A|SATURN_PAD_X)) mouseB |= MOUSE_LEFT_LEVEL;
-		if(p & (SATURN_PAD_B|SATURN_PAD_Y)) mouseB |= MOUSE_MIDDLE_LEVEL;
-		if(p & (SATURN_PAD_C|SATURN_PAD_Z)) mouseB |= MOUSE_RIGHT_LEVEL;
-		}
-	if((mouseOld & MOUSE_LEVEL)==0 && (mouseB & MOUSE_LEVEL)!=0)
-				if(mouseDbc < 30) mouseB |= MOUSE_LAUNCH;
-	mouseOld = mouseB;
-	if(mouseB & MOUSE_LEVEL) mouseDbc = 0;
-	else if(mouseDbc < 300) mouseDbc++;
-
-	if(mouseX < 0) mouseX = 0;
-	else if(mouseX >= 640) mouseX = 640-1;
-	if(mouseY < 0) mouseY = 0;
-	else if(mouseY >= 448) mouseY = 448-1;
-
-	mouseT++;
 	}
 #endif
+		uint16_t p = padbits;
+///		for(i=0; i<6; ++i) {
+///			if((TakePeriData(&data[0], smpcIdTbl[i]|SS_PEIDPL_AP|SS_PEID_6B, &portLevel[0]))>=0) {
+///				p |= ((data[0] << 8) + data[1]) ^ 0xffff;
+///			}
+///		}
+		short x;
+		short y;
+		if(p) {
+			if(p & SATURN_DIR_ALL) mouseAcl++;
+			else mouseAcl = 0;
+			if(mouseAcl > 64) mouseAcl = 64;
+			x = mouseAcl / 8;
+			x++;
+			if(p & SATURN_DIR_RIGHT) mouseX += x;
+			else if(p & SATURN_DIR_LEFT) mouseX -= x;
+			if(p & SATURN_DIR_DOWN) mouseY += x;
+			else if(p & SATURN_DIR_UP) mouseY -= x;
+			if(p & (SATURN_PAD_A|SATURN_PAD_X)) mouseB |= MOUSE_LEFT_LEVEL;
+			if(p & (SATURN_PAD_B|SATURN_PAD_Y)) mouseB |= MOUSE_MIDDLE_LEVEL;
+			if(p & (SATURN_PAD_C|SATURN_PAD_Z)) mouseB |= MOUSE_RIGHT_LEVEL;
+		}
+		if((mouseOld & MOUSE_LEVEL)==0 && (mouseB & MOUSE_LEVEL)!=0) {
+			if(mouseDbc < 30) mouseB |= MOUSE_LAUNCH;
+		}
+		mouseOld = mouseB;
+		if(mouseB & MOUSE_LEVEL) mouseDbc = 0;
+		else if(mouseDbc < 300) mouseDbc++;
+
+		if(mouseX < 0) mouseX = 0;
+		else if(mouseX >= 640) mouseX = 640-1;
+		if(mouseY < 0) mouseY = 0;
+		else if(mouseY >= 448) mouseY = 448-1;
+
+		mouseT++;
+	}
 }
 
 int TakeDirection(void)

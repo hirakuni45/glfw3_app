@@ -10,8 +10,6 @@
 
 extern char errMsg[];
 
-static void ServiceTask(void);
-
 static void (*taskAdr[TASK_MAX])(void);
 static void (*taskGo[TASK_MAX])(void);
 
@@ -30,10 +28,10 @@ void DoMainGameOnly(int no)
 	if(no==0) CreateTask(EntryLogo);
 	else if(no==1 || no > 5) CreateTask(EntryTitle);
 	else ServiceRealmsMode(no);
-	while(1) ServiceTask();
+///	while(1) ServiceTask();
 }
 
-static void ServiceTask(void)
+void ServiceTask(void)
 {
 	int	i;
 
@@ -132,31 +130,26 @@ uint32_t TakeShort(const uint8_t *ptr)
 
 const uint8_t *GetResourcePtr(const char *name)
 {
-	int	c;
-	const uint8_t *src;
-	uint32_t a, b;
-
-	a = TakeInt((const uint8_t *)name);
-	src = resIndex;
-	while((c = *(char *)src) != -1)
-	{
-	if(c >= 0x20)
-		{
-		b = TakeInt(src);
-		src += 4;
-		if(a==b) return src;
+	uint32_t a = TakeInt((const uint8_t *)name);
+	const uint8_t *src = resIndex;
+	uint8_t c;
+	while((c = *src) != 0xff) {
+		if(c >= 0x20) {
+			uint32_t b = TakeInt(src);
+			src += 4;
+			if(a == b) return src;
+		} else {
+			src += 4;
 		}
-	else src += 4;
 	}
-	sprintf(errMsg, "Stop.\nFalse !\nCan't find resource ID at '%s'.\n", name);
-	LaunchDebugger(errMsg);
+	printf("Stop.\nFalse !\nCan't find resource ID at '%s'.\n", name);
+//	sprintf(errMsg, "Stop.\nFalse !\nCan't find resource ID at '%s'.\n", name);
+//	LaunchDebugger(errMsg);
 	return NULL;
 }
 
 const uint8_t *GetResource(const char *name, int no)
 {
-	const uint8_t *src;
-
-	src = GetResourcePtr(name);
+	const uint8_t *src = GetResourcePtr(name);
 	return (resImage + TakeMiddle(src + 1 + (no << 2)));
 }

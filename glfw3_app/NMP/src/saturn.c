@@ -98,14 +98,14 @@ static const PART soundPalet[] = {
 	PART_TEXT_CHOOSER,
 	0x00000000, 0,
 	(void *)&soundSlider,
-	PlaySound,
+	PlaySoundSaturn,
 	(void *)&soundPalet[2]	},
 {	LOCATION_CENTER, 114, 48, 16,
 	(void *)" PLAY ",
 	PART_TOUCH_SWITCH,
 	0x00000000, 0,
 	NULL,
-	PlaySound,
+	PlaySoundSaturn,
 	(void *)&soundPalet[3]	},
 {	177, 10, 10, 96,
 	(void *)&soundPalet[1],
@@ -380,7 +380,7 @@ void VenusShell(void)
 	}
 }
 
-void PlaySound(void)
+void PlaySoundSaturn(void)
 {
 	int	i;
 

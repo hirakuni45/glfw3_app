@@ -100,15 +100,24 @@ typedef struct {
 	unsigned char sec;
 } DateTime;
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void LaunchDebugger(const char *msg);
 
 void ExitVenus(void);
 
 void VenusShell(void);
 
-void PlaySound(void);
+void PlaySoundSaturn(void);
 void CpkPlay(void);
 void CpkMount(void);
 
 void LaunchCluster(void);
 void ClusterMain(void);
+
+#ifdef __cplusplus
+}
+#endif

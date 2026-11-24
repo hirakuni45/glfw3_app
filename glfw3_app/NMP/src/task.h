@@ -2,7 +2,7 @@
 #include <stdint.h>
 
 void DoMainGameOnly(int no);
-
+void ServiceTask(void);
 void CreateTask(void (*)(void));
 void KillTask(void (*)(void));
 void KillAllTask(void);

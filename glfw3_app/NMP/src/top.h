@@ -29,3 +29,6 @@ void RingSfx(int no);
 
 void ServiceCloseInt(void);
 void SetSpeedLevel(int x, int c);
+
+void EntryVsync(uint32_t padbits);
+void ExitVsync(void);

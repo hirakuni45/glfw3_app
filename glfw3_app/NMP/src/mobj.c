@@ -19,7 +19,7 @@ uint8_t *get_VDP2_VRAM_TOP() { return vdp2_vram_top_; }
 
 static void PresetImage(const uint8_t *ptr);
 static void PresetImageSub(int x, int y, int p);
-static void ExtractForVDP1(const uint8_t *, short *);
+static void ExtractForVDP1(const uint8_t *, uint16_t *);
 static void ExtractForVDP2(const uint8_t *, uint8_t *);
 static void BitMapForVDP2(const uint8_t *, uint8_t *);
 static void PlaneForVDP2(const uint8_t *, uint8_t *);
@@ -31,19 +31,19 @@ int clutIdxMOBJ, clutTopMOBJ;
 
 static VDP1_CMD *cmdPtr, cmdBuff[MOBJ_COMMAND_MAX+1];
 static MOBJ *mobjPtr = NULL, mobjBuff[MOBJ_MAX];
-static short *imagePtr;
+static uint16_t *imagePtr;
 static int clutIdxBG, clutTopBG;
-static unsigned short randSeed, randBase;
+static uint16_t randSeed, randBase;
 static char installMode;
-static const unsigned char bitTbl[] = {
+static const uint8_t bitTbl[] = {
 	0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01 };
-static uint8_t lineBuff[1024+512+128+1024];
+static uint8_t lineBuff[1024 + 512 + 128 + 1024 + 2048];
 
 void ResetMotionObject(void)
 {
 	clutTopMOBJ = clutIdxMOBJ = 256;
 	mobjPtr = &mobjBuff[0];
-///	imagePtr = (short *)VDP1_VRAM_TOP + MOBJ_COMMAND_MAX * 32;
+	imagePtr = (uint16_t *)get_VDP1_VRAM_TOP() + MOBJ_COMMAND_MAX * 32;
 }
 
 void ResetBackground(void)
@@ -124,38 +124,39 @@ void InstallMotionObjectDouble(const char *name, ANIME *anm)
 
 void InstallMotionObject(const char *name, ANIME *anm)
 {
-	int	i;
-	const uint8_t *src;
-	char res[5];
-	const uint8_t *img;
-	unsigned int a, c;
-
 	anm->mobj = mobjPtr;
 	anm->anime = anm->speed = 0;
-
-	if(name==NULL) {
+	if(name == NULL) {
 		anm->mobj = mobjPtr;
 		clutTopMOBJ = clutIdxMOBJ;
 		PresetImageSub(anm->x, anm->y, anm->count);
 		anm->count = 1 << ANIME_POS_SHIFT;
 		return;
 	}
-
-	src = (const uint8_t *)GetResourcePtr(name);
-	i = 0;
+	const uint8_t *src = GetResourcePtr(name);
+	int i = 0;
+	uint32_t a;
 	while((a = TakeInt(src)) < 0x20000000) {
-	c = a >> 24;
-	img = resImage + (a & 0xffffff);
-	if(c==RESOURCE_FLAT_ID) { PresetImage(img); ++i; }
-	else if(c==RESOURCE_CLUT_ID) InstallCLUT(img, CLUT_MODE_VDP1);
-	src += 4;
+		uint32_t c = a >> 24;
+		const uint8_t *img = resImage + (a & 0xffffff);
+		if(c == RESOURCE_FLAT_ID) {
+			PresetImage(img);
+			++i;
+		} else if(c == RESOURCE_CLUT_ID) {
+			InstallCLUT(img, CLUT_MODE_VDP1);
+			++i;
+		} else {
+			printf("InstallMotionObject: error ID: %d\n", c);
+		}
+		src += 4;
 	}
-
-	if(i==0) {
-		for(i=0; i<4; ++i) res[i] = name[i];
+	if(i == 0) {
+		char res[5];
+		for(int i = 0; i < 4; ++i) res[i] = name[i];
 		res[4] = 0;
-		sprintf(errMsg, "Stop.\nFalse !\nCan't install MOBJs at '%s'.\n", res);
-		LaunchDebugger(errMsg);
+		printf("Stop.\nFalse !\nCan't install MOBJs at '%s'.\n", res);
+//		sprintf(errMsg, "Stop.\nFalse !\nCan't install MOBJs at '%s'.\n", res);
+//		LaunchDebugger(errMsg);
 	}
 	anm->count = i << ANIME_POS_SHIFT;
 }
@@ -303,16 +304,18 @@ void DoAnime(ANIME *anime)
 
 static void PresetImage(const uint8_t *ptr)
 {
-	int	x, y, i;
-
 	ExtractForVDP1(ptr, imagePtr);
-	x = TakeShort(ptr);
-	y = TakeShort(ptr+2);
-	i = *(ptr + 4);
-	if(installMode==0) PresetImageSub(x, y, i);
-	else if(installMode==1) { installMode++; }
-	else if(installMode==2) { PresetImageSub(x, y, i);
-				installMode=1; }
+	int x = TakeShort(ptr);
+	int y = TakeShort(ptr + 2);
+	int i = *(ptr + 4);
+	if(installMode == 0) {
+		PresetImageSub(x, y, i);
+	} else if(installMode == 1) {
+		installMode++;
+	} else if(installMode == 2) {
+		PresetImageSub(x, y, i);
+		installMode = 1;
+	}
 }
 
 static void PresetImageSub(int x, int y, int p)
@@ -356,74 +359,90 @@ void ExtractResource(const uint8_t *image, uint8_t *out)
 	ExtractFLAT(&bf, out, h * v, p);
 }
 
-static void ExtractForVDP1(const uint8_t *image, short *vdp)
+static void ExtractForVDP1(const uint8_t *image, uint16_t *vdp)
 {
-	int	i, j, k, s, o, type, h, v, p, w, cm;
-	const uint8_t *src;
-	uint8_t *dst;
-	const uint16_t *in;
-	BIT_FILE bf;
-
-	h = TakeShort(image); image += 2;
-	v = TakeShort(image); image += 2;
-	p  = *image++;
-
+	int h = TakeShort(image); image += 2;
+	int v = TakeShort(image); image += 2;
+	int p = *image++;
+	int cm;
 	if(p <= 4) cm = 1; else cm = 0;
+
+	BIT_FILE bf;
 	bf.top = image;
 	bf.bitpos = 0;
-	s = h * v;
-	w = 1024;
-	o = 0;
+	int s = h * v;
+	int w = 1024;
+	int o = 0;
 	while(s > 0)
 	{
-	j = ExtractFLAT(&bf, &lineBuff[o], w-o, p);
-	in = (const uint16_t *)&lineBuff[0];
-	if(cm)	{ src = dst = &lineBuff[0];
-		for(i=0; i<512; ++i)
-			{ o = *src++;
-			o <<= 4;
-			o |= *src++;
-			*dst++ = o; }
-		k = 256; }
-	else k = 512;
-
-	if(installMode==1) for(i=0; i<k; ++i) *vdp++ = ( *in++ ) << 2;
-	else if(installMode==2) for(i=0; i<k; ++i) { *vdp |= *in; vdp++; in++; }
-	else for(i=0; i<k; ++i) *vdp++ = *in++;
-
-	s -= w;
-	if(j < 0)
-		{ j = -j;
-		for(i=0; i<j; ++i) lineBuff[i] = lineBuff[w+i];
-		o = j; }
-	else o = 0;
+		int j = ExtractFLAT(&bf, &lineBuff[o], w - o, p);
+		int k;
+		if(cm)	{
+			const uint8_t *src;
+			uint8_t *dst;
+			src = dst = &lineBuff[0];
+			for(int i = 0; i < 512; ++i) {
+				o = *src++;
+				o <<= 4;
+				o |= *src++;
+				*dst++ = o;
+			}
+			k = 256;
+		} else {
+			k = 512;
+		}
+		const uint16_t *in = (const uint16_t *)&lineBuff[0];
+		if(installMode == 1) {
+			for(int i = 0; i < k; ++i) { *vdp++ = ( *in++ ) << 2; }
+		} else if(installMode == 2) {
+			for(int i = 0; i < k; ++i) { *vdp |= *in; vdp++; in++; }
+		} else {
+			for(int i = 0; i < k; ++i) { *vdp++ = *in++; }
+		}
+		s -= w;
+		if(j < 0) {
+			j = -j;
+			for(int i = 0; i < j; ++i) lineBuff[i] = lineBuff[w + i];
+			o = j;
+		} else {
+			o = 0;
+		}
 	}
 }
 
 void ExtractBitImage(const char *name, int x, int y)
 {
-	int	i, k, l;
-	const uint8_t	*ptr;
-	const uint8_t	*cmd;
-	uint8_t	*out;
-
-	ptr = GetResourcePtr(name);
-	for(i=0; i<2; ++i)
+	const uint8_t *ptr = GetResourcePtr(name);
+	for(int i = 0; i < 2; ++i)
 	{
-	k = *ptr++;
-	cmd = resImage + TakeMiddle(ptr); ptr += 3;
-	if(k==0 || k==2 || k==3)
-		{ 
-		l = TakeShort(cmd);
-		if(x < 0) x = (640 - l) >> 1;
-		l = TakeShort(cmd+2);
-		if(y < 0) y = (448 - l) >> 1; 
-		out = get_VDP2_VRAM_TOP() + x + (y << 10);
-		if(k==0) ExtractForVDP2(cmd, out);
-		else if(k==2) BitMapForVDP2(cmd, out);
-		else PlaneForVDP2(cmd, out);
+		int k = *ptr++;
+		const uint8_t *cmd = resImage + TakeMiddle(ptr); ptr += 3;
+		switch(k) {
+		case 0:
+		case 2:
+		case 3:
+			{
+				int l = TakeShort(cmd);
+				if(x < 0) x = (640 - l) >> 1;
+				l = TakeShort(cmd + 2);
+				if(y < 0) y = (448 - l) >> 1; 
+				uint8_t	*out = get_VDP2_VRAM_TOP() + x + (y << 10);
+				if(k == 0) {
+					ExtractForVDP2(cmd, out);
+				} else if(k == 2) {
+					BitMapForVDP2(cmd, out);
+				} else {
+					PlaneForVDP2(cmd, out);
+				}
+			}
+			break;
+		case 1:
+			InstallCLUT(cmd, CLUT_MODE_VDP2);
+			break;
+		default:
+			printf("ExtractBitImage ID Error: %d\n", k);
+			break;
 		}
-	else if(k==1) InstallCLUT(cmd, CLUT_MODE_VDP2);
 	}
 }
 
@@ -565,7 +584,7 @@ MOBJ *PresetBitMapImage(const uint8_t *top, int w, int h, int ic)
 {
 	int	x, y, c, i;
 	const uint8_t	*img;
-	short	*vdp;
+	uint16_t *vdp;
 	MOBJ	*mobj;
 
 	mobj = mobjPtr;

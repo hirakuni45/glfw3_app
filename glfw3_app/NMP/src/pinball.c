@@ -35,7 +35,7 @@ extern volatile unsigned short padOnlyLevel[], padOnlyTriggerP[], padOnlyTrigger
 extern volatile short mouseDx, mouseDy, mouseBl, mouseEna;
 extern volatile unsigned short mouseLevel, mouseTriggerP, mouseTriggerN;
 extern volatile short analogEna[], analogX[], analogY[];
-extern unsigned int clutBuff[];
+extern uint32_t clutBuff[];
 extern char flipperMask;
 extern int screenWidth, screenHeight;
 extern ANIME fontAnime, infoAnime, ifonAnime, info2Anime, lupeAnime;
@@ -70,8 +70,8 @@ static int GameDemo3D(void);
 static int Game3D(void);
 static void MaskSub(int, int, int, int);
 
-unsigned int clutSave[256];
-unsigned int clutLupe[16];
+uint32_t clutSave[256];
+uint32_t clutLupe[16];
 unsigned short gamePadLevel, gamePadTrigger, gamePadRelese;
 short gameAnalogX, gameAnalogY, gameAnalogEna;
 short vibrX, vibrY, vibrXo, vibrYo;
@@ -172,10 +172,18 @@ static int ScanPadCommand(const uint16_t *cmd)
 	return 1;
 }
 
+static int logoTaskIdx;
+static int logoFadeFrame;
+static int logoFadeInten;
+
+static void TaskLogoInit(void);
+static void TaskLogoFadeIn(void);
+static void TaskLogoDisplay(void);
+static void TaskLogoFadeOut(void);
+
 void EntryLogo(void)
 {
-	int	i, j, k, l, m;
-
+// printf("EntryLogo\n");
 	demoPlayIndex = 0;
 	startMaskEnable = 1;
 	mainMenuPos = 1;
@@ -190,45 +198,88 @@ void EntryLogo(void)
 	}
 
 	LaunchResource("LOGO.RES");
+	logoTaskIdx = 0;
+	KillTask(EntryLogo);
 
-	for(i=0; i<4; ++i) {
-		ToBlackScreen();
-		ResetMotionObject();
-		ResetBackground();
-		OpenMotionObject(0, 0);
-		CloseMotionObject();
-		ExtractBitImage(logoReName + i * 4, 0, 0);
-		for(j=0; j<256; ++j) {
-			clutSave[j] = clutBuff[j];
-			clutBuff[j] = 0;
-		}
-		clutTransMask = 1;
+	CreateTask(TaskLogoInit);
+///	CreateTask(EntryTitle);
+}
 
-		l = 0;
-		for(k=0; k<LOGO_FADE_FRAME; ++k) {
-			SyncBlanking();
-			ServiceStartABC();
-			for(j=0; j<256; ++j) clutBuff[j] = clutSave[j];
-			BrightColorTables(0, 64, l);
-			l += 5;
-			if(l > 255) l = 256;
-		}
-		for(k=0; k<LOGO_DISPLAY_FRAME; ++k) {
-			SyncBlanking();
-			ServiceStartABC();
-		}
-		l = 256;
-		for(k=0; k<LOGO_FADE_FRAME; ++k) {
-			SyncBlanking();
-			ServiceStartABC();
-			for(j=0; j<256; ++j) clutBuff[j] = clutSave[j];
-			BrightColorTables(0, 64, l);
-			l -= 5;
-			if(l < 0) l = 0;
+static void TaskLogoInit(void)
+{
+// printf("TaskLogoInit: %d\n", logoTaskIdx);
+	ToBlackScreen();
+	ResetMotionObject();
+	ResetBackground();
+	OpenMotionObject(0, 0);
+	CloseMotionObject();
+	ExtractBitImage(logoReName + logoTaskIdx * 4, 0, 0);
+	for(int j = 0; j < 256; ++j) {
+		clutSave[j] = clutBuff[j];
+		clutBuff[j] = 0;
+	}
+	clutTransMask = 1;
+
+	logoFadeFrame = 0;
+	logoFadeInten = 0;
+	KillTask(TaskLogoInit);
+	CreateTask(TaskLogoFadeIn);
+}
+
+static void TaskLogoFadeIn(void)
+{
+// if(logoFadeFrame == 0) printf("TaskLogoFadeIn\n");
+	if(logoFadeFrame < LOGO_FADE_FRAME) {
+		SyncBlanking();
+		ServiceStartABC();
+		for(int j = 0; j < 256; ++j) clutBuff[j] = clutSave[j];
+		BrightColorTables(0, 64, logoFadeInten);
+		logoFadeInten += 5;
+		if(logoFadeInten > 255) logoFadeInten = 256;
+		logoFadeFrame++;
+	} else {
+		logoFadeFrame = 0;
+		KillTask(TaskLogoFadeIn);
+		CreateTask(TaskLogoDisplay);
+	}
+}
+
+static void TaskLogoDisplay(void)
+{
+// if(logoFadeFrame == 0) printf("TaskLogoDisplay\n");
+	if(logoFadeFrame < LOGO_DISPLAY_FRAME) {
+		SyncBlanking();
+		ServiceStartABC();
+		logoFadeFrame++;
+	} else {
+		logoFadeFrame = 0;
+		logoFadeInten = 256;
+		KillTask(TaskLogoDisplay);
+		CreateTask(TaskLogoFadeOut);
+	}
+}
+
+static void TaskLogoFadeOut(void)
+{
+// if(logoFadeFrame == 0) printf("TaskLogoFadeOut\n");
+	if(logoFadeFrame < LOGO_FADE_FRAME) {
+		SyncBlanking();
+		ServiceStartABC();
+		for(int j = 0; j < 256; ++j) clutBuff[j] = clutSave[j];
+		BrightColorTables(0, 64, logoFadeInten);
+		logoFadeInten -= 5;
+		if(logoFadeInten < 0) logoFadeInten = 0;
+		logoFadeFrame++;
+	} else {
+		logoTaskIdx++;
+		KillTask(TaskLogoFadeOut);
+		if(logoTaskIdx < 4) {
+			CreateTask(TaskLogoInit);
+		} else {
+///			CreateTask(EntryMovie);
+			CreateTask(EntryTitle);
 		}
 	}
-	KillTask(EntryLogo);
-	CreateTask(EntryMovie);
 }
 
 static void ServiceStartABC(void)
@@ -252,9 +303,9 @@ static void EntryMovie(void)
 	PlayCD(-1, -1);
 
 	if(flashSegaEnable | geEnable) {
-	KillTask(EntryMovie);
-	CreateTask(EntryTitle);
-	return;
+		KillTask(EntryMovie);
+		CreateTask(EntryTitle);
+		return;
 	}
 
 	ToBlackScreen();
@@ -275,11 +326,12 @@ static void EntryMovie(void)
 ///	(*taskAVI)(movieTaskNo);
 }
 
+static void LoopTitle(void);
+static uint32_t tTitle = 0;
+static uint32_t sTitle = 0;
+
 void EntryTitle(void)
 {
-	int	i, s, t, f;
-	MOBJ	*mobj;
-
 	PlayCD(-1, -1);
 	ToBlackScreen();
 	ResetMotionObject();
@@ -292,56 +344,66 @@ void EntryTitle(void)
 	if(trialEnable | geEnable) ExtractBitImage("TLRV", 0, 0);
 	else ExtractBitImage("TITL", 0, 0);
 	InstallMotionObject("MOBJ", &objsAnime);
-	for(i=0; i<10; ++i) {
-		clutSave[i] = clutBuff[i+54];
+
+	for(int i = 0; i < 10; ++i) {
+		clutSave[i] = clutBuff[i + 54];
 		SetCLUTi(54+i, 0);
-		}
+	}
 	clutTransMask = 1;
 
 	FlashPadCommand();
 
-	t = 0;
-	s = 0;
-	f = 1;
-	while(f) {
+	KillTask(EntryTitle);
+	CreateTask(LoopTitle);
+	tTitle = 0;
+	sTitle = 0;
+}
+
+static void LoopTitle(void)
+{
+	int start = 0;
 	SyncBlanking();
 	ServiceSecretCommand();
 	Rand();
 	OpenMotionObject(0, 0);
 	gamePadLevel = padOnlyLevel[0] | padOnlyLevel[1];
 	gamePadTrigger = padOnlyTriggerP[0] | padOnlyTriggerP[1];
-	s++;
-	if(s > (tvFrame * 2)) startMaskEnable = 0;
+	sTitle++;
+	if(sTitle > (tvFrame * 2)) startMaskEnable = 0;
 	if(startMaskEnable==0) {
-		if(gamePadTrigger & SATURN_PAD_START) f = 0;
+		if(gamePadTrigger & SATURN_PAD_START) start = 1;
 		ServiceBrightClut(54, 10);
-		}
-	if(gamePadLevel) t = 0;
-	t++;
-	if(t >= (30 * tvFrame) && flashSegaEnable!=0) SYS_Exit(0);
-	if(s >= (tvFrame * DEMO_PLAY_DELAY)) {
+	}
+	if(gamePadLevel) tTitle = 0;
+	tTitle++;
+	if(tTitle >= (30 * tvFrame) && flashSegaEnable!=0) SYS_Exit(0);
+	if(sTitle >= (tvFrame * DEMO_PLAY_DELAY)) {
 		realmsEnable = 0;
 		demoPlayEnable = DEMO_PLAY_TIME * tvFrame;
 		gameMenuPos = demoPlayIndex + 1;
 		demoPlayIndex++;
 		if(demoPlayIndex >= 3) demoPlayIndex = 0;
 		if(flashSegaEnable) demoPlayIndex = 0;
-		KillTask(EntryTitle);
-		CreateTask(EntryGameInit);
+		CloseMotionObject();
+		KillTask(LoopTitle);
+		printf("Start Demo......\n");
+///		CreateTask(EntryGameInit);
 		return;
-		}
+	}
 	CloseMotionObject();
-	}
-	if((gamePadLevel & SATURN_PAD_ABC)==SATURN_PAD_ABC) {
-	if(geEnable) LaunchGameWare();
-	else if(flashSegaEnable) SYS_Exit(0);
-	else SYS_EXECDMP();
-	}
+	
+	if(start) {
+		if((gamePadLevel & SATURN_PAD_ABC)==SATURN_PAD_ABC) {
+			if(geEnable) LaunchGameWare();
+			else if(flashSegaEnable) SYS_Exit(0);
+			else SYS_EXECDMP();
+		}
 
-	KillTask(EntryTitle);
-	i = SATURN_PAD_RIGHT | SATURN_PAD_LEFT;
-	if((gamePadLevel & i)==i && debugEnable!=0) CreateTask(EntryStaffRoll);
-	else CreateTask(EntryMainMenu);
+		KillTask(LoopTitle);
+		uint16_t i = SATURN_PAD_RIGHT | SATURN_PAD_LEFT;
+		if((gamePadLevel & i)==i && debugEnable!=0) CreateTask(EntryStaffRoll);
+		else CreateTask(EntryMainMenu);
+	}
 }
 
 void EntryMainMenu(void)
@@ -413,11 +475,10 @@ void EntryMainMenu(void)
 	else CreateTask(EntryMainMenu);
 }
 
+static void LoopGameMenu(void);
+
 void EntryGameMenu(void)
 {
-	int	i, j, k, t, f;
-	MOBJ	*mobj;
-
 	ToBlackScreen();
 	ResetMotionObject();
 	ResetBackground();
@@ -427,19 +488,26 @@ void EntryGameMenu(void)
 	InstallMotionObject("GOBJ", &objsAnime);
 	clutTransMask = 1;
 
-	t = 0;
-	f = 1;
-	while(f) {
+	KillTask(EntryGameMenu);
+	CreateTask(LoopGameMenu);
+}
+
+static void LoopGameMenu(void)
+{
+	static uint32_t t = 0;
+
+	int start = 0;
 	SyncBlanking();
 	Rand();
 	OpenMotionObject(0, 0);
 	gamePadLevel = padOnlyLevel[0] | padOnlyLevel[1];
 	gamePadTrigger = padOnlyTriggerP[0] | padOnlyTriggerP[1];
 	if(gamePadLevel) t = 0;
-	i = gamePadTrigger & SATURN_PAD_START;
-	if(i) f = 0;
+	if((gamePadTrigger & SATURN_PAD_START) != 0) {
+		start = 1;
+	}
 
-	k = gameMenuPos;
+	int k = gameMenuPos;
 	if(gamePadTrigger & SATURN_DIR_LEFT) gameMenuPos--;
 	if(gamePadTrigger & SATURN_DIR_RIGHT) gameMenuPos++;
 	if(trialEnable) gameMenuPos = 1;
@@ -454,36 +522,38 @@ void EntryGameMenu(void)
 	if(gameMenuPos==0) gameMenuPos = 1;
 	}
 
-	if(k!=gameMenuPos) RingSfx(SFX_MENU_SELECT);
+	if(k != gameMenuPos) RingSfx(SFX_MENU_SELECT);
 	k = gameMenuPos * 2;
-	mobj = objsAnime.mobj + gameMenuPos;
+	MOBJ *mobj = objsAnime.mobj + gameMenuPos;
 	mobj->x = gameObjsPos[k++];
 	mobj->y = gameObjsPos[k];
 	if((vsyncCounter & 7) <= 5) SetupObject(mobj);
 	CloseMotionObject();
 	t++;
-	if(t >= (30 * tvFrame) && flashSegaEnable!=0) SYS_Exit(0);
-	}
-	KillTask(EntryGameMenu);
-	if((gamePadLevel & SATURN_PAD_ABC)==SATURN_PAD_ABC
-			&& (gamePadTrigger & SATURN_PAD_START)!=0)
-						CreateTask(EntryTitle);
-	else	{
-	PlayCD(-1, -1);
-	if(gameMenuPos==0) RingSfx(SFX_SACRIFICIAL_DRUMS);
-	else if(gameMenuPos==1) RingSfx(SFX_MENU_ARKHAM);
-	else if(gameMenuPos==2) RingSfx(SFX_MENU_BLOODY);
-	else RingSfx(SFX_MENU_DLANDS);
+	if(t >= (30 * tvFrame) && flashSegaEnable != 0) SYS_Exit(0);
 
-	i = SATURN_PAD_RIGHT | SATURN_PAD_LEFT;
-	if(debugEnable) {
-		if((gamePadLevel & i)==SATURN_PAD_RIGHT) debugFlag = 1;
-		if((gamePadLevel & i)==i) CreateTask(EntryInfoTester);
+	if(start) {
+		KillTask(LoopGameMenu);
+		if((gamePadLevel & SATURN_PAD_ABC)==SATURN_PAD_ABC
+				&& (gamePadTrigger & SATURN_PAD_START)!=0)
+						CreateTask(EntryTitle);
+		else	{
+		PlayCD(-1, -1);
+		if(gameMenuPos==0) RingSfx(SFX_SACRIFICIAL_DRUMS);
+		else if(gameMenuPos==1) RingSfx(SFX_MENU_ARKHAM);
+		else if(gameMenuPos==2) RingSfx(SFX_MENU_BLOODY);
+		else RingSfx(SFX_MENU_DLANDS);
+
+		int i = SATURN_PAD_RIGHT | SATURN_PAD_LEFT;
+		if(debugEnable) {
+			if((gamePadLevel & i)==SATURN_PAD_RIGHT) debugFlag = 1;
+			if((gamePadLevel & i)==i) CreateTask(EntryInfoTester);
+			else CreateTask(EntryTestBackup);
+			}
 		else CreateTask(EntryTestBackup);
+		realmsEnable = 0;
+		if(gameMenuPos==0) { realmsEnable = 1; gameMenuPos = 1; }
 		}
-	else CreateTask(EntryTestBackup);
-	realmsEnable = 0;
-	if(gameMenuPos==0) { realmsEnable = 1; gameMenuPos = 1; }
 	}
 }
 

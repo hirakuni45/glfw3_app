@@ -1,4 +1,5 @@
 ﻿#include <stdio.h>
+#include <string.h>
 #include "ballsim.h"
 #include "saturn.h"
 #include "info.h"
@@ -106,7 +107,7 @@ char tiltGo;
 char gameMode;
 char nextStageEnable;
 char roundValue[12];
-char *scoreConst[] = {
+static const char *scoreConstSrc[] = {
 	"000000030200", /*  0:STAND UP */
 	"000000300000", /*  1:STAND UP COMPLITE */
 	"000000025010", /*  2:DROP TARGET */
@@ -159,6 +160,8 @@ char *scoreConst[] = {
 	"000507030000", /* 49:INITIAL SCORE DREAML */
 	"000005800000", /* 50:INITIAL ADD SCORE DREAML */
 	NULL };
+static char scoreConstPad[12 * 50];
+char *scoreConst[50];
 char lightCommand[50];
 short *lightPosPtr;
 unsigned char *lightAnimePtr;
@@ -890,14 +893,20 @@ void InitGeneralRule(int no)
 
 void InitConstScore(void)
 {
-	int	i, j, k;
-	char	*s, *d;
+	int i, j, k;
+	char *s, *d;
 
 	i = 0;
-	while(scoreConst[i]!=NULL) {
+	while(scoreConstSrc[i] != NULL) {
+		memcpy(&scoreConstPad[i * 12], scoreConstSrc[i], 12);
+		scoreConst[i] = &scoreConstPad[i * 12];
+		++i;
+	}
+	i = 0;
+	while(scoreConst[i] != NULL) {
 	s = scoreConst[i];
-	if(s[12]==0) {
-		s[12] = 1;
+//	if(s[12]==0) {
+//		s[12] = 1;
 		d = &s[11];
 		for(j=0; j<6; ++j) {
 			k = *s;
@@ -906,7 +915,7 @@ void InitConstScore(void)
 			s++;
 			d--;
 			}
-		}
+//		}
 	i++;
 	}
 }

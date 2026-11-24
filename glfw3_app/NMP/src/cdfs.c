@@ -1,4 +1,5 @@
 ﻿#include <stdio.h>
+#include <string.h>
 #include <stdint.h>
 // #include <sega_sys.h>
 // #include <sega_gfs.h>
@@ -7,8 +8,9 @@
 #include "saturn.h"
 #include "ballsim.h"
 #include "option.h"
-#include "cdfs.h"
 #include "task.h"
+#include "top.h"
+#include "cdfs.h"
 
 #define SMCD_MAX_OPEN  4
 #define ROOT_FILES_MAX   256
@@ -121,6 +123,35 @@ void InitFileSystem(void)
 
 void ReadFile(const char *fname, void *buf)
 {
+	FILE *fp;
+	char fn[32];
+
+	strcpy(fn, "./RES/");
+	strcat(fn, fname);
+
+printf("Read file: '%s'\n", fn);
+
+	fp = fopen(fn, "rb");
+	if(fp == NULL) {
+		return;
+	}
+	long sz;
+	fseek(fp, 0, SEEK_END);
+	sz = ftell(fp);
+	fseek(fp, 0, SEEK_SET);
+	size_t rs = fread(buf, 1, sz, fp);
+
+	fclose(fp);
+
+	if(rs != sz) {
+		sprintf(&errMsg[0],
+			"Stop.\nCan't open input file as '%s'.\n", fname);
+		ToBlackScreen();
+		LaunchDebugger(&errMsg[0]);
+	}
+
+printf("Read resource: %ld bytes\n", sz);
+
 #if 0
 	int	i, id;
 	char	*src, *dst, c, cna[16];
