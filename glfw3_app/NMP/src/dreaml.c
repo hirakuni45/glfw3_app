@@ -309,7 +309,6 @@ static void ServiceMultiBall(PLAYER *ply, char *sct)
 		if(ply->roundGoNo==0 && ply->multiBallGo==0) {
 		if(ply->holeSelectorEnable!=0 && ply->holeOn[0]!=0) {
 			ply->ballLockEnable = 0;
-///			RingSfx(SFX_DRM_NIGHT_LOCKED, 0);
 			RingSfx(SFX_DRM_NIGHT_LOCKED);
 			if(ply->countUpMulti < 4) ply->countUpMulti++;
 			infoNumber = ply->countUpMulti;

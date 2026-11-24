@@ -10,10 +10,12 @@
 //=====================================================================//
 
 extern "C" {
-	void EntryVsync(void);
+	void EntryVsync(uint32_t padbits);
 	void ExitVsync(void);
 	void main_nmp(int no);
 	void ServiceTask(void);
 	const uint32_t *GetCLUT();
+	uint8_t *get_VDP1_VRAM_TOP();
+	uint8_t *get_VDP1_VRAM_IMG();
 	uint8_t *get_VDP2_VRAM_TOP();
 };

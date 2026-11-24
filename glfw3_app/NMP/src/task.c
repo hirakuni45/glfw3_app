@@ -66,7 +66,8 @@ void KillAllTask(void)
 void ResetTask(void)
 {
 	KillAllTask();
-	CreateTask(SyncBlanking);
+	// メインループの先頭で、独自に呼ぶ事
+///	CreateTask(SyncBlanking);
 }
 
 /*----------------------------------------------/

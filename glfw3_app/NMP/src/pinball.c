@@ -201,8 +201,8 @@ void EntryLogo(void)
 	logoTaskIdx = 0;
 	KillTask(EntryLogo);
 
-	CreateTask(TaskLogoInit);
-///	CreateTask(EntryTitle);
+///	CreateTask(TaskLogoInit);
+	CreateTask(EntryTitle);
 }
 
 static void TaskLogoInit(void)
@@ -370,7 +370,7 @@ static void LoopTitle(void)
 	gamePadTrigger = padOnlyTriggerP[0] | padOnlyTriggerP[1];
 	sTitle++;
 	if(sTitle > (tvFrame * 2)) startMaskEnable = 0;
-	if(startMaskEnable==0) {
+	if(startMaskEnable == 0) {
 		if(gamePadTrigger & SATURN_PAD_START) start = 1;
 		ServiceBrightClut(54, 10);
 	}
@@ -386,14 +386,14 @@ static void LoopTitle(void)
 		if(flashSegaEnable) demoPlayIndex = 0;
 		CloseMotionObject();
 		KillTask(LoopTitle);
-		printf("Start Demo......\n");
 ///		CreateTask(EntryGameInit);
+	CreateTask(EntryMainMenu);
 		return;
 	}
 	CloseMotionObject();
 	
 	if(start) {
-		if((gamePadLevel & SATURN_PAD_ABC)==SATURN_PAD_ABC) {
+		if((gamePadLevel & SATURN_PAD_ABC) == SATURN_PAD_ABC) {
 			if(geEnable) LaunchGameWare();
 			else if(flashSegaEnable) SYS_Exit(0);
 			else SYS_EXECDMP();
@@ -406,11 +406,11 @@ static void LoopTitle(void)
 	}
 }
 
+static void LoopMainMenu(void);
+static uint32_t tMainMenu;
+
 void EntryMainMenu(void)
 {
-	int	i, j, k, t, f;
-	MOBJ	*mobj;
-
 	ToBlackScreen();
 	ResetMotionObject();
 	ResetBackground();
@@ -425,28 +425,31 @@ void EntryMainMenu(void)
 
 	PlayCD(-1, CDA_MENU);
 
-	t = 0;
-	f = 1;
-	while(f) {
+	tMainMenu = 0;
+}
+
+static void LoopMainMenu(void)
+{
+	int start = 0;
 	SyncBlanking();
 	Rand();
 	OpenMotionObject(0, 0);
 	gamePadLevel = padOnlyLevel[0] | padOnlyLevel[1];
 	gamePadTrigger = padOnlyTriggerP[0] | padOnlyTriggerP[1];
-	if(gamePadLevel) t = 0;
-	i = gamePadTrigger & SATURN_PAD_START;
-	if(i) f = 0;
-	k = mainMenuPos;
+	if(gamePadLevel) tMainMenu = 0;
+	int i = gamePadTrigger & SATURN_PAD_START;
+	if(i) start = 1;
+	int k = mainMenuPos;
 	if(gamePadTrigger & SATURN_DIR_LEFT) mainMenuPos--;
 	if(gamePadTrigger & SATURN_DIR_RIGHT) mainMenuPos++;
 	if((trialEnable | geEnable)!=0 && mainMenuPos > 1) mainMenuPos = 1;
 
 	if(mainMenuPos < 0) mainMenuPos = 0;
 	else if(mainMenuPos >= 2) mainMenuPos = 2;
-	if(k!=mainMenuPos) RingSfx(SFX_MENU_SELECT);
+	if(k != mainMenuPos) RingSfx(SFX_MENU_SELECT);
 
 	k = mainMenuPos * 2;
-	mobj = objsAnime.mobj + mainMenuPos;
+	MOBJ *mobj = objsAnime.mobj + mainMenuPos;
 	mobj->x = menuObjsPos[k++];
 	mobj->y = menuObjsPos[k];
 	if((vsyncCounter & 7) <= 5) SetupObject(mobj);
@@ -456,26 +459,33 @@ void EntryMainMenu(void)
 	mobj->y = cursObjsPos[k];
 	SetupObject(mobj);
 	CloseMotionObject();
-	t++;
-	if(t >= (30 * tvFrame) && flashSegaEnable!=0) SYS_Exit(0);
-	}
-	RingSfx(SFX_SACRIFICIAL_DRUMS);
+	tMainMenu++;
+	if(tMainMenu >= (30 * tvFrame) && flashSegaEnable != 0) SYS_Exit(0);
 
-	KillTask(EntryMainMenu);
-	i = SATURN_PAD_RIGHT | SATURN_PAD_LEFT;
-	if((gamePadLevel & SATURN_PAD_ABC)==SATURN_PAD_ABC
-			&& (gamePadTrigger & SATURN_PAD_START)!=0) {
-						CreateTask(EntryTitle);
-						}
-	else if(debugEnable!=0 && (gamePadLevel & i)==i)
-						CreateTask(EntrySoundTester);
-	else if(mainMenuPos==0) CreateTask(EntryManual);
-	else if(mainMenuPos==1) CreateTask(EntryGameMenu);
-	else if(mainMenuPos==2) CreateTask(EntryOptions);
-	else CreateTask(EntryMainMenu);
+	if(start) {
+		RingSfx(SFX_SACRIFICIAL_DRUMS);
+
+		KillTask(LoopMainMenu);
+
+		i = SATURN_PAD_RIGHT | SATURN_PAD_LEFT;
+		if((gamePadLevel & SATURN_PAD_ABC)==SATURN_PAD_ABC && (gamePadTrigger & SATURN_PAD_START) != 0) {
+			CreateTask(EntryTitle);
+		} else if(debugEnable != 0 && (gamePadLevel & i) == i) {
+			CreateTask(EntrySoundTester);
+		} else if(mainMenuPos == 0) {
+			CreateTask(EntryManual);
+		} else if(mainMenuPos == 1) {
+			CreateTask(EntryGameMenu);
+		} else if(mainMenuPos == 2) {
+			CreateTask(EntryOptions);
+		} else {
+			CreateTask(EntryMainMenu);
+		}
+	}
 }
 
 static void LoopGameMenu(void);
+static uint32_t tGameMenu;
 
 void EntryGameMenu(void)
 {
@@ -490,19 +500,19 @@ void EntryGameMenu(void)
 
 	KillTask(EntryGameMenu);
 	CreateTask(LoopGameMenu);
+
+	tGameMenu = 0;
 }
 
 static void LoopGameMenu(void)
 {
-	static uint32_t t = 0;
-
 	int start = 0;
 	SyncBlanking();
 	Rand();
 	OpenMotionObject(0, 0);
 	gamePadLevel = padOnlyLevel[0] | padOnlyLevel[1];
 	gamePadTrigger = padOnlyTriggerP[0] | padOnlyTriggerP[1];
-	if(gamePadLevel) t = 0;
+	if(gamePadLevel) tGameMenu = 0;
 	if((gamePadTrigger & SATURN_PAD_START) != 0) {
 		start = 1;
 	}
@@ -512,14 +522,14 @@ static void LoopGameMenu(void)
 	if(gamePadTrigger & SATURN_DIR_RIGHT) gameMenuPos++;
 	if(trialEnable) gameMenuPos = 1;
 	if(geEnable) {
-	if(gameMenuPos > 2) gameMenuPos = 1;
-	else if(gameMenuPos < 1) gameMenuPos = 2;
+		if(gameMenuPos > 2) gameMenuPos = 1;
+		else if(gameMenuPos < 1) gameMenuPos = 2;
 	}
 	gameMenuPos &= 3;
 
 	if(optionMenuPad[OPTION_NO_PLAYER]!=0 && gameMenuPos==0) {
-	gameMenuPos = k;
-	if(gameMenuPos==0) gameMenuPos = 1;
+		gameMenuPos = k;
+		if(gameMenuPos==0) gameMenuPos = 1;
 	}
 
 	if(k != gameMenuPos) RingSfx(SFX_MENU_SELECT);
@@ -529,48 +539,47 @@ static void LoopGameMenu(void)
 	mobj->y = gameObjsPos[k];
 	if((vsyncCounter & 7) <= 5) SetupObject(mobj);
 	CloseMotionObject();
-	t++;
-	if(t >= (30 * tvFrame) && flashSegaEnable != 0) SYS_Exit(0);
+	tGameMenu++;
+	if(tGameMenu >= (30 * tvFrame) && flashSegaEnable != 0) SYS_Exit(0);
 
 	if(start) {
 		KillTask(LoopGameMenu);
-		if((gamePadLevel & SATURN_PAD_ABC)==SATURN_PAD_ABC
-				&& (gamePadTrigger & SATURN_PAD_START)!=0)
-						CreateTask(EntryTitle);
-		else	{
-		PlayCD(-1, -1);
-		if(gameMenuPos==0) RingSfx(SFX_SACRIFICIAL_DRUMS);
-		else if(gameMenuPos==1) RingSfx(SFX_MENU_ARKHAM);
-		else if(gameMenuPos==2) RingSfx(SFX_MENU_BLOODY);
-		else RingSfx(SFX_MENU_DLANDS);
+		if((gamePadLevel & SATURN_PAD_ABC)==SATURN_PAD_ABC && (gamePadTrigger & SATURN_PAD_START) != 0) {
+			CreateTask(EntryTitle);
+		} else {
+			PlayCD(-1, -1);
+			if(gameMenuPos==0) RingSfx(SFX_SACRIFICIAL_DRUMS);
+			else if(gameMenuPos==1) RingSfx(SFX_MENU_ARKHAM);
+			else if(gameMenuPos==2) RingSfx(SFX_MENU_BLOODY);
+			else RingSfx(SFX_MENU_DLANDS);
 
-		int i = SATURN_PAD_RIGHT | SATURN_PAD_LEFT;
-		if(debugEnable) {
-			if((gamePadLevel & i)==SATURN_PAD_RIGHT) debugFlag = 1;
-			if((gamePadLevel & i)==i) CreateTask(EntryInfoTester);
-			else CreateTask(EntryTestBackup);
+			int i = SATURN_PAD_RIGHT | SATURN_PAD_LEFT;
+			if(debugEnable) {
+				if((gamePadLevel & i)==SATURN_PAD_RIGHT) debugFlag = 1;
+				if((gamePadLevel & i)==i) CreateTask(EntryInfoTester);
+				else CreateTask(EntryTestBackup);
+			} else {
+				CreateTask(EntryTestBackup);
 			}
-		else CreateTask(EntryTestBackup);
-		realmsEnable = 0;
-		if(gameMenuPos==0) { realmsEnable = 1; gameMenuPos = 1; }
+			realmsEnable = 0;
+			if(gameMenuPos==0) { realmsEnable = 1; gameMenuPos = 1; }
 		}
 	}
 }
 
 static void EntryTestBackup(void)
 {
-	if(ProbeBuckupMemory())
-	{
-	ToBlackScreen();
-	ResetMotionObject();
-	OpenMotionObject(0, 0);
-	CloseMotionObject();
-	ResetBackground();
-	ExtractBitImage("ALRT", 0, 0);
-	clutTransMask = 1;
-	for(;;)	{
-		SyncBlanking();
-		if((padTriggerP[0] | padTriggerP[1]) & SATURN_PAD_START) break;
+	if(ProbeBuckupMemory()) {
+		ToBlackScreen();
+		ResetMotionObject();
+		OpenMotionObject(0, 0);
+		CloseMotionObject();
+		ResetBackground();
+		ExtractBitImage("ALRT", 0, 0);
+		clutTransMask = 1;
+		for( ; ; )	{
+			SyncBlanking();
+			if((padTriggerP[0] | padTriggerP[1]) & SATURN_PAD_START) break;
 		}
 	}
 	demoPlayEnable = 0;
@@ -582,15 +591,12 @@ static void EntryTestBackup(void)
 static void EntryGameInitBefore(void)
 {
 	KillTask(EntryGameInitBefore);
-	movieTaskNo = gameMenuPos;
 	CreateTask(EntryMovie);
+	movieTaskNo = gameMenuPos;
 }
 
 static void EntryGameInit(void)
 {
-	int	i, j, k;
-	const uint8_t *src;
-
 	ToBlackScreen();
 	ResetMotionObject();
 	ResetBackground();
@@ -611,40 +617,37 @@ static void EntryGameInit(void)
 	Install16ColorObject(&info2Anime);
 	clutIdxMOBJ = 240 + 256;
 	InstallMotionObject("LUPE", &lupeAnime);
-	for(i=0; i<16; ++i) clutLupe[i] = clutBuff[256+240+i];
+	for(int i = 0; i < 16; ++i) clutLupe[i] = clutBuff[256 + 240 + i];
 
-	k = 0;
-	for(j=0; j<4; ++j) {
-	src = GetResource("MASK", j);
-	i = TakeMiddle(src + 1) >> 1;
-	src += 4;
-	maskPtr[j] = &maskTables[k];
-	while(i) { maskTables[k] = *(short *)src; src += 2; i--; k++; }
+	int k = 0;
+	for(int j = 0; j < 4; ++j) {
+		const uint8_t *src = GetResource("MASK", j);
+		int i = TakeMiddle(src + 1) >> 1;
+		src += 4;
+		maskPtr[j] = &maskTables[k];
+		while(i) { maskTables[k] = *(short *)src; src += 2; i--; k++; }
 	}
 	if(gameMenuPos==1) {
 		LaunchSound("SNDG", "SNDA");
 		LaunchResource("ARKHAM1.RES");
-		}
-	else if(gameMenuPos==2) {
+	} else if(gameMenuPos==2) {
 		LaunchSound("SNDG", "SNDB");
 		LaunchResource("BLOODY1.RES");
-		}
-	else if(gameMenuPos==3) {
+	} else if(gameMenuPos==3) {
 		LaunchSound("SNDG", "SNDD");
 		LaunchResource("DLANDS1.RES");
-		}
+	}
 
 	StartMusic(gameMenuPos - 1);
 
 	ExtractBitImage("PASE", 0, 0);
 	clutBuff[0] = 0;
-	for(i=0; i<256; ++i) {
-	clutSave[i] = clutBuff[i];
-	SetCLUTi(i+256, clutBuff[i]);
+	for(int i = 0; i < 256; ++i) {
+		clutSave[i] = clutBuff[i];
+		SetCLUTi(i + 256, clutBuff[i]);
 	}
 
-	InitBallSimulator((FIELD *)GetResource("PARA", 0),
-		(short *)GetResource("HITS", 0), NULL);
+	InitBallSimulator((FIELD *)GetResource("PARA", 0), (short *)GetResource("HITS", 0), NULL);
 
 	flipperMask = 0;
 	cdFadeLevel = 7;
@@ -668,100 +671,95 @@ static void EntryGameInit(void)
 
 static void MainGame3D(void)
 {
-	int	i, j;
+	// タスク管理から除いたので付けたし（パッド関係のサービス）
+	SyncBlanking();
 
-	if(padStatus[0] & 5)
-	{
-	if((padOnlyTriggerN[1] & SATURN_PAD_START)!=0
-			&& debugEnable!=0) debugPauseEnable ^= 1;
-	MakeGameInput(playerNo);
-	if((padOnlyLevel[0] & SATURN_PAD_ABC)==SATURN_PAD_ABC)
-		{
-		if(padOnlyTriggerN[0] & SATURN_PAD_START) {
-			slaveTaskNo = 0;
-/*			InstallSlaveFunction(ServiceNull); */
-			PlayCD(-1, -1);
-			KillTask(MainGame3D);
-			CreateTask(EntryTitle);
-			return;
+	if(padStatus[0] & 5) {
+		if((padOnlyTriggerN[1] & SATURN_PAD_START) != 0 && debugEnable!=0) debugPauseEnable ^= 1;
+		MakeGameInput(playerNo);
+		if((padOnlyLevel[0] & SATURN_PAD_ABC)==SATURN_PAD_ABC) {
+			if(padOnlyTriggerN[0] & SATURN_PAD_START) {
+				slaveTaskNo = 0;
+/*				InstallSlaveFunction(ServiceNull); */
+				PlayCD(-1, -1);
+				KillTask(MainGame3D);
+				CreateTask(EntryTitle);
+				return;
 			}
 		}
 	}
 
+	int st;
 	if(demoPlayEnable) {
-	demoPlayEnable--;
-	i = GameDemo3D();
-	if(i < 0) {
-	slaveTaskNo = 0;
-/*	InstallSlaveFunction(ServiceNull); */
-	PresetBGposition(0, 0);
-	ToBlackScreen();
-	ResetMotionObject();
-	ResetBackground();
-	KillTask(MainGame3D);
-	CreateTask(EntryTitle);
-	PlayCD(-1, -1);
-	return;
+		demoPlayEnable--;
+		st = GameDemo3D();
+		if(st < 0) {
+			slaveTaskNo = 0;
+/*			InstallSlaveFunction(ServiceNull); */
+			PresetBGposition(0, 0);
+			ToBlackScreen();
+			ResetMotionObject();
+			ResetBackground();
+			KillTask(MainGame3D);
+			CreateTask(EntryTitle);
+			PlayCD(-1, -1);
+			return;
+		} else if(demoPlayEnable==0) {
+			slaveTaskNo = 0;
+/*			InstallSlaveFunction(ServiceNull); */
+			PresetBGposition(0, 0);
+			ToBlackScreen();
+			ResetMotionObject();
+			ResetBackground();
+			PlayCD(-1, -1);
+			if(optionMenuPad[OPTION_NO_REALMS_COMP]!=0 && demoPlayIndex==0) {
+				movieTaskNo = 4;
+			} else {
+				titleMovieIndex++;
+				movieTaskNo = titleMovieTables[titleMovieIndex];
+				if(demoMovieMax==0) movieTaskNo = 0;
+				else if(titleMovieIndex >= demoMovieMax) titleMovieIndex = 0;
+			}
+			KillTask(MainGame3D);
+			CreateTask(EntryMovie);
+			return;
+		}
+	} else {
+		if((gamePadTrigger & SATURN_PAD_START)!=0 && gameMode!=0) {
+			gamePauseEnable ^= 1;
+			if(gamePauseEnable==0) { TurnIntoDark(80); cdFadeLevel = 3; }
+			else {
+				cdFadeLevel = 7;
+				for(int i = 0; i < 256; ++i) {
+					SetCLUTi(i, clutSave[i]);
+					SetCLUTi(i+256, clutSave[i]);
+				}
+			}
+		}
+		st = Game3D();
 	}
-	else if(demoPlayEnable==0) {
+
+	if(st < 0) {
 		slaveTaskNo = 0;
 /*		InstallSlaveFunction(ServiceNull); */
 		PresetBGposition(0, 0);
 		ToBlackScreen();
 		ResetMotionObject();
 		ResetBackground();
-		PlayCD(-1, -1);
-		if(optionMenuPad[OPTION_NO_REALMS_COMP]!=0 && demoPlayIndex==0)
-			movieTaskNo = 4;
-		else	{
-			titleMovieIndex++;
-			movieTaskNo = titleMovieTables[titleMovieIndex];
-			if(demoMovieMax==0) movieTaskNo = 0;
-			else if(titleMovieIndex >= demoMovieMax)
-						titleMovieIndex = 0;
-			}
 		KillTask(MainGame3D);
-		CreateTask(EntryMovie);
-		return;
-		}
-	}
-	else {
-	if((gamePadTrigger & SATURN_PAD_START)!=0 && gameMode!=0) {
-	gamePauseEnable ^= 1;
-	if(gamePauseEnable==0) { TurnIntoDark(80); cdFadeLevel = 3; }
-	else	{
-		cdFadeLevel = 7;
-		for(i=0; i<256; ++i) {
-			SetCLUTi(i, clutSave[i]);
-			SetCLUTi(i+256, clutSave[i]);
-				}
-			}
-		}
-	i = Game3D();
-	}
-
-	if(i < 0) {
-	slaveTaskNo = 0;
-/*	InstallSlaveFunction(ServiceNull); */
-	PresetBGposition(0, 0);
-	ToBlackScreen();
- 	ResetMotionObject();
-	ResetBackground();
-	KillTask(MainGame3D);
-	if(flashSegaEnable) SYS_Exit(0);
-	else CreateTask(EntryTitle);
-	if(debugEnable==0) WriteBackupSystem();
-	}
-	else if(i!=0 && realmsEnable!=0) {
-	slaveTaskNo = 0;
-/*	InstallSlaveFunction(ServiceNull); */
-	PresetBGposition(0, 0);
-	ToBlackScreen();
- 	ResetMotionObject();
-	ResetBackground();
-	gameMenuPos++;
-	KillTask(MainGame3D);
-	CreateTask(EntryGameInitBefore);
+		if(flashSegaEnable) SYS_Exit(0);
+		else CreateTask(EntryTitle);
+		if(debugEnable==0) WriteBackupSystem();
+	} else if(st != 0 && realmsEnable != 0) {
+		slaveTaskNo = 0;
+/*		InstallSlaveFunction(ServiceNull); */
+		PresetBGposition(0, 0);
+		ToBlackScreen();
+		ResetMotionObject();
+		ResetBackground();
+		gameMenuPos++;
+		KillTask(MainGame3D);
+		CreateTask(EntryGameInitBefore);
 	}
 }
 
@@ -776,34 +774,34 @@ static int GameDemo3D(void)
 
 static int Game3D(void)
 {
-	int	f;
-
-	f = 0;
+	int f = 0;
 	OpenMotionObject(0, 0);
 
 	ServicePlayerSelector();
 	BallSimulatorMotionObjects();
 
 	if(gamePauseEnable) {
-	if(debugPauseEnable==0) {
-		if(debugEnable) MoveTestBall(padOnlyLevel[1]);
-		MainBallSimulator();
-		if(vibrEnable) ServiceVibration();
-		f = ServiceGeneralRule();
-		infoPause = 1;
+		if(debugPauseEnable == 0) {
+			if(debugEnable) MoveTestBall(padOnlyLevel[1]);
+			MainBallSimulator();
+			if(vibrEnable) ServiceVibration();
+			f = ServiceGeneralRule();
+			infoPause = 1;
+		} else {
+			infoPause = 0;
 		}
-	else infoPause = 0;
-	if(demoPlayEnable==0) ServiceInfomations();
-	else	{
-		if((vsyncCounter & 31) < 12)
-		    MobjInfoTexts(320, 190, 1, "EXPLORERS/PRESS START BUTTON");
+		if(demoPlayEnable == 0) {
+			ServiceInfomations();
+		} else {
+			if((vsyncCounter & 31) < 12) {
+				MobjInfoTexts(320, 190, 1, "EXPLORERS/PRESS START BUTTON");
+			}
 		}
-	}
-	else {
-	ServiceStatus();
-	if(gamePadLevel) outTimer = 0;
-	else outTimer++;
-	if(outTimer >= (30 * tvFrame) && flashSegaEnable!=0) f = -1;
+	} else {
+		ServiceStatus();
+		if(gamePadLevel) outTimer = 0;
+		else outTimer++;
+		if(outTimer >= (30 * tvFrame) && flashSegaEnable != 0) f = -1;
 	}
 
 	PresetBGposition(vibrXo, vibrYo);
@@ -819,87 +817,89 @@ static int Game3D(void)
 void MakeGameInput(int i)
 {
 	if(padStatus[0] & 5) {
-	if((padStatus[i] & 5)==0) i = 0;
-	gamePadLevel = padOnlyLevel[i];
-	gamePadTrigger = padOnlyTriggerP[i];
-	gamePadRelese = padOnlyTriggerN[i];
-	gameAnalogX = analogX[i];
-	gameAnalogY = analogY[i];
-	gameAnalogEna = analogEna[i];
+		if((padStatus[i] & 5) == 0) i = 0;
+		gamePadLevel = padOnlyLevel[i];
+		gamePadTrigger = padOnlyTriggerP[i];
+		gamePadRelese = padOnlyTriggerN[i];
+		gameAnalogX = analogX[i];
+		gameAnalogY = analogY[i];
+		gameAnalogEna = analogEna[i];
 
-	if(mouseEna) {
-	if(mouseLevel & SATURN_PAD_START) gamePadLevel |= SATURN_PAD_START;
-	if(mouseTriggerP & SATURN_PAD_START) gamePadTrigger |= SATURN_PAD_START;
-	if(mouseLevel & SATURN_PAD_A) gamePadLevel |= SATURN_DIR_LEFT;
-	if(mouseTriggerP & SATURN_PAD_A) gamePadTrigger |= SATURN_DIR_LEFT;
-	if(mouseLevel & SATURN_PAD_C) gamePadLevel |= SATURN_PAD_C;
-	if(mouseTriggerP & SATURN_PAD_C) gamePadTrigger |= SATURN_PAD_C;
+		if(mouseEna) {
+			if(mouseLevel & SATURN_PAD_START) gamePadLevel |= SATURN_PAD_START;
+			if(mouseTriggerP & SATURN_PAD_START) gamePadTrigger |= SATURN_PAD_START;
+			if(mouseLevel & SATURN_PAD_A) gamePadLevel |= SATURN_DIR_LEFT;
+			if(mouseTriggerP & SATURN_PAD_A) gamePadTrigger |= SATURN_DIR_LEFT;
+			if(mouseLevel & SATURN_PAD_C) gamePadLevel |= SATURN_PAD_C;
+			if(mouseTriggerP & SATURN_PAD_C) gamePadTrigger |= SATURN_PAD_C;
 
-	mseX += mouseDx;
-	mseY += mouseDy;
-	if(mseX >= 58)
-		{ gamePadLevel |= SATURN_PAD_RIGHT;
-		gamePadTrigger |= SATURN_PAD_RIGHT;
-		mseX = 0; }
-	else if(mseX <= -58)
-		{ gamePadLevel |= SATURN_PAD_LEFT;
-		gamePadTrigger |= SATURN_PAD_LEFT;
-		mseX = 0; }
-	if(mseY >= 60)
-		{ gamePadLevel |= SATURN_PAD_LEFT | SATURN_PAD_RIGHT;
-		gamePadTrigger |= SATURN_PAD_LEFT | SATURN_PAD_RIGHT;
-		mseY = 0; }
-	else if(mseY <= -60) mseY = 0;
+			mseX += mouseDx;
+			mseY += mouseDy;
+			if(mseX >= 58) {
+				gamePadLevel |= SATURN_PAD_RIGHT;
+				gamePadTrigger |= SATURN_PAD_RIGHT;
+				mseX = 0;
+			} else if(mseX <= -58) {
+				gamePadLevel |= SATURN_PAD_LEFT;
+				gamePadTrigger |= SATURN_PAD_LEFT;
+				mseX = 0;
+			}
+			if(mseY >= 60) {
+				gamePadLevel |= SATURN_PAD_LEFT | SATURN_PAD_RIGHT;
+				gamePadTrigger |= SATURN_PAD_LEFT | SATURN_PAD_RIGHT;
+				mseY = 0;
+			} else if(mseY <= -60) {
+				mseY = 0;
+			}
 		}
+	} else {
+		gamePadLevel = gamePadTrigger = gamePadRelese = 0;
 	}
-	else gamePadLevel = gamePadTrigger = gamePadRelese = 0;
 }
 
 void ServiceRealmsMode(int no)
 {
 	if(no >= 5) {
 		CreateTask(EntryStaffRoll);
-		}
-	else CreateTask(EntryGameInit);
+	} else {
+		CreateTask(EntryGameInit);
+	}
 }
 
 void TurnIntoDark(int v)
 {
-	int	i;
-
-	for(i=0; i<256; ++i) clutBuff[i] = clutSave[i];
+	for(int i = 0; i < 256; ++i) clutBuff[i] = clutSave[i];
 	BrightColorTables(0, 255, v);
-	for(i=16; i<256; ++i) SetCLUTi(i+256, clutBuff[i]);
+	for(int i = 16; i < 256; ++i) SetCLUTi(i + 256, clutBuff[i]);
 }
 
 int MobjScore(int x, int y, const char *ptr)
 {
-	int	i, j, k, f;
-	MOBJ	*mobj;
-
-	f = 0;
-	for(i=0; i<12; ++i)
-	{
-	if( ptr[i] ) f |= 1;
-	f <<= 1;
+	int f = 0;
+	for(int i = 0; i < 12; ++i) {
+		if( ptr[i] ) f |= 1;
+		f <<= 1;
 	}
 
-	j = 0x0fff;
-	for(i=0; i<12; ++i)
-	{
-	k = *ptr;
-	ptr++;
-	x -= 16;
-	if(y >= 0) MobjInfoText(x, y, 2, k + 30);
-	if(i >= 1 && (f & j)==0) break;
-	if(i==2 || i==5 || i==8) {
-		x -= 8;
-		if(y >= 0) MobjInfoText(x, y, 2, 26);
+	int j = 0x0fff;
+	for(int i = 0; i < 12; ++i) {
+		int k = *ptr;
+		ptr++;
+		x -= 16;
+		if(y >= 0) MobjInfoText(x, y, 2, k + 30);
+		if(i >= 1 && (f & j)==0) break;
+		if(i == 2 || i == 5 || i == 8) {
+			x -= 8;
+			if(y >= 0) MobjInfoText(x, y, 2, 26);
 		}
-	j >>= 1;
+		j >>= 1;
 	}
 	return x;
 }
+
+
+
+
 
 void MobjBall(int x, int y, int size, int maskno, int no)
 {

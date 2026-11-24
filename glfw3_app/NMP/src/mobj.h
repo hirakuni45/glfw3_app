@@ -84,6 +84,7 @@ typedef struct {
 } BIT_FILE;
 
 uint8_t *get_VDP1_VRAM_TOP();
+uint8_t *get_VDP1_VRAM_IMG();
 uint8_t *get_VDP2_VRAM_TOP();
 
 /* assembler routines */
@@ -99,7 +100,7 @@ void SetupRelativePosition(POINT *pos);
 void InstallCLUT(const uint8_t *, int);
 void InstallMotionObjectDouble(const char *name, ANIME *);
 void InstallMotionObject(const char *name, ANIME *);
-void SetupObject(MOBJ *mobj);
+void SetupObject(const MOBJ *mobj);
 void SetupObjectLine(int, int, int, int, int);
 void SetupObjectLineWithMesh(int, int, int, int, int);
 void SetupObjectBox(int x0, int y0, int x1, int y1, int c);

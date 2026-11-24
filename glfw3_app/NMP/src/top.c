@@ -461,6 +461,8 @@ void SyncBlanking(void)
 	uint16_t s, n;
 	for(int i = 0; i < 2; ++i)
 	{
+		padStatus[i] = 1;
+
 		int j;
 		if(i) j = SS_PEIDPL_2; else j = SS_PEIDPL_1;
 		s = n = 0;

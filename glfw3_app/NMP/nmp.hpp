@@ -131,6 +131,31 @@ namespace app {
 			}
 		}
 
+		void service_SATURN_BG() noexcept
+		{
+			const uint8_t* src = get_VDP2_VRAM_TOP();
+			uint8_t* dst = fb_;
+			for(int y = 0; y < 448; ++y) {
+				const uint32_t* clut = GetCLUT();
+				for(int x = 0; x < 640; ++x) {
+					uint8_t idx = src[x];
+					*dst++ = (clut[idx]) & 0xff;
+					*dst++ = (clut[idx] >> 8) & 0xff;
+					*dst++ = (clut[idx] >> 16) & 0xff;
+					*dst++ = 255;
+				}
+				src += 1024;
+			}
+		}
+
+		void service_SATURN_OBJ() noexcept
+		{
+			const uint8_t* src = get_VDP1_VRAM_TOP();
+			const uint8_t* img = get_VDP1_VRAM_IMG();
+			uint8_t* dst = fb_;
+
+		}
+
 	public:
 		//-----------------------------------------------------------------//
 		/*!
@@ -321,48 +346,34 @@ namespace app {
 			}
 
 			uint32_t keybits = 0;
-#if 0
 			if(dev.get_level(gl::device::key::UP)) {
-				keybits |= KEY_BITS_UP;
+				keybits |= SATURN_DIR_UP;
 			}
 			if(dev.get_level(gl::device::key::DOWN)) {
-				keybits |= KEY_BITS_DOWN;
+				keybits |= SATURN_DIR_DOWN;
 			}
 			if(dev.get_level(gl::device::key::RIGHT)) {
-				keybits |= KEY_BITS_RIGHT;
+				keybits |= SATURN_DIR_RIGHT;
 			}
 			if(dev.get_level(gl::device::key::LEFT)) {
-				keybits |= KEY_BITS_LEFT;
+				keybits |= SATURN_DIR_LEFT;
 			}
 			if(dev.get_level(gl::device::key::ENTER)) {
-				keybits |= KEY_BITS_ENTER;
+				keybits |= SATURN_PAD_START;
 			}
 			if(dev.get_level(gl::device::key::ESCAPE)) {
-				keybits |= KEY_BITS_ESC;
+//				keybits |= KEY_BITS_ESC;
 			}
 			if(dev.get_level(gl::device::key::TAB)) {
-				keybits |= KEY_BITS_TAB;
+//				keybits |= SATURN_PAD_;
 			}
-#endif
-			EntryVsync();  // NMP API
+
+			EntryVsync(keybits);  // NMP API
 			ExitVsync();   // NMP API
 			ServiceTask();  // NMP API
 
-			{
-				uint8_t* src = get_VDP2_VRAM_TOP();
-				uint8_t* dst = fb_;
-				for(int y = 0; y < 448; ++y) {
-					const uint32_t* clut = GetCLUT();
-					for(int x = 0; x < 640; ++x) {
-						uint8_t idx = src[x];
-						*dst++ = (clut[idx]) & 0xff;
-						*dst++ = (clut[idx] >> 8) & 0xff;
-						*dst++ = (clut[idx] >> 16) & 0xff;
-						*dst++ = 255;
-					}
-					src += 1024;
-				}
-			}
+			service_SATURN_BG();
+			service_SATURN_OBJ();
 
 			texfb_.rendering(gl::texfb::IMAGE::RGBA, (const char*)&fb_[0]);
 			texfb_.flip();
