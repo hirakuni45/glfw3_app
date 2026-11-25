@@ -1,18 +1,21 @@
-﻿#include <stdio.h>
+﻿//=========================================================================//
+/*! @file
+	@brief  Necronomicon インフォメーション関係
+	@author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2026 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
+*/
+//=========================================================================//
+#include <stdio.h>
 #include "mobj.h"
 #include "option.h"
 #include "task.h"
 #include "top.h"
 #include "fnc.h"
+#include "etc.h"
+#include "flags.h"
 #include "info.h"
-
-extern volatile char slaveSync;
-extern char optionMenuPad[];
-extern char playerNo;
-
-static int ServiceDiffAnime(void);
-static void InitMultiInfo(void);
-static void ServiceMultiInfo(void);
 
 ANIME fontAnime, infoAnime, ifonAnime, info2Anime;
 char infoPause;
@@ -29,7 +32,8 @@ static char difAnimeOpcode1, difAnimeOpcode2, difAnimeKey[32];
 static short difAnimePosX, difAnimePosY, difAnimeWidth, difAnimeHeight;
 static short difAnimeFrame, difAnimeCount, difAnimeOffset, difAnimeTotal;
 
-static char *infoAnimePtr, *infoAnimeAddress;
+static const char *infoAnimePtr;
+static const char *infoAnimeAddress;
 static char infoTextBuffer[64];
 static short infoTask, infoSize, infoTime, infoResizeRate, infoCount;
 static short infoResizeDelay, infoRate, info4Ctype;
@@ -42,7 +46,11 @@ static char multiInfoTables[INFO_MULTI_MAX];
 static char multiInfoPriori[INFO_MULTI_MAX];
 static short multiInfoGet, multiInfoPut;
 static char tableNo;
-static char *playerNoTables[] = { "1", "2" };
+static const char *playerNoTables[] = { "1", "2" };
+
+static int ServiceDiffAnime(void);
+static void InitMultiInfo(void);
+static void ServiceMultiInfo(void);
 
 /*----------------------------------------------/
 /	SPACEING, BAR_SPACE, UNDER_LINE_OFFSET	/
@@ -50,7 +58,7 @@ static char *playerNoTables[] = { "1", "2" };
 /	AT, AV, AW, AY, FJ, PJ, VJ, WJ, YJ, TJ,	/
 /	LT, LV, LW, LY, TA, VA, WA, YA		/
 /----------------------------------------------*/
-static char infoFontSizeTables[] = {
+static const char infoFontSizeTables[] = {
 /* L */	17, 16, 15, 16, 16, 16, 16, 17, 9, 15,
 	17, 16, 27, 19, 15, 16, 17, 17, 15, 17,
 	17, 17, 28, 18, 17, 17, 6, 6, 6, 6,
@@ -78,7 +86,7 @@ static char infoFontSizeTables[] = {
 	0,0,0,0,0,1,0,0,1,2,2,1,1,2,0,0,0,0
 };
 
-static char *diagTextTables[] = {
+static const char *diagTextTables[] = {
 /* Arkham */
 /* 0 */	"NEXT/HANGMAN/IS/DOUBLED",
 /* 1 */	"ARKHAM/ASYLUM/READY",
@@ -159,14 +167,14 @@ static char *diagTextTables[] = {
 /*74 */ "DANGER",
 	NULL
 };
-static char infoAnimeClear[] = {
+static const char infoAnimeClear[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 1,
 	INFO_FRAME_END,
 
 	INFO_ANIME_END
 };
-static char infoDialogueSilverReady[] = {
+static const char infoDialogueSilverReady[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -176,7 +184,7 @@ static char infoDialogueSilverReady[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueSilverDirect[] = {
+static const char infoDialogueSilverDirect[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -185,7 +193,7 @@ static char infoDialogueSilverDirect[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueSilverTimerDirect[] = {
+static const char infoDialogueSilverTimerDirect[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -195,7 +203,7 @@ static char infoDialogueSilverTimerDirect[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueNecroReady[] = {
+static const char infoDialogueNecroReady[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -205,7 +213,7 @@ static char infoDialogueNecroReady[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMoonReady[] = {
+static const char infoDialogueMoonReady[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -215,7 +223,7 @@ static char infoDialogueMoonReady[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMoonDirect[] = {
+static const char infoDialogueMoonDirect[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -224,7 +232,7 @@ static char infoDialogueMoonDirect[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueWoodReady[] = {
+static const char infoDialogueWoodReady[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -234,7 +242,7 @@ static char infoDialogueWoodReady[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueWoodDirect[] = {
+static const char infoDialogueWoodDirect[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -244,7 +252,7 @@ static char infoDialogueWoodDirect[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueArkhamDouble[] = {
+static const char infoDialogueArkhamDouble[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -253,7 +261,7 @@ static char infoDialogueArkhamDouble[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueAsylumReady[] = {
+static const char infoDialogueAsylumReady[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -263,7 +271,7 @@ static char infoDialogueAsylumReady[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueAsylumDirect[] = {
+static const char infoDialogueAsylumDirect[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -273,7 +281,7 @@ static char infoDialogueAsylumDirect[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueRoundOver[] = {
+static const char infoDialogueRoundOver[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 110,
 	INFO_NO_SIDE_BASE,
@@ -282,7 +290,7 @@ static char infoDialogueRoundOver[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueDeathwalkerReady[] = {
+static const char infoDialogueDeathwalkerReady[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -292,7 +300,7 @@ static char infoDialogueDeathwalkerReady[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueDeathwalkerDirect[] = {
+static const char infoDialogueDeathwalkerDirect[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -301,7 +309,7 @@ static char infoDialogueDeathwalkerDirect[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueCemeteryReady[] = {
+static const char infoDialogueCemeteryReady[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -311,7 +319,7 @@ static char infoDialogueCemeteryReady[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueCemeteryDirect[] = {
+static const char infoDialogueCemeteryDirect[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -321,7 +329,7 @@ static char infoDialogueCemeteryDirect[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueLiteWitchHouseReady[] = {
+static const char infoDialogueLiteWitchHouseReady[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -331,7 +339,7 @@ static char infoDialogueLiteWitchHouseReady[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueLiteAncientReady[] = {
+static const char infoDialogueLiteAncientReady[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -341,7 +349,7 @@ static char infoDialogueLiteAncientReady[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueLiteDreamerReady[] = {
+static const char infoDialogueLiteDreamerReady[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -351,7 +359,7 @@ static char infoDialogueLiteDreamerReady[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueSoulReady[] = {
+static const char infoDialogueSoulReady[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -361,7 +369,7 @@ static char infoDialogueSoulReady[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueSoulDirectScore[] = {
+static const char infoDialogueSoulDirectScore[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -372,7 +380,7 @@ static char infoDialogueSoulDirectScore[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueSoulDirectXBall[] = {
+static const char infoDialogueSoulDirectXBall[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -383,7 +391,7 @@ static char infoDialogueSoulDirectXBall[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueCreationReady[] = {
+static const char infoDialogueCreationReady[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -393,7 +401,7 @@ static char infoDialogueCreationReady[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueCreationDirectRestart[] = {
+static const char infoDialogueCreationDirectRestart[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -402,7 +410,7 @@ static char infoDialogueCreationDirectRestart[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMultiDirect[] = {
+static const char infoDialogueMultiDirect[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -411,7 +419,7 @@ static char infoDialogueMultiDirect[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMulti2Direct[] = {
+static const char infoDialogueMulti2Direct[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -421,7 +429,7 @@ static char infoDialogueMulti2Direct[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMysteryAward[] = {
+static const char infoDialogueMysteryAward[] = {
 	INFO_DIAG_MODE,
 	INFO_CHANGE_TEXTS, 1,
 	INFO_SET_FRAME_RATE, 110,
@@ -431,7 +439,7 @@ static char infoDialogueMysteryAward[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMultiballReady[] = {
+static const char infoDialogueMultiballReady[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -443,7 +451,7 @@ static char infoDialogueMultiballReady[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMultiballRestart[] = {
+static const char infoDialogueMultiballRestart[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -456,7 +464,7 @@ static char infoDialogueMultiballRestart[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMultiballDirect[] = {
+static const char infoDialogueMultiballDirect[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -465,7 +473,7 @@ static char infoDialogueMultiballDirect[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMultiballDirectHole[] = {
+static const char infoDialogueMultiballDirectHole[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -475,7 +483,7 @@ static char infoDialogueMultiballDirectHole[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMultiballDirectHoleWithTimer[] = {
+static const char infoDialogueMultiballDirectHoleWithTimer[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -486,7 +494,7 @@ static char infoDialogueMultiballDirectHoleWithTimer[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMultiBallTimeOut[] = {
+static const char infoDialogueMultiBallTimeOut[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 90,
 	INFO_NO_SIDE_BASE,
@@ -495,7 +503,7 @@ static char infoDialogueMultiBallTimeOut[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueJackpotValue[] = {
+static const char infoDialogueJackpotValue[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 90,
 	INFO_NO_SIDE_BASE,
@@ -504,7 +512,7 @@ static char infoDialogueJackpotValue[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueNextRampAwardScore[] = {
+static const char infoDialogueNextRampAwardScore[] = {
 	INFO_DIAG_MODE,
 	INFO_CHANGE_TEXTS, 2,
 	INFO_SET_FRAME_RATE, 50,
@@ -514,7 +522,7 @@ static char infoDialogueNextRampAwardScore[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueRampAwardScore[] = {
+static const char infoDialogueRampAwardScore[] = {
 	INFO_DIAG_MODE,
 	INFO_CHANGE_TEXTS, 2,
 	INFO_SET_FRAME_RATE, 110,
@@ -524,7 +532,7 @@ static char infoDialogueRampAwardScore[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueNextRampAwardMystery[] = {
+static const char infoDialogueNextRampAwardMystery[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -533,7 +541,7 @@ static char infoDialogueNextRampAwardMystery[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueNextRampAwardXBall[] = {
+static const char infoDialogueNextRampAwardXBall[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -542,7 +550,7 @@ static char infoDialogueNextRampAwardXBall[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMazeCompleted[] = {
+static const char infoDialogueMazeCompleted[] = {
 	INFO_DIAG_MODE,
 	INFO_CHANGE_TEXTS, 4,
 	INFO_SET_FRAME_RATE, 110,
@@ -552,7 +560,7 @@ static char infoDialogueMazeCompleted[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMysteryReady[] = {
+static const char infoDialogueMysteryReady[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -562,7 +570,7 @@ static char infoDialogueMysteryReady[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueAncientReady[] = {
+static const char infoDialogueAncientReady[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -571,7 +579,7 @@ static char infoDialogueAncientReady[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueExtraballReady[] = {
+static const char infoDialogueExtraballReady[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -581,7 +589,7 @@ static char infoDialogueExtraballReady[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueBallLockReady[] = {
+static const char infoDialogueBallLockReady[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -590,7 +598,7 @@ static char infoDialogueBallLockReady[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueBallLockCount[] = {
+static const char infoDialogueBallLockCount[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 110,
 	INFO_NO_SIDE_BASE,
@@ -599,7 +607,7 @@ static char infoDialogueBallLockCount[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueBallLockCounts[] = {
+static const char infoDialogueBallLockCounts[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 110,
 	INFO_NO_SIDE_BASE,
@@ -608,7 +616,7 @@ static char infoDialogueBallLockCounts[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMoonHole[] = {
+static const char infoDialogueMoonHole[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -617,7 +625,7 @@ static char infoDialogueMoonHole[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueRampAwardXBall[] = {
+static const char infoDialogueRampAwardXBall[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -626,7 +634,7 @@ static char infoDialogueRampAwardXBall[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueLoopBonusAward[] = {
+static const char infoDialogueLoopBonusAward[] = {
 	INFO_DIAG_MODE,
 	INFO_CHANGE_TEXTS, 3,
 	INFO_SET_FRAME_RATE, 110,
@@ -636,7 +644,7 @@ static char infoDialogueLoopBonusAward[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueEclipseReady[] = {
+static const char infoDialogueEclipseReady[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -645,7 +653,7 @@ static char infoDialogueEclipseReady[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueEclipseDirect[] = {
+static const char infoDialogueEclipseDirect[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -655,7 +663,7 @@ static char infoDialogueEclipseDirect[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueEclipseStoneDirect[] = {
+static const char infoDialogueEclipseStoneDirect[] = {
 	INFO_DIAG_MODE,
 	INFO_CHANGE_TEXTS, 3,
 	INFO_SET_FRAME_RATE, 50,
@@ -666,7 +674,7 @@ static char infoDialogueEclipseStoneDirect[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueAngelsReady[] = {
+static const char infoDialogueAngelsReady[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -676,7 +684,7 @@ static char infoDialogueAngelsReady[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMachineReady[] = {
+static const char infoDialogueMachineReady[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -686,7 +694,7 @@ static char infoDialogueMachineReady[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueGodReady[] = {
+static const char infoDialogueGodReady[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -696,7 +704,7 @@ static char infoDialogueGodReady[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueAngelsDirect[] = {
+static const char infoDialogueAngelsDirect[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -705,7 +713,7 @@ static char infoDialogueAngelsDirect[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueAngelsAward[] = {
+static const char infoDialogueAngelsAward[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -715,7 +723,7 @@ static char infoDialogueAngelsAward[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMachineLeft[] = {
+static const char infoDialogueMachineLeft[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -724,7 +732,7 @@ static char infoDialogueMachineLeft[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMachineRight[] = {
+static const char infoDialogueMachineRight[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -733,7 +741,7 @@ static char infoDialogueMachineRight[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMachineJackpot[] = {
+static const char infoDialogueMachineJackpot[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -743,7 +751,7 @@ static char infoDialogueMachineJackpot[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMultiLoopCount[] = {
+static const char infoDialogueMultiLoopCount[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -752,7 +760,7 @@ static char infoDialogueMultiLoopCount[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMultiLoopCounts[] = {
+static const char infoDialogueMultiLoopCounts[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -761,7 +769,7 @@ static char infoDialogueMultiLoopCounts[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueEnergyDirect[] = {
+static const char infoDialogueEnergyDirect[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -770,7 +778,7 @@ static char infoDialogueEnergyDirect[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueEnergyFull[] = {
+static const char infoDialogueEnergyFull[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -779,7 +787,7 @@ static char infoDialogueEnergyFull[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueDistructionDirect[] = {
+static const char infoDialogueDistructionDirect[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -789,7 +797,7 @@ static char infoDialogueDistructionDirect[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueDistructionsDirect[] = {
+static const char infoDialogueDistructionsDirect[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -799,7 +807,7 @@ static char infoDialogueDistructionsDirect[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMoonRestartDirect[] = {
+static const char infoDialogueMoonRestartDirect[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -808,7 +816,7 @@ static char infoDialogueMoonRestartDirect[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueCompleted[] = {
+static const char infoDialogueCompleted[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -817,7 +825,7 @@ static char infoDialogueCompleted[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueDanger[] = {
+static const char infoDialogueDanger[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -827,10 +835,7 @@ static char infoDialogueDanger[] = {
 	INFO_ANIME_END
 };
 
-
-
-
-static char infoDialogueSpell0[] = {
+static const char infoDialogueSpell0[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -839,7 +844,7 @@ static char infoDialogueSpell0[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueSpell1[] = {
+static const char infoDialogueSpell1[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -850,7 +855,7 @@ static char infoDialogueSpell1[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueSpell2[] = {
+static const char infoDialogueSpell2[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -863,7 +868,7 @@ static char infoDialogueSpell2[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueSpell3[] = {
+static const char infoDialogueSpell3[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -878,7 +883,7 @@ static char infoDialogueSpell3[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueSpell4[] = {
+static const char infoDialogueSpell4[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -895,7 +900,7 @@ static char infoDialogueSpell4[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueSpell5[] = {
+static const char infoDialogueSpell5[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -914,7 +919,7 @@ static char infoDialogueSpell5[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueSpell6[] = {
+static const char infoDialogueSpell6[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -935,7 +940,7 @@ static char infoDialogueSpell6[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueSpell7[] = {
+static const char infoDialogueSpell7[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -958,7 +963,7 @@ static char infoDialogueSpell7[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueSpell8[] = {
+static const char infoDialogueSpell8[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -983,7 +988,7 @@ static char infoDialogueSpell8[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueSpell9[] = {
+static const char infoDialogueSpell9[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -1010,7 +1015,7 @@ static char infoDialogueSpell9[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueSpell10[] = {
+static const char infoDialogueSpell10[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -1039,7 +1044,7 @@ static char infoDialogueSpell10[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueSpell11[] = {
+static const char infoDialogueSpell11[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -1070,7 +1075,7 @@ static char infoDialogueSpell11[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueSpell12[] = {
+static const char infoDialogueSpell12[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -1103,7 +1108,7 @@ static char infoDialogueSpell12[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueSpell13[] = {
+static const char infoDialogueSpell13[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -1138,7 +1143,7 @@ static char infoDialogueSpell13[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueDreamDouble[] = {
+static const char infoDialogueDreamDouble[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -1147,7 +1152,7 @@ static char infoDialogueDreamDouble[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueBloodyDouble[] = {
+static const char infoDialogueBloodyDouble[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_NO_SIDE_BASE,
@@ -1156,7 +1161,7 @@ static char infoDialogueBloodyDouble[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueNIGHTMARE[] = {
+static const char infoDialogueNIGHTMARE[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -1165,7 +1170,7 @@ static char infoDialogueNIGHTMARE[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueNIGHTMAREn[] = {
+static const char infoDialogueNIGHTMAREn[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -1176,7 +1181,7 @@ static char infoDialogueNIGHTMAREn[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueNIGHTMAREi[] = {
+static const char infoDialogueNIGHTMAREi[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -1189,7 +1194,7 @@ static char infoDialogueNIGHTMAREi[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueNIGHTMAREg[] = {
+static const char infoDialogueNIGHTMAREg[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -1204,7 +1209,7 @@ static char infoDialogueNIGHTMAREg[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueNIGHTMAREh[] = {
+static const char infoDialogueNIGHTMAREh[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -1221,7 +1226,7 @@ static char infoDialogueNIGHTMAREh[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueNIGHTMAREt[] = {
+static const char infoDialogueNIGHTMAREt[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -1240,7 +1245,7 @@ static char infoDialogueNIGHTMAREt[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueNIGHTMAREm[] = {
+static const char infoDialogueNIGHTMAREm[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -1261,7 +1266,7 @@ static char infoDialogueNIGHTMAREm[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueNIGHTMAREa[] = {
+static const char infoDialogueNIGHTMAREa[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -1284,7 +1289,7 @@ static char infoDialogueNIGHTMAREa[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueNIGHTMAREr[] = {
+static const char infoDialogueNIGHTMAREr[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -1309,7 +1314,7 @@ static char infoDialogueNIGHTMAREr[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueNIGHTMAREe[] = {
+static const char infoDialogueNIGHTMAREe[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -1336,7 +1341,7 @@ static char infoDialogueNIGHTMAREe[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMACHINE0[] = {
+static const char infoDialogueMACHINE0[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -1345,7 +1350,7 @@ static char infoDialogueMACHINE0[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMACHINE1[] = {
+static const char infoDialogueMACHINE1[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -1356,7 +1361,7 @@ static char infoDialogueMACHINE1[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMACHINE2[] = {
+static const char infoDialogueMACHINE2[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -1369,7 +1374,7 @@ static char infoDialogueMACHINE2[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMACHINE3[] = {
+static const char infoDialogueMACHINE3[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -1384,7 +1389,7 @@ static char infoDialogueMACHINE3[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMACHINE4[] = {
+static const char infoDialogueMACHINE4[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -1401,7 +1406,7 @@ static char infoDialogueMACHINE4[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMACHINE5[] = {
+static const char infoDialogueMACHINE5[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -1420,7 +1425,7 @@ static char infoDialogueMACHINE5[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMACHINE6[] = {
+static const char infoDialogueMACHINE6[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -1441,7 +1446,7 @@ static char infoDialogueMACHINE6[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMACHINE7[] = {
+static const char infoDialogueMACHINE7[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -1464,7 +1469,7 @@ static char infoDialogueMACHINE7[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMACHINE8[] = {
+static const char infoDialogueMACHINE8[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -1489,7 +1494,7 @@ static char infoDialogueMACHINE8[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMACHINE9[] = {
+static const char infoDialogueMACHINE9[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -1516,7 +1521,7 @@ static char infoDialogueMACHINE9[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMACHINE10[] = {
+static const char infoDialogueMACHINE10[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -1545,7 +1550,7 @@ static char infoDialogueMACHINE10[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMACHINE11[] = {
+static const char infoDialogueMACHINE11[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -1576,7 +1581,7 @@ static char infoDialogueMACHINE11[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMACHINE12[] = {
+static const char infoDialogueMACHINE12[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -1609,7 +1614,7 @@ static char infoDialogueMACHINE12[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMACHINE13[] = {
+static const char infoDialogueMACHINE13[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -1644,7 +1649,7 @@ static char infoDialogueMACHINE13[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMACHINE14[] = {
+static const char infoDialogueMACHINE14[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -1681,7 +1686,7 @@ static char infoDialogueMACHINE14[] = {
 
 	INFO_ANIME_END
 };
-static char infoDialogueMACHINE15[] = {
+static const char infoDialogueMACHINE15[] = {
 	INFO_DIAG_MODE,
 	INFO_SET_FRAME_RATE, 50,
 	INFO_OFFSET, 0, 0,
@@ -1720,7 +1725,7 @@ static char infoDialogueMACHINE15[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnimePowerSelect[] = {
+static const char infoAnimePowerSelect[] = {
 	INFO_SET_VALUE, 0,
 	INFO_SET_FRAME_RATE, 30,
 	INFO_SET_SPEED, 20,
@@ -1829,7 +1834,7 @@ static char infoAnimePowerSelect[] = {
 	INFO_FRAME_END,
 
 	INFO_JUMP_ADDRESS };
-static char infoAnimePowerSelect2[] = {
+static const char infoAnimePowerSelect2[] = {
 	INFO_SET_VALUE, 0,
 	INFO_SET_FRAME_RATE, 30,
 	INFO_SET_SPEED, 20,
@@ -1904,7 +1909,7 @@ static char infoAnimePowerSelect2[] = {
 	INFO_FRAME_END,
 
 	INFO_JUMP_ADDRESS };
-static char infoAnimeRound[] = {
+static const char infoAnimeRound[] = {
 	INFO_SET_FRAME_RATE, 30,
 	INFO_SET_SPEED, 30,
 	INFO_SET_STYLE, INFO_STYLE_ZOOM,
@@ -1963,7 +1968,7 @@ static char infoAnimeRound[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnimeRoundB[] = {
+static const char infoAnimeRoundB[] = {
 	INFO_SET_FRAME_RATE, 30,
 	INFO_SET_SPEED, 30,
 	INFO_SET_STYLE, INFO_STYLE_ZOOM,
@@ -2028,7 +2033,7 @@ static char infoAnimeRoundB[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnimeDoubleRound[] = {
+static const char infoAnimeDoubleRound[] = {
 	INFO_SET_FRAME_RATE, 30,
 	INFO_SET_SPEED, 30,
 	INFO_SET_STYLE, INFO_STYLE_ZOOM,
@@ -2092,7 +2097,7 @@ static char infoAnimeDoubleRound[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnimeDoubleRoundB[] = {
+static const char infoAnimeDoubleRoundB[] = {
 	INFO_SET_FRAME_RATE, 30,
 	INFO_SET_SPEED, 30,
 	INFO_SET_STYLE, INFO_STYLE_ZOOM,
@@ -2162,7 +2167,7 @@ static char infoAnimeDoubleRoundB[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnimeFreeze[] = {
+static const char infoAnimeFreeze[] = {
 	INFO_SET_FRAME_RATE, 30,
 	INFO_SET_STYLE, INFO_STYLE_SLASH_IN,
 	INFO_NO_FREEZE,
@@ -2180,7 +2185,7 @@ static char infoAnimeFreeze[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnimeAgain[] = {
+static const char infoAnimeAgain[] = {
 	INFO_SET_FRAME_RATE, 30,
 	INFO_SET_SPEED, 30,
 	INFO_SET_STYLE, INFO_STYLE_ZOOM,
@@ -2199,7 +2204,7 @@ static char infoAnimeAgain[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnimeGameOver[] = {
+static const char infoAnimeGameOver[] = {
 /*
 	INFO_SET_FRAME_RATE, 30,
 	INFO_SET_SPEED, 30,
@@ -2220,7 +2225,7 @@ static char infoAnimeGameOver[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnimeCompleted[] = {
+static const char infoAnimeCompleted[] = {
 	INFO_SET_FRAME_RATE, 30,
 	INFO_SET_STYLE, INFO_STYLE_SLASH_IN,
 	INFO_NO_ROUND_PARTS6,
@@ -2233,7 +2238,7 @@ static char infoAnimeCompleted[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnimeCompleted2[] = {
+static const char infoAnimeCompleted2[] = {
 	INFO_SET_FRAME_RATE, 30,
 	INFO_SET_STYLE, INFO_STYLE_SLASH_IN,
 	INFO_NO_POWER_PARTS6,
@@ -2246,7 +2251,7 @@ static char infoAnimeCompleted2[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnimePowerTitle[] = {
+static const char infoAnimePowerTitle[] = {
 	INFO_SET_FRAME_RATE, 120,
 	INFO_SET_STYLE, INFO_STYLE_NORMAL,
 	INFO_NO_POWER_TITLE,
@@ -2255,7 +2260,7 @@ static char infoAnimePowerTitle[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnimeBonusEnd[] = {
+static const char infoAnimeBonusEnd[] = {
 	INFO_SET_FRAME_RATE, 30,
 	INFO_SET_SPEED, 30,
 	INFO_SET_STYLE, INFO_STYLE_ZOOM_WIDTH,
@@ -2291,7 +2296,7 @@ static char infoAnimeBonusEnd[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnimeMystery[] = {
+static const char infoAnimeMystery[] = {
 	INFO_SET_FRAME_RATE, 30,
 	INFO_SET_SPEED, 30,
 	INFO_SET_STYLE, INFO_STYLE_ZOOM,
@@ -2312,7 +2317,7 @@ static char infoAnimeMystery[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnime4C00[] = {
+static const char infoAnime4C00[] = {
 	INFO_SET_FRAME_RATE, 160,
 	INFO_SET_STYLE, INFO_STYLE_NORMAL,
 	INFO_4COLORS, 0,
@@ -2320,7 +2325,7 @@ static char infoAnime4C00[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnime4C01[] = {
+static const char infoAnime4C01[] = {
 	INFO_SET_FRAME_RATE, 160,
 	INFO_SET_STYLE, INFO_STYLE_NORMAL,
 	INFO_4COLORS, 1,
@@ -2328,7 +2333,7 @@ static char infoAnime4C01[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnime4C02[] = {
+static const char infoAnime4C02[] = {
 	INFO_SET_FRAME_RATE, 160,
 	INFO_SET_STYLE, INFO_STYLE_NORMAL,
 	INFO_4COLORS, 2,
@@ -2336,7 +2341,7 @@ static char infoAnime4C02[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnime4C03[] = {
+static const char infoAnime4C03[] = {
 	INFO_SET_FRAME_RATE, 160,
 	INFO_SET_STYLE, INFO_STYLE_NORMAL,
 	INFO_4COLORS, 3,
@@ -2344,7 +2349,7 @@ static char infoAnime4C03[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnime4C04[] = {
+static const char infoAnime4C04[] = {
 	INFO_SET_FRAME_RATE, 160,
 	INFO_SET_STYLE, INFO_STYLE_NORMAL,
 	INFO_4COLORS, 4,
@@ -2352,7 +2357,7 @@ static char infoAnime4C04[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnime4C05[] = {
+static const char infoAnime4C05[] = {
 	INFO_SET_FRAME_RATE, 160,
 	INFO_SET_STYLE, INFO_STYLE_NORMAL,
 	INFO_4COLORS, 5,
@@ -2360,7 +2365,7 @@ static char infoAnime4C05[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnime4C06[] = {
+static const char infoAnime4C06[] = {
 	INFO_SET_FRAME_RATE, 160,
 	INFO_SET_STYLE, INFO_STYLE_NORMAL,
 	INFO_4COLORS, 6,
@@ -2368,7 +2373,7 @@ static char infoAnime4C06[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnime4C07[] = {
+static const char infoAnime4C07[] = {
 	INFO_SET_FRAME_RATE, 160,
 	INFO_SET_STYLE, INFO_STYLE_NORMAL,
 	INFO_4COLORS, 7,
@@ -2376,7 +2381,7 @@ static char infoAnime4C07[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnime4C08[] = {
+static const char infoAnime4C08[] = {
 	INFO_SET_FRAME_RATE, 160,
 	INFO_SET_STYLE, INFO_STYLE_NORMAL,
 	INFO_4COLORS, 8,
@@ -2384,7 +2389,7 @@ static char infoAnime4C08[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnime4C09[] = {
+static const char infoAnime4C09[] = {
 	INFO_SET_FRAME_RATE, 160,
 	INFO_SET_STYLE, INFO_STYLE_NORMAL,
 	INFO_4COLORS, 9,
@@ -2392,7 +2397,7 @@ static char infoAnime4C09[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnime4C10[] = {
+static const char infoAnime4C10[] = {
 	INFO_SET_FRAME_RATE, 160,
 	INFO_SET_STYLE, INFO_STYLE_NORMAL,
 	INFO_4COLORS, 10,
@@ -2400,7 +2405,7 @@ static char infoAnime4C10[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnime4C11[] = {
+static const char infoAnime4C11[] = {
 	INFO_SET_FRAME_RATE, 160,
 	INFO_SET_STYLE, INFO_STYLE_NORMAL,
 	INFO_4COLORS, 11,
@@ -2408,7 +2413,7 @@ static char infoAnime4C11[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnime4C12[] = {
+static const char infoAnime4C12[] = {
 	INFO_SET_FRAME_RATE, 75,
 	INFO_SET_STYLE, INFO_STYLE_NORMAL,
 	INFO_4COLORS, 12,
@@ -2416,7 +2421,7 @@ static char infoAnime4C12[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnime4C13[] = {
+static const char infoAnime4C13[] = {
 	INFO_SET_FRAME_RATE, 250,
 	INFO_SET_STYLE, INFO_STYLE_NORMAL,
 	INFO_4COLORS, 13,
@@ -2428,7 +2433,7 @@ static char infoAnime4C13[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnime4C14[] = {
+static const char infoAnime4C14[] = {
 	INFO_SET_FRAME_RATE, 250,
 	INFO_SET_STYLE, INFO_STYLE_NORMAL,
 	INFO_4COLORS, 14,
@@ -2440,7 +2445,7 @@ static char infoAnime4C14[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnime4C15[] = {
+static const char infoAnime4C15[] = {
 	INFO_SET_FRAME_RATE, 250,
 	INFO_SET_STYLE, INFO_STYLE_NORMAL,
 	INFO_4COLORS, 15,
@@ -2452,7 +2457,7 @@ static char infoAnime4C15[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnime4C16[] = {
+static const char infoAnime4C16[] = {
 	INFO_SET_FRAME_RATE, 185,
 	INFO_SET_STYLE, INFO_STYLE_NORMAL,
 	INFO_4COLORS, 16,
@@ -2460,7 +2465,7 @@ static char infoAnime4C16[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnimeWISDOMw[] = {
+static const char infoAnimeWISDOMw[] = {
 	INFO_SET_FRAME_RATE, 30,
 	INFO_SET_STYLE, INFO_STYLE_SLASH_IN,
 	INFO_NO_POWER_PARTS0,
@@ -2474,7 +2479,7 @@ static char infoAnimeWISDOMw[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnimeWISDOMi[] = {
+static const char infoAnimeWISDOMi[] = {
 	INFO_SET_FRAME_RATE, 30,
 	INFO_SET_STYLE, INFO_STYLE_SLASH_IN,
 	INFO_NO_POWER_PARTS0,
@@ -2490,7 +2495,7 @@ static char infoAnimeWISDOMi[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnimeWISDOMs[] = {
+static const char infoAnimeWISDOMs[] = {
 	INFO_SET_FRAME_RATE, 30,
 	INFO_SET_STYLE, INFO_STYLE_SLASH_IN,
 	INFO_NO_POWER_PARTS0,
@@ -2508,7 +2513,7 @@ static char infoAnimeWISDOMs[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnimeWISDOMd[] = {
+static const char infoAnimeWISDOMd[] = {
 	INFO_SET_FRAME_RATE, 30,
 	INFO_SET_STYLE, INFO_STYLE_SLASH_IN,
 	INFO_NO_POWER_PARTS0,
@@ -2528,7 +2533,7 @@ static char infoAnimeWISDOMd[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnimeWISDOMo[] = {
+static const char infoAnimeWISDOMo[] = {
 	INFO_SET_FRAME_RATE, 30,
 	INFO_SET_STYLE, INFO_STYLE_SLASH_IN,
 	INFO_NO_POWER_PARTS0,
@@ -2550,7 +2555,7 @@ static char infoAnimeWISDOMo[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnimeWISDOMm[] = {
+static const char infoAnimeWISDOMm[] = {
 	INFO_SET_FRAME_RATE, 30,
 	INFO_SET_STYLE, INFO_STYLE_SLASH_IN,
 	INFO_NO_POWER_PARTS0,
@@ -2574,7 +2579,7 @@ static char infoAnimeWISDOMm[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnimeComingSoon[] = {
+static const char infoAnimeComingSoon[] = {
 	INFO_CHANGE_TEXTS, 6,
 	INFO_SET_FRAME_RATE, 180,
 	INFO_STRINGS, 0,
@@ -2587,7 +2592,7 @@ static char infoAnimeComingSoon[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnimePlayerNo[] = {
+static const char infoAnimePlayerNo[] = {
 	INFO_SET_FRAME_RATE, 60,
 	INFO_SET_STYLE, INFO_STYLE_SLASH_IN,
 	INFO_NO_PLAYER,
@@ -2601,7 +2606,7 @@ static char infoAnimePlayerNo[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnimeNameEntry[] = {
+static const char infoAnimeNameEntry[] = {
 	INFO_SET_FRAME_RATE, 30,
 	INFO_SET_STYLE, INFO_STYLE_SLASH_IN,
 	INFO_NO_ENTRY,
@@ -2630,7 +2635,7 @@ static char infoAnimeNameEntry[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnimeNameEntryFin[] = {
+static const char infoAnimeNameEntryFin[] = {
 	INFO_SET_FRAME_RATE, 120,
 	INFO_SET_STYLE, INFO_STYLE_NORMAL,
 	INFO_NO_ENTRY,
@@ -2639,7 +2644,7 @@ static char infoAnimeNameEntryFin[] = {
 
 	INFO_ANIME_END
 };
-static char infoAnimeReplay[] = {
+static const char infoAnimeReplay[] = {
 	INFO_SET_FRAME_RATE, 0,
 	INFO_SET_STYLE, INFO_STYLE_NORMAL,
 	INFO_OFFSET, 0, 0,
@@ -2658,7 +2663,7 @@ static char infoAnimeReplay[] = {
 	INFO_ANIME_END
 };
 
-static char infoAnimeTilt[] = {
+static const char infoAnimeTilt[] = {
 	INFO_SET_FRAME_RATE, 0,
 	INFO_SET_STYLE, INFO_STYLE_ZOOM,
 	INFO_TILT_MESSAGE,
@@ -2667,7 +2672,7 @@ static char infoAnimeTilt[] = {
 	INFO_ANIME_END
 };
 
-static char *infoAnimeTables[] = {
+static const char *infoAnimeTables[] = {
 /* 0 */	infoAnimePowerSelect,
 /* 1 */	infoAnimeRound,
 /* 2 */	infoAnimeDoubleRound,
@@ -2822,77 +2827,77 @@ static char *infoAnimeTables[] = {
 /*151*/	infoDialogueDanger,
 /*152*/ infoAnimeTilt,
 	NULL };
-static char difAnimeArk0[] = {
+static const char difAnimeArk0[] = {
 	0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
 	12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, -1 };
-static char difAnimeArk1[] = {
+static const char difAnimeArk1[] = {
 	23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12,
 	11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, -1 };
-static char difAnimeArk2[] = { 23, 23, -1 };
-static char difAnimeDrm0[] = {
+static const char difAnimeArk2[] = { 23, 23, -1 };
+static const char difAnimeDrm0[] = {
 	0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
 	12, 13, 14, 15, 16, 17, 18, 19, -1 };
-static char difAnimeDrm1[] = {
+static const char difAnimeDrm1[] = {
 	19, 18, 17, 16, 15, 14, 13, 12,
 	11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, -1 };
-static char difAnimeDrm2[] = { 19, 19, -1 };
-static char millionShot5M[] = {
+static const char difAnimeDrm2[] = { 19, 19, -1 };
+static const char millionShot5M[] = {
 	38,50,38,50,38,50,38,50,38,50,38,50,38,50,38,50,1,5,9,13,17,
 	21,25,29,33,37,50,37,50,37,50,37,50,37,50,37,50,37,50,37, -1 };
-static char millionShot10M[] = {
+static const char millionShot10M[] = {
 	2,50,2,50,2,50,2,50,2,50,2,50,2,50,2,50,1,5,9,13,17,
 	21,25,29,33,37,50,37,50,37,50,37,50,37,50,37,50,37,50,37,-1 };
-static char millionShot20M[] = {
+static const char millionShot20M[] = {
 	6,50,6,50,6,50,6,50,6,50,6,50,6,50,6,50,1,5,9,13,17,
 	21,25,29,33,37,50,37,50,37,50,37,50,37,50,37,50,37,50,37,-1 };
-static char millionShot30M[] = {
+static const char millionShot30M[] = {
 	10,50,10,50,10,50,10,50,10,50,10,50,10,50,10,50,1,5,9,13,17,
 	21,25,29,33,37,50,37,50,37,50,37,50,37,50,37,50,37,50,37,-1 };
-static char millionShot40M[] = {
+static const char millionShot40M[] = {
 	14,50,14,50,14,50,14,50,14,50,14,50,14,50,14,50,1,5,9,13,17,
 	21,25,29,33,37,50,37,50,37,50,37,50,37,50,37,50,37,50,37,-1 };
-static char millionShot50M[] = {
+static const char millionShot50M[] = {
 	18,50,18,50,18,50,18,50,18,50,18,50,18,50,18,50,1,5,9,13,17,
 	21,25,29,33,37,50,37,50,37,50,37,50,37,50,37,50,37,50,37,-1 };
-static char millionShot60M[] = {
+static const char millionShot60M[] = {
 	22,50,22,50,22,50,22,50,22,50,22,50,22,50,22,50,1,5,9,13,17,
 	21,25,29,33,37,50,37,50,37,50,37,50,37,50,37,50,37,50,37,-1 };
-static char millionShot70M[] = {
+static const char millionShot70M[] = {
 	26,50,26,50,26,50,26,50,26,50,26,50,26,50,26,50,1,5,9,13,17,
 	21,25,29,33,37,50,37,50,37,50,37,50,37,50,37,50,37,50,37,-1 };
-static char millionShot80M[] = {
+static const char millionShot80M[] = {
 	30,50,30,50,30,50,30,50,30,50,30,50,30,50,30,50,1,5,9,13,17,
 	21,25,29,33,37,50,37,50,37,50,37,50,37,50,37,50,37,50,37,-1 };
-static char millionShot90M[] = {
+static const char millionShot90M[] = {
 	34,50,34,50,34,50,34,50,34,50,34,50,34,50,34,50,1,5,9,13,17,
 	21,25,29,33,37,50,37,50,37,50,37,50,37,50,37,50,37,50,37,-1 };
-static char millionShot15M[] = {
+static const char millionShot15M[] = {
 	42,50,42,50,42,50,42,50,42,50,42,50,42,50,42,50,1,5,9,13,17,
 	21,25,29,33,37,50,37,50,37,50,37,50,37,50,37,50,37,50,37,-1 };
-static char millionShot100M[] = {
+static const char millionShot100M[] = {
 	46,50,46,50,46,50,46,50,46,50,46,50,46,50,46,50,1,5,9,13,17,
 	21,25,29,33,37,50,37,50,37,50,37,50,37,50,37,50,37,50,37,-1 };
-static char jackpot[] = {
+static const char jackpot[] = {
 	51,50,51,50,51,50,51,50,51,50,51,50,51,50,51,-1 };
-static char superJackpot[] = {
+static const char superJackpot[] = {
 	0,50,4,50,8,50,12,50,16,50,20,50,24,50,28,50,32,50,36,50,
 	40,50,44,50,48,50,48,50,48,50,48,50,
 	41,50,41,50,41,50,41,50,41,50,41,50,41,50,41,
 	51,50,51,50,51,50,51,50,51,50,51,50,51,50,51,-1 };
-static char spiritsJackpot[] = {
+static const char spiritsJackpot[] = {
 	0,50,4,50,8,50,12,50,16,50,20,50,24,50,28,50,32,50,36,50,
 	40,50,44,50,48,50,48,50,48,50,48,50,
 	45,50,45,50,45,50,45,50,45,50,45,50,45,50,45,
 	51,50,51,50,51,50,51,50,51,50,51,50,51,50,51,-1 };
-static char darkKnowledgeJackpot[] = {
+static const char darkKnowledgeJackpot[] = {
 	0,50,4,50,8,50,12,50,16,50,20,50,24,50,28,50,32,50,36,50,
 	40,50,44,50,48,50,48,50,48,50,48,50,
 	49,50,49,50,49,50,49,50,49,50,49,50,49,50,49,
 	51,50,51,50,51,50,51,50,51,50,51,50,51,50,51,-1 };
-static char extraballCollect[] = {
+static const char extraballCollect[] = {
 	3,50,7,50,11,50,15,50,19,50,23,50,27,50,31,50,35,50,39,50,43,
 	50,47,50,47,50,47,50,47,50,47,50,47,50,47,50,47,-1 };
-static char *anime4Ctables[] = {
+static const char *anime4Ctables[] = {
 /* 0 */	millionShot5M,
 /* 1 */	millionShot10M,
 /* 2 */	millionShot15M,
@@ -2911,7 +2916,7 @@ static char *anime4Ctables[] = {
 /*15 */	darkKnowledgeJackpot,
 /*16 */	extraballCollect
 };
-static short infoArrowTables[] = {
+static const short infoArrowTables[] = {
 /*  0 */	190, 110,
 /*  1 */	460, 90,
 /*  2 */	330, 95,
@@ -3038,7 +3043,7 @@ int MobjInfoText(int x, int y, int s, int c)
 	return infoFontSizeTables[c + o] * 2;
 }
 
-void MobjInfoTexts(int x, int y, int s, char *t)
+void MobjInfoTexts(int x, int y, int s, const char *t)
 {
 	int	c, j, l, m, tag[8], o;
 	char	*top, na, nb, nc, *p;
@@ -3154,7 +3159,7 @@ int InfoTextCode(int c)
 	return c;
 }
 
-void MobjInfoScore(int x, int y, int s, char *t)
+void MobjInfoScore(int x, int y, int s, const char *t)
 {
 	int	i;
 	char	buf[12];
@@ -3261,7 +3266,7 @@ void InitInfomations(int no)
 void ServiceInfomations(void)
 {
 	int	i, j, k, c;
-	char	*ptr;
+	const char *ptr;
 
 	ServiceMultiInfo();
 
@@ -3587,7 +3592,7 @@ static int ServiceDiffAnime(void)
 void ServiceSlave(void)
 {
 	int	i, j, k, l, *p;
-	char	*ptr;
+	const char *ptr;
 	unsigned short	*dst;
 
 ///	for( ; ; )

@@ -1,4 +1,13 @@
 ﻿#pragma once
+//=========================================================================//
+/*! @file
+	@brief  SEGA SATURN Motion Object Service / Necronomicon header
+	@author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2026 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
+*/
+//=========================================================================//
 #include <stdint.h>
 
 /// #define	VDP1_VRAM_TOP		0x25C00000
@@ -7,16 +16,18 @@
 #define CLUT_MODE_VDP1		0
 #define CLUT_MODE_VDP2		1
 
-#define SPR_WIDTH		640
-#define SPR_HEIGHT		448
+#define SPR_WIDTH			640
+#define SPR_HEIGHT			448
 #define SPR_HEIGHT_PAL		480
 
+#if 0
 #define VDP1_CMD_SYS_CLIP	0x0009
 #define VDP1_CMD_USR_CLIP	0x0008
 #define VDP1_CMD_REL_POS	0x000a
 #define VDP1_CMD_MOBJ_NORM	0x0000
 #define VDP1_CMD_MOBJ_FLEX	0x0001
 #define VDP1_CMD_END		0x8000
+#endif
 
 #define VDP1_CMD_H_FLIP		0x0010
 #define VDP1_CMD_V_FLIP		0x0020
@@ -32,10 +43,10 @@
 #define VDP1_MODE_SP_OFF	0x0040
 
 #define ANIME_POS_SHIFT		8
-#define ANIME_MAX		64
-#define MOBJ_MAX		(512+1)
+#define ANIME_MAX			64
+#define MOBJ_MAX			(512+1)
 #define MOBJ_COMMAND_MAX	512
-#define CLUT_MAX		512
+#define CLUT_MAX			512
 
 typedef struct {
 	short	x, y;
@@ -45,6 +56,7 @@ typedef struct {
 	short	xt, yt, xb, yb;
 } CLIP;
 
+#if 0
 typedef struct {
 	short	ctrl;
 	short	link;
@@ -59,6 +71,7 @@ typedef struct {
 	short	grsptr;
 	short	dummy;
 } VDP1_CMD;
+#endif
 
 typedef struct {
 	short	mode;
@@ -67,6 +80,7 @@ typedef struct {
 	short	color;
 	short	chaptr;
 	short	chasiz;
+	short 	tmp;
 } MOBJ;
 
 typedef struct {
@@ -84,7 +98,6 @@ typedef struct {
 } BIT_FILE;
 
 uint8_t *get_VDP1_VRAM_TOP();
-uint8_t *get_VDP1_VRAM_IMG();
 uint8_t *get_VDP2_VRAM_TOP();
 
 /* assembler routines */
@@ -101,13 +114,14 @@ void InstallCLUT(const uint8_t *, int);
 void InstallMotionObjectDouble(const char *name, ANIME *);
 void InstallMotionObject(const char *name, ANIME *);
 void SetupObject(const MOBJ *mobj);
-void SetupObjectLine(int, int, int, int, int);
-void SetupObjectLineWithMesh(int, int, int, int, int);
+void SetupObjectLine(int x0, int y0, int x1, int y1, int c);
+void SetupObjectLineWithMesh(int x0, int y0, int x1, int y1, int c);
 void SetupObjectBox(int x0, int y0, int x1, int y1, int c);
 void SetupObjectFrame(int, int, int, int, int);
 void SetupObjectPolyline(POINT *, int);
 void SetupObjectPolygon(POINT *, int);
 void SetupResizeObject(MOBJ *obj, int xs, int ys);
+
 void CloseMotionObject(void);
 void DoAnime(ANIME *anime);
 
@@ -121,3 +135,5 @@ void ExtractBitImageOfs(const uint8_t *src, int x, int y, int o, int t);
 void ServiceSlave(void);
 void ExtractBitFrame(int *in);
 void Install16ColorObject(ANIME *anm);
+
+extern int clutIdxMOBJ, clutTopMOBJ;

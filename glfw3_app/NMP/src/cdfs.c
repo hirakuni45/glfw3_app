@@ -1,4 +1,13 @@
-﻿#include <stdio.h>
+﻿//=========================================================================//
+/*! @file
+	@brief  SEGA SATURN CD file-system
+	@author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2026 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
+*/
+//=========================================================================//
+#include <stdio.h>
 #include <string.h>
 #include <stdint.h>
 // #include <sega_sys.h>
@@ -16,28 +25,13 @@
 #define ROOT_FILES_MAX   256
 #define MAIN_FILES_MAX   24
 
-extern volatile unsigned short padLevel[], padTriggerN[];
-extern char soundDrive;
-extern char optionMenuPad[];
-extern char multiPlayerEnable;
-extern char trialEnable, geEnable;
-extern char flashSegaEnable;
-extern char alertTestEnable, blockTestEnable;
-extern char cdTrackStyle;
-extern NECRONOMICON necroPad[];
-
-extern void ExecReturn(void);
-extern void FreezeScoreCode(int *dst, char *src);
-extern void ExpandScoreCode(char *dst, int *src);
-extern char convertTrackTables3[];
-
 static void CreatePinBallDir(void);
 static void CreateTestDir(int);
 static void CreatePinBallData(void);
 static int CreateNECRONOMICON(void);
 
-void DumpMemory(char *, int);
-void ServiceMultiPlayer(void);
+// void DumpMemory(char *, int);
+// void ServiceMultiPlayer(void);
 
 static char cdfsEnable = 0;
 static char cdTrack[2];
@@ -63,7 +57,7 @@ static unsigned char testCM[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '
 // static GfsDirTbl	mainDirTbl;
 // static GfsDirName	mainDirName[MAIN_FILES_MAX];
 
-char errMsg[256];
+/// char errMsg[256];
 int cdStatus;
 short cdFadeLevel = 7;
 
@@ -144,10 +138,8 @@ printf("Read file: '%s'\n", fn);
 	fclose(fp);
 
 	if(rs != sz) {
-		sprintf(&errMsg[0],
-			"Stop.\nCan't open input file as '%s'.\n", fname);
-		ToBlackScreen();
-		LaunchDebugger(&errMsg[0]);
+		printf("Stop.\nCan't open input file as '%s'.\n", fname);
+		return;
 	}
 
 printf("Read resource: %ld bytes\n", sz);

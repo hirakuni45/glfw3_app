@@ -1,6 +1,15 @@
 ﻿#pragma once
-
+//=========================================================================//
+/*! @file
+	@brief  Necronomicon インフォメーション関係・ヘッダー
+	@author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2026 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
+*/
+//=========================================================================//
 #include <stdint.h>
+#include "mobj.h"
 
 #define INFO_MULTI_MAX		4
 
@@ -163,7 +172,6 @@
 #define INFO_DIAG_DANGER	151
 #define INFO_ANIME_TILT		152
 
-
 #define INFO_NO_POWER_BASE	0
 #define INFO_NO_POWER_PARTS0	1
 #define INFO_NO_POWER_PARTS1	2
@@ -255,9 +263,9 @@ void MobjInfo(int x, int y, int no, int sx, int sy);
 void MobjArrow(int);
 void MobjInfoSlash(int x, int y, int no);
 int MobjInfoText(int x, int y, int s, int c);
-void MobjInfoTexts(int x, int y, int s, char *);
+void MobjInfoTexts(int x, int y, int s, const char *);
 int InfoTextCode(int c);
-void MobjInfoScore(int x, int y, int s, char *t);
+void MobjInfoScore(int x, int y, int s, const char *t);
 void MobjInfo2(int x, int y, int sx, int sy);
 void CreateInfoScore(const char *ptr);
 char *CreateInfoScores(char *scr, const char *ptr);
@@ -270,3 +278,10 @@ void InitDiffAnime(int x, int y, const uint8_t *ptr);
 
 void SetMultiInfo(int, int);
 void SetDiffAnime(int no);
+
+extern ANIME fontAnime, infoAnime, ifonAnime, info2Anime;
+extern char infoPause;
+extern char *infoText[8], infoNumberTab[4], nameTextPos, nameText[4];
+extern volatile short slaveTaskNo;
+extern short infoNo, infoValue, infoPriority, infoAnimeNo[8];
+extern short infoNumber, infoAnimeMax, infoTextNo, infoTimer;

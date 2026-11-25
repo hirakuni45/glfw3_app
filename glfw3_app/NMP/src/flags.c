@@ -1,8 +1,17 @@
-﻿#include <stdio.h>
+﻿//=========================================================================//
+/*! @file
+	@brief  アプリケーション制御フラグ
+	@author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2026 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
+*/
+//=========================================================================//
+#include <stdio.h>
 #include "saturn.h"
 #include "cdfs.h"
-
-extern int randSeed, randBase1, randBase2;
+#include "fnc.h"
+#include "flags.h"
 
 char startMaskEnable;
 char demoPlayIndex;
@@ -58,7 +67,7 @@ void TransmitValues(void)
 /	・”ＯＰＴＩＯＮＳ”メニューが有効とならない。	/
 /	・バックアップＲＡＭのサービスを無効にする。	/
 /------------------------------------------------------*/
-char trialEnable = 0;
+const char trialEnable = 0;
 
 /*------------------------------------------------------/
 /	ＧＥトライアル・パッケージの場合１にする	/
@@ -69,7 +78,7 @@ char trialEnable = 0;
 /	・”ＯＰＴＩＯＮＳ”メニューが有効とならない。	/
 /	・バックアップＲＡＭのサービスを無効にする。	/
 /------------------------------------------------------*/
-char geEnable = 0;
+const char geEnable = 0;
 
 /*------------------------------------------------------/
 /	デモ・ムービーの再生を有効にする場合１にする	/
@@ -77,7 +86,7 @@ char geEnable = 0;
 /	・この値によって一連のシーケンスのムービー	/
 /	の数が決定される、デモが無い場合は０にする。	/
 /------------------------------------------------------*/
-char demoMovieMax = 0;
+const char demoMovieMax = 0;
 
 
 /*------------------------------------------------------/
@@ -92,7 +101,7 @@ char demoMovieMax = 0;
 /	３：ＣＤトラックが制限してある場合（その３）	/
 /		（ＧＥの体験版の場合）			/
 /------------------------------------------------------*/
-char cdTrackStyle = 0;
+const char cdTrackStyle = 0;
 
 
 /*------------------------------------------------------/
@@ -109,8 +118,8 @@ char staffRollDebug = 0;
 /	・強制的にアラート画面を表示する		/
 /	・３ブロックを残してめいっぱいダミーデータを書く/	
 /------------------------------------------------------*/
-char alertTestEnable = 0;
-char blockTestEnable = 0;
+const char alertTestEnable = 0;
+const char blockTestEnable = 0;
 
 
 /*------------------------------------------------------/
@@ -138,7 +147,7 @@ char debugEnable = 0;
 /	のプログラムを起動する。			/
 /	（通常、常に１とする。）			/
 /------------------------------------------------------*/
-char multiPlayerEnable = 1;
+const char multiPlayerEnable = 1;
 
 
 /*------------------------------------------------------/
@@ -154,7 +163,7 @@ char multiPlayerEnable = 1;
 /	d:/nmp/segalib/lib/sega_gfs.a			/
 /	d:/nmp/segalib/lib/sega_sys.a			/
 /------------------------------------------------------*/
-char flashSegaEnable = 0;
+const char flashSegaEnable = 0;
 
 void SYS_Exit(int val)
 {

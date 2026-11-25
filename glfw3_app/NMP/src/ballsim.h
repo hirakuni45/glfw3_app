@@ -1,4 +1,15 @@
 ﻿#pragma once
+//=========================================================================//
+/*! @file
+	@brief  ボールシュミレーター NRCRONOMICON・ヘッダー
+	@author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2026 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
+*/
+//=========================================================================//
+#include <stdint.h>
+
 /* Gladiators: 63956 / 1120[mm] */
 /* Necronomicon: 63956 / 1260[mm] */
 /* 1ST:Difarential count loop = 4, break value = 8 */
@@ -130,11 +141,11 @@
 #define OPTION_BGM_DISABLE		2
 
 typedef struct {
-  unsigned int vs;	/* Vector Size */
-  unsigned int vss;
-  short atr;		/* Attribute */
-  short xt, yt;		/* X, Y, Z Top */
-  short	sin, cos;	/* Sin, Cos */
+	unsigned int	vs;	/* Vector Size */
+	unsigned int	vss;
+	short	atr;		/* Attribute */
+	short	xt, yt;		/* X, Y, Z Top */
+	short	sin, cos;	/* Sin, Cos */
 } HIT;
 
 typedef struct {

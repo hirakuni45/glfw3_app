@@ -1,24 +1,32 @@
-﻿#include <stdio.h>
+﻿//=========================================================================//
+/*! @file
+	@brief  タスク管理とその周辺
+	@author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2026 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
+*/
+//=========================================================================//
+#include <stdio.h>
 #include "saturn.h"
 #include "cdfs.h"
 #include "etc.h"
-#include "task.h"
 #include "pinball.h"
 #include "top.h"
+#include "task.h"
 
 #define TASK_MAX	8
-
-extern char errMsg[];
 
 static void (*taskAdr[TASK_MAX])(void);
 static void (*taskGo[TASK_MAX])(void);
 
-const uint8_t *resIndex, *resImage;
+const uint8_t *resIndex;
+const uint8_t *resImage;
 
 /*----------------------------------------------/
-/						/
-/	Service Task Routine			/
-/						/
+/
+/	Service Task Routine
+/
 /----------------------------------------------*/
 void DoMainGameOnly(int no)
 {
@@ -33,17 +41,14 @@ void DoMainGameOnly(int no)
 
 void ServiceTask(void)
 {
-	int	i;
-
-	for(i=0; i<TASK_MAX; ++i) taskGo[i] = taskAdr[i];
-	for(i=0; i<TASK_MAX; ++i) if(taskGo[i]!=NULL) (*taskGo[i])();
+	for(int i = 0; i < TASK_MAX; ++i) taskGo[i] = taskAdr[i];
+	for(int i = 0; i < TASK_MAX; ++i) if(taskGo[i]!=NULL) (*taskGo[i])();
 }
 
 void CreateTask(void (*task)(void))
-{	
-	int	i;
-
-	for(i=0; i<TASK_MAX; ++i) if(taskAdr[i]==NULL) break;
+{
+	int i;
+	for(i = 0; i < TASK_MAX; ++i) if(taskAdr[i]==NULL) break;
 	taskAdr[i] = task;
 }
 
@@ -51,22 +56,20 @@ void KillTask(void (*task)(void))
 {
 	int	i, j;
 
-	for(i=0; i<TASK_MAX; ++i) if(taskAdr[i]==task) break;
-	for(j=i; j<(TASK_MAX-1); ++j) taskAdr[j] = taskAdr[j+1];
-	taskAdr[TASK_MAX-1] = NULL;
+	for(i = 0; i < TASK_MAX; ++i) if(taskAdr[i] == task) break;
+	for(j = i; j < (TASK_MAX - 1); ++j) taskAdr[j] = taskAdr[j + 1];
+	taskAdr[TASK_MAX - 1] = NULL;
 }
 
 void KillAllTask(void)
 {
-	int	i;
-
-	for(i=0; i<TASK_MAX; ++i) taskAdr[i] = NULL;
+	for(int i = 0; i < TASK_MAX; ++i) taskAdr[i] = NULL;
 }
 
 void ResetTask(void)
 {
 	KillAllTask();
-	// メインループの先頭で、独自に呼ぶ事
+	// ジョブ内で、閉じたループを排除する為、メインループの先頭で、独自に呼ぶ事
 ///	CreateTask(SyncBlanking);
 }
 

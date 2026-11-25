@@ -1,10 +1,24 @@
-﻿#include <stdio.h>
+﻿//=========================================================================//
+/*! @file
+	@brief  コリジョン関係 Necronomicon
+	@author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2026 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
+*/
+//=========================================================================//
+#include <stdio.h>
 #include "ballsim.h"
 #include "saturn.h"
 #include "sound.h"
 #include "option.h"
 #include "top.h"
 #include "fnc.h"
+#include "genr.h"
+#include "vect.h"
+#include "pinball.h"
+#include "flags.h"
+#include "etc.h"
 #include "sim.h"
 
 #define MODE_NORMAL		0
@@ -30,48 +44,6 @@ typedef struct {
 	int sin, cos, svs;
 	int vp;
 } MYXY;
-
-extern unsigned short gamePadLevel, gamePadTrigger, gamePadRelese;
-extern short gameAnalogX, gameAnalogY, gameAnalogEna;
-extern short zoneMap[ZONE_DIVIDE][ZONE_DIVIDE];
-extern HIT hitList[];
-extern short listTag[];
-extern char optionMenuPad[];
-
-extern FLIPPER flipper[];
-extern BALL ball[];
-extern SWITCH swPara[];
-extern short startBallX, startBallY, startBallZ;
-extern short psychoSaveX, psychoSaveY, psychoSaveZ;
-extern short vukPosX[], vukPosY[], vukPosZ[];
-extern short magnaPosX, magnaPosY, magnaRadius;
-extern int magnaRadius2;
-extern short ballRadius;
-extern short flipperMax, ballMax, jetBumperMax;
-extern short dropTargetMax, standUpMax, holeMax, rampMax, flipperMax;
-extern short slingShotMax, magnaLockMax;
-extern char playerNo;
-
-extern short vibrX, vibrY;
-extern char tiltGo;
-extern char gameDebugPause;
-extern unsigned int vsyncCounter;
-extern char playMonitorEnable;
-extern short demoPlayEnable;
-
-extern void PickUpFirst(short *);
-extern void MakeupVectors(FIELD *, short *, char *);
-extern void TestMap(int width, int height, int scale, int fff);
-extern void MobjBall(int, int, int, int, int);
-extern void MobjFlipper(int xc, int yc, int an);
-extern void MobjDropTarget(int xc, int yc, int an);
-extern void MobjSlingShot(int, int, int);
-extern void MobjJetBumper(int, int, int);
-extern void MobjFont(int, int, int);
-/// extern int Isqrt(unsigned int);
-extern void InitBallLost(PLAYER *);
-extern void SinCos(short, short *);
-extern void ServicePlayerInfo(PLAYER *);
 
 static void SetupOtherBallHit(int);
 
@@ -102,7 +74,7 @@ static short analogXold, analogYold;
 static unsigned int swNeg, swPos;
 static HIT ballHit[8];
 static int b2bSpdX[8], b2bSpdY[8];
-static int boundPara[] = {
+static const int boundPara[] = {
 	METAL_HIT_FACTOR,
 	PLASTIC_HIT_FACTOR,
 	RUBBER_BAND_HIT_FACTOR,
@@ -235,7 +207,7 @@ int PrintAverage(char *text, int n)
 /	Initialization Ball Simulator		/
 /						/
 /----------------------------------------------*/
-void InitBallSimulator(FIELD *para, short *po, char *msg)
+void InitBallSimulator(FIELD *para, short *po, const char *msg)
 {
 	int	i, j;
 	unsigned int	u, v;

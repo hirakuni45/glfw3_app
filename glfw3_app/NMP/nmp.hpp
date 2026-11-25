@@ -1,13 +1,13 @@
 #pragma once
-//=====================================================================//
+//=========================================================================//
 /*! @file
 	@brief  NECRONOMICON PINBALL glfw3_app メイン・クラス
 	@author 平松邦仁 (hira@rvf-rc45.net)
 	@copyright	Copyright (C) 2026 Kunihito Hiramatsu @n
 				Released under the MIT license @n
-				https://github.com/hirakuni45/RX/blob/master/LICENSE
+				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
 */
-//=====================================================================//
+//=========================================================================//
 #include <format>
 #include "main.hpp"
 #include "utils/i_scene.hpp"
@@ -28,6 +28,33 @@
 
 #include "src/saturn.h"
 #include "nmp_core.hpp"
+
+static uint32_t mobj_idx_pos_ = 0;
+static uint32_t mobj_idx_last_ = 0;
+static MOBJ mobj_pad_[64];
+
+extern "C" {
+
+	void start_motion_object(void)
+	{
+		mobj_idx_pos_ = 0;
+		mobj_idx_last_ = 0;
+	}
+
+	void setup_motion_object(const void* mobj)
+	{
+		if(mobj_idx_pos_ < 64) {
+			auto p = static_cast<const MOBJ*>(mobj);
+			mobj_pad_[mobj_idx_pos_] = *p;
+			mobj_idx_pos_++;
+		}
+	}
+
+	void end_motion_object(void)
+	{
+		mobj_idx_last_ = mobj_idx_pos_;
+	}
+}
 
 namespace app {
 
@@ -58,15 +85,12 @@ namespace app {
 
 		gl::texfb				texfb_;
 
-		static const int sys_width_   = 640;
-		static const int sys_height_  = 448;
+		static const int fb_width_   = 640;
+		static const int fb_height_  = 448;
 		static const int sample_rate_ = 44100;
 		static const int audio_len_   = sample_rate_ / 60;
 
-		uint8_t			fb_[sys_width_ * sys_height_ * 4];
-
-///		emu::tools		tools_;
-
+		uint8_t			fb_[fb_width_ * fb_height_ * 4];
 
 		void pad_() noexcept
 		{
@@ -148,12 +172,56 @@ namespace app {
 			}
 		}
 
+		void render_mobj(const MOBJ& mobj) noexcept
+		{
+			int yt = mobj.y;
+			int xt = mobj.x;
+			int ye = mobj.y + mobj.v;
+			int xe = mobj.x + mobj.h;
+
+			const uint32_t* clut_org = GetCLUT();
+			clut_org += mobj.color;
+
+			const uint8_t* src = get_VDP1_VRAM_TOP();
+			src += static_cast<uint32_t>(mobj.chaptr) << 3;
+			uint32_t srcofs = 0;
+			for(int y = yt; y < ye; ++y) {
+				auto ofs = srcofs;
+				srcofs += mobj.h;
+				if(y >= 0 && y < fb_height_) ;
+				else {
+					continue;
+				}
+				uint8_t* dst = &fb_[y * fb_width_ * 4];
+				for(int x = xt; x < xe; ++x) {
+					if(x >= 0 && x < fb_width_) {
+						uint8_t idx = 0;
+						if(mobj.mode == 0) {
+							idx = src[ofs >> 1];
+							if((ofs & 1) == 0) idx >>= 4;
+							idx &= 0xf;
+						} else {
+							idx = src[ofs];
+						}
+						uint32_t c = clut_org[idx];
+						if(idx != 0) {
+							auto l = x * 4;
+							dst[l + 0] = c & 0xff;
+							dst[l + 1] = (c >> 8) & 0xff;
+							dst[l + 2] = (c >> 16) & 0xff;
+							dst[l + 3] = 255;
+						}
+					}
+					ofs++;
+				}
+			}
+		}
+
 		void service_SATURN_OBJ() noexcept
 		{
-			const uint8_t* src = get_VDP1_VRAM_TOP();
-			const uint8_t* img = get_VDP1_VRAM_IMG();
-			uint8_t* dst = fb_;
-
+			for(uint32_t i = 0; i < mobj_idx_last_; ++i) {
+				render_mobj(mobj_pad_[i]);
+			}
 		}
 
 	public:
@@ -302,7 +370,7 @@ namespace app {
 				dialog_->enable(false);
 			}
 
-			texfb_.initialize(sys_width_, sys_height_, 32);
+			texfb_.initialize(fb_width_, fb_height_, 32);
 
 			// プリファレンスの取得
 			sys::preference& pre = director_.at().preference_;
@@ -407,12 +475,12 @@ namespace app {
 			float ofsx = 0.0f;
 			float ofsy = 0.0f;
 			if(siz.x < siz.y) {
-				scale = static_cast<float>(siz.x) / static_cast<float>(sys_width_);
-				float h = static_cast<float>(sys_height_);
+				scale = static_cast<float>(siz.x) / static_cast<float>(fb_width_);
+				float h = static_cast<float>(fb_height_);
 				ofsy = (static_cast<float>(siz.y) - h * scale) * 0.5f;
 			} else {
-				scale = static_cast<float>(siz.y) / static_cast<float>(sys_height_);
-				float w = static_cast<float>(sys_width_);
+				scale = static_cast<float>(siz.y) / static_cast<float>(fb_height_);
+				float w = static_cast<float>(fb_width_);
 				ofsx = (static_cast<float>(siz.x) - w * scale) * 0.5f;
 			}
 			gl::glTranslate(ofsx, ofsy);

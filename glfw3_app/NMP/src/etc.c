@@ -1,4 +1,13 @@
-﻿#include <stdio.h>
+﻿//=========================================================================//
+/*! @file
+	@brief  ETC Necronomicon
+	@author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2026 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
+*/
+//=========================================================================//
+#include <stdio.h>
 #include "saturn.h"
 #include "mobj.h"
 #include "sound.h"
@@ -14,6 +23,7 @@
 #include "top.h"
 #include "flags.h"
 #include "fnc.h"
+#include "cdfs.h"
 #include "etc.h"
 
 #define LENZ_X_SIZE	56
@@ -21,26 +31,6 @@
 #define CIRCLE_MAX	58
 #define MAN_COLOR_MAX	240
 #define MAN_MIRROR_TOP	0x06080000
-
-extern volatile unsigned int clutTransMask;
-extern volatile unsigned short padLevel[], padTriggerP[], padTriggerN[], padStatus[];
-extern volatile unsigned short padOnlyLevel[], padOnlyTriggerP[], padOnlyTriggerN[];
-extern volatile short mouseDx, mouseDy, mouseBl, mouseEna;
-extern unsigned int clutTransBit, clutBuff[];
-extern int clutIdxMOBJ;
-extern ANIME fontAnime, infoAnime, ifonAnime, info2Anime;
-extern short infoNumber, infoAnimeMax;
-extern int frameRate;
-extern char gamePauseEnable;
-extern uint32_t clutSave[], clutLupe[];
-extern char trialEnable, geEnable;
-extern char flashSegaEnable;
-extern char staffRollDebug;
-extern char *scoreConst[];
-extern short tvFrame;
-extern short cdFadeLevel;
-extern unsigned short gamePadLevel, gamePadTrigger, gamePadRelese;
-extern char playerNo;
 
 static uint8_t man_mirror_top_[1024 * 512];
 static uint8_t *get_MAN_MIRROR_TOP() { return man_mirror_top_; }
@@ -554,34 +544,32 @@ void EntryOptions(void)
 
 void MainOptions(void)
 {
-	int	f;
+	SyncBlanking();
 
 	manLevel = padLevel[0] | padLevel[1];
 	manTrigger = padTriggerP[0] | padTriggerP[1];
 
 	ServiceOptions();
-	f = manTrigger & SATURN_PAD_START; 
+	int f = manTrigger & SATURN_PAD_START; 
 	f |= manTrigger & SATURN_PAD_ABCXYZ;
 	if(f) {
-	if((manLevel & SATURN_PAD_ABC)==SATURN_PAD_ABC) {
-		KillTask(MainOptions);
-		CreateTask(EntryMainMenu);
-		}
-	else if(optionMenuPos>=4) {
-		KillTask(MainOptions);
-		if(optionMenuPos==4) {
-			RingSfx(SFX_TIME_BACK);
-			CreateTask(EntryColorBars);
-			}
-		else 	{
-			RingSfx(SFX_DEATHWATCH_AWARD);
+		if((manLevel & SATURN_PAD_ABC)==SATURN_PAD_ABC) {
+			KillTask(MainOptions);
 			CreateTask(EntryMainMenu);
-			ToBlackScreen();
-			ResetMotionObject();
-			ResetBackground();
-			OpenMotionObject(0, 0);
-			CloseMotionObject();
-			WriteBackupSystem();
+		} else if(optionMenuPos>=4) {
+			KillTask(MainOptions);
+			if(optionMenuPos==4) {
+				RingSfx(SFX_TIME_BACK);
+				CreateTask(EntryColorBars);
+			} else {
+				RingSfx(SFX_DEATHWATCH_AWARD);
+				CreateTask(EntryMainMenu);
+				ToBlackScreen();
+				ResetMotionObject();
+				ResetBackground();
+				OpenMotionObject(0, 0);
+				CloseMotionObject();
+				WriteBackupSystem();
 			}
 		}
 	}
@@ -690,6 +678,8 @@ static int TakeOptionTextSize(const char *t)
 	return s;
 }
 
+static void LoopColorBars(void);
+
 static void EntryColorBars(void)
 {
 	ToBlackScreen();
@@ -701,14 +691,22 @@ static void EntryColorBars(void)
 	clutTransMask = 1;
 
 	manTrigger = 0;
-	while((manTrigger & SATURN_PAD_START)==0) {
-	manTrigger = padTriggerP[0] | padTriggerP[1];
-	SyncBlanking();
-	if(manTrigger & SATURN_PAD_ABCXYZ) break;
-	}
-	RingSfx(SFX_OUT_LANE);
 	KillTask(EntryColorBars);
-	CreateTask(EntryOptions);
+	CreateTask(LoopColorBars);
+}
+
+static void LoopColorBars(void)
+{
+	SyncBlanking();
+	manTrigger = padTriggerP[0] | padTriggerP[1];
+	char exit = 0;
+	if((manTrigger & SATURN_PAD_ABCXYZ) != 0) ++exit;
+	if((manTrigger & SATURN_PAD_START) != 0) ++exit;
+	if(exit != 0) {
+		RingSfx(SFX_OUT_LANE);
+		KillTask(LoopColorBars);
+		CreateTask(EntryOptions);
+	}
 }
 
 void ServiceBrightClut(int top, int cnt)
@@ -731,9 +729,6 @@ void ServiceBrightClut(int top, int cnt)
 /----------------------------------------------*/
 void EntryManual(void)
 {
-	int	i, j, k, l;
-	MOBJ	*mobj;
-
 	ToBlackScreen();
 	ResetMotionObject();
 	ResetBackground();
@@ -746,10 +741,10 @@ void EntryManual(void)
 
 	clutIdxMOBJ = MAN_COLOR_MAX + 256;
 	InstallMotionObject("LUPE", &lupeAnime);
-	for(i=0; i<MAN_COLOR_MAX; ++i) clutBuff[i + 256] = clutBuff[i];
-	for(i=0; i<16; ++i) clutSave[i] = clutBuff[128 + i];
+	for(int i = 0; i < MAN_COLOR_MAX; ++i) clutBuff[i + 256] = clutBuff[i];
+	for(int i = 0; i < 16; ++i) clutSave[i] = clutBuff[128 + i];
 	clutBuff[225] = 0;
-	clutBuff[225+256] = 0;
+	clutBuff[225 + 256] = 0;
 
 	clutTransBit |= 0xffff0000;
 	SetCLUT(0, 0, 0, 0);
@@ -759,11 +754,11 @@ void EntryManual(void)
 
 	EtcCopyImage(0, 0, 640, 448, 0);
 
-	for(i=0; i<12; ++i) {
-	j = TakeResourcePage(manTopicTables[i]);
-	manPageMax[i] = j / 3;
-	if(manPageMax[i]) manPageMax[i]--;
-	manPagePos[i] = 0;
+	for(int i = 0; i < 12; ++i) {
+		int j = TakeResourcePage(manTopicTables[i]);
+		manPageMax[i] = j / 3;
+		if(manPageMax[i]) manPageMax[i]--;
+		manPagePos[i] = 0;
 	}
 
 	manMode = 0;
@@ -781,6 +776,8 @@ void EntryManual(void)
 
 void MainManual(void)
 {
+	SyncBlanking();
+
 	manLevel = padLevel[0] | padLevel[1];
 	manTrigger = padTriggerP[0] | padTriggerP[1];
 
@@ -789,15 +786,16 @@ void MainManual(void)
 	if(manTimer >= (30 * tvFrame) && flashSegaEnable!=0) SYS_Exit(0);
 
 	ServiceManual();
+
 	if(manTrigger & SATURN_PAD_START) {
-	ToBlackScreen();
-	ResetMotionObject();
-	ResetBackground();
-	OpenMotionObject(0, 0);
-	CloseMotionObject();
-	LaunchResource("MENU.RES");
-	KillTask(MainManual);
-	CreateTask(EntryMainMenu);
+		ToBlackScreen();
+		ResetMotionObject();
+		ResetBackground();
+		OpenMotionObject(0, 0);
+		CloseMotionObject();
+		LaunchResource("MENU.RES");
+		KillTask(MainManual);
+		CreateTask(EntryMainMenu);
 	}
 }
 
@@ -1142,14 +1140,11 @@ static void RefreshLenzImage(MOBJ *mobj, int x, int y)
 
 static void EraseRing(int x, int y)
 {
-	int	i;
-
-	for(i=0; i<CIRCLE_MAX; ++i)
-	{
-	SetupObjectLine(x-CIRCLE_MAX, y-CIRCLE_MAX+i, x-circleTables[i], y-CIRCLE_MAX+i, 0);
-	SetupObjectLine(x-CIRCLE_MAX, y+CIRCLE_MAX-i-1, x-circleTables[i], y+CIRCLE_MAX-i-1, 0);
-	SetupObjectLine(x+circleTables[i], y-CIRCLE_MAX+i, x+CIRCLE_MAX, y-CIRCLE_MAX+i, 0);
-	SetupObjectLine(x+circleTables[i], y+CIRCLE_MAX-i-1, x+CIRCLE_MAX, y+CIRCLE_MAX-i-1, 0);
+	for(int i = 0; i < CIRCLE_MAX; ++i) {
+		SetupObjectLine(x-CIRCLE_MAX, y-CIRCLE_MAX+i, x-circleTables[i], y-CIRCLE_MAX+i, 0);
+		SetupObjectLine(x-CIRCLE_MAX, y+CIRCLE_MAX-i-1, x-circleTables[i], y+CIRCLE_MAX-i-1, 0);
+		SetupObjectLine(x+circleTables[i], y-CIRCLE_MAX+i, x+CIRCLE_MAX, y-CIRCLE_MAX+i, 0);
+		SetupObjectLine(x+circleTables[i], y+CIRCLE_MAX-i-1, x+CIRCLE_MAX, y+CIRCLE_MAX-i-1, 0);
 	}
 }
 

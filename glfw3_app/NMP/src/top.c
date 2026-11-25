@@ -1,4 +1,13 @@
-﻿/*------------------------------------------------------/
+﻿//=========================================================================//
+/*! @file
+	@brief  SEGA SATURN ハード依存関係
+	@author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2026 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
+*/
+//=========================================================================//
+/*------------------------------------------------------/
 /														/
 /	ボール・シュミレーター装置依存部分（ＴＯＰ）			/
 /														/
@@ -18,10 +27,9 @@
 #include "win.h"
 #include "cdfs.h"
 #include "task.h"
-#include "top.h"
 #include "mobj.h"
+#include "top.h"
 
-#define CLUT_MAX	512
 #define SMPC_RECIVE_MAX	128
 
 extern void InitFunctions(void);
@@ -81,7 +89,8 @@ char soundSeq = 0;
 short tvFrame;
 
 uint32_t clutBuff[CLUT_MAX];
-uint32_t clutHard[CLUT_MAX];
+
+static uint32_t clutHard[CLUT_MAX];
 const uint32_t *GetCLUT() { return clutHard; }
 
 void main_nmp(int no)

@@ -1,7 +1,14 @@
 #pragma once
-
+//=========================================================================//
+/*! @file
+	@brief  pinball general for Necronomicon
+	@author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2026 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
+*/
+//=========================================================================//
 #include <stdint.h>
-
 #include "ballsim.h"
 
 int ChooseMysteryItem(void);
@@ -49,3 +56,13 @@ void ServiceStatus(void);
 
 void ServicePlayerInfo(PLAYER *);
 void ServicePlayerSelector(void);
+
+extern short trialTimer;
+extern short soulTask;
+extern short diagInfoTab[4];
+extern short roundTimer, roundStartDelay, roundDelay;
+extern char tiltGo;
+extern char gameMode;
+extern char nextStageEnable;
+extern char roundValue[12];
+extern char *scoreConst[50];

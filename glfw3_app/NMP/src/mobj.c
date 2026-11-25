@@ -1,20 +1,20 @@
-﻿/*------------------------------------------------------/
-/														/
-/	SEGA SATURN Motion Object Service					/
-/														/
-/------------------------------------------------------*/
+﻿//=========================================================================//
+/*! @file
+	@brief  SEGA SATURN Motion Object Service / Necronomicon
+	@author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2026 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
+*/
+//=========================================================================//
 #include <stdio.h>
 #include "saturn.h"
 #include "mobj.h"
 #include "top.h"
 #include "task.h"
 
-extern uint8_t *resIndex, *resImage;
-extern char errMsg[];
-
 static uint8_t vdp1_vram_top_[1024 * 512];
 uint8_t *get_VDP1_VRAM_TOP() { return vdp1_vram_top_; }
-uint8_t *get_VDP1_VRAM_IMG() { return get_VDP1_VRAM_TOP() + MOBJ_COMMAND_MAX * 32; }
 static uint8_t vdp2_vram_top_[1024 * 512];
 uint8_t *get_VDP2_VRAM_TOP() { return vdp2_vram_top_; }
 
@@ -30,7 +30,9 @@ static void ExtractOffsetForVDP2(const uint8_t *image, uint8_t *out, int ofs, in
 
 int clutIdxMOBJ, clutTopMOBJ;
 
+#if 0
 static VDP1_CMD *cmdPtr, cmdBuff[MOBJ_COMMAND_MAX+1];
+#endif
 static MOBJ *mobjPtr = NULL, mobjBuff[MOBJ_MAX];
 static uint16_t *imagePtr;
 static int clutIdxBG, clutTopBG;
@@ -39,6 +41,11 @@ static char installMode;
 static uint8_t lineBuff[1024 + 512 + 128 + 1024];
 static const uint8_t bitTbl[] = { 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01 };
 
+// Motion Object 外部参照 API
+// MOBJ 構造体の定義は外部ソースで行う事
+extern void start_motion_object(void);
+extern void setup_motion_object(const void* mobj);
+extern void end_motion_object(void);
 
 void ResetMotionObject(void)
 {
@@ -54,6 +61,8 @@ void ResetBackground(void)
 
 void OpenMotionObject(int ox, int oy)
 {
+	start_motion_object();
+#if 0
 	cmdPtr = &cmdBuff[0];
 
 	cmdPtr->ctrl = VDP1_CMD_SYS_CLIP;
@@ -67,10 +76,12 @@ void OpenMotionObject(int ox, int oy)
 	cmdPtr->ax = ox;
 	cmdPtr->ay = oy;
 	cmdPtr++;
+#endif
 }
 
 void SetupUsrClip(CLIP *clip)
 {
+#if 0
 	cmdPtr->ctrl = VDP1_CMD_USR_CLIP;
 	cmdPtr->link = 0;
 	cmdPtr->ax = clip->xt;
@@ -78,15 +89,18 @@ void SetupUsrClip(CLIP *clip)
 	cmdPtr->cx = clip->xb - 1;
 	cmdPtr->cy = clip->yb - 1;
 	cmdPtr++;
+#endif
 }
 
 void SetupRelativePosition(POINT *pos)
 {
+#if 0
 	cmdPtr->ctrl = VDP1_CMD_REL_POS;
 	cmdPtr->link = 0;
 	cmdPtr->ax = pos->x;
 	cmdPtr->ay = pos->y;
 	cmdPtr++;
+#endif
 }
 
 void InstallCLUT(const uint8_t *ptr, int type)
@@ -95,6 +109,7 @@ void InstallCLUT(const uint8_t *ptr, int type)
 		if(clutIdxMOBJ >= 512) return;
 		int j = *ptr++;
 		j++;
+// printf("  clut: %d, %d\n", clutIdxMOBJ, j);
 		clutTopMOBJ = clutIdxMOBJ;
 		SetCLUTs(clutIdxMOBJ, j, ptr);
 		if(j <= 16) clutIdxMOBJ += 16;
@@ -120,6 +135,7 @@ void InstallMotionObjectDouble(const char *name, ANIME *anm)
 
 void InstallMotionObject(const char *name, ANIME *anm)
 {
+// printf("Inst MOBJ: '%s'\n", name);
 	anm->mobj = mobjPtr;
 	anm->anime = anm->speed = 0;
 	if(name == NULL) {
@@ -159,6 +175,10 @@ void InstallMotionObject(const char *name, ANIME *anm)
 
 void SetupObject(const MOBJ *obj)
 {
+	setup_motion_object(obj);
+//	printf("MOBJ: %d, %d, (%d), %04X\n", obj->x, obj->y, obj->chasiz, obj->chaptr);
+
+#if 0
 	if(cmdPtr >= &cmdBuff[MOBJ_COMMAND_MAX]) return;
 
 	cmdPtr->ctrl = obj->flip;
@@ -171,10 +191,12 @@ void SetupObject(const MOBJ *obj)
 	cmdPtr->ay = obj->y;
 	cmdPtr->grsptr = 0;
 	cmdPtr++;
+#endif
 }
 
 void SetupObjectLine(int x0, int y0, int x1, int y1, int c)
 {
+#if 0
 	if(cmdPtr >= &cmdBuff[MOBJ_COMMAND_MAX]) return;
 
 	cmdPtr->ctrl = 0x0006;
@@ -186,10 +208,12 @@ void SetupObjectLine(int x0, int y0, int x1, int y1, int c)
 	cmdPtr->bx = x1;
 	cmdPtr->by = y1;
 	cmdPtr++;
+#endif
 }
 
 void SetupObjectLineWithMesh(int x0, int y0, int x1, int y1, int c)
 {
+#if 0
 	if(cmdPtr >= &cmdBuff[MOBJ_COMMAND_MAX]) return;
 
 	cmdPtr->ctrl = 0x0006;
@@ -201,10 +225,12 @@ void SetupObjectLineWithMesh(int x0, int y0, int x1, int y1, int c)
 	cmdPtr->bx = x1;
 	cmdPtr->by = y1;
 	cmdPtr++;
+#endif
 }
 
 void SetupObjectFrame(int x0, int y0, int x1, int y1, int c)
 {
+#if 0
 	if(cmdPtr >= &cmdBuff[MOBJ_COMMAND_MAX]) return;
 
 	cmdPtr->ctrl = 0x0005;
@@ -216,10 +242,12 @@ void SetupObjectFrame(int x0, int y0, int x1, int y1, int c)
 	cmdPtr->cx = x1; cmdPtr->cy = y1;
 	cmdPtr->dx = x0; cmdPtr->dy = y1;
 	cmdPtr++;
+#endif
 }
 
 void SetupObjectBox(int x0, int y0, int x1, int y1, int c)
 {
+#if 0
 	if(cmdPtr >= &cmdBuff[MOBJ_COMMAND_MAX]) return;
 
 	cmdPtr->ctrl = 0x0004;
@@ -231,10 +259,12 @@ void SetupObjectBox(int x0, int y0, int x1, int y1, int c)
 	cmdPtr->cx = x1; cmdPtr->cy = y1;
 	cmdPtr->dx = x0; cmdPtr->dy = y1;
 	cmdPtr++;
+#endif
 }
 
 void SetupObjectPolyline(POINT *pt, int c)
 {
+#if 0
 	if(cmdPtr >= &cmdBuff[MOBJ_COMMAND_MAX]) return;
 
 	cmdPtr->ctrl = 0x0005;
@@ -246,10 +276,12 @@ void SetupObjectPolyline(POINT *pt, int c)
 	cmdPtr->cx = pt->x; cmdPtr->cy = pt->y; pt++;
 	cmdPtr->dx = pt->x; cmdPtr->dy = pt->y;
 	cmdPtr++;
+#endif
 }
 
 void SetupObjectPolygon(POINT *pt, int c)
 {
+#if 0
 	if(cmdPtr >= &cmdBuff[MOBJ_COMMAND_MAX]) return;
 
 	cmdPtr->ctrl = 0x0004;
@@ -261,10 +293,12 @@ void SetupObjectPolygon(POINT *pt, int c)
 	cmdPtr->cx = pt->x; cmdPtr->cy = pt->y; pt++;
 	cmdPtr->dx = pt->x; cmdPtr->dy = pt->y;
 	cmdPtr++;
+#endif
 }
 
 void SetupResizeObject(MOBJ *obj, int xs, int ys)
 {
+#if 0
 	if(cmdPtr >= &cmdBuff[MOBJ_COMMAND_MAX]) return;
 
 	cmdPtr->ctrl = obj->flip | 0x0001;
@@ -279,10 +313,12 @@ void SetupResizeObject(MOBJ *obj, int xs, int ys)
 	cmdPtr->cy = obj->y + ys;
 	cmdPtr->grsptr = 0;
 	cmdPtr++;
+#endif
 }
 
 void CloseMotionObject(void)
 {
+	end_motion_object();
 #if 0
 	int	i;
 	unsigned short *dst, *src;
@@ -312,6 +348,7 @@ static void PresetImage(const uint8_t *ptr)
 	int x = TakeShort(ptr);
 	int y = TakeShort(ptr + 2);
 	int i = *(ptr + 4);
+// printf("  img: %d, %d, %d\n", x, y, i);
 	if(installMode == 0) {
 		PresetImageSub(x, y, i);
 	} else if(installMode == 1) {
@@ -369,7 +406,8 @@ static void ExtractForVDP1(const uint8_t *image, uint16_t *vdp)
 	int p = *image++;
 	int cm;
 	if(p <= 4) cm = 1; else cm = 0;
-
+// printf("EX-VDP1: %d, %d, %d\n", h, v, p);
+// printf("  instalMode: %d\n", installMode);
 	BIT_FILE bf;
 	bf.top = image;
 	bf.bitpos = 0;
@@ -378,6 +416,7 @@ static void ExtractForVDP1(const uint8_t *image, uint16_t *vdp)
 	int o = 0;
 	while(s > 0)
 	{
+// printf("  lb-ofs: %d\n", o);
 		int j = ExtractFLAT(&bf, &lineBuff[o], w - o, p);
 		int k;
 		if(cm)	{
@@ -394,6 +433,7 @@ static void ExtractForVDP1(const uint8_t *image, uint16_t *vdp)
 		} else {
 			k = 512;
 		}
+
 		const uint16_t *in = (const uint16_t *)&lineBuff[0];
 		if(installMode == 1) {
 			for(int i = 0; i < k; ++i) { *vdp++ = ( *in++ ) << 2; }
@@ -402,6 +442,7 @@ static void ExtractForVDP1(const uint8_t *image, uint16_t *vdp)
 		} else {
 			for(int i = 0; i < k; ++i) { *vdp++ = *in++; }
 		}
+
 		s -= w;
 		if(j < 0) {
 			j = -j;
@@ -518,18 +559,28 @@ static int ExtractFLAT(BIT_FILE *inp, uint8_t *out, int s, int p)
 {
 	int	i, j;
 
-	if(inp->bitpos==0) { *out++ = i = InputBits(inp, p); s--; }
-	else i = inp->old;
-	while(s > 0)
-	{
-	if(InputBit(inp)) { *out++ = i = InputBits(inp, p); s--; }
-	else	{
-		if(InputBit(inp))
-			{ j = Input5Bits(inp) + 3;
-			s -= j;
-			while(j) { *out++ = i; j--; }
+	if(inp->bitpos==0) {
+		*out++ = i = InputBits(inp, p);
+		s--;
+	} else {
+		i = inp->old;
+	}
+	while(s > 0) {
+		if(InputBit(inp)) {
+			*out++ = i = InputBits(inp, p);
+			s--;
+		} else {
+			if(InputBit(inp)) {
+				j = Input5Bits(inp) + 3;
+				s -= j;
+				while(j) {
+					*out++ = i;
+					j--;
+				}
+			} else {
+				*out++ = i;
+				s--;
 			}
-		else { *out++ = i; s--; }
 		}
 	}
 	inp->old = i;

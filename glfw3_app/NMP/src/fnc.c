@@ -1,9 +1,12 @@
-﻿/*--------------------------------------------------------------/
-/																/
-/	Functions engine. Version 1.55b								/
-/	Copyright 1994(c) G.P.L. written by K.Hiramatsu				/
-/																/
-/--------------------------------------------------------------*/
+﻿//=========================================================================//
+/*! @file
+	@brief  Functions engine. Version 1.55b
+	@author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 1994, 2026 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
+*/
+//=========================================================================//
 #include "fnc.h"
 
 #define PAI_32		0xC90FDAA2	/* Pai (3.141592654 * 2^30) */
@@ -22,7 +25,7 @@ static void Add64(int *a, int *b, int *c);
 int rootMod;
 int randSeed;
 int randBase1, randBase2;
-short randTapTables[] = {
+static short randTapTables[] = {
 	0x0001,0x0040,	0x0004,0x0040,	/*  7 bits */
 	0x0008,0x0100,			/*  9 bits */
 	0x0004,0x0200,			/* 10 bits */
@@ -39,7 +42,6 @@ static short sicoTbl[1024];
 /--------------------------------------------------------------*/
 void InitFunctions(void)
 {
-
 	MakeupTriFuncTbl(sicoTbl, ANGLE_SIZE);
 	tblSinTop = sicoTbl;
 

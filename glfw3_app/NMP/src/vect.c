@@ -1,10 +1,16 @@
-﻿#include "ballsim.h"
-#include "fnc.h"
+﻿//=========================================================================//
+/*! @file
+	@brief  コリジョン座標関係 Necronomicon
+	@author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2026 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
+*/
+//=========================================================================//
+#include <stdio.h>
 #include "vect.h"
+#include "fnc.h"
 #include "saturn.h"
-
-#define HIT_MAX		800
-#define TAG_MAX		2200
 
 typedef struct {
 	int	xt, yt, zt;
@@ -17,24 +23,24 @@ static int ValuePrintf(char *t, int v);
 static void TestMapSub(HIT *hit, int w, int h, int s);
 static void ScanArea(void);
 static int CheckArea(HIT *ptr, int xs, int ys, int xe, int ye);
-static int GetPositions(short *vect, short *out);
-static int SetBox(int a, short *vect, HIT *hit, int r);
-static int SetLine(int a, short *vect, HIT *hit, int r);
+static int GetPositions(const short *vect, short *out);
+static int SetBox(int a, const short *vect, HIT *hit, int r);
+static int SetLine(int a, const short *vect, HIT *hit, int r);
 
 static void SetLineSub(LINE *, int r, HIT *hit);
 static void SetCircleSub(LINE *line, int r, HIT *hit);
 static void SortFirstBig(int *val, short *idx, int count);
 static int HitCheckLine(int *, HIT *);
 static int LineToSinCos_(LINE *lin, SINCOS *sico);
-static int PresetPolyline(int a, short *vect, HIT *hit, int r);
-static int PresetCircle(int a, short *vect, HIT *hit, int r);
-static int PresetFlipper(int a, short *vect, HIT *hit, int r);
-static int PresetSwitch(int a, short *vect, HIT *hit, int r);
-static int PresetOpenPolyline(int a, short *vect, HIT *hit, int r);
-static int PresetDropTarget(int a, short *vect, HIT *hit, int r);
-static int PresetStandUp(int a, short *vect, HIT *hit, int r);
-static int PresetHole(int a, short *vect, HIT *hit, int r);
-static int PresetSaucer(int a, short *vect, HIT *hit, int r);
+static int PresetPolyline(int a, const short *vect, HIT *hit, int r);
+static int PresetCircle(int a, const short *vect, HIT *hit, int r);
+static int PresetFlipper(int a, const short *vect, HIT *hit, int r);
+static int PresetSwitch(int a, const short *vect, HIT *hit, int r);
+static int PresetOpenPolyline(int a, const short *vect, HIT *hit, int r);
+static int PresetDropTarget(int a, const short *vect, HIT *hit, int r);
+static int PresetStandUp(int a, const short *vect, HIT *hit, int r);
+static int PresetHole(int a, const short *vect, HIT *hit, int r);
+static int PresetSaucer(int a, const short *vect, HIT *hit, int r);
 
 static int linCount, cirCount, fieldHeightMax;
 
@@ -58,22 +64,28 @@ short vukMax, rampMax, flipperMax;
 short slingShotMax;
 short movegateMax, magnaLockMax;
 
+static short GetShort(const short *ptr)
+{
+	uint16_t val = *(const uint16_t *)ptr;
+	return (val >> 8) | ((val << 8) & 0xff00);
+}
+
 /*------------------------------------------------------/
 /							/
 /	Create HIT-MAP data.				/
 /							/
 /------------------------------------------------------*/
-void PickUpFirst(short *vect)
+void PickUpFirst(const short *vect)
 {
-	int	a, bc;
-	short	pos[32];
-	BALL	*blp;
+	int	a;
+	short pos[32];
+	BALL *blp;
 	HIT	*hit;
 
 	ballMax = 0;
 	blp = &ball[0];
-	while((a=*vect++)!=-1)
-	{
+	while((a = GetShort(vect)) != -1) {
+		++vect;
 	switch(a & ATTR_MASK)
 		{
 	case BALLS:
@@ -89,7 +101,11 @@ void PickUpFirst(short *vect)
 		startBallZ = pos[2];
 		}
 		else if((a & 3)==0) {
-		if(ballMax >= MULTI_BALL_MAX) LaunchDebugger("Too Match Balls !!!");
+		if(ballMax >= MULTI_BALL_MAX) {
+//			LaunchDebugger("Too Match Balls !!!");
+			printf("Too Match Balls !!!\n");
+			return;
+		}
 		if(ballMax < MULTI_BALL_MAX)
 			{
 			blp->xp = pos[0];
@@ -110,7 +126,7 @@ void PickUpFirst(short *vect)
 	}
 }
 
-void MakeupVectors(FIELD *para, short *vect, char *text)
+void MakeupVectors(FIELD *para, const short *vect, const char *text)
 {
 	int	i, j, k, a;
 	int	vc, fp, sw;
@@ -133,9 +149,14 @@ void MakeupVectors(FIELD *para, short *vect, char *text)
 	magnaLockMax = 0;
 
 	vc = fp = sw = 0;
-	while((a=*vect++)!=-1)
+	while((a = GetShort(vect)) != -1)
 	{
-	if(hit >= &hitList[HIT_MAX]) LaunchDebugger("Over Flow HITs !!!");
+		++vect;
+	if(hit >= &hitList[HIT_MAX]) {
+///		LaunchDebugger("Over Flow HITs !!!");
+		printf("Over Flow HITs !!!");
+		return;
+	}
 	switch(a & ATTR_MASK)
 		{
 	case BALLS:
@@ -466,17 +487,21 @@ static void ScanArea(void)
 	m = k = 0;
 	hit = &hitList[0];
 	for(n=0; n<hitMax; ++n)
-	    {
+	{
 	f=CheckArea(hit, i+ZONE_SIZE+AREA_GAP, j+ZONE_SIZE+AREA_GAP, i-AREA_GAP, j-AREA_GAP);
 	if(f)	{
-		if(list >= &listTag[TAG_MAX]) LaunchDebugger("Over Flow TAG-LIST");
+		if(list >= &listTag[TAG_MAX]) {
+///			LaunchDebugger("Over Flow TAG-LIST");
+			printf("Over Flow TAG-LIST\n");
+			return;
+		}
 		*list++ = k;
 		zoneMap[x][y] = l;
 		m++;
 		}
-	    hit++;
-	    k++;
-	    }
+		hit++;
+		k++;
+		}
 	*list++ = -1;
 	l += m + 1;
 	}
@@ -551,26 +576,23 @@ static int CheckArea(HIT *hit, int xs, int ys, int xw, int yw)
 	return 0x0000;
 }
 
-static int GetPositions(short *vect, short *out)
+static int GetPositions(const short *vect, short *out)
 {
-	int	i, j, x, y, z;
-	int	minx, miny, minz, maxx, maxy, maxz;
-
-	i = *vect++;
+	int i = GetShort(vect); vect++;
 /*	i--; */
+	int	minx, miny, minz, maxx, maxy, maxz;
 	minx = miny = minz = 32767;
 	maxx = maxy = maxz = -32768;
-	for(j=0; j<i; ++j)
-	{
-	x = *vect++;
-	y = *vect++;
-	z = *vect++;
-	if(minx > x) minx=x;
-	if(miny > y) miny=y;
-	if(minz > z) minz=z;
-	if(maxx < x) maxx=x;
-	if(maxy < y) maxy=y;
-	if(maxz < z) maxz=z;
+	for(int j = 0; j < i; ++j) {
+		int x = GetShort(vect); vect++;
+		int y = GetShort(vect); vect++;
+		int z = GetShort(vect); vect++;
+		if(minx > x) minx=x;
+		if(miny > y) miny=y;
+		if(minz > z) minz=z;
+		if(maxx < x) maxx=x;
+		if(maxy < y) maxy=y;
+		if(maxz < z) maxz=z;
 	}
 	*out++ = (minx + maxx) / 2;
 	*out++ = (miny + maxy) / 2;
@@ -579,27 +601,27 @@ static int GetPositions(short *vect, short *out)
 	*out++ = maxy - miny;
 	*out++ = maxz - minz;
 /*	i++; */
-	return i*3+1;
+	return i * 3 + 1;
 }
 
-static int SetBox(int a, short *vect, HIT *hit, int r)
+static int SetBox(int a, const short *vect, HIT *hit, int r)
 {
 	int	i, j, x, y, vss;
 	LINE	line;
 	SINCOS	sico;
 
 	linCount = 0;
-	i = *vect++;
-	if(i<=2) return i*3+1;
+	i = GetShort(vect); vect++;
+	if(i <= 2) return i * 3 + 1;
 r = 0;
-	line.xt = *(vect+i*3-3);	/* X final position */
-	line.yt = *(vect+i*3-2);	/* Y final position */
-	line.zb = *(vect+i*3-1);	/* Z final position */
+	line.xt = GetShort(vect+i*3-3);	/* X final position */
+	line.yt = GetShort(vect+i*3-2);	/* Y final position */
+	line.zb = GetShort(vect+i*3-1);	/* Z final position */
 	for(j=0; j<i; ++j)
 	{
-	line.xb = *vect++;
-	line.yb = *vect++;
-	line.zb = *vect++;
+	line.xb = GetShort(vect); vect++;
+	line.yb = GetShort(vect); vect++;
+	line.zb = GetShort(vect); vect++;
 	hit->vs = LineToSinCos_(&line, &sico);
 	hit->vss = hit->vs * hit->vs;
 	hit->sin = sico.sin;
@@ -615,26 +637,26 @@ r = 0;
 	line.yt = line.yb;
 	line.zt = line.zb;
 	}
-	return i*3+1;
+	return i * 3 + 1;
 }
 
-static int SetLine(int a, short *vect, HIT *hit, int r)
+static int SetLine(int a, const short *vect, HIT *hit, int r)
 {
 	int	i, j;
 	LINE	line;
 
 	linCount = 0;
-	i = *vect++;
-	if(i<=2) return i*3+1;
+	i = GetShort(vect); vect++;
+	if(i <= 2) return i * 3 + 1;
 
-	line.xt = *(vect+i*3-3);	/* X final position */
-	line.yt = *(vect+i*3-2);	/* Y final position */
-	line.zt = *(vect+i*3-1);	/* Z final position */
+	line.xt = GetShort(vect+i*3-3);	/* X final position */
+	line.yt = GetShort(vect+i*3-2);	/* Y final position */
+	line.zt = GetShort(vect+i*3-1);	/* Z final position */
 	for(j=0; j<i; ++j)
 	{
-	line.xb = *vect++;
-	line.yb = *vect++;
-	line.zb = *vect++;
+	line.xb = GetShort(vect); vect++;
+	line.yb = GetShort(vect); vect++;
+	line.zb = GetShort(vect); vect++;
 
 	SetLineSub(&line, r, hit);
 	hit->atr = a;			/* Attribute */
@@ -644,7 +666,7 @@ static int SetLine(int a, short *vect, HIT *hit, int r)
 	line.yt = line.yb;
 	line.zt = line.zb;
 	}
-	return i*3+1;
+	return i * 3 + 1;
 }
 
 static void SetLineSub(LINE *line, int r, HIT *hit)
@@ -717,19 +739,17 @@ void DrawOutLine(short *po, int width, int height, int scale)
 */
 static void SortFirstBig(int *val, short *idx, int count)
 {
-	int	i, j, u, w;
+	for(int i = 0; i < count; ++i) idx[i] = i;
 
-	for(i=0; i<count; ++i) idx[i]=i;
-
-	for(i=0; i<count; ++i)
-	{
-	u = val[i];
-	for(j=(i+1); j<count; ++j)
-		{
-		if(u < val[j])
-			{ w=val[i]; val[i]=val[j]; val[j]=w;
-			  w=idx[i]; idx[i]=idx[j]; idx[j]=w;
-			  u = val[i]; }
+	for(int i = 0; i < count; ++i) {
+		int u = val[i];
+		for(int j = (i + 1); j < count; ++j) {
+			if(u < val[j]) {
+				int	w;
+				w = val[i]; val[i] = val[j]; val[j] = w;
+				w = idx[i]; idx[i] = idx[j]; idx[j] = w;
+				u = val[i];
+			}
 		}
 	}
 }
@@ -799,27 +819,27 @@ static int LineToSinCos_(LINE *line, SINCOS *sico)
 /*--------------------------------------------------------------------------*/
 /*--------------------------------------------------------------------------*/
 
-static int PresetPolyline(int a, short *vect, HIT *hit, int r)
+static int PresetPolyline(int a, const short *vect, HIT *hit, int r)
 {
 	int	i, j, k, l, x, y, vs;
 	LINE	line;
 	SINCOS	sico;
 
 	cirCount = linCount = 0;
-	i = *vect++;
+	i = GetShort(vect); vect++;
 
-	line.xt = *vect++;
-	line.yt = *vect++;
-	line.zt = *vect++;
+	line.xt = GetShort(vect); vect++;
+	line.yt = GetShort(vect); vect++;
+	line.zt = GetShort(vect); vect++;
 	if(line.xt > fieldWidthMax) fieldWidthMax = line.xt;
 	vect -= 3;
 	if(i > 2) l = i; else l = 1;
 	for(j=0; j<l; ++j)
 	{
 	k = ((j + 1) % i) * 3;
-	line.xb = *(vect + k    );
-	line.yb = *(vect + k + 1);
-	line.zb = *(vect + k + 2);
+	line.xb = GetShort(vect + k    );
+	line.yb = GetShort(vect + k + 1);
+	line.zb = GetShort(vect + k + 2);
 	if(line.xb > fieldWidthMax) fieldWidthMax = line.xb;
 	vs = LineToSinCos_(&line, &sico);
 	x  = (-sico.sin * r) >> SINCOS_SHIFT;
@@ -835,8 +855,8 @@ static int PresetPolyline(int a, short *vect, HIT *hit, int r)
 	linCount++;
 
 	k = ((j + 2) % i) * 3;
-	x = *(vect + k    ) - line.xt;
-	y = *(vect + k + 1) - line.yt;
+	x = GetShort(vect + k    ) - line.xt;
+	y = GetShort(vect + k + 1) - line.yt;
 	if((y * sico.cos - x * sico.sin) < 0 && i > 2)
 		{
 		hit->atr = a | 0x8000;
@@ -855,21 +875,21 @@ static int PresetPolyline(int a, short *vect, HIT *hit, int r)
 	return (i * 3 + 1);
 }
 
-static int PresetCircle(int a, short *vect, HIT *hit, int r)
+static int PresetCircle(int a, const short *vect, HIT *hit, int r)
 {
 	int	i, j, v, zs, sin, cos;
 	int	x, y, z, minx, miny, maxx, maxy;
 	LINE	line;
 
-	i = *vect++;
+	i = GetShort(vect); ++vect;
 	minx = miny =  65536;
 	maxx = maxy = -65536;
 	zs = 0;
 	for(j=0; j<i; ++j)
 	{
-	x = *vect++;
-	y = *vect++;
-	z = *vect++;
+	x = GetShort(vect); ++vect;
+	y = GetShort(vect); ++vect;
+	z = GetShort(vect); ++vect;
 	zs += z;
 	if(minx > x) minx = x;
 	if(miny > y) miny = y;
@@ -885,22 +905,27 @@ static int PresetCircle(int a, short *vect, HIT *hit, int r)
 	return (i * 3 + 1);
 }
 
-static int PresetFlipper(int a, short *vect, HIT *hit, int r)
+static int PresetFlipper(int a, const short *vect, HIT *hit, int r)
 {
 	int	i, j, k, l, m, u, v, dx, dy;
 	int	val[128];
-	short	idx[128], *ptr;
+	short	idx[128];
+	const short *ptr;
 	LINE	line, cp[2];
 	SINCOS	sico;
 
 	cirCount = linCount = 0;
-	i = *vect++;
+	i = GetShort(vect); ++vect;
 	ptr = vect;
-	if(i > 128) LaunchDebugger("Over Flow SORT buffer !!!");
+	if(i > 128) {
+///		LaunchDebugger("Over Flow SORT buffer !!!");
+		printf("Over Flow SORT buffer !!!\n");
+		return i * 3 + 1;
+	}
 
-	line.xt = *(ptr + i * 3 - 3);
-	line.yt = *(ptr + i * 3 - 2);
-	line.zt = *(ptr + i * 3 - 1);
+	line.xt = GetShort(ptr + i * 3 - 3);
+	line.yt = GetShort(ptr + i * 3 - 2);
+	line.zt = GetShort(ptr + i * 3 - 1);
 	for(j=0; j<i; ++j)
 	{
 	line.xb = *ptr++;
@@ -919,13 +944,13 @@ static int PresetFlipper(int a, short *vect, HIT *hit, int r)
 	for(j=0; j<2; ++j)
 	{
 	k = ((idx[j]+i-1) % i) * 3;
-	line.xt = *(vect + k    );
-	line.yt = *(vect + k + 1);
-	line.zt = *(vect + k + 2);
+	line.xt = GetShort(vect + k    );
+	line.yt = GetShort(vect + k + 1);
+	line.zt = GetShort(vect + k + 2);
 	k = idx[j] * 3;
-	line.xb = *(vect + k    );
-	line.yb = *(vect + k + 1);
-	line.zb = *(vect + k + 2);
+	line.xb = GetShort(vect + k    );
+	line.yb = GetShort(vect + k + 1);
+	line.zb = GetShort(vect + k + 2);
 
 	hit->atr = a;
 	SetLineSub(&line, r, hit);
@@ -978,25 +1003,25 @@ flipper[j].cz = 0;
 	return (i * 3 + 1);
 }
 
-static int PresetSwitch(int a, short *vect, HIT *hit, int r)
+static int PresetSwitch(int a, const short *vect, HIT *hit, int r)
 {
 	int	i, j, k, l, x, y, vs;
 	int	val[128];
-	short	idx[128], *ptr;
+	short	idx[128];
 	LINE	line;
 	SINCOS	sico;
 
 	cirCount = linCount = 0;
-	i = *vect++;
+	i = GetShort(vect); ++vect;
 
 	if(i <= 2)
 	{
-	line.xt = *vect++;
-	line.yt = *vect++;
-	line.zt = *vect++;
-	line.xb = *vect++;
-	line.yb = *vect++;
-	line.zb = *vect++;
+	line.xt = GetShort(vect); ++vect;
+	line.yt = GetShort(vect); ++vect;
+	line.zt = GetShort(vect); ++vect;
+	line.xb = GetShort(vect); ++vect;
+	line.yb = GetShort(vect); ++vect;
+	line.zb = GetShort(vect); ++vect;
 	SetLineSub(&line, 0, hit);
 	hit->atr = a;
 	hit++;
@@ -1009,13 +1034,13 @@ static int PresetSwitch(int a, short *vect, HIT *hit, int r)
 /----------------------------------------------*/
 	for(j=0; j<i; ++j)
 	{
-	line.xt = *(vect + j * 3);
-	line.yt = *(vect + j * 3 + 1);
-	line.zt = *(vect + j * 3 + 2);
+	line.xt = GetShort(vect + j * 3);
+	line.yt = GetShort(vect + j * 3 + 1);
+	line.zt = GetShort(vect + j * 3 + 2);
 	k = (j + 1) % i;
-	line.xb = *(vect + k * 3);
-	line.yb = *(vect + k * 3 + 1);
-	line.zb = *(vect + k * 3 + 2);
+	line.xb = GetShort(vect + k * 3);
+	line.yb = GetShort(vect + k * 3 + 1);
+	line.zb = GetShort(vect + k * 3 + 2);
 	idx[j] = j;
 	val[j] = (line.yt + line.yb) / 2;
 	}
@@ -1023,18 +1048,18 @@ static int PresetSwitch(int a, short *vect, HIT *hit, int r)
 
 	k = (idx[i-1] + 1) % i;
 	j = (idx[i-1] - 1) % i;
-	if( *(vect + k * 3 + 1) > *(vect + j * 3 + 1) ) {
+	if( GetShort(vect + k * 3 + 1) > GetShort(vect + j * 3 + 1) ) {
 		x = -1; y = 0; }
 	else {	x = 0; y  = 1; }
 
 	k = (idx[i-1] + x) % i;
-	line.xb = *(vect + k * 3);
-	line.yb = *(vect + k * 3 + 1);
-	line.zb = *(vect + k * 3 + 2);
+	line.xb = GetShort(vect + k * 3);
+	line.yb = GetShort(vect + k * 3 + 1);
+	line.zb = GetShort(vect + k * 3 + 2);
 	k = (idx[i-1] + y) % i;
-	line.xt = *(vect + k * 3);
-	line.yt = *(vect + k * 3 + 1);
-	line.zt = *(vect + k * 3 + 2);
+	line.xt = GetShort(vect + k * 3);
+	line.yt = GetShort(vect + k * 3 + 1);
+	line.zt = GetShort(vect + k * 3 + 2);
 	SetLineSub(&line, 0, hit);
 	hit->atr = a;
 	hit++;
@@ -1042,11 +1067,11 @@ static int PresetSwitch(int a, short *vect, HIT *hit, int r)
 
 	k = a & 31;
 	j = idx[0];
-	vs = *(vect + j * 3 + 1);
+	vs = GetShort(vect + j * 3 + 1);
 	j++; j %= i;
-	vs += *(vect + j * 3 + 1);
+	vs += GetShort(vect + j * 3 + 1);
 	swPara[k].yt = vs >> 1;
-	vs = *(vect + j * 3 + 2);
+	vs = GetShort(vect + j * 3 + 2);
 	swPara[k].zw = vs;
 	vs = (line.yt + line.yb) / 2;
 	swPara[k].yb = vs;
@@ -1054,26 +1079,26 @@ static int PresetSwitch(int a, short *vect, HIT *hit, int r)
 	return (i * 3 + 1);
 }
 
-static int PresetOpenPolyline(int a, short *vect, HIT *hit, int r)
+static int PresetOpenPolyline(int a, const short *vect, HIT *hit, int r)
 {
 	int	i, j, k, l, x, y, vs;
 	LINE	line;
 	SINCOS	sico;
 
 	cirCount = linCount = 0;
-	i = *vect++;
+	i = GetShort(vect); ++vect;
 
-	line.xt = *vect++;
-	line.yt = *vect++;
-	line.zt = *vect++;
+	line.xt = GetShort(vect); ++vect;
+	line.yt = GetShort(vect); ++vect;
+	line.zt = GetShort(vect); ++vect;
 	if(line.xt > fieldWidthMax) fieldWidthMax = line.xt;
 	vect -= 3;
 	for(j=0; j<(i-1); ++j)
 	{
 	k = ((j + 1) % i) * 3;
-	line.xb = *(vect + k    );
-	line.yb = *(vect + k + 1);
-	line.zb = *(vect + k + 1);
+	line.xb = GetShort(vect + k    );
+	line.yb = GetShort(vect + k + 1);
+	line.zb = GetShort(vect + k + 1);
 	if(line.xb > fieldWidthMax) fieldWidthMax = line.xb;
 	vs = LineToSinCos_(&line, &sico);
 	x  = (-sico.sin * r) >> SINCOS_SHIFT;
@@ -1091,8 +1116,8 @@ static int PresetOpenPolyline(int a, short *vect, HIT *hit, int r)
 	if((j + 2) >= i) ;
 	else {
 	k = ((j + 2) % i) * 3;
-	x = *(vect + k    ) - line.xt;
-	y = *(vect + k + 1) - line.yt;
+	x = GetShort(vect + k    ) - line.xt;
+	y = GetShort(vect + k + 1) - line.yt;
 	if((y * sico.cos - x * sico.sin) < 0 && i > 2)
 		{
 		hit->atr = a | 0x8000;
@@ -1104,7 +1129,7 @@ static int PresetOpenPolyline(int a, short *vect, HIT *hit, int r)
 		hit++;
 		cirCount++;
 		}
-	     }
+		}
 	line.xt = line.xb;
 	line.yt = line.yb;
 	line.zt = line.zb;
@@ -1112,7 +1137,7 @@ static int PresetOpenPolyline(int a, short *vect, HIT *hit, int r)
 	return (i * 3 + 1);
 }
 
-static int PresetDropTarget(int a, short *vect, HIT *hit, int r)
+static int PresetDropTarget(int a, const short *vect, HIT *hit, int r)
 {
 	int	i, j, k, u, v, dx, dy;
 	int	val[128];
@@ -1120,18 +1145,22 @@ static int PresetDropTarget(int a, short *vect, HIT *hit, int r)
 	LINE	line;
 
 	cirCount = linCount = 0;
-	i = *vect++;
-	if(i!=4) LaunchDebugger("FALSE 'DropTarget' !!!");
+	i = GetShort(vect); ++vect;
+	if(i!=4) {
+///		LaunchDebugger("FALSE 'DropTarget' !!!");
+		printf("FALSE 'DropTarget' !!!\n");
+		return (i * 3 + 1);
+	}
 
 	for(j=0; j<i; ++j)
 	{
-	line.xt = *(vect + j * 3);
-	line.yt = *(vect + j * 3 + 1);
-	line.zt = *(vect + j * 3 + 2);
+	line.xt = GetShort(vect + j * 3);
+	line.yt = GetShort(vect + j * 3 + 1);
+	line.zt = GetShort(vect + j * 3 + 2);
 	k = (j + 1) % i;
-	line.xb = *(vect + k * 3);
-	line.yb = *(vect + k * 3 + 1);
-	line.zb = *(vect + k * 3 + 2);
+	line.xb = GetShort(vect + k * 3);
+	line.yb = GetShort(vect + k * 3 + 1);
+	line.zb = GetShort(vect + k * 3 + 2);
 	dx = line.xb - line.xt;
 	dy = line.yb - line.yt;
 	idx[j] = j;
@@ -1141,22 +1170,22 @@ static int PresetDropTarget(int a, short *vect, HIT *hit, int r)
 
 	j = idx[0];
 	k = (j + 1) % i;
-	u  = *(vect + j * 3 + 1);
-	u += *(vect + k * 3 + 1);
+	u  = GetShort(vect + j * 3 + 1);
+	u += GetShort(vect + k * 3 + 1);
 	u >>= 1;
 	j = idx[1];
 	k = (j + 1) % i;
-	v  = *(vect + j * 3 + 1);
-	v += *(vect + k * 3 + 1);
+	v  = GetShort(vect + j * 3 + 1);
+	v += GetShort(vect + k * 3 + 1);
 	v >>= 1;
 
 	if(u < v) j = 0; else j = 1;
 	j = idx[j];
-	line.xt = *(vect + j * 3);
-	line.yt = *(vect + j * 3 + 1);
+	line.xt = GetShort(vect + j * 3);
+	line.yt = GetShort(vect + j * 3 + 1);
 	k = (j + 1) % i;
-	line.xb = *(vect + k * 3);
-	line.yb = *(vect + k * 3 + 1);
+	line.xb = GetShort(vect + k * 3);
+	line.yb = GetShort(vect + k * 3 + 1);
 	SetLineSub(&line, r, hit);
 	hit->atr = a;
 	hit++;
@@ -1179,8 +1208,8 @@ static int PresetDropTarget(int a, short *vect, HIT *hit, int r)
 	for(j=0; j<2; ++j)
 	{
 	k = idx[2+j];
-	line.xt = *(vect + k * 3);
-	line.yt = *(vect + k * 3 + 1);
+	line.xt = GetShort(vect + k * 3);
+	line.yt = GetShort(vect + k * 3 + 1);
 	SetLineSub(&line, r, hit);
 	hit->atr = a;
 	hit++;
@@ -1190,7 +1219,7 @@ static int PresetDropTarget(int a, short *vect, HIT *hit, int r)
 	return (i * 3 + 1);
 }
 
-static int PresetStandUp(int a, short *vect, HIT *hit, int r)
+static int PresetStandUp(int a, const short *vect, HIT *hit, int r)
 {
 	int	i, j, k, u, v, dx, dy;
 	int	val[128];
@@ -1198,18 +1227,22 @@ static int PresetStandUp(int a, short *vect, HIT *hit, int r)
 	LINE	line;
 
 	cirCount = linCount = 0;
-	i = *vect++;
-	if(i!=4) LaunchDebugger("FALSE 'Stand Up' !!!");
+	i = GetShort(vect); ++vect;
+	if(i != 4) {
+//		LaunchDebugger("FALSE 'Stand Up' !!!");
+		printf("FALSE 'Stand Up' !!!\n");
+		return (i * 3 + 1);
+	}
 
 	for(j=0; j<i; ++j)
 	{
-	line.xt = *(vect + j * 3);
-	line.yt = *(vect + j * 3 + 1);
-	line.zt = *(vect + j * 3 + 2);
+	line.xt = GetShort(vect + j * 3);
+	line.yt = GetShort(vect + j * 3 + 1);
+	line.zt = GetShort(vect + j * 3 + 2);
 	k = (j + 1) % i;
-	line.xb = *(vect + k * 3);
-	line.yb = *(vect + k * 3 + 1);
-	line.zb = *(vect + k * 3 + 2);
+	line.xb = GetShort(vect + k * 3);
+	line.yb = GetShort(vect + k * 3 + 1);
+	line.zb = GetShort(vect + k * 3 + 2);
 	dx = line.xb - line.xt;
 	dy = line.yb - line.yt;
 	idx[j] = j;
@@ -1219,22 +1252,22 @@ static int PresetStandUp(int a, short *vect, HIT *hit, int r)
 
 	j = idx[0];
 	k = (j + 1) % i;
-	u  = *(vect + j * 3 + 1);
-	u += *(vect + k * 3 + 1);
+	u  = GetShort(vect + j * 3 + 1);
+	u += GetShort(vect + k * 3 + 1);
 	u >>= 1;
 	j = idx[1];
 	k = (j + 1) % i;
-	v  = *(vect + j * 3 + 1);
-	v += *(vect + k * 3 + 1);
+	v  = GetShort(vect + j * 3 + 1);
+	v += GetShort(vect + k * 3 + 1);
 	v >>= 1;
 
 	if(u < v) j = 0; else j = 1;
 	j = idx[j];
-	line.xt = *(vect + j * 3);
-	line.yt = *(vect + j * 3 + 1);
+	line.xt = GetShort(vect + j * 3);
+	line.yt = GetShort(vect + j * 3 + 1);
 	k = (j + 1) % i;
-	line.xb = *(vect + k * 3);
-	line.yb = *(vect + k * 3 + 1);
+	line.xb = GetShort(vect + k * 3);
+	line.yb = GetShort(vect + k * 3 + 1);
 	SetLineSub(&line, r, hit);
 	hit->atr = a;
 	hit++;
@@ -1243,26 +1276,30 @@ static int PresetStandUp(int a, short *vect, HIT *hit, int r)
 	return (i * 3 + 1);
 }
 
-static int PresetHole(int a, short *vect, HIT *hit, int r)
+static int PresetHole(int a, const short *vect, HIT *hit, int r)
 {
 	int	i, j, k, u, v;
-	int	val[64];
-	short	idx[64];
+//	int	val[64];
+//	short	idx[64];
 	LINE	line;
 	SINCOS	sico;
 
 	cirCount = linCount = 0;
-	i = *vect++;
-	if(i!=4) LaunchDebugger("FALSE 'Hole' !!!");
+	i = GetShort(vect); ++vect;
+	if(i!=4) {
+///		LaunchDebugger("FALSE 'Hole' !!!");
+		printf("FALSE 'Hole' !!!\n");
+		return (i * 3 + 1);
+	}
 
 	j = 1;
-	line.xb = *(vect + j * 3);
-	line.yb = *(vect + j * 3 + 1);
-	line.zb = *(vect + j * 3 + 2);
+	line.xb = GetShort(vect + j * 3);
+	line.yb = GetShort(vect + j * 3 + 1);
+	line.zb = GetShort(vect + j * 3 + 2);
 	k = (j + 1) % i;
-	line.xt = *(vect + k * 3);
-	line.yt = *(vect + k * 3 + 1);
-	line.zt = *(vect + k * 3 + 2);
+	line.xt = GetShort(vect + k * 3);
+	line.yt = GetShort(vect + k * 3 + 1);
+	line.zt = GetShort(vect + k * 3 + 2);
 	LineToSinCos_(&line, &sico);
 	u = (sico.cos * r) >> SINCOS_SHIFT;
 	v = (sico.sin * r) >> SINCOS_SHIFT;
@@ -1284,24 +1321,28 @@ static int PresetHole(int a, short *vect, HIT *hit, int r)
 	return (i * 3 + 1);
 }
 
-static int PresetSaucer(int a, short *vect, HIT *hit, int r)
+static int PresetSaucer(int a, const short *vect, HIT *hit, int r)
 {
 	int	i, j, k, u, v;
 	LINE	line;
 	SINCOS	sico;
 
 	cirCount = linCount = 0;
-	i = *vect++;
-	if(i!=4) LaunchDebugger("FALSE 'Hole' !!!");
+	i = GetShort(vect); vect++;
+	if(i!=4) {
+///		LaunchDebugger("FALSE 'Hole' !!!");
+		printf("FALSE 'Hole' !!!\n");
+		return (i * 3 + 1);
+	}
 
 	j = 1;
-	line.xt = *(vect + j * 3);
-	line.yt = *(vect + j * 3 + 1);
-	line.zt = *(vect + j * 3 + 2);
+	line.xt = GetShort(vect + j * 3);
+	line.yt = GetShort(vect + j * 3 + 1);
+	line.zt = GetShort(vect + j * 3 + 2);
 	k = (j + 1) % i;
-	line.xb = *(vect + k * 3);
-	line.yb = *(vect + k * 3 + 1);
-	line.zb = *(vect + k * 3 + 2);
+	line.xb = GetShort(vect + k * 3);
+	line.yb = GetShort(vect + k * 3 + 1);
+	line.zb = GetShort(vect + k * 3 + 2);
 	LineToSinCos_(&line, &sico);
 	u = (sico.cos * r) >> SINCOS_SHIFT;
 	v = (sico.sin * r) >> SINCOS_SHIFT;

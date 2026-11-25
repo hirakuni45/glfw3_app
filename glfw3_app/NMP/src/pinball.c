@@ -1,4 +1,13 @@
-﻿#include <stdio.h>
+﻿//=========================================================================//
+/*! @file
+	@brief  pinball 関係メイン処理 Necronomicon
+	@author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2026 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
+*/
+//=========================================================================//
+#include <stdio.h>
 // #include <sega_sys.h>
 #include "ballsim.h"
 #include "mobj.h"
@@ -34,17 +43,13 @@ extern volatile unsigned short padLevel[], padTriggerP[], padTriggerN[], padStat
 extern volatile unsigned short padOnlyLevel[], padOnlyTriggerP[], padOnlyTriggerN[];
 extern volatile short mouseDx, mouseDy, mouseBl, mouseEna;
 extern volatile unsigned short mouseLevel, mouseTriggerP, mouseTriggerN;
-extern volatile short analogEna[], analogX[], analogY[];
+/// extern volatile short analogEna[], analogX[], analogY[];
 extern uint32_t clutBuff[];
 extern char flipperMask;
 extern int screenWidth, screenHeight;
 extern ANIME fontAnime, infoAnime, ifonAnime, info2Anime, lupeAnime;
-extern char realmsEnable;
 extern char gameMode;
 extern char playerNo;
-extern char debugEnable;
-extern char trialEnable, geEnable;
-extern char flashSegaEnable;
 extern volatile short slaveTaskNo;
 extern short cdFadeLevel;
 extern char startMaskEnable, demoPlayIndex;
@@ -52,8 +57,6 @@ extern char mainMenuPos, gameMenuPos;
 extern char optionMenuPad[];
 extern int clutIdxMOBJ;
 extern char infoPause;
-extern char staffRollDebug;
-extern char demoMovieMax;
 extern char titleMovieIndex;
 
 static void ServiceSecretCommand(void);
@@ -72,7 +75,7 @@ static void MaskSub(int, int, int, int);
 
 uint32_t clutSave[256];
 uint32_t clutLupe[16];
-unsigned short gamePadLevel, gamePadTrigger, gamePadRelese;
+uint16_t gamePadLevel, gamePadTrigger, gamePadRelese;
 short gameAnalogX, gameAnalogY, gameAnalogEna;
 short vibrX, vibrY, vibrXo, vibrYo;
 short outTimer;
@@ -84,9 +87,7 @@ char debugPauseEnable;
 
 static ANIME flipperAnime, ballsAnime, dropAnime, slingAnime, jetsAnime;
 static ANIME objsAnime, cursAnime;
-static const char titleMovieTables[] = {
-	0, 5, 0, 0
-};
+static const char titleMovieTables[] = { 0, 5, 0, 0 };
 static const char *logoReName = { "LGOALGOBLGODLGOC" };
 static const char fontSizeTables[] = {
 	4, 4, 7, 9, 10, 7, 10, 3, 6, 6, 10, 8, 3, 8, 3, 7,
@@ -298,7 +299,7 @@ static void ServiceStartABC(void)
 
 static void EntryMovie(void)
 {
-	void (*taskAVI)(int);
+///	void (*taskAVI)(int);
 
 	PlayCD(-1, -1);
 
@@ -426,6 +427,9 @@ void EntryMainMenu(void)
 	PlayCD(-1, CDA_MENU);
 
 	tMainMenu = 0;
+
+	KillTask(EntryMainMenu);
+	CreateTask(LoopMainMenu);
 }
 
 static void LoopMainMenu(void)
@@ -559,7 +563,8 @@ static void LoopGameMenu(void)
 				if((gamePadLevel & i)==i) CreateTask(EntryInfoTester);
 				else CreateTask(EntryTestBackup);
 			} else {
-				CreateTask(EntryTestBackup);
+///				CreateTask(EntryTestBackup);
+				CreateTask(EntryGameInit);
 			}
 			realmsEnable = 0;
 			if(gameMenuPos==0) { realmsEnable = 1; gameMenuPos = 1; }
@@ -655,7 +660,7 @@ static void EntryGameInit(void)
 	debugPauseEnable = 0;
 
 	InitGeneralRule(gameMenuPos - 1);
-	InstallSlaveFunction(ServiceSlave);
+///	InstallSlaveFunction(ServiceSlave);
 
 	clutTransMask = 1;
 
@@ -689,7 +694,7 @@ static void MainGame3D(void)
 		}
 	}
 
-	int st;
+	int st = 0;
 	if(demoPlayEnable) {
 		demoPlayEnable--;
 		st = GameDemo3D();
@@ -736,8 +741,11 @@ static void MainGame3D(void)
 				}
 			}
 		}
-		st = Game3D();
+///		st = Game3D();
 	}
+
+	// SH2 スレーブ CPU のタスク
+///	ServiceSlave();
 
 	if(st < 0) {
 		slaveTaskNo = 0;
@@ -896,8 +904,6 @@ int MobjScore(int x, int y, const char *ptr)
 	}
 	return x;
 }
-
-
 
 
 

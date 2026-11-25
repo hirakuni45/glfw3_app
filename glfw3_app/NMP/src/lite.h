@@ -1,4 +1,5 @@
-﻿#define LIGHT_CLUT_TOP		211
+﻿#pragma once
+#define LIGHT_CLUT_TOP		211
 #define LIGHT_CLUT_END		43
 #define LIGHT_JET1_IDX		44
 #define LIGHT_JET2_IDX		45

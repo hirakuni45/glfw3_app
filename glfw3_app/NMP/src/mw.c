@@ -9,7 +9,7 @@
 #include "mw.h"
 
 extern volatile short mouseX, mouseY, mouseB, mouseT;
-extern unsigned int clutTransMask;
+/// extern unsigned int clutTransMask;
 
 #define WIN_WIDTH_MAX		640
 #define WIN_HEIGHT_MAX		448
@@ -31,6 +31,7 @@ static int PositioningText(SLIDER *, int, int);
 /	Micro Window System static fileds	/
 /----------------------------------------------*/
 short mxFlag;
+
 static short scsTime, scsCount;
 static MOUSE mouse;
 static MOBJ *msMobj = NULL;

@@ -1,4 +1,13 @@
-﻿#include <stdio.h>
+﻿//=========================================================================//
+/*! @file
+	@brief  pinball general for Necronomicon
+	@author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2026 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
+*/
+//=========================================================================//
+#include <stdio.h>
 #include <string.h>
 #include "ballsim.h"
 #include "saturn.h"
@@ -16,38 +25,11 @@
 #include "pinball.h"
 #include "sim.h"
 #include "etc.h"
+#include "flags.h"
+#include "vect.h"
 #include "genr.h"
 
 #define FREEZE_SWITCH	15
-
-extern PLAYER playerTab[];
-extern char playerNo;
-extern volatile short slaveTaskNo;
-extern volatile short analogX[];
-extern unsigned short gamePadLevel, gamePadTrigger, gamePadRelese;
-extern char optionMenuPad[];
-extern unsigned int vsyncCounter;
-extern int frameRate;
-extern volatile unsigned int clutTransBit;
-extern unsigned int clutBuff[];
-extern short jetBumperTurnOn[];
-extern short slingShotTurnOn[];
-extern short infoNo, infoValue, infoPriority;
-extern char *infoText[];
-extern short infoAnimeNo[];
-extern short infoNumber, infoTimer, infoTextNo;
-extern short shoottingCounter;
-extern char debugFlag;
-extern FLIPPER flipper[];
-extern char trialEnable, geEnable, cdTrackStyle;
-extern char debugEnable;
-extern NECRONOMICON necroPad[];
-extern char nameTextPos, nameText[];
-extern short demoPlayEnable;
-extern char realmsEnable;
-extern char vibrEnable, dangerFlag, dangerWait, dangerCount, tiltFlag;
-extern short cdFadeLevel;
-extern unsigned short shooterSw;
 
 typedef struct {
 	char	*txt;
@@ -107,6 +89,8 @@ char tiltGo;
 char gameMode;
 char nextStageEnable;
 char roundValue[12];
+char *scoreConst[50];
+
 static const char *scoreConstSrc[] = {
 	"000000030200", /*  0:STAND UP */
 	"000000300000", /*  1:STAND UP COMPLITE */
@@ -161,10 +145,11 @@ static const char *scoreConstSrc[] = {
 	"000005800000", /* 50:INITIAL ADD SCORE DREAML */
 	NULL };
 static char scoreConstPad[12 * 50];
-char *scoreConst[50];
+
 char lightCommand[50];
 short *lightPosPtr;
 unsigned char *lightAnimePtr;
+
 unsigned char liteBLKALL[] = {
 	LIGHT_ANIME_ON, 10,
 	LIGHT_ANIME_OFF, 10,
@@ -620,7 +605,7 @@ static short multiScoreTimer;
 static short commingTimer;
 static unsigned int lightRollFlagA[50], lightRollFlagB[50];
 static unsigned int lightSearchFlagA[50], lightSearchFlagB[50];
-static char arrowJackpotLiteTables[] = {
+static const char arrowJackpotLiteTables[] = {
 	LITE_ARK_LEFTLANE_JACKPOT,	0,
 	LITE_ARK_RIGHTLANE_JACKPOT,	1,
 	LITE_ARK_LEFTRAMP_JACKPOT,	2,
