@@ -33,32 +33,6 @@
 #define DEMO_PLAY_TIME		40
 #define PAD_COMMAND_MAX		16
 
-extern short exitBallCount;
-
-extern int frameRate;
-extern short tvFrame;
-extern volatile unsigned int clutTransMask, clutTransBit;
-extern volatile unsigned int vsyncCounter;
-extern volatile unsigned short padLevel[], padTriggerP[], padTriggerN[], padStatus[];
-extern volatile unsigned short padOnlyLevel[], padOnlyTriggerP[], padOnlyTriggerN[];
-extern volatile short mouseDx, mouseDy, mouseBl, mouseEna;
-extern volatile unsigned short mouseLevel, mouseTriggerP, mouseTriggerN;
-/// extern volatile short analogEna[], analogX[], analogY[];
-extern uint32_t clutBuff[];
-extern char flipperMask;
-extern int screenWidth, screenHeight;
-extern ANIME fontAnime, infoAnime, ifonAnime, info2Anime, lupeAnime;
-extern char gameMode;
-extern char playerNo;
-extern volatile short slaveTaskNo;
-extern short cdFadeLevel;
-extern char startMaskEnable, demoPlayIndex;
-extern char mainMenuPos, gameMenuPos;
-extern char optionMenuPad[];
-extern int clutIdxMOBJ;
-extern char infoPause;
-extern char titleMovieIndex;
-
 static void ServiceSecretCommand(void);
 static void FlashPadCommand(void);
 static void ServicePadCommand(void);
@@ -387,8 +361,8 @@ static void LoopTitle(void)
 		if(flashSegaEnable) demoPlayIndex = 0;
 		CloseMotionObject();
 		KillTask(LoopTitle);
-///		CreateTask(EntryGameInit);
-	CreateTask(EntryMainMenu);
+		CreateTask(EntryGameInit);
+///		CreateTask(EntryMainMenu);
 		return;
 	}
 	CloseMotionObject();
@@ -600,6 +574,16 @@ static void EntryGameInitBefore(void)
 	movieTaskNo = gameMenuPos;
 }
 
+static short GetShort(const short *ptr)
+{
+	uint16_t val = *(const uint16_t *)ptr;
+	return (val >> 8) | ((val << 8) & 0xff00);
+}
+
+#define VECT_NUM 4500
+static short vectPad[VECT_NUM];
+static FIELD fieldPad;
+
 static void EntryGameInit(void)
 {
 	ToBlackScreen();
@@ -630,7 +614,12 @@ static void EntryGameInit(void)
 		int i = TakeMiddle(src + 1) >> 1;
 		src += 4;
 		maskPtr[j] = &maskTables[k];
-		while(i) { maskTables[k] = *(short *)src; src += 2; i--; k++; }
+		while(i > 0) {
+			maskTables[k] = GetShort((const short *)src);
+			src += 2;
+			i--;
+			k++;
+		}
 	}
 	if(gameMenuPos==1) {
 		LaunchSound("SNDG", "SNDA");
@@ -652,7 +641,39 @@ static void EntryGameInit(void)
 		SetCLUTi(i + 256, clutBuff[i]);
 	}
 
-	InitBallSimulator((FIELD *)GetResource("PARA", 0), (short *)GetResource("HITS", 0), NULL);
+	{  // エンディアンの変換
+		const uint8_t *src = (const uint8_t *)GetResource("PARA", 0);
+		uint32_t *dst = (uint32_t *)&fieldPad;
+		for(int i = 0; i < sizeof(FIELD); i += sizeof(int)) {
+			uint32_t v = *src++;
+			v <<= 8;
+			v |= *src++;
+			v <<= 8;
+			v |= *src++;
+			v <<= 8;
+			v |= *src++;
+			*dst++ = v;
+		}
+	}
+	int vectIdx = 0;
+	{  // エンディアンの変換
+		for(int i = 0; i < VECT_NUM; ++i) vectPad[i] = 0xffff;
+		uint16_t pov;
+		const uint16_t *vect = (const uint16_t *)GetResource("HITS", 0);
+		while((pov = *(const uint16_t *)vect++) != 0xffff) {
+			vectPad[vectIdx] = (pov >> 8) | (pov << 8);
+			++vectIdx;
+			if(vectIdx >= (VECT_NUM - 1)) {
+				printf("Endian convert buffer empty.\n");
+			}
+		}
+		vectPad[vectIdx] = 0xffff;
+		++vectIdx;
+#ifdef REPORT
+		printf("Coliision vector: %d\n", vectIdx);
+#endif
+	}
+	InitBallSimulator(&fieldPad, vectPad, vectIdx, NULL);
 
 	flipperMask = 0;
 	cdFadeLevel = 7;
@@ -732,8 +753,10 @@ static void MainGame3D(void)
 	} else {
 		if((gamePadTrigger & SATURN_PAD_START)!=0 && gameMode!=0) {
 			gamePauseEnable ^= 1;
-			if(gamePauseEnable==0) { TurnIntoDark(80); cdFadeLevel = 3; }
-			else {
+			if(gamePauseEnable==0) {
+				TurnIntoDark(80);
+				cdFadeLevel = 3;
+			} else {
 				cdFadeLevel = 7;
 				for(int i = 0; i < 256; ++i) {
 					SetCLUTi(i, clutSave[i]);
@@ -741,7 +764,7 @@ static void MainGame3D(void)
 				}
 			}
 		}
-///		st = Game3D();
+		st = Game3D();
 	}
 
 	// SH2 スレーブ CPU のタスク
@@ -784,7 +807,6 @@ static int Game3D(void)
 {
 	int f = 0;
 	OpenMotionObject(0, 0);
-
 	ServicePlayerSelector();
 	BallSimulatorMotionObjects();
 
@@ -905,14 +927,12 @@ int MobjScore(int x, int y, const char *ptr)
 	return x;
 }
 
-
-
 void MobjBall(int x, int y, int size, int maskno, int no)
 {
 	short	h, v, *msk, *tbl, *ptr;
 	int	i, j, k, l, m, n, f;
 	int	xt, yt, xb, yb;
-	MOBJ	*mobj;
+	MOBJ *mobj;
 
 	if(size > 31) size = 31;
 	else if(size < 9) size = 9;
@@ -920,13 +940,12 @@ void MobjBall(int x, int y, int size, int maskno, int no)
 	h = screenWidth >> 1;
 	v = screenHeight >> 1;
 	l = 31 - size;
-
 	mobj = ballsAnime.mobj + l;
 	mobj->x = h + x - wposX - vibrX - (size >> 1);
 	mobj->y = v - y - wposY - vibrY - (mobj->v >> 1);
 	mobj->color = 0x10;
 	SetupObject(mobj);
-
+#if 0
 	h = mobj->h >> 1;
 	v = mobj->v >> 1;
 	x = mobj->x;
@@ -940,6 +959,7 @@ void MobjBall(int x, int y, int size, int maskno, int no)
 	size++;
 	MaskSub(maskno, x, y, size);
 	MaskSub(maskno+2, x, y, size);
+#endif
 }
 
 static void MaskSub(int no, int x, int y, int size)

@@ -93,6 +93,7 @@ static int shooterRans, kickbackRans, vukRans, slingshotRans, jetbumperRans;
 static int jetbumperTrgSpd, slingshotTrgSpd, droptargetTrgSpd, standupTrgSpd;
 static int loopSpd, loopRans;
 static char magnaZone;
+static FIELD *prp;
 
 short totalPlays;
 short dropTargetSw[8], dropTargetTotal[8];
@@ -106,7 +107,6 @@ short returnLaneSw, returnLaneTotal;
 unsigned int playTime, playTimeTotal;
 short exitBallCount;
 
-FIELD *prp;
 PLAYER playerTab[PLAYER_MAX];
 short shoottingCounter;
 unsigned short shooterSw;
@@ -207,12 +207,9 @@ int PrintAverage(char *text, int n)
 /	Initialization Ball Simulator		/
 /						/
 /----------------------------------------------*/
-void InitBallSimulator(FIELD *para, short *po, const char *msg)
+void InitBallSimulator(FIELD *para, const short *vect, int vnum, const char *msg)
 {
-	int	i, j;
-	unsigned int	u, v;
-	BALL	*blp;
-	SWITCH	*sw;
+	unsigned int u, v;
 
 	prp = para;
 
@@ -220,8 +217,8 @@ void InitBallSimulator(FIELD *para, short *po, const char *msg)
 	screenWidth = para->screenWidth;
 	screenHeight = para->screenHeight;
 
-	i = 63956 * 16 / para->fieldHeight;
-	j = 18;		/* [%] */
+	int i = 63956 * 16 / para->fieldHeight;
+	int j = 18;		/* [%] */
 	shooterSpd = para->shooterSpd * i / frameRate;
 	shooterRans = shooterSpd / j;
 	kickbackSpd = para->kickbackSpd * i / frameRate;
@@ -240,7 +237,8 @@ void InitBallSimulator(FIELD *para, short *po, const char *msg)
 	droptargetTrgSpd = para->droptargetTrgSpd * i / frameRate;
 	standupTrgSpd = para->standupTrgSpd * i / frameRate;
 
-	PickUpFirst(po);
+	PickUpFirst(vect, vnum);
+
 	ball2Radius = ballRadius * 2;
 	ball2RadiusSquare = ball2Radius * ball2Radius;
 
@@ -260,30 +258,29 @@ void InitBallSimulator(FIELD *para, short *po, const char *msg)
 	persWidth = ((para->screenWidth / 2) << 18) / para->tanWidth;
 	persBall = ball2Radius * persWidth;
 
-	MakeupVectors(para, po, msg);
+	MakeupVectors(para, vect, vnum, msg);
 
 	gravityTable = 240;	/* 220, 200(new), 240, 270, 325 */
 	gravityRamp = 510;	/* 480, 580, 530(new), 810, 910, 1441 */
 	gravityFall = 1500;	/* 1600(new) */
 
-	blp = &ball[0];
-	for(i=0; i<ballMax; ++i)
-	{
-	blp->mode = MODE_BALL_READY;
-	blp->shooterFlag = 0;
-	blp->vukDelay = 0;
-	blp->gravity = gravityTable;
-	blp->layer = _LAYER_0;
-	blp->xb = blp->xp = startBallX << POSITION_SHIFT;
-	blp->yb = blp->yp = startBallY << POSITION_SHIFT;
-	blp->zb = blp->zp = startBallZ << POSITION_SHIFT;
-	blp->xs = blp->ys = blp->zs = 0;
-	blp->xm = blp->ym = blp->zm = 0;
-	blp->psychoDelay = 0;
-	blp->holeNo = 0;
-	blp->vl = 0;
-	blp->test = 0;
-	blp++;
+	BALL *blp = &ball[0];
+	for(int i = 0; i < ballMax; ++i) {
+		blp->mode = MODE_BALL_READY;
+		blp->shooterFlag = 0;
+		blp->vukDelay = 0;
+		blp->gravity = gravityTable;
+		blp->layer = _LAYER_0;
+		blp->xb = blp->xp = startBallX << POSITION_SHIFT;
+		blp->yb = blp->yp = startBallY << POSITION_SHIFT;
+		blp->zb = blp->zp = startBallZ << POSITION_SHIFT;
+		blp->xs = blp->ys = blp->zs = 0;
+		blp->xm = blp->ym = blp->zm = 0;
+		blp->psychoDelay = 0;
+		blp->holeNo = 0;
+		blp->vl = 0;
+		blp->test = 0;
+		blp++;
 	}
 	ballHitCnt = 0;
 
@@ -293,14 +290,12 @@ void InitBallSimulator(FIELD *para, short *po, const char *msg)
 	swNeg = swPos = 0;
 	demoBallDelay = frameRate * 3;
 
-	for(i=0; i<FLIPPER_MAX; ++i)
-	{
-	if(flipper[i].hl > 0)
-		{
-		flipper[i].new = flipper[i].old = 0;	
-		flipper[i].spd = 0;
-		flipper[i].an = (i << 4);
-		flipper[i].sound = 0;
+	for(int i = 0; i < FLIPPER_MAX; ++i) {
+		if(flipper[i].hl > 0) {
+			flipper[i].new = flipper[i].old = 0;	
+			flipper[i].spd = 0;
+			flipper[i].an = (i << 4);
+			flipper[i].sound = 0;
 		}
 	}
 
@@ -348,12 +343,12 @@ void ServiceVibration(void)
 	if(gamePadTrigger & SATURN_DIR_RIGHT) l = -(210 << 8);
 	if((gamePadLevel & SATURN_DIR_UP)!=0 && l!=0) k = 445 << 8;
 	}
-	else	{
+	else {
 	if(gamePadTrigger & vibrSwLeft) { k = 445 << 8; l = 210 << 8; }
 	if(gamePadTrigger & vibrSwRight) { k = 445 << 8; l = -(210 << 8); }
 		}
 
-	if(k)	{
+	if(k) {
 		i = tiltY[0]; j = tiltX[0];
 		tiltY[0] += k;
 		if((tiltY[0] ^ i) < 0) i = -i;
@@ -363,7 +358,7 @@ void ServiceVibration(void)
 		tiltY[2] += k;
 		if((tiltY[2] ^ i) < 0) i = -i;
 		if(i!=0 && j!=0) tiltX[2] = j * tiltY[2] / i; }
-	if(l)	{
+	if(l) {
 		i = tiltY[1]; j = tiltX[1];
 		tiltY[1] += l;
 		if((tiltY[1] ^ i) < 0) i = -i;
@@ -806,55 +801,56 @@ static void SetupOtherBallHit(int my)
 /----------------------------------------------*/
 void BallSimulatorMotionObjects(void)
 {
-	BALL	*blp;
-	PLAYER	*ply;
-	int	i, j, k, key, lvl;
-	int	x, y, z, xx, yy, zz;
-	int	ll, l, aa, bb, bs;
-	int	xyz[3], xys[3];
-	char	sort[8];
-
-	ply = &playerTab[playerNo];
+	PLAYER *ply = &playerTab[playerNo];
 
 	if(dropTargetMax) {
-	for(i=0; i<dropTargetMax; ++i) {
-		if(ply->dropTargetEnable[i]) {
-			MobjDropTarget(prp->dtpX[i], prp->dtpY[i], i);
+		for(int i = 0; i < dropTargetMax; ++i) {
+			if(ply->dropTargetEnable[i]) {
+				MobjDropTarget(prp->dtpX[i], prp->dtpY[i], i);
 			}
 		}
 	}
 
-	for(i=0; i<ballMax; ++i) sort[i] = i;
-	for(j=0; j<(ballMax-1); ++j)
-	{
-	y = ball[j].yp;
-	z = ball[j].zp;
-	for(i=(j+1); i<ballMax; ++i)
-		{
-		if(z > ball[i].zp || y < ball[i].yp)
-			{ l = sort[j]; sort[j] = sort[i]; sort[i] = l; y = ball[i].yp; z = ball[i].zp; }
+	int sort[8];
+	for(int i = 0; i < ballMax; ++i) sort[i] = i;
+	for(int j = 0; j < (ballMax - 1); ++j) {
+		int y = ball[j].yp;
+		int z = ball[j].zp;
+		for(int i = (j + 1); i < ballMax; ++i) {
+			if(z > ball[i].zp || y < ball[i].yp) {
+				int l = sort[j];
+				sort[j] = sort[i];
+				sort[i] = l;
+				y = ball[i].yp;
+				z = ball[i].zp;
+			}
 		}
 	}
 
-	for(i=0; i<2; ++i) {
-	if(slingShotTurnOn[i]) { slingShotTurnOn[i]--;
-	MobjSlingShot(prp->slingShotPosX[i], prp->slingShotPosY[i], i); }
-	}
-	for(i=0; i<3; ++i) {
-	if(jetBumperTurnOn[i]) { jetBumperTurnOn[i]--;
-	MobjJetBumper(prp->jetBumperPosX[i], prp->jetBumperPosY[i], i); }
+	for(int i = 0; i < 2; ++i) {
+		if(slingShotTurnOn[i]) {
+			slingShotTurnOn[i]--;
+			MobjSlingShot(prp->slingShotPosX[i], prp->slingShotPosY[i], i);
+		}
 	}
 
-	for(i=0; i<ballMax; ++i)
-	{
-	blp = &ball[sort[i]];
-	xyz[0] = blp->xp >> POSITION_SHIFT;
-	xyz[1] = blp->yp >> POSITION_SHIFT;
-	xyz[2] = (blp->zp >> POSITION_SHIFT) + ballRadius;
-	if(xyz[2] > (-ballRadius * 2) && blp->mode!=MODE_BALL_READY)
-		{
-		Perspective(&xyz[0], &xys[0]);
-		MobjBall(xys[0], xys[1], xys[2], (blp->layer >> 6) & 3, i);
+	for(int i = 0; i < 3; ++i) {
+		if(jetBumperTurnOn[i]) {
+			jetBumperTurnOn[i]--;
+			MobjJetBumper(prp->jetBumperPosX[i], prp->jetBumperPosY[i], i);
+		}
+	}
+
+	int	xyz[3], xys[3];
+	for(int i = 0; i < ballMax; ++i) {
+		BALL *blp = &ball[sort[i]];
+		xyz[0] = blp->xp >> POSITION_SHIFT;
+		xyz[1] = blp->yp >> POSITION_SHIFT;
+		xyz[2] = (blp->zp >> POSITION_SHIFT) + ballRadius;
+		if(xyz[2] > (-ballRadius * 2) && blp->mode != MODE_BALL_READY) {
+			Perspective(&xyz[0], &xys[0]);
+			int mask = (blp->layer >> 6) & 3;
+			MobjBall(xys[0], xys[1], xys[2], mask, i);
 		}
 	}
 
@@ -862,6 +858,7 @@ void BallSimulatorMotionObjects(void)
 	MobjFlipper(prp->fpX[1], prp->fpY[1], flipper[1].an);
 	if(flipper[2].hl > 0) MobjFlipper(prp->fpX[2], prp->fpY[2], flipper[2].an + 6);
 	if(flipper[3].hl > 0) MobjFlipper(prp->fpX[3], prp->fpY[3], flipper[3].an + 6);
+
 	ServicePlayerInfo(&playerTab[0]);
 }
 
@@ -900,10 +897,10 @@ void AutoFlipper(void)
 /	px = (x * SL) / (ll + bb)			/
 /	bs = (BallRadius * 2 * SL) / (ll + bb)		/
 /------------------------------------------------------*/
-void Perspective(int *xyz, int *xys)
+void Perspective(const int *xyz, int *xys)
 {
 	int	x, y, z, zz, yy, aa, bb, ll;
-	unsigned int	u, v;
+	unsigned int u, v;
 
 	x = *xyz++;
 	y = *xyz++;
@@ -1427,7 +1424,7 @@ static void ScanSwitch(BALL *blp)
 					l = 1 << (j & 0x1f);
 					if(m > 0) swPos |= l;
 					else if(m < 0) swNeg |= l;
-				  	}
+					}
 				}
 			}
 		}
@@ -1635,7 +1632,7 @@ static void ServiceSwitch(BALL *blp)
 	for(i=0; i<32; i++)
 	{
 	switch(i)
-	    {
+		{
 	case SW_SHOOTER_LANE:
 		if(p & 1) {
 			blp->shooterFlag = 1;
@@ -1785,7 +1782,7 @@ static void ServiceSwitch(BALL *blp)
 		break;
 	default:
 		break;
-	    }
+		}
 	p >>= 1;
 	n >>= 1;
 	}

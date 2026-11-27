@@ -13,10 +13,10 @@
 int PrintAverage(char *, int n);
 void InitVibration(void);
 void ServiceVibration(void);
-void InitBallSimulator(FIELD *, short *, const char *);
+void InitBallSimulator(FIELD *para, const short *vect, int vnum, const char *msg);
 void MainBallSimulator(void);
 void BallSimulatorMotionObjects(void);
-void Perspective(int *xyz, int *xys);
+void Perspective(const int *xyz, int *xys);
 void AutoFlipper(void);
 void LocationBallPosition(void);
 int AddPlayerBall(void);
@@ -39,7 +39,6 @@ extern short returnLaneSw, returnLaneTotal;
 extern unsigned int playTime, playTimeTotal;
 extern short exitBallCount;
 
-extern FIELD *prp;
 extern PLAYER playerTab[PLAYER_MAX];
 extern short shoottingCounter;
 extern unsigned short shooterSw;

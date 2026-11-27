@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include "vect.h"
 #include "fnc.h"
-#include "saturn.h"
+#include "sim.h"
 
 typedef struct {
 	int	xt, yt, zt;
@@ -19,7 +19,7 @@ typedef struct {
 
 extern int screenWidth, screenHeight;
 
-static int ValuePrintf(char *t, int v);
+static void ValuePrintf(int v);
 static void TestMapSub(HIT *hit, int w, int h, int s);
 static void ScanArea(void);
 static int CheckArea(HIT *ptr, int xs, int ys, int xe, int ye);
@@ -64,75 +64,76 @@ short vukMax, rampMax, flipperMax;
 short slingShotMax;
 short movegateMax, magnaLockMax;
 
-static short GetShort(const short *ptr)
-{
-	uint16_t val = *(const uint16_t *)ptr;
-	return (val >> 8) | ((val << 8) & 0xff00);
-}
-
 /*------------------------------------------------------/
-/							/
-/	Create HIT-MAP data.				/
-/							/
+/														/
+/	Create HIT-MAP data.								/
+/														/
 /------------------------------------------------------*/
-void PickUpFirst(const short *vect)
+void PickUpFirst(const short *vect, int limit)
 {
-	int	a;
-	short pos[32];
+	short pos[16];
 	BALL *blp;
-	HIT	*hit;
 
 	ballMax = 0;
 	blp = &ball[0];
-	while((a = GetShort(vect)) != -1) {
-		++vect;
-	switch(a & ATTR_MASK)
-		{
-	case BALLS:
-		vect += GetPositions(vect, &pos[0]);
-		if((a & 3)==2) {
-		psychoSaveX = pos[0];
-		psychoSaveY = pos[1];
-		psychoSaveZ = pos[2];
+	short atr;
+	int all = 0;
+	int num = 0;
+	while((atr = *vect++) != -1) {
+		++all;
+		short pn = *vect;
+		all += pn * 3 + 1;
+		if(all >= limit) {
+			printf("Error... Type: 0x%04X Num: %d\n", atr & 0xffff, pn);
+			break;
 		}
-		else if((a & 3)==1) {
-		startBallX = pos[0];
-		startBallY = pos[1];
-		startBallZ = pos[2];
-		}
-		else if((a & 3)==0) {
-		if(ballMax >= MULTI_BALL_MAX) {
-//			LaunchDebugger("Too Match Balls !!!");
-			printf("Too Match Balls !!!\n");
-			return;
-		}
-		if(ballMax < MULTI_BALL_MAX)
-			{
-			blp->xp = pos[0];
-			blp->xp <<= POSITION_SHIFT;
-			blp->yp = pos[1];
-			blp->yp <<= POSITION_SHIFT;
-			blp->zp = 0;
-			ballRadius = (pos[3] + pos[4]) / 4;
-			blp++;
-			ballMax++;
+		switch(atr & ATTR_MASK) {
+		case BALLS:
+			num = GetPositions(vect, &pos[0]);
+			if(all >= limit) break;
+			vect += num;
+			if((atr & 3) == 2) {
+				psychoSaveX = pos[0];
+				psychoSaveY = pos[1];
+				psychoSaveZ = pos[2];
+			} else if((atr & 3) == 1) {
+				startBallX = pos[0];
+				startBallY = pos[1];
+				startBallZ = pos[2];
+			} else if((atr & 3) == 0) {
+				if(ballMax < MULTI_BALL_MAX) {
+					blp->xp = pos[0];
+					blp->xp <<= POSITION_SHIFT;
+					blp->yp = pos[1];
+					blp->yp <<= POSITION_SHIFT;
+					blp->zp = 0;
+					ballRadius = (pos[3] + pos[4]) / 4;
+					blp++;
+					ballMax++;
+				} else {
+//					LaunchDebugger("Too Match Balls !!!");
+					printf("Too Match Balls at %d\n", all);
+				}
 			}
-		}
-		break;
-	default:
-		vect += GetPositions(vect, &pos[0]);
-		break;
+			break;
+		default:
+			num = *vect;
+			vect += num * 3 + 1;
+			break;
 		}
 	}
+#ifdef REPORT
+	printf("Ball pickup loop count: %d\n", all);
+#endif
 }
 
-void MakeupVectors(FIELD *para, const short *vect, const char *text)
+void MakeupVectors(FIELD *para, const short *vect, int vnum, const char *text)
 {
-	int	i, j, k, a;
+	int	i, j, k;
 	int	vc, fp, sw;
 	int	xyz[3], xys[3];
 	HIT	*hit;
-	short	pos[32];
+	short pos[32];
 
 	for(i=0; i<FLIPPER_MAX; ++i) flipper[i].hl = -1;
 
@@ -149,24 +150,24 @@ void MakeupVectors(FIELD *para, const short *vect, const char *text)
 	magnaLockMax = 0;
 
 	vc = fp = sw = 0;
-	while((a = GetShort(vect)) != -1)
+	short atr;
+	while((atr = *vect++) != -1)
 	{
-		++vect;
 	if(hit >= &hitList[HIT_MAX]) {
 ///		LaunchDebugger("Over Flow HITs !!!");
 		printf("Over Flow HITs !!!");
 		return;
 	}
-	switch(a & ATTR_MASK)
+	switch(atr & ATTR_MASK)
 		{
 	case BALLS:
 		vect += GetPositions(vect, &pos[0]);
-		if((a & 3)==0) ballMax++;
-		else if((a & 3)==2) psychoSaveMax++;
-		else if((a & 3)==3) messengerBallMax++;
+		if((atr & 3)==0) ballMax++;
+		else if((atr & 3)==2) psychoSaveMax++;
+		else if((atr & 3)==3) messengerBallMax++;
 		break;
 	case POLYLINE:
-		k = a & 15;
+		k = atr & 15;
 		if(k==0) j = _METAL;
 		else if(k==1) j = _METAL;
 		else if(k==2) j = _PLASTIC;
@@ -174,29 +175,26 @@ void MakeupVectors(FIELD *para, const short *vect, const char *text)
 		else if(k==4) j = _RUBBER_BAND;
 		else j = _METAL;
 
-		if(a & 0x8000)
-		{
-		vect += PresetCircle(POLYLINE+0x8000+j, vect, hit, ballRadius);
-		hit++;
-		}
-		else
-		{
-		vect += PresetPolyline(POLYLINE+j, vect, hit, ballRadius);
-		hit += linCount + cirCount;
+		if(atr & 0x8000) {
+			vect += PresetCircle(POLYLINE+0x8000+j, vect, hit, ballRadius);
+			hit++;
+		} else {
+			vect += PresetPolyline(POLYLINE+j, vect, hit, ballRadius);
+			hit += linCount + cirCount;
 		}
 		break;
 	case JET_BUMPER:
-		vect += PresetCircle(a+0x8000, vect, hit, -(ballRadius / 2));
+		vect += PresetCircle(atr + 0x8000, vect, hit, -(ballRadius / 2));
 		hit++;
 		jetBumperMax++;
 		break;
 	case SLING_SHOT:
-		vect += PresetPolyline(a, vect, hit, ballRadius);
+		vect += PresetPolyline(atr, vect, hit, ballRadius);
 		hit += linCount + cirCount;
 		slingShotMax++;
 		break;
 	case DROP_TARGET:
-		vect += PresetDropTarget(a, vect, hit, ballRadius);
+		vect += PresetDropTarget(atr, vect, hit, ballRadius);
 		hit += linCount + cirCount;
 		dropTargetMax++;
 		break;
@@ -207,36 +205,36 @@ void MakeupVectors(FIELD *para, const short *vect, const char *text)
 		rampMax++;
 		break;
 	case STAND_UP:
-		vect += PresetStandUp(a, vect, hit, ballRadius);
+		vect += PresetStandUp(atr, vect, hit, ballRadius);
 		hit += linCount + cirCount;
 		standUpMax++;
 		break;
 	case LR_FLIPPER:
-		vect += PresetFlipper(a | _FLIPPER, vect, hit, ballRadius);
+		vect += PresetFlipper(atr | _FLIPPER, vect, hit, ballRadius);
 		hit += linCount + cirCount;
 		fp++;
 		break;
 	case SWITCH_GATE:
-		vect += PresetSwitch(a, vect, hit, 0);
+		vect += PresetSwitch(atr, vect, hit, 0);
 		hit += linCount + cirCount;
-		k = a & 31;
+		k = atr & 31;
 		sw++;
 		break;
 	case HOPPER:
 		vect += GetPositions(vect, &pos[0]);
-		k = a & 3;
+		k = atr & 3;
 		vukPosX[k] = pos[0];
 		vukPosY[k] = pos[1];
 		vukPosZ[k] = pos[2];
 		vukMax++;
 		break;
 	case HOLE_ZONE:
-		vect += PresetHole(a, vect, hit, ballRadius);
+		vect += PresetHole(atr, vect, hit, ballRadius);
 		hit += linCount + cirCount;
 		holeMax++;
 		break;
 	case MOVE_GATE:
-		vect += PresetPolyline(a, vect, hit, ballRadius);
+		vect += PresetPolyline(atr, vect, hit, ballRadius);
 		hit += linCount + cirCount;
 		movegateMax++;
 		break;
@@ -250,12 +248,12 @@ void MakeupVectors(FIELD *para, const short *vect, const char *text)
 		magnaLockMax++;
 		break;
 	case SAUCER_ZONE:
-		vect += PresetSaucer(a, vect, hit, ballRadius);
+		vect += PresetSaucer(atr, vect, hit, ballRadius);
 		hit += linCount + cirCount;
 		holeMax++;
 		break;
 	default:
-		vect += PresetPolyline(a, vect, hit, ballRadius);
+		vect += PresetPolyline(atr, vect, hit, ballRadius);
 		break;
 		}
 	vc++;
@@ -265,102 +263,95 @@ void MakeupVectors(FIELD *para, const short *vect, const char *text)
 	ScanArea();
 
 /*	Report Attribute, ETC,...	*/
+#ifdef REPORT
+	printf("------------ Vector transfome complete. ------------\n");
+	printf("Total Blocks = %d\n", vc);
+	printf("Total Hits (Max:%d) = %d\n", HIT_MAX, hitMax);
+	printf("Total Tags (Max:%d) = %d\n", TAG_MAX, tagMax);
+	printf("---\n");
+	printf("Total Balls (Max:%d) = %d\n", MULTI_BALL_MAX, ballMax);
+	printf("Total Messenger Balls = %d\n", messengerBallMax);
+	printf("Total Flipper: %d\n", fp / FLIPPER_STEP);
+	printf("Total Jet-Bumper: %d\n", jetBumperMax); 
+	printf("Total Sling-Shot: %d\n", slingShotMax); 
+	printf("Total Drop-Target: %d\n", dropTargetMax);
+	printf("Total Stand-Up: %d\n", standUpMax);
+	printf("Total Ramp: %d\n", rampMax);
+	printf("Total VUK: %d\n", vukMax);
+	printf("Total Hole: %d\n", holeMax);
+	printf("Total Switch: %d\n", sw);
+	printf("\n");
 
-/*	if(text!=NULL)
-	{
-	text += sprintf(text, "------------ Vector transfome complete. ------------\n");
-	text += sprintf(text, "Total Blocks = %d\n", vc);
-	text += sprintf(text, "Total Hits (Max:%d) = %d\n", HIT_MAX, hitMax);
-	text += sprintf(text, "Total Tags (Max:%d) = %d\n", TAG_MAX, tagMax);
-	text += sprintf(text, "---\n");
-	text += sprintf(text, "Total Balls (Max:%d) = %d\n", MULTI_BALL_MAX, ballMax);
-	text += sprintf(text, "Total Messenger Balls = %d\n", messengerBallMax);
-	text += sprintf(text, "Total Flipper: %d\n", fp / FLIPPER_STEP);
-	text += sprintf(text, "Total Jet-Bumper: %d\n", jetBumperMax); 
-	text += sprintf(text, "Total Sling-Shot: %d\n", slingShotMax); 
-	text += sprintf(text, "Total Drop-Target: %d\n", dropTargetMax);
-	text += sprintf(text, "Total Stand-Up: %d\n", standUpMax);
-	text += sprintf(text, "Total Ramp: %d\n", rampMax);
-	text += sprintf(text, "Total VUK: %d\n", vukMax);
-	text += sprintf(text, "Total Hole: %d\n", holeMax);
-	text += sprintf(text, "Total Switch: %d\n", sw);
-
-	text += sprintf(text, "\n");
-	for(i=0; i<4; ++i)
-	{
-	if(flipper[i].hl > 0)
-		{
-		xyz[0] = flipper[i].cx;
-		xyz[1] = flipper[i].cy;
-		xyz[2] = flipper[i].cz;
-		Perspective(&xyz[0], &xys[0]);
-		flipper[i].prx = screenWidth / 2 + xys[0];
-		flipper[i].pry = screenHeight / 2 - xys[1];
-	text += sprintf(text, "Flipper #%d location: X=%d, Y=%d [pixcel]\n",
-		i+1, flipper[i].prx, flipper[i].pry);
+#if 0
+	for(int i = 0; i < 4; ++i) {
+		if(flipper[i].hl > 0) {
+			xyz[0] = flipper[i].cx;
+			xyz[1] = flipper[i].cy;
+			xyz[2] = flipper[i].cz;
+			Perspective(&xyz[0], &xys[0]);
+			flipper[i].prx = screenWidth / 2 + xys[0];
+			flipper[i].pry = screenHeight / 2 - xys[1];
+			printf("Flipper #%d location: X=%d, Y=%d [pixcel]\n", i+1, flipper[i].prx, flipper[i].pry);
 		}
 	}
-	text += sprintf(text, "\n");
-	text += sprintf(text, "Field Height = %d [mm]\n", para->fieldHeight);
-	text += sprintf(text, "Field Width  = %d [mm]\n", para->fieldWidth);
-	text += sprintf(text, "DXF Field Width = ");
-	text += ValuePrintf(text, fieldWidthMax * 2); text += sprintf(text, " [mm]\n");
-	text += sprintf(text, "Ball Radius = ");
-	text += ValuePrintf(text, ballRadius); text += sprintf(text, " [mm]\n");
+#endif
+	printf("\n");
+	printf("Field Height = %d [mm]\n", para->fieldHeight);
+	printf("Field Width  = %d [mm]\n", para->fieldWidth);
+	printf("DXF Field Width = ");
+	ValuePrintf(fieldWidthMax * 2); printf(" [mm]\n");
+	printf("Ball Radius = ");
+	ValuePrintf(ballRadius); printf(" [mm]\n");
 
-	text += sprintf(text, "\n");
-	text += sprintf(text, "Shooter speed = %d [mm/s]\n", para->shooterSpd);
-	text += sprintf(text, "Kickback speed = %d [mm/s]\n", para->kickbackSpd);
-	text += sprintf(text, "VUK Launch speed = %d [mm/s]\n", para->vukSpd);
-	text += sprintf(text, "Sling-Shot speed = %d [mm/s]\n", para->slingshotSpd);
-	text += sprintf(text, "Jet-Bumper speed = %d [mm/s]\n", para->jetbumperSpd);
+	printf("\n");
+	printf("Shooter speed = %d [mm/s]\n", para->shooterSpd);
+	printf("Kickback speed = %d [mm/s]\n", para->kickbackSpd);
+	printf("VUK Launch speed = %d [mm/s]\n", para->vukSpd);
+	printf("Sling-Shot speed = %d [mm/s]\n", para->slingshotSpd);
+	printf("Jet-Bumper speed = %d [mm/s]\n", para->jetbumperSpd);
 
-	text += sprintf(text, "\n");
-	text += sprintf(text, "Sling-Shot trigger speed = %d [mm/s]\n", para->slingshotTrgSpd);
-	text += sprintf(text, "Jet-Bumper trigger speed = %d [mm/s]\n", para->jetbumperTrgSpd);
-	text += sprintf(text, "Drop-Target trigger speed = %d [mm/s]\n", para->droptargetTrgSpd);
-	text += sprintf(text, "Stand-Up trigger speed = %d [mm/s]\n", para->standupTrgSpd);
+	printf("\n");
+	printf("Sling-Shot trigger speed = %d [mm/s]\n", para->slingshotTrgSpd);
+	printf("Jet-Bumper trigger speed = %d [mm/s]\n", para->jetbumperTrgSpd);
+	printf("Drop-Target trigger speed = %d [mm/s]\n", para->droptargetTrgSpd);
+	printf("Stand-Up trigger speed = %d [mm/s]\n", para->standupTrgSpd);
 
-	text += sprintf(text, "\n");
+	printf("\n");
 	i = METAL_HIT_FACTOR * 100 / 1024;
 	j = METAL_HIT_FACTOR * 100 % 1024;
-	text += sprintf(text, "Metal Hit factor = %d.%0d [%%]\n", i, j);
+	printf("Metal Hit factor = %d.%0d [%%]\n", i, j);
 	i = PLASTIC_HIT_FACTOR * 100 / 1024;
 	j = PLASTIC_HIT_FACTOR * 100 % 1024;
-	text += sprintf(text, "Plastic Hit factor = %d.%0d [%%]\n", i, j);
+	printf("Plastic Hit factor = %d.%0d [%%]\n", i, j);
 	i = RUBBER_BAND_HIT_FACTOR * 100 / 1024;
 	j = RUBBER_BAND_HIT_FACTOR * 100 % 1024;
-	text += sprintf(text, "Rubber-Band Hit factor = %d.%0d [%%]\n", i, j);
+	printf("Rubber-Band Hit factor = %d.%0d [%%]\n", i, j);
 	i = RUBBER_POST_HIT_FACTOR * 100 / 1024;
 	j = RUBBER_POST_HIT_FACTOR * 100 % 1024;
-	text += sprintf(text, "Rubber-Post Hit factor = %d.%0d [%%]\n", i, j);
+	printf("Rubber-Post Hit factor = %d.%0d [%%]\n", i, j);
 	i = RAMP_HIT_FACTOR * 100 / 1024;
 	j = RAMP_HIT_FACTOR * 100 % 1024;
-	text += sprintf(text, "Ramp-Lane Hit factor = %d.%0d [%%]\n", i, j);
+	printf("Ramp-Lane Hit factor = %d.%0d [%%]\n", i, j);
 	i = HOLE_GUIDE_HIT_FACTOR * 100 / 1024;
 	j = HOLE_GUIDE_HIT_FACTOR * 100 % 1024;
-	text += sprintf(text, "Hole-Guide Hit factor = %d.%0d [%%]\n", i, j);
+	printf("Hole-Guide Hit factor = %d.%0d [%%]\n", i, j);
 	i = FLIPPER_HIT_FACTOR * 100 / 1024;
 	j = FLIPPER_HIT_FACTOR * 100 % 1024;
-	text += sprintf(text, "Flipper Hit factor = %d.%0d [%%]\n", i, j);
+	printf("Flipper Hit factor = %d.%0d [%%]\n", i, j);
 
-	text += sprintf(text, "\n");
-	text += sprintf(text, "[EOF]\n");
-	*text = 0;
-	}
-*/
+	printf("\n");
+	printf("[EOF]\n");
+#endif
 }
 
-static int ValuePrintf(char *t, int v)
+static void ValuePrintf(int v)
 {
 	int	a, b;
-/*
+
 	a = (v * fieldHeightMax) / 63956;
 	v -= (a * 63956) / fieldHeightMax;
 	b = (v * fieldHeightMax * 10) / 63956;
-	return sprintf(t, "%d.%0d", a, b);
-*/
-return 0;
+	printf("%d.%0d", a, b);
 }
 
 /*------------------------------------------------------/
@@ -578,30 +569,30 @@ static int CheckArea(HIT *hit, int xs, int ys, int xw, int yw)
 
 static int GetPositions(const short *vect, short *out)
 {
-	int i = GetShort(vect); vect++;
-/*	i--; */
+	int num = *vect++;
 	int	minx, miny, minz, maxx, maxy, maxz;
 	minx = miny = minz = 32767;
 	maxx = maxy = maxz = -32768;
-	for(int j = 0; j < i; ++j) {
-		int x = GetShort(vect); vect++;
-		int y = GetShort(vect); vect++;
-		int z = GetShort(vect); vect++;
-		if(minx > x) minx=x;
-		if(miny > y) miny=y;
-		if(minz > z) minz=z;
-		if(maxx < x) maxx=x;
-		if(maxy < y) maxy=y;
-		if(maxz < z) maxz=z;
+	for(int i = 0; i < num; ++i) {
+		int x = *vect++;
+		int y = *vect++;
+		int z = *vect++;
+		if(minx > x) minx = x;
+		if(miny > y) miny = y;
+		if(minz > z) minz = z;
+		if(maxx < x) maxx = x;
+		if(maxy < y) maxy = y;
+		if(maxz < z) maxz = z;
 	}
+
 	*out++ = (minx + maxx) / 2;
 	*out++ = (miny + maxy) / 2;
 	*out++ = (minz + maxz) / 2;
 	*out++ = maxx - minx;
 	*out++ = maxy - miny;
 	*out++ = maxz - minz;
-/*	i++; */
-	return i * 3 + 1;
+
+	return num * 3 + 1;
 }
 
 static int SetBox(int a, const short *vect, HIT *hit, int r)
@@ -611,17 +602,17 @@ static int SetBox(int a, const short *vect, HIT *hit, int r)
 	SINCOS	sico;
 
 	linCount = 0;
-	i = GetShort(vect); vect++;
+	i = *vect++;
 	if(i <= 2) return i * 3 + 1;
 r = 0;
-	line.xt = GetShort(vect+i*3-3);	/* X final position */
-	line.yt = GetShort(vect+i*3-2);	/* Y final position */
-	line.zb = GetShort(vect+i*3-1);	/* Z final position */
+	line.xt = *(vect + i * 3 - 3);	/* X final position */
+	line.yt = *(vect + i * 3 - 2);	/* Y final position */
+	line.zb = *(vect + i * 3 - 1);	/* Z final position */
 	for(j=0; j<i; ++j)
 	{
-	line.xb = GetShort(vect); vect++;
-	line.yb = GetShort(vect); vect++;
-	line.zb = GetShort(vect); vect++;
+	line.xb = *vect++;
+	line.yb = *vect++;
+	line.zb = *vect++;
 	hit->vs = LineToSinCos_(&line, &sico);
 	hit->vss = hit->vs * hit->vs;
 	hit->sin = sico.sin;
@@ -646,17 +637,17 @@ static int SetLine(int a, const short *vect, HIT *hit, int r)
 	LINE	line;
 
 	linCount = 0;
-	i = GetShort(vect); vect++;
+	i = *vect++;
 	if(i <= 2) return i * 3 + 1;
 
-	line.xt = GetShort(vect+i*3-3);	/* X final position */
-	line.yt = GetShort(vect+i*3-2);	/* Y final position */
-	line.zt = GetShort(vect+i*3-1);	/* Z final position */
+	line.xt = *(vect+i*3-3);	/* X final position */
+	line.yt = *(vect+i*3-2);	/* Y final position */
+	line.zt = *(vect+i*3-1);	/* Z final position */
 	for(j=0; j<i; ++j)
 	{
-	line.xb = GetShort(vect); vect++;
-	line.yb = GetShort(vect); vect++;
-	line.zb = GetShort(vect); vect++;
+	line.xb = *vect++;
+	line.yb = *vect++;
+	line.zb = *vect++;
 
 	SetLineSub(&line, r, hit);
 	hit->atr = a;			/* Attribute */
@@ -826,20 +817,20 @@ static int PresetPolyline(int a, const short *vect, HIT *hit, int r)
 	SINCOS	sico;
 
 	cirCount = linCount = 0;
-	i = GetShort(vect); vect++;
+	i = *vect++;
 
-	line.xt = GetShort(vect); vect++;
-	line.yt = GetShort(vect); vect++;
-	line.zt = GetShort(vect); vect++;
+	line.xt = *vect++;
+	line.yt = *vect++;
+	line.zt = *vect++;
 	if(line.xt > fieldWidthMax) fieldWidthMax = line.xt;
 	vect -= 3;
 	if(i > 2) l = i; else l = 1;
 	for(j=0; j<l; ++j)
 	{
 	k = ((j + 1) % i) * 3;
-	line.xb = GetShort(vect + k    );
-	line.yb = GetShort(vect + k + 1);
-	line.zb = GetShort(vect + k + 2);
+	line.xb = *(vect + k    );
+	line.yb = *(vect + k + 1);
+	line.zb = *(vect + k + 2);
 	if(line.xb > fieldWidthMax) fieldWidthMax = line.xb;
 	vs = LineToSinCos_(&line, &sico);
 	x  = (-sico.sin * r) >> SINCOS_SHIFT;
@@ -855,8 +846,8 @@ static int PresetPolyline(int a, const short *vect, HIT *hit, int r)
 	linCount++;
 
 	k = ((j + 2) % i) * 3;
-	x = GetShort(vect + k    ) - line.xt;
-	y = GetShort(vect + k + 1) - line.yt;
+	x = *(vect + k    ) - line.xt;
+	y = *(vect + k + 1) - line.yt;
 	if((y * sico.cos - x * sico.sin) < 0 && i > 2)
 		{
 		hit->atr = a | 0x8000;
@@ -881,15 +872,15 @@ static int PresetCircle(int a, const short *vect, HIT *hit, int r)
 	int	x, y, z, minx, miny, maxx, maxy;
 	LINE	line;
 
-	i = GetShort(vect); ++vect;
+	i = *vect++;
 	minx = miny =  65536;
 	maxx = maxy = -65536;
 	zs = 0;
 	for(j=0; j<i; ++j)
 	{
-	x = GetShort(vect); ++vect;
-	y = GetShort(vect); ++vect;
-	z = GetShort(vect); ++vect;
+	x = *vect++;
+	y = *vect++;
+	z = *vect++;
 	zs += z;
 	if(minx > x) minx = x;
 	if(miny > y) miny = y;
@@ -905,100 +896,102 @@ static int PresetCircle(int a, const short *vect, HIT *hit, int r)
 	return (i * 3 + 1);
 }
 
-static int PresetFlipper(int a, const short *vect, HIT *hit, int r)
+static int PresetFlipper(int aaa, const short *vect, HIT *hit, int rrr)
 {
-	int	i, j, k, l, m, u, v, dx, dy;
 	int	val[128];
-	short	idx[128];
-	const short *ptr;
-	LINE	line, cp[2];
-	SINCOS	sico;
+	short idx[128];
 
 	cirCount = linCount = 0;
-	i = GetShort(vect); ++vect;
-	ptr = vect;
+	int i = *vect++;
+	const short *ptr = vect;
 	if(i > 128) {
 ///		LaunchDebugger("Over Flow SORT buffer !!!");
 		printf("Over Flow SORT buffer !!!\n");
 		return i * 3 + 1;
 	}
 
-	line.xt = GetShort(ptr + i * 3 - 3);
-	line.yt = GetShort(ptr + i * 3 - 2);
-	line.zt = GetShort(ptr + i * 3 - 1);
-	for(j=0; j<i; ++j)
-	{
-	line.xb = *ptr++;
-	line.yb = *ptr++;
-	line.zb = *ptr++;
-	dx = line.xb - line.xt;
-	dy = line.yb - line.yt;
-	idx[j] = j;
-	val[j] = dx * dx + dy * dy;
-	line.xt = line.xb;
-	line.yt = line.yb;
-	line.zt = line.zb;
+	LINE line, cp[2];
+	line.xt = *(ptr + i * 3 - 3);
+	line.yt = *(ptr + i * 3 - 2);
+	line.zt = *(ptr + i * 3 - 1);
+	for(int j = 0; j < i; ++j) {
+		line.xb = *ptr++;
+		line.yb = *ptr++;
+		line.zb = *ptr++;
+		int dx = line.xb - line.xt;
+		int dy = line.yb - line.yt;
+		idx[j] = j;
+		val[j] = dx * dx + dy * dy;
+		line.xt = line.xb;
+		line.yt = line.yb;
+		line.zt = line.zb;
 	}
 	SortFirstBig(&val[0], &idx[0], i);
 
-	for(j=0; j<2; ++j)
-	{
-	k = ((idx[j]+i-1) % i) * 3;
-	line.xt = GetShort(vect + k    );
-	line.yt = GetShort(vect + k + 1);
-	line.zt = GetShort(vect + k + 2);
-	k = idx[j] * 3;
-	line.xb = GetShort(vect + k    );
-	line.yb = GetShort(vect + k + 1);
-	line.zb = GetShort(vect + k + 2);
+	for(int j = 0; j < 2; ++j) {
+		int k = ((idx[j]+i-1) % i) * 3;
+		line.xt = *(vect + k    );
+		line.yt = *(vect + k + 1);
+		line.zt = *(vect + k + 2);
+		k = idx[j] * 3;
+		line.xb = *(vect + k    );
+		line.yb = *(vect + k + 1);
+		line.zb = *(vect + k + 2);
 
-	hit->atr = a;
-	SetLineSub(&line, r, hit);
-	cp[j].xt = line.xt;
-	cp[j].yt = line.yt;
-	cp[j].zt = line.zt;
-	cp[j].xb = line.xb;
-	cp[j].yb = line.yb;
-	cp[j].zb = line.zb;
-	hit++;
-	linCount++;
+		hit->atr = aaa;
+		SetLineSub(&line, rrr, hit);
+		cp[j].xt = line.xt;
+		cp[j].yt = line.yt;
+		cp[j].zt = line.zt;
+		cp[j].xb = line.xb;
+		cp[j].yb = line.yb;
+		cp[j].zb = line.zb;
+		hit++;
+		linCount++;
 	}
 
-	u = v = k = 0;
-	for(j=0; j<2; ++j)
-	{
-	line.xt = cp[  k  ].xt;
-	line.yt = cp[  k  ].yt;
-	line.zt = cp[  k  ].zt;
-	line.xb = cp[k ^ 1].xb;
-	line.yb = cp[k ^ 1].yb;
-	line.zb = cp[k ^ 1].zb;
-	hit->atr = a | 0x8000;
-	SetCircleSub(&line, r, hit);
-	if(v < hit->vs) { u = j; v = hit->vs; }
-	hit++;
-	cirCount++;
-	k++;
+	int u = 0;
+	int v = 0;
+	int k = 0;
+	for(int j = 0; j < 2; ++j) {
+		line.xt = cp[  k  ].xt;
+		line.yt = cp[  k  ].yt;
+		line.zt = cp[  k  ].zt;
+		line.xb = cp[k ^ 1].xb;
+		line.yb = cp[k ^ 1].yb;
+		line.zb = cp[k ^ 1].zb;
+		hit->atr = aaa | 0x8000;
+		SetCircleSub(&line, rrr, hit);
+		if(v < hit->vs) { u = j; v = hit->vs; }
+		hit++;
+		cirCount++;
+		k++;
 	}
 
-	j = (a >> 4) & 0x3;
-	if((j+1) > flipperMax) flipperMax = j + 1;
-	k = a & 15;
-	line.xt = (hit-2+u)->xt;
-	line.yt = (hit-2+u)->yt;
+	int j = (aaa >> 4) & 0x3;
+	if((j + 1) > flipperMax) flipperMax = j + 1;
+	k = aaa & 15;
+	line.xt = (hit - 2 + u)->xt;
+	line.yt = (hit - 2 + u)->yt;
+// printf("Flip(%d): %d, %d\n", j, line.xt, line.yt);
 	flipper[j].cx = line.xt;
 	flipper[j].cy = line.yt;
-flipper[j].cz = 0;
+	flipper[j].cz = 0;
 	u ^= 1;
-	line.xb = (hit-2+u)->xt;
-	line.yb = (hit-2+u)->yt;
-	l = line.xb - line.xt;	
-	m = line.yb - line.yt;	
+	line.xb = (hit - 2 + u)->xt;
+	line.yb = (hit - 2 + u)->yt;
+	int l = line.xb - line.xt;	
+	int m = line.yb - line.yt;	
 	flipper[j].hl = Isqrt(l * l + m * m);
+	SINCOS	sico;
 	LineToSinCos_(&line, &sico);
-	if(a & 0x10) { sico.cos = -sico.cos; sico.sin = -sico.sin; }
+	if(aaa & 0x10) {
+		sico.cos = -sico.cos;
+		sico.sin = -sico.sin;
+	}
 	flipper[j].sin1[k] =  sico.cos;
 	flipper[j].cos1[k] = -sico.sin;
+// printf("Flipper: %d\n", flipperMax);
 
 	return (i * 3 + 1);
 }
@@ -1012,21 +1005,21 @@ static int PresetSwitch(int a, const short *vect, HIT *hit, int r)
 	SINCOS	sico;
 
 	cirCount = linCount = 0;
-	i = GetShort(vect); ++vect;
+	i = *vect++;
 
 	if(i <= 2)
 	{
-	line.xt = GetShort(vect); ++vect;
-	line.yt = GetShort(vect); ++vect;
-	line.zt = GetShort(vect); ++vect;
-	line.xb = GetShort(vect); ++vect;
-	line.yb = GetShort(vect); ++vect;
-	line.zb = GetShort(vect); ++vect;
-	SetLineSub(&line, 0, hit);
-	hit->atr = a;
-	hit++;
-	linCount++;	
-	return (i * 3 + 1);
+		line.xt = *vect++;
+		line.yt = *vect++;
+		line.zt = *vect++;
+		line.xb = *vect++;
+		line.yb = *vect++;
+		line.zb = *vect++;
+		SetLineSub(&line, 0, hit);
+		hit->atr = a;
+		hit++;
+		linCount++;	
+		return (i * 3 + 1);
 	}
 
 /*----------------------------------------------/
@@ -1034,32 +1027,34 @@ static int PresetSwitch(int a, const short *vect, HIT *hit, int r)
 /----------------------------------------------*/
 	for(j=0; j<i; ++j)
 	{
-	line.xt = GetShort(vect + j * 3);
-	line.yt = GetShort(vect + j * 3 + 1);
-	line.zt = GetShort(vect + j * 3 + 2);
-	k = (j + 1) % i;
-	line.xb = GetShort(vect + k * 3);
-	line.yb = GetShort(vect + k * 3 + 1);
-	line.zb = GetShort(vect + k * 3 + 2);
-	idx[j] = j;
-	val[j] = (line.yt + line.yb) / 2;
+		line.xt = *(vect + j * 3);
+		line.yt = *(vect + j * 3 + 1);
+		line.zt = *(vect + j * 3 + 2);
+		k = (j + 1) % i;
+		line.xb = *(vect + k * 3);
+		line.yb = *(vect + k * 3 + 1);
+		line.zb = *(vect + k * 3 + 2);
+		idx[j] = j;
+		val[j] = (line.yt + line.yb) / 2;
 	}
 	SortFirstBig(&val[0], &idx[0], i);
 
 	k = (idx[i-1] + 1) % i;
 	j = (idx[i-1] - 1) % i;
-	if( GetShort(vect + k * 3 + 1) > GetShort(vect + j * 3 + 1) ) {
-		x = -1; y = 0; }
-	else {	x = 0; y  = 1; }
+	if( *(vect + k * 3 + 1) > *(vect + j * 3 + 1) ) {
+		x = -1; y = 0;
+	} else {
+		x = 0; y  = 1;
+	}
 
-	k = (idx[i-1] + x) % i;
-	line.xb = GetShort(vect + k * 3);
-	line.yb = GetShort(vect + k * 3 + 1);
-	line.zb = GetShort(vect + k * 3 + 2);
-	k = (idx[i-1] + y) % i;
-	line.xt = GetShort(vect + k * 3);
-	line.yt = GetShort(vect + k * 3 + 1);
-	line.zt = GetShort(vect + k * 3 + 2);
+	k = (idx[i - 1] + x) % i;
+	line.xb = *(vect + k * 3);
+	line.yb = *(vect + k * 3 + 1);
+	line.zb = *(vect + k * 3 + 2);
+	k = (idx[i - 1] + y) % i;
+	line.xt = *(vect + k * 3);
+	line.yt = *(vect + k * 3 + 1);
+	line.zt = *(vect + k * 3 + 2);
 	SetLineSub(&line, 0, hit);
 	hit->atr = a;
 	hit++;
@@ -1067,11 +1062,11 @@ static int PresetSwitch(int a, const short *vect, HIT *hit, int r)
 
 	k = a & 31;
 	j = idx[0];
-	vs = GetShort(vect + j * 3 + 1);
+	vs = *(vect + j * 3 + 1);
 	j++; j %= i;
-	vs += GetShort(vect + j * 3 + 1);
+	vs += *(vect + j * 3 + 1);
 	swPara[k].yt = vs >> 1;
-	vs = GetShort(vect + j * 3 + 2);
+	vs = *(vect + j * 3 + 2);
 	swPara[k].zw = vs;
 	vs = (line.yt + line.yb) / 2;
 	swPara[k].yb = vs;
@@ -1086,19 +1081,19 @@ static int PresetOpenPolyline(int a, const short *vect, HIT *hit, int r)
 	SINCOS	sico;
 
 	cirCount = linCount = 0;
-	i = GetShort(vect); ++vect;
+	i = *vect++;
 
-	line.xt = GetShort(vect); ++vect;
-	line.yt = GetShort(vect); ++vect;
-	line.zt = GetShort(vect); ++vect;
+	line.xt = *vect++;
+	line.yt = *vect++;
+	line.zt = *vect++;
 	if(line.xt > fieldWidthMax) fieldWidthMax = line.xt;
 	vect -= 3;
 	for(j=0; j<(i-1); ++j)
 	{
 	k = ((j + 1) % i) * 3;
-	line.xb = GetShort(vect + k    );
-	line.yb = GetShort(vect + k + 1);
-	line.zb = GetShort(vect + k + 1);
+	line.xb = *(vect + k    );
+	line.yb = *(vect + k + 1);
+	line.zb = *(vect + k + 1);
 	if(line.xb > fieldWidthMax) fieldWidthMax = line.xb;
 	vs = LineToSinCos_(&line, &sico);
 	x  = (-sico.sin * r) >> SINCOS_SHIFT;
@@ -1116,8 +1111,8 @@ static int PresetOpenPolyline(int a, const short *vect, HIT *hit, int r)
 	if((j + 2) >= i) ;
 	else {
 	k = ((j + 2) % i) * 3;
-	x = GetShort(vect + k    ) - line.xt;
-	y = GetShort(vect + k + 1) - line.yt;
+	x = *(vect + k    ) - line.xt;
+	y = *(vect + k + 1) - line.yt;
 	if((y * sico.cos - x * sico.sin) < 0 && i > 2)
 		{
 		hit->atr = a | 0x8000;
@@ -1145,75 +1140,72 @@ static int PresetDropTarget(int a, const short *vect, HIT *hit, int r)
 	LINE	line;
 
 	cirCount = linCount = 0;
-	i = GetShort(vect); ++vect;
+	i = *vect++;
 	if(i!=4) {
 ///		LaunchDebugger("FALSE 'DropTarget' !!!");
 		printf("FALSE 'DropTarget' !!!\n");
 		return (i * 3 + 1);
 	}
 
-	for(j=0; j<i; ++j)
-	{
-	line.xt = GetShort(vect + j * 3);
-	line.yt = GetShort(vect + j * 3 + 1);
-	line.zt = GetShort(vect + j * 3 + 2);
-	k = (j + 1) % i;
-	line.xb = GetShort(vect + k * 3);
-	line.yb = GetShort(vect + k * 3 + 1);
-	line.zb = GetShort(vect + k * 3 + 2);
-	dx = line.xb - line.xt;
-	dy = line.yb - line.yt;
-	idx[j] = j;
-	val[j] = dx * dx + dy * dy;
+	for(j=0; j<i; ++j) {
+		line.xt = *(vect + j * 3);
+		line.yt = *(vect + j * 3 + 1);
+		line.zt = *(vect + j * 3 + 2);
+		k = (j + 1) % i;
+		line.xb = *(vect + k * 3);
+		line.yb = *(vect + k * 3 + 1);
+		line.zb = *(vect + k * 3 + 2);
+		dx = line.xb - line.xt;
+		dy = line.yb - line.yt;
+		idx[j] = j;
+		val[j] = dx * dx + dy * dy;
 	}
 	SortFirstBig(&val[0], &idx[0], i);
 
 	j = idx[0];
 	k = (j + 1) % i;
-	u  = GetShort(vect + j * 3 + 1);
-	u += GetShort(vect + k * 3 + 1);
+	u  = *(vect + j * 3 + 1);
+	u += *(vect + k * 3 + 1);
 	u >>= 1;
 	j = idx[1];
 	k = (j + 1) % i;
-	v  = GetShort(vect + j * 3 + 1);
-	v += GetShort(vect + k * 3 + 1);
+	v  = *(vect + j * 3 + 1);
+	v += *(vect + k * 3 + 1);
 	v >>= 1;
 
 	if(u < v) j = 0; else j = 1;
 	j = idx[j];
-	line.xt = GetShort(vect + j * 3);
-	line.yt = GetShort(vect + j * 3 + 1);
+	line.xt = *(vect + j * 3);
+	line.yt = *(vect + j * 3 + 1);
 	k = (j + 1) % i;
-	line.xb = GetShort(vect + k * 3);
-	line.yb = GetShort(vect + k * 3 + 1);
+	line.xb = *(vect + k * 3);
+	line.yb = *(vect + k * 3 + 1);
 	SetLineSub(&line, r, hit);
 	hit->atr = a;
 	hit++;
 	linCount++;
 
-	for(j=0; j<2; ++j)
-	{
-	hit->atr = a | 0x8000;
-	hit->xt = line.xt;
-	hit->yt = line.yt;
-	hit->vs = r;
-	hit->vss = hit->vs * hit->vs;
-	hit->sin = hit->cos = 0;
-	hit++;
-	cirCount++;
-	line.xt = line.xb;
-	line.yt = line.yb;
+	for(j=0; j<2; ++j) {
+		hit->atr = a | 0x8000;
+		hit->xt = line.xt;
+		hit->yt = line.yt;
+		hit->vs = r;
+		hit->vss = hit->vs * hit->vs;
+		hit->sin = hit->cos = 0;
+		hit++;
+		cirCount++;
+		line.xt = line.xb;
+		line.yt = line.yb;
 	}
 
-	for(j=0; j<2; ++j)
-	{
-	k = idx[2+j];
-	line.xt = GetShort(vect + k * 3);
-	line.yt = GetShort(vect + k * 3 + 1);
-	SetLineSub(&line, r, hit);
-	hit->atr = a;
-	hit++;
-	linCount++;
+	for(j=0; j<2; ++j) {
+		k = idx[2+j];
+		line.xt = *(vect + k * 3);
+		line.yt = *(vect + k * 3 + 1);
+		SetLineSub(&line, r, hit);
+		hit->atr = a;
+		hit++;
+		linCount++;
 	}
 
 	return (i * 3 + 1);
@@ -1227,47 +1219,46 @@ static int PresetStandUp(int a, const short *vect, HIT *hit, int r)
 	LINE	line;
 
 	cirCount = linCount = 0;
-	i = GetShort(vect); ++vect;
+	i = *vect++;
 	if(i != 4) {
 //		LaunchDebugger("FALSE 'Stand Up' !!!");
 		printf("FALSE 'Stand Up' !!!\n");
 		return (i * 3 + 1);
 	}
 
-	for(j=0; j<i; ++j)
-	{
-	line.xt = GetShort(vect + j * 3);
-	line.yt = GetShort(vect + j * 3 + 1);
-	line.zt = GetShort(vect + j * 3 + 2);
-	k = (j + 1) % i;
-	line.xb = GetShort(vect + k * 3);
-	line.yb = GetShort(vect + k * 3 + 1);
-	line.zb = GetShort(vect + k * 3 + 2);
-	dx = line.xb - line.xt;
-	dy = line.yb - line.yt;
-	idx[j] = j;
-	val[j] = dx * dx + dy * dy;
+	for(j=0; j<i; ++j) {
+		line.xt = *(vect + j * 3);
+		line.yt = *(vect + j * 3 + 1);
+		line.zt = *(vect + j * 3 + 2);
+		k = (j + 1) % i;
+		line.xb = *(vect + k * 3);
+		line.yb = *(vect + k * 3 + 1);
+		line.zb = *(vect + k * 3 + 2);
+		dx = line.xb - line.xt;
+		dy = line.yb - line.yt;
+		idx[j] = j;
+		val[j] = dx * dx + dy * dy;
 	}
 	SortFirstBig(&val[0], &idx[0], i);
 
 	j = idx[0];
 	k = (j + 1) % i;
-	u  = GetShort(vect + j * 3 + 1);
-	u += GetShort(vect + k * 3 + 1);
+	u  = *(vect + j * 3 + 1);
+	u += *(vect + k * 3 + 1);
 	u >>= 1;
 	j = idx[1];
 	k = (j + 1) % i;
-	v  = GetShort(vect + j * 3 + 1);
-	v += GetShort(vect + k * 3 + 1);
+	v  = *(vect + j * 3 + 1);
+	v += *(vect + k * 3 + 1);
 	v >>= 1;
 
 	if(u < v) j = 0; else j = 1;
 	j = idx[j];
-	line.xt = GetShort(vect + j * 3);
-	line.yt = GetShort(vect + j * 3 + 1);
+	line.xt = *(vect + j * 3);
+	line.yt = *(vect + j * 3 + 1);
 	k = (j + 1) % i;
-	line.xb = GetShort(vect + k * 3);
-	line.yb = GetShort(vect + k * 3 + 1);
+	line.xb = *(vect + k * 3);
+	line.yb = *(vect + k * 3 + 1);
 	SetLineSub(&line, r, hit);
 	hit->atr = a;
 	hit++;
@@ -1285,7 +1276,7 @@ static int PresetHole(int a, const short *vect, HIT *hit, int r)
 	SINCOS	sico;
 
 	cirCount = linCount = 0;
-	i = GetShort(vect); ++vect;
+	i = *vect++;
 	if(i!=4) {
 ///		LaunchDebugger("FALSE 'Hole' !!!");
 		printf("FALSE 'Hole' !!!\n");
@@ -1293,13 +1284,13 @@ static int PresetHole(int a, const short *vect, HIT *hit, int r)
 	}
 
 	j = 1;
-	line.xb = GetShort(vect + j * 3);
-	line.yb = GetShort(vect + j * 3 + 1);
-	line.zb = GetShort(vect + j * 3 + 2);
+	line.xb = *(vect + j * 3);
+	line.yb = *(vect + j * 3 + 1);
+	line.zb = *(vect + j * 3 + 2);
 	k = (j + 1) % i;
-	line.xt = GetShort(vect + k * 3);
-	line.yt = GetShort(vect + k * 3 + 1);
-	line.zt = GetShort(vect + k * 3 + 2);
+	line.xt = *(vect + k * 3);
+	line.yt = *(vect + k * 3 + 1);
+	line.zt = *(vect + k * 3 + 2);
 	LineToSinCos_(&line, &sico);
 	u = (sico.cos * r) >> SINCOS_SHIFT;
 	v = (sico.sin * r) >> SINCOS_SHIFT;
@@ -1328,7 +1319,7 @@ static int PresetSaucer(int a, const short *vect, HIT *hit, int r)
 	SINCOS	sico;
 
 	cirCount = linCount = 0;
-	i = GetShort(vect); vect++;
+	i = *vect++;
 	if(i!=4) {
 ///		LaunchDebugger("FALSE 'Hole' !!!");
 		printf("FALSE 'Hole' !!!\n");
@@ -1336,13 +1327,13 @@ static int PresetSaucer(int a, const short *vect, HIT *hit, int r)
 	}
 
 	j = 1;
-	line.xt = GetShort(vect + j * 3);
-	line.yt = GetShort(vect + j * 3 + 1);
-	line.zt = GetShort(vect + j * 3 + 2);
+	line.xt = *(vect + j * 3);
+	line.yt = *(vect + j * 3 + 1);
+	line.zt = *(vect + j * 3 + 2);
 	k = (j + 1) % i;
-	line.xb = GetShort(vect + k * 3);
-	line.yb = GetShort(vect + k * 3 + 1);
-	line.zb = GetShort(vect + k * 3 + 2);
+	line.xb = *(vect + k * 3);
+	line.yb = *(vect + k * 3 + 1);
+	line.zb = *(vect + k * 3 + 2);
 	LineToSinCos_(&line, &sico);
 	u = (sico.cos * r) >> SINCOS_SHIFT;
 	v = (sico.sin * r) >> SINCOS_SHIFT;
