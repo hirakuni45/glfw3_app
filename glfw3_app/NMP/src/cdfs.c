@@ -123,10 +123,9 @@ void ReadFile(const char *fname, void *buf)
 	strcpy(fn, "./RES/");
 	strcat(fn, fname);
 
-printf("Read file: '%s'\n", fn);
-
 	fp = fopen(fn, "rb");
 	if(fp == NULL) {
+		printf("Can't open file: '%s'\n", fn);
 		return;
 	}
 	long sz;
@@ -134,15 +133,15 @@ printf("Read file: '%s'\n", fn);
 	sz = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 	size_t rs = fread(buf, 1, sz, fp);
-
+#ifdef REPORT
+	printf("Read file: '%s' %zu Bytes\n", fn, rs);
+#endif
 	fclose(fp);
 
 	if(rs != sz) {
 		printf("Stop.\nCan't open input file as '%s'.\n", fname);
 		return;
 	}
-
-printf("Read resource: %ld bytes\n", sz);
 
 #if 0
 	int	i, id;

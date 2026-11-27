@@ -69,7 +69,7 @@ void KillAllTask(void)
 void ResetTask(void)
 {
 	KillAllTask();
-	// ジョブ内で、閉じたループを排除する為、メインループの先頭で、独自に呼ぶ事
+	// ジョブ内で、閉じたループを排除する為、メインループの先頭で、独自に呼ぶ
 ///	CreateTask(SyncBlanking);
 }
 
@@ -90,11 +90,9 @@ void InitResource(void)
 
 int TakeResourcePage(const char *name)
 {
-	int	i, j;
-	const uint8_t *src;
-
-	src = GetResourcePtr(name);
-	i = 0;
+	const uint8_t *src = GetResourcePtr(name);
+	int i = 0;
+	int j = 0;
 	while((j = *src) <= 0x20) {
 		src += 4;
 		i++;
@@ -137,17 +135,26 @@ const uint8_t *GetResourcePtr(const char *name)
 	uint32_t a = TakeInt((const uint8_t *)name);
 	const uint8_t *src = resIndex;
 	uint8_t c;
+	int idx = 0;
 	while((c = *src) != 0xff) {
 		if(c >= 0x20) {
 			uint32_t b = TakeInt(src);
 			src += 4;
-			if(a == b) return src;
+			if(a == b) {
+#ifdef REPORT
+				printf("Resource ID(%2d): '%s'\n", idx, name);
+				fflush(stdout);
+#endif
+				return src;
+			}
+			++idx;
 		} else {
 			src += 4;
 		}
 	}
-	printf("Stop.\nFalse !\nCan't find resource ID at '%s'.\n", name);
-//	sprintf(errMsg, "Stop.\nFalse !\nCan't find resource ID at '%s'.\n", name);
+	printf("STALL... Can't find resource ID at '%s'.\n", name);
+	fflush(stdout);
+	//	sprintf(errMsg, "Stop.\nFalse !\nCan't find resource ID at '%s'.\n", name);
 //	LaunchDebugger(errMsg);
 	return NULL;
 }

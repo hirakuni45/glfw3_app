@@ -87,7 +87,7 @@ endif
 # User library path 
 LIB_DIR_USR	=
 # cmpiler flags (-Dxxx)
-CFLAGS		=
+CFLAGS		= -DREPORT
 PFLAGS		=
 
 -include ../common/makefile

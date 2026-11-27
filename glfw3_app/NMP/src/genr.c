@@ -148,58 +148,48 @@ static char scoreConstPad[12 * 50];
 
 char lightCommand[50];
 short *lightPosPtr;
-unsigned char *lightAnimePtr;
+const uint8_t *lightAnimePtr;
 
-unsigned char liteBLKALL[] = {
+const uint8_t liteBLKALL[] = {
 	LIGHT_ANIME_ON, 10,
 	LIGHT_ANIME_OFF, 10,
 	LIGHT_ANIME_JUMP, -2 * 2 };
-unsigned char liteWBT[] = {
+const uint8_t liteWBT[] = {
 	LIGHT_ANIME_WAVE_UP, 60,
 	LIGHT_ANIME_STOP };
-unsigned char liteWBT2[] = {
-	LIGHT_ANIME_WAVE_UP, 60,
-	LIGHT_ANIME_WAVE_UP, 60,
-	LIGHT_ANIME_STOP };
-unsigned char liteWBT3[] = {
-	LIGHT_ANIME_WAVE_UP, 60,
+const uint8_t liteWBT2[] = {
 	LIGHT_ANIME_WAVE_UP, 60,
 	LIGHT_ANIME_WAVE_UP, 60,
 	LIGHT_ANIME_STOP };
-unsigned char liteWTB[] = {
+const uint8_t liteWBT3[] = {
+	LIGHT_ANIME_WAVE_UP, 60,
+	LIGHT_ANIME_WAVE_UP, 60,
+	LIGHT_ANIME_WAVE_UP, 60,
+	LIGHT_ANIME_STOP };
+const uint8_t liteWTB[] = {
 	LIGHT_ANIME_WAVE_DOWN, 60,
 	LIGHT_ANIME_STOP };
-unsigned char liteWTB2[] = {
+const uint8_t liteWTB2[] = {
 	LIGHT_ANIME_WAVE_DOWN, 60,
 	LIGHT_ANIME_WAVE_DOWN, 60,
 	LIGHT_ANIME_STOP };
-unsigned char liteTCW[] = {
+const uint8_t liteTCW[] = {
 	LIGHT_ANIME_ROLL_CW, 90,
 	LIGHT_ANIME_STOP };
-unsigned char liteTCC[] = {
+const uint8_t liteTCC[] = {
 	LIGHT_ANIME_ROLL_CCW, 90,
 	LIGHT_ANIME_STOP };
-unsigned char liteBLK[] = {
+const uint8_t liteBLK[] = {
 	LIGHT_ANIME_ON, 10,
 	LIGHT_ANIME_OFF, 10,
 	LIGHT_ANIME_STOP };
-unsigned char liteBLK2[] = {
-	LIGHT_ANIME_ON, 10,
-	LIGHT_ANIME_OFF, 10,
-	LIGHT_ANIME_ON, 10,
-	LIGHT_ANIME_OFF, 10,
-	LIGHT_ANIME_STOP };
-unsigned char liteBLK3[] = {
-	LIGHT_ANIME_ON, 10,
-	LIGHT_ANIME_OFF, 10,
+const uint8_t liteBLK2[] = {
 	LIGHT_ANIME_ON, 10,
 	LIGHT_ANIME_OFF, 10,
 	LIGHT_ANIME_ON, 10,
 	LIGHT_ANIME_OFF, 10,
 	LIGHT_ANIME_STOP };
-unsigned char liteBLK4[] = {
-	LIGHT_ANIME_ON, 10,
-	LIGHT_ANIME_OFF, 10,
+const uint8_t liteBLK3[] = {
 	LIGHT_ANIME_ON, 10,
 	LIGHT_ANIME_OFF, 10,
 	LIGHT_ANIME_ON, 10,
@@ -207,15 +197,7 @@ unsigned char liteBLK4[] = {
 	LIGHT_ANIME_ON, 10,
 	LIGHT_ANIME_OFF, 10,
 	LIGHT_ANIME_STOP };
-unsigned char liteBLK8[] = {
-	LIGHT_ANIME_ON, 10,
-	LIGHT_ANIME_OFF, 10,
-	LIGHT_ANIME_ON, 10,
-	LIGHT_ANIME_OFF, 10,
-	LIGHT_ANIME_ON, 10,
-	LIGHT_ANIME_OFF, 10,
-	LIGHT_ANIME_ON, 10,
-	LIGHT_ANIME_OFF, 10,
+const uint8_t liteBLK4[] = {
 	LIGHT_ANIME_ON, 10,
 	LIGHT_ANIME_OFF, 10,
 	LIGHT_ANIME_ON, 10,
@@ -225,23 +207,7 @@ unsigned char liteBLK8[] = {
 	LIGHT_ANIME_ON, 10,
 	LIGHT_ANIME_OFF, 10,
 	LIGHT_ANIME_STOP };
-unsigned char liteBLK16[] = {
-	LIGHT_ANIME_ON, 10,
-	LIGHT_ANIME_OFF, 10,
-	LIGHT_ANIME_ON, 10,
-	LIGHT_ANIME_OFF, 10,
-	LIGHT_ANIME_ON, 10,
-	LIGHT_ANIME_OFF, 10,
-	LIGHT_ANIME_ON, 10,
-	LIGHT_ANIME_OFF, 10,
-	LIGHT_ANIME_ON, 10,
-	LIGHT_ANIME_OFF, 10,
-	LIGHT_ANIME_ON, 10,
-	LIGHT_ANIME_OFF, 10,
-	LIGHT_ANIME_ON, 10,
-	LIGHT_ANIME_OFF, 10,
-	LIGHT_ANIME_ON, 10,
-	LIGHT_ANIME_OFF, 10,
+const uint8_t liteBLK8[] = {
 	LIGHT_ANIME_ON, 10,
 	LIGHT_ANIME_OFF, 10,
 	LIGHT_ANIME_ON, 10,
@@ -259,11 +225,45 @@ unsigned char liteBLK16[] = {
 	LIGHT_ANIME_ON, 10,
 	LIGHT_ANIME_OFF, 10,
 	LIGHT_ANIME_STOP };
-unsigned char liteLTA[] = {
+const uint8_t liteBLK16[] = {
+	LIGHT_ANIME_ON, 10,
+	LIGHT_ANIME_OFF, 10,
+	LIGHT_ANIME_ON, 10,
+	LIGHT_ANIME_OFF, 10,
+	LIGHT_ANIME_ON, 10,
+	LIGHT_ANIME_OFF, 10,
+	LIGHT_ANIME_ON, 10,
+	LIGHT_ANIME_OFF, 10,
+	LIGHT_ANIME_ON, 10,
+	LIGHT_ANIME_OFF, 10,
+	LIGHT_ANIME_ON, 10,
+	LIGHT_ANIME_OFF, 10,
+	LIGHT_ANIME_ON, 10,
+	LIGHT_ANIME_OFF, 10,
+	LIGHT_ANIME_ON, 10,
+	LIGHT_ANIME_OFF, 10,
+	LIGHT_ANIME_ON, 10,
+	LIGHT_ANIME_OFF, 10,
+	LIGHT_ANIME_ON, 10,
+	LIGHT_ANIME_OFF, 10,
+	LIGHT_ANIME_ON, 10,
+	LIGHT_ANIME_OFF, 10,
+	LIGHT_ANIME_ON, 10,
+	LIGHT_ANIME_OFF, 10,
+	LIGHT_ANIME_ON, 10,
+	LIGHT_ANIME_OFF, 10,
+	LIGHT_ANIME_ON, 10,
+	LIGHT_ANIME_OFF, 10,
+	LIGHT_ANIME_ON, 10,
+	LIGHT_ANIME_OFF, 10,
+	LIGHT_ANIME_ON, 10,
+	LIGHT_ANIME_OFF, 10,
+	LIGHT_ANIME_STOP };
+const uint8_t liteLTA[] = {
 	LIGHT_ANIME_ON, 60,
 	LIGHT_ANIME_OFF, 60,
 	LIGHT_ANIME_STOP };
-unsigned char liteWBT_BLK_WBT_BLK[] = {
+const uint8_t liteWBT_BLK_WBT_BLK[] = {
 	LIGHT_ANIME_WAVE_UP, 60,
 	LIGHT_ANIME_ON, 10,
 	LIGHT_ANIME_OFF, 10,
@@ -271,34 +271,34 @@ unsigned char liteWBT_BLK_WBT_BLK[] = {
 	LIGHT_ANIME_ON, 10,
 	LIGHT_ANIME_OFF, 10,
 	LIGHT_ANIME_STOP };
-unsigned char liteWBT_WTB_TCW_TCC[] = {
+const uint8_t liteWBT_WTB_TCW_TCC[] = {
 	LIGHT_ANIME_WAVE_UP, 60,
 	LIGHT_ANIME_WAVE_DOWN, 60,
 	LIGHT_ANIME_ROLL_CW, 90,
 	LIGHT_ANIME_ROLL_CCW, 90,
 	LIGHT_ANIME_STOP };
-unsigned char liteTCW_TCC[] = {
+const uint8_t liteTCW_TCC[] = {
 	LIGHT_ANIME_ROLL_CW, 90,
 	LIGHT_ANIME_ROLL_CCW, 90,
 	LIGHT_ANIME_STOP };
-unsigned char liteTCW_TCC_WBT[] = {
+const uint8_t liteTCW_TCC_WBT[] = {
 	LIGHT_ANIME_ROLL_CW, 90,
 	LIGHT_ANIME_ROLL_CCW, 90,
 	LIGHT_ANIME_WAVE_UP, 60,
 	LIGHT_ANIME_STOP };
-unsigned char liteTCW_TCC_WBT_WTB[] = {
+const uint8_t liteTCW_TCC_WBT_WTB[] = {
 	LIGHT_ANIME_ROLL_CW, 90,
 	LIGHT_ANIME_ROLL_CCW, 90,
 	LIGHT_ANIME_WAVE_UP, 60,
 	LIGHT_ANIME_WAVE_DOWN, 60,
 	LIGHT_ANIME_STOP };
-unsigned char liteTCW_TCC_WBT_WBT[] = {
+const uint8_t liteTCW_TCC_WBT_WBT[] = {
 	LIGHT_ANIME_ROLL_CW, 90,
 	LIGHT_ANIME_ROLL_CCW, 90,
 	LIGHT_ANIME_WAVE_UP, 60,
 	LIGHT_ANIME_WAVE_UP, 60,
 	LIGHT_ANIME_STOP };
-unsigned char liteNightMare[] = {
+const uint8_t liteNightMare[] = {
 	LIGHT_ANIME_ROLL_CW, 90,
 	LIGHT_ANIME_ROLL_CCW, 90,
 	LIGHT_ANIME_WAVE_UP, 60,
@@ -308,11 +308,12 @@ unsigned char liteNightMare[] = {
 	LIGHT_ANIME_WAVE_UP, 60,
 	LIGHT_ANIME_WAVE_DOWN, 60,
 	LIGHT_ANIME_STOP };
-static unsigned char liteTilt[] = {
+
+static const uint8_t liteTilt[] = {
 	LIGHT_ANIME_OFF, 60,
 	LIGHT_ANIME_JUMP, -1 * 2,
 	LIGHT_ANIME_STOP };
-static unsigned char liteDemo[] = {
+static const uint8_t liteDemo[] = {
 	LIGHT_ANIME_ROLL_CW, 180,
 	LIGHT_ANIME_ROLL_CW, 180,
 	LIGHT_ANIME_ROLL_CCW, 180,
@@ -343,7 +344,7 @@ static short replayTimer;
 static char playerSwap;
 static char multiBallReadyOld, multiBallGoOld, roundGoNoOld;
 static char loopBonusScore[16];
-static char gameSoundGroup[] = {
+static const char gameSoundGroup[] = {
 /* GENERAL */
 	SG_A, SG_G, SG_G, SG_G, SG_G, SG_G, SG_D, SG_G,
 	SG_H, SG_H, SG_H, SG_H, SG_C, SG_B, SG_G, SG_G,
@@ -365,7 +366,7 @@ static char gameSoundGroup[] = {
 	0, 0, 0, 0, SG_B, SG_B, SG_B, SG_C,
 	SG_B, 0, SG_D, SG_E, 0, 0, 0, 0
 };
-static char audioIndexTables[] = {
+static const char audioIndexTables[] = {
 	CDA_ARK_SINGLE_START, CDA_ARK_SINGLE_PLAY,
 	CDA_ARK_MULTI_READY, CDA_ARK_MULTI_START, CDA_ARK_MULTI_PLAY,
 
@@ -391,17 +392,17 @@ static POWER_SELECT powerSelectTables[] = {
 /*12*/	"LITE/EXTRABALL",	2,	0,	0,
 /*13*/	"BONUS/HOLD",		5,	0,	1
 };
-static char diagMysteryTables[] = {
+static const char diagMysteryTables[] = {
 	INFO_DIAG_MYSTERY_READY,
 	INFO_DIAG_MYSTERY_READY,
 	INFO_DIAG_MYSTERY_READY
 };
-static char diagDoubleTables[] = {
+static const char diagDoubleTables[] = {
 	INFO_DIAG_DOUBLE_ARK,
 	INFO_DIAG_DOUBLE_CLT,
 	INFO_DIAG_DOUBLE_DRM
 };
-static char *mysteryLitText[] = {
+static const char *mysteryLitText[] = {
 	"45 SECOND SHIELD",
 	"DEATHWATCH LIT",
 	"5 MILLION",
@@ -418,7 +419,7 @@ static char *mysteryLitText[] = {
 	"BONUS HELD",
 	"HANGMAN FEATURES"
 };
-static char *mysteryLitText2[] = {
+static const char *mysteryLitText2[] = {
 	"45 SECOND/SHIELD",
 	"DEATHWATCH/LIT",
 	"5 MILLION",
@@ -435,7 +436,7 @@ static char *mysteryLitText2[] = {
 	"BONUS/HELD",
 	"HANGMAN/FEATURES"
 };
-static char infoDiagRounds[] = {
+static const char infoDiagRounds[] = {
 /* Arkham */
 	INFO_DIAG_DEATH_READY,
 	INFO_DIAG_WITCH_READY,
@@ -458,7 +459,7 @@ static char infoDiagRounds[] = {
 	INFO_DIAG_MOON_READY,
 	INFO_DIAG_NECRO_READY
 };
-static unsigned char roundLiteIndex[] = {
+static const uint8_t roundLiteIndex[] = {
 	LITE_ARK_ROUND_DEATH_WALKER_READY,
 	LITE_ARK_ROUND_LITE_WITCHCRAFT_READY,
 	LITE_ARK_ROUND_ARKHAM_ASYLUM_READY,
@@ -477,7 +478,7 @@ static unsigned char roundLiteIndex[] = {
 	LITE_DRM_ROUND_ENCHANTED_WOOD_READY,
 	LITE_DRM_ROUND_MOONBEAST_READY
 };
-static char kickbackLiteIndex[] = {
+static const char kickbackLiteIndex[] = {
 	LITE_ARK_STANDUP_TARGET_1,
 	LITE_ARK_STANDUP_TARGET_2,
 	LITE_ARK_STANDUP_TARGET_3,
@@ -490,12 +491,12 @@ static char kickbackLiteIndex[] = {
 	LITE_DRM_STANDUP_TARGET_8,
 	LITE_DRM_STANDUP_TARGET_7
 };
-static char multiReadyLiteIndex[] = {
+static const char multiReadyLiteIndex[] = {
 	0,
 	LITE_CLT_MULTIBALL_READY,
 	LITE_DRM_MULTIBALL_READY
 };
-static char loopBonusTables[] = {
+static const char loopBonusTables[] = {
 /* 4 */	SCORE_001M,
 /* 5 */	SCORE_002M,
 /* 6 */	SCORE_003M,
@@ -505,17 +506,17 @@ static char loopBonusTables[] = {
 /*10 */	SCORE_020M,
 /*11 */	SCORE_050M
 };
-static char soulScoreTables[] = {
+static const char soulScoreTables[] = {
 /* 0 */	SCORE_005M, SCORE_010M,
 /* 1 */	SCORE_010M, SCORE_020M,
 /* 3 */	SCORE_030M, SCORE_060M
 };
-static char soulAnimeTables[] = {
+static const char soulAnimeTables[] = {
 /* 0 */	INFO_ANIME_5M,  INFO_ANIME_10M, 
 /* 1 */	INFO_ANIME_10M, INFO_ANIME_20M,
 /* 2 */	INFO_ANIME_30M, INFO_ANIME_60M
 };
-static char roundEndLiteTables[] = {
+static const char roundEndLiteTables[] = {
 	LITE_ARK_LEFTLANE_JACKPOT,
 	LITE_ARK_RIGHTLANE_JACKPOT,
 	LITE_ARK_LEFTRAMP_JACKPOT,
@@ -543,7 +544,7 @@ static char roundEndLiteTables[] = {
 	LITE_DRM_FIRESPITTER_JACKPOT,
 	-1
 };
-static char *testPlayString[] = {
+static const char *testPlayString[] = {
 	"DEATHWALKER",
 	"CEMETERY",
 	"ARKHAM ASYLUMK",
@@ -571,14 +572,14 @@ static char *testPlayString[] = {
 	"3 MULTI BALL",
 	"7 MULTI BALL"
 };
-static char roundInfoIndex[] = {
+static const char roundInfoIndex[] = {
 	2, 3, 1, 0, 4, 5,
 	4, 3, 2, 1, 0, 5,
 	3, 4, 2, 0, 1, 5
 };
 static char testPlayNo;
-static char bonusMultiTables[] = { 1, 2, 3, 4, 5, 6, 7, 10 };
-static char *bonusMultiTexts[] = {
+static const char bonusMultiTables[] = { 1, 2, 3, 4, 5, 6, 7, 10 };
+static const char *bonusMultiTexts[] = {
 	"1 X", "2 X", "3 X", "4 X", "5 X", "6 X", "7 X", "10 X"
 };
 static unsigned char lightRedOff[50], lightGreenOff[50], lightBlueOff[50];
@@ -587,7 +588,8 @@ static unsigned char lightIntenVal[50], lightIntenMode[50];
 static char lightCommandSlave[50];
 static char *mazeDiagScorePtr;
 static char rampScore[12], rampDiagScore[16], mazeDiagScore[16];
-static char *mysteryDiagTextPtr, *rampDiagNextPtr, *rampDiagScorePtr;
+static const char *mysteryDiagTextPtr;
+static char *rampDiagNextPtr, *rampDiagScorePtr;
 static char rampDiagNextExtra, rampDiagNextMystery;
 static short generalMode;
 static short powerItemList[3];

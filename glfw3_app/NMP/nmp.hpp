@@ -92,67 +92,98 @@ namespace app {
 
 		uint8_t			fb_[fb_width_ * fb_height_ * 4];
 
-		void pad_() noexcept
+		uint32_t pad_() noexcept
 		{
 			gl::core& core = gl::core::get_instance();
-
 			const auto& dev = core.get_device();
 
+			uint32_t keybits = 0;
 			// A
-			if(dev.get_level(gl::device::key::Z)) {
-///				inp_[0].data |= INP_PAD_A;
+			if(dev.get_level(gl::device::key::COMMA)) {
+				keybits |= SATURN_PAD_A;
 			}
 			if(dev.get_level(gl::device::key::GAME_0)) {
-///				inp_[0].data |= INP_PAD_A;
+				keybits |= SATURN_PAD_A;
 			}
-
 			// B
-			if(dev.get_level(gl::device::key::X)) {
-///				inp_[0].data |= INP_PAD_B;
+			if(dev.get_level(gl::device::key::PERIOD)) {
+				keybits |= SATURN_PAD_B;
 			}
 			if(dev.get_level(gl::device::key::GAME_1)) {
-///				inp_[0].data |= INP_PAD_B;
+				keybits |= SATURN_PAD_B;
 			}
-
-			// SELECT
-			if(dev.get_level(gl::device::key::_1)) {
-///				inp_[0].data |= INP_PAD_SELECT;
+			// C
+			if(dev.get_level(gl::device::key::SLASH)) {
+				keybits |= SATURN_PAD_C;
 			}
 			if(dev.get_level(gl::device::key::GAME_2)) {
-///				inp_[0].data |= INP_PAD_SELECT;
-			}
-			// START
-			if(dev.get_level(gl::device::key::_2)) {
-///				inp_[0].data |= INP_PAD_START;
-			}
-			if(dev.get_level(gl::device::key::GAME_3)) {
-///				inp_[0].data |= INP_PAD_START;
+				keybits |= SATURN_PAD_C;
 			}
 
-			if(dev.get_level(gl::device::key::LEFT)) {
-///				inp_[0].data |= INP_PAD_LEFT;
+			if(dev.get_level(gl::device::key::LEFT_SHIFT)) {
+				keybits |= SATURN_PAD_LEFT;
 			}
-			if(dev.get_level(gl::device::key::GAME_LEFT)) {
-///				inp_[0].data |= INP_PAD_LEFT;
+			if(dev.get_level(gl::device::key::GAME_4)) {
+				keybits |= SATURN_PAD_LEFT;
 			}
-			if(dev.get_level(gl::device::key::RIGHT)) {
-///				inp_[0].data |= INP_PAD_RIGHT;
+			if(dev.get_level(gl::device::key::RIGHT_SHIFT)) {
+				keybits |= SATURN_PAD_RIGHT;
 			}
-			if(dev.get_level(gl::device::key::GAME_RIGHT)) {
-///				inp_[0].data |= INP_PAD_RIGHT;
+			if(dev.get_level(gl::device::key::GAME_5)) {
+				keybits |= SATURN_PAD_RIGHT;
 			}
+
 			if(dev.get_level(gl::device::key::UP)) {
-///				inp_[0].data |= INP_PAD_UP;
+				keybits |= SATURN_DIR_UP;
+			}
+			if(dev.get_level(gl::device::key::W)) {
+				keybits |= SATURN_DIR_UP;
 			}
 			if(dev.get_level(gl::device::key::GAME_UP)) {
-///				inp_[0].data |= INP_PAD_UP;
+				keybits |= SATURN_DIR_UP;
 			}
 			if(dev.get_level(gl::device::key::DOWN)) {
-///				inp_[0].data |= INP_PAD_DOWN;
+				keybits |= SATURN_DIR_DOWN;
+			}
+			if(dev.get_level(gl::device::key::Z)) {
+				keybits |= SATURN_DIR_DOWN;
 			}
 			if(dev.get_level(gl::device::key::GAME_DOWN)) {
-///				inp_[0].data |= INP_PAD_DOWN;
+				keybits |= SATURN_DIR_DOWN;
 			}
+			if(dev.get_level(gl::device::key::RIGHT)) {
+				keybits |= SATURN_DIR_RIGHT;
+			}
+			if(dev.get_level(gl::device::key::S)) {
+				keybits |= SATURN_DIR_RIGHT;
+			}
+			if(dev.get_level(gl::device::key::GAME_RIGHT)) {
+				keybits |= SATURN_DIR_RIGHT;
+			}
+			if(dev.get_level(gl::device::key::LEFT)) {
+				keybits |= SATURN_DIR_LEFT;
+			}
+			if(dev.get_level(gl::device::key::A)) {
+				keybits |= SATURN_DIR_LEFT;
+			}
+			if(dev.get_level(gl::device::key::GAME_LEFT)) {
+				keybits |= SATURN_DIR_LEFT;
+			}
+
+			if(dev.get_level(gl::device::key::ENTER)) {
+				keybits |= SATURN_PAD_START;
+			}
+			if(dev.get_level(gl::device::key::GAME_3)) {
+				keybits |= SATURN_PAD_START;
+			}
+
+			if(dev.get_level(gl::device::key::ESCAPE)) {
+//				keybits |= KEY_BITS_ESC;
+			}
+			if(dev.get_level(gl::device::key::TAB)) {
+//				keybits |= SATURN_PAD_;
+			}
+			return keybits;
 		}
 
 		void service_SATURN_BG() noexcept
@@ -413,28 +444,7 @@ namespace app {
 				menu_frame_->enable(menu_);
 			}
 
-			uint32_t keybits = 0;
-			if(dev.get_level(gl::device::key::UP)) {
-				keybits |= SATURN_DIR_UP;
-			}
-			if(dev.get_level(gl::device::key::DOWN)) {
-				keybits |= SATURN_DIR_DOWN;
-			}
-			if(dev.get_level(gl::device::key::RIGHT)) {
-				keybits |= SATURN_DIR_RIGHT;
-			}
-			if(dev.get_level(gl::device::key::LEFT)) {
-				keybits |= SATURN_DIR_LEFT;
-			}
-			if(dev.get_level(gl::device::key::ENTER)) {
-				keybits |= SATURN_PAD_START;
-			}
-			if(dev.get_level(gl::device::key::ESCAPE)) {
-//				keybits |= KEY_BITS_ESC;
-			}
-			if(dev.get_level(gl::device::key::TAB)) {
-//				keybits |= SATURN_PAD_;
-			}
+			uint32_t keybits = pad_();
 
 			EntryVsync(keybits);  // NMP API
 			ExitVsync();   // NMP API

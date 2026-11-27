@@ -275,13 +275,15 @@ void EffectInfomations(int no);
 void SetInfomations(int no, int pri);
 void CreateSlashFlag(int);
 void InitDiffAnime(int x, int y, const uint8_t *ptr);
+void ServiceSlave(void);
 
 void SetMultiInfo(int, int);
 void SetDiffAnime(int no);
 
 extern ANIME fontAnime, infoAnime, ifonAnime, info2Anime;
 extern char infoPause;
-extern char *infoText[8], infoNumberTab[4], nameTextPos, nameText[4];
+extern const char *infoText[8];
+extern char infoNumberTab[4], nameTextPos, nameText[4];
 extern volatile short slaveTaskNo;
 extern short infoNo, infoValue, infoPriority, infoAnimeNo[8];
 extern short infoNumber, infoAnimeMax, infoTextNo, infoTimer;

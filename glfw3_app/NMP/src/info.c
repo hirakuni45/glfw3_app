@@ -19,7 +19,8 @@
 
 ANIME fontAnime, infoAnime, ifonAnime, info2Anime;
 char infoPause;
-char *infoText[8], infoNumberTab[4], nameTextPos, nameText[4];
+const char *infoText[8];
+char infoNumberTab[4], nameTextPos, nameText[4];
 volatile short slaveTaskNo = 0;
 short infoNo, infoValue, infoPriority, infoAnimeNo[8];
 short infoNumber, infoAnimeMax, infoTextNo, infoTimer;
@@ -3045,8 +3046,8 @@ int MobjInfoText(int x, int y, int s, int c)
 
 void MobjInfoTexts(int x, int y, int s, const char *t)
 {
-	int	c, j, l, m, tag[8], o;
-	char	*top, na, nb, nc, *p;
+	int	c, j, l, tag[8], o;
+	char na, nb, nc, *p;
 
 	if(t==NULL) return;
 
@@ -3054,13 +3055,14 @@ void MobjInfoTexts(int x, int y, int s, const char *t)
 
 	while((c = *t++) != 0) {
 	if(c=='@') {
-		top = infoText[infoTextNo];
+		const char *top = infoText[infoTextNo];
 		while((*p++ = *top++) != 0) ;
 		}
 	*p++ = c;
 	}
 	*p = 0;
 
+	char *top;
 	t = top = infoTextBuffer;
 	j = 0;
 	l = 0;
@@ -3085,8 +3087,8 @@ void MobjInfoTexts(int x, int y, int s, const char *t)
 		l += infoFontSizeTables[o + nb + 30] * 2;
 		}
 	else if(c=='@') {
-		p = infoText[infoTextNo];
-		while((c = *p++) != 0) {
+		const char *src = infoText[infoTextNo];
+		while((c = *src++) != 0) {
 			c = InfoTextCode(c);
 			l += infoFontSizeTables[o + c] * 2;
 			l += infoFontSizeTables[o + 40] * 2;
@@ -3131,8 +3133,8 @@ void MobjInfoTexts(int x, int y, int s, const char *t)
 		l += infoFontSizeTables[o + 40] * 2;
 		}
 	else if(c=='@') {
-		p = infoText[infoTextNo];
-		while((c = *p++) != 0) {
+		const char *src = infoText[infoTextNo];
+		while((c = *src++) != 0) {
 			c = InfoTextCode(c);
 			l += MobjInfoText(l, y, s, c);
 			l += infoFontSizeTables[o + 40] * 2;

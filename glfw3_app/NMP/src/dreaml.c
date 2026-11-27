@@ -1,4 +1,14 @@
-﻿#include <stdio.h>
+﻿
+//=========================================================================//
+/*! @file
+	@brief  Necronomicon DREAML
+	@author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2026 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
+*/
+//=========================================================================//
+#include <stdio.h>
 #include "ballsim.h"
 #include "score.h"
 #include "lite.h"
@@ -9,39 +19,23 @@
 #include "top.h"
 #include "cdfs.h"
 #include "sim.h"
+#include "etc.h"
 #include "dreaml.h"
-
-extern volatile short slaveTaskNo;
-extern volatile unsigned int vsyncCounter;
-extern short infoNo, infoNumber, infoTimer;
-extern unsigned short gamePadLevel, gamePadTrigger, gamePadRelese;
-extern short roundTimer;
-extern char roundValue[], *infoText[];
-extern char nextStageEnable;
-extern short diagInfoTab[];
-extern short soulTask;
-extern char optionMenuPad[];
-
-extern char *scoreConst[];
-extern int frameRate;
-extern char lightCommand[];
-extern short *lightPosPtr;
-extern unsigned char *lightAnimePtr;
-extern unsigned char liteWBT[], liteWBT_BLK_WBT_BLK[];
-extern unsigned char liteBLK[], liteBLKALL[], liteBLK4[];
-extern unsigned char liteTCW_TCC_WBT_WBT[];
-extern unsigned char liteWBT2[], liteWTB2[];
-extern unsigned char liteWBT_WTB_TCW_TCC[];
-extern unsigned char liteTCW_TCC_WBT[];
-extern unsigned char liteWBT_BLK_WBT_BLK[];
-extern unsigned char liteNightMare[];
-extern short infoAnimeNo[];
-extern short roundStartDelay;
-extern char magnaLockEnable, ballHitSfxEnable;
 
 static void ServiceMultiBall(PLAYER *ply, char *sct);
 static void ServiceRound(PLAYER *ply);
 static void ServiceRoundStart(PLAYER *ply);
+
+static short ballLockDelay;
+static short multiBallDelay;
+static short dreamMulti;
+static short woodCount;
+static short magnaTimer, vukTimer;
+static short standUpComp, jackpotNo, jackpotSpell;
+static short necroMoonCount, necroMoonLimit;
+static char necroFlag[6];
+static char magnaFlag;
+static char soulFlag[3];
 
 static short lightPosTables[] = {
 /* AREA */
@@ -99,16 +93,6 @@ static short lightPosTables[] = {
 	25,-22,
 	-25,-22
 };
-static short ballLockDelay;
-static short multiBallDelay;
-static short dreamMulti;
-static short woodCount;
-static short magnaTimer, vukTimer;
-static short standUpComp, jackpotNo, jackpotSpell;
-static short necroMoonCount, necroMoonLimit;
-static char necroFlag[6];
-static char magnaFlag;
-static char soulFlag[3];
 static char jackpotLiteTables[] = {
 	LITE_DRM_LEFTRAMP_JACKPOT,
 	LITE_DRM_LEFTLANE_JACKPOT,

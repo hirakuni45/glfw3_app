@@ -1,4 +1,13 @@
-﻿#include <stdio.h>
+﻿//=========================================================================//
+/*! @file
+	@brief  Necronomicon ARKHAM
+	@author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2026 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
+*/
+//=========================================================================//
+#include <stdio.h>
 #include "ballsim.h"
 #include "score.h"
 #include "lite.h"
@@ -9,30 +18,9 @@
 #include "top.h"
 #include "fnc.h"
 #include "cdfs.h"
+#include "sim.h"
+#include "etc.h"
 #include "arkham.h"
-
-extern volatile short slaveTaskNo;
-extern volatile unsigned int vsyncCounter;
-extern short infoNo, infoNumber, infoTimer;
-extern unsigned short gamePadLevel, gamePadTrigger, gamePadRelese;
-extern short roundTimer;
-extern char roundValue[];
-extern char nextStageEnable;
-extern short diagInfoTab[];
-extern short soulTask;
-extern char optionMenuPad[];
-
-extern char *scoreConst[];
-extern int frameRate;
-extern char lightCommand[];
-extern char tiltFlag;
-extern short *lightPosPtr;
-extern unsigned char *lightAnimePtr;
-extern unsigned char liteWBT[], liteWBT_BLK_WBT_BLK[], liteBLK[], liteBLKALL[];
-extern unsigned char liteWBT_WTB_TCW_TCC[];
-extern unsigned char liteBLK4[], liteBLK8[], liteBLK16[];
-extern short infoAnimeNo[];
-extern short roundStartDelay, roundDelay;
 
 static void ServiceMultiBall(PLAYER *ply, char *sct);
 static void ServiceRound(PLAYER *ply);
@@ -49,6 +37,11 @@ static char jackpotRise1, jackpotRise2;
 static char bingoFlag[5];
 static char doubleJackpotEnable;
 static char jackpotFlag[4];
+static short creationCount, creationComp;
+static short deathDelay[2];
+static short diverterDelay;
+static char multiInfoSel;
+static char soulFlag[3];
 
 static char jackpotLightIndex[] = {
 	LITE_ARK_RIGHTRAMP_JACKPOT,
@@ -111,12 +104,6 @@ static short lightPosTables[] = {
 	36,-8
 	-15,-8,
 };
-static short creationCount, creationComp;
-static short deathDelay[2];
-static short diverterDelay;
-static char multiInfoSel;
-static char soulFlag[3];
-
 static char arrowInfoTables[] = { 6, 5, 7 };
 static char roundTaskTables[] = { 1, 33, 17, 9, 25, 41 };
 static char roundAudioTables[] = {

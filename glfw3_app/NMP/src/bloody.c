@@ -1,4 +1,13 @@
-﻿#include <stdio.h>
+﻿//=========================================================================//
+/*! @file
+	@brief  Necronomicon BLOODY
+	@author 平松邦仁 (hira@rvf-rc45.net)
+	@copyright	Copyright (C) 2026 Kunihito Hiramatsu @n
+				Released under the MIT license @n
+				https://github.com/hirakuni45/glfw3_app/blob/master/LICENSE
+*/
+//=========================================================================//
+#include <stdio.h>
 #include "ballsim.h"
 #include "score.h"
 #include "lite.h"
@@ -8,36 +17,9 @@
 #include "genr.h"
 #include "top.h"
 #include "cdfs.h"
+#include "sim.h"
+#include "etc.h"
 #include "bloody.h"
-
-extern volatile short slaveTaskNo;
-extern volatile unsigned int vsyncCounter;
-extern short infoNo, infoNumber, infoTimer;
-extern unsigned short gamePadLevel, gamePadTrigger, gamePadRelese;
-extern short roundTimer, roundDelay, roundStartDelay;
-extern char roundValue[];
-extern short diagInfoTab[];
-extern short soulTask;
-extern char *infoText[];
-extern char nextStageEnable;
-extern char optionMenuPad[];
-
-extern char *scoreConst[];
-extern int frameRate;
-extern char lightCommand[];
-extern short *lightPosPtr;
-extern unsigned char *lightAnimePtr;
-extern unsigned char liteWBT[], liteWBT_BLK_WBT_BLK[];
-extern unsigned char liteBLK[], liteBLKALL[], liteBLK4[], liteBLK8[];
-extern unsigned char liteTCW_TCC[];
-extern unsigned char liteTCW_TCC_WBT_WBT[];
-extern unsigned char liteWBT2[], liteWTB2[], liteWBT3[];
-extern unsigned char liteWBT_WTB_TCW_TCC[];
-extern unsigned char liteTCW_TCC_WBT[];
-extern unsigned char liteTCW_TCC_WBT_WTB[];
-extern unsigned char liteWBT_BLK_WBT_BLK[];
-extern short infoAnimeNo[];
-extern short roundStartDelay;
 
 static void ServiceMultiBall(PLAYER *ply, char *sct);
 static void ServiceJackpot(PLAYER *ply);
@@ -58,6 +40,7 @@ static short switchAll, switchLimit;
 static short distraCompCount;
 static short saucerDelay1, saucerDelay2;
 static short angelsDelay;
+
 static short lightPosTables[] = {
 	-56,136,56,-92,
 /* POS */

@@ -57,8 +57,8 @@
 
 #define _METAL			0x0000
 #define _PLASTIC		0x1000
-#define _RUBBER_BAND		0x2000
-#define _RUBBER_POST		0x3000
+#define _RUBBER_BAND	0x2000
+#define _RUBBER_POST	0x3000
 #define _RAMP			0x4000
 #define _HOLE_GUIDE		0x5000
 #define _FLIPPER		0x6000

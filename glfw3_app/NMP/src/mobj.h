@@ -132,7 +132,6 @@ void DissolveCopyImage(const uint8_t *img, int x, int y, int w, int h, int lv);
 MOBJ *PresetBitMapImage(const uint8_t *, int, int, int);
 void ExtractBitImageOfs(const uint8_t *src, int x, int y, int o, int t);
 
-void ServiceSlave(void);
 void ExtractBitFrame(int *in);
 void Install16ColorObject(ANIME *anm);
 
